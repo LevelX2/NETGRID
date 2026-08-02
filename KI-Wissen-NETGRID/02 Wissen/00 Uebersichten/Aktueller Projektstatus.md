@@ -98,6 +98,15 @@ Stand: 2026-08-02
 
 ## KI
 
+- Die drei Runner-Befunde aus `match_b0b0bffec6715028` sind spielgleich
+  geschlossen. Draw-Tax zählt nur echte strukturierte Ziehsteuern;
+  `during_run`-Credits werden ausschließlich in konkreten RunAction-Quotes
+  verbraucht; Runner-Discards sind exakt unter
+  `runner.defense_and_recovery` gebunden und schützen Flatline-Prävention nur
+  bei bestätigter oder kritischer Gefahr. Die drei Checkpoints, beide
+  Deck-Hint-Audits und alle 4575 AI-Shard-Tests sind grün. Führend ist
+  `docs/reviews/ai/match-b0b0bffec6715028-runner-remediation-final-review-2026-08-02.md`.
+
 - Disgruntled Ice Technician ist im `run.jack_out_window` vollständig an den
   bestehenden Planowner `runner.convert_run_window` gebunden. Die Engine
   projiziert generische Quellen-, Fähigkeits-, Ziel- und Zahlungsfakten; die

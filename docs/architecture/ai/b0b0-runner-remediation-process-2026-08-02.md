@@ -106,9 +106,9 @@ planned
 | ----- | ---------------------------------- | ------------------------------------------------------------------------------ |
 | B000  | Prozess und Ausgangsevidence       | verbindlicher Scope, Invarianten und Paketvertrag                              |
 | B001  | Draw-Tax-Quellenvertrag            | **abgeschlossen:** nur echte Ziehsteuern; sichere Multi-Draws bleiben erhalten |
-| B002  | Run-only-Economy-Routing           | **abgeschlossen:** D9 verwirft die wertlose Lucidrine-Archives-Linie            |
-| B003  | Plan-owned Emergency-Keep          | **abgeschlossen:** D65 behält Flatline-Prävention bei bestätigter Gefahr        |
-| B004  | Gesamtverifikation und Integration | Final Review, breite Gates, Main-Merge und Cleanup                             |
+| B002  | Run-only-Economy-Routing           | **abgeschlossen:** D9 verwirft die wertlose Lucidrine-Archives-Linie           |
+| B003  | Plan-owned Emergency-Keep          | **abgeschlossen:** D65 behält Flatline-Prävention bei bestätigter Gefahr       |
+| B004  | Gesamtverifikation und Integration | **verifiziert:** Final Review und breite Gates grün; Integration folgt         |
 
 ## B000 – Prozess und Ausgangsevidence
 
@@ -312,6 +312,20 @@ nach `main` integrieren.
 - aktuelles `main` in den Arbeitsbranch integrieren, finale Checks wiederholen;
 - bevorzugt Fast-Forward nach `main` mergen;
 - Main prüfen, Worktree verifiziert entfernen und gemergten Branch löschen.
+
+### Ergebnis vor Main-Integration
+
+- Das Final Review liegt unter
+  `docs/reviews/ai/match-b0b0bffec6715028-runner-remediation-final-review-2026-08-02.md`.
+- Der erste vollständige Shard-Lauf fand einen negativen Funding-Gap, den die
+  neue General-/Temporary-Credit-Rückrechnung auf null geklemmt hatte. Der
+  Vertrag bewahrt negative Defizite wieder; Krash und Lucidrine sind gemeinsam
+  grün.
+- Der vollständige Wiederholungslauf ist mit 559 Testdateien und 4575 Tests
+  grün. AI-Typecheck, `check:ai`, Deck-Doctrine und beide B0B0-Deck-Hint-
+  Consumer-Audits sind ebenfalls grün.
+- AI-Architekturindex, aktueller Projektstatus und Monatslog enthalten die
+  dauerhaft neuen Run-only-Economy- und Runner-Discard-Ownership-Verträge.
 
 ### Done-Gate und Commit
 

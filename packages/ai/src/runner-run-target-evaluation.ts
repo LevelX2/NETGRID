@@ -515,12 +515,9 @@ function generalCreditsRemainingAfterRun(
   routeCreditsAfter: number,
 ): number {
   const availableDuringRun = creditsAfterAction + temporaryRunCredits;
-  const spentDuringRun = Math.min(
-    availableDuringRun,
-    Math.max(0, availableDuringRun - routeCreditsAfter),
-  );
+  const spentDuringRun = Math.max(0, availableDuringRun - routeCreditsAfter);
   const generalCreditsSpent = Math.max(0, spentDuringRun - temporaryRunCredits);
-  return Math.max(0, creditsAfterAction - generalCreditsSpent);
+  return creditsAfterAction - generalCreditsSpent;
 }
 
 function runActionPayoffForTarget(

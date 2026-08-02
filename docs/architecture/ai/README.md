@@ -341,6 +341,11 @@
   spielgleiche Quellen-, Fähigkeits-, Ziel- und Ownership-Abdeckung für
   optionale Post-Pass-Derez-und-End-Run-Actions unter dem bestehenden
   `runner.convert_run_window`-Owner.
+- `b0b0-runner-remediation-process-2026-08-02.md` und
+  `docs/reviews/ai/match-b0b0bffec6715028-runner-remediation-final-review-2026-08-02.md`:
+  spielgleiche Verträge für echte Draw-Tax-Quellen, ausschließlich im Run
+  nutzbare temporäre Credits und planseitig gebundene Runner-Discards mit
+  situativem Flatline-Präventions-Keep unter `runner.defense_and_recovery`.
 - `ai-planportfolio-remote-doctrine-contract.md` und
   `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`:
   aktueller Vertrag für kurze Plansequenzen, wiederkehrende Zyklen,
