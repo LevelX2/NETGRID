@@ -3,7 +3,7 @@ import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   assessCorpIcePlacementForDiagnostics,
   classifyCorpFutureRunIcePlacementProfile,
-} from "../runtime/corp-ice-placement/corp-ice-placement";
+} from "./corp-future-run-ice-placement-assessment";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type SourceDefinitionIdForSimulationAction = (

@@ -72,6 +72,29 @@ Für KI-Bewertungen gilt besonders: Die KI soll keine Karte "kennen müssen", um
 
 Wenn eine konkrete Karte einen neuen Fall sichtbar macht, wird daraus ein funktionaler Vertrag geschnitten. Beispiel: Ein einzelner Playtest-Fund mit einer bestimmten ICE-Kombination soll zu einer allgemeinen Prüfung für schädliche ungebrochene Run-Effekte führen, nicht zu einer Sonderregel für diese Kartenkombination.
 
+## Ausführbares Karten-ID-Gate
+
+Der produktive KI-Importgraph wird durch
+`corepack pnpm check:ai-generic-card-id-guards` auf direkte Karten-ID-Literale
+geprüft. Tests, Simulation, Evaluation, Reports und reine Diagnosepfade gehören
+nicht zum Entscheidungsgraphen. Jede produktive Ausnahme braucht eine zentrale
+Kategorie, eine fachliche Begründung und eine feste erwartete Vorkommenszahl;
+neue, verschobene oder ungeklärte Vorkommen brechen das Gate.
+
+Der geprüfte Stand vom 2. August 2026 enthält drei produktive Vorkommen. Sie
+gehören ausschließlich zu individuellen Planmodellen: Das dedizierte
+Shell-Traders-Modell bindet seinen Signaltyp und seine sichtbare Source an die
+konkrete Karte; der Social-Engineering-Plan bindet die konkrete Source seiner
+verdeckten Gebots- und Bypass-Sequenz. Allgemeine TurnPlanner-, Lifecycle-,
+Run-, Access-, Economy-, Punish- und Recovery-Schichten besitzen keine direkte
+Karten-ID-Entscheidung mehr.
+
+Kartenspezifische historische Messklassen dürfen im Simulationsbereich bleiben,
+wenn sie nur die Kontinuität bestehender Metriken sichern und nicht in den
+produktiven Entscheidungsgraphen importiert werden. Eine solche Diagnose-ID ist
+keine Erlaubnis, dieselbe Fallunterscheidung in eine Plan- oder
+Bewertungsschicht zu übernehmen.
+
 ## Anwendung auf serverbezogene Anzeigen
 
 Zustände am Server werden nach ihrer öffentlichen Regelwirkung modelliert,

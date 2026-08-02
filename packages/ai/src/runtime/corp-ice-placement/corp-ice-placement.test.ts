@@ -7,13 +7,15 @@ import { describe, expect, it } from "vitest";
 
 import { buildCorpIceDensityProfile } from "../corp-economy/corp-ice-density";
 import {
-  assessCorpIcePlacementForDiagnostics,
   buildCorpIceCardFacts,
-  classifyCorpFutureRunIcePlacementProfile,
   corpIcePlacementActionCostAgreementFact,
   corpIcePlacementActionCreditCostFact,
   corpIcePlacementPostInstallRezCostFact,
 } from "./corp-ice-placement";
+import {
+  assessCorpIcePlacementForDiagnostics,
+  classifyCorpFutureRunIcePlacementProfile,
+} from "../../simulation/corp-future-run-ice-placement-assessment";
 
 describe("corp ICE placement profile", () => {
   it("classifies direct stops and historical future-run ICE", () => {

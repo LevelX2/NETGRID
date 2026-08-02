@@ -353,8 +353,8 @@ describe("plan-first live authority structure", () => {
     expect(icePlacement).not.toMatch(
       /\b(?:PlanModule|PlanProposal|PlanAssessment|AiDecision)\b/,
     );
-    expect(icePlacement).toContain(
-      "export function classifyCorpFutureRunIcePlacementProfile",
+    expect(icePlacement).not.toContain(
+      "classifyCorpFutureRunIcePlacementProfile",
     );
     expect(icePlacement).toContain(
       "export function corpIcePlacementActionCostAgreementFact",

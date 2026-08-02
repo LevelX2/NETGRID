@@ -130,9 +130,12 @@
   den real erreichbaren Entscheidungsgraphen und überspringt Tests, Simulation,
   Evaluation, Reports und Diagnosecode. Exakte Karten-IDs benötigen dort eine
   zentrale Klassifikation samt Begründung und stabiler Vorkommenszahl; neue,
-  verschobene oder ungeklärte Vorkommen brechen das Gate. Die Kategorie
-  `review_required` hält bekannte Generalisierungsreststellen sichtbar und ist
-  keine fachliche Freigabe für neue Sonderlogik.
+  verschobene oder ungeklärte Vorkommen brechen das Gate. Der geprüfte Stand
+  enthält nur drei Vorkommen der Kategorie `individual_plan_model`: zwei
+  Bindungen des dedizierten Shell-Traders-Plans und die Sourcebindung des
+  Social-Engineering-Secret-Bid-Plans. `review_required` enthält keine aktive
+  Freigabe. Historische kartenspezifische Messklassen liegen ausschließlich im
+  Simulationsbereich und sind keine Entscheidungsautorität.
 - Volatile Entscheidungsfamilien besitzen fachliche Modulgruppen:
   Choice-Overrides unter `runtime/choice-ranking/`, Corp-Scoreline unter
   `runtime/corp-scoreline/`, sichtbare Run-Projektion unter `run-analysis/`

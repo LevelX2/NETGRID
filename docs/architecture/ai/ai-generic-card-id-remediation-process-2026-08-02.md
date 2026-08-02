@@ -83,8 +83,8 @@ erreichbaren KI-Quelldateien. Die geprüften Familien sind:
 | GP02      | abgeschlossen | `7e9dffec1`        |
 | GP03      | abgeschlossen | `ddc83e9f7`        |
 | GP04      | abgeschlossen | `c0bfdaf2a`        |
-| GP05      | abgeschlossen | dieser Paketcommit |
-| GP06      | offen         | –                  |
+| GP05      | abgeschlossen | `8de9211fc`        |
+| GP06      | abgeschlossen | dieser Paketcommit |
 | Abschluss | offen         | –                  |
 
 ## Paketregeln
@@ -204,6 +204,16 @@ Das Strukturgate sank dadurch von 18 auf 12 produktive ID-Vorkommen.
 Done: keine `review_required`-Freigabe bleibt ohne dokumentierten Restpunkt;
 alle verbleibenden produktiven IDs sind konkrete Bindung oder individuelles
 Planmodell.
+
+Ergebnis: Die neun historischen Future-Run-ICE-Klassen liegen nun zusammen mit
+ihrem einzigen Consumer im Simulationsbereich; die produktive
+ICE-Platzierungs-Runtime exportiert nur generische Kartenfakten und
+Engine-Kostenverträge. Im produktiven Importgraph verbleiben drei zentral
+klassifizierte Vorkommen der Kategorie `individual_plan_model`: zweimal Shell
+Traders (Signaltyp und Sourceerkennung des dedizierten Plans) sowie einmal
+Social Engineering (Sourcebindung des Secret-Bid-/Bypass-Plans). Es verbleibt
+keine `review_required`-Freigabe. Das Gate sank von 12 auf 3 produktive
+ID-Vorkommen.
 
 ## Finale Checks
 

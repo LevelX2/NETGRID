@@ -26,23 +26,6 @@ const allowedCardIdUses = createAllowances([
     reason:
       "The definition ID identifies the exact source of a dedicated card plan.",
   },
-  ...[
-    "onr_v1_222_ball-and-chain",
-    "onr_v1_224_bolter-cluster",
-    "onr_v1_225_canis-major",
-    "onr_v1_226_canis-minor",
-    "onr_v1_234_data-darts",
-    "onr_v1_242_fatal-attractor",
-    "onr_v1_274_tutor",
-    "onr_v1_276_viral-15",
-    "onr_v1_277_virizz",
-  ].map((cardId) => ({
-    relativePath: "runtime/corp-ice-placement/corp-ice-placement.ts",
-    cardId,
-    category: "review_required",
-    reason:
-      "The legacy future-run ICE table remains an explicit card-family registry pending semantic hint or engine-quote migration.",
-  })),
   {
     relativePath: "runtime/runner-targeted-bypass-plan.ts",
     cardId: "onr_v1_111_social-engineering",
