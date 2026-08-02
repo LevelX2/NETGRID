@@ -103,7 +103,6 @@ const allowedCardIdUses = createAllowances([
   },
   ...[
     "onr_v1_076_all-nighter",
-    "onr_proteus_108_faked-hit",
     "onr_v1_165_junkyard-bbs",
   ].map((cardId) => ({
     relativePath: "runtime/runner-semantic-card-ids.ts",

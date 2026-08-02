@@ -44,7 +44,6 @@ export type RunnerBadPublicityRelevanceAssessmentDependencies = {
   ) => RunnerSelfDamageSurvivalAssessmentLike | undefined;
   actionCreditCost: (action: LegalAction) => number;
   cardSupport: RunnerBadPublicityCardSupportDependencies;
-  fakedHitCardId: string;
 };
 
 const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
@@ -61,8 +60,8 @@ export function runnerBadPublicityRelevanceAssessment(
   );
   if (!sourceDefinitionId) return undefined;
   const actionEvidence = runnerBadPublicityEvidenceForAction(
+    action,
     sourceDefinitionId,
-    dependencies,
   );
   if (!actionEvidence) return undefined;
 
@@ -133,27 +132,28 @@ export function runnerBadPublicityRelevanceAssessment(
 }
 
 function runnerBadPublicityEvidenceForAction(
+  action: LegalAction,
   sourceDefinitionId: string,
-  dependencies: RunnerBadPublicityRelevanceAssessmentDependencies,
 ): RunnerBadPublicityActionEvidence | undefined {
-  if (sourceDefinitionId === dependencies.fakedHitCardId) {
-    return {
-      gain: 1,
-      evidence: ["bad_publicity_contract:faked_hit"],
-    };
-  }
-  if (
-    !cardHasBadPublicitySupport(
-      sourceDefinitionId,
-      dependencies.cardSupport,
-    )
-  ) {
-    return undefined;
-  }
+  const gain = positiveIntegerPayload(action, "badPublicityAdded");
+  if (gain === undefined) return undefined;
   return {
-    gain: 1,
-    evidence: [`bad_publicity_contract:hint:${sourceDefinitionId}`],
+    gain,
+    evidence: [
+      "bad_publicity_contract:legal_action_payload",
+      `bad_publicity_source:${sourceDefinitionId}`,
+    ],
   };
+}
+
+function positiveIntegerPayload(
+  action: LegalAction,
+  key: string,
+): number | undefined {
+  const value = action.payload?.[key];
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0)
+    return undefined;
+  return Math.floor(value);
 }
 
 function runnerVisibleBadPublicitySupportCount(

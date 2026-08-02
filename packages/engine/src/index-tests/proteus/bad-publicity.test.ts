@@ -418,6 +418,13 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
       0,
     );
 
+    expect(playAction.payload).toMatchObject({
+      badPublicityAdded: 1,
+      damageType: "core",
+      damageAmount: 2,
+      unpreventableDamage: true,
+      preventableDamage: false,
+    });
     expect(state.corp.badPublicity).toBe(1);
     expect(state.runner.coreDamage).toBe(beforePlay.runner.coreDamage + 2);
     expect(state.runner.credits).toBe(beforePlay.runner.credits - 5);

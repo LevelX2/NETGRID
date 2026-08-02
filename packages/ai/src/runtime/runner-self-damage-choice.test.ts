@@ -25,7 +25,6 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
       hintEffectsForCard: () => {
         throw new Error("Candidate self-damage should not require hints");
       },
-      fakedHitCardId: "faked-hit",
       badPublicityLossThreshold: 7,
       cardAddressesVisibleBreakerNeed: () => false,
     };
@@ -106,14 +105,12 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
     const selfAssessment = runnerSelfDamageSurvivalAssessment(input, action, {
       sourceDefinitionIdForAction: () => "hint-self-damage-card",
       hintEffectsForCard: () => [selfDamageHintEffect("self")],
-      fakedHitCardId: "faked-hit",
       badPublicityLossThreshold: 7,
       cardAddressesVisibleBreakerNeed: () => false,
     });
     const noiseAssessment = runnerSelfDamageSurvivalAssessment(input, action, {
       sourceDefinitionIdForAction: () => "hint-self-damage-card",
       hintEffectsForCard: () => [selfDamageHintEffect("selfish")],
-      fakedHitCardId: "faked-hit",
       badPublicityLossThreshold: 7,
       cardAddressesVisibleBreakerNeed: () => false,
     });
@@ -143,7 +140,6 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
     const dependencies = {
       sourceDefinitionIdForAction: () => "coverage-risk-card",
       hintEffectsForCard: () => undefined,
-      fakedHitCardId: "faked-hit",
       badPublicityLossThreshold: 7,
       cardAddressesVisibleBreakerNeed: (
         _input: AiDecisionInput,
@@ -191,7 +187,6 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
       {
         sourceDefinitionIdForAction: () => "coverage-risk-card",
         hintEffectsForCard: () => undefined,
-        fakedHitCardId: "faked-hit",
         badPublicityLossThreshold: 7,
         cardAddressesVisibleBreakerNeed: () => false,
       },

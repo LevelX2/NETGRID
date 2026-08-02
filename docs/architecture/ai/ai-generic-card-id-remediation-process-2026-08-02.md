@@ -79,8 +79,8 @@ erreichbaren KI-Quelldateien. Die geprüften Familien sind:
 | Paket | Status | Commit |
 | --- | --- | --- |
 | GP00 | abgeschlossen | `959ec9210` |
-| GP01 | abgeschlossen | dieser Paketcommit |
-| GP02 | offen | – |
+| GP01 | abgeschlossen | `fcc94df13` |
+| GP02 | abgeschlossen | dieser Paketcommit |
 | GP03 | offen | – |
 | GP04 | offen | – |
 | GP05 | offen | – |

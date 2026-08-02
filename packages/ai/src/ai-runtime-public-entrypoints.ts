@@ -72,7 +72,6 @@ import { encounterRunRemainderEffectAssessment } from "./runtime/runner-run-rema
 import {
   ALL_NIGHTER_CARD_ID,
   BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  FAKED_HIT_CARD_ID,
   JUNKYARD_BBS_CARD_ID,
   JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
   LOAN_FROM_CHIBA_CARD_ID,
@@ -242,7 +241,6 @@ export const aiLiveRuntimeDependencies = {
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
   scoreFromComponents: semanticRuntimeScoreFromComponents,
   shouldAvoidRandomBreakOrDamageRisk: randomBreakOrDamageRiskShouldAvoidRun,
-  fakedHitCardId: FAKED_HIT_CARD_ID,
   badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
   guidanceValue: runnerRunTargetSemanticGuidanceValue,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,

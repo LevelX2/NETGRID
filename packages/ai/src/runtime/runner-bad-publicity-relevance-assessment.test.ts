@@ -4,7 +4,7 @@ import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared"
 import { runnerBadPublicityRelevanceAssessment } from "./runner-bad-publicity-relevance-assessment";
 
 describe("runnerBadPublicityRelevanceAssessment", () => {
-  it("uses structured bad-publicity support roles and effect targets", () => {
+  it("uses the exact action gain while structured roles describe support", () => {
     expect(assessment({ roles: ["bad_publicity_support"] })).toEqual(
       expect.objectContaining({
         badPublicityGainFromAction: 1,
@@ -23,7 +23,7 @@ describe("runnerBadPublicityRelevanceAssessment", () => {
     );
   });
 
-  it("uses bounded rules-text tokens for bad-publicity support", () => {
+  it("uses bounded rules-text tokens only for visible plan support", () => {
     expect(assessment({ rulesText: "Prevent bad publicity." })).toEqual(
       expect.objectContaining({
         badPublicityGainFromAction: 1,
@@ -39,12 +39,37 @@ describe("runnerBadPublicityRelevanceAssessment", () => {
   });
 
   it("ignores substring-only bad-publicity support noise", () => {
-    expect(assessment({ roles: ["bad_publicityish_noise"] })).toBeUndefined();
+    expect(assessment({ roles: ["bad_publicityish_noise"] })).toMatchObject({
+      badPublicityGainFromAction: 1,
+      badPublicitySupportCount: 0,
+      badPublicityPlanPresent: false,
+    });
     expect(
       assessment({ effectTargets: ["runner.bad_publicityish_noise"] }),
-    ).toBeUndefined();
+    ).toMatchObject({ badPublicitySupportCount: 0 });
     expect(
       assessment({ rulesText: "Badly publicized bad_publicityish support." }),
+    ).toMatchObject({ badPublicitySupportCount: 0 });
+  });
+
+  it("does not invent an action gain from a card definition or support hints", () => {
+    const definitionId = "faked-hit";
+    const card = visibleCard(definitionId);
+    const action = runnerAction(definitionId);
+    action.payload = {};
+
+    expect(
+      runnerBadPublicityRelevanceAssessment(input(card), action, {
+        sourceDefinitionIdForAction: () => definitionId,
+        selfDamageSurvivalAssessment: () => undefined,
+        actionCreditCost: () => 0,
+        cardSupport: {
+          rolesForCardId: () => ["bad_publicity_support"],
+          hintEffectsForCard: () => [{ target: "runner.bad_publicity" }],
+          rulesTextForCard: () => "Give the Corp bad publicity.",
+          effectTarget: () => "runner.bad_publicity",
+        },
+      }),
     ).toBeUndefined();
   });
 });
@@ -71,7 +96,6 @@ function assessment(params: {
           ? (effect as { target: string }).target
           : undefined,
     },
-    fakedHitCardId: "faked-hit",
   });
 }
 
@@ -109,6 +133,6 @@ function runnerAction(sourceDefinitionId: string): LegalAction {
     source: `${sourceDefinitionId}-instance`,
     label: "Play event",
     costs: [],
-    payload: {},
+    payload: { badPublicityAdded: 1 },
   } as unknown as LegalAction;
 }
