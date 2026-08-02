@@ -2,7 +2,7 @@
 
 Datum: 2026-08-02
 
-Status: **fachlich und technisch freigegeben; lokale Main-Integration ausstehend**
+Status: **fachlich und technisch freigegeben; lokal in `main` integriert**
 
 ## Review-Ergebnis
 
@@ -65,3 +65,12 @@ Breaker wählt. Der zuständige Owner bleibt `runner.rig_and_coverage`, die
 Capability `search_answer_breaker_ap` und die exakte LegalAction-Bindung sind
 im Checkpoint gesichert. Die vier fokussierten Regressionstests und danach alle
 drei vollständigen Shards sind grün.
+
+## Integration und Bereinigung
+
+Der verifizierte Stand `860674dd6` wurde per Fast-Forward in den lokalen
+`main` integriert. `corepack pnpm check:ai` und `git diff --check` liefen dort
+anschließend erneut grün. Der saubere Paket-Worktree
+`C:\Projekte\NETGRID_AI_GENERIC_CARD_ID_MIGRATION` und der vollständig gemergte
+Branch `codex/ai-generic-card-id-migration` wurden entfernt. Es erfolgte kein
+Push und keine Remote-Integration.
