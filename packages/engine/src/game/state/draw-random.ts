@@ -1,10 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type CardDefinitionId,
-  type CardInstanceId,
-  type GameState,
-} from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { type CardInstanceId, type GameState } from "@netgrid/shared";
+import { applyCorpDrawReplacementAfterDraw } from "../choices/strategic-planning-group-draw-choice";
 import { mustInstance } from "./card-server-lookup";
 
 export function mustArrayValue<T>(
@@ -39,68 +34,17 @@ export function drawCorpCard(state: GameState): void {
 }
 
 export function drawCorpCards(state: GameState, amount: number): void {
-  let drawnCount = 0;
+  const drawnCardIds: CardInstanceId[] = [];
   for (let index = 0; index < amount; index += 1) {
-    if (drawCorpCardRaw(state)) drawnCount += 1;
+    const cardId = drawCorpCardRaw(state);
+    if (cardId) drawnCardIds.push(cardId);
     if (state.winner) return;
   }
-  if (drawnCount > 0) applyStrategicPlanningGroupDrawReplacement(state);
+  if (drawnCardIds.length > 0)
+    applyCorpDrawReplacementAfterDraw(state, drawnCardIds, drawCorpCardRaw);
 }
 
-function applyStrategicPlanningGroupDrawReplacement(state: GameState): void {
-  for (const sourceId of strategicPlanningGroupSourceIds(state)) {
-    const sourceDefinitionId = mustInstance(
-      state.cardInstances,
-      sourceId,
-    ).definitionId as CardDefinitionId;
-    const implementation =
-      cardImplementationForDefinitionId(sourceDefinitionId)?.corpUtility;
-    if (implementation?.kind !== "corp_draw_extra_then_bottom_one") continue;
-    for (let index = 0; index < implementation.extraDraw; index += 1) {
-      const extraCardId = drawCorpCardRaw(state);
-      if (!extraCardId || state.winner) return;
-      bottomCorpHqCard(state, extraCardId);
-    }
-  }
-}
-
-function strategicPlanningGroupSourceIds(state: GameState): CardInstanceId[] {
-  const servers = state.corp.servers ?? [];
-  return servers
-    .flatMap((server) => server.root)
-    .filter((cardId): cardId is CardInstanceId => {
-      const instance = state.cardInstances[cardId];
-      if (
-        !instance ||
-        instance.controller !== "corp" ||
-        instance.rezzed !== true ||
-        instance.zone.side !== "corp" ||
-        instance.zone.zone !== "serverRoot"
-      )
-        return false;
-      return (
-        cardImplementationForDefinitionId(instance.definitionId as CardDefinitionId)
-          ?.corpUtility?.kind === "corp_draw_extra_then_bottom_one" &&
-        CARD_DEFINITIONS_BY_ID[instance.definitionId]?.side === "corp"
-      );
-    })
-    .sort();
-}
-
-function bottomCorpHqCard(state: GameState, cardId: CardInstanceId): void {
-  state.corp.hq = state.corp.hq.filter((candidate) => candidate !== cardId);
-  state.corp.rd.push(cardId);
-  state.cardInstances[cardId] = {
-    ...mustInstance(state.cardInstances, cardId),
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "rd" },
-  };
-}
-
-export function randomHqAccess(
-  state: GameState,
-): CardInstanceId | undefined {
+export function randomHqAccess(state: GameState): CardInstanceId | undefined {
   if (state.corp.hq.length === 0) return undefined;
   const value = nextRandom(state, "hq_random_access");
   const index = Math.floor(value * state.corp.hq.length);

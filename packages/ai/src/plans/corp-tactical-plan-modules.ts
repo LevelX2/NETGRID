@@ -104,7 +104,8 @@ export type CorpHandManagementSignal = {
     | "develop_card"
     | "resolve_hq_overflow"
     | "agenda_flood_relief"
-    | "discard_window";
+    | "discard_window"
+    | "draw_filter_window";
   sourceDefinitionIds?: string[];
   sourceInstanceId?: string;
   actionIds?: string[];
@@ -139,6 +140,15 @@ export type CorpHandManagementSignal = {
     observedAtStateVersion: number;
     selectedOptionIds: string[];
     discardedCardInstanceIds: string[];
+    retainedCardInstanceIds: string[];
+    evidenceCodes: string[];
+  };
+  drawFilterChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    bottomedCardInstanceIds: string[];
     retainedCardInstanceIds: string[];
     evidenceCodes: string[];
   };
@@ -706,7 +716,8 @@ function handModule(): PlanModule {
               : { kind: "player", id: "corp" },
             signal.parentPlanInstanceId && signal.parentNeedId
               ? "flexible_support"
-              : signal.phase === "discard_window"
+              : signal.phase === "discard_window" ||
+                  signal.phase === "draw_filter_window"
                 ? "locked_sequence"
                 : "sticky_goal",
             signal.parentPlanInstanceId,

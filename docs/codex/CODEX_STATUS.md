@@ -247,7 +247,7 @@ widerrufbare Sessions, Origin-/CSRF-Schutz, neutrales Loginverhalten und
 Hash-only-Persistenz sind aktiv. E-Mail, Passkeys, MFA und öffentliche
 Registrierung sind noch kein Produktvertrag.
 
-Ein Account kann bis zu 50 persönliche Server-Decks speichern. 40 kuratierte
+Ein Account kann bis zu 50 persönliche Server-Decks speichern. 43 kuratierte
 Standard-Decks sind unveränderlich direkt spielbar oder kopierbar; interne KI-,
 Test- und Retire-Klassen bleiben unsichtbar. Jeder Matchstart verwendet einen
 neu validierten immutable Snapshot und bleibt accountfrei in Engine, Replay,

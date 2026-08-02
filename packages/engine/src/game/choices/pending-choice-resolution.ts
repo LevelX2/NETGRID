@@ -34,6 +34,7 @@ export type PendingChoiceResolutionHost = {
     resolveMultiExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveCorpInstalledEconomyCreditChoice: HostFn<void>;
+    resolveStrategicPlanningGroupDrawChoice: HostFn<void>;
     resolveCrashEverettDrawChoice: HostFn<void>;
     resolveRunnerDrawSequenceChoice: HostFn<void>;
     resolveHardwareTrashByCounterChoice: HostFn<void>;
@@ -147,6 +148,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveExposeInstalledCorpCardsChoice;
   const resolveCorpInstalledEconomyCreditChoice =
     host.hiddenZone.resolveCorpInstalledEconomyCreditChoice;
+  const resolveStrategicPlanningGroupDrawChoice =
+    host.hiddenZone.resolveStrategicPlanningGroupDrawChoice;
   const resolveCrashEverettDrawChoice =
     host.hiddenZone.resolveCrashEverettDrawChoice;
   const resolveRunnerDrawSequenceChoice =
@@ -422,6 +425,14 @@ export function resolvePendingChoice(
     )
   ) {
     resolveCorpInstalledEconomyCreditChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.strategic_planning_group_draw:",
+    )
+  ) {
+    resolveStrategicPlanningGroupDrawChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {

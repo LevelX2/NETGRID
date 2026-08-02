@@ -576,7 +576,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expectValid(state);
   });
 
-  it("draws an extra Corp card with Strategic Planning Group and bottoms the extra draw", () => {
+  it("lets the Corp choose either card drawn with Strategic Planning Group", () => {
     let state = corpMainClassic08Game("classic-08-strategic-planning-group");
     addRezzedCorpRootForTest(
       state,
@@ -588,14 +588,109 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     const extraDrawId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
     const hqBefore = state.corp.hq.length;
     const rdBefore = state.corp.rd.length;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
 
     state = apply(state, "corp", (action) => action.type === "draw_card");
 
-    expect(state.corp.hq).toContain(extraDrawId);
-    expect(state.corp.hq).not.toContain(baseDrawId);
-    expect(state.corp.rd.at(-1)).toBe(baseDrawId);
-    expect(state.corp.hq.length).toBe(hqBefore + 1);
-    expect(state.corp.rd.length).toBe(rdBefore - 1);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+      sourceCardDefinitionId: STRATEGIC_PLANNING_GROUP,
+    });
+    expect(
+      state.pendingChoice?.options.map((option) => option.value).sort(),
+    ).toEqual([baseDrawId, extraDrawId].sort());
+    expect(
+      getPlayerView(state, "corp").pendingChoice?.options.every(
+        (option) => option.card?.known === true,
+      ),
+    ).toBe(true);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(state.corp.hq).toEqual(
+      expect.arrayContaining([baseDrawId, extraDrawId]),
+    );
+    expect(state.corp.hq.length).toBe(hqBefore + 2);
+    expect(state.corp.rd.length).toBe(rdBefore - 2);
+
+    const baseOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === baseDrawId,
+    )?.id;
+    const extraOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === extraDrawId,
+    )?.id;
+    expect(baseOptionId).toBeDefined();
+    expect(extraOptionId).toBeDefined();
+
+    const bottomBase = applyChoice(
+      structuredClone(state),
+      "corp",
+      String(baseOptionId),
+    );
+    expect(bottomBase.corp.hq).toContain(extraDrawId);
+    expect(bottomBase.corp.hq).not.toContain(baseDrawId);
+    expect(bottomBase.corp.rd.at(-1)).toBe(baseDrawId);
+    expect(bottomBase.corp.hq.length).toBe(hqBefore + 1);
+    expect(bottomBase.corp.rd.length).toBe(rdBefore - 1);
+    expect(bottomBase.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      drawReplacementSourceTitle: "Strategic Planning Group",
+      strategicPlanningGroupChoiceResolved: true,
+      strategicPlanningGroupDrawnCardCount: 2,
+      bottomedCardCount: 1,
+      destinationZone: "rd_bottom",
+    });
+    expect(
+      JSON.stringify(bottomBase.eventLog.at(-1)?.publicPayload),
+    ).not.toContain(baseDrawId);
+
+    const bottomExtra = applyChoice(state, "corp", String(extraOptionId));
+    expect(bottomExtra.corp.hq).toContain(baseDrawId);
+    expect(bottomExtra.corp.hq).not.toContain(extraDrawId);
+    expect(bottomExtra.corp.rd.at(-1)).toBe(extraDrawId);
+    const replay = replayEvents(
+      initial,
+      bottomExtra.eventLog.slice(replayStart),
+    );
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(bottomExtra));
+    expectValid(bottomBase);
+    expectValid(bottomExtra);
+  });
+
+  it("opens the same private Strategic Planning Group choice for the Corp mandatory draw", () => {
+    let state = corpMainClassic08Game("classic-08-strategic-mandatory-draw");
+    addRezzedCorpRootForTest(
+      state,
+      STRATEGIC_PLANNING_GROUP,
+      "remote_1",
+      "strategic",
+    );
+    state = toRunnerTurnFromCorpMain(state);
+    const firstDrawId = putCorpCardOnTopOfRd(state, "simple_agenda");
+    const secondDrawId = putCorpCardOnTopOfRd(
+      state,
+      "simple_economy_operation",
+    );
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+
+    expect(state.timingPoint).toBe("corp_action.main");
+    expect(
+      state.pendingChoice?.options.map((option) => option.value).sort(),
+    ).toEqual([firstDrawId, secondDrawId].sort());
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    const selectedOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === firstDrawId,
+    )?.id;
+    state = applyChoice(state, "corp", String(selectedOptionId));
+    expect(state.corp.rd.at(-1)).toBe(firstDrawId);
+    expect(state.corp.hq).toContain(secondDrawId);
+    expect(state.pendingChoice).toBeUndefined();
     expectValid(state);
   });
 

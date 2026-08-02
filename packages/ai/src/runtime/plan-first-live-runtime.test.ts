@@ -632,6 +632,144 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps Strategic Planning Group selection inside the exact Corp hand-plan route", () => {
+    resetResidentPlanPortfolioMemory();
+    const choiceId = "spg-draw-choice";
+    const action = legalAction(
+      "corp.resolve-spg-draw-choice",
+      "corp",
+      "resolve_choice",
+      "Eine Karte unter R&D legen",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [action]);
+    const lowValueCard = visibleCard("drawn-operation", "corp", "operation", {
+      definitionId: "onr_v1_284_chance-observation",
+    });
+    const retainedAgenda = visibleCard("drawn-agenda", "corp", "agenda", {
+      definitionId: "simple_agenda",
+    });
+    const options = [
+      {
+        id: "bottom-operation",
+        label: "Chance Observation",
+        value: lowValueCard.instanceId,
+        card: lowValueCard,
+      },
+      {
+        id: "bottom-agenda",
+        label: "Agenda",
+        value: retainedAgenda.instanceId,
+        card: retainedAgenda,
+      },
+    ];
+    action.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 1,
+        maxSelections: 1,
+        optionIds: options.map((option) => option.id),
+      },
+    ];
+    input.playerView.own.gripOrHq = [lowValueCard, retainedAgenda];
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source: "card_implementation.strategic_planning_group_draw:spg-instance",
+      prompt: "Eine Karte unter R&D legen",
+      kind: "select_cards",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: input.playerView.stateVersion,
+      visibility: "hidden_info_barrier",
+    };
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const discardKeepScore = (
+      _decisionInput: unknown,
+      card: { instanceId: string },
+    ) => ({ total: card.instanceId === lowValueCard.instanceId ? 0 : 100 });
+    const decision = liveContext({
+      discardKeepScore,
+      selectedChoicesForDecision: (
+        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+      ) =>
+        selectedChoicesForDecision(
+          decisionInput,
+          selectedAction,
+          {
+            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+            discardKeepScore,
+            selectedRunnerProgramInstallTrashOptionIds: () => [],
+            selectedRunnerForcedProgramTrashOptionIds: () => [],
+            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+            extractAiFeatures: () => ({
+              credits: 0,
+              memoryRemaining: 4,
+              rigRoles: new Set(),
+              rigDefinitionIds: new Set(),
+            }),
+            rolesForCardId: () => [],
+          } as Parameters<typeof selectedChoicesForDecision>[2],
+          portfolio,
+        ),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: action.actionId,
+      selectedChoices: {
+        choiceId,
+        selectedOptionIds: ["bottom-operation"],
+      },
+      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.hand_and_agenda_management",
+        planFirstDecision: {
+          selectedPlan: {
+            target: { id: "corp" },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_lane:plan",
+        "plan_module:corp.hand_and_agenda_management",
+        "plan_step_capability:draw_filter_window",
+      ]),
+    );
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.hand_and_agenda_management",
+      moduleState: {
+        kind: "hand",
+        signal: {
+          phase: "draw_filter_window",
+          actionIds: [action.actionId],
+          drawFilterChoiceBinding: {
+            actionId: action.actionId,
+            choiceId,
+            observedAtStateVersion: input.playerView.stateVersion,
+            selectedOptionIds: ["bottom-operation"],
+            bottomedCardInstanceIds: [lowValueCard.instanceId],
+            retainedCardInstanceIds: [retainedAgenda.instanceId],
+          },
+        },
+      },
+    });
+  });
+
   it("keeps a coerced sole run continuation in the automatic Engine-window lane", () => {
     resetResidentPlanPortfolioMemory();
     const continueRun = legalAction(
@@ -3130,6 +3268,156 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: install.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+  });
+
+  it("preserves a reserved counter bank by choosing the cross-remote same-turn conversion", () => {
+    resetResidentPlanPortfolioMemory();
+    const advance = legalAction(
+      "advance-vapor",
+      "corp",
+      "advance_card",
+      "Advance Vapor Ops",
+      { credits: 1, clicks: 1 },
+      {
+        source: "vapor-card",
+        payload: { cardId: "vapor-card" },
+      },
+    );
+    const transfer = legalAction(
+      "transfer-vapor",
+      "corp",
+      "activated_card_ability",
+      "Move advancement counters from Vapor Ops",
+      { credits: 0, clicks: 1 },
+      {
+        source: "vapor-card",
+        payload: {
+          cardId: "vapor-card",
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        },
+      },
+    );
+    const installCrossRemote = legalAction(
+      "install-zurich-new-remote",
+      "corp",
+      "install_card",
+      "Install Project Zurich in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "zurich-card",
+        payload: {
+          cardId: "zurich-card",
+          serverId: "new_remote",
+          placement: "root",
+        },
+      },
+    );
+    const installReplacingBank = legalAction(
+      "replace-vapor-with-zurich",
+      "corp",
+      "install_card",
+      "Install Project Zurich in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "zurich-card",
+        payload: {
+          cardId: "zurich-card",
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+          replacedRootCardType: "asset",
+        },
+      },
+    );
+    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"];
+    if (!dataWall || dataWall.type !== "ice") {
+      throw new Error("Missing Data Wall test definition.");
+    }
+    const dataWallStrength = dataWall.strength ?? 0;
+    const input = aiInput("corp", [
+      advance,
+      transfer,
+      installCrossRemote,
+      installReplacingBank,
+    ]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 9;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.own.gripOrHq = [
+      visibleCard("zurich-card", "corp", "agenda", {
+        definitionId: "onr_proteus_008_project-zurich",
+        title: "Project Zurich",
+        agendaPoints: 2,
+        advancementRequirement: 3,
+      }),
+    ];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [
+          visibleCard("data-wall", "corp", "ice", {
+            definitionId: dataWall.id,
+            title: dataWall.title,
+            subtypes: dataWall.subtypes,
+            strength: dataWallStrength,
+            rezzed: true,
+            effectiveRunQuote: {
+              iceInstanceId: "data-wall",
+              iceDefinitionId: dataWall.id,
+              effectiveStrength: dataWallStrength,
+              subroutines: dataWall.subroutines ?? [],
+            },
+          }),
+        ],
+        [
+          visibleCard("vapor-card", "corp", "asset", {
+            definitionId: "onr_v1_347_vapor-ops",
+            title: "Vapor Ops",
+            rezzed: true,
+            advancementCounters: 2,
+            counterBankPreparationQuote: {
+              schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+              context: "corp_counter_bank_preparation",
+              sourceCardId: "vapor-card",
+              expiresAtStateVersion: input.playerView.stateVersion,
+              location: { kind: "installed_root", serverId: "remote_1" },
+              advancementCounters: 2,
+              advanceableBeforeRez: true,
+              activatedAbilitiesRequireRez: true,
+              cashout: {
+                advancementCounterCost: 1,
+                creditGain: 1,
+                actionCost: 0,
+              },
+              transfer: {
+                actionCost: 1,
+                minimumSourceCounters: 1,
+                source: "source_card",
+                target: "chosen_installed_advanceable_card",
+                maximum: "all",
+              },
+            },
+          }),
+        ],
+      ),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "counter-bank-replacement-runtime-test",
+      side: "corp",
+      cards: [{ cardId: "onr_proteus_008_project-zurich", quantity: 2 }],
+    });
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installCrossRemote.actionId,
       reasonCode: "plan_first.corp.score_agenda",
       fallbackUsed: false,
     });

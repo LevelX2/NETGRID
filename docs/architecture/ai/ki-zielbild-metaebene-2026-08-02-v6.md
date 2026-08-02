@@ -13,6 +13,21 @@ Kampagnenvertrag ist zusätzlich in
 `ai-turn-and-campaign-planner-concept-2026-07-29.md` und dessen Final Review
 belegt.
 
+Dieses allgemeine Zielbild bildet einen verbindlichen Dreierverbund mit:
+
+- `ai-plan-layer-target-state-wip.md` als detailliertem Plan- und
+  Ausführungsvertrag;
+- `ai-program-logic-change-compass.md` als vollständig zu lesender
+  Agenten-Handlungsanweisung.
+
+Bei jeder inhaltlichen Änderung an einem der drei Dokumente werden mögliche
+Auswirkungen auf die beiden anderen geprüft. Betroffene Begriffe, Haltung,
+Autoritätsgrenzen, Ownership- oder Abnahmeregeln werden synchron angepasst;
+andernfalls wird ausdrücklich festgestellt, dass die beiden anderen
+Dokumente unverändert gültig bleiben. Das allgemeine Zielbild darf daher
+weder dem detaillierten Planvertrag noch dem Agenten-Kompass stillschweigend
+widersprechen.
+
 Das Ziel ist keine KI aus immer mehr Sonderregeln. Fachwissen wird an der
 engsten wiederverwendbaren Stelle modelliert und von genau einem Planowner
 verwendet. Nur dieser Plan entscheidet; Hints, Doctrine, Sensoren, Quotes und

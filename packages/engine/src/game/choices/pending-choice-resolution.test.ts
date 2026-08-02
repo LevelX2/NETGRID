@@ -266,6 +266,9 @@ function pendingChoiceHost(
       resolveCorpInstalledEconomyCreditChoice: unexpected(
         "resolveCorpInstalledEconomyCreditChoice",
       ),
+      resolveStrategicPlanningGroupDrawChoice: unexpected(
+        "resolveStrategicPlanningGroupDrawChoice",
+      ),
       resolveCrashEverettDrawChoice: unexpected(
         "resolveCrashEverettDrawChoice",
       ),

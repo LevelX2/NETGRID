@@ -1348,6 +1348,113 @@
       }
     },
     {
+      "standardDeckId": "standard_corp_neon_escrow",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Neon Escrow",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_214_project-babylon",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_008_project-zurich",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_194_corporate-downsizing",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_244_filter",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_238_data-wall-2-0",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_252_keeper",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_258_neural-blade",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_245_fire-wall",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_281_accounts-receivable",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_305_team-restructuring",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_304_systematic-layoffs",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_291_falsified-transactions-expert",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_347_vapor-ops",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_312_chicago-branch",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_323_experimental-ai",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_351_bizarre-encryption-scheme",
+          "quantity": 2
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_neon_escrow_2026_08_02",
+        "sourceDeckVersion": "1.0.0-user-approved"
+      }
+    },
+    {
       "standardDeckId": "standard_corp_original_speed_v10",
       "version": "1.0.0",
       "status": "active",

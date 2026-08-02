@@ -139,6 +139,67 @@ describe("formatChronicleEvent", () => {
     expect(item.icon).toBe("discard");
   });
 
+  it("shows Strategic Planning Group as a separate public draw-resolution entry", () => {
+    const mandatoryDraw = formatChronicleEvent(
+      makeEvent("mandatory_draw", { actor: "corp" }),
+      "corp",
+    );
+    const event = makeEvent("resolve_choice", {
+      actor: "corp",
+      choiceVisibility: "hidden_info_barrier",
+      sourceDefinitionId: "onr_classic_025_strategic-planning-group",
+      drawReplacementSourceTitle: "Strategic Planning Group",
+      strategicPlanningGroupChoiceResolved: true,
+      strategicPlanningGroupDrawnCardCount: 2,
+      bottomedCardCount: 1,
+      destinationZone: "rd_bottom",
+      selectedCardId: "must-not-appear",
+    });
+    const corpItem = formatChronicleEvent(event, "corp");
+    const runnerItem = formatChronicleEvent(event, "runner");
+
+    expect(mandatoryDraw.title).toBe("Du hast deine Pflichtkarte gezogen.");
+    expect(corpItem).toMatchObject({
+      category: "card",
+      importance: "important",
+      visibility: "public",
+      title:
+        "Du hast mit Strategic Planning Group eine zusätzliche Karte gezogen und eine der beiden gezogenen Karten unter R&D gelegt.",
+      cardDefinitionId: "onr_classic_025_strategic-planning-group",
+      cardTitle: "Strategic Planning Group",
+    });
+    expect(runnerItem.title).toBe(
+      "Die Korp hat mit Strategic Planning Group eine zusätzliche Karte gezogen und eine der beiden gezogenen Karten unter R&D gelegt.",
+    );
+    expect(corpItem.chips).toEqual(
+      expect.arrayContaining([
+        "Strategic Planning Group",
+        "Zusätzliche Karte",
+        "R&D",
+      ]),
+    );
+    expect(JSON.stringify(corpItem)).not.toContain("must-not-appear");
+    expect(shouldSuppressChronicleEventItem(event)).toBe(false);
+  });
+
+  it("uses the complete draw count for multi-card Strategic Planning Group draws", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        drawReplacementSourceTitle: "Strategic Planning Group",
+        strategicPlanningGroupChoiceResolved: true,
+        strategicPlanningGroupDrawnCardCount: 4,
+        bottomedCardCount: 1,
+        destinationZone: "rd_bottom",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Die Korp hat mit Strategic Planning Group eine zusätzliche Karte gezogen und eine der 4 gezogenen Karten unter R&D gelegt.",
+    );
+  });
+
   it("names Ice and Data Special Report exposed cards and their data fort in the chronicle", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
