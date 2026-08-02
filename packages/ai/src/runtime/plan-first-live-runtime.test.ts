@@ -3273,6 +3273,156 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("preserves a reserved counter bank by choosing the cross-remote same-turn conversion", () => {
+    resetResidentPlanPortfolioMemory();
+    const advance = legalAction(
+      "advance-vapor",
+      "corp",
+      "advance_card",
+      "Advance Vapor Ops",
+      { credits: 1, clicks: 1 },
+      {
+        source: "vapor-card",
+        payload: { cardId: "vapor-card" },
+      },
+    );
+    const transfer = legalAction(
+      "transfer-vapor",
+      "corp",
+      "activated_card_ability",
+      "Move advancement counters from Vapor Ops",
+      { credits: 0, clicks: 1 },
+      {
+        source: "vapor-card",
+        payload: {
+          cardId: "vapor-card",
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        },
+      },
+    );
+    const installCrossRemote = legalAction(
+      "install-zurich-new-remote",
+      "corp",
+      "install_card",
+      "Install Project Zurich in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "zurich-card",
+        payload: {
+          cardId: "zurich-card",
+          serverId: "new_remote",
+          placement: "root",
+        },
+      },
+    );
+    const installReplacingBank = legalAction(
+      "replace-vapor-with-zurich",
+      "corp",
+      "install_card",
+      "Install Project Zurich in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "zurich-card",
+        payload: {
+          cardId: "zurich-card",
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+          replacedRootCardType: "asset",
+        },
+      },
+    );
+    const dataWall = CARD_DEFINITIONS_BY_ID["onr_v1_238_data-wall-2-0"];
+    if (!dataWall || dataWall.type !== "ice") {
+      throw new Error("Missing Data Wall test definition.");
+    }
+    const dataWallStrength = dataWall.strength ?? 0;
+    const input = aiInput("corp", [
+      advance,
+      transfer,
+      installCrossRemote,
+      installReplacingBank,
+    ]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 9;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = input.playerView.stateVersion;
+    }
+    input.playerView.own.gripOrHq = [
+      visibleCard("zurich-card", "corp", "agenda", {
+        definitionId: "onr_proteus_008_project-zurich",
+        title: "Project Zurich",
+        agendaPoints: 2,
+        advancementRequirement: 3,
+      }),
+    ];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [
+          visibleCard("data-wall", "corp", "ice", {
+            definitionId: dataWall.id,
+            title: dataWall.title,
+            subtypes: dataWall.subtypes,
+            strength: dataWallStrength,
+            rezzed: true,
+            effectiveRunQuote: {
+              iceInstanceId: "data-wall",
+              iceDefinitionId: dataWall.id,
+              effectiveStrength: dataWallStrength,
+              subroutines: dataWall.subroutines ?? [],
+            },
+          }),
+        ],
+        [
+          visibleCard("vapor-card", "corp", "asset", {
+            definitionId: "onr_v1_347_vapor-ops",
+            title: "Vapor Ops",
+            rezzed: true,
+            advancementCounters: 2,
+            counterBankPreparationQuote: {
+              schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+              context: "corp_counter_bank_preparation",
+              sourceCardId: "vapor-card",
+              expiresAtStateVersion: input.playerView.stateVersion,
+              location: { kind: "installed_root", serverId: "remote_1" },
+              advancementCounters: 2,
+              advanceableBeforeRez: true,
+              activatedAbilitiesRequireRez: true,
+              cashout: {
+                advancementCounterCost: 1,
+                creditGain: 1,
+                actionCost: 0,
+              },
+              transfer: {
+                actionCost: 1,
+                minimumSourceCounters: 1,
+                source: "source_card",
+                target: "chosen_installed_advanceable_card",
+                maximum: "all",
+              },
+            },
+          }),
+        ],
+      ),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "counter-bank-replacement-runtime-test",
+      side: "corp",
+      cards: [{ cardId: "onr_proteus_008_project-zurich", quantity: 2 }],
+    });
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installCrossRemote.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+  });
+
   it("routes an exact Night Shift conversion through Corp economy instead of generic development", () => {
     const nightShift = legalAction(
       "night-shift",

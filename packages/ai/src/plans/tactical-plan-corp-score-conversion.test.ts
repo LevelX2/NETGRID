@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type {
-  AiDecisionInput,
-  LegalAction,
-  VisibleCard,
+import {
+  CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
 } from "@netgrid/shared";
 import {
   bestCorpSameTurnScoreConversionPath,
@@ -52,6 +53,81 @@ describe("Corp same-turn score conversion", () => {
       "install_score_target",
       "move_advancement",
       "score_ready",
+    ]);
+  });
+
+  it("rejects a same-root install that destroys its reserved counter source", () => {
+    const agenda = card("agenda", "agenda", {
+      advancementRequirement: 3,
+    });
+    const vapor = card("vapor", "asset", {
+      advancementCounters: 2,
+      rezzed: true,
+      counterBankPreparationQuote: {
+        schemaVersion: CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
+        context: "corp_counter_bank_preparation",
+        sourceCardId: "vapor",
+        expiresAtStateVersion: 1,
+        location: { kind: "installed_root", serverId: "remote_1" },
+        advancementCounters: 2,
+        advanceableBeforeRez: true,
+        activatedAbilitiesRequireRez: true,
+        cashout: {
+          advancementCounterCost: 1,
+          creditGain: 1,
+          actionCost: 0,
+        },
+        transfer: {
+          actionCost: 1,
+          minimumSourceCounters: 1,
+          source: "source_card",
+          target: "chosen_installed_advanceable_card",
+          maximum: "all",
+        },
+      },
+    });
+    const input = corpInput({
+      clicks: 3,
+      credits: 3,
+      hq: [agenda],
+      root: [vapor],
+      actions: [
+        action("install-new-remote", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("replace-vapor", "install_card", agenda.instanceId, {
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        }),
+        action("transfer", "activated_card_ability", vapor.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+        action("advance", "advance_card", agenda.instanceId, {
+          serverId: "new_remote",
+        }),
+      ],
+    });
+
+    expect(
+      corpSameTurnScoreConversionPaths(input).map((path) => ({
+        targetServerId: path.targetServerId,
+        installActionId: path.steps.find(
+          (step) => step.kind === "install_score_target",
+        )?.actionId,
+        reservedAdvancementCounters: path.reservedAdvancementCounters,
+      })),
+    ).toEqual([
+      {
+        targetServerId: "new_remote",
+        installActionId: "install-new-remote",
+        reservedAdvancementCounters: { vapor: 2 },
+      },
     ]);
   });
 

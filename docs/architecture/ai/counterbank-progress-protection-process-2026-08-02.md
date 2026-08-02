@@ -135,6 +135,12 @@ P0 Prozessvertrag
 | P4    | Nachpanel und Review         | identische zehn Konfigurationen ausgewertet; harte Gates und Kartenereignisse dokumentiert | `docs(ai): review counterbank ten-seed comparison`         |
 | P5    | Integration und Cleanup      | aktuelles `main` integriert, final geprüft, lokal gemergt, Worktree und Branch entfernt    | `docs(ai): close counterbank progress protection process`  |
 
+Aktiver Paketstand: P0 ist mit `b7bdbbfdc` abgeschlossen. P1 hat die
+spielgleiche Solver- und Runtime-Regression rot bestätigt und das feste
+Zehn-Seed-Vorherpanel unter `data/local/` erfasst. Die versionierte Evidence
+liegt in
+`docs/reviews/ai/counterbank-progress-protection-red-evidence-2026-08-02.md`.
+
 ## Paketdetails
 
 ### P0 – Prozessvertrag
@@ -155,10 +161,14 @@ LegalAction-Metadaten als fokussierte Regression sichern.
 
 Arbeit:
 
-- Vapor-ähnliche Quote mit zwei Countern in einem sicheren Remote;
-- legales Bank-Advance und Agenda-Installation mit
-  `rootReplacement: asset_to_agenda` im selben Remote;
-- Nachweis, dass aktuell die ersetzende Agenda-Route gewinnt;
+- Engine-zertifizierte Counterbank mit zwei Countern in einem sicheren
+  Remote;
+- vollständig finanzierter Same-Turn-Pfad aus Agenda-Installation in einem
+  neuen Remote, Countertransfer, Basic Advance und Score;
+- konkurrierende Agenda-Installation mit
+  `rootReplacement: asset_to_agenda` im Bank-Remote;
+- Nachweis, dass der Solver aktuell beide Pfade trotz derselben reservierten
+  Counterquelle erzeugt und die selbstzerstörende Route gewinnt;
 - Plan-/Step-/Origin-Evidence festhalten;
 - zehn feste Vorherkonfigurationen lokal ausführen: fünf gegen
   `Rent-I-Con: Das Shellspiel`, fünf gegen `Blink Pressure Rig`, jeweils
@@ -189,7 +199,10 @@ Arbeit:
 
 Tests:
 
-- zwei Counter: Advance gewinnt, Same-Root-Install ist nicht zugelassen;
+- zwei Counter und finanzierter Same-Turn-Handoff: Cross-Remote-Install
+  gewinnt, Same-Root-Install ist nicht zugelassen;
+- zwei Counter ohne vollständigen Handoff: der weitere Bankaufbau bleibt
+  möglich;
 - Zielschwelle: anderer Remote, Transfer und Score bleiben möglich;
 - null Counter: Replacement bleibt möglich;
 - gewöhnliches Asset: Replacement bleibt möglich;
