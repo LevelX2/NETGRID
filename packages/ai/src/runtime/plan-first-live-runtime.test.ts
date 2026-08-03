@@ -8196,6 +8196,90 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps the successful-run bonus decision with central pressure when a bonus run is executable", () => {
+    resetResidentPlanPortfolioMemory();
+    const bonusRunHq = legalAction(
+      "bodyweight-bonus-hq",
+      "runner",
+      "start_run",
+      "Bonus-Run auf HQ",
+      { credits: 0, clicks: 0 },
+      {
+        source: "basic_action",
+        payload: {
+          serverId: "hq",
+          bonusRunNoClick: true,
+          bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        },
+      },
+    );
+    const bonusRunRd = legalAction(
+      "bodyweight-bonus-rd",
+      "runner",
+      "start_run",
+      "Bonus-Run auf R&D",
+      { credits: 0, clicks: 0 },
+      {
+        source: "basic_action",
+        payload: {
+          serverId: "rd",
+          bonusRunNoClick: true,
+          bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        },
+      },
+    );
+    const bonusRunArchives = legalAction(
+      "bodyweight-bonus-archives",
+      "runner",
+      "start_run",
+      "Bonus-Run auf Archives",
+      { credits: 0, clicks: 0 },
+      {
+        source: "basic_action",
+        payload: {
+          serverId: "archives",
+          bonusRunNoClick: true,
+          bonusRunSource: "onr_v1_123_bodyweight-data-creche",
+        },
+      },
+    );
+    const decline = legalAction(
+      "bodyweight-decline",
+      "runner",
+      "trigger_ability",
+      "Keinen Bonus-Run starten",
+      { credits: 0, clicks: 0 },
+      {
+        source: "bodyweight-data-creche",
+        payload: {
+          abilityId: "decline_successful_run_extra_run",
+        },
+      },
+    );
+    const input = aiInput("runner", [
+      bonusRunHq,
+      bonusRunRd,
+      bonusRunArchives,
+      decline,
+    ]);
+    input.playerView.own.clicks = 0;
+    input.playerView.opponent.deckCount = 10;
+
+    expect(
+      liveContext({
+        evaluateRunnerRunTargets: () => [
+          safeRuntimeRunTarget(bonusRunHq.actionId, "hq"),
+          safeRuntimeRunTarget(bonusRunRd.actionId, "rd"),
+          safeRuntimeRunTarget(bonusRunArchives.actionId, "archives"),
+        ],
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: expect.stringMatching(/^bodyweight-bonus-/),
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
+  });
+
   it("fails closed when a purported restricted run omits the Engine-certified remaining-action count", () => {
     resetResidentPlanPortfolioMemory();
     const incompleteRun = legalAction(

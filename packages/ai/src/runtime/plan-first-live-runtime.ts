@@ -2010,6 +2010,20 @@ export function runnerActionDispositions(
       .filter((signal) => signal.reachable && signal.marginalValue > 0)
       .flatMap((signal) => signal.runActionIds ?? []),
   );
+  for (const action of input.legalActions) {
+    if (
+      action.type !== "trigger_ability" ||
+      (action.payload?.abilityId ?? action.payload?.runnerAbility) !==
+        "decline_successful_run_extra_run"
+    ) {
+      continue;
+    }
+    add(
+      action.actionId,
+      "runner.pressure_central",
+      "runner_successful_run_extra_run_declined_by_central_pressure",
+    );
+  }
   const recurringEconomyInstallActionIds = new Set(
     (domain.recurringEconomy ?? [])
       .filter((signal) => signal.phase === "install")
