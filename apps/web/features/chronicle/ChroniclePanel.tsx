@@ -25,6 +25,7 @@ import {
   chronicleAccessCompletesRun,
   chroniclePaymentSupportBelongsToRunPayload,
   chroniclePaymentSupportFollowingRunGroupLabel,
+  chronicleRunnerAbilityBelongsToRunPayload,
   chronicleResolveChoiceBelongsToRunPayload,
   groupChronicleEntriesForRender,
   orderChronicleEntriesForDisplay,
@@ -587,6 +588,7 @@ function chronicleEventBelongsToActiveRun(
   ) {
     const card = eventCardDetail(event, cardDetailsById);
     return (
+      chronicleRunnerAbilityBelongsToRunPayload(event.publicPayload) ||
       (actionType === "activated_card_ability" &&
         chroniclePaymentSupportBelongsToRunPayload(event.publicPayload)) ||
       card?.type === "ice" ||

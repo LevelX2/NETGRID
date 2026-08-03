@@ -5,6 +5,7 @@ import {
   chronicleAccessCompletesRun,
   chroniclePaymentSupportBelongsToRunPayload,
   chroniclePaymentSupportFollowingRunGroupLabel,
+  chronicleRunnerAbilityBelongsToRunPayload,
   chronicleResolveChoiceBelongsToRunPayload,
   groupChronicleEntriesForRender,
   orderChronicleEntriesForDisplay,
@@ -132,6 +133,15 @@ describe("groupChronicleEntriesForRender", () => {
         null,
       ),
     ).toBeNull();
+  });
+
+  it("keeps runner run-strength abilities in the active run group", () => {
+    expect(
+      chronicleRunnerAbilityBelongsToRunPayload({
+        runnerAbility: "boost_icebreaker_for_run",
+      }),
+    ).toBe(true);
+    expect(chronicleRunnerAbilityBelongsToRunPayload({})).toBe(false);
   });
 
   it("keeps consecutive runs on the same target as separate render groups", () => {

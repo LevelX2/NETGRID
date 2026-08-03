@@ -176,6 +176,12 @@ export function chroniclePaymentSupportBelongsToRunPayload(
   );
 }
 
+export function chronicleRunnerAbilityBelongsToRunPayload(
+  payload: Record<string, unknown>,
+): boolean {
+  return payload.runnerAbility === "boost_icebreaker_for_run";
+}
+
 export function chroniclePaymentSupportFollowingRunGroupLabel(
   payload: Record<string, unknown>,
   followingRunGroupLabel: string | null,
