@@ -186,6 +186,32 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("resolves the Corp rez-or-trash ICE choice without an unbound choice window", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source:
+            "card_implementation.corp_choice_rez_or_trash_ice_decision:ice_2:7",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [
+            { id: "rez_ice", label: "Rez ICE", value: "rez_ice" },
+            { id: "trash_ice", label: "Trash ICE", value: "trash_ice" },
+          ],
+        },
+        { side: "corp" },
+      ),
+      resolveChoiceAction("corp"),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["trash_ice"],
+    });
+  });
+
   it("resolves the real Engine access-payment choice for the exact accessed Corp card", () => {
     let state = createGameAfterSetup({
       seed: "ai-real-access-payment-choice",

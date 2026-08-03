@@ -528,6 +528,23 @@ export function selectedChoicesForDecision(
     );
   }
   if (
+    input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith(
+      "card_implementation.corp_choice_rez_or_trash_ice_decision:",
+    )
+  ) {
+    const selected = selectedCorpRezOrTrashIceOptionId(
+      input,
+      choice,
+      selectableOptions,
+    );
+    return resolved(
+      selected !== undefined ? [selected] : [],
+      "corp_rez_or_trash_ice",
+    );
+  }
+  if (
     input.side === "runner" &&
     choice.kind === "bid_amount" &&
     isRunnerTargetedBypassHideChoice(choice)
@@ -737,6 +754,43 @@ export function selectedChoicesForDecision(
     action,
     "Register a complete domain resolver or preserve an exact resident-plan continuation for this non-forced choice.",
   );
+}
+
+function selectedCorpRezOrTrashIceOptionId(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): string | undefined {
+  const rezOptionId = selectableOptions.find((option) => option.id === "rez_ice")
+    ?.id;
+  const trashOptionId = selectableOptions.find(
+    (option) => option.id === "trash_ice",
+  )?.id;
+  const targetMatch =
+    /^card_implementation\.corp_choice_rez_or_trash_ice_decision:([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const targetCardId = targetMatch?.[1];
+  const targetIce = input.playerView.servers
+    .flatMap((server) => server.ice)
+    .find(
+      (card) =>
+        card.instanceId === targetCardId &&
+        card.known === true &&
+        card.rezzed === false,
+    );
+  const rezQuote = targetIce?.effectiveRezCostQuote;
+  if (
+    rezOptionId !== undefined &&
+    rezQuote?.complete === true &&
+    rezQuote.cardId === targetCardId &&
+    rezQuote.expiresAtStateVersion === input.playerView.stateVersion &&
+    Number.isFinite(rezQuote.finalCredits) &&
+    rezQuote.finalCredits <= input.playerView.own.credits
+  ) {
+    return rezOptionId;
+  }
+  return trashOptionId;
 }
 
 function selectedRunnerInstalledCardLiquidationOptionId(
