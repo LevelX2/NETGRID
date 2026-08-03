@@ -2085,9 +2085,9 @@
       "side": "corp",
       "identityCardId": "corp_identity_001",
       "cardPoolSnapshotId": "card-snapshot-0.8",
-      "cardPoolVersion": "private-local-onr-v1",
-      "formatProfileId": "netgrid_private_local_v1",
-      "formatProfileVersion": "1.3.0",
+      "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
       "cards": [
         { "cardId": "onr_v1_194_corporate-downsizing", "quantity": 3 },
         { "cardId": "onr_v1_196_corporate-war", "quantity": 3 },
