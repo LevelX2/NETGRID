@@ -1160,7 +1160,9 @@ export function actionContextStillVisible(
   if (context.kind === "server")
     return view.servers.some((server) => server.id === context.id);
   return visibleActionCards(view).some(
-    (card) => card.instanceId === context.id && card.known,
+    (card) =>
+      card.instanceId === context.id &&
+      (card.known || isConcealedRunnerResourceCard(card)),
   );
 }
 

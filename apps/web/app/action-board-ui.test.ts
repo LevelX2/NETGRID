@@ -12,6 +12,7 @@ import {
   accessRevealStatusLabel,
   actionButtonLabel,
   actionButtonTone,
+  actionContextStillVisible,
   actionConsumesClick,
   actionCostChips,
   actionMatchesContext,
@@ -5703,6 +5704,29 @@ describe("opponent runner rig card actions", () => {
     );
 
     expect(opponentRunnerRigCardActions(resource, [trash])).toEqual([trash]);
+  });
+
+  it("keeps a concealed Runner resource selected for its Corp trash action", () => {
+    const hiddenSlot: VisibleCard = {
+      instanceId: "hidden_runner_resource_slot_1",
+      known: false,
+      concealed: true,
+      hiddenRunnerResource: true,
+      type: "resource",
+      subtypes: ["hidden_runner_resource"],
+    };
+    const view = {
+      own: { gripOrHq: [], heapOrArchives: [], scoreArea: [], rig: [] },
+      opponent: { scoreArea: [], rig: [hiddenSlot] },
+      servers: [],
+    } as unknown as PlayerView;
+
+    expect(
+      actionContextStillVisible(
+        { kind: "card", id: hiddenSlot.instanceId, label: "Verdeckte Resource" },
+        view,
+      ),
+    ).toBe(true);
   });
 });
 
