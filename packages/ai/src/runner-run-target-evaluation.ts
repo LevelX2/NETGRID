@@ -3,10 +3,13 @@ import {
   type AiDecisionInput,
   type LegalAction,
   type PublicGameEvent,
+  type VisibleCard,
 } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "@netgrid/engine";
 import {
   reconstructBeliefState,
   type BeliefState,
+  type KnownPositionMemory,
   type RunnerOpponentModel,
 } from "./belief-state";
 import {
@@ -92,9 +95,9 @@ export function evaluateRunnerRunTargets(
   params: EvaluateRunnerRunTargetsParams,
 ): RunnerRunTargetEvaluation[] {
   const economyPosture = buildRunnerEconomyPosture(params);
+  const beliefState = params.beliefState ?? reconstructBeliefState(params.input);
   const unrezzedIceRiskModel =
-    (params.beliefState ?? reconstructBeliefState(params.input))
-      .runnerOpponentModel?.unrezzedIceRiskModel ?? [];
+    beliefState.runnerOpponentModel?.unrezzedIceRiskModel ?? [];
   return projectInternalRunnerRunActions(params)
     .filter(
       (projection) =>
@@ -107,6 +110,7 @@ export function evaluateRunnerRunTargets(
         projection,
         economyPosture,
         unrezzedIceRiskModel,
+        beliefState.runnerOpponentModel?.knownPositionMemory ?? [],
       ),
     )
     .filter(
@@ -130,6 +134,7 @@ function evaluateRunnerRunTarget(
   projection: InternalRunActionProjection,
   economyPosture: RunnerEconomyPosture,
   unrezzedIceRiskModel: RunnerOpponentModel["unrezzedIceRiskModel"],
+  knownPositionMemory: KnownPositionMemory[],
 ): RunnerRunTargetEvaluation | undefined {
   const targetServerId = projection.targetServerId;
   if (!targetServerId) return undefined;
@@ -155,9 +160,15 @@ function evaluateRunnerRunTarget(
   const temporaryRunCredits = Math.max(0, projection.temporaryRunCredits ?? 0);
   const creditsAvailableDuringRun = creditsAfterAction + temporaryRunCredits;
   const visibleServerIce = server?.ice ?? [];
-  const projectedServerIce = projection.bypassFirstIce
+  const serverIceForVisibleRezProjection = projection.bypassFirstIce
     ? visibleServerIce.slice(0, -1)
     : visibleServerIce;
+  const projectedServerIce = projectVisibleDuringRunRezPath(
+    serverIceForVisibleRezProjection,
+    server?.root ?? [],
+    targetServerId,
+    knownPositionMemory,
+  );
   const bypassedFirstIce =
     projection.bypassFirstIce && visibleServerIce.length > 0;
   const path = assessKnownRezzedIcePath(
@@ -507,6 +518,149 @@ function evaluateRunnerRunTarget(
       ...projection.evidence.slice(0, 12),
     ],
   };
+}
+
+function projectVisibleDuringRunRezPath(
+  iceCards: VisibleCard[],
+  rootCards: VisibleCard[],
+  serverId: string,
+  knownPositionMemory: KnownPositionMemory[],
+): VisibleCard[] {
+  if (!rootCards.some(isVisibleDuringRunIceRezSupport)) return iceCards;
+  const observedDefinitions = observedIceDefinitionsAtPositions(
+    iceCards,
+    serverId,
+    knownPositionMemory,
+  );
+  const observedIce = iceCards.map((card, index) =>
+    observedIceAtPosition(card, observedDefinitions.get(index)),
+  );
+  const newlyRezzedIce = observedIce.filter(
+    (card) => card.known && card.rezzed !== true && card.definitionId,
+  );
+  if (newlyRezzedIce.length === 0) return observedIce;
+  const newlyRezzedIds = new Set(
+    newlyRezzedIce.map((card) => card.instanceId),
+  );
+  return observedIce.map((card) => {
+    const projectedCard = newlyRezzedIds.has(card.instanceId)
+      ? { ...card, rezzed: true }
+      : card;
+    if (projectedCard.rezzed !== true || !projectedCard.definitionId)
+      return projectedCard;
+    const additionalEndTheRunCount = projectedAdditionalEndTheRunCount(
+      projectedCard,
+      newlyRezzedIce,
+    );
+    if (additionalEndTheRunCount === 0 || !projectedCard.effectiveRunQuote)
+      return projectedCard;
+    return {
+      ...projectedCard,
+      effectiveRunQuote: {
+        ...projectedCard.effectiveRunQuote,
+        subroutines: [
+          ...projectedCard.effectiveRunQuote.subroutines,
+          ...Array.from({ length: additionalEndTheRunCount }, (_, index) => ({
+            id: `ai.visible_rez_projection.${projectedCard.instanceId}.${index}`,
+            type: "end_the_run" as const,
+          })),
+        ],
+      },
+    };
+  });
+}
+
+function observedIceAtPosition(
+  card: VisibleCard,
+  observedDefinitionId: string | undefined,
+): VisibleCard {
+  if (card.known) return card;
+  const definition = observedDefinitionId
+    ? CARD_DEFINITIONS_BY_ID[observedDefinitionId]
+    : undefined;
+  if (!definition || definition.type !== "ice") return card;
+  return {
+    ...card,
+    known: true,
+    definitionId: definition.id,
+    title: definition.title,
+    type: "ice",
+    subtypes: definition.subtypes.slice(),
+    rezCost: definition.rezCost,
+    strength: definition.strength,
+  };
+}
+
+function observedIceDefinitionsAtPositions(
+  iceCards: VisibleCard[],
+  serverId: string,
+  knownPositionMemory: KnownPositionMemory[],
+): Map<number, string> {
+  const definitions = new Map<number, string>();
+  const installedMemory = knownPositionMemory.filter(
+    (entry) => entry.zone === serverId && entry.positionKey === "installed",
+  );
+  const hiddenIndices = iceCards.flatMap((card, index) =>
+    card.known ? [] : [index],
+  );
+  for (const entry of knownPositionMemory) {
+    if (entry.zone !== serverId) continue;
+    const match = /^ice:(\d+)$/.exec(entry.positionKey);
+    if (match) definitions.set(Number(match[1]), entry.definitionId);
+  }
+  if (installedMemory.length > hiddenIndices.length) return definitions;
+  for (const [offset, entry] of installedMemory.entries()) {
+    const index = hiddenIndices[offset];
+    if (index !== undefined && !definitions.has(index))
+      definitions.set(index, entry.definitionId);
+  }
+  return definitions;
+}
+
+function isVisibleDuringRunIceRezSupport(card: VisibleCard): boolean {
+  if (!card.known || card.rezzed !== true || !card.definitionId) return false;
+  return (AI_HINTS_BY_CARD.get(card.definitionId)?.effects ?? []).some(
+    (effect) =>
+      effect.kind === "rez_discount" &&
+      effect.scope === "ice" &&
+      effect.timing === "during_run",
+  );
+}
+
+function projectedAdditionalEndTheRunCount(
+  card: VisibleCard,
+  newlyRezzedIce: VisibleCard[],
+): number {
+  if (!card.definitionId) return 0;
+  return (
+    cardImplementationForDefinitionId(card.definitionId)?.modifiers?.reduce(
+      (count, modifier) => {
+        if (
+          modifier.kind !== "additional_subroutine" ||
+          modifier.activeWhile !== "rezzed" ||
+          modifier.sourceZone !== "corp_installed" ||
+          modifier.appliesTo.sourceCardOnly !== true ||
+          modifier.repeat?.kind !== "for_each_rezzed_installed_ice" ||
+          modifier.subroutine.kind !== "end_the_run"
+        )
+          return count;
+        return (
+          count +
+          newlyRezzedIce.filter(
+            (candidate) =>
+              candidate.instanceId !== card.instanceId &&
+              candidate.definitionId !== undefined &&
+              modifier.repeat.subtypeAnyOf.some((subtype) =>
+                CARD_DEFINITIONS_BY_ID[candidate.definitionId]?.subtypes.includes(
+                  subtype,
+                ),
+              ),
+          ).length
+        );
+      },
+      0,
+    ) ?? 0
+  );
 }
 
 function generalCreditsRemainingAfterRun(

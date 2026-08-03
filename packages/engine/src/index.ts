@@ -51,6 +51,8 @@ export {
   type TraceSuccessEffectCardImplementationQuote,
 } from "./game/trace/success-effect-quote";
 
+export { cardImplementationForDefinitionId } from "./card-implementations/registry";
+
 export type {
   ActionType,
   ChoiceRequest,
