@@ -16733,6 +16733,10 @@ function runnerRunWindowActionAssessment(
     runOrigin,
   );
   const exclusion = encounterExclusion ?? planStepExclusion;
+  const programPreservationPayment = runnerProgramPreservationPaymentValue(
+    input,
+    action,
+  );
   return exclusion
     ? {
         admissible: false,
@@ -16746,6 +16750,9 @@ function runnerRunWindowActionAssessment(
       }
     : {
         admissible: true,
+        ...(programPreservationPayment !== undefined
+          ? { value: programPreservationPayment }
+          : {}),
         evidenceCodes: [
           accessAction
             ? "runner_access_window_action_plan_admissible"
@@ -16829,6 +16836,19 @@ function runnerPostPassDerezAndEndRunAssessment(
       `runner_run_target:${run.attackedServerId}`,
     ],
   };
+}
+
+function runnerProgramPreservationPaymentValue(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number | undefined {
+  const payment = action.payload?.payOrTrashProgramSubroutinePayment;
+  if (typeof payment !== "number" || payment <= 0) return undefined;
+  const installedProgramCount = (input.playerView.own.rig ?? []).filter(
+    (card) => card.type === "program",
+  ).length;
+  if (installedProgramCount === 0) return undefined;
+  return 1_000 + installedProgramCount * 100;
 }
 
 function runnerExactRunWindowPhaseActionIds(
