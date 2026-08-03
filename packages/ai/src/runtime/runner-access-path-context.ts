@@ -1,6 +1,11 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
 import {
   isEndRunSubroutine,
   isUnacceptableImmediateSafetyThreatSubroutine,
@@ -16,7 +21,9 @@ type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
 
 export type RunnerAccessPathContextDependencies = {
   breakSubroutineIndexesForAction: (action: LegalAction) => Set<number>;
-  currentEncounteredIceCard: (input: AiDecisionInput) => VisibleCard | undefined;
+  currentEncounteredIceCard: (
+    input: AiDecisionInput,
+  ) => VisibleCard | undefined;
   actionCreditCost: (action: LegalAction) => number;
   estimatedEncounterBreakCost: (
     input: AiDecisionInput,
@@ -29,7 +36,9 @@ export type RunnerAccessPathContextDependencies = {
   ) => string;
   isRemoteServerTarget: (serverId: string | undefined) => boolean;
   definitionType: (definitionId: string) => string | undefined;
-  remoteRootTrashCost: (card: VisibleServer["root"][number]) => number | undefined;
+  remoteRootTrashCost: (
+    card: VisibleServer["root"][number],
+  ) => number | undefined;
 };
 
 export function createRunnerAccessPathContext(
@@ -102,35 +111,53 @@ export function createRunnerAccessPathContext(
     );
     if (hasAdvancedKnownRoot) return { blocksBreak: false, evidence: [] };
 
-    const trashCosts = server.root
-      .map((card) => {
+    const trashableRoots = server.root
+      .flatMap((card) => {
         const type = card.definitionId
           ? dependencies.definitionType(card.definitionId)
           : card.type;
         const trashCost = dependencies.remoteRootTrashCost(card);
         return (type === "asset" || type === "upgrade") &&
-          trashCost !== undefined
-          ? trashCost
-          : undefined;
+          trashCost !== undefined &&
+          card.definitionId
+          ? [{ card, definitionId: card.definitionId, type, trashCost }]
+          : [];
       })
-      .filter((trashCost): trashCost is number => trashCost !== undefined);
-
-    if (trashCosts.length <= 0)
+      .sort(
+        (left, right) =>
+          left.trashCost - right.trashCost ||
+          left.card.instanceId.localeCompare(right.card.instanceId),
+      );
+    const cheapestTrashRoot = trashableRoots[0];
+    if (!cheapestTrashRoot)
       return {
         blocksBreak: true,
         evidence: [...evidenceBase, "encounter_remote_payoff:known_low_value"],
       };
 
-    const cheapestTrashCost = Math.min(...trashCosts);
-    if (creditsAfterAccessPath >= cheapestTrashCost)
+    const trashProjection = projectKnownRemoteTrashCommitment(input, {
+      serverId: server.id,
+      definitionId: cheapestTrashRoot.definitionId,
+      rootType: cheapestTrashRoot.type,
+      trashCost: cheapestTrashRoot.trashCost,
+      creditsAfterPath: creditsAfterAccessPath,
+      visibleCard: cheapestTrashRoot.card,
+    });
+    if (!trashProjection.knownNoCurrentPayoff)
       return { blocksBreak: false, evidence: [] };
 
     return {
       blocksBreak: true,
       evidence: [
         ...evidenceBase,
-        "encounter_remote_payoff:trash_unaffordable",
-        `encounter_remote_root_trash_cost:${cheapestTrashCost}`,
+        "encounter_remote_payoff:known_no_current_payoff",
+        `encounter_remote_root_trash_cost:${cheapestTrashRoot.trashCost}`,
+        `encounter_remote_trash_decision:${trashProjection.accessDecision}`,
+        ...(trashProjection.declineReason
+          ? [
+              `encounter_remote_trash_decline_reason:${trashProjection.declineReason}`,
+            ]
+          : []),
       ],
     };
   };
