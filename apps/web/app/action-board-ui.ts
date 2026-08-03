@@ -2103,6 +2103,7 @@ export function exposedCardInstanceIdsForEvent(
 ): string[] {
   const hiddenZoneAction = event.publicPayload.hiddenZoneAction;
   if (
+    hiddenZoneAction !== "multi_expose_installed_corp_cards" &&
     hiddenZoneAction !== "expose_installed_cards_single_fort" &&
     hiddenZoneAction !==
       "schematics_search_engine_expose_installed_cards_review" &&

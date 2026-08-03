@@ -298,13 +298,14 @@ export function formatChronicleEvent(
         break;
       }
       if (
-        hiddenZoneAction === "expose_installed_cards_single_fort" &&
+        (hiddenZoneAction === "expose_installed_cards_single_fort" ||
+          hiddenZoneAction === "multi_expose_installed_corp_cards") &&
         stringValue(payload.publicRevealKind) === "expose"
       ) {
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
           sourceTitle ??
-          "Ice and Data Special Report";
+          "eine Kartenfähigkeit";
         const exposedTitles = titlesForDefinitionIds(
           stringValue(payload.publicRevealDefinitionIds),
         );

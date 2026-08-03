@@ -5515,6 +5515,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
       publicRevealKind: "expose",
       exposedCardInstanceIds: "hidden_card",
     });
+    const huntClub = publicEvent("evt_hunt_club", "resolve_choice", {
+      actionType: "resolve_choice",
+      actor: "runner",
+      hiddenZoneAction: "multi_expose_installed_corp_cards",
+      publicRevealKind: "expose",
+      exposedCardInstanceIds: "hq_ice,remote_asset,hq_ice",
+    });
     const schematicsReview = publicEvent("evt_schematics", "action", {
       actionType: "access_card",
       actor: "runner",
@@ -5538,6 +5545,10 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(exposedCardInstanceIdsForEvent(exposed)).toEqual([
       "ice_1",
       "root_1",
+    ]);
+    expect(exposedCardInstanceIdsForEvent(huntClub)).toEqual([
+      "hq_ice",
+      "remote_asset",
     ]);
     expect(exposedCardInstanceIdsForEvent(schematicsReview)).toEqual([
       "remote_asset",

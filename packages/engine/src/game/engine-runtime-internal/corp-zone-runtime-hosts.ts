@@ -993,6 +993,7 @@ export function createCorpZoneRuntimeHosts(
       sourceDefinitionId,
       sourceTitle: sourceDefinition.title,
       revealedCount: selectedIds.length,
+      exposedCardInstanceIds: selectedIds.join(","),
       publicRevealDefinitionIds: definitions
         .map((definition: CardDefinition) => definition.id)
         .join(","),

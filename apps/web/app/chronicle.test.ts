@@ -280,6 +280,30 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("names all Hunt Club BBS exposed cards in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "multi_expose_installed_corp_cards",
+        publicRevealKind: "expose",
+        sourceDefinitionId: "onr_v1_091_hunt-club-bbs",
+        revealedCount: 3,
+        publicRevealDefinitionIds:
+          "simple_barrier_ice,simple_economy_asset,simple_upgrade",
+        exposedServerLabels: "HQ ICE 1,Remote 1 Root 1,R&D Root 1",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast Hunt Club BBS genutzt und 3 installierte Korp-Karten exposed.",
+    );
+    expect(item.description).toBe(
+      "Exposed: Simple Barrier ICE (HQ ICE 1), Simple Economy Asset (Remote 1 Root 1), Simple Upgrade (R&D Root 1).",
+    );
+  });
+
   it("redacts hidden Corp installs from the Runner perspective", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {

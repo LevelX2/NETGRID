@@ -652,6 +652,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       revealKind: "expose",
       revealedCount: 1,
+      exposedCardInstanceIds: exposedIceId,
       publicRevealDefinitionIds: "simple_barrier_ice",
     });
   });
