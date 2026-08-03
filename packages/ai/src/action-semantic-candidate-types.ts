@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import type {
   AiHintActionCapacityProfile,
+  AiHintStrategicExchangeKind,
   AiHintStructuredEffect,
 } from "./hint-ontology";
 
@@ -513,6 +514,7 @@ export type ActionSemanticCandidate = {
    * facts remain bound to the Engine LegalAction projection.
    */
   functionalEffects?: readonly AiHintStructuredEffect[];
+  strategicExchangeKinds?: readonly AiHintStrategicExchangeKind[];
   /**
    * Card-wide strategic context from the active hint. This is intentionally
    * not action authority and must not satisfy a PlanStep capability by itself.
@@ -612,6 +614,7 @@ export type ActionCardSemanticProfile = {
   cardId: CardDefinitionId;
   tacticSignals: readonly string[];
   functionalEffects?: readonly AiHintStructuredEffect[];
+  strategicExchangeKinds?: readonly AiHintStrategicExchangeKind[];
   effectTargets?: readonly string[];
   compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];

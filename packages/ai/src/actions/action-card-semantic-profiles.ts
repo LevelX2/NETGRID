@@ -78,6 +78,9 @@ function actionCardSemanticProfileFromHint(
   return {
     cardId,
     functionalEffects: (hint.effects ?? []).map((effect) => ({ ...effect })),
+    ...(hint.strategicExchangeKinds?.length
+      ? { strategicExchangeKinds: [...hint.strategicExchangeKinds] }
+      : {}),
     effectTargets: uniqueStrings(
       (hint.effects ?? [])
         .map(hintEffectTarget)

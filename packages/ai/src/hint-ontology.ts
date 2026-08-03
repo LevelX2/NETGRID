@@ -75,6 +75,15 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "delayed_penalty",
 ] as const;
 
+export const KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS = [
+  "score_progress",
+  "debt_financing",
+  "board_or_hand_sacrifice",
+  "self_tag",
+  "self_damage",
+  "temporary_resource",
+] as const;
+
 export const KNOWN_HINT_EFFECT_TIMINGS = [
   "action",
   "scored_activated",
@@ -633,6 +642,10 @@ export type AiHintStructuredEffect = {
   finite?: boolean;
 };
 
+/** Cards that trade a lasting strategic burden for an immediate payoff. */
+export type AiHintStrategicExchangeKind =
+  (typeof KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS)[number];
+
 /**
  * Strategic classification only. Exact current legality and immediate
  * amounts remain Engine/LegalAction facts; these profiles distinguish action
@@ -751,6 +764,7 @@ export type AiHintStrategySupportPair = {
 };
 
 export type AiHintOntologyExtension = {
+  strategicExchangeKinds?: AiHintStrategicExchangeKind[];
   effects?: AiHintStructuredEffect[];
   actionCapacityProfiles?: AiHintActionCapacityProfile[];
   functionSignals?: string[];
@@ -844,6 +858,14 @@ function validateExtensionFields(
   path: string,
   issues: AiHintOntologyIssue[],
 ): void {
+  validateKnownArray(
+    input.strategicExchangeKinds,
+    KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS,
+    `${path}.strategicExchangeKinds`,
+    "invalid_shape",
+    issues,
+    false,
+  );
   validateEffects(input.effects, `${path}.effects`, issues);
   validateActionCapacityProfiles(
     input.actionCapacityProfiles,

@@ -1,23 +1,29 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import type { AiHintStrategicExchangeKind } from "../hint-ontology";
 
-export type RunnerStrategicExchangeKind =
-  | "score_progress"
-  | "debt_financing"
-  | "board_or_hand_sacrifice"
-  | "self_tag"
-  | "self_damage"
-  | "temporary_resource";
+export type RunnerStrategicExchangeKind = AiHintStrategicExchangeKind;
 
 export function runnerStrategicExchangeKinds(
   candidate: ActionSemanticCandidate,
 ): RunnerStrategicExchangeKind[] {
   const risks = new Set(candidate.risks.map((risk) => risk.kind));
-  const effects = candidate.functionalEffects ?? [];
-  const kinds = new Set<RunnerStrategicExchangeKind>();
+  // A current action may only bind one of a card's effects.  The exchange
+  // classification is intentionally card-level as well: an install action
+  // for a debt, temporary or self-damaging resource must retain the burden
+  // that will be paid later, even when that later effect is not the action's
+  // immediate engine effect.
+  const effects = [
+    ...(candidate.functionalEffects ?? []),
+    ...(candidate.cardContextFunctionalEffects ?? []),
+  ];
+  const kinds = new Set<RunnerStrategicExchangeKind>(
+    candidate.strategicExchangeKinds ?? [],
+  );
   if (
     candidate.costProfile.agendaPointCost !== undefined ||
+    risks.has("agenda_cost") ||
     effects.some((effect) => effect.target === "agenda_points_given_to_corp")
   ) {
     kinds.add("score_progress");
@@ -54,7 +60,13 @@ export function runnerStrategicExchangeKinds(
   if (
     (candidate.costProfile.selfDamage?.length ?? 0) > 0 ||
     risks.has("damage_window") ||
-    risks.has("brain_damage")
+    risks.has("brain_damage") ||
+    risks.has("unpreventable_damage") ||
+    effects.some(
+      (effect) =>
+        effect.target === "self_brain_damage" ||
+        effect.target === "self_inflicted_brain_damage",
+    )
   ) {
     kinds.add("self_damage");
   }
@@ -79,12 +91,14 @@ export function runnerStrategicExchangeHardExclusion(
 ): string | undefined {
   const kinds = runnerStrategicExchangeKinds(candidate);
   if (kinds.length === 0) return undefined;
-  const transfersAgendaPointsToCorp = (candidate.functionalEffects ?? []).some(
-    (effect) => effect.target === "agenda_points_given_to_corp",
-  );
+  const transfersAgendaPointsToCorp = [
+    ...(candidate.functionalEffects ?? []),
+    ...(candidate.cardContextFunctionalEffects ?? []),
+  ].some((effect) => effect.target === "agenda_points_given_to_corp");
   if (
     transfersAgendaPointsToCorp &&
-    input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 1
+    input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin - 1
   ) {
     return "runner_strategic_exchange_opponent_terminal_score";
   }

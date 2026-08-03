@@ -135,6 +135,9 @@ export function applyCardSemanticJoin(
 
   return {
     ...candidate,
+    ...(profile.strategicExchangeKinds?.length
+      ? { strategicExchangeKinds: profile.strategicExchangeKinds }
+      : {}),
     ...(actionCapacityProjection !== undefined
       ? { actionCapacityProjection }
       : {}),

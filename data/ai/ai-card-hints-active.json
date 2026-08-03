@@ -6888,6 +6888,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_084_edited-shipping-manifests",
+      "strategicExchangeKinds": ["self_tag"],
       "cardType": "event",
       "conditions": [
         {
@@ -8005,6 +8006,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_098_lucidrine-booster-drug",
+      "strategicExchangeKinds": ["self_damage"],
       "cardType": "event",
       "effects": [
         {
@@ -8878,6 +8880,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_110_sneak-preview",
+      "strategicExchangeKinds": ["temporary_resource"],
       "cardType": "event",
       "costProfile": {
         "clicks": 1,
@@ -9675,6 +9678,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "strategicExchangeKinds": ["score_progress"],
       "cardType": "hardware",
       "costProfile": {
         "agendaPoints": 1,
@@ -12788,6 +12792,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_156_corporate-ally",
+      "strategicExchangeKinds": ["score_progress", "board_or_hand_sacrifice"],
       "cardType": "resource",
       "effects": [
         {
@@ -13067,6 +13072,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_159_databroker",
+      "strategicExchangeKinds": ["score_progress"],
       "cardType": "resource",
       "effects": [
         {
@@ -13812,6 +13818,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_168_loan-from-chiba",
+      "strategicExchangeKinds": ["debt_financing"],
       "cardType": "resource",
       "conditions": [
         {
@@ -14130,6 +14137,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_171_preying-mantis",
+      "strategicExchangeKinds": ["self_damage"],
       "cardType": "resource",
       "effects": [
         {
@@ -15031,6 +15039,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_180_smiths-pawnshop",
+      "strategicExchangeKinds": ["board_or_hand_sacrifice"],
       "cardType": "resource",
       "effects": [
         {
@@ -46968,6 +46977,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_105_demolition-run",
+      "strategicExchangeKinds": ["self_tag"],
       "cardType": "event",
       "conditions": [
         {
@@ -47179,6 +47189,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_107_drone-for-a-day",
+      "strategicExchangeKinds": ["self_tag"],
       "cardType": "event",
       "effects": [
         {
@@ -47259,6 +47270,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_108_faked-hit",
+      "strategicExchangeKinds": ["self_damage"],
       "cardType": "event",
       "effects": [
         {
@@ -48135,6 +48147,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_121_remote-detonator",
+      "strategicExchangeKinds": ["self_tag"],
       "cardType": "event",
       "conditions": [
         {
@@ -48492,6 +48505,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_126_test-spin",
+      "strategicExchangeKinds": ["self_damage", "temporary_resource"],
       "cardType": "event",
       "effects": [
         {
@@ -50613,6 +50627,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "strategicExchangeKinds": ["self_damage"],
       "cardType": "hardware",
       "effects": [
         {
@@ -55233,6 +55248,7 @@
         ]
       },
       "cardId": "onr_classic_031_rent-i-con",
+      "strategicExchangeKinds": ["temporary_resource"],
       "cardType": "program",
       "conditions": [
         {
@@ -57598,6 +57614,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_034_boostergang-connections",
+      "strategicExchangeKinds": ["board_or_hand_sacrifice"],
       "cardType": "event",
       "conditions": [
         {
@@ -57715,6 +57732,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_035_corruption",
+      "strategicExchangeKinds": ["score_progress", "self_tag"],
       "cardType": "event",
       "conditions": [
         {
@@ -57822,6 +57840,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_036_do-the-drine",
+      "strategicExchangeKinds": ["self_damage"],
       "cardType": "event",
       "conditions": [
         {
@@ -58766,6 +58785,7 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+      "strategicExchangeKinds": ["self_damage"],
       "cardType": "hardware",
       "conditions": [
         {
