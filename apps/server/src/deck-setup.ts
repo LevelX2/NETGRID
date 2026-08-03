@@ -101,7 +101,7 @@ function curatedStandardSnapshots(): DeckSnapshot[] {
   const curatedAt = `${standardDeckCatalogData.curatedAt}T00:00:00.000Z`;
   return (standardDeckCatalogData.decks as CuratedStandardDeck[])
     .filter((deck) => deck.status === "active")
-    .map((deck) => {
+    .flatMap((deck) => {
       const profile = [...profiles]
         .reverse()
         .find(
@@ -110,7 +110,12 @@ function curatedStandardSnapshots(): DeckSnapshot[] {
             (!deck.formatProfileVersion ||
               candidate.version === deck.formatProfileVersion),
         );
-      if (!profile) throw new Error("standard_deck_format_profile_not_found");
+      if (!profile) {
+        console.error(
+          `Skipping standard deck ${deck.standardDeckId} (${deck.name}): format profile not found`,
+        );
+        return [];
+      }
       const editable: EditableDeck = {
         deckId: deck.standardDeckId,
         deckVersion: "1",
@@ -138,8 +143,13 @@ function curatedStandardSnapshots(): DeckSnapshot[] {
           ...(rulesBaselineId ? { rulesBaselineId } : {}),
         },
       );
-      if (!snapshot.validation.ok) throw new Error("standard_deck_invalid");
-      return snapshot;
+      if (!snapshot.validation.ok) {
+        console.error(
+          `Skipping standard deck ${deck.standardDeckId} (${deck.name}): ${snapshot.validation.errors.join(" | ")}`,
+        );
+        return [];
+      }
+      return [snapshot];
     });
 }
 
