@@ -64,7 +64,8 @@ export function runnerGenericDevelopmentMayOwnAction(
 ): boolean {
   return (
     !runnerActionRequiresTargetedBypassPlan(candidate) &&
-    !runnerCandidateStartsRun(candidate)
+    !runnerCandidateStartsRun(candidate) &&
+    candidate.tagEffectProfile?.acuteTagRemoval !== true
   );
 }
 

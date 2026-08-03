@@ -70,6 +70,18 @@ describe("Runner targeted-bypass plan admission", () => {
     expect(runnerGenericDevelopmentMayOwnAction(candidate)).toBe(false);
   });
 
+  it("keeps tag-removal events with incidental draw in defense ownership", () => {
+    const candidate = {
+      actionId: "runner.play.meat-upgrade",
+      actionType: "play_event",
+      actorSide: "runner",
+      semanticActionType: "tag.remove",
+      tagEffectProfile: { acuteTagRemoval: true },
+    } as unknown as ActionSemanticCandidate;
+
+    expect(runnerGenericDevelopmentMayOwnAction(candidate)).toBe(false);
+  });
+
   it("admits only a material payoff whose exact bypass turns a proven blocked path into access", () => {
     const commitment = runnerTargetedBypassPlanCommitment({
       input: planningInput({

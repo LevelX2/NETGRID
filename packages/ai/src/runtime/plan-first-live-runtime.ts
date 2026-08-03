@@ -4455,6 +4455,7 @@ function runnerGenericDrawDevelopmentSignals(
         candidate.semanticActionType === "draw.card" &&
         candidate.sourceKind === "basic_action") ||
       (candidate.sourceKind === "card" &&
+        candidate.tagEffectProfile?.acuteTagRemoval !== true &&
         candidate.economyProjection?.timing === "immediate" &&
         (candidate.economyProjection.netHandDelta ?? 0) > 0 &&
         (candidate.economyProjection.netHandDelta ?? 0) <=
@@ -15794,6 +15795,7 @@ function coverageSupportActionIds(
       !matchingSearchActionIds.has(candidate.actionId) &&
       !searchEngineSetupActionIds.has(candidate.actionId) &&
       candidate.sourceKind === "card" &&
+      candidate.tagEffectProfile?.acuteTagRemoval !== true &&
       (candidate.actionTacticSignals.includes("draw.card") ||
         candidate.actionTacticSignals.includes("setup.draw") ||
         (candidate.economyProjection?.cardsDrawn ?? 0) > 1),
