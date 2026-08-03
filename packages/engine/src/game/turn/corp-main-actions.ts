@@ -764,7 +764,7 @@ export function buildCorpMainActions(
         state,
         "corp",
         "trigger_ability",
-        "Edgerunner, Inc., Temps: verbleibende Installationsaktionen überspringen",
+        "Edgerunner, Inc., Temps beenden",
         "game_rule",
         [],
         {
