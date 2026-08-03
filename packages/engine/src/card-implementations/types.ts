@@ -101,7 +101,7 @@ export type CardImplementationDefinition = {
     visibility: "public";
   };
   runnerRunStrengthBoost?: {
-    timing: "during_run";
+    timing: "during_ice_encounter";
     cost: { tap?: true; trashSelf?: true };
     target: "installed_runner_icebreaker";
     amount: number;

@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const proteusLockjawImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_proteus_091_lockjaw",
   runnerRunStrengthBoost: {
-    timing: "during_run",
+    timing: "during_ice_encounter",
     cost: { trashSelf: true },
     target: "installed_runner_icebreaker",
     amount: 2,

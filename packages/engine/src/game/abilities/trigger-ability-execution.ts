@@ -362,6 +362,10 @@ export function handleTriggerAbilityExecution(
       throw new Error("Nur der Runner darf den Icebreaker verstärken.");
     if (!state.run)
       throw new Error("Die Stärkeverstärkung gilt nur während eines Runs.");
+    if (state.run.phase !== "encounter_ice")
+      throw new Error(
+        "Die Stärkeverstärkung ist nur während einer ICE-Begegnung erlaubt.",
+      );
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;

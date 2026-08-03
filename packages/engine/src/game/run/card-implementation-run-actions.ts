@@ -44,7 +44,8 @@ export type RunCardImplementationActionBuildResult = {
 export function buildRunnerDuringRunCardImplementationActions(
   host: RunCardImplementationActionHost,
 ): RunCardImplementationActionBuildResult {
-  if (!host.state.run) return { handled: true, legalActions: [] };
+  if (!host.state.run || host.state.run.phase !== "encounter_ice")
+    return { handled: true, legalActions: [] };
   const legalActions: LegalAction[] = [];
   for (const cardId of host.cards.runnerInstalledCardIds().slice().sort()) {
     const definition = host.cards.definitionFor(cardId);
