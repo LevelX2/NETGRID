@@ -14,6 +14,11 @@ import type { RunnerSpecialTriggerExecutionResult } from "./runner-special-trigg
 import type { CounterUtilityTriggerExecutionResult } from "./counter-utility-trigger-execution";
 import type { HiddenZoneTriggerExecutionResult } from "./hidden-zone-trigger-execution";
 import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
+import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  restrictedActionGrantRemaining,
+  clearRestrictedActionGrant,
+} from "../state/restricted-action-grants";
 
 export type TriggerAbilityExecutionHost = {
   state: GameState;
@@ -125,6 +130,39 @@ export function handleTriggerAbilityExecution(
   ) {
     if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
     host.actionEconomy.declineExtraActionOffer(state, legalAction);
+    return handled(legalAction);
+  }
+  if (
+    legalAction.payload?.actionEconomyAbility ===
+    "decline_edgerunner_temps_install_actions"
+  ) {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf Edgerunner-Installationsaktionen überspringen.");
+    if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
+      throw new Error(
+        "Edgerunner-Installationsaktionen können nur im Corp-Aktionsfenster übersprungen werden.",
+      );
+    const flags = state.corpTurnFlags;
+    const remaining = restrictedActionGrantRemaining(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+    );
+    if (remaining <= 0)
+      throw new Error("Es sind keine Edgerunner-Installationsaktionen offen.");
+    state.corp.clicks = Math.max(0, state.corp.clicks - remaining);
+    if (flags) {
+      clearRestrictedActionGrant(
+        flags,
+        RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+      );
+      flags.edgerunnerTempsInstallActionsRemaining = 0;
+    }
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      edgerunnerTempsInstallActionsSkipped: remaining,
+      edgerunnerTempsInstallActionsRemaining: 0,
+      corpClicksAfter: state.corp.clicks,
+    };
     return handled(legalAction);
   }
   if (

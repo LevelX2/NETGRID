@@ -759,13 +759,30 @@ export function buildCorpMainActions(
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
+    actions.push(
+      action(
+        state,
+        "corp",
+        "trigger_ability",
+        "Edgerunner, Inc., Temps: verbleibende Installationsaktionen überspringen",
+        "game_rule",
+        [],
+        {
+          actionEconomyAbility: "decline_edgerunner_temps_install_actions",
+          sourceDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+        },
+      ),
+    );
     return filterActionsForRestrictedExtraActions(
       state,
       "corp",
       actions
         .filter(
           (candidate) =>
-            candidate.type === "install_card" || candidate.type === "end_turn",
+            candidate.type === "install_card" ||
+            candidate.type === "end_turn" ||
+            candidate.payload?.actionEconomyAbility ===
+              "decline_edgerunner_temps_install_actions",
         )
         .map((candidate) =>
           candidate.type === "install_card"

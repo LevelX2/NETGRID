@@ -6223,7 +6223,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(
       bundleActions.every(
         (action) =>
-          action.type === "install_card" || action.type === "end_turn",
+          action.type === "install_card" ||
+          action.type === "end_turn" ||
+          action.payload?.actionEconomyAbility ===
+            "decline_edgerunner_temps_install_actions",
       ),
     ).toBe(true);
     expect(
@@ -6260,6 +6263,26 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
     );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.payload?.actionEconomyAbility ===
+        "decline_edgerunner_temps_install_actions",
+    );
+    expect(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining).toBe(0);
+    expect(
+      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install,
+    ).toBeUndefined();
+    expect(state.corp.clicks).toBe(9);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "gain_credit",
+      ),
+    ).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+    });
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
