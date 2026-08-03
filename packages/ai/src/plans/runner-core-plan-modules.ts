@@ -1941,16 +1941,27 @@ function coverageDrawCandidates(
   const drawAllowed = domain(context).defense.drawAllowed;
   return context.actionCandidates
     .filter(
-      (candidate) =>
-        !context.actionDispositions?.some(
-          (disposition) =>
-            disposition.actionId === candidate.actionId &&
-            disposition.disposition === "explicitly_nonproductive",
-        ) &&
-        (directSearchIds.has(candidate.actionId) ||
+      (candidate) => {
+        const isCoverageRoute =
+          directSearchIds.has(candidate.actionId) ||
           searchSetupIds.has(candidate.actionId) ||
           drawForAnswerIds.has(candidate.actionId) ||
-          (drawAllowed && candidate.semanticActionType === "draw.card")),
+          (drawAllowed && candidate.semanticActionType === "draw.card");
+        const isDrawRoute =
+          drawForAnswerIds.has(candidate.actionId) ||
+          (drawAllowed && candidate.semanticActionType === "draw.card");
+        const displacedByGeneralHandDevelopment =
+          context.actionDispositions?.some(
+            (disposition) =>
+              disposition.actionId === candidate.actionId &&
+              disposition.disposition === "explicitly_nonproductive",
+          ) ?? false;
+        return (
+          isCoverageRoute &&
+          (!displacedByGeneralHandDevelopment ||
+            (gap.deckHasAnswer && isDrawRoute))
+        );
+      },
     )
     .map((candidate) => ({
       candidate,

@@ -1434,6 +1434,45 @@ describe("Runner core plan modules", () => {
     });
   });
 
+  it("keeps a known universal breaker draw route despite general hand-development disposition", () => {
+    const coverage = coreModule("runner.rig_and_coverage");
+    const draw = candidate("draw", "draw_card", "draw.card");
+    const runnerContext = context([draw], {
+      coverageGaps: [
+        {
+          gapId: "sentry",
+          requiredRole: "breaker_sentry",
+          priorityClass: "P5",
+          evidenceCode: "universal_breaker_in_deck",
+          deckHasAnswer: true,
+          answerInHand: false,
+          fundingActionIds: [],
+          directSearchActionIds: [],
+          searchEngineSetupActionIds: [],
+          drawForAnswerActionIds: [draw.actionId],
+        },
+      ],
+    });
+    runnerContext.actionDispositions = [
+      {
+        actionId: draw.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.develop_board_and_hand",
+        evidenceCode: "runner_optional_draw_has_no_current_plan_purpose",
+      },
+    ];
+
+    const [proposal] = coverage.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal?.initialViability).toBe("ready");
+    expect(
+      coverage
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([draw.actionId]);
+  });
+
   it("materializes an exact AP search route for special coverage", () => {
     const coverage = coreModule("runner.rig_and_coverage");
     const search = candidate(
