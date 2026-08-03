@@ -227,6 +227,7 @@ import {
   visibleDeflectorSubroutineCanResolve,
 } from "../visible-run-analysis";
 import { runnerRemoteHasKnownNoCurrentPayoff } from "./runner-known-access-payoff-context";
+import { runnerStrategicExchangeHardExclusion } from "./runner-strategic-exchange";
 import {
   currentEncounteredIceCard,
   currentRunRemainingIce,
@@ -1669,6 +1670,18 @@ export function runnerActionDispositions(
   }
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(domain);
   for (const candidate of candidates) {
+    const strategicExchangeExclusion = runnerStrategicExchangeHardExclusion(
+      input,
+      candidate,
+    );
+    if (strategicExchangeExclusion) {
+      add(
+        candidate.actionId,
+        "runner.develop_board_and_hand",
+        strategicExchangeExclusion,
+      );
+      continue;
+    }
     if (
       candidate.semanticActionType === "turn_flow.end_turn" &&
       candidate.sourceKind === "card" &&
