@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v1",
   "guideSetId": "netgrid-standard-deck-guides-1.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-08-02",
+  "analyzedAt": "2026-08-03",
   "guides": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -1033,6 +1033,70 @@
         "weaknesses": [
           "Fallen Netwatch Operations Office und Punitive Counterstrike aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_salazar_toll_road",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:025808eb",
+      "sourceAnalysisHash": "deck-analysis:8732695f",
+      "reviewedAt": "2026-08-03",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring",
+          "corp.economy_rez_reserve"
+        ],
+        "secondaryStrategyIds": [
+          "corp.central_stabilize",
+          "corp.damage_kill",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "Salazar Toll Road verbindet eine wiederholbare Rez-Economy mit einer taxierenden ICE-Kette und einem geschützten Scoring-Remote.",
+        "deckIdea": "Rezze während Runs bevorzugt ein kostenloses ICE über Olivia Salazar, nimm die drei Credits mit und derezze es nach dem erfolglosen Run wieder. Baue dahinter Minotaur, Dog Pile oder Mastermind auf, damit die bereits gerezzten ICE den Run zusätzlich verteuern oder gefährlicher machen.",
+        "gamePlan": {
+          "opening": "Halte nach Olivia Salazar, einem kostenlosen ICE und Day Shift oder Night Shift Ausschau. Sichere einen Remote früh mit mindestens einem ICE, ohne die Creditreserve für die erste Rez-Reaktion zu verlieren.",
+          "midgame": "Lege den Scoring-Remote schrittweise an und kombiniere Olivia mit Tokyo-Chiba Infighting, Tesseract Fort Construction und Red Herrings. Nutze Edgerunner, Inc., Temps, um mehrere Teile des Servers in einem Zug zu installieren.",
+          "endgame": "Score Corporate War nur mit ausreichender Reserve und schütze die letzte Agenda mit Red Herrings. Wurde Olivia getrasht, hole sie mit Off-Site Backups zurück und installiere sie erneut."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_363_olivia-salazar",
+            "title": "Olivia Salazar",
+            "role": "Ermöglicht die wiederholbare Rez-Economy für die kostenlosen ICE."
+          },
+          {
+            "cardId": "onr_proteus_016_coyote",
+            "title": "Coyote",
+            "role": "Ist der günstige äußere Rez-Punkt und erhöht den Druck auf nachfolgende ICE."
+          },
+          {
+            "cardId": "onr_proteus_021_dog-pile",
+            "title": "Dog Pile",
+            "role": "Verwertet die gerezzte ICE-Kette als zusätzlichen Stärke- und Net-Damage-Druck."
+          },
+          {
+            "cardId": "onr_v1_371_tokyo-chiba-infighting",
+            "title": "Tokyo-Chiba Infighting",
+            "role": "Belohnt erfolglose Runs zusätzlich mit Credits."
+          },
+          {
+            "cardId": "onr_v1_296_off-site-backups",
+            "title": "Off-Site Backups",
+            "role": "Holt eine getrashte Olivia zurück nach HQ und stellt die Engine wieder her."
+          }
+        ],
+        "pilotingTips": [
+          "Derezze das über Olivia gerezzte ICE nach dem Run, damit es beim nächsten Run erneut drei Credits erzeugen kann.",
+          "Halte Corporate War zurück, bis du nach dem Scoren sicher mindestens zwölf Credits besitzt."
+        ],
+        "weaknesses": [
+          "Ohne Olivia Salazar verliert das Deck seine wiederholbare Rez-Economy und wird deutlich langsamer.",
+          "Der große Remote braucht mehrere Installationen; früher zentraler Druck kann das Aufbau-Tempo ausnutzen."
         ]
       }
     },

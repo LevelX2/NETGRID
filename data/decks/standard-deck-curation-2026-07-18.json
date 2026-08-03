@@ -1,7 +1,7 @@
 {
   "schemaVersion": "netgrid-standard-deck-curation-v1",
   "curationId": "netgrid-standard-deck-curation-2026-07-18",
-  "curatedAt": "2026-07-18",
+  "curatedAt": "2026-08-03",
   "policy": {
     "normalUiClassifications": ["standard"],
     "hiddenClassifications": ["internal_ai", "test_fixture", "retire"],
@@ -9,7 +9,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 43,
+      "standard": 44,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -170,6 +170,14 @@
         "classification": "standard",
         "reason": "curated_user_deck",
         "standardDeckId": "standard_corp_shadoe_tag_bag"
+      },
+      {
+        "sourceDeckId": "local_corp_salazar_toll_road",
+        "name": "Salazar Toll Road",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_salazar_toll_road"
       },
       {
         "sourceDeckId": "local_corp_siren_fortress",
