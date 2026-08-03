@@ -137,7 +137,9 @@ export function handleTriggerAbilityExecution(
     "decline_edgerunner_temps_install_actions"
   ) {
     if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf Edgerunner-Installationsaktionen überspringen.");
+      throw new Error(
+        "Nur die Korp darf Edgerunner-Installationsaktionen überspringen.",
+      );
     if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
       throw new Error(
         "Edgerunner-Installationsaktionen können nur im Corp-Aktionsfenster übersprungen werden.",
@@ -378,7 +380,7 @@ export function handleTriggerAbilityExecution(
     )?.runnerRunStrengthBoost;
     if (!boost)
       throw new Error("Die Support-Quelle hat keine Run-Verstärkung.");
-    if (state.cardInstances[sourceCardId]?.tapped)
+    if (boost.cost.tap && state.cardInstances[sourceCardId]?.tapped)
       throw new Error("Die Support-Quelle ist bereits getappt.");
     const used = state.run.runStrengthBoostUsedSourceIds ?? [];
     if (used.includes(sourceCardId))
@@ -390,6 +392,9 @@ export function handleTriggerAbilityExecution(
         ...state.cardInstances[sourceCardId]!,
         tapped: true,
       };
+    }
+    if (boost.cost.trashSelf) {
+      host.runner.trashInstalledCardToHeap(state, sourceCardId, legalAction);
     }
     state.run.runStrengthBoostUsedSourceIds = [...used, sourceCardId].sort();
     state.run.remainderStrengthBonusByBreaker = {
@@ -405,6 +410,7 @@ export function handleTriggerAbilityExecution(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       strengthBonusApplied: boost.amount,
+      ...(boost.cost.trashSelf ? { selfTrashed: true } : {}),
       targetDefinitionId: targetDefinition.id,
     };
     return handled(legalAction);

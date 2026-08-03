@@ -2969,7 +2969,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "[T]: Give one of your icebreakers +2 strength for the remainder of this run. Use this ability only during an encounter with a piece of ice.",
+      "text": "Trash Lockjaw: Give one of your icebreakers +2 strength for the remainder of this run. Use this ability only during an encounter with a piece of ice.",
       "displayOnlyText": true,
       "faction": "onr_proteus",
       "setName": "Proteus",

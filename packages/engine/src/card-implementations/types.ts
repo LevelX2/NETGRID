@@ -102,7 +102,7 @@ export type CardImplementationDefinition = {
   };
   runnerRunStrengthBoost?: {
     timing: "during_run";
-    cost: { tap: true };
+    cost: { tap?: true; trashSelf?: true };
     target: "installed_runner_icebreaker";
     amount: number;
     duration: "current_run";

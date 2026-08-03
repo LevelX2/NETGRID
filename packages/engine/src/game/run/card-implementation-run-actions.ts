@@ -60,7 +60,7 @@ export function buildRunnerDuringRunCardImplementationActions(
     )?.runnerRunStrengthBoost;
     if (
       !boost ||
-      host.state.cardInstances[cardId]?.tapped ||
+      (boost.cost.tap && host.state.cardInstances[cardId]?.tapped) ||
       host.state.run.runStrengthBoostUsedSourceIds?.includes(cardId)
     )
       continue;

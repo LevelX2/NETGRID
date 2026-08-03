@@ -1415,7 +1415,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     ).toBeUndefined();
   });
 
-  it("taps Lockjaw without trashing it and boosts only the selected icebreaker", () => {
+  it("trashes Lockjaw to boost only the selected icebreaker for the run", () => {
     let state = runnerMain("proteus-pro009-modifiers");
     const lockjawId = addInstalledRunnerProgramForTest(
       state,
@@ -1449,9 +1449,9 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       "runner",
       (action) => action.actionId === lockjaw.actionId,
     );
-    expect(state.cardInstances[lockjawId]?.tapped).toBe(true);
-    expect(state.runner.rig.programs).toContain(lockjawId);
-    expect(state.runner.heap).not.toContain(lockjawId);
+    expect(state.cardInstances[lockjawId]?.tapped).not.toBe(true);
+    expect(state.runner.rig.programs).not.toContain(lockjawId);
+    expect(state.runner.heap).toContain(lockjawId);
     expect(state.run?.remainderStrengthBonusByBreaker?.[targetId]).toBe(2);
     expect(
       state.run?.remainderStrengthBonusByBreaker?.[otherId],
@@ -1474,29 +1474,6 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
           action.payload?.cardId === lockjawId,
       ),
     ).toBe(false);
-    state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    state.corp.maxHandSize = 100;
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-    expect(state.cardInstances[lockjawId]?.tapped).toBe(false);
-    state = setEncounter(
-      state,
-      addRezzedCorpIceForTest(
-        state,
-        "onr_v1_245_fire-wall",
-        "rd",
-        "third_wall",
-      ),
-    );
-    expect(
-      getLegalActions(state, "runner").some(
-        (action) =>
-          action.type === "trigger_ability" &&
-          action.payload?.cardId === lockjawId &&
-          action.payload?.targetCardId === targetId,
-      ),
-    ).toBe(true);
 
     state = runnerMain("proteus-pro009-personal-touch");
     const breakerId = addInstalledRunnerProgramForTest(
