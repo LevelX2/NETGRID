@@ -11942,6 +11942,19 @@ describe("authoritative plan-first live runtime", () => {
       score: 200,
       evidence: ["missing_coverage:breaker_sentry"],
     };
+    const sanitized = buildAiDecisionInputDto({
+      side: input.side,
+      playerView: input.playerView,
+      eventTail: input.eventTail,
+      legalActions: input.legalActions,
+      difficulty: input.difficulty,
+      seed: input.seed,
+      decisionId: input.decisionId,
+      actionNumber: input.actionNumber,
+      profileId: input.profileId,
+    });
+    input.legalActions = sanitized.legalActions;
+    input.playerView.legalActions = sanitized.legalActions;
 
     const decision = liveContext({
       deckCapabilitiesForInput: () => ({
