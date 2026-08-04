@@ -68,3 +68,10 @@ Neue Logeinträge werden im Archiv des jeweiligen Kalendermonats oberhalb aller 
 - Lokale Datenbanken, Runtime-Daten, temporäre Dateien, Build-Artefakte und Secrets werden nicht versioniert.
 - Hidden-Info-Sicherheit ist ein Gate, kein UI-Komfortthema.
 - Offizielle Assets, Logos, Card Frames, Card Backs und externe Kartendatenbank-Abhängigkeiten sind für MVP 0.1 und 0.2 ausgeschlossen.
+
+## Ursachenorientierte Fehlerbehebung
+
+- Fachliche oder KI-Verhaltensfehler werden an der Schicht behoben, die die fehlende oder falsche strukturierte Information erzeugt, projiziert oder bewertet. Ein Workaround in einem nachgelagerten Consumer ersetzt diese Korrektur nicht.
+- Technische Kennungen, insbesondere `actionId`, werden nie als Träger fachlicher Bedeutung geparst oder durchsucht. Karte, Ziel, Server, Kosten und Fähigkeit stammen ausschließlich aus strukturierten, side-sicheren Engine-/PlayerView-/Action-Semantik-Feldern.
+- Ein temporärer Schutz darf nur einen laufenden Fehler sichtbar und sicher begrenzen. Er ist als temporär zu markieren, fail-closed zu halten und mit dem konkreten Ursachen-Fix zu ersetzen; er ist keine abschließende Verhaltenslösung.
+- Regressionstests bilden den realen Fehlpfad mit echten oder exakt nachgebildeten `LegalActions` ab und prüfen den strukturierten Datenweg bis zum zuständigen Plan. Ein Test, der nur einen nachgelagerten Workaround beweist, genügt nicht.

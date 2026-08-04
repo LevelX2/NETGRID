@@ -357,7 +357,32 @@ function payloadTargetsForAction(action: LegalAction): LegalTargetSummary[] {
   );
   if (iceTarget !== undefined) targets.push(iceTarget);
 
+  const installTarget = selectedInstallCardTargetForAction(action);
+  if (installTarget !== undefined) targets.push(installTarget);
+
   return targets;
+}
+
+function selectedInstallCardTargetForAction(
+  action: LegalAction,
+): LegalTargetSummary | undefined {
+  if (action.type !== "install_card") return undefined;
+  const targetId = stringPayload(action, "selectedCardId");
+  const requirement = action.targetRequirements.find(
+    (candidate) => candidate.kind === "card",
+  );
+  if (targetId === undefined || requirement === undefined) return undefined;
+  return {
+    targetId,
+    targetKind: "card",
+    targetSide: targetSideFromRequirement(requirement.side),
+    ...(requirement.zoneScope?.[0] !== undefined
+      ? { targetZone: requirement.zoneScope[0] }
+      : {}),
+    evidence: [
+      `AI039 legal install payload selected card target: ${targetId}`,
+    ],
+  };
 }
 
 function cardPayloadTargetForAction(

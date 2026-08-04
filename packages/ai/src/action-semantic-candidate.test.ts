@@ -2004,6 +2004,43 @@ describe("buildActionSemanticCandidates", () => {
       source: "legal_action_type",
     });
   });
+
+  it("projects the engine-bound Black Widow install target without decoding the action id", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("install_card", 0, {
+          source: "black-widow-instance",
+          payload: {
+            cardId: "black-widow-instance",
+            selectedCardId: "mastermind-instance",
+          },
+          targetRequirements: [
+            {
+              id: "targetIce",
+              kind: "card",
+              side: "corp",
+              zoneScope: ["corp.servers.ice"],
+              visibility: "public",
+            },
+          ],
+        }),
+      ],
+      visibleSourceDefinitionsByInstanceId: {
+        "black-widow-instance": "onr_proteus_080_black-widow",
+      },
+    });
+
+    if (!candidate) throw new Error("Expected Black Widow install candidate");
+    expect(candidate.sourceCardInstanceId).toBe("black-widow-instance");
+    expect(candidate.targetContext?.selectedTargets).toEqual([
+      expect.objectContaining({
+        targetId: "mastermind-instance",
+        targetKind: "card",
+        targetSide: "corp",
+        targetZone: "corp.servers.ice",
+      }),
+    ]);
+  });
 });
 
 function legalAction(

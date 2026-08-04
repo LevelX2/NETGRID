@@ -15647,14 +15647,11 @@ function runnerCoverageInstallActionValues(
     if (candidate.semanticActionType !== "install.card") continue;
     const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
     if (!definitionId || !runnerRolesCoverCoverageGap(rolesForDeckDoctrineCard(definitionId), role)) continue;
-    const action = input.legalActions.find((entry) => entry.actionId === candidate.actionId);
-    const sourceInstanceId = candidate.sourceCardInstanceId ?? action?.source;
+    const sourceInstanceId = candidate.sourceCardInstanceId;
     const card = input.playerView.own.gripOrHq.find((entry) => entry.instanceId === sourceInstanceId);
     const cost = candidate.costProfile.costKnownStatus === "known" ? candidate.costProfile.creditCost ?? 0 : 0;
     if (!card || cost > input.playerView.own.credits || !allKnownRezzed || !server) { values[candidate.actionId] = 100 - cost; continue; }
-    const targetId =
-      candidate.targetContext?.selectedTargets?.[0]?.targetId ??
-      server.ice.find((ice) => candidate.actionId.includes(ice.instanceId))?.instanceId;
+    const targetId = candidate.targetContext?.selectedTargets?.[0]?.targetId;
     const projectedCard = { ...card, ...(typeof targetId === "string" ? { selectedTargetCardId: targetId } : {}) };
     const path = assessKnownRezzedIcePath(server.ice, [...(input.playerView.own.rig ?? []), projectedCard], input.playerView.own.credits - cost, server.root, input.playerView.opponent.credits);
     values[candidate.actionId] = path.canReachAccess ? 300 - cost : 10 - cost;
