@@ -4020,6 +4020,13 @@ export function formatChronicleEvent(
     const iceInstallAdditionalCost =
       numberValue(payload.iceInstallAdditionalCost) ?? 0;
     const iceInstallTotalCost = numberValue(payload.iceInstallTotalCost);
+    const selectedTargetLabel = stringValue(payload.selectedTargetLabel);
+    const selectedTargetServerLabel = displayServerLabel(
+      stringValue(payload.selectedTargetServerLabel),
+    );
+    const selectedTargetIcePosition = numberValue(
+      payload.selectedTargetIcePosition,
+    );
     if (recurringCreditsLoaded !== undefined && recurringCreditsLoaded > 0) {
       description = `${recurringCreditsLoaded} Recurring Credit${recurringCreditsLoaded === 1 ? "" : "s"} wurden auf die Karte gelegt.`;
       chips.push(`${recurringCreditsLoaded} Recurring`);
@@ -4055,6 +4062,23 @@ export function formatChronicleEvent(
         ...(hostedCreditsPaid > 0 ? [`${hostedCreditsPaid} Quelle`] : []),
         ...paymentSourceTitles,
       );
+    }
+    if (
+      selectedTargetServerLabel !== undefined ||
+      selectedTargetIcePosition !== undefined ||
+      selectedTargetLabel !== undefined
+    ) {
+      const target = [
+        selectedTargetLabel ?? "ICE",
+        selectedTargetServerLabel,
+        selectedTargetIcePosition !== undefined
+          ? `ICE ${selectedTargetIcePosition}`
+          : undefined,
+      ]
+        .filter((value): value is string => value !== undefined)
+        .join(" – ");
+      description = `${description ? `${description} ` : ""}Gewähltes Ziel: ${target}.`;
+      chips.push(`Ziel: ${target}`);
     }
   }
 

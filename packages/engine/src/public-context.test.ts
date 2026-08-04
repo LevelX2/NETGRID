@@ -136,6 +136,43 @@ describe("publicContextForAction", () => {
     expect(context).not.toHaveProperty("title");
   });
 
+  it("publishes a rezzed public install target with server and ICE position", () => {
+    const state = {
+      corp: { servers: [{ id: "hq", label: "HQ", ice: ["coyote", "mastermind"] }] },
+      cardInstances: {
+        mastermind: {
+          rezzed: true,
+          zone: { side: "corp", zone: "serverIce", serverId: "hq" },
+        },
+      },
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "install_card",
+      payload: { cardId: "black-widow", selectedCardId: "mastermind" },
+      targetRequirements: [
+        { id: "targetIce", kind: "card", side: "corp", visibility: "public" },
+      ],
+    } as unknown as LegalAction;
+
+    expect(
+      publicContextForAction(state, action, {
+        agendaPointsForScoredCard: () => 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () => ({ title: "Mastermind" }) as never,
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      }),
+    ).toMatchObject({
+      selectedTargetLabel: "Mastermind",
+      selectedTargetServerLabel: "HQ",
+      selectedTargetIcePosition: 2,
+    });
+  });
+
   it("forwards access index and Highlighter access context", () => {
     const state = {
       corp: { servers: [] },

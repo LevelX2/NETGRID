@@ -219,6 +219,34 @@ export function publicContextForAction(
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }
+    const selectedCardId = legalAction.payload?.selectedCardId;
+    const selectedTargetIsPublic = (legalAction.targetRequirements ?? []).some(
+      (requirement) =>
+        requirement.kind === "card" && requirement.visibility === "public",
+    );
+    const selectedTarget =
+      typeof selectedCardId === "string" && selectedTargetIsPublic
+        ? state.cardInstances[selectedCardId]
+        : undefined;
+    if (selectedTarget?.zone.side === "corp" && selectedTarget.zone.zone === "serverIce") {
+      const server = state.corp.servers.find(
+        (candidate) => candidate.id === selectedTarget.zone.serverId,
+      );
+      const icePosition = server?.ice.indexOf(selectedCardId);
+      const serverLabel = serverChoiceDisplayLabel(
+        state,
+        selectedTarget.zone.serverId,
+      );
+      context.selectedTargetServerLabel = serverLabel;
+      if (icePosition !== undefined && icePosition >= 0)
+        context.selectedTargetIcePosition = icePosition + 1;
+      if (selectedTarget.rezzed) {
+        context.selectedTargetLabel = deps.definitionFor(
+          state,
+          selectedCardId,
+        ).title;
+      }
+    }
   }
   if (
     legalAction.payload?.abilityId === "broken_ice_virus_counter" ||
