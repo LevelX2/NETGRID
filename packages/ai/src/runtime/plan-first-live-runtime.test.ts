@@ -11920,21 +11920,61 @@ describe("authoritative plan-first live runtime", () => {
       server("hq", [
         visibleCard("mastermind", "corp", "ice", {
           definitionId: "onr_proteus_030_mastermind",
-          rezzed: false,
+          rezzed: true,
           strength: 2,
           subtypes: ["sentry"],
+          effectiveRunQuote: {
+            iceInstanceId: "mastermind",
+            iceDefinitionId: "onr_proteus_030_mastermind",
+            effectiveStrength: 2,
+            subroutines: [
+              {
+                id: "mastermind:damage",
+                type: "do_damage",
+                amount: 2,
+                unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+              },
+              { id: "mastermind:etr", type: "end_the_run" },
+            ],
+          },
         }),
         visibleCard("coyote", "corp", "ice", {
           definitionId: "onr_proteus_016_coyote",
-          rezzed: false,
+          rezzed: true,
           strength: 3,
           subtypes: ["sentry"],
+          effectiveRunQuote: {
+            iceInstanceId: "coyote",
+            iceDefinitionId: "onr_proteus_016_coyote",
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "coyote:strength",
+                type: "set_run_future_strength_bonus",
+                amount: 1,
+                unbrokenRunEffect: { increasesFutureIceStrength: 1 },
+              },
+            ],
+          },
         }),
         visibleCard("coyote-2", "corp", "ice", {
           definitionId: "onr_proteus_016_coyote",
-          rezzed: false,
+          rezzed: true,
           strength: 3,
           subtypes: ["sentry"],
+          effectiveRunQuote: {
+            iceInstanceId: "coyote-2",
+            iceDefinitionId: "onr_proteus_016_coyote",
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "coyote-2:strength",
+                type: "set_run_future_strength_bonus",
+                amount: 1,
+                unbrokenRunEffect: { increasesFutureIceStrength: 1 },
+              },
+            ],
+          },
         }),
       ]),
     ];

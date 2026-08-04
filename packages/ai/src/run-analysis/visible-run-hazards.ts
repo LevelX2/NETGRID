@@ -730,11 +730,10 @@ export function runPathEffectAlreadyVisibleOnFutureIce(
     });
   }
   if ((effect.increasesFutureIceStrength ?? 0) > 0) {
-    return futureIce.some((ice) => {
-      const quote = effectiveRunQuoteForIce(ice);
-      if (!quote || !ice.definitionId) return false;
-      return quote.effectiveStrength > cardDefinitionStrength(ice.definitionId);
-    });
+    // A higher effective strength can come from the future ICE's own ability,
+    // so it does not prove that this earlier run-duration modifier is already
+    // included in the quote.
+    return false;
   }
   return false;
 }
