@@ -3195,6 +3195,7 @@ function buildRunnerDomain(
             !costlyInformationRunBelowHandBuffer &&
             fundingSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
+            evaluation.routeQuote.reachability === "guaranteed_access" &&
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
