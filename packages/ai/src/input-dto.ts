@@ -2437,7 +2437,7 @@ const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {
   const payload = action.payload
-    ? sanitizeLegalActionPayload(action.payload as Record<string, unknown>)
+    ? sanitizeLegalActionPayload(action)
     : undefined;
   return {
     actionId: action.actionId,
@@ -2625,11 +2625,24 @@ function sanitizePublicPayload(
 }
 
 function sanitizeLegalActionPayload(
-  payload: Record<string, unknown>,
+  action: LegalAction,
 ): Record<string, string | number | boolean> {
+  const payload = action.payload as Record<string, unknown> | undefined;
+  if (!payload) return {};
   const result: Record<string, string | number | boolean> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
+  const selectedCardId = payload.selectedCardId;
+  if (
+    action.type === "install_card" &&
+    typeof selectedCardId === "string" &&
+    action.targetRequirements.some(
+      (requirement) =>
+        requirement.kind === "card" && requirement.visibility === "public",
+    )
+  ) {
+    result.selectedCardId = selectedCardId;
+  }
   return result;
 }
 

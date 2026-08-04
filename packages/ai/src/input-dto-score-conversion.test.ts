@@ -8,6 +8,49 @@ import type {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves a public engine-bound install target but blocks an engine-only one", () => {
+    const publicInstall = conversionAction();
+    publicInstall.type = "install_card";
+    publicInstall.payload = {
+      cardId: "black-widow",
+      selectedCardId: "public-mastermind",
+    };
+    publicInstall.targetRequirements = [
+      {
+        id: "targetIce",
+        kind: "card",
+        side: "corp",
+        zoneScope: ["corp.servers.ice"],
+        visibility: "public",
+      },
+    ];
+    const engineOnlyInstall = {
+      ...publicInstall,
+      actionId: "black-widow-engine-only",
+      targetRequirements: [
+        { ...publicInstall.targetRequirements[0]!, visibility: "engine_only" },
+      ],
+      payload: { ...publicInstall.payload, selectedCardId: "hidden-ice" },
+    };
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(publicInstall, "runner"),
+      eventTail: [],
+      legalActions: [publicInstall, engineOnlyInstall],
+      difficulty: "normal",
+      seed: "bound-install-target-dto",
+      decisionId: "bound-install-target-dto:runner:1",
+      actionNumber: 1,
+      profileId: "bound-install-target-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload?.selectedCardId).toBe(
+      "public-mastermind",
+    );
+    expect(input.legalActions[1]?.payload?.selectedCardId).toBeUndefined();
+  });
+
   it("preserves an exact advancement-counter economy quote", () => {
     const action = conversionAction();
     action.type = "activated_card_ability";
