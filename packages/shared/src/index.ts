@@ -2930,6 +2930,8 @@ export type VisibleCard = {
   selectedServerLabel?: string;
   selectedSubtype?: string;
   selectedSubtypeLabel?: string;
+  /** Exact target is visible only to the card's controller. */
+  selectedTargetCardId?: CardInstanceId;
   selectedTargetLabel?: string;
   owner?: Side;
   controller?: Side;

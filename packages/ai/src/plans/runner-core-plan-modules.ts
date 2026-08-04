@@ -116,6 +116,7 @@ export type RunnerCoverageGapSignal = {
   deckHasAnswer: boolean;
   answerInHand: boolean;
   answerInstallCost?: number;
+  installActionValues?: Record<string, number>;
   fundingGap?: number;
   fundingActionIds: string[];
   directSearchActionIds: string[];
@@ -1085,7 +1086,7 @@ function coverageModule(
       domain(context).coverageGaps.map((gap) => {
         const installs = coverageInstallCandidates(
           context,
-          gap.requiredRole,
+          gap,
           rolesForDefinitionId,
         );
         const draws = coverageDrawCandidates(context, gap);
@@ -1125,7 +1126,7 @@ function coverageModule(
         current.phase === "install_answer"
           ? coverageInstallCandidates(
               context,
-              current.gap.requiredRole,
+              current.gap,
               rolesForDefinitionId,
             )
           : current.phase === "fund_answer"
@@ -1161,7 +1162,7 @@ function coverageModule(
           },
           candidates: coverageInstallCandidates(
             context,
-            current.gap.requiredRole,
+            current.gap,
             rolesForDefinitionId,
           ),
         };
@@ -1802,7 +1803,7 @@ function recurringEconomyCandidates(
 
 function coverageInstallCandidates(
   context: PlanSchedulerContext,
-  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+  gap: RunnerCoverageGapSignal,
   rolesForDefinitionId: (definitionId: string) => readonly string[],
 ): PlanMaterialization["candidates"] {
   return context.actionCandidates.flatMap((candidate) => {
@@ -1855,12 +1856,12 @@ function coverageInstallCandidates(
     );
     if (!sourceDefinitionId) return [];
     const roles = rolesForDefinitionId(sourceDefinitionId);
-    if (!runnerRolesCoverCoverageGap(roles, requiredRole)) return [];
+    if (!runnerRolesCoverCoverageGap(roles, gap.requiredRole)) return [];
     return [
       {
         candidate,
-        sourceRoles: [...new Set([...roles, requiredRole])],
-        stepValue: 100,
+        sourceRoles: [...new Set([...roles, gap.requiredRole])],
+        stepValue: gap.installActionValues?.[candidate.actionId] ?? 100,
       },
     ];
   });

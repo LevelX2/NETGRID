@@ -311,6 +311,11 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
     economy?.source === "legal_action_payload" &&
     economy.reliability === "guaranteed" &&
     economy.confidence === "high";
+  const exactCreditCost =
+    candidate.costProfile.costKnownStatus === "known" &&
+    Number.isSafeInteger(candidate.costProfile.creditCost)
+      ? candidate.costProfile.creditCost ?? 0
+      : 0;
   return {
     schemaVersion: TURN_PROJECTION_DELTA_SCHEMA_VERSION,
     deltaId: `candidate:${candidate.actionId}`,
@@ -318,9 +323,11 @@ export function certifiedTurnProjectionDeltaFromCandidate(params: {
     certification: "legal_action_semantics",
     actionCapacityDelta,
     creditDelta:
-      exactEconomy && Number.isSafeInteger(economy.netLiquidCreditGain)
-        ? exactRange(economy.netLiquidCreditGain ?? 0)
-        : exactRange(0),
+      exactRange(
+        (exactEconomy && Number.isSafeInteger(economy.netLiquidCreditGain)
+          ? economy.netLiquidCreditGain ?? 0
+          : 0) - exactCreditCost,
+      ),
     handCountDelta:
       exactEconomy && Number.isSafeInteger(economy.netHandDelta)
         ? exactRange(economy.netHandDelta)

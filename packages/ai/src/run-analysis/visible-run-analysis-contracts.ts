@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 
 export type IceCardLike = {
+  instanceId?: string;
   definitionId?: string;
   rezzed?: boolean;
   known: boolean;

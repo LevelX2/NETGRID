@@ -630,7 +630,7 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
 export function structuredBreakerAssessment(params: {
   breakerCard: VisibleCard;
   breakerDefinition: CardDefinition;
-  ice: { definitionId?: string; subtypes?: string[]; strength?: number };
+  ice: { instanceId?: string; definitionId?: string; subtypes?: string[]; strength?: number };
   subroutineCount: number;
   currentBreakerStrength: number;
   additionalBreakCostPerSubroutine: number;
@@ -639,11 +639,18 @@ export function structuredBreakerAssessment(params: {
     params.breakerCard.definitionId,
   );
   if (!profile) return undefined;
+  const selectedTargetStrengthBonus =
+    params.breakerCard.definitionId === "onr_proteus_080_black-widow" &&
+    params.breakerCard.selectedTargetCardId === params.ice.instanceId
+      ? 5
+      : 0;
+  const effectiveBreakerStrength =
+    params.currentBreakerStrength + selectedTargetStrengthBonus;
   const estimate = estimateStructuredBreakerCostForIce(
     params.breakerCard.definitionId,
     params.ice,
     params.subroutineCount,
-    params.currentBreakerStrength,
+    effectiveBreakerStrength,
     params.additionalBreakCostPerSubroutine,
   );
   if (!estimate) return undefined;
@@ -656,7 +663,7 @@ export function structuredBreakerAssessment(params: {
   const requiredPumps = Math.max(
     0,
     Math.ceil(
-      (iceStrength - params.currentBreakerStrength) / pumpStrengthAmount,
+      (iceStrength - effectiveBreakerStrength) / pumpStrengthAmount,
     ),
   );
   return {

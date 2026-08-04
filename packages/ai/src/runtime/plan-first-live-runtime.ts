@@ -87,6 +87,7 @@ import {
 } from "../plans/runner-core-plan-modules";
 import {
   createRunnerTacticalPlanModules,
+  type RunnerCoverageGapSignal,
   type RunnerPlanDomain,
   type RunnerRemoteContestSignal,
   type RunnerRestrictedProgramInstallSequenceCommitment,
@@ -15546,6 +15547,7 @@ function uniqueCoverageGaps(
         answerInstallCost,
         fundingGap,
       ),
+      installActionValues: runnerCoverageInstallActionValues(input, candidates, evaluation.targetServerId, role),
       ...supportActions,
     });
   }
@@ -15624,11 +15626,36 @@ function uniqueCoverageGaps(
           answerInstallCost,
           fundingGap,
         ),
+        installActionValues: runnerCoverageInstallActionValues(input, candidates, undefined, role),
         ...supportActions,
       });
     }
   }
   return [...result.values()];
+}
+
+function runnerCoverageInstallActionValues(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  serverId: string | undefined,
+  role: RunnerCoverageGapSignal["requiredRole"],
+): Record<string, number> {
+  const server = serverId ? input.playerView.servers.find((entry) => entry.id === serverId) : undefined;
+  const allKnownRezzed = server?.ice.every((ice) => ice.known && ice.rezzed) === true;
+  const values: Record<string, number> = {};
+  for (const candidate of candidates) {
+    if (candidate.semanticActionType !== "install.card") continue;
+    const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
+    if (!definitionId || !runnerRolesCoverCoverageGap(rolesForDeckDoctrineCard(definitionId), role)) continue;
+    const card = input.playerView.own.gripOrHq.find((entry) => entry.instanceId === candidate.sourceCardInstanceId);
+    const cost = candidate.costProfile.costKnownStatus === "known" ? candidate.costProfile.creditCost ?? 0 : 0;
+    if (!card || cost > input.playerView.own.credits || !allKnownRezzed || !server) { values[candidate.actionId] = 100 - cost; continue; }
+    const targetId = candidate.targetContext?.selectedTargets?.[0]?.targetId;
+    const projectedCard = { ...card, ...(typeof targetId === "string" ? { selectedTargetCardId: targetId } : {}) };
+    const path = assessKnownRezzedIcePath(server.ice, [...(input.playerView.own.rig ?? []), projectedCard], input.playerView.own.credits - cost, server.root, input.playerView.opponent.credits);
+    values[candidate.actionId] = path.canReachAccess ? 300 - cost : 10 - cost;
+  }
+  return values;
 }
 
 function runnerCoverageGapIsTerminalRemoteThreat(

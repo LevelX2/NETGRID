@@ -215,6 +215,9 @@ function visibleKnownCardWithReferenceViewer(
       : {}),
     ...(instance.selectedCardId
       ? {
+          ...(referenceViewer === "own" || referenceViewer === instance.controller
+            ? { selectedTargetCardId: instance.selectedCardId }
+            : {}),
           selectedTargetLabel: visibleCardReferenceLabel(
             state,
             instance.selectedCardId,
