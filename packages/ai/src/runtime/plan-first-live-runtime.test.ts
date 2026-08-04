@@ -1377,7 +1377,7 @@ describe("authoritative plan-first live runtime", () => {
       { source: "game_rule" },
     );
     const input = aiInput("runner", [install, credit, endTurn]);
-    input.playerView.own.credits = 10;
+    input.playerView.own.credits = 3;
     input.playerView.opponent.deckCount = 10;
     input.playerView.own.gripOrHq = [
       visibleCard("broker-card", "runner", "resource", {
@@ -11852,7 +11852,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("binds Black Widow to the known Mastermind that makes the quoted HQ route passable", () => {
+  it("binds Black Widow to the cheapest known HQ path even while the immediate run is unfunded", () => {
     resetResidentPlanPortfolioMemory();
     const coyoteInstall = legalAction(
       "install-black-widow-coyote",
@@ -11918,16 +11918,22 @@ describe("authoritative plan-first live runtime", () => {
     });
     input.playerView.servers = [
       server("hq", [
-        visibleCard("coyote", "corp", "ice", {
-          definitionId: "onr_proteus_016_coyote",
-          rezzed: true,
-          strength: 1,
-          subtypes: ["sentry"],
-        }),
         visibleCard("mastermind", "corp", "ice", {
           definitionId: "onr_proteus_030_mastermind",
           rezzed: true,
-          strength: 4,
+          strength: 2,
+          subtypes: ["sentry"],
+        }),
+        visibleCard("coyote", "corp", "ice", {
+          definitionId: "onr_proteus_016_coyote",
+          rezzed: true,
+          strength: 3,
+          subtypes: ["sentry"],
+        }),
+        visibleCard("coyote-2", "corp", "ice", {
+          definitionId: "onr_proteus_016_coyote",
+          rezzed: true,
+          strength: 3,
           subtypes: ["sentry"],
         }),
       ]),

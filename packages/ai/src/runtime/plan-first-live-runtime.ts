@@ -223,6 +223,7 @@ import {
 } from "../runner-damage-threat-assessment";
 import {
   assessKnownRezzedIcePath,
+  runnerKnownPathAssessmentIsCostNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
   visibleRunnerRunPathCreditBudgetForRig,
   visibleDeflectorSubroutineCanResolve,
@@ -15674,7 +15675,13 @@ function runnerCoverageInstallActionValues(
           server.root,
           input.playerView.opponent.credits,
         );
-        return path.canReachAccess ? 300 - cost : 10 - cost;
+        if (path.canReachAccess) {
+          return 300 - cost - (path.visibleBreakCost ?? 0);
+        }
+        if (runnerKnownPathAssessmentIsCostNoAccess(path)) {
+          return 200 - cost - (path.visibleBreakCost ?? 0);
+        }
+        return 10 - cost;
       }),
     );
   }

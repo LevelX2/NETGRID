@@ -44857,9 +44857,12 @@
     {
       "aiSupportStatus": "ai_supported",
       "breakerProfile": {
+        "breakCost": 1,
         "coverage": [
           "sentry"
         ],
+        "pumpCost": 2,
+        "pumpStrengthAmount": 1,
         "strengthBonusVsChosenIce": true,
         "targetedIceBonus": true
       },

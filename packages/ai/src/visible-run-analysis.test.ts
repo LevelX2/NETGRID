@@ -112,6 +112,74 @@ describe("visible run analysis server ids", () => {
   });
 });
 
+describe("visible run analysis targeted breaker paths", () => {
+  it("does not quote the known Coyote-Mastermind path as free after installing Black Widow", () => {
+    const coyote = (instanceId: string): VisibleCard => ({
+      instanceId,
+      definitionId: "onr_proteus_016_coyote",
+      side: "corp",
+      type: "ice",
+      known: true,
+      rezzed: true,
+      strength: 3,
+      subtypes: ["sentry"],
+      effectiveRunQuote: {
+        iceInstanceId: instanceId,
+        iceDefinitionId: "onr_proteus_016_coyote",
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: `${instanceId}:tax`,
+            type: "set_run_future_strength_bonus",
+            amount: 1,
+          },
+        ],
+      },
+    });
+    const mastermind: VisibleCard = {
+      instanceId: "mastermind",
+      definitionId: "onr_proteus_030_mastermind",
+      side: "corp",
+      type: "ice",
+      known: true,
+      rezzed: true,
+      strength: 2,
+      subtypes: ["ap", "black_ice", "sentry", "zombie"],
+      effectiveRunQuote: {
+        iceInstanceId: "mastermind",
+        iceDefinitionId: "onr_proteus_030_mastermind",
+        effectiveStrength: 2,
+        subroutines: [
+          { id: "mastermind:damage", type: "do_damage", amount: 2 },
+          { id: "mastermind:etr", type: "end_the_run" },
+        ],
+      },
+    };
+    const blackWidow: VisibleCard = {
+      instanceId: "black-widow",
+      definitionId: "onr_proteus_080_black-widow",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 2,
+      subtypes: ["icebreaker", "killer"],
+      selectedTargetCardId: "coyote-1",
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [mastermind, coyote("coyote-1"), coyote("coyote-2")],
+      [blackWidow],
+      0,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByEtr: true,
+    });
+  });
+});
+
 describe("visible run analysis text-derived breaker costs", () => {
   it("counts a visible wall-breaker text profile against classic wall ICE", () => {
     const assessment = assessKnownRezzedIcePath(
