@@ -11920,19 +11920,19 @@ describe("authoritative plan-first live runtime", () => {
       server("hq", [
         visibleCard("mastermind", "corp", "ice", {
           definitionId: "onr_proteus_030_mastermind",
-          rezzed: true,
+          rezzed: false,
           strength: 2,
           subtypes: ["sentry"],
         }),
         visibleCard("coyote", "corp", "ice", {
           definitionId: "onr_proteus_016_coyote",
-          rezzed: true,
+          rezzed: false,
           strength: 3,
           subtypes: ["sentry"],
         }),
         visibleCard("coyote-2", "corp", "ice", {
           definitionId: "onr_proteus_016_coyote",
-          rezzed: true,
+          rezzed: false,
           strength: 3,
           subtypes: ["sentry"],
         }),

@@ -15658,7 +15658,7 @@ function runnerCoverageInstallActionValues(
     const eligibleServers = input.playerView.servers.filter(
       (server) =>
         (serverId === undefined || server.id === serverId) &&
-        server.ice.every((ice) => ice.known && ice.rezzed) &&
+        server.ice.every((ice) => ice.known) &&
         (targetId === undefined ||
           server.ice.some((ice) => ice.instanceId === targetId)),
     );
@@ -15669,7 +15669,7 @@ function runnerCoverageInstallActionValues(
     values[candidate.actionId] = Math.max(
       ...eligibleServers.map((server) => {
         const path = assessKnownRezzedIcePath(
-          server.ice,
+          server.ice.map((ice) => (ice.known ? { ...ice, rezzed: true } : ice)),
           [...(input.playerView.own.rig ?? []), projectedCard],
           input.playerView.own.credits - cost,
           server.root,

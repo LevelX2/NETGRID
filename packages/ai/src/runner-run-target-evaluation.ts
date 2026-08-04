@@ -238,7 +238,7 @@ function evaluateRunnerRunTarget(
     !randomBreakOrDamageRiskAssessment.blockedByHandBuffer &&
     !randomBreakOrDamageRiskAssessment.breakWouldBeExcludedInEncounter,
   );
-  const pathPassability = randomBreakOrDamageRiskAssessment?.blockedByHandBuffer
+  let pathPassability = randomBreakOrDamageRiskAssessment?.blockedByHandBuffer
     ? "blocked_by_random_break_damage_hand_buffer"
     : probabilisticUniversalPathReachable
       ? "reachable"
@@ -275,6 +275,13 @@ function evaluateRunnerRunTarget(
           ],
         }
       : baseRouteQuote;
+  if (
+    pathPassability === "reachable" &&
+    routeQuote.reachability === "guaranteed_access" &&
+    (routeQuote.fundingGap > 0 || creditsAfterRun < 0)
+  ) {
+    pathPassability = "blocked_unpayable";
+  }
   const runCommitment =
     unknownUnrezzedIceCount > 0 ? "probe_only" : "full_path";
   const unrezzedIceRisk =
