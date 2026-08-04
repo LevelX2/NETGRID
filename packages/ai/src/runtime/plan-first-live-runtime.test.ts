@@ -11852,6 +11852,115 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("binds Black Widow to the known Mastermind that makes the quoted HQ route passable", () => {
+    resetResidentPlanPortfolioMemory();
+    const coyoteInstall = legalAction(
+      "install-black-widow-coyote",
+      "runner",
+      "install_card",
+      "Black Widow: Coyote wählen",
+      { credits: 3, clicks: 1 },
+      {
+        source: "black-widow",
+        payload: {
+          cardId: "black-widow",
+          selectedCardId: "coyote",
+        },
+      },
+    );
+    const mastermindInstall = legalAction(
+      "install-black-widow-mastermind",
+      "runner",
+      "install_card",
+      "Black Widow: Mastermind wählen",
+      { credits: 3, clicks: 1 },
+      {
+        source: "black-widow",
+        payload: {
+          cardId: "black-widow",
+          selectedCardId: "mastermind",
+        },
+      },
+    );
+    for (const action of [coyoteInstall, mastermindInstall]) {
+      action.targetRequirements = [
+        {
+          id: "targetIce",
+          kind: "card",
+          side: "corp",
+          zoneScope: ["corp.servers.ice"],
+          visibility: "public",
+        },
+      ];
+    }
+    const runHq = legalAction(
+      "runner.start_run.hq",
+      "runner",
+      "start_run",
+      "Run auf HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const input = aiInput("runner", [coyoteInstall, mastermindInstall, runHq]);
+    input.decisionId = "black-widow-mastermind-coverage:1";
+    input.playerView.own.credits = 10;
+    input.playerView.own.gripOrHq = [
+      visibleCard("black-widow", "runner", "program", {
+        definitionId: "onr_proteus_080_black-widow",
+        installCost: 3,
+        subtypes: ["icebreaker", "killer"],
+      }),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "black-widow-mastermind-coverage",
+      side: "runner",
+      cards: [{ cardId: "onr_proteus_080_black-widow", quantity: 1 }],
+    });
+    input.playerView.servers = [
+      server("hq", [
+        visibleCard("coyote", "corp", "ice", {
+          definitionId: "onr_proteus_016_coyote",
+          rezzed: true,
+          strength: 1,
+          subtypes: ["sentry"],
+        }),
+        visibleCard("mastermind", "corp", "ice", {
+          definitionId: "onr_proteus_030_mastermind",
+          rezzed: true,
+          strength: 4,
+          subtypes: ["sentry"],
+        }),
+      ]),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget("runner.start_run.hq", "hq"),
+      targetKind: "central" as const,
+      accessTargetKind: "hq" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: false,
+      score: 200,
+      evidence: ["missing_coverage:breaker_sentry"],
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "install-black-widow-mastermind",
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+  });
+
   it("binds a heap search to the concrete breaker gap, server, source and recovery target", () => {
     resetResidentPlanPortfolioMemory();
     const gideon = legalAction(

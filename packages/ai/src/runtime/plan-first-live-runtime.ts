@@ -15640,8 +15640,6 @@ function runnerCoverageInstallActionValues(
   serverId: string | undefined,
   role: RunnerCoverageGapSignal["requiredRole"],
 ): Record<string, number> {
-  const server = serverId ? input.playerView.servers.find((entry) => entry.id === serverId) : undefined;
-  const allKnownRezzed = server?.ice.every((ice) => ice.known && ice.rezzed) === true;
   const values: Record<string, number> = {};
   for (const candidate of candidates) {
     if (candidate.semanticActionType !== "install.card") continue;
@@ -15650,11 +15648,35 @@ function runnerCoverageInstallActionValues(
     const sourceInstanceId = candidate.sourceCardInstanceId;
     const card = input.playerView.own.gripOrHq.find((entry) => entry.instanceId === sourceInstanceId);
     const cost = candidate.costProfile.costKnownStatus === "known" ? candidate.costProfile.creditCost ?? 0 : 0;
-    if (!card || cost > input.playerView.own.credits || !allKnownRezzed || !server) { values[candidate.actionId] = 100 - cost; continue; }
+    if (!card || cost > input.playerView.own.credits) {
+      values[candidate.actionId] = 100 - cost;
+      continue;
+    }
     const targetId = candidate.targetContext?.selectedTargets?.[0]?.targetId;
     const projectedCard = { ...card, ...(typeof targetId === "string" ? { selectedTargetCardId: targetId } : {}) };
-    const path = assessKnownRezzedIcePath(server.ice, [...(input.playerView.own.rig ?? []), projectedCard], input.playerView.own.credits - cost, server.root, input.playerView.opponent.credits);
-    values[candidate.actionId] = path.canReachAccess ? 300 - cost : 10 - cost;
+    const eligibleServers = input.playerView.servers.filter(
+      (server) =>
+        (serverId === undefined || server.id === serverId) &&
+        server.ice.every((ice) => ice.known && ice.rezzed) &&
+        (targetId === undefined ||
+          server.ice.some((ice) => ice.instanceId === targetId)),
+    );
+    if (eligibleServers.length === 0) {
+      values[candidate.actionId] = 100 - cost;
+      continue;
+    }
+    values[candidate.actionId] = Math.max(
+      ...eligibleServers.map((server) => {
+        const path = assessKnownRezzedIcePath(
+          server.ice,
+          [...(input.playerView.own.rig ?? []), projectedCard],
+          input.playerView.own.credits - cost,
+          server.root,
+          input.playerView.opponent.credits,
+        );
+        return path.canReachAccess ? 300 - cost : 10 - cost;
+      }),
+    );
   }
   return values;
 }
