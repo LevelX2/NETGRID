@@ -4086,6 +4086,18 @@ describe("formatChronicleEvent", () => {
       "runner",
       { cardTitle: "Hammer" },
     );
+    const blackWidow = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        title: "Black Widow",
+        zoneLabel: "Rig",
+        selectedTargetLabel: "Coyote",
+        selectedTargetServerLabel: "HQ",
+        selectedTargetIcePosition: 2,
+      }),
+      "runner",
+      { cardTitle: "Black Widow" },
+    );
 
     expect(invisibility.description).toBe(
       "9 Recurring Credits wurden auf die Karte gelegt.",
@@ -4108,6 +4120,10 @@ describe("formatChronicleEvent", () => {
         "Zetatech Software Installer",
       ]),
     );
+    expect(blackWidow.description).toContain(
+      "Gewähltes Ziel: Coyote – HQ – ICE 2.",
+    );
+    expect(blackWidow.chips).toContain("Ziel: Coyote – HQ – ICE 2");
   });
 
   it("names older hardware decks trashed by Runner deck replacement", () => {

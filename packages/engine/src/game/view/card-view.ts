@@ -223,6 +223,10 @@ function visibleKnownCardWithReferenceViewer(
             instance.selectedCardId,
             referenceViewer,
           ),
+          ...selectedInstalledIceTargetLocation(
+            state,
+            instance.selectedCardId,
+          ),
         }
       : {}),
     owner: instance.owner,
@@ -230,6 +234,32 @@ function visibleKnownCardWithReferenceViewer(
     ...(lifecycleMarkers.length > 0 ? { lifecycleMarkers } : {}),
     ...(runnerPaymentSupportAbilities.length > 0
       ? { runnerPaymentSupportAbilities }
+      : {}),
+  };
+}
+
+function selectedInstalledIceTargetLocation(
+  state: GameState,
+  targetId: CardInstanceId,
+): Pick<
+  VisibleCard,
+  "selectedTargetServerLabel" | "selectedTargetIcePosition"
+> {
+  const target = state.cardInstances[targetId];
+  if (target?.zone.side !== "corp" || target.zone.zone !== "serverIce") {
+    return {};
+  }
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === target.zone.serverId,
+  );
+  const position = server?.ice.indexOf(targetId);
+  return {
+    selectedTargetServerLabel: serverChoiceDisplayLabel(
+      state,
+      target.zone.serverId,
+    ),
+    ...(position !== undefined && position >= 0
+      ? { selectedTargetIcePosition: position + 1 }
       : {}),
   };
 }

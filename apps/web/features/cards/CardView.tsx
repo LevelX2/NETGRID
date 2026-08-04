@@ -19,6 +19,7 @@ import {
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
   isConcealedRunnerResourceCard,
+  selectedTargetDisplayLabel,
   variableIceSubtypeBadgeForCard,
   type IceModifierBadgeView,
   type InactiveCardZone
@@ -236,6 +237,9 @@ export function CardView({
   const tapped = card.known && card.tapped === true && !preview && !forceCardBack;
   const scoreStateBadges = explicitScoreStateBadges.length > 0 ? explicitScoreStateBadges : showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
+  const selectedTarget = preview || forceCardBack
+    ? null
+    : selectedTargetDisplayLabel(card);
   const counterAriaSuffix = renderedCounterDisplays.map((display) => display.ariaLabel).filter(Boolean).join(", ");
   const scoreStateAriaSuffix = scoreStateBadges.map((badge) => `${badge.value}: ${badge.label}`).join(", ");
   const tappedAriaSuffix = tapped ? "getappt" : "";
@@ -679,6 +683,17 @@ export function CardView({
         data-inactive-zone={inactiveZone}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} decorative /> : null}
+        {selectedTarget ? (
+          <span
+            className="cardSelectedTargetBadge"
+            tabIndex={0}
+            aria-label={`Ziel-ICE: ${selectedTarget}`}
+            data-tooltip={`Ziel-ICE: ${selectedTarget}`}
+            title={`Ziel-ICE: ${selectedTarget}`}
+          >
+            {selectedTarget}
+          </span>
+        ) : null}
         {visualImageUrl && setBadgeLabel && !isHardwareImageCard && !isOperationImageCard ? (
           <span className="cardImageSetBadge" title={setBadgeTitle} aria-hidden="true">
             {setBadgeLabel}

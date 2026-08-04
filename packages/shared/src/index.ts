@@ -2933,6 +2933,9 @@ export type VisibleCard = {
   /** Exact target is visible only to the card's controller. */
   selectedTargetCardId?: CardInstanceId;
   selectedTargetLabel?: string;
+  /** Public location context for a selected installed ICE target. */
+  selectedTargetServerLabel?: string;
+  selectedTargetIcePosition?: number;
   owner?: Side;
   controller?: Side;
   lifecycleMarkers?: VisibleCardLifecycleMarker[];

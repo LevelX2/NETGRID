@@ -8451,7 +8451,8 @@ select {
 }
 
 .cardInstanceMarker,
-.cardLifecycleMarker {
+.cardLifecycleMarker,
+.cardSelectedTargetBadge {
   position: absolute;
   z-index: 66;
   display: inline-grid;
@@ -8498,7 +8499,8 @@ select {
 }
 
 .cardInstanceMarker:focus-visible,
-.cardLifecycleMarker:focus-visible {
+.cardLifecycleMarker:focus-visible,
+.cardSelectedTargetBadge:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--runner), white 42%);
   outline-offset: 2px;
 }
@@ -8506,7 +8508,9 @@ select {
 .cardInstanceMarker::before,
 .cardInstanceMarker::after,
 .cardLifecycleMarker::before,
-.cardLifecycleMarker::after {
+.cardLifecycleMarker::after,
+.cardSelectedTargetBadge::before,
+.cardSelectedTargetBadge::after {
   position: absolute;
   left: 50%;
   opacity: 0;
@@ -8518,7 +8522,8 @@ select {
 }
 
 .cardInstanceMarker::before,
-.cardLifecycleMarker::before {
+.cardLifecycleMarker::before,
+.cardSelectedTargetBadge::before {
   content: "";
   bottom: calc(100% + 3px);
   border-left: 5px solid transparent;
@@ -8528,7 +8533,8 @@ select {
 }
 
 .cardInstanceMarker::after,
-.cardLifecycleMarker::after {
+.cardLifecycleMarker::after,
+.cardSelectedTargetBadge::after {
   content: attr(data-tooltip);
   bottom: calc(100% + 8px);
   width: max-content;
@@ -8553,10 +8559,30 @@ select {
 .cardLifecycleMarker:hover::before,
 .cardLifecycleMarker:hover::after,
 .cardLifecycleMarker:focus-visible::before,
-.cardLifecycleMarker:focus-visible::after {
+.cardLifecycleMarker:focus-visible::after,
+.cardSelectedTargetBadge:hover::before,
+.cardSelectedTargetBadge:hover::after,
+.cardSelectedTargetBadge:focus-visible::before,
+.cardSelectedTargetBadge:focus-visible::after {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+.cardSelectedTargetBadge {
+  left: 50%;
+  top: 50%;
+  max-width: calc(100% - 16px);
+  min-height: 24px;
+  padding: 4px 7px;
+  border-color: color-mix(in srgb, var(--runner), white 28%);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--runner), var(--panel) 24%);
+  box-shadow: 0 3px 9px rgb(0 0 0 / 0.52);
+  font-size: 10px;
+  line-height: 1.05;
+  text-align: center;
+  transform: translate(-50%, -50%);
 }
 
 .runPositionActiveSlot {

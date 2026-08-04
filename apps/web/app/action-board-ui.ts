@@ -785,10 +785,33 @@ export function selectedSubtypeDetailLabel(
 }
 
 export function selectedTargetDetailLabel(
-  card: Pick<VisibleCard, "selectedTargetLabel">,
+  card: Pick<
+    VisibleCard,
+    | "selectedTargetLabel"
+    | "selectedTargetServerLabel"
+    | "selectedTargetIcePosition"
+  >,
 ): string | null {
-  if (!card.selectedTargetLabel) return null;
-  return `Ziel-ICE: ${card.selectedTargetLabel}`;
+  const target = selectedTargetDisplayLabel(card);
+  return target ? `Ziel-ICE: ${target}` : null;
+}
+
+export function selectedTargetDisplayLabel(
+  card: Pick<
+    VisibleCard,
+    | "selectedTargetLabel"
+    | "selectedTargetServerLabel"
+    | "selectedTargetIcePosition"
+  >,
+): string | null {
+  const values = [
+    card.selectedTargetServerLabel,
+    card.selectedTargetIcePosition !== undefined
+      ? `ICE ${card.selectedTargetIcePosition}`
+      : undefined,
+    card.selectedTargetLabel,
+  ].filter((value): value is string => Boolean(value));
+  return values.length > 0 ? values.join(" – ") : null;
 }
 
 export function hostedOnDetailLabel(

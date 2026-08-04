@@ -106,6 +106,7 @@ import {
   serverTargetIdForAction,
   serverTargetIdForChoiceOption,
   selectedSubtypeDetailLabel,
+  selectedTargetDisplayLabel,
   selectedTargetDetailLabel,
   splitLegalActions,
   splitRunWindowActionsByServer,
@@ -123,6 +124,13 @@ describe("V1.0.5 action board UI helpers", () => {
         selectedTargetLabel: "ICE auf R&D Position 1",
       }),
     ).toBe("Ziel-ICE: ICE auf R&D Position 1");
+    expect(
+      selectedTargetDisplayLabel({
+        selectedTargetLabel: "Mastermind",
+        selectedTargetServerLabel: "HQ",
+        selectedTargetIcePosition: 2,
+      }),
+    ).toBe("HQ – ICE 2 – Mastermind");
     expect(
       hostedOnDetailLabel({ hostedOnLabel: "Eurocorpse (TM) Spin Chip" }),
     ).toBe("Gehostet auf: Eurocorpse (TM) Spin Chip");

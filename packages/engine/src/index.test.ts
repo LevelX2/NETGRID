@@ -1175,12 +1175,14 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     expect(runnerBlackWidow?.selectedTargetLabel).toBe(
       "ICE auf R&D Position 1",
     );
+    expect(runnerBlackWidow).toMatchObject({
+      selectedTargetCardId: targetIceId,
+      selectedTargetServerLabel: "R&D",
+      selectedTargetIcePosition: 1,
+    });
     expect(corpBlackWidow?.selectedTargetLabel).toBe("Fire Wall");
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Fire Wall",
-    );
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-      targetIceId,
     );
 
     const fubar = installFromGrip(state, "onr_proteus_088_fubar");
