@@ -29,6 +29,7 @@ import { SERVER_DIFFICULTY_UPGRADE_SOURCES } from "../../mechanics/agenda-scorin
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
+import { quoteStealCostForKnownInstalledAgenda } from "../../ability-engine/steal-cost-modifiers";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -235,6 +236,46 @@ function visibleKnownCardWithReferenceViewer(
     ...(runnerPaymentSupportAbilities.length > 0
       ? { runnerPaymentSupportAbilities }
       : {}),
+    ...visibleAgendaStealCostQuote(
+      state,
+      id,
+      definition,
+      instance,
+      referenceViewer,
+    ),
+  };
+}
+
+function visibleAgendaStealCostQuote(
+  state: GameState,
+  id: CardInstanceId,
+  definition: CardDefinition,
+  instance: CardInstance,
+  referenceViewer: Side | "own",
+): Pick<VisibleCard, "effectiveStealCostQuote"> | Record<string, never> {
+  if (
+    referenceViewer !== "runner" ||
+    definition.type !== "agenda" ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "serverRoot"
+  ) {
+    return {};
+  }
+  const serverId = instance.zone.serverId;
+  const quote = quoteStealCostForKnownInstalledAgenda(
+    state,
+    serverId,
+    id,
+    definition,
+  );
+  return {
+    effectiveStealCostQuote: {
+      stateVersion: state.stateVersion,
+      serverId,
+      agendaInstanceId: id,
+      creditCost: quote.totalCost,
+      complete: true,
+    },
   };
 }
 
@@ -1272,7 +1313,17 @@ export function visibleCorpCard(
         : {}),
     };
   }
-  return visibleOwnCard(state, id);
+  const visibleCard = visibleOwnCard(state, id);
+  return {
+    ...visibleCard,
+    ...visibleAgendaStealCostQuote(
+      state,
+      id,
+      definitionFor(state, id),
+      instance,
+      viewer,
+    ),
+  };
 }
 
 function pendingInstalledCorpExposeReviewCardIds(

@@ -2235,6 +2235,61 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("funds an observed agenda steal cost before repeating the remote run", () => {
+    const eventTail = [
+      syntheticPublicEvent("evt-run-remote-1", 8, "start_run", {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "remote_1",
+      }),
+      syntheticPublicEvent("evt-access-remote-1", 9, "access_card", {
+        actor: "runner",
+        actionType: "access_card",
+        serverLabel: "Remote 1",
+        cardDefinitionId: "onr_proteus_004_fetal-ai",
+      }),
+      syntheticPublicEvent("evt-decline-remote-1", 10, "decline_trash", {
+        actor: "runner",
+        actionType: "decline_trash",
+        serverLabel: "Remote 1",
+        stealCost: 2,
+        stealBlockedByCost: true,
+      }),
+    ];
+    const input = aiInput({
+      credits: 1,
+      stateVersion: 11,
+      eventTail,
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("known-fetal-ai", {
+              definitionId: "onr_proteus_004_fetal-ai",
+              title: "Fetal AI",
+              type: "agenda",
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    expect(evaluateRunnerRunTargets({ input })[0]).toMatchObject({
+      accessPayoff: "agenda",
+      accessPayoffContestable: false,
+      stealOrTrashAffordable: false,
+      recommendation: "gain_credits_first",
+    });
+
+    input.playerView.own.credits = 2;
+    expect(evaluateRunnerRunTargets({ input })[0]).toMatchObject({
+      accessPayoff: "agenda",
+      accessPayoffContestable: true,
+      stealOrTrashAffordable: true,
+      recommendation: "run_now",
+    });
+  });
+
   it("reconsiders a no-progress remote after the remote visibly changes", () => {
     const input = aiInput({
       credits: 6,

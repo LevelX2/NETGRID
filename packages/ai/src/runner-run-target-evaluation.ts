@@ -295,7 +295,10 @@ function evaluateRunnerRunTarget(
     unknownUnrezzedIceCount > 0 &&
     creditsAfterRun < unrezzedIceRiskCreditBuffer;
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
-  const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
+  const stealOrTrashAffordable = stealOrTrashAffordableFor(
+    accessPayoff,
+    payoff.accessPayoffContestable,
+  );
   const unproductiveVisibleRunPath =
     runnerRunTargetPathIsUnproductive(path) &&
     !probabilisticUniversalPathReachable;
@@ -329,6 +332,9 @@ function evaluateRunnerRunTarget(
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
     accessPayoff,
+    ...(payoff.accessPayoffContestable !== undefined
+      ? { accessPayoffContestable: payoff.accessPayoffContestable }
+      : {}),
     knownAccessState: payoff.knownAccessState,
     pathPassability,
     creditsAfterRun,
@@ -1227,6 +1233,7 @@ function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
 function recommendationForRunTarget(params: {
   targetKind: RunnerRunTargetKind;
   accessPayoff: RunnerAccessPayoff;
+  accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
   pathPassability: RunnerPathPassability;
   creditsAfterRun: number;
@@ -1313,6 +1320,13 @@ function recommendationForRunTarget(params: {
     return params.pathPassability === "blocked_unbreakable"
       ? "find_breaker_first"
       : "gain_credits_first";
+  }
+  if (
+    params.targetKind === "remote" &&
+    params.accessPayoff === "agenda" &&
+    params.accessPayoffContestable === false
+  ) {
+    return "gain_credits_first";
   }
   if (
     params.targetKind === "remote" &&
@@ -1592,8 +1606,10 @@ function runnerRunTargetPathIsUnproductive(
 
 function stealOrTrashAffordableFor(
   payoff: RunnerAccessPayoff,
+  contestable?: boolean,
 ): boolean | "unknown" {
-  if (payoff === "agenda" || payoff === "trash_affordable") return true;
+  if (payoff === "agenda") return contestable ?? true;
+  if (payoff === "trash_affordable") return true;
   if (payoff === "trash_unaffordable") return false;
   return "unknown";
 }

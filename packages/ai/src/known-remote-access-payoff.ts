@@ -18,6 +18,10 @@ import { projectAccessDecision } from "./decision/access-decision-projection";
 import { createProjectedAccessOutcome } from "./access/access-outcome-projection";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { currentRunRemainingIce } from "./runtime/current-encounter";
+import {
+  mergedPublicHistory,
+  serverIdFromEvent,
+} from "./runtime/public-event-history";
 
 export type KnownRemoteAccessPayoffKind =
   | "agenda"
@@ -156,6 +160,17 @@ export function evaluateKnownRemoteAccessPayoff(
     (root) => cardDefinitionType(root.definitionId) === "agenda",
   );
   if (agendaRoots.length > 0) {
+    const observedStealCost =
+      agendaRoots.find(
+        (root) =>
+          root.visibleCard?.effectiveStealCostQuote?.complete === true &&
+          root.visibleCard.effectiveStealCostQuote.stateVersion ===
+            input.playerView.stateVersion &&
+          root.visibleCard.effectiveStealCostQuote.serverId === serverId,
+      )?.visibleCard?.effectiveStealCostQuote?.creditCost ??
+      observedRemoteAgendaStealCost(input, serverId, agendaRoots);
+    const stealAffordable =
+      observedStealCost === undefined || creditsAfterPath >= observedStealCost;
     const commitment = knownRemoteAgendaAccessCommitment(
       serverId,
       agendaRoots.map((root) => `known_remote_agenda_root:${root.positionKey}`),
@@ -171,16 +186,30 @@ export function evaluateKnownRemoteAccessPayoff(
     });
     return {
       payoff: "agenda",
-      accessDecision: "steal",
-      contestable: true,
+      accessDecision: stealAffordable ? "steal" : "defer_until_funded",
+      ...(stealAffordable ? {} : { declineReason: "insufficient_credits" }),
+      contestable: stealAffordable,
       knownNoCurrentPayoff: false,
-      score: 420,
-      penalty: 0,
-      reasons: ["known_remote_agenda_pressure"],
+      score: stealAffordable ? 420 : 0,
+      penalty: stealAffordable ? 0 : 420,
+      reasons: [
+        stealAffordable
+          ? "known_remote_agenda_pressure"
+          : "known_remote_agenda_steal_unaffordable_after_ice",
+      ],
       evidence: [
         ...evidenceBase,
         "remote_memory_payoff:agenda",
-        "remote_run_boosted_by_known_remote_agenda:true",
+        ...(observedStealCost !== undefined
+          ? [
+              `known_remote_agenda_steal_cost:${observedStealCost}`,
+              `known_remote_agenda_credits_after_steal:${creditsAfterPath - observedStealCost}`,
+              `known_remote_agenda_steal_affordable:${stealAffordable}`,
+            ]
+          : ["known_remote_agenda_steal_cost:unknown"]),
+        stealAffordable
+          ? "remote_run_boosted_by_known_remote_agenda:true"
+          : "remote_run_deferred_for_known_agenda_steal_cost:true",
         ...commitment.evidence,
         ...accessProjection.evidence,
       ],
@@ -309,6 +338,92 @@ export function evaluateKnownRemoteAccessPayoff(
       "remote_memory_payoff:known_low_value",
     ],
   };
+}
+
+function observedRemoteAgendaStealCost(
+  input: AiDecisionInput,
+  serverId: string,
+  agendaRoots: readonly KnownRemoteRoot[],
+): number | undefined {
+  const agendaDefinitionIds = new Set(
+    agendaRoots.map((root) => root.definitionId),
+  );
+  const history = mergedPublicHistory(input);
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    if (
+      publicActionType(event) !== "decline_trash" ||
+      publicActor(event) !== "runner" ||
+      remoteEventServerId(event) !== serverId
+    ) {
+      continue;
+    }
+    const stealCost = numberPayloadValue(event, "stealCost");
+    if (stealCost === undefined || stealCost <= 0) continue;
+    for (let accessIndex = index - 1; accessIndex >= 0; accessIndex -= 1) {
+      const accessEvent = history[accessIndex]!;
+      if (publicActionType(accessEvent) === "start_run") break;
+      if (
+        publicActionType(accessEvent) !== "access_card" ||
+        publicActor(accessEvent) !== "runner" ||
+        remoteEventServerId(accessEvent) !== serverId
+      ) {
+        continue;
+      }
+      const accessedDefinitionId = stringPayloadValue(
+        accessEvent,
+        "cardDefinitionId",
+      );
+      if (
+        accessedDefinitionId &&
+        agendaDefinitionIds.has(accessedDefinitionId)
+      ) {
+        return stealCost;
+      }
+      break;
+    }
+  }
+  return undefined;
+}
+
+function publicActionType(event: AiDecisionInput["eventTail"][number]): string {
+  return stringPayloadValue(event, "actionType") ?? event.type;
+}
+
+function publicActor(
+  event: AiDecisionInput["eventTail"][number],
+): string | undefined {
+  return stringPayloadValue(event, "actor");
+}
+
+function remoteEventServerId(
+  event: AiDecisionInput["eventTail"][number],
+): string | undefined {
+  const direct = serverIdFromEvent(event);
+  if (direct) return direct;
+  const label = stringPayloadValue(event, "serverLabel")
+    ?.trim()
+    .toLowerCase();
+  const match = /^remote[\s_-]+(\d+)$/.exec(label ?? "");
+  return match?.[1] ? `remote_${Number.parseInt(match[1], 10)}` : undefined;
+}
+
+function stringPayloadValue(
+  event: AiDecisionInput["eventTail"][number],
+  key: string,
+): string | undefined {
+  const value = event.publicPayload[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function numberPayloadValue(
+  event: AiDecisionInput["eventTail"][number],
+  key: string,
+): number | undefined {
+  const value = event.publicPayload[key];
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.max(0, value)
+    : undefined;
 }
 
 function knownRemoteRoots(

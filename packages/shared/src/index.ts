@@ -2890,6 +2890,14 @@ export type CorpPunishRouteQuoteSet = {
   routes: CorpPunishRouteQuote[];
 };
 
+export type VisibleAgendaStealCostQuote = {
+  stateVersion: number;
+  serverId: Exclude<ServerId, "new_remote">;
+  agendaInstanceId: CardInstanceId;
+  creditCost: number;
+  complete: true;
+};
+
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
@@ -2947,6 +2955,8 @@ export type VisibleCard = {
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
   /** Present only in the Corp's own HQ or on an own installed root card. */
   counterBankPreparationQuote?: VisibleCorpCounterBankPreparationQuote;
+  /** Present only when the installed agenda identity is known to the Runner. */
+  effectiveStealCostQuote?: VisibleAgendaStealCostQuote;
 };
 
 export type PlayerView = {

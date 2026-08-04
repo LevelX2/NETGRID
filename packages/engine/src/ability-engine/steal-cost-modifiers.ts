@@ -139,6 +139,23 @@ function selfStealCostApplies(
   return true;
 }
 
+function selfStealCostsForAgendaAtZone(
+  agendaDefinition: CardDefinition,
+  cardId: CardInstanceId,
+  accessZone: CardAccessZone,
+): StealCostModifierQuote[] {
+  const implementation = cardImplementationForDefinitionId(agendaDefinition.id);
+  return (implementation?.selfStealCosts ?? [])
+    .filter((modifier) => selfStealCostApplies(modifier, accessZone))
+    .map((modifier) => ({
+      sourceCardInstanceId: cardId,
+      sourceDefinitionId: agendaDefinition.id,
+      sourceTitle: agendaDefinition.title,
+      amount: modifier.amount,
+      persistedForCurrentAccess: false,
+    }));
+}
+
 function currentAccessSelfStealCostsForAgenda(
   state: GameState,
   agendaDefinition: CardDefinition,
@@ -149,16 +166,40 @@ function currentAccessSelfStealCostsForAgenda(
     return [];
   const accessZone = currentAccessZoneForCard(state, accessedCardId);
   if (!accessZone) return [];
-  const implementation = cardImplementationForDefinitionId(agendaDefinition.id);
-  return (implementation?.selfStealCosts ?? [])
-    .filter((modifier) => selfStealCostApplies(modifier, accessZone))
-    .map((modifier) => ({
-      sourceCardInstanceId: accessedCardId,
-      sourceDefinitionId: agendaDefinition.id,
-      sourceTitle: agendaDefinition.title,
-      amount: modifier.amount,
-      persistedForCurrentAccess: false,
-    }));
+  return selfStealCostsForAgendaAtZone(
+    agendaDefinition,
+    accessedCardId,
+    accessZone,
+  );
+}
+
+export function quoteStealCostForKnownInstalledAgenda(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+  agendaCardId: CardInstanceId,
+  agendaDefinition: CardDefinition,
+): StealCostQuote {
+  if (
+    agendaDefinition.type !== "agenda" ||
+    state.cardInstances[agendaCardId]?.zone.side !== "corp" ||
+    state.cardInstances[agendaCardId]?.zone.zone !== "serverRoot" ||
+    state.cardInstances[agendaCardId]?.zone.serverId !== serverId
+  ) {
+    return { totalCost: 0, modifiers: [], publicPayload: {} };
+  }
+  const modifiers = [
+    ...activeStealCostModifiersForAgenda(state, serverId, agendaDefinition),
+    ...selfStealCostsForAgendaAtZone(
+      agendaDefinition,
+      agendaCardId,
+      "installed",
+    ),
+  ].sort((a, b) =>
+    `${a.sourceDefinitionId}:${a.sourceCardInstanceId ?? ""}`.localeCompare(
+      `${b.sourceDefinitionId}:${b.sourceCardInstanceId ?? ""}`,
+    ),
+  );
+  return stealCostQuoteFromModifiers(modifiers);
 }
 
 /**
@@ -197,6 +238,12 @@ export function quoteStealCostForAccessedAgenda(
       `${b.sourceDefinitionId}:${b.sourceCardInstanceId ?? ""}`,
     ),
   );
+  return stealCostQuoteFromModifiers(modifiers);
+}
+
+function stealCostQuoteFromModifiers(
+  modifiers: StealCostModifierQuote[],
+): StealCostQuote {
   const totalCost = modifiers.reduce((sum, modifier) => sum + modifier.amount, 0);
   const publicPayload: NonNullable<LegalAction["payload"]> = {};
   if (totalCost > 0) {
