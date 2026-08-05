@@ -287,17 +287,18 @@ function selectedInstalledIceTargetLocation(
   "selectedTargetServerLabel" | "selectedTargetIcePosition"
 > {
   const target = state.cardInstances[targetId];
-  if (target?.zone.side !== "corp" || target.zone.zone !== "serverIce") {
+  const zone = target?.zone;
+  if (!zone || zone.side !== "corp" || zone.zone !== "serverIce") {
     return {};
   }
   const server = state.corp.servers.find(
-    (candidate) => candidate.id === target.zone.serverId,
+    (candidate) => candidate.id === zone.serverId,
   );
   const position = server?.ice.indexOf(targetId);
   return {
     selectedTargetServerLabel: serverChoiceDisplayLabel(
       state,
-      target.zone.serverId,
+      zone.serverId,
     ),
     ...(position !== undefined && position >= 0
       ? { selectedTargetIcePosition: position + 1 }

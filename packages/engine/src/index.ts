@@ -53,6 +53,11 @@ export {
 
 export { cardImplementationForDefinitionId } from "./card-implementations/registry";
 
+export {
+  visibleBreakerEncounterQuote,
+  type VisibleBreakerEncounterQuote,
+} from "./game/view/visible-breaker-encounter-quote";
+
 export type {
   ActionType,
   ChoiceRequest,

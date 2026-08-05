@@ -224,18 +224,27 @@ export function publicContextForAction(
       (requirement) =>
         requirement.kind === "card" && requirement.visibility === "public",
     );
-    const selectedTarget =
+    const selectedTargetId =
       typeof selectedCardId === "string" && selectedTargetIsPublic
-        ? state.cardInstances[selectedCardId]
+        ? selectedCardId
         : undefined;
-    if (selectedTarget?.zone.side === "corp" && selectedTarget.zone.zone === "serverIce") {
+    const selectedTarget = selectedTargetId
+      ? state.cardInstances[selectedTargetId]
+      : undefined;
+    const selectedTargetZone = selectedTarget?.zone;
+    if (
+      selectedTarget !== undefined &&
+      selectedTargetId !== undefined &&
+      selectedTargetZone?.side === "corp" &&
+      selectedTargetZone.zone === "serverIce"
+    ) {
       const server = state.corp.servers.find(
-        (candidate) => candidate.id === selectedTarget.zone.serverId,
+        (candidate) => candidate.id === selectedTargetZone.serverId,
       );
-      const icePosition = server?.ice.indexOf(selectedCardId);
+      const icePosition = server?.ice.indexOf(selectedTargetId);
       const serverLabel = serverChoiceDisplayLabel(
         state,
-        selectedTarget.zone.serverId,
+        selectedTargetZone.serverId,
       );
       context.selectedTargetServerLabel = serverLabel;
       if (icePosition !== undefined && icePosition >= 0)
@@ -243,7 +252,7 @@ export function publicContextForAction(
       if (selectedTarget.rezzed) {
         context.selectedTargetLabel = deps.definitionFor(
           state,
-          selectedCardId,
+          selectedTargetId,
         ).title;
       }
     }

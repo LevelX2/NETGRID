@@ -7,11 +7,13 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
-import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
+import {
+  traceBaseLinkCardImplementationQuotesForDefinition,
+  visibleBreakerEncounterQuote,
+} from "@netgrid/engine";
 import { RUNTIME_CARDS } from "../ai-hints";
 import {
   breakerCardBlocksAccessReachability,
-  estimateStructuredBreakerCostForIce,
   getStructuredBreakerProfileForCard,
   structuredBreakerProfileCoversIce,
 } from "../breaker-ontology-consumer";
@@ -431,6 +433,15 @@ export function creditsToBreakVisibleSubroutinesWithBreaker(
     breakerDefinition.abilities?.filter(
       (ability) => ability.type === "break_subroutine",
     ) ?? [];
+  const engineBreakAssessment = structuredBreakerAssessment({
+    breakerCard,
+    breakerDefinition,
+    ice,
+    subroutineCount: targetSubroutines.length,
+    currentBreakerStrength,
+    additionalBreakCostPerSubroutine,
+  });
+  if (engineBreakAssessment) return engineBreakAssessment;
   const matchingBreakAbility = explicitBreakAbilities.find((ability) => {
     if (ability.iceSubtype && !hasSubtype(iceSubtypes, ability.iceSubtype)) {
       return false;
@@ -441,17 +452,6 @@ export function creditsToBreakVisibleSubroutinesWithBreaker(
       abilityBreakTags.some((tag) => tags.includes(subtypeKey(tag))),
     );
   });
-  const structuredBreakAssessment = matchingBreakAbility
-    ? undefined
-    : structuredBreakerAssessment({
-        breakerCard,
-        breakerDefinition,
-        ice,
-        subroutineCount: targetSubroutines.length,
-        currentBreakerStrength,
-        additionalBreakCostPerSubroutine,
-      });
-  if (structuredBreakAssessment) return structuredBreakAssessment;
   const structuredProfile = getStructuredBreakerProfileForCard(
     breakerCard.definitionId,
   );
@@ -563,21 +563,19 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
     breakerDefinition.abilities?.filter(
       (ability) => ability.type === "break_subroutine",
     ) ?? [];
+  const engineBreakAssessment = structuredBreakerAssessment({
+    breakerCard,
+    breakerDefinition,
+    ice,
+    subroutineCount: endTheRunCount,
+    currentBreakerStrength,
+    additionalBreakCostPerSubroutine,
+  });
+  if (engineBreakAssessment) return engineBreakAssessment;
   const matchingBreakAbility = explicitBreakAbilities.find(
     (ability) =>
       !ability.iceSubtype || hasSubtype(iceSubtypes, ability.iceSubtype),
   );
-  const structuredBreakAssessment = matchingBreakAbility
-    ? undefined
-    : structuredBreakerAssessment({
-        breakerCard,
-        breakerDefinition,
-        ice,
-        subroutineCount: endTheRunCount,
-        currentBreakerStrength,
-        additionalBreakCostPerSubroutine,
-      });
-  if (structuredBreakAssessment) return structuredBreakAssessment;
   const structuredProfile = getStructuredBreakerProfileForCard(
     breakerCard.definitionId,
   );
@@ -635,48 +633,52 @@ export function structuredBreakerAssessment(params: {
   currentBreakerStrength: number;
   additionalBreakCostPerSubroutine: number;
 }): BreakAssessment | undefined {
-  const profile = getStructuredBreakerProfileForCard(
-    params.breakerCard.definitionId,
-  );
-  if (!profile) return undefined;
-  const selectedTargetStrengthBonus =
-    params.breakerCard.definitionId === "onr_proteus_080_black-widow" &&
-    params.breakerCard.selectedTargetCardId === params.ice.instanceId
-      ? 5
-      : 0;
-  const effectiveBreakerStrength =
-    params.currentBreakerStrength + selectedTargetStrengthBonus;
-  const estimate = estimateStructuredBreakerCostForIce(
-    params.breakerCard.definitionId,
-    params.ice,
-    params.subroutineCount,
-    effectiveBreakerStrength,
-    params.additionalBreakCostPerSubroutine,
-  );
-  if (!estimate) return undefined;
+  if (!params.breakerCard.definitionId || !params.ice.definitionId) return undefined;
+  const quote = visibleBreakerEncounterQuote({
+    breakerDefinitionId: params.breakerCard.definitionId,
+    breakerInstanceId: params.breakerCard.instanceId,
+    breakerStrength: params.currentBreakerStrength,
+    ...(params.breakerCard.selectedTargetCardId
+      ? { selectedTargetCardId: params.breakerCard.selectedTargetCardId }
+      : {}),
+    ...(params.breakerCard.selectedSubtype
+      ? { selectedSubtype: params.breakerCard.selectedSubtype }
+      : {}),
+    iceDefinitionId: params.ice.definitionId,
+    ...(params.ice.instanceId ? { iceInstanceId: params.ice.instanceId } : {}),
+    ...(params.ice.subtypes ? { iceSubtypes: params.ice.subtypes } : {}),
+  });
+  if (!quote || quote.coverageStatus !== "full" || quote.endsRunAfterUse) return undefined;
   const iceStrength =
     params.ice.strength ?? cardDefinitionStrength(params.ice.definitionId);
-  const pumpStrengthAmount = Math.max(
-    1,
-    Math.floor(profile.pumpStrengthAmount ?? 1),
-  );
+  if (quote.effectiveStrength < iceStrength && !quote.pumpStrengthGain) return undefined;
+  const pumpStrengthAmount = Math.max(1, Math.floor(quote.pumpStrengthGain ?? 1));
   const requiredPumps = Math.max(
     0,
     Math.ceil(
-      (iceStrength - effectiveBreakerStrength) / pumpStrengthAmount,
+      (iceStrength - quote.effectiveStrength) / pumpStrengthAmount,
     ),
   );
+  const breakUses = Math.ceil(
+    Math.max(1, params.subroutineCount) / quote.maximumSubroutinesPerUse,
+  );
   return {
-    cost: estimate.cost,
+    cost:
+      requiredPumps * (quote.pumpCost ?? 0) +
+      breakUses * quote.breakCost +
+      Math.max(1, params.subroutineCount) *
+        Math.max(0, params.additionalBreakCostPerSubroutine),
     breakerInstanceId: params.breakerCard.instanceId,
-    breakerDefinitionId:
-      params.breakerCard.definitionId ?? params.breakerDefinition.id,
+    breakerDefinitionId: params.breakerCard.definitionId,
     breakerSubtypes: params.breakerDefinition.subtypes.slice(),
     endingStrength:
-      params.currentBreakerStrength + requiredPumps * pumpStrengthAmount,
+      quote.effectiveStrength + requiredPumps * pumpStrengthAmount,
     carriesStrengthAcrossIce: breakerCarriesStrengthAcrossIce(
       params.breakerDefinition,
     ),
+    ...(quote.postBreakStealthLossPerUse
+      ? { postBreakStealthLoss: breakUses * quote.postBreakStealthLossPerUse }
+      : {}),
   };
 }
 
