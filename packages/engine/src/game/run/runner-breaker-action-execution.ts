@@ -256,8 +256,16 @@ function executeBreakSubroutineAction(
       (breakAbility?.count ?? 1) > 1)
   ) {
     host.breaker.resolveMultiBreakSubroutinesAction(breakerId, legalAction);
+    for (const subroutineIndex of String(
+      legalAction.payload?.subroutineIndexes ?? "",
+    )
+      .split(",")
+      .map((value) => Number(value))) {
+      recordBrokenSubroutineBreaker(host, breakerId, subroutineIndex);
+    }
     recordNoisyIcebreakerUse(host, breakerId, legalAction);
     recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
+    recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
     return;
   }
@@ -321,11 +329,38 @@ function executeBreakSubroutineAction(
     },
   ]);
   if (breakerId) {
+    recordBrokenSubroutineBreaker(
+      host,
+      breakerId,
+      Number(legalAction.payload?.subroutineIndex),
+    );
     host.fort.applyPostBreakStealthLoss(breakerId, legalAction);
     recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
   }
+}
+
+function recordBrokenSubroutineBreaker(
+  host: RunnerBreakerActionExecutionHost,
+  breakerId: CardInstanceId,
+  subroutineIndex: number,
+): void {
+  const run = host.state.run;
+  if (!run || !Number.isSafeInteger(subroutineIndex) || subroutineIndex < 0)
+    return;
+  const breakerState = run.breakerState ?? {
+    strengthModifiersByBreakerInstanceId: {},
+    brokenSubroutineCountByBreakerInstanceId: {},
+    pendingFreeBreaks: [],
+  };
+  run.breakerState = {
+    ...breakerState,
+    brokenSubroutineBreakerByIndex: {
+      ...breakerState.brokenSubroutineBreakerByIndex,
+      [subroutineIndex]: breakerId,
+    },
+  };
 }
 
 function recordBreakerSpecialEffects(
@@ -419,6 +454,7 @@ function resolveNextSentryFreeBreakAction(
   if ((legalAction.costs[0]?.credits ?? 0) !== 0)
     throw new Error("Free-Break-Kosten sind nicht mehr gueltig.");
   host.effects.executeEffectCommands([{ type: "break_subroutine", subroutineIndex }]);
+  recordBrokenSubroutineBreaker(host, breakerId, subroutineIndex);
   run.breakerState = {
     ...(run.breakerState ?? {
       strengthModifiersByBreakerInstanceId: {},
@@ -466,7 +502,8 @@ function recordNextSentryFreeBreakIfEarned(
   const subroutineCount = host.run.currentEncounterSubroutines(iceDefinition).length;
   if (subroutineCount === 0) return;
   for (let index = 0; index < subroutineCount; index += 1) {
-    if (!run.brokenSubroutineIndexes.includes(index)) return;
+    if (run.breakerState?.brokenSubroutineBreakerByIndex?.[index] !== breakerId)
+      return;
   }
   const breakerState = run.breakerState ?? {
     strengthModifiersByBreakerInstanceId: {},

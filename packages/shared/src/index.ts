@@ -1381,6 +1381,7 @@ export type RunState = {
     brokenSubroutineCountByBreakerInstanceId: Partial<
       Record<CardInstanceId, number>
     >;
+    brokenSubroutineBreakerByIndex?: Partial<Record<number, CardInstanceId>>;
     pendingFreeBreaks: Array<{
       sourceBreakerInstanceId: CardInstanceId;
       iceSubtype: "sentry";

@@ -347,6 +347,7 @@ function encounterCreditBudget(
     killerCredits: visiblePools.killerCredits,
     stealthNonNoisyIcebreakerCredits:
       visiblePools.stealthNonNoisyIcebreakerCredits,
+    stealthCreditsBySourceId: { ...visiblePools.stealthCreditsBySourceId },
     hostedIcebreakerCreditsByBreakerInstanceId: {
       ...visiblePools.hostedIcebreakerCreditsByBreakerInstanceId,
     },

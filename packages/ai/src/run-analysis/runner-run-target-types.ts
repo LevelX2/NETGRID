@@ -276,6 +276,7 @@ export type RunnerRunTargetEvaluation = {
   multiaccessAvailable: boolean;
   pathPassability: RunnerPathPassability;
   pathCost: number;
+  futureClicksLost?: number;
   routeQuote?: RunnerRunRouteQuote;
   creditsAfterRun: number;
   runCommitment: "probe_only" | "full_path";

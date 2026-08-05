@@ -10,7 +10,10 @@ import {
 } from "./visible-run-analysis";
 import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
-import { creditsToBreakVisibleSubroutinesWithBreaker } from "./run-analysis/visible-run-breaker-path";
+import {
+  creditsToBreakVisibleSubroutinesWithBreaker,
+  minimumCreditsToBreakVisibleSubroutines,
+} from "./run-analysis/visible-run-breaker-path";
 
 function knownPathAssessment(
   overrides: Partial<KnownRezzedIcePathAssessment> = {},
@@ -188,6 +191,44 @@ describe("visible run analysis targeted breaker paths", () => {
     });
   });
 
+  it("uses exactly one Bulldozer free break on a multi-subroutine sentry", () => {
+    const bulldozer = bulldozerBreaker("bulldozer-free");
+    const aiBoon: VisibleCard = {
+      instanceId: "ai-boon-free",
+      definitionId: "onr_v1_002_ai-boon",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker", "killer"],
+    };
+    const assessment = minimumCreditsToBreakVisibleSubroutines(
+      { definitionId: "onr_v1_249_hunter", subtypes: ["sentry"], strength: 5 },
+      [bulldozer, aiBoon],
+      [
+        { id: "sentry:one", type: "end_the_run" },
+        { id: "sentry:two", type: "end_the_run" },
+        { id: "sentry:three", type: "end_the_run" },
+      ],
+      new Map(),
+      0,
+      [
+        {
+          sourceBreakerInstanceId: bulldozer.instanceId,
+          iceSubtype: "sentry",
+          remainingUses: 1,
+          mustBeNextEncounteredIce: true,
+        },
+      ],
+    );
+
+    expect(assessment).toMatchObject({
+      cost: 2,
+      consumedPendingFreeBreak: true,
+      breakerInstanceId: aiBoon.instanceId,
+    });
+  });
+
   it("charges Bulldozer's stealth consequence for every broken wall subroutine", () => {
     const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
       bulldozerBreaker("bulldozer-stealth"),
@@ -202,7 +243,12 @@ describe("visible run analysis targeted breaker paths", () => {
       ],
     );
 
-    expect(assessment).toMatchObject({ cost: 2, postBreakStealthLoss: 4 });
+    expect(assessment).toMatchObject({
+      cost: 2,
+      postBreakStealthLosses: [
+        expect.objectContaining({ amount: 2, occurrences: 2 }),
+      ],
+    });
   });
 
   it("expires Bulldozer's free break when the next encountered ICE is not a sentry", () => {
@@ -385,7 +431,12 @@ describe("visible run analysis targeted breaker paths", () => {
       ],
     );
 
-    expect(assessment).toMatchObject({ cost: 2, postBreakStealthLoss: 2 });
+    expect(assessment).toMatchObject({
+      cost: 2,
+      postBreakStealthLosses: [
+        expect.objectContaining({ amount: 1, occurrences: 2 }),
+      ],
+    });
   });
 
   it("uses Morphing Tool's installed subtype without changing it during a run", () => {

@@ -14,6 +14,7 @@ export const hammerImplementation: CardImplementationDefinition = {
           kind: "lose_bits_from_stealth_sources",
           amount: 2,
           mode: "up_to_if_available",
+          trigger: "per_subroutine",
         },
       ],
       visibility: "public",

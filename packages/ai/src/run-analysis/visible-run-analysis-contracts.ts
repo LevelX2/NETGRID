@@ -52,7 +52,13 @@ export type BreakAssessment = {
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
   runStrengthGain?: number;
-  postBreakStealthLoss?: number;
+  postBreakStealthLosses?: Array<{
+    amount: number;
+    occurrences: number;
+    trigger: "per_subroutine" | "per_ability_use";
+    sourceMode: "single_stealth_card" | "any_stealth_cards";
+    optionalIfUnavailable: boolean;
+  }>;
   futureClicksLost?: number;
   conditionalAccessReason?: "visible_random_breaker_strength";
   conditionalRiskReason?: "visible_breaker_may_trash_after_pass";
@@ -87,6 +93,7 @@ export type RunnerRunPathCreditBudget = {
   nonNoisyIcebreakerCredits?: number;
   killerCredits?: number;
   stealthNonNoisyIcebreakerCredits?: number;
+  stealthCreditsBySourceId?: Readonly<Record<string, number>>;
   hostedIcebreakerCreditsByBreakerInstanceId?: Readonly<Record<string, number>>;
 };
 
@@ -97,6 +104,7 @@ export type MutableRunnerRunPathCreditBudget = Omit<
   "hostedIcebreakerCreditsByBreakerInstanceId"
 > & {
   hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
+  stealthCreditsBySourceId: Record<string, number>;
 };
 
 export type CreditPaymentProjection = {
@@ -178,6 +186,7 @@ export type VisibleIceRunHazardProjection = {
 export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
   visibleBreakCost?: number;
+  futureClicksLost?: number;
   visibleIceRunHazards?: VisibleIceRunHazard[];
   visibleIceHazardPenalty?: number;
   visibleIceHazardAvoidanceCost?: number;

@@ -319,6 +319,7 @@ function evaluateRunnerRunTarget(
     path.unavoidableVisibleIceHazardCount ?? 0;
   const visibleTraceTagHazardUnavoidable =
     path.visibleTraceTagHazardUnavoidable === true;
+  const futureClicksLost = path.futureClicksLost ?? 0;
   const runnerMatchpointCentralAccess =
     (accessTargetKind === "rd" || accessTargetKind === "hq") &&
     payoff.knownAccessState !== "known_no_current_payoff" &&
@@ -343,11 +344,13 @@ function evaluateRunnerRunTarget(
     scoreThreat,
     unproductiveVisibleRunPath,
     visibleIceHazardPenalty,
+    futureClicksLost,
     visibleIceHazardAvoidanceCost,
     creditsAfterAvoidingVisibleIceHazards,
     expectedTagsFromVisibleIce,
     unavoidableVisibleIceHazardCount,
     visibleTraceTagHazardUnavoidable,
+    ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
     runnerMatchpointCentralAccess,
     routeQuote,
     targetFundingNeed,
@@ -371,6 +374,7 @@ function evaluateRunnerRunTarget(
     installedRunPayoffScore: combinedRunPayoff.scoreBonus,
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
     visibleIceHazardPenalty,
+    futureClicksLost,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(randomBreakOrDamageRiskAssessment
       ? { randomBreakOrDamageRiskAssessment }
@@ -392,6 +396,7 @@ function evaluateRunnerRunTarget(
     multiaccessAvailable,
     pathPassability,
     pathCost: routeQuote.guaranteedKnownCost,
+    ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
     routeQuote,
     creditsAfterRun,
     runCommitment,
@@ -503,6 +508,7 @@ function evaluateRunnerRunTarget(
       `probabilistic_universal_path_reachable:${probabilisticUniversalPathReachable}`,
       ...(randomBreakOrDamageRiskAssessment?.evidence ?? []),
       `unproductive_visible_run_path:${unproductiveVisibleRunPath}`,
+      `future_clicks_lost:${futureClicksLost}`,
       `visible_trace_end_run_lock_unavoidable:${visibleTraceEndRunLockUnavoidable}`,
       ...(path.hardUnbrokenRunEffects?.length
         ? [`hard_unbroken_run_effect:${path.hardUnbrokenRunEffects.join("|")}`]
@@ -1248,6 +1254,7 @@ function recommendationForRunTarget(params: {
   scoreThreat: boolean;
   unproductiveVisibleRunPath: boolean;
   visibleIceHazardPenalty: number;
+  futureClicksLost: number;
   visibleIceHazardAvoidanceCost: number;
   creditsAfterAvoidingVisibleIceHazards: number;
   expectedTagsFromVisibleIce: number;
@@ -1455,6 +1462,7 @@ function scoreRunTargetEvaluation(params: {
   installedRunPayoffScore: number;
   accessPayoffScoreAdjustment: number;
   visibleIceHazardPenalty: number;
+  futureClicksLost: number;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
 }): number {
@@ -1477,6 +1485,7 @@ function scoreRunTargetEvaluation(params: {
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
   const recommendationScore = recommendationRank(params.recommendation) * 20;
   const visibleIceHazardPenalty = -Math.max(0, params.visibleIceHazardPenalty);
+  const futureClickPenalty = -Math.max(0, params.futureClicksLost) * 80;
   const randomBreakOrDamageRiskPenalty = randomBreakOrDamageRiskScorePenalty(
     params.randomBreakOrDamageRiskAssessment,
   );
@@ -1494,6 +1503,7 @@ function scoreRunTargetEvaluation(params: {
     scoreThreatBonus +
     params.accessPayoffScoreAdjustment +
     visibleIceHazardPenalty +
+    futureClickPenalty +
     randomBreakOrDamageRiskPenalty +
     accessOutcomeMemoryPenalty +
     recommendationScore

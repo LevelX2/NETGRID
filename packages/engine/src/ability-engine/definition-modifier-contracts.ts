@@ -251,6 +251,7 @@ export type CardIcebreakerBreakSideEffectImplementation = {
   kind: "lose_bits_from_stealth_sources";
   amount: number;
   mode: "total_if_available" | "up_to_if_available";
+  trigger: "per_subroutine" | "per_ability_use";
 };
 
 export type CardIcebreakerUseSideEffectImplementation = {

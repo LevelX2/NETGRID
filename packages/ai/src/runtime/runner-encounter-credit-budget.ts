@@ -48,6 +48,7 @@ export function runnerEncounterCreditBudgetForInput(
     killerCredits: visiblePools.killerCredits,
     stealthNonNoisyIcebreakerCredits:
       visiblePools.stealthNonNoisyIcebreakerCredits,
+    stealthCreditsBySourceId: { ...visiblePools.stealthCreditsBySourceId },
     hostedIcebreakerCreditsByBreakerInstanceId: {
       ...visiblePools.hostedIcebreakerCreditsByBreakerInstanceId,
     },
@@ -207,6 +208,11 @@ function normalizeBudget(
     killerCredits: normalizeCreditAmount(budget.killerCredits ?? 0),
     stealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
       budget.stealthNonNoisyIcebreakerCredits ?? 0,
+    ),
+    stealthCreditsBySourceId: Object.fromEntries(
+      Object.entries(budget.stealthCreditsBySourceId ?? {}).map(
+        ([sourceId, amount]) => [sourceId, normalizeCreditAmount(amount)],
+      ),
     ),
     hostedIcebreakerCreditsByBreakerInstanceId: Object.fromEntries(
       Object.entries(

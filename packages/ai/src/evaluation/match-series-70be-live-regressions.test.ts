@@ -205,8 +205,8 @@ describe("match series 70BE real Engine regressions", () => {
     );
     expect(evaluation).toMatchObject({
       targetServerId: "rd",
-      pathPassability: "blocked_unpayable",
-      recommendation: "gain_credits_first",
+      pathPassability: "blocked_missing_coverage",
+      recommendation: "find_breaker_first",
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([

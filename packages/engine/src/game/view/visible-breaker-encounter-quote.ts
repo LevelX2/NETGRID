@@ -79,11 +79,14 @@ export type VisibleBreakerEncounterQuote = {
     consequences: VisibleBreakerConsequence[];
   }>;
   coverageStatus: "full" | "partial" | "none" | "requires_selection";
-  randomRunStrength?: {
-    minimumStrength: number;
-    expectedStrength: number;
-    maximumStrength: number;
-  };
+  randomRunStrength?:
+    | {
+        status: "unresolved";
+        minimumStrength: number;
+        expectedStrength: number;
+        maximumStrength: number;
+      }
+    | { status: "resolved"; actualStrength: number };
   stateChangesAfterUse: VisibleBreakerStateChange[];
 };
 
@@ -100,9 +103,11 @@ export function visibleBreakerEncounterQuote(params: {
 }): VisibleBreakerEncounterQuote | undefined {
   const breaker = CARD_DEFINITIONS_BY_ID[params.breakerDefinitionId];
   const ice = CARD_DEFINITIONS_BY_ID[params.iceDefinitionId];
-  if (!breaker || !ice || breaker.type !== "program" || ice.type !== "ice")
-    return undefined;
-  const abilities = icebreakerAbilitiesForDefinition(breaker);
+  const iceSubtypes = params.iceSubtypes ?? ice?.subtypes;
+  if (!iceSubtypes) return undefined;
+  const abilities = icebreakerAbilitiesForDefinition(
+    breaker ?? { id: params.breakerDefinitionId, abilities: [] },
+  );
   const subroutines = params.subroutines ?? [];
   const breakAbilities = abilities.filter(
     (ability) => ability.type === "break_subroutine",
@@ -114,7 +119,7 @@ export function visibleBreakerEncounterQuote(params: {
           ability,
           params.selectedSubtype,
           params.iceDefinitionId,
-          params.iceSubtypes ?? ice.subtypes,
+          iceSubtypes,
           subroutine,
         )
           ? index
@@ -128,7 +133,7 @@ export function visibleBreakerEncounterQuote(params: {
             ability,
             params.selectedSubtype,
             params.iceDefinitionId,
-            params.iceSubtypes ?? ice.subtypes,
+            iceSubtypes,
           );
     if (!matchesIce) return [];
     return [
@@ -189,11 +194,15 @@ export function visibleBreakerEncounterQuote(params: {
     coverageStatus,
     ...(hasRunStartRandomStrength
       ? {
-          randomRunStrength: {
-            minimumStrength: 1,
-            expectedStrength: 3.5,
-            maximumStrength: 6,
-          },
+          randomRunStrength:
+            params.breakerStrength > 0
+              ? { status: "resolved", actualStrength: params.breakerStrength }
+              : {
+                  status: "unresolved",
+                  minimumStrength: 1,
+                  expectedStrength: 3.5,
+                  maximumStrength: 6,
+                },
         }
       : {}),
     stateChangesAfterUse,
@@ -264,10 +273,7 @@ function consequencesFor(
     result.push({
       kind: "lose_stealth_credits",
       amount: ability.postBreakStealthLoss,
-      trigger:
-        ability.count && ability.count > 1
-          ? "per_ability_use"
-          : "per_subroutine",
+      trigger: ability.postBreakStealthLossTrigger ?? "per_subroutine",
       sourceMode:
         ability.postBreakStealthLossMode === "total_if_available"
           ? "any_stealth_cards"

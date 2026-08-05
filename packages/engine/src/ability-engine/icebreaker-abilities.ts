@@ -46,6 +46,7 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     amountPerStrength: number;
   }[];
   postBreakStealthLossMode?: "total_if_available" | "up_to_if_available";
+  postBreakStealthLossTrigger?: "per_subroutine" | "per_ability_use";
   onUseEndRun?: boolean;
   breakAllMatchingSubroutines?: boolean;
   special?:
@@ -134,7 +135,7 @@ export function icebreakerAbilityHasSpecialEffect(
 }
 
 function abilityForImplementation(
-  definition: CardDefinition,
+  definition: Pick<CardDefinition, "id">,
   ability: CardIcebreakerAbilityImplementation,
   index: number,
 ): RuntimeIcebreakerAbility {
@@ -179,6 +180,7 @@ function abilityForImplementation(
       ? {
           postBreakStealthLoss: stealthLoss.amount,
           postBreakStealthLossMode: stealthLoss.mode,
+          postBreakStealthLossTrigger: stealthLoss.trigger,
         }
       : {}),
     ...(ability.onUse?.some((effect) => effect.kind === "end_run")
@@ -192,7 +194,7 @@ function abilityForImplementation(
 }
 
 export function icebreakerAbilitiesForDefinition(
-  definition: CardDefinition,
+  definition: Pick<CardDefinition, "id" | "abilities">,
 ): readonly RuntimeIcebreakerAbility[] {
   const implementation = cardImplementationForDefinitionId(
     definition.id,

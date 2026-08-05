@@ -36,10 +36,26 @@ describe("visibleBreakerEncounterQuote", () => {
       }),
     ).toMatchObject({
       randomRunStrength: {
+        status: "unresolved",
         minimumStrength: 1,
         expectedStrength: 3.5,
         maximumStrength: 6,
       },
+    });
+  });
+
+  it("uses the resolved run-start die result instead of an expectation", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_proteus_087_forwards-legacy",
+        breakerInstanceId: "legacy",
+        breakerStrength: 1,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+      }),
+    ).toMatchObject({
+      effectiveStrength: 1,
+      randomRunStrength: { status: "resolved", actualStrength: 1 },
     });
   });
 
@@ -132,12 +148,12 @@ describe("visibleBreakerEncounterQuote", () => {
     });
   });
 
-  it("quotes Dogcatcher only against its catalogued dog ICE", () => {
+  it("quotes Dogcatcher from dog ICE subtypes", () => {
     const common = {
       breakerDefinitionId: "onr_v1_018_dogcatcher" as const,
       breakerInstanceId: "dogcatcher",
       breakerStrength: 2,
-      iceSubtypes: ["sentry"],
+      iceSubtypes: ["sentry", "pit_bull"],
       subroutines: [{ id: "etr", type: "end_the_run" as const }],
     };
     expect(
@@ -150,6 +166,7 @@ describe("visibleBreakerEncounterQuote", () => {
       visibleBreakerEncounterQuote({
         ...common,
         iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
       }),
     ).toMatchObject({ coverageStatus: "none" });
   });
