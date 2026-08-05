@@ -1354,12 +1354,6 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
-  nextSentryFreeBreakByBreaker?: Partial<
-    Record<CardInstanceId, CardInstanceId>
-  >;
-  nextSentryFreeBreakTargetIceByBreaker?: Partial<
-    Record<CardInstanceId, CardInstanceId>
-  >;
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
@@ -1372,6 +1366,29 @@ export type RunState = {
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<
     Record<CardInstanceId, number[]>
   >;
+  /** Generic state for breaker effects that persists only for this run. */
+  breakerState?: {
+    strengthModifiersByBreakerInstanceId: Partial<
+      Record<
+        CardInstanceId,
+        Array<{
+          amount: number;
+          duration: "current_encounter" | "current_run";
+          source: string;
+        }>
+      >
+    >;
+    brokenSubroutineCountByBreakerInstanceId: Partial<
+      Record<CardInstanceId, number>
+    >;
+    pendingFreeBreaks: Array<{
+      sourceBreakerInstanceId: CardInstanceId;
+      iceSubtype: "sentry";
+      remainingUses: number;
+      mustBeNextEncounteredIce: true;
+      targetIceId?: CardInstanceId;
+    }>;
+  };
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   runStrengthBoostUsedSourceIds?: CardInstanceId[];
   runDurationEffects?: Array<{
@@ -2901,6 +2918,8 @@ export type VisibleAgendaStealCostQuote = {
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
+  /** Stable owner-side shorthand for consumers that do not need controller. */
+  side?: Side;
   title?: string;
   definitionId?: CardDefinitionId;
   type?: CardType;

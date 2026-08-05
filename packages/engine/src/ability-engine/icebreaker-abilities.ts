@@ -3,7 +3,11 @@
  * encounter action shape. The adapter is read-only; break, pump, payment and
  * stale-action revalidation stay in the run engine.
  */
-import type { AbilityDefinition, CardDefinition } from "@netgrid/shared";
+import type {
+  AbilityDefinition,
+  CardDefinition,
+  CardDefinitionId,
+} from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import type {
   CardIcebreakerAbilityImplementation,
@@ -24,6 +28,7 @@ export type RuntimeIcebreakerSpecialEffect =
       trashDieResults: readonly [1];
       dieSides: 6;
     }
+  | { kind: "run_start_random_strength_bonus" }
   | { kind: "strength_bonus_per_successful_break_this_run" }
   | { kind: "run_end_add_counter_if_used_on_last_fort" }
   | { kind: "once_per_run_break_tag_and_all_stealth_loss" }
@@ -32,9 +37,14 @@ export type RuntimeIcebreakerSpecialEffect =
 
 export type RuntimeIcebreakerAbility = AbilityDefinition & {
   iceSubtypes?: readonly string[];
+  iceDefinitionIds?: readonly CardDefinitionId[];
   selectedIceSubtypeFromBreaker?: true;
   strengthDuration?: "current_encounter" | "current_run" | "current_turn";
   variableStrength?: { min: number };
+  pumpConsequences?: readonly {
+    kind: "lose_future_clicks";
+    amountPerStrength: number;
+  }[];
   postBreakStealthLossMode?: "total_if_available" | "up_to_if_available";
   onUseEndRun?: boolean;
   breakAllMatchingSubroutines?: boolean;
@@ -57,6 +67,7 @@ function breakMatcherFields(
   RuntimeIcebreakerAbility,
   | "iceSubtype"
   | "iceSubtypes"
+  | "iceDefinitionIds"
   | "selectedIceSubtypeFromBreaker"
   | "subroutineBreakTags"
 > {
@@ -66,6 +77,8 @@ function breakMatcherFields(
     return { selectedIceSubtypeFromBreaker: true };
   if (matcher.kind === "ice_subtype_any_of")
     return { iceSubtypes: [...matcher.subtypes] };
+  if (matcher.kind === "ice_definition_any_of")
+    return { iceDefinitionIds: [...matcher.definitionIds] };
   if (matcher.kind === "subroutine_tag")
     return { subroutineBreakTags: [matcher.tag] };
   return { subroutineBreakTags: ["trace"] };
@@ -76,6 +89,8 @@ function specialEffectsForImplementation(
 ): readonly RuntimeIcebreakerSpecialEffect[] | undefined {
   if (!special) return undefined;
   switch (special.kind) {
+    case "run_start_random_strength_bonus":
+      return [{ kind: "run_start_random_strength_bonus" }];
     case "blink_random_break_or_net_damage":
       return [
         {
@@ -134,6 +149,9 @@ function abilityForImplementation(
       strengthDuration: ability.duration,
       ...(ability.variableAmount
         ? { variableStrength: { min: ability.variableAmount.min } }
+        : {}),
+      ...(ability.consequences
+        ? { pumpConsequences: ability.consequences }
         : {}),
       ...(ability.onUse?.some((effect) => effect.kind === "end_run")
         ? { onUseEndRun: true }

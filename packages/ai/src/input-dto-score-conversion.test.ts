@@ -28,7 +28,10 @@ describe("AI input DTO score-conversion contract", () => {
       ...publicInstall,
       actionId: "black-widow-engine-only",
       targetRequirements: [
-        { ...publicInstall.targetRequirements[0]!, visibility: "engine_only" },
+        {
+          ...publicInstall.targetRequirements[0]!,
+          visibility: "engine_only" as const,
+        },
       ],
       payload: { ...publicInstall.payload, selectedCardId: "hidden-ice" },
     };

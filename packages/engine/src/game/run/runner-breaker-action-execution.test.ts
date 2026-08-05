@@ -311,7 +311,11 @@ describe("runner-breaker-action-execution", () => {
       action,
     );
 
-    expect(targetState.run?.remainderStrengthBonusByBreaker?.[BREAKER_ID]).toBe(5);
+    expect(
+      targetState.run?.breakerState?.strengthModifiersByBreakerInstanceId[
+        BREAKER_ID
+      ],
+    ).toEqual([{ amount: 3, duration: "current_run", source: "paid_pump" }]);
     expect(action.payload).toMatchObject({
       runRemainderStrengthBonusApplied: true,
       runRemainderStrengthBonusAfter: 5,

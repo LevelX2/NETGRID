@@ -6310,6 +6310,12 @@
   "expectation": {
     "acceptableActions": [
       {
+        "type": "trigger_ability",
+        "sourceDefinitionId": "onr_proteus_091_lockjaw",
+        "runnerAbility": "boost_icebreaker_for_run",
+        "targetDefinitionId": "onr_v1_039_krash"
+      },
+      {
         "type": "pump_breaker",
         "sourceDefinitionId": "onr_v1_039_krash"
       }

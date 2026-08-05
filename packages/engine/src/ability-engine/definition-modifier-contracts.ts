@@ -6,6 +6,7 @@
  */
 import type {
   CardType,
+  CardDefinitionId,
   CounterType,
   DamageType,
   EventVisibilityClass,
@@ -224,15 +225,25 @@ export type CardIcebreakerAbilityImplementation =
         kind: "paid_amount";
         min: number;
       };
+      consequences?: readonly CardIcebreakerPumpConsequenceImplementation[];
       onUse?: readonly CardIcebreakerUseSideEffectImplementation[];
       visibility: Extract<EventVisibilityClass, "public">;
     };
+
+export type CardIcebreakerPumpConsequenceImplementation = {
+  kind: "lose_future_clicks";
+  amountPerStrength: number;
+};
 
 export type CardIcebreakerBreakMatcherImplementation =
   | { kind: "any" }
   | { kind: "ice_subtype"; subtype: string }
   | { kind: "selected_ice_subtype" }
   | { kind: "ice_subtype_any_of"; subtypes: readonly string[] }
+  | {
+      kind: "ice_definition_any_of";
+      definitionIds: readonly CardDefinitionId[];
+    }
   | { kind: "subroutine_tag"; tag: string }
   | { kind: "subroutine_traces" };
 

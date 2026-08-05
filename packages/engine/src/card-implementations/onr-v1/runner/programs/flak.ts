@@ -8,7 +8,7 @@ export const flakImplementation: CardImplementationDefinition = {
     {
       kind: "break_subroutine",
       cost: { kind: "credit", amount: 1 },
-      matches: { kind: "ice_subtype", subtype: "ap" },
+      matches: { kind: "subroutine_tag", tag: "ap" },
       visibility: "public",
     },
     {

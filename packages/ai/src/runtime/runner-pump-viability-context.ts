@@ -8,6 +8,7 @@ import {
   canBreakerDefinitionBreakIce,
   cardDefinitionStrength,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
+  creditsToBreakVisibleSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   type RunnerRunPathCreditBudget,
   visibleDeflectorSubroutineCanResolve,
@@ -209,15 +210,29 @@ export function createRunnerPumpViabilityContext(
       (encounterContinue?.payload?.encounterWillEndRun === true
         ? endTheRunCount
         : 0);
+    const requiredBreakSubroutines = currentQuote?.subroutines.filter(
+      (subroutine) =>
+        isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
+        visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext) ||
+        (encounterContinue?.payload?.encounterWillEndRun === true &&
+          isEndRunSubroutine(subroutine)),
+    );
     const estimatedBreakCost =
-      requiredBreakCount > 0
-        ? creditsToBreakEndTheRunSubroutinesWithBreaker(
+      requiredBreakSubroutines?.length
+        ? creditsToBreakVisibleSubroutinesWithBreaker(
             breaker,
             encounteredIce,
-            requiredBreakCount,
+            requiredBreakSubroutines,
             (breaker.strength ?? 0) + requiredPumps * pumpAmount,
           )?.cost
-        : dependencies.estimatedEncounterBreakCost(input, action);
+        : requiredBreakCount > 0
+          ? creditsToBreakEndTheRunSubroutinesWithBreaker(
+              breaker,
+              encounteredIce,
+              requiredBreakCount,
+              (breaker.strength ?? 0) + requiredPumps * pumpAmount,
+            )?.cost
+          : dependencies.estimatedEncounterBreakCost(input, action);
     if (
       estimatedBreakCost === undefined ||
       !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)

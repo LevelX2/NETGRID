@@ -1389,11 +1389,26 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.type === "break_subroutine" &&
         action.payload?.breakerId === bulldozerId,
     );
-    expect(state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId]).toBe(wallId);
+    expect(state.run?.breakerState?.pendingFreeBreaks).toEqual([
+      {
+        sourceBreakerInstanceId: bulldozerId,
+        iceSubtype: "sentry",
+        remainingUses: 1,
+        mustBeNextEncounteredIce: true,
+      },
+    ]);
     state = setEncounter(state, sentryId);
-    state.run!.nextSentryFreeBreakByBreaker = { [bulldozerId]: wallId };
-    state.run!.nextSentryFreeBreakTargetIceByBreaker = {
-      [bulldozerId]: sentryId,
+    state.run!.breakerState = {
+      ...state.run!.breakerState!,
+      pendingFreeBreaks: [
+        {
+          sourceBreakerInstanceId: bulldozerId,
+          iceSubtype: "sentry",
+          remainingUses: 1,
+          mustBeNextEncounteredIce: true,
+          targetIceId: sentryId,
+        },
+      ],
     };
     const freeBreak = mustAction(
       state,
@@ -1409,12 +1424,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       (action) => action.actionId === freeBreak.actionId,
     );
     expect(state.run?.brokenSubroutineIndexes).toContain(0);
-    expect(
-      state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId],
-    ).toBeUndefined();
-    expect(
-      state.run?.nextSentryFreeBreakTargetIceByBreaker?.[bulldozerId],
-    ).toBeUndefined();
+    expect(state.run?.breakerState?.pendingFreeBreaks).toEqual([]);
   });
 
   it("trashes Lockjaw to boost only the selected icebreaker for the run", () => {

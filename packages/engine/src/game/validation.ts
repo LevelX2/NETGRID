@@ -284,6 +284,45 @@ export function validateGameState(state: GameState): ValidationResult {
       }
     }
   }
+  if (state.run?.breakerState) {
+    const breakerState = state.run.breakerState;
+    for (const [breakerId, modifiers] of Object.entries(
+      breakerState.strengthModifiersByBreakerInstanceId ?? {},
+    )) {
+      if (!state.cardInstances[breakerId])
+        errors.push(`Run breaker strength modifier references missing ${breakerId}.`);
+      for (const modifier of modifiers ?? []) {
+        if (
+          !Number.isInteger(modifier.amount) ||
+          modifier.amount <= 0 ||
+          !["current_encounter", "current_run"].includes(modifier.duration) ||
+          modifier.source.length === 0
+        )
+          errors.push(`Run breaker strength modifier for ${breakerId} is invalid.`);
+      }
+    }
+    for (const [breakerId, count] of Object.entries(
+      breakerState.brokenSubroutineCountByBreakerInstanceId ?? {},
+    )) {
+      if (!state.cardInstances[breakerId])
+        errors.push(`Run breaker count references missing ${breakerId}.`);
+      if (count === undefined || !Number.isInteger(count) || count < 0)
+        errors.push(`Run breaker count for ${breakerId} is invalid.`);
+    }
+    for (const pending of breakerState.pendingFreeBreaks ?? []) {
+      if (!state.cardInstances[pending.sourceBreakerInstanceId])
+        errors.push("Run pending free break references missing breaker.");
+      if (
+        pending.iceSubtype !== "sentry" ||
+        !Number.isInteger(pending.remainingUses) ||
+        pending.remainingUses <= 0 ||
+        pending.mustBeNextEncounteredIce !== true ||
+        (pending.targetIceId !== undefined &&
+          !state.cardInstances[pending.targetIceId])
+      )
+        errors.push("Run pending free break is invalid.");
+    }
+  }
   for (const modifier of state.temporaryBreakerStrengthModifiersUntilEndOfTurn ??
     []) {
     const source = state.cardInstances[modifier.sourceCardInstanceId];

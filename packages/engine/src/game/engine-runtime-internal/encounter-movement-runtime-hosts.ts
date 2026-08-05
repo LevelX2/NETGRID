@@ -793,10 +793,26 @@ export function createEncounterMovementRuntimeHosts(
       )
     )
       return;
-    const previous = deps.runRemainderStrengthBonusForBreaker(run, breakerId);
-    run.remainderStrengthBonusByBreaker = {
-      ...(run.remainderStrengthBonusByBreaker ?? {}),
-      [breakerId]: previous + 1,
+    const breakerState = run.breakerState ?? {
+      strengthModifiersByBreakerInstanceId: {},
+      brokenSubroutineCountByBreakerInstanceId: {},
+      pendingFreeBreaks: [],
+    };
+    run.breakerState = {
+      ...breakerState,
+      brokenSubroutineCountByBreakerInstanceId: {
+        ...breakerState.brokenSubroutineCountByBreakerInstanceId,
+        [breakerId]:
+          (breakerState.brokenSubroutineCountByBreakerInstanceId[breakerId] ??
+            0) + 1,
+      },
+      strengthModifiersByBreakerInstanceId: {
+        ...breakerState.strengthModifiersByBreakerInstanceId,
+        [breakerId]: [
+          ...(breakerState.strengthModifiersByBreakerInstanceId[breakerId] ?? []),
+          { amount: 1, duration: "current_run", source: "successful_break" },
+        ],
+      },
     };
   }
 

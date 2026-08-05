@@ -41,7 +41,7 @@
     "check:package-boundaries:selftest": "node scripts/check-package-boundaries.mjs --self-test",
     "check:test-discovery": "node scripts/check-vitest-discovery.mjs",
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
-    "check:icebreaker-run-semantics": "node scripts/check-icebreaker-run-semantics.mjs",
+    "check:icebreaker-run-semantics": "node scripts/check-icebreaker-run-semantics.mjs && corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/icebreaker-run-semantics-audit.test.ts",
     "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
     "check:standard-deck-guides": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-standard-deck-guides.ts",
     "analyze:standard-deck-guides": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/analyze-standard-deck-guides.ts",

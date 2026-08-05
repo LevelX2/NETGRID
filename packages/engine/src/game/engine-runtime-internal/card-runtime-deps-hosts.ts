@@ -895,6 +895,7 @@ export function createCardRuntimeDepsHosts(
           iceId as CardInstanceId,
           iceDefinition,
         ),
+        iceDefinition.id,
       )
     )
       throw new Error(
@@ -937,7 +938,15 @@ export function createCardRuntimeDepsHosts(
       .map((subroutine, index) => ({ subroutine, index }))
       .filter(
         ({ subroutine, index }) =>
-          breakAbilityMatchesSubroutine(ability, subroutine) &&
+          breakAbilityMatchesSubroutine(
+            ability,
+            subroutine,
+            deps.effectiveSubtypesForCard(
+              state,
+              iceId as CardInstanceId,
+              iceDefinition,
+            ),
+          ) &&
           !run.brokenSubroutineIndexes.includes(index) &&
           !run.resolvedSubroutineIndexes.includes(index),
       )
@@ -964,7 +973,17 @@ export function createCardRuntimeDepsHosts(
       const subroutine = subroutines[subroutineIndex];
       if (!subroutine)
         throw new Error("Multi-Break zielt auf eine fehlende Subroutine.");
-      if (!breakAbilityMatchesSubroutine(ability, subroutine))
+      if (
+        !breakAbilityMatchesSubroutine(
+          ability,
+          subroutine,
+          deps.effectiveSubtypesForCard(
+            state,
+            iceId as CardInstanceId,
+            iceDefinition,
+          ),
+        )
+      )
         throw new Error("Multi-Break kann diese Subroutine nicht brechen.");
       if (
         run.brokenSubroutineIndexes.includes(subroutineIndex) ||
@@ -1042,6 +1061,7 @@ export function createCardRuntimeDepsHosts(
           run.encounteredIceId,
           iceDefinition,
         ),
+        iceDefinition.id,
       )
     )
       throw new Error("Breaker hat keine gueltige Break-Faehigkeit.");
@@ -1056,7 +1076,17 @@ export function createCardRuntimeDepsHosts(
         )
     )
       throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
-    if (!breakAbilityMatchesSubroutine(ability, subroutine))
+    if (
+      !breakAbilityMatchesSubroutine(
+        ability,
+        subroutine,
+        deps.effectiveSubtypesForCard(
+          state,
+          run.encounteredIceId,
+          iceDefinition,
+        ),
+      )
+    )
       throw new Error("Breaker kann diese Subroutine nicht brechen.");
     if (ability.breakAllMatchingSubroutines)
       throw new Error(
@@ -1107,17 +1137,22 @@ export function createCardRuntimeDepsHosts(
           run.encounteredIceId,
           printedSubroutines,
         )
-      : { printedSubroutines: [...printedSubroutines], appendedSubroutines: [] };
-    const subroutines = publicDerivation.printedSubroutines.flatMap((subroutine) => {
-      const copies = [subroutine];
-      for (let index = 0; index < transmutationCopies; index += 1) {
-        copies.push({
-          ...subroutine,
-          id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
-        });
-      }
-      return copies;
-    });
+      : {
+          printedSubroutines: [...printedSubroutines],
+          appendedSubroutines: [],
+        };
+    const subroutines = publicDerivation.printedSubroutines.flatMap(
+      (subroutine) => {
+        const copies = [subroutine];
+        for (let index = 0; index < transmutationCopies; index += 1) {
+          copies.push({
+            ...subroutine,
+            id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
+          });
+        }
+        return copies;
+      },
+    );
     if (
       run?.encounteredIceId &&
       run.futureEncounterEndTheRunSourceIceId &&
@@ -1180,10 +1215,13 @@ export function createCardRuntimeDepsHosts(
     state: GameState,
     iceId: CardInstanceId,
   ): NonNullable<CardDefinition["subroutines"]> {
-    return publicIceRunSubroutineDerivation(state, iceId, [])
-      .appendedSubroutines.filter(
-        (subroutine) => subroutine.type === "initiate_trace",
-      ) as NonNullable<CardDefinition["subroutines"]>;
+    return publicIceRunSubroutineDerivation(
+      state,
+      iceId,
+      [],
+    ).appendedSubroutines.filter(
+      (subroutine) => subroutine.type === "initiate_trace",
+    ) as NonNullable<CardDefinition["subroutines"]>;
   }
 
   function runCardImplementationActionHost(state: GameState) {

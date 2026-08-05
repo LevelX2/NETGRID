@@ -3097,7 +3097,8 @@
         "coverage": [
           "wall"
         ],
-        "pumpCost": 0,
+      "pumpCost": 1,
+      "pumpStrengthAmount": 1,
         "sideEffects": [
           "forgo_actions"
         ]
@@ -45873,13 +45874,17 @@
     {
       "aiSupportStatus": "ai_supported",
       "breakerProfile": {
-        "configurableCoverage": true,
-        "coverageCandidates": [
-          "code_gate",
-          "sentry",
-          "wall"
-        ],
-        "reconfigurableType": true
+      "configurableCoverage": true,
+      "coverageCandidates": [
+        "code_gate",
+        "sentry",
+        "wall"
+      ],
+      "breakCost": 2,
+      "maxSubroutinesPerBreak": 1,
+      "pumpCost": 1,
+      "pumpStrengthAmount": 1,
+      "reconfigurableType": true
       },
       "cardId": "onr_proteus_092_morphing-tool",
       "cardType": "program",

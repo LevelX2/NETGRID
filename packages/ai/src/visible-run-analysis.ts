@@ -9,7 +9,11 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
-import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
+import {
+  cardImplementationForDefinitionId,
+  icebreakerAbilitiesForDefinition,
+  traceBaseLinkCardImplementationQuotesForDefinition,
+} from "@netgrid/engine";
 import { RUNTIME_CARDS } from "./ai-hints";
 import {
   breakerCardBlocksAccessReachability,
@@ -36,6 +40,7 @@ import type {
   VisibleIceRunHazardKind,
   VisibleIceRunHazardProjection,
   VisibleIceRunHazardSeverity,
+  VisibleRunBreakerState,
   VisibleTraceSupportSideEffect,
 } from "./run-analysis/visible-run-analysis-contracts";
 
@@ -96,6 +101,7 @@ export {
   canBreakerDefinitionBreakIce,
   cardDefinitionStrength,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
+  creditsToBreakVisibleSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   iceHasEndTheRun,
   minimumCreditsToBreakEndTheRunSubroutines,
@@ -147,21 +153,152 @@ export function assessKnownRezzedIcePath(
   visibleCorpBidCapacity = 0,
   deflectorContext: VisibleDeflectorContext = {},
 ): KnownRezzedIcePathAssessment {
-  return assessKnownRezzedIcePathInternal(
-    iceCards,
+  const normalizedCorpBidCapacity = normalizeVisibleCorpBidCapacity(
+    visibleCorpBidCapacity,
+  );
+  const context = {
+    ...deflectorContext,
+    visibleCorpCredits:
+      deflectorContext.visibleCorpCredits ?? normalizedCorpBidCapacity,
+  };
+  const availablePreRunCredits =
+    typeof runnerCredits === "number" ? runnerCredits : runnerCredits.credits;
+  const candidates = selectableSubtypeRigVariants(
     rigCards,
-    runnerCredits,
-    rootCards,
-    normalizeVisibleCorpBidCapacity(visibleCorpBidCapacity),
-    [],
-    { allowBreakingRunPathEffects: true },
-    undefined,
-    {
-      ...deflectorContext,
-      visibleCorpCredits:
-        deflectorContext.visibleCorpCredits ??
-        normalizeVisibleCorpBidCapacity(visibleCorpBidCapacity),
-    },
+    context,
+    availablePreRunCredits,
+  ).flatMap((variant) =>
+    (["retained", "trashed"] as const).map((bartmossOutcome) =>
+      ({
+        bartmossOutcome,
+        assessment: assessKnownRezzedIcePathInternal(
+          iceCards,
+          variant.rigCards,
+          runnerCredits,
+          rootCards,
+          normalizedCorpBidCapacity,
+          [],
+          {
+            allowBreakingRunPathEffects: true,
+            bartmossOutcome,
+            ...(variant.preRunPreparation
+              ? { preRunPreparation: variant.preRunPreparation }
+              : {}),
+          },
+          undefined,
+          context,
+        ),
+      }),
+    ),
+  );
+  const best = candidates
+    .slice()
+    .sort((left, right) =>
+      compareKnownPathAssessments(left.assessment, right.assessment),
+    )[0]!.assessment;
+  const bartmossBranches = candidates.filter(({ assessment }) =>
+    assessment.conditionalRiskReasons?.includes(
+      "visible_breaker_may_trash_after_pass",
+    ),
+  );
+  if (bartmossBranches.length === 0) return best;
+  return {
+    ...best,
+    postEncounterBreakerBranches: (["retained", "trashed"] as const).map(
+      (outcome) => {
+        const branch = bartmossBranches.find(
+          (candidate) => candidate.bartmossOutcome === outcome,
+        )?.assessment;
+        return {
+          outcome:
+            outcome === "retained" ? "breaker_retained" : "breaker_trashed",
+          blocked: branch?.blocked ?? true,
+          canReachAccess: branch?.canReachAccess ?? false,
+        };
+      },
+    ),
+  };
+}
+
+function selectableSubtypeRigVariants(
+  rigCards: VisibleCard[],
+  context: VisibleDeflectorContext,
+  availablePreRunCredits: number,
+): Array<{
+  rigCards: VisibleCard[];
+  preRunPreparation?: { credits: number; clicks: number };
+}> {
+  return rigCards.reduce<Array<{
+    rigCards: VisibleCard[];
+    preRunPreparation?: { credits: number; clicks: number };
+  }>>((variants, card) => {
+    if (!card.definitionId)
+      return variants.map((variant) => ({
+        ...variant,
+        rigCards: [...variant.rigCards, card],
+      }));
+    if (card.selectedSubtype) {
+      const change = cardImplementationForDefinitionId(card.definitionId)
+        ?.icebreakerSubtypeChange;
+      const canPrepareChange =
+        change?.timing === "runner_main" &&
+        (context.availableRunnerClicks ?? 0) >= change.cost.clicks;
+      if (!canPrepareChange) {
+        return variants.map((variant) => ({
+          ...variant,
+          rigCards: [...variant.rigCards, card],
+        }));
+      }
+      return variants.flatMap((variant) => [
+        {
+          ...variant,
+          rigCards: [...variant.rigCards, card],
+        },
+        ...(availablePreRunCredits >=
+          (variant.preRunPreparation?.credits ?? 0) + change.cost.credits &&
+        (context.availableRunnerClicks ?? 0) >=
+          (variant.preRunPreparation?.clicks ?? 0) + change.cost.clicks
+          ? change.choices
+          .filter((selectedSubtype) => selectedSubtype !== card.selectedSubtype)
+          .map((selectedSubtype) => ({
+            rigCards: [
+              ...variant.rigCards,
+              { ...card, selectedSubtype },
+            ],
+            preRunPreparation: {
+              credits:
+                (variant.preRunPreparation?.credits ?? 0) + change.cost.credits,
+              clicks:
+                (variant.preRunPreparation?.clicks ?? 0) + change.cost.clicks,
+            },
+          }))
+          : []),
+      ]);
+    }
+    const choices = cardImplementationForDefinitionId(card.definitionId)
+      ?.icebreakerSubtypeChange;
+    if (choices?.timing !== "during_run" || choices.limit !== "once_until_selected")
+      return variants.map((variant) => ({
+        ...variant,
+        rigCards: [...variant.rigCards, card],
+      }));
+    return variants.flatMap((variant) =>
+      choices.choices.map((selectedSubtype) => ({
+        ...variant,
+        rigCards: [...variant.rigCards, { ...card, selectedSubtype }],
+      })),
+    );
+  }, [{ rigCards: [] }]);
+}
+
+function compareKnownPathAssessments(
+  left: KnownRezzedIcePathAssessment,
+  right: KnownRezzedIcePathAssessment,
+): number {
+  return (
+    Number(right.canReachAccess) - Number(left.canReachAccess) ||
+    (left.visibleBreakCost ?? 0) - (right.visibleBreakCost ?? 0) ||
+    right.creditsAfterPath - left.creditsAfterPath
   );
 }
 
@@ -172,12 +309,32 @@ function assessKnownRezzedIcePathInternal(
   rootCards: RootCardLike[],
   visibleCorpBidCapacity: number,
   initialRunPathEffects: RunPathProjectionEffect[],
-  options: { allowBreakingRunPathEffects: boolean },
+  options: {
+    allowBreakingRunPathEffects: boolean;
+    bartmossOutcome?: "retained" | "trashed";
+    preRunPreparation?: { credits: number; clicks: number };
+  },
   initialBreakerStrengths?: Map<string, number>,
   deflectorContext: VisibleDeflectorContext = {},
 ): KnownRezzedIcePathAssessment {
   const creditBudget = normalizeRunnerRunPathCreditBudget(runnerCredits);
-  let visibleBreakCost = 0;
+  const preRunPreparation = options.preRunPreparation;
+  if (preRunPreparation && creditBudget.credits < preRunPreparation.credits) {
+    return blockedPathAssessment(
+      preRunPreparation.credits,
+      creditBudget.credits - preRunPreparation.credits,
+      0,
+      undefined,
+      undefined,
+      0,
+      false,
+      0,
+      "ice_unaffordable",
+    );
+  }
+  if (preRunPreparation) creditBudget.credits -= preRunPreparation.credits;
+  let visibleBreakCost = preRunPreparation?.credits ?? 0;
+  let futureClicksLost = 0;
   let creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
   const visibleIceRunHazards: VisibleIceRunHazard[] = [];
   let assessedKnownIceCount = 0;
@@ -186,9 +343,20 @@ function assessKnownRezzedIcePathInternal(
   const conditionalAccessReasons = new Set<string>();
   const conditionalRiskReasons = new Set<string>();
   let visibleCorpCreditsThroughPath = visibleCorpBidCapacity;
-  const breakerStrengths = new Map(
-    rigCards.map((card) => [card.instanceId, card.strength ?? 0]),
-  );
+  let netOrCoreDamagePreventionRemaining =
+    deflectorContext.netOrCoreDamagePreventionRemaining ??
+    visibleNetOrCoreDamagePreventionForRig(rigCards);
+  const breakersAtRiskOfBeingTrashed = new Set<string>();
+  const breakerState: VisibleRunBreakerState = {
+    strengthByBreakerInstanceId: new Map(
+      rigCards.map((card) => [
+        card.instanceId,
+        visibleBreakerStrengthForTargetServer(card, deflectorContext.targetServerId),
+      ]),
+    ),
+    pendingFreeBreaks: [],
+  };
+  const breakerStrengths = breakerState.strengthByBreakerInstanceId;
   if (initialBreakerStrengths) {
     for (const [instanceId, strength] of initialBreakerStrengths) {
       breakerStrengths.set(instanceId, strength);
@@ -199,11 +367,17 @@ function assessKnownRezzedIcePathInternal(
     .reverse()) {
     const iceDefinitionId = ice.definitionId;
     if (!iceDefinitionId || !ice.known || ice.rezzed !== true) continue;
+    const rigCardsForEncounter = rigCards.filter(
+      (card) => !breakersAtRiskOfBeingTrashed.has(card.instanceId),
+    );
     const effectiveIce = projectIceForRunPathEffects(
       ice,
       activeRunPathEffects,
       iceIndex,
     );
+    if (!effectiveIce.subtypes?.includes("sentry")) {
+      breakerState.pendingFreeBreaks = [];
+    }
     const pathCostBeforeIce = visibleBreakCost;
     assessedKnownIceCount += 1;
     const quote = runQuoteForIce(effectiveIce, iceIndex);
@@ -271,7 +445,7 @@ function assessKnownRezzedIcePathInternal(
       if (lossAmount <= 0) continue;
       const breakAssessment = minimumCreditsToBreakVisibleSubroutines(
         effectiveIceForQuote(effectiveIce, quote),
-        rigCards,
+        rigCardsForEncounter,
         [subroutine],
         breakerStrengths,
         additionalBreakCostPerSubroutine,
@@ -285,6 +459,7 @@ function assessKnownRezzedIcePathInternal(
         breakAssessment.cost < lossAmount
       ) {
         visibleBreakCost += breakAssessment.cost;
+        futureClicksLost += breakAssessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
         firstKnownIceBreakable = true;
         if (breakAssessment.carriesStrengthAcrossIce) {
@@ -306,10 +481,19 @@ function assessKnownRezzedIcePathInternal(
         ? undefined
         : minimumCreditsToBreakEndTheRunSubroutines(
             effectiveIceForQuote(effectiveIce, quote),
-            rigCards,
+            rigCardsForEncounter,
             accessPreservingBreakCount,
             breakerStrengths,
             additionalBreakCostPerSubroutine,
+            breakerState.pendingFreeBreaks,
+            quote?.subroutines.filter(
+              (subroutine) =>
+                isVisibleHardEndRunSubroutine(subroutine) ||
+                visibleDeflectorSubroutineCanResolve(
+                  subroutine,
+                  deflectorContext,
+                ),
+            ),
           );
       if (!breakAssessment) {
         return blockedPathAssessment(
@@ -344,7 +528,23 @@ function assessKnownRezzedIcePathInternal(
         );
       }
       visibleBreakCost += breakAssessment.cost;
+      if (breakAssessment.conditionalAccessReason)
+        conditionalAccessReasons.add(breakAssessment.conditionalAccessReason);
+      if (breakAssessment.conditionalRiskReason)
+        conditionalRiskReasons.add(breakAssessment.conditionalRiskReason);
+      futureClicksLost += breakAssessment.futureClicksLost ?? 0;
       spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+      advanceVisibleRunBreakerState(
+        breakerState,
+        breakAssessment,
+        (quote?.subroutines.length ?? 0) === accessPreservingBreakCount,
+      );
+      if (
+        breakAssessment.conditionalRiskReason &&
+        options.bartmossOutcome !== "retained"
+      ) {
+        breakersAtRiskOfBeingTrashed.add(breakAssessment.breakerInstanceId);
+      }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
       firstKnownIceBreakable = true;
       if (breakAssessment.carriesStrengthAcrossIce) {
@@ -364,10 +564,11 @@ function assessKnownRezzedIcePathInternal(
         ? undefined
         : minimumCreditsToBreakEndTheRunSubroutines(
             effectiveIceForQuote(effectiveIce, quote),
-            rigCards,
+            rigCardsForEncounter,
             1,
             breakerStrengths,
             additionalBreakCostPerSubroutine,
+            breakerState.pendingFreeBreaks,
           );
       const payment = bestAccessPreservingPayment(
         creditBudget,
@@ -391,6 +592,7 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += payment.cost;
       if (payment.breakAssessment) {
+        futureClicksLost += payment.breakAssessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(
           creditBudget,
           payment.breakAssessment,
@@ -419,10 +621,11 @@ function assessKnownRezzedIcePathInternal(
         ? undefined
         : minimumCreditsToBreakVisibleSubroutines(
             effectiveIceForQuote(effectiveIce, quote),
-            rigCards,
+            rigCardsForEncounter,
             [subroutine],
             breakerStrengths,
             additionalBreakCostPerSubroutine,
+            breakerState.pendingFreeBreaks,
           );
       if (payCost === undefined) {
         const breakPayment = breakAssessment
@@ -430,6 +633,7 @@ function assessKnownRezzedIcePathInternal(
           : undefined;
         if (breakAssessment && breakPayment?.affordable) {
           visibleBreakCost += breakAssessment.cost;
+          futureClicksLost += breakAssessment.futureClicksLost ?? 0;
           spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
@@ -466,6 +670,7 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += payment.cost;
       if (payment.breakAssessment) {
+        futureClicksLost += payment.breakAssessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(
           creditBudget,
           payment.breakAssessment,
@@ -493,13 +698,20 @@ function assessKnownRezzedIcePathInternal(
       additionalBreakCostPerSubroutine,
     });
     const avoidedVisibleHazardSubroutineIds = new Set<string>();
-    for (const { hazard, avoidancePayment } of visibleHazardProjections) {
+    for (const projection of visibleHazardProjections) {
+      const { avoidancePayment } = projection;
+      const hazard = applyVisibleDamagePrevention(
+        projection.hazard,
+        netOrCoreDamagePreventionRemaining,
+      );
+      netOrCoreDamagePreventionRemaining -= hazard.damagePreventionApplied ?? 0;
       visibleIceRunHazards.push(hazard);
       if (avoidancePayment) {
         avoidedVisibleHazardSubroutineIds.add(hazard.subroutineId);
       }
       if (avoidancePayment?.kind === "breaker") {
         visibleBreakCost += avoidancePayment.assessment.cost;
+        futureClicksLost += avoidancePayment.assessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(
           creditBudget,
           avoidancePayment.assessment,
@@ -556,7 +768,7 @@ function assessKnownRezzedIcePathInternal(
           !runPathEffectsPreventFutureBreaking(activeRunPathEffects)
             ? minimumCreditsToBreakEndTheRunSubroutines(
                 effectiveIceForQuote(effectiveIce, quote),
-                rigCards,
+                rigCardsForEncounter,
                 1,
                 breakerStrengths,
                 additionalBreakCostPerSubroutine,
@@ -567,6 +779,7 @@ function assessKnownRezzedIcePathInternal(
           : undefined;
         if (breakAssessment && payment?.affordable) {
           visibleBreakCost += breakAssessment.cost;
+          futureClicksLost += breakAssessment.futureClicksLost ?? 0;
           spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
@@ -617,6 +830,7 @@ function assessKnownRezzedIcePathInternal(
             ice: effectiveIce,
             quote,
             effect,
+            sourceSubroutine,
             activeRunPathEffects,
             rigCards,
             rootCards,
@@ -629,6 +843,7 @@ function assessKnownRezzedIcePathInternal(
         : undefined;
       if (breakAssessment) {
         visibleBreakCost += breakAssessment.cost;
+        futureClicksLost += breakAssessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
         creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
         firstKnownIceBreakable = true;
@@ -653,6 +868,8 @@ function assessKnownRezzedIcePathInternal(
   return {
     blocked: false,
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
+    ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
+    ...(preRunPreparation ? { preRunPreparation } : {}),
     ...(conditionalAccessReasons.size > 0
       ? { conditionalAccessReasons: [...conditionalAccessReasons].sort() }
       : {}),
@@ -676,6 +893,81 @@ function assessKnownRezzedIcePathInternal(
   };
 }
 
+function visibleBreakerStrengthForTargetServer(
+  card: VisibleCard,
+  targetServerId: string | undefined,
+): number {
+  const strength = card.strength ?? 0;
+  if (
+    !targetServerId ||
+    !card.selectedServerId ||
+    card.selectedServerId === targetServerId ||
+    !card.definitionId
+  )
+    return strength;
+  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+  if (!definition) return strength;
+  const hasLastServerBoundCounters = icebreakerAbilitiesForDefinition(
+    definition,
+  ).some((ability) =>
+    ability.specialEffects?.some(
+      (effect) => effect.kind === "run_end_add_counter_if_used_on_last_fort",
+    ),
+  );
+  if (!hasLastServerBoundCounters) return strength;
+  return Math.max(0, strength - Math.max(0, card.counters?.power ?? 0));
+}
+
+function visibleNetOrCoreDamagePreventionForRig(rigCards: VisibleCard[]): number {
+  return rigCards.reduce((total, card) => {
+    if (!card.definitionId || !card.known) return total;
+    const prevention = cardImplementationForDefinitionId(
+      card.definitionId,
+    )?.damagePreventionSources;
+    return (
+      total +
+      (prevention ?? [])
+        .filter(
+          (source) =>
+            source.cost.kind === "none" &&
+            source.limit?.kind === "per_turn" &&
+            source.damageTypes.some(
+              (type) => type === "net" || type === "core",
+            ),
+        )
+        .reduce(
+          (sum, source) =>
+            sum +
+            (typeof source.amount === "number"
+              ? Math.max(0, source.amount)
+              : 0),
+          0,
+        )
+    );
+  }, 0);
+}
+
+function applyVisibleDamagePrevention(
+  hazard: VisibleIceRunHazard,
+  remainingPrevention: number,
+): VisibleIceRunHazard {
+  if (
+    !hazard.expectedDamage ||
+    hazard.effectType !== "net_damage"
+  )
+    return hazard;
+  const applied = Math.min(
+    Math.max(0, Math.floor(remainingPrevention)),
+    hazard.expectedDamage,
+  );
+  if (applied <= 0) return hazard;
+  return {
+    ...hazard,
+    expectedDamage: hazard.expectedDamage - applied,
+    damagePreventionApplied: applied,
+  };
+}
+
 export function visibleDeflectorSubroutineCanResolve(
   subroutine: VisibleEffectiveSubroutine,
   context: VisibleDeflectorContext = {},
@@ -696,12 +988,40 @@ export function visibleDeflectorSubroutineCanResolve(
   return true;
 }
 
+function advanceVisibleRunBreakerState(
+  state: VisibleRunBreakerState,
+  assessment: BreakAssessment,
+  fullyBrokeEncounteredIce: boolean,
+): void {
+  if (assessment.consumedPendingFreeBreak) {
+    state.pendingFreeBreaks = state.pendingFreeBreaks.filter(
+      (entry) => entry.sourceBreakerInstanceId !== assessment.breakerInstanceId,
+    );
+  }
+  if (!fullyBrokeEncounteredIce) return;
+  for (const change of assessment.stateChangesAfterUse ?? []) {
+    if (change.kind !== "set_pending_free_break") continue;
+    state.pendingFreeBreaks = [
+      ...state.pendingFreeBreaks.filter(
+        (entry) => entry.sourceBreakerInstanceId !== assessment.breakerInstanceId,
+      ),
+      {
+        sourceBreakerInstanceId: assessment.breakerInstanceId,
+        iceSubtype: change.iceSubtype,
+        remainingUses: change.remainingUses,
+        mustBeNextEncounteredIce: change.mustBeNextEncounteredIce,
+      },
+    ];
+  }
+}
+
 function runPathEffectBreakAssessment(params: {
   iceCards: IceCardLike[];
   iceIndex: number;
   ice: IceCardLike;
   quote: VisibleEffectiveIceRunQuote | undefined;
   effect: RunPathProjectionEffect;
+  sourceSubroutine: VisibleEffectiveSubroutine;
   activeRunPathEffects: RunPathProjectionEffect[];
   rigCards: VisibleCard[];
   rootCards: RootCardLike[];
@@ -720,6 +1040,8 @@ function runPathEffectBreakAssessment(params: {
     1,
     params.breakerStrengths,
     params.additionalBreakCostPerSubroutine,
+    [],
+    [params.sourceSubroutine],
   );
   if (!breakAssessment) return undefined;
   const payment = projectBreakerCreditPayment(

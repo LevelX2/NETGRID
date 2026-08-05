@@ -80,6 +80,7 @@ import {
   runnerExactBasicLiquidCreditCandidate,
   runnerFundingRouteCandidateIsMaterializable,
   runnerInstalledCardLiquidationChoiceSignal,
+  type RunnerCoverageGapSignal,
   type RunnerCorePlanDomain,
   type RunnerDiscardChoiceBinding,
   type RunnerFundingNeedSignal,
@@ -87,7 +88,6 @@ import {
 } from "../plans/runner-core-plan-modules";
 import {
   createRunnerTacticalPlanModules,
-  type RunnerCoverageGapSignal,
   type RunnerPlanDomain,
   type RunnerRemoteContestSignal,
   type RunnerRestrictedProgramInstallSequenceCommitment,
@@ -3197,7 +3197,8 @@ function buildRunnerDomain(
             !costlyInformationRunBelowHandBuffer &&
             fundingSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
-            evaluation.routeQuote.reachability === "guaranteed_access" &&
+            (evaluation.routeQuote?.reachability ?? "guaranteed_access") ===
+              "guaranteed_access" &&
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
@@ -16945,7 +16946,10 @@ function runnerExactRunWindowPhaseActionIds(
     const directEncounterRoutes = admissibleRunWindowCandidates.filter(
       (candidate) =>
         candidate.actionType === "pump_breaker" ||
-        candidate.actionType === "break_subroutine",
+        candidate.actionType === "break_subroutine" ||
+        candidate.semanticActionType === "breaker.boost_strength" ||
+        candidate.semanticActionType === "breaker.break_subroutine" ||
+        runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined,
     );
     if (directEncounterRoutes.length > 0) {
       return directEncounterRoutes.map((candidate) => candidate.actionId);

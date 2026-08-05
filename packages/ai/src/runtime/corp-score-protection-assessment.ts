@@ -5,7 +5,7 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
-import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
+import { visibleBreakerEncounterQuote } from "@netgrid/engine";
 import { creditsToBreakEndTheRunSubroutinesWithBreaker } from "../visible-run-analysis";
 import type {
   BreakAssessment,
@@ -153,6 +153,10 @@ type SupportedIce = Readonly<{
   effectiveStrength: number;
   effectiveSubtypes: readonly string[];
   additionalBreakCostPerSubroutine: number;
+}>;
+
+type EngineRandomBreakRiskProfile = Readonly<{
+  successProbabilityPerAttempt: number;
 }>;
 
 type IceReadResult =
@@ -610,9 +614,7 @@ function accessPreservingBreakStates(params: {
   const breakOptions: Array<
     Readonly<{
       assessment: BreakAssessment;
-      riskProfile: ReturnType<
-        typeof randomBreakOrDamageRiskProfileForDefinitionId
-      >;
+      riskProfile: EngineRandomBreakRiskProfile | undefined;
     }>
   > = [];
   const effectiveIce = {
@@ -627,6 +629,10 @@ function accessPreservingBreakStates(params: {
       params.ice.endTheRunCount,
       params.state.breakerStrengths.get(breaker.instanceId),
       params.ice.additionalBreakCostPerSubroutine,
+      params.ice.card.effectiveRunQuote?.subroutines.filter(
+        isHardEndTheRunSubroutine,
+      ),
+      true,
     );
     if (
       !assessment ||
@@ -639,9 +645,14 @@ function accessPreservingBreakStates(params: {
     }
     breakOptions.push({
       assessment,
-      riskProfile: randomBreakOrDamageRiskProfileForDefinitionId(
-        assessment.breakerDefinitionId,
-      ),
+      riskProfile: randomBreakRiskProfileForEncounter({
+        breaker,
+        ice: params.ice,
+        breakerStrength:
+          params.state.breakerStrengths.get(breaker.instanceId) ??
+          breaker.strength ??
+          0,
+      }),
     });
   }
 
@@ -650,9 +661,7 @@ function accessPreservingBreakStates(params: {
       option,
     ): option is Readonly<{
       assessment: BreakAssessment;
-      riskProfile: NonNullable<
-        ReturnType<typeof randomBreakOrDamageRiskProfileForDefinitionId>
-      >;
+      riskProfile: EngineRandomBreakRiskProfile;
     }> => option.riskProfile !== undefined,
   );
   const hasMultipleIndependentRandomOptions = randomOptions.length > 1;
@@ -669,6 +678,10 @@ function accessPreservingBreakStates(params: {
           1,
           params.state.breakerStrengths.get(breaker.instanceId),
           params.ice.additionalBreakCostPerSubroutine,
+          params.ice.card.effectiveRunQuote?.subroutines.filter(
+            isHardEndTheRunSubroutine,
+          ),
+          true,
         ),
       )
       .filter(
@@ -739,14 +752,48 @@ function accessPreservingBreakStates(params: {
   return { knowledge: "known", states };
 }
 
+function randomBreakRiskProfileForEncounter(params: {
+  breaker: VisibleCard;
+  ice: SupportedIce;
+  breakerStrength: number;
+}): EngineRandomBreakRiskProfile | undefined {
+  if (!params.breaker.definitionId || !params.ice.card.definitionId)
+    return undefined;
+  const quote = visibleBreakerEncounterQuote({
+    breakerDefinitionId: params.breaker.definitionId,
+    breakerInstanceId: params.breaker.instanceId,
+    breakerStrength: params.breakerStrength,
+    ...(params.breaker.selectedTargetCardId
+      ? { selectedTargetCardId: params.breaker.selectedTargetCardId }
+      : {}),
+    ...(params.breaker.selectedSubtype
+      ? { selectedSubtype: params.breaker.selectedSubtype }
+      : {}),
+    iceDefinitionId: params.ice.card.definitionId,
+    iceInstanceId: params.ice.card.instanceId,
+    iceSubtypes: params.ice.effectiveSubtypes,
+    ...(params.ice.card.effectiveRunQuote
+      ? {
+          subroutines: params.ice.card.effectiveRunQuote.subroutines.filter(
+            isHardEndTheRunSubroutine,
+          ),
+        }
+      : {}),
+  });
+  const randomAttempt = quote?.breakOptions
+    .flatMap((option) => option.consequences)
+    .find((consequence) => consequence.kind === "random_break_attempt");
+  return randomAttempt
+    ? { successProbabilityPerAttempt: randomAttempt.successProbability }
+    : undefined;
+}
+
 function independentlyCombinedRandomBreakState(params: {
   state: AccessPathState;
   ice: SupportedIce;
   randomOptions: readonly Readonly<{
     assessment: BreakAssessment;
-    riskProfile: NonNullable<
-      ReturnType<typeof randomBreakOrDamageRiskProfileForDefinitionId>
-    >;
+    riskProfile: EngineRandomBreakRiskProfile;
   }>[];
 }):
   | Readonly<{ knowledge: "known"; state: AccessPathState }>
@@ -904,16 +951,7 @@ function validRunnerRigCard(card: VisibleCard): boolean {
   if (!cardIsIcebreaker(card)) return true;
   if (
     card.type !== "program" ||
-    !nonNegativeSafeInteger(card.strength) ||
-    ((definition.mechanics.some(
-      (mechanic) =>
-        mechanic === "deterministic_die_roll" ||
-        mechanic === "deterministic_random",
-    ) ||
-      definition.subtypes.some(
-        (subtype) => subtypeKey(subtype) === "random",
-      )) &&
-      !randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId))
+    !nonNegativeSafeInteger(card.strength)
   ) {
     return false;
   }

@@ -155,7 +155,14 @@ function onrIce(params: {
     rezCost: params.rezCost,
     strength: params.strength,
     rulesText: params.rulesText,
-    subroutines: params.subroutines,
+    subroutines: params.subroutines.map((subroutine) =>
+      params.subtypes.includes("ap")
+        ? {
+            ...subroutine,
+            breakTags: [...new Set([...(subroutine.breakTags ?? []), "ap"])],
+          }
+        : subroutine,
+    ),
     mechanics: [
       "install_ice",
       "rez_ice",
@@ -9565,9 +9572,7 @@ function catalogFallbackCards(
   });
 }
 
-function resolveCardDefinition(
-  card: CardDefinition,
-): ResolvedCardDefinition {
+function resolveCardDefinition(card: CardDefinition): ResolvedCardDefinition {
   validateDefinitionNumericContract(card);
   const { variableStrength, ...cardWithoutVariableStrength } = card;
   const numeric = {
@@ -9627,12 +9632,7 @@ function resolveCardDefinition(
       throw new Error(`${card.id}: invalid fixed play cost.`);
     }
   } else if (
-    !hasExactKeys(playCost, [
-      "kind",
-      "minimumX",
-      "creditsPerX",
-      "maximumX",
-    ]) ||
+    !hasExactKeys(playCost, ["kind", "minimumX", "creditsPerX", "maximumX"]) ||
     !Number.isInteger(playCost.minimumX) ||
     playCost.minimumX < 1 ||
     !Number.isInteger(playCost.creditsPerX) ||
@@ -9705,10 +9705,7 @@ function validateDefinitionNumericContract(card: CardDefinition): void {
     (card.type === "program" && card.subtypes.includes("icebreaker"));
   const hasFixedStrength = card.strength !== undefined;
   const hasVariableStrength = card.variableStrength !== undefined;
-  if (
-    strengthRequired &&
-    (hasFixedStrength === hasVariableStrength)
-  ) {
+  if (strengthRequired && hasFixedStrength === hasVariableStrength) {
     throw new Error(
       `${card.id}: strength-relevant ${card.type} requires exactly one fixed or variable strength model.`,
     );
@@ -9729,11 +9726,7 @@ function validateVariableStrength(
 ): void {
   if (strength.kind === "paid_x") {
     if (
-      !hasExactKeys(strength, [
-        "kind",
-        "minimumStrength",
-        "maximumStrength",
-      ]) ||
+      !hasExactKeys(strength, ["kind", "minimumStrength", "maximumStrength"]) ||
       !Number.isInteger(strength.minimumStrength) ||
       strength.minimumStrength < 0 ||
       !Number.isInteger(strength.maximumStrength) ||
@@ -9752,10 +9745,7 @@ function validateVariableStrength(
   }
 }
 
-function hasExactKeys(
-  value: object,
-  expectedKeys: readonly string[],
-): boolean {
+function hasExactKeys(value: object, expectedKeys: readonly string[]): boolean {
   const expected = [...expectedKeys].sort();
   const actual = Object.keys(value).sort();
   return (

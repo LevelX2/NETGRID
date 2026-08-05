@@ -192,7 +192,11 @@ function quoteRunnerBreak(params: {
   const matchingBreakAbilities = abilities.filter(
     (ability) =>
       ability.type === "break_subroutine" &&
-      breakAbilityMatchesIce(ability, ice.subtypes ?? iceDefinition.subtypes),
+      breakAbilityMatchesIce(
+        ability,
+        ice.subtypes ?? iceDefinition.subtypes,
+        iceDefinition.id,
+      ),
   );
   if (matchingBreakAbilities.length === 0) return { kind: "not_applicable" };
   const quotes: CompleteRunnerBreak[] = [];
@@ -217,7 +221,13 @@ function quoteRunnerBreak(params: {
 function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
   iceSubtypes: readonly string[],
+  iceDefinitionId: string,
 ): boolean {
+  if (
+    ability.iceDefinitionIds?.length &&
+    !ability.iceDefinitionIds.includes(iceDefinitionId)
+  )
+    return false;
   if (ability.selectedIceSubtypeFromBreaker || ability.subroutineBreakTags) {
     return false;
   }

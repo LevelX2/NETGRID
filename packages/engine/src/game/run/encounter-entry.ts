@@ -275,36 +275,25 @@ function bindOrExpireNextSentryFreeBreak(
   encounteredIceId: CardInstanceId,
   host: EncounterEntryHost,
 ): void {
-  const pending = { ...(run.nextSentryFreeBreakByBreaker ?? {}) };
-  const pendingBreakers = Object.keys(pending) as CardInstanceId[];
-  if (pendingBreakers.length === 0) {
-    delete run.nextSentryFreeBreakTargetIceByBreaker;
-    return;
-  }
-  const targets = { ...(run.nextSentryFreeBreakTargetIceByBreaker ?? {}) };
+  const pending = run.breakerState?.pendingFreeBreaks ?? [];
+  if (pending.length === 0) return;
   const definition = host.cards.definitionFor(encounteredIceId);
   const isSentry = host.cards
     .effectiveSubtypesForCard(encounteredIceId, definition)
     .includes("sentry");
-  for (const breakerId of pendingBreakers) {
-    const targetIceId = targets[breakerId];
-    if (targetIceId) {
-      if (targetIceId !== encounteredIceId) {
-        delete pending[breakerId];
-        delete targets[breakerId];
-      }
-      continue;
-    }
-    if (isSentry) targets[breakerId] = encounteredIceId;
-    else delete pending[breakerId];
-  }
-  if (Object.keys(pending).length > 0) {
-    run.nextSentryFreeBreakByBreaker = pending;
-    run.nextSentryFreeBreakTargetIceByBreaker = targets;
-  } else {
-    delete run.nextSentryFreeBreakByBreaker;
-    delete run.nextSentryFreeBreakTargetIceByBreaker;
-  }
+  const nextPending = pending.flatMap((entry) => {
+    if (entry.targetIceId)
+      return entry.targetIceId === encounteredIceId ? [entry] : [];
+    return isSentry ? [{ ...entry, targetIceId: encounteredIceId }] : [];
+  });
+  run.breakerState = {
+    ...(run.breakerState ?? {
+      strengthModifiersByBreakerInstanceId: {},
+      brokenSubroutineCountByBreakerInstanceId: {},
+      pendingFreeBreaks: [],
+    }),
+    pendingFreeBreaks: nextPending,
+  };
 }
 
 export function continueAfterCorpRootRezIfWindowIsComplete(

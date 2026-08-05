@@ -487,6 +487,11 @@ function actionMatches(
   if (matcher.actionId && action.actionId !== matcher.actionId) return false;
   if (matcher.type && action.type !== matcher.type) return false;
   if (
+    matcher.runnerAbility &&
+    action.payload?.runnerAbility !== matcher.runnerAbility
+  )
+    return false;
+  if (
     matcher.targetServerId &&
     (action.payload?.serverId ??
       action.payload?.selectedServerId ??

@@ -748,7 +748,15 @@ export function createCardStrengthCostRuntimeServices(
     breakerId: CardInstanceId,
   ): number {
     if (!run) return 0;
-    return Math.max(
+    const genericBonus = ((run.breakerState
+      ?.strengthModifiersByBreakerInstanceId ?? {})[breakerId] ?? []).reduce(
+      (total, modifier) =>
+        modifier.duration === "current_run"
+          ? total + Math.max(0, Math.floor(modifier.amount))
+          : total,
+      0,
+    );
+    return genericBonus + Math.max(
       0,
       Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0),
     );

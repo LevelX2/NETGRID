@@ -1044,9 +1044,18 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) => action.actionId === snowballBreak.actionId,
     );
-    expect(snowball.run?.remainderStrengthBonusByBreaker?.[snowballId!]).toBe(
-      1,
-    );
+    expect(
+      snowball.run?.breakerState?.brokenSubroutineCountByBreakerInstanceId[
+        snowballId!
+      ],
+    ).toBe(1);
+    expect(
+      snowball.run?.breakerState?.strengthModifiersByBreakerInstanceId[
+        snowballId!
+      ],
+    ).toEqual([
+      { amount: 1, duration: "current_run", source: "successful_break" },
+    ]);
   });
 
   it("applies Crash Everett draw replacement with private trash or stack-top choice", () => {

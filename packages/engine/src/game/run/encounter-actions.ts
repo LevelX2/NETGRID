@@ -199,7 +199,11 @@ export function buildRunnerEncounterActions(
     const breakAbilities = breakerAbilities.filter(
       (ability) =>
         ability.type === "break_subroutine" &&
-        breakAbilityMatchesIce(ability, encounteredIceSubtypes) &&
+        breakAbilityMatchesIce(
+          ability,
+          encounteredIceSubtypes,
+          iceDefinition.id,
+        ) &&
         selectedSubtypeAbilityMatchesBreaker(
           host.cards.cardInstanceFor(breakerId),
           ability,
@@ -209,7 +213,11 @@ export function buildRunnerEncounterActions(
     const hasEligibleBreakTarget = breakAbilities.some((ability) =>
       encounterSubroutines.some(
         (subroutine, index) =>
-          breakAbilityMatchesSubroutine(ability, subroutine) &&
+          breakAbilityMatchesSubroutine(
+            ability,
+            subroutine,
+            encounteredIceSubtypes,
+          ) &&
           !run.brokenSubroutineIndexes.includes(index) &&
           !run.resolvedSubroutineIndexes.includes(index),
       ),
@@ -317,7 +325,11 @@ export function buildRunnerEncounterActions(
       }
       subroutines.forEach((subroutine, index) => {
         const breakAbility = breakAbilities.find((candidate) =>
-          breakAbilityMatchesSubroutine(candidate, subroutine),
+          breakAbilityMatchesSubroutine(
+            candidate,
+            subroutine,
+            encounteredIceSubtypes,
+          ),
         );
         if (!breakAbility) return;
         if (
@@ -515,11 +527,14 @@ function nextSentryFreeBreakActions(
   encounteredIceSubtypes: readonly string[],
 ): LegalAction[] {
   const run = host.run.currentRun();
-  if (run.nextSentryFreeBreakByBreaker?.[breakerId] === undefined) return [];
-  if (
-    run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== encounteredIceId
-  )
-    return [];
+  const pending = run.breakerState?.pendingFreeBreaks.find(
+    (entry) =>
+      entry.sourceBreakerInstanceId === breakerId &&
+      entry.iceSubtype === "sentry" &&
+      entry.remainingUses > 0 &&
+      entry.targetIceId === encounteredIceId,
+  );
+  if (!pending) return [];
   if (!encounteredIceSubtypes.includes("sentry")) return [];
   return subroutines.flatMap((subroutine, index) => {
     if (
@@ -658,7 +673,11 @@ function multiBreakSubroutineActions(
     .map((subroutine, index) => ({ subroutine, index }))
     .filter(
       ({ subroutine, index }) =>
-        breakAbilityMatchesSubroutine(breakAbility, subroutine) &&
+        breakAbilityMatchesSubroutine(
+          breakAbility,
+          subroutine,
+          iceDefinition.subtypes,
+        ) &&
         !run.brokenSubroutineIndexes.includes(index) &&
         !run.resolvedSubroutineIndexes.includes(index),
     )
@@ -761,8 +780,14 @@ function multiBreakSubroutineActions(
 export function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
   iceSubtypes: readonly string[],
+  iceDefinitionId?: string,
 ): boolean {
   if (ability.type !== "break_subroutine") return false;
+  if (
+    ability.iceDefinitionIds?.length &&
+    (!iceDefinitionId || !ability.iceDefinitionIds.includes(iceDefinitionId))
+  )
+    return false;
   if (
     ability.iceSubtype &&
     !iceSubtypes.includes(normalizeSubtypeLabel(ability.iceSubtype))
@@ -794,12 +819,18 @@ function selectedSubtypeAbilityMatchesBreaker(
 export function breakAbilityMatchesSubroutine(
   ability: RuntimeIcebreakerAbility,
   subroutine: Subroutine,
+  inheritedBreakTags: readonly string[] = [],
 ): boolean {
   const tags = ability.subroutineBreakTags ?? [];
   if (tags.length === 0) return true;
   if (tags.includes("trace") && subroutine.type === "initiate_trace")
     return true;
   const subroutineTags = subroutine.breakTags ?? [];
+  if (
+    tags.includes("ap") &&
+    inheritedBreakTags.some((tag) => normalizeSubtypeLabel(tag) === "ap")
+  )
+    return true;
   return tags.some((tag) => subroutineTags.includes(tag));
 }
 

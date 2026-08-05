@@ -167,10 +167,21 @@ function executePumpBreakerAction(
     host.state.run
   ) {
     const run = host.run.currentRun();
+    const breakerState = run.breakerState ?? {
+      strengthModifiersByBreakerInstanceId: {},
+      brokenSubroutineCountByBreakerInstanceId: {},
+      pendingFreeBreaks: [],
+    };
     const previous = host.run.runRemainderStrengthBonusForBreaker(run, breakerId);
-    run.remainderStrengthBonusByBreaker = {
-      ...(run.remainderStrengthBonusByBreaker ?? {}),
-      [breakerId]: previous + pumpAmount,
+    run.breakerState = {
+      ...breakerState,
+      strengthModifiersByBreakerInstanceId: {
+        ...breakerState.strengthModifiersByBreakerInstanceId,
+        [breakerId]: [
+          ...(breakerState.strengthModifiersByBreakerInstanceId[breakerId] ?? []),
+          { amount: pumpAmount, duration: "current_run", source: "paid_pump" },
+        ],
+      },
     };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -384,9 +395,14 @@ function resolveNextSentryFreeBreakAction(
     throw new Error("Free-Break kann nur im ICE-Encounter genutzt werden.");
   if (!host.state.runner.rig.programs.includes(breakerId))
     throw new Error("Der Icebreaker ist nicht installiert.");
-  if (!run.nextSentryFreeBreakByBreaker?.[breakerId])
-    throw new Error("Es gibt keinen offenen Free-Break-Effekt.");
-  if (run.nextSentryFreeBreakTargetIceByBreaker?.[breakerId] !== run.encounteredIceId)
+  const pending = run.breakerState?.pendingFreeBreaks.find(
+    (entry) =>
+      entry.sourceBreakerInstanceId === breakerId &&
+      entry.iceSubtype === "sentry" &&
+      entry.remainingUses > 0 &&
+      entry.targetIceId === run.encounteredIceId,
+  );
+  if (!pending)
     throw new Error("Der Free-Break-Effekt gilt nur für das nächste ICE.");
   const iceDefinition = host.cards.definitionFor(run.encounteredIceId);
   if (
@@ -403,17 +419,21 @@ function resolveNextSentryFreeBreakAction(
   if ((legalAction.costs[0]?.credits ?? 0) !== 0)
     throw new Error("Free-Break-Kosten sind nicht mehr gueltig.");
   host.effects.executeEffectCommands([{ type: "break_subroutine", subroutineIndex }]);
-  const pending = { ...(run.nextSentryFreeBreakByBreaker ?? {}) };
-  const targetPending = { ...(run.nextSentryFreeBreakTargetIceByBreaker ?? {}) };
-  delete pending[breakerId];
-  delete targetPending[breakerId];
-  if (Object.keys(pending).length > 0) {
-    run.nextSentryFreeBreakByBreaker = pending;
-    run.nextSentryFreeBreakTargetIceByBreaker = targetPending;
-  } else {
-    delete run.nextSentryFreeBreakByBreaker;
-    delete run.nextSentryFreeBreakTargetIceByBreaker;
-  }
+  run.breakerState = {
+    ...(run.breakerState ?? {
+      strengthModifiersByBreakerInstanceId: {},
+      brokenSubroutineCountByBreakerInstanceId: {},
+      pendingFreeBreaks: [],
+    }),
+    pendingFreeBreaks: (run.breakerState?.pendingFreeBreaks ?? []).flatMap(
+      (entry) =>
+        entry === pending
+          ? entry.remainingUses > 1
+            ? [{ ...entry, remainingUses: entry.remainingUses - 1 }]
+            : []
+          : [entry],
+    ),
+  };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     nextSentryFreeBreakConsumed: true,
@@ -448,8 +468,21 @@ function recordNextSentryFreeBreakIfEarned(
   for (let index = 0; index < subroutineCount; index += 1) {
     if (!run.brokenSubroutineIndexes.includes(index)) return;
   }
-  run.nextSentryFreeBreakByBreaker = {
-    ...(run.nextSentryFreeBreakByBreaker ?? {}),
-    [breakerId]: run.encounteredIceId,
+  const breakerState = run.breakerState ?? {
+    strengthModifiersByBreakerInstanceId: {},
+    brokenSubroutineCountByBreakerInstanceId: {},
+    pendingFreeBreaks: [],
+  };
+  run.breakerState = {
+    ...breakerState,
+    pendingFreeBreaks: [
+      ...breakerState.pendingFreeBreaks,
+      {
+        sourceBreakerInstanceId: breakerId,
+        iceSubtype: "sentry",
+        remainingUses: 1,
+        mustBeNextEncounteredIce: true,
+      },
+    ],
   };
 }

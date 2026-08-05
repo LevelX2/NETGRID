@@ -53,6 +53,8 @@ export {
 
 export { cardImplementationForDefinitionId } from "./card-implementations/registry";
 
+export { icebreakerAbilitiesForDefinition } from "./ability-engine/icebreaker-abilities";
+
 export {
   visibleBreakerEncounterQuote,
   type VisibleBreakerEncounterQuote,

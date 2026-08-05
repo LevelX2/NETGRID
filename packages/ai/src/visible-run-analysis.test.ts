@@ -10,6 +10,7 @@ import {
 } from "./visible-run-analysis";
 import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
+import { creditsToBreakVisibleSubroutinesWithBreaker } from "./run-analysis/visible-run-breaker-path";
 
 function knownPathAssessment(
   overrides: Partial<KnownRezzedIcePathAssessment> = {},
@@ -113,6 +114,503 @@ describe("visible run analysis server ids", () => {
 });
 
 describe("visible run analysis targeted breaker paths", () => {
+  it("carries Bulldozer's fully-broken-wall free break to the next sentry", () => {
+    const wall = classicWallIce("outer-wall");
+    const sentry: VisibleCard = {
+      instanceId: "inner-sentry",
+      definitionId: "onr_v1_249_hunter",
+      side: "corp",
+      type: "ice",
+      known: true,
+      rezzed: true,
+      strength: 5,
+      subtypes: ["sentry"],
+      effectiveRunQuote: {
+        iceInstanceId: "inner-sentry",
+        iceDefinitionId: "onr_v1_249_hunter",
+        effectiveStrength: 5,
+        subroutines: [{ id: "inner-sentry:etr", type: "end_the_run" }],
+      },
+    };
+    const bulldozer: VisibleCard = {
+      instanceId: "bulldozer",
+      definitionId: "onr_proteus_082_bulldozer",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker", "fracter"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentry, wall],
+      [bulldozer],
+      1,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 1,
+      creditsAfterPath: 0,
+    });
+  });
+
+  it("does not create Bulldozer's free break after only part of a wall", () => {
+    const partiallyBrokenWall: VisibleCard = {
+      ...classicWallIce("outer-partial-wall"),
+      effectiveRunQuote: {
+        iceInstanceId: "outer-partial-wall",
+        iceDefinitionId: "onr_v1_232_crystal-wall",
+        effectiveStrength: 3,
+        subroutines: [
+          { id: "outer-partial-wall:etr", type: "end_the_run" },
+          {
+            id: "outer-partial-wall:future",
+            type: "set_run_future_strength_bonus",
+            amount: 1,
+          },
+        ],
+      },
+    };
+    const sentry = sentryEndTheRunIce("inner-partial-sentry");
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentry, partiallyBrokenWall],
+      [bulldozerBreaker("bulldozer")],
+      1,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unbreakable",
+    });
+  });
+
+  it("charges Bulldozer's stealth consequence for every broken wall subroutine", () => {
+    const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
+      bulldozerBreaker("bulldozer-stealth"),
+      {
+        definitionId: "onr_v1_232_crystal-wall",
+        subtypes: ["wall"],
+        strength: 3,
+      },
+      [
+        { id: "bulldozer-stealth:one", type: "end_the_run" },
+        { id: "bulldozer-stealth:two", type: "end_the_run" },
+      ],
+    );
+
+    expect(assessment).toMatchObject({ cost: 2, postBreakStealthLoss: 4 });
+  });
+
+  it("expires Bulldozer's free break when the next encountered ICE is not a sentry", () => {
+    const harmlessCodeGate: VisibleCard = {
+      instanceId: "middle-code-gate",
+      definitionId: "onr_classic_014_trapdoor",
+      side: "corp",
+      type: "ice",
+      known: true,
+      rezzed: true,
+      strength: 0,
+      subtypes: ["code_gate"],
+      effectiveRunQuote: {
+        iceInstanceId: "middle-code-gate",
+        iceDefinitionId: "onr_classic_014_trapdoor",
+        effectiveStrength: 0,
+        subroutines: [],
+      },
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("inner-expired-sentry"), harmlessCodeGate, classicWallIce("outer-wall")],
+      [bulldozerBreaker("bulldozer")],
+      1,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unbreakable",
+    });
+  });
+
+  it("carries Snowball strength from every broken subroutine to the next ICE", () => {
+    const outerSentry: VisibleCard = {
+      ...sentryEndTheRunIce("outer-snowball-sentry"),
+      effectiveRunQuote: {
+        iceInstanceId: "outer-snowball-sentry",
+        iceDefinitionId: "onr_v1_249_hunter",
+        effectiveStrength: 2,
+        subroutines: [
+          { id: "outer-snowball-sentry:etr-1", type: "end_the_run" },
+          { id: "outer-snowball-sentry:etr-2", type: "end_the_run" },
+        ],
+      },
+      strength: 2,
+    };
+    const innerSentry: VisibleCard = {
+      ...sentryEndTheRunIce("inner-snowball-sentry"),
+      effectiveRunQuote: {
+        iceInstanceId: "inner-snowball-sentry",
+        iceDefinitionId: "onr_v1_249_hunter",
+        effectiveStrength: 4,
+        subroutines: [{ id: "inner-snowball-sentry:etr", type: "end_the_run" }],
+      },
+      strength: 4,
+    };
+    const snowball: VisibleCard = {
+      instanceId: "snowball",
+      definitionId: "onr_v1_066_snowball",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 2,
+      subtypes: ["icebreaker", "killer"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [innerSentry, outerSentry],
+      [snowball],
+      3,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 3,
+      creditsAfterPath: 0,
+    });
+  });
+
+  it("keeps Grubb's paid run-strength for the next wall", () => {
+    const outerWall: VisibleCard = {
+      ...classicWallIce("outer-grubb-wall"),
+      strength: 2,
+    };
+    const innerWall: VisibleCard = {
+      ...classicWallIce("inner-grubb-wall"),
+      strength: 2,
+    };
+    const grubb: VisibleCard = {
+      instanceId: "grubb",
+      definitionId: "onr_v1_030_grubb",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 0,
+      subtypes: ["icebreaker", "worm"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [innerWall, outerWall],
+      [grubb],
+      6,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 6,
+      creditsAfterPath: 0,
+    });
+  });
+
+  it("chooses Fubar's subtype once for the entire known run", () => {
+    const fubar: VisibleCard = {
+      instanceId: "fubar",
+      definitionId: "onr_proteus_088_fubar",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker"],
+    };
+
+    const selectable = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("fubar-sentry")],
+      [fubar],
+      1,
+    );
+    const fixedWall = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("fubar-fixed-wall")],
+      [{ ...fubar, selectedSubtype: "wall" }],
+      1,
+    );
+
+    expect(selectable).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 1,
+    });
+    expect(fixedWall).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unbreakable",
+    });
+
+    const mixedPath = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("fubar-inner-sentry"), classicWallIce("fubar-outer-wall")],
+      [fubar],
+      2,
+    );
+    expect(mixedPath).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unbreakable",
+    });
+  });
+
+  it("charges Fubar's structured stealth consequence for every broken subroutine", () => {
+    const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
+      {
+        instanceId: "fubar-stealth",
+        definitionId: "onr_proteus_088_fubar",
+        side: "runner",
+        type: "program",
+        known: true,
+        strength: 5,
+        selectedSubtype: "wall",
+        subtypes: ["icebreaker"],
+      },
+      {
+        definitionId: "onr_v1_232_crystal-wall",
+        subtypes: ["wall"],
+        strength: 3,
+      },
+      [
+        { id: "fubar-stealth:one", type: "end_the_run" },
+        { id: "fubar-stealth:two", type: "end_the_run" },
+      ],
+    );
+
+    expect(assessment).toMatchObject({ cost: 2, postBreakStealthLoss: 2 });
+  });
+
+  it("uses Morphing Tool's installed subtype without changing it during a run", () => {
+    const morphingTool: VisibleCard = {
+      instanceId: "morphing-tool",
+      definitionId: "onr_proteus_092_morphing-tool",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker"],
+      selectedSubtype: "wall",
+    };
+
+    const wallRoute = assessKnownRezzedIcePath(
+      [classicWallIce("morphing-wall")],
+      [morphingTool],
+      2,
+    );
+    const sentryRoute = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("morphing-sentry")],
+      [morphingTool],
+      2,
+    );
+
+    expect(wallRoute).toMatchObject({ blocked: false, canReachAccess: true });
+    expect(sentryRoute).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unbreakable",
+    });
+  });
+
+  it("plans Morphing Tool's subtype change only as a funded pre-run action", () => {
+    const morphingTool: VisibleCard = {
+      instanceId: "morphing-tool-prep",
+      definitionId: "onr_proteus_092_morphing-tool",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker"],
+      selectedSubtype: "wall",
+    };
+    const ice = [sentryEndTheRunIce("morphing-prep-sentry")];
+
+    expect(assessKnownRezzedIcePath(ice, [morphingTool], 3)).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+    });
+    expect(
+      assessKnownRezzedIcePath(ice, [morphingTool], 3, [], 0, {
+        availableRunnerClicks: 1,
+      }),
+    ).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 3,
+      preRunPreparation: { credits: 1, clicks: 1 },
+    });
+    expect(
+      assessKnownRezzedIcePath(ice, [morphingTool], 3, [], 0, {
+        availableRunnerClicks: 0,
+      }),
+    ).toMatchObject({ blocked: true, canReachAccess: false });
+    expect(
+      assessKnownRezzedIcePath(ice, [morphingTool], 0, [], 0, {
+        availableRunnerClicks: 1,
+      }),
+    ).toMatchObject({ blocked: true, canReachAccess: false });
+  });
+
+  it("does not count Dropp's legal break as an access route", () => {
+    const dropp: VisibleCard = {
+      instanceId: "dropp",
+      definitionId: "onr_v1_019_dropp",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("dropp-sentry")],
+      [dropp],
+      0,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unbreakable",
+    });
+  });
+
+  it("does not treat Blink's random break attempt as guaranteed access", () => {
+    const blink: VisibleCard = {
+      instanceId: "blink",
+      definitionId: "onr_v1_007_blink",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 99,
+      subtypes: ["icebreaker"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("blink-sentry")],
+      [blink],
+      0,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unbreakable",
+    });
+  });
+
+  it("consumes Evil Twin's visible prevention pool across multiple damage effects", () => {
+    const evilTwin: VisibleCard = {
+      instanceId: "evil-twin",
+      definitionId: "onr_v1_023_evil-twin",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 0,
+      subtypes: ["icebreaker"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [traceDamageIce("inner-damage", 2), traceDamageIce("outer-damage", 2)],
+      [evilTwin],
+      0,
+    );
+
+    expect(
+      assessment.visibleIceRunHazards?.reduce(
+        (sum, hazard) => sum + (hazard.expectedDamage ?? 0),
+        0,
+      ),
+    ).toBe(2);
+    expect(
+      assessment.visibleIceRunHazards?.reduce(
+        (sum, hazard) => sum + (hazard.damagePreventionApplied ?? 0),
+        0,
+      ),
+    ).toBe(2);
+  });
+
+  it("marks a run-start random strength route as conditional instead of unavailable", () => {
+    const forwardsLegacy: VisibleCard = {
+      instanceId: "forwards-legacy",
+      definitionId: "onr_proteus_087_forwards-legacy",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 0,
+      subtypes: ["icebreaker"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("legacy-sentry")],
+      [forwardsLegacy],
+      0,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      conditionalAccessReasons: ["visible_random_breaker_strength"],
+    });
+  });
+
+  it("marks Bartmoss use as a post-pass trash risk", () => {
+    const bartmoss: VisibleCard = {
+      instanceId: "bartmoss",
+      definitionId: "onr_v1_005_bartmoss-memorial-icebreaker",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker"],
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("bartmoss-sentry")],
+      [bartmoss],
+      1,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      conditionalRiskReasons: ["visible_breaker_may_trash_after_pass"],
+    });
+
+    const secondIceRequiresBartmoss = assessKnownRezzedIcePath(
+      [
+        sentryEndTheRunIce("bartmoss-inner-sentry"),
+        sentryEndTheRunIce("bartmoss-outer-sentry"),
+      ],
+      [bartmoss],
+      2,
+    );
+    expect(secondIceRequiresBartmoss).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      conditionalRiskReasons: ["visible_breaker_may_trash_after_pass"],
+      postEncounterBreakerBranches: [
+        {
+          outcome: "breaker_retained",
+          blocked: false,
+          canReachAccess: true,
+        },
+        {
+          outcome: "breaker_trashed",
+          blocked: true,
+          canReachAccess: false,
+        },
+      ],
+    });
+  });
+
   it("does not quote the known Coyote-Mastermind path as free after installing Black Widow", () => {
     const coyote = (instanceId: string): VisibleCard => ({
       instanceId,
@@ -181,6 +679,20 @@ describe("visible run analysis targeted breaker paths", () => {
 });
 
 describe("visible run analysis text-derived breaker costs", () => {
+  it("carries Japanese Water Torture's future-click loss into the known path quote", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [classicWallIce("remote-wall")],
+      [japaneseWaterTortureBreaker("torture")],
+      2,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      futureClicksLost: 1,
+    });
+  });
+
   it("counts a visible wall-breaker text profile against classic wall ICE", () => {
     const assessment = assessKnownRezzedIcePath(
       [classicWallIce("remote-wall")],
@@ -1099,6 +1611,45 @@ describe("shared runner run route quote", () => {
       conditionalRiskReasons: ["visible_random_damage"],
     });
   });
+
+  it("resets Dupré's visible strength counters when the target fort changes", () => {
+    const dupre: VisibleCard = {
+      instanceId: "runner-dupre",
+      definitionId: "onr_v1_020_dupre",
+      title: "Dupré",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 2,
+      counters: { power: 2 },
+      selectedServerId: "remote_1",
+      subtypes: ["icebreaker", "codecracker"],
+    };
+
+    const sameFort = assessKnownRezzedIcePath(
+      [classicCodeGateIce("remote-code-gate")],
+      [dupre],
+      1,
+      [],
+      0,
+      { targetServerId: "remote_1" },
+    );
+    const changedFort = assessKnownRezzedIcePath(
+      [classicCodeGateIce("remote-code-gate")],
+      [dupre],
+      1,
+      [],
+      0,
+      { targetServerId: "remote_2" },
+    );
+
+    expect(sameFort).toMatchObject({ blocked: false, canReachAccess: true });
+    expect(changedFort).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unaffordable",
+    });
+  });
 });
 
 function quotedSpecialIce(
@@ -1134,6 +1685,37 @@ function classicWallIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 3,
+  };
+}
+
+function sentryEndTheRunIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_249_hunter",
+    side: "corp",
+    type: "ice",
+    known: true,
+    rezzed: true,
+    strength: 5,
+    subtypes: ["sentry"],
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
+    },
+  };
+}
+
+function bulldozerBreaker(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_proteus_082_bulldozer",
+    side: "runner",
+    type: "program",
+    known: true,
+    strength: 5,
+    subtypes: ["icebreaker", "fracter"],
   };
 }
 
@@ -1285,6 +1867,18 @@ function pileDriverBreaker(instanceId: string): VisibleCard {
     subtypes: ["icebreaker", "fracter", "noisy"],
     known: true,
     strength: 7,
+  };
+}
+
+function japaneseWaterTortureBreaker(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_037_japanese-water-torture",
+    title: "Japanese Water Torture",
+    type: "program",
+    subtypes: ["icebreaker", "fracter"],
+    known: true,
+    strength: 2,
   };
 }
 

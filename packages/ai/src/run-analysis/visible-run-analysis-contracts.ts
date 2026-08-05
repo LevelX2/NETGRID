@@ -32,6 +32,11 @@ export type RunPathProjection = {
 export type VisibleDeflectorContext = {
   visibleRemoteServerCount?: number;
   visibleCorpCredits?: number;
+  targetServerId?: string;
+  /** Remaining free Net/Core damage prevention for this turn. */
+  netOrCoreDamagePreventionRemaining?: number;
+  /** Actions available before the proposed run begins. */
+  availableRunnerClicks?: number;
 };
 
 export type HardUnbrokenRunEffectKind =
@@ -46,7 +51,34 @@ export type BreakAssessment = {
   breakerSubtypes: string[];
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
+  runStrengthGain?: number;
   postBreakStealthLoss?: number;
+  futureClicksLost?: number;
+  conditionalAccessReason?: "visible_random_breaker_strength";
+  conditionalRiskReason?: "visible_breaker_may_trash_after_pass";
+  /** A run-scoped free-break grant was consumed for this assessment. */
+  consumedPendingFreeBreak?: boolean;
+  /** Structured state changes caused by the successful break. */
+  stateChangesAfterUse?: Array<
+    | { kind: "add_run_strength"; amount: number }
+    | { kind: "increment_broken_subroutine_count"; amount: number }
+    | {
+        kind: "set_pending_free_break";
+        iceSubtype: "sentry";
+        remainingUses: 1;
+        mustBeNextEncounteredIce: true;
+      }
+  >;
+};
+
+export type VisibleRunBreakerState = {
+  strengthByBreakerInstanceId: Map<string, number>;
+  pendingFreeBreaks: Array<{
+    sourceBreakerInstanceId: string;
+    iceSubtype: "sentry";
+    remainingUses: number;
+    mustBeNextEncounteredIce: true;
+  }>;
 };
 
 export type RunnerRunPathCreditBudget = {
@@ -72,6 +104,7 @@ export type CreditPaymentProjection = {
   cost: number;
   cashSpent: number;
   creditsAfterPath: number;
+  futureClicksLost?: number;
 };
 
 export type BreakSubroutineAbilityLike = {
@@ -129,6 +162,7 @@ export type VisibleIceRunHazard = {
   expectedTags?: number;
   expectedCounters?: number;
   expectedDamage?: number;
+  damagePreventionApplied?: number;
   actionTax?: number;
   penalty: number;
   evidence: string[];
@@ -172,6 +206,18 @@ export type KnownRezzedIcePathAssessment = {
   reachableAccessReason?: string;
   conditionalAccessReasons?: string[];
   conditionalRiskReasons?: string[];
+  /** A required Runner-main setup action selected before the run. */
+  preRunPreparation?: { credits: number; clicks: number };
+  /**
+   * Explicit continuations for a breaker whose post-encounter effect can
+   * remove it from the rig.  The selected path remains the most favourable
+   * legal continuation, while callers can inspect the failure branch.
+   */
+  postEncounterBreakerBranches?: Array<{
+    outcome: "breaker_retained" | "breaker_trashed";
+    blocked: boolean;
+    canReachAccess: boolean;
+  }>;
   noAccessReason?:
     | "known_path_unpayable"
     | "known_path_unbreakable"

@@ -599,8 +599,10 @@ function observedIceAtPosition(
     title: definition.title,
     type: "ice",
     subtypes: definition.subtypes.slice(),
-    rezCost: definition.rezCost,
-    strength: definition.strength,
+    ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
+    ...(definition.strength !== undefined
+      ? { strength: definition.strength }
+      : {}),
   };
 }
 
@@ -660,14 +662,18 @@ function projectedAdditionalEndTheRunCount(
         return (
           count +
           newlyRezzedIce.filter(
-            (candidate) =>
-              candidate.instanceId !== card.instanceId &&
-              candidate.definitionId !== undefined &&
-              modifier.repeat.subtypeAnyOf.some((subtype) =>
-                CARD_DEFINITIONS_BY_ID[candidate.definitionId]?.subtypes.includes(
-                  subtype,
-                ),
-              ),
+            (candidate) => {
+              const definitionId = candidate.definitionId;
+              return (
+                candidate.instanceId !== card.instanceId &&
+                definitionId !== undefined &&
+                modifier.repeat!.subtypeAnyOf.some((subtype) =>
+                  CARD_DEFINITIONS_BY_ID[definitionId]?.subtypes.includes(
+                    subtype,
+                  ),
+                )
+              );
+            },
           ).length
         );
       },

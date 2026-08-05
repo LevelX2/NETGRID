@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-05T13:05:03.118Z",
+  "generatedAt": "2026-08-05T16:02:12.109Z",
   "activeIcebreakerCount": 47,
   "entries": [
     {
@@ -15,7 +15,11 @@
       },
       "printedStrength": 2,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 2,
+        "strengthGain": 3,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -29,7 +33,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:CardDefinition.abilities"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -44,7 +48,11 @@
       },
       "printedStrength": 0,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 3,
+        "strengthGain": 5,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -58,7 +66,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:CardDefinition.abilities"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -73,7 +81,11 @@
       },
       "printedStrength": 2,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 1,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -87,11 +99,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:CardDefinition.abilities"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -106,7 +118,11 @@
       },
       "printedStrength": 1,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 2,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -120,11 +136,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:CardDefinition.abilities"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -139,7 +155,11 @@
       },
       "printedStrength": 2,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 1,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -153,11 +173,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:CardDefinition.abilities"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -172,7 +192,11 @@
       },
       "printedStrength": 7,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 1,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 6,
@@ -186,7 +210,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/big-frackin-gun.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -219,11 +243,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/black-widow.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -256,7 +280,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/boring-bit.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -289,11 +313,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/bulldozer.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -326,7 +350,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/corrosion.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -355,11 +379,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/forwards-legacy.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -396,11 +420,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/fubar.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -418,13 +442,13 @@
       "printedStrength": 4,
       "pump": {
         "available": true,
-        "creditCost": 0,
+        "creditCost": 1,
         "strengthGain": 1,
         "duration": "current_encounter",
         "additionalCosts": []
       },
       "breakAbility": {
-        "creditCost": 0,
+        "creditCost": 2,
         "maxSubroutinesPerUse": 1,
         "additionalCosts": [
           "configurable_coverage"
@@ -435,11 +459,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/morphing-tool.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -454,7 +478,11 @@
       },
       "printedStrength": 3,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 3,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -468,7 +496,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/redecorator.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -483,7 +511,11 @@
       },
       "printedStrength": 1,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 3,
+        "strengthGain": 4,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 0,
@@ -497,7 +529,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/skeleton-passkeys.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -530,11 +562,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/proteus/runner/programs/wrecking-ball.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -569,11 +601,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/ai-boon.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -608,11 +640,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -627,7 +659,11 @@
       },
       "printedStrength": 5,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 2,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 2,
@@ -641,7 +677,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -672,11 +708,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/blink.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -691,7 +727,11 @@
       },
       "printedStrength": 0,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 1,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 0,
@@ -705,7 +745,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -734,7 +774,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/codeslinger.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -749,7 +789,11 @@
       },
       "printedStrength": 5,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 1,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 2,
@@ -763,7 +807,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -796,7 +840,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/dogcatcher.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -829,11 +873,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/dropp.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -866,11 +910,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/dupre.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -903,7 +947,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/dwarf.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -936,7 +980,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/evil-twin.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -969,7 +1013,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/flak.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1002,7 +1046,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/grubb.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1035,11 +1079,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/hammer.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1072,11 +1116,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/jackhammer.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1092,7 +1136,7 @@
       "printedStrength": 2,
       "pump": {
         "available": true,
-        "creditCost": 0,
+        "creditCost": 1,
         "strengthGain": 1,
         "duration": "current_encounter",
         "additionalCosts": []
@@ -1109,11 +1153,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1128,7 +1172,11 @@
       },
       "printedStrength": 0,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 2,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 2,
@@ -1142,7 +1190,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1157,7 +1205,11 @@
       },
       "printedStrength": 0,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 1,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -1171,7 +1223,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1204,11 +1256,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1223,7 +1275,11 @@
       },
       "printedStrength": 4,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 2,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -1237,7 +1293,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1270,11 +1326,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/ramming-piston.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1289,7 +1345,11 @@
       },
       "printedStrength": 1,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 1,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 2,
@@ -1303,7 +1363,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1332,7 +1392,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/reflector.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1365,7 +1425,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1380,7 +1440,11 @@
       },
       "printedStrength": 2,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 2,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 1,
@@ -1394,7 +1458,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1427,11 +1491,11 @@
       ],
       "engineImplementationStatus": "complete",
       "aiProfileStatus": "complete",
-      "preRunSolverStatus": "partial",
+      "preRunSolverStatus": "complete",
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/snowball.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1460,7 +1524,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1475,7 +1539,11 @@
       },
       "printedStrength": 0,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 3,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 0,
@@ -1489,7 +1557,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/wild-card.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1504,7 +1572,11 @@
       },
       "printedStrength": 2,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 2,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 0,
@@ -1518,7 +1590,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/wizards-book.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     },
     {
@@ -1533,7 +1605,11 @@
       },
       "printedStrength": 2,
       "pump": {
-        "available": false
+        "available": true,
+        "creditCost": 3,
+        "strengthGain": 1,
+        "duration": "current_encounter",
+        "additionalCosts": []
       },
       "breakAbility": {
         "creditCost": 0,
@@ -1547,7 +1623,7 @@
       "remainingCardIdSpecialCase": false,
       "remainingRuleTextFallback": false,
       "notes": [
-        "engine:packages/engine/src/card-implementations/onr-v1/runner/programs/worm.ts"
+        "engine parity: icebreaker-run-semantics-audit.test.ts"
       ]
     }
   ]

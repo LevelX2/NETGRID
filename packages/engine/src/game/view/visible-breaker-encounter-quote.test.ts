@@ -2,6 +2,47 @@ import { describe, expect, it } from "vitest";
 import { visibleBreakerEncounterQuote } from "./visible-breaker-encounter-quote";
 
 describe("visibleBreakerEncounterQuote", () => {
+  it("quotes Big Frackin' Gun's printed pump and five-subroutine break", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+        breakerInstanceId: "bfg",
+        breakerStrength: 7,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+      }),
+    ).toMatchObject({
+      effectiveStrength: 7,
+      pumpOptions: [
+        {
+          creditCost: 1,
+          strengthGain: 1,
+          duration: "current_encounter",
+        },
+      ],
+      breakOptions: [{ creditCost: 6, maximumSubroutinesPerUse: 5 }],
+      coverageStatus: "full",
+    });
+  });
+
+  it("quotes run-start random breaker strength as a visible range", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerInstanceId: "ai-boon",
+        breakerStrength: 0,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+      }),
+    ).toMatchObject({
+      randomRunStrength: {
+        minimumStrength: 1,
+        expectedStrength: 3.5,
+        maximumStrength: 6,
+      },
+    });
+  });
+
   it("applies an implementation-declared chosen-ICE strength bonus only to its bound instance", () => {
     const common = {
       breakerDefinitionId: "onr_proteus_080_black-widow" as const,
@@ -16,10 +57,13 @@ describe("visibleBreakerEncounterQuote", () => {
       visibleBreakerEncounterQuote({ ...common, iceInstanceId: "chosen_ice" }),
     ).toMatchObject({
       effectiveStrength: 7,
-      pumpCost: 2,
-      pumpStrengthGain: 1,
-      breakCost: 1,
       coverageStatus: "full",
+    });
+    expect(
+      visibleBreakerEncounterQuote({ ...common, iceInstanceId: "chosen_ice" }),
+    ).toMatchObject({
+      pumpOptions: [{ creditCost: 2, strengthGain: 1 }],
+      breakOptions: [{ creditCost: 1, maximumSubroutinesPerUse: 1 }],
     });
     expect(
       visibleBreakerEncounterQuote({ ...common, iceInstanceId: "other_ice" }),
@@ -41,8 +85,162 @@ describe("visibleBreakerEncounterQuote", () => {
       visibleBreakerEncounterQuote({ ...common, selectedSubtype: "sentry" }),
     ).toMatchObject({
       coverageStatus: "full",
-      breakCost: 1,
-      postBreakStealthLossPerUse: 1,
+      breakOptions: [
+        {
+          creditCost: 1,
+          consequences: [{ kind: "lose_stealth_credits", amount: 1 }],
+        },
+      ],
+    });
+  });
+
+  it("reports partial coverage when a breaker matches only structured trace subroutines", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_056_replicator",
+        breakerInstanceId: "replicator",
+        breakerStrength: 2,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+        subroutines: [
+          { id: "trace", type: "initiate_trace" },
+          { id: "etr", type: "end_the_run" },
+        ],
+      }),
+    ).toMatchObject({
+      coverageStatus: "partial",
+      breakOptions: [{ breakableSubroutineIndexes: [0], creditCost: 0 }],
+    });
+  });
+
+  it("quotes Flak against only AP-tagged subroutines", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_027_flak",
+        breakerInstanceId: "flak",
+        breakerStrength: 2,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry", "ap"],
+        subroutines: [
+          { id: "ap", type: "do_damage", breakTags: ["ap"] },
+          { id: "not-ap", type: "end_the_run" },
+        ],
+      }),
+    ).toMatchObject({
+      coverageStatus: "partial",
+      breakOptions: [{ breakableSubroutineIndexes: [0], creditCost: 1 }],
+    });
+  });
+
+  it("quotes Dogcatcher only against its catalogued dog ICE", () => {
+    const common = {
+      breakerDefinitionId: "onr_v1_018_dogcatcher" as const,
+      breakerInstanceId: "dogcatcher",
+      breakerStrength: 2,
+      iceSubtypes: ["sentry"],
+      subroutines: [{ id: "etr", type: "end_the_run" as const }],
+    };
+    expect(
+      visibleBreakerEncounterQuote({
+        ...common,
+        iceDefinitionId: "onr_v1_240_fang",
+      }),
+    ).toMatchObject({ coverageStatus: "full" });
+    expect(
+      visibleBreakerEncounterQuote({
+        ...common,
+        iceDefinitionId: "onr_v1_223_banpei",
+      }),
+    ).toMatchObject({ coverageStatus: "none" });
+  });
+
+  it("quotes Reflector from stable subroutine break tags", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_055_reflector",
+        breakerInstanceId: "reflector",
+        breakerStrength: 4,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+        subroutines: [
+          { id: "stun", type: "do_damage", breakTags: ["stun"] },
+          { id: "other", type: "end_the_run" },
+        ],
+      }),
+    ).toMatchObject({
+      coverageStatus: "partial",
+      breakOptions: [{ breakableSubroutineIndexes: [0], creditCost: 0 }],
+    });
+  });
+
+  it("quotes Pile Driver's stealth loss once per four-subroutine break use", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_047_pile-driver",
+        breakerInstanceId: "pile-driver",
+        breakerStrength: 7,
+        iceDefinitionId: "onr_v1_232_crystal-wall",
+        iceSubtypes: ["wall"],
+      }),
+    ).toMatchObject({
+      breakOptions: [
+        {
+          maximumSubroutinesPerUse: 4,
+          consequences: [
+            {
+              kind: "lose_stealth_credits",
+              amount: 3,
+              trigger: "per_ability_use",
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("quotes Japanese Water Torture's future-click loss with its variable pump", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_037_japanese-water-torture",
+        breakerInstanceId: "torture",
+        breakerStrength: 2,
+        iceDefinitionId: "onr_v1_232_crystal-wall",
+        iceSubtypes: ["wall"],
+      }),
+    ).toMatchObject({
+      pumpOptions: [
+        {
+          creditCost: 1,
+          consequences: expect.arrayContaining([
+            { kind: "lose_future_clicks", amountPerStrength: 1 },
+          ]),
+        },
+      ],
+    });
+  });
+
+  it("derives Blink's probability and net-damage range from its structured die effect", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_007_blink",
+        breakerInstanceId: "blink",
+        breakerStrength: 5,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+      }),
+    ).toMatchObject({
+      breakOptions: [
+        {
+          consequences: [
+            {
+              kind: "random_break_attempt",
+              successProbability: 0.5,
+              expectedNetDamage: 1,
+              maximumNetDamage: 3,
+            },
+          ],
+        },
+      ],
     });
   });
 });
