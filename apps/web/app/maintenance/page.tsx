@@ -40,6 +40,7 @@ import {
   type MaintenanceSummary
 } from "../maintenance";
 import { MaintenanceAuthBoundary, MaintenanceReauthenticationDialog, MaintenanceSecurityControls, useMaintenanceAuth } from "../maintenance-auth-ui";
+import { copyTextToClipboard } from "../../lib/clipboard";
 
 const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
@@ -404,7 +405,17 @@ export default function MaintenancePage() {
   const recoveryLink = recoveryAccess ? buildMaintenanceRecoveryLink(recoveryAccess, typeof window === "undefined" ? "http://127.0.0.1:3000" : window.location.origin) : "";
   const copyRecoveryLink = async () => {
     if (!recoveryLink) return;
-    await navigator.clipboard?.writeText(recoveryLink);
+    await copyTextToClipboard(recoveryLink);
+  };
+
+  const copyMatchId = async () => {
+    if (!detail) return;
+    const copied = await copyTextToClipboard(detail.matchId);
+    if (copied) {
+      setOperationNotice({ tone: "success", message: "Match-ID kopiert." });
+    } else {
+      setError("Match-ID konnte nicht in die Zwischenablage kopiert werden.");
+    }
   };
 
   const exportAiTraceIndex = () => {
@@ -781,6 +792,10 @@ export default function MaintenancePage() {
             <div style={buttonRow}>
               <button type="button" style={button} onClick={() => void setDetailRetentionProtection(!detail.retentionProtected)} disabled={detailLoading || loading}>
                 {detail.retentionProtected ? "Schutz aufheben" : "Vor Löschen schützen"}
+              </button>
+              <button type="button" style={button} onClick={() => void copyMatchId()} title="Vollständige Match-ID kopieren">
+                <Copy size={16} aria-hidden="true" />
+                ID kopieren
               </button>
               <code>{detail.matchId}</code>
             </div>
