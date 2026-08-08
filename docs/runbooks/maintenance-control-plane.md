@@ -149,6 +149,13 @@ Endpunkt materialisiert seinen read-only SQLite-Read kurz und liefert danach
 ein versioniertes JSON-Bundle. Direkter SQLite-Zugriff bleibt ein bewusstes
 Wartungs-/Sonderwerkzeug.
 
+Für die historische Analyse einer einzelnen KI-Entscheidung dient
+`GET /api/storage/maintenance/analysis/matches/:matchId/decisions/:decisionIndex`.
+Er liefert nur bei exakt passendem, hash-verifiziertem Snapshot eine
+actor-sichere State-View und die daraus mit der aktuellen Engine rekonstruierten
+LegalActions; bei fehlender oder mehrdeutiger Snapshotbindung bleibt dieser
+Abschnitt sichtbar nicht verfügbar.
+
 ## Öffentliche Selbsthoster-Perspektive
 
 ARC-001 ist die Sicherheitsgrundlage, aber keine vollständige öffentliche Distribution. Vor einer allgemeinen Veröffentlichung bleiben eigene Gates für Installation/Updates, Secret-Erzeugung, Zertifikatsautomatisierung, Backup/Restore, Benutzerkonten, Missbrauchsschutz, Datenschutz, Moderation und Support erforderlich. Die Game Plane darf öffentlich erreichbar sein; die Control Plane bleibt betreibergebunden und separat abgesichert.

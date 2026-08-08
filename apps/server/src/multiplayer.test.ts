@@ -1501,6 +1501,31 @@ describe("Backend 0.5 private storage maintenance", () => {
         /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
       );
 
+      const decisionResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/decisions/1`,
+      );
+      const decisionContext = (await decisionResponse.json()) as {
+        schemaVersion?: string;
+        decision?: { decisionIndex?: number; side?: string; stateVersion?: number };
+        state?: unknown;
+        legalActions?: Array<{ actionId?: string }>;
+        surroundingEvents?: Array<{ eventId?: string }>;
+        provenance?: { persisted?: string[]; reconstructed?: unknown[] };
+      };
+      expect(decisionResponse.status).toBe(200);
+      expect(decisionContext).toMatchObject({
+        schemaVersion: "netgrid-decision-analysis-context-v1",
+        decision: { decisionIndex: 1, side: "corp" },
+      });
+      expect(decisionContext.state).toBeDefined();
+      expect(decisionContext.legalActions?.length).toBeGreaterThan(0);
+      expect(decisionContext.surroundingEvents?.length).toBeGreaterThan(0);
+      expect(decisionContext.provenance?.persisted).toContain("stateSnapshot");
+      expect(decisionContext.provenance?.reconstructed).toHaveLength(1);
+      expect(JSON.stringify(decisionContext)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|gameStateJson|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
+      );
+
       const after = await service.loadForTest(active.matchId);
       if (!after) throw new Error("Missing active analysis match after read");
       expect(after?.match.matchVersion).toBe(before.match.matchVersion);

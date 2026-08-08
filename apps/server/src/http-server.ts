@@ -2376,6 +2376,16 @@ async function routeHttp(
       return;
     }
 
+    const maintenanceDecisionAnalysisRoute = /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/decisions\/(\d+)$/.exec(url.pathname);
+    if (maintenanceDecisionAnalysisRoute && request.method === "GET") {
+      const matchId = decodeURIComponent(maintenanceDecisionAnalysisRoute[1] ?? "");
+      const decisionIndex = Number(maintenanceDecisionAnalysisRoute[2]);
+      const context = await service.storageMaintenanceDecisionAnalysis(matchId, decisionIndex);
+      if (!context) { sendJson(response, 404, { error: { code: "not_found", message: "Diese Analyseansicht hat keine Entscheidung für diesen Match-Kontext." } }); return; }
+      sendJson(response, 200, context);
+      return;
+    }
+
     if (
       url.pathname === "/api/storage/maintenance/cleanup/preview" &&
       request.method === "POST"

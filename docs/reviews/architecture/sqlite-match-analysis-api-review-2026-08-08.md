@@ -27,16 +27,20 @@ redigierten KI-Trace-Details. Die Filter `side`, `turn`, `fromDecision` und
 sind auf 500, Entscheidungen auf 200 Einträge begrenzt; Begrenzungen stehen
 in `diagnostics.warnings`.
 
-Die Ereignistabelle speichert keine Turnnummer. Daher bleibt der Eventabschnitt
-matchweit, während Turn- und Decision-Filter ausschließlich auf die exakt
-gespeicherten KI-Trace-Spalten angewendet werden.
+Der Bundle-Endpunkt bleibt für die Matchübersicht begrenzt. Für eine tiefe,
+exakt gebundene Diagnose steht zusätzlich
+`GET /api/storage/maintenance/analysis/matches/:matchId/decisions/:decisionIndex`
+bereit. Er materialisiert den zugehörigen Trace, den exakt gleichversionierten
+Snapshot und einen kleinen Eventbereich, beendet den SQLite-Read und erzeugt
+danach im RAM die actor-sichere historische State-View und LegalActions.
 
 Verfügbar sind Match-ID/Status/Versionen, öffentliche Events, ausgeführte
 KI-Aktionen sowie die aktivierte redigierte Plan- und Why-not-Diagnostik. Nicht
-als belastbare historische Daten verfügbar sind LegalActions, eigenständige
-Engine-Quotes, side-sichere Analyse-Snapshots sowie eine separate Run-/ICE-
-Encounter-Projektion. Diese Lücken werden als `unavailableSections` sichtbar
-gemacht und nicht rekonstruiert.
+als belastbare historische Daten verfügbar sind LegalActions und actor-sichere
+State-Views, wenn ein exakt passender, hash-verifizierter Snapshot existiert.
+Sie werden als heutige Engine-Rekonstruktion gekennzeichnet. Eigenständige
+historische Engine-Quotes und eine getrennte Run-/ICE-Encounter-Projektion
+bleiben weiterhin nur verfügbar, soweit sie bereits im Decision-Trace stehen.
 
 ## Laufende Matches und SQLite
 

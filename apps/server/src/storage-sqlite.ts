@@ -407,6 +407,19 @@ export type StorageMaintenanceMatchAnalysisBundle = {
   };
 };
 
+export type StorageMaintenanceDecisionAnalysisSource = {
+  trace: StorageMaintenanceAiDecisionTraceDetail;
+  snapshot?: {
+    snapshotId: string;
+    stateVersion: number;
+    matchVersion: number;
+    stateHash: string;
+    gameStateJson: string;
+  };
+  surroundingEvents: StorageMaintenanceMatchAnalysisEvent[];
+  snapshotIssue?: "snapshot_missing" | "snapshot_ambiguous";
+};
+
 const MATCH_ANALYSIS_EVENT_LIMIT = 500;
 const MATCH_ANALYSIS_DECISION_LIMIT = 200;
 
@@ -1022,6 +1035,71 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           }
         : {}),
       diagnostics: { warnings, unavailableSections },
+    };
+  }
+
+  async maintenanceDecisionAnalysisSource(
+    matchId: string,
+    decisionIndex: number,
+  ): Promise<StorageMaintenanceDecisionAnalysisSource | undefined> {
+    const materialized = runSqliteReadSnapshot(this.db, () => {
+      const traceRow = this.db
+        .prepare(
+          `SELECT trace_id AS traceId, event_id AS eventId, state_version AS stateVersion,
+             match_version AS matchVersion, side, turn, decision_index AS decisionIndex,
+             selected_action_id AS selectedActionId, selected_action_type AS selectedActionType,
+             plan_kind AS planKind, score, confidence, created_at AS createdAt,
+             schema_version AS schemaVersion, trace_json AS traceJson
+           FROM ai_decision_traces WHERE match_id = ? AND decision_index = ?`,
+        )
+        .get(matchId, decisionIndex) as AiDecisionTraceRow | undefined;
+      if (!traceRow) return undefined;
+      const snapshots = this.db
+        .prepare(
+          `SELECT snapshot_id AS snapshotId, state_version AS stateVersion,
+             match_version AS matchVersion, state_hash AS stateHash,
+             game_state_json AS gameStateJson
+           FROM state_snapshots WHERE match_id = ? AND state_version = ?
+           ORDER BY created_at ASC LIMIT 2`,
+        )
+        .all(matchId, traceRow.stateVersion) as Array<{
+        snapshotId: string;
+        stateVersion: number;
+        matchVersion: number;
+        stateHash: string;
+        gameStateJson: string;
+      }>;
+      const events = this.db
+        .prepare(
+          `SELECT event_id AS eventId, event_index AS eventIndex,
+             state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter,
+             state_hash_after AS stateHashAfter, public_payload_json AS publicPayloadJson,
+             hidden_info_barrier AS hiddenInfoBarrier
+           FROM events WHERE match_id = ? AND event_index BETWEEN
+             MAX(0, COALESCE((SELECT event_index FROM events WHERE match_id = ? AND event_id = ?), 0) - 4)
+             AND COALESCE((SELECT event_index FROM events WHERE match_id = ? AND event_id = ?), 0) + 4
+           ORDER BY event_index ASC`,
+        )
+        .all(matchId, matchId, traceRow.eventId, matchId, traceRow.eventId) as Array<{
+        eventId: string; eventIndex: number; stateVersionBefore: number; stateVersionAfter: number;
+        stateHashAfter: string; publicPayloadJson: string; hiddenInfoBarrier: number;
+      }>;
+      return { traceRow, snapshots, events };
+    });
+    if (!materialized) return undefined;
+    const trace = aiDecisionTraceRecordFromRow(matchId, materialized.traceRow);
+    return {
+      trace: { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson },
+      ...(materialized.snapshots.length === 1 ? { snapshot: materialized.snapshots[0]! } : {}),
+      surroundingEvents: materialized.events.map((row) => ({
+        eventId: row.eventId, eventIndex: Number(row.eventIndex),
+        stateVersionBefore: Number(row.stateVersionBefore), stateVersionAfter: Number(row.stateVersionAfter),
+        stateHashAfter: row.stateHashAfter,
+        publicPayload: JSON.parse(row.publicPayloadJson) as Record<string, unknown>,
+        hiddenInfoBarrier: row.hiddenInfoBarrier === 1,
+      })),
+      ...(materialized.snapshots.length === 0 ? { snapshotIssue: "snapshot_missing" as const } : {}),
+      ...(materialized.snapshots.length > 1 ? { snapshotIssue: "snapshot_ambiguous" as const } : {}),
     };
   }
 
