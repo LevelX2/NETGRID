@@ -1,12 +1,9 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import type {
-  AiDecisionDebug,
   AiDecisionInput,
   LegalAction,
   PlayerView,
 } from "@netgrid/shared";
-import { chooseSemanticRuntimeAction } from "./semantic-runtime";
-import type { SemanticRuntimeDependencies } from "./semantic-runtime";
 import {
   getRunnerRunPlanMemorySnapshot,
   MissingRunnerRunPlanError,
@@ -43,27 +40,6 @@ describe("runner run plan memory", () => {
     expect(getRunnerRunPlanMemorySnapshot(activeInput)?.id).toBe("runplan-1");
     expect(getRunnerRunPlanMemorySnapshot(inactiveInput)).toBeUndefined();
     expect(getRunnerRunPlanMemorySnapshot(activeInput)).toBeUndefined();
-  });
-
-  it("lets the semantic runtime recover from a missing active run plan", () => {
-    const continueRun = action("continue_run");
-    const runtimeChoice = choice(continueRun, "simple_run_choice", 300);
-    const input = runnerInput({
-      activeRun: true,
-      legalActions: [continueRun],
-    });
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      runtimeDependenciesForStartRun(runtimeChoice, continueRun),
-    );
-
-    expect(decision.actionId).toBe("continue_run");
-    expect(decision.evidence).toContain("active_runner_run_plan_missing:true");
-    expect(decision.evidence).toContain(
-      "active_runner_run_plan_recovery:semantic_runtime_fallback",
-    );
   });
 
   it("selects active run actions through a run plan annotated choice", () => {
@@ -546,95 +522,7 @@ describe("runner run plan memory", () => {
     expect(plan?.objective.kind).toBe("access_hq_card");
   });
 
-  it("remembers a run plan when the semantic runtime selects start_run", () => {
-    const startRun = action("start_run", { serverId: "rd" });
-    const input = runnerInput({ activeRun: false, legalActions: [startRun] });
-    const runtimeChoice = choice(startRun, "simple_hq_or_rnd_pressure", 500);
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      runtimeDependenciesForStartRun(runtimeChoice, startRun),
-    );
-
-    const activeRunInput = runnerInput({ activeRun: true });
-    const remembered = getRunnerRunPlanMemorySnapshot(activeRunInput);
-    expect(decision.actionId).toBe("start_run");
-    expect(remembered?.runStartActionId).toBe("start_run");
-    expect(remembered?.objective.kind).toBe("access_rnd_top");
-    expect(decision.evidence).toContain(
-      `runner_run_decision_fingerprint:${remembered?.commitment?.decisionFingerprint.value}`,
-    );
-  });
 });
-
-function minimalRuntimeDependencies(
-  overrides: Partial<SemanticRuntimeDependencies> = {},
-): SemanticRuntimeDependencies {
-  return {
-    buildActionSemanticCandidates: () => [],
-    ...overrides,
-  } as unknown as SemanticRuntimeDependencies;
-}
-
-function runtimeDependenciesForStartRun(
-  runtimeChoice: SemanticRuntimeChoice,
-  startRun: LegalAction,
-): SemanticRuntimeDependencies {
-  const choices = [runtimeChoice];
-  return minimalRuntimeDependencies({
-    semanticRuntimeChoices: () => choices,
-    semanticRuntimeChoiceIsReactive: () => false,
-    getTacticalPlanMemorySnapshot: () => undefined,
-    deckCapabilitiesForInput: () => ({ side: "runner" }) as never,
-    runnerStrategicIntentForInput: () => ({
-      schemaVersion: "runner-strategic-intent-profile-v1",
-      side: "runner",
-      source: {
-        deckStrategyProfile: "ai_internal_strategy_profile",
-        deckCapabilities: "ai_internal",
-        plannerEffect: "runtime_projection",
-      },
-      primaryWinIntent: "runner.steal_agendas_default",
-      setupEngine: [],
-      pressureVectors: ["runner.central_probe_pressure"],
-      riskProfile: [],
-      rejectedIntents: [],
-      confidence: "medium",
-      evidence: ["strategic_intent:central_probe"],
-    }),
-    evaluateRunnerHandDevelopment: () => [],
-    buildRunnerEconomyPosture: () => ({}) as never,
-    evaluateRunnerRunTargets: () => [runTargetEvaluation(startRun)],
-    buildRunnerTacticalGoals: () => [],
-    evaluateTacticalPlans: () => ({ planAlternatives: [], blockedPlans: [] }),
-    bestSemanticRuntimeChoice: () => runtimeChoice,
-    bestSemanticRuntimeChoiceForTacticalPlanOverride: () => undefined,
-    tacticalPlanMappedChoice: () => ({}),
-    runnerSelfDamageImmediateWinSemanticChoice: () => undefined,
-    semanticRuntimeChoiceWithEvidence: (choiceValue) => choiceValue,
-    tacticalPlanMappingOverrideEvidence: () => [],
-    tacticalPlanRuntimeAlignedToChoice: (planRuntime) => planRuntime,
-    runnerRunOnlyActionAdjustedSemanticChoice: () => ({
-      choice: runtimeChoice,
-      rankedChoices: choices,
-    }),
-    semanticRuntimeCoverageSelectionDebug: () => undefined,
-    selectedChoicesForDecision: () => undefined,
-    rememberTacticalPlanRuntime: () => undefined,
-    scrubEvidence: (evidence) => evidence,
-    semanticRuntimeDecisionDebug: () =>
-      ({
-        schemaVersion: "ai-decision-debug-v1",
-        aiLevel: 2,
-        summary: "test",
-        planKind: "test",
-        score: 0,
-        fallbackUsed: false,
-        timeoutUsed: false,
-      }) as AiDecisionDebug,
-  });
-}
 
 function runnerInput(params: {
   activeRun: boolean;

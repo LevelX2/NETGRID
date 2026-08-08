@@ -1,8 +1,6 @@
 import { chooseRunnerAction } from "./index";
-import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import type { AiDeckStrategyProfile } from "./deck-doctrine-strategy";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
-import type { SemanticRuntimeDependencies } from "./runtime/semantic-runtime";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import {
   CURRENT_RULES_BASELINE,
@@ -336,101 +334,6 @@ export function runtimeRunnerStrategyProfile(): AiDeckStrategyProfile {
       activeHints: "data/ai/ai-card-hints-active.json",
       plannerEffect: "strategic_intent_input",
     },
-  };
-}
-
-export function semanticRuntimeDependenciesWithoutRunTargetEvaluation(
-  choices: SemanticRuntimeChoice[],
-  options: {
-    initiallySelectedActionId: string;
-    goal?: {
-      goalId: string;
-      family: string;
-      priority: number;
-      urgency: string;
-      source: string;
-      evidence: string[];
-    };
-    rememberedActions?: string[];
-    observedTacticalGoals?: string[];
-  },
-): Partial<SemanticRuntimeDependencies> {
-  return {
-    semanticRuntimeChoices: () => choices,
-    semanticRuntimeChoiceIsReactive: () => false,
-    buildActionSemanticCandidates,
-    getTacticalPlanMemorySnapshot: () => undefined,
-    deckCapabilitiesForInput: () => ({}) as any,
-    runnerStrategicIntentForInput: () => ({}) as any,
-    evaluateRunnerHandDevelopment: () => [],
-    buildRunnerEconomyPosture: () =>
-      ({
-        recommendation: "build_economy",
-        fundingNeed: "credits",
-        evidence: ["test_economy_posture"],
-      }) as any,
-    buildRunnerTacticalGoals: () =>
-      [
-        options.goal ?? {
-          goalId: "runner.build_economy_base",
-          family: "economy",
-          priority: 940,
-          urgency: "high",
-          source: "economy_posture",
-          evidence: ["test_goal:economy"],
-        },
-      ] as any,
-    evaluateTacticalPlans: (context) => {
-      options.observedTacticalGoals?.push(
-        ...(context.tacticalGoals?.map((goal) => goal.goalId) ?? []),
-      );
-      return {
-        planAlternatives: [],
-        blockedPlans: [],
-      };
-    },
-    bestSemanticRuntimeChoice: () =>
-      choices.find(
-        (choice) =>
-          choice.action.actionId === options.initiallySelectedActionId,
-      ),
-    bestSemanticRuntimeChoiceForTacticalPlanOverride: () => undefined,
-    tacticalPlanMappedChoice: () => ({}),
-    runnerSelfDamageImmediateWinSemanticChoice: () => undefined,
-    semanticRuntimeChoiceWithEvidence: (choice, options) => ({
-      ...choice,
-      evidence: [...choice.evidence, ...options.evidence],
-      ...(options.minimumScore !== undefined
-        ? { score: Math.max(choice.score, options.minimumScore) }
-        : {}),
-      ...(options.reasonCode ? { reasonCode: options.reasonCode } : {}),
-      ...(options.explanation ? { explanation: options.explanation } : {}),
-    }),
-    tacticalPlanMappingOverrideEvidence: () => [],
-    tacticalPlanRuntimeAlignedToChoice: () => ({
-      planAlternatives: [],
-      blockedPlans: [],
-    }),
-    runnerRunOnlyActionAdjustedSemanticChoice: (
-      _input,
-      rankedChoices,
-      selectedChoice,
-    ) => ({
-      choice: selectedChoice,
-      rankedChoices: [...rankedChoices],
-    }),
-    semanticRuntimeCoverageSelectionDebug: () => undefined,
-    selectedChoicesForDecision: () => undefined,
-    rememberTacticalPlanRuntime: (_input, _result, selectedAction) => {
-      options.rememberedActions?.push(selectedAction.actionId);
-      return undefined;
-    },
-    scrubEvidence: (evidence) => evidence,
-    semanticRuntimeDecisionDebug: () =>
-      ({
-        schemaVersion: "ai-decision-debug-v1",
-        aiLevel: 2,
-      }) as any,
   };
 }
 

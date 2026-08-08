@@ -2,7 +2,7 @@
 
 ## Status
 
-`LGM-0` aktiv. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
+`LGM-1` abgeschlossen. `LGM-2` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
 weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
 Worktree vorgesehen ist.
 
@@ -64,6 +64,13 @@ einschließlich seiner exklusiven Tests und Evaluationen weg. Kein
 
 **Done-Gate:** betroffene fokussierte Tests, AI-Typecheck, Strukturcheck und
 `git diff --check` sind grün.
+
+**Ergebnis:** `runtime/semantic-runtime.ts` sowie zwei ausschließlich auf
+diese alte Auswahlruntime zugeschnittene Cutover-Testdateien sind entfernt.
+Der produktive Runner-Run-Plan-Speicher bleibt unverändert; aus seinem Test
+sind nur die beiden historischen Runtime-Integrationsfälle entfernt. Die
+weiterhin breit verwendete Testunterstützung enthält keine alte
+`SemanticRuntimeDependencies`-Fixture mehr.
 
 ### LGM-2 – Gemischte Verträge fachlich trennen
 

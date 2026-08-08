@@ -1,15 +1,15 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T12:50:16.247Z
+Erzeugt: 2026-08-08T12:55:02.849Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
 
 ## Klassifikationen
 
-- `legacy_test_only`: 95
-- `mixed_split_required`: 220
-- `productive_shared`: 235
+- `legacy_test_only`: 94
+- `mixed_split_required`: 201
+- `productive_shared`: 254
 - `productive_simulation`: 166
 - `productive_tooling`: 12
 - `unreferenced`: 32
@@ -97,7 +97,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/deck-doctrine-strategy.ts`
 - `packages/ai/src/deck-strategy-snapshot-validation.ts`
 - `packages/ai/src/deck-strategy-snapshot.ts`
-- `packages/ai/src/diagnostics/semantic-decision-chain-debug.ts`
 - `packages/ai/src/diagnostics/semantic-redaction.ts`
 - `packages/ai/src/economy/economy-action-score.ts`
 - `packages/ai/src/hint-ontology.ts`
@@ -196,19 +195,14 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runner/hand-development/runner-hand-development-types.ts`
 - `packages/ai/src/runner/hand-development/runner-hand-text-signals.ts`
 - `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts`
-- `packages/ai/src/runtime/action-capacity-score-components.ts`
 - `packages/ai/src/runtime/action-cost.ts`
 - `packages/ai/src/runtime/ai-decision-input.ts`
 - `packages/ai/src/runtime/card-definition-lookup.ts`
 - `packages/ai/src/runtime/card-role-lookup.ts`
-- `packages/ai/src/runtime/choose-ai-action.ts`
 - `packages/ai/src/runtime/collection.ts`
 - `packages/ai/src/runtime/corp-central-defense-allocation.ts`
 - `packages/ai/src/runtime/corp-central-defense-facts-adapter.ts`
-- `packages/ai/src/runtime/corp-economy/corp-defensive-draw.ts`
-- `packages/ai/src/runtime/corp-economy/corp-ice-density.ts`
 - `packages/ai/src/runtime/corp-exact-ice-rez-route.ts`
-- `packages/ai/src/runtime/corp-funded-score-protection.ts`
 - `packages/ai/src/runtime/corp-ice-placement/corp-ice-placement.ts`
 - `packages/ai/src/runtime/corp-known-agenda-inventory.ts`
 - `packages/ai/src/runtime/corp-score-protection-assessment.ts`
@@ -230,22 +224,12 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/corp-visible-kill-line.ts`
 - `packages/ai/src/runtime/current-encounter.ts`
 - `packages/ai/src/runtime/decision-derived-cache.ts`
-- `packages/ai/src/runtime/decision-opportunity.ts`
-- `packages/ai/src/runtime/encounter-action.ts`
-- `packages/ai/src/runtime/encounter-subroutine.ts`
 - `packages/ai/src/runtime/public-event-history.ts`
 - `packages/ai/src/runtime/role-match.ts`
-- `packages/ai/src/runtime/runner-encounter-credit-budget.ts`
-- `packages/ai/src/runtime/runner-future-path-assessment.ts`
 - `packages/ai/src/runtime/runner-hq-saturation-score.ts`
-- `packages/ai/src/runtime/runner-installed-program.ts`
 - `packages/ai/src/runtime/runner-run-plan-memory.ts`
-- `packages/ai/src/runtime/runner-run-plan-path-quote.ts`
 - `packages/ai/src/runtime/runner-run-plan-types.ts`
-- `packages/ai/src/runtime/runner-run-release.ts`
-- `packages/ai/src/runtime/runner-run-remainder-effect-assessment.ts`
 - `packages/ai/src/runtime/runner-start-run-score.ts`
-- `packages/ai/src/runtime/runner-terminal-contest-threat.ts`
 - `packages/ai/src/runtime/runner-visible-breaker-coverage.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-central-pressure.ts`
@@ -254,13 +238,10 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/semantic-runtime-corp-remote-reachability.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts`
-- `packages/ai/src/runtime/semantic-runtime-score-components.ts`
-- `packages/ai/src/runtime/semantic-runtime-types.ts`
 - `packages/ai/src/runtime/server-target.ts`
 - `packages/ai/src/runtime/stable-hash.ts`
 - `packages/ai/src/runtime/strategic-intent-live-revalidation.ts`
 - `packages/ai/src/runtime/strategic-runtime-context.ts`
-- `packages/ai/src/runtime/subroutine-indexes.ts`
 - `packages/ai/src/runtime/trace-tag-success-estimate.ts`
 - `packages/ai/src/runtime/visible-card-lookup.ts`
 - `packages/ai/src/runtime/visible-runner-action-economy.ts`
@@ -290,6 +271,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/deck-opening-hand.ts`
 - `packages/ai/src/diagnostics/debug-format.ts`
 - `packages/ai/src/diagnostics/decision-debug.ts`
+- `packages/ai/src/diagnostics/semantic-decision-chain-debug.ts`
 - `packages/ai/src/diagnostics/semantic-runtime-debug.ts`
 - `packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts`
 - `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts`
@@ -336,6 +318,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/playeraction-dry-run-builder.ts`
 - `packages/ai/src/remote-role-ontology-consumer.ts`
 - `packages/ai/src/reports/simulation-report-formatters.ts`
+- `packages/ai/src/runtime/action-capacity-score-components.ts`
 - `packages/ai/src/runtime/action-order.ts`
 - `packages/ai/src/runtime/action-role-lookup.ts`
 - `packages/ai/src/runtime/ai-action-entrypoints-composition.ts`
@@ -350,6 +333,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/breaker-role-match.ts`
 - `packages/ai/src/runtime/card-title.ts`
 - `packages/ai/src/runtime/choice-option.ts`
+- `packages/ai/src/runtime/choose-ai-action.ts`
 - `packages/ai/src/runtime/corp-access-payment-choice.ts`
 - `packages/ai/src/runtime/corp-advancement-counter-choice.ts`
 - `packages/ai/src/runtime/corp-ambush-plan-signals.ts`
@@ -358,6 +342,9 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/corp-defense-score-reserve.ts`
 - `packages/ai/src/runtime/corp-defense-staging-policy.ts`
 - `packages/ai/src/runtime/corp-draw-admission.ts`
+- `packages/ai/src/runtime/corp-economy/corp-defensive-draw.ts`
+- `packages/ai/src/runtime/corp-economy/corp-ice-density.ts`
+- `packages/ai/src/runtime/corp-funded-score-protection.ts`
 - `packages/ai/src/runtime/corp-hand-inventory-facts.ts`
 - `packages/ai/src/runtime/corp-hardware-trash-choice.ts`
 - `packages/ai/src/runtime/corp-hq-retain-payment-choice.ts`
@@ -385,6 +372,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/corp-upgrade-placement.ts`
 - `packages/ai/src/runtime/counter.ts`
 - `packages/ai/src/runtime/damage-prevention-choice-option.ts`
+- `packages/ai/src/runtime/decision-opportunity.ts`
 - `packages/ai/src/runtime/deck-capabilities-context.ts`
 - `packages/ai/src/runtime/discard-choice-option.ts`
 - `packages/ai/src/runtime/discard-choice-selection.ts`
@@ -392,6 +380,8 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/discard-keep-score.ts`
 - `packages/ai/src/runtime/discard-plan.ts`
 - `packages/ai/src/runtime/economy-score-components.ts`
+- `packages/ai/src/runtime/encounter-action.ts`
+- `packages/ai/src/runtime/encounter-subroutine.ts`
 - `packages/ai/src/runtime/evidence-value.ts`
 - `packages/ai/src/runtime/installed-card-location.ts`
 - `packages/ai/src/runtime/number-rounding.ts`
@@ -424,12 +414,15 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/runner-encounter-action-exclusion.ts`
 - `packages/ai/src/runtime/runner-encounter-break-context.ts`
 - `packages/ai/src/runtime/runner-encounter-composition-context.ts`
+- `packages/ai/src/runtime/runner-encounter-credit-budget.ts`
 - `packages/ai/src/runtime/runner-expose-installed-card-choice.ts`
+- `packages/ai/src/runtime/runner-future-path-assessment.ts`
 - `packages/ai/src/runtime/runner-hand-buffer-need.ts`
 - `packages/ai/src/runtime/runner-hand-funding-context.ts`
 - `packages/ai/src/runtime/runner-hand-funding-target.ts`
 - `packages/ai/src/runtime/runner-hardware-payoff-evidence.ts`
 - `packages/ai/src/runtime/runner-hq-repeat-run-score.ts`
+- `packages/ai/src/runtime/runner-installed-program.ts`
 - `packages/ai/src/runtime/runner-known-access-payoff-context.ts`
 - `packages/ai/src/runtime/runner-known-ice-path-score.ts`
 - `packages/ai/src/runtime/runner-loan-context.ts`
@@ -469,6 +462,9 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/runner-run-funding-admission.ts`
 - `packages/ai/src/runtime/runner-run-lock-release-score.ts`
 - `packages/ai/src/runtime/runner-run-only-action-adjustment.ts`
+- `packages/ai/src/runtime/runner-run-plan-path-quote.ts`
+- `packages/ai/src/runtime/runner-run-release.ts`
+- `packages/ai/src/runtime/runner-run-remainder-effect-assessment.ts`
 - `packages/ai/src/runtime/runner-run-window-additional-access.ts`
 - `packages/ai/src/runtime/runner-search-coverage-need.ts`
 - `packages/ai/src/runtime/runner-semantic-card-ids.ts`
@@ -477,6 +473,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/runner-strategic-intent-context.ts`
 - `packages/ai/src/runtime/runner-targeted-bypass-choice.ts`
 - `packages/ai/src/runtime/runner-targeted-bypass-plan.ts`
+- `packages/ai/src/runtime/runner-terminal-contest-threat.ts`
 - `packages/ai/src/runtime/runner-viral15-jack-out-context.ts`
 - `packages/ai/src/runtime/runner-viral15-jack-out-score.ts`
 - `packages/ai/src/runtime/runner-visible-card-context.ts`
@@ -515,6 +512,8 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/semantic-runtime-orchestration-composition.ts`
 - `packages/ai/src/runtime/semantic-runtime-plan-memory-exclusion.ts`
 - `packages/ai/src/runtime/semantic-runtime-scope.ts`
+- `packages/ai/src/runtime/semantic-runtime-score-components.ts`
+- `packages/ai/src/runtime/semantic-runtime-types.ts`
 - `packages/ai/src/runtime/semantic-runtime-visible-card-context.ts`
 - `packages/ai/src/runtime/setup-mulligan-choice-option.ts`
 - `packages/ai/src/runtime/shell-traders-action.ts`
@@ -524,6 +523,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/simulation-action-target.ts`
 - `packages/ai/src/runtime/simulation-card-target.ts`
 - `packages/ai/src/runtime/strategic-action-fit.ts`
+- `packages/ai/src/runtime/subroutine-indexes.ts`
 - `packages/ai/src/runtime/tag-avoidance-choice-option.ts`
 - `packages/ai/src/runtime/tag-punish-payoff-mapping.ts`
 - `packages/ai/src/runtime/trace-context.ts`
@@ -783,7 +783,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/semantic-runtime-action-exclusion.ts`
 - `packages/ai/src/runtime/semantic-runtime-debug-context.ts`
 - `packages/ai/src/runtime/semantic-runtime-score-breakdown.ts`
-- `packages/ai/src/runtime/semantic-runtime.ts`
 - `packages/ai/src/runtime/shell-traders-urgency.ts`
 
 ## RETAIN_DIAGNOSTIC_OR_RETIRE
