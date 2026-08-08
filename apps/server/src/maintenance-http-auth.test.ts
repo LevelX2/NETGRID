@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createNetgridHttpServer } from "./http-server";
+import { createNetgridHttpServer, mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth } from "./http-server";
 import { loadDeploymentConfig } from "./internet-hardening";
 import { InMemoryMaintenanceCredentialStore, MaintenanceAuthService } from "./maintenance-auth";
 import { InMemoryMatchStorage, MultiplayerService } from "./multiplayer";
@@ -18,6 +18,41 @@ afterEach(() => {
 });
 
 describe("ARC-001 maintenance HTTP security", () => {
+  it("permits only local loopback GET analysis without a session", () => {
+    const config = loadDeploymentConfig({} as NodeJS.ProcessEnv);
+    const request = (address: string, method = "GET") =>
+      ({ method, socket: { remoteAddress: address }, headers: { host: "127.0.0.1", "x-forwarded-for": "127.0.0.1" } }) as never;
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(true);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("::ffff:127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/decisions/1", config)).toBe(true);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("203.0.113.9"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(false);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/bundle", { ...config, profile: "private_internet" })).toBe(false);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1", "POST"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(false);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/cleanup/preview", config)).toBe(false);
+  });
+
+  it("allows loopback analysis without a session while other maintenance routes remain authenticated", async () => {
+    const directory = mkdtempSync(join(tmpdir(), "netgrid-local-analysis-auth-"));
+    tempDirs.push(directory);
+    const storage = new SqliteMatchStorage({ dbPath: join(directory, "netgrid.sqlite"), backupDir: join(directory, "backups") });
+    const service = new MultiplayerService(storage, { tokenSalt: "local-analysis-auth" });
+    const maintenanceAuth = new MaintenanceAuthService(new InMemoryMaintenanceCredentialStore(), { passwordKdf: TEST_KDF });
+    await maintenanceAuth.bootstrapPassword(PASSWORD);
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv),
+      maintenanceAuth
+    });
+    const baseUrl = await listen(handle);
+    try {
+      const analysis = await fetch(`${baseUrl}/api/storage/maintenance/analysis/matches/missing/bundle`);
+      expect(analysis.status).toBe(404);
+      expect(await analysis.json()).toMatchObject({ error: { code: "not_found" } });
+
+      expect((await fetch(`${baseUrl}/api/storage/maintenance/summary`)).status).toBe(401);
+      expect((await fetch(`${baseUrl}/api/storage/maintenance/cleanup/preview`, { method: "POST" })).status).toBe(401);
+    } finally {
+      await handle.close();
+    }
+  });
   it("fails closed, enforces cookie, origin, CSRF and reauthentication, and revokes sessions after password change", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "maintenance-auth-http" });
     const maintenanceAuth = new MaintenanceAuthService(new InMemoryMaintenanceCredentialStore(), { passwordKdf: TEST_KDF });

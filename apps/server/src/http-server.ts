@@ -2126,8 +2126,13 @@ async function routeHttp(
     }
 
     if (url.pathname.startsWith("/api/storage/maintenance/")) {
-      const authenticated =
-        request.method === "GET"
+      const authenticated = mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
+        request,
+        url.pathname,
+        deploymentConfig,
+      )
+        ? true
+        : request.method === "GET"
           ? await ensureMaintenanceAuthenticated(
               response,
               request,
@@ -4186,6 +4191,18 @@ function isSensitiveMaintenanceOperation(
       pathname,
     )
   );
+}
+
+export function mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
+  request: IncomingMessage,
+  pathname: string,
+  deploymentConfig: DeploymentConfig,
+): boolean {
+  if (request.method !== "GET") return false;
+  if (!pathname.startsWith("/api/storage/maintenance/analysis/")) return false;
+  if (deploymentConfig.profile !== "local") return false;
+  const address = normalizeClientAddress(request.socket.remoteAddress);
+  return address === "127.0.0.1" || address === "::1";
 }
 
 function maintenanceSessionToken(request: IncomingMessage): string | undefined {

@@ -14,8 +14,13 @@ stattdessen einen begrenzten, read-only Match-Bundle-Endpunkt:
 GET /api/storage/maintenance/analysis/matches/:matchId/bundle
 ```
 
-Er ist ausschließlich durch die vorhandene Maintenance-Session geschützt und
-erweitert weder PlayerViews, WebSockets noch öffentliche Replays.
+Im lokalen Deploymentprofil ist er ohne Maintenance-Session nur über die
+tatsächliche Socket-Adresse `127.0.0.1` oder `::1` erreichbar; IPv4-mapped
+IPv6-Loopback wird gleich behandelt. Das gilt ausschließlich für `GET` unter
+`/api/storage/maintenance/analysis/*`, nicht für andere Maintenance-Routen.
+Host- und Forwarded-Header begründen keine Freigabe. Außerhalb dieses lokalen
+Loopback-Pfads bleibt die vorhandene Maintenance-Session erforderlich. Die
+Änderung erweitert weder PlayerViews, WebSockets noch öffentliche Replays.
 
 ## Bundle-Vertrag
 
@@ -55,10 +60,10 @@ geparst und aufbereitet. Der Endpunkt schreibt nichts, erzeugt keine Kopie und
 verwendet unverändert WAL, den gemeinsamen kurzen Busy-Timeout und die
 bestehende typisierte `storage_temporarily_unavailable`-HTTP-Abbildung.
 
-Für normale Analyse laufender NETGRID-Matches sollen Codex und andere
-Diagnosewerkzeuge nicht direkt `netgrid.sqlite` öffnen. Sie sollen die private
-lokale NETGRID-Analysis-/Maintenance-API verwenden. Direkter SQLite-Zugriff
-bleibt ein bewusst eingesetztes Wartungs-/Sonderwerkzeug.
+Für normale Analyse laufender NETGRID-Matches sollen Codex und andere lokale
+Diagnosewerkzeuge die read-only API über `127.0.0.1` verwenden und nicht direkt
+`netgrid.sqlite` öffnen. Direkter SQLite-Zugriff bleibt ein bewusst eingesetztes
+Wartungs-/Sonderwerkzeug.
 
 ## Verifikation
 

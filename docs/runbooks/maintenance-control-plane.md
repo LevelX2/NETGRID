@@ -156,6 +156,13 @@ actor-sichere State-View und die daraus mit der aktuellen Engine rekonstruierten
 LegalActions; bei fehlender oder mehrdeutiger Snapshotbindung bleibt dieser
 Abschnitt sichtbar nicht verfügbar.
 
+Im lokalen Profil dürfen dieselben read-only Analysis-Routen ohne
+Maintenance-Login über `127.0.0.1` oder `::1` aufgerufen werden. Das gilt
+ausschließlich für `GET /api/storage/maintenance/analysis/*` und prüft die
+tatsächliche Socket-Adresse; Host- oder Forwarded-Header genügen nicht.
+Alle übrigen Maintenance-Routen, insbesondere Cleanup, Backup, Restore,
+Compaction, Trace-Änderungen und Credentials, bleiben authentifiziert.
+
 ## Öffentliche Selbsthoster-Perspektive
 
 ARC-001 ist die Sicherheitsgrundlage, aber keine vollständige öffentliche Distribution. Vor einer allgemeinen Veröffentlichung bleiben eigene Gates für Installation/Updates, Secret-Erzeugung, Zertifikatsautomatisierung, Backup/Restore, Benutzerkonten, Missbrauchsschutz, Datenschutz, Moderation und Support erforderlich. Die Game Plane darf öffentlich erreichbar sein; die Control Plane bleibt betreibergebunden und separat abgesichert.
