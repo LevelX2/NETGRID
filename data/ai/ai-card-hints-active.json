@@ -51319,6 +51319,16 @@
           "scope": "runner",
           "target": "economy.temporary_resource_bank",
           "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "amountKind": "fixed",
+          "economyMode": "bank_load",
+          "kind": "counter_economy",
+          "resource": "credits",
+          "scope": "runner",
+          "target": "economy.bank_load",
+          "timing": "action"
         }
       ],
       "planRoles": [
@@ -51350,12 +51360,15 @@
       "actionTacticSignals": [
         "economy.card",
         "effect_scope:runner",
+        "effect_timing:action",
         "effect_timing:persistent",
+        "effect:counter_economy",
         "effect:economy",
         "effect:global_modifier"
       ],
       "functionSignals": [
         "economy.action_credit",
+        "economy.counter",
         "economy.generic",
         "economy.temporary_resource_bank",
         "economy.turn_start_credit",

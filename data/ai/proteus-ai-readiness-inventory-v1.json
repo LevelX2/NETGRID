@@ -3187,7 +3187,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 0,
-        "effectCount": 5
+        "effectCount": 6
       },
       "removalConditions": [
         "complex_multi_ability_decision_smoke_green",

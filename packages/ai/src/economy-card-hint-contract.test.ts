@@ -129,6 +129,28 @@ describe("economy card hint contracts", () => {
     ).toEqual([3]);
   });
 
+  it("publishes Streetware Distributor's fixed bank load as an action", () => {
+    const streetware = hint("onr_proteus_150_streetware-distributor");
+
+    expect(streetware.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          amount: 3,
+          amountKind: "fixed",
+          economyMode: "bank_load",
+          kind: "counter_economy",
+          resource: "credits",
+          scope: "runner",
+          target: "economy.bank_load",
+          timing: "action",
+        }),
+      ]),
+    );
+    expect(streetware.functionSignals).toEqual(
+      expect.arrayContaining(["economy.counter"]),
+    );
+  });
+
   it.each([
     "onr_v1_193_corporate-coup",
     "onr_v1_209_political-coup",
