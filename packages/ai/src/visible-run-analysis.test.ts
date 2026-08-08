@@ -11,6 +11,7 @@ import {
 import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 import {
+  canBreakerDefinitionBreakIce,
   canVisibleBreakerBreakQuotedSubroutines,
   creditsToBreakVisibleSubroutinesWithBreaker,
   minimumCreditsToBreakVisibleSubroutines,
@@ -130,6 +131,24 @@ describe("visible run analysis server ids", () => {
 });
 
 describe("visible run analysis targeted breaker paths", () => {
+  it("keeps definition-level coverage independent of random breaker strength", () => {
+    expect(
+      canBreakerDefinitionBreakIce("simple_decoder", "simple_code_gate_ice"),
+    ).toBe(true);
+    expect(
+      canBreakerDefinitionBreakIce("simple_decoder", "simple_barrier_ice"),
+    ).toBe(false);
+    expect(
+      canBreakerDefinitionBreakIce("onr_v1_002_ai-boon", "onr_v1_249_hunter"),
+    ).toBe(true);
+    expect(
+      canBreakerDefinitionBreakIce(
+        "onr_proteus_087_forwards-legacy",
+        "onr_v1_249_hunter",
+      ),
+    ).toBe(true);
+  });
+
   it("carries Bulldozer's fully-broken-wall free break to the next sentry", () => {
     const wall = classicWallIce("outer-wall");
     const sentry: VisibleCard = {
