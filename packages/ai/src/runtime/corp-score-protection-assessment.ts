@@ -769,6 +769,9 @@ function randomBreakRiskProfileForEncounter(params: {
     ...(params.breaker.selectedSubtype
       ? { selectedSubtype: params.breaker.selectedSubtype }
       : {}),
+    ...(params.breaker.randomRunStrengthState
+      ? { randomRunStrengthState: params.breaker.randomRunStrengthState }
+      : {}),
     iceDefinitionId: params.ice.card.definitionId,
     iceInstanceId: params.ice.card.instanceId,
     iceSubtypes: params.ice.effectiveSubtypes,
@@ -875,6 +878,7 @@ function pruneDominatedStates(
       state.creditBudget.credits,
       state.creditBudget.icebreakerCredits,
       state.creditBudget.nonNoisyIcebreakerCredits,
+      state.creditBudget.nonStealthNonNoisyIcebreakerCredits,
       state.creditBudget.killerCredits,
       state.creditBudget.stealthNonNoisyIcebreakerCredits,
       ...Object.entries(

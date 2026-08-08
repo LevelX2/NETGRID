@@ -95,6 +95,11 @@ describe("AI Boon run strength", () => {
     expect(state.eventLog.at(-1)?.publicPayload.runStartRandomStrength).toBe(
       dieRoll,
     );
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === breakerId,
+      )?.randomRunStrengthState,
+    ).toEqual({ status: "resolved", actualStrength: dieRoll });
   });
 
   it("offers pump before break at strength 2 and accepts the break after pumping", () => {

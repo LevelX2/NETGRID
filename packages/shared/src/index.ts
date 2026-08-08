@@ -2659,6 +2659,10 @@ export type VisibleCardLifecycleMarker = {
   detail: string;
 };
 
+export type VisibleRunStartRandomStrengthState =
+  | { status: "unresolved" }
+  | { status: "resolved"; actualStrength: number };
+
 export type VisibleRunnerPaymentSupportAbility = {
   abilityIndex: number;
   timing: "runner_cost_penalty_support";
@@ -2945,6 +2949,8 @@ export type VisibleCard = {
     | "start_of_corp_turn_credits";
   strength?: number;
   strengthModifier?: number;
+  /** Explicit run-scoped state for breakers with a run-start random strength. */
+  randomRunStrengthState?: VisibleRunStartRandomStrengthState;
   agendaPoints?: number;
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;

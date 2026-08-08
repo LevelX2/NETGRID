@@ -544,13 +544,46 @@ export function applyPostBreakStealthLoss(
   const ability = host.breaker.breakAbilityForLegalAction(legalAction);
   const lossAmount = ability?.postBreakStealthLoss ?? 0;
   if (lossAmount <= 0) return { handled: false };
+  const sourceMode = ability?.postBreakStealthLossSourceMode;
+  const optionalIfUnavailable =
+    ability?.postBreakStealthLossOptionalIfUnavailable;
+  if (!sourceMode || optionalIfUnavailable === undefined)
+    throw new Error("Breaker-Stealth-Verlust hat keine vollstaendige Semantik.");
   const stealthSources = runnerStealthRecurringCreditSources(host);
   const availableStealth = stealthSources.reduce(
     (sum, source) => sum + source.available,
     0,
   );
-  const requiredLoss = Math.min(lossAmount, availableStealth);
+  const singleSource =
+    sourceMode === "single_stealth_card"
+      ? stealthSources.find((source) => source.available >= lossAmount)
+      : undefined;
+  if (sourceMode === "single_stealth_card" && !singleSource) {
+    if (optionalIfUnavailable) return { handled: false };
+    throw new Error("Verpflichtender Stealth-Credit-Verlust hat keine Einzelquelle.");
+  }
+  if (sourceMode === "any_stealth_cards" && availableStealth < lossAmount) {
+    if (!optionalIfUnavailable)
+      throw new Error("Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.");
+  }
+  const requiredLoss =
+    sourceMode === "single_stealth_card"
+      ? lossAmount
+      : Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return { handled: false };
+  if (singleSource) {
+    host.payment.spendHostedPaymentCredits(singleSource.cardId, requiredLoss);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      postBreakStealthLoss: requiredLoss,
+    };
+    return {
+      handled: true,
+      targetProgramId: breakerId,
+      stealthCreditsLost: requiredLoss,
+      stateChanged: true,
+    };
+  }
   if (stealthSources.length > 1) {
     startHammerStealthLossChoice(host, breakerId, requiredLoss, stealthSources);
     legalAction.payload = {

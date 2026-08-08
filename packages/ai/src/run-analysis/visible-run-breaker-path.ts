@@ -430,7 +430,14 @@ export function minimumCreditsToBreakVisibleSubroutines(
             )
             .filter((assessment): assessment is BreakAssessment => assessment !== undefined)
             .sort((left, right) => left.cost - right.cost)[0];
-          return paid ? { ...paid, consumedPendingFreeBreak: true } : undefined;
+          return paid
+            ? {
+                ...paid,
+                consumedPendingFreeBreak: true,
+                consumedPendingFreeBreakSourceBreakerInstanceId:
+                  free.consumedPendingFreeBreakSourceBreakerInstanceId,
+              }
+            : undefined;
         })
         .filter((assessment) => assessment !== undefined)
     : []) as BreakAssessment[];
@@ -557,7 +564,14 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
             )
             .filter((assessment): assessment is BreakAssessment => assessment !== undefined)
             .sort((left, right) => left.cost - right.cost)[0];
-          return paid ? { ...paid, consumedPendingFreeBreak: true } : undefined;
+          return paid
+            ? {
+                ...paid,
+                consumedPendingFreeBreak: true,
+                consumedPendingFreeBreakSourceBreakerInstanceId:
+                  free.consumedPendingFreeBreakSourceBreakerInstanceId,
+              }
+            : undefined;
         })
         .filter((assessment) => assessment !== undefined)
     : []) as BreakAssessment[];
@@ -637,6 +651,9 @@ export function structuredBreakerAssessment(params: {
       : {}),
     ...(params.breakerCard.selectedSubtype
       ? { selectedSubtype: params.breakerCard.selectedSubtype }
+      : {}),
+    ...(params.breakerCard.randomRunStrengthState
+      ? { randomRunStrengthState: params.breakerCard.randomRunStrengthState }
       : {}),
     iceDefinitionId: params.ice.definitionId,
     ...(params.ice.instanceId ? { iceInstanceId: params.ice.instanceId } : {}),
@@ -859,6 +876,8 @@ function pendingFreeBreakAssessment(
         cardDefinitionStrength(breaker.definitionId),
       carriesStrengthAcrossIce: false,
       consumedPendingFreeBreak: true,
+      consumedPendingFreeBreakSourceBreakerInstanceId:
+        pending.sourceBreakerInstanceId,
     };
   }
   const assessment = structuredBreakerAssessment({
@@ -878,6 +897,8 @@ function pendingFreeBreakAssessment(
   return {
     ...assessment,
     consumedPendingFreeBreak: true,
+    consumedPendingFreeBreakSourceBreakerInstanceId:
+      pending.sourceBreakerInstanceId,
   };
 }
 
@@ -908,6 +929,7 @@ export function canBreakerDefinitionBreakIce(
       type: subroutine.type,
       ...(subroutine.breakTags ? { breakTags: subroutine.breakTags } : {}),
     })),
+    randomRunStrengthState: { status: "unresolved" },
   });
   return (quote?.breakOptions.length ?? 0) > 0;
 }

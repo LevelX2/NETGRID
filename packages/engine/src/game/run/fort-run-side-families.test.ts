@@ -268,6 +268,8 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
           breakCost: 1,
           count: 1,
           postBreakStealthLoss: 2,
+          postBreakStealthLossSourceMode: "any_stealth_cards",
+          postBreakStealthLossOptionalIfUnavailable: true,
         }) as unknown as ReturnType<
           FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
         >,

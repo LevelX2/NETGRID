@@ -21,6 +21,12 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
     ...(rigBudget.nonNoisyIcebreakerCredits > 0
       ? { nonNoisyIcebreakerCredits: rigBudget.nonNoisyIcebreakerCredits }
       : {}),
+    ...(rigBudget.nonStealthNonNoisyIcebreakerCredits > 0
+      ? {
+          nonStealthNonNoisyIcebreakerCredits:
+            rigBudget.nonStealthNonNoisyIcebreakerCredits,
+        }
+      : {}),
     ...(rigBudget.killerCredits > 0
       ? { killerCredits: rigBudget.killerCredits }
       : {}),
@@ -49,6 +55,7 @@ export function visibleRunnerRunPathCreditBudgetForRig(
   const budget = {
     icebreakerCredits: 0,
     nonNoisyIcebreakerCredits: 0,
+    nonStealthNonNoisyIcebreakerCredits: 0,
     killerCredits: 0,
     stealthNonNoisyIcebreakerCredits: 0,
     stealthCreditsBySourceId: {} as Record<string, number>,
@@ -85,6 +92,8 @@ export function visibleRunnerRunPathCreditBudgetForRig(
           budget.stealthNonNoisyIcebreakerCredits += amount;
           budget.stealthCreditsBySourceId[card.instanceId] =
             (budget.stealthCreditsBySourceId[card.instanceId] ?? 0) + amount;
+        } else if (use === "nonNoisyIcebreakerCredits") {
+          budget.nonStealthNonNoisyIcebreakerCredits += amount;
         }
       }
     }
@@ -117,27 +126,58 @@ export function normalizeRunnerRunPathCreditBudget(
       credits: normalizeCreditAmount(budget),
       icebreakerCredits: 0,
       nonNoisyIcebreakerCredits: 0,
+      nonStealthNonNoisyIcebreakerCredits: 0,
       killerCredits: 0,
       stealthNonNoisyIcebreakerCredits: 0,
       stealthCreditsBySourceId: {},
       hostedIcebreakerCreditsByBreakerInstanceId: {},
     };
   }
+  const stealthCreditsBySourceId = Object.fromEntries(
+    Object.entries(budget.stealthCreditsBySourceId ?? {}).map(
+      ([sourceId, amount]) => [sourceId, normalizeCreditAmount(amount)],
+    ),
+  );
+  const stealthNonNoisyIcebreakerCredits = totalStealthCredits(
+    stealthCreditsBySourceId,
+  );
+  const declaredStealthCredits = normalizeCreditAmount(
+    budget.stealthNonNoisyIcebreakerCredits ?? 0,
+  );
+  if (
+    declaredStealthCredits > 0 &&
+    declaredStealthCredits !== stealthNonNoisyIcebreakerCredits
+  ) {
+    throw new Error(
+      "Stealth-Credit-Ledger stimmt nicht mit seinen Quellkonten ueberein.",
+    );
+  }
+  const declaredNonNoisyCredits = normalizeCreditAmount(
+    budget.nonNoisyIcebreakerCredits ?? 0,
+  );
+  const nonStealthNonNoisyIcebreakerCredits = normalizeCreditAmount(
+    budget.nonStealthNonNoisyIcebreakerCredits ??
+      Math.max(0, declaredNonNoisyCredits - stealthNonNoisyIcebreakerCredits),
+  );
+  const nonNoisyIcebreakerCredits =
+    nonStealthNonNoisyIcebreakerCredits + stealthNonNoisyIcebreakerCredits;
+  if (
+    budget.nonStealthNonNoisyIcebreakerCredits !== undefined &&
+    declaredNonNoisyCredits > 0 &&
+    declaredNonNoisyCredits !== nonNoisyIcebreakerCredits
+  ) {
+    throw new Error(
+      "Non-Noisy-Credit-Ledger stimmt nicht mit seinen Teilpools ueberein.",
+    );
+  }
   return {
     credits: normalizeCreditAmount(budget.credits),
     icebreakerCredits: normalizeCreditAmount(budget.icebreakerCredits ?? 0),
-    nonNoisyIcebreakerCredits: normalizeCreditAmount(
-      budget.nonNoisyIcebreakerCredits ?? 0,
-    ),
+    nonNoisyIcebreakerCredits,
+    nonStealthNonNoisyIcebreakerCredits,
     killerCredits: normalizeCreditAmount(budget.killerCredits ?? 0),
-    stealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
-      budget.stealthNonNoisyIcebreakerCredits ?? 0,
-    ),
-    stealthCreditsBySourceId: Object.fromEntries(
-      Object.entries(budget.stealthCreditsBySourceId ?? {}).map(
-        ([sourceId, amount]) => [sourceId, normalizeCreditAmount(amount)],
-      ),
-    ),
+    stealthNonNoisyIcebreakerCredits,
+    stealthCreditsBySourceId,
     hostedIcebreakerCreditsByBreakerInstanceId: Object.fromEntries(
       Object.entries(
         budget.hostedIcebreakerCreditsByBreakerInstanceId ?? {},
@@ -197,8 +237,12 @@ export function projectBreakerCreditPayment(
   );
   const cashNeeded = Math.max(0, cost - restrictedCredits);
   const creditsAfterPath = budget.credits - cashNeeded;
+  const budgetAfterPayment = cloneRunnerRunPathCreditBudget(budget);
+  spendBreakerCredits(budgetAfterPayment, breakAssessment);
   return {
-    affordable: creditsAfterPath >= 0,
+    affordable:
+      creditsAfterPath >= 0 &&
+      canApplyPostBreakStealthLosses(budgetAfterPayment, breakAssessment),
     cost,
     cashSpent: Math.min(budget.credits, cashNeeded),
     creditsAfterPath,
@@ -225,38 +269,26 @@ export function spendBreakerCredits(
     ] ?? 0) - hostedCredits,
   );
   remainingCost -= hostedCredits;
-  const spend = (
-    key:
-      | "icebreakerCredits"
-      | "nonNoisyIcebreakerCredits"
-      | "killerCredits"
-      | "stealthNonNoisyIcebreakerCredits",
-  ) => {
-    if (key === "stealthNonNoisyIcebreakerCredits") return;
+  const spend = (key: "icebreakerCredits" | "killerCredits") => {
     const amount = Math.min(budget[key] ?? 0, remainingCost);
     budget[key] -= amount;
-    if (key === "nonNoisyIcebreakerCredits") {
-      budget.stealthNonNoisyIcebreakerCredits = Math.max(
-        0,
-        budget.stealthNonNoisyIcebreakerCredits - amount,
-      );
-      let remainingStealthSpend = amount;
-      for (const sourceId of Object.keys(budget.stealthCreditsBySourceId).sort()) {
-        const spent = Math.min(
-          budget.stealthCreditsBySourceId[sourceId] ?? 0,
-          remainingStealthSpend,
-        );
-        budget.stealthCreditsBySourceId[sourceId] =
-          (budget.stealthCreditsBySourceId[sourceId] ?? 0) - spent;
-        remainingStealthSpend -= spent;
-        if (remainingStealthSpend === 0) break;
-      }
-    }
     remainingCost -= amount;
   };
   if (breakerCanUseKillerCredits(breakAssessment)) spend("killerCredits");
   if (breakerCanUseNonNoisyCredits(breakAssessment)) {
-    spend("nonNoisyIcebreakerCredits");
+    const nonStealthSpend = Math.min(
+      budget.nonStealthNonNoisyIcebreakerCredits,
+      remainingCost,
+    );
+    budget.nonStealthNonNoisyIcebreakerCredits -= nonStealthSpend;
+    remainingCost -= nonStealthSpend;
+    const stealthSpend = Math.min(
+      totalStealthCredits(budget.stealthCreditsBySourceId),
+      remainingCost,
+    );
+    spendStealthCredits(budget, stealthSpend);
+    remainingCost -= stealthSpend;
+    refreshNonNoisyCreditTotals(budget);
   }
   spend("icebreakerCredits");
   const cash = Math.min(budget.credits, remainingCost);
@@ -267,6 +299,11 @@ export function spendBreakerCreditsAndApplySideEffects(
   budget: MutableRunnerRunPathCreditBudget,
   breakAssessment: BreakAssessment,
 ): void {
+  const projectedBudget = cloneRunnerRunPathCreditBudget(budget);
+  spendBreakerCredits(projectedBudget, breakAssessment);
+  if (!canApplyPostBreakStealthLosses(projectedBudget, breakAssessment)) {
+    throw new Error("Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.");
+  }
   spendBreakerCredits(budget, breakAssessment);
   for (const loss of breakAssessment.postBreakStealthLosses ?? []) {
     for (let occurrence = 0; occurrence < loss.occurrences; occurrence += 1) {
@@ -276,11 +313,11 @@ export function spendBreakerCreditsAndApplySideEffects(
         const source = sources.find(
           (sourceId) => (budget.stealthCreditsBySourceId[sourceId] ?? 0) >= amount,
         );
-        if (!source) continue;
-        budget.stealthCreditsBySourceId[source] =
-          (budget.stealthCreditsBySourceId[source] ?? 0) - amount;
-        budget.stealthNonNoisyIcebreakerCredits -= amount;
-        budget.nonNoisyIcebreakerCredits -= amount;
+        if (!source) {
+          if (loss.optionalIfUnavailable) continue;
+          throw new Error("Verpflichtender Stealth-Credit-Verlust hat keine Quelle.");
+        }
+        spendStealthCreditsFromSource(budget, source, amount);
         continue;
       }
       let remaining = amount;
@@ -289,15 +326,89 @@ export function spendBreakerCreditsAndApplySideEffects(
           budget.stealthCreditsBySourceId[source] ?? 0,
           remaining,
         );
-        budget.stealthCreditsBySourceId[source] =
-          (budget.stealthCreditsBySourceId[source] ?? 0) - spent;
-        budget.stealthNonNoisyIcebreakerCredits -= spent;
-        budget.nonNoisyIcebreakerCredits -= spent;
+        spendStealthCreditsFromSource(budget, source, spent);
         remaining -= spent;
         if (remaining === 0) break;
       }
     }
   }
+}
+
+function canApplyPostBreakStealthLosses(
+  budget: MutableRunnerRunPathCreditBudget,
+  breakAssessment: BreakAssessment,
+): boolean {
+  for (const loss of breakAssessment.postBreakStealthLosses ?? []) {
+    if (loss.optionalIfUnavailable) continue;
+    for (let occurrence = 0; occurrence < loss.occurrences; occurrence += 1) {
+      const amount = normalizeCreditAmount(loss.amount);
+      if (loss.sourceMode === "single_stealth_card") {
+        const source = Object.keys(budget.stealthCreditsBySourceId)
+          .sort()
+          .find(
+            (sourceId) =>
+              (budget.stealthCreditsBySourceId[sourceId] ?? 0) >= amount,
+          );
+        if (!source) return false;
+        spendStealthCreditsFromSource(budget, source, amount);
+      } else {
+        if (totalStealthCredits(budget.stealthCreditsBySourceId) < amount)
+          return false;
+        spendStealthCredits(budget, amount);
+      }
+    }
+  }
+  return true;
+}
+
+function spendStealthCredits(
+  budget: MutableRunnerRunPathCreditBudget,
+  amount: number,
+): void {
+  let remaining = normalizeCreditAmount(amount);
+  for (const sourceId of Object.keys(budget.stealthCreditsBySourceId).sort()) {
+    const spent = Math.min(
+      budget.stealthCreditsBySourceId[sourceId] ?? 0,
+      remaining,
+    );
+    spendStealthCreditsFromSource(budget, sourceId, spent);
+    remaining -= spent;
+    if (remaining === 0) break;
+  }
+}
+
+function spendStealthCreditsFromSource(
+  budget: MutableRunnerRunPathCreditBudget,
+  sourceId: string,
+  amount: number,
+): void {
+  const spent = Math.min(
+    budget.stealthCreditsBySourceId[sourceId] ?? 0,
+    normalizeCreditAmount(amount),
+  );
+  budget.stealthCreditsBySourceId[sourceId] =
+    (budget.stealthCreditsBySourceId[sourceId] ?? 0) - spent;
+  refreshNonNoisyCreditTotals(budget);
+}
+
+function refreshNonNoisyCreditTotals(
+  budget: MutableRunnerRunPathCreditBudget,
+): void {
+  budget.stealthNonNoisyIcebreakerCredits = totalStealthCredits(
+    budget.stealthCreditsBySourceId,
+  );
+  budget.nonNoisyIcebreakerCredits =
+    budget.nonStealthNonNoisyIcebreakerCredits +
+    budget.stealthNonNoisyIcebreakerCredits;
+}
+
+function totalStealthCredits(
+  stealthCreditsBySourceId: Readonly<Record<string, number>>,
+): number {
+  return Object.values(stealthCreditsBySourceId).reduce(
+    (total, amount) => total + normalizeCreditAmount(amount),
+    0,
+  );
 }
 
 export function applicableRestrictedBreakerCredits(

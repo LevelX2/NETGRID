@@ -100,18 +100,21 @@ export function visibleBreakerEncounterQuote(params: {
   iceInstanceId?: string;
   iceSubtypes?: readonly string[];
   subroutines?: readonly VisibleEffectiveSubroutine[];
+  randomRunStrengthState?:
+    | { status: "unresolved" }
+    | { status: "resolved"; actualStrength: number };
 }): VisibleBreakerEncounterQuote | undefined {
   const breaker = CARD_DEFINITIONS_BY_ID[params.breakerDefinitionId];
+  if (!breaker) return undefined;
   const ice = CARD_DEFINITIONS_BY_ID[params.iceDefinitionId];
   const iceSubtypes = params.iceSubtypes ?? ice?.subtypes;
   if (!iceSubtypes) return undefined;
-  const abilities = icebreakerAbilitiesForDefinition(
-    breaker ?? { id: params.breakerDefinitionId, abilities: [] },
-  );
+  const abilities = icebreakerAbilitiesForDefinition(breaker);
   const subroutines = params.subroutines ?? [];
   const breakAbilities = abilities.filter(
     (ability) => ability.type === "break_subroutine",
   );
+  if (breakAbilities.length === 0) return undefined;
   const breakOptions = breakAbilities.flatMap((ability) => {
     const indexes = subroutines
       .map((subroutine, index) =>
@@ -185,6 +188,8 @@ export function visibleBreakerEncounterQuote(params: {
       (effect) => effect.kind === "run_start_random_strength_bonus",
     ),
   );
+  if (hasRunStartRandomStrength && !params.randomRunStrengthState)
+    return undefined;
   return {
     breakerInstanceId: params.breakerInstanceId,
     ...(params.iceInstanceId ? { iceInstanceId: params.iceInstanceId } : {}),
@@ -195,8 +200,12 @@ export function visibleBreakerEncounterQuote(params: {
     ...(hasRunStartRandomStrength
       ? {
           randomRunStrength:
-            params.breakerStrength > 0
-              ? { status: "resolved", actualStrength: params.breakerStrength }
+            params.randomRunStrengthState?.status === "resolved"
+              ? {
+                  status: "resolved",
+                  actualStrength:
+                    params.randomRunStrengthState.actualStrength,
+                }
               : {
                   status: "unresolved",
                   minimumStrength: 1,
@@ -273,12 +282,9 @@ function consequencesFor(
     result.push({
       kind: "lose_stealth_credits",
       amount: ability.postBreakStealthLoss,
-      trigger: ability.postBreakStealthLossTrigger ?? "per_subroutine",
-      sourceMode:
-        ability.postBreakStealthLossMode === "total_if_available"
-          ? "any_stealth_cards"
-          : "single_stealth_card",
-      optionalIfUnavailable: true,
+      trigger: requiredStealthLossTrigger(ability),
+      sourceMode: requiredStealthLossSourceMode(ability),
+      optionalIfUnavailable: requiredStealthLossOptionality(ability),
     });
   if (ability.onUseEndRun) result.push({ kind: "end_run_after_use" });
   for (const effect of ability.specialEffects ?? []) {
@@ -308,6 +314,30 @@ function consequencesFor(
       });
   }
   return result;
+}
+
+function requiredStealthLossSourceMode(
+  ability: RuntimeIcebreakerAbility,
+): "single_stealth_card" | "any_stealth_cards" {
+  if (ability.postBreakStealthLossSourceMode)
+    return ability.postBreakStealthLossSourceMode;
+  throw new Error("Breaker-Stealth-Verlust hat keinen Quellenmodus.");
+}
+
+function requiredStealthLossTrigger(
+  ability: RuntimeIcebreakerAbility,
+): "per_subroutine" | "per_ability_use" {
+  if (ability.postBreakStealthLossTrigger)
+    return ability.postBreakStealthLossTrigger;
+  throw new Error("Breaker-Stealth-Verlust hat keinen Ausloeser.");
+}
+
+function requiredStealthLossOptionality(
+  ability: RuntimeIcebreakerAbility,
+): boolean {
+  if (ability.postBreakStealthLossOptionalIfUnavailable !== undefined)
+    return ability.postBreakStealthLossOptionalIfUnavailable;
+  throw new Error("Breaker-Stealth-Verlust hat keine Verfuegbarkeitssemantik.");
 }
 
 function expectedFailureDamage(

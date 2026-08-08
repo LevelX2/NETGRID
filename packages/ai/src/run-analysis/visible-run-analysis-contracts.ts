@@ -64,6 +64,8 @@ export type BreakAssessment = {
   conditionalRiskReason?: "visible_breaker_may_trash_after_pass";
   /** A run-scoped free-break grant was consumed for this assessment. */
   consumedPendingFreeBreak?: boolean;
+  /** Exact breaker that granted the consumed run-scoped free break. */
+  consumedPendingFreeBreakSourceBreakerInstanceId?: string;
   /** Structured state changes caused by the successful break. */
   stateChangesAfterUse?: Array<
     | { kind: "add_run_strength"; amount: number }
@@ -91,6 +93,8 @@ export type RunnerRunPathCreditBudget = {
   credits: number;
   icebreakerCredits?: number;
   nonNoisyIcebreakerCredits?: number;
+  /** Non-stealth portion of the non-noisy breaker-credit pool. */
+  nonStealthNonNoisyIcebreakerCredits?: number;
   killerCredits?: number;
   stealthNonNoisyIcebreakerCredits?: number;
   stealthCreditsBySourceId?: Readonly<Record<string, number>>;

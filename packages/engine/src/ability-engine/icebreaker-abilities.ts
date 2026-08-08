@@ -45,7 +45,10 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     kind: "lose_future_clicks";
     amountPerStrength: number;
   }[];
-  postBreakStealthLossMode?: "total_if_available" | "up_to_if_available";
+  postBreakStealthLossSourceMode?:
+    | "single_stealth_card"
+    | "any_stealth_cards";
+  postBreakStealthLossOptionalIfUnavailable?: boolean;
   postBreakStealthLossTrigger?: "per_subroutine" | "per_ability_use";
   onUseEndRun?: boolean;
   breakAllMatchingSubroutines?: boolean;
@@ -179,7 +182,9 @@ function abilityForImplementation(
     ...(stealthLoss
       ? {
           postBreakStealthLoss: stealthLoss.amount,
-          postBreakStealthLossMode: stealthLoss.mode,
+          postBreakStealthLossSourceMode: stealthLoss.sourceMode,
+          postBreakStealthLossOptionalIfUnavailable:
+            stealthLoss.optionalIfUnavailable,
           postBreakStealthLossTrigger: stealthLoss.trigger,
         }
       : {}),

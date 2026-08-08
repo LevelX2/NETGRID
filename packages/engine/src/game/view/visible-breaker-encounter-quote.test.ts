@@ -25,14 +25,15 @@ describe("visibleBreakerEncounterQuote", () => {
     });
   });
 
-  it("quotes run-start random breaker strength as a visible range", () => {
+  it("keeps run-start random strength unresolved even when the displayed strength is positive", () => {
     expect(
       visibleBreakerEncounterQuote({
         breakerDefinitionId: "onr_v1_002_ai-boon",
         breakerInstanceId: "ai-boon",
-        breakerStrength: 0,
+        breakerStrength: 5,
         iceDefinitionId: "onr_v1_223_banpei",
         iceSubtypes: ["sentry"],
+        randomRunStrengthState: { status: "unresolved" },
       }),
     ).toMatchObject({
       randomRunStrength: {
@@ -44,18 +45,19 @@ describe("visibleBreakerEncounterQuote", () => {
     });
   });
 
-  it("uses the resolved run-start die result instead of an expectation", () => {
+  it("uses an explicit resolved run-start value, including zero", () => {
     expect(
       visibleBreakerEncounterQuote({
         breakerDefinitionId: "onr_proteus_087_forwards-legacy",
         breakerInstanceId: "legacy",
-        breakerStrength: 1,
+        breakerStrength: 5,
         iceDefinitionId: "onr_v1_223_banpei",
         iceSubtypes: ["sentry"],
+        randomRunStrengthState: { status: "resolved", actualStrength: 0 },
       }),
     ).toMatchObject({
-      effectiveStrength: 1,
-      randomRunStrength: { status: "resolved", actualStrength: 1 },
+      effectiveStrength: 5,
+      randomRunStrength: { status: "resolved", actualStrength: 0 },
     });
   });
 
@@ -208,11 +210,25 @@ describe("visibleBreakerEncounterQuote", () => {
               kind: "lose_stealth_credits",
               amount: 3,
               trigger: "per_ability_use",
+              sourceMode: "any_stealth_cards",
+              optionalIfUnavailable: true,
             },
           ],
         },
       ],
     });
+  });
+
+  it("returns no regular quote for an unknown breaker definition", () => {
+    expect(
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "unknown-breaker" as never,
+        breakerInstanceId: "unknown",
+        breakerStrength: 5,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+      }),
+    ).toBeUndefined();
   });
 
   it("quotes Japanese Water Torture's future-click loss with its variable pump", () => {

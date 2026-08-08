@@ -1661,7 +1661,8 @@ describe("CardImplementation coverage and registry invariants", () => {
             {
               kind: "lose_bits_from_stealth_sources",
               amount: testCase.stealthLoss,
-              mode: "up_to_if_available",
+              sourceMode: "single_stealth_card",
+              optionalIfUnavailable: true,
             },
           ],
         });

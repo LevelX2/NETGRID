@@ -344,6 +344,8 @@ function encounterCreditBudget(
     credits: normalizeCreditAmount(input.playerView.own.credits),
     icebreakerCredits: visiblePools.icebreakerCredits,
     nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
+    nonStealthNonNoisyIcebreakerCredits:
+      visiblePools.nonStealthNonNoisyIcebreakerCredits,
     killerCredits: visiblePools.killerCredits,
     stealthNonNoisyIcebreakerCredits:
       visiblePools.stealthNonNoisyIcebreakerCredits,
@@ -368,6 +370,7 @@ function spendIcebreakerCredits(
     hostedIcebreakerCreditsByBreakerInstanceId: {
       ...budget.hostedIcebreakerCreditsByBreakerInstanceId,
     },
+    stealthCreditsBySourceId: { ...budget.stealthCreditsBySourceId },
   };
   let remaining = normalizeCreditAmount(cost);
   let restrictedSpent = 0;
@@ -383,13 +386,7 @@ function spendIcebreakerCredits(
     );
   remaining -= hostedCredits;
   restrictedSpent += hostedCredits;
-  const spendRestricted = (
-    key:
-      | "icebreakerCredits"
-      | "nonNoisyIcebreakerCredits"
-      | "killerCredits"
-      | "stealthNonNoisyIcebreakerCredits",
-  ) => {
+  const spendRestricted = (key: "icebreakerCredits" | "killerCredits") => {
     const spent = Math.min(next[key], remaining);
     next[key] -= spent;
     remaining -= spent;
@@ -397,7 +394,27 @@ function spendIcebreakerCredits(
   };
   if (breakerHasSubtype(breaker, "killer")) spendRestricted("killerCredits");
   if (!breakerHasSubtype(breaker, "noisy")) {
-    spendRestricted("nonNoisyIcebreakerCredits");
+    const ordinarySpent = Math.min(
+      next.nonStealthNonNoisyIcebreakerCredits,
+      remaining,
+    );
+    next.nonStealthNonNoisyIcebreakerCredits -= ordinarySpent;
+    next.nonNoisyIcebreakerCredits -= ordinarySpent;
+    remaining -= ordinarySpent;
+    restrictedSpent += ordinarySpent;
+    for (const sourceId of Object.keys(next.stealthCreditsBySourceId).sort()) {
+      const spent = Math.min(
+        next.stealthCreditsBySourceId[sourceId] ?? 0,
+        remaining,
+      );
+      next.stealthCreditsBySourceId[sourceId] =
+        (next.stealthCreditsBySourceId[sourceId] ?? 0) - spent;
+      next.stealthNonNoisyIcebreakerCredits -= spent;
+      next.nonNoisyIcebreakerCredits -= spent;
+      remaining -= spent;
+      restrictedSpent += spent;
+      if (remaining === 0) break;
+    }
   }
   spendRestricted("icebreakerCredits");
   const cashSpent = Math.min(next.credits, remaining);

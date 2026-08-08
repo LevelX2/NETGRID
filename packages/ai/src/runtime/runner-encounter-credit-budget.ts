@@ -17,9 +17,10 @@ type EncounterCreditBudget = RunnerRunPathCreditBudget & {
 
 type MutableEncounterCreditBudget = Omit<
   Required<RunnerRunPathCreditBudget>,
-  "hostedIcebreakerCreditsByBreakerInstanceId"
+  "hostedIcebreakerCreditsByBreakerInstanceId" | "stealthCreditsBySourceId"
 > & {
   hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
+  stealthCreditsBySourceId: Record<string, number>;
   runOnlyCredits: number;
 };
 
@@ -45,6 +46,8 @@ export function runnerEncounterCreditBudgetForInput(
     ),
     icebreakerCredits: visiblePools.icebreakerCredits,
     nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
+    nonStealthNonNoisyIcebreakerCredits:
+      visiblePools.nonStealthNonNoisyIcebreakerCredits,
     killerCredits: visiblePools.killerCredits,
     stealthNonNoisyIcebreakerCredits:
       visiblePools.stealthNonNoisyIcebreakerCredits,
@@ -155,13 +158,7 @@ export function spendRunnerEncounterBreakerCost(params: {
     }
     remaining -= hostedCredits;
     restrictedSpent += hostedCredits;
-    const spendRestricted = (
-      key:
-        | "icebreakerCredits"
-        | "nonNoisyIcebreakerCredits"
-        | "killerCredits"
-        | "stealthNonNoisyIcebreakerCredits",
-    ) => {
+    const spendRestricted = (key: "icebreakerCredits" | "killerCredits") => {
       const spent = Math.min(budget[key], remaining);
       budget[key] -= spent;
       remaining -= spent;
@@ -169,7 +166,10 @@ export function spendRunnerEncounterBreakerCost(params: {
     };
     if (breakerHasSubtype(breaker, "killer")) spendRestricted("killerCredits");
     if (!breakerHasSubtype(breaker, "noisy")) {
-      spendRestricted("nonNoisyIcebreakerCredits");
+      spendNonNoisyCredits(budget, () => remaining, (spent) => {
+        remaining -= spent;
+        restrictedSpent += spent;
+      });
     }
     spendRestricted("icebreakerCredits");
   }
@@ -205,6 +205,14 @@ function normalizeBudget(
     nonNoisyIcebreakerCredits: normalizeCreditAmount(
       budget.nonNoisyIcebreakerCredits ?? 0,
     ),
+    nonStealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
+      budget.nonStealthNonNoisyIcebreakerCredits ??
+        Math.max(
+          0,
+          normalizeCreditAmount(budget.nonNoisyIcebreakerCredits ?? 0) -
+            totalStealthCredits(budget.stealthCreditsBySourceId ?? {}),
+        ),
+    ),
     killerCredits: normalizeCreditAmount(budget.killerCredits ?? 0),
     stealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
       budget.stealthNonNoisyIcebreakerCredits ?? 0,
@@ -223,6 +231,43 @@ function normalizeBudget(
       ]),
     ),
   };
+}
+
+function spendNonNoisyCredits(
+  budget: MutableEncounterCreditBudget,
+  remaining: () => number,
+  recordSpend: (spent: number) => void,
+): void {
+  const ordinarySpent = Math.min(
+    budget.nonStealthNonNoisyIcebreakerCredits,
+    remaining(),
+  );
+  budget.nonStealthNonNoisyIcebreakerCredits -= ordinarySpent;
+  budget.nonNoisyIcebreakerCredits -= ordinarySpent;
+  recordSpend(ordinarySpent);
+  let stillNeeded = remaining();
+  for (const sourceId of Object.keys(budget.stealthCreditsBySourceId).sort()) {
+    const spent = Math.min(
+      budget.stealthCreditsBySourceId[sourceId] ?? 0,
+      stillNeeded,
+    );
+    budget.stealthCreditsBySourceId[sourceId] =
+      (budget.stealthCreditsBySourceId[sourceId] ?? 0) - spent;
+    budget.stealthNonNoisyIcebreakerCredits -= spent;
+    budget.nonNoisyIcebreakerCredits -= spent;
+    recordSpend(spent);
+    stillNeeded -= spent;
+    if (stillNeeded === 0) break;
+  }
+}
+
+function totalStealthCredits(
+  sources: Readonly<Record<string, number>>,
+): number {
+  return Object.values(sources).reduce(
+    (sum, amount) => sum + normalizeCreditAmount(amount),
+    0,
+  );
 }
 
 function breakerHasSubtype(breaker: VisibleCard, subtype: string): boolean {

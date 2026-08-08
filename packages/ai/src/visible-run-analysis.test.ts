@@ -200,6 +200,7 @@ describe("visible run analysis targeted breaker paths", () => {
       type: "program",
       known: true,
       strength: 5,
+      randomRunStrengthState: { status: "unresolved" },
       subtypes: ["icebreaker", "killer"],
     };
     const assessment = minimumCreditsToBreakVisibleSubroutines(
@@ -225,7 +226,47 @@ describe("visible run analysis targeted breaker paths", () => {
     expect(assessment).toMatchObject({
       cost: 2,
       consumedPendingFreeBreak: true,
+      consumedPendingFreeBreakSourceBreakerInstanceId: bulldozer.instanceId,
       breakerInstanceId: aiBoon.instanceId,
+    });
+  });
+
+  it("consumes the Bulldozer grant instead of retaining it on the paid breaker", () => {
+    const bulldozer = bulldozerBreaker("bulldozer-source");
+    const aiBoon: VisibleCard = {
+      instanceId: "ai-boon-paid",
+      definitionId: "onr_v1_002_ai-boon",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 5,
+      randomRunStrengthState: { status: "unresolved" },
+      subtypes: ["icebreaker", "killer"],
+    };
+    const mixedSentry: VisibleCard = {
+      ...sentryEndTheRunIce("middle-mixed-sentry"),
+      effectiveRunQuote: {
+        iceInstanceId: "middle-mixed-sentry",
+        iceDefinitionId: "onr_v1_249_hunter",
+        effectiveStrength: 5,
+        subroutines: [
+          { id: "middle-mixed-sentry:etr-1", type: "end_the_run" },
+          { id: "middle-mixed-sentry:etr-2", type: "end_the_run" },
+        ],
+      },
+    };
+
+    const assessment = assessKnownRezzedIcePath(
+      [sentryEndTheRunIce("inner-paid-sentry"), mixedSentry, classicWallIce("outer-wall-source")],
+      [bulldozer, aiBoon],
+      3,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 3,
+      creditsAfterPath: 0,
     });
   });
 
@@ -565,6 +606,7 @@ describe("visible run analysis targeted breaker paths", () => {
       type: "program",
       known: true,
       strength: 0,
+      randomRunStrengthState: { status: "unresolved" },
       subtypes: ["icebreaker"],
     };
 
@@ -596,6 +638,7 @@ describe("visible run analysis targeted breaker paths", () => {
       type: "program",
       known: true,
       strength: 0,
+      randomRunStrengthState: { status: "unresolved" },
       subtypes: ["icebreaker"],
     };
 

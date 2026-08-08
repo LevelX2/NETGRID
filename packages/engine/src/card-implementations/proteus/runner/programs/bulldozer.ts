@@ -13,7 +13,8 @@ export const proteusBulldozerImplementation: CardImplementationDefinition = {
         {
           kind: "lose_bits_from_stealth_sources",
           amount: 2,
-          mode: "total_if_available",
+          sourceMode: "any_stealth_cards",
+          optionalIfUnavailable: true,
           trigger: "per_subroutine",
         },
       ],

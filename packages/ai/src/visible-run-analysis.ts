@@ -994,9 +994,18 @@ function advanceVisibleRunBreakerState(
   fullyBrokeEncounteredIce: boolean,
 ): void {
   if (assessment.consumedPendingFreeBreak) {
-    state.pendingFreeBreaks = state.pendingFreeBreaks.filter(
-      (entry) => entry.sourceBreakerInstanceId !== assessment.breakerInstanceId,
+    const sourceBreakerInstanceId =
+      assessment.consumedPendingFreeBreakSourceBreakerInstanceId;
+    if (!sourceBreakerInstanceId) {
+      throw new Error("Verbrauchter Free-Break hat keine Quellbreaker-ID.");
+    }
+    const pendingIndex = state.pendingFreeBreaks.findIndex(
+      (entry) => entry.sourceBreakerInstanceId === sourceBreakerInstanceId,
     );
+    if (pendingIndex < 0) {
+      throw new Error("Verbrauchter Free-Break ist im Run-State nicht vorhanden.");
+    }
+    state.pendingFreeBreaks.splice(pendingIndex, 1);
   }
   if (!fullyBrokeEncounteredIce) return;
   for (const change of assessment.stateChangesAfterUse ?? []) {

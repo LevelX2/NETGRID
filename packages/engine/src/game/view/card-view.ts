@@ -23,6 +23,7 @@ import {
   type EffectiveAgendaDifficultyDependencies,
 } from "../../ability-engine/effective-values";
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
+import { icebreakerAbilitiesForDefinition } from "../../ability-engine/icebreaker-abilities";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { SERVER_DIFFICULTY_UPGRADE_SOURCES } from "../../mechanics/agenda-scoring";
@@ -68,6 +69,17 @@ function visibleKnownCardWithReferenceViewer(
     (state.run?.runStartRandomStrengthSourceCardId === id
       ? state.run.runStartRandomStrength
       : undefined);
+  const randomRunStrengthState = icebreakerAbilitiesForDefinition(
+    definition,
+  ).some((ability) =>
+    ability.specialEffects?.some(
+      (effect) => effect.kind === "run_start_random_strength_bonus",
+    ),
+  )
+    ? typeof runStartStrength === "number"
+      ? ({ status: "resolved", actualStrength: runStartStrength } as const)
+      : ({ status: "unresolved" } as const)
+    : undefined;
   const variableIceStrength =
     definition.type === "ice" &&
     instance.variableIceState?.family === "x_strength" &&
@@ -153,6 +165,7 @@ function visibleKnownCardWithReferenceViewer(
     ...(definition.rezCost !== undefined
       ? { rezCost: definition.rezCost }
       : {}),
+    ...(randomRunStrengthState ? { randomRunStrengthState } : {}),
     ...(definition.baseLink !== undefined
       ? { baseLink: definition.baseLink }
       : {}),
