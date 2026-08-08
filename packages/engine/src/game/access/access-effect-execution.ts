@@ -344,11 +344,17 @@ export function startCardImplementationAccessPaymentChoice(
   }
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
+  const definition = host.cards.definitionFor(cardId);
   host.state.pendingChoice = {
     choiceId: `p3_35_access_payment_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `p3_35.access_payment:${cardId}:${effectIndex}:${accessZone}:${host.state.stateVersion + 1}`,
-    prompt: "Access-Ambush bezahlen",
+    prompt: cardImplementationAccessPaymentPrompt(
+      definition.title,
+      accessZone,
+      cost.amount,
+      effect,
+    ),
     kind: "select_option",
     options: [
       {
@@ -376,6 +382,40 @@ export function startCardImplementationAccessPaymentChoice(
     ambushPaymentChoiceOpened: true,
     ambushPaymentAmount: cost.amount,
   };
+}
+
+function cardImplementationAccessPaymentPrompt(
+  cardTitle: string,
+  accessZone: CardAccessZone,
+  creditCost: number,
+  effect: CardAccessEffectImplementation,
+): string {
+  return `${cardTitle} wurde aus ${accessZoneLabel(accessZone)} accessed. ${creditCost} Credits bezahlen, um ${cardImplementationAccessPaymentEffectText(effect)}?`;
+}
+
+function cardImplementationAccessPaymentEffectText(
+  effect: CardAccessEffectImplementation,
+): string {
+  const runnerCounter = effect.effects.find(
+    (step) => step.kind === "add_runner_counter",
+  );
+  if (runnerCounter) {
+    return `dem Runner ${runnerCounter.amount} Counter zu geben`;
+  }
+  return "den Access-Effekt auszulösen";
+}
+
+function accessZoneLabel(accessZone: CardAccessZone): string {
+  switch (accessZone) {
+    case "hq":
+      return "HQ";
+    case "rd":
+      return "R&D";
+    case "archives":
+      return "Archives";
+    case "installed":
+      return "dem angegriffenen Server";
+  }
 }
 
 export function executeCardImplementationAccessEffectSteps(

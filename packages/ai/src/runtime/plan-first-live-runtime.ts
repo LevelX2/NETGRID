@@ -3247,6 +3247,10 @@ function buildRunnerDomain(
             evaluation,
             candidates,
           );
+          const executionMode = runPurposeForEvaluation(evaluation);
+          const informationProbeAdmissible =
+            executionMode !== "information" ||
+            runnerInformationProbeKnownPathWithinBudget(evaluation);
           const currentPressureRoute =
             !knownNoPayoff &&
             pressureCadence.routeAvailable &&
@@ -3255,19 +3259,15 @@ function buildRunnerDomain(
             fundingSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
             evaluation.routeQuote?.reachability !== "no_access" &&
+            informationProbeAdmissible &&
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
             (evaluation.score > 0 ||
               terminalCentralAccess ||
               hqSuccessWindowRoute !== undefined);
-          const executionMode = runPurposeForEvaluation(evaluation);
-          const purpose = evaluation.multiaccessAvailable
-            ? ("multiaccess" as const)
-            : evaluation.knownAccessState === "unknown" ||
-                evaluation.knownAccessState === "fresh"
-              ? ("information" as const)
-              : ("access" as const);
+          const purpose =
+            executionMode === "contest" ? ("access" as const) : executionMode;
           return {
             pressureId: `central:${evaluation.targetServerId}`,
             serverId: evaluation.targetServerId as "hq" | "rd" | "archives",
@@ -3414,7 +3414,10 @@ function buildRunnerDomain(
               }),
             ),
             ...(executionMode === "information"
-              ? { encounterCreditSpendLimit: 1 }
+              ? {
+                  encounterCreditSpendLimit:
+                    INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET,
+                }
               : {}),
             accessCommitment: accessCommitmentForEvaluation(evaluation),
             ...(sourceDefinitionForEvaluation(evaluation, candidates)
@@ -3590,6 +3593,9 @@ function buildRunnerDomain(
               candidates,
             );
         const purpose = runPurposeForEvaluation(evaluation);
+        const informationProbeAdmissible =
+          purpose !== "information" ||
+          runnerInformationProbeKnownPathWithinBudget(evaluation);
         const directRunCanConvertNow = runnerRunTargetCanConvertNow(
           input,
           economy,
@@ -3610,10 +3616,11 @@ function buildRunnerDomain(
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
         const directRunRouteReady =
-          evaluation.recommendation === "run_now" ||
-          evaluation.recommendation === "run_if_free" ||
-          productiveProbeCanConvertNow ||
-          directRunCanConvertNow;
+          informationProbeAdmissible &&
+          (evaluation.recommendation === "run_now" ||
+            evaluation.recommendation === "run_if_free" ||
+            productiveProbeCanConvertNow ||
+            directRunCanConvertNow);
         return {
           contestId: `remote:${evaluation.targetServerId}`,
           serverId: evaluation.targetServerId,
@@ -3655,7 +3662,10 @@ function buildRunnerDomain(
           ...(fundingSupport ? { supportNeedId: fundingSupport.needId } : {}),
           preferredRunActionIds: [evaluation.actionId],
           ...(purpose === "information"
-            ? { encounterCreditSpendLimit: 1 }
+            ? {
+                encounterCreditSpendLimit:
+                  INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET,
+              }
             : {}),
           accessCommitment: accessCommitmentForEvaluation(evaluation),
         };
@@ -3712,7 +3722,8 @@ function buildRunnerDomain(
             constrainedActionCapacity: true,
             evidenceCode,
             preferredRunActionIds: [candidate.actionId],
-            encounterCreditSpendLimit: 1,
+            encounterCreditSpendLimit:
+              INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET,
           },
         ];
       },
@@ -17342,6 +17353,24 @@ function runPurposeForEvaluation(
     return "information";
   }
   return evaluation.targetKind === "remote" ? "contest" : "access";
+}
+
+/**
+ * An information probe keeps a one-credit encounter ceiling in its bound
+ * continuation. Do not launch it when the already quoted known path needs
+ * more than that ceiling: otherwise the plan can only reach the encounter
+ * and is then forced into ETR.
+ */
+const INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET = 1;
+
+function runnerInformationProbeKnownPathWithinBudget(
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    evaluation.pathPassability === "reachable" &&
+    evaluation.routeQuote?.fundingGap === 0 &&
+    evaluation.pathCost <= INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET
+  );
 }
 
 function currentEncounterHasUnbrokenResolvableDeflector(

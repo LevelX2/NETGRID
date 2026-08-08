@@ -8622,6 +8622,67 @@ describe("authoritative plan-first live runtime", () => {
   });
 
   it.each([
+    ["central", "hq", "runner.pressure_central"],
+    ["remote", "remote_1", "runner.contest_remote"],
+  ] as const)(
+    "does not launch a %s information probe when its known path exceeds the encounter budget",
+    (_kind, serverId, owner) => {
+      resetResidentPlanPortfolioMemory();
+      const run = legalAction(
+        `run-${serverId}`,
+        "runner",
+        "start_run",
+        `Run ${serverId}`,
+        { credits: 0, clicks: 1 },
+        { payload: { serverId } },
+      );
+      const credit = legalAction(
+        "credit",
+        "runner",
+        "gain_credit",
+        "Gain 1 Credit",
+        { credits: 0, clicks: 1 },
+      );
+      const input = aiInput("runner", [run, credit]);
+      input.playerView.own.credits = 5;
+      input.playerView.own.clicks = 3;
+      input.playerView.opponent.deckCount = 10;
+      const target = {
+        ...safeRuntimeRunTarget(run.actionId, serverId),
+        targetKind: serverId.startsWith("remote_")
+          ? ("remote" as const)
+          : ("hq" as const),
+        accessTargetKind: serverId.startsWith("remote_")
+          ? ("remote" as const)
+          : ("hq" as const),
+        knownAccessState: "unknown" as const,
+        accessPayoff: "unknown" as const,
+        recommendation: "run_if_free" as const,
+        pathCost: 2,
+        routeQuote: {
+          ...safeRuntimeRunTarget(run.actionId, serverId).routeQuote,
+          knownCost: 2,
+          guaranteedKnownCost: 2,
+          availableCredits: 5,
+          fundingGap: 0,
+        },
+        score: 180,
+      };
+
+      const decision = liveContext({
+        evaluateRunnerRunTargets: () => [target],
+      }).chooseSemanticRuntimeAction(input, {});
+
+      expect(decision).toMatchObject({
+        actionId: credit.actionId,
+        reasonCode: "plan_first.runner.economy",
+        fallbackUsed: false,
+      });
+      expect(decision.reasonCode).not.toContain(owner);
+    },
+  );
+
+  it.each([
     {
       label: "zero-cost score-threat probe",
       pathCost: 0,

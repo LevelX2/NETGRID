@@ -2488,6 +2488,28 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("describes a Doppelganger counter removal emitted as a trigger ability", () => {
+    const item = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        runnerAbility: "remove_runner_trace_counter",
+        counterType: "link_reduction_counter",
+        removedCounterAmount: 1,
+        remainingCounters: 0,
+        runnerCreditsAfter: 8,
+      }),
+      "corp",
+    );
+
+    expect(item.title).toBe(
+      "Der Runner hat 1 Doppelganger-Counter entfernt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Doppelganger-Counter", "-1", "0 übrig"]),
+    );
+    expect(item.chips).not.toContain("0 Credits");
+  });
+
   it("names access ambush choices from resolved effects when payment payload is missing", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -5848,6 +5870,28 @@ describe("formatChronicleEvent", () => {
       expect.arrayContaining(["Rez", "+1 Aktion", "5 Credits"]),
     );
     expect(formatChronicleEffectItems(event, "runner")).toEqual([]);
+  });
+
+  it("describes a rezzed card that shuffles itself into R&D", () => {
+    const item = formatChronicleEvent(
+      makeEvent("rez_card", {
+        actor: "corp",
+        title: "Bel-Digmo Antibody",
+        cardDefinitionId: "onr_proteus_054_bel-digmo-antibody",
+        sourceDefinitionId: "onr_proteus_054_bel-digmo-antibody",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "shuffle_source_into_corp_rd",
+        movedCardCount: 1,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Die Korp hat Bel-Digmo Antibody gerezzt und durch seine Fähigkeit in R&D gemischt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Rez", "Bel-Digmo Antibody", "R&D", "Gemischt"]),
+    );
   });
 
   it("formats Corporate War score credit swings from score payload fields", () => {

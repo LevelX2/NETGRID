@@ -2214,7 +2214,7 @@ export function formatChronicleEvent(
       if (abilityId === "remove_runner_trace_counter") {
         const removed = numberValue(payload.removedCounterAmount) ?? 1;
         const remaining = numberValue(payload.remainingCounters) ?? 0;
-        const paid = numberValue(payload.counterRemoveCreditCost) ?? 0;
+        const paid = numberValue(payload.counterRemoveCreditCost);
         const counterText = counterLabel(payload.counterType);
         category = "card";
         importance = "important";
@@ -2223,7 +2223,7 @@ export function formatChronicleEvent(
           counterText,
           `-${removed}`,
           `${remaining} übrig`,
-          `${paid} ${creditLabel(paid)}`,
+          ...(paid !== undefined ? [`${paid} ${creditLabel(paid)}`] : []),
         );
         break;
       }
@@ -2804,6 +2804,26 @@ export function formatChronicleEvent(
     case "rez_ice":
     case "rez_card":
       {
+        if (hiddenZoneAction === "shuffle_source_into_corp_rd") {
+          const source =
+            cardTitle ??
+            titleForDefinitionId(sourceDefinitionId) ??
+            sourceTitle ??
+            "eine Karte";
+          category = "card";
+          importance = "important";
+          visibility = "public";
+          cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+          cardTitle = source;
+          title = phrase(
+            subject,
+            `${source} gerezzt und durch seine Fähigkeit in R&D gemischt`,
+          );
+          description =
+            "Die Karte verlässt dadurch den angegriffenen Server; die Runfortsetzung wird anschließend regelkonform bestimmt.";
+          chips.push("Rez", source, "R&D", "Gemischt");
+          break;
+        }
         const rezEffect = mergedCardResolverEffect ?? effect;
         const selectedSubtypes = subtypeLabelListFromPayload(
           payload.selectedSubtypesAfterRez,
@@ -4016,6 +4036,29 @@ export function formatChronicleEvent(
       chips.push("Aktion");
       if (!description && label) description = `Hinweis: ${safeLabel(label)}`;
       break;
+  }
+
+  if (
+    actionType === "trigger_ability" &&
+    abilityId === "remove_runner_trace_counter"
+  ) {
+    const removed = numberValue(payload.removedCounterAmount) ?? 1;
+    const remaining = numberValue(payload.remainingCounters) ?? 0;
+    const paid = numberValue(payload.counterRemoveCreditCost);
+    const counterText = counterLabel(payload.counterType);
+    category = "card";
+    importance = "important";
+    visibility = "public";
+    title = phrase(subject, `${removed} ${counterText} entfernt`);
+    chips.splice(
+      0,
+      chips.length,
+      ...baseChipList,
+      counterText,
+      `-${removed}`,
+      `${remaining} übrig`,
+      ...(paid !== undefined ? [`${paid} ${creditLabel(paid)}`] : []),
+    );
   }
 
   if (abilityId === "broken_ice_virus_counter_choice") {

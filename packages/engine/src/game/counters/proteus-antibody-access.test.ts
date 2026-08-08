@@ -224,6 +224,8 @@ describe("Proteus Phase 8b Corp Antibody access", () => {
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       kind: "select_option",
+      prompt:
+        "Doppelganger Antibody wurde aus R&D accessed. 2 Credits bezahlen, um dem Runner 1 Counter zu geben?",
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       ambushPaymentChoiceOpened: true,
