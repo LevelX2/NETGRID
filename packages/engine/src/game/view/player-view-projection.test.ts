@@ -24,7 +24,7 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
-import type { CardInstanceId } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID, type CardInstanceId } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { overadvanceViewFields } from "./card-view";
 
@@ -47,6 +47,67 @@ describe("PlayerView projection", () => {
       effectiveStrength: expect.any(Number),
       subroutines: expect.any(Array),
     });
+    expect(ice?.effectiveRunQuote?.subroutines[0]).toMatchObject({
+      sourceDefinitionId: "simple_barrier_ice",
+      sourceTitle: "Simple Barrier ICE",
+    });
+  });
+
+  it("projects an authoritative quote with explicit trace bases for every playable ICE", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "all-playable-ice-run-quotes" }),
+    );
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === "rd",
+    );
+    const sourceInstance = Object.values(state.cardInstances)[0];
+    if (!server || !sourceInstance)
+      throw new Error("Missing audit fixture state");
+    const playableIce = Object.values(CARD_DEFINITIONS_BY_ID).filter(
+      (definition) =>
+        definition.implementationStatus === "playable_mvp" &&
+        definition.type === "ice",
+    );
+
+    expect(playableIce.length).toBeGreaterThan(0);
+    for (const definition of playableIce) {
+      const iceId = `authoritative-quote-${definition.id}` as CardInstanceId;
+      state.cardInstances[iceId] = {
+        ...sourceInstance,
+        definitionId: definition.id,
+        zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+        faceup: true,
+        rezzed: true,
+      };
+      server.ice = [iceId];
+
+      const ice = getPlayerView(state, "runner")
+        .servers.find((candidate) => candidate.id === "rd")
+        ?.ice.find((card) => card.instanceId === iceId);
+      const quote = ice?.effectiveRunQuote;
+
+      expect(
+        quote,
+        `${definition.title}: fehlender authoritative Quote`,
+      ).toBeDefined();
+      expect(quote?.effectiveStrength).toBeTypeOf("number");
+      for (const subroutine of quote?.subroutines ?? []) {
+        expect(
+          subroutine.sourceDefinitionId,
+          `${definition.title}: fehlende Subroutinenquelle`,
+        ).toBeDefined();
+        expect(
+          subroutine.sourceTitle,
+          `${definition.title}: fehlender Subroutinentitel`,
+        ).toBeDefined();
+        if (subroutine.type === "initiate_trace") {
+          expect(
+            subroutine.baseTraceStrength,
+            `${definition.title}: fehlende explizite Trace-Basis`,
+          ).toBeTypeOf("number");
+        }
+      }
+    }
   });
 
   it("projects Vapor Ops counter-bank evidence only to the Corp", () => {

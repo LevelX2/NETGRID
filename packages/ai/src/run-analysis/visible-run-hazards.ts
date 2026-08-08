@@ -229,7 +229,7 @@ export function visibleIceRunHazardsForQuote(params: {
       penalty,
       evidence: [
         `visible_ice_hazard:${baseHazard.kind}`,
-        `visible_ice_hazard_source:${sourceTitle}`,
+        ...(sourceTitle ? [`visible_ice_hazard_source:${sourceTitle}`] : []),
         ...(traceBaseStrength !== undefined
           ? [`visible_ice_trace_base:${traceBaseStrength}`]
           : []),
@@ -639,9 +639,6 @@ export function traceBaseStrengthForVisibleSubroutine(
 ): number | undefined {
   if (typeof subroutine.baseTraceStrength === "number") {
     return Math.max(0, Math.floor(subroutine.baseTraceStrength));
-  }
-  if (typeof subroutine.amount === "number") {
-    return Math.max(0, Math.floor(subroutine.amount));
   }
   return undefined;
 }

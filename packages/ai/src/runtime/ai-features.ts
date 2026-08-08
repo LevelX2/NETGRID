@@ -48,10 +48,6 @@ export type AiFeaturesDependencies = {
     credits: number,
     root: VisibleCard[],
   ) => KnownPathAssessment;
-  readonly isBlockedByKnownRezzedIce: (
-    ice: VisibleCard | undefined,
-    rigDefinitionIds: Set<string>,
-  ) => boolean;
   readonly visibleRunnerDrawTaxSourceCount: (input: AiDecisionInput) => number;
 };
 
@@ -107,11 +103,7 @@ export function extractAiFeatures(
           server.root.slice(),
         );
         return (
-          knownPath.canReachAccess === false ||
-          dependencies.isBlockedByKnownRezzedIce(
-            server.ice.at(-1),
-            rigDefinitionIds,
-          )
+          knownPath.canReachAccess === false
         );
       })
       .map((server) => server.id),

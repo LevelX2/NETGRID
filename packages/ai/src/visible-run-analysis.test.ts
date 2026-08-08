@@ -11,6 +11,7 @@ import {
 import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 import {
+  canVisibleBreakerBreakQuotedSubroutines,
   creditsToBreakVisibleSubroutinesWithBreaker,
   minimumCreditsToBreakVisibleSubroutines,
 } from "./run-analysis/visible-run-breaker-path";
@@ -673,6 +674,53 @@ describe("visible run analysis targeted breaker paths", () => {
       canReachAccess: true,
       conditionalAccessReasons: ["visible_random_breaker_strength"],
     });
+  });
+
+  it("uses the visible random-breaker strength for quoted coverage", () => {
+    const resolvedForwardsLegacy: VisibleCard = {
+      instanceId: "resolved-forwards-legacy",
+      definitionId: "onr_proteus_087_forwards-legacy",
+      side: "runner",
+      type: "program",
+      known: true,
+      strength: 3,
+      randomRunStrengthState: {
+        status: "resolved",
+        actualStrength: 3,
+        currentStrengthAdjustment: 0,
+      },
+      subtypes: ["icebreaker", "killer"],
+    };
+    const sentry = sentryEndTheRunIce("quoted-coverage-sentry");
+
+    expect(
+      canVisibleBreakerBreakQuotedSubroutines({
+        breaker: resolvedForwardsLegacy,
+        ice: sentry,
+        subroutines: sentry.effectiveRunQuote!.subroutines,
+      }),
+    ).toBe(true);
+    expect(
+      canVisibleBreakerBreakQuotedSubroutines({
+        breaker: resolvedForwardsLegacy,
+        ice: {
+          definitionId: "simple_code_gate_ice",
+          subtypes: ["code_gate"],
+        },
+        subroutines: [{ id: "quoted-coverage-etr", type: "end_the_run" }],
+      }),
+    ).toBe(false);
+    expect(
+      canVisibleBreakerBreakQuotedSubroutines({
+        breaker: {
+          ...resolvedForwardsLegacy,
+          strength: 4,
+          randomRunStrengthState: { status: "unresolved" },
+        },
+        ice: sentry,
+        subroutines: sentry.effectiveRunQuote!.subroutines,
+      }),
+    ).toBe(true);
   });
 
   it("marks Bartmoss use as a post-pass trash risk", () => {

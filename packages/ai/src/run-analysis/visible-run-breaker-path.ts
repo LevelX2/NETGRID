@@ -788,12 +788,13 @@ export function canBreakerDefinitionBreakIce(
   iceDefinitionId: string,
 ): boolean {
   if (breakerCardBlocksAccessReachability(breakerDefinitionId)) return false;
+  const breakerDefinition = visibleRunCardDefinition(breakerDefinitionId);
   const iceDefinition = visibleRunCardDefinition(iceDefinitionId);
-  if (!iceDefinition) return false;
+  if (!breakerDefinition || !iceDefinition) return false;
   const quote = visibleBreakerEncounterQuote({
     breakerDefinitionId,
     breakerInstanceId: "coverage_probe",
-    breakerStrength: Number.MAX_SAFE_INTEGER,
+    breakerStrength: breakerDefinition.strength ?? 0,
     iceDefinitionId,
     iceSubtypes: iceDefinition.subtypes,
     subroutines: (iceDefinition.subroutines ?? []).map((subroutine) => ({
@@ -818,6 +819,7 @@ export function canVisibleBreakerBreakQuotedSubroutines(params: {
   if (
     !params.breaker.known ||
     !params.breaker.definitionId ||
+    typeof params.breaker.strength !== "number" ||
     !params.ice.definitionId ||
     params.subroutines.length === 0 ||
     breakerCardBlocksAccessReachability(params.breaker.definitionId)
@@ -826,7 +828,7 @@ export function canVisibleBreakerBreakQuotedSubroutines(params: {
   const quote = visibleBreakerEncounterQuote({
     breakerDefinitionId: params.breaker.definitionId,
     breakerInstanceId: params.breaker.instanceId,
-    breakerStrength: Number.MAX_SAFE_INTEGER,
+    breakerStrength: params.breaker.strength,
     ...(params.breaker.selectedTargetCardId
       ? { selectedTargetCardId: params.breaker.selectedTargetCardId }
       : {}),

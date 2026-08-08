@@ -34,10 +34,6 @@ export type AiFacadeFoundationContextDependencies = {
     credits: number,
     root: VisibleCard[],
   ) => KnownPathAssessment;
-  isBlockedByKnownRezzedIce: (
-    ice: VisibleCard | undefined,
-    rigDefinitionIds: Set<string>,
-  ) => boolean;
   visibleRunnerDrawTaxSourceCount: (input: AiDecisionInput) => number;
   sourceDefinitionIdForAction: (
     input: AiDecisionInput,
@@ -61,7 +57,6 @@ export function createAiFacadeFoundationContext(
     buildObservedFacts: dependencies.buildObservedFacts,
     buildServerFeatures: dependencies.buildServerFeatures,
     assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
-    isBlockedByKnownRezzedIce: dependencies.isBlockedByKnownRezzedIce,
     visibleRunnerDrawTaxSourceCount:
       dependencies.visibleRunnerDrawTaxSourceCount,
   });

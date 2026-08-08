@@ -53,7 +53,6 @@ import { corpVisibleRunnerHardwarePayoffEvidence } from "./runtime/runner-hardwa
 import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
 import { runnerHasInstalledPrograms } from "./runtime/runner-installed-program";
 import { runnerKnownIcePathReason as semanticRuntimeKnownIcePathReason } from "./runtime/runner-known-ice-path-score";
-import { isBlockedByKnownRezzedIce } from "./runtime/runner-known-rezzed-ice-block";
 import { runnerProjectedCreditGainForAction } from "./runtime/runner-loan-credit-projection";
 import { runnerMultiRunEventScoreValue } from "./runtime/runner-multi-run-event-score";
 import {
@@ -152,7 +151,6 @@ export const aiLiveRuntimeDependencies = {
   buildObservedFacts,
   buildServerFeatures,
   assessKnownRezzedIcePath,
-  isBlockedByKnownRezzedIce,
   visibleRunnerDrawTaxSourceCount,
   sourceDefinitionIdForAction,
   runnerKnownPathAssessmentIsKnownNoAccess,

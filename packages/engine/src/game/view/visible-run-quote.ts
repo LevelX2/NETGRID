@@ -1,5 +1,6 @@
 import {
   CARD_DEFINITIONS_BY_ID,
+  type CardDefinitionId,
   type CardInstanceId,
   type GameState,
   type SubroutineDefinition,
@@ -28,13 +29,14 @@ export function visibleEffectiveIceRunQuote(
   iceId: CardInstanceId,
   visibleIce: VisibleCard,
 ): VisibleEffectiveIceRunQuote | undefined {
+  const definitionId = visibleIce.definitionId;
   if (
     !visibleIce.known ||
     visibleIce.rezzed !== true ||
-    !visibleIce.definitionId
+    !definitionId
   )
     return undefined;
-  const definition = CARD_DEFINITIONS_BY_ID[visibleIce.definitionId];
+  const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition || definition.type !== "ice") return undefined;
   const printedSubroutines =
     printedSubroutinesForCardImplementation(definition) ??
@@ -59,7 +61,12 @@ export function visibleEffectiveIceRunQuote(
       (subroutine) => subroutine.type === "initiate_trace",
     ),
     ...additionalSubroutinesForIce(state, iceId),
-  ].map(visibleEffectiveSubroutine);
+  ].map((subroutine) =>
+    visibleEffectiveSubroutine(subroutine, {
+      definitionId,
+      title: definition.title,
+    }),
+  );
   const breakCostQuote = quoteBreakSubroutineCostModifiers(state, iceId, 1);
   const runBreakCost = iceIsOnCurrentRunServer(state, iceId)
     ? Math.max(0, Math.floor(state.run?.breakSubroutineAdditionalCost ?? 0))
@@ -69,12 +76,12 @@ export function visibleEffectiveIceRunQuote(
   const encounterTemporaryTraceCredits =
     publicEncounterTemporaryTraceCreditsForIce(state, iceId);
   const conditionalEncounterEffects = visibleConditionalEncounterEffects(
-    visibleIce.definitionId,
+    definitionId,
   );
 
   return {
     iceInstanceId: visibleIce.instanceId,
-    iceDefinitionId: visibleIce.definitionId,
+    iceDefinitionId: definitionId,
     effectiveStrength: Math.max(0, Math.floor(visibleIce.strength ?? 0)),
     subroutines,
     ...(breakSubroutineAdditionalCostPerSubroutine > 0
@@ -195,9 +202,12 @@ function iceIsOnCurrentRunServer(
 
 function visibleEffectiveSubroutine(
   subroutine: SubroutineDefinition,
+  source: { definitionId: CardDefinitionId; title: string },
 ): VisibleEffectiveSubroutine {
   const dynamic = dynamicSubroutineAttributionFor(subroutine);
   const unbrokenRunEffect = visibleUnbrokenRunEffectForSubroutine(subroutine);
+  const sourceDefinitionId = dynamic?.sourceDefinitionId ?? source.definitionId;
+  const sourceTitle = dynamic?.sourceTitle ?? source.title;
   return {
     id: subroutine.id,
     type: subroutine.type,
@@ -231,10 +241,10 @@ function visibleEffectiveSubroutine(
     ...(subroutine.breakTags
       ? { breakTags: subroutine.breakTags.slice() }
       : {}),
+    sourceDefinitionId,
+    sourceTitle,
     ...(dynamic
       ? {
-          sourceDefinitionId: dynamic.sourceDefinitionId,
-          sourceTitle: dynamic.sourceTitle,
           dynamicSourceKind:
             subroutine.id === "v1922_tutor_future_end_the_run"
               ? "run_duration_additional_subroutine"
