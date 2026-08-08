@@ -2,7 +2,7 @@
 
 ## Status
 
-`LGM-3` abgeschlossen. `LGM-4` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
+`LGM-4` abgeschlossen. `LGM-5` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
 weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
 Worktree vorgesehen ist.
 
@@ -100,7 +100,26 @@ Strukturcheck und `git diff --check` sind grün.
 `tactical-plans.ts` ist entfernt. Der Audit weist danach ausschließlich den
 alten Choice-Ranking-Cluster als verbleibenden direkten Consumer aus.
 
-### LGM-4 – Alten Choice-Ranking-Cluster retiren und Restgraph finalisieren
+### LGM-4 – Alten Choice-Ranking-Cluster retiren
+
+Entfernt die historische freie Choice-Ranking- und Override-Schicht samt
+exklusiven Regressionstests. Ebenfalls entfernt werden ihre unerreichbaren
+Self-Damage- und Exclusion-Kontexte. Kein Produktivpfad ersetzt diese
+Entscheidungsautorität; Plan-first bleibt der alleinige Live-Chooser.
+
+**Done-Gate:** fokussierte Authority-/Invarianten-Tests, AI-Typecheck,
+Strukturcheck, Referenzscan und `git diff --check` sind grün.
+
+**Ergebnis:** Der Audit klassifiziert `tactical-plans.ts` einschließlich der
+alten Runner-/Corp-Builder nun als `legacy_test_only`.
+
+### LGM-5 – TacticalPlan-Evaluator und Restgraph retiren
+
+Entfernt den verbleibenden alten TacticalPlan-Evaluator, seine exklusiven
+Builder/Mapper/Memory-Pfade und die nur noch daraus abgeleiteten Tests. Tests,
+die ausschließlich einen Reset der alten Memory verwenden, werden auf den
+heutigen residenten Planportfolio-Reset umgestellt; sie behalten ihren
+fachlichen produktiven Vertrag.
 
 Prüft, ob verbleibende historische Diagnoseflächen einen aktuellen,
 ausdrücklich begründeten Zweck besitzen. Andernfalls werden sie entfernt. Der

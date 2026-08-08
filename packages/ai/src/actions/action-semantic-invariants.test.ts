@@ -327,8 +327,6 @@ describe("Action semantic invariants", () => {
   it("stays out of runtime selection modules", () => {
     for (const sourcePath of [
       "packages/ai/src/index.ts",
-      "packages/ai/src/runtime/semantic-runtime.ts",
-      "packages/ai/src/runtime/semantic-choice-ranking.ts",
     ]) {
       const source = readFileSync(path.join(repoRoot, sourcePath), "utf8");
       expect(source).not.toContain("action-semantic-invariants");

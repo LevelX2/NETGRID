@@ -1,17 +1,17 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T12:59:37.346Z
+Erzeugt: 2026-08-08T13:03:28.973Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
 
 ## Klassifikationen
 
-- `legacy_test_only`: 128
-- `mixed_split_required`: 162
+- `legacy_test_only`: 121
+- `mixed_split_required`: 161
 - `productive_shared`: 254
 - `productive_simulation`: 166
-- `unreferenced`: 33
+- `unreferenced`: 30
 - `productive_tooling`: 12
 
 ## RETIRE_NOW
@@ -36,12 +36,9 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/runner-run-target-guidance-context.ts`
 - `packages/ai/src/runtime/runner-score-components.ts`
 - `packages/ai/src/runtime/runner-scoring-support-composition.ts`
-- `packages/ai/src/runtime/runner-self-damage-context.ts`
 - `packages/ai/src/runtime/runner-simple-exclusions-context.ts`
 - `packages/ai/src/runtime/runner-source-card-answer-role-context.ts`
 - `packages/ai/src/runtime/runner-tag-cleanup-score.ts`
-- `packages/ai/src/runtime/semantic-runtime-action-exclusion-composition.ts`
-- `packages/ai/src/runtime/semantic-runtime-action-exclusion-context.ts`
 - `packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts`
 - `packages/ai/src/runtime/semantic-runtime-choice-composition.ts`
 - `packages/ai/src/runtime/semantic-runtime-evidence-context.ts`
@@ -211,7 +208,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/strategic-intent-memory.ts`
 - `packages/ai/src/strategic-intent-state.ts`
 - `packages/ai/src/strategy-runtime-registry.ts`
-- `packages/ai/src/tactical-plans.ts`
 - `packages/ai/src/tag-punish-ontology-consumer.ts`
 - `packages/ai/src/visible-run-analysis.ts`
 
@@ -736,12 +732,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/plans/tactical-plan-step-candidate-matching.ts`
 - `packages/ai/src/plans/tactical-plan-step-semantics.ts`
 - `packages/ai/src/reports/selfplay-promotion-activity-formatters.ts`
-- `packages/ai/src/runtime/choice-ranking/corp-plan-overrides.ts`
-- `packages/ai/src/runtime/choice-ranking/mapped-choice-initial-overrides.ts`
-- `packages/ai/src/runtime/choice-ranking/mapped-choice-orchestrator.ts`
-- `packages/ai/src/runtime/choice-ranking/mapped-choice-policies.ts`
-- `packages/ai/src/runtime/choice-ranking/runner-plan-overrides.ts`
-- `packages/ai/src/runtime/choice-ranking/semantic-choice-ranking-support.ts`
 - `packages/ai/src/runtime/corp-card-action-score.ts`
 - `packages/ai/src/runtime/corp-economy/corp-basic-economy-near-tie.ts`
 - `packages/ai/src/runtime/practical-micro-candidates-context.ts`
@@ -773,13 +763,12 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/runner-run-plan-revalidation.ts`
 - `packages/ai/src/runtime/runner-run-plan-start.ts`
 - `packages/ai/src/runtime/runner-run-target-guidance-score.ts`
-- `packages/ai/src/runtime/runner-self-damage-choice.ts`
 - `packages/ai/src/runtime/runner-source-card-answer-role.ts`
 - `packages/ai/src/runtime/runner-terminal-remote-tool-score.ts`
-- `packages/ai/src/runtime/semantic-choice-ranking.ts`
 - `packages/ai/src/runtime/semantic-runtime-action-exclusion.ts`
 - `packages/ai/src/runtime/semantic-runtime-score-breakdown.ts`
 - `packages/ai/src/runtime/shell-traders-urgency.ts`
+- `packages/ai/src/tactical-plans.ts`
 
 ## RETAIN_DIAGNOSTIC_OR_RETIRE
 
