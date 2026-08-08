@@ -24,7 +24,7 @@ Die Runner-Züge wurden vollständig abgedeckt: 1 (D1), 2 (D2–D8), 4
 | D79 / 148 (Zug 20) | 3 / 2 | `runner.contest_remote:remote%3Aremote_2`, erneut Remote-Contest | Gleicher stale Contest-Trigger; keine neue bekannte Agenda, keine installierte Änderung und keine tragfähige Trashreserve. Kein isolierter Zufall, sondern derselbe Verlust der Positionserinnerung. |
 | D86 / 164 (Zug 22) | 3 / 4 | `runner.contest_remote:remote%3Aremote_2`, erneut Remote-Contest | Wie D79: bekannte Root-Information wurde nicht mehr an den bestehenden Access-Payoff geliefert; die aus Engine-Quotes berechnete 5-Credit-Trashreserve konnte deshalb nicht sperren. |
 | D107 / 197 (Zug 26) | 3 / 4 | `runner.contest_remote:remote%3Aremote_2`, erneut Remote-Contest | Wie D79/D86: keine neue aktuelle Payoff-Evidence. Gemeinsame Ursache ist die überbreite Invalidierung, nicht Shock Treatment selbst. |
-| D58 / 103 bis D63 / 113 (Zug 14) | D58: 3 / 3; D63: 3 / 2 | D58 `runner.contest_remote` auf Remote 1; D60 löst Baskervilles Net-Damage und Trace, D62 beendet den Run, D63 ist `runner.defense_and_recovery` | Die zwei unmittelbaren Net Damage sind Baskervilles erste Subroutine, nicht Counter-Schaden. Nach erfolgreichem Trace enthielt der PlayerView genau einen öffentlichen `baskerville`-Counter mit Standardlabel/Aria-Label; D63 bot die LegalAction zum Entfernen gegen 1 Action + 3 Credits und wählte sie. Kein Counter-Schaden rückwirkend im selben Run. |
+| D58 / 103 bis D63 / 113 (Zug 14) | D58: 3 / 3; D63: 3 / 2 | D58 `runner.contest_remote` auf Remote 1; Event 110 löst Baskervilles erste Subroutine und Trace, Event 112 setzt nach erfolgreichem Trace den Counter | Event 110 verursachte korrekt 2 Net Damage. Event 113 löste jedoch nach dem Trace die bereits aufgelöste erste Subroutine nochmals mit weiteren 2 Net Damage aus. Das war kein Counter-Schaden; der Counter wurde erst in Event 112 erzeugt und D63 bot korrekt seine Entfernung gegen 1 Action + 3 Credits an. |
 
 ## Ursachen und Korrekturen
 
@@ -32,7 +32,7 @@ Die Runner-Züge wurden vollständig abgedeckt: 1 (D1), 2 (D2–D8), 4
 | --- | --- | --- | --- | --- |
 | All-Nighter läuft kostenfrei auf Archives | D35 / 64 | bestätigt | Die frühere zielgenaue Restricted-Run-Rangfolge funktioniert: Ziele hatten unterschiedliche Scores. Es fehlte jedoch die Engine-Modellierung eines freiwilligen Verzichts, obwohl `followupRunOnEnd: optional` gilt. `runner.convert_run_window` musste deshalb einen nur schwach positiven `run_if_free`-Run wählen. | Engine erzeugt nun eine generische Decline-LegalAction für optionale Bonus-Run-Fenster; sie erhält Restactions. Der bestehende RunTarget-/Access-Payoff-Owner lässt nur Optionen mit gegenwärtigem, realisierbarem Grenznutzen zu. Owner bleibt `runner.convert_run_window`. |
 | Wiederholte Remote-2-Runs gegen nicht trashbares Shock Treatment | D44 / 81, D79 / 148, D86 / 164, D107 / 197 | bestätigt | `belief-state` invalidierte bei jedem serverlosen Corp-Discard alle bekannten Positionen. Der unsichtbare Hand-Discard zwischen D40 und D44 löschte fälschlich `remote_2/root:0`; vorhandene Engine-Quote-/Known-Remote-Payoff-Logik bekam daher keine bekannte Karte. | Ein serverloser Discard invalidiert nur HQ-Positionswissen. Installierte Remote-Positionen bleiben bis zu einer ihnen zuordenbaren Änderung bekannt; vorhandene Kostenquote-/Payoff-Bewertung entscheidet weiter über Trashbarkeit und Contest. |
-| Baskerville verursache „zu früh“ 2 Net Damage | D60 / 109 | Playtest-False-Positive | Die erste gedruckte Subroutine verursacht sofort 2 Net Damage. Counter werden erst nach erfolgreichem Trace gesetzt und wirken am Start eines späteren Runs. | Keine Änderung. Öffentliche Standard-Counterdarstellung, LegalAction zum Entfernen und Counter-Effekt sind vorhanden. |
+| Baskerville verursache „zu früh“ 2 Net Damage | Events 110 und 113, States 109–113 | bestätigt | Die erste gedruckte Subroutine verursacht sofort korrekt 2 Net Damage. Nach dem folgenden Trace kehrte die Encounter-Fortsetzung zurück, ohne diese bereits resolvte Damage-Subroutine als erledigt zu markieren, und führte sie erneut aus. | Die generische Printed-Damage-Auflösung markiert die Subroutine nun sofort nach erfolgreichem Schaden als resolved. Dadurch kann jede nachfolgende suspendierende Subroutine, etwa ein Trace, sie nicht wiederholen. Counter, Anzeige und Entfernung bleiben unverändert korrekt. |
 | „Diese Aktion ist nicht legal“ bei ungefähr Version 67 / State 66 | State 66–67, D35–D37 | unklar / nicht reproduzierbar | Der API-Trace zeigt dort: D35 Bonusrun, D36 Run-Fortsetzung, State 66 Corp-Decline-Rez, D37 Runner-Run Remote 2. Keine stale Action-ID/-Version, keine ApplyAction-Ablehnung, kein Fallback oder Timeout. | Keine Änderung ohne Matchbeleg. |
 
 ## Regression-Checkpoints und Verifikation
@@ -49,6 +49,9 @@ Die Runner-Züge wurden vollständig abgedeckt: 1 (D1), 2 (D2–D8), 4
   `onr_classic_023_shock-treatment`-Root in Remote 2 über genau den
   unverbundenen, verdeckten Corp-Discard hinweg. Servergebundene Änderungen
   invalidieren sie weiterhin über den bestehenden Pfad.
+- Der Baskerville-Regressionstest sichert, dass eine unmittelbar aufgelöste
+  Damage-Subroutine vor einer möglichen späteren Encounter-Fortsetzung als
+  resolved markiert ist.
 - Fokussiert grün: 35 AI-Tests (Restricted-Run-Contract und Belief-State),
   die gesamte Engine-Suite (214 Dateien, 1.892 Tests), beide Paket-Typechecks,
   `check:ai`, `check:engine-source-structure` und `git diff --check`.

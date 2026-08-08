@@ -246,6 +246,11 @@ export function resolvePrintedDamageSubroutine(
     host.callbacks.setDamagePayload(
       aggregateDamageSummaries(options.damageSummaries),
     );
+  // Damage has resolved before a later subroutine can suspend the encounter
+  // (for example a following printed trace). Record that immediately so the
+  // continuation cannot resolve the same damage subroutine a second time.
+  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
+    run.resolvedSubroutineIndexes.push(subroutineIndex);
   return {
     handled: true,
     damageSummary: summary,
