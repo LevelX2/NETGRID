@@ -1899,6 +1899,15 @@ describe("Runner core plan modules", () => {
         affordableOrSupportable: true,
       }),
     ).toMatchObject({ admitted: true });
+    expect(
+      runnerDevelopmentCardAdmission({
+        definitionId: "special-card",
+        assignedDomainPlanIds: [],
+        concretePurposeCode: "unknown:later",
+        duplicateAlreadyInstalled: false,
+        affordableOrSupportable: true,
+      }),
+    ).toEqual({ admitted: false, reasonCode: "no_concrete_plan_purpose" });
   });
 });
 

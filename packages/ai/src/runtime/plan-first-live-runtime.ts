@@ -1709,10 +1709,11 @@ export function runnerActionDispositions(
       );
       continue;
     }
-    const cardDevelopmentOwnsActionRoute = domain.developments.some(
-      (development) =>
-        development.actionIds.includes(candidate.actionId) &&
-        runnerDevelopmentCardAdmission({
+    const cardDevelopmentAdmissions = domain.developments
+      .filter((development) => development.actionIds.includes(candidate.actionId))
+      .map((development) => ({
+        development,
+        admission: runnerDevelopmentCardAdmission({
           definitionId: development.definitionId,
           assignedDomainPlanIds: development.assignedDomainPlanIds,
           ...(development.purposeCode
@@ -1720,8 +1721,22 @@ export function runnerActionDispositions(
             : {}),
           duplicateAlreadyInstalled: development.duplicateAlreadyInstalled,
           affordableOrSupportable: development.affordableOrSupportable,
-        }).admitted,
+        }),
+      }));
+    const cardDevelopmentOwnsActionRoute = cardDevelopmentAdmissions.some(
+      ({ admission }) => admission.admitted,
     );
+    const unconcreteDevelopment = cardDevelopmentAdmissions.find(
+      ({ admission }) => admission.reasonCode === "no_concrete_plan_purpose",
+    );
+    if (unconcreteDevelopment && !cardDevelopmentOwnsActionRoute) {
+      add(
+        candidate.actionId,
+        "runner.develop_board_and_hand",
+        "runner_card_development_rejected_no_concrete_plan_purpose",
+      );
+      continue;
+    }
     if (
       !delegatedFundingActionIds.has(candidate.actionId) &&
       !cardDevelopmentOwnsActionRoute &&
@@ -3197,8 +3212,7 @@ function buildRunnerDomain(
             !costlyInformationRunBelowHandBuffer &&
             fundingSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
-            (evaluation.routeQuote?.reachability ?? "guaranteed_access") ===
-              "guaranteed_access" &&
+            evaluation.routeQuote?.reachability !== "no_access" &&
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
@@ -8653,6 +8667,7 @@ function buildCorpDomain(
   const requiredEconomyNeeds = corpRequiredEconomyNeeds(
     input,
     scoreProjects,
+    scorelineFeasibility,
     defenseNeeds,
     ambushes,
     punishCampaigns,
@@ -12011,6 +12026,7 @@ function corpImmediateOperationThresholdPreparations(
 function corpRequiredEconomyNeeds(
   input: AiDecisionInput,
   scoreProjects: readonly CorpScoreProjectSignal[],
+  scorelineFeasibility: CorpScorelineFeasibility | undefined,
   defenseNeeds: readonly CorpDefenseSignal[],
   ambushes: readonly CorpPlanDomain["ambushes"][number][],
   punishCampaigns: readonly CorpPunishCampaignSignal[],
@@ -12032,6 +12048,8 @@ function corpRequiredEconomyNeeds(
       .map((ambush) => ambush.sourceInstanceId),
   );
   const scoreSupport = scoreProjects.flatMap((project) =>
+    scorelineFeasibility?.feasible !== false &&
+    (project.feasible || project.terminalScore) &&
     (project.fundingGap ?? 0) > 0 &&
     exactAmbushSetupCardIds.size === 0 &&
     !projectsWithCurrentProtectionSupport.has(project.projectId)
@@ -14600,9 +14618,7 @@ function runnerCreditBankSignals(
       const delayedInstallWithoutFundingNeed =
         handEvaluation !== undefined &&
         handEvaluation.activationPrerequisites.length === 0 &&
-        handEvaluation.liquidityTiming !== "immediate" &&
-        !economy.fundingNeed &&
-        input.playerView.own.credits >= economy.desiredCreditReserve;
+        !economy.fundingNeed;
       if (
         unsatisfiedActivationPrerequisites.length > 0 ||
         delayedInstallWithoutFundingNeed

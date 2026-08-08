@@ -881,7 +881,7 @@ export function runnerDevelopmentCardAdmission(params: {
       reasonCode: `assigned_domain_requires_domain_owner:${[...params.assignedDomainPlanIds].sort()[0]}`,
     };
   }
-  if (!params.concretePurposeCode)
+  if (!isConcreteRunnerDevelopmentPurpose(params.concretePurposeCode))
     return { admitted: false, reasonCode: "no_concrete_plan_purpose" };
   if (params.duplicateAlreadyInstalled)
     return { admitted: false, reasonCode: "redundant_board_copy" };
@@ -891,6 +891,18 @@ export function runnerDevelopmentCardAdmission(params: {
       ? `card_specific_purpose:${params.concretePurposeCode}`
       : `card_specific_waiting_route:${params.concretePurposeCode}`,
   };
+}
+
+function isConcreteRunnerDevelopmentPurpose(
+  purposeCode: string | undefined,
+): purposeCode is string {
+  const normalized = purposeCode?.trim();
+  return (
+    normalized !== undefined &&
+    normalized.length > 0 &&
+    normalized !== "unknown" &&
+    !normalized.startsWith("unknown:")
+  );
 }
 
 function economyModule(): PlanModule {
