@@ -205,8 +205,14 @@ sie im Planowner.
 - keine zweite Entscheidungsautorität und kein Hidden-Info-Leak;
 - Known-/Unknown- und Boundary-Gegenfall geprüft;
 - relevante Decision Checkpoints beziehungsweise Match-Repros;
-- fokussierte Tests, AI-Typecheck, aktive AI-Struktur-/Hint-Gates und bei
-  breiter Wirkung die vollständigen AI-Shards.
+- während Diagnose und iterativer Umsetzung zunächst der kleinste fokussierte
+  Test, der Fehlpfad und Ownership belegt;
+- AI-Typecheck und aktive AI-Struktur-/Hint-Gates bei Änderungen an
+  Typoberflächen, Paketgrenzen, gemeinsamen Verträgen, Hints oder der geprüften
+  Struktur, ansonsten gesammelt am nächsten bewussten Integrationscheckpoint;
+- vollständige AI-Shards nur bei breiter Wirkung, am vereinbarten
+  Phasen-/Release-/`Endfinale`-Checkpoint oder auf ausdrücklichen
+  Nutzerwunsch.
 
 ## Debug-Grenze
 

@@ -70,6 +70,25 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - Keine offiziellen Artworks, Card Frames, Logos, Card Backs oder externen Kartendatenbank-Abhängigkeiten ohne eigenes Asset-/Rechts-Gate.
 - Agentendateien dürfen diese globalen NETGRID-Prinzipien konkretisieren, aber nicht abschwächen.
 
+### Ursachenorientierte Fehlerbehebung und Fallback-Verbot
+
+- Fehler werden an der Schicht behoben, die die falsche oder fehlende
+  Information, Regel, Projektion, Zustandsänderung oder Entscheidung erzeugt.
+- Ein Fallback, Ersatzwert, Kompatibilitäts-Shortcut, stilles Ignorieren,
+  `catch-and-continue` oder nachgelagerter Workaround ist keine zulässige
+  abschließende Fehlerbehebung.
+- Fehlen notwendige Daten, Quotes, Bindungen oder Zuständigkeiten, scheitert
+  der betroffene Pfad sichtbar und fail-closed mit einer strukturierten
+  Diagnose. Nutzerseitige Fehlermeldungen bleiben side-sicher; privilegierte
+  lokale Diagnoseflächen sollen die konkrete Ursache und den verantwortlichen
+  Pfad ausweisen.
+- Temporäre Schutzmaßnahmen sind nur zur sicheren Begrenzung eines laufenden
+  Fehlers zulässig. Sie werden ausdrücklich als temporär gekennzeichnet und
+  erhalten einen konkreten Ursachen-Fix beziehungsweise eine Removal
+  Condition.
+- Ein Fallback ist nur zulässig, wenn er ausdrücklich Teil des fachlichen
+  Produktverhaltens ist oder vom Nutzer für den konkreten Fall genehmigt wurde.
+
 ### Verbindlicher KI-Architektur-Preflight
 
 Vor jeder Änderung an KI-Verhalten, KI-Entscheidungen, Choice-Auflösung,
@@ -118,6 +137,12 @@ NETGRID ist bis auf Weiteres eine private Version-0-/Vor-Produktionsumgebung. Es
 
 Wenn ein neuer Stand fachlich besser ist, darf der alte Stand ersetzt, gelöscht oder ignoriert werden. Historische Daten, Legacy-Artefakte, Migrationspfade oder Verweise auf historische Stände werden nicht aus Prinzip erhalten; sie bleiben nur dann relevant, wenn sie ausdrücklich als aktuelle Entscheidungs-, Regel-, Gate- oder Review-Evidence gebraucht werden. Default-Annahme ist: keine Legacy-Pflege, keine History-Konservierung und keine Rückwärtskompatibilitätsarbeit ohne ausdrücklichen aktuellen Nutzen.
 
+Ohne ausdrücklichen Nutzerauftrag entstehen insbesondere keine
+Datenmigrationen, Kompatibilitätsadapter, Dual-Read-/Dual-Write-Pfade,
+veralteten Feldaliasse, historischen Replay-Reparaturen oder Übergangsformate.
+Lokale Entwicklungsdaten, Datenbanken und Fixtures werden stattdessen bei
+Bedarf zurückgesetzt oder auf den aktuellen Stand gebracht.
+
 ## Git und lokale Artefakte
 
 - `main` ist der lokale Integrationsbranch.
@@ -130,7 +155,26 @@ Wenn ein neuer Stand fachlich besser ist, darf der alte Stand ersetzt, gelöscht
 
 ## Testbetrieb
 
-- Der normale vollständige lokale AI-Lauf ist
+- Während Diagnose und iterativer Entwicklung wird nur der kleinste Test
+  ausgeführt, der den konkret geänderten Pfad belastbar abdeckt.
+- Kleine lokale Änderungen benötigen standardmäßig einen fokussierten
+  Regressionstest oder eine eng begrenzte thematische Prüfung.
+- Paket-Typechecks und Strukturgates werden ausgeführt, wenn Typoberflächen,
+  Paketgrenzen, gemeinsame Verträge oder die betreffende Struktur geändert
+  wurden, nicht automatisch nach jedem lokalen Verhaltensfix.
+- Thematische Testsuiten folgen nach zusammenhängenden Änderungen innerhalb
+  eines Subsystems. Mehrere kleine Änderungen dürfen gesammelt werden, bevor
+  ein vollständiger Lauf erfolgt.
+- Vollständige AI-Shards, Workspace-Tests, Builds oder E2E-Läufe erfolgen an
+  einem bewussten Integrations-, Phasen-, Release- oder
+  `Endfinale`-Checkpoint, bei breiter Wirkung oder auf ausdrücklichen
+  Nutzerwunsch.
+- Ein fehlgeschlagener breiter Test wird ursachenbezogen analysiert. Die
+  fachliche Intention einer korrekten Änderung wird weder durch einen Fallback
+  noch durch vorschnelles Zurücknehmen oder Abschwächen kaschiert. Bereits
+  bekannte, unabhängige Baseline-Fehler werden getrennt ausgewiesen und nicht
+  nebenbei in den aktuellen Scope gezogen.
+- Der vollständige lokale AI-Gate-Lauf an einem solchen Checkpoint ist
   `corepack pnpm test:ai:shards`. Er startet drei feste Shards parallel und
   begrenzt jeden Shard auf einen Vitest-Worker.
 - `corepack pnpm --filter @netgrid/ai test` ist der serielle paketnahe

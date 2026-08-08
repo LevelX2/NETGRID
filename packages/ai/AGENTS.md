@@ -62,4 +62,13 @@ Hilfsfunktion und einem kurzfristig grünen Einzeltest vor.
   StateVersion-/Optionsbindung.
 - Keine zweite Entscheidungsautorität, keine illegalen Actions und kein
   Hidden-Info-Leak.
-- Passende fokussierte Tests, AI-Typecheck und aktive AI-Strukturgates.
+- Während Diagnose und iterativer Umsetzung läuft zunächst nur der kleinste
+  fokussierte Test, der den realen Fehlpfad und die unveränderte Ownership
+  belegt.
+- AI-Typecheck sowie aktive Struktur-/Hint-Gates laufen, wenn die Änderung
+  Typoberflächen, Paketgrenzen, gemeinsame Verträge, Hints oder die geprüfte
+  Struktur berührt, ansonsten gesammelt am nächsten bewussten
+  Integrationscheckpoint.
+- Die vollständigen AI-Shards laufen bei breiter Wirkung, am vereinbarten
+  Phasen-/Release-/`Endfinale`-Checkpoint oder auf ausdrücklichen Nutzerwunsch,
+  nicht automatisch nach jedem lokalen KI-Fix.
