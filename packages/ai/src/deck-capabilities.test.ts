@@ -156,9 +156,9 @@ describe("DeckCapabilityProfile", () => {
       ]),
     });
 
-    expect(
-      profile.runner?.economyBankTools.map((tool) => tool.cardId),
-    ).toEqual(["onr_v1_154_broker"]);
+    expect(profile.runner?.economyBankTools.map((tool) => tool.cardId)).toEqual(
+      ["onr_v1_154_broker"],
+    );
   });
 
   it("uses structured hosted-credit payloads and ignores label-only bank actions", () => {
@@ -319,12 +319,26 @@ describe("DeckCapabilityProfile", () => {
       deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 2]]),
     });
 
-    expect(profile.runner?.economyBankTools[0]).toMatchObject({
-      currentBankAmount: 12,
-      currentBankAmounts: [12, 3],
-      portfolioStoredAmount: 15,
-      estimatedPayout: 12,
-    });
+    expect(profile.runner?.economyBankTools).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: "broker-1",
+        currentBankAmount: 12,
+        currentBankAmounts: [12],
+        portfolioStoredAmount: 12,
+        estimatedPayout: 12,
+        buildActionIds: ["broker-1-build"],
+        cashOutActionIds: ["broker-1-cash"],
+      }),
+      expect.objectContaining({
+        sourceCardInstanceId: "broker-2",
+        currentBankAmount: 3,
+        currentBankAmounts: [3],
+        portfolioStoredAmount: 3,
+        estimatedPayout: 3,
+        buildActionIds: ["broker-2-build"],
+        cashOutActionIds: ["broker-2-cash"],
+      }),
+    ]);
   });
 
   it("bounds text-only bank tool signals to exact tokens", () => {

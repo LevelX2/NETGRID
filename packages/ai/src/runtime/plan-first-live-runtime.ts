@@ -14726,11 +14726,26 @@ function runnerCreditBankSignals(
       tool.estimatedPayout ?? currentStoredCredits,
     );
     const installActionIds = candidates
-      .filter(
-        (candidate) =>
-          candidate.semanticActionType === "install.card" &&
-          candidate.sourceDefinitionId === tool.cardId,
-      )
+      .filter((candidate) => {
+        if (
+          candidate.semanticActionType !== "install.card" ||
+          candidate.sourceDefinitionId !== tool.cardId
+        ) {
+          return false;
+        }
+        if (!tool.sourceCardInstanceId) return true;
+        const action = input.legalActions.find(
+          (entry) => entry.actionId === candidate.actionId,
+        );
+        const sourceCardInstanceId =
+          candidate.sourceCardInstanceId ??
+          (typeof action?.payload?.cardId === "string"
+            ? action.payload.cardId
+            : typeof action?.source === "string"
+              ? action.source
+              : undefined);
+        return sourceCardInstanceId === tool.sourceCardInstanceId;
+      })
       .map((candidate) => candidate.actionId);
     if (tool.status === "in_hand" && installActionIds.length > 0) {
       const handEvaluation = handDevelopment.find(
@@ -14755,7 +14770,7 @@ function runnerCreditBankSignals(
       )
         return [
           {
-            bankId: tool.cardId,
+            bankId: tool.sourceCardInstanceId ?? tool.cardId,
             phase: "hold" as const,
             actionIds: [],
             rejectedActionIds: installActionIds,
@@ -14780,7 +14795,7 @@ function runnerCreditBankSignals(
       if (!plausibleFollowupWindow)
         return [
           {
-            bankId: tool.cardId,
+            bankId: tool.sourceCardInstanceId ?? tool.cardId,
             phase: "hold" as const,
             actionIds: [],
             rejectedActionIds: installActionIds,
@@ -14797,7 +14812,7 @@ function runnerCreditBankSignals(
         ];
       return [
         {
-          bankId: tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? tool.cardId,
           phase: "install" as const,
           actionIds: installActionIds,
           priorityClass: "P5" as const,
@@ -14879,7 +14894,7 @@ function runnerCreditBankSignals(
     if (shouldCashOut) {
       return [
         {
-          bankId: tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? tool.cardId,
           phase: "cash_out" as const,
           actionIds: tool.cashOutActionIds,
           rejectedActionIds: tool.buildActionIds,
@@ -14906,10 +14921,8 @@ function runnerCreditBankSignals(
 
     const combinedCreditAccess =
       input.playerView.own.credits + currentStoredCredits;
-    const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool.cardId);
     const shouldBuild =
       tool.buildActionLegal &&
-      !alreadyBuiltThisTurn &&
       !convertibleRunFundingNeed &&
       !convertibleDevelopmentFundingNeed &&
       (!urgentCreditFloor || input.playerView.own.clicks === 1) &&
@@ -14919,7 +14932,7 @@ function runnerCreditBankSignals(
     if (!shouldBuild)
       return [
         {
-          bankId: tool.cardId,
+          bankId: tool.sourceCardInstanceId ?? tool.cardId,
           phase: "hold" as const,
           actionIds: [],
           rejectedActionIds: [
@@ -14935,13 +14948,11 @@ function runnerCreditBankSignals(
             developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
               ? `runner_credit_bank_cashout_delegation_missing_exact_route:${developmentCashOutAdmission.route?.targetCardInstanceId ?? "unknown"}`
-              : alreadyBuiltThisTurn
-                ? "runner_credit_bank_hold_already_built_this_turn"
-                : combinedCreditAccess >= 20 || currentStoredCredits >= 12
-                  ? "runner_credit_bank_hold_comfortable_value"
-                  : convertibleDevelopmentFundingNeed
-                    ? "runner_credit_bank_cashout_delegated_to_development_plan"
-                    : "runner_credit_bank_hold_no_current_conversion_need",
+              : combinedCreditAccess >= 20 || currentStoredCredits >= 12
+                ? "runner_credit_bank_hold_comfortable_value"
+                : convertibleDevelopmentFundingNeed
+                  ? "runner_credit_bank_cashout_delegated_to_development_plan"
+                  : "runner_credit_bank_hold_no_current_conversion_need",
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
             ...(developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
@@ -14954,7 +14965,7 @@ function runnerCreditBankSignals(
       ];
     return [
       {
-        bankId: tool.cardId,
+        bankId: tool.sourceCardInstanceId ?? tool.cardId,
         phase: "build" as const,
         actionIds: tool.buildActionIds,
         rejectedActionIds: convertibleDevelopmentFundingNeed
@@ -15193,45 +15204,6 @@ function runnerCreditBankRunFundingRoute(params: {
     }
   }
   return undefined;
-}
-
-function creditBankBuiltThisTurn(
-  input: AiDecisionInput,
-  sourceDefinitionId: string,
-): boolean {
-  const events = uniqueBy(
-    [...input.playerView.publicEvents, ...input.eventTail],
-    (event) => event.eventId,
-  ).sort(
-    (left, right) =>
-      left.stateVersionAfter - right.stateVersionAfter ||
-      left.eventId.localeCompare(right.eventId),
-  );
-  let turnStartIndex = -1;
-  for (let index = events.length - 1; index >= 0; index -= 1) {
-    const event = events[index];
-    if (event?.type === "end_turn" && event.publicPayload?.actor === "corp") {
-      turnStartIndex = index;
-      break;
-    }
-  }
-  return events.slice(turnStartIndex + 1).some((event) => {
-    const resolvedEffects = Array.isArray(event.publicPayload?.resolvedEffects)
-      ? event.publicPayload.resolvedEffects
-      : [];
-    return (
-      event.type === "activated_card_ability" &&
-      event.publicPayload?.actor === "runner" &&
-      event.publicPayload?.sourceDefinitionId === sourceDefinitionId &&
-      resolvedEffects.some(
-        (effect) =>
-          typeof effect === "object" &&
-          effect !== null &&
-          "kind" in effect &&
-          effect.kind === "add_hosted_credits",
-      )
-    );
-  });
 }
 
 function planSafeRunExclusionEvidence(evidence: readonly string[]): string[] {
@@ -15952,7 +15924,6 @@ function runnerCoverageFundingActionIds(
     deadline: "end_of_current_turn",
     targetCredits: answerInstallCost,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
-    allowIncrementalProgress: true,
     evidence: [
       `coverage_gap:${gapId}`,
       "coverage_install_conversion_click_reserved:1",

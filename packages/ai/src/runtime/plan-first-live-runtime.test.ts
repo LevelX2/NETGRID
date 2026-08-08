@@ -8,6 +8,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
+import { buildDeckCapabilityProfileFromInput } from "../deck-capabilities";
 import {
   attachOwnDeckSnapshot,
   aiInput,
@@ -1515,7 +1516,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("leaves a deferred Broker install exclusively with the credit-bank plan", () => {
+  it("keeps an early Broker install exclusively with the credit-bank plan", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
       "install-broker",
@@ -1561,6 +1562,7 @@ describe("authoritative plan-first live runtime", () => {
             economyBankTools: [
               {
                 cardId: "onr_v1_154_broker",
+                sourceCardInstanceId: "broker-card",
                 title: "Broker",
                 ownerSide: "runner",
                 status: "in_hand",
@@ -1591,9 +1593,18 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.runner.economy",
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.credit_bank",
       fallbackUsed: false,
+      decisionDebug: {
+        planId: expect.stringContaining("broker-card"),
+        planKind: "runner.credit_bank",
+        planFirstDecision: {
+          route: {
+            actionId: install.actionId,
+          },
+        },
+      },
     });
   });
 
@@ -1797,6 +1808,96 @@ describe("authoritative plan-first live runtime", () => {
     ).toMatchObject({
       actionId: "broker-cash",
       fallbackUsed: false,
+    });
+  });
+
+  it("keeps same-definition Broker cadence and plan identity per card instance", () => {
+    resetResidentPlanPortfolioMemory();
+    const secondBuild = legalAction(
+      "broker-2-build",
+      "runner",
+      "activated_card_ability",
+      "Add hosted credits to the second Broker",
+      { credits: 0, clicks: 1 },
+      {
+        source: "broker-2",
+        payload: {
+          cardId: "broker-2",
+          sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationAddsHostedCredits: true,
+          hostedCreditAddAmount: 3,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [secondBuild, credit]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.rig = [
+      visibleCard("broker-1", "runner", "resource", {
+        definitionId: "onr_v1_154_broker",
+        title: "Broker",
+      }),
+      visibleCard("broker-2", "runner", "resource", {
+        definitionId: "onr_v1_154_broker",
+        title: "Broker",
+      }),
+    ];
+    input.playerView.publicEvents = [
+      {
+        eventId: "broker-1-loaded",
+        type: "activated_card_ability",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        turnSerial: 1,
+        stateHashAfter: "fnv1a:broker-1-loaded",
+        publicPayload: {
+          actor: "runner",
+          actionType: "activated_card_ability",
+          sourceDefinitionId: "onr_v1_154_broker",
+          resolvedEffects: [
+            {
+              effectId: "broker-1-load-effect",
+              kind: "add_hosted_credits",
+              visibility: "public",
+              amount: 3,
+            },
+          ],
+        },
+      },
+    ];
+    input.eventTail = input.playerView.publicEvents;
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: buildDeckCapabilityProfileFromInput,
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: secondBuild.actionId,
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+      decisionDebug: {
+        planId: expect.stringContaining("broker-2"),
+        planKind: "runner.credit_bank",
+        planFirstDecision: {
+          leafExecutorInstanceId: expect.stringContaining("broker-2"),
+          route: {
+            actionId: secondBuild.actionId,
+          },
+        },
+      },
     });
   });
 
@@ -2201,6 +2302,85 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(decision.actionId).not.toBe(cash.actionId);
+  });
+
+  it("does not admit a one-credit step as same-turn coverage funding when the install target remains unreachable", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const run = legalAction(
+      "run-hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const input = aiInput("runner", [credit, run]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("snowball", "runner", "program", {
+        definitionId: "onr_v1_066_snowball",
+        title: "Snowball",
+        subtypes: ["icebreaker", "killer"],
+        installCost: 10,
+      }),
+    ];
+    const blockedTarget = {
+      ...safeRuntimeRunTarget(run.actionId, "hq"),
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: false,
+      score: 200,
+      evidence: ["missing_coverage:breaker_sentry"],
+    };
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: () => ({
+        primaryWinIntent: "runner.access_agendas",
+        setupEngine: ["runner.rig_first"],
+      }),
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          breakerCoverageMatrix: {
+            sentry: {
+              coverage: "sentry",
+              inDeckKnown: true,
+              inHand: true,
+              installed: false,
+              searchableNow: false,
+              drawOnly: false,
+              missing: false,
+              bestKnownCards: ["onr_v1_066_snowball"],
+              blockers: ["needs_install"],
+            },
+          },
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [blockedTarget],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 6,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(decision.reasonCode).not.toBe("plan_first.runner.rig_and_coverage");
   });
 
   it("rejects every install variant when hand development has a nonpositive stronger override", () => {

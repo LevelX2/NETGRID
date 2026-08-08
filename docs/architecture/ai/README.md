@@ -45,7 +45,11 @@
 - `PlanPortfolioSnapshot` koordiniert einen Interrupt, einen Vordergrundplan
   und höchstens zwei fortsetzbare Hintergrundprojekte. Broker-/Bank-Zyklen und
   strategieabhängige Corp-Scoring-Remotes besitzen begrenzte Zugkadenz,
-  redigierte Mehrplan-Beiträge und deterministische Zielbindung.
+  redigierte Mehrplan-Beiträge und deterministische Zielbindung. Sichtbare
+  Bankkopien besitzen jeweils eine eigene Karteninstanz, eigene gespeicherte
+  Credits, eigene Planidentität und exakt zugehörige aktuelle LegalActions;
+  eine definitionsweite Ereignisannahme darf die noch legale Fähigkeit einer
+  Geschwisterkopie nicht sperren.
 - Wiederholbare Economy- und Bankaktionen werden nach sichtbarer Reserve,
   konkretem Fundingbedarf, kombiniertem Credit-Zugriff und legalen
   Entwicklungsalternativen marginal bewertet. Ein Bankaufbau ohne konkreten

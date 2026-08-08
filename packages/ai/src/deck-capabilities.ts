@@ -92,6 +92,7 @@ export type SearchAccessProfile = {
 
 export type EconomyBankTool = {
   cardId: string;
+  sourceCardInstanceId?: string;
   title: string;
   ownerSide: Side;
   status: CapabilityCardStatus;
@@ -832,34 +833,73 @@ function buildEconomyBankTools(
   records: readonly CardCapabilityRecord[],
 ): EconomyBankTool[] {
   return records
-    .map((record) => economyBankToolForRecord(params, record))
+    .flatMap((record) => economyBankToolsForRecord(params, record))
     .filter((tool): tool is EconomyBankTool => tool !== undefined)
-    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+    .sort(
+      (left, right) =>
+        left.cardId.localeCompare(right.cardId) ||
+        (left.sourceCardInstanceId ?? "").localeCompare(
+          right.sourceCardInstanceId ?? "",
+        ),
+    );
 }
 
-function economyBankToolForRecord(
+function economyBankToolsForRecord(
   params: BuildDeckCapabilityProfileParams,
   record: CardCapabilityRecord,
-): EconomyBankTool | undefined {
-  if (recordHasRunOnlyEconomyPool(record)) return undefined;
+): EconomyBankTool[] {
+  if (recordHasRunOnlyEconomyPool(record)) return [];
   const text = normalizedRecordText(record);
   const signals = [...record.roles, ...record.planRoles]
     .join(" ")
     .toLowerCase();
   if (!deckCapabilityTextHasBankToolSignal(`${text} ${signals}`)) {
-    return undefined;
+    return [];
   }
+  const visibleInstances = visibleCardRecords(
+    params.playerView,
+    params.side,
+  ).filter(({ card }) => card.definitionId === record.cardId);
+  if (visibleInstances.length > 0) {
+    return visibleInstances.map(({ card, location }) =>
+      economyBankToolForRecord(params, record, {
+        card,
+        location,
+      }),
+    );
+  }
+  return [economyBankToolForRecord(params, record)];
+}
+
+function economyBankToolForRecord(
+  params: BuildDeckCapabilityProfileParams,
+  record: CardCapabilityRecord,
+  visibleInstance?: {
+    card: VisibleCard;
+    location: CapabilityCardStatus;
+  },
+): EconomyBankTool {
+  const text = normalizedRecordText(record);
+  const signals = [...record.roles, ...record.planRoles]
+    .join(" ")
+    .toLowerCase();
   const buildActionIds = (params.legalActions ?? [])
-    .filter((action) => actionMatchesBankBuild(action, record))
+    .filter((action) =>
+      actionMatchesBankBuild(action, record, visibleInstance?.card),
+    )
     .map((action) => action.actionId)
     .sort();
   const cashOutActionIds = (params.legalActions ?? [])
-    .filter((action) => actionMatchesBankCashOut(action, record))
+    .filter((action) =>
+      actionMatchesBankCashOut(action, record, visibleInstance?.card),
+    )
     .map((action) => action.actionId)
     .sort();
   const buildActionLegal = buildActionIds.length > 0;
   const cashOutActionLegal = cashOutActionIds.length > 0;
-  const currentBankAmounts = currentVisibleBankAmounts(record.visibleCards);
+  const currentBankAmounts = currentVisibleBankAmounts(
+    visibleInstance ? [visibleInstance.card] : record.visibleCards,
+  );
   const currentBankAmount =
     currentBankAmounts.length > 0 ? Math.max(...currentBankAmounts) : undefined;
   const portfolioStoredAmount =
@@ -871,9 +911,12 @@ function economyBankToolForRecord(
     currentBankAmount !== undefined;
   return {
     cardId: record.cardId,
+    ...(visibleInstance
+      ? { sourceCardInstanceId: visibleInstance.card.instanceId }
+      : {}),
     title: record.title,
     ownerSide: record.side,
-    status: primaryStatus(record.locations),
+    status: visibleInstance?.location ?? primaryStatus(record.locations),
     ...(currentBankAmount !== undefined ? { currentBankAmount } : {}),
     ...(currentBankAmounts.length > 0 ? { currentBankAmounts } : {}),
     ...(portfolioStoredAmount !== undefined ? { portfolioStoredAmount } : {}),
@@ -894,7 +937,10 @@ function economyBankToolForRecord(
         structured: structuredBank,
         roleBased: record.roles.length > 0 || record.planRoles.length > 0,
       }),
-      `bank_status:${primaryStatus(record.locations)}`,
+      ...(visibleInstance
+        ? [`bank_source_instance:${visibleInstance.card.instanceId}`]
+        : []),
+      `bank_status:${visibleInstance?.location ?? primaryStatus(record.locations)}`,
       buildActionLegal ? "bank_build_legal:true" : "bank_build_legal:false",
       cashOutActionLegal
         ? "bank_cashout_legal:true"
@@ -1308,17 +1354,40 @@ function actionSourceMatchesRecord(
 function actionMatchesBankBuild(
   action: LegalAction,
   record: CardCapabilityRecord,
+  visibleCard?: VisibleCard,
 ): boolean {
-  if (!actionSourceMatchesRecord(action, record)) return false;
+  if (
+    !(visibleCard
+      ? actionSourceMatchesVisibleCard(action, visibleCard)
+      : actionSourceMatchesRecord(action, record))
+  )
+    return false;
   return action.payload?.cardImplementationAddsHostedCredits === true;
 }
 
 function actionMatchesBankCashOut(
   action: LegalAction,
   record: CardCapabilityRecord,
+  visibleCard?: VisibleCard,
 ): boolean {
-  if (!actionSourceMatchesRecord(action, record)) return false;
+  if (
+    !(visibleCard
+      ? actionSourceMatchesVisibleCard(action, visibleCard)
+      : actionSourceMatchesRecord(action, record))
+  )
+    return false;
   return action.payload?.cardImplementationTakesHostedCredits === true;
+}
+
+function actionSourceMatchesVisibleCard(
+  action: LegalAction,
+  card: VisibleCard,
+): boolean {
+  return (
+    action.source === card.instanceId ||
+    action.payload?.cardId === card.instanceId ||
+    action.abilityRef?.sourceCardInstanceId === card.instanceId
+  );
 }
 
 function currentVisibleBankAmounts(cards: readonly VisibleCard[]): number[] {
