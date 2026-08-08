@@ -1,21 +1,22 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T12:55:02.849Z
+Erzeugt: 2026-08-08T12:57:23.639Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
 
 ## Klassifikationen
 
-- `legacy_test_only`: 94
+- `legacy_test_only`: 89
 - `mixed_split_required`: 201
 - `productive_shared`: 254
 - `productive_simulation`: 166
+- `unreferenced`: 33
 - `productive_tooling`: 12
-- `unreferenced`: 32
 
 ## RETIRE_NOW
 
+- `packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts`
 - `packages/ai/src/runtime/known-central-payoff-exclusion.ts`
 - `packages/ai/src/runtime/record-value.ts`
 - `packages/ai/src/runtime/runner-archives-exclusion.ts`
@@ -712,9 +713,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/decision/scoring-consumer-contract.ts`
 - `packages/ai/src/decision/semantic-basic-setup-pilot.ts`
 - `packages/ai/src/decision/semantic-shadow-decision.ts`
-- `packages/ai/src/diagnostics/coverage-selection-debug.ts`
-- `packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts`
-- `packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts`
 - `packages/ai/src/endgame-goal-conversion-contracts.ts`
 - `packages/ai/src/evaluation/access-loop-detection.ts`
 - `packages/ai/src/evaluation/access-outcome-feedback.ts`
@@ -779,9 +777,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/runner-source-card-answer-role.ts`
 - `packages/ai/src/runtime/runner-terminal-remote-tool-score.ts`
 - `packages/ai/src/runtime/semantic-choice-ranking.ts`
-- `packages/ai/src/runtime/semantic-decision-chain.ts`
 - `packages/ai/src/runtime/semantic-runtime-action-exclusion.ts`
-- `packages/ai/src/runtime/semantic-runtime-debug-context.ts`
 - `packages/ai/src/runtime/semantic-runtime-score-breakdown.ts`
 - `packages/ai/src/runtime/shell-traders-urgency.ts`
 

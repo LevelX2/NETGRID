@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-08T12:55:02.849Z",
+  "generatedAt": "2026-08-08T12:57:23.639Z",
   "roots": {
     "live": [
       "index.ts",
@@ -19,12 +19,12 @@
   },
   "summary": {
     "byClassification": {
-      "legacy_test_only": 94,
+      "legacy_test_only": 89,
       "mixed_split_required": 201,
       "productive_shared": 254,
       "productive_simulation": 166,
-      "productive_tooling": 12,
-      "unreferenced": 32
+      "unreferenced": 33,
+      "productive_tooling": 12
     },
     "decisions": {
       "RETIRE_AFTER_TEST_CONSUMER_REVIEW": [
@@ -50,9 +50,6 @@
         "packages/ai/src/decision/scoring-consumer-contract.ts",
         "packages/ai/src/decision/semantic-basic-setup-pilot.ts",
         "packages/ai/src/decision/semantic-shadow-decision.ts",
-        "packages/ai/src/diagnostics/coverage-selection-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
         "packages/ai/src/endgame-goal-conversion-contracts.ts",
         "packages/ai/src/evaluation/access-loop-detection.ts",
         "packages/ai/src/evaluation/access-outcome-feedback.ts",
@@ -117,9 +114,7 @@
         "packages/ai/src/runtime/runner-source-card-answer-role.ts",
         "packages/ai/src/runtime/runner-terminal-remote-tool-score.ts",
         "packages/ai/src/runtime/semantic-choice-ranking.ts",
-        "packages/ai/src/runtime/semantic-decision-chain.ts",
         "packages/ai/src/runtime/semantic-runtime-action-exclusion.ts",
-        "packages/ai/src/runtime/semantic-runtime-debug-context.ts",
         "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts",
         "packages/ai/src/runtime/shell-traders-urgency.ts"
       ],
@@ -761,6 +756,7 @@
         "packages/ai/src/witness-opportunity-projection.ts"
       ],
       "RETIRE_NOW": [
+        "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
         "packages/ai/src/runtime/known-central-payoff-exclusion.ts",
         "packages/ai/src/runtime/record-value.ts",
         "packages/ai/src/runtime/runner-archives-exclusion.ts",
@@ -1346,7 +1342,6 @@
         "packages/ai/src/runtime/semantic-runtime-corp-effective-defense.test.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-remote-score.test.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score.test-support.ts",
-        "packages/ai/src/runtime/semantic-runtime-debug-context.test.ts",
         "packages/ai/src/runtime/semantic-runtime-scope.test.ts",
         "packages/ai/src/runtime/semantic-runtime-score-breakdown.test.ts",
         "packages/ai/src/runtime/shell-traders-plan-signals.test.ts",
@@ -1461,7 +1456,6 @@
         "packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score-context.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-debug-context.ts",
         "packages/ai/src/runtime/semantic-runtime-evidence-context.ts",
         "packages/ai/src/runtime/semantic-runtime-evidence.ts",
         "packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts",
@@ -3851,27 +3845,6 @@
       "blocker": "productive runtime consumer"
     },
     {
-      "path": "packages/ai/src/diagnostics/coverage-selection-debug.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/diagnostics/coverage-selection-debug.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/tactical-plans.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
       "path": "packages/ai/src/diagnostics/debug-format.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -4009,30 +3982,6 @@
       "blocker": "productive runtime consumer"
     },
     {
-      "path": "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/tactical-plans.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/diagnostics/semantic-runtime-debug.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
       "path": "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -4148,11 +4097,8 @@
     },
     {
       "path": "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
+      "classification": "unreferenced",
+      "reachableFrom": [],
       "importedByProduction": [],
       "importedByTests": [],
       "imports": [
@@ -4166,8 +4112,7 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
+      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/diagnostics/semantic-runtime-why-coverage.ts",
@@ -18478,27 +18423,6 @@
       "blocker": "test consumer review required"
     },
     {
-      "path": "packages/ai/src/runtime/semantic-decision-chain.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/runtime/semantic-decision-chain.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/tactical-plans.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
       "path": "packages/ai/src/runtime/semantic-runtime-action-exclusion-composition.ts",
       "classification": "unreferenced",
       "reachableFrom": [],
@@ -19665,37 +19589,6 @@
       "blocker": "productive runtime consumer"
     },
     {
-      "path": "packages/ai/src/runtime/semantic-runtime-debug-context.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/runtime/semantic-runtime-debug-context.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/diagnostics/coverage-selection-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/tactical-plans.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/diagnostics/coverage-selection-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
       "path": "packages/ai/src/runtime/semantic-runtime-decision-composition.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -20068,7 +19961,6 @@
       "importedByTests": [
         "packages/ai/src/decision/pilot/pilot-scope-registry.test.ts",
         "packages/ai/src/decision/semantic-basic-setup-pilot.test.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.test.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.test.ts",
         "packages/ai/src/evaluation/real-engine-decision-corpus.test.ts",
         "packages/ai/src/runtime/choice-ranking/semantic-choice-ranking.test-support.ts",
@@ -20078,8 +19970,6 @@
         "packages/ai/src/runtime/runner-run-plan-access-policy.test.ts",
         "packages/ai/src/runtime/runner-run-plan-memory.test.ts",
         "packages/ai/src/runtime/runner-run-plan-policy.test.ts",
-        "packages/ai/src/runtime/semantic-decision-chain.test.ts",
-        "packages/ai/src/runtime/semantic-runtime-debug-context.test.ts",
         "packages/ai/src/runtime/semantic-runtime-score-components.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover.test-support.ts"
       ],
@@ -20087,8 +19977,6 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [
         "packages/ai/src/decision/pilot/pilot-scope-registry.ts",
-        "packages/ai/src/diagnostics/coverage-selection-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
@@ -20120,12 +20008,10 @@
         "packages/ai/src/runtime/runner-self-damage-choice.ts",
         "packages/ai/src/runtime/runner-self-damage-context.ts",
         "packages/ai/src/runtime/runner-simple-exclusions-context.ts",
-        "packages/ai/src/runtime/semantic-decision-chain.ts",
         "packages/ai/src/runtime/semantic-runtime-action-exclusion-context.ts",
         "packages/ai/src/runtime/semantic-runtime-action-exclusion.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
-        "packages/ai/src/runtime/semantic-runtime-debug-context.ts",
         "packages/ai/src/runtime/semantic-runtime-plan-memory-exclusion.ts",
         "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts",
         "packages/ai/src/runtime/semantic-runtime-score-components.ts"
@@ -26023,8 +25909,6 @@
       ],
       "importedByProduction": [],
       "importedByTests": [
-        "packages/ai/src/diagnostics/coverage-selection-debug.test.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.test.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.test.ts",
         "packages/ai/src/evaluation/decision-contract-real-engine.test.ts",
         "packages/ai/src/evaluation/hidden-info-observational-equivalence.test.ts",
@@ -26041,8 +25925,6 @@
         "packages/ai/src/runtime/choice-ranking/semantic-choice-ranking.test-support.ts",
         "packages/ai/src/runtime/corp-counter-cashout-economy.test.ts",
         "packages/ai/src/runtime/plan-first-live-runtime-corp-card-variant-contract.test.ts",
-        "packages/ai/src/runtime/semantic-decision-chain.test.ts",
-        "packages/ai/src/runtime/semantic-runtime-debug-context.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover-runner-plans.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover-runner-safety.test.ts",
         "packages/ai/src/simulation/benchmark-reports.test.ts",
@@ -26094,17 +25976,13 @@
         "packages/ai/src/runner-tactical-goals.ts"
       ],
       "typeOnlyProductionConsumers": [
-        "packages/ai/src/diagnostics/coverage-selection-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
         "packages/ai/src/runtime/choice-ranking/corp-plan-overrides.ts",
         "packages/ai/src/runtime/choice-ranking/mapped-choice-initial-overrides.ts",
         "packages/ai/src/runtime/choice-ranking/mapped-choice-orchestrator.ts",
         "packages/ai/src/runtime/choice-ranking/mapped-choice-policies.ts",
-        "packages/ai/src/runtime/choice-ranking/runner-plan-overrides.ts",
-        "packages/ai/src/runtime/semantic-decision-chain.ts",
-        "packages/ai/src/runtime/semantic-runtime-debug-context.ts"
+        "packages/ai/src/runtime/choice-ranking/runner-plan-overrides.ts"
       ],
       "publicExportedBy": [],
       "proposedDisposition": "SPLIT_BEFORE_RETIRE",

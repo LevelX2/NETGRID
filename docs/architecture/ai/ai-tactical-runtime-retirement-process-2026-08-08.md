@@ -2,7 +2,7 @@
 
 ## Status
 
-`LGM-1` abgeschlossen. `LGM-2` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
+`LGM-2` abgeschlossen. `LGM-3` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
 weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
 Worktree vorgesehen ist.
 
@@ -72,16 +72,21 @@ sind nur die beiden historischen Runtime-Integrationsfälle entfernt. Die
 weiterhin breit verwendete Testunterstützung enthält keine alte
 `SemanticRuntimeDependencies`-Fixture mehr.
 
-### LGM-2 – Gemischte Verträge fachlich trennen
+### LGM-2 – Isolierte historische Diagnosepfade retiren
 
-Bearbeitet ausschließlich durch LGM-0 ausgewiesene Shared-Module. Die
-produktive Utility erhält einen fachlich aktuellen Owner; der ausschließlich
-historische Rest folgt LGM-1 oder wird entfernt.
+Entfernt ausschließlich durch LGM-0 ausgewiesene historische
+Diagnose-/Decision-Chain-Module, die keine Produktionsconsumer und nur ihre
+eigenen Tests besitzen. Die gemischten Verträge bleiben ausdrücklich für das
+Folgepaket unverändert.
 
-**Done-Gate:** fokussierte Produktiv- und Altvertrags-Tests, AI-Typecheck,
-Strukturcheck und `git diff --check` sind grün.
+**Done-Gate:** AI-Typecheck, Strukturcheck, Referenzscan und `git diff --check`
+sind grün.
 
-### LGM-3 – Restgraph und Boundary finalisieren
+**Ergebnis:** Die alten Coverage-Selection-, Action-Alternatives-,
+Decision-Chain- und Runtime-Debug-Contexts einschließlich exklusiver Tests
+sind entfernt. Kein produktiver Plan-first-Debugvertrag wurde geändert.
+
+### LGM-3 – Gemischte Verträge fachlich trennen und Restgraph finalisieren
 
 Prüft, ob verbleibende historische Diagnoseflächen einen aktuellen,
 ausdrücklich begründeten Zweck besitzen. Andernfalls werden sie entfernt. Der
