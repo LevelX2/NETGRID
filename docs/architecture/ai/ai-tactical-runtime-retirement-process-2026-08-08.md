@@ -2,10 +2,10 @@
 
 ## Status
 
-`LGM-5` ist abgeschlossen. Weitere ausschließlich testseitig erreichbare
-historische Diagnose- und Goal-Cluster bleiben außerhalb dieses
-TacticalPlan-Evaluator-Pakets und werden nur nach einem separaten
-Consumer-Audit bearbeitet. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
+`LGM-6` ist abgeschlossen. Die historische Semantic-Shadow-Evaluation bleibt
+als expliziter Consumer erhalten; weitere ausschließlich testseitig erreichbare
+Cluster werden weiterhin nur nach einem separaten Consumer-Audit bearbeitet.
+Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
 weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
 Worktree vorgesehen ist.
 
@@ -140,6 +140,19 @@ Struktur-Gate sind grün; 22 fokussierte, weiterbestehende Vertrags-Tests sind
 grün. Die separate Runner-Safety-Suite schlägt bereits beim Fixture-Aufbau an
 fehlenden autoritativen Effective-Run-Quotes für bekannte ICE fehl und ist kein
 Consumer des entfernten Graphen.
+
+### LGM-6 – Isolierte Micro-/Overlay-Reste retiren
+
+Entfernt nur den im Folgeaudit vollständig isolierten TacticalGoal-Merge sowie
+die praktische Micro-/Overlay- und alte Scorebreakdown-Schicht einschließlich
+ihrer ausschließlichen Tests. Ein erster Versuch, auch die Goal-Synthesen zu
+entfernen, wurde anhand des Typechecks verworfen: Sie sind weiterhin fachlicher
+Bestandteil der historischen Semantic-Shadow-Evaluation und bleiben daher
+unverändert erhalten.
+
+**Ergebnis:** 13 isolierte Quelldateien beziehungsweise Tests wurden entfernt.
+AI-Typecheck, Struktur-Gate, Package-Boundary-Check und `git diff --check`
+sind grün.
 
 ## Fehlerbehandlung und Abschluss
 

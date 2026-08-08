@@ -1,16 +1,16 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T13:19:09.582Z
+Erzeugt: 2026-08-08T13:25:01.355Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
 
 ## Klassifikationen
 
-- `legacy_test_only`: 86
+- `legacy_test_only`: 80
 - `productive_shared`: 409
 - `productive_simulation`: 169
-- `unreferenced`: 31
+- `unreferenced`: 30
 - `productive_tooling`: 12
 
 ## RETIRE_NOW
@@ -40,7 +40,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/runtime/runner-source-card-answer-role-context.ts`
 - `packages/ai/src/runtime/runner-tag-cleanup-score.ts`
 - `packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts`
-- `packages/ai/src/runtime/semantic-runtime-choice-composition.ts`
 - `packages/ai/src/runtime/semantic-runtime-evidence-context.ts`
 - `packages/ai/src/runtime/semantic-runtime-evidence.ts`
 - `packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts`
@@ -670,7 +669,6 @@ Keine Dateien.
 - `packages/ai/src/decision/scoring-consumer-contract.ts`
 - `packages/ai/src/decision/semantic-basic-setup-pilot.ts`
 - `packages/ai/src/decision/semantic-shadow-decision.ts`
-- `packages/ai/src/decision/tactical-goal-merge.ts`
 - `packages/ai/src/endgame-goal-conversion-contracts.ts`
 - `packages/ai/src/evaluation/access-loop-detection.ts`
 - `packages/ai/src/evaluation/access-outcome-feedback.ts`
@@ -698,9 +696,6 @@ Keine Dateien.
 - `packages/ai/src/reports/selfplay-promotion-activity-formatters.ts`
 - `packages/ai/src/runtime/corp-card-action-score.ts`
 - `packages/ai/src/runtime/corp-economy/corp-basic-economy-near-tie.ts`
-- `packages/ai/src/runtime/practical-micro-candidates-context.ts`
-- `packages/ai/src/runtime/practical-micro-runtime.ts`
-- `packages/ai/src/runtime/practical-tactic-overlay.ts`
 - `packages/ai/src/runtime/runner-access-trash-score.ts`
 - `packages/ai/src/runtime/runner-action-reserve.ts`
 - `packages/ai/src/runtime/runner-activated-agenda-score.ts`
@@ -729,8 +724,6 @@ Keine Dateien.
 - `packages/ai/src/runtime/runner-run-target-guidance-score.ts`
 - `packages/ai/src/runtime/runner-source-card-answer-role.ts`
 - `packages/ai/src/runtime/runner-terminal-remote-tool-score.ts`
-- `packages/ai/src/runtime/semantic-runtime-action-exclusion.ts`
-- `packages/ai/src/runtime/semantic-runtime-score-breakdown.ts`
 - `packages/ai/src/runtime/shell-traders-urgency.ts`
 
 ## RETAIN_DIAGNOSTIC_OR_RETIRE

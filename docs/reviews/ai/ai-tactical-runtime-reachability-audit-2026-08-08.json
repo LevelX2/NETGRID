@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-08T13:19:09.582Z",
+  "generatedAt": "2026-08-08T13:25:01.355Z",
   "roots": {
     "live": [
       "index.ts",
@@ -19,10 +19,10 @@
   },
   "summary": {
     "byClassification": {
-      "legacy_test_only": 86,
+      "legacy_test_only": 80,
       "productive_shared": 409,
       "productive_simulation": 169,
-      "unreferenced": 31,
+      "unreferenced": 30,
       "productive_tooling": 12
     },
     "decisions": {
@@ -51,7 +51,6 @@
         "packages/ai/src/decision/scoring-consumer-contract.ts",
         "packages/ai/src/decision/semantic-basic-setup-pilot.ts",
         "packages/ai/src/decision/semantic-shadow-decision.ts",
-        "packages/ai/src/decision/tactical-goal-merge.ts",
         "packages/ai/src/endgame-goal-conversion-contracts.ts",
         "packages/ai/src/evaluation/access-loop-detection.ts",
         "packages/ai/src/evaluation/access-outcome-feedback.ts",
@@ -79,9 +78,6 @@
         "packages/ai/src/reports/selfplay-promotion-activity-formatters.ts",
         "packages/ai/src/runtime/corp-card-action-score.ts",
         "packages/ai/src/runtime/corp-economy/corp-basic-economy-near-tie.ts",
-        "packages/ai/src/runtime/practical-micro-candidates-context.ts",
-        "packages/ai/src/runtime/practical-micro-runtime.ts",
-        "packages/ai/src/runtime/practical-tactic-overlay.ts",
         "packages/ai/src/runtime/runner-access-trash-score.ts",
         "packages/ai/src/runtime/runner-action-reserve.ts",
         "packages/ai/src/runtime/runner-activated-agenda-score.ts",
@@ -110,8 +106,6 @@
         "packages/ai/src/runtime/runner-run-target-guidance-score.ts",
         "packages/ai/src/runtime/runner-source-card-answer-role.ts",
         "packages/ai/src/runtime/runner-terminal-remote-tool-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-action-exclusion.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts",
         "packages/ai/src/runtime/shell-traders-urgency.ts"
       ],
       "KEEP_PRODUCTIVE": [
@@ -732,7 +726,6 @@
         "packages/ai/src/runtime/runner-source-card-answer-role-context.ts",
         "packages/ai/src/runtime/runner-tag-cleanup-score.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-choice-composition.ts",
         "packages/ai/src/runtime/semantic-runtime-evidence-context.ts",
         "packages/ai/src/runtime/semantic-runtime-evidence.ts",
         "packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts",
@@ -1222,7 +1215,6 @@
         "packages/ai/src/decision/semantic-basic-setup-pilot.test.ts",
         "packages/ai/src/decision/semantic-decision-frame.test.ts",
         "packages/ai/src/decision/semantic-shadow-decision.test.ts",
-        "packages/ai/src/decision/tactical-goal-merge.test.ts",
         "packages/ai/src/decision/target-choice-shadow.test.ts",
         "packages/ai/src/decision/threat-opportunity.test.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.test.ts",
@@ -1257,7 +1249,6 @@
         "packages/ai/src/runtime/semantic-runtime-corp-remote-score.test.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score.test-support.ts",
         "packages/ai/src/runtime/semantic-runtime-scope.test.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.test.ts",
         "packages/ai/src/runtime/shell-traders-plan-signals.test.ts",
         "packages/ai/src/runtime/strategic-action-fit.test.ts",
         "packages/ai/src/runtime/trace-tag-success-estimate.test.ts",
@@ -1349,7 +1340,6 @@
         "packages/ai/src/runtime/runner-strategic-exchange.ts",
         "packages/ai/src/runtime/runner-tag-cleanup-score.ts",
         "packages/ai/src/runtime/runner-terminal-remote-tool-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-action-exclusion.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts",
@@ -1363,7 +1353,6 @@
         "packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts",
         "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts",
         "packages/ai/src/runtime/semantic-runtime-scope.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts",
         "packages/ai/src/runtime/shell-traders-plan-signals.ts",
         "packages/ai/src/runtime/strategic-action-fit.ts",
         "packages/ai/src/runtime/trace-tag-success-estimate.ts",
@@ -2416,7 +2405,6 @@
       ],
       "importedByTests": [
         "packages/ai/src/corp-strategic-intent.test.ts",
-        "packages/ai/src/decision/tactical-goal-merge.test.ts",
         "packages/ai/src/runtime/corp-ambush-plan-signals.test.ts",
         "packages/ai/src/runtime/plan-first-live-runtime-ambush-contract.test.ts",
         "packages/ai/src/runtime/plan-first-live-runtime-ambush-persistent-root-red-contract.test.ts",
@@ -2431,7 +2419,6 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [
         "packages/ai/src/decision/semantic-decision-frame.ts",
-        "packages/ai/src/decision/tactical-goal-merge.ts",
         "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/runtime/corp-ambush-plan-signals.ts"
       ],
@@ -2989,7 +2976,6 @@
         "packages/ai/src/decision/semantic-basic-setup-pilot.test.ts",
         "packages/ai/src/decision/semantic-decision-frame.test.ts",
         "packages/ai/src/decision/semantic-shadow-decision.test.ts",
-        "packages/ai/src/decision/tactical-goal-merge.test.ts",
         "packages/ai/src/decision/tactical-goal-utility.test.ts",
         "packages/ai/src/decision/threat-opportunity.test.ts",
         "packages/ai/src/evaluation/decision-snapshot-suite.test.ts",
@@ -3023,7 +3009,6 @@
         "packages/ai/src/decision/pilot/runner-safe-access-pilot.ts",
         "packages/ai/src/decision/semantic-decision-trace.ts",
         "packages/ai/src/decision/semantic-shadow-decision.ts",
-        "packages/ai/src/decision/tactical-goal-merge.ts",
         "packages/ai/src/decision/tactical-goal-utility.ts",
         "packages/ai/src/decision/threat-projection.ts",
         "packages/ai/src/evaluation/decision-snapshot.ts",
@@ -3149,31 +3134,6 @@
         "packages/ai/src/decision/target-choice-shadow.ts",
         "packages/ai/src/decision/threat-projection.ts",
         "packages/ai/src/role-match.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
-      "path": "packages/ai/src/decision/tactical-goal-merge.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/decision/tactical-goal-merge.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/corp-strategic-intent.ts",
-        "packages/ai/src/decision/neutral-goal-synthesis.ts",
-        "packages/ai/src/decision/semantic-decision-frame.ts",
-        "packages/ai/src/strategic-intent-state.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/decision/neutral-goal-synthesis.ts"
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
@@ -3466,7 +3426,6 @@
         "packages/ai/src/decision/neutral-goal-synthesis.test.ts",
         "packages/ai/src/decision/semantic-decision-frame.test.ts",
         "packages/ai/src/decision/semantic-shadow-decision.test.ts",
-        "packages/ai/src/decision/tactical-goal-merge.test.ts",
         "packages/ai/src/deck-doctrine-strategy.test.ts",
         "packages/ai/src/deck-strategy-completeness-gate.test.ts",
         "packages/ai/src/evaluation/decision-contract-real-engine.test.ts",
@@ -4604,8 +4563,7 @@
         "packages/ai/src/simulation.ts"
       ],
       "importedByTests": [
-        "packages/ai/src/evaluation/practical-tactic-benchmark.test.ts",
-        "packages/ai/src/runtime/practical-tactic-overlay.test.ts"
+        "packages/ai/src/evaluation/practical-tactic-benchmark.test.ts"
       ],
       "imports": [],
       "runtimeImports": [],
@@ -5158,7 +5116,6 @@
         "packages/ai/src/runtime/plan-first-live-runtime-corp-card-variant-contract.test.ts",
         "packages/ai/src/runtime/plan-first-live-runtime-punish-coupled-sequence-red-contract.test.ts",
         "packages/ai/src/runtime/plan-first-live-runtime-punish-persistent-root-contract.test.ts",
-        "packages/ai/src/runtime/practical-tactic-overlay.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover-runner-plans.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover-runner-safety.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover.test-support.ts",
@@ -5514,8 +5471,7 @@
         "packages/ai/src/plans/action-capacity-route.test.ts",
         "packages/ai/src/plans/action-demand.test.ts",
         "packages/ai/src/plans/plan-portfolio.test.ts",
-        "packages/ai/src/runtime/action-capacity-score-components.test.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.test.ts"
+        "packages/ai/src/runtime/action-capacity-score-components.test.ts"
       ],
       "imports": [],
       "runtimeImports": [],
@@ -6163,8 +6119,7 @@
         "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-corp-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts"
+        "packages/ai/src/runtime/semantic-runtime-corp-score.ts"
       ],
       "publicExportedBy": [
         "packages/ai/src/index.ts"
@@ -8364,7 +8319,6 @@
         "packages/ai/src/runtime/runner-opponent-matchpoint-contest-choice.test.ts",
         "packages/ai/src/runtime/runner-run-plan-memory.test.ts",
         "packages/ai/src/runtime/runner-run-release.test.ts",
-        "packages/ai/src/runtime/semantic-runtime-action-exclusion.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover-runner-plans.test.ts"
       ],
       "imports": [
@@ -8409,7 +8363,6 @@
         "packages/ai/src/runner-tactical-goals.ts",
         "packages/ai/src/runtime/ai-live-runtime-composition.ts",
         "packages/ai/src/runtime/plan-first-live-runtime.ts",
-        "packages/ai/src/runtime/practical-micro-candidates-context.ts",
         "packages/ai/src/runtime/runner-bank-investment-context.ts",
         "packages/ai/src/runtime/runner-blink-encounter-break-context.ts",
         "packages/ai/src/runtime/runner-blink-risk-composition.ts",
@@ -8425,8 +8378,7 @@
         "packages/ai/src/runtime/runner-run-plan-start.ts",
         "packages/ai/src/runtime/runner-run-release.ts",
         "packages/ai/src/runtime/runner-run-target-guidance-context.ts",
-        "packages/ai/src/runtime/runner-run-target-guidance-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-action-exclusion.ts"
+        "packages/ai/src/runtime/runner-run-target-guidance-score.ts"
       ],
       "publicExportedBy": [
         "packages/ai/src/index.ts"
@@ -9347,8 +9299,6 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [
         "packages/ai/src/runtime/plan-first-live-runtime.ts",
-        "packages/ai/src/runtime/practical-micro-runtime.ts",
-        "packages/ai/src/runtime/practical-tactic-overlay.ts",
         "packages/ai/src/runtime/semantic-runtime-decision-context.ts",
         "packages/ai/src/simulation/ai-simulation-config.ts"
       ],
@@ -10930,7 +10880,6 @@
       ],
       "typeOnlyProductionConsumers": [
         "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-contracts.ts",
-        "packages/ai/src/runtime/practical-micro-candidates-context.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-passive-scoreline.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts"
@@ -12232,73 +12181,6 @@
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/practical-micro-candidates-context.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/runtime/practical-micro-candidates-context.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/runner-run-target-evaluation.ts",
-        "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoreline-assessment.ts",
-        "packages/ai/src/runtime/practical-micro-runtime.ts",
-        "packages/ai/src/runtime/role-match.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/role-match.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
-      "path": "packages/ai/src/runtime/practical-micro-runtime.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/runtime/practical-micro-runtime.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/runtime/choose-ai-action.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/practical-micro-candidates-context.ts"
-      ],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
-      "path": "packages/ai/src/runtime/practical-tactic-overlay.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/runtime/practical-tactic-overlay.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/runtime/choose-ai-action.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/runtime/progression-card-target.ts",
@@ -16388,41 +16270,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/semantic-runtime-action-exclusion.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/runtime/semantic-runtime-action-exclusion.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/actions/runner-hazard-counter-semantics.ts",
-        "packages/ai/src/runner-run-target-evaluation.ts",
-        "packages/ai/src/runtime/public-event-history.ts",
-        "packages/ai/src/runtime/runner-action-reserve.ts",
-        "packages/ai/src/runtime/runner-run-release.ts",
-        "packages/ai/src/runtime/semantic-runtime-scope.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/visible-run-analysis.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/actions/runner-hazard-counter-semantics.ts",
-        "packages/ai/src/runtime/public-event-history.ts",
-        "packages/ai/src/runtime/runner-action-reserve.ts",
-        "packages/ai/src/runtime/runner-run-release.ts",
-        "packages/ai/src/runtime/semantic-runtime-scope.ts",
-        "packages/ai/src/visible-run-analysis.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
-    },
-    {
       "path": "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
       "classification": "unreferenced",
       "reachableFrom": [],
@@ -16478,37 +16325,9 @@
         "packages/ai/src/runtime/semantic-runtime-score-components.ts",
         "packages/ai/src/runtime/strategic-action-fit.ts"
       ],
-      "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/semantic-runtime-choice-composition.ts"
-      ],
-      "publicExportedBy": [],
-      "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/semantic-runtime-choice-composition.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts",
-        "packages/ai/src/runtime/semantic-runtime-scope.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts"
-      ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
+      "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
       "path": "packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts",
@@ -17606,9 +17425,7 @@
         "packages/ai/src/action-semantic-candidate.ts"
       ],
       "runtimeImports": [],
-      "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/semantic-runtime-choice-composition.ts"
-      ],
+      "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "RETIRE_NOW"
     },
@@ -17733,7 +17550,6 @@
       ],
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/semantic-runtime-choice-composition.ts",
         "packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts"
       ],
       "publicExportedBy": [],
@@ -17768,44 +17584,9 @@
       "runtimeImports": [
         "packages/ai/src/actions/action-effect-classification.ts"
       ],
-      "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/semantic-runtime-choice-composition.ts"
-      ],
-      "publicExportedBy": [],
-      "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts",
-      "classification": "legacy_test_only",
-      "reachableFrom": [
-        "test_runtime",
-        "test_type"
-      ],
-      "importedByProduction": [],
-      "importedByTests": [
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.test.ts"
-      ],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/diagnostics/decision-debug.ts",
-        "packages/ai/src/plans/credit-demand.ts",
-        "packages/ai/src/runtime/action-capacity-score-components.ts",
-        "packages/ai/src/runtime/economy-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/runtime/strategic-action-fit.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/diagnostics/decision-debug.ts",
-        "packages/ai/src/runtime/action-capacity-score-components.ts",
-        "packages/ai/src/runtime/economy-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-components.ts",
-        "packages/ai/src/runtime/strategic-action-fit.ts"
-      ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
-      "blocker": "test consumer review required"
+      "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
       "path": "packages/ai/src/runtime/semantic-runtime-score-components.ts",
@@ -17892,11 +17673,9 @@
         "packages/ai/src/runtime/runner-run-only-action-adjustment.ts",
         "packages/ai/src/runtime/runner-run-plan-policy.ts",
         "packages/ai/src/runtime/runner-simple-exclusions-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-action-exclusion.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
         "packages/ai/src/runtime/semantic-runtime-plan-memory-exclusion.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-breakdown.ts",
         "packages/ai/src/runtime/semantic-runtime-score-components.ts"
       ],
       "publicExportedBy": [],
@@ -23682,7 +23461,6 @@
       ],
       "importedByTests": [
         "packages/ai/src/corp-strategic-intent.test.ts",
-        "packages/ai/src/decision/tactical-goal-merge.test.ts",
         "packages/ai/src/deck-strategy-completeness-gate.test.ts",
         "packages/ai/src/remote-doctrine-profile.test.ts",
         "packages/ai/src/runtime/strategic-action-fit.test.ts",
@@ -23707,7 +23485,6 @@
       "typeOnlyProductionConsumers": [
         "packages/ai/src/corp-strategic-intent.ts",
         "packages/ai/src/decision/semantic-decision-frame.ts",
-        "packages/ai/src/decision/tactical-goal-merge.ts",
         "packages/ai/src/evaluation/decision-checkpoints/checkpoint-types.ts",
         "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/remote-doctrine-profile.ts",
