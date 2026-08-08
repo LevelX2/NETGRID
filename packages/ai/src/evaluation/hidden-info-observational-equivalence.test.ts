@@ -20,7 +20,6 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { resetStrategicIntentMemory } from "../strategic-intent-memory";
-import { resetTacticalPlanMemory } from "../tactical-plans";
 import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
 
 const RUNNER_DECK = withCards(
@@ -336,7 +335,7 @@ function swapDefinitions(
 }
 
 function resetAllAiMemory(): void {
-  resetTacticalPlanMemory();
+  resetResidentPlanPortfolioMemory();
   resetPlanPortfolioMemory();
   resetResidentPlanPortfolioMemory();
   resetRunnerRunPlanMemory();

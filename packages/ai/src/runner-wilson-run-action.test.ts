@@ -9,7 +9,7 @@ import type {
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import { buildPlanningRulesContext, chooseRunnerAction } from "./index";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 
 const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 
@@ -17,12 +17,12 @@ describe("Runner Wilson run action utilization", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
   });
 
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {

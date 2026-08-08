@@ -19,13 +19,13 @@ import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { corpUpgradePlacementExclusion } from "../runtime/corp-upgrade-placement";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-definitions";
 import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
 
 describe("hardened decision contracts on real Engine inputs", () => {
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
   });
 
   it("mulligans the historical non-executable Manhunt hand through the real setup contract", () => {

@@ -18,7 +18,7 @@ import { chooseCorpAction, chooseRunnerAction } from "../index";
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { resetStrategicIntentMemory } from "../strategic-intent-memory";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { RealEngineFixtureBuilder } from "./real-engine-fixture-builder";
@@ -32,7 +32,7 @@ const PILE_DRIVER = "onr_v1_047_pile-driver";
 
 describe("match series 70BE real Engine regressions", () => {
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     resetRunnerRunPlanMemory();
     resetStrategicIntentMemory();
   });

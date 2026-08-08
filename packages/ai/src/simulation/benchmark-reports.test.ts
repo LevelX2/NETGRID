@@ -24,7 +24,7 @@ import {
   runMatchProgressionBenchmarkSuite,
   type AiSimulationSummary,
 } from "../simulation";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
 describe("benchmark report formatting", () => {
   it("formats doctrine quality benchmark reports with gate interpretation", () => {
@@ -612,7 +612,7 @@ describe("benchmark report formatting", () => {
       "local_realistic_corp_ivory_bastion_snapshot_v1",
     );
 
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     const isolated = runAiSelfplayTraceMining({
       seeds: [seed],
       runnerDeck: pairG.runner.deck,
@@ -623,7 +623,7 @@ describe("benchmark report formatting", () => {
       maxFindings: 50,
     }).summaries[0]!;
 
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     runAiSelfplayTraceMining({
       seeds: [seed],
       runnerDeck: pairF.runner.deck,

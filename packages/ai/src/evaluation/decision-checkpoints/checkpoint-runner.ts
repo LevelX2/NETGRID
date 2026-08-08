@@ -2,7 +2,7 @@ import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { quoteCorpPunishRoute } from "@netgrid/engine";
 
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { resetTacticalPlanMemory } from "../../plans/plan-memory";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
   evaluateRunnerRunTargets,
   type RunnerRunTargetEvaluation,
@@ -36,7 +36,7 @@ export function runAiDecisionCheckpoint(
   uncheckedFixture: AiDecisionCheckpointV1,
 ): AiDecisionCheckpointRunResult {
   const fixture = validateAiDecisionCheckpoint(uncheckedFixture);
-  resetTacticalPlanMemory();
+  resetResidentPlanPortfolioMemory();
   const state = structuredClone(fixture.engine.testOnlyGameState);
   state.eventLog = fixture.engine.eventPrefix.map((event) => ({ ...event }));
   const options = {

@@ -6,7 +6,7 @@ import {
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
 } from "./decision/pilot-scope-registry";
 import { PlanResolutionFailure } from "./plans/plan-resolution-failure";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 import {
   attachOwnDeckSnapshot,
   aiInput,
@@ -103,7 +103,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     process.env[AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV];
 
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {

@@ -10,7 +10,7 @@ import {
 import { buildCorpStrategicIntentProfile } from "./corp-strategic-intent";
 import { buildRunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { buildStrategicIntentState } from "./strategic-intent-state";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./runtime/ai-decision-input";
 import type {
   AiDecisionInput,
@@ -23,7 +23,7 @@ import type {
 
 describe("Deck strategy runtime vertical slices", () => {
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
   });
 
   it("recognizes representative golden strategy fixtures", () => {

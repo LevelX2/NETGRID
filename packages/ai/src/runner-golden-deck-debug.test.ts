@@ -25,7 +25,7 @@ import {
   type RunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
 import { buildRunnerTacticalGoals } from "./runner-tactical-goals";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "./plans/resident-plan-portfolio-memory";
 
 const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as Array<{
   deckSnapshotId: string;
@@ -42,12 +42,12 @@ describe("Runner Golden Deck strategy and debug", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
   beforeEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
   });
 
   afterEach(() => {
-    resetTacticalPlanMemory();
+    resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {

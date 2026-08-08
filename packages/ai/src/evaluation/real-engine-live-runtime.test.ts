@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { chooseAiAction } from "../index";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { resetStrategicIntentMemory } from "../strategic-intent-memory";
-import { resetTacticalPlanMemory } from "../tactical-plans";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildRealEngineDecisionCorpusScenarios } from "./real-engine-decision-corpus-fixtures";
 
 describe("real Engine inputs through the live Semantic Runtime", () => {
@@ -78,7 +78,7 @@ function evaluateAnnotatedScenarios(
 }
 
 function chooseWithoutPersistentMemory(input: AiDecisionInput): string {
-  resetTacticalPlanMemory();
+  resetResidentPlanPortfolioMemory();
   resetRunnerRunPlanMemory();
   resetStrategicIntentMemory();
   const decision = chooseAiAction(input, {
