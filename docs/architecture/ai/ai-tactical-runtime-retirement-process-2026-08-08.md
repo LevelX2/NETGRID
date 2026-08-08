@@ -2,10 +2,10 @@
 
 ## Status
 
-`LGM-6` ist abgeschlossen. Die historische Semantic-Shadow-Evaluation bleibt
-als expliziter Consumer erhalten; weitere ausschließlich testseitig erreichbare
-Cluster werden weiterhin nur nach einem separaten Consumer-Audit bearbeitet.
-Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
+`LGM-7` ist abgeschlossen. `LGM-8` klassifiziert anschließend den verbleibenden
+test-only-Bestand fachlich. Die historische Semantic-Shadow-Evaluation bleibt
+bis zu dieser Prüfung als expliziter Consumer erhalten. Die Umsetzung erfolgt
+auf dem sauberen lokalen Branch `main`,
 weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
 Worktree vorgesehen ist.
 
@@ -153,6 +153,21 @@ unverändert erhalten.
 **Ergebnis:** 13 isolierte Quelldateien beziehungsweise Tests wurden entfernt.
 AI-Typecheck, Struktur-Gate, Package-Boundary-Check und `git diff --check`
 sind grün.
+
+### LGM-7 – Unerreichbare Restmodule retiren
+
+Der frische Reachability-Audit wies 30 vollständig unerreichbare
+`RETIRE_NOW`-Quelldateien aus: einen alten Runner-Scoring-/Kontext-Cluster,
+Semantic-Evidence-Reste sowie zwei isolierte TacticalPlan-/Diagnosemodule.
+Die einzige interne Type-only-Kante lag vollständig innerhalb derselben
+unerreichbaren Evidence-Teilgruppe; es gab keine Live-, Simulations-,
+Tooling-, Workspace-, öffentlichen oder Testconsumer. Deshalb wurde der
+geschlossene Teilgraph ohne Ersatzlogik entfernt; Tests waren nicht betroffen.
+
+**Ergebnis:** Der erneute Audit erreicht den Fixpunkt `unreferenced = 0` und
+`RETIRE_NOW = 0`. Audit-Selftest, AI-Typecheck, Struktur-Gate,
+Package-Boundary-Check und `git diff --check` sind grün. Die produktive
+Plan-first-Runtime blieb unverändert.
 
 ## Fehlerbehandlung und Abschluss
 

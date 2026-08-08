@@ -1,6 +1,6 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T13:25:01.355Z
+Erzeugt: 2026-08-08T14:52:08.866Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
@@ -10,41 +10,11 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `legacy_test_only`: 80
 - `productive_shared`: 409
 - `productive_simulation`: 169
-- `unreferenced`: 30
 - `productive_tooling`: 12
 
 ## RETIRE_NOW
 
-- `packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts`
-- `packages/ai/src/plans/tactical-plan-runner-survival-progress.ts`
-- `packages/ai/src/runtime/known-central-payoff-exclusion.ts`
-- `packages/ai/src/runtime/record-value.ts`
-- `packages/ai/src/runtime/runner-archives-exclusion.ts`
-- `packages/ai/src/runtime/runner-bad-publicity-relevance-context.ts`
-- `packages/ai/src/runtime/runner-bad-publicity-relevance-score.ts`
-- `packages/ai/src/runtime/runner-central-memory-context.ts`
-- `packages/ai/src/runtime/runner-central-memory-score.ts`
-- `packages/ai/src/runtime/runner-followup-score.ts`
-- `packages/ai/src/runtime/runner-junkyard-bbs-recovery-score.ts`
-- `packages/ai/src/runtime/runner-loan-liability-score.ts`
-- `packages/ai/src/runtime/runner-recent-history-context.ts`
-- `packages/ai/src/runtime/runner-recovery-commitment-score.ts`
-- `packages/ai/src/runtime/runner-recovery-context.ts`
-- `packages/ai/src/runtime/runner-recovery-funding-need.ts`
-- `packages/ai/src/runtime/runner-remote-score.ts`
-- `packages/ai/src/runtime/runner-run-components-context.ts`
-- `packages/ai/src/runtime/runner-run-target-guidance-context.ts`
-- `packages/ai/src/runtime/runner-score-components.ts`
-- `packages/ai/src/runtime/runner-scoring-support-composition.ts`
-- `packages/ai/src/runtime/runner-simple-exclusions-context.ts`
-- `packages/ai/src/runtime/runner-source-card-answer-role-context.ts`
-- `packages/ai/src/runtime/runner-tag-cleanup-score.ts`
-- `packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts`
-- `packages/ai/src/runtime/semantic-runtime-evidence-context.ts`
-- `packages/ai/src/runtime/semantic-runtime-evidence.ts`
-- `packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts`
-- `packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts`
-- `packages/ai/src/runtime/semantic-runtime-runner-evidence.ts`
+Keine Dateien.
 
 ## SPLIT_BEFORE_RETIRE
 

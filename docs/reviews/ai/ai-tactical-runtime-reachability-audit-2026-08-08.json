@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-08T13:25:01.355Z",
+  "generatedAt": "2026-08-08T14:52:08.866Z",
   "roots": {
     "live": [
       "index.ts",
@@ -22,7 +22,6 @@
       "legacy_test_only": 80,
       "productive_shared": 409,
       "productive_simulation": 169,
-      "unreferenced": 30,
       "productive_tooling": 12
     },
     "decisions": {
@@ -699,38 +698,6 @@
         "packages/ai/src/trace-bid-efficiency.ts",
         "packages/ai/src/visible-run-analysis.ts",
         "packages/ai/src/witness-opportunity-projection.ts"
-      ],
-      "RETIRE_NOW": [
-        "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
-        "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
-        "packages/ai/src/runtime/known-central-payoff-exclusion.ts",
-        "packages/ai/src/runtime/record-value.ts",
-        "packages/ai/src/runtime/runner-archives-exclusion.ts",
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-context.ts",
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-score.ts",
-        "packages/ai/src/runtime/runner-central-memory-context.ts",
-        "packages/ai/src/runtime/runner-central-memory-score.ts",
-        "packages/ai/src/runtime/runner-followup-score.ts",
-        "packages/ai/src/runtime/runner-junkyard-bbs-recovery-score.ts",
-        "packages/ai/src/runtime/runner-loan-liability-score.ts",
-        "packages/ai/src/runtime/runner-recent-history-context.ts",
-        "packages/ai/src/runtime/runner-recovery-commitment-score.ts",
-        "packages/ai/src/runtime/runner-recovery-context.ts",
-        "packages/ai/src/runtime/runner-recovery-funding-need.ts",
-        "packages/ai/src/runtime/runner-remote-score.ts",
-        "packages/ai/src/runtime/runner-run-components-context.ts",
-        "packages/ai/src/runtime/runner-run-target-guidance-context.ts",
-        "packages/ai/src/runtime/runner-score-components.ts",
-        "packages/ai/src/runtime/runner-scoring-support-composition.ts",
-        "packages/ai/src/runtime/runner-simple-exclusions-context.ts",
-        "packages/ai/src/runtime/runner-source-card-answer-role-context.ts",
-        "packages/ai/src/runtime/runner-tag-cleanup-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts"
       ]
     }
   },
@@ -1307,7 +1274,6 @@
         "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
         "packages/ai/src/evaluation/doctrine-goal-action-fit.ts",
-        "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
         "packages/ai/src/plans/tactical-plan-step-semantics.ts",
         "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/run-analysis/runner-run-target-types.ts",
@@ -1336,11 +1302,8 @@
         "packages/ai/src/runtime/runner-goal-fit-score.ts",
         "packages/ai/src/runtime/runner-hand-overflow-relief-score.ts",
         "packages/ai/src/runtime/runner-run-plan-start.ts",
-        "packages/ai/src/runtime/runner-score-components.ts",
         "packages/ai/src/runtime/runner-strategic-exchange.ts",
-        "packages/ai/src/runtime/runner-tag-cleanup-score.ts",
         "packages/ai/src/runtime/runner-terminal-remote-tool-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts",
@@ -1348,10 +1311,6 @@
         "packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score-context.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts",
         "packages/ai/src/runtime/semantic-runtime-scope.ts",
         "packages/ai/src/runtime/shell-traders-plan-signals.ts",
         "packages/ai/src/runtime/strategic-action-fit.ts",
@@ -3841,25 +3800,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
-        "packages/ai/src/runtime/semantic-runtime-score-components.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/diagnostics/semantic-runtime-why-coverage.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -6115,8 +6055,6 @@
         "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/runtime/economy-score-components.ts",
         "packages/ai/src/runtime/runner-install-score.ts",
-        "packages/ai/src/runtime/runner-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score-context.ts",
         "packages/ai/src/runtime/semantic-runtime-corp-score.ts"
@@ -7339,25 +7277,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/plans/tactical-plan-action-values.ts",
-        "packages/ai/src/plans/tactical-plan-types.ts",
-        "packages/ai/src/runner-run-target-evaluation.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/plans/tactical-plan-action-values.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/plans/tactical-plan-step-semantics.ts",
       "classification": "legacy_test_only",
       "reachableFrom": [
@@ -7433,7 +7352,6 @@
         "packages/ai/src/plans/tactical-plan-breaker-coverage.ts",
         "packages/ai/src/plans/tactical-plan-coverage-kinds.ts",
         "packages/ai/src/plans/tactical-plan-credit-demands.ts",
-        "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
         "packages/ai/src/plans/tactical-plan-step-semantics.ts",
         "packages/ai/src/runtime/runner-search-coverage-need.ts",
         "packages/ai/src/runtime/search-choice-option.ts",
@@ -8357,7 +8275,6 @@
         "packages/ai/src/decision/semantic-decision-frame.ts",
         "packages/ai/src/decision/threat-projection.ts",
         "packages/ai/src/evaluation/decision-checkpoints/checkpoint-types.ts",
-        "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
         "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/runner-run-target-guidance.ts",
         "packages/ai/src/runner-tactical-goals.ts",
@@ -8374,10 +8291,8 @@
         "packages/ai/src/runtime/runner-multi-run-event-assessment.ts",
         "packages/ai/src/runtime/runner-opponent-matchpoint-contest-choice.ts",
         "packages/ai/src/runtime/runner-run-commitment.ts",
-        "packages/ai/src/runtime/runner-run-components-context.ts",
         "packages/ai/src/runtime/runner-run-plan-start.ts",
         "packages/ai/src/runtime/runner-run-release.ts",
-        "packages/ai/src/runtime/runner-run-target-guidance-context.ts",
         "packages/ai/src/runtime/runner-run-target-guidance-score.ts"
       ],
       "publicExportedBy": [
@@ -8647,9 +8562,7 @@
       "runtimeImports": [
         "packages/ai/src/plans/action-demand.ts"
       ],
-      "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts"
-      ],
+      "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
@@ -11846,20 +11759,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/known-central-payoff-exclusion.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/semantic-runtime-types.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/number-rounding.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -12303,18 +12202,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/record-value.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/remote-trash-cost.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -12593,20 +12480,6 @@
       "blocker": "test consumer review required"
     },
     {
-      "path": "packages/ai/src/runtime/runner-archives-exclusion.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/semantic-runtime-types.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/runner-archives-score.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -12656,36 +12529,6 @@
       "publicExportedBy": [],
       "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
       "blocker": "test consumer review required"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-bad-publicity-relevance-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-assessment.ts",
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-score.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-assessment.ts",
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-score.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-bad-publicity-relevance-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-bank-investment-context.ts",
@@ -13002,34 +12845,6 @@
       "publicExportedBy": [],
       "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
       "blocker": "test consumer review required"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-central-memory-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/runner-central-memory-score.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/runner-central-memory-score.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-central-memory-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-development-cashout-admission.ts",
@@ -13430,18 +13245,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/runner-followup-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/runner-future-path-assessment.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -13784,18 +13587,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/runner-junkyard-bbs-recovery-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/runner-junkyard-bbs-recovery-target.ts",
       "classification": "legacy_test_only",
       "reachableFrom": [
@@ -14009,18 +13800,6 @@
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-loan-liability-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-loan-projected-spend.ts",
@@ -14658,9 +14437,7 @@
         "packages/ai/src/runtime/breaker-role-match.ts",
         "packages/ai/src/runtime/role-match.ts"
       ],
-      "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts"
-      ],
+      "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
@@ -14778,74 +14555,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/runner-recent-history-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/runner-recovery-repeat-score.ts",
-        "packages/ai/src/runtime/runner-run-history.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/runner-recovery-repeat-score.ts",
-        "packages/ai/src/runtime/runner-run-history.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-recovery-commitment-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-recovery-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/runner-blink-recovery-score.ts",
-        "packages/ai/src/runtime/runner-junkyard-bbs-recovery-score.ts",
-        "packages/ai/src/runtime/runner-junkyard-bbs-recovery-target.ts",
-        "packages/ai/src/runtime/runner-recovery-funding-need.ts",
-        "packages/ai/src/runtime/runner-recovery-history.ts",
-        "packages/ai/src/runtime/runner-recovery-repeat-score.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/runner-blink-recovery-score.ts",
-        "packages/ai/src/runtime/runner-junkyard-bbs-recovery-score.ts",
-        "packages/ai/src/runtime/runner-junkyard-bbs-recovery-target.ts",
-        "packages/ai/src/runtime/runner-recovery-funding-need.ts",
-        "packages/ai/src/runtime/runner-recovery-history.ts",
-        "packages/ai/src/runtime/runner-recovery-repeat-score.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-recovery-funding-need.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/runner-recovery-history.ts",
       "classification": "legacy_test_only",
       "reachableFrom": [
@@ -14884,18 +14593,6 @@
       "publicExportedBy": [],
       "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
       "blocker": "test consumer review required"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-remote-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-repeated-run-target-score.ts",
@@ -15033,32 +14730,6 @@
       "publicExportedBy": [],
       "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
       "blocker": "test consumer review required"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-run-components-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runner-run-target-evaluation.ts",
-        "packages/ai/src/runtime/runner-access-trash-score.ts",
-        "packages/ai/src/runtime/runner-archives-score.ts",
-        "packages/ai/src/runtime/runner-known-ice-path-score.ts",
-        "packages/ai/src/runtime/runner-remote-score.ts",
-        "packages/ai/src/runtime/runner-repeated-run-target-score.ts",
-        "packages/ai/src/visible-run-analysis.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/runner-access-trash-score.ts",
-        "packages/ai/src/runtime/runner-archives-score.ts",
-        "packages/ai/src/runtime/runner-known-ice-path-score.ts",
-        "packages/ai/src/runtime/runner-remote-score.ts",
-        "packages/ai/src/runtime/runner-repeated-run-target-score.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-run-funding-admission.ts",
@@ -15459,25 +15130,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/runner-run-target-guidance-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runner-run-target-evaluation.ts",
-        "packages/ai/src/runtime/runner-run-target-guidance-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-scope.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/runner-run-target-guidance-score.ts",
-        "packages/ai/src/runtime/semantic-runtime-scope.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/runner-run-target-guidance-score.ts",
       "classification": "legacy_test_only",
       "reachableFrom": [
@@ -15525,97 +15177,6 @@
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-score-components.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/actions/persistent-development-action.ts",
-        "packages/ai/src/plans/credit-demand.ts",
-        "packages/ai/src/runner-damage-threat-assessment.ts",
-        "packages/ai/src/runtime/economy-score-components.ts",
-        "packages/ai/src/runtime/runner-activated-agenda-score.ts",
-        "packages/ai/src/runtime/runner-basic-action-penalty-score.ts",
-        "packages/ai/src/runtime/runner-draw-overflow-score.ts",
-        "packages/ai/src/runtime/runner-draw-tax-liability-score.ts",
-        "packages/ai/src/runtime/runner-encounter-break-score.ts",
-        "packages/ai/src/runtime/runner-followup-score.ts",
-        "packages/ai/src/runtime/runner-goal-fit-score.ts",
-        "packages/ai/src/runtime/runner-hand-overflow-relief-score.ts",
-        "packages/ai/src/runtime/runner-hosted-install-score.ts",
-        "packages/ai/src/runtime/runner-install-score.ts",
-        "packages/ai/src/runtime/runner-loan-liability-score.ts",
-        "packages/ai/src/runtime/runner-recovery-commitment-score.ts",
-        "packages/ai/src/runtime/runner-run-lock-release-score.ts",
-        "packages/ai/src/runtime/runner-start-run-score.ts",
-        "packages/ai/src/runtime/runner-tag-cleanup-score.ts",
-        "packages/ai/src/runtime/runner-terminal-remote-tool-score.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/actions/persistent-development-action.ts",
-        "packages/ai/src/runner-damage-threat-assessment.ts",
-        "packages/ai/src/runtime/economy-score-components.ts",
-        "packages/ai/src/runtime/runner-activated-agenda-score.ts",
-        "packages/ai/src/runtime/runner-basic-action-penalty-score.ts",
-        "packages/ai/src/runtime/runner-draw-overflow-score.ts",
-        "packages/ai/src/runtime/runner-draw-tax-liability-score.ts",
-        "packages/ai/src/runtime/runner-encounter-break-score.ts",
-        "packages/ai/src/runtime/runner-followup-score.ts",
-        "packages/ai/src/runtime/runner-goal-fit-score.ts",
-        "packages/ai/src/runtime/runner-hand-overflow-relief-score.ts",
-        "packages/ai/src/runtime/runner-hosted-install-score.ts",
-        "packages/ai/src/runtime/runner-install-score.ts",
-        "packages/ai/src/runtime/runner-loan-liability-score.ts",
-        "packages/ai/src/runtime/runner-recovery-commitment-score.ts",
-        "packages/ai/src/runtime/runner-run-lock-release-score.ts",
-        "packages/ai/src/runtime/runner-start-run-score.ts",
-        "packages/ai/src/runtime/runner-tag-cleanup-score.ts",
-        "packages/ai/src/runtime/runner-terminal-remote-tool-score.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-scoring-support-composition.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/belief-state.ts",
-        "packages/ai/src/runtime/card-definition-lookup.ts",
-        "packages/ai/src/runtime/record-value.ts",
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-context.ts",
-        "packages/ai/src/runtime/runner-central-memory-context.ts",
-        "packages/ai/src/runtime/runner-recent-history-context.ts",
-        "packages/ai/src/runtime/runner-recovery-context.ts",
-        "packages/ai/src/runtime/runner-run-components-context.ts",
-        "packages/ai/src/runtime/runner-run-target-guidance-context.ts",
-        "packages/ai/src/runtime/runner-score-components.ts",
-        "packages/ai/src/simulation/runner-pressure-metric-types.ts",
-        "packages/ai/src/visible-run-analysis.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/belief-state.ts",
-        "packages/ai/src/runtime/card-definition-lookup.ts",
-        "packages/ai/src/runtime/record-value.ts",
-        "packages/ai/src/runtime/runner-bad-publicity-relevance-context.ts",
-        "packages/ai/src/runtime/runner-central-memory-context.ts",
-        "packages/ai/src/runtime/runner-recent-history-context.ts",
-        "packages/ai/src/runtime/runner-recovery-context.ts",
-        "packages/ai/src/runtime/runner-run-components-context.ts",
-        "packages/ai/src/runtime/runner-run-target-guidance-context.ts",
-        "packages/ai/src/runtime/runner-score-components.ts",
-        "packages/ai/src/visible-run-analysis.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-search-coverage-need.ts",
@@ -15707,41 +15268,6 @@
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-simple-exclusions-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/known-central-payoff-exclusion.ts",
-        "packages/ai/src/runtime/runner-archives-exclusion.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/known-central-payoff-exclusion.ts",
-        "packages/ai/src/runtime/runner-archives-exclusion.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-source-card-answer-role-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/runner-source-card-answer-role.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/runner-source-card-answer-role.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-source-card-answer-role.ts",
@@ -15854,20 +15380,6 @@
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/runner-tag-cleanup-score.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/runner-targeted-bypass-choice.ts",
@@ -16268,26 +15780,6 @@
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/plans/credit-demand.ts",
-        "packages/ai/src/runtime/action-capacity-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/semantic-runtime-choice-builder.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
@@ -17399,37 +16891,6 @@
       "proposedDisposition": "KEEP_PRODUCTIVE"
     },
     {
-      "path": "packages/ai/src/runtime/semantic-runtime-evidence-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/runtime/semantic-runtime-evidence.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/semantic-runtime-evidence.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/semantic-runtime-evidence.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
       "path": "packages/ai/src/runtime/semantic-runtime-explanation.ts",
       "classification": "productive_shared",
       "reachableFrom": [
@@ -17503,57 +16964,6 @@
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
       "proposedDisposition": "KEEP_PRODUCTIVE"
-    },
-    {
-      "path": "packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/semantic-runtime-runner-evidence-context.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts"
-      ],
-      "runtimeImports": [
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts"
-      ],
-      "typeOnlyProductionConsumers": [],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
-    },
-    {
-      "path": "packages/ai/src/runtime/semantic-runtime-runner-evidence.ts",
-      "classification": "unreferenced",
-      "reachableFrom": [],
-      "importedByProduction": [],
-      "importedByTests": [],
-      "imports": [
-        "packages/ai/src/action-semantic-candidate.ts",
-        "packages/ai/src/runtime/runner-program-install-trash-policy.ts"
-      ],
-      "runtimeImports": [],
-      "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/semantic-runtime-runner-evidence-composition.ts"
-      ],
-      "publicExportedBy": [],
-      "proposedDisposition": "RETIRE_NOW"
     },
     {
       "path": "packages/ai/src/runtime/semantic-runtime-scope.ts",
@@ -17652,14 +17062,11 @@
         "packages/ai/src/decision/pilot/pilot-scope-registry.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-ranked-alternatives.ts",
         "packages/ai/src/runtime/corp-economy/corp-basic-economy-near-tie.ts",
         "packages/ai/src/runtime/corp-upgrade-placement.ts",
-        "packages/ai/src/runtime/known-central-payoff-exclusion.ts",
         "packages/ai/src/runtime/plan-first-live-runtime.ts",
         "packages/ai/src/runtime/reactive-action.ts",
         "packages/ai/src/runtime/runner-action-reserve.ts",
-        "packages/ai/src/runtime/runner-archives-exclusion.ts",
         "packages/ai/src/runtime/runner-blink-break-exclusion.ts",
         "packages/ai/src/runtime/runner-blink-risk-context.ts",
         "packages/ai/src/runtime/runner-blink-run-exclusion.ts",
@@ -17672,8 +17079,6 @@
         "packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts",
         "packages/ai/src/runtime/runner-run-only-action-adjustment.ts",
         "packages/ai/src/runtime/runner-run-plan-policy.ts",
-        "packages/ai/src/runtime/runner-simple-exclusions-context.ts",
-        "packages/ai/src/runtime/semantic-runtime-choice-builder-context.ts",
         "packages/ai/src/runtime/semantic-runtime-choice-builder.ts",
         "packages/ai/src/runtime/semantic-runtime-plan-memory-exclusion.ts",
         "packages/ai/src/runtime/semantic-runtime-score-components.ts"
@@ -22153,7 +21558,6 @@
       "imports": [],
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [
-        "packages/ai/src/runtime/runner-scoring-support-composition.ts",
         "packages/ai/src/simulation/runner-breaker-coverage-diagnostics.ts",
         "packages/ai/src/simulation/runner-pressure-metrics.ts"
       ],
@@ -23722,7 +23126,6 @@
         "packages/ai/src/runtime/runner-encounter-composition-context.ts",
         "packages/ai/src/runtime/runner-known-ice-path-score.ts",
         "packages/ai/src/runtime/runner-pump-future-path-context.ts",
-        "packages/ai/src/runtime/runner-run-components-context.ts",
         "packages/ai/src/runtime/runner-visible-card-discard-composition.ts",
         "packages/ai/src/simulation/runner-breaker-coverage-composition.ts",
         "packages/ai/src/simulation/runner-central-pressure-diagnostics-composition.ts",
