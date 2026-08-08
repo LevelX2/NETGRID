@@ -632,6 +632,79 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("continues the existing run when the engine certifies the selected bypass ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const continueRun = legalAction(
+      "continue-rd-auto-pass",
+      "runner",
+      "continue_run",
+      "Continue R&D run",
+      { credits: 0, clicks: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const jackOut = legalAction(
+      "jack-out-rd-auto-pass",
+      "runner",
+      "jack_out",
+      "Jack out",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [continueRun, jackOut]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      runId: "social-engineering-rd",
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      pendingAutoPassIceId: "rd-keeper",
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("rd-keeper", "corp", "ice", {
+          definitionId: "onr_v1_252_keeper",
+          rezzed: true,
+          subtypes: ["code_gate"],
+          strength: 4,
+          effectiveRunQuote: {
+            iceInstanceId: "rd-keeper",
+            iceDefinitionId: "onr_v1_252_keeper",
+            effectiveStrength: 4,
+            subroutines: [{ id: "keeper-etr", type: "end_the_run" }],
+          },
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "continue-rd-auto-pass",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).not.toContain(
+      "runner_current_run_remaining_path_unreachable:rd",
+    );
+
+    resetResidentPlanPortfolioMemory();
+    const withoutBypass = structuredClone(input);
+    if (withoutBypass.playerView.run) {
+      delete withoutBypass.playerView.run.pendingAutoPassIceId;
+    }
+    const abortDecision = liveContext().chooseSemanticRuntimeAction(
+      withoutBypass,
+      {},
+    );
+    expect(abortDecision).toMatchObject({
+      actionId: "jack-out-rd-auto-pass",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+  });
+
   it("keeps Strategic Planning Group selection inside the exact Corp hand-plan route", () => {
     resetResidentPlanPortfolioMemory();
     const choiceId = "spg-draw-choice";
@@ -10806,9 +10879,7 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
-    expect(
-      decision.decisionDebug?.planFirstDecision?.dispositions,
-    ).not.toEqual(
+    expect(decision.decisionDebug?.planFirstDecision?.dispositions).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({ actionId: derez.actionId }),
       ]),

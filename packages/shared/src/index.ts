@@ -3132,6 +3132,8 @@ export type PlayerView = {
     approachedIce?: VisibleCard;
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
+    /** Runner-only engine-certified ICE that will be passed on approach. */
+    pendingAutoPassIceId?: CardInstanceId;
     breach?: {
       breachId: string;
       serverId: Exclude<ServerId, "new_remote">;

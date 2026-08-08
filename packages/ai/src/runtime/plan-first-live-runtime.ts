@@ -232,6 +232,7 @@ import { runnerRemoteHasKnownNoCurrentPayoff } from "./runner-known-access-payof
 import { runnerStrategicExchangeHardExclusion } from "./runner-strategic-exchange";
 import {
   currentEncounteredIceCard,
+  currentRunHasPendingAutoPassIce,
   currentRunRemainingIce,
 } from "./current-encounter";
 import {
@@ -1710,7 +1711,9 @@ export function runnerActionDispositions(
       continue;
     }
     const cardDevelopmentAdmissions = domain.developments
-      .filter((development) => development.actionIds.includes(candidate.actionId))
+      .filter((development) =>
+        development.actionIds.includes(candidate.actionId),
+      )
       .map((development) => ({
         development,
         admission: runnerDevelopmentCardAdmission({
@@ -15584,7 +15587,12 @@ function uniqueCoverageGaps(
         answerInstallCost,
         fundingGap,
       ),
-      installActionValues: runnerCoverageInstallActionValues(input, candidates, evaluation.targetServerId, role),
+      installActionValues: runnerCoverageInstallActionValues(
+        input,
+        candidates,
+        evaluation.targetServerId,
+        role,
+      ),
       ...supportActions,
     });
   }
@@ -15663,7 +15671,12 @@ function uniqueCoverageGaps(
           answerInstallCost,
           fundingGap,
         ),
-        installActionValues: runnerCoverageInstallActionValues(input, candidates, undefined, role),
+        installActionValues: runnerCoverageInstallActionValues(
+          input,
+          candidates,
+          undefined,
+          role,
+        ),
         ...supportActions,
       });
     }
@@ -15681,16 +15694,30 @@ function runnerCoverageInstallActionValues(
   for (const candidate of candidates) {
     if (candidate.semanticActionType !== "install.card") continue;
     const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
-    if (!definitionId || !runnerRolesCoverCoverageGap(rolesForDeckDoctrineCard(definitionId), role)) continue;
+    if (
+      !definitionId ||
+      !runnerRolesCoverCoverageGap(rolesForDeckDoctrineCard(definitionId), role)
+    )
+      continue;
     const sourceInstanceId = candidate.sourceCardInstanceId;
-    const card = input.playerView.own.gripOrHq.find((entry) => entry.instanceId === sourceInstanceId);
-    const cost = candidate.costProfile.costKnownStatus === "known" ? candidate.costProfile.creditCost ?? 0 : 0;
+    const card = input.playerView.own.gripOrHq.find(
+      (entry) => entry.instanceId === sourceInstanceId,
+    );
+    const cost =
+      candidate.costProfile.costKnownStatus === "known"
+        ? (candidate.costProfile.creditCost ?? 0)
+        : 0;
     if (!card || cost > input.playerView.own.credits) {
       values[candidate.actionId] = 100 - cost;
       continue;
     }
     const targetId = candidate.targetContext?.selectedTargets?.[0]?.targetId;
-    const projectedCard = { ...card, ...(typeof targetId === "string" ? { selectedTargetCardId: targetId } : {}) };
+    const projectedCard = {
+      ...card,
+      ...(typeof targetId === "string"
+        ? { selectedTargetCardId: targetId }
+        : {}),
+    };
     const eligibleServers = input.playerView.servers.filter(
       (server) =>
         (serverId === undefined || server.id === serverId) &&
@@ -17003,6 +17030,11 @@ function runnerExactRunWindowPhaseActionIds(
     if (additionalAccessRoutes.length > 0) {
       return additionalAccessRoutes.map((candidate) => candidate.actionId);
     }
+  }
+  if (currentRunHasPendingAutoPassIce(input)) {
+    return admissibleRunWindowCandidates
+      .filter((candidate) => candidate.actionType === "continue_run")
+      .map((candidate) => candidate.actionId);
   }
   if (run.phase === "movement" && run.position?.kind === "server") {
     return admissibleRunWindowCandidates

@@ -47,7 +47,31 @@ export function currentRunRemainingIce(input: AiDecisionInput): VisibleCard[] {
     run.phase === "movement"
       ? run.position.iceIndex + 1
       : run.position.iceIndex;
-  return server?.ice.slice(0, Math.max(0, remainingIceCount)) ?? [];
+  return (
+    server?.ice
+      .slice(0, Math.max(0, remainingIceCount))
+      .filter((ice) => ice.instanceId !== run.pendingAutoPassIceId) ?? []
+  );
+}
+
+export function currentRunHasPendingAutoPassIce(
+  input: AiDecisionInput,
+): boolean {
+  const run = input.playerView.run;
+  if (
+    !run ||
+    run.phase !== "movement" ||
+    run.position?.kind !== "ice" ||
+    !run.pendingAutoPassIceId
+  ) {
+    return false;
+  }
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run.position?.serverId,
+  );
+  return (
+    server?.ice[run.position.iceIndex]?.instanceId === run.pendingAutoPassIceId
+  );
 }
 
 export function currentRunHasFutureVisibleIce(input: AiDecisionInput): boolean {

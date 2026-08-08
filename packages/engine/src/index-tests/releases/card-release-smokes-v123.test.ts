@@ -1886,6 +1886,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       approachedIceId: iceId,
       secretSpendGuessRunAutoPassIceId: iceId,
     });
+    expect(getPlayerView(wrong, "runner").run?.pendingAutoPassIceId).toBe(
+      iceId,
+    );
+    expect(
+      getPlayerView(wrong, "corp").run?.pendingAutoPassIceId,
+    ).toBeUndefined();
     expect(
       getLegalActions(wrong, "corp").some(
         (action) => action.type === "rez_ice" && action.source === iceId,
