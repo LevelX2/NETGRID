@@ -60,6 +60,12 @@ export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
+export {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "./visible-run-analysis";
+export { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
+export type { RunnerRunRouteQuote } from "./run-analysis/runner-run-route-quote";
 export type {
   AiDecisionInputWithDeckCapabilities,
   AiDecisionSideSelection,
