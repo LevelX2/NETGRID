@@ -10380,7 +10380,7 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["draw_for_answer_breaker_wall"]
+      "acceptableCapabilities": ["draw_for_answer_breaker_ap"]
     }
   }
 }

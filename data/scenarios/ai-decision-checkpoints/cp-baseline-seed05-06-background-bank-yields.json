@@ -23241,7 +23241,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "trigger_ability"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -23251,8 +23251,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_rd_access"]
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["build_required_hand_buffer"]
     }
   }
 }

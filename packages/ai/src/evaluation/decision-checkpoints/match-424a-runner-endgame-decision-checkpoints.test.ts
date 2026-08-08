@@ -18,7 +18,10 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match 424A runner endgame decision checkpoints", () => {
   it.each([
     ["424A-F01 Krash before redundant Force Shield", forceShieldJson],
-    ["424A-F02 no Inside Job on known-empty Archives", insideJobArchivesJson],
+    [
+      "424A-F02 restores missing AP coverage instead of using Inside Job on Archives",
+      insideJobArchivesJson,
+    ],
     [
       "424A-F04 expose a matchpoint remote before bank setup",
       remoteInformationJson,

@@ -38,7 +38,7 @@ describe("baseline seed 03 and seed 05 exact loop checkpoints", () => {
       thirdTraceWithoutPayoffJson,
     ],
     [
-      "lets a clearly better draw override background Broker investment",
+      "lets hand-buffer recovery draw override background Broker investment",
       backgroundBankYieldsJson,
     ],
   ])("%s", (_label, json) => {
