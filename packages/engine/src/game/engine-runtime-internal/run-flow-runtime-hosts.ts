@@ -847,8 +847,9 @@ export function createRunFlowRuntimeHosts(
       });
     }
     if (
+      !state.corp.archives.includes(cardId) &&
       implementation?.hiddenReplacementLongtail?.kind ===
-      "delayed_agenda_access_replacement"
+        "delayed_agenda_access_replacement"
     )
       return true;
     return (definition.mechanics ?? []).some(

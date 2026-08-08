@@ -13,6 +13,7 @@ import {
   moveCorpCardToArchives,
   toRunnerTurn,
   v097RunGame,
+  v199CardReleaseGame,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
 describe("V1.1.2 Full Archives Access", () => {
@@ -188,6 +189,37 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
       archivesRevealDefinitionIds: "onr_v1_340_setup",
+      archivesAutoAccessedCount: 1,
+    });
+  });
+
+  it("auto-accesses Bizarre Encryption Scheme in Archives without a pointless window", () => {
+    let state = toRunnerTurn(v199CardReleaseGame("v112-archives-bizarre"));
+    const bizarreId = moveCorpCardToArchives(
+      state,
+      "onr_v1_351_bizarre-encryption-scheme",
+      false,
+    );
+    keepOnlyCorpArchivesCards(state, [bizarreId]);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.serverId === "archives",
+    );
+
+    expect(state.run).toBeUndefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "access_card" || action.type === "decline_trash",
+      ),
+    ).toBe(false);
+    expect(state.cardInstances[bizarreId]?.faceup).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
       archivesAutoAccessedCount: 1,
     });
   });

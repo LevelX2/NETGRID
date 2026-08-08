@@ -518,8 +518,11 @@ describe("hidden-zone nonsearch choice handlers", () => {
     host.playerAction = playerAction(["hide_3"]);
     handleHiddenZoneNonSearchChoice(host);
     expect(host.state.activeSide).toBe("corp");
+    expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual(
+      [2, 3, 4, 5, 6],
+    );
 
-    host.playerAction = playerAction(["guess_1"]);
+    host.playerAction = playerAction(["guess_2"]);
     handleHiddenZoneNonSearchChoice(host);
     expect(host.state.pendingChoice?.source).toContain(
       "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target",
@@ -560,7 +563,7 @@ describe("hidden-zone nonsearch choice handlers", () => {
     startSecretSpendGuessThenTargetedBypassRunHideChoice(host, sourceId);
     host.playerAction = playerAction(["hide_3"]);
     handleHiddenZoneNonSearchChoice(host);
-    host.playerAction = playerAction(["guess_1"]);
+    host.playerAction = playerAction(["guess_2"]);
     handleHiddenZoneNonSearchChoice(host);
 
     expect(host.state.pendingChoice?.options).toEqual([

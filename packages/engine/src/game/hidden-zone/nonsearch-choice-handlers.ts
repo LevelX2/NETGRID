@@ -924,12 +924,15 @@ function secretSpendGuessChoice(
     source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:${sourceCardId}:${host.state.stateVersion + 1}`,
     prompt: "Versteckte Credits raten.",
     kind: "bid_amount",
-    options: Array.from({ length: maxAmount + 1 }, (_, amount) => ({
+    options: Array.from({ length: maxAmount - 1 }, (_, index) => {
+      const amount = index + 2;
+      return {
       id: `guess_${amount}`,
       label: `${amount}`,
       publicLabel: "Geratene Credits",
       value: amount,
-    })),
+      };
+    }),
     minSelections: 1,
     maxSelections: 1,
     stateVersion: host.state.stateVersion + 1,
