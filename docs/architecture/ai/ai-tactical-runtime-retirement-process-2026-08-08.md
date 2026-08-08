@@ -2,12 +2,13 @@
 
 ## Status
 
-`LGM-7` ist abgeschlossen. `LGM-8` klassifiziert anschließend den verbleibenden
-test-only-Bestand fachlich. Die historische Semantic-Shadow-Evaluation bleibt
-bis zu dieser Prüfung als expliziter Consumer erhalten. Die Umsetzung erfolgt
-auf dem sauberen lokalen Branch `main`,
-weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
-Worktree vorgesehen ist.
+`LGM-7` und `LGM-8` sind abgeschlossen. Der Audit erreicht damit den
+Fixpunkt ohne unreferenzierte, gemischte oder reine Legacy-Test-Quellen. Die
+noch vorhandene historische Semantic-Shadow-Evaluation und die aktuellen
+Real-Engine-/Replay-Evaluationen sind als explizite, begründete Consumer
+erfasst. Die Umsetzung erfolgt auf dem lokalen Branch `main`, weil für diesen
+nicht parallelen Bereinigungsauftrag ausdrücklich kein Worktree vorgesehen
+ist.
 
 ## Quelle und Ziel
 
@@ -168,6 +169,35 @@ geschlossene Teilgraph ohne Ersatzlogik entfernt; Tests waren nicht betroffen.
 `RETIRE_NOW = 0`. Audit-Selftest, AI-Typecheck, Struktur-Gate,
 Package-Boundary-Check und `git diff --check` sind grün. Die produktive
 Plan-first-Runtime blieb unverändert.
+
+### LGM-8 – Test-only-Reste konsolidieren und ratcheten
+
+Der Folgeaudit klassifizierte 80 frühere `legacy_test_only`-Quelldateien
+clusterweise. 45 selbstreferenzielle, ausschließlich historische Scoring-,
+Pilot-, Run-Plan-, Test- und Debugmodule wurden zusammen mit ihren
+exklusiven Tests entfernt oder aus weiterbestehenden Produkttests ausgeschnitten.
+Insbesondere bleibt kein alter Choice-/Run-Plan-Fallback, Alias oder
+Kompatibilitätspfad zurück.
+
+35 Dateien bleiben als `intentional_test_evaluation` erhalten. Ihre kleinen,
+expliziten Wurzeln dokumentieren historische Semantic-Shadow-Vergleiche,
+aktuelle Real-Engine-Corpora, Selfplay-Regressions-Evidence,
+Action-Semantik-Safety, Proteus-Readiness und den Plan-first-Replayvertrag.
+Der Audit dokumentiert für jede Wurzel einen Grund und verfolgt nur deren
+Importabschluss; es gibt keine pauschale Verzeichnis- oder Dateilistenfreigabe.
+
+`scripts/audit-ai-source-reachability.mjs --check` schlägt jetzt bei
+`unreferenced`, `RETIRE_NOW`, `mixed_split_required` oder
+`legacy_test_only` fehl. Der bestehende Befehl `check:ai-source-structure`
+führt diesen Ratchet mit aus; begründete `intentional_test_evaluation`-Dateien
+bleiben zulässig. Damit sind nachfolgende Legacy-Inseln nicht mehr still
+akzeptiert, sondern müssen entfernt oder bewusst als fachliche
+Evaluationseintrittspunkte dokumentiert werden.
+
+**Ergebnis:** `unreferenced = 0`, `RETIRE_NOW = 0`,
+`mixed_split_required = 0` und `legacy_test_only = 0`. Die produktive
+Plan-first-Runtime, ihre Ownership und ihre LegalAction-Bindung wurden nicht
+geändert.
 
 ## Fehlerbehandlung und Abschluss
 

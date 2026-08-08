@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import scoreBeforeOveradvanceJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-renticon-code-rot-c3-01-score-before-overadvance-seed001-d257.json";
 import tagPayoffJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-renticon-code-rot-c3-02-tag-payoff-over-stale-remote-seed001-d331.json";
 import avoidStaleRemoteJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-renticon-code-rot-c3-03-avoid-stale-remote-sprawl-seed001-d350.json";
-import { runAiDecisionCheckpoint, type AiDecisionCheckpointV1 } from "./index";
+import { type AiDecisionCheckpointV1 } from "./checkpoint-types";
+import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
   [

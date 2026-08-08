@@ -51,6 +51,25 @@ const roots = {
     "plans/tactical-plan-corp-plans.ts",
   ],
 };
+const intentionalEvaluationRoots = [
+  ["evaluation/semantic-shadow-league.ts", "historical_semantic_shadow_comparison"],
+  ["evaluation/doctrine-goal-coverage.ts", "historical_semantic_shadow_comparison"],
+  ["evaluation/play-strength-benchmark.ts", "historical_semantic_shadow_comparison"],
+  ["evaluation/real-engine-access-corpus.ts", "current_real_engine_access_corpus"],
+  ["evaluation/real-engine-decision-corpus.ts", "current_real_engine_decision_corpus"],
+  ["evaluation/real-engine-decision-corpus-fixtures.ts", "current_real_engine_decision_corpus"],
+  ["evaluation/real-engine-fixture-builder.ts", "current_real_engine_decision_corpus"],
+  ["evaluation/selfplay-decision-snapshot-mining.ts", "current_selfplay_regression_evidence"],
+  ["reports/selfplay-promotion-activity-formatters.ts", "current_selfplay_regression_evidence"],
+  ["actions/action-semantic-invariants.ts", "current_action_semantics_safety_contract"],
+  ["evaluation/proteus-random-model-readiness.ts", "current_proteus_random_readiness_evaluation"],
+  ["evaluation/replay-portable-fixtures.ts", "current_plan_first_replay_contract"],
+  ["evaluation/semantic-shadow-league-delta.ts", "historical_semantic_shadow_comparison"],
+  ["evaluation/semantic-shadow-report.ts", "historical_semantic_shadow_comparison"],
+  ["evaluation/target-choice-shadow-coverage.ts", "historical_semantic_shadow_comparison"],
+  ["evaluation/target-choice-shadow-readiness.ts", "historical_semantic_shadow_comparison"],
+].map(([entry, reason]) => ({ entry, reason, path: path.join(srcRoot, entry) }))
+  .filter((root) => sourceSet.has(root.path));
 const rootPaths = Object.fromEntries(
   Object.entries(roots).map(([kind, entries]) => [
     kind,
@@ -58,6 +77,9 @@ const rootPaths = Object.fromEntries(
       .map((entry) => path.join(srcRoot, entry))
       .filter((entry) => sourceSet.has(entry)),
   ]),
+);
+const intentionalEvaluationReachability = intentionalEvaluationRoots.map(
+  (root) => ({ ...root, reachable: reachableFrom([root.path], sourceGraph.all) }),
 );
 const reachability = {
   live_runtime: reachableFrom(rootPaths.live, sourceGraph.runtime),
@@ -76,6 +98,9 @@ const reachability = {
     toolingConsumers(workspaceGraph),
     sourceGraph.all,
   ),
+  intentional_evaluation_type: new Set(
+    intentionalEvaluationReachability.flatMap((root) => [...root.reachable]),
+  ),
 };
 
 const rows = sourceFiles.map((file) =>
@@ -84,16 +109,35 @@ const rows = sourceFiles.map((file) =>
     testGraph,
     workspaceGraph,
     reachability,
+    intentionalEvaluationReachability,
   }),
 );
 const summary = summarize(rows);
 const audit = {
   schemaVersion: 1,
   generatedAt: new Date().toISOString(),
-  roots,
+  roots: {
+    ...roots,
+    intentionalEvaluation: intentionalEvaluationRoots.map(({ entry, reason }) => ({
+      path: entry,
+      reason,
+    })),
+  },
   summary,
   rows,
 };
+
+if (args.has("--check")) {
+  const failures = reachabilityCheckFailures(summary);
+  if (failures.length > 0) {
+    console.error(
+      `AI_SOURCE_REACHABILITY_CHECK FAILED: ${failures.join(", ")}`,
+    );
+    process.exit(1);
+  }
+  console.log("AI_SOURCE_REACHABILITY_CHECK OK");
+  process.exit(0);
+}
 
 if (args.has("--check-legacy-boundary")) {
   const legacyRuntimeImports = rows.filter(
@@ -317,6 +361,9 @@ function classifyFile(file, context) {
       .map(relative)
       .sort(),
     typeOnlyProductionConsumers: typeOnlyProductionConsumers.sort(),
+    intentionalEvaluationReasons: context.intentionalEvaluationReachability
+      .filter((root) => root.reachable.has(file))
+      .map((root) => root.reason),
     publicExportedBy: publicExportedBy(file, context.sourceGraph),
     proposedDisposition: proposedDisposition(classification),
     blocker: blockerFor(classification, {
@@ -347,6 +394,7 @@ function classify(flags, consumers) {
   const tooling = flags.tooling_runtime || flags.tooling_type;
   const legacy = flags.legacy_runtime || flags.legacy_type;
   const test = flags.test_runtime || flags.test_type;
+  const intentionalEvaluation = flags.intentional_evaluation_type;
   const productive = live || simulation || tooling;
   const legacyAndProductive = legacy &&
     (productive || consumers.typeOnlyProductionConsumers.length > 0);
@@ -355,6 +403,7 @@ function classify(flags, consumers) {
   if (live) return "productive_live";
   if (simulation) return "productive_simulation";
   if (tooling) return "productive_tooling";
+  if (intentionalEvaluation) return "intentional_test_evaluation";
   if (legacy && test) return "legacy_test_only";
   if (legacy) return "diagnostic_comparison";
   if (test) return "legacy_test_only";
@@ -363,6 +412,9 @@ function classify(flags, consumers) {
 
 function proposedDisposition(classification) {
   if (classification === "unreferenced") return "RETIRE_NOW";
+  if (classification === "intentional_test_evaluation") {
+    return "RETAIN_INTENTIONAL_TEST_EVALUATION";
+  }
   if (classification === "legacy_test_only") return "RETIRE_AFTER_TEST_CONSUMER_REVIEW";
   if (classification === "diagnostic_comparison") return "RETAIN_DIAGNOSTIC_OR_RETIRE";
   if (classification === "mixed_split_required") return "SPLIT_BEFORE_RETIRE";
@@ -377,6 +429,9 @@ function blockerFor(classification, consumers) {
     return "production type-only consumer requires contract decision";
   }
   if (classification === "legacy_test_only") return "test consumer review required";
+  if (classification === "intentional_test_evaluation") {
+    return "explicit evaluation root";
+  }
   if (classification === "diagnostic_comparison") return "explicit diagnostic retention decision required";
   return undefined;
 }
@@ -420,6 +475,7 @@ function renderReport(audit) {
     section("RETIRE_NOW"),
     section("SPLIT_BEFORE_RETIRE"),
     section("KEEP_PRODUCTIVE"),
+    section("RETAIN_INTENTIONAL_TEST_EVALUATION"),
     section("RETIRE_AFTER_TEST_CONSUMER_REVIEW"),
     section("RETAIN_DIAGNOSTIC_OR_RETIRE"),
   ].join("\n");
@@ -427,6 +483,18 @@ function renderReport(audit) {
 
 function relative(file) {
   return path.relative(repoRoot, file).replaceAll("\\", "/");
+}
+
+function reachabilityCheckFailures(summary) {
+  const violations = [
+    ["unreferenced", summary.byClassification.unreferenced ?? 0],
+    ["RETIRE_NOW", summary.decisions.RETIRE_NOW?.length ?? 0],
+    ["mixed_split_required", summary.byClassification.mixed_split_required ?? 0],
+    ["legacy_test_only", summary.byClassification.legacy_test_only ?? 0],
+  ];
+  return violations
+    .filter(([, count]) => count > 0)
+    .map(([kind, count]) => `${kind}=${count}`);
 }
 
 function runSelfTest() {
@@ -455,6 +523,23 @@ function runSelfTest() {
     productionRuntimeConsumers: [], externalConsumers: [], typeOnlyProductionConsumers: [],
   }) !== "productive_live") {
     throw new Error("classification self-test failed: type-only live contract");
+  }
+  if (classify({ intentional_evaluation_type: true }, {
+    productionRuntimeConsumers: [], externalConsumers: [], typeOnlyProductionConsumers: [],
+  }) !== "intentional_test_evaluation") {
+    throw new Error("classification self-test failed: intentional evaluation");
+  }
+  if (reachabilityCheckFailures({
+    byClassification: { intentional_test_evaluation: 1 },
+    decisions: { RETIRE_NOW: [] },
+  }).length !== 0) {
+    throw new Error("reachability self-test failed: intentional evaluation gate");
+  }
+  if (reachabilityCheckFailures({
+    byClassification: { unreferenced: 1, mixed_split_required: 1 },
+    decisions: { RETIRE_NOW: ["dead-file"] },
+  }).length !== 3) {
+    throw new Error("reachability self-test failed: retirement gate");
   }
   console.log("AI_SOURCE_REACHABILITY_AUDIT_SELFTEST OK");
 }

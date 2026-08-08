@@ -1,14 +1,14 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T14:52:08.866Z
+Erzeugt: 2026-08-08T15:08:20.151Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
 
 ## Klassifikationen
 
-- `legacy_test_only`: 80
 - `productive_shared`: 409
+- `intentional_test_evaluation`: 35
 - `productive_simulation`: 169
 - `productive_tooling`: 12
 
@@ -613,16 +613,12 @@ Keine Dateien.
 - `packages/ai/src/visible-run-analysis.ts`
 - `packages/ai/src/witness-opportunity-projection.ts`
 
-## RETIRE_AFTER_TEST_CONSUMER_REVIEW
+## RETAIN_INTENTIONAL_TEST_EVALUATION
 
-- `packages/ai/src/access/access-decision-debug.ts`
 - `packages/ai/src/access/remote-access-fingerprint.ts`
-- `packages/ai/src/access/remote-trash-spendability.ts`
-- `packages/ai/src/action-doctrine-goal-diagnostics.ts`
 - `packages/ai/src/actions/action-semantic-invariants.ts`
 - `packages/ai/src/decision/action-goal-fit.ts`
 - `packages/ai/src/decision/corp-tactical-goals.ts`
-- `packages/ai/src/decision/corp-tempo-goals.ts`
 - `packages/ai/src/decision/doctrine-goal-synthesis.ts`
 - `packages/ai/src/decision/hard-gates.ts`
 - `packages/ai/src/decision/neutral-goal-synthesis.ts`
@@ -635,14 +631,7 @@ Keine Dateien.
 - `packages/ai/src/decision/pilot/remote-contest-candidate.ts`
 - `packages/ai/src/decision/pilot/runner-safe-access-pilot.ts`
 - `packages/ai/src/decision/run-target-action-alignment.ts`
-- `packages/ai/src/decision/runner-coverage-goals.ts`
-- `packages/ai/src/decision/scoring-consumer-contract.ts`
-- `packages/ai/src/decision/semantic-basic-setup-pilot.ts`
 - `packages/ai/src/decision/semantic-shadow-decision.ts`
-- `packages/ai/src/endgame-goal-conversion-contracts.ts`
-- `packages/ai/src/evaluation/access-loop-detection.ts`
-- `packages/ai/src/evaluation/access-outcome-feedback.ts`
-- `packages/ai/src/evaluation/decision-checkpoints/index.ts`
 - `packages/ai/src/evaluation/decision-snapshot-suite.ts`
 - `packages/ai/src/evaluation/decision-snapshot.ts`
 - `packages/ai/src/evaluation/doctrine-goal-action-fit.ts`
@@ -660,41 +649,11 @@ Keine Dateien.
 - `packages/ai/src/evaluation/semantic-shadow-report.ts`
 - `packages/ai/src/evaluation/target-choice-shadow-coverage.ts`
 - `packages/ai/src/evaluation/target-choice-shadow-readiness.ts`
-- `packages/ai/src/plans/plan-resource-ledger.ts`
-- `packages/ai/src/plans/tactical-plan-action-values.ts`
-- `packages/ai/src/plans/tactical-plan-step-semantics.ts`
 - `packages/ai/src/reports/selfplay-promotion-activity-formatters.ts`
-- `packages/ai/src/runtime/corp-card-action-score.ts`
-- `packages/ai/src/runtime/corp-economy/corp-basic-economy-near-tie.ts`
-- `packages/ai/src/runtime/runner-access-trash-score.ts`
-- `packages/ai/src/runtime/runner-action-reserve.ts`
-- `packages/ai/src/runtime/runner-activated-agenda-score.ts`
-- `packages/ai/src/runtime/runner-bad-publicity-relevance-assessment.ts`
-- `packages/ai/src/runtime/runner-basic-action-penalty-score.ts`
-- `packages/ai/src/runtime/runner-blink-recovery-score.ts`
-- `packages/ai/src/runtime/runner-card-action-score.ts`
-- `packages/ai/src/runtime/runner-draw-overflow-score.ts`
-- `packages/ai/src/runtime/runner-encounter-break-score.ts`
-- `packages/ai/src/runtime/runner-goal-fit-score.ts`
-- `packages/ai/src/runtime/runner-hand-overflow-relief-score.ts`
-- `packages/ai/src/runtime/runner-hosted-install-score.ts`
-- `packages/ai/src/runtime/runner-inevitable-corp-deckout-choice.ts`
-- `packages/ai/src/runtime/runner-install-score.ts`
-- `packages/ai/src/runtime/runner-junkyard-bbs-recovery-target.ts`
-- `packages/ai/src/runtime/runner-marginal-credit-value.ts`
-- `packages/ai/src/runtime/runner-opponent-matchpoint-contest-choice.ts`
-- `packages/ai/src/runtime/runner-recovery-history.ts`
-- `packages/ai/src/runtime/runner-recovery-repeat-score.ts`
-- `packages/ai/src/runtime/runner-repeated-run-target-score.ts`
-- `packages/ai/src/runtime/runner-run-commitment.ts`
-- `packages/ai/src/runtime/runner-run-history.ts`
-- `packages/ai/src/runtime/runner-run-plan-policy.ts`
-- `packages/ai/src/runtime/runner-run-plan-revalidation.ts`
-- `packages/ai/src/runtime/runner-run-plan-start.ts`
-- `packages/ai/src/runtime/runner-run-target-guidance-score.ts`
-- `packages/ai/src/runtime/runner-source-card-answer-role.ts`
-- `packages/ai/src/runtime/runner-terminal-remote-tool-score.ts`
-- `packages/ai/src/runtime/shell-traders-urgency.ts`
+
+## RETIRE_AFTER_TEST_CONSUMER_REVIEW
+
+Keine Dateien.
 
 ## RETAIN_DIAGNOSTIC_OR_RETIRE
 
