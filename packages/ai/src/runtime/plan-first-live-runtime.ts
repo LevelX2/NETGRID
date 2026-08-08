@@ -2222,6 +2222,25 @@ export function runnerActionDispositions(
   ]);
   for (const evaluation of handDevelopment) {
     if (!evaluation.legalActionId) continue;
+    const accessPayoffCandidate = candidates.find(
+      (candidate) => candidate.actionId === evaluation.legalActionId,
+    );
+    if (
+      accessPayoffCandidate !== undefined &&
+      runnerAccessPayoffInstallLacksBoundAccessRoute(
+        evaluation,
+        accessPayoffCandidate,
+        runTargets,
+        domain.coverageGaps,
+      )
+    ) {
+      add(
+        accessPayoffCandidate.actionId,
+        "runner.pressure_central",
+        `runner_access_payoff_install_waits_for_bound_access_route:${runnerCentralPayoffServer(accessPayoffCandidate) ?? "unknown"}`,
+      );
+      continue;
+    }
     if (!runnerHandDevelopmentExplicitlyRejected(evaluation)) continue;
     if (
       dispositions.some((entry) => entry.actionId === evaluation.legalActionId)
@@ -3764,6 +3783,17 @@ function buildRunnerDomain(
       if (executableNow && !candidate) return [];
       if (
         candidate !== undefined &&
+        runnerAccessPayoffInstallLacksBoundAccessRoute(
+          evaluation,
+          candidate,
+          runTargets,
+          coverageGaps,
+        )
+      ) {
+        return [];
+      }
+      if (
+        candidate !== undefined &&
         !runnerGenericDevelopmentMayOwnAction(candidate)
       ) {
         return [];
@@ -4882,6 +4912,41 @@ function runnerCentralPayoffServer(
   return undefined;
 }
 
+function runnerAccessPayoffInstallLacksBoundAccessRoute(
+  evaluation: RunnerHandDevelopmentEvaluation,
+  candidate: ActionSemanticCandidate,
+  runTargets: readonly RunnerRunTargetEvaluation[],
+  coverageGaps: RunnerPlanDomain["coverageGaps"],
+): boolean {
+  if (
+    evaluation.developmentRole !== "access_payoff" ||
+    candidate.semanticActionType !== "install.card"
+  ) {
+    return false;
+  }
+  const serverId = runnerCentralPayoffServer(candidate);
+  if (!serverId) return false;
+  const targetEvaluations = runTargets.filter(
+    (target) =>
+      target.targetServerId === serverId || target.accessServerId === serverId,
+  );
+  if (targetEvaluations.length === 0) return false;
+  const currentAccessRoute = targetEvaluations.some(
+    (target) =>
+      target.pathPassability === "reachable" &&
+      target.score > 0 &&
+      (target.recommendation === "run_now" ||
+        target.recommendation === "run_if_free"),
+  );
+  if (currentAccessRoute) return false;
+  const boundCoverageContinuation = coverageGaps.some(
+    (gap) =>
+      (gap.targetServerId === undefined || gap.targetServerId === serverId) &&
+      (gap.answerInHand || (gap.directSearchActionIds?.length ?? 0) > 0),
+  );
+  return !boundCoverageContinuation;
+}
+
 function runnerDevelopmentFundingRoute(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -5375,6 +5440,12 @@ function runnerRemoteProbeCanConvertNow(
   economy: RunnerEconomyPosture,
   evaluation: RunnerRunTargetEvaluation,
 ): boolean {
+  if (
+    evaluation.unrezzedIceRiskUnderfunded === true &&
+    evaluation.creditsAfterRun <= 0
+  ) {
+    return false;
+  }
   return (
     evaluation.accessTargetKind === "remote" &&
     evaluation.runCommitment === "probe_only" &&
@@ -5479,6 +5550,12 @@ function runnerRunTargetCanConvertNow(
   evaluation: RunnerRunTargetEvaluation,
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
+  if (
+    evaluation.unrezzedIceRiskUnderfunded === true &&
+    evaluation.creditsAfterRun <= 0
+  ) {
+    return false;
+  }
   const requiredPostRunReserve = runnerRunRequiredPostRunReserve(
     input,
     candidates,
@@ -16034,7 +16111,10 @@ function runnerCoverageRecoveryTarget(
     hint?.functionSignals?.includes("setup.top_trash_recovery") === true
       ? "top"
       : hint?.functionSignals?.includes("setup.card_recovery") === true ||
-          hint?.functionSignals?.includes("setup.recovery") === true
+          hint?.functionSignals?.includes("setup.recovery") === true ||
+          hint?.functionSignals?.includes(
+            "setup.temporary_program_install",
+          ) === true
         ? "search"
         : undefined;
   if (!recoveryKind) return undefined;

@@ -2104,6 +2104,45 @@ describe("formatChronicleEvent", () => {
     expect(installed.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("shows temporary free program installs and their end-of-turn return", () => {
+    const installed = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "p3_38_stack_or_trash_program_install",
+        sourceDefinitionId: "onr_v1_110_sneak-preview",
+        searchReveal: "public",
+        searchDestination: "install_program",
+        installedProgramDefinitionId: "onr_classic_031_rent-i-con",
+        temporaryInstall: true,
+        shuffled: true,
+      }),
+      "runner",
+    );
+    const returned = formatChronicleEvent(
+      makeEvent("end_turn", {
+        actor: "runner",
+        hiddenZoneAction: "temporary_program_install_end_turn_return",
+        returnedCount: 1,
+        returnedCardDefinitionIds: "onr_classic_031_rent-i-con",
+      }),
+      "runner",
+    );
+
+    expect(installed.title).toBe(
+      "Du hast Rent-I-Con mit Sneak Preview kostenlos und temporär aus dem Stack im Rig installiert.",
+    );
+    expect(installed.description).toContain("kehrt am Zugende auf die Hand zurück");
+    expect(installed.chips).toEqual(
+      expect.arrayContaining(["Kostenlos", "Temporär", "Shuffle"]),
+    );
+    expect(returned.title).toBe(
+      "Du hast Rent-I-Con vom Rig auf die Hand zurückgenommen.",
+    );
+    expect(returned.chips).toEqual(
+      expect.arrayContaining(["Rig → Hand"]),
+    );
+  });
+
   it("shows The Short Circuit activation and selected program concretely", () => {
     const activated = formatChronicleEvent(
       makeEvent("gain_credit", {

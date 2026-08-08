@@ -322,6 +322,100 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
+  it("defers central multiaccess installation until a current or bound access route exists", () => {
+    resetResidentPlanPortfolioMemory();
+    const rdInterface = legalAction(
+      "install-rd-interface",
+      "runner",
+      "install_card",
+      "Install R&D Interface",
+      { credits: 1, clicks: 1 },
+      {
+        source: "rd-interface-card",
+        payload: {
+          cardId: "rd-interface-card",
+          sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const runRd = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [rdInterface, credit, runRd]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("rd-interface-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+    ];
+    const blockedRd = {
+      ...safeRuntimeRunTarget("run-rd", "rd"),
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      score: 120,
+    };
+
+    const decision = liveContext({
+      buildActionSemanticCandidates: (
+        params: Parameters<typeof buildActionSemanticCandidates>[0],
+      ) =>
+        buildActionSemanticCandidates(params).map((candidate) =>
+          candidate.actionId === "install-rd-interface"
+            ? {
+                ...candidate,
+                effectTargets: ["rd"],
+                actionTacticSignals: [
+                  ...candidate.actionTacticSignals,
+                  "access.rnd_multiaccess",
+                ],
+              }
+            : candidate,
+        ),
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "rd-interface-card",
+          definitionId: "onr_v1_139_r-and-d-interface",
+          legalActionId: "install-rd-interface",
+          priority: 900,
+          cardType: "hardware",
+          developmentRole: "access_payoff",
+          strategicFit: "strong",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 6,
+        fundingNeed: true,
+        evidence: [],
+      }),
+      evaluateRunnerRunTargets: () => [blockedRd],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "credit",
+      reasonCode: "plan_first.runner.economy",
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "runner.develop_board_and_hand" &&
+          JSON.stringify(instance.moduleState).includes("rd-interface-card"),
+      ),
+    ).toBe(false);
+  });
+
   it.each([
     {
       label: "missing credits",
@@ -12276,6 +12370,128 @@ describe("authoritative plan-first live runtime", () => {
     ).toEqual({
       choiceId: "gideon-search-choice",
       selectedOptionIds: ["choose-bound-rent-i-con"],
+    });
+  });
+
+  it("binds a temporary program search to the visible coverage answer in the heap", () => {
+    resetResidentPlanPortfolioMemory();
+    const sneak = legalAction(
+      "play-sneak-preview",
+      "runner",
+      "play_event",
+      "Play Sneak Preview",
+      { credits: 1, clicks: 1 },
+      {
+        source: "sneak-card",
+        payload: {
+          cardId: "sneak-card",
+          sourceDefinitionId: "onr_v1_110_sneak-preview",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const runRd = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [sneak, credit, runRd]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("sneak-card", "runner", "event", {
+        definitionId: "onr_v1_110_sneak-preview",
+      }),
+    ];
+    input.playerView.own.heapOrArchives = [
+      visibleCard("rent-i-con-heap", "runner", "program", {
+        definitionId: "onr_classic_031_rent-i-con",
+        title: "Rent-I-Con",
+        subtypes: ["icebreaker", "ai"],
+        rulesText: "1 credit: Break 1 ice subroutine.",
+      }),
+      visibleCard("invisibility-heap", "runner", "program", {
+        definitionId: "onr_v1_035_invisibility",
+        subtypes: ["stealth"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("rd-code-gate", "corp", "ice", {
+          definitionId: "onr_v1_252_keeper",
+          rezzed: true,
+          subtypes: ["code gate"],
+          strength: 4,
+          effectiveRunQuote: {
+            iceInstanceId: "rd-code-gate",
+            iceDefinitionId: "onr_v1_252_keeper",
+            effectiveStrength: 4,
+            subroutines: [{ id: "rd-code-gate:etr", type: "end_the_run" }],
+          },
+        }),
+      ]),
+      server("archives"),
+    ];
+    const blockedRd = {
+      ...safeRuntimeRunTarget("run-rd", "rd"),
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: true,
+      score: 180,
+      evidence: ["missing_coverage:breaker_code_gate"],
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [
+            {
+              cardId: "onr_classic_031_rent-i-con",
+              title: "Rent-I-Con",
+              coverage: ["universal"],
+              risks: [],
+              restrictions: [],
+              quantityKnownInDeck: 1,
+              locations: ["discarded"],
+              confidence: "high",
+              evidence: [],
+            },
+          ],
+          searchAccess: { tools: [], evidence: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [blockedRd],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: sneak.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+    });
+    const executor = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    expect(executor?.moduleState).toMatchObject({
+      phase: "search_answer",
+      gap: {
+        requiredRole: "breaker_code_gate",
+        directSearchChoiceBindings: [
+          {
+            actionId: sneak.actionId,
+            targetCardInstanceId: "rent-i-con-heap",
+            targetDefinitionId: "onr_classic_031_rent-i-con",
+          },
+        ],
+      },
     });
   });
 

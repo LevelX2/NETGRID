@@ -43,6 +43,13 @@ export function runnerRunReleaseForEvaluation(
   if (route.effects.some((effect) => effect.canEndGameBeforeAccess)) {
     return blocked("flatline_risk_before_access", baseEvidence);
   }
+  if (
+    route.unknownIceCount > 0 &&
+    evaluation.unrezzedIceRiskUnderfunded === true &&
+    evaluation.creditsAfterRun <= 0
+  ) {
+    return blocked("unknown_ice_risk_underfunded", baseEvidence);
+  }
   const unknownOnlyProbe =
     route.unknownIceCount > 0 &&
     route.fundingGap === 0 &&

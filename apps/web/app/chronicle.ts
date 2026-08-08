@@ -1385,6 +1385,46 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (
+        (hiddenZoneAction === "temporary_program_install" ||
+          hiddenZoneAction === "p3_38_stack_or_trash_program_install") &&
+        stringValue(payload.installedProgramDefinitionId)
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          "einer Kartenfähigkeit";
+        const programDefinitionId = stringValue(
+          payload.installedProgramDefinitionId,
+        );
+        const programTitle =
+          titleForDefinitionId(programDefinitionId) ?? "ein Programm";
+        const sourceZone =
+          searchDestination === "install_program" && searchReveal === "public"
+            ? "Stack"
+            : "Ablagestapel";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = programDefinitionId;
+        title = phrase(
+          subject,
+          `${programTitle} mit ${source} kostenlos und temporär aus dem ${sourceZone} im Rig installiert`,
+        );
+        description =
+          payload.shuffled === true
+            ? "Der Stack wurde danach gemischt; das Programm kehrt am Zugende auf die Hand zurück."
+            : "Das Programm kehrt am Zugende auf die Hand zurück.";
+        chips.push(
+          source,
+          sourceZone,
+          "Kostenlos",
+          "Installiert",
+          "Temporär",
+          ...(payload.shuffled === true ? ["Shuffle"] : []),
+        );
+        break;
+      }
       if (hiddenZoneAction === "search_stack") {
         const destinationLabel = searchDestinationLabel(searchDestination);
         const installFailed =
@@ -3920,6 +3960,26 @@ export function formatChronicleEvent(
       break;
     }
     case "end_turn":
+      if (
+        hiddenZoneAction === "temporary_program_install_end_turn_return"
+      ) {
+        const returnedTitles = titlesForDefinitionIds(
+          stringValue(payload.returnedCardDefinitionIds),
+        );
+        const returnedCount =
+          numberValue(payload.returnedCount) ?? returnedTitles.length;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(
+          subject,
+          returnedTitles.length > 0
+            ? `${returnedTitles.join(", ")} vom Rig auf die Hand zurückgenommen`
+            : `${cardCountText(returnedCount)} vom Rig auf die Hand zurückgenommen`,
+        );
+        chips.push("Zugende", "Rig → Hand", `${returnedCount}`);
+        break;
+      }
       if (shellTradersAbility === "start_turn_remove_shell_counter") {
         const remaining = numberValue(payload.remainingCounters) ?? 0;
         const installed = payload.installedFromSpecialZone === true;

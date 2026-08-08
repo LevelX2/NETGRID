@@ -42,11 +42,11 @@ describe("runner run release", () => {
 
     expect(release).toMatchObject({
       status: "blocked",
-      reason: "recommendation_gain_credits_first",
+      reason: "unknown_ice_risk_underfunded",
     });
   });
 
-  it("keeps the same score-threat probe available at one visible Corp credit", () => {
+  it("blocks an under-reserved score-threat probe even at one visible Corp credit", () => {
     const release = runnerRunReleaseForEvaluation(
       runnerInput(1),
       evaluation({
@@ -62,8 +62,8 @@ describe("runner run release", () => {
     );
 
     expect(release).toMatchObject({
-      status: "released_conditional",
-      reason: "bounded_unknown_ice_probe",
+      status: "blocked",
+      reason: "unknown_ice_risk_underfunded",
     });
   });
 
