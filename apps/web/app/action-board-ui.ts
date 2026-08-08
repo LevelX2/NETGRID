@@ -473,7 +473,12 @@ export type ServerStatusChipView = {
   label: string;
   ariaLabel: string;
   tooltip: string;
-  tone: "blocking" | "cost_increase" | "cost_reduction";
+  tone:
+    | "blocking"
+    | "cost_increase"
+    | "cost_reduction"
+    | "payment_restriction"
+    | "rez_support";
 };
 
 export type RunnerProgramInstallTrashChoiceInfo = {
@@ -867,12 +872,7 @@ export function serverStatusChips(
       label: serverStatusLabel(status),
       ariaLabel: tooltip,
       tooltip,
-      tone:
-        status.kind === "run_prohibited"
-          ? "blocking"
-          : status.operation === "increase"
-            ? "cost_increase"
-            : "cost_reduction",
+      tone: serverStatusTone(status),
     };
   });
 }
@@ -888,12 +888,48 @@ export function serverStatusTooltip(status: VisibleServerStatus): string {
       return status.operation === "increase"
         ? `${status.sourceTitle}: Die Korp muss ${status.amount} zusätzliche ${status.amount === 1 ? "Credit" : "Credits"} zahlen, um ICE vor diesem Server zu installieren.`
         : `${status.sourceTitle}: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um ${status.amount} ${status.amount === 1 ? "Credit" : "Credits"} reduziert.`;
+    case "run_payment_restriction":
+      return `${status.sourceTitle}: Der Runner kann während Runs auf diesen Server keine Stealth-Bits als Zahlungsquelle verwenden.`;
+    case "during_run_ice_rez_support":
+      return `${status.sourceTitle}: Die Korp darf während eines Runs auf diesen Server einmal pro Run und Quelle ein unrezztes ICE dieses Forts für die Hälfte der Rezkosten (abgerundet) rezzen.`;
   }
+  return assertNeverServerStatus(status);
 }
 
 function serverStatusLabel(status: VisibleServerStatus): string {
-  if (status.kind === "run_prohibited") return "Run gesperrt";
-  return `ICE-Install ${status.operation === "increase" ? "+" : "−"}${status.amount}`;
+  switch (status.kind) {
+    case "run_prohibited":
+      return "Run gesperrt";
+    case "cost_modifier":
+      return `ICE-Install ${status.operation === "increase" ? "+" : "−"}${status.amount}`;
+    case "run_payment_restriction":
+      return "Stealth-Bits gesperrt";
+    case "during_run_ice_rez_support":
+      return "ICE-Rez ½";
+  }
+  return assertNeverServerStatus(status);
+}
+
+function serverStatusTone(
+  status: VisibleServerStatus,
+): ServerStatusChipView["tone"] {
+  switch (status.kind) {
+    case "run_prohibited":
+      return "blocking";
+    case "cost_modifier":
+      return status.operation === "increase"
+        ? "cost_increase"
+        : "cost_reduction";
+    case "run_payment_restriction":
+      return "payment_restriction";
+    case "during_run_ice_rez_support":
+      return "rez_support";
+  }
+  return assertNeverServerStatus(status);
+}
+
+function assertNeverServerStatus(status: never): never {
+  throw new Error(`Unsupported server status: ${JSON.stringify(status)}`);
 }
 
 export function safeCounterDisplayAmount(amount: number): number {

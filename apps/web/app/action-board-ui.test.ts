@@ -3092,6 +3092,28 @@ describe("V1.0.6 resource and card-display helpers", () => {
         sourceTitle: "Öffentliche Korp-Kostenquelle",
         sourceSide: "corp",
       },
+      {
+        id: "server_status:remote_1:run_payment_restriction:card_10:stealth_bits",
+        kind: "run_payment_restriction",
+        scope: "target_server",
+        restriction: "runner_stealth_bit_payment_sources",
+        targetServerId: "remote_1",
+        sourceCardInstanceId: "card_10",
+        sourceTitle: "Öffentliche Zahlungsbeschränkung",
+        sourceSide: "corp",
+      },
+      {
+        id: "server_status:remote_1:during_run_ice_rez_support:card_11",
+        kind: "during_run_ice_rez_support",
+        scope: "target_server",
+        costModel: "half_rez_cost_rounded_down",
+        target: "unrezzed_ice_on_this_fort",
+        limit: "once_per_run_per_source",
+        targetServerId: "remote_1",
+        sourceCardInstanceId: "card_11",
+        sourceTitle: "Öffentliche Rez-Unterstützung",
+        sourceSide: "corp",
+      },
     ];
 
     const runTooltip =
@@ -3122,6 +3144,24 @@ describe("V1.0.6 resource and card-display helpers", () => {
         tooltip:
           "Öffentliche Korp-Kostenquelle: Die Kosten der Korp, ICE vor diesem Server zu installieren, sind um 1 Credit reduziert.",
         tone: "cost_reduction",
+      },
+      {
+        key: statuses[3]!.id,
+        label: "Stealth-Bits gesperrt",
+        ariaLabel:
+          "Öffentliche Zahlungsbeschränkung: Der Runner kann während Runs auf diesen Server keine Stealth-Bits als Zahlungsquelle verwenden.",
+        tooltip:
+          "Öffentliche Zahlungsbeschränkung: Der Runner kann während Runs auf diesen Server keine Stealth-Bits als Zahlungsquelle verwenden.",
+        tone: "payment_restriction",
+      },
+      {
+        key: statuses[4]!.id,
+        label: "ICE-Rez ½",
+        ariaLabel:
+          "Öffentliche Rez-Unterstützung: Die Korp darf während eines Runs auf diesen Server einmal pro Run und Quelle ein unrezztes ICE dieses Forts für die Hälfte der Rezkosten (abgerundet) rezzen.",
+        tooltip:
+          "Öffentliche Rez-Unterstützung: Die Korp darf während eines Runs auf diesen Server einmal pro Run und Quelle ein unrezztes ICE dieses Forts für die Hälfte der Rezkosten (abgerundet) rezzen.",
+        tone: "rez_support",
       },
     ]);
   });
@@ -5742,7 +5782,11 @@ describe("opponent runner rig card actions", () => {
 
     expect(
       actionContextStillVisible(
-        { kind: "card", id: hiddenSlot.instanceId, label: "Verdeckte Resource" },
+        {
+          kind: "card",
+          id: hiddenSlot.instanceId,
+          label: "Verdeckte Resource",
+        },
         view,
       ),
     ).toBe(true);

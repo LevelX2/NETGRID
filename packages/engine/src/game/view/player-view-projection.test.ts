@@ -26,7 +26,10 @@ import {
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
 import { CARD_DEFINITIONS_BY_ID, type CardInstanceId } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
+  cardImplementationForDefinitionId,
+} from "../../card-implementations/registry";
 import {
   overadvanceViewFields,
   visibleFreeNetOrCoreDamagePreventionRemaining,
@@ -142,6 +145,78 @@ describe("PlayerView projection", () => {
         trashSource: true,
       }),
     );
+  });
+
+  it("ignores installed non-trace abilities while projecting trace support", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "non-trace-ability-trace-quote" }),
+    );
+    const sourceId = "crash-space-trace-quote" as CardInstanceId;
+    state.cardInstances[sourceId] = {
+      ...state.cardInstances[state.runner.identity]!,
+      definitionId: "onr_classic_044_crash-space",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.runner.rig.resources.push(sourceId);
+
+    expect(() => getPlayerView(state, "runner")).not.toThrow();
+    const traceSupport = getPlayerView(state, "runner").own
+      .runnerTraceSupportQuote;
+    expect(traceSupport?.postBidLinkOptions).not.toContainEqual(
+      expect.objectContaining({ sourceCardInstanceId: sourceId }),
+    );
+    expect(traceSupport?.traceSuccessCancelOptions).not.toContainEqual(
+      expect.objectContaining({ sourceCardInstanceId: sourceId }),
+    );
+  });
+
+  it("fails loudly for a trace-window ability with an invalid trace cost", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "invalid-trace-window-cost" }),
+    );
+    const sourceId = "invalid-trace-window-source" as CardInstanceId;
+    state.cardInstances[sourceId] = {
+      ...state.cardInstances[state.runner.identity]!,
+      definitionId: "onr_classic_044_crash-space",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.runner.rig.resources.push(sourceId);
+
+    const definitionId = "onr_classic_044_crash-space";
+    const originalImplementation =
+      CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId];
+    if (!originalImplementation)
+      throw new Error("Missing Crash Space implementation");
+    CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] = {
+      ...originalImplementation,
+      abilities: [
+        {
+          kind: "activated",
+          timing: "trace_post_bid_link_window",
+          costs: [{ kind: "action", amount: 1 }],
+          label: "Invalid trace-window cost",
+          effects: [
+            {
+              kind: "increase_trace_link",
+              amount: 1,
+              visibility: "public",
+            },
+          ],
+        },
+      ],
+    };
+    try {
+      expect(() => getPlayerView(state, "runner")).toThrow(
+        "Trace CardImplementation ability supports nonnegative credit and optional source costs.",
+      );
+    } finally {
+      CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] =
+        originalImplementation;
+    }
   });
 
   it("projects public during-run ICE rez support as a server status", () => {

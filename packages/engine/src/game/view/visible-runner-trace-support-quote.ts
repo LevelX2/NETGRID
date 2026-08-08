@@ -166,9 +166,9 @@ function visibleTraceWindowOptions(
       "trace_link_force_jack_out";
     for (const ability of implementation?.abilities ?? []) {
       if (ability.kind !== "activated") continue;
-      const cost = traceWindowAbilityCost(ability);
-      if (cost.tapSource && instance.tapped === true) continue;
       if (ability.timing === "trace_post_bid_link_window") {
+        const cost = traceWindowAbilityCost(ability);
+        if (cost.tapSource && instance.tapped === true) continue;
         const effect = singlePublicTraceLinkEffect(ability);
         if (!effect) continue;
         postBidLinkOptions.push({
@@ -181,11 +181,12 @@ function visibleTraceWindowOptions(
           trashSource: cost.trashSource,
           safeForAccess,
         });
+        continue;
       }
-      if (
-        ability.timing === "trace_success_cancel_window" &&
-        (cost.tapSource || cost.trashSource)
-      ) {
+      if (ability.timing === "trace_success_cancel_window") {
+        const cost = traceWindowAbilityCost(ability);
+        if (cost.tapSource && instance.tapped === true) continue;
+        if (!(cost.tapSource || cost.trashSource)) continue;
         traceSuccessCancelOptions.push({
           sourceCardInstanceId: cardId,
           sourceDefinitionId: definition.id,

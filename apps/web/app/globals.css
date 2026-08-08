@@ -7550,6 +7550,26 @@ select {
   );
 }
 
+.serverStatusChip--payment_restriction {
+  border-color: rgb(238 149 105 / 0.88);
+  color: #ffe0cb;
+  background: linear-gradient(
+    135deg,
+    rgb(129 48 38 / 0.96),
+    rgb(58 30 35 / 0.97)
+  );
+}
+
+.serverStatusChip--rez_support {
+  border-color: rgb(138 180 246 / 0.88);
+  color: #dbe9ff;
+  background: linear-gradient(
+    135deg,
+    rgb(44 74 129 / 0.96),
+    rgb(29 40 72 / 0.97)
+  );
+}
+
 .corpHqServer.serverCollapsed .serverLayout {
   width: auto;
 }
