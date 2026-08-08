@@ -139,6 +139,16 @@ Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` s
 8. Passwortänderung oder lokaler Reset meldet alle Geräte ab.
 9. Direkter LAN-Aufruf von Port `8787` bleibt für Maintenance geschlossen.
 
+## Laufende Matchanalyse
+
+Für normale Analyse laufender NETGRID-Matches sollen Codex und andere
+Diagnosewerkzeuge nicht direkt `data/runtime/multiplayer/netgrid.sqlite`
+öffnen. Sie verwenden die authentifizierte lokale Maintenance-API
+`GET /api/storage/maintenance/analysis/matches/:matchId/bundle`; der
+Endpunkt materialisiert seinen read-only SQLite-Read kurz und liefert danach
+ein versioniertes JSON-Bundle. Direkter SQLite-Zugriff bleibt ein bewusstes
+Wartungs-/Sonderwerkzeug.
+
 ## Öffentliche Selbsthoster-Perspektive
 
 ARC-001 ist die Sicherheitsgrundlage, aber keine vollständige öffentliche Distribution. Vor einer allgemeinen Veröffentlichung bleiben eigene Gates für Installation/Updates, Secret-Erzeugung, Zertifikatsautomatisierung, Backup/Restore, Benutzerkonten, Missbrauchsschutz, Datenschutz, Moderation und Support erforderlich. Die Game Plane darf öffentlich erreichbar sein; die Control Plane bleibt betreibergebunden und separat abgesichert.

@@ -361,6 +361,55 @@ export type StorageMaintenanceAiDecisionTraceDetail =
     detail: Record<string, unknown>;
   };
 
+export type StorageMaintenanceMatchAnalysisFilters = {
+  side?: "runner" | "corp";
+  turn?: number;
+  fromDecision?: number;
+  toDecision?: number;
+  includeEvents?: boolean;
+  includeDecisionTraces?: boolean;
+};
+
+export type StorageMaintenanceMatchAnalysisEvent = {
+  eventId: string;
+  eventIndex: number;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  stateHashAfter: string;
+  publicPayload: Record<string, unknown>;
+  hiddenInfoBarrier: boolean;
+};
+
+export type StorageMaintenanceMatchAnalysisBundle = {
+  schemaVersion: "netgrid-match-analysis-bundle-v1";
+  match: {
+    matchId: string;
+    status: MatchStatus;
+    mode: MatchMode;
+    matchVersion: number;
+    stateVersion?: number;
+    stateHash?: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  scope: {
+    side?: "runner" | "corp";
+    turn?: number;
+    fromDecision?: number;
+    toDecision?: number;
+  };
+  events?: StorageMaintenanceMatchAnalysisEvent[];
+  decisions: StorageMaintenanceAiDecisionTraceIndexEntry[];
+  traces?: StorageMaintenanceAiDecisionTraceDetail[];
+  diagnostics: {
+    warnings: string[];
+    unavailableSections: string[];
+  };
+};
+
+const MATCH_ANALYSIS_EVENT_LIMIT = 500;
+const MATCH_ANALYSIS_DECISION_LIMIT = 200;
+
 export class StorageError extends Error {
   constructor(
     readonly code:
@@ -410,6 +459,20 @@ export function runSqliteStorageOperation<T>(work: () => T): T {
   try {
     return work();
   } catch (error) {
+    throw storageErrorForSqliteFailure(error);
+  }
+}
+
+function runSqliteReadSnapshot<T>(database: DatabaseSync, work: () => T): T {
+  let transactionStarted = false;
+  try {
+    database.exec("BEGIN");
+    transactionStarted = true;
+    const result = work();
+    database.exec("COMMIT");
+    return result;
+  } catch (error) {
+    if (transactionStarted) rollbackSqliteTransaction(database);
     throw storageErrorForSqliteFailure(error);
   }
 }
@@ -815,6 +878,151 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return trace
       ? { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson }
       : undefined;
+  }
+
+  async maintenanceMatchAnalysis(
+    matchId: string,
+    filters: StorageMaintenanceMatchAnalysisFilters = {},
+  ): Promise<StorageMaintenanceMatchAnalysisBundle | undefined> {
+    const normalized = normalizeMatchAnalysisFilters(filters);
+    const materialized = runSqliteReadSnapshot(this.db, () => {
+      const match = this.db
+        .prepare(
+          `SELECT match_id AS matchId, status, mode, match_version AS matchVersion,
+             state_version AS stateVersion, state_hash AS stateHash,
+             created_at AS createdAt, updated_at AS updatedAt
+           FROM matches WHERE match_id = ?`,
+        )
+        .get(matchId) as
+        | {
+            matchId: string;
+            status: MatchStatus;
+            mode: MatchMode;
+            matchVersion: number;
+            stateVersion?: number;
+            stateHash?: string;
+            createdAt: string;
+            updatedAt: string;
+          }
+        | undefined;
+      if (!match) return undefined;
+
+      const eventRows = normalized.includeEvents
+        ? (this.db
+            .prepare(
+              `SELECT event_id AS eventId, event_index AS eventIndex,
+                 state_version_before AS stateVersionBefore,
+                 state_version_after AS stateVersionAfter,
+                 state_hash_after AS stateHashAfter,
+                 public_payload_json AS publicPayloadJson,
+                 hidden_info_barrier AS hiddenInfoBarrier
+               FROM events WHERE match_id = ?
+               ORDER BY event_index ASC LIMIT ?`,
+            )
+            .all(matchId, MATCH_ANALYSIS_EVENT_LIMIT + 1) as Array<{
+            eventId: string;
+            eventIndex: number;
+            stateVersionBefore: number;
+            stateVersionAfter: number;
+            stateHashAfter: string;
+            publicPayloadJson: string;
+            hiddenInfoBarrier: number;
+          }>)
+        : undefined;
+      const decisionRows = this.db
+        .prepare(
+          `SELECT trace_id AS traceId, event_id AS eventId,
+             state_version AS stateVersion, match_version AS matchVersion,
+             side, turn, decision_index AS decisionIndex,
+             selected_action_id AS selectedActionId,
+             selected_action_type AS selectedActionType, plan_kind AS planKind,
+             score, confidence, created_at AS createdAt,
+             schema_version AS schemaVersion, trace_json AS traceJson
+           FROM ai_decision_traces
+           WHERE match_id = ?
+             AND (? IS NULL OR side = ?)
+             AND (? IS NULL OR turn = ?)
+             AND (? IS NULL OR decision_index >= ?)
+             AND (? IS NULL OR decision_index <= ?)
+           ORDER BY decision_index ASC LIMIT ?`,
+        )
+        .all(
+          matchId,
+          normalized.side ?? null,
+          normalized.side ?? null,
+          normalized.turn ?? null,
+          normalized.turn ?? null,
+          normalized.fromDecision ?? null,
+          normalized.fromDecision ?? null,
+          normalized.toDecision ?? null,
+          normalized.toDecision ?? null,
+          MATCH_ANALYSIS_DECISION_LIMIT + 1,
+        ) as AiDecisionTraceRow[];
+      return { match, eventRows, decisionRows };
+    });
+    if (!materialized) return undefined;
+
+    const warnings: string[] = [];
+    const events = materialized.eventRows?.slice(0, MATCH_ANALYSIS_EVENT_LIMIT).map(
+      (row) => ({
+        eventId: row.eventId,
+        eventIndex: Number(row.eventIndex),
+        stateVersionBefore: Number(row.stateVersionBefore),
+        stateVersionAfter: Number(row.stateVersionAfter),
+        stateHashAfter: row.stateHashAfter,
+        publicPayload: JSON.parse(row.publicPayloadJson) as Record<string, unknown>,
+        hiddenInfoBarrier: row.hiddenInfoBarrier === 1,
+      }),
+    );
+    if ((materialized.eventRows?.length ?? 0) > MATCH_ANALYSIS_EVENT_LIMIT)
+      warnings.push(`Events wurden auf ${MATCH_ANALYSIS_EVENT_LIMIT} Einträge begrenzt.`);
+
+    const decisionRecords = materialized.decisionRows
+      .slice(0, MATCH_ANALYSIS_DECISION_LIMIT)
+      .map((row) => aiDecisionTraceRecordFromRow(matchId, row));
+    if (materialized.decisionRows.length > MATCH_ANALYSIS_DECISION_LIMIT)
+      warnings.push(
+        `KI-Entscheidungen wurden auf ${MATCH_ANALYSIS_DECISION_LIMIT} Einträge begrenzt.`,
+      );
+    if (decisionRecords.length === 0)
+      warnings.push("Für den gewählten Entscheidungsbereich sind keine KI-Traces gespeichert.");
+
+    const decisions = decisionRecords.map(aiDecisionTraceIndexEntry);
+    const unavailableSections = [
+      "historicalLegalActions",
+      "engineQuotes",
+      "analysisSnapshots",
+      "runAndEncounterProjection",
+    ];
+    return {
+      schemaVersion: "netgrid-match-analysis-bundle-v1",
+      match: {
+        matchId: materialized.match.matchId,
+        status: materialized.match.status,
+        mode: materialized.match.mode,
+        matchVersion: Number(materialized.match.matchVersion),
+        ...(materialized.match.stateVersion === undefined
+          ? {}
+          : { stateVersion: Number(materialized.match.stateVersion) }),
+        ...(materialized.match.stateHash
+          ? { stateHash: materialized.match.stateHash }
+          : {}),
+        createdAt: materialized.match.createdAt,
+        updatedAt: materialized.match.updatedAt,
+      },
+      scope: analysisScope(normalized),
+      ...(events ? { events } : {}),
+      decisions,
+      ...(normalized.includeDecisionTraces
+        ? {
+            traces: decisionRecords.map((trace) => ({
+              ...aiDecisionTraceIndexEntry(trace),
+              detail: trace.traceJson,
+            })),
+          }
+        : {}),
+      diagnostics: { warnings, unavailableSections },
+    };
   }
 
   async maintenanceCleanupPreview(
@@ -3138,6 +3346,48 @@ const MANUAL_CLEANUP_STATUSES: MatchStatus[] = [
   "active",
   ...AUTOMATIC_CLEANUP_STATUSES,
 ];
+
+function normalizeMatchAnalysisFilters(
+  filters: StorageMaintenanceMatchAnalysisFilters,
+): StorageMaintenanceMatchAnalysisFilters & {
+  includeEvents: boolean;
+  includeDecisionTraces: boolean;
+} {
+  const normalizeOptionalInteger = (value: number | undefined): number | undefined =>
+    Number.isFinite(value) && value !== undefined
+      ? Math.max(0, Math.floor(value))
+      : undefined;
+  const turn = normalizeOptionalInteger(filters.turn);
+  const fromDecision = normalizeOptionalInteger(filters.fromDecision);
+  const toDecision = normalizeOptionalInteger(filters.toDecision);
+  return {
+    ...(filters.side === "runner" || filters.side === "corp"
+      ? { side: filters.side }
+      : {}),
+    ...(turn === undefined ? {} : { turn }),
+    ...(fromDecision === undefined ? {} : { fromDecision }),
+    ...(toDecision === undefined
+      ? {}
+      : { toDecision: Math.max(toDecision, fromDecision ?? 0) }),
+    includeEvents: filters.includeEvents !== false,
+    includeDecisionTraces: filters.includeDecisionTraces !== false,
+  };
+}
+
+function analysisScope(
+  filters: StorageMaintenanceMatchAnalysisFilters,
+): StorageMaintenanceMatchAnalysisBundle["scope"] {
+  return {
+    ...(filters.side ? { side: filters.side } : {}),
+    ...(filters.turn === undefined ? {} : { turn: filters.turn }),
+    ...(filters.fromDecision === undefined
+      ? {}
+      : { fromDecision: filters.fromDecision }),
+    ...(filters.toDecision === undefined
+      ? {}
+      : { toDecision: filters.toDecision }),
+  };
+}
 
 function normalizeCleanupFilters(
   filters: StorageMaintenanceCleanupFilters,

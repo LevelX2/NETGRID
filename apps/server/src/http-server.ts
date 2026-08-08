@@ -2342,6 +2342,40 @@ async function routeHttp(
       return;
     }
 
+    const maintenanceAnalysisRoute =
+      /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/bundle$/.exec(
+        url.pathname,
+      );
+    if (maintenanceAnalysisRoute && request.method === "GET") {
+      const matchId = decodeURIComponent(maintenanceAnalysisRoute[1] ?? "");
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          `storage-maintenance-analysis:${matchId}`,
+        )
+      )
+        return;
+      const bundle = await service.storageMaintenanceMatchAnalysis(
+        matchId,
+        maintenanceAnalysisFiltersFromSearch(url.searchParams),
+      );
+      if (!bundle) {
+        sendJson(response, 404, {
+          error: {
+            code: "not_found",
+            message: "Diese Analyseansicht hat keine Daten für dieses Match.",
+          },
+        });
+        return;
+      }
+      sendJson(response, 200, bundle);
+      return;
+    }
+
     if (
       url.pathname === "/api/storage/maintenance/cleanup/preview" &&
       request.method === "POST"
@@ -4298,6 +4332,41 @@ function maintenanceFiltersFromSearch(
   return filters;
 }
 
+function maintenanceAnalysisFiltersFromSearch(
+  searchParams: URLSearchParams,
+): {
+  side?: "runner" | "corp";
+  turn?: number;
+  fromDecision?: number;
+  toDecision?: number;
+  includeEvents?: boolean;
+  includeDecisionTraces?: boolean;
+} {
+  const filters: {
+    side?: "runner" | "corp";
+    turn?: number;
+    fromDecision?: number;
+    toDecision?: number;
+    includeEvents?: boolean;
+    includeDecisionTraces?: boolean;
+  } = {};
+  const side = searchParams.get("side");
+  if (side === "runner" || side === "corp") filters.side = side;
+  for (const [queryName, field] of [
+    ["turn", "turn"],
+    ["fromDecision", "fromDecision"],
+    ["toDecision", "toDecision"],
+  ] as const) {
+    const value = nonNegativeIntegerParam(searchParams.get(queryName));
+    if (value !== undefined) filters[field] = value;
+  }
+  if (searchParams.get("includeEvents") === "false")
+    filters.includeEvents = false;
+  if (searchParams.get("includeDecisionTraces") === "false")
+    filters.includeDecisionTraces = false;
+  return filters;
+}
+
 function maintenanceCleanupFiltersFromBody(
   body: Record<string, unknown>,
 ): StorageMaintenanceCleanupFilters {
@@ -4425,6 +4494,11 @@ function numberParam(value: string | null): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function nonNegativeIntegerParam(value: string | null): number | undefined {
+  const parsed = numberParam(value);
+  return parsed === undefined || parsed < 0 ? undefined : Math.floor(parsed);
 }
 
 function positiveInteger(

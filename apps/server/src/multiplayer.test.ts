@@ -1421,6 +1421,119 @@ describe("Backend 0.5 private storage maintenance", () => {
     }
   });
 
+  it("serves a read-only analysis bundle for active and finished SQLite matches", async () => {
+    const dir = await tempStorageDir();
+    const storage = new SqliteMatchStorage({
+      dbPath: join(dir, "netgrid.sqlite"),
+      backupDir: join(dir, "backups"),
+    });
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "maintenance-match-analysis",
+    });
+    const active = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "maintenance-match-analysis-active",
+      corpDifficulty: "normal",
+      aiTraceMode: "detailed",
+    });
+    const setup = await submitChoice(
+      service,
+      active.matchId,
+      {
+        side: "runner",
+        sessionToken: active.hostSessionToken,
+        reconnectToken: active.hostReconnectToken,
+      },
+      "keep",
+      "maintenance-match-analysis-setup",
+    );
+    const advanced = await service.advanceAi({
+      matchId: active.matchId,
+      side: "runner",
+      sessionToken: active.hostSessionToken,
+      knownStateVersion: setup.playerView.stateVersion,
+      mode: "single_step",
+    });
+    expect(advanced.ok).toBe(true);
+    const before = await service.loadForTest(active.matchId);
+    if (!before) throw new Error("Missing active analysis match");
+
+    const finished = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      seed: "maintenance-match-analysis-finished",
+    });
+    const finishedRecord = await service.loadForTest(finished.matchId);
+    if (!finishedRecord) throw new Error("Missing finished analysis match");
+    finishedRecord.match.status = "finished";
+    await storage.save(finishedRecord);
+
+    const maintenance = await authenticatedMaintenanceServer(service);
+    try {
+      const activeResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?turn=1&side=corp&fromDecision=1&toDecision=1`,
+      );
+      const activeBundle = (await activeResponse.json()) as {
+        schemaVersion?: string;
+        match?: { matchId?: string; status?: string; stateVersion?: number };
+        scope?: { turn?: number; side?: string; fromDecision?: number; toDecision?: number };
+        events?: Array<{ eventId: string }>;
+        decisions?: Array<{ decisionIndex: number; side: string }>;
+        traces?: Array<{ detail: Record<string, unknown> }>;
+        diagnostics?: { unavailableSections?: string[] };
+      };
+      expect(activeResponse.status).toBe(200);
+      expect(activeBundle).toMatchObject({
+        schemaVersion: "netgrid-match-analysis-bundle-v1",
+        match: { matchId: active.matchId, stateVersion: before.gameState.stateVersion },
+        scope: { turn: 1, side: "corp", fromDecision: 1, toDecision: 1 },
+      });
+      expect(activeBundle.events?.length).toBeGreaterThan(0);
+      expect(activeBundle.decisions).toEqual([
+        expect.objectContaining({ decisionIndex: 1, side: "corp" }),
+      ]);
+      expect(activeBundle.traces).toHaveLength(1);
+      expect(activeBundle.diagnostics?.unavailableSections).toContain(
+        "historicalLegalActions",
+      );
+      expect(JSON.stringify(activeBundle)).not.toMatch(
+        /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
+      );
+
+      const after = await service.loadForTest(active.matchId);
+      if (!after) throw new Error("Missing active analysis match after read");
+      expect(after?.match.matchVersion).toBe(before.match.matchVersion);
+      expect(after?.gameState.stateVersion).toBe(before.gameState.stateVersion);
+      expect(hashState(after.gameState)).toBe(hashState(before.gameState));
+
+      const finishedResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(finished.matchId)}/bundle?includeEvents=false&includeDecisionTraces=false`,
+      );
+      expect(finishedResponse.status).toBe(200);
+      const finishedBundle = (await finishedResponse.json()) as {
+        match?: { status?: string };
+        events?: unknown;
+        traces?: unknown;
+        diagnostics?: { warnings?: string[] };
+      };
+      expect(finishedBundle.match?.status).toBe("finished");
+      expect(finishedBundle.events).toBeUndefined();
+      expect(finishedBundle.traces).toBeUndefined();
+      expect(finishedBundle.diagnostics?.warnings).toContain(
+        "Für den gewählten Entscheidungsbereich sind keine KI-Traces gespeichert.",
+      );
+
+      const missingResponse = await maintenance.request(
+        "/api/storage/maintenance/analysis/matches/missing/bundle",
+      );
+      expect(missingResponse.status).toBe(404);
+    } finally {
+      await maintenance.handle.close();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("stores compact and detailed decision chains in the same SQLite AI trace path", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");

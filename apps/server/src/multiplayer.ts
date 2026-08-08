@@ -125,6 +125,8 @@ import type {
   StorageMaintenanceAiDecisionTraceDetail,
   StorageMaintenanceAiDecisionTraceIndexEntry,
   StorageMaintenanceAiDecisionTraceMatchEntry,
+  StorageMaintenanceMatchAnalysisBundle,
+  StorageMaintenanceMatchAnalysisFilters,
   StorageMaintenanceMatchDetail,
   StorageMaintenanceMatchEntry,
   StorageMaintenanceMatchFilters,
@@ -456,6 +458,10 @@ export type MultiplayerStorage = {
   maintenanceAiDecisionTraceDetail?(
     traceId: string,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined>;
+  maintenanceMatchAnalysis?(
+    matchId: string,
+    filters?: StorageMaintenanceMatchAnalysisFilters,
+  ): Promise<StorageMaintenanceMatchAnalysisBundle | undefined>;
   maintenanceCleanupPreview?(
     filters: StorageMaintenanceCleanupFilters,
   ): Promise<StorageMaintenanceCleanupPreview>;
@@ -4300,6 +4306,13 @@ export class MultiplayerService {
     traceId: string,
   ): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
     return this.storage.maintenanceAiDecisionTraceDetail?.(traceId);
+  }
+
+  async storageMaintenanceMatchAnalysis(
+    matchId: string,
+    filters?: StorageMaintenanceMatchAnalysisFilters,
+  ): Promise<StorageMaintenanceMatchAnalysisBundle | undefined> {
+    return this.storage.maintenanceMatchAnalysis?.(matchId, filters);
   }
 
   async enableStorageMaintenanceAiDecisionTrace(
