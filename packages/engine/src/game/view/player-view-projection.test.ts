@@ -29,6 +29,26 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import { overadvanceViewFields } from "./card-view";
 
 describe("PlayerView projection", () => {
+  it("projects an authoritative effective run quote for known rezzed ICE", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "known-rezzed-ice-run-quote" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId]!.faceup = true;
+    state.cardInstances[iceId]!.rezzed = true;
+
+    const ice = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+
+    expect(ice?.effectiveRunQuote).toMatchObject({
+      iceInstanceId: iceId,
+      iceDefinitionId: "simple_barrier_ice",
+      effectiveStrength: expect.any(Number),
+      subroutines: expect.any(Array),
+    });
+  });
+
   it("projects Vapor Ops counter-bank evidence only to the Corp", () => {
     const state = originalsetReorderCounterRunlockGame(
       "vapor-counter-bank-projection",

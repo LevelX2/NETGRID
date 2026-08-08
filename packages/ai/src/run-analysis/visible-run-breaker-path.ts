@@ -2,7 +2,6 @@ import {
   CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
-  type TraceSuccessEffect,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
@@ -11,7 +10,6 @@ import {
   traceBaseLinkCardImplementationQuotesForDefinition,
   visibleBreakerEncounterQuote,
 } from "@netgrid/engine";
-import { RUNTIME_CARDS } from "../ai-hints";
 import { breakerCardBlocksAccessReachability } from "../breaker-ontology-consumer";
 import type {
   BreakAssessment,
@@ -38,37 +36,8 @@ export function projectIceForRunPathEffects(
     ice.rezzed !== true
   )
     return ice;
-  const quote = effectiveRunQuoteForIce(ice);
-  const baseQuote: VisibleEffectiveIceRunQuote = quote ?? {
-    iceInstanceId: `visible_path.${ice.definitionId}.${iceIndex}`,
-    iceDefinitionId: ice.definitionId,
-    effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
-    subroutines:
-      CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.map(
-        (subroutine) => ({
-          id: subroutine.id,
-          type: subroutine.type,
-          ...(subroutine.amount !== undefined
-            ? { amount: subroutine.amount }
-            : {}),
-          ...(subroutine.baseTraceStrength !== undefined
-            ? { baseTraceStrength: subroutine.baseTraceStrength }
-            : {}),
-          ...(subroutine.traceSuccessEffect
-            ? { traceSuccessEffect: subroutine.traceSuccessEffect }
-            : {}),
-          ...(subroutine.runFutureStrengthCancelPaymentAmount !== undefined
-            ? {
-                runFutureStrengthCancelPaymentAmount:
-                  subroutine.runFutureStrengthCancelPaymentAmount,
-              }
-            : {}),
-          ...(subroutine.breakTags
-            ? { breakTags: subroutine.breakTags.slice() }
-            : {}),
-        }),
-      ) ?? [],
-  };
+  const baseQuote = requireEffectiveRunQuoteForKnownRezzedIce(ice);
+  if (!baseQuote) return ice;
   let effectiveStrength = baseQuote.effectiveStrength;
   let breakSubroutineAdditionalCostPerSubroutine =
     baseQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
@@ -252,115 +221,21 @@ export function effectiveRunQuoteForIce(
   return quote;
 }
 
-export function runQuoteForIce(
+export function requireEffectiveRunQuoteForKnownRezzedIce(
   ice: IceCardLike,
-  iceIndex: number,
 ): VisibleEffectiveIceRunQuote | undefined {
   const quote = effectiveRunQuoteForIce(ice);
-  if (quote) return quoteWithFallbackUnbrokenRunEffects(quote);
-  if (!ice.definitionId) return undefined;
-  const definition = visibleRunCardDefinition(ice.definitionId);
-  if (!definition || definition.type !== "ice") return undefined;
-  return {
-    iceInstanceId: `visible_path.${ice.definitionId}.${iceIndex}`,
-    iceDefinitionId: ice.definitionId,
-    effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
-    subroutines:
-      definition.subroutines?.map((subroutine) =>
-        visibleSubroutineWithFallbackUnbrokenRunEffect({
-          id: subroutine.id,
-          type: subroutine.type,
-          ...(subroutine.amount !== undefined
-            ? { amount: subroutine.amount }
-            : {}),
-          ...(subroutine.baseTraceStrength !== undefined
-            ? { baseTraceStrength: subroutine.baseTraceStrength }
-            : {}),
-          ...(subroutine.traceSuccessEffect
-            ? { traceSuccessEffect: subroutine.traceSuccessEffect }
-            : {}),
-          ...(subroutine.breakTags
-            ? { breakTags: subroutine.breakTags.slice() }
-            : {}),
-        }),
-      ) ?? [],
-  };
-}
-
-export function quoteWithFallbackUnbrokenRunEffects(
-  quote: VisibleEffectiveIceRunQuote,
-): VisibleEffectiveIceRunQuote {
-  return {
-    ...quote,
-    subroutines: quote.subroutines.map(
-      visibleSubroutineWithFallbackUnbrokenRunEffect,
-    ),
-  };
-}
-
-export function visibleSubroutineWithFallbackUnbrokenRunEffect(
-  subroutine: VisibleEffectiveSubroutine,
-): VisibleEffectiveSubroutine {
-  const unbrokenRunEffect =
-    subroutine.unbrokenRunEffect ??
-    fallbackUnbrokenRunEffectForSubroutine(subroutine);
-  return unbrokenRunEffect ? { ...subroutine, unbrokenRunEffect } : subroutine;
-}
-
-export function fallbackUnbrokenRunEffectForSubroutine(subroutine: {
-  type: VisibleEffectiveSubroutine["type"];
-  amount?: number;
-  traceSuccessEffect?: TraceSuccessEffect;
-}): RunPathProjectionEffect | undefined {
-  const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
-  const traceEffect =
-    subroutine.type === "initiate_trace"
-      ? fallbackUnbrokenRunEffectForTraceSuccess(subroutine.traceSuccessEffect)
-      : undefined;
-  if (traceEffect) return traceEffect;
-  switch (subroutine.type) {
-    case "set_run_future_end_the_run_subroutine":
-      return { addsFutureEndTheRunSubroutines: 1 };
-    case "set_run_break_subroutine_cost_modifier":
-      return amount > 0
-        ? { increasesFutureBreakCostPerSubroutine: amount }
-        : undefined;
-    case "set_run_future_strength_bonus":
-      return amount > 0 ? { increasesFutureIceStrength: amount } : undefined;
-    case "set_next_encounter_no_break_subroutines":
-      return { preventsFutureBreaking: true };
-    case "set_run_encounter_tax":
-      return amount > 0 ? { addsFutureEncounterCost: amount } : undefined;
-    case "set_run_jack_out_lock":
-    case "set_next_encounter_lock":
-      return { preventsJackOut: true };
-    case "set_next_encounter_unless_fully_break_damage":
-    case "set_run_pass_rezzed_ice_program_trash":
-    case "set_run_active_ice_program_trash":
-    case "do_damage":
-    case "trash_installed_program":
-      return { causesDamageOrProgramTrash: true };
-    case "set_runner_run_lock_actions":
-      return { createsRunLockOrActionTax: Math.max(1, amount) };
-    case "set_runner_forgo_next_action":
-      return { createsRunLockOrActionTax: 1 };
-    default:
-      return undefined;
+  if (
+    ice.known &&
+    ice.rezzed === true &&
+    ice.definitionId &&
+    !quote
+  ) {
+    throw new Error(
+      `Known rezzed ICE ${ice.definitionId} is missing its authoritative effective run quote.`,
+    );
   }
-}
-
-export function fallbackUnbrokenRunEffectForTraceSuccess(
-  effect: TraceSuccessEffect | undefined,
-): RunPathProjectionEffect | undefined {
-  if (!effect || effect.type === "none") return undefined;
-  switch (effect.type) {
-    case "end_run_and_run_lock":
-      return { createsRunLockOrActionTax: Math.max(1, effect.amount) };
-    case "end_run_trash_program_and_run_lock":
-      return { createsRunLockOrActionTax: Math.max(1, effect.amount) };
-    default:
-      return undefined;
-  }
+  return quote;
 }
 
 export function effectiveIceForQuote(
@@ -467,8 +342,6 @@ export function creditsToBreakVisibleSubroutinesWithBreaker(
     return undefined;
   }
   const breakerDefinition = visibleRunCardDefinition(breakerCard.definitionId);
-  const iceDefinition = visibleRunCardDefinition(ice.definitionId);
-  if (!iceDefinition) return undefined;
   const engineBreakAssessment = structuredBreakerAssessment({
     breakerCard,
     breakerDefinition,
@@ -729,8 +602,8 @@ export function structuredBreakerAssessment(params: {
       mayTrashBreakerAfterPass = true;
     for (const index of coveredIndexes) remainingIndexes.delete(index);
   }
-  const iceStrength =
-    params.ice.strength ?? cardDefinitionStrength(params.ice.definitionId);
+  const iceStrength = params.ice.strength;
+  if (iceStrength === undefined) return undefined;
   const strengthDeficit = Math.max(
     0,
     iceStrength -
@@ -853,8 +726,7 @@ function pendingFreeBreakAssessment(
   additionalBreakCostPerSubroutine: number,
 ): BreakAssessment | undefined {
   if (!ice.definitionId || subroutines.length === 0) return undefined;
-  const iceDefinition = visibleRunCardDefinition(ice.definitionId);
-  const iceSubtypes = ice.subtypes ?? iceDefinition?.subtypes ?? [];
+  const iceSubtypes = ice.subtypes ?? [];
   if (!hasSubtype(iceSubtypes, "sentry")) return undefined;
   const pending = pendingFreeBreaks.find(
     (entry) => entry.iceSubtype === "sentry" && entry.remainingUses > 0,
@@ -934,6 +806,44 @@ export function canBreakerDefinitionBreakIce(
   return (quote?.breakOptions.length ?? 0) > 0;
 }
 
+/**
+ * Coverage check for a visible, quoted ICE encounter.  Unlike the legacy
+ * definition probe this consumes the Engine-projected effective subroutines.
+ */
+export function canVisibleBreakerBreakQuotedSubroutines(params: {
+  breaker: VisibleCard;
+  ice: { instanceId?: string; definitionId?: string; subtypes?: string[] };
+  subroutines: readonly VisibleEffectiveSubroutine[];
+}): boolean {
+  if (
+    !params.breaker.known ||
+    !params.breaker.definitionId ||
+    !params.ice.definitionId ||
+    params.subroutines.length === 0 ||
+    breakerCardBlocksAccessReachability(params.breaker.definitionId)
+  )
+    return false;
+  const quote = visibleBreakerEncounterQuote({
+    breakerDefinitionId: params.breaker.definitionId,
+    breakerInstanceId: params.breaker.instanceId,
+    breakerStrength: Number.MAX_SAFE_INTEGER,
+    ...(params.breaker.selectedTargetCardId
+      ? { selectedTargetCardId: params.breaker.selectedTargetCardId }
+      : {}),
+    ...(params.breaker.selectedSubtype
+      ? { selectedSubtype: params.breaker.selectedSubtype }
+      : {}),
+    ...(params.breaker.randomRunStrengthState
+      ? { randomRunStrengthState: params.breaker.randomRunStrengthState }
+      : {}),
+    iceDefinitionId: params.ice.definitionId,
+    ...(params.ice.instanceId ? { iceInstanceId: params.ice.instanceId } : {}),
+    ...(params.ice.subtypes ? { iceSubtypes: params.ice.subtypes } : {}),
+    subroutines: params.subroutines,
+  });
+  return (quote?.breakOptions.length ?? 0) > 0;
+}
+
 export function iceHasEndTheRun(iceDefinitionId: string): boolean {
   return endTheRunSubroutineCount(iceDefinitionId) > 0;
 }
@@ -942,21 +852,14 @@ export function cardDefinitionStrength(
   definitionId: string | undefined,
 ): number {
   if (!definitionId) return 0;
-  return (
-    visibleRunCardDefinition(definitionId)?.strength ??
-    RUNTIME_CARDS[definitionId]?.numeric.strength ??
-    0
-  );
+  return visibleRunCardDefinition(definitionId)?.strength ?? 0;
 }
 
 export function visibleRunCardDefinition(
   definitionId: string | undefined,
 ): CardDefinition | undefined {
   if (!definitionId) return undefined;
-  const directDefinition = CARD_DEFINITIONS_BY_ID[definitionId];
-  if (directDefinition) return directDefinition;
-  const runtimeEngineId = RUNTIME_CARDS[definitionId]?.engineCardId;
-  return runtimeEngineId ? CARD_DEFINITIONS_BY_ID[runtimeEngineId] : undefined;
+  return CARD_DEFINITIONS_BY_ID[definitionId];
 }
 
 export function breakerCarriesStrengthAcrossIce(

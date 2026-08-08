@@ -3,6 +3,7 @@ import {
   type CardInstanceId,
   type GameState,
   type SubroutineDefinition,
+  type TraceSuccessEffect,
   type VisibleCard,
   type VisibleConditionalEncounterEffect,
   type VisibleEffectiveIceRunQuote,
@@ -248,6 +249,11 @@ function visibleUnbrokenRunEffectForSubroutine(
   subroutine: SubroutineDefinition,
 ): VisibleEffectiveSubroutine["unbrokenRunEffect"] | undefined {
   const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+  const traceSuccessEffect =
+    subroutine.type === "initiate_trace"
+      ? visibleUnbrokenRunEffectForTraceSuccess(subroutine.traceSuccessEffect)
+      : undefined;
+  if (traceSuccessEffect) return traceSuccessEffect;
   switch (subroutine.type) {
     case "set_run_future_end_the_run_subroutine":
       return { addsFutureEndTheRunSubroutines: 1 };
@@ -274,6 +280,19 @@ function visibleUnbrokenRunEffectForSubroutine(
       return { createsRunLockOrActionTax: Math.max(1, amount) };
     case "set_runner_forgo_next_action":
       return { createsRunLockOrActionTax: 1 };
+    default:
+      return undefined;
+  }
+}
+
+function visibleUnbrokenRunEffectForTraceSuccess(
+  effect: TraceSuccessEffect | undefined,
+): VisibleEffectiveSubroutine["unbrokenRunEffect"] | undefined {
+  if (!effect || effect.type === "none") return undefined;
+  switch (effect.type) {
+    case "end_run_and_run_lock":
+    case "end_run_trash_program_and_run_lock":
+      return { createsRunLockOrActionTax: Math.max(1, effect.amount) };
     default:
       return undefined;
   }

@@ -8,11 +8,11 @@ import type {
 import { createAiHintsByCard } from "../ai-hints";
 import {
   assessKnownRezzedIcePath,
-  canBreakerDefinitionBreakIce,
+  canVisibleBreakerBreakQuotedSubroutines,
   cardDefinitionStrength,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
-  endTheRunSubroutineCount,
   minimumCreditsToBreakEndTheRunSubroutines,
+  requireEffectiveRunQuoteForKnownRezzedIce,
   runnerRunPathCreditBudgetWithVisiblePools,
   visibleDeflectorSubroutineCanResolve,
 } from "../visible-run-analysis";
@@ -303,6 +303,7 @@ function quoteIceEncounter(params: {
   currentEncounter: boolean;
 }): RunnerRunIceEncounterQuote {
   const { input, plan, ice, currentEncounter } = params;
+  requireEffectiveRunQuoteForKnownRezzedIce(ice);
   const subroutineQuotes = subroutineQuotesForIce(
     input,
     plan,
@@ -564,22 +565,14 @@ function cheapestTraceAccessSequence(params: {
     Math.max(0, params.input.playerView.run?.badPublicityCredits ?? 0);
   let guaranteedTraceCost = 0;
   const acceptedEffectTypes: string[] = [];
-  for (const { index, subroutine } of requiredSubroutines) {
-    const effect = traceSuccessEffectForVisibleSubroutine(
-      quote,
-      subroutine,
-      index,
-    );
+  for (const { subroutine } of requiredSubroutines) {
+    const effect = traceSuccessEffectForVisibleSubroutine(subroutine);
     if (!traceEffectRequiresAccessGuarantee(params.input, effect)) {
       if (effect && effect.type !== "none")
         acceptedEffectTypes.push(effect.type);
       continue;
     }
-    const baseStrength = traceBaseStrengthForVisibleSubroutine(
-      quote,
-      subroutine,
-      index,
-    );
+    const baseStrength = traceBaseStrengthForVisibleSubroutine(subroutine);
     if (baseStrength === undefined) return undefined;
     const support = visibleRunnerTraceSupport(
       params.input.playerView.own.rig ?? [],
@@ -760,9 +753,6 @@ function pumpBreakSequenceForAction(params: {
   }
   const breaker = findVisibleCard(input, breakerId);
   if (!breaker?.definitionId) return undefined;
-  if (!canBreakerDefinitionBreakIce(breaker.definitionId, ice.definitionId)) {
-    return undefined;
-  }
   const pumpAmount = pumpStrengthAmountForAction(
     pumpAction,
     breaker.definitionId,
@@ -1005,10 +995,15 @@ function breakerCoverageQuotesForIce(
   return (input.playerView.own.rig ?? [])
     .filter((card) => card.known && card.definitionId)
     .map((breaker): RunnerRunBreakerCoverageQuote => {
-      const canBreak = Boolean(
-        breaker.definitionId &&
-        canBreakerDefinitionBreakIce(breaker.definitionId, ice.definitionId!),
+      const accessSubroutines = (ice.effectiveRunQuote?.subroutines ?? []).filter(
+        (subroutine) =>
+          subroutineRequiresBreak(threatClassForSubroutine(input, subroutine)),
       );
+      const canBreak = canVisibleBreakerBreakQuotedSubroutines({
+        breaker,
+        ice,
+        subroutines: accessSubroutines,
+      });
       const accessThreatCount = accessPreservingThreatCount(input, ice);
       const assessment =
         canBreak && accessThreatCount > 0
@@ -1047,14 +1042,14 @@ function subroutineQuotesForIce(
   ice: VisibleCard,
   currentEncounter: boolean,
 ): RunnerRunSubroutineQuote[] {
-  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
+  const quoteSubroutines = ice.effectiveRunQuote?.subroutines;
   const allBroken =
     currentEncounter &&
     encounterContinueAction(input)?.payload?.unbrokenSubroutineCount === 0;
   const futurePathAssessment = currentEncounter
     ? encounterRunRemainderEffectAssessment(input)
     : undefined;
-  if (quoteSubroutines.length > 0) {
+  if (quoteSubroutines) {
     return quoteSubroutines.map((subroutine, index) => {
       const baseThreatClass = threatClassForSubroutine(
         input,
@@ -1087,18 +1082,7 @@ function subroutineQuotesForIce(
       };
     });
   }
-  if (!ice.definitionId) return [];
-  return Array.from(
-    { length: endTheRunSubroutineCount(ice.definitionId) },
-    (_, index) => ({
-      index,
-      threatClass: allBroken
-        ? "irrelevant_to_current_plan"
-        : ("must_break_for_access" as const),
-      broken: allBroken,
-      evidence: ["subroutine_type:end_the_run"],
-    }),
-  );
+  return [];
 }
 
 function currentThreatClassForSubroutine(
@@ -1316,32 +1300,6 @@ function actionTargetsIce(action: LegalAction, ice: VisibleCard): boolean {
   );
 }
 
-function currentEndTheRunThreatCount(
-  input: AiDecisionInput,
-  ice: VisibleCard,
-): number {
-  const continueAction = encounterContinueAction(input);
-  const printedEndRunCount = ice.definitionId
-    ? endTheRunSubroutineCount(ice.definitionId)
-    : 0;
-  const quotedEndRunCount =
-    ice.effectiveRunQuote?.subroutines.filter(
-      (subroutine) => subroutine.type === "end_the_run",
-    ).length ?? printedEndRunCount;
-  const unbrokenCount =
-    typeof continueAction?.payload?.unbrokenSubroutineCount === "number"
-      ? continueAction.payload.unbrokenSubroutineCount
-      : undefined;
-  if (unbrokenCount === 0) return 0;
-  if (continueAction?.payload?.encounterWillEndRun === true) {
-    if (unbrokenCount !== undefined && quotedEndRunCount > 0) {
-      return Math.min(unbrokenCount, quotedEndRunCount);
-    }
-    return quotedEndRunCount || unbrokenCount || 1;
-  }
-  return quotedEndRunCount;
-}
-
 function currentRequiredBreakSubroutineIndexes(
   input: AiDecisionInput,
   plan: RunnerRunPlan,
@@ -1357,8 +1315,8 @@ function currentRequiredBreakSubroutineIndexes(
       : undefined;
   if (unbrokenCount === 0) return new Set();
 
-  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
-  if (quoteSubroutines.length > 0) {
+  const quoteSubroutines = ice.effectiveRunQuote?.subroutines;
+  if (quoteSubroutines) {
     const continueWillEndRun =
       continueAction?.payload?.encounterWillEndRun === true;
     return new Set(
@@ -1383,12 +1341,7 @@ function currentRequiredBreakSubroutineIndexes(
     );
   }
 
-  return new Set(
-    Array.from(
-      { length: currentEndTheRunThreatCount(input, ice) },
-      (_, index) => index,
-    ),
-  );
+  return new Set();
 }
 
 function currentSafetyBreakSubroutineIndexes(
@@ -1403,8 +1356,8 @@ function currentSafetyBreakSubroutineIndexes(
       : undefined;
   if (unbrokenCount === 0) return new Set();
 
-  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
-  if (quoteSubroutines.length > 0) {
+  const quoteSubroutines = ice.effectiveRunQuote?.subroutines;
+  if (quoteSubroutines) {
     return new Set(
       quoteSubroutines.flatMap((subroutine, index) =>
         threatClassForSubroutine(input, subroutine, plan) ===
@@ -1446,12 +1399,12 @@ function accessPreservingThreatCount(
   ice: VisibleCard,
 ): number {
   const quoted = ice.effectiveRunQuote?.subroutines;
-  if (quoted?.length) {
+  if (quoted) {
     return quoted.filter((subroutine) =>
       subroutineRequiresBreak(threatClassForSubroutine(input, subroutine)),
     ).length;
   }
-  return ice.definitionId ? endTheRunSubroutineCount(ice.definitionId) : 0;
+  return 0;
 }
 
 function knownRequiredSubroutineIndexes(
@@ -1459,7 +1412,7 @@ function knownRequiredSubroutineIndexes(
   ice: VisibleCard,
 ): Set<number> {
   const quoted = ice.effectiveRunQuote?.subroutines;
-  if (quoted?.length) {
+  if (quoted) {
     return new Set(
       quoted.flatMap((subroutine, index) =>
         subroutineRequiresBreak(threatClassForSubroutine(input, subroutine))
@@ -1468,16 +1421,7 @@ function knownRequiredSubroutineIndexes(
       ),
     );
   }
-  return new Set(
-    Array.from(
-      {
-        length: ice.definitionId
-          ? endTheRunSubroutineCount(ice.definitionId)
-          : 0,
-      },
-      (_, index) => index,
-    ),
-  );
+  return new Set();
 }
 
 function visibleDeflectorContextForInput(input: AiDecisionInput) {
@@ -1493,10 +1437,7 @@ function effectiveIceStrength(ice: VisibleCard): number | undefined {
   if (typeof ice.effectiveRunQuote?.effectiveStrength === "number") {
     return ice.effectiveRunQuote.effectiveStrength;
   }
-  if (typeof ice.strength === "number") return ice.strength;
-  return ice.definitionId
-    ? cardDefinitionStrength(ice.definitionId)
-    : undefined;
+  return typeof ice.strength === "number" ? ice.strength : undefined;
 }
 
 function iceBreakEstimateInput(

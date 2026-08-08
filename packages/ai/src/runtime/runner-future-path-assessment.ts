@@ -1,13 +1,11 @@
 import type {
   AiDecisionInput,
   VisibleCard,
-  VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 
 import {
   assessKnownRezzedIcePath,
-  cardDefinitionStrength,
+  requireEffectiveRunQuoteForKnownRezzedIce,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 
@@ -59,23 +57,8 @@ export function projectFutureIceForUnbrokenEffects(
   effects: UnbrokenRunEffectEntry[],
 ): VisibleCard {
   if (!ice.known || ice.rezzed !== true || !ice.definitionId) return ice;
-  const quote = ice.effectiveRunQuote;
-  const baseQuote: VisibleEffectiveIceRunQuote = quote ?? {
-    iceInstanceId: ice.instanceId,
-    iceDefinitionId: ice.definitionId,
-    effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
-    subroutines:
-      CARD_DEFINITIONS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
-        id: subroutine.id,
-        type: subroutine.type,
-        ...(subroutine.amount !== undefined
-          ? { amount: subroutine.amount }
-          : {}),
-        ...(subroutine.breakTags
-          ? { breakTags: subroutine.breakTags.slice() }
-          : {}),
-      })) ?? [],
-  };
+  const baseQuote = requireEffectiveRunQuoteForKnownRezzedIce(ice);
+  if (!baseQuote) return ice;
   let effectiveStrength = baseQuote.effectiveStrength;
   let breakSubroutineAdditionalCostPerSubroutine =
     baseQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0;

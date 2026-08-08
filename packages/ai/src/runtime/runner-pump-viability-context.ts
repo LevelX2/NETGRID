@@ -5,11 +5,10 @@ import type {
 } from "@netgrid/shared";
 
 import {
-  canBreakerDefinitionBreakIce,
-  cardDefinitionStrength,
+  canVisibleBreakerBreakQuotedSubroutines,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   creditsToBreakVisibleSubroutinesWithBreaker,
-  endTheRunSubroutineCount,
+  requireEffectiveRunQuoteForKnownRezzedIce,
   type RunnerRunPathCreditBudget,
   visibleDeflectorSubroutineCanResolve,
   visibleRunnerRunPathCreditBudgetForRig,
@@ -80,11 +79,16 @@ export function createRunnerPumpViabilityContext(
     const encounteredIce = input.playerView.run?.encounteredIce;
     if (!breaker?.definitionId || !encounteredIce?.definitionId)
       return { canLeadToBreak: true, evidence: [] };
+    const currentQuote = requireEffectiveRunQuoteForKnownRezzedIce(
+      currentEncounteredIceCard(input) ?? encounteredIce,
+    );
     if (
-      !canBreakerDefinitionBreakIce(
-        breaker.definitionId,
-        encounteredIce.definitionId,
-      )
+      !currentQuote ||
+      !canVisibleBreakerBreakQuotedSubroutines({
+        breaker,
+        ice: encounteredIce,
+        subroutines: currentQuote.subroutines,
+      })
     )
       return {
         canLeadToBreak: false,
@@ -128,20 +132,18 @@ export function createRunnerPumpViabilityContext(
         evidence: ["pump_strength_already_sufficient:true"],
       };
 
-    const endTheRunCount = endTheRunSubroutineCount(
-      encounteredIce.definitionId,
-    );
-    const currentQuote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+    const endTheRunCount = currentQuote.subroutines.filter(
+      (subroutine) => subroutine.type === "end_the_run",
+    ).length;
     const deflectorContext = {
       visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
         candidate.id.startsWith("remote_"),
       ).length,
       visibleCorpCredits: input.playerView.opponent.credits,
     };
-    const accessRedirectCount =
-      currentQuote?.subroutines.filter((subroutine) =>
-        visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
-      ).length ?? 0;
+    const accessRedirectCount = currentQuote.subroutines.filter((subroutine) =>
+      visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
+    ).length;
     const runEffect = dependencies.encounterRunRemainderEffectAssessment(input);
     const hasUsefulRunRemainderEffect =
       runEffect.hasRunRemainderEffect &&
@@ -175,10 +177,7 @@ export function createRunnerPumpViabilityContext(
         canLeadToBreak: false,
         evidence: ["pump_cannot_reach_break_strength:true"],
       };
-    const requiredStrength =
-      encounteredIce.effectiveRunQuote?.effectiveStrength ??
-      encounteredIce.strength ??
-      cardDefinitionStrength(encounteredIce.definitionId);
+    const requiredStrength = currentQuote.effectiveStrength;
     const missingStrength = Math.max(
       0,
       requiredStrength - (breaker.strength ?? 0),

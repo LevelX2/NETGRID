@@ -52,6 +52,16 @@ export function buildPlayerViewProjection(
         id,
         visibleIce,
       );
+      if (
+        visibleIce.known &&
+        visibleIce.rezzed === true &&
+        visibleIce.type === "ice" &&
+        !effectiveRunQuote
+      ) {
+        throw new Error(
+          `Known rezzed ICE ${visibleIce.definitionId ?? id} is missing its effective run quote.`,
+        );
+      }
       const effectiveRezCostQuote =
         side === "corp" ? projectInstalledCorpIceRezCost(state, id) : undefined;
       const effectiveRezResourceExchangeQuote =

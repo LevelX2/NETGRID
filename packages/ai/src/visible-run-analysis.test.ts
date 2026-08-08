@@ -45,6 +45,18 @@ function event(publicPayload: Record<string, unknown>): PublicGameEvent {
 }
 
 describe("visible run analysis known-path classification", () => {
+  it("fails loudly instead of reconstructing a missing quote for known rezzed ICE", () => {
+    const ice = classicWallIce("missing-authoritative-quote");
+    delete ice.effectiveRunQuote;
+    expect(() =>
+      assessKnownRezzedIcePath(
+        [ice],
+        [],
+        5,
+      ),
+    ).toThrow("missing its authoritative effective run quote");
+  });
+
   it("classifies cost-blocked known no-access paths", () => {
     expect(
       runnerKnownPathAssessmentIsCostNoAccess(
@@ -375,10 +387,18 @@ describe("visible run analysis targeted breaker paths", () => {
     const outerWall: VisibleCard = {
       ...classicWallIce("outer-grubb-wall"),
       strength: 2,
+      effectiveRunQuote: {
+        ...classicWallIce("outer-grubb-wall").effectiveRunQuote!,
+        effectiveStrength: 2,
+      },
     };
     const innerWall: VisibleCard = {
       ...classicWallIce("inner-grubb-wall"),
       strength: 2,
+      effectiveRunQuote: {
+        ...classicWallIce("inner-grubb-wall").effectiveRunQuote!,
+        effectiveStrength: 2,
+      },
     };
     const grubb: VisibleCard = {
       instanceId: "grubb",
@@ -1779,6 +1799,12 @@ function classicWallIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 3,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_232_crystal-wall",
+      effectiveStrength: 3,
+      subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
+    },
   };
 }
 
@@ -1823,6 +1849,15 @@ function classicCodeGateIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 2,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "simple_code_gate_ice",
+      effectiveStrength: 2,
+      subroutines: [
+        { id: `${instanceId}:credit`, type: "corp_gain_credit", amount: 1 },
+        { id: `${instanceId}:etr`, type: "end_the_run" },
+      ],
+    },
   };
 }
 
@@ -1836,6 +1871,12 @@ function dataWallTwoPointZeroIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 1,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_238_data-wall-2-0",
+      effectiveStrength: 1,
+      subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
+    },
   };
 }
 
@@ -1849,6 +1890,24 @@ function neuralBladeIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 4,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_258_neural-blade",
+      effectiveStrength: 4,
+      subroutines: [
+        {
+          id: `${instanceId}:damage`,
+          type: "do_damage",
+          amount: 1,
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+        {
+          id: `${instanceId}:no-break`,
+          type: "set_next_encounter_no_break_subroutines",
+          unbrokenRunEffect: { preventsFutureBreaking: true },
+        },
+      ],
+    },
   };
 }
 
@@ -1862,6 +1921,12 @@ function fireWallIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 4,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_245_fire-wall",
+      effectiveStrength: 4,
+      subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
+    },
   };
 }
 
@@ -1875,6 +1940,12 @@ function keeperIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 4,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_252_keeper",
+      effectiveStrength: 4,
+      subroutines: [{ id: `${instanceId}:etr`, type: "end_the_run" }],
+    },
   };
 }
 
@@ -2064,6 +2135,9 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
           amount: 5,
+          baseTraceStrength: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+          breakTags: ["trace"],
         },
       ],
     },
@@ -2179,6 +2253,14 @@ function dataRavenTraceTagCounterIce(instanceId: string): VisibleCard {
           sourceDefinitionId: "onr_v1_236_data-raven",
           sourceTitle: "Data Raven",
           amount: 5,
+          baseTraceStrength: 5,
+          traceSuccessEffect: {
+            type: "add_tag_and_counter",
+            tagAmount: 1,
+            counterType: "trace_tag_counter",
+            amount: 1,
+          },
+          breakTags: ["trace"],
         },
       ],
     },

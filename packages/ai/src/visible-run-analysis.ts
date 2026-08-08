@@ -14,7 +14,6 @@ import {
   icebreakerAbilitiesForDefinition,
   traceBaseLinkCardImplementationQuotesForDefinition,
 } from "@netgrid/engine";
-import { RUNTIME_CARDS } from "./ai-hints";
 import {
   breakerCardBlocksAccessReachability,
   estimateStructuredBreakerCostForIce,
@@ -65,13 +64,12 @@ import {
   blockedPathAssessment,
   effectiveIceForQuote,
   effectiveRunQuoteForIce,
-  endTheRunSubroutineCount,
   hardUnbrokenEffectBlockedPathAssessment,
   minimumCreditsToBreakEndTheRunSubroutines,
   minimumCreditsToBreakVisibleSubroutines,
   projectIceForRunPathEffects,
+  requireEffectiveRunQuoteForKnownRezzedIce,
   runPathEffectsPreventFutureBreaking,
-  runQuoteForIce,
 } from "./run-analysis/visible-run-breaker-path";
 import {
   hardUnbrokenRunEffectKinds,
@@ -99,12 +97,14 @@ export {
 export {
   breakerCarriesStrengthAcrossIce,
   canBreakerDefinitionBreakIce,
+  canVisibleBreakerBreakQuotedSubroutines,
   cardDefinitionStrength,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   creditsToBreakVisibleSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   iceHasEndTheRun,
   minimumCreditsToBreakEndTheRunSubroutines,
+  requireEffectiveRunQuoteForKnownRezzedIce,
 } from "./run-analysis/visible-run-breaker-path";
 
 export function runnerKnownPathAssessmentIsCostNoAccess(
@@ -370,6 +370,7 @@ function assessKnownRezzedIcePathInternal(
     const rigCardsForEncounter = rigCards.filter(
       (card) => !breakersAtRiskOfBeingTrashed.has(card.instanceId),
     );
+    requireEffectiveRunQuoteForKnownRezzedIce(ice);
     const effectiveIce = projectIceForRunPathEffects(
       ice,
       activeRunPathEffects,
@@ -380,8 +381,9 @@ function assessKnownRezzedIcePathInternal(
     }
     const pathCostBeforeIce = visibleBreakCost;
     assessedKnownIceCount += 1;
-    const quote = runQuoteForIce(effectiveIce, iceIndex);
-    for (const effect of quote?.conditionalEncounterEffects ?? []) {
+    const quote = requireEffectiveRunQuoteForKnownRezzedIce(effectiveIce);
+    if (!quote) continue;
+    for (const effect of quote.conditionalEncounterEffects ?? []) {
       if (
         effect.kind === "corp_paid_add_end_the_run_subroutine" &&
         visibleCorpCreditsThroughPath >= effect.creditCost
@@ -392,7 +394,7 @@ function assessKnownRezzedIcePathInternal(
         conditionalAccessReasons.add("visible_random_encounter_strength");
       }
     }
-    for (const subroutine of quote?.subroutines ?? []) {
+    for (const subroutine of quote.subroutines) {
       if (subroutine.type === "random_damage") {
         conditionalRiskReasons.add("visible_random_damage");
       }
@@ -400,16 +402,16 @@ function assessKnownRezzedIcePathInternal(
         conditionalAccessReasons.add("visible_random_rewind");
       }
     }
-    const endTheRunCount = quote
-      ? quote.subroutines.filter(isVisibleHardEndRunSubroutine).length
-      : endTheRunSubroutineCount(iceDefinitionId);
+    const endTheRunCount = quote.subroutines.filter(
+      isVisibleHardEndRunSubroutine,
+    ).length;
     const deflectorCount =
-      quote?.subroutines.filter((subroutine) =>
+      quote.subroutines.filter((subroutine) =>
         visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext),
       ).length ?? 0;
     const accessPreservingBreakCount = endTheRunCount + deflectorCount;
     const additionalBreakCostPerSubroutine =
-      quote?.breakSubroutineAdditionalCostPerSubroutine ?? 0;
+      quote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
     const encounterTax = activeRunPathEffects.reduce(
       (sum, effect) =>
         sum + Math.max(0, Math.floor(effect.addsFutureEncounterCost ?? 0)),
@@ -436,7 +438,7 @@ function assessKnownRezzedIcePathInternal(
       spendGeneralCredits(creditBudget, encounterTax);
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
-    for (const subroutine of quote?.subroutines ?? []) {
+    for (const subroutine of quote.subroutines) {
       if (!isVisibleRunnerCreditLossSubroutine(subroutine)) continue;
       const lossAmount = Math.min(
         creditBudget.credits,

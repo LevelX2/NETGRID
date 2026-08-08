@@ -1,6 +1,4 @@
 import {
-  CARD_DEFINITIONS_BY_ID,
-  type CardDefinition,
   type CardDefinitionId,
   type CounterCreditUse,
   type TraceSuccessEffect,
@@ -9,7 +7,6 @@ import {
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
 import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import { RUNTIME_CARDS } from "../ai-hints";
 import type {
   BreakAssessment,
   HardUnbrokenRunEffectKind,
@@ -25,7 +22,6 @@ import type {
   VisibleTraceSupportSideEffect,
 } from "./visible-run-analysis-contracts";
 import {
-  cardDefinitionStrength,
   effectiveIceForQuote,
   effectiveRunQuoteForIce,
   minimumCreditsToBreakVisibleSubroutines,
@@ -97,24 +93,16 @@ export function visibleIceRunHazardsForQuote(params: {
   if (!params.quote) return [];
   const hazards: VisibleIceRunHazardProjection[] = [];
   let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
-  params.quote.subroutines.forEach((subroutine, subroutineIndex) => {
+  params.quote.subroutines.forEach((subroutine) => {
     if (subroutine.type !== "initiate_trace") return;
     const traceSupport = visibleRunnerTraceSupport(
       params.rigCards,
       remainingHazardCredits,
     );
-    const successEffect = traceSuccessEffectForVisibleSubroutine(
-      params.quote!,
-      subroutine,
-      subroutineIndex,
-    );
+    const successEffect = traceSuccessEffectForVisibleSubroutine(subroutine);
     const baseHazard = visibleIceRunHazardForTraceEffect(successEffect);
     if (!baseHazard) return;
-    const traceBaseStrength = traceBaseStrengthForVisibleSubroutine(
-      params.quote!,
-      subroutine,
-      subroutineIndex,
-    );
+    const traceBaseStrength = traceBaseStrengthForVisibleSubroutine(subroutine);
     const traceAvoidance =
       traceBaseStrength === undefined
         ? undefined
@@ -160,10 +148,7 @@ export function visibleIceRunHazardsForQuote(params: {
     const unavoidable = minimumAvoidanceCost === undefined;
     const sourceDefinitionId =
       subroutine.sourceDefinitionId ?? params.quote!.iceDefinitionId;
-    const sourceTitle =
-      subroutine.sourceTitle ??
-      visibleRunCardDefinition(sourceDefinitionId)?.title ??
-      sourceDefinitionId;
+    const sourceTitle = subroutine.sourceTitle;
     const cheapestTraceAvoidance = traceAvoidance?.cheapestSafe;
     const cheapestCorpMaxTraceAvoidance =
       visibleCorpMaxTraceAvoidance?.cheapestSafe;
@@ -650,9 +635,7 @@ export function cheapestTraceAvoidanceCandidate(
 }
 
 export function traceBaseStrengthForVisibleSubroutine(
-  quote: VisibleEffectiveIceRunQuote,
   subroutine: VisibleEffectiveSubroutine,
-  subroutineIndex: number,
 ): number | undefined {
   if (typeof subroutine.baseTraceStrength === "number") {
     return Math.max(0, Math.floor(subroutine.baseTraceStrength));
@@ -660,50 +643,13 @@ export function traceBaseStrengthForVisibleSubroutine(
   if (typeof subroutine.amount === "number") {
     return Math.max(0, Math.floor(subroutine.amount));
   }
-  const definitionSubroutine = definitionSubroutineForVisibleSubroutine(
-    quote,
-    subroutine,
-    subroutineIndex,
-  );
-  return definitionSubroutine?.baseTraceStrength === undefined
-    ? undefined
-    : Math.max(0, Math.floor(definitionSubroutine.baseTraceStrength));
+  return undefined;
 }
 
 export function traceSuccessEffectForVisibleSubroutine(
-  quote: VisibleEffectiveIceRunQuote,
   subroutine: VisibleEffectiveSubroutine,
-  subroutineIndex: number,
 ): TraceSuccessEffect | undefined {
-  return (
-    subroutine.traceSuccessEffect ??
-    definitionSubroutineForVisibleSubroutine(quote, subroutine, subroutineIndex)
-      ?.traceSuccessEffect
-  );
-}
-
-export function definitionSubroutineForVisibleSubroutine(
-  quote: VisibleEffectiveIceRunQuote,
-  subroutine: VisibleEffectiveSubroutine,
-  subroutineIndex: number,
-): NonNullable<CardDefinition["subroutines"]>[number] | undefined {
-  const definition =
-    visibleRunCardDefinition(subroutine.sourceDefinitionId) ??
-    visibleRunCardDefinition(quote.iceDefinitionId);
-  const definitionSubroutines = definition?.subroutines ?? [];
-  const byId = definitionSubroutines.find(
-    (candidate) => candidate.id === subroutine.id,
-  );
-  if (byId) return byId;
-  const sameType = definitionSubroutines.filter(
-    (candidate) => candidate.type === subroutine.type,
-  );
-  const sameTypeIndex = quote.subroutines
-    .slice(0, subroutineIndex)
-    .filter((candidate) => candidate.type === subroutine.type).length;
-  return (
-    sameType[sameTypeIndex] ?? (sameType.length === 1 ? sameType[0] : undefined)
-  );
+  return subroutine.traceSuccessEffect;
 }
 
 export function runPathEffectAlreadyVisibleOnFutureIce(
