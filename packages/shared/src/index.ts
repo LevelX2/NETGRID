@@ -2661,7 +2661,12 @@ export type VisibleCardLifecycleMarker = {
 
 export type VisibleRunStartRandomStrengthState =
   | { status: "unresolved" }
-  | { status: "resolved"; actualStrength: number };
+  | {
+      status: "resolved";
+      actualStrength: number;
+      /** Visible strength changes applied after the random run-start base. */
+      currentStrengthAdjustment: number;
+    };
 
 export type VisibleRunnerPaymentSupportAbility = {
   abilityIndex: number;

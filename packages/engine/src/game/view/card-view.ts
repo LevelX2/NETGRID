@@ -69,17 +69,13 @@ function visibleKnownCardWithReferenceViewer(
     (state.run?.runStartRandomStrengthSourceCardId === id
       ? state.run.runStartRandomStrength
       : undefined);
-  const randomRunStrengthState = icebreakerAbilitiesForDefinition(
+  const hasRunStartRandomStrength = icebreakerAbilitiesForDefinition(
     definition,
   ).some((ability) =>
     ability.specialEffects?.some(
       (effect) => effect.kind === "run_start_random_strength_bonus",
     ),
-  )
-    ? typeof runStartStrength === "number"
-      ? ({ status: "resolved", actualStrength: runStartStrength } as const)
-      : ({ status: "unresolved" } as const)
-    : undefined;
+  );
   const variableIceStrength =
     definition.type === "ice" &&
     instance.variableIceState?.family === "x_strength" &&
@@ -104,6 +100,19 @@ function visibleKnownCardWithReferenceViewer(
           runRemainderStrengthBonus -
           breakerStrengthPenaltyCounterAmount(instance)
       : undefined;
+  const randomRunStrengthState = hasRunStartRandomStrength
+    ? typeof runStartStrength === "number"
+      ? visibleStrength === undefined
+        ? (() => {
+            throw new Error("Aufgeloeste zufaellige Breakerstaerke ist nicht sichtbar.");
+          })()
+        : {
+            status: "resolved" as const,
+            actualStrength: runStartStrength,
+            currentStrengthAdjustment: visibleStrength - runStartStrength,
+          }
+      : ({ status: "unresolved" } as const)
+    : undefined;
   const visibleStrengthModifier =
     visibleStrength !== undefined
       ? visibleStrengthModifierForKnownCard(

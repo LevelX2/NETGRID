@@ -99,7 +99,11 @@ describe("AI Boon run strength", () => {
       getPlayerView(state, "runner").own.rig?.find(
         (card) => card.instanceId === breakerId,
       )?.randomRunStrengthState,
-    ).toEqual({ status: "resolved", actualStrength: dieRoll });
+    ).toEqual({
+      status: "resolved",
+      actualStrength: dieRoll,
+      currentStrengthAdjustment: 0,
+    });
   });
 
   it("offers pump before break at strength 2 and accepts the break after pumping", () => {

@@ -86,7 +86,11 @@ export type VisibleBreakerEncounterQuote = {
         expectedStrength: number;
         maximumStrength: number;
       }
-    | { status: "resolved"; actualStrength: number };
+    | {
+        status: "resolved";
+        actualStrength: number;
+        currentStrengthAdjustment: number;
+      };
   stateChangesAfterUse: VisibleBreakerStateChange[];
 };
 
@@ -102,7 +106,11 @@ export function visibleBreakerEncounterQuote(params: {
   subroutines?: readonly VisibleEffectiveSubroutine[];
   randomRunStrengthState?:
     | { status: "unresolved" }
-    | { status: "resolved"; actualStrength: number };
+    | {
+        status: "resolved";
+        actualStrength: number;
+        currentStrengthAdjustment: number;
+      };
 }): VisibleBreakerEncounterQuote | undefined {
   const breaker = CARD_DEFINITIONS_BY_ID[params.breakerDefinitionId];
   if (!breaker) return undefined;
@@ -190,6 +198,7 @@ export function visibleBreakerEncounterQuote(params: {
   );
   if (hasRunStartRandomStrength && !params.randomRunStrengthState)
     return undefined;
+  assertResolvedRandomRunStrengthConsistency(params);
   return {
     breakerInstanceId: params.breakerInstanceId,
     ...(params.iceInstanceId ? { iceInstanceId: params.iceInstanceId } : {}),
@@ -205,6 +214,8 @@ export function visibleBreakerEncounterQuote(params: {
                   status: "resolved",
                   actualStrength:
                     params.randomRunStrengthState.actualStrength,
+                  currentStrengthAdjustment:
+                    params.randomRunStrengthState.currentStrengthAdjustment,
                 }
               : {
                   status: "unresolved",
@@ -216,6 +227,28 @@ export function visibleBreakerEncounterQuote(params: {
       : {}),
     stateChangesAfterUse,
   };
+}
+
+function assertResolvedRandomRunStrengthConsistency(params: {
+  breakerStrength: number;
+  randomRunStrengthState?:
+    | { status: "unresolved" }
+    | {
+        status: "resolved";
+        actualStrength: number;
+        currentStrengthAdjustment: number;
+      };
+}): void {
+  const state = params.randomRunStrengthState;
+  if (state?.status !== "resolved") return;
+  const visibleStrength = Math.floor(params.breakerStrength);
+  const expectedVisibleStrength =
+    state.actualStrength + state.currentStrengthAdjustment;
+  if (visibleStrength !== expectedVisibleStrength) {
+    throw new Error(
+      "Aufgeloeste zufaellige Breakerstaerke stimmt nicht mit der sichtbaren Staerke ueberein.",
+    );
+  }
 }
 
 function effectiveStrength(params: {

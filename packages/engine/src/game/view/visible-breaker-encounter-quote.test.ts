@@ -53,12 +53,37 @@ describe("visibleBreakerEncounterQuote", () => {
         breakerStrength: 5,
         iceDefinitionId: "onr_v1_223_banpei",
         iceSubtypes: ["sentry"],
-        randomRunStrengthState: { status: "resolved", actualStrength: 0 },
+        randomRunStrengthState: {
+          status: "resolved",
+          actualStrength: 0,
+          currentStrengthAdjustment: 5,
+        },
       }),
     ).toMatchObject({
       effectiveStrength: 5,
-      randomRunStrength: { status: "resolved", actualStrength: 0 },
+      randomRunStrength: {
+        status: "resolved",
+        actualStrength: 0,
+        currentStrengthAdjustment: 5,
+      },
     });
+  });
+
+  it("rejects a resolved random strength that does not explain the visible strength", () => {
+    expect(() =>
+      visibleBreakerEncounterQuote({
+        breakerDefinitionId: "onr_v1_002_ai-boon",
+        breakerInstanceId: "ai-boon",
+        breakerStrength: 5,
+        iceDefinitionId: "onr_v1_223_banpei",
+        iceSubtypes: ["sentry"],
+        randomRunStrengthState: {
+          status: "resolved",
+          actualStrength: 2,
+          currentStrengthAdjustment: 0,
+        },
+      }),
+    ).toThrow("zufaellige Breakerstaerke");
   });
 
   it("applies an implementation-declared chosen-ICE strength bonus only to its bound instance", () => {
