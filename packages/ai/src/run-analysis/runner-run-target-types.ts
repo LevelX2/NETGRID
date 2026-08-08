@@ -81,6 +81,7 @@ export type RunActionProjection = {
   riskSignals: string[];
   temporaryRunCredits?: number;
   postRunSelfDamage?: number;
+  runTraceLinkBonus?: number;
   spendLimit?: number;
   noNoisyBreakers: boolean;
   bypassFirstIce: boolean;

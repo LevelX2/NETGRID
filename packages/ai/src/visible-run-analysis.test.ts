@@ -654,6 +654,9 @@ describe("visible run analysis targeted breaker paths", () => {
       [traceDamageIce("inner-damage", 2), traceDamageIce("outer-damage", 2)],
       [evilTwin],
       0,
+      [],
+      0,
+      { netOrCoreDamagePreventionRemaining: 2 },
     );
 
     expect(
@@ -1404,6 +1407,9 @@ describe("visible run analysis trace hazards", () => {
       [hunterTraceTagIce("rd-hunter")],
       [accessThroughAlpha("access-through-alpha")],
       0,
+      [],
+      0,
+      { runnerTraceSupportQuote: traceSupportQuote(9, 1, true, "Access through Alpha") },
     );
 
     expect(assessment).toMatchObject({
@@ -1430,6 +1436,9 @@ describe("visible run analysis trace hazards", () => {
       [hunterTraceTagIce("rd-hunter")],
       [accessThroughAlpha("access-through-alpha")],
       1,
+      [],
+      0,
+      { runnerTraceSupportQuote: traceSupportQuote(9, 1, true, "Access through Alpha") },
     );
 
     expect(assessment).toMatchObject({
@@ -1456,6 +1465,17 @@ describe("visible run analysis trace hazards", () => {
       [hunterTraceTagIce("rd-hunter")],
       [submarineUplink("runner-submarine")],
       1,
+      [],
+      0,
+      {
+        runnerTraceSupportQuote: traceSupportQuote(
+          4,
+          0,
+          false,
+          "Submarine Uplink",
+          "forces_jack_out_after_encounter",
+        ),
+      },
     );
 
     expect(assessment).toMatchObject({
@@ -2332,6 +2352,29 @@ function dataRavenTraceTagCounterIce(instanceId: string): VisibleCard {
       ],
     },
   };
+}
+
+function traceSupportQuote(
+  baseLink: number,
+  activationCost: number,
+  safeForAccess: boolean,
+  sourceTitle: string,
+  sideEffect?: "forces_jack_out_after_encounter",
+) {
+  return {
+    traceCreditPool: 0,
+    baseLinkOptions: [
+      { baseLink: 0, activationCost: 0, safeForAccess: true },
+      {
+        baseLink,
+        activationCost,
+        safeForAccess,
+        sourceDefinitionId: "trace-base-link-source",
+        sourceTitle,
+        ...(sideEffect ? { sideEffect } : {}),
+      },
+    ],
+  } as const;
 }
 
 function accessThroughAlpha(instanceId: string): VisibleCard {

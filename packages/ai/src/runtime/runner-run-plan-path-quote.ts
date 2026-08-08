@@ -187,13 +187,25 @@ export function quoteRunnerRunPath(
   ).length;
   const sharedPathGeneralCredits =
     input.playerView.own.credits +
-    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0);
+    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0) +
+    Math.max(
+      0,
+      input.playerView.run?.runnerRunTemporaryCredits?.remaining ?? 0,
+    );
   const sharedPathAssessment = assessKnownRezzedIcePath(
     sharedPathIce,
     input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
       sharedPathGeneralCredits,
       input.playerView.own.rig ?? [],
+      {
+        excludeStealthCredits:
+          server?.statuses?.some(
+            (status) =>
+              status.kind === "run_payment_restriction" &&
+              status.restriction === "runner_stealth_bit_payment_sources",
+          ) === true,
+      },
     ),
     server?.root ?? [],
     input.playerView.opponent.credits,
@@ -562,7 +574,11 @@ function cheapestTraceAccessSequence(params: {
   if (params.currentEncounter && !continueAction) return undefined;
   let remainingGeneralCredits =
     params.input.playerView.own.credits +
-    Math.max(0, params.input.playerView.run?.badPublicityCredits ?? 0);
+    Math.max(0, params.input.playerView.run?.badPublicityCredits ?? 0) +
+    Math.max(
+      0,
+      params.input.playerView.run?.runnerRunTemporaryCredits?.remaining ?? 0,
+    );
   let guaranteedTraceCost = 0;
   const acceptedEffectTypes: string[] = [];
   for (const { subroutine } of requiredSubroutines) {
@@ -575,8 +591,9 @@ function cheapestTraceAccessSequence(params: {
     const baseStrength = traceBaseStrengthForVisibleSubroutine(subroutine);
     if (baseStrength === undefined) return undefined;
     const support = visibleRunnerTraceSupport(
-      params.input.playerView.own.rig ?? [],
+      params.input.playerView.own.runnerTraceSupportQuote,
       remainingGeneralCredits,
+      params.input.playerView.run?.runTraceLinkBonus,
     );
     const guarantee = visibleTraceAvoidanceForBaseStrength(
       baseStrength +
@@ -1430,6 +1447,17 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
       candidate.id.startsWith("remote_"),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
+    netOrCoreDamagePreventionRemaining: Math.max(
+      0,
+      (input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0) +
+        (input.playerView.run?.damagePreventionPool?.remaining ?? 0),
+    ),
+    prohibitNoisyIcebreakers:
+      input.playerView.run?.prohibitNoisyIcebreakers === true,
+    runnerTraceSupportQuote: input.playerView.own.runnerTraceSupportQuote,
+    ...(input.playerView.run?.runTraceLinkBonus !== undefined
+      ? { runTraceLinkBonus: input.playerView.run.runTraceLinkBonus }
+      : {}),
   };
 }
 

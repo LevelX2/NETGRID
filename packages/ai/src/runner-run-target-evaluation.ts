@@ -158,7 +158,12 @@ function evaluateRunnerRunTarget(
     params.input.playerView.own.credits - actionCreditCost,
   );
   const temporaryRunCredits = Math.max(0, projection.temporaryRunCredits ?? 0);
-  const creditsAvailableDuringRun = creditsAfterAction + temporaryRunCredits;
+  const badPublicityRunCredits = Math.max(
+    0,
+    params.input.playerView.own.availableBadPublicityRunCredits ?? 0,
+  );
+  const runOnlyCredits = temporaryRunCredits + badPublicityRunCredits;
+  const creditsAvailableDuringRun = creditsAfterAction + runOnlyCredits;
   const visibleServerIce = server?.ice ?? [];
   const serverIceForVisibleRezProjection = projection.bypassFirstIce
     ? visibleServerIce.slice(0, -1)
@@ -171,12 +176,18 @@ function evaluateRunnerRunTarget(
   );
   const bypassedFirstIce =
     projection.bypassFirstIce && visibleServerIce.length > 0;
+  const stealthCreditsBlocked = server?.statuses?.some(
+    (status) =>
+      status.kind === "run_payment_restriction" &&
+      status.restriction === "runner_stealth_bit_payment_sources",
+  ) === true;
   const path = assessKnownRezzedIcePath(
     projectedServerIce,
     params.input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
       creditsAvailableDuringRun,
       params.input.playerView.own.rig ?? [],
+      { excludeStealthCredits: stealthCreditsBlocked },
     ),
     server?.root ?? [],
     params.input.playerView.opponent.credits,
@@ -185,6 +196,17 @@ function evaluateRunnerRunTarget(
         (candidate) => candidate.id.startsWith("remote_"),
       ).length,
       visibleCorpCredits: params.input.playerView.opponent.credits,
+      netOrCoreDamagePreventionRemaining:
+        Math.max(
+          0,
+          params.input.playerView.own.freeNetOrCoreDamagePreventionRemaining ??
+            0,
+        ),
+      prohibitNoisyIcebreakers: projection.noNoisyBreakers,
+      runnerTraceSupportQuote: params.input.playerView.own.runnerTraceSupportQuote,
+      ...(projection.runTraceLinkBonus !== undefined
+        ? { runTraceLinkBonus: projection.runTraceLinkBonus }
+        : {}),
     },
   );
   const payoff =
@@ -247,7 +269,7 @@ function evaluateRunnerRunTarget(
         : basePathPassability;
   const creditsAfterRun = generalCreditsRemainingAfterRun(
     creditsAfterAction,
-    temporaryRunCredits,
+    runOnlyCredits,
     path.creditsAfterPath,
   );
   const unknownUnrezzedIceCount = projectedServerIce.filter(
@@ -310,7 +332,7 @@ function evaluateRunnerRunTarget(
     path.creditsAfterAvoidingVisibleIceHazards !== undefined
       ? generalCreditsRemainingAfterRun(
           creditsAfterAction,
-          temporaryRunCredits,
+          runOnlyCredits,
           path.creditsAfterAvoidingVisibleIceHazards,
         )
       : creditsAfterRun;
@@ -445,6 +467,7 @@ function evaluateRunnerRunTarget(
       `run_action_credit_cost:${actionCreditCost}`,
       `credits_after_run_action:${creditsAfterAction}`,
       `temporary_run_credits:${temporaryRunCredits}`,
+      `bad_publicity_run_credits:${badPublicityRunCredits}`,
       `credits_after_run:${creditsAfterRun}`,
       ...(economyPosture.creditReservePolicy.remotePressureReserveActive ===
       true
@@ -504,6 +527,7 @@ function evaluateRunnerRunTarget(
       `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
       `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
       `run_action_projection_bypassed_first_ice:${bypassedFirstIce}`,
+      `server_stealth_credits_blocked:${stealthCreditsBlocked}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
       `probabilistic_universal_path_reachable:${probabilisticUniversalPathReachable}`,
       ...(randomBreakOrDamageRiskAssessment?.evidence ?? []),

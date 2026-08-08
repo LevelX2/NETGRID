@@ -162,6 +162,29 @@ export function deterministicOnPlayResourcePayload(
     makeRunEffect.followupRunOnEnd === "optional"
       ? { followupRunOnEnd: "optional" }
       : {}),
+    ...(makeRunEffect?.kind === "make_run"
+      ? {
+          ...(makeRunEffect.bypassFirstIce !== undefined
+            ? { bypassFirstIce: makeRunEffect.bypassFirstIce }
+            : {}),
+          ...(makeRunEffect.prohibitNoisyIcebreakers !== undefined
+            ? { noNoisyBreakers: makeRunEffect.prohibitNoisyIcebreakers }
+            : {}),
+          ...(makeRunEffect.runTraceLinkBonus !== undefined
+            ? { runTraceLinkBonus: makeRunEffect.runTraceLinkBonus }
+            : {}),
+          ...(makeRunEffect.runTemporaryCredits
+            ? { runTemporaryCredits: makeRunEffect.runTemporaryCredits.amount }
+            : {}),
+          ...(makeRunEffect.afterRunCompletedUnpreventableCoreDamage !==
+          undefined
+            ? {
+                afterRunUnpreventableCoreDamage:
+                  makeRunEffect.afterRunCompletedUnpreventableCoreDamage,
+              }
+            : {}),
+        }
+      : {}),
     ...actionCapacityPayload,
     ...restrictedCorpInstallPayload,
   };

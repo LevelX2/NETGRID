@@ -52,6 +52,47 @@ export function visibleOwnCardForViewer(
   return visibleKnownCardWithReferenceViewer(state, id, viewer);
 }
 
+/**
+ * The run path only consumes prevention that is both free and automatically
+ * available to the Runner. Project its current remaining amount here so AI
+ * does not have to reinterpret CardImplementation damage rules.
+ */
+export function visibleFreeNetOrCoreDamagePreventionRemaining(
+  state: GameState,
+): number {
+  const usage = state.runnerTurnFlags?.damagePreventionUsage ?? {};
+  return [
+    ...state.runner.rig.programs,
+    ...state.runner.rig.hardware,
+    ...state.runner.rig.resources,
+  ].reduce((total, cardId) => {
+    const definition = definitionFor(state, cardId);
+    const remainingForCard = (
+      cardImplementationForDefinitionId(definition.id)?.damagePreventionSources ??
+      []
+    )
+      .filter(
+        (source) =>
+          source.cost.kind === "none" &&
+          source.limit?.kind === "per_turn" &&
+          typeof source.amount === "number" &&
+          source.damageTypes.some((type) => type === "net" || type === "core"),
+      )
+      .reduce(
+        (sum, source) =>
+          sum +
+          (typeof source.amount === "number"
+            ? Math.max(0, Math.floor(source.amount))
+            : 0),
+        0,
+      );
+    return Math.max(
+      0,
+      total + remainingForCard - Math.max(0, Math.floor(usage[cardId] ?? 0)),
+    );
+  }, 0);
+}
+
 function visibleKnownCardWithReferenceViewer(
   state: GameState,
   id: CardInstanceId,

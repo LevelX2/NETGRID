@@ -15,6 +15,7 @@ import {
   moveCorpCardToArchives,
   moveCorpCardToHq,
   moveRunnerCardToGrip,
+  MECHANIC_SMOKE_GAMES,
   ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
   ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
   originalsetReorderCounterRunlockGame,
@@ -50,6 +51,12 @@ describe("PlayerView projection", () => {
     expect(ice?.effectiveRunQuote?.subroutines[0]).toMatchObject({
       sourceDefinitionId: "simple_barrier_ice",
       sourceTitle: "Simple Barrier ICE",
+    });
+    expect(getPlayerView(state, "runner").own.runnerTraceSupportQuote).toMatchObject({
+      traceCreditPool: 0,
+      baseLinkOptions: expect.arrayContaining([
+        expect.objectContaining({ activationCost: 0, safeForAccess: true }),
+      ]),
     });
   });
 
@@ -404,6 +411,30 @@ describe("PlayerView projection", () => {
         (server) => server.id === "remote_1",
       )?.statuses,
     ).toBeUndefined();
+  });
+
+  it("projects a server-bound stealth-payment restriction from a rezzed root", () => {
+    const state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-block"),
+    );
+    const surveillanceId = putCorpRootInRemote(
+      state,
+      "onr_v1_373_twenty-four-hour-surveillance",
+    );
+    state.cardInstances[surveillanceId]!.rezzed = true;
+    state.cardInstances[surveillanceId]!.faceup = true;
+
+    const server = getPlayerView(state, "runner").servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+
+    expect(server?.statuses).toContainEqual(
+      expect.objectContaining({
+        kind: "run_payment_restriction",
+        restriction: "runner_stealth_bit_payment_sources",
+        sourceCardInstanceId: surveillanceId,
+      }),
+    );
   });
 
   it.each([

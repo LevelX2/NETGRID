@@ -88,4 +88,16 @@ describe("deterministic on-play action-capacity payload", () => {
       followupRunOnEnd: "optional",
     });
   });
+
+  it("publishes declarative run-duration effects for an on-play run", () => {
+    const definition =
+      CARD_DEFINITIONS_BY_ID["onr_v1_098_lucidrine-booster-drug"];
+
+    expect(
+      deterministicOnPlayResourcePayload(definition!, "runner"),
+    ).toMatchObject({
+      runTemporaryCredits: 9,
+      afterRunUnpreventableCoreDamage: 1,
+    });
+  });
 });

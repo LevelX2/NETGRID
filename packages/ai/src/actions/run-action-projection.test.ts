@@ -46,6 +46,8 @@ describe("projectRunnerRunActions", () => {
         sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
         serverId: "rd",
         runnerEventRun: true,
+        runTemporaryCredits: 9,
+        afterRunUnpreventableCoreDamage: 1,
       },
     });
 
@@ -274,7 +276,7 @@ describe("projectRunnerRunActions", () => {
     expect(noiseProjection?.accessServerId).toBeUndefined();
   });
 
-  it("bounds run projection constraint signals to structured entries", () => {
+  it("takes run constraints exclusively from LegalAction payload", () => {
     const constrained = action({
       actionId: "constrained-run",
       payload: {
@@ -284,6 +286,8 @@ describe("projectRunnerRunActions", () => {
           "no_noisy",
           "bypass_first_ice",
         ],
+        noNoisyBreakers: true,
+        bypassFirstIce: true,
       } as unknown as LegalAction["payload"],
     });
     const noise = action({

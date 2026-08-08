@@ -11,15 +11,25 @@ import { subtypeKey } from "./visible-run-breaker-path";
 export function runnerRunPathCreditBudgetWithVisiblePools(
   credits: number,
   rigCards: readonly VisibleCard[],
+  options: { excludeStealthCredits?: boolean } = {},
 ): RunnerRunPathCreditBudget {
   const rigBudget = visibleRunnerRunPathCreditBudgetForRig(rigCards);
+  const stealthCreditsBySourceId = options.excludeStealthCredits
+    ? {}
+    : rigBudget.stealthCreditsBySourceId;
+  const stealthNonNoisyIcebreakerCredits = options.excludeStealthCredits
+    ? 0
+    : rigBudget.stealthNonNoisyIcebreakerCredits;
+  const nonNoisyIcebreakerCredits =
+    rigBudget.nonStealthNonNoisyIcebreakerCredits +
+    stealthNonNoisyIcebreakerCredits;
   return {
     credits: normalizeCreditAmount(credits),
     ...(rigBudget.icebreakerCredits > 0
       ? { icebreakerCredits: rigBudget.icebreakerCredits }
       : {}),
-    ...(rigBudget.nonNoisyIcebreakerCredits > 0
-      ? { nonNoisyIcebreakerCredits: rigBudget.nonNoisyIcebreakerCredits }
+    ...(nonNoisyIcebreakerCredits > 0
+      ? { nonNoisyIcebreakerCredits }
       : {}),
     ...(rigBudget.nonStealthNonNoisyIcebreakerCredits > 0
       ? {
@@ -30,14 +40,13 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
     ...(rigBudget.killerCredits > 0
       ? { killerCredits: rigBudget.killerCredits }
       : {}),
-    ...(rigBudget.stealthNonNoisyIcebreakerCredits > 0
+    ...(stealthNonNoisyIcebreakerCredits > 0
       ? {
-          stealthNonNoisyIcebreakerCredits:
-            rigBudget.stealthNonNoisyIcebreakerCredits,
+          stealthNonNoisyIcebreakerCredits,
         }
       : {}),
-    ...(Object.keys(rigBudget.stealthCreditsBySourceId).length > 0
-      ? { stealthCreditsBySourceId: rigBudget.stealthCreditsBySourceId }
+    ...(Object.keys(stealthCreditsBySourceId).length > 0
+      ? { stealthCreditsBySourceId }
       : {}),
     ...(Object.keys(rigBudget.hostedIcebreakerCreditsByBreakerInstanceId)
       .length > 0

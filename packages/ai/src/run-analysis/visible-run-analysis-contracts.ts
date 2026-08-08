@@ -2,6 +2,7 @@ import type {
   TraceSuccessEffect,
   VisibleEffectiveIceRunQuote,
   VisibleEffectiveSubroutine,
+  VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
 
 export type IceCardLike = {
@@ -37,6 +38,12 @@ export type VisibleDeflectorContext = {
   netOrCoreDamagePreventionRemaining?: number;
   /** Actions available before the proposed run begins. */
   availableRunnerClicks?: number;
+  /** Structured run restriction; noisy breakers cannot be used. */
+  prohibitNoisyIcebreakers?: boolean;
+  /** Runner-private Engine quote for trace base-link and credit support. */
+  runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  /** Explicit current or projected run-duration Link bonus. */
+  runTraceLinkBonus?: number;
 };
 
 export type HardUnbrokenRunEffectKind =

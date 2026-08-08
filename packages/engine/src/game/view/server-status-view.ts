@@ -1,4 +1,5 @@
 import {
+  CARD_DEFINITIONS_BY_ID,
   type CardInstanceId,
   type GameState,
   type ServerId,
@@ -6,6 +7,7 @@ import {
   type VisibleServerCostModifierStatus,
   type VisibleServerStatus,
 } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
@@ -27,7 +29,44 @@ export function visibleServerStatuses(
   return [
     ...serverRunStartRestrictions(state, targetServerId),
     ...visibleServerIceInstallCostModifierStatuses(state, targetServerId),
+    ...visibleStealthPaymentRestrictionStatuses(state, targetServerId),
   ].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function visibleStealthPaymentRestrictionStatuses(
+  state: GameState,
+  targetServerId: Exclude<ServerId, "new_remote">,
+): VisibleServerStatus[] {
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (!server) throw new Error(`Server fehlt: ${targetServerId}`);
+  return server.root.flatMap((cardId) => {
+    const instance = state.cardInstances[cardId];
+    if (!instance?.rezzed) return [];
+    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+    if (!definition) throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
+    const implementation = cardImplementationForDefinitionId(definition.id);
+    if (
+      !implementation?.fortRunWindows?.some(
+        (window) =>
+          window.kind === "block_stealth_bits_during_runs_on_this_fort",
+      )
+    )
+      return [];
+    return [
+      {
+        id: `server_status:${targetServerId}:run_payment_restriction:${cardId}:stealth_bits`,
+        kind: "run_payment_restriction" as const,
+        scope: "target_server" as const,
+        restriction: "runner_stealth_bit_payment_sources" as const,
+        targetServerId,
+        sourceCardInstanceId: cardId,
+        sourceTitle: definition.title,
+        sourceSide: "corp" as const,
+      },
+    ];
+  });
 }
 
 function visibleServerIceInstallCostModifierStatuses(

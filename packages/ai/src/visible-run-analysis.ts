@@ -12,7 +12,6 @@ import {
 import {
   cardImplementationForDefinitionId,
   icebreakerAbilitiesForDefinition,
-  traceBaseLinkCardImplementationQuotesForDefinition,
 } from "@netgrid/engine";
 import {
   breakerCardBlocksAccessReachability,
@@ -345,7 +344,7 @@ function assessKnownRezzedIcePathInternal(
   let visibleCorpCreditsThroughPath = visibleCorpBidCapacity;
   let netOrCoreDamagePreventionRemaining =
     deflectorContext.netOrCoreDamagePreventionRemaining ??
-    visibleNetOrCoreDamagePreventionForRig(rigCards);
+    0;
   const breakersAtRiskOfBeingTrashed = new Set<string>();
   const breakerState: VisibleRunBreakerState = {
     strengthByBreakerInstanceId: new Map(
@@ -368,7 +367,12 @@ function assessKnownRezzedIcePathInternal(
     const iceDefinitionId = ice.definitionId;
     if (!iceDefinitionId || !ice.known || ice.rezzed !== true) continue;
     const rigCardsForEncounter = rigCards.filter(
-      (card) => !breakersAtRiskOfBeingTrashed.has(card.instanceId),
+      (card) =>
+        !breakersAtRiskOfBeingTrashed.has(card.instanceId) &&
+        !(
+          deflectorContext.prohibitNoisyIcebreakers === true &&
+          card.subtypes?.includes("noisy")
+        ),
     );
     requireEffectiveRunQuoteForKnownRezzedIce(ice);
     const effectiveIce = projectIceForRunPathEffects(
@@ -698,6 +702,12 @@ function assessKnownRezzedIcePathInternal(
       visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
       additionalBreakCostPerSubroutine,
+      ...(deflectorContext.runnerTraceSupportQuote
+        ? { runnerTraceSupportQuote: deflectorContext.runnerTraceSupportQuote }
+        : {}),
+      ...(deflectorContext.runTraceLinkBonus !== undefined
+        ? { runTraceLinkBonus: deflectorContext.runTraceLinkBonus }
+        : {}),
     });
     const avoidedVisibleHazardSubroutineIds = new Set<string>();
     for (const projection of visibleHazardProjections) {
@@ -918,35 +928,6 @@ function visibleBreakerStrengthForTargetServer(
   );
   if (!hasLastServerBoundCounters) return strength;
   return Math.max(0, strength - Math.max(0, card.counters?.power ?? 0));
-}
-
-function visibleNetOrCoreDamagePreventionForRig(rigCards: VisibleCard[]): number {
-  return rigCards.reduce((total, card) => {
-    if (!card.definitionId || !card.known) return total;
-    const prevention = cardImplementationForDefinitionId(
-      card.definitionId,
-    )?.damagePreventionSources;
-    return (
-      total +
-      (prevention ?? [])
-        .filter(
-          (source) =>
-            source.cost.kind === "none" &&
-            source.limit?.kind === "per_turn" &&
-            source.damageTypes.some(
-              (type) => type === "net" || type === "core",
-            ),
-        )
-        .reduce(
-          (sum, source) =>
-            sum +
-            (typeof source.amount === "number"
-              ? Math.max(0, source.amount)
-              : 0),
-          0,
-        )
-    );
-  }, 0);
 }
 
 function applyVisibleDamagePrevention(

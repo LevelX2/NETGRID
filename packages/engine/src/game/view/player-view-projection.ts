@@ -21,6 +21,7 @@ import {
   visibleCorpArchives,
   visibleCorpCard,
   visibleCorpIdentityCard,
+  visibleFreeNetOrCoreDamagePreventionRemaining,
   visibleOwnCard,
   visibleOwnCardForViewer,
   visibleRunnerRigCardForViewer,
@@ -34,6 +35,7 @@ import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
 import { visibleServerStatuses } from "./server-status-view";
+import { visibleRunnerTraceSupportQuote } from "./visible-runner-trace-support-quote";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -166,6 +168,32 @@ export function buildPlayerViewProjection(
         ...(state.run.badPublicityCredits !== undefined
           ? { badPublicityCredits: state.run.badPublicityCredits }
           : {}),
+        ...(state.run.runnerRunTemporaryCredits
+          ? {
+              runnerRunTemporaryCredits: {
+                ...state.run.runnerRunTemporaryCredits,
+              },
+            }
+          : {}),
+        ...(state.run.unpreventableCoreDamageAtRunEnd
+          ? {
+              unpreventableCoreDamageAtRunEnd: {
+                ...state.run.unpreventableCoreDamageAtRunEnd,
+              },
+            }
+          : {}),
+        ...(state.run.runTraceLinkBonus !== undefined
+          ? { runTraceLinkBonus: state.run.runTraceLinkBonus }
+          : {}),
+        ...(state.run.prohibitNoisyIcebreakers
+          ? { prohibitNoisyIcebreakers: true }
+          : {}),
+        ...(state.run.runnerCreditGainOnCorpRez !== undefined
+          ? { runnerCreditGainOnCorpRez: state.run.runnerCreditGainOnCorpRez }
+          : {}),
+        ...(state.run.damagePreventionPool
+          ? { damagePreventionPool: { ...state.run.damagePreventionPool } }
+          : {}),
         successful: state.run.successful,
       }
     : undefined;
@@ -201,6 +229,13 @@ export function buildPlayerViewProjection(
           maxHandSize: maxHandSize(state, "runner"),
           coreDamage: state.runner.coreDamage,
           tags: state.runner.tags,
+          freeNetOrCoreDamagePreventionRemaining:
+            visibleFreeNetOrCoreDamagePreventionRemaining(state),
+          runnerTraceSupportQuote: visibleRunnerTraceSupportQuote(state),
+          availableBadPublicityRunCredits: Math.max(
+            0,
+            Math.floor(state.corp.badPublicity),
+          ),
         }
       : {
           identity: visibleCorpIdentityCard(state),

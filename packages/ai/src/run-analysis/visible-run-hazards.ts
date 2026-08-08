@@ -1,12 +1,10 @@
 import {
-  type CardDefinitionId,
-  type CounterCreditUse,
   type TraceSuccessEffect,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
+  type VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
-import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
 import type {
   BreakAssessment,
   HardUnbrokenRunEffectKind,
@@ -25,7 +23,6 @@ import {
   effectiveIceForQuote,
   effectiveRunQuoteForIce,
   minimumCreditsToBreakVisibleSubroutines,
-  visibleRunCardDefinition,
 } from "./visible-run-breaker-path";
 
 export function pathProjectionEffectsForQuote(
@@ -89,6 +86,8 @@ export function visibleIceRunHazardsForQuote(params: {
   visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
+  runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  runTraceLinkBonus?: number;
 }): VisibleIceRunHazardProjection[] {
   if (!params.quote) return [];
   const hazards: VisibleIceRunHazardProjection[] = [];
@@ -96,8 +95,9 @@ export function visibleIceRunHazardsForQuote(params: {
   params.quote.subroutines.forEach((subroutine) => {
     if (subroutine.type !== "initiate_trace") return;
     const traceSupport = visibleRunnerTraceSupport(
-      params.rigCards,
+      params.runnerTraceSupportQuote,
       remainingHazardCredits,
+      params.runTraceLinkBonus,
     );
     const successEffect = traceSuccessEffectForVisibleSubroutine(subroutine);
     const baseHazard = visibleIceRunHazardForTraceEffect(successEffect);
@@ -492,63 +492,24 @@ type VisibleTraceAvoidanceAssessment = {
 };
 
 export function visibleRunnerTraceSupport(
-  rigCards: VisibleCard[],
+  quote: VisibleRunnerTraceSupportQuote | undefined,
   availableCredits: number,
+  runTraceLinkBonus = 0,
 ): VisibleRunnerTraceSupport {
   const normalizedCredits = Math.max(0, Math.floor(availableCredits));
-  let traceCreditPool = 0;
-  const baseLinkOptions: VisibleRunnerTraceSupportOption[] = [
-    { baseLink: 0, activationCost: 0, safeForAccess: true },
-  ];
-  for (const card of rigCards) {
-    if (card.known === false) continue;
-    const definition = visibleRunCardDefinition(card.definitionId);
-    for (const display of card.counterDisplays ?? []) {
-      const uses = display.creditPool?.uses ?? [];
-      if (uses.includes("increase_link")) {
-        traceCreditPool += Math.max(0, Math.floor(display.amount));
-      }
-    }
-    if (
-      definition?.mechanics.includes("link_recurring_credit") &&
-      definition.recurringCredits !== undefined
-    ) {
-      traceCreditPool += Math.max(0, Math.floor(definition.recurringCredits));
-    }
-    if (card.definitionId) {
-      const implementationQuotes =
-        traceBaseLinkCardImplementationQuotesForDefinition(
-          card.definitionId as CardDefinitionId,
-        );
-      for (const quote of implementationQuotes) {
-        const option: VisibleRunnerTraceSupportOption = {
-          baseLink: Math.max(0, Math.floor(quote.baseLinkValue)),
-          activationCost: Math.max(0, Math.floor(quote.creditCost)),
-          safeForAccess: !quote.forcesJackOutAfterEncounter,
-          sourceDefinitionId: quote.sourceDefinitionId,
-          sourceTitle: quote.label,
-        };
-        if (quote.forcesJackOutAfterEncounter) {
-          option.sideEffect = "forces_jack_out_after_encounter";
-        }
-        baseLinkOptions.push(option);
-      }
-      if (implementationQuotes.length > 0) continue;
-    }
-    const staticIdentityBaseLink =
-      card.type === "identity"
-        ? Math.max(0, Math.floor(card.baseLink ?? definition?.baseLink ?? 0))
-        : 0;
-    if (staticIdentityBaseLink > 0) {
-      baseLinkOptions.push({
-        baseLink: staticIdentityBaseLink,
-        activationCost: 0,
-        safeForAccess: true,
-        ...(card.definitionId ? { sourceDefinitionId: card.definitionId } : {}),
-        ...(card.title ? { sourceTitle: card.title } : {}),
-      });
-    }
-  }
+  const traceCreditPool = Math.max(
+    0,
+    Math.floor(quote?.traceCreditPool ?? 0),
+  );
+  const linkBonus = Math.max(0, Math.floor(runTraceLinkBonus));
+  const baseLinkOptions: VisibleRunnerTraceSupportOption[] =
+    (quote?.baseLinkOptions ?? [
+      { baseLink: 0, activationCost: 0, safeForAccess: true },
+    ]).map((option) => ({
+      ...option,
+      baseLink: Math.max(0, Math.floor(option.baseLink)) + linkBonus,
+      activationCost: Math.max(0, Math.floor(option.activationCost)),
+    }));
   const runnerTraceCapacity = Math.max(
     ...baseLinkOptions
       .filter(

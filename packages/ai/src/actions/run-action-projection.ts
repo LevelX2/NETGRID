@@ -63,8 +63,11 @@ export function projectInternalRunnerRunActions(
       signals,
     );
     const spendLimit = runSpendLimitForAction(action);
-    const temporaryRunCredits = temporaryRunCreditsForHint(hint);
-    const postRunSelfDamage = postRunSelfDamageForHint(hint);
+    const temporaryRunCredits =
+      numberPayloadValue(action, ["runTemporaryCredits"]) ?? 0;
+    const postRunSelfDamage =
+      numberPayloadValue(action, ["afterRunUnpreventableCoreDamage"]) ?? 0;
+    const runTraceLinkBonus = numberPayloadValue(action, ["runTraceLinkBonus"]);
     const accessReplacement = stringPayloadValue(
       action,
       "successfulRunAccessReplacement",
@@ -97,9 +100,10 @@ export function projectInternalRunnerRunActions(
       riskSignals: riskSignalsForRunAction(candidate, hint),
       ...(temporaryRunCredits > 0 ? { temporaryRunCredits } : {}),
       ...(postRunSelfDamage > 0 ? { postRunSelfDamage } : {}),
+      ...(runTraceLinkBonus !== undefined ? { runTraceLinkBonus } : {}),
       ...(spendLimit !== undefined ? { spendLimit } : {}),
-      noNoisyBreakers: noNoisyBreakersForRunAction(action, signals),
-      bypassFirstIce: bypassFirstIceForRunAction(action, signals),
+      noNoisyBreakers: noNoisyBreakersForRunAction(action),
+      bypassFirstIce: bypassFirstIceForRunAction(action),
     } satisfies Omit<
       InternalRunActionProjection,
       "targetServerId" | "targetKind" | "projectionStatus" | "evidence"
@@ -235,6 +239,11 @@ function runActionProjectionEvidence(
     ...(projection.postRunSelfDamage !== undefined
       ? [
           `run_action_projection_post_run_self_damage:${projection.postRunSelfDamage}`,
+        ]
+      : []),
+    ...(projection.runTraceLinkBonus !== undefined
+      ? [
+          `run_action_projection_trace_link_bonus:${projection.runTraceLinkBonus}`,
         ]
       : []),
     ...projection.accessPayoffSignals
@@ -821,10 +830,10 @@ function constraintSignalsForRunAction(
 ): string[] {
   return uniqueStrings([
     ...(runSpendLimitForAction(action) !== undefined ? ["spend_limit"] : []),
-    ...(noNoisyBreakersForRunAction(action, signals)
+    ...(noNoisyBreakersForRunAction(action)
       ? ["no_noisy_breakers"]
       : []),
-    ...(bypassFirstIceForRunAction(action, signals)
+    ...(bypassFirstIceForRunAction(action)
       ? ["bypass_first_ice"]
       : []),
     ...(candidate?.constraints ?? []).map(
@@ -886,34 +895,6 @@ function riskSignalsForRunAction(
   ]);
 }
 
-function temporaryRunCreditsForHint(hint: AiCardHint | undefined): number {
-  return Math.max(
-    0,
-    ...(hint?.effects ?? [])
-      .filter(
-        (effect) =>
-          effect.kind === "finite_economy_pool" &&
-          effect.timing === "during_run" &&
-          effect.target === "run_credit_pool",
-      )
-      .map((effect) => effect.amount ?? 0),
-  );
-}
-
-function postRunSelfDamageForHint(hint: AiCardHint | undefined): number {
-  return Math.max(
-    0,
-    ...(hint?.effects ?? [])
-      .filter(
-        (effect) =>
-          effect.kind === "damage" &&
-          effect.scope === "runner" &&
-          effect.target?.startsWith("self_") === true,
-      )
-      .map((effect) => effect.amount ?? 0),
-  );
-}
-
 function runSpendLimitForAction(action: LegalAction): number | undefined {
   return numberPayloadValue(action, [
     "runSpendingCap",
@@ -925,28 +906,14 @@ function runSpendLimitForAction(action: LegalAction): number | undefined {
 
 function noNoisyBreakersForRunAction(
   action: LegalAction,
-  signals: readonly string[],
 ): boolean {
-  if (booleanPayloadValue(action, "noNoisyBreakers")) return true;
-  return runActionHasBoundedSignalTerm(signals, [
-    "no_noisy",
-    "no noisy",
-    "noisy_breaker_restriction",
-  ]);
+  return booleanPayloadValue(action, "noNoisyBreakers");
 }
 
 function bypassFirstIceForRunAction(
   action: LegalAction,
-  signals: readonly string[],
 ): boolean {
-  if (booleanPayloadValue(action, "bypassFirstIce")) return true;
-  const normalizedSignals = signals.map((signal) =>
-    signal.toLocaleLowerCase("en-US"),
-  );
-  return (
-    signalTokensInclude(normalizedSignals, "bypass_first_ice") ||
-    runActionHasStructuredSignal(signals, ["bypass first ice", "inside_job"])
-  );
+  return booleanPayloadValue(action, "bypassFirstIce");
 }
 function payloadRecord(action: LegalAction): Record<string, unknown> {
   return action.payload ?? {};

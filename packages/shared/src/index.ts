@@ -2328,9 +2328,21 @@ export type VisibleServerCostModifierStatus = {
   sourceSide: Side;
 };
 
+export type VisibleServerRunPaymentRestrictionStatus = {
+  id: string;
+  kind: "run_payment_restriction";
+  scope: "target_server";
+  restriction: "runner_stealth_bit_payment_sources";
+  targetServerId: Exclude<ServerId, "new_remote">;
+  sourceCardInstanceId: CardInstanceId;
+  sourceTitle: string;
+  sourceSide: "corp";
+};
+
 export type VisibleServerStatus =
   | VisibleServerRunProhibitedStatus
-  | VisibleServerCostModifierStatus;
+  | VisibleServerCostModifierStatus
+  | VisibleServerRunPaymentRestrictionStatus;
 
 export type VisibleEffectiveSubroutine = {
   id: string;
@@ -2677,6 +2689,24 @@ export type VisibleRunnerPaymentSupportAbility = {
   trashesSource: boolean;
 };
 
+/**
+ * Runner-private trace inputs derived by the Engine from the current game
+ * state. `baseLink` already includes the Runner identity and static link
+ * modifiers; an activated base-link option replaces only the installed
+ * base-link contribution, exactly as the trace runtime does.
+ */
+export type VisibleRunnerTraceSupportQuote = {
+  traceCreditPool: number;
+  baseLinkOptions: Array<{
+    baseLink: number;
+    activationCost: number;
+    safeForAccess: boolean;
+    sourceDefinitionId?: CardDefinitionId;
+    sourceTitle?: string;
+    sideEffect?: "forces_jack_out_after_encounter";
+  }>;
+};
+
 export const CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION =
   "corp-punish-route-quote-v2" as const;
 export const CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID =
@@ -3012,6 +3042,12 @@ export type PlayerView = {
     maxHandSize: number;
     coreDamage?: number;
     tags: number;
+    /** Runner-private, currently available free Net/Core prevention. */
+    freeNetOrCoreDamagePreventionRemaining?: number;
+    /** Runner-private, authoritative trace payment and base-link choices. */
+    runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+    /** Public Bad Publicity converted into run-only credits at run start. */
+    availableBadPublicityRunCredits?: number;
   };
   opponent: {
     identity: VisibleCard;
@@ -3064,6 +3100,22 @@ export type PlayerView = {
       completed: boolean;
     };
     badPublicityCredits?: number;
+    runnerRunTemporaryCredits?: {
+      sourceDefinitionId: CardDefinitionId;
+      remaining: number;
+      returnUnusedAtRunEnd: true;
+    };
+    unpreventableCoreDamageAtRunEnd?: {
+      sourceDefinitionId: CardDefinitionId;
+      amount: number;
+    };
+    runTraceLinkBonus?: number;
+    prohibitNoisyIcebreakers?: boolean;
+    runnerCreditGainOnCorpRez?: number;
+    damagePreventionPool?: {
+      sourceDefinitionId: CardDefinitionId;
+      remaining: number;
+    };
     successful: boolean;
   };
   deckMetadata?: {
