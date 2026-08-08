@@ -13,7 +13,6 @@ import {
   ARMADILLO_ARMORED_ROAD_HOME_ID,
   BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
-  HELLS_RUN_ID,
   ZZ22_SPEED_CHIP_ID,
 } from "../../compatibility/runtime-compatibility";
 import {
@@ -251,7 +250,6 @@ export function runnerRunRecurringCreditSourceIds(
     ) {
       return false;
     }
-    if (definition.id === HELLS_RUN_ID) return false;
     if (!noisyBreaker) return true;
     return !cardHasSubtype(definition, "stealth");
   });
@@ -322,7 +320,11 @@ function spendRunnerRunStartCredits(
     })
   )
     return { handled: true, paid: false, amount, stateChanged: true };
-  closeRunnerCostPenaltySupportWindowForPayment(host.state, legalAction, amount);
+  closeRunnerCostPenaltySupportWindowForPayment(
+    host.state,
+    legalAction,
+    amount,
+  );
   if (availableRunnerRunStartCreditsWithoutSupport(host) < amount)
     throw new Error("Der Runner kann die Run-Start-Kosten nicht bezahlen.");
   let remaining = amount;
@@ -732,9 +734,7 @@ function restrictedHostedCreditSourceMatchesUse(
   }
   if (use === "install_programs") return options.installCardType === "program";
   return (
-    use === "increase_link" ||
-    use === "remove_tags" ||
-    use === "play_events"
+    use === "increase_link" || use === "remove_tags" || use === "play_events"
   );
 }
 

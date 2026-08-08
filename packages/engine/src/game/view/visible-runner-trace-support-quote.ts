@@ -5,7 +5,6 @@ import {
   type GameState,
   type VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
-import { HELLS_RUN_ID } from "../../compatibility/runtime-compatibility";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   installedTraceBaseLinkCardImplementation,
@@ -101,17 +100,7 @@ export function visibleRunnerTraceSupportQuote(
   }
   const traceCreditSources: Array<
     VisibleRunnerTraceSupportQuote["traceCreditSources"][number]
-  > = [
-    ...restrictedHostedCreditSourceIds(state, "increase_link"),
-    ...installedCards.filter((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return (
-        !isRestrictedHostedCreditSource(definition) &&
-        definition.id === HELLS_RUN_ID &&
-        (state.cardInstances[cardId]?.counters?.recurring_credit ?? 0) > 0
-      );
-    }),
-  ].map((cardId) => {
+  > = restrictedHostedCreditSourceIds(state, "increase_link").map((cardId) => {
     const definition = definitionFor(state, cardId);
     return {
       sourceCardInstanceId: cardId,

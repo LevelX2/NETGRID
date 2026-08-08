@@ -147,6 +147,32 @@ describe("PlayerView projection", () => {
     );
   });
 
+  it("projects Hell's Run trace credits from its restricted-credit contract", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "hells-run-structured-trace-credit" }),
+    );
+    const sourceId = "hells-run-trace-credit" as CardInstanceId;
+    state.cardInstances[sourceId] = {
+      ...state.cardInstances[state.runner.identity]!,
+      definitionId: "onr_v1_164_hells-run",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      counters: { bit: 1 },
+    };
+    state.runner.rig.resources.push(sourceId);
+
+    expect(
+      getPlayerView(state, "runner").own.runnerTraceSupportQuote
+        ?.traceCreditSources,
+    ).toContainEqual({
+      sourceCardInstanceId: sourceId,
+      sourceDefinitionId: "onr_v1_164_hells-run",
+      amount: 1,
+      isStealth: false,
+    });
+  });
+
   it("ignores installed non-trace abilities while projecting trace support", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "non-trace-ability-trace-quote" }),
