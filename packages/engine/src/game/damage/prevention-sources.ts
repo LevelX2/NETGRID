@@ -35,6 +35,7 @@ import {
   damageTypePayload,
 } from "./damage-runtime-context";
 import { trashTargetIdsFromEvent } from "./damage-event-resolution";
+import { damagePreventionUsedThisTurn } from "../state/turn-flags-counters";
 
 export function cybertechThinkTankBoostCandidates(
   state: GameState,
@@ -496,14 +497,6 @@ export function collectHarnessDamagePreventionCandidates(
       preventAmount,
     },
   ];
-}
-
-export function damagePreventionUsedThisTurn(
-  state: GameState,
-  cardId: CardInstanceId,
-): number {
-  const flags = ensureRunnerTurnFlags(state);
-  return flags.damagePreventionUsage?.[cardId] ?? 0;
 }
 
 export function registerDamagePreventionUsage(

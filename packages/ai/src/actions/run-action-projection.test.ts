@@ -62,6 +62,31 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("projects structured external run context without card-rule reconstruction", () => {
+    const eventRun = action({
+      actionId: "external-run-context",
+      type: "play_event",
+      payload: {
+        serverId: "rd",
+        runnerEventRun: true,
+        corpRezCostSurchargeKind: "matching_printed_rez_cost",
+        runnerCreditGainOnCorpRez: 1,
+        damagePreventionPool: 7,
+        eventApproachIceExposeBeforeRez: true,
+      },
+    });
+
+    expect(projectRunnerRunActions({ input: input([eventRun]) })).toEqual([
+      expect.objectContaining({
+        actionId: "external-run-context",
+        corpRezCostSurcharge: { kind: "matching_printed_rez_cost" },
+        runnerCreditGainOnCorpRez: 1,
+        damagePreventionPool: 7,
+        eventApproachIceExposeBeforeRez: true,
+      }),
+    ]);
+  });
+
   it("uses structured run signals and ignores label-only run text", () => {
     const labelOnly = action({
       actionId: "label-only",

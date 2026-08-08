@@ -82,6 +82,13 @@ export type RunActionProjection = {
   temporaryRunCredits?: number;
   postRunSelfDamage?: number;
   runTraceLinkBonus?: number;
+  corpRezCostSurcharge?: {
+    kind: "matching_printed_rez_cost";
+    sourceDefinitionId?: string;
+  };
+  runnerCreditGainOnCorpRez?: number;
+  damagePreventionPool?: number;
+  eventApproachIceExposeBeforeRez?: boolean;
   spendLimit?: number;
   noNoisyBreakers: boolean;
   bypassFirstIce: boolean;

@@ -27,9 +27,47 @@ import {
 import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
 import { CARD_DEFINITIONS_BY_ID, type CardInstanceId } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { overadvanceViewFields } from "./card-view";
+import {
+  overadvanceViewFields,
+  visibleFreeNetOrCoreDamagePreventionRemaining,
+} from "./card-view";
 
 describe("PlayerView projection", () => {
+  it("matches free prevention runtime capacity including use and cancellation", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "free-prevention-view-capacity" }),
+    );
+    const sourceId = "free-prevention-source" as CardInstanceId;
+    state.cardInstances[sourceId] = {
+      ...state.cardInstances[state.runner.identity]!,
+      definitionId: "onr_classic_047_little-black-box",
+      owner: "runner",
+      controller: "runner",
+    };
+    state.runner.rig.hardware.push(sourceId);
+    state.cardInstances[sourceId] = {
+      ...state.cardInstances[sourceId]!,
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      stoleAgendaThisTurn: state.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaLastTurn: state.runnerTurnFlags?.stoleAgendaLastTurn ?? false,
+      damagePreventionUsage: { [sourceId]: 1 },
+    };
+
+    expect(visibleFreeNetOrCoreDamagePreventionRemaining(state)).toBe(0);
+
+    state.runnerTurnFlags = {
+      ...state.runnerTurnFlags,
+      damagePreventionUsage: {
+        ...state.runnerTurnFlags.damagePreventionUsage,
+        [sourceId]: 0,
+      },
+    };
+    state.cancelledDamagePreventionSourceIdsUntilEndOfTurn = [sourceId];
+    expect(visibleFreeNetOrCoreDamagePreventionRemaining(state)).toBe(0);
+  });
   it("projects an authoritative effective run quote for known rezzed ICE", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "known-rezzed-ice-run-quote" }),
@@ -52,12 +90,91 @@ describe("PlayerView projection", () => {
       sourceDefinitionId: "simple_barrier_ice",
       sourceTitle: "Simple Barrier ICE",
     });
-    expect(getPlayerView(state, "runner").own.runnerTraceSupportQuote).toMatchObject({
+    expect(
+      getPlayerView(state, "runner").own.runnerTraceSupportQuote,
+    ).toMatchObject({
       traceCreditPool: 0,
       baseLinkOptions: expect.arrayContaining([
         expect.objectContaining({ activationCost: 0, safeForAccess: true }),
       ]),
     });
+  });
+
+  it("projects structured post-bid link and trace-success-cancel support", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "runner-trace-window-support" }),
+    );
+    const source = state.cardInstances[state.runner.identity]!;
+    const postBidSourceId = "trace-post-bid-source" as CardInstanceId;
+    const cancelSourceId = "trace-cancel-source" as CardInstanceId;
+    state.cardInstances[postBidSourceId] = {
+      ...source,
+      definitionId: "onr_proteus_154_wired-switchboard",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.cardInstances[cancelSourceId] = {
+      ...source,
+      definitionId: "onr_proteus_129_back-door-to-netwatch",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+    };
+    state.runner.rig.resources.push(postBidSourceId, cancelSourceId);
+
+    const traceSupport = getPlayerView(state, "runner").own
+      .runnerTraceSupportQuote;
+
+    expect(traceSupport?.postBidLinkOptions).toContainEqual(
+      expect.objectContaining({
+        sourceCardInstanceId: postBidSourceId,
+        linkDelta: 3,
+        activationCost: 0,
+        trashSource: true,
+        safeForAccess: true,
+      }),
+    );
+    expect(traceSupport?.traceSuccessCancelOptions).toContainEqual(
+      expect.objectContaining({
+        sourceCardInstanceId: cancelSourceId,
+        activationCost: 3,
+        trashSource: true,
+      }),
+    );
+  });
+
+  it("projects public during-run ICE rez support as a server status", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "during-run-ice-rez-support-status" }),
+    );
+    const sourceId = "olivia-salazar" as CardInstanceId;
+    const source = state.cardInstances[state.runner.identity]!;
+    const rd = state.corp.servers.find((server) => server.id === "rd");
+    if (!rd) throw new Error("Missing R&D server");
+    state.cardInstances[sourceId] = {
+      ...source,
+      definitionId: "onr_v1_363_olivia-salazar",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+      faceup: true,
+      rezzed: true,
+    };
+    rd.root.push(sourceId);
+
+    const statuses = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "rd",
+    )?.statuses;
+
+    expect(statuses).toContainEqual(
+      expect.objectContaining({
+        kind: "during_run_ice_rez_support",
+        sourceCardInstanceId: sourceId,
+        costModel: "half_rez_cost_rounded_down",
+        target: "unrezzed_ice_on_this_fort",
+      }),
+    );
   });
 
   it("projects an authoritative quote with explicit trace bases for every playable ICE", () => {

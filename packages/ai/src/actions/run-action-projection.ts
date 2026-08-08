@@ -68,6 +68,13 @@ export function projectInternalRunnerRunActions(
     const postRunSelfDamage =
       numberPayloadValue(action, ["afterRunUnpreventableCoreDamage"]) ?? 0;
     const runTraceLinkBonus = numberPayloadValue(action, ["runTraceLinkBonus"]);
+    const runnerCreditGainOnCorpRez = numberPayloadValue(action, [
+      "runnerCreditGainOnCorpRez",
+    ]);
+    const damagePreventionPool = numberPayloadValue(action, [
+      "damagePreventionPool",
+    ]);
+    const corpRezCostSurcharge = corpRezCostSurchargeForRunAction(action);
     const accessReplacement = stringPayloadValue(
       action,
       "successfulRunAccessReplacement",
@@ -101,6 +108,14 @@ export function projectInternalRunnerRunActions(
       ...(temporaryRunCredits > 0 ? { temporaryRunCredits } : {}),
       ...(postRunSelfDamage > 0 ? { postRunSelfDamage } : {}),
       ...(runTraceLinkBonus !== undefined ? { runTraceLinkBonus } : {}),
+      ...(corpRezCostSurcharge ? { corpRezCostSurcharge } : {}),
+      ...(runnerCreditGainOnCorpRez !== undefined
+        ? { runnerCreditGainOnCorpRez }
+        : {}),
+      ...(damagePreventionPool !== undefined ? { damagePreventionPool } : {}),
+      ...(booleanPayloadValue(action, "eventApproachIceExposeBeforeRez")
+        ? { eventApproachIceExposeBeforeRez: true }
+        : {}),
       ...(spendLimit !== undefined ? { spendLimit } : {}),
       noNoisyBreakers: noNoisyBreakersForRunAction(action),
       bypassFirstIce: bypassFirstIceForRunAction(action),
@@ -245,6 +260,24 @@ function runActionProjectionEvidence(
       ? [
           `run_action_projection_trace_link_bonus:${projection.runTraceLinkBonus}`,
         ]
+      : []),
+    ...(projection.corpRezCostSurcharge
+      ? [
+          `run_action_projection_corp_rez_surcharge:${projection.corpRezCostSurcharge.kind}`,
+        ]
+      : []),
+    ...(projection.runnerCreditGainOnCorpRez !== undefined
+      ? [
+          `run_action_projection_runner_credit_gain_on_corp_rez:${projection.runnerCreditGainOnCorpRez}`,
+        ]
+      : []),
+    ...(projection.damagePreventionPool !== undefined
+      ? [
+          `run_action_projection_damage_prevention_pool:${projection.damagePreventionPool}`,
+        ]
+      : []),
+    ...(projection.eventApproachIceExposeBeforeRez
+      ? ["run_action_projection_approach_ice_expose_before_rez:true"]
       : []),
     ...projection.accessPayoffSignals
       .slice(0, 8)
@@ -830,12 +863,8 @@ function constraintSignalsForRunAction(
 ): string[] {
   return uniqueStrings([
     ...(runSpendLimitForAction(action) !== undefined ? ["spend_limit"] : []),
-    ...(noNoisyBreakersForRunAction(action)
-      ? ["no_noisy_breakers"]
-      : []),
-    ...(bypassFirstIceForRunAction(action)
-      ? ["bypass_first_ice"]
-      : []),
+    ...(noNoisyBreakersForRunAction(action) ? ["no_noisy_breakers"] : []),
+    ...(bypassFirstIceForRunAction(action) ? ["bypass_first_ice"] : []),
     ...(candidate?.constraints ?? []).map(
       (constraint) => `${constraint.kind}:${constraint.status}`,
     ),
@@ -904,15 +933,11 @@ function runSpendLimitForAction(action: LegalAction): number | undefined {
   ]);
 }
 
-function noNoisyBreakersForRunAction(
-  action: LegalAction,
-): boolean {
+function noNoisyBreakersForRunAction(action: LegalAction): boolean {
   return booleanPayloadValue(action, "noNoisyBreakers");
 }
 
-function bypassFirstIceForRunAction(
-  action: LegalAction,
-): boolean {
+function bypassFirstIceForRunAction(action: LegalAction): boolean {
   return booleanPayloadValue(action, "bypassFirstIce");
 }
 function payloadRecord(action: LegalAction): Record<string, unknown> {
@@ -979,6 +1004,22 @@ function numberPayloadValue(
     if (typeof value === "number" && Number.isFinite(value)) return value;
   }
   return undefined;
+}
+
+function corpRezCostSurchargeForRunAction(
+  action: LegalAction,
+): RunActionProjection["corpRezCostSurcharge"] | undefined {
+  const payload = payloadRecord(action);
+  if (payload.corpRezCostSurchargeKind !== "matching_printed_rez_cost")
+    return undefined;
+  return {
+    kind: "matching_printed_rez_cost",
+    ...(typeof payload.corpRezCostSurchargeSourceDefinitionId === "string"
+      ? {
+          sourceDefinitionId: payload.corpRezCostSurchargeSourceDefinitionId,
+        }
+      : {}),
+  };
 }
 
 function stringPayloadValue(

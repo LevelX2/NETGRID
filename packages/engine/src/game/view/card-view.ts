@@ -31,6 +31,7 @@ import type { CardImplementationDefinition } from "../../card-implementations/ty
 import { serverChoiceDisplayLabel } from "./server-view";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 import { quoteStealCostForKnownInstalledAgenda } from "../../ability-engine/steal-cost-modifiers";
+import { damagePreventionUsedThisTurn } from "../state/turn-flags-counters";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -60,36 +61,37 @@ export function visibleOwnCardForViewer(
 export function visibleFreeNetOrCoreDamagePreventionRemaining(
   state: GameState,
 ): number {
-  const usage = state.runnerTurnFlags?.damagePreventionUsage ?? {};
   return [
     ...state.runner.rig.programs,
     ...state.runner.rig.hardware,
     ...state.runner.rig.resources,
   ].reduce((total, cardId) => {
+    if (
+      state.cancelledDamagePreventionSourceIdsUntilEndOfTurn?.includes(cardId)
+    )
+      return total;
     const definition = definitionFor(state, cardId);
     const remainingForCard = (
-      cardImplementationForDefinitionId(definition.id)?.damagePreventionSources ??
-      []
+      cardImplementationForDefinitionId(definition.id)
+        ?.damagePreventionSources ?? []
     )
       .filter(
         (source) =>
           source.cost.kind === "none" &&
           source.limit?.kind === "per_turn" &&
-          typeof source.amount === "number" &&
           source.damageTypes.some((type) => type === "net" || type === "core"),
       )
       .reduce(
         (sum, source) =>
           sum +
-          (typeof source.amount === "number"
-            ? Math.max(0, Math.floor(source.amount))
-            : 0),
+          Math.max(
+            0,
+            Math.floor(source.limit?.amount ?? 0) -
+              damagePreventionUsedThisTurn(state, cardId),
+          ),
         0,
       );
-    return Math.max(
-      0,
-      total + remainingForCard - Math.max(0, Math.floor(usage[cardId] ?? 0)),
-    );
+    return total + remainingForCard;
   }, 0);
 }
 
@@ -145,7 +147,9 @@ function visibleKnownCardWithReferenceViewer(
     ? typeof runStartStrength === "number"
       ? visibleStrength === undefined
         ? (() => {
-            throw new Error("Aufgeloeste zufaellige Breakerstaerke ist nicht sichtbar.");
+            throw new Error(
+              "Aufgeloeste zufaellige Breakerstaerke ist nicht sichtbar.",
+            );
           })()
         : {
             status: "resolved" as const,
@@ -279,7 +283,8 @@ function visibleKnownCardWithReferenceViewer(
       : {}),
     ...(instance.selectedCardId
       ? {
-          ...(referenceViewer === "own" || referenceViewer === instance.controller
+          ...(referenceViewer === "own" ||
+          referenceViewer === instance.controller
             ? { selectedTargetCardId: instance.selectedCardId }
             : {}),
           selectedTargetLabel: visibleCardReferenceLabel(
@@ -287,10 +292,7 @@ function visibleKnownCardWithReferenceViewer(
             instance.selectedCardId,
             referenceViewer,
           ),
-          ...selectedInstalledIceTargetLocation(
-            state,
-            instance.selectedCardId,
-          ),
+          ...selectedInstalledIceTargetLocation(state, instance.selectedCardId),
         }
       : {}),
     owner: instance.owner,
@@ -359,10 +361,7 @@ function selectedInstalledIceTargetLocation(
   );
   const position = server?.ice.indexOf(targetId);
   return {
-    selectedTargetServerLabel: serverChoiceDisplayLabel(
-      state,
-      zone.serverId,
-    ),
+    selectedTargetServerLabel: serverChoiceDisplayLabel(state, zone.serverId),
     ...(position !== undefined && position >= 0
       ? { selectedTargetIcePosition: position + 1 }
       : {}),
@@ -1660,17 +1659,22 @@ function runRemainderStrengthBonusForBreaker(
   breakerId: CardInstanceId,
 ): number {
   if (!run) return 0;
-  const genericBonus = ((run.breakerState
-    ?.strengthModifiersByBreakerInstanceId ?? {})[breakerId] ?? []).reduce(
+  const genericBonus = (
+    (run.breakerState?.strengthModifiersByBreakerInstanceId ?? {})[breakerId] ??
+    []
+  ).reduce(
     (total, modifier) =>
       modifier.duration === "current_run"
         ? total + Math.max(0, Math.floor(modifier.amount))
         : total,
     0,
   );
-  return genericBonus + Math.max(
-    0,
-    Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0),
+  return (
+    genericBonus +
+    Math.max(
+      0,
+      Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0),
+    )
   );
 }
 

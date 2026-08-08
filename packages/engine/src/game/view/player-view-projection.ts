@@ -185,6 +185,12 @@ export function buildPlayerViewProjection(
         ...(state.run.runTraceLinkBonus !== undefined
           ? { runTraceLinkBonus: state.run.runTraceLinkBonus }
           : {}),
+        ...(state.run.corpRezCostSurcharge
+          ? { corpRezCostSurcharge: { ...state.run.corpRezCostSurcharge } }
+          : {}),
+        ...(state.run.eventApproachIceExposeBeforeRez
+          ? { eventApproachIceExposeBeforeRez: true }
+          : {}),
         ...(state.run.prohibitNoisyIcebreakers
           ? { prohibitNoisyIcebreakers: true }
           : {}),

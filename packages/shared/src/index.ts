@@ -2339,10 +2339,25 @@ export type VisibleServerRunPaymentRestrictionStatus = {
   sourceSide: "corp";
 };
 
+/** Public, server-scoped permission for a Corp to rez an unrezzed ICE during a run. */
+export type VisibleServerDuringRunIceRezSupportStatus = {
+  id: string;
+  kind: "during_run_ice_rez_support";
+  scope: "target_server";
+  costModel: "half_rez_cost_rounded_down";
+  target: "unrezzed_ice_on_this_fort";
+  limit: "once_per_run_per_source";
+  targetServerId: Exclude<ServerId, "new_remote">;
+  sourceCardInstanceId: CardInstanceId;
+  sourceTitle: string;
+  sourceSide: "corp";
+};
+
 export type VisibleServerStatus =
   | VisibleServerRunProhibitedStatus
   | VisibleServerCostModifierStatus
-  | VisibleServerRunPaymentRestrictionStatus;
+  | VisibleServerRunPaymentRestrictionStatus
+  | VisibleServerDuringRunIceRezSupportStatus;
 
 export type VisibleEffectiveSubroutine = {
   id: string;
@@ -2697,13 +2712,38 @@ export type VisibleRunnerPaymentSupportAbility = {
  */
 export type VisibleRunnerTraceSupportQuote = {
   traceCreditPool: number;
-  baseLinkOptions: Array<{
+  /** Exact Runner-private sources that make up `traceCreditPool`. */
+  traceCreditSources: ReadonlyArray<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+    isStealth: boolean;
+  }>;
+  baseLinkOptions: ReadonlyArray<{
     baseLink: number;
     activationCost: number;
     safeForAccess: boolean;
     sourceDefinitionId?: CardDefinitionId;
     sourceTitle?: string;
     sideEffect?: "forces_jack_out_after_encounter";
+  }>;
+  postBidLinkOptions: ReadonlyArray<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    linkDelta: number;
+    activationCost: number;
+    tapSource: boolean;
+    trashSource: boolean;
+    safeForAccess: boolean;
+  }>;
+  traceSuccessCancelOptions: ReadonlyArray<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    sourceTitle: string;
+    activationCost: number;
+    tapSource: boolean;
+    trashSource: boolean;
   }>;
 };
 
@@ -3110,6 +3150,11 @@ export type PlayerView = {
       amount: number;
     };
     runTraceLinkBonus?: number;
+    corpRezCostSurcharge?: {
+      kind: "matching_printed_rez_cost";
+      sourceDefinitionId: CardDefinitionId;
+    };
+    eventApproachIceExposeBeforeRez?: boolean;
     prohibitNoisyIcebreakers?: boolean;
     runnerCreditGainOnCorpRez?: number;
     damagePreventionPool?: {

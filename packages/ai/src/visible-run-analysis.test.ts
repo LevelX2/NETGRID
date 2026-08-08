@@ -8,7 +8,11 @@ import {
   serverIdFromEvent,
   type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
-import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
+import type {
+  PublicGameEvent,
+  VisibleCard,
+  VisibleRunnerTraceSupportQuote,
+} from "@netgrid/shared";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 import {
   canBreakerDefinitionBreakIce,
@@ -50,13 +54,9 @@ describe("visible run analysis known-path classification", () => {
   it("fails loudly instead of reconstructing a missing quote for known rezzed ICE", () => {
     const ice = classicWallIce("missing-authoritative-quote");
     delete ice.effectiveRunQuote;
-    expect(() =>
-      assessKnownRezzedIcePath(
-        [ice],
-        [],
-        5,
-      ),
-    ).toThrow("missing its authoritative effective run quote");
+    expect(() => assessKnownRezzedIcePath([ice], [], 5)).toThrow(
+      "missing its authoritative effective run quote",
+    );
   });
 
   it("classifies cost-blocked known no-access paths", () => {
@@ -177,11 +177,7 @@ describe("visible run analysis targeted breaker paths", () => {
       subtypes: ["icebreaker", "fracter"],
     };
 
-    const assessment = assessKnownRezzedIcePath(
-      [sentry, wall],
-      [bulldozer],
-      1,
-    );
+    const assessment = assessKnownRezzedIcePath([sentry, wall], [bulldozer], 1);
 
     expect(assessment).toMatchObject({
       blocked: false,
@@ -289,7 +285,11 @@ describe("visible run analysis targeted breaker paths", () => {
     };
 
     const assessment = assessKnownRezzedIcePath(
-      [sentryEndTheRunIce("inner-paid-sentry"), mixedSentry, classicWallIce("outer-wall-source")],
+      [
+        sentryEndTheRunIce("inner-paid-sentry"),
+        mixedSentry,
+        classicWallIce("outer-wall-source"),
+      ],
       [bulldozer, aiBoon],
       3,
     );
@@ -343,7 +343,11 @@ describe("visible run analysis targeted breaker paths", () => {
     };
 
     const assessment = assessKnownRezzedIcePath(
-      [sentryEndTheRunIce("inner-expired-sentry"), harmlessCodeGate, classicWallIce("outer-wall")],
+      [
+        sentryEndTheRunIce("inner-expired-sentry"),
+        harmlessCodeGate,
+        classicWallIce("outer-wall"),
+      ],
       [bulldozerBreaker("bulldozer")],
       1,
     );
@@ -478,7 +482,10 @@ describe("visible run analysis targeted breaker paths", () => {
     });
 
     const mixedPath = assessKnownRezzedIcePath(
-      [sentryEndTheRunIce("fubar-inner-sentry"), classicWallIce("fubar-outer-wall")],
+      [
+        sentryEndTheRunIce("fubar-inner-sentry"),
+        classicWallIce("fubar-outer-wall"),
+      ],
       [fubar],
       2,
     );
@@ -668,6 +675,42 @@ describe("visible run analysis targeted breaker paths", () => {
     expect(
       assessment.visibleIceRunHazards?.reduce(
         (sum, hazard) => sum + (hazard.damagePreventionApplied ?? 0),
+        0,
+      ),
+    ).toBe(2);
+  });
+
+  it("keeps run-scoped damage prevention separate and consumes it across hazards", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [
+        traceDamageIce("inner-run-pool", 2),
+        traceDamageIce("outer-run-pool", 2),
+      ],
+      [],
+      0,
+      [],
+      0,
+      {
+        netOrCoreDamagePreventionRemaining: 1,
+        runDamagePreventionRemaining: 2,
+      },
+    );
+
+    expect(
+      assessment.visibleIceRunHazards?.reduce(
+        (sum, hazard) => sum + (hazard.expectedDamage ?? 0),
+        0,
+      ),
+    ).toBe(1);
+    expect(
+      assessment.visibleIceRunHazards?.reduce(
+        (sum, hazard) => sum + (hazard.freeDamagePreventionApplied ?? 0),
+        0,
+      ),
+    ).toBe(1);
+    expect(
+      assessment.visibleIceRunHazards?.reduce(
+        (sum, hazard) => sum + (hazard.runDamagePreventionApplied ?? 0),
         0,
       ),
     ).toBe(2);
@@ -1371,6 +1414,119 @@ describe("visible run analysis trace hazards", () => {
     });
   });
 
+  it("consumes structured trace-credit sources across trace subroutines", () => {
+    const traceSupport: VisibleRunnerTraceSupportQuote = {
+      traceCreditPool: 5,
+      traceCreditSources: [
+        {
+          sourceCardInstanceId: "link-bit-source",
+          sourceDefinitionId: "link-bit-source-definition",
+          amount: 5,
+          isStealth: false,
+        },
+      ],
+      baseLinkOptions: [
+        { baseLink: 0, activationCost: 0, safeForAccess: true },
+      ],
+      postBidLinkOptions: [],
+      traceSuccessCancelOptions: [],
+    };
+    const assessment = assessKnownRezzedIcePath(
+      [doubleTraceTagIce("rd-double-trace")],
+      [],
+      0,
+      [],
+      0,
+      { runnerTraceSupportQuote: traceSupport },
+    );
+
+    expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
+      unavoidable: false,
+      minimumAvoidanceCost: 0,
+    });
+    expect(assessment.visibleIceRunHazards?.[1]).toMatchObject({
+      unavoidable: true,
+      runnerTraceCapacity: 0,
+    });
+  });
+
+  it("uses structured post-bid link and success-cancel trace options", () => {
+    const postBidSupport: VisibleRunnerTraceSupportQuote = {
+      traceCreditPool: 0,
+      traceCreditSources: [],
+      baseLinkOptions: [
+        { baseLink: 0, activationCost: 0, safeForAccess: true },
+      ],
+      postBidLinkOptions: [
+        {
+          sourceCardInstanceId: "wired-switchboard",
+          sourceDefinitionId: "onr_proteus_154_wired-switchboard",
+          sourceTitle: "Wired Switchboard",
+          linkDelta: 3,
+          activationCost: 0,
+          tapSource: false,
+          trashSource: true,
+          safeForAccess: true,
+        },
+      ],
+      traceSuccessCancelOptions: [],
+    };
+    const postBidAssessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter-post-bid")],
+      [],
+      2,
+      [],
+      0,
+      { runnerTraceSupportQuote: postBidSupport },
+    );
+    expect(postBidAssessment.visibleIceRunHazards?.[0]).toMatchObject({
+      minimumAvoidanceCost: 2,
+      unavoidable: false,
+    });
+    const postBidSequence = assessKnownRezzedIcePath(
+      [doubleTraceTagIce("rd-double-post-bid")],
+      [],
+      4,
+      [],
+      0,
+      { runnerTraceSupportQuote: postBidSupport },
+    );
+    expect(postBidSequence.visibleIceRunHazards?.[0]).toMatchObject({
+      unavoidable: false,
+    });
+    expect(postBidSequence.visibleIceRunHazards?.[1]).toMatchObject({
+      unavoidable: true,
+    });
+
+    const cancelSupport: VisibleRunnerTraceSupportQuote = {
+      ...postBidSupport,
+      postBidLinkOptions: [],
+      traceSuccessCancelOptions: [
+        {
+          sourceCardInstanceId: "back-door-netwatch",
+          sourceDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+          sourceTitle: "Back Door to Netwatch",
+          activationCost: 3,
+          tapSource: false,
+          trashSource: true,
+        },
+      ],
+    };
+    const cancelAssessment = assessKnownRezzedIcePath(
+      [hunterTraceTagIce("rd-hunter-cancel")],
+      [],
+      3,
+      [],
+      5,
+      { runnerTraceSupportQuote: cancelSupport },
+    );
+    expect(cancelAssessment.visibleIceRunHazards?.[0]).toMatchObject({
+      traceSuccessCancelAvoidanceCost: 3,
+      minimumAvoidanceCost: 3,
+      unavoidable: false,
+    });
+  });
+
   it("does not reuse Replicator break credits across multiple traces", () => {
     const assessment = assessKnownRezzedIcePath(
       [doubleTraceTagIce("rd-double-trace")],
@@ -1409,7 +1565,14 @@ describe("visible run analysis trace hazards", () => {
       0,
       [],
       0,
-      { runnerTraceSupportQuote: traceSupportQuote(9, 1, true, "Access through Alpha") },
+      {
+        runnerTraceSupportQuote: traceSupportQuote(
+          9,
+          1,
+          true,
+          "Access through Alpha",
+        ),
+      },
     );
 
     expect(assessment).toMatchObject({
@@ -1438,7 +1601,14 @@ describe("visible run analysis trace hazards", () => {
       1,
       [],
       0,
-      { runnerTraceSupportQuote: traceSupportQuote(9, 1, true, "Access through Alpha") },
+      {
+        runnerTraceSupportQuote: traceSupportQuote(
+          9,
+          1,
+          true,
+          "Access through Alpha",
+        ),
+      },
     );
 
     expect(assessment).toMatchObject({
@@ -2363,6 +2533,7 @@ function traceSupportQuote(
 ) {
   return {
     traceCreditPool: 0,
+    traceCreditSources: [],
     baseLinkOptions: [
       { baseLink: 0, activationCost: 0, safeForAccess: true },
       {
@@ -2374,6 +2545,8 @@ function traceSupportQuote(
         ...(sideEffect ? { sideEffect } : {}),
       },
     ],
+    postBidLinkOptions: [],
+    traceSuccessCancelOptions: [],
   } as const;
 }
 

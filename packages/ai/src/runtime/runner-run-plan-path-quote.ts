@@ -1012,9 +1012,10 @@ function breakerCoverageQuotesForIce(
   return (input.playerView.own.rig ?? [])
     .filter((card) => card.known && card.definitionId)
     .map((breaker): RunnerRunBreakerCoverageQuote => {
-      const accessSubroutines = (ice.effectiveRunQuote?.subroutines ?? []).filter(
-        (subroutine) =>
-          subroutineRequiresBreak(threatClassForSubroutine(input, subroutine)),
+      const accessSubroutines = (
+        ice.effectiveRunQuote?.subroutines ?? []
+      ).filter((subroutine) =>
+        subroutineRequiresBreak(threatClassForSubroutine(input, subroutine)),
       );
       const canBreak = canVisibleBreakerBreakQuotedSubroutines({
         breaker,
@@ -1449,12 +1450,30 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
     visibleCorpCredits: input.playerView.opponent.credits,
     netOrCoreDamagePreventionRemaining: Math.max(
       0,
-      (input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0) +
-        (input.playerView.run?.damagePreventionPool?.remaining ?? 0),
+      input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
+    ),
+    runDamagePreventionRemaining: Math.max(
+      0,
+      input.playerView.run?.damagePreventionPool?.remaining ?? 0,
     ),
     prohibitNoisyIcebreakers:
       input.playerView.run?.prohibitNoisyIcebreakers === true,
-    runnerTraceSupportQuote: input.playerView.own.runnerTraceSupportQuote,
+    ...(input.playerView.own.runnerTraceSupportQuote
+      ? {
+          runnerTraceSupportQuote: input.playerView.own.runnerTraceSupportQuote,
+        }
+      : {}),
+    ...(input.playerView.servers
+      .find(
+        (candidate) => candidate.id === input.playerView.run?.attackedServerId,
+      )
+      ?.statuses?.some(
+        (status) =>
+          status.kind === "run_payment_restriction" &&
+          status.restriction === "runner_stealth_bit_payment_sources",
+      )
+      ? { excludeStealthTraceCredits: true }
+      : {}),
     ...(input.playerView.run?.runTraceLinkBonus !== undefined
       ? { runTraceLinkBonus: input.playerView.run.runTraceLinkBonus }
       : {}),

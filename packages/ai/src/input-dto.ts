@@ -595,12 +595,24 @@ function sanitizePlayerView(
         ? {
             runnerTraceSupportQuote: {
               traceCreditPool: view.own.runnerTraceSupportQuote.traceCreditPool,
+              traceCreditSources:
+                view.own.runnerTraceSupportQuote.traceCreditSources.map(
+                  (source) => ({ ...source }),
+                ),
               baseLinkOptions:
                 view.own.runnerTraceSupportQuote.baseLinkOptions.map(
                   (option) => ({ ...option }),
                 ),
+              postBidLinkOptions:
+                view.own.runnerTraceSupportQuote.postBidLinkOptions.map(
+                  (option) => ({ ...option }),
+                ),
+              traceSuccessCancelOptions:
+                view.own.runnerTraceSupportQuote.traceSuccessCancelOptions.map(
+                  (option) => ({ ...option }),
+                ),
             },
-        }
+          }
         : {}),
       ...(view.own.availableBadPublicityRunCredits !== undefined
         ? {
@@ -672,6 +684,9 @@ function sanitizePlayerView(
         ? {
             counterDisplays: server.counterDisplays.map(sanitizeCounterDisplay),
           }
+        : {}),
+      ...(server.statuses
+        ? { statuses: server.statuses.map((status) => ({ ...status })) }
         : {}),
     })),
     ...(view.specialZones
@@ -755,11 +770,23 @@ function sanitizePlayerView(
             ...(view.run.runTraceLinkBonus !== undefined
               ? { runTraceLinkBonus: view.run.runTraceLinkBonus }
               : {}),
+            ...(view.run.corpRezCostSurcharge
+              ? {
+                  corpRezCostSurcharge: {
+                    ...view.run.corpRezCostSurcharge,
+                  },
+                }
+              : {}),
+            ...(view.run.eventApproachIceExposeBeforeRez
+              ? { eventApproachIceExposeBeforeRez: true }
+              : {}),
             ...(view.run.prohibitNoisyIcebreakers
               ? { prohibitNoisyIcebreakers: true }
               : {}),
             ...(view.run.runnerCreditGainOnCorpRez !== undefined
-              ? { runnerCreditGainOnCorpRez: view.run.runnerCreditGainOnCorpRez }
+              ? {
+                  runnerCreditGainOnCorpRez: view.run.runnerCreditGainOnCorpRez,
+                }
               : {}),
             ...(view.run.damagePreventionPool
               ? { damagePreventionPool: { ...view.run.damagePreventionPool } }

@@ -36,12 +36,16 @@ export type VisibleDeflectorContext = {
   targetServerId?: string;
   /** Remaining free Net/Core damage prevention for this turn. */
   netOrCoreDamagePreventionRemaining?: number;
+  /** Remaining run-scoped prevention that applies to all damage types. */
+  runDamagePreventionRemaining?: number;
   /** Actions available before the proposed run begins. */
   availableRunnerClicks?: number;
   /** Structured run restriction; noisy breakers cannot be used. */
   prohibitNoisyIcebreakers?: boolean;
   /** Runner-private Engine quote for trace base-link and credit support. */
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  /** Structured server restriction for trace-credit sources with Stealth. */
+  excludeStealthTraceCredits?: boolean;
   /** Explicit current or projected run-duration Link bonus. */
   runTraceLinkBonus?: number;
 };
@@ -169,6 +173,7 @@ export type VisibleIceRunHazard = {
   visibleCorpMaxTraceCovered?: boolean;
   traceAvoidanceCost?: number;
   visibleCorpMaxTraceAvoidanceCost?: number;
+  traceSuccessCancelAvoidanceCost?: number;
   traceBidCost?: number;
   baseLinkValue?: number;
   baseLinkActivationCost?: number;
@@ -182,6 +187,8 @@ export type VisibleIceRunHazard = {
   expectedCounters?: number;
   expectedDamage?: number;
   damagePreventionApplied?: number;
+  freeDamagePreventionApplied?: number;
+  runDamagePreventionApplied?: number;
   actionTax?: number;
   penalty: number;
   evidence: string[];
@@ -189,6 +196,10 @@ export type VisibleIceRunHazard = {
 
 export type VisibleIceRunHazardProjection = {
   hazard: VisibleIceRunHazard;
+  /** Exact restricted trace credits consumed while avoiding this hazard. */
+  traceCreditPoolSpent?: number;
+  /** Trace sources tapped or trashed while avoiding this hazard. */
+  traceSupportSourceIdsConsumed?: string[];
   avoidancePayment?:
     | { kind: "general"; cost: number }
     | { kind: "breaker"; assessment: BreakAssessment };

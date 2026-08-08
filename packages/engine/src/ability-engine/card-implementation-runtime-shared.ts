@@ -173,6 +173,24 @@ export function deterministicOnPlayResourcePayload(
           ...(makeRunEffect.runTraceLinkBonus !== undefined
             ? { runTraceLinkBonus: makeRunEffect.runTraceLinkBonus }
             : {}),
+          ...(makeRunEffect.corpRezCostSurcharge !== undefined
+            ? {
+                corpRezCostSurchargeKind:
+                  makeRunEffect.corpRezCostSurcharge.kind,
+              }
+            : {}),
+          ...(makeRunEffect.runnerCreditGainOnCorpRez !== undefined
+            ? {
+                runnerCreditGainOnCorpRez:
+                  makeRunEffect.runnerCreditGainOnCorpRez,
+              }
+            : {}),
+          ...(makeRunEffect.damagePreventionPool !== undefined
+            ? { damagePreventionPool: makeRunEffect.damagePreventionPool }
+            : {}),
+          ...(makeRunEffect.eventApproachIceExposeBeforeRez
+            ? { eventApproachIceExposeBeforeRez: true }
+            : {}),
           ...(makeRunEffect.runTemporaryCredits
             ? { runTemporaryCredits: makeRunEffect.runTemporaryCredits.amount }
             : {}),

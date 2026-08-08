@@ -157,6 +157,17 @@ export function ensureRunnerTurnFlags(
   return flags;
 }
 
+/** Pure capacity lookup shared by damage runtime and PlayerView projection. */
+export function damagePreventionUsedThisTurn(
+  state: GameState,
+  cardId: CardInstanceId,
+): number {
+  return Math.max(
+    0,
+    Math.floor(state.runnerTurnFlags?.damagePreventionUsage?.[cardId] ?? 0),
+  );
+}
+
 export function recordRunnerActionSpent(
   state: GameState,
   amount: number,

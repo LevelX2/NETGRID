@@ -65,8 +65,7 @@ describe("deterministic on-play action-capacity payload", () => {
   });
 
   it("publishes exact deterministic bad-publicity and self-damage effects", () => {
-    const definition =
-      CARD_DEFINITIONS_BY_ID["onr_proteus_108_faked-hit"];
+    const definition = CARD_DEFINITIONS_BY_ID["onr_proteus_108_faked-hit"];
 
     expect(
       deterministicOnPlayResourcePayload(definition!, "runner"),
@@ -77,6 +76,35 @@ describe("deterministic on-play action-capacity payload", () => {
       preventableDamage: false,
       unpreventableDamage: true,
     });
+  });
+
+  it("projects every deterministic make-run context field before run start", () => {
+    expect(
+      deterministicOnPlayResourcePayload(
+        CARD_DEFINITIONS_BY_ID["onr_classic_043_running-interference"]!,
+        "runner",
+      ),
+    ).toMatchObject({
+      corpRezCostSurchargeKind: "matching_printed_rez_cost",
+    });
+    expect(
+      deterministicOnPlayResourcePayload(
+        CARD_DEFINITIONS_BY_ID["onr_proteus_120_reconnaissance"]!,
+        "runner",
+      ),
+    ).toMatchObject({ runnerCreditGainOnCorpRez: 1 });
+    expect(
+      deterministicOnPlayResourcePayload(
+        CARD_DEFINITIONS_BY_ID["onr_proteus_127_weefle-initiation"]!,
+        "runner",
+      ),
+    ).toMatchObject({ damagePreventionPool: 7 });
+    expect(
+      deterministicOnPlayResourcePayload(
+        CARD_DEFINITIONS_BY_ID["onr_proteus_104_decoy-signal"]!,
+        "runner",
+      ),
+    ).toMatchObject({ eventApproachIceExposeBeforeRez: true });
   });
 
   it("publishes an optional follow-up run as an action-bound fact", () => {

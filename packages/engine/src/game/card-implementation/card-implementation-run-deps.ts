@@ -182,10 +182,17 @@ export function startRunForCardImplementation(
             : {}),
         }
       : {}),
+    ...(options.corpRezCostSurcharge !== undefined
+      ? {
+          corpRezCostSurchargeKind: options.corpRezCostSurcharge.kind,
+          ...(sourceDefinitionId
+            ? { corpRezCostSurchargeSourceDefinitionId: sourceDefinitionId }
+            : {}),
+        }
+      : {}),
     ...(options.runTemporaryCredits !== undefined
       ? {
-          v1922RunnerEventAbility:
-            "run_temporary_credits",
+          v1922RunnerEventAbility: "run_temporary_credits",
           temporaryRunCredits: options.runTemporaryCredits.amount,
           temporaryRunCreditsRemaining:
             state.run?.runnerRunTemporaryCredits?.remaining ?? 0,

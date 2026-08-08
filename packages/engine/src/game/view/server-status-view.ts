@@ -30,7 +30,51 @@ export function visibleServerStatuses(
     ...serverRunStartRestrictions(state, targetServerId),
     ...visibleServerIceInstallCostModifierStatuses(state, targetServerId),
     ...visibleStealthPaymentRestrictionStatuses(state, targetServerId),
+    ...visibleDuringRunIceRezSupportStatuses(state, targetServerId),
   ].sort((left, right) => left.id.localeCompare(right.id));
+}
+
+function visibleDuringRunIceRezSupportStatuses(
+  state: GameState,
+  targetServerId: Exclude<ServerId, "new_remote">,
+): VisibleServerStatus[] {
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (!server) throw new Error(`Server fehlt: ${targetServerId}`);
+  return server.root.flatMap((cardId) => {
+    const instance = state.cardInstances[cardId];
+    if (!instance?.rezzed) return [];
+    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
+    if (!definition)
+      throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
+    const support = cardImplementationForDefinitionId(
+      definition.id,
+    )?.fortRunWindows?.find(
+      (window) =>
+        window.kind === "discounted_rez_ice_on_this_fort" &&
+        window.timing === "during_run_on_this_fort" &&
+        window.discount === "half_rez_cost_rounded_down" &&
+        window.target === "unrezzed_ice_on_this_fort" &&
+        window.limit === "once_per_run_per_source" &&
+        window.visibility === "public",
+    );
+    if (!support) return [];
+    return [
+      {
+        id: `server_status:${targetServerId}:during_run_ice_rez_support:${cardId}`,
+        kind: "during_run_ice_rez_support" as const,
+        scope: "target_server" as const,
+        costModel: "half_rez_cost_rounded_down" as const,
+        target: "unrezzed_ice_on_this_fort" as const,
+        limit: "once_per_run_per_source" as const,
+        targetServerId,
+        sourceCardInstanceId: cardId,
+        sourceTitle: definition.title,
+        sourceSide: "corp" as const,
+      },
+    ];
+  });
 }
 
 function visibleStealthPaymentRestrictionStatuses(
@@ -45,7 +89,8 @@ function visibleStealthPaymentRestrictionStatuses(
     const instance = state.cardInstances[cardId];
     if (!instance?.rezzed) return [];
     const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
-    if (!definition) throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
+    if (!definition)
+      throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
     const implementation = cardImplementationForDefinitionId(definition.id);
     if (
       !implementation?.fortRunWindows?.some(

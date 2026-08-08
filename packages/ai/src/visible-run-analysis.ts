@@ -8,6 +8,7 @@ import {
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
+  type VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
 import {
   cardImplementationForDefinitionId,
@@ -167,28 +168,26 @@ export function assessKnownRezzedIcePath(
     context,
     availablePreRunCredits,
   ).flatMap((variant) =>
-    (["retained", "trashed"] as const).map((bartmossOutcome) =>
-      ({
-        bartmossOutcome,
-        assessment: assessKnownRezzedIcePathInternal(
-          iceCards,
-          variant.rigCards,
-          runnerCredits,
-          rootCards,
-          normalizedCorpBidCapacity,
-          [],
-          {
-            allowBreakingRunPathEffects: true,
-            bartmossOutcome,
-            ...(variant.preRunPreparation
-              ? { preRunPreparation: variant.preRunPreparation }
-              : {}),
-          },
-          undefined,
-          context,
-        ),
-      }),
-    ),
+    (["retained", "trashed"] as const).map((bartmossOutcome) => ({
+      bartmossOutcome,
+      assessment: assessKnownRezzedIcePathInternal(
+        iceCards,
+        variant.rigCards,
+        runnerCredits,
+        rootCards,
+        normalizedCorpBidCapacity,
+        [],
+        {
+          allowBreakingRunPathEffects: true,
+          bartmossOutcome,
+          ...(variant.preRunPreparation
+            ? { preRunPreparation: variant.preRunPreparation }
+            : {}),
+        },
+        undefined,
+        context,
+      ),
+    })),
   );
   const best = candidates
     .slice()
@@ -227,67 +226,78 @@ function selectableSubtypeRigVariants(
   rigCards: VisibleCard[];
   preRunPreparation?: { credits: number; clicks: number };
 }> {
-  return rigCards.reduce<Array<{
-    rigCards: VisibleCard[];
-    preRunPreparation?: { credits: number; clicks: number };
-  }>>((variants, card) => {
-    if (!card.definitionId)
-      return variants.map((variant) => ({
-        ...variant,
-        rigCards: [...variant.rigCards, card],
-      }));
-    if (card.selectedSubtype) {
-      const change = cardImplementationForDefinitionId(card.definitionId)
-        ?.icebreakerSubtypeChange;
-      const canPrepareChange =
-        change?.timing === "runner_main" &&
-        (context.availableRunnerClicks ?? 0) >= change.cost.clicks;
-      if (!canPrepareChange) {
+  return rigCards.reduce<
+    Array<{
+      rigCards: VisibleCard[];
+      preRunPreparation?: { credits: number; clicks: number };
+    }>
+  >(
+    (variants, card) => {
+      if (!card.definitionId)
         return variants.map((variant) => ({
           ...variant,
           rigCards: [...variant.rigCards, card],
         }));
+      if (card.selectedSubtype) {
+        const change = cardImplementationForDefinitionId(
+          card.definitionId,
+        )?.icebreakerSubtypeChange;
+        const canPrepareChange =
+          change?.timing === "runner_main" &&
+          (context.availableRunnerClicks ?? 0) >= change.cost.clicks;
+        if (!canPrepareChange) {
+          return variants.map((variant) => ({
+            ...variant,
+            rigCards: [...variant.rigCards, card],
+          }));
+        }
+        return variants.flatMap((variant) => [
+          {
+            ...variant,
+            rigCards: [...variant.rigCards, card],
+          },
+          ...(availablePreRunCredits >=
+            (variant.preRunPreparation?.credits ?? 0) + change.cost.credits &&
+          (context.availableRunnerClicks ?? 0) >=
+            (variant.preRunPreparation?.clicks ?? 0) + change.cost.clicks
+            ? change.choices
+                .filter(
+                  (selectedSubtype) => selectedSubtype !== card.selectedSubtype,
+                )
+                .map((selectedSubtype) => ({
+                  rigCards: [...variant.rigCards, { ...card, selectedSubtype }],
+                  preRunPreparation: {
+                    credits:
+                      (variant.preRunPreparation?.credits ?? 0) +
+                      change.cost.credits,
+                    clicks:
+                      (variant.preRunPreparation?.clicks ?? 0) +
+                      change.cost.clicks,
+                  },
+                }))
+            : []),
+        ]);
       }
-      return variants.flatMap((variant) => [
-        {
+      const choices = cardImplementationForDefinitionId(
+        card.definitionId,
+      )?.icebreakerSubtypeChange;
+      if (
+        choices?.timing !== "during_run" ||
+        choices.limit !== "once_until_selected"
+      )
+        return variants.map((variant) => ({
           ...variant,
           rigCards: [...variant.rigCards, card],
-        },
-        ...(availablePreRunCredits >=
-          (variant.preRunPreparation?.credits ?? 0) + change.cost.credits &&
-        (context.availableRunnerClicks ?? 0) >=
-          (variant.preRunPreparation?.clicks ?? 0) + change.cost.clicks
-          ? change.choices
-          .filter((selectedSubtype) => selectedSubtype !== card.selectedSubtype)
-          .map((selectedSubtype) => ({
-            rigCards: [
-              ...variant.rigCards,
-              { ...card, selectedSubtype },
-            ],
-            preRunPreparation: {
-              credits:
-                (variant.preRunPreparation?.credits ?? 0) + change.cost.credits,
-              clicks:
-                (variant.preRunPreparation?.clicks ?? 0) + change.cost.clicks,
-            },
-          }))
-          : []),
-      ]);
-    }
-    const choices = cardImplementationForDefinitionId(card.definitionId)
-      ?.icebreakerSubtypeChange;
-    if (choices?.timing !== "during_run" || choices.limit !== "once_until_selected")
-      return variants.map((variant) => ({
-        ...variant,
-        rigCards: [...variant.rigCards, card],
-      }));
-    return variants.flatMap((variant) =>
-      choices.choices.map((selectedSubtype) => ({
-        ...variant,
-        rigCards: [...variant.rigCards, { ...card, selectedSubtype }],
-      })),
-    );
-  }, [{ rigCards: [] }]);
+        }));
+      return variants.flatMap((variant) =>
+        choices.choices.map((selectedSubtype) => ({
+          ...variant,
+          rigCards: [...variant.rigCards, { ...card, selectedSubtype }],
+        })),
+      );
+    },
+    [{ rigCards: [] }],
+  );
 }
 
 function compareKnownPathAssessments(
@@ -343,14 +353,23 @@ function assessKnownRezzedIcePathInternal(
   const conditionalRiskReasons = new Set<string>();
   let visibleCorpCreditsThroughPath = visibleCorpBidCapacity;
   let netOrCoreDamagePreventionRemaining =
-    deflectorContext.netOrCoreDamagePreventionRemaining ??
-    0;
+    deflectorContext.netOrCoreDamagePreventionRemaining ?? 0;
+  let runDamagePreventionRemaining =
+    deflectorContext.runDamagePreventionRemaining ?? 0;
+  let runnerTraceSupportQuote = deflectorContext.runnerTraceSupportQuote
+    ? cloneVisibleRunnerTraceSupportQuote(
+        deflectorContext.runnerTraceSupportQuote,
+      )
+    : undefined;
   const breakersAtRiskOfBeingTrashed = new Set<string>();
   const breakerState: VisibleRunBreakerState = {
     strengthByBreakerInstanceId: new Map(
       rigCards.map((card) => [
         card.instanceId,
-        visibleBreakerStrengthForTargetServer(card, deflectorContext.targetServerId),
+        visibleBreakerStrengthForTargetServer(
+          card,
+          deflectorContext.targetServerId,
+        ),
       ]),
     ),
     pendingFreeBreaks: [],
@@ -702,11 +721,12 @@ function assessKnownRezzedIcePathInternal(
       visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
       breakerStrengths,
       additionalBreakCostPerSubroutine,
-      ...(deflectorContext.runnerTraceSupportQuote
-        ? { runnerTraceSupportQuote: deflectorContext.runnerTraceSupportQuote }
-        : {}),
+      ...(runnerTraceSupportQuote ? { runnerTraceSupportQuote } : {}),
       ...(deflectorContext.runTraceLinkBonus !== undefined
         ? { runTraceLinkBonus: deflectorContext.runTraceLinkBonus }
+        : {}),
+      ...(deflectorContext.excludeStealthTraceCredits
+        ? { excludeStealthTraceCredits: true }
         : {}),
     });
     const avoidedVisibleHazardSubroutineIds = new Set<string>();
@@ -715,8 +735,11 @@ function assessKnownRezzedIcePathInternal(
       const hazard = applyVisibleDamagePrevention(
         projection.hazard,
         netOrCoreDamagePreventionRemaining,
+        runDamagePreventionRemaining,
       );
-      netOrCoreDamagePreventionRemaining -= hazard.damagePreventionApplied ?? 0;
+      netOrCoreDamagePreventionRemaining -=
+        hazard.freeDamagePreventionApplied ?? 0;
+      runDamagePreventionRemaining -= hazard.runDamagePreventionApplied ?? 0;
       visibleIceRunHazards.push(hazard);
       if (avoidancePayment) {
         avoidedVisibleHazardSubroutineIds.add(hazard.subroutineId);
@@ -737,6 +760,22 @@ function assessKnownRezzedIcePathInternal(
       } else if (avoidancePayment?.kind === "general") {
         visibleBreakCost += avoidancePayment.cost;
         spendGeneralCredits(creditBudget, avoidancePayment.cost);
+      }
+      if (projection.traceCreditPoolSpent && runnerTraceSupportQuote) {
+        runnerTraceSupportQuote = spendVisibleTraceCreditPool(
+          runnerTraceSupportQuote,
+          projection.traceCreditPoolSpent,
+          deflectorContext.excludeStealthTraceCredits === true,
+        );
+      }
+      if (
+        projection.traceSupportSourceIdsConsumed?.length &&
+        runnerTraceSupportQuote
+      ) {
+        runnerTraceSupportQuote = consumeVisibleTraceSupportSources(
+          runnerTraceSupportQuote,
+          projection.traceSupportSourceIdsConsumed,
+        );
       }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
@@ -905,6 +944,66 @@ function assessKnownRezzedIcePathInternal(
   };
 }
 
+function cloneVisibleRunnerTraceSupportQuote(
+  quote: VisibleRunnerTraceSupportQuote,
+): VisibleRunnerTraceSupportQuote {
+  return {
+    traceCreditPool: quote.traceCreditPool,
+    traceCreditSources: quote.traceCreditSources.map((source) => ({
+      ...source,
+    })),
+    baseLinkOptions: quote.baseLinkOptions.map((option) => ({ ...option })),
+    postBidLinkOptions: quote.postBidLinkOptions.map((option) => ({
+      ...option,
+    })),
+    traceSuccessCancelOptions: quote.traceSuccessCancelOptions.map(
+      (option) => ({
+        ...option,
+      }),
+    ),
+  };
+}
+
+function spendVisibleTraceCreditPool(
+  quote: VisibleRunnerTraceSupportQuote,
+  amount: number,
+  excludeStealthCredits: boolean,
+): VisibleRunnerTraceSupportQuote {
+  let remaining = Math.max(0, Math.floor(amount));
+  const traceCreditSources = quote.traceCreditSources.map((source) => {
+    if (remaining <= 0 || (excludeStealthCredits && source.isStealth)) {
+      return source;
+    }
+    const spent = Math.min(Math.max(0, Math.floor(source.amount)), remaining);
+    remaining -= spent;
+    return { ...source, amount: source.amount - spent };
+  });
+  if (remaining > 0) {
+    throw new Error("Trace-Credit-Payment uebersteigt die sichtbaren Quellen.");
+  }
+  return {
+    ...quote,
+    traceCreditPool: Math.max(0, quote.traceCreditPool - amount),
+    traceCreditSources,
+  };
+}
+
+function consumeVisibleTraceSupportSources(
+  quote: VisibleRunnerTraceSupportQuote,
+  sourceIds: string[],
+): VisibleRunnerTraceSupportQuote {
+  const consumed = new Set(sourceIds);
+  return {
+    ...quote,
+    postBidLinkOptions: quote.postBidLinkOptions.filter(
+      (option) => !consumed.has(option.sourceCardInstanceId),
+    ),
+    traceSuccessCancelOptions: quote.traceSuccessCancelOptions.filter(
+      (option) => !consumed.has(option.sourceCardInstanceId),
+    ),
+  };
+}
+
 function visibleBreakerStrengthForTargetServer(
   card: VisibleCard,
   targetServerId: string | undefined,
@@ -932,22 +1031,27 @@ function visibleBreakerStrengthForTargetServer(
 
 function applyVisibleDamagePrevention(
   hazard: VisibleIceRunHazard,
-  remainingPrevention: number,
+  remainingNetOrCorePrevention: number,
+  remainingRunPrevention: number,
 ): VisibleIceRunHazard {
-  if (
-    !hazard.expectedDamage ||
-    hazard.effectType !== "net_damage"
-  )
+  if (!hazard.expectedDamage || hazard.effectType !== "net_damage")
     return hazard;
-  const applied = Math.min(
-    Math.max(0, Math.floor(remainingPrevention)),
+  const freeApplied = Math.min(
+    Math.max(0, Math.floor(remainingNetOrCorePrevention)),
     hazard.expectedDamage,
   );
+  const runApplied = Math.min(
+    Math.max(0, Math.floor(remainingRunPrevention)),
+    hazard.expectedDamage - freeApplied,
+  );
+  const applied = freeApplied + runApplied;
   if (applied <= 0) return hazard;
   return {
     ...hazard,
     expectedDamage: hazard.expectedDamage - applied,
     damagePreventionApplied: applied,
+    ...(freeApplied > 0 ? { freeDamagePreventionApplied: freeApplied } : {}),
+    ...(runApplied > 0 ? { runDamagePreventionApplied: runApplied } : {}),
   };
 }
 
@@ -986,7 +1090,9 @@ function advanceVisibleRunBreakerState(
       (entry) => entry.sourceBreakerInstanceId === sourceBreakerInstanceId,
     );
     if (pendingIndex < 0) {
-      throw new Error("Verbrauchter Free-Break ist im Run-State nicht vorhanden.");
+      throw new Error(
+        "Verbrauchter Free-Break ist im Run-State nicht vorhanden.",
+      );
     }
     state.pendingFreeBreaks.splice(pendingIndex, 1);
   }
@@ -995,7 +1101,8 @@ function advanceVisibleRunBreakerState(
     if (change.kind !== "set_pending_free_break") continue;
     state.pendingFreeBreaks = [
       ...state.pendingFreeBreaks.filter(
-        (entry) => entry.sourceBreakerInstanceId !== assessment.breakerInstanceId,
+        (entry) =>
+          entry.sourceBreakerInstanceId !== assessment.breakerInstanceId,
       ),
       {
         sourceBreakerInstanceId: assessment.breakerInstanceId,

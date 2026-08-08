@@ -88,16 +88,31 @@ export function visibleIceRunHazardsForQuote(params: {
   additionalBreakCostPerSubroutine: number;
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
   runTraceLinkBonus?: number;
+  excludeStealthTraceCredits?: boolean;
 }): VisibleIceRunHazardProjection[] {
   if (!params.quote) return [];
   const hazards: VisibleIceRunHazardProjection[] = [];
   let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
+  let remainingTraceCreditPool = visibleTraceCreditPool(
+    params.runnerTraceSupportQuote,
+    params.excludeStealthTraceCredits,
+  );
+  const consumedTraceSupportSourceIds = new Set<string>();
   params.quote.subroutines.forEach((subroutine) => {
     if (subroutine.type !== "initiate_trace") return;
     const traceSupport = visibleRunnerTraceSupport(
-      params.runnerTraceSupportQuote,
+      traceSupportQuoteWithoutConsumedSources(
+        params.runnerTraceSupportQuote,
+        consumedTraceSupportSourceIds,
+      ),
       remainingHazardCredits,
       params.runTraceLinkBonus,
+      {
+        traceCreditPool: remainingTraceCreditPool,
+        ...(params.excludeStealthTraceCredits
+          ? { excludeStealthCredits: true }
+          : {}),
+      },
     );
     const successEffect = traceSuccessEffectForVisibleSubroutine(subroutine);
     const baseHazard = visibleIceRunHazardForTraceEffect(successEffect);
@@ -119,8 +134,13 @@ export function visibleIceRunHazardsForQuote(params: {
             traceBaseStrength + visibleCorpBidCapacity,
             traceSupport,
           );
+    const traceSuccessCancel = cheapestTraceSuccessCancel(
+      traceSupport,
+      remainingHazardCredits,
+    );
     const traceAvoidanceCandidate =
       visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe?.creditCost;
+    const traceSuccessCancelCandidate = traceSuccessCancel?.activationCost;
     const breakAssessment = minimumCreditsToBreakVisibleSubroutines(
       effectiveIceForQuote(params.ice, params.quote),
       params.rigCards,
@@ -134,6 +154,7 @@ export function visibleIceRunHazardsForQuote(params: {
         : undefined;
     const avoidanceCandidates = [
       traceAvoidanceCandidate,
+      traceSuccessCancelCandidate,
       breakAvoidanceCandidate,
     ].filter((cost): cost is number => cost !== undefined);
     const minimumAvoidanceCost =
@@ -144,7 +165,20 @@ export function visibleIceRunHazardsForQuote(params: {
       breakAvoidanceCandidate !== undefined &&
       minimumAvoidanceCost === breakAvoidanceCandidate &&
       (traceAvoidanceCandidate === undefined ||
-        breakAvoidanceCandidate < traceAvoidanceCandidate);
+        breakAvoidanceCandidate < traceAvoidanceCandidate) &&
+      (traceSuccessCancelCandidate === undefined ||
+        breakAvoidanceCandidate < traceSuccessCancelCandidate);
+    const usesTraceLinkAvoidance =
+      traceAvoidanceCandidate !== undefined &&
+      minimumAvoidanceCost === traceAvoidanceCandidate &&
+      (traceSuccessCancelCandidate === undefined ||
+        traceAvoidanceCandidate <= traceSuccessCancelCandidate) &&
+      !usesBreakAvoidance;
+    const usesTraceSuccessCancel =
+      traceSuccessCancelCandidate !== undefined &&
+      minimumAvoidanceCost === traceSuccessCancelCandidate &&
+      !usesBreakAvoidance &&
+      !usesTraceLinkAvoidance;
     const unavoidable = minimumAvoidanceCost === undefined;
     const sourceDefinitionId =
       subroutine.sourceDefinitionId ?? params.quote!.iceDefinitionId;
@@ -203,6 +237,9 @@ export function visibleIceRunHazardsForQuote(params: {
               cheapestCorpMaxTraceAvoidance.creditCost,
           }
         : {}),
+      ...(traceSuccessCancel
+        ? { traceSuccessCancelAvoidanceCost: traceSuccessCancel.activationCost }
+        : {}),
       ...(baseLinkEvidenceSource?.baseLink
         ? { baseLinkValue: baseLinkEvidenceSource.baseLink }
         : {}),
@@ -252,6 +289,12 @@ export function visibleIceRunHazardsForQuote(params: {
               `visible_corp_max_trace_avoidance_cost:${cheapestCorpMaxTraceAvoidance.creditCost}`,
             ]
           : []),
+        ...(traceSuccessCancel
+          ? [
+              `visible_trace_success_cancel_cost:${traceSuccessCancel.activationCost}`,
+              `visible_trace_success_cancel_source:${traceSuccessCancel.sourceTitle}`,
+            ]
+          : []),
         ...(baseLinkEvidenceSource?.baseLink
           ? [
               `visible_trace_base_link:${baseLinkEvidenceSource.baseLink}`,
@@ -276,6 +319,28 @@ export function visibleIceRunHazardsForQuote(params: {
     };
     hazards.push({
       hazard,
+      ...(usesTraceLinkAvoidance &&
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe
+        ? {
+            traceCreditPoolSpent:
+              visibleCorpMaxTraceAvoidance.cheapestAffordableSafe
+                .traceCreditPoolSpent,
+          }
+        : {}),
+      ...(usesTraceLinkAvoidance &&
+      visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe
+        ? {
+            traceSupportSourceIdsConsumed:
+              visibleCorpMaxTraceAvoidance.cheapestAffordableSafe
+                .consumedSourceIds,
+          }
+        : usesTraceSuccessCancel && traceSuccessCancel
+          ? {
+              traceSupportSourceIdsConsumed: [
+                traceSuccessCancel.sourceCardInstanceId,
+              ],
+            }
+          : {}),
       ...(!unavoidable && minimumAvoidanceCost !== undefined
         ? usesBreakAvoidance && breakAssessment
           ? {
@@ -294,6 +359,25 @@ export function visibleIceRunHazardsForQuote(params: {
     });
     if (!unavoidable && minimumAvoidanceCost !== undefined) {
       remainingHazardCredits -= minimumAvoidanceCost;
+      const selectedTraceCreditPoolSpent = usesTraceLinkAvoidance
+        ? (visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe
+            ?.traceCreditPoolSpent ?? 0)
+        : 0;
+      remainingTraceCreditPool = Math.max(
+        0,
+        remainingTraceCreditPool - selectedTraceCreditPoolSpent,
+      );
+      if (usesTraceLinkAvoidance) {
+        for (const sourceId of visibleCorpMaxTraceAvoidance
+          ?.cheapestAffordableSafe?.consumedSourceIds ?? []) {
+          consumedTraceSupportSourceIds.add(sourceId);
+        }
+      }
+      if (usesTraceSuccessCancel && traceSuccessCancel) {
+        consumedTraceSupportSourceIds.add(
+          traceSuccessCancel.sourceCardInstanceId,
+        );
+      }
     }
   });
   return hazards;
@@ -470,11 +554,33 @@ type VisibleRunnerTraceSupportOption = {
   sideEffect?: VisibleTraceSupportSideEffect;
 };
 
+type VisibleRunnerTracePostBidLinkOption = {
+  sourceCardInstanceId: string;
+  sourceDefinitionId: string;
+  sourceTitle: string;
+  linkDelta: number;
+  activationCost: number;
+  tapSource: boolean;
+  trashSource: boolean;
+  safeForAccess: boolean;
+};
+
+type VisibleRunnerTraceSuccessCancelOption = {
+  sourceCardInstanceId: string;
+  sourceDefinitionId: string;
+  sourceTitle: string;
+  activationCost: number;
+  tapSource: boolean;
+  trashSource: boolean;
+};
+
 type VisibleRunnerTraceSupport = {
   availableCredits: number;
   traceCreditPool: number;
   runnerTraceCapacity: number;
   baseLinkOptions: VisibleRunnerTraceSupportOption[];
+  postBidLinkOptions: VisibleRunnerTracePostBidLinkOption[];
+  traceSuccessCancelOptions: VisibleRunnerTraceSuccessCancelOption[];
 };
 
 type VisibleTraceAvoidanceCandidate = VisibleRunnerTraceSupportOption & {
@@ -482,6 +588,8 @@ type VisibleTraceAvoidanceCandidate = VisibleRunnerTraceSupportOption & {
   traceBidCost: number;
   affordable: boolean;
   runnerTraceCapacity: number;
+  traceCreditPoolSpent: number;
+  consumedSourceIds: string[];
 };
 
 type VisibleTraceAvoidanceAssessment = {
@@ -495,41 +603,89 @@ export function visibleRunnerTraceSupport(
   quote: VisibleRunnerTraceSupportQuote | undefined,
   availableCredits: number,
   runTraceLinkBonus = 0,
+  options: {
+    traceCreditPool?: number;
+    excludeStealthCredits?: boolean;
+  } = {},
 ): VisibleRunnerTraceSupport {
   const normalizedCredits = Math.max(0, Math.floor(availableCredits));
   const traceCreditPool = Math.max(
     0,
-    Math.floor(quote?.traceCreditPool ?? 0),
+    Math.floor(
+      options.traceCreditPool ??
+        visibleTraceCreditPool(quote, options.excludeStealthCredits),
+    ),
   );
   const linkBonus = Math.max(0, Math.floor(runTraceLinkBonus));
-  const baseLinkOptions: VisibleRunnerTraceSupportOption[] =
-    (quote?.baseLinkOptions ?? [
+  const baseLinkOptions: VisibleRunnerTraceSupportOption[] = (
+    quote?.baseLinkOptions ?? [
       { baseLink: 0, activationCost: 0, safeForAccess: true },
-    ]).map((option) => ({
+    ]
+  ).map((option) => ({
+    ...option,
+    baseLink: Math.max(0, Math.floor(option.baseLink)) + linkBonus,
+    activationCost: Math.max(0, Math.floor(option.activationCost)),
+  }));
+  const postBidLinkOptions = (quote?.postBidLinkOptions ?? []).map(
+    (option) => ({
       ...option,
-      baseLink: Math.max(0, Math.floor(option.baseLink)) + linkBonus,
+      linkDelta: Math.max(0, Math.floor(option.linkDelta)),
       activationCost: Math.max(0, Math.floor(option.activationCost)),
-    }));
+    }),
+  );
+  const traceSuccessCancelOptions = (
+    quote?.traceSuccessCancelOptions ?? []
+  ).map((option) => ({
+    ...option,
+    activationCost: Math.max(0, Math.floor(option.activationCost)),
+  }));
   const runnerTraceCapacity = Math.max(
-    ...baseLinkOptions
-      .filter(
-        (option) =>
-          option.safeForAccess && option.activationCost <= normalizedCredits,
-      )
-      .map(
-        (option) =>
-          option.baseLink +
-          normalizedCredits -
-          option.activationCost +
-          traceCreditPool,
-      ),
+    0,
+    ...baseLinkOptions.flatMap((baseOption) =>
+      visibleTracePostBidSelections(postBidLinkOptions)
+        .filter(
+          (selection) =>
+            baseOption.safeForAccess &&
+            selection.safeForAccess &&
+            baseOption.activationCost + selection.activationCost <=
+              normalizedCredits,
+        )
+        .map(
+          (selection) =>
+            baseOption.baseLink +
+            selection.linkDelta +
+            normalizedCredits -
+            baseOption.activationCost -
+            selection.activationCost +
+            traceCreditPool,
+        ),
+    ),
   );
   return {
     availableCredits: normalizedCredits,
     traceCreditPool,
     runnerTraceCapacity,
     baseLinkOptions,
+    postBidLinkOptions,
+    traceSuccessCancelOptions,
   };
+}
+
+export function visibleTraceCreditPool(
+  quote: VisibleRunnerTraceSupportQuote | undefined,
+  excludeStealthCredits = false,
+): number {
+  if (!quote) return 0;
+  const traceCreditPool = quote.traceCreditSources
+    .filter((source) => !excludeStealthCredits || !source.isStealth)
+    .reduce(
+      (total, source) => total + Math.max(0, Math.floor(source.amount)),
+      0,
+    );
+  if (traceCreditPool > quote.traceCreditPool) {
+    throw new Error("Trace-Credit-Quellen uebersteigen den sichtbaren Pool.");
+  }
+  return traceCreditPool;
 }
 
 export function visibleTraceAvoidanceForBaseStrength(
@@ -537,27 +693,40 @@ export function visibleTraceAvoidanceForBaseStrength(
   support: VisibleRunnerTraceSupport,
 ): VisibleTraceAvoidanceAssessment {
   const baseStrength = Math.max(0, Math.floor(traceBaseStrength));
-  const candidates = support.baseLinkOptions.map((option) => {
-    const traceBidCost = Math.max(0, baseStrength - option.baseLink);
-    const creditBidCost = Math.max(0, traceBidCost - support.traceCreditPool);
-    const creditCost = option.activationCost + creditBidCost;
-    const affordable =
-      option.activationCost <= support.availableCredits &&
-      traceBidCost <=
-        support.availableCredits -
-          option.activationCost +
-          support.traceCreditPool;
-    return {
-      ...option,
-      creditCost,
-      traceBidCost,
-      affordable,
-      runnerTraceCapacity:
-        option.baseLink +
-        Math.max(0, support.availableCredits - option.activationCost) +
-        support.traceCreditPool,
-    };
-  });
+  const candidates = support.baseLinkOptions.flatMap((option) =>
+    visibleTracePostBidSelections(support.postBidLinkOptions).map(
+      (postBidSelection) => {
+        const activationCost =
+          option.activationCost + postBidSelection.activationCost;
+        const effectiveLink = option.baseLink + postBidSelection.linkDelta;
+        const traceBidCost = Math.max(0, baseStrength - effectiveLink);
+        const traceCreditPoolSpent = Math.min(
+          support.traceCreditPool,
+          traceBidCost,
+        );
+        const creditBidCost = traceBidCost - traceCreditPoolSpent;
+        const creditCost = activationCost + creditBidCost;
+        const affordable =
+          activationCost <= support.availableCredits &&
+          traceBidCost <=
+            support.availableCredits - activationCost + support.traceCreditPool;
+        return {
+          ...option,
+          activationCost,
+          safeForAccess: option.safeForAccess && postBidSelection.safeForAccess,
+          creditCost,
+          traceBidCost,
+          affordable,
+          traceCreditPoolSpent,
+          consumedSourceIds: postBidSelection.consumedSourceIds,
+          runnerTraceCapacity:
+            effectiveLink +
+            Math.max(0, support.availableCredits - activationCost) +
+            support.traceCreditPool,
+        };
+      },
+    ),
+  );
   const assessment: VisibleTraceAvoidanceAssessment = {};
   const cheapestSafe = cheapestTraceAvoidanceCandidate(
     candidates.filter((candidate) => candidate.safeForAccess),
@@ -582,6 +751,73 @@ export function visibleTraceAvoidanceForBaseStrength(
   if (cheapestAffordableUnsafe)
     assessment.cheapestAffordableUnsafe = cheapestAffordableUnsafe;
   return assessment;
+}
+
+function visibleTracePostBidSelections(
+  options: VisibleRunnerTracePostBidLinkOption[],
+): Array<{
+  linkDelta: number;
+  activationCost: number;
+  safeForAccess: boolean;
+  consumedSourceIds: string[];
+}> {
+  let selections: Array<{
+    linkDelta: number;
+    activationCost: number;
+    safeForAccess: boolean;
+    consumedSourceIds: string[];
+  }> = [
+    {
+      linkDelta: 0,
+      activationCost: 0,
+      safeForAccess: true,
+      consumedSourceIds: [],
+    },
+  ];
+  for (const option of options) {
+    selections = [
+      ...selections,
+      ...selections.map((selection) => ({
+        linkDelta: selection.linkDelta + option.linkDelta,
+        activationCost: selection.activationCost + option.activationCost,
+        safeForAccess: selection.safeForAccess && option.safeForAccess,
+        consumedSourceIds:
+          option.tapSource || option.trashSource
+            ? [...selection.consumedSourceIds, option.sourceCardInstanceId]
+            : selection.consumedSourceIds,
+      })),
+    ];
+  }
+  return selections;
+}
+
+function traceSupportQuoteWithoutConsumedSources(
+  quote: VisibleRunnerTraceSupportQuote | undefined,
+  consumedSourceIds: Set<string>,
+): VisibleRunnerTraceSupportQuote | undefined {
+  if (!quote || consumedSourceIds.size === 0) return quote;
+  return {
+    ...quote,
+    postBidLinkOptions: quote.postBidLinkOptions.filter(
+      (option) => !consumedSourceIds.has(option.sourceCardInstanceId),
+    ),
+    traceSuccessCancelOptions: quote.traceSuccessCancelOptions.filter(
+      (option) => !consumedSourceIds.has(option.sourceCardInstanceId),
+    ),
+  };
+}
+
+function cheapestTraceSuccessCancel(
+  support: VisibleRunnerTraceSupport,
+  availableCredits: number,
+): VisibleRunnerTraceSuccessCancelOption | undefined {
+  return support.traceSuccessCancelOptions
+    .filter((option) => option.activationCost <= availableCredits)
+    .sort(
+      (left, right) =>
+        left.activationCost - right.activationCost ||
+        left.sourceCardInstanceId.localeCompare(right.sourceCardInstanceId),
+    )[0];
 }
 
 export function cheapestTraceAvoidanceCandidate(
