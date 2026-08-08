@@ -1,17 +1,10 @@
-import type {
-  AiDecisionInput,
-  LegalAction,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import activeHints from "../../../data/ai/ai-card-hints-active.json";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
 import { createAiHintsByCard } from "./ai-hints";
-import type { TacticalGoalLike } from "./decision/semantic-decision-frame";
-import { corpPunishCandidates } from "./plans/tactical-plan-corp-helpers";
-import type { TacticalPlanBuildContext } from "./plans/tactical-plan-types";
 import { candidateRequiresSuccessfulTrace } from "./runtime/trace-tag-success-estimate";
 import { buildCorpIceCardFacts } from "./runtime/corp-ice-placement/corp-ice-placement";
 
@@ -110,15 +103,6 @@ describe("match FD7671 card-hint contract", () => {
       );
       expect(candidateRequiresSuccessfulTrace(candidate)).toBe(false);
     }
-    expect(
-      corpPunishCandidates(
-        {
-          input: rexCorpInput(actions),
-          candidates,
-        } as TacticalPlanBuildContext,
-        { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
-      ),
-    ).toEqual([]);
   });
 });
 
@@ -138,35 +122,4 @@ function rexAction(
     targetRequirements: [],
     visibility: "public",
   } as unknown as LegalAction;
-}
-
-function rexCorpInput(legalActions: LegalAction[]): AiDecisionInput {
-  return {
-    side: "corp",
-    actorSide: "corp",
-    legalActions,
-    playerView: {
-      side: "corp",
-      legalActions,
-      own: {
-        credits: 8,
-        clicks: 3,
-        agendaPoints: 0,
-        gripOrHq: [],
-        heapOrArchives: [],
-        rig: [],
-        scoreArea: [],
-      },
-      opponent: {
-        credits: 4,
-        clicks: 4,
-        agendaPoints: 0,
-        rig: [],
-        scoreArea: [],
-      },
-      servers: [],
-      publicEvents: [],
-      agendaPointsToWin: 7,
-    },
-  } as unknown as AiDecisionInput;
 }

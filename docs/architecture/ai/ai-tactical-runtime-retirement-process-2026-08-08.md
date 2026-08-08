@@ -2,7 +2,10 @@
 
 ## Status
 
-`LGM-4` abgeschlossen. `LGM-5` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
+`LGM-5` ist abgeschlossen. Weitere ausschließlich testseitig erreichbare
+historische Diagnose- und Goal-Cluster bleiben außerhalb dieses
+TacticalPlan-Evaluator-Pakets und werden nur nach einem separaten
+Consumer-Audit bearbeitet. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
 weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
 Worktree vorgesehen ist.
 
@@ -128,6 +131,15 @@ Legacy-/Diagnosebereich verbleibt.
 
 **Done-Gate:** gezielte Tests, AI-Typecheck, aktive AI-Strukturgates,
 Package-Boundary-Check und `git diff --check` sind grün.
+
+**Ergebnis:** Der historische Evaluator `tactical-plans.ts`, seine exklusiven
+Runner-/Corp-Builder, Mapper und TacticalPlan-Memory sowie die ausschließlich
+darauf bezogenen Tests sind entfernt. Checkpoint- und Capture-Tooling speichern
+nur noch den residenten Planportfolio-Zustand. Der AI-Typecheck und der
+Struktur-Gate sind grün; 22 fokussierte, weiterbestehende Vertrags-Tests sind
+grün. Die separate Runner-Safety-Suite schlägt bereits beim Fixture-Aufbau an
+fehlenden autoritativen Effective-Run-Quotes für bekannte ICE fehl und ist kein
+Consumer des entfernten Graphen.
 
 ## Fehlerbehandlung und Abschluss
 

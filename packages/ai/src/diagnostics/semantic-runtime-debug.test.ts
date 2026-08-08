@@ -5,11 +5,11 @@ import {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import type {
   TacticalPlan,
   TacticalPlanRuntimeResult,
-} from "../tactical-plans";
+} from "../plans/tactical-plan-types";
+import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import { createRunnerCreditDemand } from "../plans/credit-demand";
 import { createRunnerActionDemand } from "../plans/action-demand";
 import type { ActionCapacityRoute } from "../plans/action-capacity-route";

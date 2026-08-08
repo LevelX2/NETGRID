@@ -5,10 +5,6 @@ import {
   AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV,
 } from "./decision/pilot-scope-registry";
 import {
-  getTacticalPlanMemorySnapshot,
-  resetTacticalPlanMemory,
-} from "./tactical-plans";
-import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "./plans/resident-plan-portfolio-memory";
@@ -32,7 +28,6 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     process.env[AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV];
 
   afterEach(() => {
-    resetTacticalPlanMemory();
     resetResidentPlanPortfolioMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -910,7 +905,6 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       "resident_plan_portfolio_preview_only:true",
     );
     expect(residentPlanPortfolioSnapshot(input)).toBeUndefined();
-    expect(getTacticalPlanMemorySnapshot(input)).toBeUndefined();
 
     const liveDecision = chooseRunnerAction(input);
 
@@ -920,6 +914,5 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         "plan:runner.rig_and_coverage:",
       ),
     });
-    expect(getTacticalPlanMemorySnapshot(input)).toBeUndefined();
   });
 });
