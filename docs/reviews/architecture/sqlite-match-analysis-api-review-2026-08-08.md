@@ -33,14 +33,19 @@ exakt gebundene Diagnose steht zusätzlich
 bereit. Er materialisiert den zugehörigen Trace, den exakt gleichversionierten
 Snapshot und einen kleinen Eventbereich, beendet den SQLite-Read und erzeugt
 danach im RAM die actor-sichere historische State-View und LegalActions.
+Bei Decision-Filtern bindet das Bundle Events an den StateVersion-Bereich der
+ausgewählten Decisions, damit späte Kontexte nicht durch frühe Events verdrängt
+werden.
 
 Verfügbar sind Match-ID/Status/Versionen, öffentliche Events, ausgeführte
-KI-Aktionen sowie die aktivierte redigierte Plan- und Why-not-Diagnostik. Nicht
-als belastbare historische Daten verfügbar sind LegalActions und actor-sichere
-State-Views, wenn ein exakt passender, hash-verifizierter Snapshot existiert.
+KI-Aktionen sowie die aktivierte redigierte Plan- und Why-not-Diagnostik.
+LegalActions und actor-sichere State-Views sind verfügbar, wenn ein exakt
+passender, hash-verifizierter Snapshot existiert.
 Sie werden als heutige Engine-Rekonstruktion gekennzeichnet. Eigenständige
 historische Engine-Quotes und eine getrennte Run-/ICE-Encounter-Projektion
-bleiben weiterhin nur verfügbar, soweit sie bereits im Decision-Trace stehen.
+bleiben weiterhin nur verfügbar, soweit sie bereits im Decision-Trace stehen;
+für Corp-`rez_ice` liefert der Context zusätzlich einen heutigen Rez-Quote auf
+dem exakten historischen Snapshot.
 
 ## Laufende Matches und SQLite
 
