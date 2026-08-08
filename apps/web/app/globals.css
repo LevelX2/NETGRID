@@ -4803,6 +4803,13 @@ select {
   white-space: nowrap;
 }
 
+.matchStrip .matchStripMatchId {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .matchStrip strong {
   margin-right: 4px;
   color: var(--text);

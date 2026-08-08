@@ -6888,8 +6888,8 @@ export default function Page() {
                 <span title={payload.matchStatus}>
                   <strong>Status</strong> {payload.matchStatus}
                 </span>
-                <span title={payload.matchId}>
-                  <strong>Match</strong> {shortDiagnosticsHash(payload.matchId)}
+                <span className="matchStripMatchId" title={payload.matchId}>
+                  <strong>Match</strong> {payload.matchId}
                 </span>
                 <span>
                   <strong>Gegenüber</strong>{" "}
