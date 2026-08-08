@@ -1564,6 +1564,8 @@ function positionInvalidatesKey(
     event.family === "steal" ||
     event.family === "discard"
   ) {
+    if (event.family === "discard" && !event.serverId)
+      return key.startsWith("hq:");
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
   }
   return false;

@@ -271,6 +271,32 @@ export function handleTriggerAbilityExecution(
     };
     return handled(legalAction);
   }
+  if (legalAction.payload?.runnerAbility === "decline_optional_bonus_run") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf den optionalen Bonus-Run ablehnen.");
+    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+      throw new Error(
+        "Der optionale Bonus-Run kann nur im unmittelbaren Runner-Fenster abgelehnt werden.",
+      );
+    const flags = host.runner.ensureTurnFlags(state);
+    if (
+      flags.bonusRunPending !== true ||
+      flags.successfulRunExtraRunPending === true ||
+      flags.pendingSequences?.some(
+        (sequence) =>
+          sequence.kind === "multi_server_success_sequence" &&
+          sequence.pendingServerIds.length > 0,
+      )
+    )
+      throw new Error("Es ist kein optionaler Bonus-Run offen.");
+    flags.bonusRunPending = false;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      optionalBonusRunDecision: "decline",
+      optionalBonusRunPending: false,
+    };
+    return handled(legalAction);
+  }
   if (
     legalAction.payload?.runnerAbility ===
     "multi_server_success_sequence_failed"

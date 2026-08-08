@@ -855,6 +855,42 @@ describe("belief-state known position memory", () => {
       definitionId: "simple_upgrade",
     });
   });
+
+  it("keeps the match-b763978b remote root memory across an unrelated hidden Corp discard", () => {
+    const remoteAccess = publicEvent("evt_remote_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "remote_2",
+      serverLabel: "Remote 2",
+      cardDefinitionId: "onr_classic_023_shock-treatment",
+      accessedCardPositionKey: "root:0",
+      accessedArea: "root",
+      accessedIndex: 0,
+    });
+    const hiddenCorpDiscard = publicEvent("evt_corp_discard", "resolve_choice", 2, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      choiceKind: "select_cards",
+      discardResolved: true,
+      discardSide: "corp",
+      discardZone: "archives",
+      redactedKind: "hidden_zone",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "discard_phase",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([remoteAccess, hiddenCorpDiscard]),
+    );
+
+    expect(belief.runnerOpponentModel?.knownPositionMemory).toContainEqual(
+      expect.objectContaining({
+        zone: "remote_2",
+        positionKey: "root:0",
+        definitionId: "onr_classic_023_shock-treatment",
+      }),
+    );
+  });
 });
 
 describe("belief-state public remote root type deductions", () => {

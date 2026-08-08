@@ -351,6 +351,10 @@ export function buildRunnerMainActions(
   }
   const bonusRunPending =
     flags.bonusRunPending === true || nextSequenceServerId !== undefined;
+  const optionalBonusRunPending =
+    flags.bonusRunPending === true &&
+    !bodyweightExtraRunPending &&
+    nextSequenceServerId === undefined;
   if (
     !hasClicks &&
     !bonusRunPending &&
@@ -1289,6 +1293,7 @@ export function buildRunnerMainActions(
           {
             ...runPayload,
             bonusRunNoClick: true,
+            ...(optionalBonusRunPending ? { optionalBonusRun: true } : {}),
             bonusRunSource: nextSequenceServerId
               ? pendingSequence?.sourceDefinitionId
               : flags.successfulRunExtraRunPending === true
@@ -1342,7 +1347,32 @@ export function buildRunnerMainActions(
     "runner",
     actions,
   );
-  if (!bodyweightExtraRunPending) return filteredActions;
+  if (!bodyweightExtraRunPending && !optionalBonusRunPending)
+    return filteredActions;
+
+  if (optionalBonusRunPending) {
+    const immediateRunActions = filteredActions.filter(
+      (candidate) =>
+        candidate.type === "start_run" &&
+        candidate.payload?.bonusRunNoClick === true &&
+        candidate.payload?.optionalBonusRun === true,
+    );
+    immediateRunActions.push(
+      action(
+        state,
+        "runner",
+        "trigger_ability",
+        "Keinen optionalen Bonus-Run starten",
+        "game_rule",
+        [],
+        {
+          runnerAbility: "decline_optional_bonus_run",
+          optionalBonusRunDecision: "decline",
+        },
+      ),
+    );
+    return immediateRunActions;
+  }
 
   const sourceCardId = state.runner.rig.hardware
     .slice()

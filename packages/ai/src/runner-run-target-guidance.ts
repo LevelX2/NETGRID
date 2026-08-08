@@ -109,6 +109,24 @@ export function runnerRunTargetPlausibleForMultiRun(
   );
 }
 
+/**
+ * A free, optional restricted run must still beat declining it. In particular,
+ * an unknown probe is useful as a normal or forced sequence route, but is not
+ * by itself a reason to spend an optional bonus-run opportunity.
+ */
+export function runnerRunTargetHasOptionalBonusRunValue(
+  evaluation: RunTargetPayoffInput | undefined,
+): boolean {
+  if (!evaluation) return false;
+  if (evaluation.pathPassability !== "reachable") return false;
+  if (evaluation.creditsAfterRun < 0) return false;
+  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
+  return (
+    runnerRunTargetHighPayoff(evaluation) ||
+    evaluation.recommendation === "run_now"
+  );
+}
+
 export function runnerRunTargetMultiRunPayoffClass(
   evaluation: RunTargetPayoffInput | undefined,
 ): RunnerRunTargetMultiRunPayoffClass {
