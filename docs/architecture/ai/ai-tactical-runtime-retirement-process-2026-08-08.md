@@ -2,7 +2,7 @@
 
 ## Status
 
-`LGM-2` abgeschlossen. `LGM-3` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
+`LGM-3` abgeschlossen. `LGM-4` ist als nächstes Paket vorgesehen. Die Umsetzung erfolgt auf dem sauberen lokalen Branch `main`,
 weil für diesen nicht parallelen Bereinigungsauftrag ausdrücklich kein
 Worktree vorgesehen ist.
 
@@ -86,7 +86,21 @@ sind grün.
 Decision-Chain- und Runtime-Debug-Contexts einschließlich exklusiver Tests
 sind entfernt. Kein produktiver Plan-first-Debugvertrag wurde geändert.
 
-### LGM-3 – Gemischte Verträge fachlich trennen und Restgraph finalisieren
+### LGM-3 – Produktive Diagnosetypen vom Evaluator lösen
+
+Die produktive Plan-first-Diagnostik importiert die benötigten historischen
+Strukturtypen direkt aus `plans/tactical-plan-types.ts`; sie importiert nicht
+mehr die alte TacticalPlan-Evaluator-Fassade. Verhalten, Debugpayload und
+Plan-Ownership bleiben unverändert.
+
+**Done-Gate:** fokussierte Diagnostik-/Authority-Tests, AI-Typecheck,
+Strukturcheck und `git diff --check` sind grün.
+
+**Ergebnis:** Die letzte produktive Type-only-Abhängigkeit von
+`tactical-plans.ts` ist entfernt. Der Audit weist danach ausschließlich den
+alten Choice-Ranking-Cluster als verbleibenden direkten Consumer aus.
+
+### LGM-4 – Alten Choice-Ranking-Cluster retiren und Restgraph finalisieren
 
 Prüft, ob verbleibende historische Diagnoseflächen einen aktuellen,
 ausdrücklich begründeten Zweck besitzen. Andernfalls werden sie entfernt. Der

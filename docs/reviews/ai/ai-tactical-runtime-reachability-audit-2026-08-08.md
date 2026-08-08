@@ -1,14 +1,14 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T12:57:23.639Z
+Erzeugt: 2026-08-08T12:59:37.346Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
 
 ## Klassifikationen
 
-- `legacy_test_only`: 89
-- `mixed_split_required`: 201
+- `legacy_test_only`: 128
+- `mixed_split_required`: 162
 - `productive_shared`: 254
 - `productive_simulation`: 166
 - `unreferenced`: 33
@@ -87,11 +87,8 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/breaker-ontology-consumer.ts`
 - `packages/ai/src/corp-strategic-intent.ts`
 - `packages/ai/src/decision/access-decision-projection.ts`
-- `packages/ai/src/decision/corp-tactical-goals.ts`
 - `packages/ai/src/decision/known-remote-access-commitment.ts`
-- `packages/ai/src/decision/neutral-goal-synthesis.ts`
 - `packages/ai/src/decision/semantic-decision-frame.ts`
-- `packages/ai/src/decision/tactical-goal-merge.ts`
 - `packages/ai/src/decision/tactical-goal-types.ts`
 - `packages/ai/src/deck-capabilities.ts`
 - `packages/ai/src/deck-doctrine-runtime-context.ts`
@@ -123,52 +120,16 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/plans/plan-resolution-failure.ts`
 - `packages/ai/src/plans/resident-plan-portfolio-memory.ts`
 - `packages/ai/src/plans/resident-plan-portfolio.ts`
-- `packages/ai/src/plans/runner-draw-overflow.ts`
-- `packages/ai/src/plans/tactical-plan-access-commitment.ts`
 - `packages/ai/src/plans/tactical-plan-action-demands.ts`
 - `packages/ai/src/plans/tactical-plan-action-values.ts`
-- `packages/ai/src/plans/tactical-plan-bank-tools.ts`
 - `packages/ai/src/plans/tactical-plan-breaker-cards.ts`
 - `packages/ai/src/plans/tactical-plan-breaker-coverage.ts`
 - `packages/ai/src/plans/tactical-plan-builders.ts`
-- `packages/ai/src/plans/tactical-plan-candidate-matching.ts`
-- `packages/ai/src/plans/tactical-plan-corp-finite-economy.ts`
-- `packages/ai/src/plans/tactical-plan-corp-helpers.ts`
-- `packages/ai/src/plans/tactical-plan-corp-persistent-economy.ts`
-- `packages/ai/src/plans/tactical-plan-corp-plans.ts`
-- `packages/ai/src/plans/tactical-plan-corp-remote-project.ts`
-- `packages/ai/src/plans/tactical-plan-corp-score-conversion-plan.ts`
 - `packages/ai/src/plans/tactical-plan-corp-score-conversion.ts`
 - `packages/ai/src/plans/tactical-plan-corp-score-window.ts`
-- `packages/ai/src/plans/tactical-plan-coverage-answers.ts`
-- `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts`
 - `packages/ai/src/plans/tactical-plan-coverage-kinds.ts`
-- `packages/ai/src/plans/tactical-plan-coverage-search-fit.ts`
 - `packages/ai/src/plans/tactical-plan-credit-demands.ts`
-- `packages/ai/src/plans/tactical-plan-deck-coverage.ts`
-- `packages/ai/src/plans/tactical-plan-development-card-matching.ts`
-- `packages/ai/src/plans/tactical-plan-followup-budget.ts`
-- `packages/ai/src/plans/tactical-plan-goal-evidence.ts`
-- `packages/ai/src/plans/tactical-plan-legal-action-mapping.ts`
-- `packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts`
-- `packages/ai/src/plans/tactical-plan-mapping-helpers.ts`
-- `packages/ai/src/plans/tactical-plan-progression.ts`
-- `packages/ai/src/plans/tactical-plan-recovery-loop-penalties.ts`
-- `packages/ai/src/plans/tactical-plan-redaction.ts`
-- `packages/ai/src/plans/tactical-plan-run-action-matching.ts`
-- `packages/ai/src/plans/tactical-plan-run-reachability.ts`
-- `packages/ai/src/plans/tactical-plan-runner-breaker-coverage-step.ts`
-- `packages/ai/src/plans/tactical-plan-runner-credit-base.ts`
-- `packages/ai/src/plans/tactical-plan-runner-funding-need.ts`
-- `packages/ai/src/plans/tactical-plan-runner-hand-buffer.ts`
-- `packages/ai/src/plans/tactical-plan-runner-hand-development.ts`
-- `packages/ai/src/plans/tactical-plan-runner-plans.ts`
-- `packages/ai/src/plans/tactical-plan-runner-run-targets.ts`
-- `packages/ai/src/plans/tactical-plan-runner-support-actions.ts`
 - `packages/ai/src/plans/tactical-plan-runner-survival-progress.ts`
-- `packages/ai/src/plans/tactical-plan-server-targets.ts`
-- `packages/ai/src/plans/tactical-plan-step-candidate-matching.ts`
-- `packages/ai/src/plans/tactical-plan-step-semantics.ts`
 - `packages/ai/src/plans/tactical-plan-types.ts`
 - `packages/ai/src/plans/tactical-plan-visible-cards.ts`
 - `packages/ai/src/plans/transient-plan-signals.ts`
@@ -697,9 +658,11 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/action-doctrine-goal-diagnostics.ts`
 - `packages/ai/src/actions/action-semantic-invariants.ts`
 - `packages/ai/src/decision/action-goal-fit.ts`
+- `packages/ai/src/decision/corp-tactical-goals.ts`
 - `packages/ai/src/decision/corp-tempo-goals.ts`
 - `packages/ai/src/decision/doctrine-goal-synthesis.ts`
 - `packages/ai/src/decision/hard-gates.ts`
+- `packages/ai/src/decision/neutral-goal-synthesis.ts`
 - `packages/ai/src/decision/pilot-scope-registry.ts`
 - `packages/ai/src/decision/pilot/basic-setup-pilot.ts`
 - `packages/ai/src/decision/pilot/corp-score-window-pilot.ts`
@@ -713,6 +676,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/decision/scoring-consumer-contract.ts`
 - `packages/ai/src/decision/semantic-basic-setup-pilot.ts`
 - `packages/ai/src/decision/semantic-shadow-decision.ts`
+- `packages/ai/src/decision/tactical-goal-merge.ts`
 - `packages/ai/src/endgame-goal-conversion-contracts.ts`
 - `packages/ai/src/evaluation/access-loop-detection.ts`
 - `packages/ai/src/evaluation/access-outcome-feedback.ts`
@@ -735,6 +699,42 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/evaluation/target-choice-shadow-coverage.ts`
 - `packages/ai/src/evaluation/target-choice-shadow-readiness.ts`
 - `packages/ai/src/plans/plan-resource-ledger.ts`
+- `packages/ai/src/plans/runner-draw-overflow.ts`
+- `packages/ai/src/plans/tactical-plan-access-commitment.ts`
+- `packages/ai/src/plans/tactical-plan-bank-tools.ts`
+- `packages/ai/src/plans/tactical-plan-candidate-matching.ts`
+- `packages/ai/src/plans/tactical-plan-corp-finite-economy.ts`
+- `packages/ai/src/plans/tactical-plan-corp-helpers.ts`
+- `packages/ai/src/plans/tactical-plan-corp-persistent-economy.ts`
+- `packages/ai/src/plans/tactical-plan-corp-plans.ts`
+- `packages/ai/src/plans/tactical-plan-corp-remote-project.ts`
+- `packages/ai/src/plans/tactical-plan-corp-score-conversion-plan.ts`
+- `packages/ai/src/plans/tactical-plan-coverage-answers.ts`
+- `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts`
+- `packages/ai/src/plans/tactical-plan-coverage-search-fit.ts`
+- `packages/ai/src/plans/tactical-plan-deck-coverage.ts`
+- `packages/ai/src/plans/tactical-plan-development-card-matching.ts`
+- `packages/ai/src/plans/tactical-plan-followup-budget.ts`
+- `packages/ai/src/plans/tactical-plan-goal-evidence.ts`
+- `packages/ai/src/plans/tactical-plan-legal-action-mapping.ts`
+- `packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts`
+- `packages/ai/src/plans/tactical-plan-mapping-helpers.ts`
+- `packages/ai/src/plans/tactical-plan-progression.ts`
+- `packages/ai/src/plans/tactical-plan-recovery-loop-penalties.ts`
+- `packages/ai/src/plans/tactical-plan-redaction.ts`
+- `packages/ai/src/plans/tactical-plan-run-action-matching.ts`
+- `packages/ai/src/plans/tactical-plan-run-reachability.ts`
+- `packages/ai/src/plans/tactical-plan-runner-breaker-coverage-step.ts`
+- `packages/ai/src/plans/tactical-plan-runner-credit-base.ts`
+- `packages/ai/src/plans/tactical-plan-runner-funding-need.ts`
+- `packages/ai/src/plans/tactical-plan-runner-hand-buffer.ts`
+- `packages/ai/src/plans/tactical-plan-runner-hand-development.ts`
+- `packages/ai/src/plans/tactical-plan-runner-plans.ts`
+- `packages/ai/src/plans/tactical-plan-runner-run-targets.ts`
+- `packages/ai/src/plans/tactical-plan-runner-support-actions.ts`
+- `packages/ai/src/plans/tactical-plan-server-targets.ts`
+- `packages/ai/src/plans/tactical-plan-step-candidate-matching.ts`
+- `packages/ai/src/plans/tactical-plan-step-semantics.ts`
 - `packages/ai/src/reports/selfplay-promotion-activity-formatters.ts`
 - `packages/ai/src/runtime/choice-ranking/corp-plan-overrides.ts`
 - `packages/ai/src/runtime/choice-ranking/mapped-choice-initial-overrides.ts`

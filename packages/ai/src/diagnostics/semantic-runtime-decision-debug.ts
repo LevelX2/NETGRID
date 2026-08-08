@@ -10,7 +10,7 @@ import type {
   SemanticRuntimeCoverageSelectionDebug,
 } from "../runtime/semantic-runtime-types";
 import { scrubEvidence } from "../runtime/semantic-runtime-score-components";
-import type { TacticalPlanRuntimeResult } from "../tactical-plans";
+import type { TacticalPlanRuntimeResult } from "../plans/tactical-plan-types";
 import { buildSemanticDecisionChainDetailSection } from "./semantic-decision-chain-debug";
 import { buildSemanticDecisionDebugDiagnostics } from "./decision-debug";
 import { semanticRuntimeMemoryDebug } from "./semantic-runtime-memory-debug";

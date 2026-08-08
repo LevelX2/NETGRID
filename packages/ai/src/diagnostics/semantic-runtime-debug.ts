@@ -16,7 +16,7 @@ import { scrubEvidence } from "../runtime/semantic-runtime-score-components";
 import type {
   TacticalPlan,
   TacticalPlanRuntimeResult,
-} from "../tactical-plans";
+} from "../plans/tactical-plan-types";
 import { formatDebugFieldValue } from "./debug-format";
 import { buildSemanticDecisionDebugScoreComponent } from "./decision-debug";
 

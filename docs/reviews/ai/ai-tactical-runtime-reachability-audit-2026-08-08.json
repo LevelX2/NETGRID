@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-08T12:57:23.639Z",
+  "generatedAt": "2026-08-08T12:59:37.346Z",
   "roots": {
     "live": [
       "index.ts",
@@ -19,8 +19,8 @@
   },
   "summary": {
     "byClassification": {
-      "legacy_test_only": 89,
-      "mixed_split_required": 201,
+      "legacy_test_only": 128,
+      "mixed_split_required": 162,
       "productive_shared": 254,
       "productive_simulation": 166,
       "unreferenced": 33,
@@ -34,9 +34,11 @@
         "packages/ai/src/action-doctrine-goal-diagnostics.ts",
         "packages/ai/src/actions/action-semantic-invariants.ts",
         "packages/ai/src/decision/action-goal-fit.ts",
+        "packages/ai/src/decision/corp-tactical-goals.ts",
         "packages/ai/src/decision/corp-tempo-goals.ts",
         "packages/ai/src/decision/doctrine-goal-synthesis.ts",
         "packages/ai/src/decision/hard-gates.ts",
+        "packages/ai/src/decision/neutral-goal-synthesis.ts",
         "packages/ai/src/decision/pilot-scope-registry.ts",
         "packages/ai/src/decision/pilot/basic-setup-pilot.ts",
         "packages/ai/src/decision/pilot/corp-score-window-pilot.ts",
@@ -50,6 +52,7 @@
         "packages/ai/src/decision/scoring-consumer-contract.ts",
         "packages/ai/src/decision/semantic-basic-setup-pilot.ts",
         "packages/ai/src/decision/semantic-shadow-decision.ts",
+        "packages/ai/src/decision/tactical-goal-merge.ts",
         "packages/ai/src/endgame-goal-conversion-contracts.ts",
         "packages/ai/src/evaluation/access-loop-detection.ts",
         "packages/ai/src/evaluation/access-outcome-feedback.ts",
@@ -72,6 +75,42 @@
         "packages/ai/src/evaluation/target-choice-shadow-coverage.ts",
         "packages/ai/src/evaluation/target-choice-shadow-readiness.ts",
         "packages/ai/src/plans/plan-resource-ledger.ts",
+        "packages/ai/src/plans/runner-draw-overflow.ts",
+        "packages/ai/src/plans/tactical-plan-access-commitment.ts",
+        "packages/ai/src/plans/tactical-plan-bank-tools.ts",
+        "packages/ai/src/plans/tactical-plan-candidate-matching.ts",
+        "packages/ai/src/plans/tactical-plan-corp-finite-economy.ts",
+        "packages/ai/src/plans/tactical-plan-corp-helpers.ts",
+        "packages/ai/src/plans/tactical-plan-corp-persistent-economy.ts",
+        "packages/ai/src/plans/tactical-plan-corp-plans.ts",
+        "packages/ai/src/plans/tactical-plan-corp-remote-project.ts",
+        "packages/ai/src/plans/tactical-plan-corp-score-conversion-plan.ts",
+        "packages/ai/src/plans/tactical-plan-coverage-answers.ts",
+        "packages/ai/src/plans/tactical-plan-coverage-card-roles.ts",
+        "packages/ai/src/plans/tactical-plan-coverage-search-fit.ts",
+        "packages/ai/src/plans/tactical-plan-deck-coverage.ts",
+        "packages/ai/src/plans/tactical-plan-development-card-matching.ts",
+        "packages/ai/src/plans/tactical-plan-followup-budget.ts",
+        "packages/ai/src/plans/tactical-plan-goal-evidence.ts",
+        "packages/ai/src/plans/tactical-plan-legal-action-mapping.ts",
+        "packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts",
+        "packages/ai/src/plans/tactical-plan-mapping-helpers.ts",
+        "packages/ai/src/plans/tactical-plan-progression.ts",
+        "packages/ai/src/plans/tactical-plan-recovery-loop-penalties.ts",
+        "packages/ai/src/plans/tactical-plan-redaction.ts",
+        "packages/ai/src/plans/tactical-plan-run-action-matching.ts",
+        "packages/ai/src/plans/tactical-plan-run-reachability.ts",
+        "packages/ai/src/plans/tactical-plan-runner-breaker-coverage-step.ts",
+        "packages/ai/src/plans/tactical-plan-runner-credit-base.ts",
+        "packages/ai/src/plans/tactical-plan-runner-funding-need.ts",
+        "packages/ai/src/plans/tactical-plan-runner-hand-buffer.ts",
+        "packages/ai/src/plans/tactical-plan-runner-hand-development.ts",
+        "packages/ai/src/plans/tactical-plan-runner-plans.ts",
+        "packages/ai/src/plans/tactical-plan-runner-run-targets.ts",
+        "packages/ai/src/plans/tactical-plan-runner-support-actions.ts",
+        "packages/ai/src/plans/tactical-plan-server-targets.ts",
+        "packages/ai/src/plans/tactical-plan-step-candidate-matching.ts",
+        "packages/ai/src/plans/tactical-plan-step-semantics.ts",
         "packages/ai/src/reports/selfplay-promotion-activity-formatters.ts",
         "packages/ai/src/runtime/choice-ranking/corp-plan-overrides.ts",
         "packages/ai/src/runtime/choice-ranking/mapped-choice-initial-overrides.ts",
@@ -154,11 +193,8 @@
         "packages/ai/src/breaker-ontology-consumer.ts",
         "packages/ai/src/corp-strategic-intent.ts",
         "packages/ai/src/decision/access-decision-projection.ts",
-        "packages/ai/src/decision/corp-tactical-goals.ts",
         "packages/ai/src/decision/known-remote-access-commitment.ts",
-        "packages/ai/src/decision/neutral-goal-synthesis.ts",
         "packages/ai/src/decision/semantic-decision-frame.ts",
-        "packages/ai/src/decision/tactical-goal-merge.ts",
         "packages/ai/src/decision/tactical-goal-types.ts",
         "packages/ai/src/deck-capabilities.ts",
         "packages/ai/src/deck-doctrine-runtime-context.ts",
@@ -190,52 +226,16 @@
         "packages/ai/src/plans/plan-resolution-failure.ts",
         "packages/ai/src/plans/resident-plan-portfolio-memory.ts",
         "packages/ai/src/plans/resident-plan-portfolio.ts",
-        "packages/ai/src/plans/runner-draw-overflow.ts",
-        "packages/ai/src/plans/tactical-plan-access-commitment.ts",
         "packages/ai/src/plans/tactical-plan-action-demands.ts",
         "packages/ai/src/plans/tactical-plan-action-values.ts",
-        "packages/ai/src/plans/tactical-plan-bank-tools.ts",
         "packages/ai/src/plans/tactical-plan-breaker-cards.ts",
         "packages/ai/src/plans/tactical-plan-breaker-coverage.ts",
         "packages/ai/src/plans/tactical-plan-builders.ts",
-        "packages/ai/src/plans/tactical-plan-candidate-matching.ts",
-        "packages/ai/src/plans/tactical-plan-corp-finite-economy.ts",
-        "packages/ai/src/plans/tactical-plan-corp-helpers.ts",
-        "packages/ai/src/plans/tactical-plan-corp-persistent-economy.ts",
-        "packages/ai/src/plans/tactical-plan-corp-plans.ts",
-        "packages/ai/src/plans/tactical-plan-corp-remote-project.ts",
-        "packages/ai/src/plans/tactical-plan-corp-score-conversion-plan.ts",
         "packages/ai/src/plans/tactical-plan-corp-score-conversion.ts",
         "packages/ai/src/plans/tactical-plan-corp-score-window.ts",
-        "packages/ai/src/plans/tactical-plan-coverage-answers.ts",
-        "packages/ai/src/plans/tactical-plan-coverage-card-roles.ts",
         "packages/ai/src/plans/tactical-plan-coverage-kinds.ts",
-        "packages/ai/src/plans/tactical-plan-coverage-search-fit.ts",
         "packages/ai/src/plans/tactical-plan-credit-demands.ts",
-        "packages/ai/src/plans/tactical-plan-deck-coverage.ts",
-        "packages/ai/src/plans/tactical-plan-development-card-matching.ts",
-        "packages/ai/src/plans/tactical-plan-followup-budget.ts",
-        "packages/ai/src/plans/tactical-plan-goal-evidence.ts",
-        "packages/ai/src/plans/tactical-plan-legal-action-mapping.ts",
-        "packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts",
-        "packages/ai/src/plans/tactical-plan-mapping-helpers.ts",
-        "packages/ai/src/plans/tactical-plan-progression.ts",
-        "packages/ai/src/plans/tactical-plan-recovery-loop-penalties.ts",
-        "packages/ai/src/plans/tactical-plan-redaction.ts",
-        "packages/ai/src/plans/tactical-plan-run-action-matching.ts",
-        "packages/ai/src/plans/tactical-plan-run-reachability.ts",
-        "packages/ai/src/plans/tactical-plan-runner-breaker-coverage-step.ts",
-        "packages/ai/src/plans/tactical-plan-runner-credit-base.ts",
-        "packages/ai/src/plans/tactical-plan-runner-funding-need.ts",
-        "packages/ai/src/plans/tactical-plan-runner-hand-buffer.ts",
-        "packages/ai/src/plans/tactical-plan-runner-hand-development.ts",
-        "packages/ai/src/plans/tactical-plan-runner-plans.ts",
-        "packages/ai/src/plans/tactical-plan-runner-run-targets.ts",
-        "packages/ai/src/plans/tactical-plan-runner-support-actions.ts",
         "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
-        "packages/ai/src/plans/tactical-plan-server-targets.ts",
-        "packages/ai/src/plans/tactical-plan-step-candidate-matching.ts",
-        "packages/ai/src/plans/tactical-plan-step-semantics.ts",
         "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/plans/tactical-plan-visible-cards.ts",
         "packages/ai/src/plans/transient-plan-signals.ts",
@@ -2662,15 +2662,12 @@
     },
     {
       "path": "packages/ai/src/decision/corp-tactical-goals.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -2683,8 +2680,8 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/decision/corp-tempo-goals.ts",
@@ -2792,15 +2789,12 @@
     },
     {
       "path": "packages/ai/src/decision/neutral-goal-synthesis.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -2816,8 +2810,8 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/decision/opportunity-projection.ts",
@@ -3343,15 +3337,12 @@
     },
     {
       "path": "packages/ai/src/decision/tactical-goal-merge.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -3368,8 +3359,8 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/decision/tactical-goal-types.ts",
@@ -4006,10 +3997,10 @@
         "packages/ai/src/decision/target-choice-shadow.ts",
         "packages/ai/src/diagnostics/debug-format.ts",
         "packages/ai/src/diagnostics/decision-debug.ts",
+        "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/runtime/ai-decision-input.ts",
         "packages/ai/src/runtime/semantic-runtime-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/tactical-plans.ts"
+        "packages/ai/src/runtime/semantic-runtime-types.ts"
       ],
       "runtimeImports": [
         "packages/ai/src/decision/semantic-shadow-calibration.ts",
@@ -4047,9 +4038,9 @@
         "packages/ai/src/diagnostics/semantic-decision-chain-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts",
+        "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/runtime/semantic-runtime-score-components.ts",
-        "packages/ai/src/runtime/semantic-runtime-types.ts",
-        "packages/ai/src/tactical-plans.ts"
+        "packages/ai/src/runtime/semantic-runtime-types.ts"
       ],
       "runtimeImports": [
         "packages/ai/src/diagnostics/decision-debug.ts",
@@ -6135,7 +6126,6 @@
       "reachableFrom": [
         "live_runtime",
         "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
@@ -6659,8 +6649,6 @@
       "path": "packages/ai/src/plans/plan-memory.ts",
       "classification": "mixed_split_required",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
@@ -6788,7 +6776,6 @@
       "reachableFrom": [
         "live_runtime",
         "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
@@ -7301,15 +7288,12 @@
     },
     {
       "path": "packages/ai/src/plans/runner-draw-overflow.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7322,8 +7306,8 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/runner-tactical-plan-modules.ts",
@@ -7457,15 +7441,12 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-access-commitment.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -7475,8 +7456,8 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-action-demands.ts",
@@ -7518,8 +7499,6 @@
       "path": "packages/ai/src/plans/tactical-plan-action-values.ts",
       "classification": "mixed_split_required",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
@@ -7552,15 +7531,12 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-bank-tools.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7573,8 +7549,8 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-breaker-cards.ts",
@@ -7689,15 +7665,12 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-candidate-matching.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7713,20 +7686,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-corp-finite-economy.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7747,20 +7717,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-corp-helpers.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7794,20 +7761,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-corp-persistent-economy.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7826,20 +7790,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-corp-plans.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7884,20 +7845,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-corp-remote-project.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -7920,20 +7878,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-corp-score-conversion-plan.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -7951,8 +7906,8 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-corp-score-conversion.ts",
@@ -8039,15 +7994,12 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-coverage-answers.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8062,20 +8014,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-coverage-card-roles.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8092,8 +8041,8 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-coverage-kinds.ts",
@@ -8129,15 +8078,12 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-coverage-search-fit.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8167,8 +8113,8 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-credit-demands.ts",
@@ -8205,15 +8151,12 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-deck-coverage.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8226,20 +8169,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-development-card-matching.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8249,20 +8189,17 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-followup-budget.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8274,20 +8211,17 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-goal-evidence.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8303,20 +8237,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-legal-action-mapping.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8341,20 +8272,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8375,20 +8303,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-mapping-helpers.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8404,20 +8329,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-progression.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8432,20 +8354,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-recovery-loop-penalties.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8453,20 +8372,17 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-redaction.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8481,20 +8397,17 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-run-action-matching.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8510,20 +8423,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-run-reachability.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8537,20 +8447,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-breaker-coverage-step.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8571,20 +8478,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-credit-base.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8605,20 +8509,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-funding-need.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8632,20 +8533,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-hand-buffer.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8672,20 +8570,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-hand-development.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8716,20 +8611,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-plans.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8777,20 +8669,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-run-targets.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8814,20 +8703,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-support-actions.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8842,15 +8728,13 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
       "classification": "mixed_split_required",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
@@ -8878,15 +8762,12 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-server-targets.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [],
@@ -8894,20 +8775,17 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-step-candidate-matching.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8946,20 +8824,17 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-step-semantics.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -8972,8 +8847,8 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "production type-only consumer requires contract decision"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-types.ts",
@@ -9036,6 +8911,8 @@
       "runtimeImports": [],
       "typeOnlyProductionConsumers": [
         "packages/ai/src/decision/semantic-decision-frame.ts",
+        "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
+        "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
         "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
         "packages/ai/src/plans/plan-portfolio-action-capacity.ts",
         "packages/ai/src/plans/plan-portfolio-funding.ts",
@@ -12547,7 +12424,6 @@
       "path": "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-facts.ts",
       "classification": "mixed_split_required",
       "reachableFrom": [
-        "live_type",
         "simulation_runtime",
         "simulation_type",
         "legacy_runtime",
@@ -12766,7 +12642,6 @@
       "path": "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts",
       "classification": "mixed_split_required",
       "reachableFrom": [
-        "live_type",
         "simulation_runtime",
         "simulation_type",
         "legacy_runtime",
@@ -18834,7 +18709,6 @@
       "path": "packages/ai/src/runtime/semantic-runtime-corp-central-rez-context.ts",
       "classification": "mixed_split_required",
       "reachableFrom": [
-        "live_type",
         "simulation_runtime",
         "simulation_type",
         "legacy_runtime",
@@ -25899,13 +25773,10 @@
       "path": "packages/ai/src/tactical-plans.ts",
       "classification": "mixed_split_required",
       "reachableFrom": [
-        "live_type",
-        "simulation_type",
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_type"
+        "test_type"
       ],
       "importedByProduction": [],
       "importedByTests": [
@@ -25976,8 +25847,6 @@
         "packages/ai/src/runner-tactical-goals.ts"
       ],
       "typeOnlyProductionConsumers": [
-        "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
-        "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
         "packages/ai/src/runtime/choice-ranking/corp-plan-overrides.ts",
         "packages/ai/src/runtime/choice-ranking/mapped-choice-initial-overrides.ts",
         "packages/ai/src/runtime/choice-ranking/mapped-choice-orchestrator.ts",
