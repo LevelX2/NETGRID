@@ -32,6 +32,7 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
+import { runnerRunTargetHasOptionalBonusRunValue } from "../runner-run-target-guidance";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
@@ -2451,7 +2452,26 @@ export function runnerActionDispositions(
       );
     }
   }
-  return dispositions;
+  const optionalBonusRunDeclineActionIds = new Set(
+    input.legalActions
+      .filter(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.runnerAbility === "decline_optional_bonus_run",
+      )
+      .map((action) => action.actionId),
+  );
+  const runWindowActionIds = new Set(
+    domain.runWindows.flatMap((window) =>
+      Object.keys(window.actionAssessments ?? {}),
+    ),
+  );
+  return dispositions.filter(
+    (entry) =>
+      !optionalBonusRunDeclineActionIds.has(entry.actionId) &&
+      (!runWindowActionIds.has(entry.actionId) ||
+        entry.ownerModuleId === "runner.convert_run_window"),
+  );
 }
 
 type RunnerFundingOwnershipDomain = Pick<
@@ -16546,6 +16566,7 @@ function isRunWindowSemantic(candidate: ActionSemanticCandidate): boolean {
   return (
     candidate.semanticActionType === "run.continue" ||
     candidate.semanticActionType === "run.jack_out" ||
+    candidate.semanticActionType === "run.decline_optional_bonus" ||
     candidate.semanticActionType.startsWith("access.") ||
     candidate.semanticActionType === "breaker.boost_strength" ||
     candidate.semanticActionType === "breaker.break_subroutine"
@@ -16560,8 +16581,21 @@ function isRunnerRunWindowCandidate(
     isRunWindowSemantic(candidate) ||
     runnerCandidateHasVisibleAdditionalAccessEffect(candidate) ||
     runnerRestrictedRunSequenceAction(input, candidate) !== undefined ||
+    runnerOptionalBonusRunDeclineAction(input, candidate) !== undefined ||
     runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
     runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined
+  );
+}
+
+function runnerOptionalBonusRunDeclineAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.actionId === candidate.actionId &&
+      action.type === "trigger_ability" &&
+      action.payload?.runnerAbility === "decline_optional_bonus_run",
   );
 }
 
@@ -16757,7 +16791,21 @@ function runnerRunWindowActionAssessment(
     input,
     candidate,
   );
+  const optionalBonusRunDeclineAction = runnerOptionalBonusRunDeclineAction(
+    input,
+    candidate,
+  );
   if (!input.playerView.run) {
+    if (optionalBonusRunDeclineAction) {
+      return {
+        admissible: true,
+        value: 0,
+        evidenceCodes: [
+          "runner_optional_bonus_run_decline",
+          "runner_optional_bonus_run_decline_preserves_ordinary_actions",
+        ],
+      };
+    }
     if (restrictedRunSequenceAction) {
       const serverId = restrictedRunSequenceAction.payload?.serverId;
       const costProfile =
@@ -16771,8 +16819,16 @@ function runnerRunWindowActionAssessment(
         (evaluation) =>
           evaluation.actionId === restrictedRunSequenceAction.actionId,
       );
+      const optionalBonusRun =
+        restrictedRunSequenceAction.payload?.optionalBonusRun === true;
+      const optionalBonusRunHasValue =
+        !optionalBonusRun ||
+        runnerRunTargetHasOptionalBonusRunValue(targetEvaluation);
       return {
-        admissible: typeof serverId === "string" && serverId.length > 0,
+        admissible:
+          typeof serverId === "string" &&
+          serverId.length > 0 &&
+          optionalBonusRunHasValue,
         ...(costFree
           ? { value: targetEvaluation?.score ?? 250 }
           : targetEvaluation
@@ -16794,6 +16850,12 @@ function runnerRunWindowActionAssessment(
             ? [
                 "runner_restricted_run_sequence_cost_profile:no_click",
                 "runner_restricted_run_sequence_cost_free_route_preferred",
+              ]
+            : []),
+          ...(optionalBonusRun
+            ? [
+                "runner_optional_bonus_run",
+                `runner_optional_bonus_run_value:${optionalBonusRunHasValue}`,
               ]
             : []),
         ],

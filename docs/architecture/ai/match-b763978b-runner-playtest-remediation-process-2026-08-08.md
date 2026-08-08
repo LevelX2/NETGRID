@@ -17,7 +17,7 @@ und dessen Decision-Endpunkt für `match_b763978b57e73191`.
 | Paket | Bestätigte Evidence | Owner | Akzeptanz |
 | --- | --- | --- | --- |
 | Optionaler Bonus-Run | D35 / State 64: All-Nighter-Restricted-Runs, aber keine Decline-LegalAction; Archives erhielt nur `run_if_free` | Engine-Fortsetzungsfenster + `runner.convert_run_window` | generische Decline-Action, nur wertvolle optionale Ziele werden gewählt |
-| Bekannter Remote | D44 / State 81 und spätere D79/D86/D107: PlayerView hatte nur den neuesten PublicEvent, obwohl der vorherige Zugriff Shock Treatment / `root:0` kannte | AI-Input-Historie + bestehender Remote-Contest | `state.eventLog` liefert die begrenzte, side-sichere Historie; bestehender Known-Remote-Payoff sperrt den Run bei nicht finanzierbarem Trash |
+| Bekannter Remote | D44 / State 81 und spätere D79/D86/D107: Ein nicht servergebundener, verdeckter Corp-Discard invalidierte fälschlich die bekannte Position `remote_2/root:0` trotz vorherigem Zugriff auf Shock Treatment | side-sichere bekannte-Positions-Erinnerung + bestehender Remote-Contest | nur HQ-Positionen verlieren bei einem serverlosen Discard ihre Gültigkeit; der bestehende Known-Remote-Payoff sperrt den Run bei nicht finanzierbarem Trash |
 | Baskerville / illegale Aktion | D58–D63 respektive State 66 | keine Änderung ohne Gegenbeleg | bestehende Mechanik und Diagnose belegen oder klar abgrenzen |
 
 ## Explizite Nicht-Ziele

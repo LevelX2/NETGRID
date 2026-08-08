@@ -250,6 +250,39 @@ describe("runner main action generation", () => {
     ).toBe(true);
   });
 
+  it("offers a generic immediate decline for an optional bonus run and preserves normal actions after it", () => {
+    const state = minimalRunnerMainState("optional-bonus-run-decline-window");
+    state.runner.clicks = 3;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      bonusRunPending: true,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+
+    const actions = buildRunnerMainActions(testRunnerMainHost(state));
+
+    expect(actions.every((candidate) => candidate.type !== "gain_credit")).toBe(
+      true,
+    );
+    expect(actions.filter((candidate) => candidate.type === "start_run")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          payload: expect.objectContaining({
+            bonusRunNoClick: true,
+            optionalBonusRun: true,
+          }),
+        }),
+      ]),
+    );
+    expect(actions).toContainEqual(
+      expect.objectContaining({
+        type: "trigger_ability",
+        payload: expect.objectContaining({
+          runnerAbility: "decline_optional_bonus_run",
+        }),
+      }),
+    );
+  });
+
   it("requires two clicks for Classic double prep events", () => {
     const eventCardId = "classic_networking_1" as CardInstanceId;
     const state = minimalRunnerMainState("classic-03-runner-double-prep");

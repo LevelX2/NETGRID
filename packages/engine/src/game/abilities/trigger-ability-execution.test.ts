@@ -165,6 +165,43 @@ describe("trigger ability execution", () => {
     });
   });
 
+  it("declines a generic optional bonus-run window without consuming a Runner action", () => {
+    const state = createGame({
+      seed: "optional-bonus-run-decline-window",
+      setupMode: "completed",
+    });
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      bonusRunPending: true,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const clicksBefore = state.runner.clicks;
+    const action = buildLegalAction(
+      state,
+      "runner",
+      "trigger_ability",
+      "Keinen optionalen Bonus-Run starten",
+      "game_rule",
+      [],
+      {
+        runnerAbility: "decline_optional_bonus_run",
+        optionalBonusRunDecision: "decline",
+      },
+    );
+
+    expect(
+      handleTriggerAbilityExecution(testHost(state), action),
+    ).toMatchObject({ handled: true, actionType: "trigger_ability" });
+    expect(state.runner.clicks).toBe(clicksBefore);
+    expect(state.runnerTurnFlags?.bonusRunPending).toBe(false);
+    expect(action.payload).toMatchObject({
+      optionalBonusRunDecision: "decline",
+      optionalBonusRunPending: false,
+    });
+  });
+
   it("keeps the legacy generic-trigger error for unsupported triggers", () => {
     const state = createGame({
       seed: "arch-70-trigger-ability-unsupported",

@@ -8,6 +8,31 @@ export function applyCardImplementationEffectSemantics(
   if (
     action.side === "runner" &&
     action.type === "trigger_ability" &&
+    action.payload?.runnerAbility === "decline_optional_bonus_run"
+  ) {
+    const projectionIssues = new Set(candidate.projectionIssues);
+    projectionIssues.delete("ability_unresolved");
+    return {
+      ...candidate,
+      semanticActionType: "run.decline_optional_bonus",
+      actionTacticSignals: [
+        ...new Set([
+          ...candidate.actionTacticSignals,
+          "run.optional_bonus_decline",
+        ]),
+      ],
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+      projectionIssues: [...projectionIssues],
+      evidence: [
+        ...candidate.evidence,
+        "Engine optional bonus-run decline resolves the current restricted run window",
+      ],
+    };
+  }
+  if (
+    action.side === "runner" &&
+    action.type === "trigger_ability" &&
     action.payload?.runnerAbility === "boost_icebreaker_for_run"
   ) {
     const projectionIssues = new Set(candidate.projectionIssues);
