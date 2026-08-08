@@ -1,9 +1,9 @@
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createNetgridHttpServer, mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth } from "./http-server";
-import { loadDeploymentConfig } from "./internet-hardening";
+import { FixedWindowRateLimiter, loadDeploymentConfig } from "./internet-hardening";
 import { InMemoryMaintenanceCredentialStore, MaintenanceAuthService } from "./maintenance-auth";
 import { InMemoryMatchStorage, MultiplayerService } from "./multiplayer";
 import { SqliteMatchStorage } from "./storage-sqlite";
@@ -23,11 +23,47 @@ describe("ARC-001 maintenance HTTP security", () => {
     const request = (address: string, method = "GET") =>
       ({ method, socket: { remoteAddress: address }, headers: { host: "127.0.0.1", "x-forwarded-for": "127.0.0.1" } }) as never;
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(true);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("::1"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(true);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("::ffff:127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/decisions/1", config)).toBe(true);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/future-endpoint", config)).toBe(false);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("203.0.113.9"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(false);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/bundle", { ...config, profile: "private_internet" })).toBe(false);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1", "POST"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(false);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/cleanup/preview", config)).toBe(false);
+  });
+
+  it("rate-limits decision analysis before reconstruction without affecting the bundle scope", async () => {
+    const directory = mkdtempSync(join(tmpdir(), "netgrid-decision-analysis-rate-limit-"));
+    tempDirs.push(directory);
+    const storage = new SqliteMatchStorage({ dbPath: join(directory, "netgrid.sqlite"), backupDir: join(directory, "backups") });
+    const service = new MultiplayerService(storage, { tokenSalt: "decision-analysis-rate-limit" });
+    const decisionAnalysis = vi.spyOn(service, "storageMaintenanceDecisionAnalysis");
+    const rateLimiter = new FixedWindowRateLimiter({
+      create_match: undefined,
+      token_probe: { limit: 1, windowMs: 60_000 },
+      account_read: undefined,
+      lifecycle: undefined,
+      ai_advance: undefined,
+      ws_handshake: undefined,
+      ws_join: undefined,
+    });
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv),
+      rateLimiter,
+    });
+    const baseUrl = await listen(handle);
+    try {
+      const firstDecision = await fetch(`${baseUrl}/api/storage/maintenance/analysis/matches/missing/decisions/1`);
+      expect(firstDecision.status).toBe(404);
+      const limitedDecision = await fetch(`${baseUrl}/api/storage/maintenance/analysis/matches/missing/decisions/1`);
+      expect(limitedDecision.status).toBe(429);
+      expect(await limitedDecision.json()).toMatchObject({ error: { code: "rate_limited" } });
+      expect(decisionAnalysis).toHaveBeenCalledTimes(1);
+
+      expect((await fetch(`${baseUrl}/api/storage/maintenance/analysis/matches/missing/bundle`)).status).toBe(404);
+    } finally {
+      await handle.close();
+    }
   });
 
   it("allows loopback analysis without a session while other maintenance routes remain authenticated", async () => {

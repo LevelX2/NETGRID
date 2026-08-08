@@ -106,6 +106,10 @@ const NETGRID_REPOSITORY_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "../../..",
 );
+const MAINTENANCE_ANALYSIS_BUNDLE_ROUTE =
+  /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/bundle$/;
+const MAINTENANCE_DECISION_ANALYSIS_ROUTE =
+  /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/decisions\/(\d+)$/;
 
 function resolveRepositoryStoragePath(path: string): string {
   return resolve(NETGRID_REPOSITORY_ROOT, path);
@@ -2347,10 +2351,9 @@ async function routeHttp(
       return;
     }
 
-    const maintenanceAnalysisRoute =
-      /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/bundle$/.exec(
-        url.pathname,
-      );
+    const maintenanceAnalysisRoute = MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.exec(
+      url.pathname,
+    );
     if (maintenanceAnalysisRoute && request.method === "GET") {
       const matchId = decodeURIComponent(maintenanceAnalysisRoute[1] ?? "");
       if (
@@ -2381,10 +2384,22 @@ async function routeHttp(
       return;
     }
 
-    const maintenanceDecisionAnalysisRoute = /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/decisions\/(\d+)$/.exec(url.pathname);
+    const maintenanceDecisionAnalysisRoute =
+      MAINTENANCE_DECISION_ANALYSIS_ROUTE.exec(url.pathname);
     if (maintenanceDecisionAnalysisRoute && request.method === "GET") {
       const matchId = decodeURIComponent(maintenanceDecisionAnalysisRoute[1] ?? "");
       const decisionIndex = Number(maintenanceDecisionAnalysisRoute[2]);
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          `storage-maintenance-decision-analysis:${matchId}:${decisionIndex}`,
+        )
+      )
+        return;
       const context = await service.storageMaintenanceDecisionAnalysis(matchId, decisionIndex);
       if (!context) { sendJson(response, 404, { error: { code: "not_found", message: "Diese Analyseansicht hat keine Entscheidung für diesen Match-Kontext." } }); return; }
       sendJson(response, 200, context);
@@ -4199,10 +4214,17 @@ export function mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
   deploymentConfig: DeploymentConfig,
 ): boolean {
   if (request.method !== "GET") return false;
-  if (!pathname.startsWith("/api/storage/maintenance/analysis/")) return false;
+  if (!isExplicitLocalReadOnlyAnalysisRoute(pathname)) return false;
   if (deploymentConfig.profile !== "local") return false;
   const address = normalizeClientAddress(request.socket.remoteAddress);
   return address === "127.0.0.1" || address === "::1";
+}
+
+function isExplicitLocalReadOnlyAnalysisRoute(pathname: string): boolean {
+  return (
+    MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.test(pathname) ||
+    MAINTENANCE_DECISION_ANALYSIS_ROUTE.test(pathname)
+  );
 }
 
 function maintenanceSessionToken(request: IncomingMessage): string | undefined {
