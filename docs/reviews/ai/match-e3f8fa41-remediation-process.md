@@ -1,6 +1,6 @@
 # Match e3f8fa41 – Remediation Process
 
-Status: implemented and focused-verification passed; final integration pending
+Status: locally integrated to `main`; focused verification passed
 Source: human Corp vs. Runner AI match `match_e3f8fa4143e28391`
 
 ## Goal
@@ -64,3 +64,11 @@ app/maintenance/match-id-copy.test.ts app/maintenance.test.ts` — 15 tests
 
 The user explicitly deferred the complete AI-/workspace test run to the later
 cross-chat integration checkpoint.
+
+## Local integration
+
+- `main` was already contained in `codex/match-e3f8-remediation`; no merge
+  commit or conflict resolution was necessary.
+- The remediation branch was fast-forwarded locally into `main` at
+  `e18f269bb`.
+- No remote push was requested or performed.
