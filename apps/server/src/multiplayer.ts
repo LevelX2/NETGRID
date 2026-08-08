@@ -23,6 +23,7 @@ import {
   isHiddenInfoBarrierEvent,
   replayEvents,
   quoteCorpPunishRoute,
+  quoteCorpRezCost,
   quoteRandomizedIceInstallSelection,
   quoteRandomizedTurnPlanSelection,
 } from "@netgrid/engine";
@@ -4332,14 +4333,29 @@ export class MultiplayerService {
     }
     const playerView = getPlayerView(state, source.trace.side);
     const { publicEvents: _events, legalActions: _actions, ...actorState } = playerView;
+    const legalActions = getLegalActions(state, source.trace.side);
+    const reconstructedRezQuotes = source.trace.side === "corp"
+      ? legalActions.flatMap((action) => {
+          const cardId = action.type === "rez_ice" && typeof action.payload?.cardId === "string"
+            ? action.payload.cardId
+            : undefined;
+          return cardId ? [{ actionId: action.actionId, quote: quoteCorpRezCost(state, cardId as never) }] : [];
+        })
+      : [];
+    const runEvents = source.surroundingEvents.filter((event) => {
+      const type = typeof event.publicPayload.type === "string" ? event.publicPayload.type : "";
+      return type.includes("run") || type.includes("encounter") || type.includes("access");
+    });
     return {
       schemaVersion: "netgrid-decision-analysis-context-v1",
       decision: source.trace,
       state: actorState,
-      legalActions: getLegalActions(state, source.trace.side),
+      legalActions,
       aiTrace: source.trace,
       surroundingEvents: source.surroundingEvents,
-      provenance: { persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"], reconstructed: [{ section: "actorStateAndLegalActions", note: "current engine on exact persisted state snapshot" }] },
+      ...(runEvents.length > 0 ? { runContext: { selectedActionId: source.trace.selectedActionId, selectedActionType: source.trace.selectedActionType, events: runEvents } } : {}),
+      ...(reconstructedRezQuotes.length > 0 ? { engineAnalysis: { reconstructedRezQuotes } } : {}),
+      provenance: { persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"], reconstructed: [{ section: "actorStateAndLegalActions", note: "current engine on exact persisted state snapshot" }, ...(reconstructedRezQuotes.length > 0 ? [{ section: "corpRezQuotes", note: "current engine on exact persisted state snapshot" }] : [])] },
       diagnostics,
     };
   }

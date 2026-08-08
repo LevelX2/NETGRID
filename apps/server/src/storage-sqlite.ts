@@ -920,28 +920,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         | undefined;
       if (!match) return undefined;
 
-      const eventRows = normalized.includeEvents
-        ? (this.db
-            .prepare(
-              `SELECT event_id AS eventId, event_index AS eventIndex,
-                 state_version_before AS stateVersionBefore,
-                 state_version_after AS stateVersionAfter,
-                 state_hash_after AS stateHashAfter,
-                 public_payload_json AS publicPayloadJson,
-                 hidden_info_barrier AS hiddenInfoBarrier
-               FROM events WHERE match_id = ?
-               ORDER BY event_index ASC LIMIT ?`,
-            )
-            .all(matchId, MATCH_ANALYSIS_EVENT_LIMIT + 1) as Array<{
-            eventId: string;
-            eventIndex: number;
-            stateVersionBefore: number;
-            stateVersionAfter: number;
-            stateHashAfter: string;
-            publicPayloadJson: string;
-            hiddenInfoBarrier: number;
-          }>)
-        : undefined;
       const decisionRows = this.db
         .prepare(
           `SELECT trace_id AS traceId, event_id AS eventId,
@@ -971,6 +949,23 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           normalized.toDecision ?? null,
           MATCH_ANALYSIS_DECISION_LIMIT + 1,
         ) as AiDecisionTraceRow[];
+      const stateVersions = decisionRows.map((row) => Number(row.stateVersion));
+      const firstStateVersion = stateVersions.length > 0 ? Math.min(...stateVersions) : undefined;
+      const lastStateVersion = stateVersions.length > 0 ? Math.max(...stateVersions) : undefined;
+      const eventRows = normalized.includeEvents
+        ? (this.db.prepare(
+            `SELECT event_id AS eventId, event_index AS eventIndex, state_version_before AS stateVersionBefore,
+               state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter,
+               public_payload_json AS publicPayloadJson, hidden_info_barrier AS hiddenInfoBarrier
+             FROM events WHERE match_id = ?
+               AND (? IS NULL OR state_version_after >= ? - 2)
+               AND (? IS NULL OR state_version_before <= ? + 2)
+             ORDER BY event_index ASC LIMIT ?`,
+          ).all(matchId, firstStateVersion ?? null, firstStateVersion ?? null, lastStateVersion ?? null, lastStateVersion ?? null, MATCH_ANALYSIS_EVENT_LIMIT + 1) as Array<{
+            eventId: string; eventIndex: number; stateVersionBefore: number; stateVersionAfter: number;
+            stateHashAfter: string; publicPayloadJson: string; hiddenInfoBarrier: number;
+          }>)
+        : undefined;
       return { match, eventRows, decisionRows };
     });
     if (!materialized) return undefined;
