@@ -276,8 +276,34 @@ export function buildCorpTurnPlannerShadow(params: {
       left.head.candidateId.localeCompare(right.head.candidateId),
   )[0];
   const liveActionId = params.runtimeResult.route.head.actionId;
+  const boundedSingleStepLine = boundedSingleStepSearch.lines.find(
+    (line) => line.lineId === boundedSingleStepSearch.selectedLineId,
+  );
+  const selectedSearchHead = selectedSearchLine?.steps[0]
+    ? heads.find(
+        (head) => head.candidateId === selectedSearchLine.steps[0]!.candidateId,
+      )
+    : undefined;
+  const boundedSingleStepHead = boundedSingleStepLine?.steps[0]
+    ? heads.find(
+        (head) =>
+          head.candidateId === boundedSingleStepLine.steps[0]!.candidateId,
+      )
+    : undefined;
+  const liveHead = heads.find(
+    (head) => head.currentBinding.actionId === liveActionId,
+  );
+  const retainsAuthoritativeHead =
+    selectedSearchHead !== undefined &&
+    boundedSingleStepHead?.candidateId === selectedSearchHead.candidateId &&
+    liveHead !== undefined &&
+    plannerBaselineRecord?.head.currentBinding.actionId === liveActionId &&
+    liveHead.rootPlanInstanceId === selectedSearchHead.rootPlanInstanceId &&
+    liveHead.currentBinding.actionId !== selectedSearchHead.currentBinding.actionId;
   const selectedLine =
-    selectedSearchLine ??
+    (retainsAuthoritativeHead
+      ? fallbackLine(input, stateIdentity, liveActionId, heads)
+      : selectedSearchLine) ??
     fallbackLine(
       input,
       stateIdentity,
@@ -295,15 +321,7 @@ export function buildCorpTurnPlannerShadow(params: {
       )?.route.instance.instanceId
     : undefined;
   const shadowActionId = shadowHead?.currentBinding.actionId;
-  const boundedSingleStepLine = boundedSingleStepSearch.lines.find(
-    (line) => line.lineId === boundedSingleStepSearch.selectedLineId,
-  );
-  const greedyBaselineHead = boundedSingleStepLine?.steps[0]
-    ? heads.find(
-        (head) =>
-          head.candidateId === boundedSingleStepLine.steps[0]!.candidateId,
-      )
-    : undefined;
+  const greedyBaselineHead = boundedSingleStepHead;
   const debug = debugForShadow({
     input,
     rulesContext,

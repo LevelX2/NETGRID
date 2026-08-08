@@ -8333,6 +8333,19 @@ function buildCorpDomain(
               : undefined;
           const visibleAgendaExposure =
             serverId === "archives" && archivesHasVisibleKnownAgenda(input);
+          const unfundedOrdinaryCentralStaging =
+            (serverId === "hq" || serverId === "rd") &&
+            input.playerView.own.credits === 0 &&
+            (route.rezFundingGap ?? 0) > 0 &&
+            targetCentralThreat === undefined &&
+            !visibleAgendaExposure &&
+            !scoreProjects.some(
+              (project) =>
+                project.feasible ||
+                project.terminalScore ||
+                project.conversion?.runnerStealIsMatchpoint === true,
+            );
+          if (unfundedOrdinaryCentralStaging) return [];
           const terminalCentralInstallIsImmediatelyRelevant =
             centralPressure === "terminal" &&
             (route.progressKind === "engine_certified_access" ||
@@ -8667,7 +8680,6 @@ function buildCorpDomain(
   const requiredEconomyNeeds = corpRequiredEconomyNeeds(
     input,
     scoreProjects,
-    scorelineFeasibility,
     defenseNeeds,
     ambushes,
     punishCampaigns,
@@ -12026,7 +12038,6 @@ function corpImmediateOperationThresholdPreparations(
 function corpRequiredEconomyNeeds(
   input: AiDecisionInput,
   scoreProjects: readonly CorpScoreProjectSignal[],
-  scorelineFeasibility: CorpScorelineFeasibility | undefined,
   defenseNeeds: readonly CorpDefenseSignal[],
   ambushes: readonly CorpPlanDomain["ambushes"][number][],
   punishCampaigns: readonly CorpPunishCampaignSignal[],
@@ -12034,7 +12045,10 @@ function corpRequiredEconomyNeeds(
 ): CorpCorePlanDomain["economyNeeds"] {
   const projectsWithCurrentProtectionSupport = new Set(
     defenseNeeds.flatMap((need) =>
-      need.kind === "generic" ? [] : [need.parentProjectId],
+      need.kind === "generic" ||
+      (need.kind === "score_protection_install" && need.effect === "progress")
+        ? []
+        : [need.parentProjectId],
     ),
   );
   const exactAmbushSetupCardIds = new Set(
@@ -12048,9 +12062,12 @@ function corpRequiredEconomyNeeds(
       .map((ambush) => ambush.sourceInstanceId),
   );
   const scoreSupport = scoreProjects.flatMap((project) =>
-    scorelineFeasibility?.feasible !== false &&
-    (project.feasible || project.terminalScore) &&
     (project.fundingGap ?? 0) > 0 &&
+    (project.feasible ||
+      project.terminalScore ||
+      project.conversion?.residentParent === true ||
+      project.conversion?.runnerStealIsMatchpoint === true ||
+      (project.conversion?.realizedStrategySupportCount ?? 0) > 0) &&
     exactAmbushSetupCardIds.size === 0 &&
     !projectsWithCurrentProtectionSupport.has(project.projectId)
       ? [
@@ -14618,7 +14635,9 @@ function runnerCreditBankSignals(
       const delayedInstallWithoutFundingNeed =
         handEvaluation !== undefined &&
         handEvaluation.activationPrerequisites.length === 0 &&
-        !economy.fundingNeed;
+        handEvaluation.liquidityTiming !== "immediate" &&
+        !economy.fundingNeed &&
+        input.playerView.own.credits >= economy.desiredCreditReserve;
       if (
         unsatisfiedActivationPrerequisites.length > 0 ||
         delayedInstallWithoutFundingNeed

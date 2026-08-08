@@ -848,12 +848,6 @@ function lineDominates(
   registry: TurnPlanEvaluationRegistry,
 ): boolean {
   if (
-    (left.moduleCandidatePreferenceRank ?? 0) <
-    (right.moduleCandidatePreferenceRank ?? 0)
-  ) {
-    return false;
-  }
-  if (
     coverageSignature(left.priorityCoverage) !==
     coverageSignature(right.priorityCoverage)
   ) {
@@ -898,9 +892,9 @@ function compareOffers(
   return (
     priorityRank(left.head.priorityClass) -
       priorityRank(right.head.priorityClass) ||
+    scalarOfferValue(right, registry) - scalarOfferValue(left, registry) ||
     (right.moduleCandidatePreferenceRank ?? 0) -
       (left.moduleCandidatePreferenceRank ?? 0) ||
-    scalarOfferValue(right, registry) - scalarOfferValue(left, registry) ||
     left.head.candidateId.localeCompare(right.head.candidateId)
   );
 }
@@ -921,10 +915,10 @@ function compareLines(
       left.priorityCoverage.satisfiedObligationIds.length ||
     priorityRank(left.priorityClass) - priorityRank(right.priorityClass) ||
     sameRootPreference ||
-    (right.moduleCandidatePreferenceRank ?? 0) -
-      (left.moduleCandidatePreferenceRank ?? 0) ||
     scalarEvaluation(right.evaluationValues, registry) -
       scalarEvaluation(left.evaluationValues, registry) ||
+    (right.moduleCandidatePreferenceRank ?? 0) -
+      (left.moduleCandidatePreferenceRank ?? 0) ||
     right.projectedFrame.actionCapacityLedger.unrestricted.minimum -
       left.projectedFrame.actionCapacityLedger.unrestricted.minimum ||
     right.projectedFrame.ownCredits.minimum -
