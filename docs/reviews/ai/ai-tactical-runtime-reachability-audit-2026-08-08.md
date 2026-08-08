@@ -1,14 +1,14 @@
 # AI Tactical Runtime Reachability Audit
 
-Erzeugt: 2026-08-08T13:03:28.973Z
+Erzeugt: 2026-08-08T13:14:20.947Z
 
 Der Audit wertet Runtime- und Typkanten getrennt aus. Die vollständigen
 Dateidaten stehen im gleichnamigen JSON-Manifest.
 
 ## Klassifikationen
 
-- `legacy_test_only`: 121
-- `mixed_split_required`: 161
+- `legacy_test_only`: 123
+- `mixed_split_required`: 159
 - `productive_shared`: 254
 - `productive_simulation`: 166
 - `unreferenced`: 30
@@ -108,7 +108,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/plans/plan-contract-types.ts`
 - `packages/ai/src/plans/plan-instance.ts`
 - `packages/ai/src/plans/plan-kernel-types.ts`
-- `packages/ai/src/plans/plan-memory.ts`
 - `packages/ai/src/plans/plan-portfolio-action-capacity.ts`
 - `packages/ai/src/plans/plan-portfolio-funding.ts`
 - `packages/ai/src/plans/plan-portfolio-memory.ts`
@@ -126,7 +125,6 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/plans/tactical-plan-corp-score-window.ts`
 - `packages/ai/src/plans/tactical-plan-coverage-kinds.ts`
 - `packages/ai/src/plans/tactical-plan-credit-demands.ts`
-- `packages/ai/src/plans/tactical-plan-runner-survival-progress.ts`
 - `packages/ai/src/plans/tactical-plan-types.ts`
 - `packages/ai/src/plans/tactical-plan-visible-cards.ts`
 - `packages/ai/src/plans/transient-plan-signals.ts`
@@ -694,6 +692,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/evaluation/semantic-shadow-report.ts`
 - `packages/ai/src/evaluation/target-choice-shadow-coverage.ts`
 - `packages/ai/src/evaluation/target-choice-shadow-readiness.ts`
+- `packages/ai/src/plans/plan-memory.ts`
 - `packages/ai/src/plans/plan-resource-ledger.ts`
 - `packages/ai/src/plans/runner-draw-overflow.ts`
 - `packages/ai/src/plans/tactical-plan-access-commitment.ts`
@@ -728,6 +727,7 @@ Dateidaten stehen im gleichnamigen JSON-Manifest.
 - `packages/ai/src/plans/tactical-plan-runner-plans.ts`
 - `packages/ai/src/plans/tactical-plan-runner-run-targets.ts`
 - `packages/ai/src/plans/tactical-plan-runner-support-actions.ts`
+- `packages/ai/src/plans/tactical-plan-runner-survival-progress.ts`
 - `packages/ai/src/plans/tactical-plan-server-targets.ts`
 - `packages/ai/src/plans/tactical-plan-step-candidate-matching.ts`
 - `packages/ai/src/plans/tactical-plan-step-semantics.ts`

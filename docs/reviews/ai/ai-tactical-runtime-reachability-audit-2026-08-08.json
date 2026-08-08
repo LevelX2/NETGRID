@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-08T13:03:28.973Z",
+  "generatedAt": "2026-08-08T13:14:20.947Z",
   "roots": {
     "live": [
       "index.ts",
@@ -19,8 +19,8 @@
   },
   "summary": {
     "byClassification": {
-      "legacy_test_only": 121,
-      "mixed_split_required": 161,
+      "legacy_test_only": 123,
+      "mixed_split_required": 159,
       "productive_shared": 254,
       "productive_simulation": 166,
       "unreferenced": 30,
@@ -74,6 +74,7 @@
         "packages/ai/src/evaluation/semantic-shadow-report.ts",
         "packages/ai/src/evaluation/target-choice-shadow-coverage.ts",
         "packages/ai/src/evaluation/target-choice-shadow-readiness.ts",
+        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/plans/plan-resource-ledger.ts",
         "packages/ai/src/plans/runner-draw-overflow.ts",
         "packages/ai/src/plans/tactical-plan-access-commitment.ts",
@@ -108,6 +109,7 @@
         "packages/ai/src/plans/tactical-plan-runner-plans.ts",
         "packages/ai/src/plans/tactical-plan-runner-run-targets.ts",
         "packages/ai/src/plans/tactical-plan-runner-support-actions.ts",
+        "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
         "packages/ai/src/plans/tactical-plan-server-targets.ts",
         "packages/ai/src/plans/tactical-plan-step-candidate-matching.ts",
         "packages/ai/src/plans/tactical-plan-step-semantics.ts",
@@ -210,7 +212,6 @@
         "packages/ai/src/plans/plan-contract-types.ts",
         "packages/ai/src/plans/plan-instance.ts",
         "packages/ai/src/plans/plan-kernel-types.ts",
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/plans/plan-portfolio-action-capacity.ts",
         "packages/ai/src/plans/plan-portfolio-funding.ts",
         "packages/ai/src/plans/plan-portfolio-memory.ts",
@@ -228,7 +229,6 @@
         "packages/ai/src/plans/tactical-plan-corp-score-window.ts",
         "packages/ai/src/plans/tactical-plan-coverage-kinds.ts",
         "packages/ai/src/plans/tactical-plan-credit-demands.ts",
-        "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
         "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/plans/tactical-plan-visible-cards.ts",
         "packages/ai/src/plans/transient-plan-signals.ts",
@@ -1641,7 +1641,6 @@
       "importedByProduction": [
         "packages/ai/src/actions/action-economy-projection.ts",
         "packages/ai/src/actions/basic-action-semantics.ts",
-        "packages/ai/src/plans/tactical-plan-action-values.ts",
         "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-actions.ts",
         "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts",
         "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-economy.ts",
@@ -4346,7 +4345,7 @@
         "packages/ai/src/evaluation/decision-checkpoints/checkpoint-types.ts",
         "packages/ai/src/evaluation/decision-checkpoints/checkpoint-validation.ts",
         "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
-        "packages/ai/src/plans/plan-memory.ts",
+        "packages/ai/src/plans/resident-plan-portfolio-memory.ts",
         "packages/ai/src/runner-run-target-evaluation.ts",
         "packages/ai/src/runtime/ai-decision-input.ts",
         "packages/ai/src/strategic-intent-memory.ts"
@@ -4355,7 +4354,7 @@
         "packages/ai/src/ai-runtime-public-entrypoints.ts",
         "packages/ai/src/evaluation/decision-checkpoints/checkpoint-validation.ts",
         "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
-        "packages/ai/src/plans/plan-memory.ts",
+        "packages/ai/src/plans/resident-plan-portfolio-memory.ts",
         "packages/ai/src/runner-run-target-evaluation.ts",
         "packages/ai/src/runtime/ai-decision-input.ts",
         "packages/ai/src/strategic-intent-memory.ts"
@@ -4587,19 +4586,16 @@
         "packages/ai/src/runtime/plan-first-live-runtime.test.ts"
       ],
       "imports": [
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/plans/plan-portfolio-memory.ts",
         "packages/ai/src/plans/plan-portfolio.ts",
         "packages/ai/src/plans/resident-plan-portfolio-memory.ts",
         "packages/ai/src/plans/resident-plan-portfolio.ts",
-        "packages/ai/src/plans/tactical-plan-types.ts",
         "packages/ai/src/plans/turn-plan-commitment.ts",
         "packages/ai/src/runtime/runner-run-plan-memory.ts",
         "packages/ai/src/runtime/runner-run-plan-types.ts",
         "packages/ai/src/strategic-intent-memory.ts"
       ],
       "runtimeImports": [
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/plans/plan-portfolio-memory.ts",
         "packages/ai/src/plans/resident-plan-portfolio-memory.ts",
         "packages/ai/src/plans/turn-plan-commitment.ts",
@@ -6631,22 +6627,15 @@
     },
     {
       "path": "packages/ai/src/plans/plan-memory.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_runtime",
-        "tooling_type"
+        "test_type"
       ],
-      "importedByProduction": [
-        "packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts",
-        "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
-        "scripts/capture-ai-decision-checkpoint.ts"
-      ],
+      "importedByProduction": [],
       "importedByTests": [
-        "packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.test.ts",
         "packages/ai/src/plans/plan-memory-portfolio.test.ts",
         "packages/ai/src/plans/plan-memory-progress.test.ts"
       ],
@@ -6675,8 +6664,8 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "productive runtime consumer"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/plan-portfolio-action-capacity.ts",
@@ -6769,8 +6758,7 @@
       ],
       "importedByProduction": [
         "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
-        "packages/ai/src/index.ts",
-        "packages/ai/src/plans/plan-memory.ts"
+        "packages/ai/src/index.ts"
       ],
       "importedByTests": [
         "packages/ai/src/evaluation/hidden-info-observational-equivalence.test.ts",
@@ -6844,7 +6832,6 @@
       ],
       "importedByProduction": [
         "packages/ai/src/index.ts",
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/runtime/runner-bank-investment-context.ts"
       ],
       "importedByTests": [
@@ -7080,18 +7067,26 @@
         "tooling_type"
       ],
       "importedByProduction": [
+        "packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts",
         "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
         "packages/ai/src/index.ts",
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/runtime/plan-first-live-runtime.ts",
         "packages/ai/src/runtime/runner-targeted-bypass-choice.ts",
         "packages/ai/src/runtime/selected-choices-for-decision.ts",
-        "packages/ai/src/simulation/ai-game-simulator.ts"
+        "packages/ai/src/simulation/ai-game-simulator.ts",
+        "scripts/capture-ai-decision-checkpoint.ts"
       ],
       "importedByTests": [
+        "packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.test.ts",
         "packages/ai/src/evaluation/decision-checkpoints/match-3aac-corp-first-turn-regression.test.ts",
         "packages/ai/src/evaluation/decision-checkpoints/two-latest-corp-20260731-remediation-decision-checkpoints.test.ts",
+        "packages/ai/src/evaluation/decision-contract-real-engine.test.ts",
         "packages/ai/src/evaluation/hidden-info-observational-equivalence.test.ts",
+        "packages/ai/src/evaluation/match-series-70be-live-regressions.test.ts",
+        "packages/ai/src/evaluation/real-engine-live-runtime.test.ts",
+        "packages/ai/src/evaluation/replay-portable-fixtures.test.ts",
+        "packages/ai/src/runner-golden-deck-debug.test.ts",
+        "packages/ai/src/runner-wilson-run-action.test.ts",
         "packages/ai/src/runtime/corp-counter-cashout-economy.test.ts",
         "packages/ai/src/runtime/corp-exact-ice-rez-route.test.ts",
         "packages/ai/src/runtime/corp-punish-route-quote-input.test.ts",
@@ -7110,8 +7105,11 @@
         "packages/ai/src/runtime/plan-first-live-runtime.test.ts",
         "packages/ai/src/runtime/runner-targeted-bypass-plan.test.ts",
         "packages/ai/src/runtime/selected-choices-for-decision.test.ts",
+        "packages/ai/src/semantic-ai-runtime-cutover-runner-plans.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover-runner-safety.test.ts",
-        "packages/ai/src/simulation/inside-job-central-plan-coverage.test.ts"
+        "packages/ai/src/simulation/benchmark-reports.test.ts",
+        "packages/ai/src/simulation/inside-job-central-plan-coverage.test.ts",
+        "packages/ai/src/strategic-vertical-slices.test.ts"
       ],
       "imports": [
         "packages/ai/src/plans/plan-resolution-failure.ts",
@@ -7486,13 +7484,9 @@
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_runtime",
-        "tooling_type"
+        "test_type"
       ],
-      "importedByProduction": [
-        "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts"
-      ],
+      "importedByProduction": [],
       "importedByTests": [
         "packages/ai/src/plans/tactical-plan-action-values.test.ts"
       ],
@@ -7511,7 +7505,7 @@
       ],
       "publicExportedBy": [],
       "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "productive runtime consumer"
+      "blocker": "production type-only consumer requires contract decision"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-bank-tools.ts",
@@ -8717,18 +8711,14 @@
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-runner-survival-progress.ts",
-      "classification": "mixed_split_required",
+      "classification": "legacy_test_only",
       "reachableFrom": [
         "legacy_runtime",
         "legacy_type",
         "test_runtime",
-        "test_type",
-        "tooling_runtime",
-        "tooling_type"
+        "test_type"
       ],
-      "importedByProduction": [
-        "packages/ai/src/plans/plan-memory.ts"
-      ],
+      "importedByProduction": [],
       "importedByTests": [],
       "imports": [
         "packages/ai/src/action-semantic-candidate.ts",
@@ -8741,8 +8731,8 @@
       ],
       "typeOnlyProductionConsumers": [],
       "publicExportedBy": [],
-      "proposedDisposition": "SPLIT_BEFORE_RETIRE",
-      "blocker": "productive runtime consumer"
+      "proposedDisposition": "RETIRE_AFTER_TEST_CONSUMER_REVIEW",
+      "blocker": "test consumer review required"
     },
     {
       "path": "packages/ai/src/plans/tactical-plan-server-targets.ts",
@@ -8850,11 +8840,9 @@
         "tooling_type"
       ],
       "importedByProduction": [
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/plans/tactical-plan-builders.ts"
       ],
       "importedByTests": [
-        "packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.test.ts",
         "packages/ai/src/match-fd7671-card-hint-contract.test.ts",
         "packages/ai/src/plans/plan-memory-progress.test.ts",
         "packages/ai/src/plans/plan-portfolio.test.ts",
@@ -8897,7 +8885,6 @@
         "packages/ai/src/decision/semantic-decision-frame.ts",
         "packages/ai/src/diagnostics/semantic-runtime-debug.ts",
         "packages/ai/src/diagnostics/semantic-runtime-decision-debug.ts",
-        "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
         "packages/ai/src/plans/plan-portfolio-action-capacity.ts",
         "packages/ai/src/plans/plan-portfolio-funding.ts",
         "packages/ai/src/plans/plan-portfolio.ts",
@@ -11845,7 +11832,6 @@
         "tooling_type"
       ],
       "importedByProduction": [
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/plans/plan-portfolio.ts",
         "packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-policies.ts",
         "packages/ai/src/runtime/plan-first-live-runtime.ts",
@@ -16947,7 +16933,6 @@
       ],
       "importedByProduction": [
         "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/runtime/bid-choice-option.ts",
         "packages/ai/src/simulation/ai-game-simulator.ts"
       ],
@@ -25336,7 +25321,6 @@
       "importedByProduction": [
         "packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts",
         "packages/ai/src/evaluation/decision-checkpoints/runtime-checkpoint.ts",
-        "packages/ai/src/plans/plan-memory.ts",
         "packages/ai/src/runtime/ai-decision-input.ts",
         "packages/ai/src/runtime/plan-first-live-runtime.ts",
         "packages/ai/src/runtime/selected-choices-for-decision.ts",
@@ -25462,23 +25446,11 @@
       "importedByProduction": [],
       "importedByTests": [
         "packages/ai/src/diagnostics/semantic-runtime-debug.test.ts",
-        "packages/ai/src/evaluation/decision-contract-real-engine.test.ts",
-        "packages/ai/src/evaluation/hidden-info-observational-equivalence.test.ts",
-        "packages/ai/src/evaluation/match-series-70be-live-regressions.test.ts",
-        "packages/ai/src/evaluation/real-engine-live-runtime.test.ts",
-        "packages/ai/src/evaluation/replay-portable-fixtures.test.ts",
         "packages/ai/src/plans/tactical-plan-corp-remote-project.test.ts",
         "packages/ai/src/plans/tactical-plan-corp-score-conversion-plan.test.ts",
         "packages/ai/src/plans/tactical-plan-runner-survival-progress.test.ts",
-        "packages/ai/src/runner-golden-deck-debug.test.ts",
         "packages/ai/src/runner-tactical-goals.test.ts",
-        "packages/ai/src/runner-wilson-run-action.test.ts",
-        "packages/ai/src/runtime/corp-counter-cashout-economy.test.ts",
-        "packages/ai/src/runtime/plan-first-live-runtime-corp-card-variant-contract.test.ts",
-        "packages/ai/src/semantic-ai-runtime-cutover-runner-plans.test.ts",
         "packages/ai/src/semantic-ai-runtime-cutover-runner-safety.test.ts",
-        "packages/ai/src/simulation/benchmark-reports.test.ts",
-        "packages/ai/src/strategic-vertical-slices.test.ts",
         "packages/ai/src/tactical-plans.test.ts"
       ],
       "imports": [
