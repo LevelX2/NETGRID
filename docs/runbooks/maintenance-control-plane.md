@@ -151,10 +151,23 @@ Wartungs-/Sonderwerkzeug.
 
 Für die historische Analyse einer einzelnen KI-Entscheidung dient
 `GET /api/storage/maintenance/analysis/matches/:matchId/decisions/:decisionIndex`.
-Er liefert nur bei exakt passendem, hash-verifiziertem Snapshot eine
-actor-sichere State-View und die daraus mit der aktuellen Engine rekonstruierten
-LegalActions; bei fehlender oder mehrdeutiger Snapshotbindung bleibt dieser
-Abschnitt sichtbar nicht verfügbar.
+Neue KI-Traces persistieren dafür am damaligen Entscheidungspunkt den Vertrag
+`ai-decision-historical-audit-v1`: actor-sichere LegalAction-Semantik,
+Engine-Bindungs- und Validierungs-Evidence, einen StateHash-gebundenen
+Actor-Snapshot sowie – nur während eines Runs – die damals sichtbare
+Run-/Encounter-Projektion. Der Detailendpunkt liefert diesen Auditvertrag
+vollständig, jedoch nie rohe Zustände, Datenbankzeilen, Logzeilen oder
+gegnerische private Zonen.
+
+Das Bundle verwendet `netgrid-match-analysis-bundle-v2`. Es enthält die
+Schema-Versionen und im kompakten Decision-Index pro Abschnitt den Status
+`persisted`, `reconstructed` oder `unavailable`. Der Detailendpunkt verwendet
+`netgrid-decision-analysis-context-v2` und liefert für eine Entscheidung die
+vollständige Audit-Evidence. Aktuelle Engine-Rekonstruktion ist ausdrücklich
+kein Ersatz: ältere Traces ohne gespeicherten Auditvertrag melden für jeden
+betroffenen Abschnitt strukturiert `unavailable` mit
+`historical_audit_not_persisted`; der Server erstellt keinen
+Rückwärtskompatibilitätsadapter.
 
 Im lokalen Profil dürfen dieselben read-only Analysis-Routen ohne
 Maintenance-Login über `127.0.0.1` oder `::1` aufgerufen werden. Das gilt

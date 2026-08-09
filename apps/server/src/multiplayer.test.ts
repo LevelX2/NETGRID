@@ -1479,24 +1479,41 @@ describe("Backend 0.5 private storage maintenance", () => {
         match?: { matchId?: string; status?: string; stateVersion?: number };
         scope?: { turn?: number; side?: string; fromDecision?: number; toDecision?: number };
         events?: Array<{ eventId: string }>;
-        decisions?: Array<{ decisionIndex: number; side: string }>;
         traces?: Array<{ detail: Record<string, unknown> }>;
-        diagnostics?: { unavailableSections?: string[] };
+        schemaVersions?: { decisionIndex?: string; historicalAudit?: string };
+        decisions?: Array<{
+          decisionIndex: number;
+          side: string;
+          auditAvailability?: {
+            historicalLegalActions?: { status?: string };
+            engineEvidence?: { status?: string };
+            analysisSnapshot?: { status?: string };
+          };
+        }>;
       };
       expect(activeResponse.status).toBe(200);
       expect(activeBundle).toMatchObject({
-        schemaVersion: "netgrid-match-analysis-bundle-v1",
+        schemaVersion: "netgrid-match-analysis-bundle-v2",
+        schemaVersions: {
+          decisionIndex: "netgrid-decision-audit-availability-v1",
+          historicalAudit: "ai-decision-historical-audit-v1",
+        },
         match: { matchId: active.matchId, stateVersion: before.gameState.stateVersion },
         scope: { turn: 1, side: "corp", fromDecision: 1, toDecision: 1 },
       });
       expect(activeBundle.events?.length).toBeGreaterThan(0);
       expect(activeBundle.decisions).toEqual([
-        expect.objectContaining({ decisionIndex: 1, side: "corp" }),
+        expect.objectContaining({
+          decisionIndex: 1,
+          side: "corp",
+          auditAvailability: expect.objectContaining({
+            historicalLegalActions: expect.objectContaining({ status: "persisted" }),
+            engineEvidence: expect.objectContaining({ status: "persisted" }),
+            analysisSnapshot: expect.objectContaining({ status: "persisted" }),
+          }),
+        }),
       ]);
       expect(activeBundle.traces).toHaveLength(1);
-      expect(activeBundle.diagnostics?.unavailableSections).toContain(
-        "historicalLegalActions",
-      );
       expect(JSON.stringify(activeBundle)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
       );
@@ -1507,21 +1524,28 @@ describe("Backend 0.5 private storage maintenance", () => {
       const decisionContext = (await decisionResponse.json()) as {
         schemaVersion?: string;
         decision?: { decisionIndex?: number; side?: string; stateVersion?: number };
-        state?: unknown;
-        legalActions?: Array<{ actionId?: string }>;
+        audit?: {
+          capture?: string;
+          legalActions?: { actions?: Array<{ actionId?: string; actionType?: string }> };
+          engineEvidence?: { stateHash?: string; rulesBaseline?: { engineSchemaVersion?: string } };
+          analysisSnapshot?: { actorState?: unknown };
+        };
         surroundingEvents?: Array<{ eventId?: string }>;
         provenance?: { persisted?: string[]; reconstructed?: unknown[] };
       };
       expect(decisionResponse.status).toBe(200);
       expect(decisionContext).toMatchObject({
-        schemaVersion: "netgrid-decision-analysis-context-v1",
+        schemaVersion: "netgrid-decision-analysis-context-v2",
         decision: { decisionIndex: 1, side: "corp" },
       });
-      expect(decisionContext.state).toBeDefined();
-      expect(decisionContext.legalActions?.length).toBeGreaterThan(0);
+      expect(decisionContext.audit?.capture).toBe("persisted");
+      expect(decisionContext.audit?.legalActions?.actions?.length).toBeGreaterThan(0);
+      expect(decisionContext.audit?.engineEvidence?.stateHash).toBeDefined();
+      expect(decisionContext.audit?.engineEvidence?.rulesBaseline?.engineSchemaVersion).toBeDefined();
+      expect(decisionContext.audit?.analysisSnapshot?.actorState).toBeDefined();
       expect(decisionContext.surroundingEvents?.length).toBeGreaterThan(0);
-      expect(decisionContext.provenance?.persisted).toContain("stateSnapshot");
-      expect(decisionContext.provenance?.reconstructed).toHaveLength(1);
+      expect(decisionContext.provenance?.persisted).toContain("historicalDecisionAudit");
+      expect(decisionContext.provenance?.reconstructed).toHaveLength(0);
       expect(JSON.stringify(decisionContext)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|gameStateJson|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
       );
@@ -1531,6 +1555,41 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(after?.match.matchVersion).toBe(before.match.matchVersion);
       expect(after?.gameState.stateVersion).toBe(before.gameState.stateVersion);
       expect(hashState(after.gameState)).toBe(hashState(before.gameState));
+
+      // A pre-audit trace must remain visibly unavailable; the API may not
+      // substitute current-engine reconstruction for missing historical data.
+      const legacyTraceDatabase = new DatabaseSync(join(dir, "netgrid.sqlite"));
+      legacyTraceDatabase
+        .prepare(
+          "UPDATE ai_decision_traces SET trace_json = ? WHERE match_id = ? AND decision_index = ?",
+        )
+        .run(JSON.stringify({ schemaVersion: "ai-decision-trace-v1" }), active.matchId, 1);
+      legacyTraceDatabase.close();
+      const unavailableResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/decisions/1`,
+      );
+      expect(unavailableResponse.status).toBe(200);
+      expect(await unavailableResponse.json()).toMatchObject({
+        audit: {
+          capture: "unavailable",
+          reason: "historical_audit_not_persisted",
+          availability: {
+            historicalLegalActions: {
+              status: "unavailable",
+              reason: "historical_audit_not_persisted",
+            },
+          },
+        },
+        provenance: { reconstructed: [] },
+        diagnostics: {
+          unavailableSections: expect.arrayContaining([
+            "historicalLegalActions",
+            "engineEvidence",
+            "analysisSnapshot",
+            "runAndEncounterProjection",
+          ]),
+        },
+      });
 
       const finishedResponse = await maintenance.request(
         `/api/storage/maintenance/analysis/matches/${encodeURIComponent(finished.matchId)}/bundle?includeEvents=false&includeDecisionTraces=false`,
