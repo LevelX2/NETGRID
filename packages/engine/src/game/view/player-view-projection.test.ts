@@ -103,6 +103,215 @@ describe("PlayerView projection", () => {
     });
   });
 
+  it("projects a Corp-private state-bound post-rez run quote for fixed ICE", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "fixed-ice-post-rez-run-quote" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    const corpIce = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+    const runnerIce = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+
+    expect(corpIce?.effectiveRunQuote).toBeUndefined();
+    expect(corpIce?.effectivePostRezRunQuote).toMatchObject({
+      context: "installed_post_rez",
+      cardId: iceId,
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: state.stateVersion,
+      complete: true,
+      effectiveRunQuote: {
+        iceInstanceId: iceId,
+        iceDefinitionId: "simple_barrier_ice",
+        subroutines: expect.arrayContaining([
+          expect.objectContaining({ type: "end_the_run" }),
+        ]),
+      },
+    });
+    expect(runnerIce?.effectivePostRezRunQuote).toBeUndefined();
+  });
+
+  it("matches a deterministic rez with rezzed-only strength and subroutine modifiers", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "fixed-ice-post-rez-state-parity" }),
+    );
+    state.corp.credits = 20;
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const antiquatedId = "post-rez-antiquated" as CardInstanceId;
+    const tesseractId = "post-rez-tesseract" as CardInstanceId;
+    const identity = state.cardInstances[state.corp.identity]!;
+    state.cardInstances[antiquatedId] = {
+      ...identity,
+      definitionId: "onr_v1_350_antiquated-interface-routines",
+      owner: "corp",
+      controller: "corp",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+    };
+    state.cardInstances[tesseractId] = {
+      ...identity,
+      definitionId: "onr_v1_370_tesseract-fort-construction",
+      owner: "corp",
+      controller: "corp",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "rd" },
+    };
+    state.corp.servers
+      .find((server) => server.id === "rd")!
+      .root.push(antiquatedId, tesseractId);
+
+    const projectedQuote = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId)?.effectivePostRezRunQuote;
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(false);
+    expect(projectedQuote).toMatchObject({
+      complete: true,
+      effectiveRunQuote: {
+        subroutines: expect.arrayContaining([
+          expect.objectContaining({
+            sourceDefinitionId: "onr_v1_370_tesseract-fort-construction",
+            type: "end_the_run_unless_runner_pays",
+          }),
+        ]),
+      },
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
+    );
+    const actuallyRezzedQuote = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId)?.effectiveRunQuote;
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(
+      projectedQuote?.complete && projectedQuote.effectiveRunQuote,
+    ).toEqual(actuallyRezzedQuote);
+  });
+
+  it("fails closed and stays side-safe for ICE with real on-rez lifecycle effects", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "on-rez-lifecycle-post-rez-quote" }),
+    );
+    state.corp.credits = 10;
+    const iceId = "post-rez-snowbank" as CardInstanceId;
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[state.corp.identity]!,
+      instanceId: iceId,
+      definitionId: "onr_proteus_038_snowbank",
+      owner: "corp",
+      controller: "corp",
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+    state.corp.servers.find((server) => server.id === "rd")!.ice.push(iceId);
+    const stateBeforeProjection = structuredClone(state);
+
+    const corpIce = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === iceId);
+    const runnerIce = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === iceId);
+
+    expect(corpIce?.effectivePostRezRunQuote).toMatchObject({
+      context: "installed_post_rez",
+      cardId: iceId,
+      iceDefinitionId: "onr_proteus_038_snowbank",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: state.stateVersion,
+      complete: false,
+      reason: "on_rez_lifecycle_projection_required",
+    });
+    expect(runnerIce?.effectivePostRezRunQuote).toBeUndefined();
+    expect(state).toEqual(stateBeforeProjection);
+
+    const corpCreditsBeforeRez = state.corp.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const rezAction = getLegalActions(state, "corp").find(
+      (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
+    );
+    if (!rezAction) throw new Error("Expected Snowbank rez action");
+    const rezCreditCost = rezAction.costs.reduce(
+      (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
+      0,
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === rezAction.actionId,
+    );
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(state.corp.credits).toBe(corpCreditsBeforeRez - rezCreditCost + 3);
+  });
+
+  it("keeps variable and active-run post-rez projections incomplete", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "incomplete-post-rez-run-quotes" }),
+    );
+    const variableIceId = "variable-post-rez-ice" as CardInstanceId;
+    state.cardInstances[variableIceId] = {
+      ...state.cardInstances[state.corp.identity]!,
+      definitionId: "onr_proteus_025_homing-missile",
+      owner: "corp",
+      controller: "corp",
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "hq" },
+    };
+    state.corp.servers
+      .find((server) => server.id === "hq")!
+      .ice.push(variableIceId);
+    const fixedIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    expect(
+      getPlayerView(state, "corp")
+        .servers.find((server) => server.id === "hq")
+        ?.ice.find((card) => card.instanceId === variableIceId)
+        ?.effectivePostRezRunQuote,
+    ).toMatchObject({
+      complete: false,
+      reason: "variable_rez_choice_required",
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(
+      getPlayerView(state, "corp")
+        .servers.find((server) => server.id === "rd")
+        ?.ice.find((card) => card.instanceId === fixedIceId)
+        ?.effectivePostRezRunQuote,
+    ).toMatchObject({ complete: false, reason: "active_run_context" });
+  });
+
   it("projects structured post-bid link and trace-success-cancel support", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "runner-trace-window-support" }),

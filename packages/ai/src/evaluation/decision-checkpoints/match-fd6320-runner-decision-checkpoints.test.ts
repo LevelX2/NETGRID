@@ -64,13 +64,16 @@ describe("match FD6320 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
-    [
-      "FD6320-F01-central-target-quality",
-      "FD6320-F02-reachable-hq-matchpoint",
-    ],
+    ["FD6320-F01-central-target-quality", "FD6320-F02-reachable-hq-matchpoint"],
   );
+  if (checkpoint.checkpointId === "FD6320-F02-reachable-hq-matchpoint") {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_hq_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

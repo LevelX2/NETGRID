@@ -20,6 +20,50 @@ describe("four-match card-hint decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     const selectedAction = result.selectedAction;
     if (!selectedAction) throw new Error("Expected selected Inside Job action");
+    const decision = result.decision;
+    if (!decision) throw new Error("Expected plan-owned Inside Job decision");
+    const pressurePlanInstanceId = "plan:runner.pressure_central:central%3Ard";
+    expect(decision).toMatchObject({
+      actionId: selectedAction.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.pressure_central",
+        planFirstDecision: {
+          selectionAuthority: "turn_plan_commitment",
+          rootPlanInstanceId: pressurePlanInstanceId,
+          leafExecutorInstanceId: pressurePlanInstanceId,
+          selectedPlan: {
+            instanceId: pressurePlanInstanceId,
+            moduleId: "runner.pressure_central",
+            executionState: "executor",
+          },
+          route: {
+            planInstanceId: pressurePlanInstanceId,
+            stepId: `${pressurePlanInstanceId}:pressure:rd`,
+            capabilityId: "pressure_rd_access",
+            actionId: selectedAction.actionId,
+            actionType: "play_event",
+            stateVersion: result.input.playerView.stateVersion,
+            target: { kind: "server", id: "rd" },
+          },
+          turnPlanning: {
+            shadowComparison: {
+              liveActionId: selectedAction.actionId,
+              shadowActionId: selectedAction.actionId,
+              shadowRootPlanInstanceId: pressurePlanInstanceId,
+              agreement: true,
+              comparisonClass: "agreement",
+            },
+          },
+        },
+      },
+    });
+    expect(decision.evidence).not.toEqual(
+      expect.arrayContaining([
+        "plan_assessment_evidence:runner_damage_locked_hand_reaction_reserve",
+      ]),
+    );
     const scopedInput = {
       ...result.input,
       legalActions: [selectedAction],

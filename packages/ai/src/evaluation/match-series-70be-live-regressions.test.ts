@@ -100,7 +100,7 @@ describe("match series 70BE real Engine regressions", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
       ]),
     );
   });

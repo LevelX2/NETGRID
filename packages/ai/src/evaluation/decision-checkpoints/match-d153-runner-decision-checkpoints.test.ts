@@ -65,7 +65,7 @@ describe("match D153 Runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     [
       "cp-d153-05-preserve-hq-facecheck-d61",
@@ -73,6 +73,14 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       "cp-d153-12-cashout-for-rd-d185",
     ],
   );
+  if (
+    checkpoint.checkpointId === "cp-d153-10-liquidate-for-remote-threat-d167"
+  ) {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

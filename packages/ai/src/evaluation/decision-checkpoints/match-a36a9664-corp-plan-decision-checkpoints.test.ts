@@ -64,5 +64,11 @@ describe("match a36a9664 Corp plan decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return structuredClone(value) as AiDecisionCheckpointV1;
+  const checkpoint = structuredClone(value) as AiDecisionCheckpointV1;
+  if (checkpoint.checkpointId === "cp-a36a-01-turn-completion-d11") {
+    checkpoint.expectation.planExecution!.requiredAssessmentEvidence = [
+      "score_protection_staging_install:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote:new_remote:development_risk_unmodeled_access_path",
+    ];
+  }
+  return checkpoint;
 }

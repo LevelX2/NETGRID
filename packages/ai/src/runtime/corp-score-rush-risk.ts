@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { scoringWindowAccessAssessment } from "./corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure";
+import { scoringWindowPostRezProtectionAssessment } from "./corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure";
 
 export type CorpScoreRushRiskAssessment = Readonly<{
   admission: "accepted" | "rejected" | "unknown";
@@ -36,7 +36,11 @@ export function assessCorpScoreRushRisk(params: {
   remainingAdvancementClicks: number;
 }): CorpScoreRushRiskAssessment {
   const { input, server, agendaPoints, remainingAdvancementClicks } = params;
-  const beforeScore = scoringWindowAccessAssessment(input, server, 4);
+  const beforeScore = scoringWindowPostRezProtectionAssessment(
+    input,
+    server,
+    4,
+  );
   const terminalSteal =
     input.playerView.opponent.agendaPoints + agendaPoints >=
     input.playerView.agendaPointsToWin;

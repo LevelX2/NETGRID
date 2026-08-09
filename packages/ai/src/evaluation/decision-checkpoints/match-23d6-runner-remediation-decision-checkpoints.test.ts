@@ -74,7 +74,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_priority_class:P4",
-        "plan_scheduler:assess:validated:plan:runner.credit_bank:onr_v1_154_broker",
+        "plan_scheduler:assess:validated:plan:runner.credit_bank:runner_onr_v1_154_broker_1",
       ]),
     );
     expect(
@@ -83,7 +83,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
       )?.whyNot,
     ).toEqual(
       expect.arrayContaining([
-        "candidate_plan:plan:runner.credit_bank:onr_v1_154_broker:ready",
+        "candidate_plan:plan:runner.credit_bank:runner_onr_v1_154_broker_1:ready",
         "candidate_plan_evidence:runner_credit_bank_first_load",
       ]),
     );
@@ -121,9 +121,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
           acceptableCapabilities: ["setup_search_engine_breaker_sentry"],
-          requiredAssessmentEvidence: [
-            "deck_strategy_open_sentry_coverage",
-          ],
+          requiredAssessmentEvidence: ["deck_strategy_open_sentry_coverage"],
         },
       };
     });

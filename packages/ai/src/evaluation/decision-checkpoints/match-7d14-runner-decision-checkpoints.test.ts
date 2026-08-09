@@ -57,8 +57,7 @@ describe("match 7D14 runner decision checkpoints", () => {
         };
         state.runner.rig.hardware.push(installedInstanceId);
         checkpoint.source.kind = "synthetic_companion";
-        checkpoint.source.findingId =
-          "7D14-C02-DISCARD-INSTALLED-EQUIVALENT";
+        checkpoint.source.findingId = "7D14-C02-DISCARD-INSTALLED-EQUIVALENT";
         checkpoint.expectation = {
           discardChoice: {
             mustDiscardDefinitionIds: ["onr_v1_129_hq-interface"],
@@ -72,13 +71,22 @@ describe("match 7D14 runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     [
       "cp-7d14-01-urgent-run-over-stale-funding",
       "cp-7d14-01b-urgent-run-over-funded-install",
     ],
   );
+  if (
+    checkpoint.checkpointId === "cp-7d14-01-urgent-run-over-stale-funding" ||
+    checkpoint.checkpointId === "cp-7d14-01b-urgent-run-over-funded-install"
+  ) {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

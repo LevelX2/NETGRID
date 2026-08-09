@@ -31,7 +31,7 @@ describe("replay portable fixtures", () => {
       expect.arrayContaining([
         "plan_first_runtime:true",
         "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
       ]),
     );
     expect(JSON.stringify(fixture)).not.toMatch(

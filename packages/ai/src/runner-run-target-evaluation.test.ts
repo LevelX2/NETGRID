@@ -19,6 +19,7 @@ import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   type RunnerHandDevelopmentEvaluation,
 } from "./runner-hand-development";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 
 const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 const ALL_HANDS_DEFINITION_ID = "onr_proteus_101_all-hands";
@@ -84,6 +85,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
         serverId: "rd",
         runnerEventRun: true,
+        runTemporaryCredits: 9,
+        afterRunUnpreventableCoreDamage: 1,
       },
     } satisfies LegalAction;
     const input = aiInput({
@@ -1139,14 +1142,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [
         server("hq", {
           ice: [
-            visibleCard("hq-wall", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              type: "ice",
-              subtypes: ["wall"],
-              known: true,
-              rezzed: true,
-            }),
+            wallOfStaticIce("hq-wall"),
           ],
         }),
       ],
@@ -1622,7 +1618,16 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         credits: 6,
         servers: [server("hq")],
         legalActions: [
-          runEventAction("all-hands-hq", ALL_HANDS_DEFINITION_ID, "All-Hands"),
+          runEventAction(
+            "all-hands-hq",
+            ALL_HANDS_DEFINITION_ID,
+            "All-Hands",
+            {
+              serverId: "hq",
+              runnerEventRun: true,
+              noNoisyBreakers: true,
+            },
+          ),
         ],
       }),
       beliefState,
@@ -1751,14 +1756,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [
         server("hq", {
           ice: [
-            visibleCard("hq-data-wall", {
-              definitionId: "onr_v1_237_data-wall",
-              title: "Data Wall",
-              type: "ice",
-              known: true,
-              rezzed: true,
-              subtypes: ["wall"],
-            }),
+            dataWallIce("hq-data-wall"),
           ],
         }),
       ],
@@ -1767,6 +1765,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           "blocked-all-hands",
           ALL_HANDS_DEFINITION_ID,
           "All-Hands",
+          {
+            serverId: "hq",
+            runnerEventRun: true,
+            noNoisyBreakers: true,
+          },
         ),
       ],
     });
@@ -1817,14 +1820,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [
         server("remote_1", {
           ice: [
-            visibleCard("remote-vacuum-link", {
-              definitionId: "onr_v1_275_vacuum-link",
-              title: "Vacuum Link",
-              type: "ice",
-              subtypes: ["sentry", "random"],
-              known: true,
-              rezzed: true,
-            }),
+            vacuumLinkIce("remote-vacuum-link"),
           ],
           root: [
             visibleCard("remote-euromarket", {
@@ -2485,14 +2481,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [
         server("remote_2", {
           ice: [
-            visibleCard("remote-ice-1", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              type: "ice",
-              subtypes: ["wall"],
-              known: true,
-              rezzed: true,
-            }),
+            wallOfStaticIce("remote-ice-1"),
           ],
           root: [
             visibleCard("remote-root-2", {
@@ -3260,6 +3249,7 @@ function runEventAction(
   actionId: string,
   sourceDefinitionId: string,
   label: string,
+  payload: LegalAction["payload"] = {},
 ): LegalAction {
   return {
     actionId,
@@ -3272,7 +3262,7 @@ function runEventAction(
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 2,
-    payload: { sourceDefinitionId },
+    payload: { sourceDefinitionId, ...payload },
   };
 }
 
@@ -3366,7 +3356,7 @@ function visibleCard(
 }
 
 function barrierIce(instanceId: string): VisibleCard {
-  return visibleCard(instanceId, {
+  const ice = visibleCard(instanceId, {
     definitionId: "simple_barrier_ice",
     title: "Simple Barrier ICE",
     type: "ice",
@@ -3374,12 +3364,15 @@ function barrierIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 3,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "simple_barrier_ice",
+  });
+  return withEffectiveRunQuote(ice, {
       effectiveStrength: 3,
-      subroutines: [{ id: "simple_barrier_ice_etr", type: "end_the_run" }],
-    },
+      subroutines: [{
+        id: "simple_barrier_ice_etr",
+        type: "end_the_run",
+        sourceDefinitionId: "simple_barrier_ice",
+        sourceTitle: "Simple Barrier ICE",
+      }],
   });
 }
 
@@ -3402,7 +3395,7 @@ function expensiveBarrierIce(instanceId: string): VisibleCard {
 }
 
 function wallOfStaticIce(instanceId: string): VisibleCard {
-  return visibleCard(instanceId, {
+  const ice = visibleCard(instanceId, {
     definitionId: "onr_v1_279_wall-of-static",
     title: "Wall of Static",
     type: "ice",
@@ -3410,17 +3403,63 @@ function wallOfStaticIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 2,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_279_wall-of-static",
+  });
+  return withEffectiveRunQuote(ice, {
       effectiveStrength: 2,
       subroutines: [
         {
           id: `${instanceId}_etr`,
           type: "end_the_run",
+          sourceDefinitionId: "onr_v1_279_wall-of-static",
+          sourceTitle: "Wall of Static",
         },
       ],
-    },
+  });
+}
+
+function dataWallIce(instanceId: string): VisibleCard {
+  const ice = visibleCard(instanceId, {
+    definitionId: "onr_v1_237_data-wall",
+    title: "Data Wall",
+    type: "ice",
+    subtypes: ["wall"],
+    known: true,
+    rezzed: true,
+    strength: 0,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 0,
+    subroutines: [
+      {
+        id: `${instanceId}_etr`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_237_data-wall",
+        sourceTitle: "Data Wall",
+      },
+    ],
+  });
+}
+
+function vacuumLinkIce(instanceId: string): VisibleCard {
+  const ice = visibleCard(instanceId, {
+    definitionId: "onr_v1_275_vacuum-link",
+    title: "Vacuum Link",
+    type: "ice",
+    subtypes: ["sentry", "random"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 5,
+    subroutines: [
+      {
+        id: `${instanceId}_rewind`,
+        type: "rewind_run_to_rezzed_ice_by_die",
+        sourceDefinitionId: "onr_v1_275_vacuum-link",
+        sourceTitle: "Vacuum Link",
+      },
+    ],
   });
 }
 
@@ -3494,10 +3533,9 @@ function aspTraceRunLockIce(instanceId: string): VisibleCard {
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_221_asp",
           sourceTitle: "Asp",
-          amount: 5,
-          unbrokenRunEffect: {
-            createsRunLockOrActionTax: 1,
-          },
+          baseTraceStrength: 5,
+          traceSuccessEffect: { type: "end_run_and_run_lock", amount: 1 },
+          unbrokenRunEffect: { createsRunLockOrActionTax: 1 },
         },
       ],
     },
@@ -3523,7 +3561,8 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
-          amount: 5,
+          baseTraceStrength: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
         },
       ],
     },

@@ -218,6 +218,50 @@ export function assessKnownRezzedIcePath(
   };
 }
 
+export function assessEngineCertifiedPostRezIcePath(
+  iceCards: VisibleCard[],
+  targetServerId: string,
+  observedAtStateVersion: number,
+  financedPostRezIceInstanceIds: ReadonlySet<string>,
+  rigCards: VisibleCard[],
+  runnerCredits: RunnerRunPathCreditBudgetInput,
+  rootCards: RootCardLike[] = [],
+  visibleCorpBidCapacity = 0,
+  deflectorContext: VisibleDeflectorContext = {},
+): KnownRezzedIcePathAssessment {
+  const authoritativePath = iceCards.map((ice): IceCardLike => {
+    if (ice.rezzed === true) return ice;
+    if (!financedPostRezIceInstanceIds.has(ice.instanceId)) return ice;
+    const quote = ice.effectivePostRezRunQuote;
+    if (
+      quote?.context !== "installed_post_rez" ||
+      quote.complete !== true ||
+      quote.cardId !== ice.instanceId ||
+      quote.iceDefinitionId !== ice.definitionId ||
+      quote.targetServerId !== targetServerId ||
+      quote.projectedServerId !== targetServerId ||
+      quote.expiresAtStateVersion !== observedAtStateVersion ||
+      quote.effectiveRunQuote.iceInstanceId !== ice.instanceId ||
+      quote.effectiveRunQuote.iceDefinitionId !== ice.definitionId
+    ) {
+      return ice;
+    }
+    return {
+      ...ice,
+      effectiveRunQuote: quote.effectiveRunQuote,
+      authoritativePostRezRunProjection: true,
+    };
+  });
+  return assessKnownRezzedIcePath(
+    authoritativePath,
+    rigCards,
+    runnerCredits,
+    rootCards,
+    visibleCorpBidCapacity,
+    deflectorContext,
+  );
+}
+
 function selectableSubtypeRigVariants(
   rigCards: VisibleCard[],
   context: VisibleDeflectorContext,
@@ -384,7 +428,13 @@ function assessKnownRezzedIcePathInternal(
     .map((ice, iceIndex) => ({ ice, iceIndex }))
     .reverse()) {
     const iceDefinitionId = ice.definitionId;
-    if (!iceDefinitionId || !ice.known || ice.rezzed !== true) continue;
+    if (
+      !iceDefinitionId ||
+      !ice.known ||
+      (ice.rezzed !== true &&
+        ice.authoritativePostRezRunProjection !== true)
+    )
+      continue;
     const rigCardsForEncounter = rigCards.filter(
       (card) =>
         !breakersAtRiskOfBeingTrashed.has(card.instanceId) &&

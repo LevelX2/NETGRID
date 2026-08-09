@@ -11,6 +11,7 @@ import {
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
   type CorpPunishRouteQuoteSet,
+  type CounterType,
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
@@ -20,15 +21,19 @@ import {
   type PublicGameEvent,
   type ResolvedGameEffect,
   type Side,
+  type SubroutineType,
   type TargetRequirement,
   type TraceSuccessEffect,
   type VisibleCard,
   type VisibleChoiceRequest,
+  type VisibleConditionalEncounterEffect,
+  type VisibleCorpIcePostRezRunQuote,
   type VisibleCorpCounterBankPreparationQuote,
   type VisibleCorpIceRezResourceExchangeQuote,
   type VisibleCorpRezCostQuote,
   type VisibleCorpScoreContinuationQuote,
   type VisibleEffectiveIceRunQuote,
+  type VisibleEffectiveSubroutine,
   type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 
@@ -278,6 +283,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "title",
   "cardTitle",
   "cardDefinitionId",
+  "sourceCardInstanceId",
   "sourceDefinitionId",
   "sourceTitle",
   "targetCardDefinitionId",
@@ -656,6 +662,13 @@ function sanitizePlayerView(
             card.owner === "corp" &&
             card.controller === "corp" &&
             card.type === "ice",
+          allowCorpPostRezRunQuote:
+            view.side === "corp" &&
+            card.known &&
+            card.owner === "corp" &&
+            card.controller === "corp" &&
+            card.type === "ice" &&
+            card.rezzed === false,
           expectedCorpRezServerId: server.id,
           expectedCorpRezStateVersion: view.stateVersion,
         }),
@@ -1437,6 +1450,7 @@ function sanitizeVisibleCardWithOptions(
   card: VisibleCard,
   options: {
     allowCorpRezCostQuote?: boolean;
+    allowCorpPostRezRunQuote?: boolean;
     expectedCorpRezServerId?: PlayerView["servers"][number]["id"];
     expectedCorpRezStateVersion?: number;
     allowCorpScoreContinuationQuote?: boolean;
@@ -1448,6 +1462,8 @@ function sanitizeVisibleCardWithOptions(
     expectedCorpCounterBankStateVersion?: number;
   } = {},
 ): VisibleCard {
+  const effectiveRunQuote = card.effectiveRunQuote;
+  const effectivePostRezRunQuote = card.effectivePostRezRunQuote;
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
   const effectiveRezResourceExchangeQuote =
     card.effectiveRezResourceExchangeQuote;
@@ -1461,6 +1477,17 @@ function sanitizeVisibleCardWithOptions(
     effectiveRezCostQuote.projectedServerId ===
       options.expectedCorpRezServerId &&
     effectiveRezCostQuote.expiresAtStateVersion ===
+      options.expectedCorpRezStateVersion;
+  const includeEffectivePostRezRunQuote =
+    options.allowCorpPostRezRunQuote === true &&
+    effectivePostRezRunQuote?.context === "installed_post_rez" &&
+    effectivePostRezRunQuote.cardId === card.instanceId &&
+    effectivePostRezRunQuote.iceDefinitionId === card.definitionId &&
+    effectivePostRezRunQuote.targetServerId ===
+      options.expectedCorpRezServerId &&
+    effectivePostRezRunQuote.projectedServerId ===
+      options.expectedCorpRezServerId &&
+    effectivePostRezRunQuote.expiresAtStateVersion ===
       options.expectedCorpRezStateVersion;
   const includeEffectiveRezResourceExchangeQuote =
     options.allowCorpRezCostQuote === true &&
@@ -1496,6 +1523,18 @@ function sanitizeVisibleCardWithOptions(
   const sanitizedCounterBankPreparationQuote =
     includeCounterBankPreparationQuote && counterBankPreparationQuote
       ? sanitizeCorpCounterBankPreparationQuote(counterBankPreparationQuote)
+      : undefined;
+  const sanitizedEffectiveRunQuote =
+    card.known === true &&
+    card.type === "ice" &&
+    card.rezzed === true &&
+    effectiveRunQuote?.iceInstanceId === card.instanceId &&
+    effectiveRunQuote.iceDefinitionId === card.definitionId
+      ? sanitizeVisibleEffectiveIceRunQuote(effectiveRunQuote)
+      : undefined;
+  const sanitizedEffectivePostRezRunQuote =
+    includeEffectivePostRezRunQuote && effectivePostRezRunQuote
+      ? sanitizeVisibleCorpIcePostRezRunQuote(effectivePostRezRunQuote)
       : undefined;
   return {
     instanceId: card.instanceId,
@@ -1554,12 +1593,13 @@ function sanitizeVisibleCardWithOptions(
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
-    ...(card.effectiveRunQuote
+    ...(sanitizedEffectiveRunQuote
       ? {
-          effectiveRunQuote: sanitizeVisibleEffectiveIceRunQuote(
-            card.effectiveRunQuote,
-          ),
+          effectiveRunQuote: sanitizedEffectiveRunQuote,
         }
+      : {}),
+    ...(sanitizedEffectivePostRezRunQuote
+      ? { effectivePostRezRunQuote: sanitizedEffectivePostRezRunQuote }
       : {}),
     ...(includeEffectiveRezCostQuote && effectiveRezCostQuote
       ? {
@@ -2066,140 +2106,470 @@ function sanitizeCounterCreditPool(
   };
 }
 
+const VISIBLE_EFFECTIVE_SUBROUTINE_TYPES = {
+  end_the_run: true,
+  end_the_run_unless_runner_pays: true,
+  corp_gain_credit: true,
+  runner_lose_credits: true,
+  give_runner_tag: true,
+  do_damage: true,
+  random_damage: true,
+  initiate_trace: true,
+  end_the_run_and_trash_source_at_end_of_turn: true,
+  trash_installed_program: true,
+  trash_installed_program_unless_runner_pays: true,
+  set_run_encounter_tax: true,
+  set_run_break_subroutine_cost_modifier: true,
+  set_run_future_end_the_run_subroutine: true,
+  set_run_active_ice_program_trash: true,
+  set_run_future_strength_bonus: true,
+  set_next_encounter_unless_fully_break_damage: true,
+  set_next_encounter_lock: true,
+  set_next_encounter_no_break_subroutines: true,
+  set_run_jack_out_lock: true,
+  set_runner_forgo_next_action: true,
+  set_runner_run_lock_actions: true,
+  set_run_jack_out_additional_cost: true,
+  set_run_pass_rezzed_ice_program_trash: true,
+  secret_spend_compare_end_run_unless_corp_spent_at_least_runner: true,
+  reveal_corp_rd_top: true,
+  reorder_corp_rd_top2: true,
+  deflect_run: true,
+  rewind_run_to_rezzed_ice_by_die: true,
+} satisfies Record<SubroutineType, true>;
+
+const TRACE_COUNTER_TYPES = {
+  advancement: true,
+  virus: true,
+  cockroach: true,
+  cascade: true,
+  doom: true,
+  crumble: true,
+  garbage: true,
+  highlighter: true,
+  scaldan: true,
+  tax: true,
+  vienna: true,
+  socket_archives: true,
+  socket_hq: true,
+  socket_rd: true,
+  pipe: true,
+  spy: true,
+  link_reduction_counter: true,
+  breaker_strength_penalty: true,
+  baskerville: true,
+  cerberus: true,
+  trace_tag_counter: true,
+  mastiff: true,
+  militech: true,
+  power: true,
+  agenda: true,
+  recurring_credit: true,
+  bad_publicity: true,
+  install_cost_modifier: true,
+  charge: true,
+  mark: true,
+  dividend: true,
+  core_damage: true,
+  shell: true,
+  bit: true,
+  crying: true,
+  ablative: true,
+  trauma: true,
+  boon: true,
+  pdca: true,
+  remap: true,
+  kludge: true,
+  term: true,
+  drip: true,
+} satisfies Record<CounterType, true>;
+
 function sanitizeVisibleEffectiveIceRunQuote(
-  quote: VisibleEffectiveIceRunQuote,
-): VisibleEffectiveIceRunQuote {
+  value: unknown,
+): VisibleEffectiveIceRunQuote | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  const subroutines = Array.isArray(value.subroutines)
+    ? value.subroutines.map(sanitizeVisibleEffectiveSubroutine)
+    : undefined;
+  const breakSubroutineCostSourceDefinitionIds =
+    value.breakSubroutineCostSourceDefinitionIds === undefined
+      ? undefined
+      : sanitizeNonEmptyStringArray(
+          value.breakSubroutineCostSourceDefinitionIds,
+        );
+  const breakSubroutineCostSourceTitles =
+    value.breakSubroutineCostSourceTitles === undefined
+      ? undefined
+      : sanitizeNonEmptyStringArray(value.breakSubroutineCostSourceTitles);
+  const conditionalEncounterEffects =
+    value.conditionalEncounterEffects === undefined
+      ? undefined
+      : sanitizeVisibleConditionalEncounterEffects(
+          value.conditionalEncounterEffects,
+        );
+  if (
+    !isNonEmptyString(value.iceInstanceId) ||
+    !isNonEmptyString(value.iceDefinitionId) ||
+    !isNonNegativeSafeInteger(value.effectiveStrength) ||
+    !subroutines ||
+    subroutines.some((subroutine) => subroutine === undefined) ||
+    (value.breakSubroutineAdditionalCostPerSubroutine !== undefined &&
+      !isNonNegativeSafeInteger(
+        value.breakSubroutineAdditionalCostPerSubroutine,
+      )) ||
+    (value.breakSubroutineCostSourceDefinitionIds !== undefined &&
+      breakSubroutineCostSourceDefinitionIds === undefined) ||
+    (value.breakSubroutineCostSourceTitles !== undefined &&
+      breakSubroutineCostSourceTitles === undefined) ||
+    (value.encounterTemporaryTraceCredits !== undefined &&
+      !isNonNegativeSafeInteger(value.encounterTemporaryTraceCredits)) ||
+    (value.conditionalEncounterEffects !== undefined &&
+      conditionalEncounterEffects === undefined)
+  ) {
+    return undefined;
+  }
   return {
-    iceInstanceId: quote.iceInstanceId,
-    iceDefinitionId: quote.iceDefinitionId,
-    effectiveStrength: quote.effectiveStrength,
-    subroutines: quote.subroutines.map((subroutine) => ({
-      id: subroutine.id,
-      type: subroutine.type,
-      ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
-      ...(subroutine.baseTraceStrength !== undefined
-        ? { baseTraceStrength: subroutine.baseTraceStrength }
-        : {}),
-      ...(subroutine.traceSuccessEffect
-        ? {
-            traceSuccessEffect: sanitizeTraceSuccessEffect(
-              subroutine.traceSuccessEffect,
-            ),
-          }
-        : {}),
-      ...(subroutine.deflectorTarget
-        ? { deflectorTarget: subroutine.deflectorTarget }
-        : {}),
-      ...(subroutine.deflectorCost !== undefined
-        ? { deflectorCost: subroutine.deflectorCost }
-        : {}),
-      ...(subroutine.deflectorAutoBreakIfNoTarget !== undefined
-        ? {
-            deflectorAutoBreakIfNoTarget:
-              subroutine.deflectorAutoBreakIfNoTarget,
-          }
-        : {}),
-      ...(subroutine.breakTags
-        ? { breakTags: subroutine.breakTags.slice() }
-        : {}),
-      ...(subroutine.sourceDefinitionId
-        ? { sourceDefinitionId: subroutine.sourceDefinitionId }
-        : {}),
-      ...(subroutine.sourceTitle
-        ? { sourceTitle: subroutine.sourceTitle }
-        : {}),
-      ...(subroutine.dynamicSourceKind
-        ? { dynamicSourceKind: subroutine.dynamicSourceKind }
-        : {}),
-      ...(subroutine.unbrokenRunEffect
-        ? {
-            unbrokenRunEffect: {
-              ...(subroutine.unbrokenRunEffect
-                .addsFutureEndTheRunSubroutines !== undefined
-                ? {
-                    addsFutureEndTheRunSubroutines:
-                      subroutine.unbrokenRunEffect
-                        .addsFutureEndTheRunSubroutines,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect
-                .increasesFutureBreakCostPerSubroutine !== undefined
-                ? {
-                    increasesFutureBreakCostPerSubroutine:
-                      subroutine.unbrokenRunEffect
-                        .increasesFutureBreakCostPerSubroutine,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.increasesFutureIceStrength !==
-              undefined
-                ? {
-                    increasesFutureIceStrength:
-                      subroutine.unbrokenRunEffect.increasesFutureIceStrength,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.preventsFutureBreaking !==
-              undefined
-                ? {
-                    preventsFutureBreaking:
-                      subroutine.unbrokenRunEffect.preventsFutureBreaking,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.addsFutureEncounterCost !==
-              undefined
-                ? {
-                    addsFutureEncounterCost:
-                      subroutine.unbrokenRunEffect.addsFutureEncounterCost,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.preventsJackOut !== undefined
-                ? {
-                    preventsJackOut:
-                      subroutine.unbrokenRunEffect.preventsJackOut,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.causesDamageOrProgramTrash !==
-              undefined
-                ? {
-                    causesDamageOrProgramTrash:
-                      subroutine.unbrokenRunEffect.causesDamageOrProgramTrash,
-                  }
-                : {}),
-              ...(subroutine.unbrokenRunEffect.createsRunLockOrActionTax !==
-              undefined
-                ? {
-                    createsRunLockOrActionTax:
-                      subroutine.unbrokenRunEffect.createsRunLockOrActionTax,
-                  }
-                : {}),
-            },
-          }
-        : {}),
-    })),
-    ...(quote.breakSubroutineAdditionalCostPerSubroutine !== undefined
+    iceInstanceId: value.iceInstanceId,
+    iceDefinitionId: value.iceDefinitionId,
+    effectiveStrength: value.effectiveStrength,
+    subroutines: subroutines as VisibleEffectiveSubroutine[],
+    ...(value.breakSubroutineAdditionalCostPerSubroutine !== undefined
       ? {
           breakSubroutineAdditionalCostPerSubroutine:
-            quote.breakSubroutineAdditionalCostPerSubroutine,
+            value.breakSubroutineAdditionalCostPerSubroutine,
         }
       : {}),
-    ...(quote.breakSubroutineCostSourceDefinitionIds
+    ...(breakSubroutineCostSourceDefinitionIds !== undefined
+      ? { breakSubroutineCostSourceDefinitionIds }
+      : {}),
+    ...(breakSubroutineCostSourceTitles !== undefined
+      ? { breakSubroutineCostSourceTitles }
+      : {}),
+    ...(value.encounterTemporaryTraceCredits !== undefined
       ? {
-          breakSubroutineCostSourceDefinitionIds:
-            quote.breakSubroutineCostSourceDefinitionIds.slice(),
+          encounterTemporaryTraceCredits: value.encounterTemporaryTraceCredits,
         }
       : {}),
-    ...(quote.breakSubroutineCostSourceTitles
-      ? {
-          breakSubroutineCostSourceTitles:
-            quote.breakSubroutineCostSourceTitles.slice(),
-        }
+    ...(conditionalEncounterEffects !== undefined
+      ? { conditionalEncounterEffects }
       : {}),
   };
 }
 
+function sanitizeVisibleEffectiveSubroutine(
+  value: unknown,
+): VisibleEffectiveSubroutine | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  const traceSuccessEffect =
+    value.traceSuccessEffect === undefined
+      ? undefined
+      : sanitizeTraceSuccessEffect(value.traceSuccessEffect);
+  const breakTags =
+    value.breakTags === undefined
+      ? undefined
+      : sanitizeNonEmptyStringArray(value.breakTags);
+  const unbrokenRunEffect =
+    value.unbrokenRunEffect === undefined
+      ? undefined
+      : sanitizeVisibleUnbrokenRunEffect(value.unbrokenRunEffect);
+  if (
+    !isNonEmptyString(value.id) ||
+    !isVisibleEffectiveSubroutineType(value.type) ||
+    (value.amount !== undefined && !isNonNegativeSafeInteger(value.amount)) ||
+    (value.baseTraceStrength !== undefined &&
+      !isNonNegativeSafeInteger(value.baseTraceStrength)) ||
+    (value.traceBidLimit !== undefined &&
+      !isNonNegativeSafeInteger(value.traceBidLimit)) ||
+    (value.runFutureStrengthCancelPaymentAmount !== undefined &&
+      !isNonNegativeSafeInteger(value.runFutureStrengthCancelPaymentAmount)) ||
+    (value.traceSuccessEffect !== undefined &&
+      traceSuccessEffect === undefined) ||
+    (value.deflectorTarget !== undefined &&
+      value.deflectorTarget !== "archives" &&
+      value.deflectorTarget !== "any_data_fort" &&
+      value.deflectorTarget !== "subsidiary_data_fort") ||
+    (value.deflectorCost !== undefined &&
+      !isNonNegativeSafeInteger(value.deflectorCost)) ||
+    (value.deflectorAutoBreakIfNoTarget !== undefined &&
+      typeof value.deflectorAutoBreakIfNoTarget !== "boolean") ||
+    (value.breakTags !== undefined && breakTags === undefined) ||
+    (value.sourceDefinitionId !== undefined &&
+      !isNonEmptyString(value.sourceDefinitionId)) ||
+    (value.sourceTitle !== undefined && !isNonEmptyString(value.sourceTitle)) ||
+    (value.dynamicSourceKind !== undefined &&
+      value.dynamicSourceKind !== "additional_subroutine" &&
+      value.dynamicSourceKind !== "run_duration_additional_subroutine") ||
+    (value.unbrokenRunEffect !== undefined && unbrokenRunEffect === undefined)
+  ) {
+    return undefined;
+  }
+  return {
+    id: value.id,
+    type: value.type,
+    ...(value.amount !== undefined ? { amount: value.amount } : {}),
+    ...(value.baseTraceStrength !== undefined
+      ? { baseTraceStrength: value.baseTraceStrength }
+      : {}),
+    ...(value.traceBidLimit !== undefined
+      ? { traceBidLimit: value.traceBidLimit }
+      : {}),
+    ...(value.runFutureStrengthCancelPaymentAmount !== undefined
+      ? {
+          runFutureStrengthCancelPaymentAmount:
+            value.runFutureStrengthCancelPaymentAmount,
+        }
+      : {}),
+    ...(traceSuccessEffect ? { traceSuccessEffect } : {}),
+    ...(value.deflectorTarget !== undefined
+      ? { deflectorTarget: value.deflectorTarget }
+      : {}),
+    ...(value.deflectorCost !== undefined
+      ? { deflectorCost: value.deflectorCost }
+      : {}),
+    ...(value.deflectorAutoBreakIfNoTarget !== undefined
+      ? {
+          deflectorAutoBreakIfNoTarget: value.deflectorAutoBreakIfNoTarget,
+        }
+      : {}),
+    ...(breakTags !== undefined ? { breakTags } : {}),
+    ...(value.sourceDefinitionId !== undefined
+      ? { sourceDefinitionId: value.sourceDefinitionId }
+      : {}),
+    ...(value.sourceTitle !== undefined
+      ? { sourceTitle: value.sourceTitle }
+      : {}),
+    ...(value.dynamicSourceKind !== undefined
+      ? { dynamicSourceKind: value.dynamicSourceKind }
+      : {}),
+    ...(unbrokenRunEffect !== undefined ? { unbrokenRunEffect } : {}),
+  };
+}
+
+function sanitizeVisibleUnbrokenRunEffect(
+  value: unknown,
+): NonNullable<VisibleEffectiveSubroutine["unbrokenRunEffect"]> | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  if (
+    (value.addsFutureEndTheRunSubroutines !== undefined &&
+      !isNonNegativeSafeInteger(value.addsFutureEndTheRunSubroutines)) ||
+    (value.increasesFutureBreakCostPerSubroutine !== undefined &&
+      !isNonNegativeSafeInteger(value.increasesFutureBreakCostPerSubroutine)) ||
+    (value.increasesFutureIceStrength !== undefined &&
+      !isNonNegativeSafeInteger(value.increasesFutureIceStrength)) ||
+    (value.preventsFutureBreaking !== undefined &&
+      typeof value.preventsFutureBreaking !== "boolean") ||
+    (value.addsFutureEncounterCost !== undefined &&
+      !isNonNegativeSafeInteger(value.addsFutureEncounterCost)) ||
+    (value.preventsJackOut !== undefined &&
+      typeof value.preventsJackOut !== "boolean") ||
+    (value.causesDamageOrProgramTrash !== undefined &&
+      typeof value.causesDamageOrProgramTrash !== "boolean") ||
+    (value.createsRunLockOrActionTax !== undefined &&
+      !isNonNegativeSafeInteger(value.createsRunLockOrActionTax))
+  ) {
+    return undefined;
+  }
+  return {
+    ...(value.addsFutureEndTheRunSubroutines !== undefined
+      ? {
+          addsFutureEndTheRunSubroutines: value.addsFutureEndTheRunSubroutines,
+        }
+      : {}),
+    ...(value.increasesFutureBreakCostPerSubroutine !== undefined
+      ? {
+          increasesFutureBreakCostPerSubroutine:
+            value.increasesFutureBreakCostPerSubroutine,
+        }
+      : {}),
+    ...(value.increasesFutureIceStrength !== undefined
+      ? { increasesFutureIceStrength: value.increasesFutureIceStrength }
+      : {}),
+    ...(value.preventsFutureBreaking !== undefined
+      ? { preventsFutureBreaking: value.preventsFutureBreaking }
+      : {}),
+    ...(value.addsFutureEncounterCost !== undefined
+      ? { addsFutureEncounterCost: value.addsFutureEncounterCost }
+      : {}),
+    ...(value.preventsJackOut !== undefined
+      ? { preventsJackOut: value.preventsJackOut }
+      : {}),
+    ...(value.causesDamageOrProgramTrash !== undefined
+      ? { causesDamageOrProgramTrash: value.causesDamageOrProgramTrash }
+      : {}),
+    ...(value.createsRunLockOrActionTax !== undefined
+      ? { createsRunLockOrActionTax: value.createsRunLockOrActionTax }
+      : {}),
+  };
+}
+
+function sanitizeVisibleCorpIcePostRezRunQuote(
+  value: unknown,
+): VisibleCorpIcePostRezRunQuote | undefined {
+  if (
+    !isPlainObjectRecord(value) ||
+    value.context !== "installed_post_rez" ||
+    !isNonEmptyString(value.cardId) ||
+    !isNonEmptyString(value.iceDefinitionId) ||
+    !isExistingRunServerId(value.targetServerId) ||
+    !isExistingRunServerId(value.projectedServerId) ||
+    !isNonNegativeSafeInteger(value.expiresAtStateVersion)
+  ) {
+    return undefined;
+  }
+  const binding = {
+    context: "installed_post_rez" as const,
+    cardId: value.cardId,
+    iceDefinitionId: value.iceDefinitionId,
+    targetServerId: value.targetServerId,
+    projectedServerId: value.projectedServerId,
+    expiresAtStateVersion: value.expiresAtStateVersion,
+  };
+  if (value.complete === false) {
+    if (
+      value.reason !== "variable_rez_choice_required" &&
+      value.reason !== "on_rez_lifecycle_projection_required" &&
+      value.reason !== "active_run_context" &&
+      value.reason !== "effective_run_projection_unavailable"
+    ) {
+      return undefined;
+    }
+    return { ...binding, complete: false, reason: value.reason };
+  }
+  if (value.complete !== true) return undefined;
+  const effectiveRunQuote = sanitizeVisibleEffectiveIceRunQuote(
+    value.effectiveRunQuote,
+  );
+  if (
+    !effectiveRunQuote ||
+    effectiveRunQuote.iceInstanceId !== value.cardId ||
+    effectiveRunQuote.iceDefinitionId !== value.iceDefinitionId
+  ) {
+    return undefined;
+  }
+  return { ...binding, complete: true, effectiveRunQuote };
+}
+
+function sanitizeVisibleConditionalEncounterEffects(
+  value: unknown,
+): VisibleConditionalEncounterEffect[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const sanitized = value.map((effect) => {
+    if (!isPlainObjectRecord(effect)) return undefined;
+    if (effect.kind === "corp_paid_add_end_the_run_subroutine") {
+      return isNonNegativeSafeInteger(effect.creditCost)
+        ? {
+            kind: "corp_paid_add_end_the_run_subroutine" as const,
+            creditCost: effect.creditCost,
+          }
+        : undefined;
+    }
+    if (
+      effect.kind === "random_strength_or_derez_auto_pass" &&
+      effect.dieFaces === 6 &&
+      effect.autoPassResult === 6 &&
+      isNonNegativeSafeInteger(effect.maxStrengthBonus) &&
+      effect.maxStrengthBonus <= 5
+    ) {
+      return {
+        kind: "random_strength_or_derez_auto_pass" as const,
+        dieFaces: 6 as const,
+        autoPassResult: 6 as const,
+        maxStrengthBonus: effect.maxStrengthBonus,
+      };
+    }
+    return undefined;
+  });
+  return sanitized.every(
+    (effect): effect is VisibleConditionalEncounterEffect =>
+      effect !== undefined,
+  )
+    ? sanitized
+    : undefined;
+}
+
 function sanitizeTraceSuccessEffect(
-  effect: TraceSuccessEffect,
-): TraceSuccessEffect {
-  return { ...effect };
+  value: unknown,
+): TraceSuccessEffect | undefined {
+  if (!isPlainObjectRecord(value)) return undefined;
+  switch (value.type) {
+    case "add_tag":
+    case "net_damage":
+    case "end_run_and_run_lock":
+    case "end_run_trash_program_and_run_lock":
+    case "end_run_trash_hardware_and_unpreventable_meat_damage":
+      return isNonNegativeSafeInteger(value.amount)
+        ? { type: value.type, amount: value.amount }
+        : undefined;
+    case "add_tags_by_trace_margin_over_runner_link":
+    case "none":
+      return { type: value.type };
+    case "add_counter":
+      return isCounterType(value.counterType) &&
+        isNonNegativeSafeInteger(value.amount)
+        ? {
+            type: "add_counter",
+            counterType: value.counterType,
+            amount: value.amount,
+          }
+        : undefined;
+    case "add_tag_and_counter":
+      return isNonNegativeSafeInteger(value.tagAmount) &&
+        isCounterType(value.counterType) &&
+        isNonNegativeSafeInteger(value.amount)
+        ? {
+            type: "add_tag_and_counter",
+            tagAmount: value.tagAmount,
+            counterType: value.counterType,
+            amount: value.amount,
+          }
+        : undefined;
+    case "trash_runner_resource_and_add_tag":
+      return isNonEmptyString(value.targetCardInstanceId)
+        ? {
+            type: "trash_runner_resource_and_add_tag",
+            targetCardInstanceId: value.targetCardInstanceId,
+          }
+        : undefined;
+    default:
+      return undefined;
+  }
+}
+
+function isVisibleEffectiveSubroutineType(
+  value: unknown,
+): value is SubroutineType {
+  return (
+    typeof value === "string" &&
+    Object.hasOwn(VISIBLE_EFFECTIVE_SUBROUTINE_TYPES, value)
+  );
+}
+
+function isCounterType(value: unknown): value is CounterType {
+  return typeof value === "string" && Object.hasOwn(TRACE_COUNTER_TYPES, value);
+}
+
+function isExistingRunServerId(
+  value: unknown,
+): value is Extract<
+  VisibleCorpIcePostRezRunQuote,
+  { complete: true }
+>["targetServerId"] {
+  return (
+    value === "hq" ||
+    value === "rd" ||
+    value === "archives" ||
+    (typeof value === "string" && /^remote_[1-9][0-9]*$/.test(value))
+  );
+}
+
+function sanitizeNonEmptyStringArray(value: unknown): string[] | undefined {
+  return Array.isArray(value) && value.every(isNonEmptyString)
+    ? value.slice()
+    : undefined;
+}
+
+function isPlainObjectRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function sanitizeVisibleChoiceRequest(

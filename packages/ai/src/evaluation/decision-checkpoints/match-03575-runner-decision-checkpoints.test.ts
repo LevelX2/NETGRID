@@ -42,7 +42,7 @@ describe("match 03575 runner decision checkpoints", () => {
           forbiddenActions: [{ actionId: "runner.start_run.rd" }],
           planExecution: {
             acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["pressure_hq_information"],
+            acceptableCapabilities: ["pressure_hq_access"],
             requiredAssessmentEvidence: ["target:hq"],
           },
         };

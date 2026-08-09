@@ -17,8 +17,30 @@ import {
   server,
   visibleCard,
 } from "./semantic-ai-runtime-cutover.test-support";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 
 type RunnerDecision = ReturnType<typeof chooseRunnerAction>;
+
+function wallOfStatic(instanceId: string) {
+  const ice = visibleCard(instanceId, "corp", "ice", {
+    definitionId: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    rezzed: true,
+    strength: 2,
+    subtypes: ["wall"],
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 2,
+    subroutines: [
+      {
+        id: `${instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_279_wall-of-static",
+        sourceTitle: "Wall of Static",
+      },
+    ],
+  });
+}
 
 function expectPlanDecision(
   decision: RunnerDecision,
@@ -150,9 +172,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server(
         "remote_1",
         [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
+          wallOfStatic("onr_v1_279_wall-of-static"),
         ],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
@@ -162,7 +182,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-hq",
       planKind: "runner.pressure_central",
-      capability: "pressure_hq_information",
+      capability: "pressure_hq_access",
       priorityClass: "P4",
       assessmentEvidence: "target:hq",
     });
@@ -360,7 +380,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -1381,7 +1401,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -1427,10 +1447,28 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     input.playerView.servers = [
       server("hq"),
       server("rd", [
-        visibleCard("onr_v1_264_rex", "corp", "ice", {
-          rezzed: true,
-          strength: 3,
-        }),
+        withEffectiveRunQuote(
+          visibleCard("onr_v1_264_rex", "corp", "ice", {
+            rezzed: true,
+            strength: 3,
+          }),
+          {
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "onr_v1_264_rex_trace",
+                type: "initiate_trace",
+                baseTraceStrength: 3,
+                traceSuccessEffect: {
+                  type: "end_run_and_run_lock",
+                  amount: 2,
+                },
+                sourceDefinitionId: "onr_v1_264_rex",
+                sourceTitle: "Rex",
+              },
+            ],
+          },
+        ),
       ]),
       server("archives"),
     ];
@@ -1449,7 +1487,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
     });
     expect(planPortfolioItems(decision)).toEqual(
@@ -1491,7 +1529,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -1596,7 +1634,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -1632,7 +1670,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expectPlanDecision(decision, {
       actionId: "run-rd",
       planKind: "runner.pressure_central",
-      capability: "pressure_rd_information",
+      capability: "pressure_rd_access",
       priorityClass: "P4",
       assessmentEvidence: "target:rd",
     });
@@ -1671,9 +1709,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server(
         "remote_1",
         [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
+          wallOfStatic("onr_v1_279.wall-of-static.fixture"),
         ],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),

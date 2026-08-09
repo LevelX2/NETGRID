@@ -41,6 +41,36 @@ import {
   exportAiRuntimeCheckpoint,
   restoreAiRuntimeCheckpoint,
 } from "../evaluation/decision-checkpoints/runtime-checkpoint";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
+
+function quotedFixtureIce(params: {
+  instanceId: string;
+  definitionId: string;
+  title: string;
+  strength: number;
+  subtypes: string[];
+  subroutineType?: "end_the_run" | "do_damage";
+}): ReturnType<typeof visibleCard> {
+  const ice = visibleCard(params.instanceId, "corp", "ice", {
+    definitionId: params.definitionId,
+    title: params.title,
+    rezzed: true,
+    strength: params.strength,
+    subtypes: params.subtypes,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: params.strength,
+    subroutines: [
+      {
+        id: `${params.instanceId}-fixture-subroutine`,
+        type: params.subroutineType ?? "end_the_run",
+        ...(params.subroutineType === "do_damage" ? { amount: 1 } : {}),
+        sourceDefinitionId: params.definitionId,
+        sourceTitle: params.title,
+      },
+    ],
+  });
+}
 
 describe("authoritative plan-first live runtime", () => {
   it("admits an owned event-run head only when its current pressure route is executable", () => {
@@ -660,12 +690,12 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.servers = [
       server("hq", [
-        visibleCard("hq-wall", "corp", "ice", {
+        quotedFixtureIce({
+          instanceId: "hq-wall",
           definitionId: "onr_v1_232_crystal-wall",
           title: "Crystal Wall",
-          rezzed: true,
-          subtypes: ["wall"],
           strength: 3,
+          subtypes: ["wall"],
         }),
       ]),
       server("rd"),
@@ -12478,8 +12508,11 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.servers = [
       server("hq", [
-        visibleCard("hq-code-gate", "corp", "ice", {
-          rezzed: true,
+        quotedFixtureIce({
+          instanceId: "hq-code-gate",
+          definitionId: "test-hq-code-gate",
+          title: "HQ Code Gate",
+          strength: 3,
           subtypes: ["code gate"],
         }),
       ]),
@@ -12893,8 +12926,11 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     const remote = server("remote_1", [
-      visibleCard("remote-wall", "corp", "ice", {
-        rezzed: true,
+      quotedFixtureIce({
+        instanceId: "remote-wall",
+        definitionId: "test-remote-wall",
+        title: "Remote Wall",
+        strength: 3,
         subtypes: ["wall"],
       }),
     ]);
@@ -13135,10 +13171,13 @@ describe("authoritative plan-first live runtime", () => {
       server("rd"),
       server("archives"),
       server("remote_1", [
-        visibleCard("ap-ice", "corp", "ice", {
-          rezzed: true,
+        quotedFixtureIce({
+          instanceId: "ap-ice",
+          definitionId: "test-ap-ice",
           title: "AP ICE",
+          strength: 3,
           subtypes: ["ap"],
+          subroutineType: "do_damage",
         }),
       ]),
     ];
@@ -13359,10 +13398,13 @@ describe("authoritative plan-first live runtime", () => {
     ];
     input.playerView.servers = [
       server("remote_1", [
-        visibleCard("ap-ice", "corp", "ice", {
-          rezzed: true,
+        quotedFixtureIce({
+          instanceId: "ap-ice",
+          definitionId: "test-ap-ice",
           title: "AP ICE",
+          strength: 3,
           subtypes: ["ap"],
+          subroutineType: "do_damage",
         }),
       ]),
     ];

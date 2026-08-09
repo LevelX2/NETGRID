@@ -11,6 +11,7 @@ import scorelineSeed004D247Json from "../../../../../data/scenarios/ai-decision-
 import matchpointSeed004Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-renticon-code-rot-c1-08-matchpoint-central-seed004-d295.json";
 import nestedChoiceSeed001Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-renticon-code-rot-c1-09-nested-choice-seed001-d246.json";
 import nestedChoiceSeed005Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-renticon-code-rot-c1-10-nested-choice-seed005-d193.json";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -50,6 +51,19 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
   it.each(BEHAVIOR_FIXTURES)("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    if (
+      _label ===
+      "allocates exact matchpoint central defense without exposing score material in Seed 004"
+    ) {
+      expectBoundTurnPlan(result, {
+        actionId:
+          "corp.install_card.corp_onr_v1_221_asp_1.rd.corp_onr_v1_221_asp_1.3",
+        planKind: "corp.defend_servers",
+        capability: "allocate_server_defense",
+        executorInstanceId:
+          "plan:corp.defend_servers:server-defense-portfolio",
+      });
+    }
   });
 
   it.each([
@@ -185,7 +199,16 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       };
     });
 
-    expectCheckpointToPass(checkpoint);
+    const result = expectCheckpointToPass(checkpoint);
+    expectBoundTurnPlan(result, {
+      actionId: "corp.gain_credit",
+      planKind: "corp.economy",
+      capability: "develop_or_convert_corp_economy",
+      assessmentEvidence:
+        "corp_engine_certified_basic_liquidity_development",
+      executorInstanceId:
+        "plan:corp.economy:economy-visible-liquidity-development%3Acorp%3A38",
+    });
   });
 });
 
@@ -205,7 +228,74 @@ function mutateFixture(
   return result;
 }
 
-function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {
+function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1) {
   const result = runAiDecisionCheckpoint(checkpoint);
   expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  return result;
+}
+
+function expectBoundTurnPlan(
+  result: ReturnType<typeof runAiDecisionCheckpoint>,
+  expected: Readonly<{
+    actionId: string;
+    planKind: string;
+    capability: string;
+    assessmentEvidence?: string;
+    executorInstanceId: string;
+  }>,
+): void {
+  expect(result.decision?.actionId).toBe(expected.actionId);
+  expect(result.decision?.decisionDebug?.planKind).toBe(expected.planKind);
+  expect(result.decision?.evidence).toEqual(
+    expect.arrayContaining([
+      `plan_step_capability:${expected.capability}`,
+      ...(expected.assessmentEvidence
+        ? [`plan_assessment_evidence:${expected.assessmentEvidence}`]
+        : []),
+    ]),
+  );
+  expect(
+    result.decision?.decisionDebug?.planFirstDecision?.selectionAuthority,
+  ).toBe("turn_plan_commitment");
+  const planning =
+    result.decision?.decisionDebug?.planFirstDecision?.turnPlanning;
+  expect(planning).toMatchObject({
+    mode: "cutover",
+    shadowComparison: {
+      liveActionId: expected.actionId,
+      shadowActionId: expected.actionId,
+      agreement: true,
+    },
+    commitment: {
+      status: "active",
+      rematerialization: {
+        status: "executable",
+        actionId: expected.actionId,
+      },
+    },
+  });
+
+  const portfolio = residentPlanPortfolioSnapshot(result.input);
+  expect(portfolio?.executorInstanceId).toBe(expected.executorInstanceId);
+  expect(portfolio).toMatchObject({
+    turnPlanCommitment: { status: "active" },
+    turnPlanExecutionLease: {
+      currentBinding: { actionId: expected.actionId },
+    },
+  });
+  expect(portfolio?.turnPlanExecutionLease?.sourcePlanId).toBe(
+    portfolio?.turnPlanCommitment?.sourcePlanId,
+  );
+  expect(portfolio?.turnPlanExecutionLease?.commitmentId).toBe(
+    portfolio?.turnPlanCommitment?.commitmentId,
+  );
+  const cursor = portfolio?.turnPlanCommitment?.cursor;
+  const committedNode = cursor
+    ? portfolio?.turnPlanCommitment?.phases[cursor.phaseIndex]?.nodes[
+        cursor.nodeIndex
+      ]
+    : undefined;
+  expect(portfolio?.turnPlanExecutionLease?.routeKey).toBe(
+    committedNode?.invocation.routeKey,
+  );
 }

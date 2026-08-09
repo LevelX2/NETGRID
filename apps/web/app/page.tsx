@@ -2061,7 +2061,6 @@ export default function Page() {
   accountMatchStartPreferencesRef.current = currentAccountMatchStartPreferences;
 
   function resetAccountMatchStartPreferencesToDefaults() {
-    setMode("host");
     setPlayMode("human_vs_human");
     setHumanSideSelection("random");
     setHumanAiSideSelection("random");
@@ -2154,7 +2153,6 @@ export default function Page() {
   function applyAccountMatchStartPreferences(
     preferences: AccountMatchStartPreferences,
   ) {
-    setMode("host");
     setPlayMode(preferences.playMode);
     setHumanSideSelection(preferences.humanSideSelection);
     setHumanAiSideSelection(preferences.humanAiSideSelection);

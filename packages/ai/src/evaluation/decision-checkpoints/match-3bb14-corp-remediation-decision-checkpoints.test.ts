@@ -4,7 +4,7 @@ import scoredOnlyTimingJson from "../../../../../data/scenarios/ai-decision-chec
 import realisticScoreHorizonJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-02-realistic-score-horizon-d40.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
-import { scoringWindowAccessAssessment } from "../../runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection";
+import { scoringWindowPostRezProtectionAssessment } from "../../runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection";
 
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
@@ -39,8 +39,11 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     );
     if (!remote) throw new Error("Missing captured scoring remote");
 
-    const currentAccess = scoringWindowAccessAssessment(result.input, remote);
-    const exposureAccess = scoringWindowAccessAssessment(
+    const currentAccess = scoringWindowPostRezProtectionAssessment(
+      result.input,
+      remote,
+    );
+    const exposureAccess = scoringWindowPostRezProtectionAssessment(
       result.input,
       remote,
       3,
@@ -65,7 +68,10 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       (server) => server.id === "remote_1",
     );
     expect(
-      scoringWindowAccessAssessment(alreadyAtRunnerTurn, runnerTurnRemote)
+      scoringWindowPostRezProtectionAssessment(
+        alreadyAtRunnerTurn,
+        runnerTurnRemote,
+      )
         .evidence,
     ).toContain("public_staged_breaker_install_credit_cost:3");
   });
@@ -81,7 +87,11 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     );
     if (!remote) throw new Error("Missing captured scoring remote");
 
-    const exposureAccess = scoringWindowAccessAssessment(input, remote, 3);
+    const exposureAccess = scoringWindowPostRezProtectionAssessment(
+      input,
+      remote,
+      3,
+    );
 
     expect(exposureAccess.runnerCanReachAccessNow).toBe(false);
     expect(exposureAccess.visibleRunnerIcebreakerCount).toBe(0);

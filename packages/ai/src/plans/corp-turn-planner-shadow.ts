@@ -293,17 +293,28 @@ export function buildCorpTurnPlannerShadow(params: {
   const liveHead = heads.find(
     (head) => head.currentBinding.actionId === liveActionId,
   );
+  const liveHeadOffer = liveHead
+    ? offers.find((offer) => offer.head.candidateId === liveHead.candidateId)
+    : undefined;
+  const liveHeadSearch = liveHeadOffer
+    ? searchDeterministicRemainderTurnPlans({
+        entryFrame,
+        offers: [liveHeadOffer],
+        budget: { maximumDepth: 1 },
+      })
+    : undefined;
+  const liveHeadLine = liveHeadSearch?.lines.find(
+    (line) => line.lineId === liveHeadSearch.selectedLineId,
+  );
   const retainsAuthoritativeHead =
     selectedSearchHead !== undefined &&
-    boundedSingleStepHead?.candidateId === selectedSearchHead.candidateId &&
     liveHead !== undefined &&
-    plannerBaselineRecord?.head.currentBinding.actionId === liveActionId &&
-    liveHead.rootPlanInstanceId === selectedSearchHead.rootPlanInstanceId &&
-    liveHead.currentBinding.actionId !== selectedSearchHead.currentBinding.actionId;
+    liveHeadLine !== undefined &&
+    samePlanStepOwner(liveHead, selectedSearchHead) &&
+    liveHead.currentBinding.actionId !==
+      selectedSearchHead.currentBinding.actionId;
   const selectedLine =
-    (retainsAuthoritativeHead
-      ? fallbackLine(input, stateIdentity, liveActionId, heads)
-      : selectedSearchLine) ??
+    (retainsAuthoritativeHead ? liveHeadLine : selectedSearchLine) ??
     fallbackLine(
       input,
       stateIdentity,
@@ -362,6 +373,22 @@ export function buildCorpTurnPlannerShadow(params: {
         : {}),
     })),
   };
+}
+
+function samePlanStepOwner(
+  left: TurnPlanningHeadCandidate,
+  right: TurnPlanningHeadCandidate,
+): boolean {
+  return (
+    left.rootPlanInstanceId === right.rootPlanInstanceId &&
+    left.rootPlanModuleId === right.rootPlanModuleId &&
+    left.moduleId === right.moduleId &&
+    left.executorPlanInstanceId === right.executorPlanInstanceId &&
+    left.executorParentPlanInstanceId === right.executorParentPlanInstanceId &&
+    left.executorParentNeedId === right.executorParentNeedId &&
+    left.nextMilestoneId === right.nextMilestoneId &&
+    left.priorityClass === right.priorityClass
+  );
 }
 
 function dispositionsForUnmaterializedSpecializedLines(params: {

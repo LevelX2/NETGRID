@@ -4476,11 +4476,13 @@
         "type": "activated_card_ability",
         "stateVersionBefore": 79,
         "stateVersionAfter": 80,
+        "turnSerial": 13,
         "stateHashAfter": "fnv1a:81042d39",
         "visibilityClass": "public",
         "publicPayload": {
           "actor": "runner",
           "actionType": "activated_card_ability",
+          "sourceCardInstanceId": "runner_onr_proteus_150_streetware-distributor_2",
           "label": "Streetware Distributor: 3 Credits auflegen",
           "actionCostClicks": 1,
           "turnActionOrdinalStart": 1,

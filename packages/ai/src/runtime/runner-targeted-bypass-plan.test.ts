@@ -3,6 +3,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -437,7 +438,7 @@ function planningInput(params: {
 }
 
 function blockingWall(instanceId: string): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId,
     definitionId: "onr_v1_232_crystal-wall",
     title: "Crystal Wall",
@@ -447,6 +448,17 @@ function blockingWall(instanceId: string): VisibleCard {
     rezzed: true,
     strength: 3,
   };
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 3,
+    subroutines: [
+      {
+        id: `${instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_232_crystal-wall",
+        sourceTitle: "Crystal Wall",
+      },
+    ],
+  });
 }
 
 function pileDriver(instanceId: string): VisibleCard {

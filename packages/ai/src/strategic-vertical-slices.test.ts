@@ -109,7 +109,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(first.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
       ]),
     );
     expect(first.decisionDebug?.planId).toContain(
@@ -118,7 +118,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(second.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.pressure_central",
-        "plan_step_capability:pressure_rd_information",
+        "plan_step_capability:pressure_rd_access",
       ]),
     );
     expect(second.decisionDebug?.planId).toBe(first.decisionDebug?.planId);

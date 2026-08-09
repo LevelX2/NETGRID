@@ -5,6 +5,7 @@ import {
   semanticRuntimeCorpEffectiveDefenseContext,
   visibleCorpIceDefenseProfile,
 } from "./semantic-runtime-corp-effective-defense";
+import { withPostRezRunQuote } from "../effective-run-quote.test-support";
 
 describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
   it("consumes runtime card text and structured active hints for visible ICE", () => {
@@ -420,11 +421,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         runnerRig: [earlyWormBreaker()],
         servers: [
           server("rd", [
-            corpIce("wall-of-static", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              subtypes: ["wall"],
-            }),
+            postRezWallOfStatic("wall-of-static", "rd", 1),
           ]),
         ],
       }),
@@ -464,11 +461,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         runnerRig: [earlyWormBreaker()],
         servers: [
           server("rd", [
-            corpIce("wall-of-static", {
-              definitionId: "onr_v1_279_wall-of-static",
-              title: "Wall of Static",
-              subtypes: ["wall"],
-            }),
+            postRezWallOfStatic("wall-of-static", "rd", 1),
           ]),
         ],
       }),
@@ -506,6 +499,7 @@ function corpInput(
   return {
     side: "corp",
     playerView: {
+      stateVersion: 1,
       own: {
         credits,
         gripOrHq: [],
@@ -625,6 +619,35 @@ function corpIce(
     controller: "corp",
     ...overrides,
   };
+}
+
+function postRezWallOfStatic(
+  instanceId: string,
+  serverId: AiDecisionInput["playerView"]["servers"][number]["id"],
+  stateVersion: number,
+) {
+  const ice = corpIce(instanceId, {
+    definitionId: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    subtypes: ["wall"],
+    rezzed: false,
+    strength: 2,
+  });
+  return withPostRezRunQuote(
+    ice,
+    { serverId, stateVersion },
+    {
+      effectiveStrength: 2,
+      subroutines: [
+        {
+          id: `${instanceId}-end-the-run`,
+          type: "end_the_run",
+          sourceDefinitionId: "onr_v1_279_wall-of-static",
+          sourceTitle: "Wall of Static",
+        },
+      ],
+    },
+  );
 }
 
 function killerBreaker(): NonNullable<

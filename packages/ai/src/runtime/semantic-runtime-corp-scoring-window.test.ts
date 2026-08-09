@@ -145,9 +145,9 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment).toMatchObject({
       windowKind: "unsafe",
       scoreHorizon: "next_turn",
-      missingVisibleBreakerCoverage: true,
+      missingVisibleBreakerCoverage: false,
       corpCanRezRelevantIce: false,
-      runnerCanContestBeforeScore: false,
+      runnerCanContestBeforeScore: true,
       recommendedNextStep: "gain_credit",
     });
     expect(assessment?.evidence).toEqual(
@@ -485,7 +485,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.scoreHorizon).not.toBe("immediate");
   });
 
-  it("treats unmodeled generic remote ice as temporary only when no breaker is installed", () => {
+  it("fails closed when generic remote ICE has no Engine post-rez quote", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
       "advance-generic-protected-agenda",
@@ -512,12 +512,12 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     );
 
     expect(assessment).toMatchObject({
-      windowKind: "temporary_safe",
-      runnerCanContestNow: false,
-      recommendedNextStep: "advance",
+      windowKind: "unsafe",
+      runnerCanContestNow: true,
+      recommendedNextStep: "gain_credit",
     });
     expect(assessment?.evidence).toContain(
-      "remote_access:unmodeled_ice_count:1",
+      "post_rez_remote_access:unmodeled_ice_count:1",
     );
   });
 

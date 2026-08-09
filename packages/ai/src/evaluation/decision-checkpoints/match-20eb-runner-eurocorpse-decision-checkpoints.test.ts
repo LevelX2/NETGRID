@@ -78,7 +78,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         acceptableActions: [{ actionId: "runner.start_run.rd" }],
         planExecution: {
           acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: ["pressure_rd_information"],
+          acceptableCapabilities: ["pressure_rd_access"],
           requiredAssessmentEvidence: ["target:rd"],
         },
       };

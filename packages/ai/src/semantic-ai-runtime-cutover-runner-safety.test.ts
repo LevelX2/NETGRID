@@ -18,6 +18,54 @@ import {
   server,
   visibleCard,
 } from "./semantic-ai-runtime-cutover.test-support";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
+
+function quotedEndTheRunIce(params: {
+  instanceId: string;
+  definitionId: string;
+  title: string;
+  strength: number;
+  subtype: string;
+}): VisibleCard {
+  const ice = visibleCard(params.instanceId, "corp", "ice", {
+    definitionId: params.definitionId,
+    title: params.title,
+    rezzed: true,
+    strength: params.strength,
+    subtypes: [params.subtype],
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: params.strength,
+    subroutines: [
+      {
+        id: `${params.instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: params.definitionId,
+        sourceTitle: params.title,
+      },
+    ],
+  });
+}
+
+function wallOfStatic(instanceId: string): VisibleCard {
+  return quotedEndTheRunIce({
+    instanceId,
+    definitionId: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    strength: 2,
+    subtype: "wall",
+  });
+}
+
+function dataWall(instanceId: string): VisibleCard {
+  return quotedEndTheRunIce({
+    instanceId,
+    definitionId: "onr_v1_237_data-wall",
+    title: "Data Wall",
+    strength: 0,
+    subtype: "wall",
+  });
+}
 
 describe("Semantic AI runtime cutover — Runner safety contracts", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -70,9 +118,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
+          wallOfStatic("onr_v1_279.wall-of-static.coverage"),
         ],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
@@ -139,9 +185,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
+          wallOfStatic("onr_v1_279.wall-of-static.trace-safety"),
         ],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
@@ -184,19 +228,14 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       known: true,
       strength: 3,
     };
-    const crystalWall: VisibleCard = {
+    const crystalWall = quotedEndTheRunIce({
       instanceId: "corp-crystal-wall",
       definitionId: "onr_v1_232_crystal-wall",
       title: "Crystal Wall",
-      owner: "corp",
-      controller: "corp",
-      type: "ice",
-      subtypes: ["wall"],
-      known: true,
-      rezzed: true,
       strength: 4,
-      strengthModifier: 1,
-    };
+      subtype: "wall",
+    });
+    crystalWall.strengthModifier = 1;
     const pump = legalAction(
       "pump-dwarf",
       "runner",
@@ -310,7 +349,14 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
         iceInstanceId: "corp-keeper",
         iceDefinitionId: "onr_v1_252_keeper",
         effectiveStrength: 4,
-        subroutines: [{ id: "keeper-etr", type: "end_the_run" }],
+        subroutines: [
+          {
+            id: "keeper-etr",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_252_keeper",
+            sourceTitle: "Keeper",
+          },
+        ],
       },
     };
     const pump = legalAction(
@@ -396,36 +442,20 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       known: true,
       strength: 4,
     };
-    const outerCrystalWall: VisibleCard = {
+    const outerCrystalWall = quotedEndTheRunIce({
       instanceId: "corp-outer-crystal-wall",
       definitionId: "onr_v1_232_crystal-wall",
       title: "Crystal Wall",
-      owner: "corp",
-      controller: "corp",
-      type: "ice",
-      subtypes: ["wall"],
-      known: true,
-      rezzed: true,
       strength: 4,
-    };
-    const currentCrystalWall: VisibleCard = {
+      subtype: "wall",
+    });
+    const currentCrystalWall = quotedEndTheRunIce({
       instanceId: "corp-current-crystal-wall",
       definitionId: "onr_v1_232_crystal-wall",
       title: "Crystal Wall",
-      owner: "corp",
-      controller: "corp",
-      type: "ice",
-      subtypes: ["wall"],
-      known: true,
-      rezzed: true,
       strength: 4,
-      effectiveRunQuote: {
-        iceInstanceId: "corp-current-crystal-wall",
-        iceDefinitionId: "onr_v1_232_crystal-wall",
-        effectiveStrength: 4,
-        subroutines: [{ id: "current-etr", type: "end_the_run" }],
-      },
-    };
+      subtype: "wall",
+    });
     const breakCurrent = legalAction(
       "break-current-wall",
       "runner",
@@ -777,10 +807,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [
-          visibleCard("remote-data-wall", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
-            rezzed: true,
-          }),
+          dataWall("remote-data-wall"),
           hiddenIce,
         ],
         [hiddenAdvancedRoot],
@@ -844,10 +871,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [
-          visibleCard("remote-data-wall", "corp", "ice", {
-            definitionId: "onr_v1_237_data-wall",
-            rezzed: true,
-          }),
+          dataWall("remote-data-wall"),
           hiddenIce,
         ],
         [hiddenAdvancedRoot],
@@ -883,9 +907,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server(
         "remote_1",
         [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
+          wallOfStatic("onr_v1_279.wall-of-static.preview"),
         ],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),

@@ -10,6 +10,7 @@ import type {
   TraceSuccessEffect,
   VisibleCard,
 } from "@netgrid/shared";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 import {
   createGameAfterSetup,
   getLegalActions,
@@ -477,7 +478,7 @@ function visibleCard(
 }
 
 function hunterTraceTagIce(instanceId: string): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId,
     definitionId: "onr_v1_249_hunter",
     title: "Hunter",
@@ -486,9 +487,8 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 5,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "onr_v1_249_hunter",
+  };
+  return withEffectiveRunQuote(ice, {
       effectiveStrength: 5,
       subroutines: [
         {
@@ -496,18 +496,18 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
-          amount: 5,
+          baseTraceStrength: 5,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
         },
       ],
-    },
-  };
+  });
 }
 
 function traceEffectIce(
   instanceId: string,
   effect: TraceSuccessEffect,
 ): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId,
     definitionId: "test_visible_trace_effect_ice",
     title: "Trace Risk ICE",
@@ -516,9 +516,8 @@ function traceEffectIce(
     known: true,
     rezzed: true,
     strength: 5,
-    effectiveRunQuote: {
-      iceInstanceId: instanceId,
-      iceDefinitionId: "test_visible_trace_effect_ice",
+  };
+  return withEffectiveRunQuote(ice, {
       effectiveStrength: 5,
       subroutines: [
         {
@@ -526,13 +525,19 @@ function traceEffectIce(
           type: "initiate_trace",
           sourceDefinitionId: "test_visible_trace_effect_ice",
           sourceTitle: "Trace Risk ICE",
-          amount: 5,
           baseTraceStrength: 5,
           traceSuccessEffect: effect,
+          ...(effect.type === "end_run_and_run_lock" ||
+          effect.type === "end_run_trash_program_and_run_lock"
+            ? {
+                unbrokenRunEffect: {
+                  createsRunLockOrActionTax: Math.max(1, effect.amount),
+                },
+              }
+            : {}),
         },
       ],
-    },
-  };
+  });
 }
 
 function semanticGuidanceReason(

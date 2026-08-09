@@ -1122,6 +1122,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       (action) => action.actionId === load.actionId,
     );
     expect(cardCounterAmount(state, brokerId, "bit")).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "sourceCardInstanceId",
+    );
+    expect(
+      getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({ sourceCardInstanceId: brokerId });
+    expect(
+      getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload,
+    ).not.toHaveProperty("sourceCardInstanceId");
     expect(
       getLegalActions(state, "runner").some(
         (action) =>

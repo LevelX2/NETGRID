@@ -247,7 +247,7 @@ widerrufbare Sessions, Origin-/CSRF-Schutz, neutrales Loginverhalten und
 Hash-only-Persistenz sind aktiv. E-Mail, Passkeys, MFA und öffentliche
 Registrierung sind noch kein Produktvertrag.
 
-Ein Account kann bis zu 50 persönliche Server-Decks speichern. 43 kuratierte
+Ein Account kann bis zu 50 persönliche Server-Decks speichern. 44 kuratierte
 Standard-Decks sind unveränderlich direkt spielbar oder kopierbar; interne KI-,
 Test- und Retire-Klassen bleiben unsichtbar. Jeder Matchstart verwendet einen
 neu validierten immutable Snapshot und bleibt accountfrei in Engine, Replay,
@@ -255,7 +255,7 @@ StateHash und KI. Führend sind
 `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
 und `docs/runbooks/account-alpha-operations.md`.
 
-Alle 43 aktiven Standard-Decks besitzen außerdem eine versionierte deutsche
+Alle 44 aktiven Standard-Decks besitzen außerdem eine versionierte deutsche
 Anleitung aus der deterministischen Deckstrategie-Ableitung. Die gemeinsame
 UI zeigt Deckidee, Spielphasen, Schlüsselkarten, Tipps und Risiken in Auswahl-
 und Kopierabläufen. Fehlende oder nach Deckänderungen veraltete Inhalte werden

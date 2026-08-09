@@ -33,7 +33,8 @@ export function projectIceForRunPathEffects(
     effects.length === 0 ||
     !ice.definitionId ||
     !ice.known ||
-    ice.rezzed !== true
+    ice.rezzed !== true &&
+    ice.authoritativePostRezRunProjection !== true
   )
     return ice;
   const baseQuote = requireEffectiveRunQuoteForKnownRezzedIce(ice);
@@ -217,7 +218,12 @@ export function effectiveRunQuoteForIce(
   ice: IceCardLike,
 ): VisibleEffectiveIceRunQuote | undefined {
   const quote = ice.effectiveRunQuote;
-  if (!quote || quote.iceDefinitionId !== ice.definitionId) return undefined;
+  if (
+    !quote ||
+    quote.iceInstanceId !== ice.instanceId ||
+    quote.iceDefinitionId !== ice.definitionId
+  )
+    return undefined;
   return quote;
 }
 
@@ -227,7 +233,7 @@ export function requireEffectiveRunQuoteForKnownRezzedIce(
   const quote = effectiveRunQuoteForIce(ice);
   if (
     ice.known &&
-    ice.rezzed === true &&
+    (ice.rezzed === true || ice.authoritativePostRezRunProjection === true) &&
     ice.definitionId &&
     !quote
   ) {

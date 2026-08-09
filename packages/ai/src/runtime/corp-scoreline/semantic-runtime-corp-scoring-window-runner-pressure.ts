@@ -5,6 +5,8 @@ import {
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
+import { assessEngineCertifiedPostRezIcePath } from "../../visible-run-analysis";
+import { readExactCurrentInstalledCorpIceRezQuote } from "../corp-exact-ice-rez-route";
 import { semanticRuntimeCorpObservedRemoteReachability } from "../semantic-runtime-corp-remote-reachability";
 import { visibleRunnerExposureCreditValue } from "../visible-runner-action-economy";
 import type { CorpServerLike } from "./semantic-runtime-corp-scoring-window-contracts";
@@ -48,6 +50,39 @@ export function scoringWindowAccessAssessment(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
   extraRunnerCredits = 0,
+): ReturnType<typeof scoringWindowAccessAssessmentForMode> {
+  return scoringWindowAccessAssessmentForMode(
+    input,
+    server,
+    extraRunnerCredits,
+    "current_state",
+  );
+}
+
+export function scoringWindowPostRezProtectionAssessment(
+  input: AiDecisionInput,
+  server: CorpServerLike | undefined,
+  extraRunnerCredits = 0,
+  corpRezCredits = input.playerView.own.credits,
+  corpRezCreditReserve = 0,
+): ReturnType<typeof scoringWindowAccessAssessmentForMode> {
+  return scoringWindowAccessAssessmentForMode(
+    input,
+    server,
+    extraRunnerCredits,
+    "engine_post_rez",
+    corpRezCredits,
+    corpRezCreditReserve,
+  );
+}
+
+function scoringWindowAccessAssessmentForMode(
+  input: AiDecisionInput,
+  server: CorpServerLike | undefined,
+  extraRunnerCredits: number,
+  mode: "current_state" | "engine_post_rez",
+  corpRezCredits = 0,
+  corpRezCreditReserve = 0,
 ): {
   runnerCanReachAccessNow: boolean;
   agendaStealRelevantNow: boolean;
@@ -82,6 +117,46 @@ export function scoringWindowAccessAssessment(
   const baseRunnerPathCandidate = runnerPathCandidates[0]!;
   const visibleRunnerIcebreakerCount =
     baseRunnerPathCandidate.visibleIcebreakerCount;
+  const postRezProjection =
+    mode === "engine_post_rez" && server
+      ? financedScoringProtectionPostRezIce(
+          input,
+          server,
+          {
+            corpRezCredits,
+            corpRezCreditReserve,
+          },
+          (financedIceInstanceIds) => {
+            const evaluatedPaths = runnerPathCandidates.map((candidate) => ({
+              ...candidate,
+              assessment: assessEngineCertifiedPostRezIcePath(
+                [...server.ice],
+                server.id,
+                input.playerView.stateVersion,
+                financedIceInstanceIds,
+                candidate.rig,
+                candidate.creditsAfterStagedInstall,
+                [...server.root],
+              ),
+            }));
+            const runnerBestPath = evaluatedPaths.reduce((best, candidate) =>
+              scoringWindowRunnerPathCandidateIsBetter(candidate, best)
+                ? candidate
+                : best,
+            );
+            return {
+              runnerCanReachAccess:
+                runnerBestPath.assessment.canReachAccess &&
+                runnerBestPath.assessment.creditsAfterPath >= 0,
+              runnerCreditsAfterPath:
+                runnerBestPath.assessment.creditsAfterPath,
+              runnerVisibleBreakCost:
+                (runnerBestPath.assessment.visibleBreakCost ?? 0) +
+                runnerBestPath.stagedInstallCreditCost,
+            };
+          },
+        )
+      : undefined;
   if (!server || server.ice.length === 0) {
     return {
       runnerCanReachAccessNow: true,
@@ -100,19 +175,25 @@ export function scoringWindowAccessAssessment(
       ],
     };
   }
-  const projectedIce = server.ice.map((ice) => ({
-    ...ice,
-    known: ice.known !== false,
-    rezzed: true,
-  }));
   const evaluatedRunnerPaths = runnerPathCandidates.map((candidate) => ({
     ...candidate,
-    assessment: assessKnownRezzedIcePath(
-      projectedIce,
-      candidate.rig,
-      candidate.creditsAfterStagedInstall,
-      [...server.root],
-    ),
+    assessment:
+      mode === "engine_post_rez"
+        ? assessEngineCertifiedPostRezIcePath(
+            [...server.ice],
+            server.id,
+            input.playerView.stateVersion,
+            postRezProjection?.financedIceInstanceIds ?? new Set<string>(),
+            candidate.rig,
+            candidate.creditsAfterStagedInstall,
+            [...server.root],
+          )
+        : assessKnownRezzedIcePath(
+            [...server.ice],
+            candidate.rig,
+            candidate.creditsAfterStagedInstall,
+            [...server.root],
+          ),
   }));
   const selectedRunnerPath = evaluatedRunnerPaths.reduce((best, candidate) =>
     scoringWindowRunnerPathCandidateIsBetter(candidate, best)
@@ -122,11 +203,17 @@ export function scoringWindowAccessAssessment(
   const assessment = selectedRunnerPath.assessment;
   const effectiveVisibleRunnerIcebreakerCount =
     selectedRunnerPath.visibleIcebreakerCount;
-  const unmodeledIceCount = projectedIce.filter(
-    (ice) => !iceHasModeledRunImpact(ice),
+  const unmodeledIceCount = server.ice.filter((ice) =>
+    mode === "engine_post_rez"
+      ? postRezIceIsUnmodeled(
+          ice,
+          server.id,
+          input.playerView.stateVersion,
+          postRezProjection?.unmodeledIceInstanceIds ?? new Set<string>(),
+        )
+      : ice.rezzed === true && !iceHasModeledRunImpact(ice),
   ).length;
-  const unmodeledBlocksVisibleAccess =
-    unmodeledIceCount > 0 && effectiveVisibleRunnerIcebreakerCount === 0;
+  const unmodeledBlocksVisibleAccess = false;
   const observedReachability = server
     ? semanticRuntimeCorpObservedRemoteReachability(input, server.id, server)
     : undefined;
@@ -166,6 +253,7 @@ export function scoringWindowAccessAssessment(
       `remote_access:credits_after_path:${assessment.creditsAfterPath}`,
       `remote_access:unmodeled_ice_count:${unmodeledIceCount}`,
       `remote_access:unmodeled_blocks_visible_access:${unmodeledBlocksVisibleAccess}`,
+      `remote_access:assessment_mode:${mode}`,
       `visible_runner_icebreaker_count:${effectiveVisibleRunnerIcebreakerCount}`,
       `public_staged_breaker_used:${selectedRunnerPath.stagedBreakerCount > 0}`,
       `public_staged_breaker_count:${selectedRunnerPath.stagedBreakerCount}`,
@@ -181,6 +269,7 @@ export function scoringWindowAccessAssessment(
       `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
       `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
       `visible_runner_pre_run_credit_take_bonus:${visibleRunnerPreRunCreditBonus}`,
+      ...(postRezProjection?.evidence ?? []),
       ...(observedReachability?.evidence ?? []),
     ],
   };
@@ -416,12 +505,265 @@ function scoringWindowRunnerPathCandidateIsBetter(
 }
 
 export function iceHasModeledRunImpact(ice: VisibleCard): boolean {
-  if (ice.effectiveRunQuote) return true;
-  const definitionId = ice.definitionId;
-  if (!definitionId) return false;
   return (
-    RUNTIME_CARDS[definitionId] !== undefined ||
-    CARD_DEFINITIONS_BY_ID[definitionId] !== undefined
+    ice.rezzed === true &&
+    ice.effectiveRunQuote?.iceInstanceId === ice.instanceId &&
+    ice.effectiveRunQuote.iceDefinitionId === ice.definitionId
+  );
+}
+
+function iceHasBoundEnginePostRezRunImpact(
+  ice: VisibleCard,
+  serverId: string,
+  stateVersion: number,
+): boolean {
+  if (iceHasModeledRunImpact(ice)) return true;
+  const quote = ice.effectivePostRezRunQuote;
+  return (
+    ice.rezzed === false &&
+    quote?.context === "installed_post_rez" &&
+    quote.complete === true &&
+    quote.cardId === ice.instanceId &&
+    quote.iceDefinitionId === ice.definitionId &&
+    quote.targetServerId === serverId &&
+    quote.projectedServerId === serverId &&
+    quote.expiresAtStateVersion === stateVersion &&
+    quote.effectiveRunQuote.iceInstanceId === ice.instanceId &&
+    quote.effectiveRunQuote.iceDefinitionId === ice.definitionId
+  );
+}
+
+function postRezIceIsUnmodeled(
+  ice: VisibleCard,
+  serverId: string,
+  stateVersion: number,
+  unmodeledIceInstanceIds: ReadonlySet<string>,
+): boolean {
+  if (ice.rezzed === true) return !iceHasModeledRunImpact(ice);
+  if (!iceHasBoundEnginePostRezRunImpact(ice, serverId, stateVersion)) {
+    return true;
+  }
+  if (
+    !iceRunQuoteHasPotentialScoringProtection(
+      ice.effectivePostRezRunQuote?.complete === true
+        ? ice.effectivePostRezRunQuote.effectiveRunQuote
+        : undefined,
+    )
+  ) {
+    return false;
+  }
+  return unmodeledIceInstanceIds.has(ice.instanceId);
+}
+
+function financedScoringProtectionPostRezIce(
+  input: AiDecisionInput,
+  server: CorpServerLike,
+  budget: {
+    corpRezCredits: number;
+    corpRezCreditReserve: number;
+  },
+  assessSubset: (
+    financedIceInstanceIds: ReadonlySet<string>,
+  ) => ScoringProtectionSubsetAssessment,
+): {
+  financedIceInstanceIds: ReadonlySet<string>;
+  unmodeledIceInstanceIds: ReadonlySet<string>;
+  evidence: string[];
+} {
+  const validBudget =
+    Number.isSafeInteger(budget.corpRezCredits) &&
+    budget.corpRezCredits >= 0 &&
+    Number.isSafeInteger(budget.corpRezCreditReserve) &&
+    budget.corpRezCreditReserve >= 0;
+  const availableCredits = validBudget
+    ? Math.max(0, budget.corpRezCredits - budget.corpRezCreditReserve)
+    : 0;
+  const financedIceInstanceIds = new Set<string>();
+  const unmodeledIceInstanceIds = new Set<string>();
+  const evidence = [
+    `corp_post_rez_budget:credits:${budget.corpRezCredits}`,
+    `corp_post_rez_budget:reserve:${budget.corpRezCreditReserve}`,
+    `corp_post_rez_budget:available:${availableCredits}`,
+    `corp_post_rez_budget:valid:${validBudget}`,
+  ];
+  if (!validBudget) {
+    for (const ice of server.ice) {
+      if (
+        ice.rezzed !== true &&
+        iceHasBoundEnginePostRezRunImpact(
+          ice,
+          server.id,
+          input.playerView.stateVersion,
+        ) &&
+        iceRunQuoteHasPotentialScoringProtection(
+          ice.effectivePostRezRunQuote?.complete === true
+            ? ice.effectivePostRezRunQuote.effectiveRunQuote
+            : undefined,
+        )
+      ) {
+        unmodeledIceInstanceIds.add(ice.instanceId);
+      }
+    }
+    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+  }
+  const candidates: Array<{ ice: VisibleCard; rezCredits: number }> = [];
+  // Candidate order is outermost to innermost. Exact subset comparison keeps
+  // this order as its final deterministic tie-break without making it the
+  // protection policy.
+  for (const ice of [...server.ice].reverse()) {
+    if (ice.rezzed === true) continue;
+    const postRezQuote = ice.effectivePostRezRunQuote;
+    if (
+      !iceHasBoundEnginePostRezRunImpact(
+        ice,
+        server.id,
+        input.playerView.stateVersion,
+      ) ||
+      !iceRunQuoteHasPotentialScoringProtection(
+        postRezQuote?.complete === true
+          ? postRezQuote.effectiveRunQuote
+          : undefined,
+      )
+    ) {
+      continue;
+    }
+    const rezQuote = readExactCurrentInstalledCorpIceRezQuote({
+      input,
+      sourceCard: ice,
+      targetServerId: server.id,
+    });
+    if (
+      !rezQuote ||
+      rezQuote.quote.mandatoryAdditionalCosts.agendaPoints !== 0
+    ) {
+      unmodeledIceInstanceIds.add(ice.instanceId);
+      evidence.push(`corp_post_rez_budget:unknown_quote:${ice.instanceId}`);
+      continue;
+    }
+    candidates.push({ ice, rezCredits: rezQuote.totalRezCredits });
+  }
+  const maximumExactCandidates = 12;
+  if (candidates.length > maximumExactCandidates) {
+    for (const candidate of candidates) {
+      unmodeledIceInstanceIds.add(candidate.ice.instanceId);
+    }
+    evidence.push(
+      "corp_post_rez_budget:selection:exact_subset",
+      "corp_post_rez_budget:selection_incomplete:search_space_exceeded",
+      `corp_post_rez_budget:maximum_exact_candidates:${maximumExactCandidates}`,
+      `corp_post_rez_budget:candidate_count:${candidates.length}`,
+      "corp_post_rez_budget:financed_ice_count:0",
+    );
+    return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+  }
+  let evaluatedSubsetCount = 0;
+  let best: ScoringProtectionSubset | undefined;
+  const subsetCount = 2 ** candidates.length;
+  for (let mask = 0; mask < subsetCount; mask += 1) {
+    const selected = candidates.filter(
+      (_, index) => (mask & (1 << index)) !== 0,
+    );
+    const totalRezCredits = selected.reduce(
+      (sum, candidate) => sum + candidate.rezCredits,
+      0,
+    );
+    if (totalRezCredits > availableCredits) continue;
+    const selectedIds = new Set(
+      selected.map((candidate) => candidate.ice.instanceId),
+    );
+    const subset: ScoringProtectionSubset = {
+      selectedIds,
+      totalRezCredits,
+      assessment: assessSubset(selectedIds),
+    };
+    evaluatedSubsetCount += 1;
+    if (!best || scoringProtectionSubsetIsBetter(subset, best)) best = subset;
+  }
+  for (const candidate of candidates) {
+    if (best?.selectedIds.has(candidate.ice.instanceId)) {
+      financedIceInstanceIds.add(candidate.ice.instanceId);
+      evidence.push(
+        `corp_post_rez_budget:financed:${candidate.ice.instanceId}`,
+      );
+    } else if (candidate.rezCredits > availableCredits) {
+      evidence.push(
+        `corp_post_rez_budget:unfunded:${candidate.ice.instanceId}`,
+      );
+    } else {
+      evidence.push(
+        `corp_post_rez_budget:not_selected:${candidate.ice.instanceId}`,
+      );
+    }
+  }
+  evidence.push(
+    "corp_post_rez_budget:selection:exact_subset",
+    `corp_post_rez_budget:evaluated_subset_count:${evaluatedSubsetCount}`,
+    `corp_post_rez_budget:financed_ice_count:${financedIceInstanceIds.size}`,
+    `corp_post_rez_budget:remaining:${availableCredits - (best?.totalRezCredits ?? 0)}`,
+  );
+  return { financedIceInstanceIds, unmodeledIceInstanceIds, evidence };
+}
+
+type ScoringProtectionSubsetAssessment = Readonly<{
+  runnerCanReachAccess: boolean;
+  runnerCreditsAfterPath: number;
+  runnerVisibleBreakCost: number;
+}>;
+
+type ScoringProtectionSubset = Readonly<{
+  selectedIds: ReadonlySet<string>;
+  totalRezCredits: number;
+  assessment: ScoringProtectionSubsetAssessment;
+}>;
+
+function scoringProtectionSubsetIsBetter(
+  candidate: ScoringProtectionSubset,
+  current: ScoringProtectionSubset,
+): boolean {
+  if (
+    candidate.assessment.runnerCanReachAccess !==
+    current.assessment.runnerCanReachAccess
+  ) {
+    return !candidate.assessment.runnerCanReachAccess;
+  }
+  if (
+    candidate.assessment.runnerCreditsAfterPath !==
+    current.assessment.runnerCreditsAfterPath
+  ) {
+    return (
+      candidate.assessment.runnerCreditsAfterPath <
+      current.assessment.runnerCreditsAfterPath
+    );
+  }
+  if (
+    candidate.assessment.runnerVisibleBreakCost !==
+    current.assessment.runnerVisibleBreakCost
+  ) {
+    return (
+      candidate.assessment.runnerVisibleBreakCost >
+      current.assessment.runnerVisibleBreakCost
+    );
+  }
+  if (candidate.totalRezCredits !== current.totalRezCredits) {
+    return candidate.totalRezCredits < current.totalRezCredits;
+  }
+  return candidate.selectedIds.size < current.selectedIds.size;
+}
+
+export function iceRunQuoteHasPotentialScoringProtection(
+  quote: VisibleCard["effectiveRunQuote"] | undefined,
+): boolean {
+  return (quote?.subroutines ?? []).some((subroutine) =>
+    [
+      "end_the_run",
+      "end_the_run_unless_runner_pays",
+      "set_run_future_end_the_run_subroutine",
+      "set_runner_run_lock_actions",
+      "do_damage",
+      "trash_installed_program",
+      "trash_installed_program_unless_runner_pays",
+      "initiate_trace",
+    ].includes(subroutine.type),
   );
 }
 

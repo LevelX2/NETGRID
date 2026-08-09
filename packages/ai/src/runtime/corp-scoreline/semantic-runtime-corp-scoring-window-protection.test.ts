@@ -9,6 +9,10 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { semanticRuntimeCorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import {
+  scoringWindowAccessAssessment,
+  scoringWindowPostRezProtectionAssessment,
+} from "./semantic-runtime-corp-scoring-window-runner-pressure";
+import {
   agendaCard,
   assess,
   blankIce,
@@ -48,6 +52,244 @@ const DEFINITION_BACKED_AGENDA_ID =
 describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
   afterEach(() => {
     delete CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID];
+  });
+
+  it("separates current access from Engine-certified fixed post-rez protection", () => {
+    const input = corpInput({
+      runnerCredits: 5,
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [wallIce("remote-fixed-wall")]),
+      ]),
+    });
+    const remote = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+
+    expect(scoringWindowAccessAssessment(input, remote)).toMatchObject({
+      runnerCanReachAccessNow: true,
+      effectiveIceCount: 0,
+    });
+    expect(
+      scoringWindowPostRezProtectionAssessment(input, remote),
+    ).toMatchObject({
+      runnerCanReachAccessNow: false,
+      effectiveIceCount: 1,
+      missingVisibleBreakerCoverage: true,
+      unmodeledIceCount: 0,
+    });
+  });
+
+  it("does not turn an incomplete post-rez quote into hypothetical protection", () => {
+    const {
+      effectiveRunQuote: _currentStateQuote,
+      ...dynamicIceWithoutCurrentQuote
+    } = wallIce("remote-dynamic-wall");
+    const dynamicIce: VisibleCard = {
+      ...dynamicIceWithoutCurrentQuote,
+      effectivePostRezRunQuote: {
+        context: "installed_post_rez",
+        cardId: "remote-dynamic-wall",
+        iceDefinitionId: "simple_barrier_ice",
+        targetServerId: "remote_1",
+        projectedServerId: "remote_1",
+        expiresAtStateVersion: 1,
+        complete: false,
+        reason: "variable_rez_choice_required",
+      },
+    };
+    const input = corpInput({
+      runnerCredits: 5,
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [dynamicIce]),
+      ]),
+    });
+    const remote = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+
+    expect(
+      scoringWindowPostRezProtectionAssessment(input, remote),
+    ).toMatchObject({
+      runnerCanReachAccessNow: true,
+      effectiveIceCount: 0,
+      unmodeledIceCount: 1,
+    });
+  });
+
+  it("does not spend projected rez budget on inert ICE or activate an unaffordable ETR", () => {
+    const input = corpInput({
+      ownCredits: 2,
+      runnerCredits: 5,
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [
+          blankIce("cheap-inert-ice", { rezCost: 0 }),
+          wallIce("unaffordable-etr", { rezCost: 5 }),
+        ]),
+      ]),
+    });
+    const remote = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+
+    expect(
+      scoringWindowPostRezProtectionAssessment(input, remote),
+    ).toMatchObject({
+      runnerCanReachAccessNow: true,
+      effectiveIceCount: 0,
+      unmodeledIceCount: 0,
+      evidence: expect.arrayContaining([
+        "corp_post_rez_budget:unfunded:unaffordable-etr",
+        "corp_post_rez_budget:financed_ice_count:0",
+      ]),
+    });
+  });
+
+  it("activates only the jointly financeable ICE subset in encounter order", () => {
+    const input = corpInput({
+      ownCredits: 4,
+      runnerCredits: 5,
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [
+          wallIce("inner-wall", { rezCost: 3 }),
+          wallIce("outer-wall", { rezCost: 3 }),
+        ]),
+      ]),
+    });
+    const remote = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+
+    expect(
+      scoringWindowPostRezProtectionAssessment(input, remote),
+    ).toMatchObject({
+      runnerCanReachAccessNow: false,
+      effectiveIceCount: 1,
+      unmodeledIceCount: 0,
+      evidence: expect.arrayContaining([
+        "corp_post_rez_budget:financed:outer-wall",
+        "corp_post_rez_budget:not_selected:inner-wall",
+        "corp_post_rez_budget:selection:exact_subset",
+        "corp_post_rez_budget:financed_ice_count:1",
+      ]),
+    });
+  });
+
+  it("selects a cheaper blocking inner ICE over an expensive reachable outer ICE", () => {
+    const input = corpInput({
+      ownCredits: 4,
+      runnerCredits: 5,
+      runnerRig: [simpleKiller("runner-killer")],
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [
+          wallIce("inner-blocking-wall", { rezCost: 2 }),
+          hunterTraceTagIce("outer-reachable-trace", { rezCost: 4 }),
+        ]),
+      ]),
+    });
+    const remote = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+
+    expect(
+      scoringWindowPostRezProtectionAssessment(input, remote),
+    ).toMatchObject({
+      runnerCanReachAccessNow: false,
+      effectiveIceCount: 1,
+      unmodeledIceCount: 0,
+      evidence: expect.arrayContaining([
+        "corp_post_rez_budget:selection:exact_subset",
+        "corp_post_rez_budget:financed:inner-blocking-wall",
+        "corp_post_rez_budget:not_selected:outer-reachable-trace",
+        "corp_post_rez_budget:financed_ice_count:1",
+        "corp_post_rez_budget:remaining:2",
+      ]),
+    });
+  });
+
+  it("fails closed instead of partially activating more than twelve rez candidates", () => {
+    const input = corpInput({
+      ownCredits: 100,
+      runnerCredits: 5,
+      servers: protectedCentralServers([
+        remoteServer(
+          "remote_1",
+          Array.from({ length: 13 }, (_, index) =>
+            wallIce(`exact-subset-wall-${index}`, { rezCost: 1 }),
+          ),
+        ),
+      ]),
+    });
+    const remote = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+    const assessment = scoringWindowPostRezProtectionAssessment(input, remote);
+
+    expect(assessment).toMatchObject({
+      runnerCanReachAccessNow: true,
+      effectiveIceCount: 0,
+      unmodeledIceCount: 13,
+      evidence: expect.arrayContaining([
+        "corp_post_rez_budget:selection:exact_subset",
+        "corp_post_rez_budget:selection_incomplete:search_space_exceeded",
+        "corp_post_rez_budget:maximum_exact_candidates:12",
+        "corp_post_rez_budget:candidate_count:13",
+        "corp_post_rez_budget:financed_ice_count:0",
+      ]),
+    });
+    expect(assessment.evidence).not.toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^corp_post_rez_budget:financed:/),
+      ]),
+    );
+  });
+
+  it("keeps current rezzed ICE active without consuming post-rez budget", () => {
+    const input = corpInput({
+      ownCredits: 0,
+      runnerCredits: 5,
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [
+          wallIce("already-rezzed-wall", { rezzed: true, rezCost: 5 }),
+        ]),
+      ]),
+    });
+    const remote = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+
+    expect(
+      scoringWindowPostRezProtectionAssessment(input, remote),
+    ).toMatchObject({
+      runnerCanReachAccessNow: false,
+      effectiveIceCount: 1,
+      unmodeledIceCount: 0,
+      evidence: expect.arrayContaining([
+        "corp_post_rez_budget:financed_ice_count:0",
+      ]),
+    });
+  });
+
+  it("does not count unaffordable central ICE as post-rez protection", () => {
+    const input = corpInput({
+      ownCredits: 1,
+      runnerCredits: 5,
+      servers: [
+        centralServer("hq", [wallIce("unaffordable-hq-wall", { rezCost: 4 })]),
+        centralServer("rd", []),
+      ],
+    });
+    const hq = input.playerView.servers.find(
+      (candidate) => candidate.id === "hq",
+    );
+
+    expect(scoringWindowPostRezProtectionAssessment(input, hq)).toMatchObject({
+      runnerCanReachAccessNow: true,
+      effectiveIceCount: 0,
+      unmodeledIceCount: 0,
+      evidence: expect.arrayContaining([
+        "corp_post_rez_budget:unfunded:unaffordable-hq-wall",
+      ]),
+    });
   });
 
   it("treats remote ICE as the next score-window step when it removes before-score contestability", () => {
@@ -126,6 +368,38 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
       windowKind: "unsafe",
       missingVisibleBreakerCoverage: true,
     });
+    expect(assessment?.evidence).toContain("central_pressure:true");
+  });
+
+  it("keeps agenda-heavy HQ pressure active behind unaffordable ICE", () => {
+    const agenda = agendaCard("agenda-behind-unaffordable-hq-ice");
+    const action = corpAction(
+      "install-agenda-behind-unaffordable-hq-ice",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 1,
+        runnerCredits: 5,
+        hq: [agenda],
+        servers: [
+          centralServer("hq", [
+            wallIce("unaffordable-hq-wall", { rezCost: 4 }),
+          ]),
+          centralServer("rd", []),
+          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 1 })]),
+        ],
+      }),
+      action,
+    );
+
     expect(assessment?.evidence).toContain("central_pressure:true");
   });
 
@@ -388,9 +662,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
         runnerCredits: 10,
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
-            wallIce("remote-wall-1", { rezCost: 2 }),
-          ]),
+          remoteServer("remote_1", [wallIce("remote-wall-1", { rezCost: 2 })]),
         ]),
       }),
       action,
@@ -426,9 +698,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
         runnerRig: [simpleFracter("visible-runner-fracter")],
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
-            wallIce("remote-wall-1", { rezCost: 2 }),
-          ]),
+          remoteServer("remote_1", [wallIce("remote-wall-1", { rezCost: 2 })]),
         ]),
       }),
       action,
@@ -548,7 +818,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
     );
   });
 
-  it("does not promote solo position-scaling ICE to durable protection", () => {
+  it("fails closed for solo position-scaling ICE without a post-rez quote", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
       "install-agenda",
@@ -573,20 +843,21 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
     );
 
     expect(assessment).toMatchObject({
-      windowKind: "temporary_safe",
-      corpCanRezRelevantIce: true,
+      windowKind: "unsafe",
+      corpCanRezRelevantIce: false,
     });
     expect(assessment?.windowKind).not.toBe("durable");
     expect(assessment?.evidence).toEqual(
       expect.arrayContaining([
-        "remote_relevant_ice_count:1",
+        "remote_relevant_ice_count:0",
         "remote_durable_relevant_ice_count:0",
-        "remote_weak_position_scaling_ice_count:1",
+        "remote_weak_position_scaling_ice_count:0",
+        "post_rez_remote_access:unmodeled_ice_count:1",
       ]),
     );
   });
 
-  it("does not promote Bug Zapper plus Mastermind to durable protection without stable outside support", () => {
+  it("does not infer dynamic protection from Bug Zapper and Mastermind definitions", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
       "install-agenda",
@@ -615,9 +886,9 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
 
     expect(assessment?.windowKind).not.toBe("durable");
     expect(assessment).toMatchObject({
-      windowKind: "temporary_safe",
+      windowKind: "unsafe",
       affordableDurableRelevantIceCount: 0,
-      dynamicProtectionWeaknessCount: 2,
+      dynamicProtectionWeaknessCount: 0,
     });
   });
 
@@ -825,17 +1096,18 @@ describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
     expect(assessment).toMatchObject({
       windowKind: "unsafe",
       scoreHorizon: "next_turn",
-      runnerCanContestBeforeScore: false,
+      runnerCanContestBeforeScore: true,
       agendaPointsAtRisk: 3,
       runnerAgendaPointsAfterSteal: 7,
       agendaStealSeverity: "game_ending",
-      recommendedNextStep: "gain_credit",
+      recommendedNextStep: "build_remote_ice",
     });
     expect(assessment?.evidence).toEqual(
       expect.arrayContaining([
         "agenda_steal_severity:game_ending",
-        "remote_dynamic_protection_weakness_count:2",
-        "remote_dynamic_protection_reserve:1",
+        "remote_dynamic_protection_weakness_count:0",
+        "remote_dynamic_protection_reserve:0",
+        "post_rez_remote_access:unmodeled_ice_count:2",
         "corp_can_rez_full_path_with_dynamic_reserve:false",
       ]),
     );

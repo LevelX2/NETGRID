@@ -32,6 +32,7 @@ export type {
 import {
   projectedRemoteServerForAction,
   scoringWindowAccessAssessment,
+  scoringWindowPostRezProtectionAssessment,
   scoringWindowAgendaPointsAtRisk,
   scoringWindowAgendaStealSeverity,
   scoringWindowDelayedScoreExposureRisk,
@@ -133,7 +134,14 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
     creditsAfterAction,
     preExposureAdvancementCreditReserve,
   );
-  const access = scoringWindowAccessAssessment(input, projectedServer);
+  const currentAccess = scoringWindowAccessAssessment(input, projectedServer);
+  const access = scoringWindowPostRezProtectionAssessment(
+    input,
+    projectedServer,
+    0,
+    creditsAfterAction,
+    preExposureAdvancementCreditReserve,
+  );
   const runnerExposureCreditActions = scoringWindowRunnerExposureCreditActions(
     input,
     scoreHorizon,
@@ -145,10 +153,12 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
   );
   const exposureAccess =
     runnerExposureCreditActions > 0
-      ? scoringWindowAccessAssessment(
+      ? scoringWindowPostRezProtectionAssessment(
           input,
           projectedServer,
           runnerExposureCredits,
+          creditsAfterAction,
+          preExposureAdvancementCreditReserve,
         )
       : access;
   const hasScorePressure =
@@ -232,8 +242,8 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
     serverId,
     windowKind,
     runnerCanContestNow,
-    runnerCanReachAccessNow: access.runnerCanReachAccessNow,
-    agendaStealRelevantNow: access.agendaStealRelevantNow,
+    runnerCanReachAccessNow: currentAccess.runnerCanReachAccessNow,
+    agendaStealRelevantNow: currentAccess.agendaStealRelevantNow,
     runnerCanContestBeforeScore,
     runnerCanReachAccessBeforeScore: exposureAccess.runnerCanReachAccessNow,
     agendaStealRelevantBeforeScore: exposureAccess.agendaStealRelevantNow,
@@ -257,8 +267,8 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
       `window_kind:${windowKind}`,
       `score_horizon:${scoreHorizon}`,
       `runner_can_contest_now:${runnerCanContestNow}`,
-      `runner_can_reach_access_now:${access.runnerCanReachAccessNow}`,
-      `agenda_steal_relevant_now:${access.agendaStealRelevantNow}`,
+      `runner_can_reach_access_now:${currentAccess.runnerCanReachAccessNow}`,
+      `agenda_steal_relevant_now:${currentAccess.agendaStealRelevantNow}`,
       `runner_can_contest_before_score:${runnerCanContestBeforeScore}`,
       `runner_can_reach_access_before_score:${exposureAccess.runnerCanReachAccessNow}`,
       `agenda_steal_relevant_before_score:${exposureAccess.agendaStealRelevantNow}`,
@@ -287,7 +297,8 @@ function buildSemanticRuntimeCorpScoringWindowAssessment<
       `central_pressure:${centralPressure}`,
       `existing_scoring_remote:${existingWindow}`,
       `recommended_next_step:${recommendedNextStep}`,
-      ...access.evidence,
+      ...currentAccess.evidence,
+      ...access.evidence.map((entry) => `post_rez_${entry}`),
       ...(runnerExposureCreditActions > 0
         ? exposureAccess.evidence.map((entry) => `exposure_${entry}`)
         : []),

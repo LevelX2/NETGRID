@@ -276,6 +276,10 @@ function evaluateRunnerRunTarget(
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
   ).length;
+  const visibleDuringRunRezSupport =
+    server?.statuses?.some(
+      (status) => status.kind === "during_run_ice_rez_support",
+    ) === true;
   const baseRouteQuote = quoteRunnerRunRoute({
     path,
     availableCredits: creditsAvailableDuringRun,
@@ -317,6 +321,15 @@ function evaluateRunnerRunTarget(
   const unrezzedIceRiskUnderfunded =
     unknownUnrezzedIceCount > 0 &&
     creditsAfterRun < unrezzedIceRiskCreditBuffer;
+  if (
+    pathPassability === "reachable" &&
+    unknownUnrezzedIceCount > 0 &&
+    visibleDuringRunRezSupport &&
+    params.input.playerView.opponent.credits > 0 &&
+    creditsAvailableDuringRun <= 0
+  ) {
+    pathPassability = "blocked_unpayable";
+  }
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(
     accessPayoff,
@@ -507,6 +520,7 @@ function evaluateRunnerRunTarget(
       `unrezzed_ice_risk:${unrezzedIceRisk}`,
       `unrezzed_ice_risk_credit_buffer:${unrezzedIceRiskCreditBuffer}`,
       `unrezzed_ice_risk_underfunded:${unrezzedIceRiskUnderfunded}`,
+      `visible_during_run_rez_support:${visibleDuringRunRezSupport}`,
       `visible_ice_hazard_penalty:${visibleIceHazardPenalty}`,
       `visible_ice_hazard_avoidance_cost:${visibleIceHazardAvoidanceCost}`,
       `credits_after_avoiding_visible_ice_hazards:${creditsAfterAvoidingVisibleIceHazards}`,

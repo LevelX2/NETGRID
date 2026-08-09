@@ -535,55 +535,26 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps tactical plans as a thin plan facade", () => {
-    const tacticalPlans = path.join(srcDir, "tactical-plans.ts");
-    const content = readFileSync(tacticalPlans, "utf8");
-    const forbiddenPatterns = [
-      {
-        pattern: /^\s*function\s/m,
-        reason: "declares local helper functions",
-      },
-      {
-        pattern:
-          /from\s+["']\.\/plans\/tactical-plan-(?:runner-run-targets|runner-hand-buffer|runner-hand-development|runner-credit-base|runner-breaker-coverage-step|corp-helpers|corp-score-window|deck-coverage|bank-tools|run-reachability)["']/,
-        reason: "imports split plan implementation modules directly",
-      },
-    ];
-    const requiredImports = [
-      "./plans/tactical-plan-runner-plans",
-      "./plans/tactical-plan-corp-plans",
-      "./plans/tactical-plan-legal-action-mapping",
-      "./plans/tactical-plan-progression",
-    ];
-    const violations = [
-      ...forbiddenPatterns
-        .filter(({ pattern }) => pattern.test(content))
-        .map(({ reason }) => `tactical-plans.ts ${reason}`),
-      ...requiredImports
-        .filter((importSource) => !content.includes(`from "${importSource}"`))
-        .map((importSource) => `tactical-plans.ts misses ${importSource}`),
-    ];
-    const planModuleCycles = [
-      "tactical-plan-runner-plans.ts",
-      "tactical-plan-corp-plans.ts",
-      "tactical-plan-legal-action-mapping.ts",
-      "tactical-plan-step-candidate-matching.ts",
-    ].flatMap((fileName) => {
-      const file = path.join(srcDir, "plans", fileName);
-      return importsFrom(file)
-        .filter((reference) =>
-          resolvesToSrcEntry(file, reference.importSource, "tactical-plans"),
-        )
-        .map((reference) =>
-          violation(
-            file,
-            reference,
-            "plan modules must not import tactical-plans.ts",
+  it("keeps the retired tactical-plan facade outside the current module graph", () => {
+    const retiredFacade = path.join(srcDir, "tactical-plans.ts");
+    const references = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) =>
+        importsFrom(file)
+          .filter((reference) =>
+            resolvesToSrcEntry(file, reference.importSource, "tactical-plans"),
+          )
+          .map((reference) =>
+            violation(
+              file,
+              reference,
+              "productive modules must not import the retired tactical-plan facade",
+            ),
           ),
-        );
-    });
+      );
 
-    expect([...violations, ...planModuleCycles]).toEqual([]);
+    expect(existsSync(retiredFacade)).toBe(false);
+    expect(references).toEqual([]);
   });
 
   it("keeps the productive runtime tree zero legacy", () => {
@@ -1090,15 +1061,12 @@ describe("AI module boundaries", () => {
     const allowedFilesBySymbol = new Map<string, Set<string>>([
       [
         "progressTacticalPlans",
-        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+        new Set(["plans/tactical-plan-progression.ts"]),
       ],
-      [
-        "rankTacticalPlans",
-        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
-      ],
+      ["rankTacticalPlans", new Set(["plans/tactical-plan-progression.ts"])],
       [
         "planCanMapToCurrentAction",
-        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+        new Set(["plans/tactical-plan-progression.ts"]),
       ],
       [
         "createSemanticRuntimePlanMemoryExclusionContext",

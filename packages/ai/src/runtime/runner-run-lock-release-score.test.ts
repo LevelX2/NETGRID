@@ -5,6 +5,7 @@ import {
   runnerRunLockReleaseScoreComponent,
   runnerSpeculativeRunLockReleaseScoreComponent,
 } from "./runner-run-lock-release-score";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 describe("runnerRunLockReleaseScoreComponent", () => {
   it("converts a payable matchpoint lock into a plausible HQ follow-up", () => {
@@ -41,14 +42,24 @@ describe("runnerRunLockReleaseScoreComponent", () => {
   it("does not release into a known rezzed ETR path without breaker coverage", () => {
     const current = input();
     current.playerView.servers[0]!.ice = [
-      {
+      withEffectiveRunQuote({
         instanceId: "known-data-wall",
         definitionId: "onr_v1_237_data-wall",
         title: "Data Wall",
         type: "ice",
         known: true,
         rezzed: true,
-      },
+      }, {
+        effectiveStrength: 7,
+        subroutines: [
+          {
+            id: "known-data-wall-end-the-run",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_237_data-wall",
+            sourceTitle: "Data Wall",
+          },
+        ],
+      }),
     ];
     current.playerView.own.rig = [];
 

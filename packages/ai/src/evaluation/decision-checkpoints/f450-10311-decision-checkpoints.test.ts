@@ -13,9 +13,15 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("F450 and 10311 exact decision checkpoints", () => {
   it.each([
     ["reachable movement path is continued", cp01Json],
-    ["guaranteed score conversion precedes later matchpoint pressure", cp02Json],
+    [
+      "guaranteed score conversion precedes later matchpoint pressure",
+      cp02Json,
+    ],
     ["comfortable Streetware bank is not overfilled", cp03Json],
-    ["captured R&D pressure is executed instead of a vacuous action class", cp04Json],
+    [
+      "captured R&D pressure is executed instead of a vacuous action class",
+      cp04Json,
+    ],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
@@ -67,10 +73,16 @@ describe("F450 and 10311 exact decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-f450-10311-funded-cybermodem"],
   );
+  if (checkpoint.checkpointId === "cp-f450-10311-funded-cybermodem") {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

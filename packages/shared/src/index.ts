@@ -524,6 +524,7 @@ export type PublicEventPayload = Record<string, unknown> & {
   abilityFamily?: PublicAbilityFamily;
   abilityId?: string;
   effectKind?: string;
+  sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: string;
   amounts?: Record<string, number>;
   targets?: Record<string, string | number | boolean>;
@@ -2412,6 +2413,39 @@ export type VisibleEffectiveIceRunQuote = {
   conditionalEncounterEffects?: VisibleConditionalEncounterEffect[];
 };
 
+/**
+ * Corp-private, Engine-certified run projection for one currently unrezzed,
+ * installed ICE after a fixed rez in the current board state.
+ *
+ * Incomplete quotes intentionally expose no projected run effect. Consumers
+ * must not reconstruct it from printed definitions, card text, or AI hints.
+ */
+export type VisibleCorpIcePostRezRunQuote =
+  | {
+      context: "installed_post_rez";
+      cardId: CardInstanceId;
+      iceDefinitionId: CardDefinitionId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: false;
+      reason:
+        | "variable_rez_choice_required"
+        | "on_rez_lifecycle_projection_required"
+        | "active_run_context"
+        | "effective_run_projection_unavailable";
+    }
+  | {
+      context: "installed_post_rez";
+      cardId: CardInstanceId;
+      iceDefinitionId: CardDefinitionId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: true;
+      effectiveRunQuote: VisibleEffectiveIceRunQuote;
+    };
+
 export type VisibleMandatoryCorpRezCosts = {
   agendaPoints: number;
 };
@@ -3050,6 +3084,8 @@ export type VisibleCard = {
   lifecycleMarkers?: VisibleCardLifecycleMarker[];
   runnerPaymentSupportAbilities?: VisibleRunnerPaymentSupportAbility[];
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
+  /** Present only to the Corp for own, installed, currently unrezzed ICE. */
+  effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
   /** Present only for the Corp's installed agendas. */

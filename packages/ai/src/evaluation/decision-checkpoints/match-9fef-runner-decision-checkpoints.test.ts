@@ -65,7 +65,7 @@ describe("match 9FEF runner decision checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     [
       "9FEF-F02-JETTISON-WINDOW-D26",
@@ -75,6 +75,14 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       "9FEF-F06-HQ-PROBE-CLASSIFICATION-D109",
     ],
   );
+  if (
+    checkpoint.checkpointId === "9FEF-F05-RD-AFTER-KNOWN-TOP-INVALIDATED-D95"
+  ) {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

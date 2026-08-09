@@ -17,7 +17,7 @@ import {
   type CorpScoringWindowAssessment,
 } from "./semantic-runtime-corp-scoring-window";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { scoringWindowPostRezProtectionAssessment } from "./corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
@@ -211,6 +211,7 @@ export function semanticRuntimeCorpInstallRemoteScore<
       input,
       server,
       supportSourceCard,
+      input.playerView.own.credits - dependencies.actionCreditCost(action),
     )
   ) {
     return -1400;
@@ -285,6 +286,7 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
   sourceCard: VisibleCard | undefined,
+  corpRezCreditsAfterAction: number,
 ): boolean {
   if (!server) return false;
   const visibleRunnerContestCredits =
@@ -295,20 +297,19 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   if (server.ice.length === 0) {
     return visibleRunnerContestCredits >= trashCost;
   }
-  const projectedIce = server.ice.map((ice) => ({
-    ...ice,
-    known: ice.known !== false,
-    rezzed: true,
-  }));
-  const assessment = assessKnownRezzedIcePath(
-    projectedIce,
-    input.playerView.opponent.rig ?? [],
-    visibleRunnerContestCredits,
-    sourceCard ? [...server.root, sourceCard] : [...server.root],
+  const assessment = scoringWindowPostRezProtectionAssessment(
+    input,
+    sourceCard
+      ? { ...server, root: [...server.root, sourceCard] }
+      : server,
+    semanticRuntimeCorpRunnerExposureCredits(input),
+    corpRezCreditsAfterAction,
   );
   return (
-    assessment.canReachAccess &&
-    assessment.creditsAfterPath >= Math.max(0, trashCost)
+    assessment.runnerCanReachAccessNow &&
+    assessment.visibleRunnerContestCredits -
+      (assessment.visibleBreakCost ?? 0) >=
+      Math.max(0, trashCost)
   );
 }
 

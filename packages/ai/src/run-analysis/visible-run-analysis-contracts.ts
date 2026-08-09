@@ -13,6 +13,8 @@ export type IceCardLike = {
   subtypes?: string[];
   strength?: number;
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
+  /** Internal marker set only after a complete Engine post-rez quote is bound. */
+  authoritativePostRezRunProjection?: true;
 };
 
 export type RootCardLike = {

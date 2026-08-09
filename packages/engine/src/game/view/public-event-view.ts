@@ -3,6 +3,7 @@
 // keine PublicPayload-Vertragsaenderung.
 import {
   type GameEvent,
+  type LegalAction,
   type PublicGameEvent,
   type Side,
 } from "@netgrid/shared";
@@ -102,18 +103,38 @@ function sidePrivatePublicPayload(
     privatePayload &&
     typeof privatePayload.legalAction === "object" &&
     privatePayload.legalAction !== null
-      ? (privatePayload.legalAction as { payload?: Record<string, unknown> })
+      ? (privatePayload.legalAction as LegalAction)
+      : undefined;
+  const action =
+    privatePayload &&
+    typeof privatePayload.action === "object" &&
+    privatePayload.action !== null
+      ? (privatePayload.action as {
+          actionId?: unknown;
+          side?: unknown;
+          clientKnownStateVersion?: unknown;
+        })
       : undefined;
   const payload = legalAction?.payload;
+  const sourceCardInstanceId = activatedAbilitySourceCardInstanceId({
+    event,
+    viewerSide,
+    legalAction,
+    action,
+  });
+  const result: Record<string, unknown> = {
+    ...(sourceCardInstanceId ? { sourceCardInstanceId } : {}),
+  };
   if (
     viewerSide !== "runner" ||
     event.publicPayload.actor !== "runner" ||
     payload?.hiddenZoneAction !== "p3_33_private_look"
   ) {
-    return undefined;
+    return Object.keys(result).length > 0 ? result : undefined;
   }
   const zone = payload.privateLookZone;
-  if (zone !== "hq" && zone !== "rd") return undefined;
+  if (zone !== "hq" && zone !== "rd")
+    return Object.keys(result).length > 0 ? result : undefined;
   const definitionIds = payload.knownHqDefinitionIds;
   const csvDefinitionIds =
     typeof payload.knownPrivateLookDefinitionIdsCsv === "string"
@@ -127,16 +148,49 @@ function sidePrivatePublicPayload(
           typeof value === "string" && value.length > 0,
       )
     : csvDefinitionIds;
-  if (knownHqDefinitionIds.length === 0) return undefined;
+  if (knownHqDefinitionIds.length === 0)
+    return Object.keys(result).length > 0 ? result : undefined;
   if (zone === "rd") {
     return {
+      ...result,
       knownRndDefinitionIds: knownHqDefinitionIds,
       knownRndTopDefinitionId: knownHqDefinitionIds[0],
       knownRndCardCount: knownHqDefinitionIds.length,
     };
   }
   return {
+    ...result,
     knownHqDefinitionIds,
     knownHqCardCount: knownHqDefinitionIds.length,
   };
+}
+
+function activatedAbilitySourceCardInstanceId(params: {
+  event: GameEvent;
+  viewerSide: Side;
+  legalAction: LegalAction | undefined;
+  action:
+    | {
+        actionId?: unknown;
+        side?: unknown;
+        clientKnownStateVersion?: unknown;
+      }
+    | undefined;
+}): string | undefined {
+  const { event, viewerSide, legalAction, action } = params;
+  if (
+    event.type !== "activated_card_ability" ||
+    event.publicPayload.actor !== viewerSide ||
+    legalAction?.type !== "activated_card_ability" ||
+    legalAction.side !== viewerSide ||
+    action?.side !== viewerSide ||
+    action.actionId !== legalAction.actionId ||
+    action.clientKnownStateVersion !== event.stateVersionBefore ||
+    legalAction.expiresAtStateVersion !== event.stateVersionBefore ||
+    typeof legalAction.source !== "string" ||
+    legalAction.payload?.cardId !== legalAction.source
+  ) {
+    return undefined;
+  }
+  return legalAction.source;
 }

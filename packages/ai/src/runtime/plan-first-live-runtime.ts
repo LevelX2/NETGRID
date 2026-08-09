@@ -26,7 +26,10 @@ import { actionHasConditionalDefenseFollowupQuotePayload } from "../actions/cond
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
 import { getStructuredTagPunishProfileForCard } from "../tag-punish-ontology-consumer";
-import type { DeckCapabilityProfile } from "../deck-capabilities";
+import type {
+  DeckCapabilityProfile,
+  EconomyBankTool,
+} from "../deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import type {
   RunnerEconomyPosture,
@@ -2783,6 +2786,14 @@ function buildRunnerDomain(
         evaluation.accessPayoff,
       ),
   );
+  const directlyConvertibleBypassEventRunAvailable = runTargets.some(
+    (evaluation) =>
+      evaluation.runActionProjection?.sourceKind === "event" &&
+      evaluation.runActionProjection?.bypassFirstIce === true &&
+      evaluation.bypassedFirstIce === true &&
+      evaluation.recommendation === "run_now" &&
+      runnerRunTargetCanConvertNow(input, economy, evaluation, candidates),
+  );
   const visiblySafePositiveRunAvailable = runTargets.some((evaluation) => {
     const visibleServer = input.playerView.servers.find(
       (server) => server.id === evaluation.targetServerId,
@@ -2826,18 +2837,25 @@ function buildRunnerDomain(
       evidence: ["runner_damage_locked_hand_reaction_reserve"],
     },
   ).routeActionIds;
-  const reactionReserveOpen =
-    damageThreat.deckBelief.level === "confirmed" &&
+  const criticalDamageAtHandFloor =
+    damageThreat.flatlineRisk.level === "critical" &&
+    damageThreat.flatlineRisk.handCount <=
+      damageThreat.flatlineRisk.recommendedHandFloor;
+  const confirmedDamageAtLockedHand =
     (damageThreat.flatlineRisk.level === "confirmed" ||
       damageThreat.flatlineRisk.level === "critical") &&
     damageThreat.flatlineRisk.effectiveMaxHandSize <=
       damageThreat.flatlineRisk.recommendedHandFloor &&
     damageThreat.flatlineRisk.handCount >=
       damageThreat.flatlineRisk.effectiveMaxHandSize &&
-    damageThreat.flatlineRisk.handBufferHeadroom === 0 &&
-    input.playerView.own.clicks <= 1 &&
+    damageThreat.flatlineRisk.handBufferHeadroom === 0;
+  const reactionReserveOpen =
+    damageThreat.deckBelief.level === "confirmed" &&
+    (criticalDamageAtHandFloor || confirmedDamageAtLockedHand) &&
+    input.playerView.own.clicks > 0 &&
     input.playerView.own.credits < 10 &&
     !visibleImmediatePayoffRunAvailable &&
+    !directlyConvertibleBypassEventRunAvailable &&
     reactionReserveActionIds.length > 0;
   const reactionReserveNeed: RunnerCorePlanDomain["defense"]["reactionReserveNeed"] =
     reactionReserveOpen
@@ -3248,9 +3266,6 @@ function buildRunnerDomain(
             candidates,
           );
           const executionMode = runPurposeForEvaluation(evaluation);
-          const informationProbeAdmissible =
-            executionMode !== "information" ||
-            runnerInformationProbeKnownPathWithinBudget(evaluation);
           const currentPressureRoute =
             !knownNoPayoff &&
             pressureCadence.routeAvailable &&
@@ -3259,7 +3274,12 @@ function buildRunnerDomain(
             fundingSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
             evaluation.routeQuote?.reachability !== "no_access" &&
-            informationProbeAdmissible &&
+            (executionMode !== "information" ||
+              runnerInformationProbeCanUseQuotedPath(
+                evaluation,
+                directRunCanConvertNow,
+                terminalCentralAccess,
+              )) &&
             (evaluation.recommendation === "run_now" ||
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
@@ -3415,8 +3435,7 @@ function buildRunnerDomain(
             ),
             ...(executionMode === "information"
               ? {
-                  encounterCreditSpendLimit:
-                    INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET,
+                  encounterCreditSpendLimit: evaluation.pathCost,
                 }
               : {}),
             accessCommitment: accessCommitmentForEvaluation(evaluation),
@@ -3593,9 +3612,6 @@ function buildRunnerDomain(
               candidates,
             );
         const purpose = runPurposeForEvaluation(evaluation);
-        const informationProbeAdmissible =
-          purpose !== "information" ||
-          runnerInformationProbeKnownPathWithinBudget(evaluation);
         const directRunCanConvertNow = runnerRunTargetCanConvertNow(
           input,
           economy,
@@ -3616,7 +3632,11 @@ function buildRunnerDomain(
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
         const directRunRouteReady =
-          informationProbeAdmissible &&
+          (purpose !== "information" ||
+            runnerInformationProbeCanUseQuotedPath(
+              evaluation,
+              directRunCanConvertNow,
+            )) &&
           (evaluation.recommendation === "run_now" ||
             evaluation.recommendation === "run_if_free" ||
             productiveProbeCanConvertNow ||
@@ -3663,8 +3683,7 @@ function buildRunnerDomain(
           preferredRunActionIds: [evaluation.actionId],
           ...(purpose === "information"
             ? {
-                encounterCreditSpendLimit:
-                  INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET,
+                encounterCreditSpendLimit: evaluation.pathCost,
               }
             : {}),
           accessCommitment: accessCommitmentForEvaluation(evaluation),
@@ -5581,9 +5600,14 @@ function runnerRunTargetCanConvertNow(
   evaluation: RunnerRunTargetEvaluation,
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
+  const allowCreditFloorOverride = runnerRunCreditFloorOverrideAllowed(
+    input,
+    evaluation,
+  );
   if (
     evaluation.unrezzedIceRiskUnderfunded === true &&
-    evaluation.creditsAfterRun <= 0
+    evaluation.creditsAfterRun <= 0 &&
+    !allowCreditFloorOverride
   ) {
     return false;
   }
@@ -5597,7 +5621,7 @@ function runnerRunTargetCanConvertNow(
     target: evaluation,
     economy,
     allowCreditFloorOverride:
-      runnerRunCreditFloorOverrideAllowed(input, evaluation) ||
+      allowCreditFloorOverride ||
       runnerImmediatePaidAccessConversionCanUseReserve(evaluation),
     ...(requiredPostRunReserve !== undefined ? { requiredPostRunReserve } : {}),
   });
@@ -5627,7 +5651,6 @@ function runnerFreeCentralInformationRoutePreservesCurrentCredits(
     (evaluation.accessTargetKind === "hq" ||
       evaluation.accessTargetKind === "rd") &&
     evaluation.pathPassability === "reachable" &&
-    evaluation.pathCost === 0 &&
     routeQuote !== undefined &&
     routeQuote.reachability === "guaranteed_access" &&
     routeQuote.fundingGap === 0 &&
@@ -5668,6 +5691,9 @@ function runnerRunRequiredPostRunReserve(
   economy: RunnerEconomyPosture,
   evaluation: RunnerRunTargetEvaluation,
 ): number | undefined {
+  if (runnerRunCreditFloorOverrideAllowed(input, evaluation)) {
+    return undefined;
+  }
   if (
     evaluation.accessTargetKind !== "remote" ||
     evaluation.accessPayoff !== "score_threat" ||
@@ -7914,6 +7940,13 @@ function buildCorpDomain(
         ]
       : []),
   ];
+  const deferredLastClickScoreProject =
+    corpKnownDeferredLastClickScoreProject(scoreProjects);
+  const exactLastClickLiquidityHeadAvailable =
+    input.playerView.own.clicks === 1 &&
+    candidates.some((candidate) =>
+      corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+    );
   const requiredScoreCreditFloor = Math.max(
     0,
     ...scoreProjects.map(
@@ -8302,6 +8335,13 @@ function buildCorpDomain(
             centralDefenseAllocation,
             CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
           );
+          if (
+            route?.progressKind === "agenda_capacity_defense_conversion" &&
+            deferredLastClickScoreProject !== undefined &&
+            exactLastClickLiquidityHeadAvailable
+          ) {
+            return [];
+          }
           const selectedScoreProtectionPrecedesAdditionalCentralLayer =
             (serverId === "hq" || serverId === "rd") &&
             selectedScoreProtectionSignals.length > 0 &&
@@ -8798,7 +8838,7 @@ function buildCorpDomain(
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
-  const turnLiquidityDevelopment =
+  const genericTurnLiquidityDevelopment =
     operationThresholdPreparations.length === 0
       ? corpTurnLiquidityDevelopmentNeed(
           input,
@@ -8807,6 +8847,13 @@ function buildCorpDomain(
           currentTurnKey,
         )
       : undefined;
+  const turnLiquidityDevelopment =
+    genericTurnLiquidityDevelopment && deferredLastClickScoreProject
+      ? {
+          ...genericTurnLiquidityDevelopment,
+          evidenceCode: deferredLastClickScoreProject.evidenceCode,
+        }
+      : genericTurnLiquidityDevelopment;
   const unboundEconomyNeeds: CorpCorePlanDomain["economyNeeds"] = uniqueBy(
     [
       ...requiredEconomyNeeds,
@@ -10787,13 +10834,7 @@ function corpScoreProtectionStagingInstallSignal(
   if (remainingAdvancementClicks === undefined || !source) return undefined;
   const projectedServer = {
     id: serverId,
-    ice: [
-      ...(existingRemote?.ice ?? []),
-      {
-        ...source,
-        rezzed: true,
-      },
-    ],
+    ice: [...(existingRemote?.ice ?? []), source],
     root: existingRemote?.root ?? [],
   };
   const rushRisk = assessCorpScoreRushRisk({
@@ -14921,8 +14962,10 @@ function runnerCreditBankSignals(
 
     const combinedCreditAccess =
       input.playerView.own.credits + currentStoredCredits;
+    const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool);
     const shouldBuild =
       tool.buildActionLegal &&
+      !alreadyBuiltThisTurn &&
       !convertibleRunFundingNeed &&
       !convertibleDevelopmentFundingNeed &&
       (!urgentCreditFloor || input.playerView.own.clicks === 1) &&
@@ -14948,11 +14991,13 @@ function runnerCreditBankSignals(
             developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
               ? `runner_credit_bank_cashout_delegation_missing_exact_route:${developmentCashOutAdmission.route?.targetCardInstanceId ?? "unknown"}`
-              : combinedCreditAccess >= 20 || currentStoredCredits >= 12
-                ? "runner_credit_bank_hold_comfortable_value"
-                : convertibleDevelopmentFundingNeed
-                  ? "runner_credit_bank_cashout_delegated_to_development_plan"
-                  : "runner_credit_bank_hold_no_current_conversion_need",
+              : alreadyBuiltThisTurn
+                ? "runner_credit_bank_hold_instance_built_this_turn"
+                : combinedCreditAccess >= 20 || currentStoredCredits >= 12
+                  ? "runner_credit_bank_hold_comfortable_value"
+                  : convertibleDevelopmentFundingNeed
+                    ? "runner_credit_bank_cashout_delegated_to_development_plan"
+                    : "runner_credit_bank_hold_no_current_conversion_need",
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
             ...(developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
@@ -15072,6 +15117,50 @@ function runnerMatureCreditBankDevelopmentFundingRoute(params: {
     };
   }
   return undefined;
+}
+
+function creditBankBuiltThisTurn(
+  input: AiDecisionInput,
+  tool: EconomyBankTool,
+): boolean {
+  const sourceCardInstanceId = tool.sourceCardInstanceId;
+  if (!sourceCardInstanceId) return false;
+
+  const events = uniqueBy(
+    [...input.playerView.publicEvents, ...input.eventTail],
+    (event) => event.eventId,
+  ).sort(
+    (left, right) =>
+      left.stateVersionAfter - right.stateVersionAfter ||
+      left.eventId.localeCompare(right.eventId),
+  );
+  const currentTurnSerial = input.playerView.turnSerial;
+  if (
+    currentTurnSerial === undefined ||
+    !Number.isSafeInteger(currentTurnSerial) ||
+    currentTurnSerial < 0
+  ) {
+    return false;
+  }
+  return events.some((event) => {
+    const resolvedEffects = Array.isArray(event.publicPayload?.resolvedEffects)
+      ? event.publicPayload.resolvedEffects
+      : [];
+    const bankLoadEffects = resolvedEffects.filter(
+      (effect) => effect.kind === "add_hosted_credits",
+    );
+    if (
+      event.type !== "activated_card_ability" ||
+      event.turnSerial !== currentTurnSerial ||
+      event.publicPayload?.actor !== "runner" ||
+      event.publicPayload?.sourceCardInstanceId !== sourceCardInstanceId ||
+      event.publicPayload?.sourceDefinitionId !== tool.cardId ||
+      bankLoadEffects.length === 0
+    ) {
+      return false;
+    }
+    return true;
+  });
 }
 
 function runnerCreditBankRunFundingRoute(params: {
@@ -15666,6 +15755,7 @@ function uniqueCoverageGaps(
         `coverage:${role}`,
         answerInstallCost,
         fundingGap,
+        false,
       ),
       installActionValues: runnerCoverageInstallActionValues(
         input,
@@ -15750,6 +15840,7 @@ function uniqueCoverageGaps(
           `coverage:${role}`,
           answerInstallCost,
           fundingGap,
+          true,
         ),
         installActionValues: runnerCoverageInstallActionValues(
           input,
@@ -15907,6 +15998,7 @@ function runnerCoverageFundingActionIds(
   gapId: string,
   answerInstallCost: number | undefined,
   fundingGap: number | undefined,
+  allowIncrementalProgress: boolean,
 ): string[] {
   if (
     answerInstallCost === undefined ||
@@ -15924,6 +16016,7 @@ function runnerCoverageFundingActionIds(
     deadline: "end_of_current_turn",
     targetCredits: answerInstallCost,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+    allowIncrementalProgress,
     evidence: [
       `coverage_gap:${gapId}`,
       "coverage_install_conversion_click_reserved:1",
@@ -16114,9 +16207,8 @@ function runnerCoverageRecoveryTarget(
       ? "top"
       : hint?.functionSignals?.includes("setup.card_recovery") === true ||
           hint?.functionSignals?.includes("setup.recovery") === true ||
-          hint?.functionSignals?.includes(
-            "setup.temporary_program_install",
-          ) === true
+          hint?.functionSignals?.includes("setup.temporary_program_install") ===
+            true
         ? "search"
         : undefined;
   if (!recoveryKind) return undefined;
@@ -17326,21 +17418,31 @@ function runPurposeForEvaluation(
   return evaluation.targetKind === "remote" ? "contest" : "access";
 }
 
-/**
- * An information probe keeps a one-credit encounter ceiling in its bound
- * continuation. Do not launch it when the already quoted known path needs
- * more than that ceiling: otherwise the plan can only reach the encounter
- * and is then forced into ETR.
- */
+/** Bound ceiling for an explicitly constrained bonus-capacity probe. */
 const INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET = 1;
 
-function runnerInformationProbeKnownPathWithinBudget(
+function runnerInformationProbeCanUseQuotedPath(
   evaluation: RunnerRunTargetEvaluation,
+  directlyConvertible: boolean,
+  terminalCentralAccess = false,
 ): boolean {
-  return (
-    evaluation.pathPassability === "reachable" &&
-    evaluation.routeQuote?.fundingGap === 0 &&
+  if (
+    evaluation.pathPassability !== "reachable" ||
+    (evaluation.routeQuote?.fundingGap ?? 0) > 0
+  ) {
+    return false;
+  }
+  if (
+    terminalCentralAccess ||
     evaluation.pathCost <= INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET
+  ) {
+    return true;
+  }
+  if (!directlyConvertible) return false;
+  return evaluation.evidence.some(
+    (entry) =>
+      entry === "central_memory_payoff:partial_known" ||
+      entry === "remote_memory_payoff:partial_unknown",
   );
 }
 
@@ -18946,13 +19048,11 @@ type CorpScoreAccelerationSetupBinding = Readonly<{
   setupNeed: NonNullable<CorpScoreProjectSignal["setupNeed"]>;
 }>;
 
-function corpScoreAccelerationSetupBinding(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
+function corpDeferredLastClickScoreProject(
   scoreProjects: readonly CorpScoreProjectSignal[],
-): CorpScoreAccelerationSetupBinding | undefined {
+): CorpScoreProjectSignal | undefined {
   const priorityRank = { P1: 1, P2: 2, P3: 3, P4: 4 } as const;
-  const parent = scoreProjects
+  return scoreProjects
     .filter(
       (project) =>
         project.phase !== "select_agenda" &&
@@ -18969,6 +19069,24 @@ function corpScoreAccelerationSetupBinding(
           priorityRank[corpScorePriorityClass(right)] ||
         technicalIdCompare(left.projectId, right.projectId),
     )[0];
+}
+
+function corpKnownDeferredLastClickScoreProject(
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): CorpScoreProjectSignal | undefined {
+  return corpDeferredLastClickScoreProject(
+    scoreProjects.filter(
+      (project) => project.protectionNeed?.baseline.knowledge === "known",
+    ),
+  );
+}
+
+function corpScoreAccelerationSetupBinding(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  scoreProjects: readonly CorpScoreProjectSignal[],
+): CorpScoreAccelerationSetupBinding | undefined {
+  const parent = corpDeferredLastClickScoreProject(scoreProjects);
   if (!parent) return undefined;
   const setupCandidate = candidates
     .filter((candidate) => {

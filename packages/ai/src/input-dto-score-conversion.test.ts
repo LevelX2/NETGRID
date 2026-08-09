@@ -765,6 +765,307 @@ describe("AI input DTO score-conversion contract", () => {
       "privateProbe",
     );
   });
+
+  it("preserves the complete public effective ICE run quote without aliasing it", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    const effectiveRunQuote = {
+      iceInstanceId: "homing-missile",
+      iceDefinitionId: "onr_proteus_025_homing-missile",
+      effectiveStrength: 5,
+      encounterTemporaryTraceCredits: 2,
+      conditionalEncounterEffects: [
+        {
+          kind: "corp_paid_add_end_the_run_subroutine" as const,
+          creditCost: 2,
+        },
+        {
+          kind: "random_strength_or_derez_auto_pass" as const,
+          dieFaces: 6 as const,
+          autoPassResult: 6 as const,
+          maxStrengthBonus: 5,
+        },
+      ],
+      subroutines: [
+        {
+          id: "homing-missile:trace",
+          type: "initiate_trace" as const,
+          baseTraceStrength: 5,
+          traceBidLimit: 5,
+          runFutureStrengthCancelPaymentAmount: 2,
+        },
+      ],
+    };
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "homing-missile",
+            definitionId: "onr_proteus_025_homing-missile",
+            title: "Homing Missile",
+            type: "ice",
+            known: true,
+            rezzed: true,
+            effectiveRunQuote,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "effective-run-quote-dto",
+      decisionId: "effective-run-quote-dto:runner:1",
+      actionNumber: 1,
+      profileId: "effective-run-quote-dto-test",
+    });
+
+    const quote = input.playerView.servers[0]?.ice[0]?.effectiveRunQuote;
+    expect(quote).toMatchObject(effectiveRunQuote);
+    expect(quote).not.toBe(effectiveRunQuote);
+    expect(quote?.subroutines).not.toBe(effectiveRunQuote.subroutines);
+    expect(quote?.conditionalEncounterEffects).not.toBe(
+      effectiveRunQuote.conditionalEncounterEffects,
+    );
+  });
+
+  it("fails closed for a malformed public effective ICE run quote", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "malformed-ice",
+            definitionId: "onr_proteus_025_homing-missile",
+            type: "ice",
+            known: true,
+            rezzed: true,
+            effectiveRunQuote: {
+              iceInstanceId: "malformed-ice",
+              iceDefinitionId: "onr_proteus_025_homing-missile",
+              effectiveStrength: 5,
+              subroutines: [
+                {
+                  id: "malformed-ice:trace",
+                  type: "initiate_trace",
+                  traceBidLimit: -1,
+                },
+              ],
+              conditionalEncounterEffects: [
+                {
+                  kind: "random_strength_or_derez_auto_pass",
+                  dieFaces: 6,
+                  autoPassResult: 6,
+                  maxStrengthBonus: 6,
+                },
+              ],
+            } as unknown as NonNullable<VisibleCard["effectiveRunQuote"]>,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "malformed-effective-run-quote-dto",
+      decisionId: "malformed-effective-run-quote-dto:runner:1",
+      actionNumber: 1,
+      profileId: "effective-run-quote-dto-test",
+    });
+
+    expect(input.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectiveRunQuote",
+    );
+  });
+
+  it("does not forward an effective run quote from hidden ICE", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "runner");
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "hidden-ice",
+            known: false,
+            type: "ice",
+            rezzed: true,
+            effectiveRunQuote: {
+              iceInstanceId: "hidden-ice",
+              iceDefinitionId: "must-not-cross-dto",
+              effectiveStrength: 5,
+              subroutines: [],
+              privateQuoteProbe: "must-not-cross-dto",
+            } as unknown as NonNullable<VisibleCard["effectiveRunQuote"]>,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "hidden-effective-run-quote-dto",
+      decisionId: "hidden-effective-run-quote-dto:runner:1",
+      actionNumber: 1,
+      profileId: "effective-run-quote-dto-test",
+    });
+
+    expect(input.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectiveRunQuote",
+    );
+    expect(JSON.stringify(input)).not.toContain("must-not-cross-dto");
+  });
+
+  it("keeps only a correctly bound Corp-private post-rez run quote", () => {
+    const action = runnerSemanticAction();
+    const view = playerView(action, "corp");
+    const postRezQuote = {
+      context: "installed_post_rez" as const,
+      cardId: "corp-fixed-ice",
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd" as const,
+      projectedServerId: "rd" as const,
+      expiresAtStateVersion: view.stateVersion,
+      complete: true as const,
+      effectiveRunQuote: {
+        iceInstanceId: "corp-fixed-ice",
+        iceDefinitionId: "simple_barrier_ice",
+        effectiveStrength: 3,
+        subroutines: [{ id: "fixed-etr", type: "end_the_run" as const }],
+      },
+    };
+    view.servers = [
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "corp-fixed-ice",
+            definitionId: "simple_barrier_ice",
+            type: "ice",
+            owner: "corp",
+            controller: "corp",
+            known: true,
+            rezzed: false,
+            effectivePostRezRunQuote: postRezQuote,
+          },
+        ],
+        root: [],
+      },
+    ];
+
+    const corpInput = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "post-rez-run-quote-dto",
+      decisionId: "post-rez-run-quote-dto:corp:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(
+      corpInput.playerView.servers[0]?.ice[0]?.effectivePostRezRunQuote,
+    ).toMatchObject(postRezQuote);
+    expect(
+      corpInput.playerView.servers[0]?.ice[0]?.effectivePostRezRunQuote,
+    ).not.toBe(postRezQuote);
+
+    view.servers[0]!.ice[0]!.effectivePostRezRunQuote = {
+      context: "installed_post_rez",
+      cardId: "corp-fixed-ice",
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: view.stateVersion,
+      complete: false,
+      reason: "active_run_context",
+    };
+    const incompleteInput = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "incomplete-post-rez-run-quote",
+      decisionId: "incomplete-post-rez-run-quote:corp:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(
+      incompleteInput.playerView.servers[0]?.ice[0]
+        ?.effectivePostRezRunQuote,
+    ).toEqual({
+      context: "installed_post_rez",
+      cardId: "corp-fixed-ice",
+      iceDefinitionId: "simple_barrier_ice",
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: view.stateVersion,
+      complete: false,
+      reason: "active_run_context",
+    });
+
+    const runnerView = {
+      ...view,
+      side: "runner" as const,
+    };
+    const runnerInput = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: runnerView,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "post-rez-run-quote-redaction",
+      decisionId: "post-rez-run-quote-redaction:runner:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(
+      runnerInput.playerView.servers[0]?.ice[0],
+    ).not.toHaveProperty("effectivePostRezRunQuote");
+
+    view.servers[0]!.ice[0]!.effectivePostRezRunQuote = {
+      ...postRezQuote,
+      expiresAtStateVersion: view.stateVersion + 1,
+    };
+    const staleInput = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "stale-post-rez-run-quote",
+      decisionId: "stale-post-rez-run-quote:corp:1",
+      actionNumber: 1,
+      profileId: "post-rez-run-quote-dto-test",
+    });
+    expect(staleInput.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectivePostRezRunQuote",
+    );
+  });
 });
 
 function publicEvent(

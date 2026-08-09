@@ -15,6 +15,7 @@ import {
 import { runnerCentralPressureHasExecutableEventRun } from "../runtime/plan-first-live-runtime";
 import { createSemanticRuntimeDecisionContext } from "../runtime/semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "../runtime/semantic-runtime-decision-context";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 const DIRECT_RD_ACTION_ID = "runner.start_run.rd";
 const INSIDE_JOB_RD_ACTION_ID = "runner.play.inside-job.rd";
@@ -191,13 +192,26 @@ function insideJobConflictFixture() {
   input.playerView.servers = [
     server("hq"),
     server("rd", [
-      visibleCard("rd-wall", "corp", "ice", {
-        definitionId: "onr_v1_232_crystal-wall",
-        title: "Crystal Wall",
-        rezzed: true,
-        subtypes: ["wall"],
-        strength: 3,
-      }),
+      withEffectiveRunQuote(
+        visibleCard("rd-wall", "corp", "ice", {
+          definitionId: "onr_v1_232_crystal-wall",
+          title: "Crystal Wall",
+          rezzed: true,
+          subtypes: ["wall"],
+          strength: 3,
+        }),
+        {
+          effectiveStrength: 3,
+          subroutines: [
+            {
+              id: "rd-wall-end-the-run",
+              type: "end_the_run",
+              sourceDefinitionId: "onr_v1_232_crystal-wall",
+              sourceTitle: "Crystal Wall",
+            },
+          ],
+        },
+      ),
     ]),
     server("archives"),
   ];

@@ -51,13 +51,21 @@ describe("match F5D27033 runner flatline-risk checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     [
       "cp-f5d27033-05-useful-breaker-install-control",
       "cp-f5d27033-06-visible-payoff-run-control",
     ],
   );
+  if (
+    checkpoint.checkpointId === "cp-f5d27033-05-useful-breaker-install-control"
+  ) {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function expectCheckpointToPass(checkpoint: AiDecisionCheckpointV1): void {

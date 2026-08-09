@@ -4,6 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
@@ -905,7 +906,7 @@ function visibleIce(params: {
   encounterTemporaryTraceCredits?: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
 }): VisibleCard {
-  return {
+  const ice: VisibleCard = {
     instanceId: params.instanceId ?? "ice-1",
     known: true,
     title: params.iceTitle,
@@ -917,24 +918,24 @@ function visibleIce(params: {
         : ["code_gate"],
     rezzed: true,
     strength: params.iceStrength,
-    effectiveRunQuote: {
-      iceInstanceId: "ice-1",
-      iceDefinitionId: params.iceDefinitionId,
-      effectiveStrength: params.iceStrength,
-      ...(params.encounterTemporaryTraceCredits !== undefined
-        ? {
-            encounterTemporaryTraceCredits:
-              params.encounterTemporaryTraceCredits,
-          }
-        : {}),
-      subroutines: params.subroutines ?? [
-        {
-          id: `${params.iceDefinitionId}:etr`,
-          type: "end_the_run",
-        },
-      ],
-    },
   };
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: params.iceStrength,
+    ...(params.encounterTemporaryTraceCredits !== undefined
+      ? {
+          encounterTemporaryTraceCredits:
+            params.encounterTemporaryTraceCredits,
+        }
+      : {}),
+    subroutines: params.subroutines ?? [
+      {
+        id: `${params.iceDefinitionId}:etr`,
+        type: "end_the_run",
+        sourceDefinitionId: params.iceDefinitionId,
+        sourceTitle: params.iceTitle,
+      },
+    ],
+  });
 }
 
 function quietPrograms(): VisibleCard {

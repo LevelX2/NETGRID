@@ -36,6 +36,7 @@ import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continua
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
 import { visibleServerStatuses } from "./server-status-view";
 import { visibleRunnerTraceSupportQuote } from "./visible-runner-trace-support-quote";
+import { visibleCorpIcePostRezRunQuote } from "./visible-post-rez-run-quote";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -66,6 +67,10 @@ export function buildPlayerViewProjection(
       }
       const effectiveRezCostQuote =
         side === "corp" ? projectInstalledCorpIceRezCost(state, id) : undefined;
+      const effectivePostRezRunQuote =
+        side === "corp"
+          ? visibleCorpIcePostRezRunQuote(state, id, visibleIce)
+          : undefined;
       const effectiveRezResourceExchangeQuote =
         side === "corp"
           ? visibleCorpIceRezResourceExchangeQuote(state, id, visibleIce)
@@ -73,6 +78,7 @@ export function buildPlayerViewProjection(
       return {
         ...visibleIce,
         ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
+        ...(effectivePostRezRunQuote ? { effectivePostRezRunQuote } : {}),
         ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),
         ...(effectiveRezResourceExchangeQuote
           ? { effectiveRezResourceExchangeQuote }

@@ -5,6 +5,7 @@ import {
   isBreakerInstallAction,
   missingBreakerCoverageKind,
 } from "./tactical-plan-breaker-coverage";
+import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
 
 describe("isBreakerInstallAction", () => {
   it("uses visible source card coverage and ignores label-only breaker text", () => {
@@ -166,7 +167,7 @@ function missingCoverageForIceText(text: string) {
 }
 
 function visibleCard(overrides: Partial<VisibleCard>): VisibleCard {
-  return {
+  const card = {
     instanceId: "card",
     definitionId: "definition",
     title: "Visible Card",
@@ -176,4 +177,16 @@ function visibleCard(overrides: Partial<VisibleCard>): VisibleCard {
     rezzed: true,
     ...overrides,
   } as VisibleCard;
+  if (card.type !== "ice") return card;
+  return withEffectiveRunQuote(card, {
+    effectiveStrength: card.strength ?? 1,
+    subroutines: [
+      {
+        id: `${card.instanceId}-end-the-run`,
+        type: "end_the_run",
+        sourceDefinitionId: card.definitionId!,
+        sourceTitle: card.title ?? "Fixture ICE",
+      },
+    ],
+  });
 }

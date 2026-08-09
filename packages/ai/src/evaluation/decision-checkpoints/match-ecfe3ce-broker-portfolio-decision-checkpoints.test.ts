@@ -13,6 +13,7 @@ import twoSourceBalancedLoadJson from "../../../../../data/scenarios/ai-decision
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { applyAction } from "@netgrid/engine";
 
 describe("match ECFE3CE Broker portfolio checkpoints", () => {
   it.each([
@@ -77,10 +78,44 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-ecfe3ce-broker-02-hold-three-with-liquid-five"],
   );
+  return checkpoint.checkpointId ===
+    "cp-ecfe3ce-broker-10-two-source-balanced-load"
+    ? afterDeclinedOptionalBonusRun(checkpoint)
+    : checkpoint;
+}
+
+function afterDeclinedOptionalBonusRun(
+  checkpoint: AiDecisionCheckpointV1,
+): AiDecisionCheckpointV1 {
+  const state = structuredClone(checkpoint.engine.testOnlyGameState);
+  state.eventLog = checkpoint.engine.eventPrefix.map((event) => ({ ...event }));
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side: "runner",
+    actionId: "runner.trigger_ability.decline_optional_bonus_run",
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `${checkpoint.checkpointId}:decline-optional-bonus-run`,
+  });
+  if (!result.ok) {
+    throw new Error(
+      `Optional bonus-run continuation fixture failed: ${result.error.code}: ${result.error.message}`,
+    );
+  }
+  checkpoint.engine.testOnlyGameState = result.state;
+  checkpoint.engine.eventPrefix = result.publicEvents.map((event) => ({
+    ...event,
+  }));
+  checkpoint.engine.stateVersion = result.state.stateVersion;
+  checkpoint.engine.stateHash = result.stateHash;
+  checkpoint.source.stateVersion = result.state.stateVersion;
+  if (checkpoint.source.decisionIndex !== undefined) {
+    checkpoint.source.decisionIndex += 1;
+  }
+  return checkpoint;
 }
 
 function expectCheckpointToPass(

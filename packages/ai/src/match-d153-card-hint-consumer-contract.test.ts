@@ -51,7 +51,7 @@ describe("match D153 card hint consumer contract", () => {
     );
   });
 
-  it("binds only the structured Broker actions without selecting an unbound payout", () => {
+  it("binds every visible Broker instance without selecting an unbound payout", () => {
     const checkpoint = bindHistoricalRunEventCadence(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );
@@ -64,9 +64,13 @@ describe("match D153 card hint consumer contract", () => {
       legalActions: result.input.legalActions,
       deckSnapshot: checkpoint.deckSnapshot,
     });
-    const broker = capabilityProfile.runner?.economyBankTools.find(
-      (tool) => tool.cardId === BROKER,
-    );
+    const brokers = (capabilityProfile.runner?.economyBankTools ?? [])
+      .filter((tool) => tool.cardId === BROKER)
+      .sort((left, right) =>
+        (left.sourceCardInstanceId ?? "").localeCompare(
+          right.sourceCardInstanceId ?? "",
+        ),
+      );
     const expectedBuildIds = result.input.legalActions
       .filter(
         (action) =>
@@ -82,15 +86,35 @@ describe("match D153 card hint consumer contract", () => {
       .map((action) => action.actionId)
       .sort();
 
-    expect(broker).toMatchObject({
-      currentBankAmount: 12,
-      currentBankAmounts: [12],
-      portfolioStoredAmount: 12,
-      estimatedPayout: 12,
-      buildActionIds: expectedBuildIds,
-      cashOutActionIds: expectedCashOutIds,
-    });
-    expect(broker && "maxKnownCapacity" in broker).toBe(false);
+    expect(brokers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: "runner_onr_v1_154_broker_1",
+        buildActionIds: [
+          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0",
+        ],
+        cashOutActionIds: [],
+      }),
+      expect.objectContaining({
+        sourceCardInstanceId: "runner_onr_v1_154_broker_2",
+        currentBankAmount: 12,
+        currentBankAmounts: [12],
+        portfolioStoredAmount: 12,
+        estimatedPayout: 12,
+        buildActionIds: [
+          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.0",
+        ],
+        cashOutActionIds: [
+          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.1",
+        ],
+      }),
+    ]);
+    expect(brokers.flatMap((tool) => tool.buildActionIds).sort()).toEqual(
+      expectedBuildIds,
+    );
+    expect(brokers.flatMap((tool) => tool.cashOutActionIds).sort()).toEqual(
+      expectedCashOutIds,
+    );
+    expect(brokers.every((tool) => !("maxKnownCapacity" in tool))).toBe(true);
     expect(
       capabilityProfile.runner?.economyBankTools.some(
         (tool) => tool.cardId === JUNKYARD,

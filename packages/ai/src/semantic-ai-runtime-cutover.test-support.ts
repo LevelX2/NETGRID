@@ -16,6 +16,7 @@ import {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
 } from "./plans/turn-planning-contracts";
+import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 
 export function aiInput(
   side: Side,
@@ -101,10 +102,25 @@ export function runnerWallCoverageInput(
     server(
       "remote_1",
       [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
+        withEffectiveRunQuote(
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            title: "Simple Barrier ICE",
+            rezzed: true,
+            strength: 3,
+            subtypes: ["Wall"],
+          }),
+          {
+            effectiveStrength: 3,
+            subroutines: [
+              {
+                id: "simple_barrier_ice-end-the-run",
+                type: "end_the_run",
+                sourceDefinitionId: "simple_barrier_ice",
+                sourceTitle: "Simple Barrier ICE",
+              },
+            ],
+          },
+        ),
       ],
       [visibleCard("simple_agenda", "corp", "agenda")],
     ),

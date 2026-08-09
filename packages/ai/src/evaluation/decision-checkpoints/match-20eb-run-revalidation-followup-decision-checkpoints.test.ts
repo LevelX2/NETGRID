@@ -50,12 +50,10 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
         checkpoint.source.findingId =
           "20EB-C06-POST-SCORE-UNKNOWN-REMOTE-CONTEST";
         checkpoint.expectation = {
-          acceptableActions: [
-            { type: "start_run", targetServerId: "rd" },
-          ],
+          acceptableActions: [{ type: "start_run", targetServerId: "rd" }],
           planExecution: {
             acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["pressure_rd_information"],
+            acceptableCapabilities: ["pressure_rd_access"],
             requiredAssessmentEvidence: ["target:rd"],
           },
         };
@@ -93,10 +91,18 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
-  return bindHistoricalRunEventCadence(
+  const checkpoint = bindHistoricalRunEventCadence(
     structuredClone(value) as AiDecisionCheckpointV1,
     ["cp-20eb-07-no-upgrade-only-matchpoint-run-d92"],
   );
+  if (
+    checkpoint.checkpointId === "cp-20eb-07-no-upgrade-only-matchpoint-run-d92"
+  ) {
+    checkpoint.expectation.planExecution!.acceptableCapabilities = [
+      "pressure_rd_access",
+    ];
+  }
+  return checkpoint;
 }
 
 function mutateFixture(

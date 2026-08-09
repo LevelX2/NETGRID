@@ -491,7 +491,15 @@ async function createBrowserAccountInvite(
   loginName: string,
   displayName: string,
 ): Promise<string> {
-  const form = page.locator("form").filter({
+  const administration = page.locator("details.accountSegment").filter({
+    has: page.getByText("Administration", { exact: true }),
+  });
+  await expect(administration).toBeVisible();
+  if ((await administration.getAttribute("open")) === null)
+    await administration.locator("summary").click();
+  await expect(administration).toHaveAttribute("open", "");
+
+  const form = administration.locator("form").filter({
     has: page.getByRole("heading", { name: "Account einladen", exact: true }),
   });
   await form.getByLabel("Anmeldename", { exact: true }).fill(loginName);

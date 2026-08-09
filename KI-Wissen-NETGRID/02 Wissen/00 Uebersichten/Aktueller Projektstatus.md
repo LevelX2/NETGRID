@@ -277,8 +277,8 @@ Stand: 2026-08-02
   und
   `docs/reviews/ai/ai-behavior-baseline-v1-action-capacity-routes-2026-07-22.md`.
 
-- Die Deckstrategie-Ableitung ist für 43 aktive Standarddecks und alle
-  produktiven Strategy-IDs vollständig gegatet. 42 aktive Decks besitzen eine
+- Die Deckstrategie-Ableitung ist für 44 aktive Standarddecks und alle
+  produktiven Strategy-IDs vollständig gegatet. 43 aktive Decks besitzen eine
   produktive Primärstrategie; Ghost Circuit bleibt wegen zwei
   realer Breaker-Coverage-Lücken bewusst neutral. Runtime-, Target-/Reserve-,
   Goal-, Action-Fit- und Metadaten-Consumerverträge sind geschlossen; ein
@@ -570,13 +570,13 @@ Stand: 2026-08-02
   stabil an die einzelne Session gebunden; Session-Restore, Reload und mehrere
   Tabs invalidieren einander nicht.
 - Ein Account kann bis zu 50 ownergebundene persönliche Server-Decks halten.
-  43 kuratierte Standard-Decks sind direkt spielbar oder kopierbar; interne
+  44 kuratierte Standard-Decks sind direkt spielbar oder kopierbar; interne
   KI-, Test- und ausgemusterte Decks sind in der normalen UI unsichtbar.
   Matchstarts erzeugen weiterhin ausschließlich neu validierte immutable
   Snapshots. Führend sind
   `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
   und `docs/runbooks/account-alpha-operations.md`.
-- Alle 43 aktiven Standard-Decks besitzen eine versionierte deutsche
+- Alle 44 aktiven Standard-Decks besitzen eine versionierte deutsche
   Deck-Anleitung mit Deckidee, Spielphasen, Schlüsselkarten, Tipps und Risiken.
   Feste Standarddeck-Auswahlen und der Kopierdialog öffnen dieselbe Anleitung;
   Zufallsauswahlen und persönliche Decks erhalten keine. Neue oder geänderte
