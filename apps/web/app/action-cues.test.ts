@@ -6,10 +6,32 @@ import {
   cueHasHiddenLeak,
   damageAudioCueFromPublicPayload,
   deriveDamageImpactCues,
-  deriveOpponentActionCues,
+  deriveOpponentActionCues as deriveOpponentActionCuesWithoutCatalog,
   eventsAfter,
   turnStartAudioCue,
+  type CueDerivationInput,
 } from "./action-cues";
+
+const TEST_CARD_PRESENTATIONS = {
+  simple_agenda: { title: "Simple Agenda", type: "agenda" },
+  simple_barrier_ice: { title: "Simple Barrier ICE", type: "ice" },
+  simple_decoder: { title: "Simple Decoder", type: "program" },
+} as const;
+
+function deriveOpponentActionCues(input: CueDerivationInput) {
+  return deriveOpponentActionCuesWithoutCatalog({
+    ...input,
+    contextByEventId: Object.fromEntries(
+      input.events.map((event) => [
+        event.eventId,
+        {
+          ...(input.contextByEventId?.[event.eventId] ?? {}),
+          cardPresentationsById: TEST_CARD_PRESENTATIONS,
+        },
+      ]),
+    ),
+  });
+}
 
 describe("deriveOpponentActionCues", () => {
   it("suppresses technical rez-pass cues but keeps an actual ICE rez decline visible", () => {

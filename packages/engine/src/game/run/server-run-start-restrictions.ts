@@ -1,5 +1,4 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
-import { CS06_CARD_DEFINITION_IDS } from "@netgrid/cards/engine";
 import {
   type CardInstance,
   type CardInstanceId,
@@ -27,8 +26,6 @@ export type ServerRunStartRestrictionSource = {
   implementation: ServerRunStartRestrictionImplementation;
   sourceCapabilityKey: string;
 };
-
-const CARD_SPEC_DEFINITION_IDS = new Set<string>(CS06_CARD_DEFINITION_IDS);
 
 export function serverRunStartRestrictionSources(
   state: GameState,
@@ -67,22 +64,35 @@ export function serverRunStartRestrictionSources(
   );
 }
 
-function runStartRestrictionCapabilityKey(
+export function runStartRestrictionCapabilityKey(
   definitionId: string,
   implementation: ServerRunStartRestrictionImplementation,
 ): string {
-  if (CARD_SPEC_DEFINITION_IDS.has(definitionId)) {
-    if (!("capabilityKey" in implementation) || !implementation.capabilityKey)
-      throw new Error(
-        `card_spec_run_restriction_capability_key_missing: ${definitionId}`,
-      );
-    return implementation.capabilityKey;
-  }
-  if (!("abilityKey" in implementation) || !implementation.abilityKey)
+  const capabilityKey =
+    "capabilityKey" in implementation
+      ? implementation.capabilityKey
+      : undefined;
+  const abilityKey =
+    "abilityKey" in implementation ? implementation.abilityKey : undefined;
+  if (capabilityKey !== undefined && abilityKey === undefined)
+    return capabilityKey;
+  if (abilityKey !== undefined && capabilityKey === undefined)
+    return abilityKey;
+  if (capabilityKey !== undefined)
+    throw new Error(
+      `hybrid_run_restriction_capability_identity: ${definitionId}`,
+    );
+  if ("capabilityKey" in implementation)
+    throw new Error(
+      `card_spec_run_restriction_capability_key_missing: ${definitionId}`,
+    );
+  if ("abilityKey" in implementation)
     throw new Error(
       `legacy_run_restriction_ability_key_missing: ${definitionId}`,
     );
-  return implementation.abilityKey;
+  throw new Error(
+    `run_restriction_capability_identity_missing: ${definitionId}`,
+  );
 }
 
 export function serverRunStartRestrictions(

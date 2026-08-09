@@ -3973,6 +3973,7 @@ describe("MVP 0.8 playable starter slice", () => {
         sourceDefinition(state, action) === "v08_steady_fracter",
     );
     state = continueRunThroughMovement(state);
+    expect(state.run?.pendingSuccessBonusCredits).toBe(3);
     const beforeAccessCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "access_card");
 

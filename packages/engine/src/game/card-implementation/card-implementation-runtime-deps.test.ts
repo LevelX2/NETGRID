@@ -126,12 +126,27 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       appendResolvedEffectsToPayload: () => undefined,
     },
     run: {
-      startRun: (gameState, serverId, accessCount, options) => {
+      startRun: (
+        gameState,
+        serverId,
+        accessCount,
+        options,
+        pendingSuccessBonusCredits,
+      ) => {
         calls.push(`start_run:${serverId}:${accessCount}`);
         gameState.run = {
           attackedServerId: serverId,
           phase: "approach_ice",
           runnerRunTemporaryCredits: options.runnerRunTemporaryCredits,
+          ...(pendingSuccessBonusCredits !== undefined
+            ? { pendingSuccessBonusCredits }
+            : {}),
+          ...(options.successfulRunRunnerCreditGain !== undefined
+            ? {
+                successfulRunRunnerCreditGain:
+                  options.successfulRunRunnerCreditGain,
+              }
+            : {}),
         } as unknown as RunState;
       },
       finishRun: (gameState, _legalAction, successful) => {
@@ -445,6 +460,32 @@ describe("game card implementation runtime deps root", () => {
       temporaryRunCredits: 4,
       temporaryRunCreditsRemaining: 4,
       afterRunUnpreventableCoreDamage: 1,
+    });
+  });
+
+  it("routes ordinary successful-run credits through the once-only run-end bonus", () => {
+    const deps = createGameCardImplementationRuntimeDeps(host());
+    const ordinaryState = state();
+    deps.startRun(ordinaryState, action(), "rd", {
+      successfulRunRunnerCreditGain: 3,
+    });
+    expect(ordinaryState.run).toMatchObject({
+      pendingSuccessBonusCredits: 3,
+    });
+    expect(ordinaryState.run).not.toHaveProperty(
+      "successfulRunRunnerCreditGain",
+    );
+
+    const replacementState = state();
+    deps.startRun(replacementState, action(), "hq", {
+      successfulRunAccessReplacement: "corp_lose_credits",
+      successfulRunRunnerCreditGain: 10,
+    });
+    expect(replacementState.run).not.toHaveProperty(
+      "pendingSuccessBonusCredits",
+    );
+    expect(replacementState.run).toMatchObject({
+      successfulRunRunnerCreditGain: 10,
     });
   });
 

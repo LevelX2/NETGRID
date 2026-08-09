@@ -48,7 +48,7 @@ describe("AI hint quality gates", () => {
     );
     const generatedHints = JSON.parse(
       fs.readFileSync(
-        path.join(repoRoot, "data/ai/cs06-ai-hints-generated.json"),
+        path.join(repoRoot, "data/ai/card-spec-ai-hints-generated.json"),
         "utf8",
       ),
     );

@@ -170,8 +170,16 @@ function hostFor(
           payload,
           metadata,
         ),
-      abilityMetadata: (sourceCardInstanceId, abilityId, encounteredIceId) => ({
-        abilityRef: { sourceCardInstanceId, abilityId },
+      abilityMetadata: (
+        sourceCardInstanceId,
+        abilityId,
+        encounteredIceId,
+        bindingKind,
+      ) => ({
+        abilityRef:
+          bindingKind === "card_spec_capability_key"
+            ? { sourceCardInstanceId, sourceAbilityId: abilityId }
+            : { sourceCardInstanceId, abilityId },
         effectRef: `effect.${abilityId}`,
         targetRequirements: [
           { id: "encounteredIce", kind: "card", visibility: "public" },
@@ -239,17 +247,32 @@ describe("runner encounter action generation", () => {
       "continue_run",
     ]);
     const pump = result.legalActions[0]!;
-    expect(pump.actionId).toBe("runner.pump_breaker.breaker_1.breaker_1.ice_1");
+    expect(pump.actionId).toBe(
+      "runner.pump_breaker.breaker_1.breaker_1.breaker_1.ice_1.simple_killer:simple_killer_pump",
+    );
     expect(pump.payload).toMatchObject({
+      cardId: "breaker_1",
       breakerId: "breaker_1",
       iceId: "ice_1",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey: "simple_killer_pump",
+      cardImplementationAbilityId: "simple_killer:simple_killer_pump",
+    });
+    expect(pump.payload).not.toHaveProperty("cardImplementationAbilityIndex");
+    expect(pump.payload).not.toHaveProperty(
+      "cardImplementationLifecycleAbilityIndex",
+    );
+    expect(pump.abilityRef).toEqual({
+      sourceCardInstanceId: "breaker_1",
+      sourceAbilityId: "simple_killer:simple_killer_pump",
     });
     const breaker = result.legalActions[1]!;
     expect(breaker.actionId).toBe(
-      "runner.break_subroutine.breaker_1.breaker_1.ice_1.0.test_sentry_etr",
+      "runner.break_subroutine.breaker_1.breaker_1.breaker_1.ice_1.0.test_sentry_etr.simple_killer:simple_killer_break_sentry",
     );
     expect(breaker.costs).toEqual([{ credits: 1 }]);
     expect(breaker.payload).toMatchObject({
+      cardId: "breaker_1",
       breakerId: "breaker_1",
       iceId: "ice_1",
       subroutineIndex: 0,
@@ -257,6 +280,13 @@ describe("runner encounter action generation", () => {
       targetIceDefinitionId: "test_sentry_ice",
       targetIceTitle: "Test Sentry",
       breakSubroutineBaseCost: 1,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey: "simple_killer_break_sentry",
+      cardImplementationAbilityId: "simple_killer:simple_killer_break_sentry",
+    });
+    expect(breaker.abilityRef).toEqual({
+      sourceCardInstanceId: "breaker_1",
+      sourceAbilityId: "simple_killer:simple_killer_break_sentry",
     });
     expect(result.legalActions[2]!.payload).toMatchObject({
       encounterContinue: true,

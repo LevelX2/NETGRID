@@ -20,6 +20,7 @@ import {
   type DisplayVisibleCard,
 } from "../cards/card-view-model";
 import { useCardScaleSettings } from "../cards/card-display-settings";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import { CARD_SCALE_PERCENT_MIN, type CardDisplayMode } from "../settings/settings-model";
 import { CardView } from "../cards/CardView";
 import { RunnerHostedCardCluster } from "./RunnerHostedCardCluster";
@@ -213,6 +214,7 @@ export function RunnerRigStrip({
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
 }) {
+  const cardPresentationsById = useCatalogCardPresentations();
   const { zonePercent } = useCardScaleSettings();
   const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
   const opponentRigStyle = useMemo(
@@ -282,7 +284,7 @@ export function RunnerRigStrip({
                               selected={selectedContext?.kind === "card" && selectedContext.id === rigCard.instanceId}
                               actions={cardActionsForRig(rigCard)}
                               actionDisabled={actionDisabled}
-                              actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
+                              actionLabelForAction={(action) => runAwareActionButtonLabel(view, action, cardPresentationsById)}
                               {...fieldChoiceCardProps?.(rigCard)}
                               onFocus={onFocus}
                               onActionContextSelect={onActionContext}

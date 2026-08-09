@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS06 abgeschlossen, CS07 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS07 abgeschlossen, CS08 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -402,7 +402,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS04  | Stabile Capability-Identität und Engine-Rebinding      | completed |
 | CS05  | Prospective-Capability-Compiler                        | completed |
 | CS06  | Heterogener produktiver Mechanik-Stresstest            | completed |
-| CS07  | Testset-Migration und Migrationsautomatisierung        | pending   |
+| CS07  | Testset-Migration und Migrationsautomatisierung        | completed |
 | CS08  | Classic-Migration                                      | pending   |
 | CS09  | Proteus-Migration                                      | pending   |
 | CS10  | Originalset-v1-Migration                               | pending   |
@@ -1033,6 +1033,99 @@ Done-Gate:
 Commit:
 
 `feat(cards): migrate test set to canonical specifications`
+
+Ergebnis vom 10.08.2026:
+
+- Das Testset ist vollständig auf 38 kanonische CardSpecs und eine SetSpec
+  migriert. 36 aktive Karten werden in Engine, Planning und AI projiziert;
+  die zwei experimentellen Katalogfixtures bleiben ausschließlich in Public-,
+  Editor- und Serverprojektionen sichtbar. Der Operations-Preview bleibt
+  katalogseitig unblocked, der Resource-Preview trägt den expliziten
+  redaktionellen Blockgrund. Die bisherige Quellenklassifikation bleibt im
+  Paritätsreport getrennt erhalten: 2 implementation-backed, 34
+  definition-only und 2 catalog-only.
+- Alte Testset-Autorquellen wurden vollständig entfernt: 38 Raw-Karten, 38
+  Manifesteinträge, 36 Legacy-Hints, 36 Shared-Definitionen, zwei
+  CardImplementation-Module sowie elf ID-spezifische Event- und
+  Operation-Resolver. Die kombinierte Kompatibilitätsregistry enthält jetzt
+  571 verbleibende Legacy- und 30 CardSpec-Implementierungen, insgesamt 601.
+  Public-, Editor-, Source- und Supportprojektionen enthalten 48 CardSpecs;
+  Engine, Planning und Definitionen jeweils 46.
+- Das temporäre Migrationstool ist scripts-only und nutzt den tatsächlich
+  eingebundenen generischen Core mit Setdeskriptor. Es ist auf den
+  Source-Commit `a771126723c80aa5d77d8a444e7d6489e52819b3` gepinnt, prüft
+  geschlossene verschachtelte Formen und konkrete Runtime-Evidence,
+  produziert kanonische Fingerprints und entfernt im Write-Modus nur exakt
+  unerwartete `*.card-spec.ts` direkt unter dem gebundenen Outputverzeichnis.
+  `--check` und `--dry-run` reproduzieren jeweils 38 Karten, 36 Definitionen
+  und 36 Hints; der Core-Selftest ist `3/3` grün. Der Report weist den
+  Aggregate-Fingerprint
+  `sha256:7796aa3522e66cb76b8765a478daafc2f861b68b31bd0a10f9bc0d5be80ada58`
+  und den gebundenen Datei-Hash
+  `sha256:51e214561c2739be675b8cac9d7144ced81e68c63490dc301ec6e504b88357c9`
+  aus.
+- Der generische CardSpec-Hintcompiler und das reine v2-Artefakt führen exakt
+  46 aktive CardSpec-Hints; die zwei Previews sind ausgeschlossen. Zusammen
+  mit 572 disjunkten Legacy-Hints bleibt das Effective-Readmodel bei 618.
+  Das vollständige reviewte 36er Golden bindet Schema, Dispositionen,
+  Reportfingerprints, komplette Hintobjekte und explizite Abwesenheiten; die
+  eingefrorenen zehn CS06-Hints bleiben objekt- und fingerprintgleich. Der
+  Quality-Lauf ist mit 618 Hints, 0 Fehlern und 0 Warnungen grün; der
+  Metadatavertrag meldet 203 Value-Zuweisungen, 125 Runtime-Paare, 117
+  Evidence-Paare, 48 Runtime-Mechaniken, 1.840 Evidence-Mechaniken und 627
+  ScenarioRefs.
+- Mechanikparität ist für die elf On-play-Familien, sieben Breaker, acht ICE,
+  zwei Rez-Assets, zwei Memory-Hardwarekarten und die verbleibenden generischen
+  Definitionen fokussiert belegt. Kanonische Breaker-AbilityRefs binden Key,
+  ID, Quellinstanz und Payload fail-closed; Legacy-Breaker behalten ihre alten
+  IDs und Sourcewerte. Make-run-Erfolgscredits werden einmalig sowohl im
+  normalen Accesspfad als auch bei Access-Replacement korrekt abgewickelt.
+  Die drei Real-Engine-Fälle, in denen nun die wahrheitsgetreu strukturierte
+  `simple_run_event`-LegalAction statt der Basic-Run-Aktion gewinnt, behalten
+  Planowner `runner.contest_remote`, Capability, semantische Route und das
+  exakte Remoteziel. Der report-only Shadowlauf dokumentiert den erwarteten
+  Gleichstand der CardSpec-Economy-Operation: insgesamt 30 Overrides, Runner
+  22/22, Corp 8/23 und Basic-Setup 6/21; alle 15 Corp-Differenzen belegen
+  `gainCreditsAmount: 4` aus der LegalAction bei ScoreGap 0 und verändern
+  keine produktive Entscheidung.
+- Alle 352 gespeicherten Decision-Checkpoint-StateHashes wurden gegen den
+  aktuellen `testOnlyGameState` neu berechnet und stimmen ohne
+  Fixtureänderung. Der vollständige Checkpointlauf ist mit 89 Dateien und 483
+  Tests grün. Die drei finalen AI-Shards sind ebenfalls grün: 1.567, 1.449
+  und 1.045 Tests. Der Workspace-Typecheck, Package-Boundaries `1950` plus
+  Selftest `45`, Cards-Source `82` plus Selftest `22`, AI-Source `630` samt
+  Reachability, Engine-Source `1003`, Importindex, Testdiscovery und alle
+  Generatorchecks sind grün.
+- Der Browser erhält Titel und Kartentypen der migrierten Karten ausschließlich
+  aus der sanitisierten, ungefilterten Katalog-ListResponse. Der injizierte
+  `{title,type}`-Index deckt Live- und Replay-Chronik, Action Cues, Action Board
+  und sichtbare Karten ab, einschließlich der beiden Identities. Fehlt ein
+  migrierter DTO-Eintrag, bleibt die Darstellung fail-closed ohne Rückfall auf
+  Shared; dessen Kompatibilitätslookup ist auf die 429 verbleibenden
+  Legacy-Shared-Definitionen begrenzt und schließt die migrierten 46 Karten
+  ausdrücklich aus.
+  Der fokussierte Weblauf ist `371/371`, der vollständige Weblauf `787/787`
+  und der Web-Typecheck ist grün; die Browser-Paketgrenze bleibt frei von
+  Cards-Registry-, Engine- und Planning-Imports.
+- Ein Architektur-Target-Scan bleibt wegen exakt einer bereits am gepinnten
+  Base unveränderten Edgerunner-Zeile in
+  `packages/engine/src/game/turn/corp-main-actions.ts` rot; dieselbe Zeile wird
+  in zwei Kategorien gemeldet. Quell- und Gatescript-Blobs sind gegenüber
+  Base bytegleich, alle CS07-induzierten Findings sind null. Der Fund wird
+  weder repariert noch allowgelistet; Owner ist der Originalset-Cutover CS10,
+  spätestens der Cleanup CS11.
+- Drei frische CS00-kompatible Messungen ergeben einen Importstart-Median von
+  `1.583,6013 ms`, einen statischen Heap-Median von `33.786.504 B` und einen
+  Retained-Match-Proxy-Median von `20.889,2 B` je Match. Alle Werte liegen
+  unter den Budgets `2.820,799 ms`, `41.682.940 B` und `24.610,098 B`.
+  Structural-Retention ist `1/1` grün; die isolierte Fünf-Sample-Messung
+  ergibt `45,2 B` je Match bei `4.096 B` Budget.
+- Der frische isolierte Next-Production-Build enthält 22 produktive
+  JavaScriptdateien mit `4.233.838 B` raw, `1.055.745 B` GZip und `988.958 B`
+  Brotli nach derselben .NET-Optimal-Aggregation wie CS00. Das sind
+  `23.786 B` beziehungsweise `2,305 %` über der CS00-GZip-Baseline und
+  `79.410 B` Reserve zum Budget. Das temporäre `.next-cs07`-Verzeichnis wurde
+  nach der Messung entfernt.
 
 ### CS08 – Classic-Migration
 

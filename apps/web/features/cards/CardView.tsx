@@ -52,6 +52,7 @@ import {
   type DisplayVisibleCard,
 } from "./card-view-model";
 import { CardActionsPopover } from "./CardActionsPopover";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import { AdvancementGems, CounterDisplayBadge, IceModifierBadges, IceStrengthBadge, RunStrengthBadge, StrengthModifierBadge } from "./CardBadges";
 import { ScoreCardStateBadges, scoreCardStateBadges, type ScoredAgendaStateLine } from "./ScoredAgendaState";
 
@@ -84,7 +85,7 @@ export function CardView({
   selected = false,
   actions = [],
   actionDisabled = false,
-  actionLabelForAction = contextualCardActionLabel,
+  actionLabelForAction,
   slotClassName,
   instanceMarker,
   positionBadge,
@@ -141,6 +142,8 @@ export function CardView({
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction?(action: LegalAction): void;
 }) {
+  const cardPresentationsById = useCatalogCardPresentations();
+  const resolvedActionLabelForAction = actionLabelForAction ?? ((action: LegalAction) => contextualCardActionLabel(action, cardPresentationsById));
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const { tooltipPercent } = useCardScaleSettings();
   const tooltipViewId = useId();
@@ -866,7 +869,7 @@ export function CardView({
           <Play size={10} strokeWidth={2.35} />
         </button>
       ) : null}
-      {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} style={actionMenuPositionStyle} actionLabelForAction={actionLabelForAction} onAction={onAction!} /> : null}
+      {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} style={actionMenuPositionStyle} actionLabelForAction={resolvedActionLabelForAction} onAction={onAction!} /> : null}
     </div>
   );
 }

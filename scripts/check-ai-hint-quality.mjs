@@ -7,7 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 
 const DEFAULT_HINTS_PATH = "data/ai/ai-card-hints-active.json";
-const GENERATED_HINTS_PATH = "data/ai/cs06-ai-hints-generated.json";
+const GENERATED_HINTS_PATH = "data/ai/card-spec-ai-hints-generated.json";
 const DEFAULT_INVENTORY_PATH =
   "docs/reviews/ai/ai-hint-consumer-contract-inventory-2026-05-25.json";
 const DEFAULT_REPORT_PATH =
@@ -85,15 +85,19 @@ export function analyzeAiHintQuality(options = {}) {
   const activeRoleContract = new Set(
     inventory.roles.map((entry) => entry.value),
   );
-  const activePlanRoleContract = new Set(
-    inventory.planRoles.map((entry) => entry.value),
-  );
+  const reviewedPlanRoles = roleContract.reviewedPlanRoles ?? {};
+  const activePlanRoleContract = new Set([
+    ...inventory.planRoles.map((entry) => entry.value),
+    ...Object.keys(reviewedPlanRoles),
+  ]);
   const roleClassification = new Map(
     [...inventory.roles, ...inventory.planRoles].map((entry) => [
       entry.value,
       entry.classification,
     ]),
   );
+  for (const [role, classification] of Object.entries(reviewedPlanRoles))
+    roleClassification.set(role, classification);
   const roleCounts = countValues(hints, "roles");
   const planRoleCounts = countValues(hints, "planRoles");
   const roleInventoryByValue = new Map(

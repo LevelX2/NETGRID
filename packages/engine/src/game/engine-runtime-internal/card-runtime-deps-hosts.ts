@@ -511,6 +511,7 @@ import {
 import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { traceSuccessEffectForCardImplementation } from "../../ability-engine/trace-implementations";
 import {
+  icebreakerAbilityForLegalAction,
   icebreakerAbilitiesForDefinition,
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
@@ -765,21 +766,23 @@ export function createCardRuntimeDepsHosts(
     state: GameState,
     legalAction: LegalAction,
   ): number {
-    const payloadAmount = Number(legalAction.payload?.pumpAmount);
-    if (Number.isInteger(payloadAmount) && payloadAmount >= 0)
-      return payloadAmount;
-    const breakerId = String(legalAction.payload?.breakerId ?? "");
-    const abilityId = legalAction.abilityRef?.abilityId;
+    const breakerId = String(
+      legalAction.payload?.breakerId ?? "",
+    ) as CardInstanceId;
     const definition = state.cardInstances[breakerId]
       ? definitionFor(state, breakerId)
       : undefined;
-    const ability = definition
-      ? icebreakerAbilitiesForDefinition(definition).find(
-          (candidate) =>
-            candidate.type === "pump_strength" &&
-            (!abilityId || candidate.id === abilityId),
-        )
-      : undefined;
+    if (!definition)
+      throw new Error("Die Breaker-Definition existiert nicht mehr.");
+    const ability = icebreakerAbilityForLegalAction(
+      definition,
+      breakerId,
+      legalAction,
+      "pump_strength",
+    );
+    const payloadAmount = Number(legalAction.payload?.pumpAmount);
+    if (Number.isInteger(payloadAmount) && payloadAmount >= 0)
+      return payloadAmount;
     const amount = ability?.amount ?? 1;
     return Number.isInteger(amount) ? amount : 1;
   }
@@ -788,54 +791,61 @@ export function createCardRuntimeDepsHosts(
     state: GameState,
     legalAction: LegalAction,
   ): RuntimeIcebreakerAbility | undefined {
-    const breakerId = String(legalAction.payload?.breakerId ?? "");
-    const abilityId = legalAction.abilityRef?.abilityId;
+    const breakerId = String(
+      legalAction.payload?.breakerId ?? "",
+    ) as CardInstanceId;
     const definition = state.cardInstances[breakerId]
       ? definitionFor(state, breakerId)
       : undefined;
-    return definition
-      ? icebreakerAbilitiesForDefinition(definition).find(
-          (candidate) =>
-            candidate.type === "pump_strength" &&
-            (!abilityId || candidate.id === abilityId),
-        )
-      : undefined;
+    if (!definition)
+      throw new Error("Die Breaker-Definition existiert nicht mehr.");
+    return icebreakerAbilityForLegalAction(
+      definition,
+      breakerId,
+      legalAction,
+      "pump_strength",
+    );
   }
 
   function breakAbilityForLegalAction(
     state: GameState,
     legalAction: LegalAction,
   ): RuntimeIcebreakerAbility | undefined {
-    const breakerId = String(legalAction.payload?.breakerId ?? "");
-    const abilityId = legalAction.abilityRef?.abilityId;
+    if (legalAction.payload?.nextSentryFreeBreak === true) return undefined;
+    const breakerId = String(
+      legalAction.payload?.breakerId ?? "",
+    ) as CardInstanceId;
     const definition = state.cardInstances[breakerId]
       ? definitionFor(state, breakerId)
       : undefined;
-    return definition
-      ? icebreakerAbilitiesForDefinition(definition).find(
-          (candidate) =>
-            candidate.type === "break_subroutine" &&
-            (!abilityId || candidate.id === abilityId),
-        )
-      : undefined;
+    if (!definition)
+      throw new Error("Die Breaker-Definition existiert nicht mehr.");
+    return icebreakerAbilityForLegalAction(
+      definition,
+      breakerId,
+      legalAction,
+      "break_subroutine",
+    );
   }
 
   function pumpDurationForLegalAction(
     state: GameState,
     legalAction: LegalAction,
   ): "current_encounter" | "current_run" | "current_turn" {
-    const breakerId = String(legalAction.payload?.breakerId ?? "");
-    const abilityId = legalAction.abilityRef?.abilityId;
+    const breakerId = String(
+      legalAction.payload?.breakerId ?? "",
+    ) as CardInstanceId;
     const definition = state.cardInstances[breakerId]
       ? definitionFor(state, breakerId)
       : undefined;
-    const ability = definition
-      ? icebreakerAbilitiesForDefinition(definition).find(
-          (candidate) =>
-            candidate.type === "pump_strength" &&
-            (!abilityId || candidate.id === abilityId),
-        )
-      : undefined;
+    if (!definition)
+      throw new Error("Die Breaker-Definition existiert nicht mehr.");
+    const ability = icebreakerAbilityForLegalAction(
+      definition,
+      breakerId,
+      legalAction,
+      "pump_strength",
+    );
     return ability?.strengthDuration ?? "current_encounter";
   }
 
@@ -879,10 +889,11 @@ export function createCardRuntimeDepsHosts(
     const iceDefinition = definitionFor(state, iceId);
     if (legalAction.payload?.targetIceDefinitionId !== iceDefinition.id)
       throw new Error("Multi-Break zielt auf die falsche ICE-Definition.");
-    const ability = icebreakerAbilitiesForDefinition(breakerDefinition).find(
-      (candidate) =>
-        candidate.id === legalAction.abilityRef?.abilityId &&
-        candidate.type === "break_subroutine",
+    const ability = icebreakerAbilityForLegalAction(
+      breakerDefinition,
+      breakerId,
+      legalAction,
+      "break_subroutine",
     );
     if (
       !ability ||
@@ -1045,10 +1056,11 @@ export function createCardRuntimeDepsHosts(
       throw new Error("Breaker ist nicht installiert.");
     const breakerDefinition = definitionFor(state, breakerId);
     const iceDefinition = definitionFor(state, run.encounteredIceId);
-    const ability = icebreakerAbilitiesForDefinition(breakerDefinition).find(
-      (candidate) =>
-        candidate.id === legalAction.abilityRef?.abilityId &&
-        candidate.type === "break_subroutine",
+    const ability = icebreakerAbilityForLegalAction(
+      breakerDefinition,
+      breakerId,
+      legalAction,
+      "break_subroutine",
     );
     if (
       !ability ||

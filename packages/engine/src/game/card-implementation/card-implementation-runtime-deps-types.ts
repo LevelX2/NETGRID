@@ -86,6 +86,7 @@ export type GameCardImplementationRuntimeDepsHost = {
       serverId: Exclude<ServerId, "new_remote">,
       accessCount: number,
       options: CardImplementationStartRunOptions,
+      pendingSuccessBonusCredits: number | undefined,
       legalAction: RuntimeLegalAction,
     ) => void;
     finishRun: (

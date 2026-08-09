@@ -5,8 +5,8 @@
  * subregistries so the main registry stays stable and merge-light.
  */
 import {
-  CS06_CARD_DEFINITION_IDS,
-  cs06CardImplementations,
+  cardSpecImplementations,
+  cardSpecImplementationDefinitionIds,
 } from "@netgrid/cards/engine";
 import type { CardDefinitionId } from "@netgrid/shared";
 import type { CardImplementationDefinition } from "./types";
@@ -79,13 +79,13 @@ function assertUniqueImplementationIds(
 }
 
 const legacyImplementations = CARD_IMPLEMENTATION_CATALOG;
-const cs06Implementations: readonly CardImplementationDefinition[] =
-  cs06CardImplementations();
+const cardSpecImplementationAuthority: readonly CardImplementationDefinition[] =
+  cardSpecImplementations();
 
 export const CARD_IMPLEMENTATIONS = composeCardImplementationAuthorities(
   legacyImplementations,
-  cs06Implementations,
-  CS06_CARD_DEFINITION_IDS,
+  cardSpecImplementationAuthority,
+  cardSpecImplementationDefinitionIds(),
 );
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Readonly<

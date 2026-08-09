@@ -141,6 +141,38 @@ describe("card set support catalog source", () => {
     expect(validateLoadedCardSets(sets)).toEqual([]);
   });
 
+  it("keeps both previews catalog-only and preserves their editorial block split", () => {
+    const cards = createRuntimeCardsById();
+    const operation = cards.catalog_preview_operation_001;
+    const resource = cards.catalog_preview_resource_001;
+
+    expect(operation?.statuses).toMatchObject({
+      catalog_ready: true,
+      engine_supported: false,
+      playable: false,
+      human_playable: false,
+      ai_supported: false,
+      deck_legal: false,
+      format_legal: false,
+      blocked: false,
+    });
+    expect(operation?.blockReasons).toEqual([]);
+
+    expect(resource?.statuses).toMatchObject({
+      catalog_ready: true,
+      engine_supported: false,
+      playable: false,
+      human_playable: false,
+      ai_supported: false,
+      deck_legal: false,
+      format_legal: false,
+      blocked: true,
+    });
+    expect(resource?.blockReasons).toEqual([
+      "Intentionally blocked catalog-only test fixture.",
+    ]);
+  });
+
   it("keeps card data and support data in one-to-one alignment", () => {
     for (const { set, support } of loadCardSets()) {
       const cardIds = set.cards.map((card) => card.cardId).sort();

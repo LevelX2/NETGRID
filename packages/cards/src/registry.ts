@@ -211,6 +211,16 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
       .filter((set) => set.publication.status !== "disabled")
       .map((set) => set.setId),
   );
+  const runtimeSetIds = new Set(
+    sets
+      .filter((set) => set.publication.status === "active")
+      .map((set) => set.setId),
+  );
+  const runtimeCards = cards.filter(
+    (spec) =>
+      spec.publication.status === "active" &&
+      spec.printings.some((printing) => runtimeSetIds.has(printing.setId)),
+  );
   const publicCards = new Map(
     cards
       .filter(
@@ -233,7 +243,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
       .map((set) => [set.setId, projectPublicSet(set)]),
   );
   const engineCards = new Map(
-    cards.map((spec) => [
+    runtimeCards.map((spec) => [
       spec.identity.cardDefinitionId,
       projectEngineCard(
         spec,
@@ -242,7 +252,7 @@ export function createCardRegistry(input: CardRegistryInput): CardRegistry {
     ]),
   );
   const planningCards = new Map(
-    cards.map((spec) => [
+    runtimeCards.map((spec) => [
       spec.identity.cardDefinitionId,
       projectPlanningCard(
         spec,

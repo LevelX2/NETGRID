@@ -5,7 +5,7 @@ import {
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
 import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
-import generatedCs06AiHints from "../../../../../data/ai/cs06-ai-hints-generated.json";
+import generatedCardSpecAiHints from "../../../../../data/ai/card-spec-ai-hints-generated.json";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
 type CatalogAiHintExpectation = {
@@ -522,7 +522,7 @@ describe("catalog API filters", () => {
   });
 
   it("attributes migrated inspector hints to the CardSpec compiler", () => {
-    const brokerArtifact = generatedCs06AiHints.cards.find(
+    const brokerArtifact = generatedCardSpecAiHints.cards.find(
       (entry) => entry.cardId === "onr_v1_154_broker",
     );
     expect(brokerArtifact).toBeDefined();
@@ -532,15 +532,15 @@ describe("catalog API filters", () => {
     expect(body.card.aiInspector?.source).toEqual({
       schemaVersion: "ai-hint-provenance-v1",
       authority: "card_spec_compiler",
-      artifactSchemaVersion: "cs06-ai-hint-artifact-v1",
-      compilerVersion: "cs06-ai-hint-compiler-v1",
+      artifactSchemaVersion: "card-spec-ai-hint-artifact-v2",
+      compilerVersion: "card-spec-ai-hint-compiler-v2",
       cardRulesFingerprint: brokerArtifact?.cardRulesFingerprint,
       planningAnnotationsFingerprint:
         brokerArtifact?.planningAnnotationsFingerprint,
-      evidenceFingerprint: generatedCs06AiHints.evidence.fingerprint,
+      evidenceFingerprint: generatedCardSpecAiHints.evidence.fingerprint,
       sourceRefs: [
-        "data/ai/cs06-ai-hints-generated.json",
-        "packages/ai/src/cs06-ai-hint-compiler.ts#deriveCs06AiHint",
+        "data/ai/card-spec-ai-hints-generated.json",
+        "packages/ai/src/card-spec-ai-hint-compiler.ts#deriveCardSpecAiHint",
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
       ],
     });

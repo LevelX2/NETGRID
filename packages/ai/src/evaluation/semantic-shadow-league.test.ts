@@ -57,7 +57,7 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.pilotEligibleCount).toBe(45);
     expect(report.metrics.scopeCandidateCount).toBe(samples.length * 3);
     expect(report.metrics.scopeAllowedCount).toBe(45);
-    expect(report.metrics.pilotWouldOverrideCount).toBe(45);
+    expect(report.metrics.pilotWouldOverrideCount).toBe(30);
     expect(report.metrics.pilotActualOverrideCount).toBe(0);
     expect(report.metrics.averageScoreGap).toBeGreaterThan(0);
     expect(report.metrics.blockedByReason).toMatchObject({
@@ -69,15 +69,57 @@ describe("SemanticShadowLeague", () => {
       report.metrics.pilotEligibleCount / samples.length,
       3,
     );
+    expect(report.metrics.pilotEligibilityBySide.runner).toMatchObject({
+      scenarioCount: report.sideCounts.runner,
+      eligibleCount: 22,
+      wouldOverrideCount: 22,
+    });
+    expect(report.metrics.pilotEligibilityBySide.corp).toMatchObject({
+      scenarioCount: report.sideCounts.corp,
+      eligibleCount: 23,
+      wouldOverrideCount: 8,
+    });
     for (const side of ["runner", "corp"] as const) {
       const bySide = report.metrics.pilotEligibilityBySide[side];
-      expect(bySide.scenarioCount).toBe(report.sideCounts[side]);
-      expect(bySide.eligibleCount).toBeGreaterThan(0);
-      expect(bySide.wouldOverrideCount).toBe(bySide.eligibleCount);
       expect(bySide.eligibleRate).toBeCloseTo(
         bySide.eligibleCount / bySide.scenarioCount,
         3,
       );
+    }
+
+    const tiedCorpEconomyScenarios = report.scenarios.filter(
+      (scenario) =>
+        scenario.side === "corp" &&
+        scenario.pilotEligibility.eligible &&
+        !scenario.pilotEligibility.wouldOverride,
+    );
+    expect(tiedCorpEconomyScenarios).toHaveLength(15);
+    for (const scenario of tiedCorpEconomyScenarios) {
+      expect(scenario.pilotEligibility.scoreGap).toBe(0);
+      const sample = samples.find(
+        (candidate) => candidate.scenarioId === scenario.scenarioId,
+      );
+      const [top, tied] = sample?.trace.rankedActions ?? [];
+      const topCandidate = sample?.frame.actionCandidates.find(
+        (candidate) => candidate.actionId === top?.actionId,
+      );
+      const tiedCandidate = sample?.frame.actionCandidates.find(
+        (candidate) => candidate.actionId === tied?.actionId,
+      );
+      expect(topCandidate).toMatchObject({
+        actionType: "gain_credit",
+        sourceKind: "basic_action",
+        economyProjection: { grossLiquidCreditGain: 1 },
+      });
+      expect(tied?.score).toBe(top?.score);
+      expect(tiedCandidate).toMatchObject({
+        actionType: "play_operation",
+        sourceDefinitionId: "simple_economy_operation",
+        economyProjection: {
+          grossLiquidCreditGain: 4,
+          source: "legal_action_payload",
+        },
+      });
     }
     expect(
       Object.values(report.metrics.scopeBreakdown).reduce(
@@ -361,7 +403,7 @@ describe("SemanticShadowLeague", () => {
       scope: "basic_setup",
       scenarioCount: report.scenarioCount,
       eligible: 21,
-      wouldOverride: 21,
+      wouldOverride: 6,
       badOverrideRisk: 0,
       knownNoGoCases: [],
       recommendation: "local_default_dry_run_candidate",

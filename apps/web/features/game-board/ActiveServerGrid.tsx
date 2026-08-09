@@ -20,6 +20,7 @@ import {
   type ActionContext,
 } from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import { scoreCardStateBadges } from "../cards/ScoredAgendaState";
 import type { CardDisplayMode } from "../settings/settings-model";
@@ -106,6 +107,7 @@ export function ActiveServerGrid({
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onSelectActionContext(context: ActionContext): void;
 }) {
+  const cardPresentationsById = useCatalogCardPresentations();
   const laneClassName = (lane: {
     kind: "ice" | "root";
     cards: VisibleCard[];
@@ -286,8 +288,11 @@ export function ActiveServerGrid({
                           type="button"
                           onClick={() => onAction(runAction)}
                           disabled={actionDisabled}
-                          aria-label={`${actionButtonLabel(runAction)} starten`}
-                          data-tooltip={actionButtonLabel(runAction)}
+                          aria-label={`${actionButtonLabel(runAction, cardPresentationsById)} starten`}
+                          data-tooltip={actionButtonLabel(
+                            runAction,
+                            cardPresentationsById,
+                          )}
                           data-testid="server-run-action"
                           data-server-id={server.id}
                         >

@@ -13,7 +13,7 @@ import {
 } from "../registry";
 import { CARD_REGISTRY } from "../registry-runtime";
 import { CS06_CARD_DEFINITION_IDS } from "../cs06-slice";
-import { projectCs06CardDefinition } from "../engine/cs06-compatibility-projections";
+import { projectCardSpecDefinition } from "../engine/card-spec-compatibility-projections";
 import { deepFreezeSerializable } from "../serializable";
 import type { ResolvedCardDefinition } from "@netgrid/shared";
 import type { DeepReadonly } from "../serializable";
@@ -61,18 +61,15 @@ export const planningCardByDefinitionId = planningCardViewForDefinitionId.bind(
 export const planningCards = (): ReturnType<typeof planningCardViews> =>
   planningCardViews(CARD_REGISTRY);
 
-export type Cs06PlanningCompatibilityCard = DeepReadonly<{
+export type CardSpecPlanningCompatibilityCard = DeepReadonly<{
   definition: ResolvedCardDefinition;
   planning: PlanningCardView;
 }>;
+export type Cs06PlanningCompatibilityCard = CardSpecPlanningCompatibilityCard;
 
 const expectedCs06Ids = new Set<string>(CS06_CARD_DEFINITION_IDS);
-const cachedCs06PlanningCards = deepFreezeSerializable(
+const cachedCardSpecPlanningCards = deepFreezeSerializable(
   planningCardViews(CARD_REGISTRY).map((planning) => {
-    if (!expectedCs06Ids.has(planning.cardDefinitionId))
-      throw new Error(
-        `cs06_planning_unexpected_definition: ${planning.cardDefinitionId}`,
-      );
     const spec = cardSpecForDefinitionId(
       CARD_REGISTRY,
       planning.cardDefinitionId,
@@ -82,7 +79,7 @@ const cachedCs06PlanningCards = deepFreezeSerializable(
         `cs06_planning_missing_card_spec: ${planning.cardDefinitionId}`,
       );
     return {
-      definition: projectCs06CardDefinition(
+      definition: projectCardSpecDefinition(
         {
           schemaVersion: "engine-card-view-v1",
           cardDefinitionId: planning.cardDefinitionId,
@@ -96,6 +93,18 @@ const cachedCs06PlanningCards = deepFreezeSerializable(
       planning,
     };
   }),
+);
+const cachedCardSpecPlanningCardsById = new Map(
+  cachedCardSpecPlanningCards.map((entry) => [entry.definition.id, entry]),
+);
+export const cardSpecPlanningCardByDefinitionId = (definitionId: string) =>
+  cachedCardSpecPlanningCardsById.get(definitionId);
+export const cardSpecPlanningCards = () => cachedCardSpecPlanningCards;
+
+const cachedCs06PlanningCards = deepFreezeSerializable(
+  cachedCardSpecPlanningCards.filter((entry) =>
+    expectedCs06Ids.has(entry.definition.id),
+  ),
 );
 if (cachedCs06PlanningCards.length !== expectedCs06Ids.size)
   throw new Error("cs06_planning_slice_mismatch");

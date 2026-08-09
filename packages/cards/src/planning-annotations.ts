@@ -6,15 +6,21 @@ export const KNOWN_PLANNING_TACTIC_SIGNALS = [
   "corp.remote_protection",
   "coverage.breaker",
   "damage.payoff",
+  "draw.card",
   "economy.card",
+  "punish.payoff",
   "remote.ambush",
+  "tag.payoff",
 ] as const;
 
 export const KNOWN_PLANNING_TACTIC_USES = [
   "corp.remote_protection",
   "coverage.breaker",
   "damage.payoff.runner",
+  "draw.card",
   "economy.card",
+  "punish.payoff",
+  "tag.payoff",
 ] as const;
 
 export type CardPlanningAnnotations = {

@@ -1,6 +1,6 @@
 import {
-  CS06_CARD_DEFINITION_IDS,
-  cs06CardDefinitions,
+  cardSpecDefinitions,
+  cardSpecRuntimeDefinitionIds,
 } from "@netgrid/cards/engine";
 import {
   CARD_DEFINITIONS_BY_ID as LEGACY_CARD_DEFINITIONS_BY_ID,
@@ -70,10 +70,12 @@ function assertUniqueDefinitionIds(
   }
 }
 
+const cardSpecDefinitionAuthority = cardSpecDefinitions();
+
 export const CARD_DEFINITIONS = composeCardDefinitionAuthorities(
   Object.values(LEGACY_CARD_DEFINITIONS_BY_ID),
-  cs06CardDefinitions(),
-  CS06_CARD_DEFINITION_IDS,
+  cardSpecDefinitionAuthority,
+  cardSpecRuntimeDefinitionIds(),
 );
 
 export const CARD_DEFINITIONS_BY_ID: Readonly<

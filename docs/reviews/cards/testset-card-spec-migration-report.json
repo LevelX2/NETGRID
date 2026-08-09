@@ -1,0 +1,1018 @@
+{
+  "schemaVersion": "card-spec-migration-report-v1",
+  "setId": "testset",
+  "sourceCommit": "a771126723c80aa5d77d8a444e7d6489e52819b3",
+  "sourceInputs": [
+    {
+      "relativePath": "data/cards/testset-cards.json",
+      "fingerprint": "sha256:f8d7a88c128f5413024469215960a2e5b70652c1335d027638a20a4166dec279"
+    },
+    {
+      "relativePath": "data/manifests/testset-card-support.json",
+      "fingerprint": "sha256:9180e0d9a198d2f0650d260f025f190d04226e9c8eef73913364102fc734ca98"
+    },
+    {
+      "relativePath": "data/ai/ai-card-hints-active.json",
+      "fingerprint": "sha256:d1493517b4ef22d3d9b21f62840fcb4dbbbf482aa301f16d585e8bd86174419f"
+    },
+    {
+      "relativePath": "packages/shared/src/card-definitions.ts",
+      "fingerprint": "sha256:7f4b2e2cb74dc6b744a5567969f12789f43b353e6b5b9e11a59c8d1a8f02178d"
+    },
+    {
+      "relativePath": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "fingerprint": "sha256:c026afaa39615a333979afc9cbe0c70a1236b3d59d02b2db280bba75aa0215c8"
+    },
+    {
+      "relativePath": "packages/engine/src/game/play/corp-operation-resolution.ts",
+      "fingerprint": "sha256:8bb7564e9c8b15c0eaeb5c09eb65f88544e869ae8514871be14850287afa0eb3"
+    },
+    {
+      "relativePath": "packages/engine/src/card-implementations/demo/corp/assets/simple-economy-asset.ts",
+      "fingerprint": "sha256:4d51567aaadcc5b43edf44795474fc00c4567f9e350b384de2a370dfff7f1a94"
+    },
+    {
+      "relativePath": "packages/engine/src/card-implementations/v08/corp/assets/cashout-asset.ts",
+      "fingerprint": "sha256:3cb62989ee7a526228793c8a480dd25cadea13ecc789ef4958aa83f2bf775968"
+    },
+    {
+      "relativePath": "packages/engine/src/card-implementations/subregistries/card-implementation-catalog.ts",
+      "fingerprint": "sha256:bf2e390e5494209bba1138cb759829a2e4220183d5b09f7b601315c14c258f3e"
+    },
+    {
+      "relativePath": "packages/engine/src/game/install/install-card.ts",
+      "fingerprint": "sha256:c5452d74b5e7aa396ff609883dfc4958fe6dbfeddba5bca89785dc62d934184f"
+    },
+    {
+      "relativePath": "packages/engine/src/game/abilities/runner-special-trigger-execution.ts",
+      "fingerprint": "sha256:608c71c3a9feaaf6a437537beb136f3cb9f02d4622abbd5f7eeb3dc38e164836"
+    },
+    {
+      "relativePath": "packages/ai/src/simulation/remote-trash-role.ts",
+      "fingerprint": "sha256:40795d9e3f6bd253ab59f420d1c813294bc10140eacac2f8450eed30fa3b37c3"
+    }
+  ],
+  "counts": {
+    "rawCards": 38,
+    "supportEntries": 38,
+    "sharedDefinitions": 36,
+    "legacyHints": 36,
+    "generatedCardSpecs": 38,
+    "runtimeDefinitions": 36,
+    "projectedImplementations": 20,
+    "targetDefinitionOnlyRuntime": 16,
+    "catalogOnly": 2,
+    "legacyImplementationModules": 2,
+    "legacyDefinitionOnlyRuntime": 34
+  },
+  "dispositions": {
+    "rawFields": "canonical_identity_text_characteristics_printing",
+    "definitionFields": "canonical_mechanics_or_explicit_editor_discard",
+    "hintFields": "mechanical_derivation_planning_annotation_or_evidence",
+    "manifestFields": "editorial_parity_evidence_only",
+    "displayOnlyText": "legacy_catalog_metadata_not_public_card_text",
+    "v08_local_original": "explicitly_discarded_nonsemantic_marker",
+    "identityAbilityEnabledFalse": "explicitly_discarded_unused_legacy_flag",
+    "hintMechanicalFields": "compiler_derived_from_card_spec_and_bound_by_legacy_hint_fingerprint",
+    "hintPlanningFields": "closed_typed_planning_annotations",
+    "hintEvidenceFields": "review_quality_scenario_and_manual_evidence_only"
+  },
+  "reconciliations": [
+    {
+      "cardDefinitionId": "catalog_preview_resource_001",
+      "field": "numeric.cost->characteristics.numeric.installCost",
+      "disposition": "canonical_resource_install_cost",
+      "value": 1
+    },
+    {
+      "cardDefinitionId": "efficient_fracter",
+      "field": "subtypes",
+      "disposition": "shared_runtime_canonical_order_same_set"
+    },
+    {
+      "cardDefinitionId": "simple_decoder",
+      "field": "subtypes",
+      "disposition": "shared_runtime_canonical_order_same_set"
+    },
+    {
+      "cardDefinitionId": "simple_fracter",
+      "field": "subtypes",
+      "disposition": "shared_runtime_canonical_order_same_set"
+    },
+    {
+      "cardDefinitionId": "v08_precise_decoder",
+      "field": "subtypes",
+      "disposition": "shared_runtime_canonical_order_same_set"
+    },
+    {
+      "cardDefinitionId": "v08_steady_fracter",
+      "field": "subtypes",
+      "disposition": "shared_runtime_canonical_order_same_set"
+    },
+    {
+      "cardDefinitionId": "simple_setup_hardware",
+      "field": "memoryLimitBonus",
+      "disposition": "explicit_legacy_runtime_default",
+      "value": 1
+    },
+    {
+      "cardDefinitionId": "v08_memory_chip",
+      "field": "memoryLimitBonus",
+      "disposition": "explicit_legacy_runtime_default",
+      "value": 1
+    },
+    {
+      "cardDefinitionId": "catalog_preview_resource_001",
+      "field": "publication.catalogBlockReason",
+      "disposition": "editorial_reason_replaces_runtime_coupled_legacy_reason",
+      "value": "Intentionally blocked catalog-only test fixture."
+    },
+    {
+      "cardDefinitionId": "efficient_fracter",
+      "field": "hint.breakerProfile.baseStrength",
+      "disposition": "discarded_stale_hint_mechanics_card_spec_strength_is_authority",
+      "legacyValue": 1
+    },
+    {
+      "cardDefinitionId": "simple_decoder",
+      "field": "hint.breakerProfile.baseStrength",
+      "disposition": "discarded_stale_hint_mechanics_card_spec_strength_is_authority",
+      "legacyValue": 1
+    },
+    {
+      "cardDefinitionId": "simple_fracter",
+      "field": "hint.breakerProfile.baseStrength",
+      "disposition": "discarded_stale_hint_mechanics_card_spec_strength_is_authority",
+      "legacyValue": 1
+    },
+    {
+      "cardDefinitionId": "simple_killer",
+      "field": "hint.breakerProfile.baseStrength",
+      "disposition": "discarded_stale_hint_mechanics_card_spec_strength_is_authority",
+      "legacyValue": 1
+    },
+    {
+      "cardDefinitionId": "v08_adaptive_killer",
+      "field": "hint.breakerProfile.baseStrength",
+      "disposition": "discarded_stale_hint_mechanics_card_spec_strength_is_authority",
+      "legacyValue": 1
+    },
+    {
+      "cardDefinitionId": "v08_precise_decoder",
+      "field": "hint.breakerProfile.baseStrength",
+      "disposition": "discarded_stale_hint_mechanics_card_spec_strength_is_authority",
+      "legacyValue": 1
+    },
+    {
+      "cardDefinitionId": "v08_steady_fracter",
+      "field": "hint.breakerProfile.baseStrength",
+      "disposition": "discarded_stale_hint_mechanics_card_spec_strength_is_authority",
+      "legacyValue": 1
+    }
+  ],
+  "runtimeEvidence": [
+    {
+      "cardDefinitionId": "simple_economy_event",
+      "relativePath": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "locator": "simple_economy_event: {",
+      "marker": "runner_event_gain_credits_4",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "simple_draw_event",
+      "relativePath": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "locator": "simple_draw_event: {",
+      "marker": "runner_event_draw_2",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "simple_run_event",
+      "relativePath": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "locator": "simple_run_event: {",
+      "marker": "runner_event_run_success_2",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "v08_burst_credit_event",
+      "relativePath": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "locator": "v08_burst_credit_event: {",
+      "marker": "runner_event_gain_credits_6",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "v08_deep_draw_event",
+      "relativePath": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "locator": "v08_deep_draw_event: {",
+      "marker": "runner_event_draw_3",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "v08_overclock_run_event",
+      "relativePath": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
+      "locator": "v08_overclock_run_event: {",
+      "marker": "runner_event_run_success_3",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "simple_economy_operation",
+      "relativePath": "packages/engine/src/game/play/corp-operation-resolution.ts",
+      "locator": "simple_economy_operation: {",
+      "marker": "corp_operation_gain_credits_4",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "simple_draw_operation",
+      "relativePath": "packages/engine/src/game/play/corp-operation-resolution.ts",
+      "locator": "simple_draw_operation: {",
+      "marker": "corp_operation_draw_2",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "simple_tag_punishment_operation",
+      "relativePath": "packages/engine/src/game/play/corp-operation-resolution.ts",
+      "locator": "simple_tag_punishment_operation: {",
+      "marker": "corp_operation_tag_punishment_lose_2",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "v08_credit_surge_operation",
+      "relativePath": "packages/engine/src/game/play/corp-operation-resolution.ts",
+      "locator": "v08_credit_surge_operation: {",
+      "marker": "corp_operation_gain_credits_7",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "v08_archive_planning_operation",
+      "relativePath": "packages/engine/src/game/play/corp-operation-resolution.ts",
+      "locator": "v08_archive_planning_operation: {",
+      "marker": "corp_operation_draw_3",
+      "maxDistance": 100
+    },
+    {
+      "cardDefinitionId": "simple_economy_asset",
+      "relativePath": "packages/engine/src/card-implementations/demo/corp/assets/simple-economy-asset.ts",
+      "locator": "cardDefinitionId: \"simple_economy_asset\"",
+      "marker": "amount: 3",
+      "maxDistance": 250
+    },
+    {
+      "cardDefinitionId": "v08_cashout_asset",
+      "relativePath": "packages/engine/src/card-implementations/v08/corp/assets/cashout-asset.ts",
+      "locator": "cardDefinitionId: \"v08_cashout_asset\"",
+      "marker": "amount: 4",
+      "maxDistance": 250
+    },
+    {
+      "cardDefinitionIds": [
+        "simple_setup_hardware",
+        "v08_memory_chip"
+      ],
+      "relativePath": "packages/engine/src/game/install/install-card.ts",
+      "locator": "memoryLimitBonus ?? 1",
+      "marker": "memoryLimitBonus ?? 1",
+      "maxDistance": 0
+    },
+    {
+      "cardDefinitionIds": [
+        "simple_setup_hardware",
+        "v08_memory_chip"
+      ],
+      "relativePath": "packages/engine/src/game/abilities/runner-special-trigger-execution.ts",
+      "locator": "memoryLimitBonus ?? 1",
+      "marker": "memoryLimitBonus ?? 1",
+      "maxDistance": 0
+    },
+    {
+      "cardDefinitionId": "simple_upgrade",
+      "relativePath": "packages/ai/src/simulation/remote-trash-role.ts",
+      "locator": "definitionId === \"simple_upgrade\"",
+      "marker": "definitionId === \"simple_upgrade\"",
+      "maxDistance": 0
+    }
+  ],
+  "cards": [
+    {
+      "cardDefinitionId": "catalog_preview_operation_001",
+      "implementationCoverage": "coverage_missing",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": false
+      },
+      "legacyHintFingerprint": null,
+      "outputFingerprint": "sha256:4823fb1fb06908c408d7107562cefbeff47a3ac81fae2f1dd495981718bc2cfa"
+    },
+    {
+      "cardDefinitionId": "catalog_preview_resource_001",
+      "implementationCoverage": "coverage_missing",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "legacyHintFingerprint": null,
+      "outputFingerprint": "sha256:bcca6b62b9c6482ee81cc861e09ec84877fc317315eb9fccbac78070c1db99fd"
+    },
+    {
+      "cardDefinitionId": "corp_identity_001",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:7dd138f10fe6c47cb36f5261dc39e3e6c93725271621a84e98e264f3d8b10378",
+      "outputFingerprint": "sha256:8c6456e1f9795de49b0544a7f5e2530f8d3e2714d80594779626ff5adfaaf1f7"
+    },
+    {
+      "cardDefinitionId": "efficient_fracter",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:5d67dbe6329416a6107d79860f396c956073d12c9801f630140bafc032f10658",
+      "outputFingerprint": "sha256:c7b7438e7df5dea3ac5833fd49f9cebf1915d99e366c99d7cd1218d3b6768b54"
+    },
+    {
+      "cardDefinitionId": "runner_identity_001",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:f5d49b5a6d6d7821523f5c007f285f1a29548b915a4c907111a46670774a5c84",
+      "outputFingerprint": "sha256:af7e0b19af390f60a2caad396a9248a963937203b8b1e7f963a188351ff98688"
+    },
+    {
+      "cardDefinitionId": "simple_agenda",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:13f411ca1beaac31d4dfc3ec454f050a2dd8d298bdc577beb9445bdacbbc0df9",
+      "outputFingerprint": "sha256:dd2279da4416c8627825f15ffe3094951f45b84c9865a7103fb981d92fdb5a5a"
+    },
+    {
+      "cardDefinitionId": "simple_barrier_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:87712226a841b42290612046ac0227ee104be3075f085e1034106c7cf6e50a10",
+      "outputFingerprint": "sha256:3500eae93b1af1629e359e71da2399c5a1b0ef171740b01c8c4fb82a62de059b"
+    },
+    {
+      "cardDefinitionId": "simple_code_gate_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:9fae2e47e97d891827ae8dbd8d8ebbb4f2fb8042e17cef1e130f132318456f19",
+      "outputFingerprint": "sha256:a74e33300a37dd8dc612da46ecac94bd6ec1a65bacbcb0d0978fe0dd5cf18ed6"
+    },
+    {
+      "cardDefinitionId": "simple_decoder",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:46fc0a7a6277cfd027e9a5f018a5b15f13896ef150b50d476c19ad385e7f5199",
+      "outputFingerprint": "sha256:f62eef3cfbdc0fda33d404047c0a718dbbe25adfba1ed6a7325487fcf37243e1"
+    },
+    {
+      "cardDefinitionId": "simple_draw_event",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:76227207c8a578387e0fe7c96bc679416cb86ff503872068fcdb53a8b31ed184",
+      "outputFingerprint": "sha256:158757573c1eb5e1e4702684fa8accb785fc878946c540810bc6f95cb9dbebc9"
+    },
+    {
+      "cardDefinitionId": "simple_draw_operation",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:5a16ba4f8b030316af176781d8a66a4410c8bf43c6bfe57771772b3def7d186d",
+      "outputFingerprint": "sha256:5b9bcc03f71dd221763e06a91299a53fae9c9276c917eaded329f63f1f5ee912"
+    },
+    {
+      "cardDefinitionId": "simple_economy_asset",
+      "implementationCoverage": "implementation_backed_declarative",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:626e9acd3d899a2997a396490f0d6b84e3d1097de216a5f9887092ed3cb1baa1",
+      "outputFingerprint": "sha256:4d30e6fa3027ad356b1bd1b423dba58e447027036639daaa0eee6871d343eb15"
+    },
+    {
+      "cardDefinitionId": "simple_economy_event",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:4fc2214607f3428fb5413c42e09b6ce9d057040ca81179938061770a35704865",
+      "outputFingerprint": "sha256:0f89e4e1da41fc8193a2aafacf2f6900fc207ecef6d420f3d47d188d282e8b3f"
+    },
+    {
+      "cardDefinitionId": "simple_economy_operation",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:84cbb0eb7f90d621e9fec46e4cf420faba5a6c215b77e67475dd907c38f37f1d",
+      "outputFingerprint": "sha256:643059eda3359acc8c22e55e52b96821f1e479c297ef54bd47d0dd38a01c874e"
+    },
+    {
+      "cardDefinitionId": "simple_fracter",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:b61b8025ff7f8abdc42ee231b04a4a9bca935e1a8258c03b4e429c1ea1e80268",
+      "outputFingerprint": "sha256:8f1257e11341b7661190152f750e922d03f69c8071d1eceb70fb38c6279e4bf1"
+    },
+    {
+      "cardDefinitionId": "simple_killer",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:eb38e0b3c54be6816aa8037d24d975875718e68498ad06c1c6ab5202dcbfc3df",
+      "outputFingerprint": "sha256:46361f486db3b8e04829e82189aaaf014a3c7b4aa2e213620b9293d0b8481cf3"
+    },
+    {
+      "cardDefinitionId": "simple_priority_agenda",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:46c58277cc5c84a97ac8ac2da6e9f3a0a3ca8cdc8fc33e6fbeab646aa8c4b3f2",
+      "outputFingerprint": "sha256:b642211248c9f9c340e91821a8eb9f7c36c5a3264200399b689d1980ebceaf33"
+    },
+    {
+      "cardDefinitionId": "simple_run_event",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:8ea2165a0d848b66bbd848e93f1aaa4451a420e4e37b69017c44ce0a8d91729c",
+      "outputFingerprint": "sha256:f21ec6c8948e1754262de4c3c6bf1b7ea2e478ea1b34bd96adf9be1e7c415c1b"
+    },
+    {
+      "cardDefinitionId": "simple_sentry_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:6ce476444b782a75c59ce4789ee83c7cd45ad40ca5f5865776c9c783f5cb4303",
+      "outputFingerprint": "sha256:919dd3dab3726d5266dbebbed3dbc7fcb1ef903adf6175ce6837704e1c1e7dff"
+    },
+    {
+      "cardDefinitionId": "simple_setup_hardware",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:27942e680958939303c5520ea1282f2828f0a773ab515bea27ba29e73756d76a",
+      "outputFingerprint": "sha256:e63e0b21880019badfdaab4a921d43b440971b6c66536091efbb2ea88a27ac3e"
+    },
+    {
+      "cardDefinitionId": "simple_tag_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:33bd1af32ca4c97277ef7c8ca6529491f0077bc5b3c39b536447c5de562357c9",
+      "outputFingerprint": "sha256:af663beb474911bcfe4910ead963b1880c3b61e0181161281f0d565e389248ee"
+    },
+    {
+      "cardDefinitionId": "simple_tag_punishment_operation",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:2e5c268d1ccb04f27133a0c54833bf7b11d93e8b419acae02384a94ac31062d6",
+      "outputFingerprint": "sha256:e8f6b46acfa7827655e8217176fc5c4be66d836c108265c05d57b5b71d041b65"
+    },
+    {
+      "cardDefinitionId": "simple_taxing_barrier_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:a88fac28e8d977e8b0684f6316e8fd9d04a566e8bf7f3fde67e78e391c34cdb3",
+      "outputFingerprint": "sha256:d786a452d38564297f396fad62d4ce0900b1b94b60ee6a84bdcc1455a9e430e7"
+    },
+    {
+      "cardDefinitionId": "simple_upgrade",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:c1379e1c6cc583afb0e2690cab73fd8321177d19e2ff6ef198871515bfa0a42c",
+      "outputFingerprint": "sha256:65bee3d69bfbd17adf02c718e2c581be2e357a674444ea06e5de48f27918a8bf"
+    },
+    {
+      "cardDefinitionId": "v08_adaptive_killer",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:9385b48052a2d65fb9027710517051442c54f5cae6f60a1b795e00a87a503ee9",
+      "outputFingerprint": "sha256:18e6996769a5595dc60f9d4905c067cc3da7a6ba8ce72ce0a46e2bb43d373ce4"
+    },
+    {
+      "cardDefinitionId": "v08_archive_planning_operation",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:d9224cc42d5041fa13c8f2a9d8aa231624e4b9dd0a32ac1d5734bcc3562de791",
+      "outputFingerprint": "sha256:faad76d34805cb7eb873a152a284621cf34948c60bb4295fb5c9dbecba375c60"
+    },
+    {
+      "cardDefinitionId": "v08_burst_credit_event",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:43935117bc54269d4fa70284129efbd49a3d52afccebe1d1df9f7c86101a129c",
+      "outputFingerprint": "sha256:29de35f3e2ac495312b6b58bd460665fd2c2daac3a3101b33121ad82082d8617"
+    },
+    {
+      "cardDefinitionId": "v08_cashout_asset",
+      "implementationCoverage": "implementation_backed_declarative",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:57229445cec4d01d07b84ba0c977d3a59878940b0324027f12df08d9035161d3",
+      "outputFingerprint": "sha256:8dc7fe6a51a4fb4913425daebc06bed0ea2f1b2da4c3e00d78fea22a05725736"
+    },
+    {
+      "cardDefinitionId": "v08_credit_surge_operation",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:5a27d37c577ccd9d3bd26467b3c8074b83766f6bedf7dd9e8ec95a33307c31f7",
+      "outputFingerprint": "sha256:cb383e3679b14e9b350082e7f21b7e1cdcdc128c5ad5b835b66b70b6bbfded0f"
+    },
+    {
+      "cardDefinitionId": "v08_deep_draw_event",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:cc6020bd44093c75fa6dee62bd4c77c43d0448534ed5d1bb2266b11c9de24026",
+      "outputFingerprint": "sha256:feac98041182dcd7a798d2cc0f71d399192c689567bf64768017fb9f5123c3d0"
+    },
+    {
+      "cardDefinitionId": "v08_gate_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:61441713af057e482e7110c448dc06424ea5e52ec63c475ee61209d1df4f4a88",
+      "outputFingerprint": "sha256:39c9e68deaf7e07faeb2aa737b805d41f1b24802428acbdbeef61f2987ffcf47"
+    },
+    {
+      "cardDefinitionId": "v08_memory_chip",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:1c5e0478ae090b55b384ce410e522448df6c3acd9a1b55dc554898148a923d4a",
+      "outputFingerprint": "sha256:45b3adb764fe07a0a349e49d55e2a2062bb0610d5be6987d4e11ca082e79113f"
+    },
+    {
+      "cardDefinitionId": "v08_overclock_run_event",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:1a509c87d3dbfb16d10706d7a6bb8eed9b014ad672fdf5358d88e3ab9df2953f",
+      "outputFingerprint": "sha256:27d4880ba103cd8226edc10e719e6d8f422a3412348740a539f07b6e9f212cb4"
+    },
+    {
+      "cardDefinitionId": "v08_precise_decoder",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:bf8c6e0a88470e0843723c7c5c31d23af6771f709b329402da905376ff6f6d23",
+      "outputFingerprint": "sha256:4438768d3135ea077b8128fe58f3402d97beb9cbcafb35de02524761462474eb"
+    },
+    {
+      "cardDefinitionId": "v08_project_agenda",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:24048fbd4d6a74b5b82edf18ae4806bcbf4ab2be34f43042bbcb32e4e8ae0d5f",
+      "outputFingerprint": "sha256:85d8abe6e65f4e30ee440c0f72e75ed0d77382a70e84b7a827282864e048bdd0"
+    },
+    {
+      "cardDefinitionId": "v08_steady_fracter",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:497b349c348a2d34d37892cb7c6cceac43e1a04fdba7e674aa94d7e5e3b591fd",
+      "outputFingerprint": "sha256:9f98223ac886d92059c313e27c6bc56cbf7fb6e8cd05f7d02e02da5544baa034"
+    },
+    {
+      "cardDefinitionId": "v08_wall_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:89aeed4ca2faae3ddde89c169a2cc585a896e8fccd98a6a30cb03ae1d0d09122",
+      "outputFingerprint": "sha256:75cfdc8c12752f35e10266550c4b1a3d489994602feff504c6786d45e3dda821"
+    },
+    {
+      "cardDefinitionId": "v08_watchdog_ice",
+      "implementationCoverage": "definition_only_test_fixture",
+      "manifestStatuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "legacyHintFingerprint": "sha256:64bc09c3caa82529c584643db810dad0f0265b39ac84d5b8940c2d5628e2d1f9",
+      "outputFingerprint": "sha256:5e413ff74e3423317ab827856a532c57a0af618176f276d4c8fba09f8a91d184"
+    }
+  ],
+  "aggregateOutputFingerprint": "sha256:7796aa3522e66cb76b8765a478daafc2f861b68b31bd0a10f9bc0d5be80ada58"
+}

@@ -1,19 +1,23 @@
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
-import generatedCs06AiHints from "../../../data/ai/cs06-ai-hints-generated.json";
+import generatedCardSpecAiHints from "../../../data/ai/card-spec-ai-hints-generated.json";
 import {
-  CS06_AI_HINT_ARTIFACT_SCHEMA_VERSION,
-  CS06_AI_HINT_COMPILER_VERSION,
+  CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
+  CARD_SPEC_AI_HINT_COMPILER_VERSION,
   type AiCardHint,
   type AiRuntimeValueHintKey,
   type AiRuntimeValueHints,
-  type Cs06AiHintArtifact,
+  type CardSpecAiHintArtifact,
 } from "./ai-hint-contracts";
 
 export type { AiCardHint, AiRuntimeValueHintKey, AiRuntimeValueHints };
 
-const generatedArtifact = validateGeneratedArtifact(generatedCs06AiHints);
+const generatedArtifact = validateGeneratedArtifact(generatedCardSpecAiHints);
 export const AI_HINTS_BY_CARD = new Map<string, AiCardHint>();
-const derivedCs06AiHintIds = new Set(generatedArtifact.cardIds);
+const derivedCardSpecAiHintIds = new Set(generatedArtifact.cardIds);
+
+export function cardIdHasGeneratedCardSpecAiHint(cardId: string): boolean {
+  return derivedCardSpecAiHintIds.has(cardId);
+}
 
 for (const hint of activeAiHintsData.cards as AiCardHint[]) {
   if (AI_HINTS_BY_CARD.has(hint.cardId))
@@ -39,14 +43,14 @@ export type CatalogAiHintProvenance =
   | {
       schemaVersion: "ai-hint-provenance-v1";
       authority: "card_spec_compiler";
-      artifactSchemaVersion: typeof CS06_AI_HINT_ARTIFACT_SCHEMA_VERSION;
-      compilerVersion: typeof CS06_AI_HINT_COMPILER_VERSION;
+      artifactSchemaVersion: typeof CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION;
+      compilerVersion: typeof CARD_SPEC_AI_HINT_COMPILER_VERSION;
       cardRulesFingerprint: string;
       planningAnnotationsFingerprint: string;
       evidenceFingerprint: string;
       sourceRefs: readonly [
-        "data/ai/cs06-ai-hints-generated.json",
-        "packages/ai/src/cs06-ai-hint-compiler.ts#deriveCs06AiHint",
+        "data/ai/card-spec-ai-hints-generated.json",
+        "packages/ai/src/card-spec-ai-hint-compiler.ts#deriveCardSpecAiHint",
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
       ];
     };
@@ -79,7 +83,7 @@ export function catalogAiHintReadModelForCardId(
 ): CatalogAiHintReadModel | undefined {
   const hint = AI_HINTS_BY_CARD.get(cardId);
   if (hint === undefined) return undefined;
-  if (!derivedCs06AiHintIds.has(cardId))
+  if (!derivedCardSpecAiHintIds.has(cardId))
     return Object.freeze({
       hint: deepFreezeCatalogReadModel(structuredClone(hint)),
       provenance: LEGACY_AI_HINT_PROVENANCE,
@@ -101,8 +105,8 @@ export function catalogAiHintReadModelForCardId(
       planningAnnotationsFingerprint: record.planningAnnotationsFingerprint,
       evidenceFingerprint: generatedArtifact.evidence.fingerprint,
       sourceRefs: [
-        "data/ai/cs06-ai-hints-generated.json",
-        "packages/ai/src/cs06-ai-hint-compiler.ts#deriveCs06AiHint",
+        "data/ai/card-spec-ai-hints-generated.json",
+        "packages/ai/src/card-spec-ai-hint-compiler.ts#deriveCardSpecAiHint",
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
       ] as const,
     }),
@@ -131,25 +135,27 @@ export function catalogAiHintSummaryForCardId(
   });
 }
 
-export function validateGeneratedArtifact(value: unknown): Cs06AiHintArtifact {
+export function validateGeneratedArtifact(
+  value: unknown,
+): CardSpecAiHintArtifact {
   if (typeof value !== "object" || value === null)
-    throw new Error("invalid_cs06_ai_hint_artifact");
-  const artifact = value as Partial<Cs06AiHintArtifact>;
+    throw new Error("invalid_card_spec_ai_hint_artifact");
+  const artifact = value as Partial<CardSpecAiHintArtifact>;
   if (
-    artifact.schemaVersion !== CS06_AI_HINT_ARTIFACT_SCHEMA_VERSION ||
-    artifact.compilerVersion !== CS06_AI_HINT_COMPILER_VERSION ||
+    artifact.schemaVersion !== CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION ||
+    artifact.compilerVersion !== CARD_SPEC_AI_HINT_COMPILER_VERSION ||
     artifact.evidence?.status !== "ai_supported" ||
     artifact.evidence.scenarioPackId !== "card-support-ai-supported-current" ||
     artifact.evidence.scenarioId !== "active_card_support_ai_supported" ||
     !artifact.evidence.fingerprint.startsWith(
-      "fnv1a64x2:cs06-ai-hint-evidence-v1:",
+      "fnv1a64x2:card-spec-ai-hint-evidence-v2:",
     ) ||
     !Array.isArray(artifact.cardIds) ||
     !Array.isArray(artifact.cards) ||
-    artifact.cardIds.length !== 10 ||
-    artifact.cards.length !== 10
+    artifact.cardIds.length !== 46 ||
+    artifact.cards.length !== 46
   )
-    throw new Error("invalid_cs06_ai_hint_artifact_contract");
+    throw new Error("invalid_card_spec_ai_hint_artifact_contract");
   const expectedIds = [...artifact.cardIds].sort(compareText);
   const actualIds = artifact.cards
     .map((record) => record.cardId)
@@ -170,8 +176,8 @@ export function validateGeneratedArtifact(value: unknown): Cs06AiHintArtifact {
         ),
     )
   )
-    throw new Error("invalid_cs06_ai_hint_artifact_rows");
-  return artifact as Cs06AiHintArtifact;
+    throw new Error("invalid_card_spec_ai_hint_artifact_rows");
+  return artifact as CardSpecAiHintArtifact;
 }
 
 function hasCatalogMechanicalFacts(hint: AiCardHint): boolean {

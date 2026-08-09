@@ -34,14 +34,14 @@ export type AiRuntimeValueHints = Partial<
   Record<AiRuntimeValueHintKey, number>
 >;
 
-export const CS06_AI_HINT_COMPILER_VERSION =
-  "cs06-ai-hint-compiler-v1" as const;
-export const CS06_AI_HINT_ARTIFACT_SCHEMA_VERSION =
-  "cs06-ai-hint-artifact-v1" as const;
+export const CARD_SPEC_AI_HINT_COMPILER_VERSION =
+  "card-spec-ai-hint-compiler-v2" as const;
+export const CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION =
+  "card-spec-ai-hint-artifact-v2" as const;
 
-export type Cs06AiHintArtifact = {
-  schemaVersion: typeof CS06_AI_HINT_ARTIFACT_SCHEMA_VERSION;
-  compilerVersion: typeof CS06_AI_HINT_COMPILER_VERSION;
+export type CardSpecAiHintArtifact = {
+  schemaVersion: typeof CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION;
+  compilerVersion: typeof CARD_SPEC_AI_HINT_COMPILER_VERSION;
   evidence: {
     scenarioPackId: string;
     scenarioId: string;

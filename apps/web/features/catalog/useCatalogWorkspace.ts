@@ -29,6 +29,8 @@ import type {
   CatalogCardSummary,
   CatalogListResponse,
 } from "./catalog-types";
+import type { PublicCardPresentationsById } from "../../app/legacy-card-definition-compatibility";
+import { catalogCardPresentationsFor } from "./catalog-card-presentations";
 import { CatalogDetailRequestCoordinator } from "./catalog-detail-loader";
 
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
@@ -92,6 +94,8 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   const [allCatalogCards, setAllCatalogCards] = useState<CatalogCardSummary[]>(
     [],
   );
+  const [catalogCardPresentationsById, setCatalogCardPresentationsById] =
+    useState<PublicCardPresentationsById>({});
   const [catalogDetailsById, setCatalogDetailsById] = useState<
     Record<string, CatalogCardDetail>
   >({});
@@ -252,14 +256,20 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
   useEffect(() => {
     void fetch("/api/cards/catalog", { cache: "no-store" })
       .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) =>
-        setAllCatalogCards((data.cards ?? []).filter(isCatalogVisibleCard)),
-      )
-      .catch(() => setAllCatalogCards([]));
+      .then((data) => {
+        const cards = data.cards ?? [];
+        setAllCatalogCards(cards.filter(isCatalogVisibleCard));
+        setCatalogCardPresentationsById(catalogCardPresentationsFor(cards));
+      })
+      .catch(() => {
+        setAllCatalogCards([]);
+        setCatalogCardPresentationsById({});
+      });
   }, []);
 
   return {
     allCatalogCards,
+    catalogCardPresentationsById,
     catalogDetailsById,
     ensureCatalogDetails,
     catalogPanelProps: {

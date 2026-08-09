@@ -4,8 +4,9 @@ import {
   type Side,
 } from "@netgrid/shared";
 import {
-  legacyPublicCardDefinition,
-  legacyPublicCardTitle,
+  publicCardPresentation,
+  publicCardTitle,
+  type PublicCardPresentationsById,
 } from "./legacy-card-definition-compatibility";
 import {
   isDataFortReclamationInstallPayload,
@@ -32,6 +33,7 @@ export type ChronicleIcon = "discard";
 
 export type ChronicleContext = {
   side: Side;
+  cardPresentationsById?: PublicCardPresentationsById;
   cardTitle?: string | null;
   cardText?: string | null;
   cardType?: string | null;
@@ -117,6 +119,29 @@ export function formatChronicleEvent(
   side: Side,
   context: Omit<ChronicleContext, "side"> = {},
 ): ChronicleItem {
+  const titleForDefinitionId = (definitionId: string | undefined) =>
+    publicCardTitle(definitionId, context.cardPresentationsById);
+  const targetCardTitleFromPayload = (payload: Record<string, unknown>) => {
+    const explicitTitle = stringValue(payload.targetCardTitle);
+    return (
+      explicitTitle ??
+      titleForDefinitionId(stringValue(payload.targetCardDefinitionId))
+    );
+  };
+  const publicRevealTitleFromPayload = (payload: Record<string, unknown>) =>
+    titleForDefinitionId(stringValue(payload.publicRevealDefinitionId));
+  const titlesForDefinitionIds = (value: string | undefined) =>
+    definitionIdsFromCsv(value)
+      .map(titleForDefinitionId)
+      .filter((title): title is string => Boolean(title));
+  const iceTitlesForDefinitionIds = (value: string | undefined) =>
+    definitionIdsFromCsv(value)
+      .map((definitionId) =>
+        publicCardPresentation(definitionId, context.cardPresentationsById),
+      )
+      .flatMap((definition) =>
+        definition?.type === "ice" ? [definition.title] : [],
+      );
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   const actor = sideValue(payload.actor);
@@ -189,6 +214,7 @@ export function formatChronicleEvent(
   const successfulRunCreditLoss = successfulRunCreditLossChronicleSummary(
     payload,
     cardTitle,
+    context.cardPresentationsById,
   );
   if (successfulRunCreditLoss) {
     return {
@@ -357,7 +383,11 @@ export function formatChronicleEvent(
         break;
       }
       if (isSecurityPurgePayload(payload)) {
-        const summary = securityPurgeChronicleSummary(payload, cardTitle);
+        const summary = securityPurgeChronicleSummary(
+          payload,
+          cardTitle,
+          context.cardPresentationsById,
+        );
         category = "agenda";
         importance = "important";
         visibility = "public";
@@ -1810,7 +1840,10 @@ export function formatChronicleEvent(
         break;
       }
       if (hiddenZoneAction === "scored_agenda_hq_agenda_shuffle_credits") {
-        const revealedTitles = publicRevealTitlesFromPayload(payload);
+        const revealedTitles = publicRevealTitlesFromPayload(
+          payload,
+          context.cardPresentationsById,
+        );
         const shownCount =
           numberValue(payload.shownCount) ?? revealedTitles.length;
         const shuffledIntoRndCount =
@@ -1959,6 +1992,7 @@ export function formatChronicleEvent(
         const summary = gypsyScheduleAnalyzerChronicleSummary(
           payload,
           cardTitle,
+          context.cardPresentationsById,
         );
         category = "run";
         importance = "important";
@@ -2409,8 +2443,10 @@ export function formatChronicleEvent(
         const installSuffix = installEffect?.suffix
           ? ` und ${installEffect.suffix}`
           : "";
-        const deckReplacementSuffix =
-          runnerHardwareDeckReplacementSuffix(payload);
+        const deckReplacementSuffix = runnerHardwareDeckReplacementSuffix(
+          payload,
+          context.cardPresentationsById,
+        );
         if (actor === "runner" && selectedServerLabel) {
           category = "card";
           title = phrase(
@@ -2422,7 +2458,10 @@ export function formatChronicleEvent(
             "Resource",
             selectedServerLabel,
             ...(installEffect?.chips ?? []),
-            ...runnerHardwareDeckReplacementChips(payload),
+            ...runnerHardwareDeckReplacementChips(
+              payload,
+              context.cardPresentationsById,
+            ),
           );
         } else if (actor === "corp" && (redactedKind || !cardTitle)) {
           category = "hidden";
@@ -2445,7 +2484,10 @@ export function formatChronicleEvent(
             "Install",
             installAreaFromPayload(serverLabel, zoneLabel, label),
             ...(installEffect?.chips ?? []),
-            ...runnerHardwareDeckReplacementChips(payload),
+            ...runnerHardwareDeckReplacementChips(
+              payload,
+              context.cardPresentationsById,
+            ),
           );
         }
       }
@@ -2592,6 +2634,7 @@ export function formatChronicleEvent(
         const summary = gypsyScheduleAnalyzerChronicleSummary(
           payload,
           cardTitle,
+          context.cardPresentationsById,
         );
         category = "run";
         importance = "important";
@@ -2749,7 +2792,11 @@ export function formatChronicleEvent(
       category = "agenda";
       importance = "important";
       if (isSecurityPurgePayload(payload)) {
-        const summary = securityPurgeChronicleSummary(payload, cardTitle);
+        const summary = securityPurgeChronicleSummary(
+          payload,
+          cardTitle,
+          context.cardPresentationsById,
+        );
         title = phrase(subject, summary.title);
         description = summary.description;
         chips.push(...summary.chips);
@@ -3312,6 +3359,7 @@ export function formatChronicleEvent(
         const summary = gypsyScheduleAnalyzerChronicleSummary(
           payload,
           cardTitle,
+          context.cardPresentationsById,
         );
         category = "run";
         importance = "important";
@@ -4234,6 +4282,7 @@ export function formatChronicleEvent(
 export function formatChronicleEffectItems(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem[] {
   const effects = resolvedEffectsFromPayload(
     event.publicPayload.resolvedEffects,
@@ -4244,16 +4293,36 @@ export function formatChronicleEffectItems(
         !shouldMergeCardResolverEffect(event, effect) &&
         !shouldSuppressPaymentSupportCreditEffect(event, effect),
     )
-    .map((effect, index) => formatChronicleEffect(event, effect, index, side));
-  const payloadItem = endTurnCreditPayoutChronicleItem(event, side);
+    .map((effect, index) =>
+      formatChronicleEffect(event, effect, index, side, cardPresentationsById),
+    );
+  const payloadItem = endTurnCreditPayoutChronicleItem(
+    event,
+    side,
+    cardPresentationsById,
+  );
   const traceHardwareWreckerItem = traceHardwareWreckerChronicleItem(
     event,
     side,
+    cardPresentationsById,
   );
-  const tagGainItem = tagGainChronicleItem(event, side, effects);
+  const tagGainItem = tagGainChronicleItem(
+    event,
+    side,
+    effects,
+    cardPresentationsById,
+  );
   const aiBoonRunStrengthItem = aiBoonRunStrengthChronicleItem(event);
-  const insideJobAutoPassItem = insideJobAutoPassChronicleItem(event, side);
-  const encounterTaxItem = encounterTaxChronicleItem(event, side);
+  const insideJobAutoPassItem = insideJobAutoPassChronicleItem(
+    event,
+    side,
+    cardPresentationsById,
+  );
+  const encounterTaxItem = encounterTaxChronicleItem(
+    event,
+    side,
+    cardPresentationsById,
+  );
   const runnerForgoneActionItem = runnerForgoneActionChronicleItem(
     event,
     effects,
@@ -4326,6 +4395,7 @@ function shouldSuppressPaymentSupportCreditEffect(
 function encounterTaxChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const requiredAmount = positiveIntegerValue(payload.encounterTaxForFutureIce);
@@ -4335,12 +4405,13 @@ function encounterTaxChronicleItem(
   const sourceDefinitionId =
     stringValue(payload.encounterTaxSource) ?? BALL_AND_CHAIN_ID;
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ?? "Ball and Chain";
+    publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
+    "Ball and Chain";
   const encounteredIceDefinitionId =
     stringValue(payload.targetIceDefinitionId) ??
     stringValue(payload.cardDefinitionId);
   const encounteredIceTitle =
-    titleForDefinitionId(encounteredIceDefinitionId) ??
+    publicCardTitle(encounteredIceDefinitionId, cardPresentationsById) ??
     stringValue(payload.targetIceTitle) ??
     stringValue(payload.title);
   const encounteredIceSuffix =
@@ -4387,6 +4458,7 @@ function encounterTaxChronicleItem(
 function insideJobAutoPassChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   if (payload.runStartBypassAutoPassedIce !== true) return undefined;
@@ -4395,7 +4467,8 @@ function insideJobAutoPassChronicleItem(
   );
   const passedIcePosition = positiveIntegerValue(payload.passedIcePosition);
   const passedIceTitle =
-    titleForDefinitionId(passedIceDefinitionId) ?? "ein gerezztes ICE";
+    publicCardTitle(passedIceDefinitionId, cardPresentationsById) ??
+    "ein gerezztes ICE";
   const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
   const subject = side === "runner" ? "Du hast" : "Der Runner hat";
 
@@ -4462,6 +4535,7 @@ function tagGainChronicleItem(
   event: PublicGameEvent,
   side: Side,
   effects: ResolvedGameEffect[],
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const tagsAdded = tagGainAmountFromPublicPayload(payload);
@@ -4496,7 +4570,7 @@ function tagGainChronicleItem(
       stringValue(payload.traceAutoSuccessSourceDefinitionId));
   const primarySourceTitle = drawTaxOnly
     ? "City Surveillance"
-    : (titleForDefinitionId(sourceDefinitionId) ??
+    : (titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
       stringValue(payload.sourceTitle) ??
       stringValue(payload.title));
   const additionalSourceDefinitionId = stringValue(
@@ -4504,6 +4578,7 @@ function tagGainChronicleItem(
   );
   const additionalSourceTitle = titleForDefinitionId(
     additionalSourceDefinitionId,
+    cardPresentationsById,
   );
   const sourceTitles = Array.from(
     new Set(
@@ -4552,6 +4627,7 @@ function tagGainChronicleItem(
 function traceHardwareWreckerChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   if (
@@ -4562,12 +4638,13 @@ function traceHardwareWreckerChronicleItem(
   const actor = sideValue(payload.actor);
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.title) ??
     "Karteneffekt";
   const trashedCount = numberValue(payload.trashedCount) ?? 0;
   const trashedTitle = titleForDefinitionId(
     stringValue(payload.trashedCardDefinitionId),
+    cardPresentationsById,
   );
   const damageAmount = numberValue(payload.damageAmount) ?? 0;
   const damageType = damageTypeLabel(stringValue(payload.damageType) ?? "meat");
@@ -4858,6 +4935,7 @@ function formatChronicleEffect(
   effect: ResolvedGameEffect,
   index: number,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem {
   let actor = sideValue(effect.side);
   let subject = subjectFor(actor, side, false);
@@ -4888,6 +4966,7 @@ function formatChronicleEffect(
       sourceTitle,
       sourceDefinitionId,
       amount,
+      cardPresentationsById,
     );
     if (accessDamage) return accessDamage;
     const accessAmbushTrash = accessAmbushTrashInstalledChronicleItem(
@@ -4895,6 +4974,7 @@ function formatChronicleEffect(
       effect,
       index,
       actor,
+      cardPresentationsById,
     );
     if (accessAmbushTrash) return accessAmbushTrash;
     const redactedAccessAmbushCounter =
@@ -4904,6 +4984,7 @@ function formatChronicleEffect(
         index,
         actor,
         subject,
+        cardPresentationsById,
       );
     if (redactedAccessAmbushCounter) return redactedAccessAmbushCounter;
     return redactedChronicleEffectItem(
@@ -4938,7 +5019,9 @@ function formatChronicleEffect(
           ? "important"
           : "normal";
     const source =
-      sourceTitle ?? titleForDefinitionId(sourceDefinitionId) ?? "Die Quelle";
+      sourceTitle ??
+      titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
+      "Die Quelle";
     const rollText =
       dieRoll !== undefined ? ` würfelt eine ${dieRoll}` : " würfelt";
     const gainsAction = subject === "Du" ? "Du erhältst" : `${subject} erhält`;
@@ -5114,6 +5197,7 @@ function formatChronicleEffect(
       const pattelAccessCounter = pattelAccessCounterChronicleText(
         event,
         effect,
+        cardPresentationsById,
       );
       if (pattelAccessCounter) {
         category = "run";
@@ -5349,10 +5433,11 @@ function formatChronicleEffect(
         amount,
         damageType,
         source,
+        cardPresentationsById,
       );
       const trashedProgramTitle =
         subroutineType === "trash_installed_program" && cardsTrashed > 0
-          ? (titleForDefinitionId(cardDefinitionId) ??
+          ? (titleForDefinitionId(cardDefinitionId, cardPresentationsById) ??
             cardTitle ??
             "ein Programm")
           : undefined;
@@ -5622,11 +5707,14 @@ function accessEffectDamageChronicleItem(
   sourceTitle: string | undefined,
   sourceDefinitionId: string | undefined,
   amount: number,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
   if (effect.kind !== "damage" || effect.reason !== "access_effect")
     return null;
   const source =
-    sourceTitle ?? titleForDefinitionId(sourceDefinitionId) ?? "Access-Effekt";
+    sourceTitle ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
+    "Access-Effekt";
   const damageType = damageTypeLabel(stringValue(effect.damageType));
   const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
   return {
@@ -5670,6 +5758,7 @@ function accessAmbushTrashInstalledChronicleItem(
   effect: ResolvedGameEffect,
   index: number,
   actor: Side | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
   if (effect.kind !== "trash_card" || effect.reason !== "access_effect")
     return null;
@@ -5684,11 +5773,12 @@ function accessAmbushTrashInstalledChronicleItem(
   if (!isAccessAmbushTrash) return null;
   const source =
     stringValue(effect.sourceTitle) ??
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     "Access-Ambush";
   const trashedTitles = titlesForDefinitionIds(
     stringValue(payload.trashedCardDefinitionIds) ??
       stringValue(effect.cardDefinitionId),
+    cardPresentationsById,
   );
   const trashedCount =
     numberValue(payload.trashedCount) ??
@@ -5742,6 +5832,7 @@ function accessAmbushTrashInstalledChronicleItem(
 function pattelAccessCounterChronicleText(
   event: PublicGameEvent,
   effect: ResolvedGameEffect,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): { title: string; description?: string; targetChips?: string[] } | null {
   if (
     effect.kind !== "counter_change" ||
@@ -5754,7 +5845,8 @@ function pattelAccessCounterChronicleText(
     stringValue(payload.ambushDefinitionId) ??
     stringValue(payload.accessEffectSourceDefinitionId);
   const sourceTitle =
-    stringValue(effect.sourceTitle) ?? titleForDefinitionId(sourceDefinitionId);
+    stringValue(effect.sourceTitle) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById);
   const isPattelAccessCounter =
     effect.reason === "access_effect" ||
     sourceDefinitionId === "onr_proteus_068_pattel-antibody" ||
@@ -5764,6 +5856,7 @@ function pattelAccessCounterChronicleText(
   if (!isPattelAccessCounter) return null;
   const targetTitles = titlesForDefinitionIds(
     stringValue(payload.targetCardDefinitionIds),
+    cardPresentationsById,
   );
   const added = numberValue(effect.addedCounterAmount) ?? 0;
   const targetCount =
@@ -5806,6 +5899,7 @@ function isPattelAccessCounterType(counterType: unknown): boolean {
 function endTurnCreditPayoutChronicleItem(
   event: PublicGameEvent,
   side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
@@ -5816,7 +5910,7 @@ function endTurnCreditPayoutChronicleItem(
   if (gainedCredits === undefined || gainedCredits <= 0) return undefined;
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
     stringValue(payload.title);
   const actor = sideValue(payload.actor);
@@ -5875,6 +5969,7 @@ function redactedAccessAmbushCounterChronicleItem(
   index: number,
   actor: Side | undefined,
   subject: string,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): ChronicleItem | null {
   if (effect.kind !== "counter_change") return null;
   const payload = event.publicPayload ?? {};
@@ -5885,7 +5980,7 @@ function redactedAccessAmbushCounterChronicleItem(
   if (!sourceDefinitionId) return null;
   const source =
     stringValue(effect.sourceTitle) ??
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     "Access-Ambush";
   const counterText = counterLabel(effect.counterType);
   const added =
@@ -6439,10 +6534,14 @@ function purgeableRunnerVirusCounterSummaryParts(
 function securityPurgeChronicleSummary(
   payload: Record<string, unknown>,
   fallbackTitle: string | null | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): { title: string; description?: string; chips: string[] } {
   const agendaTitle =
     fallbackTitle ??
-    titleForDefinitionId(stringValue(payload.sourceDefinitionId)) ??
+    titleForDefinitionId(
+      stringValue(payload.sourceDefinitionId),
+      cardPresentationsById,
+    ) ??
     "Security Purge";
   const revealedCount = numberValue(payload.revealedCount) ?? 0;
   const installedIceCount = numberValue(payload.installedIceCount) ?? 0;
@@ -6454,12 +6553,15 @@ function securityPurgeChronicleSummary(
   const runnerReviewResolved = payload.agendaPurgeRunnerReviewResolved === true;
   const revealedTitles = titlesForDefinitionIds(
     stringValue(payload.publicRevealDefinitionIds),
+    cardPresentationsById,
   );
   const revealedIceTitles = iceTitlesForDefinitionIds(
     stringValue(payload.publicRevealDefinitionIds),
+    cardPresentationsById,
   );
   const installedTitles = titlesForDefinitionIds(
     stringValue(payload.installedIceDefinitionIds),
+    cardPresentationsById,
   );
   const installedServerLabels = (
     stringValue(payload.installedIceServerLabels) ?? ""
@@ -6469,6 +6571,7 @@ function securityPurgeChronicleSummary(
     .filter((label): label is string => Boolean(label));
   const trashedTitles = titlesForDefinitionIds(
     stringValue(payload.trashedDefinitionIds),
+    cardPresentationsById,
   );
   const revealedDescription =
     revealedTitles.length > 0
@@ -7009,6 +7112,7 @@ function subroutineDamagePreventionSummary(
   effectAmount: number,
   damageType: string | undefined,
   subroutineSource: string,
+  cardPresentationsById?: PublicCardPresentationsById,
 ):
   | {
       originalAmount: number;
@@ -7034,7 +7138,7 @@ function subroutineDamagePreventionSummary(
     stringValue(payload.sourceDefinitionId) ??
     stringValue(payload.cardDefinitionId);
   const sourceTitle =
-    titleForDefinitionId(preventionSourceDefinitionId) ??
+    titleForDefinitionId(preventionSourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.title) ??
     stringValue(payload.sourceTitle);
   if (!sourceTitle || sourceTitle === subroutineSource) return undefined;
@@ -7083,6 +7187,7 @@ function accessReplacementEffectParts(
 function successfulRunCreditLossChronicleSummary(
   payload: Record<string, unknown>,
   fallbackCardTitle: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): {
   title: string;
   description: string;
@@ -7100,7 +7205,7 @@ function successfulRunCreditLossChronicleSummary(
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   if (!sourceDefinitionId) return null;
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
     fallbackCardTitle ??
     "Run-Effekt";
@@ -7146,6 +7251,7 @@ function successfulRunCreditLossChronicleSummary(
 function gypsyScheduleAnalyzerChronicleSummary(
   payload: Record<string, unknown>,
   fallbackCardTitle: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): {
   title: string;
   description: string;
@@ -7156,11 +7262,14 @@ function gypsyScheduleAnalyzerChronicleSummary(
   const sourceDefinitionId =
     stringValue(payload.sourceDefinitionId) ?? GYPSY_SCHEDULE_ANALYZER_ID;
   const sourceTitle =
-    titleForDefinitionId(sourceDefinitionId) ??
+    titleForDefinitionId(sourceDefinitionId, cardPresentationsById) ??
     stringValue(payload.sourceTitle) ??
     fallbackCardTitle ??
     "Gypsy Schedule Analyzer";
-  const revealedTitles = publicRevealTitlesFromPayload(payload);
+  const revealedTitles = publicRevealTitlesFromPayload(
+    payload,
+    cardPresentationsById,
+  );
   const revealedCount =
     numberValue(payload.revealedCount) ?? revealedTitles.length;
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
@@ -7201,7 +7310,10 @@ function gypsyScheduleAnalyzerChronicleSummary(
   const storedAgendaDefinitionId =
     stringValue(payload.storedAgendaDefinitionId) ??
     definitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))[0];
-  const storedAgendaTitle = titleForDefinitionId(storedAgendaDefinitionId);
+  const storedAgendaTitle = titleForDefinitionId(
+    storedAgendaDefinitionId,
+    cardPresentationsById,
+  );
   const agendaStored =
     payload.agendaStoredInHq === true || Boolean(storedAgendaDefinitionId);
   const shuffledIntoRdCount =
@@ -7236,9 +7348,11 @@ function gypsyScheduleAnalyzerChronicleSummary(
 
 function publicRevealTitlesFromPayload(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
   const fromIds = titlesForDefinitionIds(
     stringValue(payload.publicRevealDefinitionIds),
+    cardPresentationsById,
   );
   if (fromIds.length > 0) return fromIds;
   const rawTitles = stringValue(payload.publicRevealTitles);
@@ -7501,23 +7615,29 @@ function shellTradersAbilityFromPayload(
 
 function targetCardTitleFromPayload(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
   const explicitTitle = stringValue(payload.targetCardTitle);
   if (explicitTitle) return explicitTitle;
   const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
-  return legacyPublicCardTitle(targetDefinitionId);
+  return publicCardTitle(targetDefinitionId, cardPresentationsById);
 }
 
 function publicRevealTitleFromPayload(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
-  return titleForDefinitionId(stringValue(payload.publicRevealDefinitionId));
+  return titleForDefinitionId(
+    stringValue(payload.publicRevealDefinitionId),
+    cardPresentationsById,
+  );
 }
 
 function titleForDefinitionId(
   definitionId: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string | undefined {
-  return legacyPublicCardTitle(definitionId);
+  return publicCardTitle(definitionId, cardPresentationsById);
 }
 
 function definitionIdsFromCsv(value: string | undefined): string[] {
@@ -7529,15 +7649,25 @@ function definitionIdsFromCsv(value: string | undefined): string[] {
     : [];
 }
 
-function titlesForDefinitionIds(value: string | undefined): string[] {
+function titlesForDefinitionIds(
+  value: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string[] {
   return definitionIdsFromCsv(value)
-    .map((definitionId) => titleForDefinitionId(definitionId))
+    .map((definitionId) =>
+      titleForDefinitionId(definitionId, cardPresentationsById),
+    )
     .filter((title): title is string => Boolean(title));
 }
 
-function iceTitlesForDefinitionIds(value: string | undefined): string[] {
+function iceTitlesForDefinitionIds(
+  value: string | undefined,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string[] {
   return definitionIdsFromCsv(value)
-    .map((definitionId) => legacyPublicCardDefinition(definitionId))
+    .map((definitionId) =>
+      publicCardPresentation(definitionId, cardPresentationsById),
+    )
     .flatMap((definition) =>
       definition?.type === "ice" ? [definition.title] : [],
     );
@@ -7545,10 +7675,12 @@ function iceTitlesForDefinitionIds(value: string | undefined): string[] {
 
 function runnerHardwareDeckReplacementSuffix(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string {
   if (payload.deckUniqueReplacement !== true) return "";
   const titles = titlesForDefinitionIds(
     stringValue(payload.trashedDeckDefinitionIds),
+    cardPresentationsById,
   );
   const target =
     titles.length > 0
@@ -7560,10 +7692,12 @@ function runnerHardwareDeckReplacementSuffix(
 
 function runnerHardwareDeckReplacementChips(
   payload: Record<string, unknown>,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string[] {
   if (payload.deckUniqueReplacement !== true) return [];
   const titles = titlesForDefinitionIds(
     stringValue(payload.trashedDeckDefinitionIds),
+    cardPresentationsById,
   );
   return [
     "Deck-Einzigartigkeit",

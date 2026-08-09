@@ -29,6 +29,52 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
       ]),
     );
   });
+
+  it("keeps the remote-contest owner and target when a migrated run event wins", () => {
+    const expectedTargetByScenario = new Map([
+      ["runner_real_target_choice_hq_remote_mix", "remote_1"],
+      ["runner_real_remote_score_threat", "remote_1"],
+      ["runner_real_remote_known_agenda_contest", "remote_2"],
+    ]);
+    const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
+      (scenario) => expectedTargetByScenario.has(scenario.scenarioId),
+    );
+
+    expect(scenarios).toHaveLength(3);
+    for (const scenario of scenarios) {
+      resetResidentPlanPortfolioMemory();
+      resetRunnerRunPlanMemory();
+      resetStrategicIntentMemory();
+      const decision = chooseAiAction(scenario.input, {
+        persistTacticalPlanMemory: false,
+      });
+      expect(decision.selectionKind ?? "direct").toBe("direct");
+      const selected = scenario.input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      );
+      const expectedTarget = expectedTargetByScenario.get(scenario.scenarioId);
+      const sourceDefinitionId = scenario.input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === selected?.source,
+      )?.definitionId;
+
+      expect(selected).toMatchObject({
+        type: "play_event",
+        payload: {
+          cardId: selected?.source,
+          serverId: expectedTarget,
+          runnerEventRun: true,
+        },
+      });
+      expect(sourceDefinitionId).toBe("simple_run_event");
+      expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
+      expect(decision.decisionDebug?.planFirstDecision?.route).toMatchObject({
+        capabilityId: "contest_remote",
+        actionType: "play_event",
+        semanticActionType: "play.runner_event",
+        target: { kind: "server", id: expectedTarget },
+      });
+    }
+  });
 });
 
 function evaluateAnnotatedScenarios(

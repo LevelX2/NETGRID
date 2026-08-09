@@ -67,13 +67,22 @@ export type PrintingSpec = {
 export type CardPublicationSpec =
   | {
       schemaVersion: "card-publication-v1";
-      status: "active" | "experimental";
+      status: "active";
       blockReason?: never;
+      catalogBlockReason?: never;
+    }
+  | {
+      schemaVersion: "card-publication-v1";
+      status: "experimental";
+      blockReason?: never;
+      /** Optional catalog-only diagnostic; never implies runtime support. */
+      catalogBlockReason?: string;
     }
   | {
       schemaVersion: "card-publication-v1";
       status: "disabled";
       blockReason: string;
+      catalogBlockReason?: never;
     };
 
 export type SetSpec = {

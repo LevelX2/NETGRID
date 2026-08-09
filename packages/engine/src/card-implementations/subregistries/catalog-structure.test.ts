@@ -5,8 +5,8 @@ import {
   legacyCardImplementationForDefinitionId,
 } from "../registry";
 import {
-  CS06_CARD_DEFINITION_IDS,
-  cs06CardImplementations,
+  cardSpecImplementationDefinitionIds,
+  cardSpecImplementations,
 } from "@netgrid/cards/engine";
 import {
   CARD_IMPLEMENTATION_CATALOG,
@@ -41,16 +41,12 @@ const EXPECTED_GROUP_KEYS = [
   "proteus:runner:hardware",
   "proteus:runner:program",
   "proteus:runner:resource",
-  "demo:corp:asset",
-  "v08:corp:asset",
 ] as const;
 
 const SET_PREFIX = {
   classic: "onr_classic_",
-  demo: "simple_",
   "onr-v1": "onr_v1_",
   proteus: "onr_proteus_",
-  v08: "v08_",
 } as const;
 
 describe("semantic CardImplementation catalog", () => {
@@ -65,16 +61,16 @@ describe("semantic CardImplementation catalog", () => {
     expect(groupKeys).toEqual(EXPECTED_GROUP_KEYS);
     expect(new Set(groupKeys).size).toBe(groupKeys.length);
     expect(CARD_IMPLEMENTATION_CATALOG).toEqual(flattened);
-    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(573);
-    expect(cs06CardImplementations()).toHaveLength(10);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(583);
+    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(571);
+    expect(cardSpecImplementations()).toHaveLength(30);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(601);
     expect(CARD_IMPLEMENTATIONS.slice(0, flattened.length)).toEqual(flattened);
     expect(
       CARD_IMPLEMENTATIONS.slice(flattened.length).map(
         (entry) => entry.cardDefinitionId,
       ),
-    ).toEqual(CS06_CARD_DEFINITION_IDS);
-    for (const definitionId of CS06_CARD_DEFINITION_IDS)
+    ).toEqual(cardSpecImplementationDefinitionIds());
+    for (const definitionId of cardSpecImplementationDefinitionIds())
       expect(
         legacyCardImplementationForDefinitionId(definitionId),
       ).toBeUndefined();

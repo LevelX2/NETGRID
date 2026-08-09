@@ -1,11 +1,9 @@
 import originalsetCardsData from "../../../data/cards/originalset-v1-cards.json";
 import classicCardsData from "../../../data/cards/classic-cards.json";
 import proteusCardsData from "../../../data/cards/proteus-cards.json";
-import testsetCardsData from "../../../data/cards/testset-cards.json";
 import classicSupportData from "../../../data/manifests/classic-card-support.json";
 import originalsetSupportData from "../../../data/manifests/originalset-v1-card-support.json";
 import proteusSupportData from "../../../data/manifests/proteus-card-support.json";
-import testsetSupportData from "../../../data/manifests/testset-card-support.json";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
   getCardSpecSupportSummary,
@@ -91,10 +89,6 @@ export type LoadedCardSet = {
 
 const LEGACY_CARD_SET_FILES: LoadedCardSet[] = [
   {
-    set: testsetCardsData as CardSetFile,
-    support: testsetSupportData as CardSupportFile,
-  },
-  {
     set: originalsetCardsData as CardSetFile,
     support: originalsetSupportData as CardSupportFile,
   },
@@ -114,9 +108,10 @@ const CARD_SPEC_AI_SCENARIO_REF =
 export type CardSpecSupportEvidence = {
   cardDefinitionId: string;
   validationStatus: "valid";
-  runtimeProjectionStatus: "playable_mvp";
-  planningProjectionStatus: "available";
+  runtimeProjectionStatus: "playable_mvp" | "catalog_only";
+  planningProjectionStatus: "available" | "unavailable";
   releaseEligibilityStatus: "active" | "ineligible";
+  catalogBlockReason?: string;
 };
 
 export type CardSpecSupportErrorCode =
@@ -160,8 +155,8 @@ export function deriveCardSpecSupportEntry(
       "missing_ai_scenario_evidence",
       cardDefinitionId,
     );
-  const implemented = evidence.runtimeProjectionStatus === "playable_mvp";
-  const engineSupported = implemented;
+  const engineSupported = evidence.runtimeProjectionStatus === "playable_mvp";
+  const implemented = engineSupported;
   const playable = catalogReady && engineSupported && releaseEligible;
   const humanPlayable = playable;
   const deckLegal = humanPlayable;
@@ -189,7 +184,7 @@ export function deriveCardSpecSupportEntry(
       ai_supported: aiSupported,
       deck_legal: deckLegal,
       format_legal: formatLegal,
-      blocked: !playable,
+      blocked: !playable && evidence.catalogBlockReason !== undefined,
     },
     support: {
       resolverRef: engineSupported
@@ -199,13 +194,9 @@ export function deriveCardSpecSupportEntry(
       aiHintRef: null,
       scenarioRefs: aiSupported ? [CARD_SPEC_AI_SCENARIO_REF] : [],
     },
-    ...(!playable
+    ...(evidence.catalogBlockReason !== undefined
       ? {
-          blockReasons: [
-            !releaseEligible
-              ? "publication_not_release_eligible"
-              : "runtime_projection_incomplete",
-          ],
+          blockReasons: [evidence.catalogBlockReason],
         }
       : {}),
   };
@@ -247,10 +238,6 @@ function buildCardSetFiles(): LoadedCardSet[] {
     if (!publicSetViews.has(printing.setId))
       throw new Error(
         `CardSpec ${view.cardDefinitionId} references missing SetSpec ${printing.setId}.`,
-      );
-    if (!legacySetIds.has(printing.setId))
-      throw new Error(
-        `CardSpec ${view.cardDefinitionId} has no catalog set target ${printing.setId}.`,
       );
     const rarity =
       printing.rarity === undefined
@@ -326,6 +313,26 @@ function buildCardSetFiles(): LoadedCardSet[] {
     };
   });
 
+  for (const [setId, cards] of cardSpecCardsBySet) {
+    if (legacySetIds.has(setId)) continue;
+    const setView = publicSetViews.get(setId);
+    if (setView === undefined)
+      throw new Error(`CardSpec set ${setId} has no public SetSpec.`);
+    cardSetFiles.push({
+      set: {
+        schemaVersion: "card-set-v1",
+        setId,
+        setName: setView.name,
+        cards,
+      },
+      support: {
+        schemaVersion: "card-support-v1",
+        setId,
+        cards: cardSpecSupportBySet.get(setId) ?? [],
+      },
+    });
+  }
+
   const materializedCardSpecIds = new Set(
     cardSetFiles
       .flatMap(({ set }) => set.cards)
@@ -337,7 +344,18 @@ function buildCardSetFiles(): LoadedCardSet[] {
       throw new Error(
         `CardSpec ${view.cardDefinitionId} was not materialized in the catalog.`,
       );
-  return cardSetFiles;
+  return cardSetFiles
+    .map((loaded, sourceIndex) => ({ loaded, sourceIndex }))
+    .sort((left, right) => {
+      const leftOrder =
+        publicSetViews.get(left.loaded.set.setId)?.sortOrder ??
+        Number.MAX_SAFE_INTEGER;
+      const rightOrder =
+        publicSetViews.get(right.loaded.set.setId)?.sortOrder ??
+        Number.MAX_SAFE_INTEGER;
+      return leftOrder - rightOrder || left.sourceIndex - right.sourceIndex;
+    })
+    .map(({ loaded }) => loaded);
 }
 
 const CARD_SET_FILES = buildCardSetFiles();

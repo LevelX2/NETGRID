@@ -1,5 +1,9 @@
 import type { Side } from "@netgrid/shared";
-import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
+import {
+  AI_HINTS_BY_CARD,
+  cardIdHasGeneratedCardSpecAiHint,
+  RUNTIME_CARDS,
+} from "./ai-hints";
 import { rolesMatch } from "./runtime/role-match";
 
 export function deckDoctrineCardIsAiSupported(cardId: string): boolean {
@@ -10,6 +14,11 @@ export function rolesForDeckDoctrineCard(cardId: string): string[] {
   if (!cardId) return [];
   const runtimeCard = RUNTIME_CARDS[cardId];
   const hint = AI_HINTS_BY_CARD.get(cardId);
+  if (cardIdHasGeneratedCardSpecAiHint(cardId)) {
+    if (hint === undefined)
+      throw new Error(`missing_generated_card_spec_ai_hint: ${cardId}`);
+    return sortedUnique([...(hint.roles ?? []), ...(hint.planRoles ?? [])]);
+  }
   const inferred = inferredRoles(runtimeCard);
   return sortedUnique([
     ...(hint?.roles ?? []),

@@ -12,6 +12,10 @@
   "planRoleAliases": {
     "remove_tags": "clear_tags"
   },
+  "reviewedPlanRoles": {
+    "setup": "direct_or_doctrine_effect",
+    "tempo": "direct_decision_effect"
+  },
   "reviewedSingletonRoles": [
     "access_ambush",
     "access_punisher",
@@ -62,7 +66,6 @@
     "killer_support",
     "low_install_breaker",
     "memory_pressure",
-    "no_ability_agenda",
     "overadvance_agenda",
     "persistent_counter",
     "persistent_liability",
@@ -95,7 +98,6 @@
     "tag_prevention",
     "tag_protection",
     "temporary_program_install",
-    "testset_baseline_agenda",
     "trace_pool",
     "trace_support",
     "trash_for_value",

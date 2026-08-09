@@ -9,6 +9,7 @@ import type {
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { normalizeSubtypeLabel } from "../../ability-engine/card-implementation-modifiers";
 import {
+  icebreakerAbilityBindingPayload,
   icebreakerAbilityHasSpecialEffect,
   icebreakerAbilitiesForDefinition,
   type RuntimeIcebreakerAbility,
@@ -91,6 +92,7 @@ export type RunnerEncounterActionHost = {
       sourceCardInstanceId: CardInstanceId,
       abilityId: string,
       encounteredIceId?: CardInstanceId,
+      bindingKind?: "card_spec_capability_key",
     ) => Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements">;
   };
   costs: {
@@ -264,11 +266,13 @@ export function buildRunnerEncounterActions(
                 iceId: encounteredIceId,
                 pumpAmount: amount,
                 futureActionDebtAdded: amount,
+                ...icebreakerAbilityBindingPayload(pump, breakerId),
               },
               host.actions.abilityMetadata(
                 breakerId,
                 pump.id,
                 encounteredIceId,
+                abilityBindingKind(pump),
               ),
             ),
           );
@@ -280,8 +284,17 @@ export function buildRunnerEncounterActions(
             `${breaker.title}: Stärke +${pump.amount ?? 1}`,
             breakerId,
             [{ credits: pump.cost.credits }],
-            { breakerId, iceId: encounteredIceId },
-            host.actions.abilityMetadata(breakerId, pump.id, encounteredIceId),
+            {
+              breakerId,
+              iceId: encounteredIceId,
+              ...icebreakerAbilityBindingPayload(pump, breakerId),
+            },
+            host.actions.abilityMetadata(
+              breakerId,
+              pump.id,
+              encounteredIceId,
+              abilityBindingKind(pump),
+            ),
           ),
         );
       }
@@ -375,11 +388,13 @@ export function buildRunnerEncounterActions(
                 ...(singleBreakCost?.publicPayload ?? {
                   breakSubroutineBaseCost: breakAbility.cost.credits,
                 }),
+                ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
               },
               host.actions.abilityMetadata(
                 breakerId,
                 breakAbility.id,
                 encounteredIceId,
+                abilityBindingKind(breakAbility),
               ),
             ),
           );
@@ -713,11 +728,13 @@ function multiBreakSubroutineActions(
           targetIceDefinitionId: iceDefinition.id,
           targetIceTitle: iceDefinition.title,
           ...breakCost.publicPayload,
+          ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
         },
         host.actions.abilityMetadata(
           breakerId,
           breakAbility.id,
           encounteredIceId,
+          abilityBindingKind(breakAbility),
         ),
       ),
     ];
@@ -757,11 +774,13 @@ function multiBreakSubroutineActions(
             targetIceDefinitionId: iceDefinition.id,
             targetIceTitle: iceDefinition.title,
             ...breakCost.publicPayload,
+            ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
           },
           host.actions.abilityMetadata(
             breakerId,
             breakAbility.id,
             encounteredIceId,
+            abilityBindingKind(breakAbility),
           ),
         ),
       );
@@ -775,6 +794,14 @@ function multiBreakSubroutineActions(
   };
   visit(0);
   return actions;
+}
+
+function abilityBindingKind(
+  ability: RuntimeIcebreakerAbility,
+): "card_spec_capability_key" | undefined {
+  return ability.source === "card_spec_capability"
+    ? "card_spec_capability_key"
+    : undefined;
 }
 
 export function breakAbilityMatchesIce(

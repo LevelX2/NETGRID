@@ -1341,9 +1341,13 @@ export function createCorpRuntimeResolvers(
     sourceCardInstanceId: CardInstanceId,
     abilityId: string,
     encounteredIceId?: CardInstanceId,
+    bindingKind?: "card_spec_capability_key",
   ): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
     return {
-      abilityRef: { sourceCardInstanceId, abilityId },
+      abilityRef:
+        bindingKind === "card_spec_capability_key"
+          ? { sourceCardInstanceId, sourceAbilityId: abilityId }
+          : { sourceCardInstanceId, abilityId },
       effectRef: `effect.${abilityId}`,
       targetRequirements: [
         { id: "encounteredIce", kind: "card", visibility: "public" },

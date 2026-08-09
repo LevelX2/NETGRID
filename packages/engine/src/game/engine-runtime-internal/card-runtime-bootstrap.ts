@@ -1228,11 +1228,18 @@ export function configureCardRuntimeBootstrap() {
           runtimePorts.appendResolvedEffectsToPayload,
       },
       run: {
-        startRun: (state, serverId, accessCount, options, legalAction) =>
+        startRun: (
+          state,
+          serverId,
+          accessCount,
+          options,
+          pendingSuccessBonusCredits,
+          legalAction,
+        ) =>
           runtimePorts.startRun(
             state,
             serverId,
-            undefined,
+            pendingSuccessBonusCredits,
             accessCount,
             options,
             legalAction,

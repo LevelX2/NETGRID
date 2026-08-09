@@ -38,8 +38,8 @@ describe("AI hint metadata contracts", () => {
     expect(current.hardErrorCount).toBe(0);
     expect(current.summary.valueHintAssignmentCount).toBe(203);
     expect(current.summary.runtimePairCount).toBe(125);
-    expect(current.summary.evidenceOnlyPairCount).toBe(116);
-    expect(current.summary.runtimeMechanicCount).toBe(46);
+    expect(current.summary.evidenceOnlyPairCount).toBe(117);
+    expect(current.summary.runtimeMechanicCount).toBe(48);
     expect(current.summary.evidenceOnlyMechanicCount).toBeGreaterThan(0);
     expect(current.summary.evidenceOnlyScenarioRefCount).toBeGreaterThan(0);
   });

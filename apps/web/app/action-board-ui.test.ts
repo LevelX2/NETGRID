@@ -10,7 +10,7 @@ import type {
 import {
   DEFAULT_CUE_POSITION,
   accessRevealStatusLabel,
-  actionButtonLabel,
+  actionButtonLabel as actionButtonLabelWithoutCatalog,
   actionButtonTone,
   actionContextStillVisible,
   actionConsumesClick,
@@ -46,7 +46,7 @@ import {
   counterDisplayTooltipText,
   counterDisplaysForRendering,
   clampCuePosition,
-  contextualCardActionLabel,
+  contextualCardActionLabel as contextualCardActionLabelWithoutCatalog,
   corpInstalledCardState,
   corpRootCardsForDisplay,
   fieldCardChoiceInfo,
@@ -113,6 +113,16 @@ import {
   storedCreditAmount,
   storedCreditSourceLabel,
 } from "./action-board-ui";
+
+const TEST_CARD_PRESENTATIONS = {
+  simple_fracter: { title: "Simple Fracter", type: "program" },
+} as const;
+
+const actionButtonLabel: typeof actionButtonLabelWithoutCatalog = (action) =>
+  actionButtonLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS);
+const contextualCardActionLabel: typeof contextualCardActionLabelWithoutCatalog =
+  (action) =>
+    contextualCardActionLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS);
 
 describe("V1.0.5 action board UI helpers", () => {
   it("formats persisted card state as readable card detail labels", () => {

@@ -11,7 +11,7 @@ const REPO_ROOT = path.resolve(
 const HINT_PATH = path.join(REPO_ROOT, "data/ai/ai-card-hints-active.json");
 const GENERATED_HINT_PATH = path.join(
   REPO_ROOT,
-  "data/ai/cs06-ai-hints-generated.json",
+  "data/ai/card-spec-ai-hints-generated.json",
 );
 const MIGRATED_CARD_IDS = new Set(
   JSON.parse(fs.readFileSync(GENERATED_HINT_PATH, "utf8")).cardIds ?? [],

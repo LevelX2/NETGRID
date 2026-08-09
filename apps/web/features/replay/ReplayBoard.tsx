@@ -44,6 +44,7 @@ import {
   type ChronicleDetailMode,
 } from "../settings/settings-model";
 import type { OverlayPositionPreference } from "../../lib/overlay-position";
+import type { PublicCardPresentationsById } from "../../app/legacy-card-definition-compatibility";
 
 const EMPTY_CARD_DETAILS = {};
 const EMPTY_ACTIONS: LegalAction[] = [];
@@ -55,6 +56,7 @@ export function ReplayBoard({
   perspective,
   displayNames,
   publicEvents,
+  cardPresentationsById,
   cardDisplayMode,
   chronicleDetailMode,
   onCardDisplayMode,
@@ -63,6 +65,7 @@ export function ReplayBoard({
   perspective: Side;
   displayNames: Partial<Record<Side, string>>;
   publicEvents: PublicGameEvent[];
+  cardPresentationsById: PublicCardPresentationsById;
   cardDisplayMode: CardDisplayMode;
   chronicleDetailMode: ChronicleDetailMode;
   onCardDisplayMode(value: CardDisplayMode): void;
@@ -417,6 +420,7 @@ export function ReplayBoard({
             turnContextEvents={publicEvents}
             side={view.side}
             cardDetailsById={EMPTY_CARD_DETAILS}
+            cardPresentationsById={cardPresentationsById}
             displayMode={cardDisplayMode}
             detailMode={chronicleDetailMode}
             preferGermanCardImages={preferGermanCardImages}

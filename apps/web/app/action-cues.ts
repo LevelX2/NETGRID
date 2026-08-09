@@ -168,6 +168,7 @@ export function deriveOpponentActionCues(
     const forcedEffectCueItems = formatChronicleEffectItems(
       event,
       input.viewerSide,
+      input.contextByEventId?.[event.eventId]?.cardPresentationsById,
     ).filter(isForcedEffectCueItem);
     const systemCue =
       !actor &&

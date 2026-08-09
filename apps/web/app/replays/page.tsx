@@ -33,6 +33,12 @@ import {
 import { readLocalStorage } from "../../lib/local-storage";
 import { CARD_DISPLAY_MODE_STORAGE_KEY } from "../../lib/storage-keys";
 import type { CardDisplayMode } from "../../features/settings/settings-model";
+import type { CatalogListResponse } from "../../features/catalog/catalog-types";
+import type { PublicCardPresentationsById } from "../legacy-card-definition-compatibility";
+import {
+  CatalogCardPresentationsProvider,
+  catalogCardPresentationsFor,
+} from "../../features/catalog/catalog-card-presentations";
 
 const SERVER_HTTP =
   process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
@@ -84,6 +90,8 @@ export default function ReplayPage() {
   const [speed, setSpeed] = useState(1);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [cardPresentationsById, setCardPresentationsById] =
+    useState<PublicCardPresentationsById>({});
   const [boardSettings, setBoardSettings] = useState(
     DEFAULT_REPLAY_BOARD_SETTINGS,
   );
@@ -91,6 +99,22 @@ export default function ReplayPage() {
 
   useEffect(() => {
     setBoardSettings(loadReplayBoardSettings(readLocalStorage));
+  }, []);
+
+  useEffect(() => {
+    let closed = false;
+    void fetch("/api/cards/catalog", { cache: "no-store" })
+      .then((response) => response.json() as Promise<CatalogListResponse>)
+      .then((data) => {
+        if (closed) return;
+        setCardPresentationsById(catalogCardPresentationsFor(data.cards ?? []));
+      })
+      .catch(() => {
+        if (!closed) setCardPresentationsById({});
+      });
+    return () => {
+      closed = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -350,15 +374,18 @@ export default function ReplayPage() {
                 mode: boardSettings.cardTooltipMode,
               }}
             >
-              <ReplayBoard
-                frame={currentFrame}
-                perspective={perspective}
-                displayNames={replay?.metadata.participantNames ?? {}}
-                publicEvents={currentPublicEvents}
-                cardDisplayMode={boardSettings.cardDisplayMode}
-                chronicleDetailMode={boardSettings.chronicleDetailMode}
-                onCardDisplayMode={updateCardDisplayMode}
-              />
+              <CatalogCardPresentationsProvider value={cardPresentationsById}>
+                <ReplayBoard
+                  frame={currentFrame}
+                  perspective={perspective}
+                  displayNames={replay?.metadata.participantNames ?? {}}
+                  publicEvents={currentPublicEvents}
+                  cardPresentationsById={cardPresentationsById}
+                  cardDisplayMode={boardSettings.cardDisplayMode}
+                  chronicleDetailMode={boardSettings.chronicleDetailMode}
+                  onCardDisplayMode={updateCardDisplayMode}
+                />
+              </CatalogCardPresentationsProvider>
             </CardTooltipSettingsContext.Provider>
           </CardImagePreferenceContext.Provider>
         </CardScaleSettingsContext.Provider>

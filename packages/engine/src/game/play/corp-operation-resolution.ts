@@ -165,12 +165,6 @@ export type CorpOperationResolutionHost = {
 };
 
 const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
-  simple_economy_operation: {
-    name: "corp_operation_gain_credits_4",
-    resolve: (host) => {
-      host.economy.gainCorpCredits(4);
-    },
-  },
   v111_core_damage_operation: {
     name: "corp_operation_core_damage_1",
     resolve: (host, legalAction) => {
@@ -180,33 +174,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         1,
         "v111_core_damage_operation" as CardDefinitionId,
       );
-    },
-  },
-  simple_draw_operation: {
-    name: "corp_operation_draw_2",
-    resolve: (host) => {
-      host.corp.drawCorpCards(2);
-    },
-  },
-  simple_tag_punishment_operation: {
-    name: "corp_operation_tag_punishment_lose_2",
-    canPlay: (host) => host.state.runner.tags > 0,
-    resolve: (host) => {
-      if (host.state.runner.tags <= 0)
-        throw new Error("Der Runner ist nicht getaggt.");
-      host.state.runner.credits = Math.max(0, host.state.runner.credits - 2);
-    },
-  },
-  v08_credit_surge_operation: {
-    name: "corp_operation_gain_credits_7",
-    resolve: (host) => {
-      host.economy.gainCorpCredits(7);
-    },
-  },
-  v08_archive_planning_operation: {
-    name: "corp_operation_draw_3",
-    resolve: (host) => {
-      host.corp.drawCorpCards(3);
     },
   },
   v098_hq_rd_swap_operation: {

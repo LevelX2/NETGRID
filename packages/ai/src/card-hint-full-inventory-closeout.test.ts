@@ -41,9 +41,13 @@ describe("AI card hint full-inventory closeout", () => {
     expect(plans("v08_overclock_run_event")).toEqual(["recover_economy"]);
     expect(plans("simple_setup_hardware")).toEqual([]);
     expect(plans("v08_memory_chip")).toEqual([]);
-    expect(plans("simple_draw_operation")).toEqual(["draw_for_answers"]);
+    expect(plans("simple_draw_operation")).toEqual([
+      "draw_for_answers",
+      "setup",
+    ]);
     expect(plans("v08_archive_planning_operation")).toEqual([
       "draw_for_answers",
+      "setup",
     ]);
     expect(plans("simple_tag_punishment_operation")).toEqual([
       "punish_tagged_runner",

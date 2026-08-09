@@ -158,7 +158,12 @@ const PRINTING_KEYS = new Set([
   "variant",
   "faceTextOverride",
 ]);
-const PUBLICATION_KEYS = new Set(["schemaVersion", "status", "blockReason"]);
+const PUBLICATION_KEYS = new Set([
+  "schemaVersion",
+  "status",
+  "blockReason",
+  "catalogBlockReason",
+]);
 const SET_KEYS = new Set([
   "schemaVersion",
   "setId",
@@ -582,6 +587,17 @@ function assertEditorialPublication(
     assertNonEmptyString(publication.blockReason, `${path}.blockReason`);
   else if (publication.blockReason !== undefined)
     invalid(`${path}.blockReason`, "is allowed only for disabled publication");
+  if (publication.catalogBlockReason !== undefined) {
+    if (publication.status !== "experimental")
+      invalid(
+        `${path}.catalogBlockReason`,
+        "is allowed only for experimental catalog entries",
+      );
+    assertNonEmptyString(
+      publication.catalogBlockReason,
+      `${path}.catalogBlockReason`,
+    );
+  }
 }
 
 function assertCapabilityIdentities(

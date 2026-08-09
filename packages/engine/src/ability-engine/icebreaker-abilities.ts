@@ -7,8 +7,17 @@ import type {
   AbilityDefinition,
   CardDefinition,
   CardDefinitionId,
+  CardInstanceId,
+  LegalAction,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import {
+  assertAbilityRefIdentity,
+  capabilityKey,
+  canonicalCapabilityId,
+  parseCanonicalCapabilityId,
+  type CapabilityKey,
+} from "@netgrid/cards/engine";
 import type {
   CardIcebreakerAbilityImplementation,
   CardIcebreakerBreakMatcherImplementation,
@@ -45,9 +54,7 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     kind: "lose_future_clicks";
     amountPerStrength: number;
   }[];
-  postBreakStealthLossSourceMode?:
-    | "single_stealth_card"
-    | "any_stealth_cards";
+  postBreakStealthLossSourceMode?: "single_stealth_card" | "any_stealth_cards";
   postBreakStealthLossOptionalIfUnavailable?: boolean;
   postBreakStealthLossTrigger?: "per_subroutine" | "per_ability_use";
   onUseEndRun?: boolean;
@@ -62,8 +69,121 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     | "run_end_trash_source_if_used"
     | "set_next_sentry_free_break_after_fully_breaking_wall";
   specialEffects?: readonly RuntimeIcebreakerSpecialEffect[];
-  source: "shared_card_definition" | "card_implementation";
+  source:
+    | "shared_card_definition"
+    | "card_implementation"
+    | "card_spec_capability";
 };
+
+export class IcebreakerAbilityBindingError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "IcebreakerAbilityBindingError";
+  }
+}
+
+export function icebreakerAbilityBindingPayload(
+  ability: RuntimeIcebreakerAbility,
+  breakerId: CardInstanceId,
+): Record<string, string> {
+  if (ability.source !== "card_spec_capability") return {};
+  const parsed = parseCanonicalCapabilityId(ability.id);
+  return {
+    cardId: breakerId,
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    cardImplementationAbilityKey: parsed.capabilityKey,
+    cardImplementationAbilityId: ability.id,
+  };
+}
+
+export function icebreakerAbilityForLegalAction(
+  definition: Pick<CardDefinition, "id" | "abilities">,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+  expectedType: RuntimeIcebreakerAbility["type"],
+): RuntimeIcebreakerAbility {
+  return resolveIcebreakerAbilityBinding(
+    icebreakerAbilitiesForDefinition(definition),
+    definition.id,
+    breakerId,
+    legalAction,
+    expectedType,
+  );
+}
+
+export function resolveIcebreakerAbilityBinding(
+  abilities: readonly RuntimeIcebreakerAbility[],
+  definitionId: CardDefinitionId,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+  expectedType: RuntimeIcebreakerAbility["type"],
+): RuntimeIcebreakerAbility {
+  const abilityRef = legalAction.abilityRef;
+  try {
+    assertAbilityRefIdentity(abilityRef);
+  } catch {
+    throw new IcebreakerAbilityBindingError(
+      "Die Breaker-Faehigkeitsreferenz ist nicht eindeutig gebunden.",
+    );
+  }
+  if (abilityRef.sourceCardInstanceId !== breakerId)
+    throw new IcebreakerAbilityBindingError(
+      "Die Breaker-Faehigkeit ist nicht an ihre Quellinstanz gebunden.",
+    );
+  if ("sourceAbilityId" in abilityRef) {
+    if (typeof abilityRef.sourceAbilityId !== "string")
+      throw new IcebreakerAbilityBindingError(
+        "Die kanonische Breaker-Faehigkeits-ID fehlt.",
+      );
+    const parsed = parseCanonicalCapabilityId(abilityRef.sourceAbilityId);
+    const payload = legalAction.payload;
+    if (
+      parsed.cardDefinitionId !== definitionId ||
+      payload?.cardId !== breakerId ||
+      payload?.cardImplementationCapabilityBindingKind !==
+        "card_spec_capability_key" ||
+      payload.cardImplementationAbilityId !== abilityRef.sourceAbilityId ||
+      payload.cardImplementationAbilityKey !== parsed.capabilityKey ||
+      payload.cardImplementationAbilityIndex !== undefined ||
+      payload.cardImplementationLifecycleAbilityIndex !== undefined
+    )
+      throw new IcebreakerAbilityBindingError(
+        "Die kanonische Breaker-Faehigkeitsbindung ist unvollstaendig oder widerspruechlich.",
+      );
+    const matches = abilities.filter(
+      (candidate) =>
+        candidate.source === "card_spec_capability" &&
+        candidate.id === abilityRef.sourceAbilityId &&
+        candidate.type === expectedType,
+    );
+    if (matches.length !== 1)
+      throw new IcebreakerAbilityBindingError(
+        "Die kanonische Breaker-Faehigkeit existiert nicht eindeutig auf der Quellkarte.",
+      );
+    return matches[0]!;
+  }
+  const payload = legalAction.payload;
+  if (
+    typeof abilityRef.abilityId !== "string" ||
+    payload?.cardImplementationCapabilityBindingKind !== undefined ||
+    payload?.cardImplementationAbilityId !== undefined ||
+    payload?.cardImplementationAbilityKey !== undefined
+  )
+    throw new IcebreakerAbilityBindingError(
+      "Eine Legacy-Breaker-Faehigkeit darf keine kanonische Bindung tragen.",
+    );
+  const matches = abilities.filter(
+    (candidate) =>
+      candidate.source !== "card_spec_capability" &&
+      candidate.id === abilityRef.abilityId &&
+      candidate.type === expectedType,
+  );
+  if (matches.length !== 1)
+    throw new IcebreakerAbilityBindingError(
+      "Die Legacy-Breaker-Faehigkeit existiert nicht eindeutig auf der Quellkarte.",
+    );
+  return matches[0]!;
+}
 
 function breakMatcherFields(
   matcher: CardIcebreakerBreakMatcherImplementation,
@@ -142,7 +262,13 @@ function abilityForImplementation(
   ability: CardIcebreakerAbilityImplementation,
   index: number,
 ): RuntimeIcebreakerAbility {
-  const abilityId = `${definition.id}.card_implementation.icebreaker.${index + 1}.${ability.kind}`;
+  const canonicalKey = capabilityKeyFromImplementation(ability);
+  const abilityId = canonicalKey
+    ? canonicalCapabilityId(definition.id, canonicalKey)
+    : `${definition.id}.card_implementation.icebreaker.${index + 1}.${ability.kind}`;
+  const source = canonicalKey
+    ? ("card_spec_capability" as const)
+    : ("card_implementation" as const);
   if (ability.kind === "increase_strength") {
     return {
       id: abilityId,
@@ -160,7 +286,7 @@ function abilityForImplementation(
       ...(ability.onUse?.some((effect) => effect.kind === "end_run")
         ? { onUseEndRun: true }
         : {}),
-      source: "card_implementation",
+      source,
     };
   }
   const stealthLoss = ability.onSuccessfulBreak?.find(
@@ -194,8 +320,17 @@ function abilityForImplementation(
     ...(ability.special ? { special: ability.special.kind } : {}),
     ...(specialEffects ? { specialEffects } : {}),
     ...breakMatcherFields(ability.matches),
-    source: "card_implementation",
+    source,
   };
+}
+
+function capabilityKeyFromImplementation(
+  ability: CardIcebreakerAbilityImplementation,
+): CapabilityKey | undefined {
+  if (!("capabilityKey" in ability)) return undefined;
+  if (typeof ability.capabilityKey !== "string")
+    throw new Error("invalid_card_spec_icebreaker_capability_key");
+  return capabilityKey(ability.capabilityKey);
 }
 
 export function icebreakerAbilitiesForDefinition(

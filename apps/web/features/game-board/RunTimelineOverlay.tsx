@@ -42,6 +42,7 @@ import {
   splitRunWindowActionsByServer,
 } from "../../app/action-board-ui";
 import { enrichVisibleCard } from "../cards/card-view-model";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import { OverflowAwareActionButton } from "../actions/ActionControls";
 import { RUN_OVERLAY_POSITION_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
@@ -81,6 +82,7 @@ export function RunTimelineOverlay({
   ): void;
   onCorpRunAutoPassEnabled(enabled: boolean): void;
 }) {
+  const cardPresentationsById = useCatalogCardPresentations();
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const [position, setPosition] = useState<OverlayPositionPreference>(() =>
@@ -304,11 +306,19 @@ export function RunTimelineOverlay({
             data-testid="run-action-bar"
           >
             {currentServerActions.map((action) => {
-              const compactLabel = runWindowActionButtonLabel(view, action);
+              const compactLabel = runWindowActionButtonLabel(
+                view,
+                action,
+                cardPresentationsById,
+              );
               const baseFullLabel =
                 compactLabel.startsWith("SMC:") && action.label
                   ? normalizeVisibleTerms(action.label)
-                  : runAwareActionButtonLabel(view, action);
+                  : runAwareActionButtonLabel(
+                      view,
+                      action,
+                      cardPresentationsById,
+                    );
               const instanceDetail = runWindowActionInstanceDetail(
                 view,
                 action,
@@ -344,13 +354,21 @@ export function RunTimelineOverlay({
               </div>
             ) : null}
             {otherServerRezActions.map((action) => {
-              const compactLabel = runWindowActionButtonLabel(view, action);
+              const compactLabel = runWindowActionButtonLabel(
+                view,
+                action,
+                cardPresentationsById,
+              );
               return (
                 <OverflowAwareActionButton
                   action={action}
                   className="button primary actionButton runActionButton"
                   key={action.actionId}
-                  label={runAwareActionButtonLabel(view, action)}
+                  label={runAwareActionButtonLabel(
+                    view,
+                    action,
+                    cardPresentationsById,
+                  )}
                   displayLabel={compactLabel}
                   tone={actionButtonTone(view, action)}
                   onClick={() => onAction(action)}

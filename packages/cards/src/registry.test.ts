@@ -75,7 +75,15 @@ function registryFor(
 
 describe("CardRegistry", () => {
   it("builds deterministic cached projections and all scoped lookups", () => {
-    const registry = registryFor([capabilitySpec()]);
+    const active = capabilitySpec();
+    active.publication = {
+      schemaVersion: "card-publication-v1",
+      status: "active",
+    };
+    const registry = registryFor(
+      [active],
+      [setSpec({ publication: { status: "active" } })],
+    );
     const definitionId = "test_card" as CardDefinitionId;
     const capabilityId = canonicalCapabilityId(
       definitionId,
@@ -258,7 +266,13 @@ describe("CardRegistry", () => {
     expect(publicSetViewForId(registry, "testset")).toBeUndefined();
     expect(
       engineCardViewForDefinitionId(registry, "test_card" as CardDefinitionId),
-    ).toBeDefined();
+    ).toBeUndefined();
+    expect(
+      planningCardViewForDefinitionId(
+        registry,
+        "test_card" as CardDefinitionId,
+      ),
+    ).toBeUndefined();
     expect(editorCardViews(registry)).toHaveLength(1);
     expect(printingSpecForId(registry, "test_card:first")).toBeDefined();
   });

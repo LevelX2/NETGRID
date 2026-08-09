@@ -2,6 +2,7 @@ import { createRuntimeCardsById } from "@netgrid/catalog";
 
 export {
   AI_HINTS_BY_CARD,
+  cardIdHasGeneratedCardSpecAiHint,
   createAiHintsByCard,
   validateGeneratedArtifact,
 } from "./catalog-ai-hint-authority";

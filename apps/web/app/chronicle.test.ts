@@ -18,10 +18,42 @@ import {
   chronicleStartTurnEffectGroupFromEvent,
   chronicleTurnNumberByEventId,
   chronicleTurnSideByEventId,
-  formatChronicleEffectItems,
-  formatChronicleEvent,
+  formatChronicleEffectItems as formatChronicleEffectItemsWithoutCatalog,
+  formatChronicleEvent as formatChronicleEventWithoutCatalog,
   shouldSuppressChronicleEventItem,
 } from "./chronicle";
+
+const TEST_CARD_PRESENTATIONS = {
+  simple_agenda: { title: "Simple Agenda", type: "agenda" },
+  simple_barrier_ice: { title: "Simple Barrier ICE", type: "ice" },
+  simple_code_gate_ice: { title: "Simple Code Gate ICE", type: "ice" },
+  simple_decoder: { title: "Simple Decoder", type: "program" },
+  simple_economy_asset: { title: "Simple Economy Asset", type: "asset" },
+  simple_economy_operation: {
+    title: "Simple Economy Operation",
+    type: "operation",
+  },
+  simple_fracter: { title: "Simple Fracter", type: "program" },
+  simple_upgrade: { title: "Simple Upgrade", type: "upgrade" },
+} as const;
+
+const formatChronicleEvent: typeof formatChronicleEventWithoutCatalog = (
+  event,
+  side,
+  context = {},
+) =>
+  formatChronicleEventWithoutCatalog(event, side, {
+    ...context,
+    cardPresentationsById: TEST_CARD_PRESENTATIONS,
+  });
+
+const formatChronicleEffectItems: typeof formatChronicleEffectItemsWithoutCatalog =
+  (event, side) =>
+    formatChronicleEffectItemsWithoutCatalog(
+      event,
+      side,
+      TEST_CARD_PRESENTATIONS,
+    );
 
 const ACTION_TYPES = [
   "mandatory_draw",

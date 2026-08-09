@@ -19,6 +19,7 @@ import {
   type ChronicleContext,
   type ChronicleItem,
 } from "../../app/chronicle";
+import type { PublicCardPresentationsById } from "../../app/legacy-card-definition-compatibility";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
   chronicleActionTypeBelongsToRunContext,
@@ -184,7 +185,10 @@ function eventCardDetail(
 export function chronicleContextByEventId(
   events: PublicGameEvent[],
   detailsById: Record<string, CatalogCardDetail>,
-  options: { preferGermanCardImages?: boolean } = {},
+  options: {
+    preferGermanCardImages?: boolean;
+    cardPresentationsById?: PublicCardPresentationsById;
+  } = {},
 ): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
@@ -212,6 +216,9 @@ export function chronicleContextByEventId(
       return [
         event.eventId,
         {
+          ...(options.cardPresentationsById
+            ? { cardPresentationsById: options.cardPresentationsById }
+            : {}),
           cardTitle,
           cardText: card?.text ?? null,
           cardType: card?.type ?? null,
@@ -240,6 +247,7 @@ export function ChroniclePanel({
   turnContextEvents = events,
   side,
   cardDetailsById,
+  cardPresentationsById,
   displayMode,
   detailMode,
   preferGermanCardImages,
@@ -249,6 +257,7 @@ export function ChroniclePanel({
   turnContextEvents?: PublicGameEvent[];
   side: Side;
   cardDetailsById: Record<string, CatalogCardDetail>;
+  cardPresentationsById?: PublicCardPresentationsById;
   displayMode: CardDisplayMode;
   detailMode: ChronicleDetailMode;
   preferGermanCardImages: boolean;
@@ -262,7 +271,10 @@ export function ChroniclePanel({
   const contextByEventId = chronicleContextByEventId(
     turnContextEvents,
     cardDetailsById,
-    { preferGermanCardImages },
+    {
+      preferGermanCardImages,
+      ...(cardPresentationsById ? { cardPresentationsById } : {}),
+    },
   );
   const entries = orderChronicleEntriesForDisplay(
     chronicleEntriesWithRunGroups(
@@ -475,7 +487,11 @@ function chronicleEntriesWithRunGroups(
       side,
       contextByEventId[event.eventId] ?? {},
     );
-    const effectItems = formatChronicleEffectItems(event, side);
+    const effectItems = formatChronicleEffectItems(
+      event,
+      side,
+      contextByEventId[event.eventId]?.cardPresentationsById,
+    );
     const items = shouldSuppressChronicleEventItem(
       event,
       projectionSuppressedEventIds,

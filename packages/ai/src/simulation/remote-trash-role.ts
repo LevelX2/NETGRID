@@ -27,7 +27,6 @@ const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
 export function remoteTrashRoleForVisibleCard(
   card: VisibleCard,
 ): RemoteTrashRole {
-  if (card.definitionId === "simple_upgrade") return "low_value";
   const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
   if (structuredRole) {
     if (structuredRole.kind === "remote_capacity") return "remote_capacity";
@@ -49,6 +48,9 @@ export function remoteTrashRoleForVisibleCard(
     )
       return "scoring_protection";
   }
+  const hint = card.definitionId
+    ? REMOTE_TRASH_ROLE_AI_HINTS.get(card.definitionId)
+    : undefined;
   const roles = cardRolesForId(card.definitionId, REMOTE_TRASH_ROLE_AI_HINTS);
   const runtimeDefinition = card.definitionId
     ? RUNTIME_CARDS[card.definitionId]
@@ -98,6 +100,7 @@ export function remoteTrashRoleForVisibleCard(
   if (rolesMatch(roles, ["tag", "trace", "punish", "damage"]))
     return "tag_punish";
   if (rolesMatch(roles, ["ambush", "trap"])) return "ambush";
+  if (hint?.valueHints?.remoteRootValue === 1) return "low_value";
   if (rolesMatch(roles, ["low_value"])) return "low_value";
   if (card.type === "asset" || card.type === "upgrade") return "unknown";
   return "unknown";

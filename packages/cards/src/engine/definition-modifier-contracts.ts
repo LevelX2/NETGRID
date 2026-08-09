@@ -419,6 +419,21 @@ export type CardPrintedSubroutineImplementation =
       text: "*End the run.";
     }
   | {
+      kind: "corp_gain_credit";
+      amount: number;
+      text: string;
+    }
+  | {
+      kind: "runner_lose_credits";
+      amount: number;
+      text: string;
+    }
+  | {
+      kind: "give_runner_tag";
+      amount: number;
+      text: string;
+    }
+  | {
       kind: "end_the_run_and_trash_source_at_end_of_turn";
       text: string;
     }

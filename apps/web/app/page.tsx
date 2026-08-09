@@ -291,6 +291,7 @@ import { UndoPanel } from "../features/app-shell/UndoPanel";
 import { OptionsPanel } from "../features/settings/OptionsPanel";
 import { CatalogPanel } from "../features/catalog/CatalogPanel";
 import { useCatalogWorkspace } from "../features/catalog/useCatalogWorkspace";
+import { CatalogCardPresentationsProvider } from "../features/catalog/catalog-card-presentations";
 import { DeckEditorPanel } from "../features/decks/DeckEditorPanel";
 import type {
   DeckLibraryResponse,
@@ -1037,6 +1038,7 @@ export default function Page() {
   });
   const {
     allCatalogCards,
+    catalogCardPresentationsById,
     catalogDetailsById,
     catalogPanelProps,
     ensureCatalogDetails,
@@ -3660,7 +3662,10 @@ export default function Page() {
     const contextByEventId = chronicleContextByEventId(
       payload.playerView.publicEvents,
       catalogDetailsById,
-      { preferGermanCardImages },
+      {
+        preferGermanCardImages,
+        cardPresentationsById: catalogCardPresentationsById,
+      },
     );
     const cues =
       !matchEnded && actionCuesEnabled
@@ -3744,6 +3749,7 @@ export default function Page() {
     payload?.playerView.stateVersion,
     payload?.side,
     catalogDetailsById,
+    catalogCardPresentationsById,
     preferGermanCardImages,
   ]);
 
@@ -6261,6 +6267,7 @@ export default function Page() {
           specialZonePercent: cardSpecialZoneScalePercent,
         }}
       >
+        <CatalogCardPresentationsProvider value={catalogCardPresentationsById}>
         <CardImagePreferenceContext.Provider
           value={{ preferGermanCardImages, showSetBadges }}
         >
@@ -6785,6 +6792,7 @@ export default function Page() {
             </main>
           </CardTooltipSettingsContext.Provider>
         </CardImagePreferenceContext.Provider>
+        </CatalogCardPresentationsProvider>
       </CardScaleSettingsContext.Provider>
     );
   }
@@ -6801,6 +6809,7 @@ export default function Page() {
         specialZonePercent: cardSpecialZoneScalePercent,
       }}
     >
+      <CatalogCardPresentationsProvider value={catalogCardPresentationsById}>
       <CardImagePreferenceContext.Provider
         value={{ preferGermanCardImages, showSetBadges }}
       >
@@ -7419,6 +7428,7 @@ export default function Page() {
                         turnContextEvents={payload.playerView.publicEvents}
                         side={payload.side}
                         cardDetailsById={catalogDetailsById}
+                        cardPresentationsById={catalogCardPresentationsById}
                         displayMode={cardDisplayMode}
                         detailMode={chronicleDetailMode}
                         preferGermanCardImages={preferGermanCardImages}
@@ -7753,6 +7763,7 @@ export default function Page() {
           </main>
         </CardTooltipSettingsContext.Provider>
       </CardImagePreferenceContext.Provider>
+      </CatalogCardPresentationsProvider>
     </CardScaleSettingsContext.Provider>
   );
 }

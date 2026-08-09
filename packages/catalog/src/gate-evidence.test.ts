@@ -137,7 +137,7 @@ describe("card support evidence projections", () => {
     ).toBe("Original Netrunner CCG");
   });
 
-  it("keeps ineligible publication blocked without demanding AI scenario evidence", () => {
+  it("keeps ineligible publication catalog-visible without inferring an editorial block", () => {
     const entry = deriveCardSpecSupportEntry(
       "experimental_card",
       "experimental_set",
@@ -152,8 +152,8 @@ describe("card support evidence projections", () => {
     );
     expect(entry.statuses.playable).toBe(false);
     expect(entry.statuses.ai_supported).toBe(false);
-    expect(entry.statuses.blocked).toBe(true);
-    expect(entry.blockReasons).toEqual(["publication_not_release_eligible"]);
+    expect(entry.statuses.blocked).toBe(false);
+    expect(entry.blockReasons).toBeUndefined();
     expect(entry.support.scenarioRefs).toEqual([]);
   });
 

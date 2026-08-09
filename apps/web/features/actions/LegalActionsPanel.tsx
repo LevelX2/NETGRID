@@ -53,6 +53,7 @@ import {
   isSecurityPurgeInstallTargetChoice,
 } from "./SecurityPurgeChoicePanel";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 
 export function LegalActionsPanel({
   view,
@@ -113,6 +114,7 @@ export function LegalActionsPanel({
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
 }) {
+  const cardPresentationsById = useCatalogCardPresentations();
   const setupChoice =
     view.pendingChoice?.source === "setup.mulligan"
       ? view.pendingChoice
@@ -339,7 +341,11 @@ export function LegalActionsPanel({
       />
       <div className="actions">
         {primaryActions.map((action) => {
-          const label = runAwareActionButtonLabel(view, action);
+          const label = runAwareActionButtonLabel(
+            view,
+            action,
+            cardPresentationsById,
+          );
           return (
             <OverflowAwareActionButton
               action={action}
@@ -369,7 +375,11 @@ export function LegalActionsPanel({
               </button>
             </div>
             {contextualActions.map((action) => {
-              const label = runAwareActionButtonLabel(view, action);
+              const label = runAwareActionButtonLabel(
+                view,
+                action,
+                cardPresentationsById,
+              );
               return (
                 <OverflowAwareActionButton
                   action={action}

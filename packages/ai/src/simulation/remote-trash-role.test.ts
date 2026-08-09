@@ -14,6 +14,21 @@ vi.mock("../runtime/card-role-lookup", () => ({
 }));
 
 describe("remoteTrashRoleForVisibleCard", () => {
+  it("derives low remote value from the effective hint value axis", () => {
+    expect(
+      remoteTrashRoleForVisibleCard({
+        ...card(),
+        definitionId: "simple_upgrade",
+        type: "upgrade",
+      }),
+    ).toBe("low_value");
+    expect(
+      remoteTrashRoleForVisibleCard({
+        ...card(),
+        definitionId: "onr_v1_317_data-masons",
+      }),
+    ).not.toBe("low_value");
+  });
   it("consumes Chicago Branch score acceleration as a relevant trash role", () => {
     expect(
       remoteTrashRoleForVisibleCard({
@@ -27,9 +42,7 @@ describe("remoteTrashRoleForVisibleCard", () => {
     expect(roleForRoles(["remote_agenda_protection"])).toBe(
       "scoring_protection",
     );
-    expect(roleForRoles(["remote_agenda_protectionish_noise"])).toBe(
-      "unknown",
-    );
+    expect(roleForRoles(["remote_agenda_protectionish_noise"])).toBe("unknown");
 
     expect(roleForRoles(["ice_tax"])).toBe("run_tax");
     expect(roleForRoles(["nice_tax_noise"])).toBe("unknown");

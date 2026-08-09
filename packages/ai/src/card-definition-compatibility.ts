@@ -4,10 +4,7 @@ import {
   type ResolvedCardDefinition,
   type SubroutineDefinition,
 } from "@netgrid/shared";
-import {
-  CS06_CARD_DEFINITION_IDS,
-  cs06PlanningCards,
-} from "@netgrid/cards/planning";
+import { cardSpecPlanningCards } from "@netgrid/cards/planning";
 
 export type AiCardDefinitionAuthorityErrorCode =
   | "overlapping_definition_authority"
@@ -25,8 +22,16 @@ export class AiCardDefinitionAuthorityError extends Error {
   }
 }
 
-const expectedCardSpecIds = new Set<string>(CS06_CARD_DEFINITION_IDS);
-const cardSpecDefinitions = cs06PlanningCards().map(({ definition }) =>
+const cardSpecEntries = cardSpecPlanningCards();
+const expectedCardSpecIds = new Set<string>(
+  cardSpecEntries.map(({ definition }) => definition.id),
+);
+if (expectedCardSpecIds.size !== 46)
+  throw new AiCardDefinitionAuthorityError(
+    "missing_definition_authority",
+    `expected_46_active_card_specs_got_${expectedCardSpecIds.size}`,
+  );
+const cardSpecDefinitions = cardSpecEntries.map(({ definition }) =>
   mutableCompatibilityDefinition(definition),
 );
 const cardSpecIds = new Set(cardSpecDefinitions.map(({ id }) => id));
@@ -70,7 +75,7 @@ export const CARD_DEFINITIONS_BY_ID = Object.freeze(
 );
 
 function mutableCompatibilityDefinition(
-  definition: ReturnType<typeof cs06PlanningCards>[number]["definition"],
+  definition: ReturnType<typeof cardSpecPlanningCards>[number]["definition"],
 ): ResolvedCardDefinition {
   const { abilities, mechanics, modifiers, subroutines, subtypes, ...scalar } =
     definition;
@@ -91,7 +96,9 @@ function mutableCompatibilityDefinition(
 
 function mutableSubroutineDefinition(
   subroutine: NonNullable<
-    ReturnType<typeof cs06PlanningCards>[number]["definition"]["subroutines"]
+    ReturnType<
+      typeof cardSpecPlanningCards
+    >[number]["definition"]["subroutines"]
   >[number],
 ): SubroutineDefinition {
   return {

@@ -8,7 +8,10 @@ import {
   type VisibleServerStatus,
 } from "@netgrid/shared";
 import { actionHasAbility } from "./action-payload";
-import { legacyPublicCardTitle } from "./legacy-card-definition-compatibility";
+import {
+  publicCardTitle,
+  type PublicCardPresentationsById,
+} from "./legacy-card-definition-compatibility";
 export {
   DEFAULT_CUE_POSITION,
   clampCuePosition,
@@ -1229,7 +1232,10 @@ export function actionGroupLabel(type: LegalAction["type"]): string {
   return ACTION_GROUP_LABELS[type] ?? "Weitere Aktionen";
 }
 
-export function actionButtonLabel(action: LegalAction): string {
+export function actionButtonLabel(
+  action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string {
   switch (action.type) {
     case "mandatory_draw":
       return "Pflichtkarte ziehen";
@@ -1268,13 +1274,16 @@ export function actionButtonLabel(action: LegalAction): string {
     case "break_subroutine":
       return breakSubroutineActionLabel(action);
     case "trigger_ability":
-      return triggerAbilityActionLabel(action);
+      return triggerAbilityActionLabel(action, false, cardPresentationsById);
     default:
       return normalizeVisibleTerms(action.label);
   }
 }
 
-export function contextualCardActionLabel(action: LegalAction): string {
+export function contextualCardActionLabel(
+  action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string {
   switch (action.type) {
     case "gain_credit":
       return (
@@ -1313,7 +1322,7 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "steal_agenda":
       return stealCostPaymentLabel(action.payload) ?? "Stehlen";
     case "trigger_ability":
-      return triggerAbilityActionLabel(action, true);
+      return triggerAbilityActionLabel(action, true, cardPresentationsById);
     default:
       return cardContextFallbackLabel(action);
   }
@@ -1341,6 +1350,7 @@ function cardContextActionOrderPriority(action: LegalAction): number {
 function triggerAbilityActionLabel(
   action: LegalAction,
   compact = false,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string {
   if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact
@@ -1351,7 +1361,7 @@ function triggerAbilityActionLabel(
     return approachIceExposeActionLabel(action);
   }
   return (
-    resourceAbilityContextLabel(action) ??
+    resourceAbilityContextLabel(action, cardPresentationsById) ??
     (compact
       ? cardContextFallbackLabel(action)
       : normalizeVisibleTerms(action.label))
@@ -1451,17 +1461,20 @@ function stripTrailingActionSourceParenthetical(label: string): string {
   return normalizeVisibleTerms(label.replace(/\s+\([^)]*\)\s*$/u, "").trim());
 }
 
-function resourceAbilityContextLabel(action: LegalAction): string | null {
+function resourceAbilityContextLabel(
+  action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string | null {
   if (action.payload?.runnerAbility === "remove_data_raven_counter")
     return "Raven-Counter entfernen";
   if (actionHasAbility(action, "set_aside_from_grip")) {
-    const targetTitle = shellTradersTargetTitle(action);
+    const targetTitle = shellTradersTargetTitle(action, cardPresentationsById);
     return targetTitle
       ? `${targetTitle} zur Seite legen`
       : "Karte zur Seite legen";
   }
   if (actionHasAbility(action, "remove_shell_counter")) {
-    const targetTitle = shellTradersTargetTitle(action);
+    const targetTitle = shellTradersTargetTitle(action, cardPresentationsById);
     const remainingCounters = action.payload?.remainingCountersBefore;
     const targetLabel =
       targetTitle &&
@@ -1494,7 +1507,10 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
         : "Credits nehmen";
     }
     case "junkyard_bbs_return_top_heap": {
-      const targetTitle = targetTitleFromDefinition(action);
+      const targetTitle = targetTitleFromDefinition(
+        action,
+        cardPresentationsById,
+      );
       return targetTitle
         ? `${targetTitle} aus dem Heap auf die Hand nehmen`
         : "Oberste Heap-Karte auf die Hand nehmen";
@@ -1504,7 +1520,10 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
   }
 }
 
-function targetTitleFromDefinition(action: LegalAction): string | null {
+function targetTitleFromDefinition(
+  action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string | null {
   const explicitTitle = action.payload?.targetCardTitle;
   if (typeof explicitTitle === "string") return explicitTitle;
   const targetDefinitionId =
@@ -1512,12 +1531,18 @@ function targetTitleFromDefinition(action: LegalAction): string | null {
       ? action.payload.targetCardDefinitionId
       : undefined;
   return targetDefinitionId
-    ? (legacyPublicCardTitle(targetDefinitionId) ?? null)
+    ? (publicCardTitle(targetDefinitionId, cardPresentationsById) ?? null)
     : null;
 }
 
-function shellTradersTargetTitle(action: LegalAction): string | null {
-  const titleFromDefinition = targetTitleFromDefinition(action);
+function shellTradersTargetTitle(
+  action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
+): string | null {
+  const titleFromDefinition = targetTitleFromDefinition(
+    action,
+    cardPresentationsById,
+  );
   if (titleFromDefinition) return titleFromDefinition;
   if (actionHasAbility(action, "set_aside_from_grip")) {
     const labelTarget =
@@ -2831,10 +2856,11 @@ export function runWindowStatusLabel(view: PlayerView): string | null {
 export function runAwareActionButtonLabel(
   view: PlayerView,
   action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string {
   if (action.payload?.runnerCostPenaltySupportContinuation === true)
     return paymentSupportContinuationLabel(action);
-  const base = actionButtonLabel(action);
+  const base = actionButtonLabel(action, cardPresentationsById);
   if (!view.run) return base;
   const iceLabel = runCurrentIceLabel(view);
   if (action.type === "jack_out") {
@@ -3033,6 +3059,7 @@ function isAccessWindowAction(action: LegalAction): boolean {
 export function runWindowActionButtonLabel(
   view: PlayerView,
   action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string {
   if (action.payload?.runnerCostPenaltySupportContinuation === true)
     return paymentSupportContinuationLabel(action);
@@ -3041,7 +3068,7 @@ export function runWindowActionButtonLabel(
     return "SMC: Programm suchen";
   }
   if (action.type === "continue_run" && view.run?.phase === "encounter_ice") {
-    const base = actionButtonLabel(action);
+    const base = actionButtonLabel(action, cardPresentationsById);
     if (/^Subroutinen auslösen\b/i.test(base)) return base;
   }
   if (
@@ -3051,7 +3078,7 @@ export function runWindowActionButtonLabel(
   ) {
     return compactRunWindowBreakerLabel(view, action);
   }
-  return runAwareActionButtonLabel(view, action);
+  return runAwareActionButtonLabel(view, action, cardPresentationsById);
 }
 
 function paymentSupportContinuationLabel(action: LegalAction): string {

@@ -25,13 +25,23 @@ export function startRunForCardImplementation(
   const sourceDefinitionId = sourceCardId
     ? host.cards.definitionFor(state, sourceCardId).id
     : undefined;
+  const ordinarySuccessBonusCredits =
+    options.successfulRunAccessReplacement === undefined
+      ? options.successfulRunRunnerCreditGain
+      : undefined;
+  const forwardedOptions =
+    ordinarySuccessBonusCredits === undefined
+      ? options
+      : omitOrdinarySuccessBonus(options);
   host.run.startRun(
     state,
     serverId,
-    options.accessCount ?? 1,
+    forwardedOptions.accessCount ?? 1,
     {
-      ...(options.freeTrashAccessZones
-        ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
+      ...(forwardedOptions.freeTrashAccessZones
+        ? {
+            freeTrashAccessZones: forwardedOptions.freeTrashAccessZones.slice(),
+          }
         : {}),
       ...(options.accessServerOverride
         ? { accessServerOverride: options.accessServerOverride }
@@ -64,10 +74,10 @@ export function startRunForCardImplementation(
       ...(options.successfulRunRunnerTagGain !== undefined
         ? { successfulRunRunnerTagGain: options.successfulRunRunnerTagGain }
         : {}),
-      ...(options.successfulRunRunnerCreditGain !== undefined
+      ...(forwardedOptions.successfulRunRunnerCreditGain !== undefined
         ? {
             successfulRunRunnerCreditGain:
-              options.successfulRunRunnerCreditGain,
+              forwardedOptions.successfulRunRunnerCreditGain,
           }
         : {}),
       ...(options.successfulRunRequiresCorpCredits !== undefined
@@ -162,6 +172,7 @@ export function startRunForCardImplementation(
           }
         : {}),
     },
+    ordinarySuccessBonusCredits,
     legalAction,
   );
   legalAction.payload = {
@@ -225,4 +236,15 @@ export function startRunForCardImplementation(
       : {}),
   };
   return { publicPayload: legalAction.payload ?? {} };
+}
+
+function omitOrdinarySuccessBonus(
+  options: CardEffectMakeRunOptions,
+): CardEffectMakeRunOptions {
+  const {
+    successfulRunRunnerCreditGain: _ordinarySuccessBonus,
+    ...forwardedOptions
+  } = options;
+  void _ordinarySuccessBonus;
+  return forwardedOptions;
 }
