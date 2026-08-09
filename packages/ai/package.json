@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@netgrid/catalog": "workspace:*",
+    "@netgrid/cards": "workspace:*",
     "@netgrid/decks": "workspace:*",
     "@netgrid/engine": "workspace:*",
     "@netgrid/shared": "workspace:*"

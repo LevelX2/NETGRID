@@ -30,6 +30,7 @@ const packageRules = [
     prefix: "packages/ai/",
     allow: new Set([
       "@netgrid/catalog",
+      "@netgrid/cards",
       "@netgrid/decks",
       "@netgrid/engine",
       "@netgrid/shared",
@@ -89,6 +90,10 @@ function boundaryFindings(file, source) {
         findings.push(
           `${file}: Engine muss Card-Verträge ausschließlich über @netgrid/cards/engine importieren`,
         );
+      else if (file.startsWith("packages/ai/") && imported === "@netgrid/cards")
+        findings.push(
+          `${file}: AI muss Card-Verträge ausschließlich über @netgrid/cards/planning importieren`,
+        );
       else if (
         imported !== packageName &&
         !allowedWorkspaceSubpath(file, imported)
@@ -100,6 +105,14 @@ function boundaryFindings(file, source) {
     if (normalWebClient && forbiddenNormalBrowserImport(file, imported))
       findings.push(
         `${file}: normaler Webclient darf ${imported} nicht direkt laden`,
+      );
+    if (
+      normalWebClient &&
+      imported.startsWith(".") &&
+      relativeImportReachesPrivilegedCode(file, imported)
+    )
+      findings.push(
+        `${file}: normaler Webclient-Relativimport erreicht privilegierten Code (${imported})`,
       );
     if (engineProduction) {
       if (!imported.startsWith(".") && !imported.startsWith("@netgrid/"))
@@ -122,8 +135,10 @@ function boundaryFindings(file, source) {
 function allowedWorkspaceSubpath(file, specifier) {
   if (specifier.startsWith("@netgrid/cards/"))
     return (
-      file.startsWith("packages/engine/") &&
-      specifier === "@netgrid/cards/engine"
+      (file.startsWith("packages/engine/") &&
+        specifier === "@netgrid/cards/engine") ||
+      (file.startsWith("packages/ai/") &&
+        specifier === "@netgrid/cards/planning")
     );
   return false;
 }
@@ -233,6 +248,26 @@ function runSelfTest() {
       0,
     ],
     [
+      "packages/ai/src/valid-cards-planning.ts",
+      'import type { PlanningCardView } from "@netgrid/cards/planning";',
+      0,
+    ],
+    [
+      "packages/ai/src/invalid-cards-root.ts",
+      'import type { CardSpec } from "@netgrid/cards";',
+      1,
+    ],
+    [
+      "packages/ai/src/invalid-cards-engine.ts",
+      'import type { EngineCardView } from "@netgrid/cards/engine";',
+      1,
+    ],
+    [
+      "packages/ai/src/invalid-cards-editor.ts",
+      'import type { EditorCardView } from "@netgrid/cards/editor";',
+      1,
+    ],
+    [
       "packages/cards/src/invalid-dynamic.ts",
       "const value = import(target);",
       1,
@@ -249,15 +284,60 @@ function runSelfTest() {
       0,
     ],
     [
+      "apps/web/features/game/valid-runtime.tsx",
+      'import * as CardsPublic from "@netgrid/cards/public";',
+      0,
+    ],
+    [
+      "apps/web/features/game/invalid-planning.tsx",
+      'import type { PlanningCardView } from "@netgrid/cards/planning";',
+      1,
+    ],
+    [
+      "apps/web/features/game/invalid-editor.tsx",
+      'import type { EditorCardView } from "@netgrid/cards/editor";',
+      1,
+    ],
+    [
       "apps/web/app/replays/page.tsx",
       'import type { CardSpec } from "@netgrid/cards";',
       1,
     ],
     ["apps/web/app/spectate/page.tsx", "const module = import(target);", 1],
     [
+      "apps/server/src/cards.ts",
+      'import { listPublicCardViews } from "@netgrid/cards/server";',
+      0,
+    ],
+    [
+      "apps/web/features/game/invalid-cards-server.tsx",
+      'import { listPublicCardViews } from "@netgrid/cards/server";',
+      1,
+    ],
+    [
       "apps/web/app/api/current/route.ts",
       'import { applyAction } from "@netgrid/engine";',
       0,
+    ],
+    [
+      "apps/web/features/game/invalid-relative-cards.tsx",
+      'import "../../../../packages/cards/src/index";',
+      1,
+    ],
+    [
+      "apps/web/features/game/invalid-relative-export.tsx",
+      'export * from "../../../../packages/cards/src/engine/index";',
+      1,
+    ],
+    [
+      "apps/web/features/game/invalid-relative-dynamic.tsx",
+      'import("../../../../packages/cards/src/planning/index");',
+      1,
+    ],
+    [
+      "apps/web/features/game/invalid-relative-require.tsx",
+      'require("../../../../packages/cards/src/editor/index");',
+      1,
     ],
   ];
   const failures = cases.filter(
@@ -408,6 +488,20 @@ function relativeImportEscapesEngine(file, specifier) {
   const base = path.resolve(root, path.dirname(file), specifier);
   const engineRoot = path.join(root, "packages", "engine");
   return base !== engineRoot && !base.startsWith(engineRoot + path.sep);
+}
+
+function relativeImportReachesPrivilegedCode(file, specifier) {
+  const base = path.resolve(root, path.dirname(file), specifier);
+  const forbiddenRoots = [
+    path.join(root, "packages", "cards"),
+    path.join(root, "packages", "engine"),
+    path.join(root, "packages", "ai"),
+    path.join(root, "apps", "server"),
+  ];
+  return forbiddenRoots.some(
+    (forbiddenRoot) =>
+      base === forbiddenRoot || base.startsWith(forbiddenRoot + path.sep),
+  );
 }
 
 function engineGlobalFindings(file, sourceText) {

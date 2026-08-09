@@ -56,6 +56,11 @@ export { cardImplementationForDefinitionId } from "./card-implementations/regist
 export { icebreakerAbilitiesForDefinition } from "./ability-engine/icebreaker-abilities";
 
 export {
+  CARD_IMPLEMENTATION_PRIMITIVE_CONTRACT_VERSION,
+  createCurrentCardRegistryRulesContext,
+} from "./card-registry-rules-context";
+
+export {
   visibleBreakerEncounterQuote,
   type VisibleBreakerEncounterQuote,
 } from "./game/view/visible-breaker-encounter-quote";

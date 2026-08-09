@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS02 abgeschlossen, CS03 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS03 abgeschlossen, CS04 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -398,7 +398,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS00  | Worktree-Preflight, Architekturfreeze und Baselines    | completed |
 | CS01  | Capability-, Longtail- und Consumer-Inventar           | completed |
 | CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | completed |
-| CS03  | Registry, Projektionen, Importindex und Fingerprints   | pending   |
+| CS03  | Registry, Projektionen, Importindex und Fingerprints   | completed |
 | CS04  | Stabile Capability-Identität und Engine-Rebinding      | pending   |
 | CS05  | Prospective-Capability-Compiler                        | pending   |
 | CS06  | Heterogener produktiver Mechanik-Stresstest            | pending   |
@@ -710,6 +710,37 @@ Done-Gate:
 Commit:
 
 `feat(cards): add deterministic registry projections and fingerprints`
+
+Ergebnis am 09.08.2026:
+
+- Ein dateibaumbasierter Generator erzeugt den sortierten statischen
+  CardSpec-/SetSpec-Importindex. Der Driftcheck, AST-gebundene Exportprüfung
+  und Incoming-Edge-Guard verhindern manuelle Listen, Direktimporte und einen
+  zweiten produktiven Ladepfad. Bis zur Migration in CS06 bleibt der
+  Produktionsindex bewusst leer.
+- Die Registry validiert globale Definition-, Printing-, Set- und
+  Capability-Identitäten atomar, friert die einzige Objektinstanz tief ein und
+  hält Maps privat. Definition-, Printing-, Set- und Capability-Lookups sowie
+  sortierte Engine-, Planning-, Editor- und PublicDTO-Sichten sind daraus
+  abgeleitet und gecacht.
+- `/public` ist eine browserreine Typoberfläche ohne Vollregistry-
+  Reachability. Der browsergesperrte `/server`-Subpath stellt ausschließlich
+  gebundene PublicDTO-Read-APIs bereit; Root bleibt zyklenfreie
+  Authoringoberfläche und `/engine`, `/planning` sowie `/editor` bleiben auf
+  ihre jeweilige Sicht begrenzt.
+- Regel-, Text-, Printing-, Planning- und Publication-Fingerprints sowie
+  Registry-Aggregate sind getrennt. Matchkontexte binden ausschließlich den
+  gewählten Cardpool, seine Regelfingerprints und caller-owned Engine-,
+  Primitive-, Action- und Planversionen; globale Registryänderungen und reine
+  Text-/Bild-/Publication-Änderungen invalidieren keinen laufenden
+  Regelkontext.
+- PlanningRulesContext und StateHash konsumieren den Registry-/Primitive-
+  Kontext. Textquellen- und Textsnapshotmetadaten bleiben außerhalb des
+  mechanischen Hashes. Die leere Match-ID-Grenze wird in CS06 beim produktiven
+  CardSpec-Cutover durch die aufgelösten Format-IDs ersetzt.
+- Fokussierte Cards-, Planning- und StateHash-Tests, Cards-/Shared-/Engine-/AI-
+  Typechecks, Generator-, Boundary-, Source-/Cycle-, Browser- und
+  Test-Discovery-Gates sind grün.
 
 ### CS04 – Stabile Capability-Identität und Engine-Rebinding
 

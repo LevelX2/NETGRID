@@ -17,6 +17,7 @@ import {
   TURN_PLAN_EVALUATION_REGISTRY,
   TURN_PLAN_EVALUATION_REGISTRY_VERSION,
   TURN_PLANNING_CONTRACT_SCHEMA_VERSION,
+  turnPlanningFingerprint,
   type CampaignValueClaim,
   type CurrentLegalActionBinding,
   type PlanningStateIdentity,
@@ -31,17 +32,64 @@ describe("turn planning contracts", () => {
 
     expect(first).toEqual(second);
     expect(first.fingerprint).toMatch(/^fnv1a:/);
-    expect(first.rulesBaseline.engineSchemaVersion).toBe(
+    expect(first.cardRegistryRulesContext.engineSchemaVersion).toBe(
       CURRENT_RULES_BASELINE.engineSchemaVersion,
     );
     expect(() => assertPlanningRulesContext(first)).not.toThrow();
     expect(() =>
       assertPlanningRulesContext({
         ...first,
-        cardPoolSnapshotId: "different-pool",
+        cardRegistryRulesContext: {
+          ...first.cardRegistryRulesContext,
+          cardPoolSnapshotId: "different-pool",
+        },
       }),
     ).toThrowError(/rules_fingerprint_mismatch/);
   });
+
+  it("keeps text provenance outside the mechanical planning-rules context", () => {
+    const changedTextBaseline = {
+      ...CURRENT_RULES_BASELINE,
+      cardTextSnapshotId: "text-only-change",
+    } as unknown as typeof CURRENT_RULES_BASELINE;
+    const changed = buildPlanningRulesContext({
+      rulesBaseline: changedTextBaseline,
+      formatProfileId: "test-format",
+      cardPoolSnapshotId: "test-pool",
+    });
+    expect(changed.fingerprint).toBe(rulesContext().fingerprint);
+  });
+
+  it("rejects a forged nested CardRegistry context even with a refreshed outer hash", () => {
+    const forged = structuredClone(rulesContext());
+    forged.cardRegistryContext.rulesContextFingerprint =
+      "fnv1a64x2:forged:0000000000000000";
+    const { fingerprint: _fingerprint, ...input } = forged;
+    forged.fingerprint = turnPlanningFingerprint("planning-rules", input);
+    expect(() => assertPlanningRulesContext(forged)).toThrowError(
+      /card_registry_context_invalid|card_registry_rules_context_mismatch/,
+    );
+  });
+
+  it.each([
+    ["cardRegistryContext", undefined],
+    ["cardRegistryContext", null],
+    ["cardRegistryContext", "invalid"],
+    ["cardRegistryRulesContext", undefined],
+    ["cardRegistryRulesContext", null],
+    ["cardRegistryRulesContext", "invalid"],
+  ])(
+    "rejects a missing or non-object nested CardRegistry context",
+    (field, invalid) => {
+      const context = rulesContext() as unknown as Record<string, unknown>;
+      context[field] = invalid;
+      expect(() =>
+        assertPlanningRulesContext(
+          context as unknown as ReturnType<typeof rulesContext>,
+        ),
+      ).toThrowError(/card_registry_context_invalid/);
+    },
+  );
 
   it("derives identical planner identity from hidden-equivalent safe inputs", () => {
     const first = decisionInput();

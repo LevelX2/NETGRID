@@ -91,6 +91,9 @@ importers:
 
   packages/ai:
     dependencies:
+      '@netgrid/cards':
+        specifier: workspace:*
+        version: link:../cards
       '@netgrid/catalog':
         specifier: workspace:*
         version: link:../catalog

@@ -17,16 +17,23 @@ function runRepositoryCheck() {
   );
   const fileSet = new Set(files.map((file) => path.resolve(file)));
   const graph = new Map(files.map((file) => [path.resolve(file), new Set()]));
+  const runtimeGraph = new Map(
+    files.map((file) => [path.resolve(file), new Set()]),
+  );
   const findings = [];
   for (const file of files) {
     const source = readFileSync(file, "utf8");
-    findings.push(...sourceFindings(file, source, fileSet, graph));
+    findings.push(
+      ...sourceFindings(file, source, fileSet, graph, runtimeGraph),
+    );
   }
   findings.push(...configurationFindings());
   for (const cycle of graphCycles(graph))
     findings.push(
       `Cards-Quellzyklus: ${cycle.map(relativeCardPath).join(" -> ")}`,
     );
+  findings.push(...publicRuntimeReachabilityFindings(runtimeGraph));
+  findings.push(...singleLoadImportFindings(runtimeGraph));
   if (findings.length > 0) {
     console.error("CARDS_SOURCE_STRUCTURE FAIL");
     for (const finding of findings) console.error(`- ${finding}`);
@@ -35,7 +42,13 @@ function runRepositoryCheck() {
     console.log(`CARDS_SOURCE_STRUCTURE OK files=${files.length} cycles=0`);
 }
 
-function sourceFindings(file, sourceText, fileSet, graph) {
+function sourceFindings(
+  file,
+  sourceText,
+  fileSet,
+  graph,
+  runtimeGraph = graph,
+) {
   const relative = relativeCardPath(file);
   const source = ts.createSourceFile(
     file,
@@ -62,7 +75,13 @@ function sourceFindings(file, sourceText, fileSet, graph) {
           findings.push(
             `${relative}: relativer Import verlässt packages/cards/src (${specifier})`,
           );
-      } else graph.get(path.resolve(file))?.add(target);
+      } else {
+        graph.get(path.resolve(file))?.add(target);
+        const typeOnly = ts.isImportDeclaration(statement)
+          ? statement.importClause?.isTypeOnly === true
+          : statement.isTypeOnly === true;
+        if (!typeOnly) runtimeGraph.get(path.resolve(file))?.add(target);
+      }
     } else if (specifier !== "@netgrid/shared")
       findings.push(
         `${relative}: Produktivimport ${specifier} ist in cards nicht erlaubt`,
@@ -90,13 +109,7 @@ function sourceFindings(file, sourceText, fileSet, graph) {
       const requireCall =
         ts.isIdentifier(node.expression) && node.expression.text === "require";
       if (dynamicImport || requireCall) {
-        const argument = node.arguments[0];
-        if (argument && ts.isStringLiteralLike(argument))
-          inspectSpecifier(argument.text);
-        else
-          findings.push(
-            `${relative}: dynamischer Import/require muss ein Stringliteral sein`,
-          );
+        findings.push(`${relative}: dynamischer Import/require ist verboten`);
       }
     }
     const isPropertyName =
@@ -137,7 +150,7 @@ function sourceFindings(file, sourceText, fileSet, graph) {
     findings.push(
       `${relative}: ${runtimeGlobal} ist in der reinen Vertragsschicht verboten`,
     );
-  return findings;
+  return [...new Set(findings)];
 
   function accessPath(node) {
     if (ts.isIdentifier(node)) return [node.text];
@@ -180,6 +193,65 @@ function sourceFindings(file, sourceText, fileSet, graph) {
         `${relative}: Produktivimport ${specifier} ist in cards nicht erlaubt`,
       );
   }
+}
+
+function publicRuntimeReachabilityFindings(graph) {
+  const entry = path.resolve(sourceRoot, "public", "index.ts");
+  if (!graph.has(entry)) return [];
+  const forbidden = (file) => {
+    const relative = path.relative(sourceRoot, file).replaceAll(path.sep, "/");
+    return (
+      relative === "registry.ts" ||
+      relative === "registry-runtime.ts" ||
+      relative.startsWith("generated/") ||
+      relative.startsWith("engine/") ||
+      relative.startsWith("planning/") ||
+      relative.startsWith("editor/")
+    );
+  };
+  const visited = new Set();
+  const pending = [entry];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (!current || visited.has(current)) continue;
+    visited.add(current);
+    if (current !== entry && forbidden(current))
+      return [
+        `src/public/index.ts: Runtime-Reachability erreicht verbotene Vollregistry ${relativeCardPath(current)}`,
+      ];
+    pending.push(...(graph.get(current) ?? []));
+  }
+  return [];
+}
+
+function singleLoadImportFindings(graph) {
+  const generatedIndex = path.resolve(
+    sourceRoot,
+    "generated",
+    "card-spec-import-index.ts",
+  );
+  const registryRuntime = path.resolve(sourceRoot, "registry-runtime.ts");
+  const findings = [];
+  for (const [source, targets] of graph) {
+    for (const target of targets) {
+      const targetRelative = path
+        .relative(sourceRoot, target)
+        .replaceAll(path.sep, "/");
+      if (
+        (targetRelative.startsWith("specs/") ||
+          targetRelative.startsWith("sets/")) &&
+        source !== generatedIndex
+      )
+        findings.push(
+          `${relativeCardPath(source)}: CardSpec/SetSpec darf nur der generierte Importindex laden (${targetRelative})`,
+        );
+      if (target === generatedIndex && source !== registryRuntime)
+        findings.push(
+          `${relativeCardPath(source)}: generierter Importindex darf nur von registry-runtime geladen werden`,
+        );
+    }
+  }
+  return findings;
 }
 
 function configurationFindings() {
@@ -279,12 +351,52 @@ function runSelfTest() {
   ]);
   if (graphCycles(acyclicGraph).length !== 0)
     failures.push("acyclic graph was rejected");
+  const publicEntry = path.resolve(sourceRoot, "public", "index.ts");
+  const registryRuntime = path.resolve(sourceRoot, "registry-runtime.ts");
+  if (
+    publicRuntimeReachabilityFindings(
+      new Map([
+        [publicEntry, new Set([registryRuntime])],
+        [registryRuntime, new Set()],
+      ]),
+    ).length !== 1
+  )
+    failures.push("public-to-full-registry reachability was not detected");
+  const generatedIndex = path.resolve(
+    sourceRoot,
+    "generated",
+    "card-spec-import-index.ts",
+  );
+  const cardSpec = path.resolve(sourceRoot, "specs", "a.card-spec.ts");
+  const manualConsumer = path.resolve(sourceRoot, "manual-consumer.ts");
+  if (
+    singleLoadImportFindings(
+      new Map([
+        [generatedIndex, new Set([cardSpec])],
+        [registryRuntime, new Set([generatedIndex])],
+        [cardSpec, new Set()],
+      ]),
+    ).length !== 0
+  )
+    failures.push("valid generated-index load chain was rejected");
+  if (
+    singleLoadImportFindings(
+      new Map([
+        [manualConsumer, new Set([cardSpec, generatedIndex])],
+        [cardSpec, new Set()],
+        [generatedIndex, new Set()],
+      ]),
+    ).length !== 2
+  )
+    failures.push(
+      "manual CardSpec/generated-index consumers were not rejected",
+    );
   if (failures.length > 0) {
     console.error("CARDS_SOURCE_STRUCTURE SELFTEST FAIL");
     for (const failure of failures) console.error(`- ${failure}`);
     process.exitCode = 1;
   } else
-    console.log(`CARDS_SOURCE_STRUCTURE SELFTEST OK cases=${cases.length + 2}`);
+    console.log(`CARDS_SOURCE_STRUCTURE SELFTEST OK cases=${cases.length + 5}`);
 }
 
 function collectSourceFiles(directory) {
