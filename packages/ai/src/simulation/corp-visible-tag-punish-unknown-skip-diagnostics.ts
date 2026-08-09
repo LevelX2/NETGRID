@@ -1,5 +1,5 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { titleForCardId } from "../runtime/card-title";

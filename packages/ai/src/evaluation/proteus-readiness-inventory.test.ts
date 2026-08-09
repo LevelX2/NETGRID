@@ -1,6 +1,6 @@
 import inventoryData from "../../../../data/ai/proteus-ai-readiness-inventory-v1.json";
-import manifestData from "../../../../data/manifests/proteus-card-support.json";
 import { describe, expect, it } from "vitest";
+import { RUNTIME_CARDS } from "../ai-hints";
 
 const allowedFamilies = new Set([
   "baseline",
@@ -17,16 +17,19 @@ const allowedFamilies = new Set([
 ]);
 
 describe("Proteus AI readiness inventory", () => {
-  it("classifies every manifest card exactly once", () => {
+  it("classifies every effective Proteus card exactly once", () => {
     const inventoryIds = inventoryData.cards.map((entry) => entry.cardId);
-    const manifestIds = manifestData.cards.map((entry) => entry.cardId).sort();
+    const effectiveProteusIds = Object.values(RUNTIME_CARDS)
+      .filter((card) => card.setId === "proteus")
+      .map((card) => card.catalogCardId)
+      .sort();
 
     expect(inventoryData.schemaVersion).toBe(
       "netgrid.proteus-ai-readiness-inventory.v1",
     );
     expect(inventoryIds).toHaveLength(154);
     expect(new Set(inventoryIds).size).toBe(154);
-    expect([...inventoryIds].sort()).toEqual(manifestIds);
+    expect([...inventoryIds].sort()).toEqual(effectiveProteusIds);
     expect(
       inventoryData.cards.every((entry) =>
         allowedFamilies.has(entry.primaryFamily),

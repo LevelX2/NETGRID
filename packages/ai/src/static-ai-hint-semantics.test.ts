@@ -1,23 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import activeHintsData from "../../../data/ai/ai-card-hints-active.json";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./actions/action-card-semantic-profiles";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 
-type StaticHint = {
-  cardId: string;
-  side: "runner" | "corp";
-  functionSignals?: string[];
-  tacticSignals?: string[];
-  actionTacticSignals?: string[];
-  strategyAnchors?: string[];
-  strategySupportPairs?: Array<{
-    strategyId: string;
-    role: string;
-    evidence: string[];
-  }>;
-};
-
-const hints = activeHintsData.cards as StaticHint[];
+const hints = [...AI_HINTS_BY_CARD.values()];
 const hintById = new Map(hints.map((hint) => [hint.cardId, hint]));
 
 describe("static AI hint semantics", () => {

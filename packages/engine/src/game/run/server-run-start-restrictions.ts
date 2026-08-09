@@ -1,5 +1,6 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { CS06_CARD_DEFINITION_IDS } from "@netgrid/cards/engine";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardInstance,
   type CardInstanceId,
   type GameState,
@@ -24,7 +25,10 @@ export type ServerRunStartRestrictionSource = {
   sourceTitle: string;
   targetServerId: Exclude<ServerId, "new_remote">;
   implementation: ServerRunStartRestrictionImplementation;
+  sourceCapabilityKey: string;
 };
+
+const CARD_SPEC_DEFINITION_IDS = new Set<string>(CS06_CARD_DEFINITION_IDS);
 
 export function serverRunStartRestrictionSources(
   state: GameState,
@@ -49,14 +53,36 @@ export function serverRunStartRestrictionSources(
         sourceTitle: definition.title,
         targetServerId,
         implementation: window,
+        sourceCapabilityKey: runStartRestrictionCapabilityKey(
+          definition.id,
+          window,
+        ),
       });
     }
   }
   return sources.sort((left, right) =>
-    `${left.sourceCardInstanceId}:${left.implementation.abilityKey}`.localeCompare(
-      `${right.sourceCardInstanceId}:${right.implementation.abilityKey}`,
+    `${left.sourceCardInstanceId}:${left.sourceCapabilityKey}`.localeCompare(
+      `${right.sourceCardInstanceId}:${right.sourceCapabilityKey}`,
     ),
   );
+}
+
+function runStartRestrictionCapabilityKey(
+  definitionId: string,
+  implementation: ServerRunStartRestrictionImplementation,
+): string {
+  if (CARD_SPEC_DEFINITION_IDS.has(definitionId)) {
+    if (!("capabilityKey" in implementation) || !implementation.capabilityKey)
+      throw new Error(
+        `card_spec_run_restriction_capability_key_missing: ${definitionId}`,
+      );
+    return implementation.capabilityKey;
+  }
+  if (!("abilityKey" in implementation) || !implementation.abilityKey)
+    throw new Error(
+      `legacy_run_restriction_ability_key_missing: ${definitionId}`,
+    );
+  return implementation.abilityKey;
 }
 
 export function serverRunStartRestrictions(
@@ -70,14 +96,14 @@ export function serverRunStartRestrictions(
           "corp_installed_or_advanced_on_target_server_during_latest_corp_turn" &&
         !hasFortActivitySinceCorpTurnStart(state, targetServerId),
     )
-    .map(({ sourceCardInstanceId, sourceTitle, implementation }) => ({
-      id: `server_status:${targetServerId}:run_prohibited:${sourceCardInstanceId}:${implementation.abilityKey}`,
+    .map(({ sourceCardInstanceId, sourceTitle, sourceCapabilityKey }) => ({
+      id: `server_status:${targetServerId}:run_prohibited:${sourceCardInstanceId}:${sourceCapabilityKey}`,
       kind: "run_prohibited",
       scope: "target_server",
       reason: "required_corp_activity_during_latest_corp_turn_missing",
       targetServerId,
       sourceCardInstanceId,
-      sourceAbilityId: implementation.abilityKey,
+      sourceAbilityId: sourceCapabilityKey,
       sourceTitle,
       sourceSide: "corp",
     }));

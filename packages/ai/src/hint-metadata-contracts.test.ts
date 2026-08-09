@@ -19,12 +19,13 @@ const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../..",
 );
+const tsxCliPath = fileURLToPath(import.meta.resolve("tsx/cli"));
 
 function report(): MetadataContractReport {
   return JSON.parse(
     execFileSync(
       process.execPath,
-      ["scripts/check-ai-hint-metadata-contracts.mjs", "--json"],
+      [tsxCliPath, "scripts/check-ai-hint-metadata-contracts.mjs", "--json"],
       { cwd: repoRoot, encoding: "utf8" },
     ),
   ) as MetadataContractReport;

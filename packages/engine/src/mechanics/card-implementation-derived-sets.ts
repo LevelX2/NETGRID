@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type CardDefinitionId } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
+import { type CardDefinitionId } from "@netgrid/shared";
 import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
 import type { CardImplementationDefinition } from "../card-implementations/types";
 import type { CardEffectImplementation } from "../ability-engine/definition-types";
@@ -41,7 +42,10 @@ function lifecycleEffects(
 function allEffects(
   implementation: CardImplementationDefinition,
 ): readonly CardEffectImplementation[] {
-  return [...abilityEffects(implementation), ...lifecycleEffects(implementation)];
+  return [
+    ...abilityEffects(implementation),
+    ...lifecycleEffects(implementation),
+  ];
 }
 
 function hasEffectKind(

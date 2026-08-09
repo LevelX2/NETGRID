@@ -13,6 +13,7 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-ability-contracts";
+import type { AddressableCapabilityContract } from "../capability-identity";
 import type {
   CardAccessZone,
   CardConditionImplementation,
@@ -634,14 +635,13 @@ export type CardFortRunWindowImplementation =
       limit: "once_per_run_per_source";
       visibility: Extract<EventVisibilityClass, "public">;
     }
-  | {
+  | ({
       kind: "server_run_start_restriction";
-      abilityKey: string;
       timing: "run_start_legal";
       target: "source_fort" | "selected_server";
       condition: "corp_installed_or_advanced_on_target_server_during_latest_corp_turn";
       visibility: Extract<EventVisibilityClass, "public">;
-    }
+    } & ({ abilityKey: string } | AddressableCapabilityContract))
   | {
       kind: "gain_credits_after_unsuccessful_run_on_same_fort";
       timing: "after_unsuccessful_run_on_this_fort";

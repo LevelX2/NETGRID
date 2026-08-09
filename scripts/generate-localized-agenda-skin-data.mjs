@@ -3,28 +3,47 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRuntimeCardsById } from "../packages/catalog/src/index.ts";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 const skinRoot = path.join(repoRoot, "data", "card-assets", "localized", "de");
 const artRoot = path.join(skinRoot, "art");
 const tmpArtRoot = path.join(repoRoot, "tmp", "localized-card-art-svg");
-const originalCardsPath = path.join(repoRoot, "data", "cards", "originalset-v1-cards.json");
 const cardsOutPath = path.join(skinRoot, "cards.de.json");
 
-const source = JSON.parse(await readFile(originalCardsPath, "utf8"));
-const agendas = source.cards
+const agendas = Object.values(createRuntimeCardsById())
+  .filter((card) => card.setId === "originalset-v1")
   .filter((card) => card.type === "agenda")
+  .map((card) => ({
+    cardId: card.catalogCardId,
+    title: card.title,
+    collectorNumber: card.collectorNumber,
+    subtypes: card.subtypes,
+    numeric: card.numeric,
+    text: card.text,
+  }))
   .sort((a, b) => Number(a.collectorNumber) - Number(b.collectorNumber));
 
 if (agendas.length !== 33) {
-  throw new Error(`Expected 33 originalset agenda cards, found ${agendas.length}.`);
+  throw new Error(
+    `Expected 33 originalset agenda cards, found ${agendas.length}.`,
+  );
+}
+if (process.argv.includes("--check-source")) {
+  console.log(
+    `Localized agenda source complete: ${agendas.length} effective Originalset agendas including Data Fort Reclamation.`,
+  );
+  process.exit(0);
 }
 
 const projectClassLabels = {
   "gray-ops": "Graue Operation",
   "black-ops": "Schwarze Operation",
   research: "Forschung",
-  asset: "Anlage"
+  asset: "Anlage",
 };
 
 const text = (value) => ({ type: "text", text: value });
@@ -42,9 +61,11 @@ const localizations = {
     localizedRules: [
       paragraph(
         action(),
-        text("Mische Karten aus Hauptquartier und Archiv in F&E; ziehe dann 5 Karten.")
-      )
-    ]
+        text(
+          "Mische Karten aus Hauptquartier und Archiv in F&E; ziehe dann 5 Karten.",
+        ),
+      ),
+    ],
   },
   "onr_v1_189_artificial-security-directors": {
     localizedTitle: "Künstliche Sicherheitsdirektion",
@@ -53,8 +74,12 @@ const localizations = {
     artPrompt:
       "Cyberpunk security boardroom run by abstract machine directors, surveillance panes and access-control glass, no readable text.",
     localizedRules: [
-      paragraph(text("Entwicklungskosten von Projekten der Klasse Schwarze Operation sind um 1 reduziert."))
-    ]
+      paragraph(
+        text(
+          "Entwicklungskosten von Projekten der Klasse Schwarze Operation sind um 1 reduziert.",
+        ),
+      ),
+    ],
   },
   "onr_v1_190_bioweapons-engineering": {
     localizedTitle: "Biowaffen-Engineering",
@@ -62,7 +87,11 @@ const localizations = {
     palette: ["#102820", "#77ff88", "#18b6ff", "#f05a8a"],
     artPrompt:
       "Corporate cyberpunk bioengineering lab with sealed vats, gene helix lights and hazard-glass architecture, no readable text.",
-    localizedRules: [paragraph(text("Jede Quelle von Fleischschaden verursacht +1 Fleischschaden."))]
+    localizedRules: [
+      paragraph(
+        text("Jede Quelle von Fleischschaden verursacht +1 Fleischschaden."),
+      ),
+    ],
   },
   "onr_v1_191_black-ice-quality-assurance": {
     localizedTitle: "Qualitätssicherung für Schwarzes ICE",
@@ -70,7 +99,7 @@ const localizations = {
     palette: ["#090b18", "#27e2ff", "#7158ff", "#d7f7ff"],
     artPrompt:
       "Dark cyberpunk black ICE quality lab, crystalline defensive code structures under diagnostic light, no readable text.",
-    localizedRules: [paragraph(text("Alles schwarze ICE hat +2 Stärke."))]
+    localizedRules: [paragraph(text("Alles schwarze ICE hat +2 Stärke."))],
   },
   "onr_v1_192_corporate-boon": {
     localizedTitle: "Konzernbonus",
@@ -80,8 +109,10 @@ const localizations = {
       "Prestige corporate benefit vault, executive reward circuitry and stacked luminous counters, no readable text.",
     localizedRules: [
       paragraph(text("Lege 4 Bonus-Zähler auf dieses Projekt.")),
-      paragraph(text("Bonus-Zähler: Erhalte 1 Aktion. Nur 1x pro Zug in deinem Zug."))
-    ]
+      paragraph(
+        text("Bonus-Zähler: Erhalte 1 Aktion. Nur 1x pro Zug in deinem Zug."),
+      ),
+    ],
   },
   "onr_v1_193_corporate-coup": {
     localizedTitle: "Konzernputsch",
@@ -90,9 +121,13 @@ const localizations = {
     artPrompt:
       "Cyberpunk hostile boardroom coup, corporate towers fractured by red security light and encrypted takeover lines, no readable text.",
     localizedRules: [
-      paragraph(text("Lege "), gridmark(15), text(" aus der Bank auf dieses Projekt.")),
-      paragraph(action(), text("Nimm "), gridmark(3), text(" davon."))
-    ]
+      paragraph(
+        text("Lege "),
+        gridmark(15),
+        text(" aus der Bank auf dieses Projekt."),
+      ),
+      paragraph(action(), text("Nimm "), gridmark(3), text(" davon.")),
+    ],
   },
   "onr_v1_194_corporate-downsizing": {
     localizedTitle: "Konzernabbau",
@@ -102,9 +137,11 @@ const localizations = {
       "Corporate downsizing in a neon operations floor, empty workstations and severed network lines, no readable text.",
     localizedRules: [
       paragraph(
-        text("Zeige dem Runner Agendas aus dem Hauptquartier. Erhalte das Doppelte ihrer Projektpunkte als Gridmark; mische sie in F&E.")
-      )
-    ]
+        text(
+          "Zeige dem Runner Agendas aus dem Hauptquartier. Erhalte das Doppelte ihrer Projektpunkte als Gridmark; mische sie in F&E.",
+        ),
+      ),
+    ],
   },
   "onr_v1_195_corporate-retreat": {
     localizedTitle: "Konzernrückzug",
@@ -114,8 +151,8 @@ const localizations = {
       "Corporate evacuation from a sealed headquarters, mobile command pods and retreating light trails, no readable text.",
     localizedRules: [
       paragraph(text("Bis du eine Karte installierst oder aktivierst:")),
-      paragraph(action(), text("Erhalte "), gridmark(2), text("."))
-    ]
+      paragraph(action(), text("Erhalte "), gridmark(2), text(".")),
+    ],
   },
   "onr_v1_196_corporate-war": {
     localizedTitle: "Konzernkrieg",
@@ -124,8 +161,12 @@ const localizations = {
     artPrompt:
       "Corporate cyberwar command map with competing megacorp towers, red-orange alert grids and data salvos, no readable text.",
     localizedRules: [
-      paragraph(text("Mit 12+ Gridmark im Vorrat: erhalte "), gridmark(12), text(". Sonst verlierst du alle Gridmark."))
-    ]
+      paragraph(
+        text("Mit 12+ Gridmark im Vorrat: erhalte "),
+        gridmark(12),
+        text(". Sonst verlierst du alle Gridmark."),
+      ),
+    ],
   },
   "onr_v1_197_data-fort-reclamation": {
     localizedTitle: "Datenfestung-Rückgewinnung",
@@ -137,9 +178,11 @@ const localizations = {
       paragraph(
         text("Erhalte "),
         gridmark(10),
-        text(" für bis zu 4 Karten aus dem Hauptquartier: installiere sie einzeln in einer neuen Datenfestung; Rest zurück.")
-      )
-    ]
+        text(
+          " für bis zu 4 Karten aus dem Hauptquartier: installiere sie einzeln in einer neuen Datenfestung; Rest zurück.",
+        ),
+      ),
+    ],
   },
   "onr_v1_198_detroit-police-contract": {
     localizedTitle: "Detroit-Polizeivertrag",
@@ -148,9 +191,17 @@ const localizations = {
     artPrompt:
       "Private cyberpunk police contract in Detroit, armored drones, rain, city grid and corporate badges without logos or text.",
     localizedRules: [
-      paragraph(text("Lege "), gridmark(12), text(" aus der Bank auf dieses Projekt.")),
-      paragraph(text("Zu Beginn deines Zugs nimm "), gridmark(2), text(" davon."))
-    ]
+      paragraph(
+        text("Lege "),
+        gridmark(12),
+        text(" aus der Bank auf dieses Projekt."),
+      ),
+      paragraph(
+        text("Zu Beginn deines Zugs nimm "),
+        gridmark(2),
+        text(" davon."),
+      ),
+    ],
   },
   "onr_v1_199_employee-empowerment": {
     localizedTitle: "Mitarbeiterermächtigung",
@@ -160,8 +211,8 @@ const localizations = {
       "Cyberpunk corporate workforce empowerment, employees at luminous terminals connected by green-blue network lanes, no readable text.",
     localizedRules: [
       paragraph(text("Du darfst zu Zugbeginn 1 zusätzliche Karte ziehen.")),
-      paragraph(action(), text("Ziehe 2 Karten."))
-    ]
+      paragraph(action(), text("Ziehe 2 Karten.")),
+    ],
   },
   "onr_v1_200_encryption-breakthrough": {
     localizedTitle: "Verschlüsselungsdurchbruch",
@@ -171,8 +222,12 @@ const localizations = {
       "Cyberpunk encryption breakthrough, code-gate lattice cracking open into clean corporate light, no readable text.",
     localizedRules: [
       paragraph(text("Alle Code-Gates haben +1 Stärke.")),
-      paragraph(text("Zeige beliebig viele Code-Gates; erhalte "), gridmark(1), text(" je gezeigtem oder aktiviertem Code-Gate."))
-    ]
+      paragraph(
+        text("Zeige beliebig viele Code-Gates; erhalte "),
+        gridmark(1),
+        text(" je gezeigtem oder aktiviertem Code-Gate."),
+      ),
+    ],
   },
   "onr_v1_201_executive-extraction": {
     localizedTitle: "Führungskräfte-Extraktion",
@@ -181,8 +236,12 @@ const localizations = {
     artPrompt:
       "Cyberpunk executive extraction from a corporate tower, stealth VTOL silhouettes and encrypted escape corridors, no readable text.",
     localizedRules: [
-      paragraph(text("Entwicklungskosten von Projekten der Klasse Graue Operation sind um 1 reduziert."))
-    ]
+      paragraph(
+        text(
+          "Entwicklungskosten von Projekten der Klasse Graue Operation sind um 1 reduziert.",
+        ),
+      ),
+    ],
   },
   "onr_v1_202_genetics-visionary-acquisition": {
     localizedTitle: "Übernahme von Genetics-Visionary",
@@ -191,8 +250,12 @@ const localizations = {
     artPrompt:
       "Corporate acquisition of a futuristic genetics company, clean biotech tower and merger network streams, no readable text.",
     localizedRules: [
-      paragraph(text("Entwicklungskosten von Projekten der Klasse Forschung sind um 1 reduziert."))
-    ]
+      paragraph(
+        text(
+          "Entwicklungskosten von Projekten der Klasse Forschung sind um 1 reduziert.",
+        ),
+      ),
+    ],
   },
   "onr_v1_203_hostile-takeover": {
     localizedTitle: "Feindliche Übernahme",
@@ -200,7 +263,7 @@ const localizations = {
     palette: ["#171d2b", "#ff4d6d", "#ffd166", "#2ce7ff"],
     artPrompt:
       "Cyberpunk hostile takeover, corporate skyscraper seized by red acquisition lines and cold blue network grids, no readable text.",
-    localizedRules: [paragraph(text("Erhalte "), gridmark(5), text("."))]
+    localizedRules: [paragraph(text("Erhalte "), gridmark(5), text("."))],
   },
   "onr_v1_204_ice-transmutation": {
     localizedTitle: "ICE-Transmutation",
@@ -209,8 +272,12 @@ const localizations = {
     artPrompt:
       "Cyberpunk ICE transmutation, crystalline code defense morphing into repeated subroutine prisms, no readable text.",
     localizedRules: [
-      paragraph(text("Wähle ein aktiviertes ICE: Es erhält +1 Stärke; jede Subroutine darauf wird einmal direkt wiederholt."))
-    ]
+      paragraph(
+        text(
+          "Wähle ein aktiviertes ICE: Es erhält +1 Stärke; jede Subroutine darauf wird einmal direkt wiederholt.",
+        ),
+      ),
+    ],
   },
   "onr_v1_205_main-office-relocation": {
     localizedTitle: "Hauptquartier-Verlegung",
@@ -218,7 +285,7 @@ const localizations = {
     palette: ["#12243a", "#37d8ff", "#f9c74f", "#90f06a"],
     artPrompt:
       "Corporate headquarters relocation, mobile tower modules and secure transit corridors over a neon city, no readable text.",
-    localizedRules: [paragraph(text("Handlimit +2."))]
+    localizedRules: [paragraph(text("Handlimit +2."))],
   },
   "onr_v1_206_marine-arcology": {
     localizedTitle: "Meeres-Arkologie",
@@ -226,7 +293,9 @@ const localizations = {
     palette: ["#062033", "#24c6dc", "#5fffa2", "#ffd166"],
     artPrompt:
       "Marine cyberpunk arcology above dark water, corporate habitat domes and undersea fiber-optic networks, no readable text.",
-    localizedRules: [paragraph(action(2), text("Erhalte "), gridmark(3), text("."))]
+    localizedRules: [
+      paragraph(action(2), text("Erhalte "), gridmark(3), text(".")),
+    ],
   },
   "onr_v1_207_netwatch-operations-office": {
     localizedTitle: "Netwatch-Einsatzzentrale",
@@ -235,8 +304,11 @@ const localizations = {
     artPrompt:
       "Cyberpunk network operations office, trace consoles, signal triangulation beams and corporate security glass, no readable text.",
     localizedRules: [
-      paragraph(action(), text("Ortung 2 - bei Erfolg erhält der Runner 1 Markierung."))
-    ]
+      paragraph(
+        action(),
+        text("Ortung 2 - bei Erfolg erhält der Runner 1 Markierung."),
+      ),
+    ],
   },
   "onr_v1_208_on-call-solo-team": {
     localizedTitle: "Solo-Einsatzteam",
@@ -245,8 +317,11 @@ const localizations = {
     artPrompt:
       "On-call cyberpunk solo response team in a corporate armory, tactical silhouettes and amber alert lighting, no readable text.",
     localizedRules: [
-      paragraph(action(), text("Verursache 1 Fleischschaden. Nur wenn der Runner markiert ist."))
-    ]
+      paragraph(
+        action(),
+        text("Verursache 1 Fleischschaden. Nur wenn der Runner markiert ist."),
+      ),
+    ],
   },
   "onr_v1_209_political-coup": {
     localizedTitle: "Politischer Putsch",
@@ -255,9 +330,13 @@ const localizations = {
     artPrompt:
       "Cyberpunk political coup, corporate influence over a government chamber with neon red control lines, no readable text.",
     localizedRules: [
-      paragraph(text("Lege "), gridmark(12), text(" aus der Bank auf dieses Projekt.")),
-      paragraph(action(), text("Nimm "), gridmark(3), text(" davon."))
-    ]
+      paragraph(
+        text("Lege "),
+        gridmark(12),
+        text(" aus der Bank auf dieses Projekt."),
+      ),
+      paragraph(action(), text("Nimm "), gridmark(3), text(" davon.")),
+    ],
   },
   "onr_v1_210_political-overthrow": {
     localizedTitle: "Politischer Umsturz",
@@ -265,7 +344,9 @@ const localizations = {
     palette: ["#1d1225", "#e84dff", "#ffb84a", "#29d8ff"],
     artPrompt:
       "Cyberpunk political overthrow, shattered public authority architecture replaced by corporate network control, no readable text.",
-    localizedRules: [paragraph(action(), text("Erhalte "), gridmark(3), text("."))]
+    localizedRules: [
+      paragraph(action(), text("Erhalte "), gridmark(3), text(".")),
+    ],
   },
   "onr_v1_211_polymer-breakthrough": {
     localizedTitle: "Polymer-Durchbruch",
@@ -273,7 +354,13 @@ const localizations = {
     palette: ["#14212c", "#8ef06a", "#29d8ff", "#f4d35e"],
     artPrompt:
       "Futuristic polymer breakthrough lab, smart material sheets flowing through corporate fabrication rigs, no readable text.",
-    localizedRules: [paragraph(text("Erhalte zu Beginn jedes deiner Züge "), gridmark(1), text("."))]
+    localizedRules: [
+      paragraph(
+        text("Erhalte zu Beginn jedes deiner Züge "),
+        gridmark(1),
+        text("."),
+      ),
+    ],
   },
   "onr_v1_212_priority-requisition": {
     localizedTitle: "Priorisierte Anforderung",
@@ -281,7 +368,7 @@ const localizations = {
     palette: ["#152033", "#29d8ff", "#ffd166", "#8ef06a"],
     artPrompt:
       "Priority corporate requisition, heavy ICE hardware deployed from a secure logistics bay into a network corridor, no readable text.",
-    localizedRules: [paragraph(text("Du darfst 1 ICE kostenlos aktivieren."))]
+    localizedRules: [paragraph(text("Du darfst 1 ICE kostenlos aktivieren."))],
   },
   "onr_v1_213_private-cybernet-police": {
     localizedTitle: "Private Cybernet-Polizei",
@@ -290,8 +377,11 @@ const localizations = {
     artPrompt:
       "Private cybernet police unit, synthetic officers and trace drones in a corporate surveillance district, no readable text.",
     localizedRules: [
-      paragraph(action(), text("Ortung 5 - bei Erfolg erhält der Runner 1 Markierung."))
-    ]
+      paragraph(
+        action(),
+        text("Ortung 5 - bei Erfolg erhält der Runner 1 Markierung."),
+      ),
+    ],
   },
   "onr_v1_214_project-babylon": {
     localizedTitle: "Projekt Babylon",
@@ -300,8 +390,12 @@ const localizations = {
     artPrompt:
       "Project Babylon as a towering cyberpunk megastructure rising through network clouds and corporate scaffolds, no readable text.",
     localizedRules: [
-      paragraph(text("Erhalte 1 zusätzlichen Projektpunkt für je 2 Advancement-Counter über der Entwicklungskosten-Schwelle."))
-    ]
+      paragraph(
+        text(
+          "Erhalte 1 zusätzlichen Projektpunkt für je 2 Advancement-Counter über der Entwicklungskosten-Schwelle.",
+        ),
+      ),
+    ],
   },
   "onr_v1_215_security-net-optimization": {
     localizedTitle: "Sicherheitsnetz-Optimierung",
@@ -310,8 +404,12 @@ const localizations = {
     artPrompt:
       "Optimized security net over a corporate data fort, reinforced ICE lines and luminous defensive mesh, no readable text.",
     localizedRules: [
-      paragraph(text("Wähle eine Datenfestung. ICE auf dieser Datenfestung erhält +1 Stärke."))
-    ]
+      paragraph(
+        text(
+          "Wähle eine Datenfestung. ICE auf dieser Datenfestung erhält +1 Stärke.",
+        ),
+      ),
+    ],
   },
   "onr_v1_216_security-purge": {
     localizedTitle: "Sicherheitssäuberung",
@@ -320,8 +418,12 @@ const localizations = {
     artPrompt:
       "Cyberpunk security purge, corporate firewall sweep burning through a network archive and exposing ICE shapes, no readable text.",
     localizedRules: [
-      paragraph(text("Zeige dem Runner die obersten 3 F&E-Karten. Installiere und aktiviere ICE daraus kostenlos; wirf den Rest ab."))
-    ]
+      paragraph(
+        text(
+          "Zeige dem Runner die obersten 3 F&E-Karten. Installiere und aktiviere ICE daraus kostenlos; wirf den Rest ab.",
+        ),
+      ),
+    ],
   },
   "onr_v1_217_strike-force-kali": {
     localizedTitle: "Einsatzgruppe Kali",
@@ -330,8 +432,11 @@ const localizations = {
     artPrompt:
       "Cyberpunk strike force Kali, elite corporate tactical squad with crimson network targeting and no insignia text.",
     localizedRules: [
-      paragraph(action(), text("Verursache 2 Fleischschaden. Nur wenn der Runner markiert ist."))
-    ]
+      paragraph(
+        action(),
+        text("Verursache 2 Fleischschaden. Nur wenn der Runner markiert ist."),
+      ),
+    ],
   },
   "onr_v1_218_subsidiary-branch": {
     localizedTitle: "Tochterfiliale",
@@ -339,7 +444,9 @@ const localizations = {
     palette: ["#152033", "#42d9ff", "#8ef06a", "#ffd166"],
     artPrompt:
       "Corporate subsidiary branch office expanding through a city network, modular tower nodes and workflow channels, no readable text.",
-    localizedRules: [paragraph(text("Erhalte in jedem deiner Züge 1 zusätzliche Aktion."))]
+    localizedRules: [
+      paragraph(text("Erhalte in jedem deiner Züge 1 zusätzliche Aktion.")),
+    ],
   },
   "onr_v1_219_superior-net-barriers": {
     localizedTitle: "Überlegene Netzbarrieren",
@@ -349,8 +456,12 @@ const localizations = {
       "Superior cyberpunk net barriers, layered luminous wall ICE plates protecting a corporate server horizon, no readable text.",
     localizedRules: [
       paragraph(text("Alle Barriere-ICE haben +1 Stärke.")),
-      paragraph(text("Zeige beliebig viele Barriere-ICE; erhalte "), gridmark(1), text(" je gezeigtem oder aktiviertem Barriere-ICE."))
-    ]
+      paragraph(
+        text("Zeige beliebig viele Barriere-ICE; erhalte "),
+        gridmark(1),
+        text(" je gezeigtem oder aktiviertem Barriere-ICE."),
+      ),
+    ],
   },
   "onr_v1_220_tycho-extension": {
     localizedTitle: "Tycho-Erweiterung",
@@ -358,8 +469,8 @@ const localizations = {
     palette: ["#10172b", "#b86cff", "#29d8ff", "#f4d35e"],
     artPrompt:
       "Tycho space extension as a corporate lunar network facility, orbital infrastructure and violet-blue data beams, no readable text.",
-    localizedRules: []
-  }
+    localizedRules: [],
+  },
 };
 
 await Promise.all([
@@ -368,7 +479,7 @@ await Promise.all([
   mkdir(path.join(skinRoot, "rendered", "full"), { recursive: true }),
   mkdir(path.join(skinRoot, "rendered", "preview"), { recursive: true }),
   mkdir(path.join(skinRoot, "rendered", "thumb"), { recursive: true }),
-  mkdir(tmpArtRoot, { recursive: true })
+  mkdir(tmpArtRoot, { recursive: true }),
 ]);
 
 const cards = [];
@@ -378,7 +489,9 @@ for (const sourceCard of agendas) {
     throw new Error(`Missing German localization for ${sourceCard.cardId}.`);
   }
 
-  const classes = sourceCard.subtypes.filter((subtype) => projectClassLabels[subtype]);
+  const classes = sourceCard.subtypes.filter(
+    (subtype) => projectClassLabels[subtype],
+  );
   const localizedClass = classes.length
     ? `Projekt - ${classes.map((subtype) => projectClassLabels[subtype]).join(" / ")}`
     : "Projekt";
@@ -409,12 +522,17 @@ for (const sourceCard of agendas) {
     artGeneration: {
       method: "project-local generated or preserved raster draft",
       status: existsSync(artPath) ? "present" : "generated",
-      constraints: ["no official artwork", "no official frame", "no logos", "no readable text in image"]
+      constraints: [
+        "no official artwork",
+        "no official frame",
+        "no logos",
+        "no readable text in image",
+      ],
     },
     art: `art/${artFileName}`,
     rendered: {
-      full: `rendered/full/${sourceCard.cardId}.png`
-    }
+      full: `rendered/full/${sourceCard.cardId}.png`,
+    },
   });
 }
 
@@ -424,14 +542,14 @@ const out = {
   skinId: "de-project-frame-v1-originalset-agendas",
   status: "draft_complete_originalset_agendas_display_only",
   generatedAt: "2026-05-24",
-  sourceSetId: source.setId,
-  sourceCardFile: "data/cards/originalset-v1-cards.json",
+  sourceSetId: "originalset-v1",
+  sourceCardFile: "@netgrid/catalog#createRuntimeCardsById",
   scope: {
     cardType: "agenda",
     expectedCount: 33,
     actualCount: cards.length,
     displayOnly: true,
-    engineRuleAuthority: false
+    engineRuleAuthority: false,
   },
   fallbackPolicy:
     "Wenn eine deutsche Skin-Karte vorhanden ist, kann sie als Anzeigeersatz dienen; fehlt sie, bleibt die Originalanzeige Fallback.",
@@ -439,13 +557,15 @@ const out = {
     "Die internen cardIds bleiben die Originalkarten-IDs.",
     "Diese Skin-Schicht ist keine Regelautorität und ändert keine LegalActions, Replay-, StateHash-, KI- oder Decklegalitätsdaten.",
     "sourceText ist Originaltext für Nachvollziehbarkeit; lokalisiert gerendert werden nur localizedTitle, localizedProjectClass und localizedRules.",
-    "Projektklassen sind strukturiert als sourceProjectClasses und sichtbar als localizedProjectClass hinterlegt."
+    "Projektklassen sind strukturiert als sourceProjectClasses und sichtbar als localizedProjectClass hinterlegt.",
   ],
-  cards
+  cards,
 };
 
 await writeFile(cardsOutPath, `${JSON.stringify(out, null, 2)}\n`, "utf8");
-console.log(`Wrote ${path.relative(repoRoot, cardsOutPath)} with ${cards.length} cards.`);
+console.log(
+  `Wrote ${path.relative(repoRoot, cardsOutPath)} with ${cards.length} cards.`,
+);
 
 async function generateProceduralArt(sourceCard, localization, outPath) {
   const svgPath = path.join(tmpArtRoot, `${sourceCard.cardId}.svg`);
@@ -459,15 +579,21 @@ function plainText(blocks) {
       block.segments
         .map((segment) => {
           if (segment.type === "text") return segment.text;
-          if (segment.symbol === "action") return segment.amount === 1 ? "1 Aktion " : `${segment.amount} Aktionen `;
-          if (segment.symbol === "gridmark") return segment.amount == null ? "Gridmark" : `${segment.amount} Gridmark`;
+          if (segment.symbol === "action")
+            return segment.amount === 1
+              ? "1 Aktion "
+              : `${segment.amount} Aktionen `;
+          if (segment.symbol === "gridmark")
+            return segment.amount == null
+              ? "Gridmark"
+              : `${segment.amount} Gridmark`;
           return "";
         })
         .join("")
         .replace(/\s+([.;,:])/g, "$1")
         .replace(/\s+/g, " ")
         .replace(/^(\d+ Aktionen?)\s+/, "$1: ")
-        .trim()
+        .trim(),
     )
     .join("\n");
 }
@@ -478,10 +604,10 @@ function artSvg(sourceCard, localization) {
   const nodes = Array.from({ length: 34 }, (_, index) => {
     const localSeed = seed + index * 7919;
     return {
-      x: 80 + (pseudo(localSeed) * 1090),
-      y: 70 + (pseudo(localSeed + 17) * 990),
+      x: 80 + pseudo(localSeed) * 1090,
+      y: 70 + pseudo(localSeed + 17) * 990,
       r: 4 + Math.round(pseudo(localSeed + 31) * 11),
-      opacity: 0.24 + pseudo(localSeed + 47) * 0.46
+      opacity: 0.24 + pseudo(localSeed + 47) * 0.46,
     };
   });
   const lines = nodes
@@ -494,7 +620,7 @@ function artSvg(sourceCard, localization) {
   const nodeSvg = nodes
     .map(
       (node, index) =>
-        `<circle cx="${node.x.toFixed(1)}" cy="${node.y.toFixed(1)}" r="${node.r}" fill="${index % 2 ? primary : accent}" opacity="${node.opacity.toFixed(2)}"/>`
+        `<circle cx="${node.x.toFixed(1)}" cy="${node.y.toFixed(1)}" r="${node.r}" fill="${index % 2 ? primary : accent}" opacity="${node.opacity.toFixed(2)}"/>`,
     )
     .join("\n");
 
@@ -551,7 +677,11 @@ function motifSvg(theme, palette, seed) {
       <path d="M752 306 C832 378 830 502 742 618 S704 792 812 868" stroke="${accent}" stroke-width="5" opacity="0.72"/>
     </g>`;
   }
-  if (theme.includes("ice") || theme.includes("barriers") || theme.includes("encryption")) {
+  if (
+    theme.includes("ice") ||
+    theme.includes("barriers") ||
+    theme.includes("encryption")
+  ) {
     return `${commonPanel}<g fill="${mix(dark, primary, 0.24)}" stroke="${glow}" stroke-width="6" opacity="0.78">
       <path d="M274 792 L416 236 L562 792 Z"/>
       <path d="M476 828 L642 164 L812 828 Z"/>
@@ -559,14 +689,25 @@ function motifSvg(theme, palette, seed) {
       <path d="M310 776 H1018" fill="none" opacity="0.62"/>
     </g><g opacity="0.42" stroke="${accent}" stroke-width="8"><path d="M406 418 H928"/><path d="M360 604 H974"/><path d="M520 246 L812 828"/></g>`;
   }
-  if (theme.includes("police") || theme.includes("netwatch") || theme.includes("security") || theme.includes("strike") || theme.includes("solo")) {
+  if (
+    theme.includes("police") ||
+    theme.includes("netwatch") ||
+    theme.includes("security") ||
+    theme.includes("strike") ||
+    theme.includes("solo")
+  ) {
     return `${commonPanel}<g fill="none" stroke-linejoin="round">
       <path d="M626 214 L914 344 V558 C914 746 794 868 626 940 C458 868 338 746 338 558 V344 Z" fill="${mix(dark, primary, 0.22)}" stroke="${glow}" stroke-width="8" opacity="0.72"/>
       <path d="M626 318 L808 400 V552 C808 668 736 746 626 802 C516 746 444 668 444 552 V400 Z" stroke="${accent}" stroke-width="6" opacity="0.78"/>
       <path d="M256 574 H996 M626 236 V922 M382 410 L870 790 M870 410 L382 790" stroke="${secondary}" stroke-width="5" opacity="0.34"/>
     </g>`;
   }
-  if (theme.includes("coup") || theme.includes("war") || theme.includes("overthrow") || theme.includes("takeover")) {
+  if (
+    theme.includes("coup") ||
+    theme.includes("war") ||
+    theme.includes("overthrow") ||
+    theme.includes("takeover")
+  ) {
     return `${commonPanel}<g fill="${mix(dark, accent, 0.2)}" stroke="${glow}" stroke-width="6" opacity="0.74">
       <path d="M246 884 L364 340 L496 884 Z"/>
       <path d="M522 884 L642 232 L774 884 Z"/>
@@ -582,7 +723,13 @@ function motifSvg(theme, palette, seed) {
       <path d="M320 900 H932"/>
     </g><g fill="none" stroke="${secondary}" stroke-width="5" opacity="0.48"><path d="M278 760 C438 680 804 680 974 760"/><path d="M420 532 C528 580 716 580 824 532"/></g>`;
   }
-  if (theme.includes("finance") || theme.includes("boon") || theme.includes("subsidiary") || theme.includes("relocation") || theme.includes("requisition")) {
+  if (
+    theme.includes("finance") ||
+    theme.includes("boon") ||
+    theme.includes("subsidiary") ||
+    theme.includes("relocation") ||
+    theme.includes("requisition")
+  ) {
     return `${commonPanel}<g fill="${mix(dark, primary, 0.18)}" stroke="${glow}" stroke-width="6" opacity="0.76">
       <rect x="286" y="412" width="138" height="454" rx="18"/>
       <rect x="474" y="302" width="160" height="564" rx="18"/>
@@ -606,7 +753,9 @@ function helix(x, y, width, height, primary, accent) {
     const yy = y + (height / (rows - 1)) * i;
     const left = x + width * (0.18 + 0.14 * Math.sin(i));
     const right = x + width * (0.72 + 0.14 * Math.cos(i));
-    parts.push(`<path d="M${left.toFixed(1)} ${yy.toFixed(1)} H${right.toFixed(1)}" stroke="${i % 2 ? primary : accent}" stroke-width="5" opacity="0.42"/>`);
+    parts.push(
+      `<path d="M${left.toFixed(1)} ${yy.toFixed(1)} H${right.toFixed(1)}" stroke="${i % 2 ? primary : accent}" stroke-width="5" opacity="0.42"/>`,
+    );
   }
   return `${parts.join("")}<path d="M${x + width * 0.2} ${y} C${x + width * 0.9} ${y + height * 0.25} ${x - width * 0.1} ${y + height * 0.75} ${x + width * 0.72} ${y + height}" stroke="${primary}" stroke-width="11" opacity="0.62"/><path d="M${x + width * 0.72} ${y} C${x - width * 0.1} ${y + height * 0.25} ${x + width * 0.9} ${y + height * 0.75} ${x + width * 0.2} ${y + height}" stroke="${accent}" stroke-width="6" opacity="0.76"/>`;
 }
@@ -615,7 +764,9 @@ function windowGrid(x, y, width, height) {
   const parts = [];
   for (let row = 0; row < 7; row += 1) {
     for (let col = 0; col < 3; col += 1) {
-      parts.push(`<path d="M${x + col * width * 0.34} ${y + row * height * 0.13} h${width * 0.18}"/>`);
+      parts.push(
+        `<path d="M${x + col * width * 0.34} ${y + row * height * 0.13} h${width * 0.18}"/>`,
+      );
     }
   }
   return parts.join("");
@@ -623,8 +774,10 @@ function windowGrid(x, y, width, height) {
 
 function gridLines(width, height, step) {
   const parts = [];
-  for (let x = step; x < width; x += step) parts.push(`<path d="M${x} 0 V${height}"/>`);
-  for (let y = step; y < height; y += step) parts.push(`<path d="M0 ${y} H${width}"/>`);
+  for (let x = step; x < width; x += step)
+    parts.push(`<path d="M${x} 0 V${height}"/>`);
+  for (let y = step; y < height; y += step)
+    parts.push(`<path d="M0 ${y} H${width}"/>`);
   return parts.join("");
 }
 
@@ -648,11 +801,15 @@ function pseudo(seed) {
 function mix(a, b, weight) {
   const ca = parseColor(a);
   const cb = parseColor(b);
-  const mixed = ca.map((channel, index) => Math.round(channel * (1 - weight) + cb[index] * weight));
+  const mixed = ca.map((channel, index) =>
+    Math.round(channel * (1 - weight) + cb[index] * weight),
+  );
   return `#${mixed.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
 }
 
 function parseColor(color) {
   const normalized = color.replace("#", "");
-  return [0, 2, 4].map((offset) => Number.parseInt(normalized.slice(offset, offset + 2), 16));
+  return [0, 2, 4].map((offset) =>
+    Number.parseInt(normalized.slice(offset, offset + 2), 16),
+  );
 }

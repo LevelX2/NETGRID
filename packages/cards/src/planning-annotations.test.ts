@@ -106,4 +106,82 @@ describe("planning annotation boundary", () => {
     expect(() => assertPlanningAnnotations(value)).toThrow();
     expect(calls).toBe(0);
   });
+
+  it.each([
+    {
+      kind: "strategy_support",
+      strategyKey: "corp.ice_tax_glacier",
+      role: "tax_tool",
+      roleDetail: "rez_paid_scaling_ice",
+      confidence: "high",
+      rationale: "Visible mechanical support.",
+    },
+    {
+      kind: "strategic_exchange",
+      exchange: "credits_for_access_pressure",
+    },
+  ])("accepts the closed $kind planning shape", (annotation) => {
+    expect(() =>
+      assertPlanningAnnotations({
+        schemaVersion: "card-planning-annotations-v1",
+        card: [annotation],
+      }),
+    ).not.toThrow();
+  });
+
+  it.each([
+    [
+      {
+        kind: "strategy_support",
+        strategyKey: "corp.ice_tax_glacier",
+        role: "tax_tool",
+        roleDetail: "rez_paid_scaling_ice",
+        confidence: "certain",
+      },
+      "planning_invalid_shape",
+    ],
+    [
+      {
+        kind: "strategy_support",
+        strategyKey: "corp.ice_tax_glacier",
+        role: "tax_tool",
+        confidence: "high",
+      },
+      "planning_invalid_shape",
+    ],
+    [
+      {
+        kind: "strategy_support",
+        strategyKey: "corp.ice_tax_glacier",
+        role: "tax_tool",
+        roleDetail: "rez_paid_scaling_ice",
+        confidence: "high",
+        evidence: ["mechanical"],
+      },
+      "planning_unknown_field",
+    ],
+    [
+      {
+        kind: "strategic_exchange",
+        exchange: "credits_for_access_pressure",
+        effects: [{ kind: "gain_credits", amount: 2 }],
+      },
+      "planning_mechanical_field",
+    ],
+    [{ kind: "strategic_exchange" }, "planning_invalid_shape"],
+  ] as const)(
+    "rejects malformed strategy support/exchange annotation %#",
+    (annotation, code) => {
+      try {
+        assertPlanningAnnotations({
+          schemaVersion: "card-planning-annotations-v1",
+          card: [annotation],
+        });
+        throw new Error("expected validation failure");
+      } catch (error) {
+        expect(error).toBeInstanceOf(PlanningAnnotationError);
+        expect((error as PlanningAnnotationError).code).toBe(code);
+      }
+    },
+  );
 });

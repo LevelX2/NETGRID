@@ -9,6 +9,13 @@ const REPO_ROOT = path.resolve(
   "..",
 );
 const HINT_PATH = path.join(REPO_ROOT, "data/ai/ai-card-hints-active.json");
+const GENERATED_HINT_PATH = path.join(
+  REPO_ROOT,
+  "data/ai/cs06-ai-hints-generated.json",
+);
+const MIGRATED_CARD_IDS = new Set(
+  JSON.parse(fs.readFileSync(GENERATED_HINT_PATH, "utf8")).cardIds ?? [],
+);
 
 const profile = (input) => ({
   class: input.class,
@@ -444,6 +451,16 @@ function inferredProfiles(card) {
 }
 
 function normalizeHints(data) {
+  for (const card of data.cards ?? [])
+    if (MIGRATED_CARD_IDS.has(card.cardId))
+      throw new Error(
+        `Raw action-capacity normalizer cannot own migrated CardSpec hint ${card.cardId}.`,
+      );
+  for (const cardId of EXACT_PROFILES.keys())
+    if (MIGRATED_CARD_IDS.has(cardId))
+      throw new Error(
+        `Raw action-capacity profile cannot target migrated CardSpec hint ${cardId}.`,
+      );
   for (const card of data.cards ?? []) {
     const profiles = EXACT_PROFILES.get(card.cardId) ?? inferredProfiles(card);
     if (profiles.length > 0) card.actionCapacityProfiles = profiles;

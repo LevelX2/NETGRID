@@ -619,47 +619,6 @@
       "blockReasons": []
     },
     {
-      "cardId": "onr_proteus_020_digiconda",
-      "setId": "proteus",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_proteus_020_digiconda",
-        "coverage": [
-          "ai_hint",
-          "card_implementation",
-          "compiled_hint",
-          "effective_strength",
-          "legal_action",
-          "public_payload",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "variable_ice_state",
-          "variable_rez",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_proteus_020_digiconda",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ],
-        "notes": "Proteus Phase 3a: Digiconda declares a generic x_strength variableRez CardImplementation; rez LegalActions bind X, persist variableIceState strength, and replay with stable StateHash."
-      },
-      "blockReasons": []
-    },
-    {
       "cardId": "onr_proteus_021_dog-pile",
       "setId": "proteus",
       "statuses": {
@@ -2678,37 +2637,6 @@
       "blockReasons": []
     },
     {
-      "cardId": "onr_proteus_080_black-widow",
-      "setId": "proteus",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_proteus_080_black-widow",
-        "coverage": [
-          "ai_hint",
-          "card_implementation",
-          "compiled_hint",
-          "scenario"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_proteus_080_black-widow",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      },
-      "blockReasons": []
-    },
-    {
       "cardId": "onr_proteus_081_boring-bit",
       "setId": "proteus",
       "statuses": {
@@ -3076,37 +3004,6 @@
           "scenario"
         ],
         "aiHintRef": "ai-card-hints-active:onr_proteus_091_lockjaw",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      },
-      "blockReasons": []
-    },
-    {
-      "cardId": "onr_proteus_092_morphing-tool",
-      "setId": "proteus",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_proteus_092_morphing-tool",
-        "coverage": [
-          "ai_hint",
-          "card_implementation",
-          "compiled_hint",
-          "scenario"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_proteus_092_morphing-tool",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ]

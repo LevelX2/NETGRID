@@ -1,6 +1,9 @@
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import type { SemanticDecisionFrame, TacticalGoalLike } from "./semantic-decision-frame";
+import type {
+  SemanticDecisionFrame,
+  TacticalGoalLike,
+} from "./semantic-decision-frame";
 
 type CorpGoalSpec = {
   goalId: string;
@@ -30,7 +33,9 @@ export function buildCorpTacticalGoals(
   return dedupeGoals(goals.map(goal));
 }
 
-function goalSpecsForCandidate(candidate: ActionSemanticCandidate): CorpGoalSpec[] {
+function goalSpecsForCandidate(
+  candidate: ActionSemanticCandidate,
+): CorpGoalSpec[] {
   const semantic = candidate.semanticActionType;
   const evidence = evidenceForCandidate(candidate);
   const targetServerId = targetServerForCandidate(candidate);
@@ -159,9 +164,11 @@ function evidenceForCandidate(candidate: ActionSemanticCandidate): string[] {
     ...(candidate.targetContext?.availableTargets?.map(
       (target) => `available_target:${target.targetKind}:${target.targetId}`,
     ) ?? []),
-    ...(candidate.targetContext?.targetZones.map((zone) => `target_zone:${zone}`) ?? []),
-    ...(candidate.actionTacticSignals.map((signal) => `tactic:${signal}`)),
-    ...(candidate.evidence.map((entry) => `evidence:${entry}`)),
+    ...(candidate.targetContext?.targetZones.map(
+      (zone) => `target_zone:${zone}`,
+    ) ?? []),
+    ...candidate.actionTacticSignals.map((signal) => `tactic:${signal}`),
+    ...candidate.evidence.map((entry) => `evidence:${entry}`),
   ]);
 }
 
@@ -193,7 +200,9 @@ function hasVisiblePunishBasis(candidate: ActionSemanticCandidate): boolean {
   );
 }
 
-function hasVisibleDamageOrAmbushBasis(candidate: ActionSemanticCandidate): boolean {
+function hasVisibleDamageOrAmbushBasis(
+  candidate: ActionSemanticCandidate,
+): boolean {
   return visibleSignals(candidate).some(
     (signal) =>
       signalHasTerm(signal, "damage") ||
@@ -222,7 +231,9 @@ function visibleSignals(candidate: ActionSemanticCandidate): string[] {
     ...candidate.actionTacticSignals,
     ...candidate.cardContextSignals,
     ...candidate.evidence,
-    ...(candidate.targetContext?.selectedTargets.flatMap((target) => target.evidence) ?? []),
+    ...(candidate.targetContext?.selectedTargets.flatMap(
+      (target) => target.evidence,
+    ) ?? []),
   ].map((signal) => signal.toLocaleLowerCase("en-US"));
 }
 
@@ -256,12 +267,11 @@ function stripServerPrefix(value: string): string {
 }
 
 function normalizeRemoteServerId(value: string): string | undefined {
-  const prefix =
-    value.startsWith("remote_")
-      ? "remote_"
-      : value.startsWith("remote-")
-        ? "remote-"
-        : undefined;
+  const prefix = value.startsWith("remote_")
+    ? "remote_"
+    : value.startsWith("remote-")
+      ? "remote-"
+      : undefined;
   if (!prefix) return undefined;
   const suffix = value.slice(prefix.length);
   if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;
@@ -276,7 +286,8 @@ function dedupeGoals(goals: readonly TacticalGoalLike[]): TacticalGoalLike[] {
   const byId = new Map<string, TacticalGoalLike>();
   for (const goal of goals) {
     const current = byId.get(goal.goalId);
-    if (!current || goal.priority > current.priority) byId.set(goal.goalId, goal);
+    if (!current || goal.priority > current.priority)
+      byId.set(goal.goalId, goal);
   }
   return [...byId.values()].sort(
     (left, right) =>

@@ -1,5 +1,4 @@
 import {
-  CARD_DEFINITIONS_BY_ID,
   type LegalAction,
   type PlayerView,
   type PublicGameEvent,
@@ -9,6 +8,7 @@ import {
   type VisibleServerStatus,
 } from "@netgrid/shared";
 import { actionHasAbility } from "./action-payload";
+import { legacyPublicCardTitle } from "./legacy-card-definition-compatibility";
 export {
   DEFAULT_CUE_POSITION,
   clampCuePosition,
@@ -1505,12 +1505,14 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
 }
 
 function targetTitleFromDefinition(action: LegalAction): string | null {
+  const explicitTitle = action.payload?.targetCardTitle;
+  if (typeof explicitTitle === "string") return explicitTitle;
   const targetDefinitionId =
     typeof action.payload?.targetCardDefinitionId === "string"
       ? action.payload.targetCardDefinitionId
       : undefined;
   return targetDefinitionId
-    ? (CARD_DEFINITIONS_BY_ID[targetDefinitionId]?.title ?? null)
+    ? (legacyPublicCardTitle(targetDefinitionId) ?? null)
     : null;
 }
 

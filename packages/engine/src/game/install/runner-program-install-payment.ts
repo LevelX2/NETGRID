@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
@@ -48,7 +48,9 @@ export function runnerProgramInstallAutomaticCreditSourceIds(
         definitionFor(state, cardId).id === ZETATECH_SOFTWARE_INSTALLER_SOURCE,
     ),
   ]
-    .filter((cardId) => !isRestrictedHostedCreditSource(definitionFor(state, cardId)))
+    .filter(
+      (cardId) => !isRestrictedHostedCreditSource(definitionFor(state, cardId)),
+    )
     .filter((cardId) => hostedPaymentCredits(state, cardId) > 0)
     .sort();
 }
@@ -109,15 +111,21 @@ export function runnerInstallPaymentSourcePaymentsFromPayload(
   const rawAmounts = payload?.runnerInstallPaymentSourceAmounts;
   if (rawIds === undefined && rawAmounts === undefined) return undefined;
   if (typeof rawIds !== "string" || typeof rawAmounts !== "string")
-    throw new Error("Die Programminstallations-Zahlungsaufteilung ist ungueltig.");
+    throw new Error(
+      "Die Programminstallations-Zahlungsaufteilung ist ungueltig.",
+    );
   const sourceIds = rawIds.length > 0 ? rawIds.split(",") : [];
   const amounts = rawAmounts.length > 0 ? rawAmounts.split(",") : [];
   if (sourceIds.length !== amounts.length)
-    throw new Error("Die Programminstallations-Zahlungsaufteilung ist ungueltig.");
+    throw new Error(
+      "Die Programminstallations-Zahlungsaufteilung ist ungueltig.",
+    );
   return sourceIds.map((sourceCardId, index) => {
     const amount = Number(amounts[index]);
     if (!sourceCardId || !Number.isInteger(amount) || amount < 0)
-      throw new Error("Die Programminstallations-Zahlungsaufteilung ist ungueltig.");
+      throw new Error(
+        "Die Programminstallations-Zahlungsaufteilung ist ungueltig.",
+      );
     return {
       sourceCardId: sourceCardId as CardInstanceId,
       amount,
@@ -188,7 +196,10 @@ function enumerateInstallPaymentSourceAmounts(
       return;
     }
     const sourceCardId = sources[index]!;
-    const max = Math.min(hostedPaymentCredits(state, sourceCardId), installCost - spent);
+    const max = Math.min(
+      hostedPaymentCredits(state, sourceCardId),
+      installCost - spent,
+    );
     for (let amount = 0; amount <= max; amount += 1) {
       current.push({ sourceCardId, amount });
       visit(index + 1, spent + amount);
@@ -244,7 +255,10 @@ function runnerInstallPaymentPayload(
     runnerInstallPaymentHostedCredits: sourceCredits,
     runnerInstallPaymentLabel: paymentLabel(state, sourcePayments),
     ...(sourceDefinitionIds.length > 0
-      ? { runnerInstallPaymentSourceDefinitionIds: sourceDefinitionIds.join(",") }
+      ? {
+          runnerInstallPaymentSourceDefinitionIds:
+            sourceDefinitionIds.join(","),
+        }
       : {}),
   };
 }

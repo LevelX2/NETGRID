@@ -12,7 +12,6 @@ import { databrokerImplementation } from "../onr-v1/runner/resources/databroker"
 import { diplomaticImmunityImplementation } from "../onr-v1/runner/resources/diplomatic-immunity";
 import { fieldReporterForIceAndDataImplementation } from "../onr-v1/runner/resources/field-reporter-for-ice-and-data";
 import { fallGuyImplementation } from "../onr-v1/runner/resources/fall-guy";
-import { brokerImplementation } from "../onr-v1/runner/resources/broker";
 import { codeViralCacheImplementation } from "../onr-v1/runner/resources/code-viral-cache";
 import { floatingRunnerBbsImplementation } from "../onr-v1/runner/resources/floating-runner-bbs";
 import { hellsRunImplementation } from "../onr-v1/runner/resources/hells-run";
@@ -35,7 +34,6 @@ export const ONR_V1_RUNNER_RESOURCE_ACCESS_THROUGH_ALPHA_TO_LELAND_CORPORATE_BOD
     diplomaticImmunityImplementation,
     fieldReporterForIceAndDataImplementation,
     fallGuyImplementation,
-    brokerImplementation,
     codeViralCacheImplementation,
     floatingRunnerBbsImplementation,
     hellsRunImplementation,

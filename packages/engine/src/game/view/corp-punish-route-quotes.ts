@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type CorpPunishRouteIncompleteReason,

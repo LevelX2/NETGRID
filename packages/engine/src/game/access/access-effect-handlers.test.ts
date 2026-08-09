@@ -260,7 +260,6 @@ function makeHost(legalAction: LegalAction) {
       hardwareTrashByAdvancementAsset: definitions.remains!.id,
       programTrashByAdvancementAsset: "experimental" as CardDefinitionId,
       advancementCoreDamageAsset: "soulkiller" as CardDefinitionId,
-      advancementNetDamageAsset: "virus" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId]!,

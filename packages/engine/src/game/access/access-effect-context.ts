@@ -37,7 +37,6 @@ export type AccessEffectDefinitionIds = {
   hardwareTrashByAdvancementAsset: CardDefinitionId;
   programTrashByAdvancementAsset: CardDefinitionId;
   advancementCoreDamageAsset: CardDefinitionId;
-  advancementNetDamageAsset: CardDefinitionId;
 };
 
 export type AccessEffectHandlerHost = {

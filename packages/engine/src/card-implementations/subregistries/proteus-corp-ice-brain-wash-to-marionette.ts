@@ -9,7 +9,6 @@ import { proteusColonelFailureImplementation } from "../proteus/corp/ice/colonel
 import { proteusCreditBlocksImplementation } from "../proteus/corp/ice/credit-blocks";
 import { proteusDatacombImplementation } from "../proteus/corp/ice/datacomb";
 import { proteusDeathYoYoImplementation } from "../proteus/corp/ice/death-yo-yo";
-import { proteusDigicondaImplementation } from "../proteus/corp/ice/digiconda";
 import { proteusDogPileImplementation } from "../proteus/corp/ice/dog-pile";
 import { proteusFoodFightImplementation } from "../proteus/corp/ice/food-fight";
 import { proteusGalateaImplementation } from "../proteus/corp/ice/galatea";
@@ -31,7 +30,6 @@ export const PROTEUS_CORP_ICE_BRAIN_WASH_TO_MARIONETTE_IMPLEMENTATIONS = [
   proteusCreditBlocksImplementation,
   proteusDatacombImplementation,
   proteusDeathYoYoImplementation,
-  proteusDigicondaImplementation,
   proteusDogPileImplementation,
   proteusFoodFightImplementation,
   proteusGalateaImplementation,

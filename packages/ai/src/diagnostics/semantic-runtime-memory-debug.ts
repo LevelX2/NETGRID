@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import {
   beliefUncertaintyConsumerFacts,

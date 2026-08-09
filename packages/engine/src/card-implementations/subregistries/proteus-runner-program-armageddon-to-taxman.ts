@@ -1,6 +1,5 @@
 import type { CardImplementationDefinition } from "../types";
 import { proteusArmageddonImplementation } from "../proteus/runner/programs/armageddon";
-import { proteusBlackWidowImplementation } from "../proteus/runner/programs/black-widow";
 import { proteusBigFrackinGunImplementation } from "../proteus/runner/programs/big-frackin-gun";
 import { proteusBoringBitImplementation } from "../proteus/runner/programs/boring-bit";
 import { proteusBulldozerImplementation } from "../proteus/runner/programs/bulldozer";
@@ -13,7 +12,6 @@ import { proteusFubarImplementation } from "../proteus/runner/programs/fubar";
 import { proteusGarbageInImplementation } from "../proteus/runner/programs/garbage-in";
 import { proteusHighlighterImplementation } from "../proteus/runner/programs/highlighter";
 import { proteusLockjawImplementation } from "../proteus/runner/programs/lockjaw";
-import { proteusMorphingToolImplementation } from "../proteus/runner/programs/morphing-tool";
 import { proteusRedecoratorImplementation } from "../proteus/runner/programs/redecorator";
 import { proteusScaldanImplementation } from "../proteus/runner/programs/scaldan";
 import { proteusSkeletonPasskeysImplementation } from "../proteus/runner/programs/skeleton-passkeys";
@@ -22,7 +20,6 @@ import { proteusTaxmanImplementation } from "../proteus/runner/programs/taxman";
 
 export const PROTEUS_RUNNER_PROGRAM_ARMAGEDDON_TO_TAXMAN_IMPLEMENTATIONS = [
   proteusArmageddonImplementation,
-  proteusBlackWidowImplementation,
   proteusBigFrackinGunImplementation,
   proteusBoringBitImplementation,
   proteusBulldozerImplementation,
@@ -35,7 +32,6 @@ export const PROTEUS_RUNNER_PROGRAM_ARMAGEDDON_TO_TAXMAN_IMPLEMENTATIONS = [
   proteusGarbageInImplementation,
   proteusHighlighterImplementation,
   proteusLockjawImplementation,
-  proteusMorphingToolImplementation,
   proteusRedecoratorImplementation,
   proteusScaldanImplementation,
   proteusSkeletonPasskeysImplementation,

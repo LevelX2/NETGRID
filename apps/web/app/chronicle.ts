@@ -1,9 +1,12 @@
 import {
-  CARD_DEFINITIONS_BY_ID,
   type PublicGameEvent,
   type ResolvedGameEffect,
   type Side,
 } from "@netgrid/shared";
+import {
+  legacyPublicCardDefinition,
+  legacyPublicCardTitle,
+} from "./legacy-card-definition-compatibility";
 import {
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,
@@ -3980,9 +3983,7 @@ export function formatChronicleEvent(
       break;
     }
     case "end_turn":
-      if (
-        hiddenZoneAction === "temporary_program_install_end_turn_return"
-      ) {
+      if (hiddenZoneAction === "temporary_program_install_end_turn_return") {
         const returnedTitles = titlesForDefinitionIds(
           stringValue(payload.returnedCardDefinitionIds),
         );
@@ -7501,10 +7502,10 @@ function shellTradersAbilityFromPayload(
 function targetCardTitleFromPayload(
   payload: Record<string, unknown>,
 ): string | undefined {
+  const explicitTitle = stringValue(payload.targetCardTitle);
+  if (explicitTitle) return explicitTitle;
   const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
-  return targetDefinitionId
-    ? CARD_DEFINITIONS_BY_ID[targetDefinitionId]?.title
-    : undefined;
+  return legacyPublicCardTitle(targetDefinitionId);
 }
 
 function publicRevealTitleFromPayload(
@@ -7516,7 +7517,7 @@ function publicRevealTitleFromPayload(
 function titleForDefinitionId(
   definitionId: string | undefined,
 ): string | undefined {
-  return definitionId ? CARD_DEFINITIONS_BY_ID[definitionId]?.title : undefined;
+  return legacyPublicCardTitle(definitionId);
 }
 
 function definitionIdsFromCsv(value: string | undefined): string[] {
@@ -7536,7 +7537,7 @@ function titlesForDefinitionIds(value: string | undefined): string[] {
 
 function iceTitlesForDefinitionIds(value: string | undefined): string[] {
   return definitionIdsFromCsv(value)
-    .map((definitionId) => CARD_DEFINITIONS_BY_ID[definitionId])
+    .map((definitionId) => legacyPublicCardDefinition(definitionId))
     .flatMap((definition) =>
       definition?.type === "ice" ? [definition.title] : [],
     );

@@ -3600,39 +3600,6 @@
       }
     },
     {
-      "cardId": "onr_v1_110_sneak-preview",
-      "setId": "originalset-v1",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_v1_110_sneak-preview",
-        "coverage": [
-          "deck_validation",
-          "legal_action",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_v1_110_sneak-preview",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      }
-    },
-    {
       "cardId": "onr_v1_111_social-engineering",
       "setId": "originalset-v1",
       "statuses": {
@@ -5052,39 +5019,6 @@
       }
     },
     {
-      "cardId": "onr_v1_154_broker",
-      "setId": "originalset-v1",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_v1_154_broker",
-        "coverage": [
-          "deck_validation",
-          "legal_action",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_v1_154_broker",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      }
-    },
-    {
       "cardId": "onr_v1_155_code-viral-cache",
       "setId": "originalset-v1",
       "statuses": {
@@ -5508,39 +5442,6 @@
           "wrong_side_revalidation"
         ],
         "aiHintRef": "ai-card-hints-active:onr_v1_167_leland-corporate-bodyguard",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      }
-    },
-    {
-      "cardId": "onr_v1_168_loan-from-chiba",
-      "setId": "originalset-v1",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_v1_168_loan-from-chiba",
-        "coverage": [
-          "deck_validation",
-          "legal_action",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_v1_168_loan-from-chiba",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ]
@@ -6465,39 +6366,6 @@
           "wrong_side_revalidation"
         ],
         "aiHintRef": "ai-card-hints-active:onr_v1_196_corporate-war",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      }
-    },
-    {
-      "cardId": "onr_v1_197_data-fort-reclamation",
-      "setId": "originalset-v1",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_v1_197_data-fort-reclamation",
-        "coverage": [
-          "deck_validation",
-          "legal_action",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_v1_197_data-fort-reclamation",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ]
@@ -10431,39 +10299,6 @@
       }
     },
     {
-      "cardId": "onr_v1_317_data-masons",
-      "setId": "originalset-v1",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_v1_317_data-masons",
-        "coverage": [
-          "deck_validation",
-          "legal_action",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_v1_317_data-masons",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      }
-    },
-    {
       "cardId": "onr_v1_318_department-of-truth-enhancement",
       "setId": "originalset-v1",
       "statuses": {
@@ -11454,39 +11289,6 @@
       }
     },
     {
-      "cardId": "onr_v1_348_virus-test-site",
-      "setId": "originalset-v1",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_v1_348_virus-test-site",
-        "coverage": [
-          "deck_validation",
-          "legal_action",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_v1_348_virus-test-site",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      }
-    },
-    {
       "cardId": "onr_v1_349_aardvark",
       "setId": "originalset-v1",
       "statuses": {
@@ -12108,39 +11910,6 @@
           "wrong_side_revalidation"
         ],
         "aiHintRef": "ai-card-hints-active:onr_v1_367_rio-de-janeiro-city-grid",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-        ]
-      }
-    },
-    {
-      "cardId": "onr_v1_368_roving-submarine",
-      "setId": "originalset-v1",
-      "statuses": {
-        "imported": true,
-        "validated": true,
-        "catalog_ready": true,
-        "implemented": true,
-        "engine_supported": true,
-        "playable": true,
-        "human_playable": true,
-        "ai_supported": true,
-        "deck_legal": true,
-        "format_legal": true,
-        "blocked": false
-      },
-      "support": {
-        "resolverRef": "engine:onr_v1_368_roving-submarine",
-        "coverage": [
-          "deck_validation",
-          "legal_action",
-          "replay_statehash",
-          "scenario",
-          "unit_test",
-          "visibility",
-          "wrong_side_revalidation"
-        ],
-        "aiHintRef": "ai-card-hints-active:onr_v1_368_roving-submarine",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ]

@@ -1,8 +1,8 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -619,7 +619,6 @@ import {
   SHELL_TRADERS_ID,
   SKIVVISS_ID,
   SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
   TERRORIST_REPRISAL_ID,
   TOO_MANY_DOORS_ID,
 } from "../../compatibility/runtime-compatibility";

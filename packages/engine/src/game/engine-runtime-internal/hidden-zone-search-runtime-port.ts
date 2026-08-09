@@ -27,7 +27,6 @@ export type HiddenZoneSearchRuntimePort = {
       randomStackProgramInstallSourceId: string;
       stackProgramFreeInstallSourceId: string;
       stackSearchGripSourceId: string;
-      temporaryProgramInstallSourceId: string;
     };
     cards: {
       definitionFor: (cardId: CardInstanceId) => CardDefinition;

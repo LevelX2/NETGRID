@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 /**
  * Reports CardImplementation coverage for the original set.
  *
@@ -6,7 +7,10 @@
  * the registry and the ability-engine runtime.
  */
 import type { CardDefinitionId } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import {
+  CS06_CARD_DEFINITION_IDS,
+  cs06CardSpecSourceRefByDefinitionId,
+} from "@netgrid/cards/engine";
 import { CARD_IMPLEMENTATIONS } from "./registry";
 import { IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID } from "./coverage-source-locations";
 
@@ -104,6 +108,7 @@ const IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
 const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;
+const CARD_SPEC_DEFINITION_IDS = new Set<string>(CS06_CARD_DEFINITION_IDS);
 
 export function isCurrentCardImplementationReleaseScopeDefinitionId(
   definitionId: CardDefinitionId,
@@ -114,6 +119,22 @@ export function isCurrentCardImplementationReleaseScopeDefinitionId(
 function implementedCoverageFor(
   implementation: (typeof CARD_IMPLEMENTATIONS)[number],
 ): CardImplementationCoverageEntry {
+  if (CARD_SPEC_DEFINITION_IDS.has(implementation.cardDefinitionId)) {
+    const sourceRef = cs06CardSpecSourceRefByDefinitionId(
+      implementation.cardDefinitionId,
+    );
+    if (sourceRef === undefined)
+      throw new Error(
+        `card_spec_coverage_source_ref_missing: ${implementation.cardDefinitionId}`,
+      );
+    return {
+      cardDefinitionId: implementation.cardDefinitionId,
+      status: "implemented",
+      reason:
+        "CardSpec registry mechanical contract projects runtime behavior.",
+      currentLocations: [sourceRef.sourcePath],
+    };
+  }
   const reasons: string[] = [];
   const currentLocations = new Set<string>();
 

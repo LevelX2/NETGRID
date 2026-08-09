@@ -17,7 +17,10 @@ const roots = ["packages", "apps/server/src", "apps/web"];
 const packageRules = [
   { prefix: "packages/shared/", allow: new Set() },
   { prefix: "packages/cards/", allow: new Set(["@netgrid/shared"]) },
-  { prefix: "packages/catalog/", allow: new Set(["@netgrid/shared"]) },
+  {
+    prefix: "packages/catalog/",
+    allow: new Set(["@netgrid/cards", "@netgrid/shared"]),
+  },
   {
     prefix: "packages/decks/",
     allow: new Set(["@netgrid/catalog", "@netgrid/shared"]),
@@ -66,6 +69,7 @@ function boundaryFindings(file, source) {
     file.startsWith(candidate.prefix),
   );
   const normalWebClient = isNormalWebClientModule(file);
+  const cardCatalogApiModule = isCardCatalogApiModule(file);
   const engineProduction = isEngineProductionModule(file);
   for (const entry of imports) {
     if (entry.unknownDynamic) {
@@ -107,6 +111,23 @@ function boundaryFindings(file, source) {
         `${file}: normaler Webclient darf ${imported} nicht direkt laden`,
       );
     if (
+      cardCatalogApiModule &&
+      (imported === "@netgrid/ai" ||
+        (imported.startsWith("@netgrid/ai/") &&
+          imported !== "@netgrid/ai/catalog"))
+    )
+      findings.push(
+        `${file}: Web-API darf AI-Hints ausschließlich über @netgrid/ai/catalog laden`,
+      );
+    if (
+      cardCatalogApiModule &&
+      imported.startsWith(".") &&
+      relativeImportReachesForbiddenAiCode(file, imported)
+    )
+      findings.push(
+        `${file}: Web-API-Relativimport erreicht die interne AI-Runtime (${imported})`,
+      );
+    if (
       normalWebClient &&
       imported.startsWith(".") &&
       relativeImportReachesPrivilegedCode(file, imported)
@@ -137,6 +158,8 @@ function allowedWorkspaceSubpath(file, specifier) {
     return (
       (file.startsWith("packages/engine/") &&
         specifier === "@netgrid/cards/engine") ||
+      (file.startsWith("packages/catalog/") &&
+        specifier === "@netgrid/cards/server") ||
       (file.startsWith("packages/ai/") &&
         specifier === "@netgrid/cards/planning")
     );
@@ -156,6 +179,11 @@ function forbiddenNormalBrowserImport(file, specifier) {
   )
     return true;
   if (specifier === "@netgrid/ai" || specifier.startsWith("@netgrid/ai/"))
+    return true;
+  if (
+    specifier === "@netgrid/catalog" ||
+    specifier.startsWith("@netgrid/catalog/")
+  )
     return true;
   if (specifier === "@netgrid/cards") return true;
   if (specifier.startsWith("@netgrid/cards/"))
@@ -274,6 +302,16 @@ function runSelfTest() {
     ],
     ["apps/web/features/game/invalid.tsx", 'import "@netgrid/cards";', 1],
     [
+      "apps/web/features/game/invalid-catalog.tsx",
+      'import { createRuntimeCardsById } from "@netgrid/catalog";',
+      1,
+    ],
+    [
+      "apps/web/features/game/invalid-ai-catalog.tsx",
+      'import { catalogAiHintReadModelForCardId } from "@netgrid/ai/catalog";',
+      1,
+    ],
+    [
       "apps/web/features/game/invalid-engine.tsx",
       'import("@netgrid/cards/engine");',
       1,
@@ -317,6 +355,31 @@ function runSelfTest() {
     [
       "apps/web/app/api/current/route.ts",
       'import { applyAction } from "@netgrid/engine";',
+      0,
+    ],
+    [
+      "apps/web/app/api/cards/route.ts",
+      'import { createRuntimeCardsById } from "@netgrid/catalog";',
+      0,
+    ],
+    [
+      "apps/web/app/api/cards/ai-route.ts",
+      'import { catalogAiHintReadModelForCardId } from "@netgrid/ai/catalog";',
+      0,
+    ],
+    [
+      "apps/web/app/api/cards/invalid-ai-root.ts",
+      'import { chooseAiAction } from "@netgrid/ai";',
+      1,
+    ],
+    [
+      "apps/web/app/api/cards/invalid-ai-internal.ts",
+      'import { AI_HINTS_BY_CARD } from "../../../../../packages/ai/src/ai-hints";',
+      1,
+    ],
+    [
+      "apps/web/app/api/decks/strategy-profile/valid-ai-root.ts",
+      'import { buildDeckStrategyProfile } from "@netgrid/ai";',
       0,
     ],
     [
@@ -456,7 +519,11 @@ function collectFiles(directory) {
   if (!existsSync(directory)) return [];
   const files = [];
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
+    if (
+      entry.isDirectory() &&
+      (ignoredDirectories.has(entry.name) || entry.name.startsWith(".next"))
+    )
+      continue;
     const target = path.join(directory, entry.name);
     if (entry.isDirectory()) files.push(...collectFiles(target));
     else files.push(target);
@@ -473,6 +540,21 @@ function isNormalWebClientModule(file) {
   if (file.startsWith("apps/web/app/api/")) return false;
   if (/\.(test|spec)\.[^.]+$/.test(file)) return false;
   return true;
+}
+
+function isCardCatalogApiModule(file) {
+  return file.startsWith("apps/web/app/api/cards/");
+}
+
+function relativeImportReachesForbiddenAiCode(file, specifier) {
+  const target = slash(
+    path.relative(root, path.resolve(root, path.dirname(file), specifier)),
+  );
+  return (
+    target.startsWith("packages/ai/") &&
+    target !== "packages/ai/src/catalog-ai-hint-public" &&
+    target !== "packages/ai/src/catalog-ai-hint-public.ts"
+  );
 }
 
 function isEngineProductionModule(file) {

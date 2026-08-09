@@ -4,7 +4,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";

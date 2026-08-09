@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -53,13 +53,14 @@ export type RezzedIceRewindResult = EncounterSpecialWindowResult & {
   runnerJacksOut?: boolean;
 };
 
-export type FullyBrokenPassedIceTrashWindowResult = EncounterSpecialWindowResult & {
-  sourceCardId?: CardInstanceId;
-  iceId?: CardInstanceId;
-  paymentAmount?: number;
-  paid?: boolean;
-  iceTrashed?: boolean;
-};
+export type FullyBrokenPassedIceTrashWindowResult =
+  EncounterSpecialWindowResult & {
+    sourceCardId?: CardInstanceId;
+    iceId?: CardInstanceId;
+    paymentAmount?: number;
+    paid?: boolean;
+    iceTrashed?: boolean;
+  };
 
 export type FullyBrokenPassedIceWindowResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
@@ -196,8 +197,7 @@ export function resolveSecretSpendCompareChoice(
     };
   }
   const corpSpend = comparison.corpSpend;
-  if (corpSpend === undefined)
-    throw new Error("Der Korp-Secret-Spend fehlt.");
+  if (corpSpend === undefined) throw new Error("Der Korp-Secret-Spend fehlt.");
   if (state.corp.credits < corpSpend || state.runner.credits < selected)
     throw new Error("Secret Spend ist nicht mehr bezahlbar.");
   spendCredits(host, "corp", corpSpend);
@@ -247,9 +247,7 @@ export function resolveRezzedIceRewindSubroutine(
       ? run.position.iceIndex
       : server.ice.findIndex((cardId) => cardId === run.encounteredIceId);
   if (currentIndex < 0)
-    throw new Error(
-      "Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.",
-    );
+    throw new Error("Rezzed-ICE-Rewind konnte das Encounter-ICE nicht finden.");
 
   const randomPurpose = `rewind_run_to_rezzed_ice_by_die.${run.runId}.${run.encounteredIceId}`;
   const die = rollDie(host, randomPurpose);
@@ -328,8 +326,7 @@ export function applyPassedIceRunEndTrigger(
     .filter((cardId) => {
       const instance = state.cardInstances[cardId];
       return (
-        instance?.rezzed === true &&
-        isRioPassRezzedIceSource(state, cardId)
+        instance?.rezzed === true && isRioPassRezzedIceSource(state, cardId)
       );
     })
     .sort();
@@ -385,7 +382,9 @@ export function fullyBrokenPassedIceTrashPostPassActions(
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
   return state.runner.rig.programs
-    .filter((cardId) => fullyBrokenPassedIceTrashImplementationForCard(state, cardId))
+    .filter((cardId) =>
+      fullyBrokenPassedIceTrashImplementationForCard(state, cardId),
+    )
     .filter((cardId) => !used.has(cardId))
     .sort()
     .map((sourceCardId) =>
@@ -423,7 +422,9 @@ export function fullyBrokenPassedIcePostPassActions(
     ...(run.successfulRunSourceCardId ? [run.successfulRunSourceCardId] : []),
   ];
   const derezAndEndRunActions = [...new Set(sourceIds)]
-    .filter((cardId) => fullyBrokenPassedIceDerezImplementationForCard(state, cardId))
+    .filter((cardId) =>
+      fullyBrokenPassedIceDerezImplementationForCard(state, cardId),
+    )
     .filter((cardId) => {
       const implementation = fullyBrokenPassedIceDerezImplementationForCard(
         state,
@@ -495,10 +496,17 @@ export function resolveFullyBrokenPassedIceDerezAndEndRun(
     throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
   const run = mustRun(state);
   if (run.phase !== "movement")
-    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
-  const sourceIsInstalledProgram = state.runner.rig.programs.includes(sourceCardId);
+    throw new Error(
+      "Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.",
+    );
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
+  const targetIceId = String(
+    legalAction.payload?.targetIceId ?? "",
+  ) as CardInstanceId;
+  const sourceIsInstalledProgram =
+    state.runner.rig.programs.includes(sourceCardId);
   const sourceIsRunEvent = run.successfulRunSourceCardId === sourceCardId;
   if (!sourceIsInstalledProgram && !sourceIsRunEvent)
     throw new Error("Die Post-Pass-Quelle ist nicht legal.");
@@ -564,9 +572,15 @@ export function resolveFullyBrokenPassedIceDerez(
     throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
   const run = mustRun(state);
   if (run.phase !== "movement")
-    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-  const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
+    throw new Error(
+      "Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.",
+    );
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
+  const targetIceId = String(
+    legalAction.payload?.targetIceId ?? "",
+  ) as CardInstanceId;
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
   if (state.cardInstances[sourceCardId]?.tapped === true)
@@ -628,18 +642,27 @@ export function resolveFullyBrokenPassedIceTrash(
     throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
   const run = mustRun(state);
   if (run.phase !== "movement")
-    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
+    throw new Error(
+      "Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.",
+    );
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   const targetIceId = String(legalAction.payload?.targetIceId ?? "");
   if (!state.runner.rig.programs.includes(sourceCardId as CardInstanceId))
     throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
-  if (!fullyBrokenPassedIceTrashImplementationForCard(state, sourceCardId as CardInstanceId))
+  if (
+    !fullyBrokenPassedIceTrashImplementationForCard(
+      state,
+      sourceCardId as CardInstanceId,
+    )
+  )
     throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
   const flags = ensureRunnerTurnFlags(state);
   const limitKey = fullyBrokenPassedIceTrashLimitKey();
   const used = flags.abilityUsedSourceIdsByLimitKey?.[limitKey] ?? [];
   if (used.includes(sourceCardId as CardInstanceId))
-    throw new Error("Die Post-Pass-Faehigkeit wurde in diesem Zug bereits genutzt.");
+    throw new Error(
+      "Die Post-Pass-Faehigkeit wurde in diesem Zug bereits genutzt.",
+    );
   if (
     !targetIceId ||
     run.fullyBrokenPassedIceTrashPendingId !== targetIceId ||
@@ -650,7 +673,9 @@ export function resolveFullyBrokenPassedIceTrash(
   const rezCost = quoteIceRezCost(host, targetIceId as CardInstanceId);
   const paid = Number(legalAction.payload?.rezCostPaid ?? rezCost);
   if (!Number.isInteger(paid) || paid !== rezCost)
-    throw new Error("Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.");
+    throw new Error(
+      "Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.",
+    );
   spendCredits(host, "runner", rezCost);
   const targetDefinitionId = definitionFor(
     state,
@@ -704,8 +729,7 @@ export function isTraceLinkForceJackOutSource(
 ): boolean {
   return (
     cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.runnerUtilityLongtail?.kind ===
-    "trace_link_force_jack_out"
+      ?.runnerUtilityLongtail?.kind === "trace_link_force_jack_out"
   );
 }
 
@@ -859,17 +883,17 @@ function isRioPassRezzedIceSource(
   cardId: CardInstanceId,
 ): boolean {
   return (
-    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.fortRunWindows?.some(
-        (window) => window.kind === "roll_die_on_pass_rezzed_ice_on_same_fort",
-      ) === true
+    cardImplementationForDefinitionId(
+      definitionFor(state, cardId).id,
+    )?.fortRunWindows?.some(
+      (window) => window.kind === "roll_die_on_pass_rezzed_ice_on_same_fort",
+    ) === true
   );
 }
 
 function rezzedInstalledIceIds(state: GameState): CardInstanceId[] {
   const installed: CardInstanceId[] = [];
-  for (const server of state.corp.servers)
-    installed.push(...server.ice);
+  for (const server of state.corp.servers) installed.push(...server.ice);
   return installed.filter((cardId) => {
     const instance = mustInstance(state.cardInstances, cardId);
     return instance.zone.zone === "serverIce" && instance.rezzed;
@@ -891,8 +915,7 @@ function spendCredits(
   amount: number,
 ): void {
   if (amount <= 0) return;
-  if (!host.callbacks?.spendCredits)
-    throw new Error("Payment-Callback fehlt.");
+  if (!host.callbacks?.spendCredits) throw new Error("Payment-Callback fehlt.");
   host.callbacks.spendCredits(side, amount);
 }
 
@@ -905,7 +928,11 @@ function outermostIceIndex(server: CorpServer): number {
   return server.ice.length - 1;
 }
 
-function mustArrayValue<T>(values: readonly T[], index: number, message: string): T {
+function mustArrayValue<T>(
+  values: readonly T[],
+  index: number,
+  message: string,
+): T {
   const value = values[index];
   if (value === undefined) throw new Error(message);
   return value;
@@ -928,7 +955,9 @@ function legalActionPayload(
   };
 }
 
-function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerTurnFlags"]> {
+function ensureRunnerTurnFlags(
+  state: GameState,
+): NonNullable<GameState["runnerTurnFlags"]> {
   state.runnerTurnFlags ??= {
     stoleAgendaThisTurn: false,
     stoleAgendaLastTurn: false,
@@ -939,7 +968,8 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
 function definitionFor(state: GameState, id: CardInstanceId): CardDefinition {
   const instance = mustInstance(state.cardInstances, id);
   const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
-  if (!definition) throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
+  if (!definition)
+    throw new Error(`Unbekannte Karte: ${instance.definitionId}`);
   return definition;
 }
 

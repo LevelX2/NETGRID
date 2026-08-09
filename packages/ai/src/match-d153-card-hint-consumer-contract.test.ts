@@ -90,7 +90,7 @@ describe("match D153 card hint consumer contract", () => {
       expect.objectContaining({
         sourceCardInstanceId: "runner_onr_v1_154_broker_1",
         buildActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.0",
+          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
         ],
         cashOutActionIds: [],
       }),
@@ -101,10 +101,10 @@ describe("match D153 card hint consumer contract", () => {
         portfolioStoredAmount: 12,
         estimatedPayout: 12,
         buildActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.0",
+          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
         ],
         cashOutActionIds: [
-          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.1",
+          "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
         ],
       }),
     ]);

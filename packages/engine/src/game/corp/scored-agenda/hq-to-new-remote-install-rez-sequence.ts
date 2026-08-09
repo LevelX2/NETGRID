@@ -113,6 +113,7 @@ export function startHqToNewRemoteInstallRezChoice(
     primitiveKind: sequence.kind,
     effectKind: "install_rez_sequence",
     abilityKey: sequence.abilityKey,
+    capabilityKey: capabilityKeyForSequence(sequence),
   });
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
@@ -205,16 +206,14 @@ export function resolveHqToNewRemoteInstallRezChoice(
     throw new Error(
       "Das HQ-to-new-remote-Install-/Rez-Primitive ist nicht gescored.",
     );
-  const sequence = requireHqToNewRemoteInstallRezSequence(
-    host,
-    agendaId,
-  );
+  const sequence = requireHqToNewRemoteInstallRezSequence(host, agendaId);
   const primitivePayload = cardImplementationPrimitivePayload({
     sourceCardId: agendaId,
     sourceDefinitionId: choice.sourceCardDefinitionId,
     primitiveKind: sequence.kind,
     effectKind: "install_rez_sequence",
     abilityKey: sequence.abilityKey,
+    capabilityKey: capabilityKeyForSequence(sequence),
   });
   const selectedIds = selectedChoiceCardIds(host, choice);
   if (
@@ -479,7 +478,17 @@ function hqInstallRezPrimitivePayload(
     primitiveKind: sequence.kind,
     effectKind: "install_rez_sequence",
     abilityKey: sequence.abilityKey,
+    capabilityKey: capabilityKeyForSequence(sequence),
   });
+}
+
+function capabilityKeyForSequence(
+  sequence: HqToNewRemoteInstallRezSequence,
+): string | undefined {
+  if (!("capabilityKey" in sequence)) return undefined;
+  return typeof sequence.capabilityKey === "string"
+    ? sequence.capabilityKey
+    : undefined;
 }
 
 function hqInstallRezSequencePayload(

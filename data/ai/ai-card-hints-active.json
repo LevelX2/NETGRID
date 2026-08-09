@@ -534,23 +534,23 @@
     },
     {
       "aiSupportStatus": "ai_supported",
-    "breakerProfile": {
-      "baseStrength": 5,
-      "breakCost": 0,
+      "breakerProfile": {
+        "baseStrength": 5,
+        "breakCost": 0,
         "coverage": [
           "universal"
         ],
-      "sideEffects": [
-        "random_failure",
-        "once_per_subroutine"
-      ],
-      "randomOutcome": {
-        "failureDamageType": "net",
-        "kind": "random_break_or_damage",
-        "maxSingleFailureDamage": 3,
-        "successProbabilityPerAttempt": 0.5
-      }
-    },
+        "sideEffects": [
+          "random_failure",
+          "once_per_subroutine"
+        ],
+        "randomOutcome": {
+          "failureDamageType": "net",
+          "kind": "random_break_or_damage",
+          "maxSingleFailureDamage": 3,
+          "successProbabilityPerAttempt": 0.5
+        }
+      },
       "cardId": "onr_v1_007_blink",
       "cardType": "program",
       "costProfile": {
@@ -3097,8 +3097,8 @@
         "coverage": [
           "wall"
         ],
-      "pumpCost": 1,
-      "pumpStrengthAmount": 1,
+        "pumpCost": 1,
+        "pumpStrengthAmount": 1,
         "sideEffects": [
           "forgo_actions"
         ]
@@ -6889,7 +6889,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_084_edited-shipping-manifests",
-      "strategicExchangeKinds": ["self_tag"],
+      "strategicExchangeKinds": [
+        "self_tag"
+      ],
       "cardType": "event",
       "conditions": [
         {
@@ -8007,7 +8009,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_098_lucidrine-booster-drug",
-      "strategicExchangeKinds": ["self_damage"],
+      "strategicExchangeKinds": [
+        "self_damage"
+      ],
       "cardType": "event",
       "effects": [
         {
@@ -8880,124 +8884,6 @@
     },
     {
       "aiSupportStatus": "ai_supported",
-      "cardId": "onr_v1_110_sneak-preview",
-      "strategicExchangeKinds": ["temporary_resource"],
-      "cardType": "event",
-      "costProfile": {
-        "clicks": 1,
-        "opportunityCost": "medium",
-        "reserveRisk": "low"
-      },
-      "effects": [
-        {
-          "kind": "search",
-          "scope": "runner",
-          "target": "program_search",
-          "timing": "action"
-        },
-        {
-          "kind": "install",
-          "scope": "installed_card",
-          "target": "program",
-          "timing": "action"
-        },
-        {
-          "kind": "install_discount",
-          "scope": "installed_card",
-          "target": "temporary_program_install",
-          "timing": "action"
-        },
-        {
-          "kind": "delayed_penalty",
-          "scope": "runner",
-          "target": "end_of_turn_bounce",
-          "timing": "runner_turn"
-        }
-      ],
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
-      "planRoles": [
-        "build_rig",
-        "recover_rig"
-      ],
-      "quality": {
-        "benchmarkCovered": false,
-        "confidence": "medium",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-02",
-        "strategyCovered": false
-      },
-      "requiredMechanics": [
-        "play_event",
-        "search_stack",
-        "search_trash",
-        "install_program",
-        "temporary_install",
-        "end_turn_return",
-        "shuffle",
-        "legal_action_only"
-      ],
-      "riskTags": [
-        "temporary_install",
-        "shuffle_invalidates_memory",
-        "hidden_info_barrier"
-      ],
-      "roles": [
-        "event",
-        "hidden_zone_tool",
-        "temporary_program_install"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_sneak_preview_heap_stack_install"
-      ],
-      "side": "runner",
-      "strategicRole": [
-        "enabler"
-      ],
-      "targetProfiles": [
-        {
-          "avoid": [],
-          "hiddenInfoPolicy": "public_or_controller_known_only",
-          "kind": "search_install_target",
-          "preferences": [
-            "program_repairs_missing_coverage",
-            "program_preserves_run_goal"
-          ],
-          "purpose": "temporary_program_install",
-          "schemaVersion": "target-profile-v1",
-          "targetType": "program",
-          "timing": "on_play"
-        }
-      ],
-      "valueHints": {},
-      "strategyAnchors": [
-        "runner.search.breaker"
-      ],
-      "actionTacticSignals": [
-        "effect_scope:installed_card",
-        "effect_scope:runner",
-        "effect_timing:action",
-        "effect_timing:runner_turn",
-        "effect:delayed_penalty",
-        "effect:install",
-        "effect:install_discount",
-        "effect:search",
-        "setup.search"
-      ],
-      "functionSignals": [
-        "setup.end_of_turn_bounce",
-        "setup.install_discount",
-        "setup.program_install",
-        "setup.program_search",
-        "setup.search",
-        "setup.temporary_program_install"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_111_social-engineering",
       "cardType": "event",
       "effects": [
@@ -9679,7 +9565,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_119_arasaka-portable-prototype",
-      "strategicExchangeKinds": ["score_progress"],
+      "strategicExchangeKinds": [
+        "score_progress"
+      ],
       "cardType": "hardware",
       "costProfile": {
         "agendaPoints": 1,
@@ -12614,110 +12502,6 @@
     },
     {
       "aiSupportStatus": "ai_supported",
-      "cardId": "onr_v1_154_broker",
-      "cardType": "resource",
-      "conditions": [
-        {
-          "kind": "requires_installed_resource"
-        }
-      ],
-      "effects": [
-        {
-          "kind": "global_modifier",
-          "scope": "runner",
-          "target": "resource.connection",
-          "timing": "persistent"
-        },
-        {
-          "kind": "economy",
-          "scope": "runner",
-          "target": "economy.action_credit",
-          "timing": "persistent"
-        },
-        {
-          "kind": "economy",
-          "scope": "runner",
-          "target": "economy.temporary_resource_bank",
-          "timing": "persistent"
-        },
-        {
-          "amount": 3,
-          "economyMode": "bank_load",
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "runner",
-          "target": "economy.bank_load",
-          "timing": "action"
-        },
-        {
-          "amountKind": "all_available",
-          "economyMode": "bank_cashout",
-          "kind": "action_economy",
-          "resource": "credits",
-          "scope": "runner",
-          "target": "economy.bank_cashout_all",
-          "timing": "action"
-        }
-      ],
-      "planRoles": [
-        "build_rig",
-        "recover_economy",
-        "click_for_credits_when_safe",
-        "resource_value_engine"
-      ],
-      "quality": {
-        "benchmarkCovered": false,
-        "confidence": "medium",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex-economy-contract-v1",
-        "reviewedDate": "2026-07-21",
-        "strategyCovered": false
-      },
-      "requiredMechanics": [
-        "install_resource",
-        "resource_tag_interaction",
-        "gain_credit",
-        "bit_depot",
-        "take_click_ability"
-      ],
-      "riskTags": [
-        "resource_trash_if_tagged",
-        "click_cost"
-      ],
-      "roles": [
-        "connection",
-        "economy",
-        "resource"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
-      ],
-      "side": "runner",
-      "valueHints": {
-        "economy": 3
-      },
-      "actionTacticSignals": [
-        "economy.card",
-        "effect_scope:runner",
-        "effect_timing:action",
-        "effect_timing:persistent",
-        "effect:action_economy",
-        "effect:counter_economy",
-        "effect:economy",
-        "effect:global_modifier"
-      ],
-      "functionSignals": [
-        "economy.action",
-        "economy.action_credit",
-        "economy.counter",
-        "economy.generic",
-        "economy.temporary_resource_bank",
-        "resource.connection"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_155_code-viral-cache",
       "cardType": "resource",
       "effects": [
@@ -12793,7 +12577,10 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_156_corporate-ally",
-      "strategicExchangeKinds": ["score_progress", "board_or_hand_sacrifice"],
+      "strategicExchangeKinds": [
+        "score_progress",
+        "board_or_hand_sacrifice"
+      ],
       "cardType": "resource",
       "effects": [
         {
@@ -13073,7 +12860,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_159_databroker",
-      "strategicExchangeKinds": ["score_progress"],
+      "strategicExchangeKinds": [
+        "score_progress"
+      ],
       "cardType": "resource",
       "effects": [
         {
@@ -13818,128 +13607,6 @@
     },
     {
       "aiSupportStatus": "ai_supported",
-      "cardId": "onr_v1_168_loan-from-chiba",
-      "strategicExchangeKinds": ["debt_financing"],
-      "cardType": "resource",
-      "conditions": [
-        {
-          "kind": "requires_start_of_turn"
-        }
-      ],
-      "costProfile": {
-        "clicks": 0,
-        "opportunityCost": "high",
-        "reserveRisk": "medium"
-      },
-      "effects": [
-        {
-          "kind": "economy",
-          "scope": "runner",
-          "target": "economy.high_risk_burst_credit",
-          "timing": "persistent"
-        },
-        {
-          "kind": "delayed_penalty",
-          "scope": "runner",
-          "target": "risk.debt_loss_condition",
-          "timing": "persistent"
-        },
-        {
-          "kind": "delayed_penalty",
-          "scope": "runner",
-          "target": "risk.lose_game_debt",
-          "timing": "persistent"
-        },
-        {
-          "kind": "economy",
-          "scope": "runner",
-          "target": "economy.turn_start_credit",
-          "timing": "persistent"
-        },
-        {
-          "amount": 1,
-          "kind": "delayed_penalty",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "start_of_turn"
-        },
-        {
-          "amount": 10,
-          "kind": "delayed_penalty",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "on_leave_play"
-        },
-        {
-          "amount": 12,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
-        }
-      ],
-      "planRoles": [
-        "credit_swing"
-      ],
-      "quality": {
-        "benchmarkCovered": false,
-        "confidence": "medium",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-02",
-        "strategyCovered": false
-      },
-      "requiredMechanics": [
-        "persistent_special_state_resolver",
-        "gain_credits_on_install"
-      ],
-      "riskTags": [
-        "credit_swing",
-        "leave_play_penalty",
-        "state_hash_replay_stable"
-      ],
-      "roles": [
-        "economy",
-        "resource"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
-      ],
-      "side": "runner",
-      "valueHints": {
-        "installCreditGain": 12,
-        "leavePlayPayCost": 10,
-        "startOfTurnCreditLoss": 1
-      },
-      "actionTacticSignals": [
-        "economy.card",
-        "effect_scope:runner",
-        "effect_timing:action",
-        "effect_timing:on_leave_play",
-        "effect_timing:persistent",
-        "effect_timing:start_of_turn",
-        "effect:counter_economy",
-        "effect:delayed_penalty",
-        "effect:economy"
-      ],
-      "functionSignals": [
-        "economy.counter",
-        "economy.generic",
-        "economy.high_risk_burst_credit",
-        "economy.turn_start_credit",
-        "risk.debt_loss_condition",
-        "risk.lose_game_debt"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_169_n-e-t-o",
       "cardType": "resource",
       "effects": [
@@ -14138,7 +13805,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_171_preying-mantis",
-      "strategicExchangeKinds": ["self_damage"],
+      "strategicExchangeKinds": [
+        "self_damage"
+      ],
       "cardType": "resource",
       "effects": [
         {
@@ -15040,7 +14709,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_180_smiths-pawnshop",
-      "strategicExchangeKinds": ["board_or_hand_sacrifice"],
+      "strategicExchangeKinds": [
+        "board_or_hand_sacrifice"
+      ],
       "cardType": "resource",
       "effects": [
         {
@@ -16766,137 +16437,6 @@
         "risk.economy_crash_on_score",
         "risk.requires_corp_credit_threshold",
         "score.economy_conditional_burst"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
-      "cardId": "onr_v1_197_data-fort-reclamation",
-      "cardType": "agenda",
-      "conditions": [
-        {
-          "kind": "requires_hq_agenda"
-        },
-        {
-          "kind": "requires_score_window"
-        },
-        {
-          "kind": "requires_scored_agenda"
-        }
-      ],
-      "effects": [
-        {
-          "amount": 10,
-          "kind": "economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "when_scored"
-        },
-        {
-          "kind": "install",
-          "scope": "remote",
-          "timing": "when_scored"
-        },
-        {
-          "kind": "remote_build",
-          "scope": "remote",
-          "timing": "when_scored"
-        },
-        {
-          "kind": "rez",
-          "scope": "remote",
-          "timing": "when_scored"
-        }
-      ],
-      "lineSupport": [
-        "corp.remote_scoring"
-      ],
-      "planRoles": [
-        "corp_score_agenda",
-        "corp_agenda_ability"
-      ],
-      "quality": {
-        "benchmarkCovered": true,
-        "confidence": "high",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex-agenda-semantic-review-v1",
-        "reviewedDate": "2026-07-01",
-        "strategyCovered": true
-      },
-      "requiredMechanics": [
-        "per_card_longtail_resolver_gate",
-        "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence",
-        "corp_agenda_resolver"
-      ],
-      "riskTags": [
-        "legal_actions_only",
-        "public_payload_only",
-        "replay_statehash_required"
-      ],
-      "roles": [
-        "corp",
-        "agenda",
-        "per_card_longtail"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
-      ],
-      "side": "corp",
-      "strategicRole": [
-        "engine_anchor"
-      ],
-      "strategySupportPairs": [
-        {
-          "confidence": "high",
-          "evidence": [
-            "score.remote_fort_creation",
-            "score.remote_install_budget"
-          ],
-          "rationale": "Agenda Semantic Review v1 maps Data Fort Reclamation to corp.remote_scoring as engine_anchor/remote_setup_engine.",
-          "role": "engine_anchor",
-          "roleDetail": "remote_setup_engine",
-          "strategyId": "corp.remote_scoring"
-        }
-      ],
-      "tacticSignals": [
-        "install.corp_new_remote_fort_from_hq",
-        "economy.corp_install_rez_budget",
-        "score.remote_fort_creation",
-        "score.remote_install_budget"
-      ],
-      "targetProfiles": [
-        {
-          "avoid": [],
-          "hiddenInfoPolicy": "public_or_controller_known_only",
-          "kind": "install_target",
-          "preferences": [
-            "prefer_option_that_protects_agenda_or_remote_pressure",
-            "central_or_remote_plan_enabler"
-          ],
-          "purpose": "create_remote_with_best_hq_cards",
-          "schemaVersion": "target-profile-v1",
-          "targetType": "card",
-          "timing": "on_score"
-        }
-      ],
-      "valueHints": {},
-      "actionTacticSignals": [
-        "corp.remote_protection",
-        "economy.card",
-        "effect_scope:corp",
-        "effect_scope:remote",
-        "effect_timing:when_scored",
-        "effect:economy",
-        "effect:install",
-        "effect:remote_build",
-        "effect:rez"
-      ],
-      "functionSignals": [
-        "economy.corp_install_rez_budget",
-        "economy.generic",
-        "install.corp_new_remote_fort_from_hq",
-        "score.remote_fort_creation",
-        "score.remote_install_budget"
       ]
     },
     {
@@ -30054,155 +29594,6 @@
     },
     {
       "aiSupportStatus": "ai_supported",
-      "cardId": "onr_v1_317_data-masons",
-      "cardType": "asset",
-      "conditions": [
-        {
-          "kind": "requires_installed_ice"
-        }
-      ],
-      "effects": [
-        {
-          "kind": "rez_discount",
-          "scope": "ice",
-          "timing": "persistent"
-        },
-        {
-          "kind": "global_modifier",
-          "scope": "ice",
-          "timing": "persistent"
-        },
-        {
-          "amount": 1,
-          "kind": "remote_protection",
-          "resource": "strength",
-          "scope": "ice",
-          "timing": "persistent"
-        },
-        {
-          "amount": 2,
-          "kind": "rez_discount",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "persistent"
-        }
-      ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "manualNotes": [
-        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
-        "ASSET-V2: Target/Constraints: not_required.",
-        "AI-GENERIC: Wall scope is published as a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal."
-      ],
-      "planRoles": [
-        "protect_rnd",
-        "protect_hq",
-        "bait_runner"
-      ],
-      "quality": {
-        "benchmarkCovered": true,
-        "confidence": "high",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-03",
-        "strategyCovered": true
-      },
-      "remoteRole": {
-        "kind": "ice_modifier",
-        "serverScope": "server",
-        "threatLevel": "medium"
-      },
-      "requiredMechanics": [
-        "install_remote",
-        "rez_card",
-        "global_ice_rez_cost_modifier",
-        "global_ice_strength_modifier",
-        "persistent_modifier"
-      ],
-      "riskTags": [
-        "hidden_root"
-      ],
-      "roles": [
-        "asset",
-        "economy_asset",
-        "ice_modifier",
-        "remote_support"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
-      ],
-      "side": "corp",
-      "strategicRole": [
-        "tax_tool"
-      ],
-      "strategySupportPairs": [
-        {
-          "confidence": "high",
-          "evidence": [
-            "ice.corp_rez_discount",
-            "ice.corp_strength_support",
-            "tax.ice"
-          ],
-          "rationale": "Wall scope is a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal.",
-          "role": "tax_tool",
-          "roleDetail": "ice_tax_support",
-          "strategyId": "corp.ice_tax_glacier"
-        }
-      ],
-      "tacticSignals": [
-        "ice.corp_rez_discount",
-        "ice.corp_strength_support",
-        "tax.ice"
-      ],
-      "targetProfiles": [
-        {
-          "avoid": [
-            "hidden_info_dependent_choice"
-          ],
-          "hiddenInfoPolicy": "legal_targets_only",
-          "kind": "use_target",
-          "preferences": [
-            "high_rez_cost_relief",
-            "blocks_relevant_run_path",
-            "protects_agenda_remote"
-          ],
-          "purpose": "rez_best_defensive_ice",
-          "requiredSubtypes": [
-            "wall"
-          ],
-          "schemaVersion": "target-profile-v1",
-          "serverScope": "any_visible_server",
-          "targetType": "installed_ice",
-          "timing": "corp_rez_window"
-        }
-      ],
-      "valueHints": {
-        "economy": 2,
-        "remoteRootValue": 2
-      },
-      "strategyAnchors": [
-        "corp.economy_rez_reserve",
-        "corp.ice_tax_glacier"
-      ],
-      "actionTacticSignals": [
-        "corp.remote_protection",
-        "effect_scope:corp",
-        "effect_scope:ice",
-        "effect_timing:persistent",
-        "effect:global_modifier",
-        "effect:remote_protection",
-        "effect:rez_discount",
-        "remote_role:ice_modifier"
-      ],
-      "functionSignals": [
-        "economy.rez_discount",
-        "ice.strength_modifier"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_318_department-of-truth-enhancement",
       "cardType": "asset",
       "effects": [
@@ -33685,136 +33076,6 @@
     },
     {
       "aiSupportStatus": "ai_supported",
-      "cardId": "onr_v1_348_virus-test-site",
-      "cardType": "asset",
-      "conditions": [
-        {
-          "kind": "requires_accessed_card"
-        },
-        {
-          "kind": "requires_advancement_counter"
-        },
-        {
-          "kind": "requires_rnd_top"
-        }
-      ],
-      "effects": [
-        {
-          "kind": "damage",
-          "scope": "runner",
-          "target": "access.corp_net_damage_ambush",
-          "timing": "on_access"
-        },
-        {
-          "amount": 1,
-          "kind": "damage",
-          "resource": "damage",
-          "scope": "runner",
-          "timing": "action"
-        }
-      ],
-      "lineSupport": [
-        "corp.ambush_bluff",
-        "corp.damage_kill"
-      ],
-      "manualNotes": [
-        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
-        "ASSET-V2: Target/Constraints: not_required.",
-        "ASSET-V2: Rationale: Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
-      ],
-      "planRoles": [
-        "remote_asset_trap"
-      ],
-      "quality": {
-        "benchmarkCovered": false,
-        "confidence": "high",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-03",
-        "strategyCovered": true
-      },
-      "requiredMechanics": [
-        "install_asset",
-        "rez_card",
-        "access_ambush",
-        "net_damage",
-        "hidden_zone"
-      ],
-      "riskTags": [
-        "access_window",
-        "hidden_zone_barrier"
-      ],
-      "roles": [
-        "asset",
-        "ambush",
-        "net_damage",
-        "hidden_zone"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
-      ],
-      "side": "corp",
-      "strategicRole": [
-        "punish_payoff"
-      ],
-      "strategySupportPairs": [
-        {
-          "confidence": "high",
-          "evidence": [
-            "access.corp_net_damage_ambush",
-            "access.punish"
-          ],
-          "rationale": "Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
-          "role": "punish_payoff",
-          "roleDetail": "access_net_damage_payoff",
-          "strategyId": "corp.ambush_bluff"
-        },
-        {
-          "confidence": "medium",
-          "evidence": [
-            "access.corp_net_damage_ambush",
-            "damage.payoff"
-          ],
-          "rationale": "Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
-          "role": "punish_payoff",
-          "roleDetail": "access_net_damage_payoff",
-          "strategyId": "corp.damage_kill"
-        }
-      ],
-      "tacticSignals": [
-        "access.archives_safe_exception",
-        "access.corp_net_damage_ambush",
-        "access.punish",
-        "access.rnd_reveal_requirement",
-        "advance.corp_counter_bank",
-        "damage.payoff",
-        "remote.ambush"
-      ],
-      "valueHints": {
-        "damage": 1,
-        "remoteRootValue": 1
-      },
-      "strategyAnchors": [
-        "corp.ambush_bluff"
-      ],
-      "actionTacticSignals": [
-        "damage.payoff.runner",
-        "effect_scope:runner",
-        "effect_timing:action",
-        "effect_timing:on_access",
-        "effect:damage"
-      ],
-      "functionSignals": [
-        "access.archives_safe_exception",
-        "access.corp_net_damage_ambush",
-        "access.rnd_reveal_requirement",
-        "advance.corp_counter_bank",
-        "damage.payoff"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
       "cardId": "onr_v1_349_aardvark",
       "cardType": "upgrade",
       "conditions": [
@@ -36089,106 +35350,6 @@
         "remote.scoring_protection",
         "risk.random_outcome",
         "run.corp_random_end_run"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
-      "cardId": "onr_v1_368_roving-submarine",
-      "cardType": "upgrade",
-      "conditions": [
-        {
-          "kind": "requires_remote_server"
-        }
-      ],
-      "effects": [
-        {
-          "kind": "remote_tax",
-          "scope": "remote",
-          "target": "run.corp_server_lock",
-          "timing": "during_run"
-        }
-      ],
-      "lineSupport": [
-        "corp.remote_scoring"
-      ],
-      "manualNotes": [
-        "AI030 rationale: Run eligibility restriction on a subsidiary fort is a direct remote-scoring protection fact.",
-        "UPGRADE-V2: ändern; priority=high; set=originalset-v1.",
-        "UPGRADE-V2: Target/Constraints: Subsidiary remote; condition is specifically install/advance inside or on this fort during the Corp last turn.",
-        "UPGRADE-V2: Rationale: Die Bedingung im Report war zu breit. Es geht nicht um irgendeine Corp-Install-/Advance-Aktion, sondern um diese Fort-Zone. Außerdem ist `high` zu stark, weil aktive Scoring-Entwicklung die Run-Erlaubnis gerade wieder öffnet."
-      ],
-      "planRoles": [
-        "remote_upgrade_agenda_support"
-      ],
-      "quality": {
-        "benchmarkCovered": true,
-        "confidence": "medium",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-07-03",
-        "strategyCovered": true
-      },
-      "remoteRole": {
-        "kind": "run_tax",
-        "serverScope": "remote",
-        "threatLevel": "medium"
-      },
-      "requiredMechanics": [
-        "install_upgrade",
-        "rez_card",
-        "advance",
-        "overadvance"
-      ],
-      "riskTags": [
-        "score_window"
-      ],
-      "roles": [
-        "upgrade",
-        "advance",
-        "agenda"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_upgrade_rez_support"
-      ],
-      "side": "corp",
-      "strategicRole": [
-        "defensive_tool"
-      ],
-      "strategySupportPairs": [
-        {
-          "confidence": "medium",
-          "evidence": [
-            "run.corp_server_lock",
-            "condition.corp_installed_or_advanced_this_fort_last_turn"
-          ],
-          "rationale": "Conditional run lock can protect a dormant or staged remote, but the same condition opens the fort after recent install/advance activity.",
-          "role": "defensive_tool",
-          "roleDetail": "conditional_server_lock",
-          "strategyId": "corp.remote_scoring"
-        }
-      ],
-      "tacticSignals": [
-        "run.corp_server_lock",
-        "condition.corp_installed_or_advanced_this_fort_last_turn"
-      ],
-      "valueHints": {
-        "remoteRootValue": 1
-      },
-      "strategyAnchors": [
-        "corp.remote_scoring"
-      ],
-      "actionTacticSignals": [
-        "corp.remote_protection",
-        "effect_scope:remote",
-        "effect_timing:during_run",
-        "effect:remote_tax",
-        "remote_role:run_tax"
-      ],
-      "functionSignals": [
-        "condition.corp_installed_or_advanced_this_fort_last_turn",
-        "run.corp_server_lock",
-        "tax.remote"
       ]
     },
     {
@@ -38793,127 +37954,6 @@
         "corp_ice.optional_self_bounce_gain",
         "damage.payoff",
         "ice.etr"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
-      "cardId": "onr_proteus_020_digiconda",
-      "cardType": "ice",
-      "conditions": [
-        {
-          "kind": "requires_encounter"
-        },
-        {
-          "kind": "requires_unbroken_subroutine"
-        }
-      ],
-      "effects": [
-        {
-          "amount": 2,
-          "finite": true,
-          "kind": "damage",
-          "resource": "net_damage",
-          "scope": "runner",
-          "target": "corp_ice.net_damage",
-          "timing": "encounter_resolution"
-        },
-        {
-          "kind": "etr",
-          "scope": "run_path",
-          "target": "corp_ice.end_run",
-          "timing": "encounter_resolution"
-        },
-        {
-          "kind": "global_modifier",
-          "resource": "strength",
-          "scope": "ice",
-          "target": "corp_ice.rez_paid_scaling",
-          "timing": "on_rez"
-        }
-      ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "manualNotes": [
-        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
-        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
-        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
-      ],
-      "planRoles": [
-        "protect_hq",
-        "protect_rnd",
-        "protect_remote"
-      ],
-      "quality": {
-        "benchmarkCovered": false,
-        "confidence": "medium",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-07-03",
-        "strategyCovered": true
-      },
-      "requiredMechanics": [],
-      "riskTags": [
-        "damage_window",
-        "hidden_ice"
-      ],
-      "roles": [
-        "damage_ice",
-        "etr_ice",
-        "ice",
-        "sentry_ice"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-      ],
-      "side": "corp",
-      "strategicRole": [
-        "tax_tool"
-      ],
-      "strategySupportPairs": [
-        {
-          "confidence": "medium",
-          "evidence": [
-            "corp_ice.rez_paid_scaling"
-          ],
-          "rationale": "ICE Semantic Review v1: Digiconda bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten.",
-          "role": "tax_tool",
-          "roleDetail": "rez_paid_scaling_ice",
-          "strategyId": "corp.ice_tax_glacier"
-        }
-      ],
-      "tacticSignals": [
-        "corp_ice.damage_source",
-        "corp_ice.end_run",
-        "corp_ice.net_damage",
-        "corp_ice.rez_paid_scaling",
-        "damage.payoff"
-      ],
-      "valueHints": {},
-      "strategyAnchors": [
-        "corp.damage_kill",
-        "corp.ice_tax_glacier"
-      ],
-      "actionTacticSignals": [
-        "corp.ice_protection",
-        "damage.payoff.runner",
-        "effect_scope:ice",
-        "effect_scope:run_path",
-        "effect_scope:runner",
-        "effect_timing:encounter_resolution",
-        "effect_timing:on_rez",
-        "effect:damage",
-        "effect:etr",
-        "effect:global_modifier"
-      ],
-      "functionSignals": [
-        "corp_ice.end_run",
-        "corp_ice.net_damage",
-        "corp_ice.rez_paid_scaling",
-        "damage.payoff",
-        "ice.etr",
-        "ice.strength_modifier"
       ]
     },
     {
@@ -44858,88 +43898,6 @@
     {
       "aiSupportStatus": "ai_supported",
       "breakerProfile": {
-        "breakCost": 1,
-        "coverage": [
-          "sentry"
-        ],
-        "pumpCost": 2,
-        "pumpStrengthAmount": 1,
-        "strengthBonusVsChosenIce": true,
-        "targetedIceBonus": true
-      },
-      "cardId": "onr_proteus_080_black-widow",
-      "cardType": "program",
-      "effects": [
-        {
-          "kind": "breaker",
-          "scope": "runner",
-          "timing": "persistent"
-        }
-      ],
-      "planRoles": [
-        "build_rig",
-        "safe_probe_run"
-      ],
-      "quality": {
-        "benchmarkCovered": false,
-        "confidence": "medium",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-01",
-        "strategyCovered": false
-      },
-      "requiredMechanics": [],
-      "riskTags": [
-        "encounter"
-      ],
-      "roles": [
-        "breaker_killer",
-        "icebreaker",
-        "program"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-      ],
-      "side": "runner",
-      "targetProfiles": [
-        {
-          "avoid": [
-            "unknown_low_information_target",
-            "irrelevant_server_ice",
-            "already_cheap_to_break"
-          ],
-          "hiddenInfoPolicy": "visible_or_known_only",
-          "kind": "install_target",
-          "preferences": [
-            "known_or_rezzed_ice",
-            "known_sentry",
-            "high_strength_ice",
-            "high_break_cost_without_bonus",
-            "relevant_server_ice"
-          ],
-          "purpose": "strength_bonus_vs_chosen_ice",
-          "schemaVersion": "target-profile-v1",
-          "targetType": "installed_ice",
-          "timing": "on_install"
-        }
-      ],
-      "valueHints": {},
-      "actionTacticSignals": [
-        "coverage.breaker",
-        "effect_scope:runner",
-        "effect_timing:persistent",
-        "effect:breaker"
-      ],
-      "functionSignals": [
-        "breaker.sentry",
-        "breaker.strength_bonus_vs_chosen_ice",
-        "breaker.targeted_ice_bonus"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
-      "breakerProfile": {
         "breakCost": 2,
         "coverage": [
           "wall"
@@ -45869,105 +44827,6 @@
       "functionSignals": [
         "breaker.support",
         "run.break_cost_support"
-      ]
-    },
-    {
-      "aiSupportStatus": "ai_supported",
-      "breakerProfile": {
-      "configurableCoverage": true,
-      "coverageCandidates": [
-        "code_gate",
-        "sentry",
-        "wall"
-      ],
-      "breakCost": 2,
-      "maxSubroutinesPerBreak": 1,
-      "pumpCost": 1,
-      "pumpStrengthAmount": 1,
-      "reconfigurableType": true
-      },
-      "cardId": "onr_proteus_092_morphing-tool",
-      "cardType": "program",
-      "effects": [
-        {
-          "kind": "breaker",
-          "scope": "runner",
-          "timing": "persistent"
-        }
-      ],
-      "planRoles": [
-        "build_rig",
-        "safe_probe_run"
-      ],
-      "quality": {
-        "benchmarkCovered": false,
-        "confidence": "medium",
-        "hintReviewed": true,
-        "needsHumanReview": false,
-        "reviewedBy": "codex",
-        "reviewedDate": "2026-06-01",
-        "strategyCovered": false
-      },
-      "requiredMechanics": [],
-      "riskTags": [
-        "encounter"
-      ],
-      "roles": [
-        "breaker_decoder",
-        "breaker_fracter",
-        "icebreaker",
-        "program"
-      ],
-      "scenarioRefs": [
-        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
-      ],
-      "side": "runner",
-      "targetProfiles": [
-        {
-          "avoid": [
-            "unknown_low_information_target",
-            "hidden_info_dependent_choice"
-          ],
-          "hiddenInfoPolicy": "visible_or_known_only",
-          "kind": "mode_choice",
-          "preferences": [
-            "type_blocking_relevant_run_path",
-            "type_with_known_problem_ice",
-            "type_missing_in_current_rig"
-          ],
-          "purpose": "choose_current_breaker_coverage",
-          "schemaVersion": "target-profile-v1",
-          "targetType": "ice_type",
-          "timing": "on_install"
-        },
-        {
-          "avoid": [
-            "unknown_low_information_target",
-            "hidden_info_dependent_choice"
-          ],
-          "hiddenInfoPolicy": "visible_or_known_only",
-          "kind": "mode_choice",
-          "preferences": [
-            "type_blocking_relevant_run_path",
-            "type_with_known_problem_ice",
-            "type_missing_in_current_rig"
-          ],
-          "purpose": "choose_current_breaker_coverage",
-          "schemaVersion": "target-profile-v1",
-          "targetType": "ice_type",
-          "timing": "paid_action"
-        }
-      ],
-      "valueHints": {},
-      "actionTacticSignals": [
-        "coverage.breaker",
-        "effect_scope:runner",
-        "effect_timing:persistent",
-        "effect:breaker"
-      ],
-      "functionSignals": [
-        "breaker.configurable_coverage",
-        "breaker.reconfigurable_type"
       ]
     },
     {
@@ -46985,7 +45844,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_105_demolition-run",
-      "strategicExchangeKinds": ["self_tag"],
+      "strategicExchangeKinds": [
+        "self_tag"
+      ],
       "cardType": "event",
       "conditions": [
         {
@@ -47197,7 +46058,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_107_drone-for-a-day",
-      "strategicExchangeKinds": ["self_tag"],
+      "strategicExchangeKinds": [
+        "self_tag"
+      ],
       "cardType": "event",
       "effects": [
         {
@@ -47278,7 +46141,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_108_faked-hit",
-      "strategicExchangeKinds": ["self_damage"],
+      "strategicExchangeKinds": [
+        "self_damage"
+      ],
       "cardType": "event",
       "effects": [
         {
@@ -48155,7 +47020,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_121_remote-detonator",
-      "strategicExchangeKinds": ["self_tag"],
+      "strategicExchangeKinds": [
+        "self_tag"
+      ],
       "cardType": "event",
       "conditions": [
         {
@@ -48513,7 +47380,10 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_126_test-spin",
-      "strategicExchangeKinds": ["self_damage", "temporary_resource"],
+      "strategicExchangeKinds": [
+        "self_damage",
+        "temporary_resource"
+      ],
       "cardType": "event",
       "effects": [
         {
@@ -50635,7 +49505,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
-      "strategicExchangeKinds": ["self_damage"],
+      "strategicExchangeKinds": [
+        "self_damage"
+      ],
       "cardType": "hardware",
       "effects": [
         {
@@ -55269,7 +54141,9 @@
         ]
       },
       "cardId": "onr_classic_031_rent-i-con",
-      "strategicExchangeKinds": ["temporary_resource"],
+      "strategicExchangeKinds": [
+        "temporary_resource"
+      ],
       "cardType": "program",
       "conditions": [
         {
@@ -57635,7 +56509,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_034_boostergang-connections",
-      "strategicExchangeKinds": ["board_or_hand_sacrifice"],
+      "strategicExchangeKinds": [
+        "board_or_hand_sacrifice"
+      ],
       "cardType": "event",
       "conditions": [
         {
@@ -57753,7 +56629,10 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_035_corruption",
-      "strategicExchangeKinds": ["score_progress", "self_tag"],
+      "strategicExchangeKinds": [
+        "score_progress",
+        "self_tag"
+      ],
       "cardType": "event",
       "conditions": [
         {
@@ -57861,7 +56740,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_036_do-the-drine",
-      "strategicExchangeKinds": ["self_damage"],
+      "strategicExchangeKinds": [
+        "self_damage"
+      ],
       "cardType": "event",
       "conditions": [
         {
@@ -58806,7 +57687,9 @@
     {
       "aiSupportStatus": "ai_supported",
       "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
-      "strategicExchangeKinds": ["self_damage"],
+      "strategicExchangeKinds": [
+        "self_damage"
+      ],
       "cardType": "hardware",
       "conditions": [
         {

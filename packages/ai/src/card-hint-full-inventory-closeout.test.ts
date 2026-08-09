@@ -3,13 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-type Hint = {
-  cardId: string;
-  roles: string[];
-  planRoles: string[];
-  quality?: { hintReviewed?: boolean; needsHumanReview?: boolean };
-  targetProfiles?: unknown[];
-};
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -20,12 +14,8 @@ function readJson(relativePath: string): any {
   return JSON.parse(fs.readFileSync(path.join(repoRoot, relativePath), "utf8"));
 }
 
-function hintById(): Map<string, Hint> {
-  return new Map(
-    (readJson("data/ai/ai-card-hints-active.json").cards as Hint[]).map(
-      (hint) => [hint.cardId, hint],
-    ),
-  );
+function hintById() {
+  return AI_HINTS_BY_CARD;
 }
 
 describe("AI card hint full-inventory closeout", () => {

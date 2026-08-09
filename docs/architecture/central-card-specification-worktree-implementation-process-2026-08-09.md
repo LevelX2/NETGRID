@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS05 abgeschlossen, CS06 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS06 abgeschlossen, CS07 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -401,7 +401,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS03  | Registry, Projektionen, Importindex und Fingerprints   | completed |
 | CS04  | Stabile Capability-Identität und Engine-Rebinding      | completed |
 | CS05  | Prospective-Capability-Compiler                        | completed |
-| CS06  | Heterogener produktiver Mechanik-Stresstest            | pending   |
+| CS06  | Heterogener produktiver Mechanik-Stresstest            | completed |
 | CS07  | Testset-Migration und Migrationsautomatisierung        | pending   |
 | CS08  | Classic-Migration                                      | pending   |
 | CS09  | Proteus-Migration                                      | pending   |
@@ -929,6 +929,68 @@ Done-Gate:
 - keine Stresstestfamilie erzwingt eine zweite mechanische Quelle;
 - Performancebudgets sind eingehalten oder eine ursachenbezogene Optimierung
   ist im Paket abgeschlossen.
+
+Ergebnis am 09.08.2026:
+
+- Der heterogene Schnitt umfasst exakt zehn CardSpecs: Digiconda, Black
+  Widow, Morphing Tool, Sneak Preview, Broker, Loan from Chiba, Data Fort
+  Reclamation, Data Masons, Virus Test Site und Roving Submarine. Ihre alten
+  Card-JSON-, Manifest-, Shared-Definition-, Hint- und
+  CardImplementation-Autoreneinträge wurden im selben Paket entfernt. CS07
+  wurde nicht begonnen.
+- Die produktiven Authoritypartitionen sind disjunkt und fail-closed:
+  CardDefinitions `634 = 624 Legacy + 10 CardSpec` und
+  CardImplementations `583 = 573 Legacy + 10 CardSpec`. Overlap, Missing,
+  Unexpected und Duplicate werden in beiden Composerpfaden negativ geprüft;
+  die kombinierten Container und Indizes sind stabil und gefroren.
+- Die effektiven Readmodels enthalten 620 Katalogkarten, 618 AI-Hints
+  (`608 Legacy-JSON + 10 deterministisch erzeugte CardSpec-Hints`), 154
+  Proteus-Readiness-Zeilen mit 114 Pilotkarten, 54 aktive Icebreaker sowie 33
+  lokalisierte Agendaquellen einschließlich Data Fort Reclamation. Browser
+  und normale Webmodule erreichen weder Fullregistry noch Planning- oder
+  AI-Compilerflächen.
+- Die zehn AI-Hints werden generisch aus typisierten Engineknoten,
+  PlanningAnnotations und geprüfter Scenario-Evidence kompiliert. Das
+  eingecheckte, kanonisch sortierte Generated-Artefakt bindet Rules-,
+  Planning- und Evidence-Fingerprints; Byte-, Drift- und Runtimevalidatoren
+  verhindern manuelle oder veraltete Ausgaben. Der produktive
+  `@netgrid/ai/catalog`-Subpath besitzt exakt fünf transitive Inputs: zwei
+  Hintartefakte, Contract, reine Authority und Public-Fassade.
+- Capability-Identitäten sind für die migrierte Partition kanonisch und
+  indexfrei. Broker verwendet `store_credits`/`withdraw_credits`; Data Fort
+  Reclamation transportiert `hq_to_new_remote_install_rez` in Start,
+  HQ-Choice und Rez-Continuation ohne `:0`-Fallback. Der Legacyzweig behält
+  seine bisherige, strikt getrennte Identität.
+- Die fokussierten Gates sind grün, unter anderem StateHash `7/7`, DFR
+  Primitive/Sequence `19/19` plus der bestehende reale Replay-/Wrong-Side-/
+  Stale-/Hidden-Info-Fall in `per-card-longtail.test.ts`, Broker `49/49`,
+  Derived Evidence `59/59`, die kombinierte Hint-/Quality-/Hidden-/Webmatrix
+  `88/88`, die Validator-Negativmatrix `41/41` sowie Registry-Retention
+  strukturell `1/1` über 500 CS06-Stressmatches.
+- Der matchspezifische RulesContext ist nun Teil des StateHash. Daher wurden
+  352 gespeicherte Decision-Checkpoint-Hashes deterministisch gegen ihren
+  unveränderten `engine.testOnlyGameState` neu berechnet; fünf exakte
+  Broker-Erwartungen verwenden zusätzlich die kanonischen Capability-Action-
+  IDs. Ein gespeicherter Legacy-Turn-Plan bindet seine Rent-I-Con-Fähigkeit
+  typwahr als `legacy_ability_id`; Planowner, Ziele, Choices und erwartetes
+  Verhalten bleiben unverändert. Der vollständige finale AI-Shard-Lauf ist
+  mit `1.567 + 1.420 + 1.067` Tests grün, ebenso der Workspace-Typecheck und
+  die finalen Source-, Boundary-, Discovery-, Generated-Artifact- und
+  Retention-Gates.
+- Drei frische CS00-kompatible Messungen ergeben für den Importstart einen
+  Median von `2.098,0894 ms`, für den statischen Heap `40.529.216 B` bei
+  einem Budget von `41.682.940 B` und für den Retained-Match-Proxy
+  `11.354,48 B`. Der isolierte Registryanteil wurde zusätzlich in fünf
+  frischen `--expose-gc`-Prozessen je Lane mit 500 formgleichen Matches
+  gemessen: Legacy-Median `6.084.176 B`, CS06-Median `6.099.032 B`, also
+  `29,712 B` Differenz je Match bei `4.096 B` Budget. Die transitive
+  Authorityprüfung findet zugleich null Registry-/Spec-/Projectionreferenzen
+  oder strukturierte Clones in den Matchzuständen.
+- Der finale isolierte Next-Production-Build enthält 22 produktive
+  JavaScriptdateien mit `4.187.747 B` raw, `1.049.877 B` GZip und `984.578 B`
+  Brotli. Gegen die CS00-GZip-Baseline `1.031.959 B` beträgt der Zuwachs
+  `1,736 %`; zum Budget `1.135.155 B` verbleiben `85.278 B` Reserve. Das
+  temporäre `.next-cs06`-Verzeichnis wurde nach der Messung entfernt.
 
 Commit:
 

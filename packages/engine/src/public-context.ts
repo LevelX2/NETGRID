@@ -916,6 +916,8 @@ export function publicContextForAction(
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
+    if (typeof legalAction.payload.sourceTitle === "string")
+      context.sourceTitle = legalAction.payload.sourceTitle;
     if (
       (legalAction.payload.hiddenZoneAction ===
         "schematics_search_engine_expose_installed_cards_review" ||

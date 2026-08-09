@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AbilityDefinition,
-  type CardDefinitionId,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AbilityDefinition, type CardDefinitionId } from "@netgrid/shared";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import type {
   ActionCardAbilitySemanticProfile,

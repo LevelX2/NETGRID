@@ -46,7 +46,6 @@ export type HiddenZoneSearchActivationBaseHost = {
     randomStackProgramInstallSourceId: CardDefinitionId;
     stackProgramFreeInstallSourceId: CardDefinitionId;
     stackSearchGripSourceId: CardDefinitionId;
-    temporaryProgramInstallSourceId: CardDefinitionId;
   };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
@@ -147,16 +146,16 @@ export function startSearchTrashToGripActivation(
     sourceDefinitionId: input.sourceDefinitionId,
     filter: input.filter,
     options: host.state.runner.heap.map((cardId) => {
-        const definition = host.cards.definitionFor(cardId);
-        const selectable = targets.includes(cardId);
-        return {
-          id: `card_${cardId}`,
-          label: definition.title,
-          publicLabel: definition.title,
-          value: cardId,
-          ...(!selectable ? { selectable: false } : {}),
-        };
-      }),
+      const definition = host.cards.definitionFor(cardId);
+      const selectable = targets.includes(cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
   });
   const payload = buildSearchTrashToGripPayload({
     sourceDefinitionId: input.sourceDefinitionId,
@@ -557,8 +556,8 @@ export function startTemporaryProgramInstallSourceActivation(
   input: {
     sourcePrefix?: string;
     sourceCardId?: CardInstanceId;
-    sourceDefinitionId?: CardDefinitionId;
-  } = {},
+    sourceDefinitionId: CardDefinitionId;
+  },
 ): void {
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
@@ -571,9 +570,7 @@ export function startTemporaryProgramInstallSourceActivation(
     stateVersion: host.state.stateVersion,
     sourcePrefix: input.sourcePrefix ?? "v1911.temporary_program_install",
     sourceCardId: input.sourceCardId,
-    sourceDefinitionId:
-      input.sourceDefinitionId ??
-      host.constants.temporaryProgramInstallSourceId,
+    sourceDefinitionId: input.sourceDefinitionId,
     options,
   });
   host.legalAction.payload = {

@@ -82,7 +82,7 @@ export type CardMechanicalDefinition = {
   icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
   hostedProgramCapacity?: HostedProgramCapacityImplementation;
   hostedProgramModifiers?: readonly HostedProgramModifierImplementation[];
-  modifiers?: CardModifierImplementation[];
+  modifiers?: readonly CardModifierImplementation[];
   selfStealCosts?: readonly CardSelfStealCostImplementation[];
   abilities?: CardAbilityImplementation[];
   agendaAccessReplacement?: CardAgendaAccessReplacementImplementation;

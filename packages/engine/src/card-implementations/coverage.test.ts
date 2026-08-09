@@ -1,7 +1,8 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { CS06_CARD_DEFINITION_IDS } from "@netgrid/cards/engine";
 import { CARD_DEFINITIONS_BY_ID } from "../index";
 import {
   CARD_IMPLEMENTATION_COVERAGE_ENTRIES,
@@ -541,6 +542,34 @@ function formatClassicCoverageReport(report: ClassicCoverageReport): string {
 }
 
 describe("CardImplementation coverage and registry invariants", () => {
+  it("reports exact CardSpec registry source authority for the CS06 slice", () => {
+    const paths = new Set<string>();
+    for (const definitionId of CS06_CARD_DEFINITION_IDS) {
+      const coverage = cardImplementationCoverageForDefinitionId(definitionId);
+      expect(coverage).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+        reason:
+          "CardSpec registry mechanical contract projects runtime behavior.",
+      });
+      if (coverage === undefined)
+        throw new Error(`Missing coverage for ${definitionId}`);
+      expect(coverage.currentLocations).toHaveLength(1);
+      const locations = coverage.currentLocations;
+      if (locations === undefined || locations.length !== 1)
+        throw new Error(`Invalid source coverage for ${definitionId}`);
+      const sourcePath = locations[0]!;
+      expect(sourcePath).toMatch(
+        /^packages\/cards\/src\/specs\/.+\.card-spec\.ts$/,
+      );
+      expect(sourcePath).not.toContain(
+        "packages/engine/src/card-implementations",
+      );
+      expect(existsSync(`${repoRoot}/${sourcePath}`)).toBe(true);
+      paths.add(sourcePath!);
+    }
+    expect(paths.size).toBe(CS06_CARD_DEFINITION_IDS.length);
+  });
   it("keeps every avoid-tag card in the shared prevention registry with its printed cost", () => {
     const cases = [
       ["onr_v1_135_nasuko-cycle", { kind: "credit", amount: 3 }, 125],
@@ -1943,11 +1972,19 @@ describe("CardImplementation coverage and registry invariants", () => {
   it("reconciles Proteus manifest support against concrete files and registry", () => {
     const report = buildProteusCoverageReport();
     process.stdout.write(`${formatProteusCoverageReport(report)}\n`);
+    const canonicalProteusIds = CS06_CARD_DEFINITION_IDS.filter((id) =>
+      id.startsWith("onr_proteus_"),
+    );
+    const effectiveProteusIds = [
+      ...new Set([...report.proteusCardIds, ...canonicalProteusIds]),
+    ];
 
     expect(report.cardSet.setId).toBe("proteus");
-    expect(report.proteusCardIds).toHaveLength(154);
+    expect(report.proteusCardIds).toHaveLength(151);
+    expect(canonicalProteusIds).toHaveLength(3);
+    expect(effectiveProteusIds).toHaveLength(154);
     expect(report.manifest.setId).toBe("proteus");
-    expect(report.manifest.cards).toHaveLength(154);
+    expect(report.manifest.cards).toHaveLength(151);
     expect([...report.manifestCardIds].sort()).toEqual(
       [...report.proteusCardIds].sort(),
     );
@@ -1961,9 +1998,13 @@ describe("CardImplementation coverage and registry invariants", () => {
     expect(report.duplicateFileDefinitionIds).toEqual([]);
     expect(report.duplicateRegistryDefinitionIds).toEqual([]);
     expect(report.unregisteredProteusFiles).toEqual([]);
-    expect(report.registeredProteusImplementationsWithoutFile).toEqual([]);
+    expect(report.registeredProteusImplementationsWithoutFile).toEqual(
+      [...canonicalProteusIds].sort(),
+    );
     expect([...report.registryDefinitionIds].sort()).toEqual(
-      [...report.uniqueFileDefinitionIds].sort(),
+      [
+        ...new Set([...report.uniqueFileDefinitionIds, ...canonicalProteusIds]),
+      ].sort(),
     );
     expect(report.manifestImplementedIds).toEqual(
       [...report.uniqueFileDefinitionIds].sort(),

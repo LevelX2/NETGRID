@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   applyAction,
   createGameAfterSetup,
@@ -25,6 +25,24 @@ import type {
   GameState,
   ResolvedCardDefinition,
 } from "@netgrid/shared";
+
+vi.mock("../../card-definitions", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("../../card-definitions")>();
+  const definitions = structuredClone(original.CARD_DEFINITIONS);
+  return {
+    ...original,
+    CARD_DEFINITIONS: definitions,
+    CARD_DEFINITIONS_BY_ID: Object.fromEntries(
+      definitions.map((definition) => [definition.id, definition]),
+    ),
+  };
+});
+
+const TEST_CARD_DEFINITIONS_BY_ID = CARD_DEFINITIONS_BY_ID as Record<
+  string,
+  ResolvedCardDefinition
+>;
 
 describe("HiddenInfo special zone projection", () => {
   it("moves a card to side-private Set Aside atomically without public identity leaks and replays deterministically", () => {
@@ -87,7 +105,6 @@ describe("HiddenInfo special zone projection", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
-
 });
 
 describe("Proteus Hidden-Resource Foundation Harness", () => {
@@ -100,12 +117,15 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   const hiddenOriginalSubtypesByDefinitionId = new Map<string, string[]>();
 
   afterEach(() => {
-    delete CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId];
-    for (const [definitionId, subtypes] of hiddenOriginalSubtypesByDefinitionId) {
-      const currentDefinition = CARD_DEFINITIONS_BY_ID[definitionId];
+    delete TEST_CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId];
+    for (const [
+      definitionId,
+      subtypes,
+    ] of hiddenOriginalSubtypesByDefinitionId) {
+      const currentDefinition = TEST_CARD_DEFINITIONS_BY_ID[definitionId];
       if (!currentDefinition)
         throw new Error(`Fehlende Test-Kartendefinition: ${definitionId}`);
-      CARD_DEFINITIONS_BY_ID[definitionId] = {
+      TEST_CARD_DEFINITIONS_BY_ID[definitionId] = {
         ...currentDefinition,
         subtypes,
       };
@@ -114,7 +134,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   });
 
   function ensureHiddenResourceHarnessCard(): void {
-    CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId] ??= {
+    TEST_CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId] ??= {
       id: hiddenResourceDefinitionId,
       title: hiddenResourceTitle,
       side: "runner",
@@ -168,16 +188,15 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   function makeExistingCardImplementationResourceHiddenForHarness(
     definitionId = hiddenActivationDefinitionId,
   ): void {
-    const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+    const definition = TEST_CARD_DEFINITIONS_BY_ID[definitionId];
     if (!definition)
       throw new Error("Missing hidden activation fixture definition.");
     if (!hiddenOriginalSubtypesByDefinitionId.has(definitionId)) {
-      hiddenOriginalSubtypesByDefinitionId.set(
-        definitionId,
-        [...(definition.subtypes ?? [])],
-      );
+      hiddenOriginalSubtypesByDefinitionId.set(definitionId, [
+        ...(definition.subtypes ?? []),
+      ]);
     }
-    CARD_DEFINITIONS_BY_ID[definitionId] = {
+    TEST_CARD_DEFINITIONS_BY_ID[definitionId] = {
       ...definition,
       subtypes: [...new Set([...(definition.subtypes ?? []), "hidden"])],
     };
@@ -274,8 +293,9 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   });
 
   it("lets Corp tag-trash redacted hidden-resource slots and reveals only in the heap", () => {
-    const { state: installed, hiddenResourceId } =
-      installHiddenResource("hidden-resource-trash");
+    const { state: installed, hiddenResourceId } = installHiddenResource(
+      "hidden-resource-trash",
+    );
     let state = installed;
     state.activeSide = "corp";
     state.phase = "corp_action_phase";
@@ -442,7 +462,8 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       option.id.includes("avoid_tag"),
     )?.id;
     expect(optionId).toBeDefined();
-    if (!optionId) throw new Error("Missing hidden resource activation option.");
+    if (!optionId)
+      throw new Error("Missing hidden resource activation option.");
     const resolveAction = mustAction(
       state,
       "runner",
@@ -589,17 +610,16 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       publicRevealDefinitionId: hiddenActivatedAbilityDefinitionId,
     });
 
-    const replay = replayEvents(
-      initial,
-      state.eventLog.slice(replayStart),
-    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
   it("keeps hidden-resource fixture support out of Proteus card promotion", () => {
     ensureHiddenResourceHarnessCard();
-    expect(CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId]).toMatchObject({
+    expect(
+      TEST_CARD_DEFINITIONS_BY_ID[hiddenResourceDefinitionId],
+    ).toMatchObject({
       type: "resource",
       subtypes: ["hidden"],
       mechanics: expect.arrayContaining([
@@ -608,9 +628,10 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
       ]),
     });
     expect(
-      Object.values(CARD_DEFINITIONS_BY_ID).filter((card) =>
-        card.id.startsWith("onr_proteus_") &&
-        card.mechanics.includes("hidden_runner_resource_foundation"),
+      Object.values(TEST_CARD_DEFINITIONS_BY_ID).filter(
+        (card) =>
+          card.id.startsWith("onr_proteus_") &&
+          card.mechanics.includes("hidden_runner_resource_foundation"),
       ),
     ).toHaveLength(0);
   });

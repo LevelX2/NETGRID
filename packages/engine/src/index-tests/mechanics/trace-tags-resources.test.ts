@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -199,6 +195,41 @@ import {
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
 
+const BROKER_DEFINITION_ID = "onr_v1_154_broker";
+
+function isBrokerCapabilityAction(
+  action: LegalAction,
+  brokerId: string,
+  capabilityKey: "store_credits" | "withdraw_credits",
+): boolean {
+  return (
+    action.type === "activated_card_ability" &&
+    action.payload?.cardId === brokerId &&
+    action.payload?.cardImplementationCapabilityBindingKind ===
+      "card_spec_capability_key" &&
+    action.payload?.cardImplementationAbilityKey === capabilityKey &&
+    action.payload?.cardImplementationAbilityId ===
+      `${BROKER_DEFINITION_ID}:${capabilityKey}` &&
+    action.payload?.cardImplementationAbilityIndex === undefined &&
+    action.payload?.cardImplementationLifecycleIndex === undefined
+  );
+}
+
+function expectCanonicalBrokerCapability(
+  action: LegalAction,
+  brokerId: string,
+  capabilityKey: "store_credits" | "withdraw_credits",
+): void {
+  expect(action.payload).toMatchObject({
+    cardId: brokerId,
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    cardImplementationAbilityKey: capabilityKey,
+    cardImplementationAbilityId: `${BROKER_DEFINITION_ID}:${capabilityKey}`,
+  });
+  expect(action.payload).not.toHaveProperty("cardImplementationAbilityIndex");
+  expect(action.payload).not.toHaveProperty("cardImplementationLifecycleIndex");
+}
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -338,18 +369,18 @@ describe("MVP 0.95 Resources and tag interaction", () => {
 
     expect(actionTypes).not.toContain("resolve_choice");
     expect(actionTypes).not.toContain("trigger_ability");
-    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
-      "trace",
-    );
-    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
-      "hosting",
-    );
-    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
-      "virus",
-    );
-    expect(CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain(
-      "prevention",
-    );
+    expect(
+      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
+    ).not.toContain("trace");
+    expect(
+      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
+    ).not.toContain("hosting");
+    expect(
+      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
+    ).not.toContain("virus");
+    expect(
+      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
+    ).not.toContain("prevention");
   });
 });
 
@@ -367,8 +398,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
     ).toBe("playable_mvp");
   });
 
@@ -409,7 +439,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_221_asp"]?.mechanics).toEqual(
-      expect.arrayContaining(["trace", "link", "bid_amount", "end_the_run", "run_lock"]),
+      expect.arrayContaining([
+        "trace",
+        "link",
+        "bid_amount",
+        "end_the_run",
+        "run_lock",
+      ]),
     );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.kind).toBe("bid_amount");
@@ -495,7 +531,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   });
 
   it("uses Hacker Tracker counters in traces and applies Fang 2.0's pay-to-run lock", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("v1914-fang-htc-lock"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-fang-htc-lock"),
+    );
     const hackerTrackerId = putCorpRootInRemote(
       state,
       "onr_v1_325_hacker-tracker-central",
@@ -518,11 +556,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       ice: [],
       root: [],
     });
-    const fangId = putCorpIceOnServer(
-      state,
-      "remote_1",
-      "onr_v1_241_fang-2-0",
-    );
+    const fangId = putCorpIceOnServer(state, "remote_1", "onr_v1_241_fang-2-0");
     state.corp.credits = 10;
     state.runner.credits = 10;
     const initial = structuredClone(state);
@@ -574,12 +608,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
-        action.payload?.cardId === fangId,
+        action.type === "rez_ice" && action.payload?.cardId === fangId,
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(
-      getLegalActions(state, "corp").some((action) => action.type === "rez_ice"),
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "rez_ice",
+      ),
     ).toBe(false);
     state = applyChoice(state, "corp", "bid_6");
     expect(state.corp.credits).toBe(0);
@@ -792,13 +827,8 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     expect(brokerId).toBeDefined();
     if (!brokerId) throw new Error("Broker was not installed.");
-    resourceState = apply(
-      resourceState,
-      "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 0 &&
-        action.payload?.cardId === brokerId,
+    resourceState = apply(resourceState, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "store_credits"),
     );
     expect(cardCounterAmount(resourceState, brokerId, "bit")).toBe(3);
     resourceState.runner.tags = 1;
@@ -849,27 +879,24 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       (action) => action.payload?.cardId === brokerId,
     );
     expect(
-      brokerActions.some(
-        (action) =>
-          action.type === "activated_card_ability" &&
-          action.payload?.cardImplementationAbilityIndex === 0,
+      brokerActions.some((action) =>
+        isBrokerCapabilityAction(action, brokerId, "store_credits"),
       ),
     ).toBe(true);
     expect(
-      brokerActions.some(
-        (action) =>
-          action.type === "activated_card_ability" &&
-          action.payload?.cardImplementationAbilityIndex === 1,
+      brokerActions.some((action) =>
+        isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
       ),
     ).toBe(false);
 
+    const initialLoad = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "store_credits"),
+    );
+    expectCanonicalBrokerCapability(initialLoad, brokerId, "store_credits");
     state = apply(
       state,
       "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 0 &&
-        action.payload?.cardId === brokerId,
+      (action) => action.actionId === initialLoad.actionId,
     );
     expect(cardCounterAmount(state, brokerId, "bit")).toBe(3);
     expect(
@@ -892,53 +919,36 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(
       brokerActions.some(
         (action) =>
-          action.type === "activated_card_ability" &&
-          (action.payload?.cardImplementationAbilityIndex === 0 ||
-            action.payload?.cardImplementationAbilityIndex === 1),
+          isBrokerCapabilityAction(action, brokerId, "store_credits") ||
+          isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
       ),
     ).toBe(false);
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(
-      state,
-      "corp",
-      (action) => action.type === "mandatory_draw",
-    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = toRunnerTurnFromCorpMain(state);
     brokerActions = getLegalActions(state, "runner").filter(
       (action) => action.payload?.cardId === brokerId,
     );
     expect(
-      brokerActions.some(
-        (action) =>
-          action.type === "activated_card_ability" &&
-          action.payload?.cardImplementationAbilityIndex === 0,
+      brokerActions.some((action) =>
+        isBrokerCapabilityAction(action, brokerId, "store_credits"),
       ),
     ).toBe(true);
     expect(
-      brokerActions.some(
-        (action) =>
-          action.type === "activated_card_ability" &&
-          action.payload?.cardImplementationAbilityIndex === 1,
+      brokerActions.some((action) =>
+        isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
       ),
     ).toBe(true);
 
-    const loadAgain = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 0 &&
-        action.payload?.cardId === brokerId,
+    const loadAgain = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "store_credits"),
     );
-    const staleTakeAll = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 1 &&
-        action.payload?.cardId === brokerId,
+    expectCanonicalBrokerCapability(loadAgain, brokerId, "store_credits");
+    const staleTakeAll = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
     );
+    expectCanonicalBrokerCapability(staleTakeAll, brokerId, "withdraw_credits");
     const creditsBeforeSecondLoad = state.runner.credits;
     state = apply(
       state,
@@ -963,27 +973,23 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(
       brokerActions.some(
         (action) =>
-          action.type === "activated_card_ability" &&
-          (action.payload?.cardImplementationAbilityIndex === 0 ||
-            action.payload?.cardImplementationAbilityIndex === 1),
+          isBrokerCapabilityAction(action, brokerId, "store_credits") ||
+          isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
       ),
     ).toBe(false);
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(
-      state,
-      "corp",
-      (action) => action.type === "mandatory_draw",
-    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = toRunnerTurnFromCorpMain(state);
     const creditsBeforeTake = state.runner.credits;
+    const take = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
+    );
+    expectCanonicalBrokerCapability(take, brokerId, "withdraw_credits");
     state = apply(
       state,
       "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 1 &&
-        action.payload?.cardId === brokerId,
+      (action) => action.actionId === take.actionId,
     );
     expect(state.runner.credits).toBe(creditsBeforeTake + 6);
     expect(cardCounterAmount(state, brokerId, "bit")).toBe(0);
@@ -993,9 +999,8 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(
       brokerActions.some(
         (action) =>
-          action.type === "activated_card_ability" &&
-          (action.payload?.cardImplementationAbilityIndex === 0 ||
-            action.payload?.cardImplementationAbilityIndex === 1),
+          isBrokerCapabilityAction(action, brokerId, "store_credits") ||
+          isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
       ),
     ).toBe(false);
   });
@@ -1005,10 +1010,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       MECHANIC_SMOKE_GAMES.traceTags("v1914-rig-exit-clears-counters"),
     );
     state.runner.credits = 12;
-    const brokerId = installRunnerResourceForTest(
-      state,
-      "onr_v1_154_broker",
-    );
+    const brokerId = installRunnerResourceForTest(state, "onr_v1_154_broker");
     setCardCounterForTest(state, brokerId, "power", 3);
     state.specialZoneHarness = {
       actor: "runner",
@@ -1212,9 +1214,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(rdOnly.runner.heap).toContain(rdOnlyInterfaceId);
     expect(rdOnly.runner.rig.hardware).toContain(rdOnlyCyberneticsId);
 
-    let state = makeState(
-      "v1914-power-grid-overload-rd-interface-choice",
-    );
+    let state = makeState("v1914-power-grid-overload-rd-interface-choice");
     const rdInterfaceId = installRunnerHardwareForTest(
       state,
       "onr_v1_139_r-and-d-interface",
@@ -1240,7 +1240,8 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       .filter(
         (action) =>
           action.type === "play_operation" &&
-          sourceDefinition(state, action) === "onr_v1_299_power-grid-overload" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_299_power-grid-overload" &&
           action.payload?.cardId === operationId,
       )
       .sort(
@@ -1284,9 +1285,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         variableCostKind: "printed_play_cost",
       },
     ]);
-    expect(new Set(powerGridActions.map((action) => action.actionId)).size).toBe(
-      2,
-    );
+    expect(
+      new Set(powerGridActions.map((action) => action.actionId)).size,
+    ).toBe(2);
 
     const trashTwo = powerGridActions[1]!;
     const staleHash = hashState(state);
@@ -1419,8 +1420,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
         (card) =>
-          card.definitionId ===
-          "onr_v1_120_armadillo-armored-road-home",
+          card.definitionId === "onr_v1_120_armadillo-armored-road-home",
       )?.counters?.bit,
     ).toBe(2);
 
@@ -1496,8 +1496,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(cardCounterAmount(state, drifterId, "bit")).toBe(2);
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
-        (card) =>
-          card.definitionId === "onr_v1_126_drifter-mobile-environment",
+        (card) => card.definitionId === "onr_v1_126_drifter-mobile-environment",
       )?.counters?.bit,
     ).toBe(2);
 

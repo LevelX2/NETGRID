@@ -1,7 +1,9 @@
 import type { Side } from "@netgrid/shared";
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import strategyGoalsData from "../../../data/ai/strategy-goals-v1.json";
-import { RUNTIME_CARDS } from "./ai-hints";
+import {
+  AI_HINTS_BY_CARD as EFFECTIVE_AI_HINTS_BY_CARD,
+  RUNTIME_CARDS,
+} from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
   buildRunnerDeckEngineDoctrine,
@@ -220,7 +222,7 @@ export type AiDeckStrategyProfile = {
   source: {
     mode: "ai_internal_strategy_profile";
     strategyGoals: "data/ai/strategy-goals-v1.json";
-    activeHints: "data/ai/ai-card-hints-active.json";
+    activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1";
     plannerEffect: "strategic_intent_input";
   };
 };
@@ -387,9 +389,7 @@ const STRATEGY_GOALS = (
 const STRATEGY_GOALS_BY_ID = new Map(
   STRATEGY_GOALS.map((goal) => [goal.strategyId, goal]),
 );
-const AI_HINTS_BY_CARD = new Map(
-  (activeAiHintsData.cards as AiCardHint[]).map((hint) => [hint.cardId, hint]),
-);
+const AI_HINTS_BY_CARD = new Map(EFFECTIVE_AI_HINTS_BY_CARD);
 const ANCHOR_STRATEGIC_ROLES = new Set([
   "engine_anchor",
   "payoff_anchor",
@@ -531,7 +531,7 @@ export function buildDeckStrategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       plannerEffect: "strategic_intent_input",
     },
   });
@@ -560,7 +560,7 @@ export function buildNeutralDeckStrategyProfile(
     source: {
       mode: "ai_internal_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       plannerEffect: "strategic_intent_input",
     },
   };

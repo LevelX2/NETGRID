@@ -1,5 +1,9 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { RUNTIME_CARDS } from "../ai-hints";
 import { actionCreditCost } from "./action-cost";
 import { rolesMatch } from "./role-match";

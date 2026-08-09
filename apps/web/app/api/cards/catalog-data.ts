@@ -8,66 +8,22 @@ import {
   type CatalogSide,
   type CatalogStatusKey,
 } from "@netgrid/catalog";
-import activeAiHintsData from "../../../../../data/ai/ai-card-hints-active.json";
+import {
+  catalogAiHintReadModelForCardId,
+  catalogAiHintSummaryForCardId,
+  type AiCardHint as CatalogAiCardHint,
+  type CatalogAiHintReadModel,
+} from "@netgrid/ai/catalog";
 import { createRuntimeCardPool } from "../card-pool-runtime";
-
-type CatalogAiHint = {
-  cardId: string;
-  roles: string[];
-  planRoles: string[];
-  requiredMechanics: string[];
-  valueHints: Record<string, number>;
-  riskTags: string[];
-  aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
-  scenarioRefs: string[];
-};
-
-type CatalogAiCardHint = CatalogAiHint & {
-  effects?: Array<Record<string, unknown>>;
-  conditions?: Array<Record<string, unknown>>;
-  costProfile?: Record<string, unknown>;
-  breakerProfile?: Record<string, unknown>;
-  remoteRole?: Record<string, unknown>;
-  targetProfiles?: Array<Record<string, unknown>>;
-  lineSupport?: string[];
-  strategicRole?: string[];
-  functionSignals?: string[];
-  tacticSignals?: string[];
-  strategyAnchors?: string[];
-  strategySupportPairs?: CatalogStrategySupportPair[];
-  quality?: Record<string, unknown>;
-  descriptorGaps?: Array<Record<string, unknown>>;
-  manualNotes?: string[];
-  strategicNotes?: string[];
-};
-
-type CatalogStrategySupportPair = {
-  strategyId: string;
-  role?: string;
-  roleDetail?: string;
-  confidence?: string;
-  evidence?: string[];
-  sourceField?: string;
-  sourceValue?: string;
-  triageCategory?: string;
-  rationale?: string;
-};
 
 type CatalogAiInspectorListSummary = {
   available: boolean;
-  aiSupportStatus: CatalogAiHint["aiSupportStatus"];
+  aiSupportStatus: CatalogAiCardHint["aiSupportStatus"];
   hintFound: boolean;
   mechanicalFactsFound: boolean;
   hasClassifications: boolean;
   hasWarnings: boolean;
 };
-
-const AI_HINTS_BY_CARD_ID = new Map(
-  (activeAiHintsData.cards as CatalogAiCardHint[]).map((hint) => [
-    hint.cardId,
-    hint,
-  ]),
-);
 
 export function catalogListResponse(searchParams: URLSearchParams) {
   const { snapshot, snapshotHash, catalogIndex, validation } =
@@ -112,13 +68,14 @@ export function catalogDetailResponse(catalogCardId: string) {
       "catalog_card_not_found",
       "Karte wurde im Katalog nicht gefunden.",
     );
+  const aiHintReadModel = catalogAiHintReadModelForCardId(card.catalogCardId);
   return safeCatalogPayload({
     snapshotId: snapshot.snapshotId,
     snapshotHash,
     card: {
       ...card,
-      aiHints: AI_HINTS_BY_CARD_ID.get(card.catalogCardId) ?? null,
-      aiInspector: catalogAiInspectorForCard(card.catalogCardId),
+      aiHints: aiHintReadModel?.hint ?? null,
+      aiInspector: catalogAiInspectorForReadModel(aiHintReadModel),
     },
   });
 }
@@ -196,29 +153,24 @@ function catalogSummaryWithAiInspector<T extends { catalogCardId: string }>(
 function catalogAiInspectorSummaryForCard(
   catalogCardId: string,
 ): CatalogAiInspectorListSummary | null {
-  const cardHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
-  if (!cardHint) return null;
+  const summary = catalogAiHintSummaryForCardId(catalogCardId);
+  if (!summary) return null;
 
   return {
     available: true,
-    aiSupportStatus: cardHint.aiSupportStatus,
+    aiSupportStatus: summary.aiSupportStatus,
     hintFound: true,
-    mechanicalFactsFound: hasMechanicalFacts(cardHint),
-    hasClassifications: Boolean(
-      cardHint.functionSignals?.length ||
-      cardHint.strategyAnchors?.length ||
-      cardHint.strategySupportPairs?.length ||
-      cardHint.lineSupport?.length,
-    ),
-    hasWarnings: Boolean(
-      cardHint.quality?.needsHumanReview || cardHint.descriptorGaps?.length,
-    ),
+    mechanicalFactsFound: summary.mechanicalFactsFound,
+    hasClassifications: summary.hasClassifications,
+    hasWarnings: summary.hasWarnings,
   };
 }
 
-function catalogAiInspectorForCard(catalogCardId: string) {
-  const cardHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
-  if (!cardHint) return null;
+function catalogAiInspectorForReadModel(
+  readModel: CatalogAiHintReadModel | undefined,
+) {
+  if (!readModel) return null;
+  const cardHint = readModel.hint;
   const needsHumanReview = cardHint.quality?.needsHumanReview === true;
   const strategySupportPairs = (cardHint.strategySupportPairs ?? []).map(
     (pair) => ({
@@ -230,11 +182,8 @@ function catalogAiInspectorForCard(catalogCardId: string) {
   );
 
   return {
-    schemaVersion: "ai-card-hints-active-v1",
-    source: {
-      activeHintsPath: "data/ai/ai-card-hints-active.json",
-      mode: "single static AI hint source",
-    },
+    schemaVersion: "catalog-ai-hint-inspector-v1",
+    source: readModel.provenance,
     supportStatus: {
       aiSupportStatus: cardHint.aiSupportStatus,
       hintFound: true,

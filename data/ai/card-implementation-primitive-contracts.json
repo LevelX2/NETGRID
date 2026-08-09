@@ -29,7 +29,7 @@
   },
   {
     "cardDefinitionId": "onr_v1_197_data-fort-reclamation",
-    "abilityKey": "hq_to_new_remote_install_rez:0",
+    "abilityKey": "hq_to_new_remote_install_rez",
     "primitiveKind": "score_install_hq_cards_into_new_remote_then_rez",
     "effectKind": "install_rez_sequence",
     "timing": "score_window",

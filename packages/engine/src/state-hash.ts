@@ -1,13 +1,42 @@
 import type { GameState, StateHash } from "@netgrid/shared";
+import { CS06_CARD_DEFINITION_IDS } from "@netgrid/cards/engine";
 import { createCurrentCardRegistryRulesContext } from "./card-registry-rules-context";
 
 export function hashStateSnapshot(state: GameState): StateHash {
   const rulesContext = createCurrentCardRegistryRulesContext({
     cardPoolSnapshotId: cardPoolSnapshotIdentityForState(state),
-    // CS06 replaces the empty CardSpec migration boundary with resolved IDs.
-    matchCardPoolDefinitionIds: [],
+    matchCardPoolDefinitionIds: matchCardSpecDefinitionIdsForState(state),
   });
   return hashStateSnapshotWithRulesContext(state, rulesContext.fingerprint);
+}
+
+const cs06CardDefinitionIds = new Set<string>(CS06_CARD_DEFINITION_IDS);
+
+export class StateHashCardPoolError extends Error {
+  readonly name = "StateHashCardPoolError";
+  readonly code = "missing_card_instances" as const;
+
+  constructor() {
+    super(
+      "GameState.cardInstances must be present to derive the rules context",
+    );
+  }
+}
+
+export function matchCardSpecDefinitionIdsForState(state: GameState): string[] {
+  if (
+    state.cardInstances === null ||
+    typeof state.cardInstances !== "object" ||
+    Array.isArray(state.cardInstances)
+  )
+    throw new StateHashCardPoolError();
+  return [
+    ...new Set(
+      Object.values(state.cardInstances)
+        .map((card) => card.definitionId)
+        .filter((definitionId) => cs06CardDefinitionIds.has(definitionId)),
+    ),
+  ].sort();
 }
 
 export function hashStateSnapshotWithRulesContext(

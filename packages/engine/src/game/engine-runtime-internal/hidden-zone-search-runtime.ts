@@ -111,7 +111,6 @@ export function createHiddenZoneSearchRuntime(
         randomStackProgramInstallSourceId: deps.MYSTERY_BOX_ID,
         stackProgramFreeInstallSourceId: deps.SELF_MODIFYING_CODE_ID,
         stackSearchGripSourceId: deps.PAID_STACK_SEARCH_RESOURCE_SOURCE,
-        temporaryProgramInstallSourceId: deps.SNEAK_PREVIEW_ID,
       },
       cards: {
         definitionFor: (cardId) => deps.definitionFor(state, cardId),
@@ -193,7 +192,6 @@ export function createHiddenZoneSearchRuntime(
         randomStackProgramInstallSourceId: deps.MYSTERY_BOX_ID,
         stackProgramFreeInstallSourceId: deps.SELF_MODIFYING_CODE_ID,
         stackSearchGripSourceId: deps.PAID_STACK_SEARCH_RESOURCE_SOURCE,
-        temporaryProgramInstallSourceId: deps.SNEAK_PREVIEW_ID,
       },
       cards: {
         definitionFor: (cardId: CardInstanceId) =>

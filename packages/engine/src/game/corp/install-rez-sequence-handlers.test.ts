@@ -22,7 +22,12 @@ import {
   type CorpInstallRezSequenceHandlerHost,
 } from "./install-rez-sequence-handlers";
 
+const DATA_FORT_RECLAMATION_DEFINITION_ID =
+  "onr_v1_197_data-fort-reclamation" as CardDefinitionId;
+const DATA_FORT_RECLAMATION_CAPABILITY_KEY = "hq_to_new_remote_install_rez";
+
 const DATA_FORT_SEQUENCE = {
+  capabilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
   kind: "score_install_hq_cards_into_new_remote_then_rez",
   sourceZone: "hq",
   targetServer: "new_remote",
@@ -88,8 +93,7 @@ function selectCardsChoice(
     source.includes("score_install_hq_cards_into_new_remote_then_rez")
       ? {
           sourceCardInstanceId: "data_fort_agenda",
-          sourceCardDefinitionId:
-            "score_install_hq_cards_into_new_remote_then_rez",
+          sourceCardDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
         }
       : {}),
     prompt: "Choice",
@@ -125,7 +129,7 @@ function makeHost(
 ): CorpInstallRezSequenceHandlerHost {
   const definitions: Record<string, CardDefinition> = {
     data_fort_agenda: definition(
-      "score_install_hq_cards_into_new_remote_then_rez",
+      DATA_FORT_RECLAMATION_DEFINITION_ID,
       "agenda",
       "Data Fort Reclamation",
     ),
@@ -454,6 +458,21 @@ function zoneFor(
   return { side: "corp", zone: "hq" };
 }
 
+function expectCanonicalDataFortPrimitiveIdentity(payload: unknown): void {
+  expect(payload).toMatchObject({
+    cardImplementationAbilityId:
+      "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+    cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    sourceDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
+  });
+  expect(payload).not.toHaveProperty("cardImplementationAbilityIndex");
+  expect(payload).not.toHaveProperty("cardImplementationLifecycleIndex");
+  expect(JSON.stringify(payload)).not.toContain(
+    "hq_to_new_remote_install_rez:0",
+  );
+}
+
 describe("corp install rez sequence handlers", () => {
   it("starts Data Fort Reclamation with stable HQ install candidates", () => {
     const host = makeHost({
@@ -473,13 +492,14 @@ describe("corp install rez sequence handlers", () => {
     ).toEqual(["asset_1", "ice_1"]);
     expect(host.legalAction.payload).toMatchObject({
       cardImplementationAbilityId:
-        "score_install_hq_cards_into_new_remote_then_rez:hq_to_new_remote_install_rez:0",
-      cardImplementationAbilityKey: "hq_to_new_remote_install_rez:0",
+        "onr_v1_197_data-fort-reclamation:hq_to_new_remote_install_rez",
+      cardImplementationAbilityKey: DATA_FORT_RECLAMATION_CAPABILITY_KEY,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind:
         "score_install_hq_cards_into_new_remote_then_rez",
       cardImplementationEffectKind: "install_rez_sequence",
       sourceCardId: "data_fort_agenda",
-      sourceDefinitionId: "score_install_hq_cards_into_new_remote_then_rez",
+      sourceDefinitionId: DATA_FORT_RECLAMATION_DEFINITION_ID,
       sourceAgendaId: "data_fort_agenda",
       cardImplementationSourceZone: "hq",
       cardImplementationTargetServer: "new_remote",
@@ -490,6 +510,7 @@ describe("corp install rez sequence handlers", () => {
       hqToNewRemoteInstallRezCandidateCount: 2,
       hqToNewRemoteInstallRezMaxSelections: 2,
     });
+    expectCanonicalDataFortPrimitiveIdentity(host.legalAction.payload);
   });
 
   it("installs and offers to rez each selected Data Fort Reclamation card in selected order", () => {
@@ -508,6 +529,7 @@ describe("corp install rez sequence handlers", () => {
     });
 
     const firstResult = handleCorpInstallRezSequenceChoice(host);
+    expectCanonicalDataFortPrimitiveIdentity(firstResult.resolvedPayload);
 
     expect(firstResult.handled).toBe(true);
     expect(firstResult.selectedCardIds).toEqual(["ice_1", "asset_1"]);
@@ -549,6 +571,7 @@ describe("corp install rez sequence handlers", () => {
 
     host.playerAction = playerAction(["card_ice_1"]);
     const secondResult = handleCorpInstallRezSequenceChoice(host);
+    expectCanonicalDataFortPrimitiveIdentity(secondResult.resolvedPayload);
 
     expect(secondResult.rezzedCardIds).toEqual(["ice_1"]);
     expect(secondResult.installedCardIds).toEqual(["asset_1"]);

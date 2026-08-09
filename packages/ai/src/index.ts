@@ -1,6 +1,7 @@
 // Public package facade. Keep new AI behavior in focused runtime, decision,
 // action, access, diagnostics, reports or simulation modules, then re-export
 // only intentional public contracts here.
+export type { AiCardHint } from "./ai-hints";
 export {
   ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION,
   ACTION_SEMANTIC_COVERAGE_GROUPS,

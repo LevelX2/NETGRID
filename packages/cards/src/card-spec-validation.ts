@@ -361,6 +361,39 @@ export function assertCardSpecContract(spec: CardSpec): void {
     characteristics.strength,
     "$cardSpec.engine.characteristics.strength",
   );
+  assertCharacteristicOwnership(identity.cardType, characteristics, numeric);
+  if (engine.variableRez !== undefined) {
+    const variableRez = closedObject(
+      engine.variableRez,
+      new Set([
+        "capabilityKey",
+        "abilityKey",
+        "addressability",
+        "kind",
+        "additionalCostPerValue",
+        "minValue",
+        "maxValue",
+        "visibility",
+      ]),
+      "$cardSpec.engine.variableRez",
+    );
+    if (variableRez.kind === "x_strength") {
+      const strength = closedObject(
+        characteristics.strength,
+        new Set(["kind", "minimumStrength", "maximumStrength"]),
+        "$cardSpec.engine.characteristics.strength",
+      );
+      if (
+        strength.kind !== "paid_x" ||
+        strength.minimumStrength !== variableRez.minValue ||
+        strength.maximumStrength !== variableRez.maxValue
+      )
+        invalid(
+          "$cardSpec.engine.variableRez",
+          "x_strength bounds must match paid_x strength bounds",
+        );
+    }
+  }
   if (engine.regionBaseline !== undefined) {
     const region = closedObject(
       engine.regionBaseline,
@@ -431,6 +464,70 @@ export function assertCardSpecContract(spec: CardSpec): void {
     },
   );
   assertPublication(root.publication, "$cardSpec.publication");
+}
+
+function assertCharacteristicOwnership(
+  cardType: unknown,
+  characteristics: Record<string, unknown>,
+  numeric: Record<string, unknown>,
+): void {
+  const type = requiredString(cardType, "$cardSpec.identity.cardType");
+  const numericPath = "$cardSpec.engine.characteristics.numeric";
+  const requireNumber = (key: string): void => {
+    if (typeof numeric[key] !== "number")
+      invalid(`${numericPath}.${key}`, `${type} cards require this value`);
+  };
+  const requireNull = (key: string): void => {
+    if (numeric[key] !== null)
+      invalid(
+        `${numericPath}.${key}`,
+        `${type} cards must not declare this value`,
+      );
+  };
+  const allNumeric = [...NUMERIC_KEYS];
+  const requiredNumeric: Record<string, readonly string[]> = {
+    identity: [],
+    event: [],
+    operation: [],
+    program: ["installCost", "memoryCost"],
+    hardware: ["installCost"],
+    resource: ["installCost"],
+    agenda: ["advancementRequirement", "agendaPoints"],
+    asset: ["rezCost", "trashCost"],
+    upgrade: ["rezCost", "trashCost"],
+    ice: ["rezCost"],
+  };
+  const required = requiredNumeric[type];
+  if (required === undefined)
+    invalid("$cardSpec.identity.cardType", `unknown card type ${type}`);
+  for (const key of allNumeric)
+    if (required.includes(key)) requireNumber(key);
+    else requireNull(key);
+
+  const played = type === "event" || type === "operation";
+  if (played !== (characteristics.playCost !== null))
+    invalid(
+      "$cardSpec.engine.characteristics.playCost",
+      played
+        ? `${type} cards require a play cost`
+        : `${type} cards must not declare a play cost`,
+    );
+
+  const strength = characteristics.strength as Record<string, unknown>;
+  const strengthRequired =
+    type === "ice" ||
+    (type === "program" &&
+      (characteristics.subtypes as readonly unknown[]).includes("icebreaker"));
+  if (strengthRequired && strength.kind === "not_applicable")
+    invalid(
+      "$cardSpec.engine.characteristics.strength",
+      `${type} ice capabilities require fixed or variable strength`,
+    );
+  if (!strengthRequired && strength.kind !== "not_applicable")
+    invalid(
+      "$cardSpec.engine.characteristics.strength",
+      `${type} cards must not declare strength`,
+    );
 }
 
 export function assertSetSpecContract(spec: unknown): asserts spec is SetSpec {
@@ -768,10 +865,12 @@ function assertResolvedStrength(value: unknown, path: string): void {
       `${path}.maximumStrength`,
     );
     if (
-      record.minimumStrength === undefined ||
-      record.maximumStrength === undefined
+      typeof record.minimumStrength !== "number" ||
+      typeof record.maximumStrength !== "number"
     )
       invalid(path, "paid_x strength requires minimum and maximum");
+    if (record.maximumStrength < record.minimumStrength)
+      invalid(path, "paid_x maximumStrength must not be below minimumStrength");
     return;
   }
   if (record.kind !== "random_die")

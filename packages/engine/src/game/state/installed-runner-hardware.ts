@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type CardInstanceId,
-  type GameState,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { type CardInstanceId, type GameState } from "@netgrid/shared";
 
 /**
  * Returns the exact, public installed Runner-hardware target set for effects

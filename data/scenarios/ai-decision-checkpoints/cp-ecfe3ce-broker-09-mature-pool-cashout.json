@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 318,
-    "stateHash": "fnv1a:665e84eb",
+    "stateHash": "fnv1a:126571cb",
     "testOnlyGameState": {
       "matchId": "match_ecfe3ce373a56823",
       "baseline": {
@@ -13430,7 +13430,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.1"
+        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits"
       },
       {
         "actionId": "runner.trigger_ability"

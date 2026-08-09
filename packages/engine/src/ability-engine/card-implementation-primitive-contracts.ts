@@ -1,5 +1,6 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import type { CardImplementationDefinition } from "../card-implementations/types";
+import { resolveCardImplementationPrimitiveIdentity } from "./card-implementation-primitives";
 
 export type CardImplementationPrimitiveContractRecord = {
   cardDefinitionId: CardDefinitionId;
@@ -62,7 +63,17 @@ export function primitiveContractRecords(
     ) {
       records.push({
         cardDefinitionId: implementation.cardDefinitionId,
-        abilityKey: scoredAgenda.abilityKey ?? "hq_to_new_remote_install_rez:0",
+        abilityKey: resolveCardImplementationPrimitiveIdentity({
+          sourceDefinitionId: implementation.cardDefinitionId,
+          primitiveKind: scoredAgenda.kind,
+          effectKind: "install_rez_sequence",
+          abilityKey: scoredAgenda.abilityKey,
+          capabilityKey:
+            "capabilityKey" in scoredAgenda &&
+            typeof scoredAgenda.capabilityKey === "string"
+              ? scoredAgenda.capabilityKey
+              : undefined,
+        }).abilityKey,
         primitiveKind: scoredAgenda.kind,
         effectKind: "install_rez_sequence",
         timing: "score_window",

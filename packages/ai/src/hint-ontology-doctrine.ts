@@ -1,5 +1,5 @@
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import type { Side } from "@netgrid/shared";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 import {
   type AiHintBreakerProfile,
   type AiHintCondition,
@@ -124,10 +124,7 @@ type AiHintWithOntology = AiHintOntologyExtension & {
 };
 
 const ACTIVE_HINT_ONTOLOGY_BY_CARD = new Map(
-  (activeAiHintsData.cards as AiHintWithOntology[]).map((hint) => [
-    hint.cardId,
-    hint,
-  ]),
+  [...AI_HINTS_BY_CARD.values()].map((hint) => [hint.cardId, hint]),
 );
 
 export function buildAiDeckOntologySummary(

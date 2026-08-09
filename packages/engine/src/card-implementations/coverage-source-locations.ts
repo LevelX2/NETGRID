@@ -46,8 +46,6 @@ export const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/paris-city-grid.ts",
   "onr_v1_367_rio-de-janeiro-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/rio-de-janeiro-city-grid.ts",
-  "onr_v1_368_roving-submarine":
-    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/roving-submarine.ts",
   "onr_v1_371_tokyo-chiba-infighting":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tokyo-chiba-infighting.ts",
   "onr_v1_372_turbeau-delacroix":
@@ -284,8 +282,6 @@ export const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/zetatech-mem-chip.ts",
   "onr_v1_147_zz22-speed-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/zz22-speed-chip.ts",
-  onr_v1_154_broker:
-    "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
   "onr_v1_076_all-nighter":
@@ -328,8 +324,6 @@ export const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/playful-ai.ts",
   "onr_v1_105_priority-wreck":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/priority-wreck.ts",
-  "onr_v1_110_sneak-preview":
-    "packages/engine/src/card-implementations/onr-v1/runner/preps/sneak-preview.ts",
   "onr_v1_095_jack-n-joe":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
   "onr_v1_097_livewires-contacts":
@@ -592,8 +586,6 @@ export const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
   "onr_v1_314_corporate-negotiating-center":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/corporate-negotiating-center.ts",
-  "onr_v1_317_data-masons":
-    "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_318_department-of-truth-enhancement":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/department-of-truth-enhancement.ts",
   "onr_v1_320_encoder-inc":
@@ -634,8 +626,6 @@ export const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/trap.ts",
   "onr_v1_346_vacant-soulkiller":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/vacant-soulkiller.ts",
-  "onr_v1_348_virus-test-site":
-    "packages/engine/src/card-implementations/onr-v1/corp/assets/virus-test-site.ts",
   "onr_v1_350_antiquated-interface-routines":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
   "onr_v1_352_chester-mix":
@@ -760,8 +750,6 @@ export const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/armageddon.ts",
   "onr_proteus_079_big-frackin-gun":
     "packages/engine/src/card-implementations/proteus/runner/programs/big-frackin-gun.ts",
-  "onr_proteus_080_black-widow":
-    "packages/engine/src/card-implementations/proteus/runner/programs/black-widow.ts",
   "onr_proteus_081_boring-bit":
     "packages/engine/src/card-implementations/proteus/runner/programs/boring-bit.ts",
   onr_proteus_082_bulldozer:
@@ -782,8 +770,6 @@ export const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
   onr_proteus_091_lockjaw:
     "packages/engine/src/card-implementations/proteus/runner/programs/lockjaw.ts",
-  "onr_proteus_092_morphing-tool":
-    "packages/engine/src/card-implementations/proteus/runner/programs/morphing-tool.ts",
   onr_proteus_093_redecorator:
     "packages/engine/src/card-implementations/proteus/runner/programs/redecorator.ts",
   onr_proteus_094_scaldan:

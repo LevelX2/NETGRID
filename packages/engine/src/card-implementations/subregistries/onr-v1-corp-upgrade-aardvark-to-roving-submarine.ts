@@ -18,7 +18,6 @@ import { omniKismetPhDImplementation } from "../onr-v1/corp/upgrades/omni-kismet
 import { parisCityGridImplementation } from "../onr-v1/corp/upgrades/paris-city-grid";
 import { redHerringsImplementation } from "../onr-v1/corp/upgrades/red-herrings";
 import { rioDeJaneiroCityGridImplementation } from "../onr-v1/corp/upgrades/rio-de-janeiro-city-grid";
-import { rovingSubmarineImplementation } from "../onr-v1/corp/upgrades/roving-submarine";
 
 export const ONR_V1_CORP_UPGRADE_AARDVARK_TO_ROVING_SUBMARINE_IMPLEMENTATIONS =
   [
@@ -41,5 +40,4 @@ export const ONR_V1_CORP_UPGRADE_AARDVARK_TO_ROVING_SUBMARINE_IMPLEMENTATIONS =
     parisCityGridImplementation,
     redHerringsImplementation,
     rioDeJaneiroCityGridImplementation,
-    rovingSubmarineImplementation,
   ] as const satisfies readonly CardImplementationDefinition[];

@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CounterCreditUse,
@@ -431,8 +431,7 @@ function assessKnownRezzedIcePathInternal(
     if (
       !iceDefinitionId ||
       !ice.known ||
-      (ice.rezzed !== true &&
-        ice.authoritativePostRezRunProjection !== true)
+      (ice.rezzed !== true && ice.authoritativePostRezRunProjection !== true)
     )
       continue;
     const rigCardsForEncounter = rigCards.filter(

@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 /**
  * ARCH-7 Payment-/CostQuote-Helfer.
  * Keine State-Mutation, keine LegalAction-Erzeugung, keine Action-Ausführung.
@@ -19,7 +20,6 @@ import type {
   VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
 import {
-  CARD_DEFINITIONS_BY_ID,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_FORT_RUN_REZ_SUPPORT_KIND,

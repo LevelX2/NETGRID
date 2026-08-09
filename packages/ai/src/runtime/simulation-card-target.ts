@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardInstanceId,
   type GameState,
   type LegalAction,
@@ -18,7 +18,8 @@ export function cardTargetTypeForInstance(
   const definitionId = state.cardInstances[cardId]?.definitionId;
   if (!definitionId) return "unknown";
   const type =
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
+    RUNTIME_CARDS[definitionId]?.type;
   return progressionCardTargetType(type);
 }
 

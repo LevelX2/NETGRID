@@ -46,8 +46,16 @@ describe("AI hint quality gates", () => {
         "utf8",
       ),
     );
+    const generatedHints = JSON.parse(
+      fs.readFileSync(
+        path.join(repoRoot, "data/ai/cs06-ai-hints-generated.json"),
+        "utf8",
+      ),
+    );
     expect(report.errorCount).toBe(0);
-    expect(report.hintCount).toBe(activeHints.cards.length);
+    expect(report.hintCount).toBe(
+      activeHints.cards.length + generatedHints.cards.length,
+    );
     expect(report.benchmarkCoverage.totalUniqueCards).toBeGreaterThan(0);
     expect(report.benchmarkCoverage.missingHintCards).toEqual([]);
     expect(report.benchmarkCoverage.skippedDecks).toEqual([]);

@@ -26,11 +26,11 @@ import {
   quoteCorpRezCost,
   quoteRandomizedIceInstallSelection,
   quoteRandomizedTurnPlanSelection,
+  CARD_DEFINITIONS_BY_ID,
 } from "@netgrid/engine";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
-  CARD_DEFINITIONS_BY_ID,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -464,7 +464,10 @@ export type MultiplayerStorage = {
     matchId: string,
     filters?: StorageMaintenanceMatchAnalysisFilters,
   ): Promise<StorageMaintenanceMatchAnalysisBundle | undefined>;
-  maintenanceDecisionAnalysisSource?(matchId: string, decisionIndex: number): Promise<StorageMaintenanceDecisionAnalysisSource | undefined>;
+  maintenanceDecisionAnalysisSource?(
+    matchId: string,
+    decisionIndex: number,
+  ): Promise<StorageMaintenanceDecisionAnalysisSource | undefined>;
   maintenanceCleanupPreview?(
     filters: StorageMaintenanceCleanupFilters,
   ): Promise<StorageMaintenanceCleanupPreview>;
@@ -4318,33 +4321,94 @@ export class MultiplayerService {
     return this.storage.maintenanceMatchAnalysis?.(matchId, filters);
   }
 
-  async storageMaintenanceDecisionAnalysis(matchId: string, decisionIndex: number): Promise<Record<string, unknown> | undefined> {
-    const source = await this.storage.maintenanceDecisionAnalysisSource?.(matchId, decisionIndex);
+  async storageMaintenanceDecisionAnalysis(
+    matchId: string,
+    decisionIndex: number,
+  ): Promise<Record<string, unknown> | undefined> {
+    const source = await this.storage.maintenanceDecisionAnalysisSource?.(
+      matchId,
+      decisionIndex,
+    );
     if (!source) return undefined;
-    const diagnostics = { warnings: [] as string[], unavailableSections: [] as string[] };
+    const diagnostics = {
+      warnings: [] as string[],
+      unavailableSections: [] as string[],
+    };
     if (!source.snapshot) {
-      diagnostics.unavailableSections.push(source.snapshotIssue ?? "snapshot_missing", "historicalLegalActions", "historicalActorState");
-      return { schemaVersion: "netgrid-decision-analysis-context-v1", decision: source.trace, surroundingEvents: source.surroundingEvents, aiTrace: source.trace, provenance: { persisted: ["decisionTrace", "surroundingEvents"], reconstructed: [] }, diagnostics };
+      diagnostics.unavailableSections.push(
+        source.snapshotIssue ?? "snapshot_missing",
+        "historicalLegalActions",
+        "historicalActorState",
+      );
+      return {
+        schemaVersion: "netgrid-decision-analysis-context-v1",
+        decision: source.trace,
+        surroundingEvents: source.surroundingEvents,
+        aiTrace: source.trace,
+        provenance: {
+          persisted: ["decisionTrace", "surroundingEvents"],
+          reconstructed: [],
+        },
+        diagnostics,
+      };
     }
     const state = JSON.parse(source.snapshot.gameStateJson) as GameState;
-    if (state.stateVersion !== source.trace.stateVersion || hashState(state) !== source.snapshot.stateHash) {
-      diagnostics.unavailableSections.push("historical_state_not_reconstructable", "historicalLegalActions", "historicalActorState");
-      return { schemaVersion: "netgrid-decision-analysis-context-v1", decision: source.trace, surroundingEvents: source.surroundingEvents, aiTrace: source.trace, provenance: { persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"], reconstructed: [] }, diagnostics };
+    if (
+      state.stateVersion !== source.trace.stateVersion ||
+      hashState(state) !== source.snapshot.stateHash
+    ) {
+      diagnostics.unavailableSections.push(
+        "historical_state_not_reconstructable",
+        "historicalLegalActions",
+        "historicalActorState",
+      );
+      return {
+        schemaVersion: "netgrid-decision-analysis-context-v1",
+        decision: source.trace,
+        surroundingEvents: source.surroundingEvents,
+        aiTrace: source.trace,
+        provenance: {
+          persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"],
+          reconstructed: [],
+        },
+        diagnostics,
+      };
     }
     const playerView = getPlayerView(state, source.trace.side);
-    const { publicEvents: _events, legalActions: _actions, ...actorState } = playerView;
+    const {
+      publicEvents: _events,
+      legalActions: _actions,
+      ...actorState
+    } = playerView;
     const legalActions = getLegalActions(state, source.trace.side);
-    const reconstructedRezQuotes = source.trace.side === "corp"
-      ? legalActions.flatMap((action) => {
-          const cardId = action.type === "rez_ice" && typeof action.payload?.cardId === "string"
-            ? action.payload.cardId
-            : undefined;
-          return cardId ? [{ actionId: action.actionId, quote: quoteCorpRezCost(state, cardId as never) }] : [];
-        })
-      : [];
+    const reconstructedRezQuotes =
+      source.trace.side === "corp"
+        ? legalActions.flatMap((action) => {
+            const cardId =
+              action.type === "rez_ice" &&
+              typeof action.payload?.cardId === "string"
+                ? action.payload.cardId
+                : undefined;
+            return cardId
+              ? [
+                  {
+                    actionId: action.actionId,
+                    quote: quoteCorpRezCost(state, cardId as never),
+                  },
+                ]
+              : [];
+          })
+        : [];
     const runEvents = source.surroundingEvents.filter((event) => {
-      const type = typeof event.publicPayload.type === "string" ? event.publicPayload.type : "";
-      return type.includes("run") || type.includes("encounter") || type.includes("access");
+      const type =
+        typeof event.publicPayload.type === "string"
+          ? event.publicPayload.type
+          : "";
+      return (
+        type.includes("run") ||
+        type.includes("encounter") ||
+        type.includes("access")
+      );
     });
     return {
       schemaVersion: "netgrid-decision-analysis-context-v1",
@@ -4353,9 +4417,35 @@ export class MultiplayerService {
       legalActions,
       aiTrace: source.trace,
       surroundingEvents: source.surroundingEvents,
-      ...(runEvents.length > 0 ? { runContext: { selectedActionId: source.trace.selectedActionId, selectedActionType: source.trace.selectedActionType, events: runEvents } } : {}),
-      ...(reconstructedRezQuotes.length > 0 ? { engineAnalysis: { reconstructedRezQuotes } } : {}),
-      provenance: { persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"], reconstructed: [{ section: "actorStateAndLegalActions", note: "current engine on exact persisted state snapshot" }, ...(reconstructedRezQuotes.length > 0 ? [{ section: "corpRezQuotes", note: "current engine on exact persisted state snapshot" }] : [])] },
+      ...(runEvents.length > 0
+        ? {
+            runContext: {
+              selectedActionId: source.trace.selectedActionId,
+              selectedActionType: source.trace.selectedActionType,
+              events: runEvents,
+            },
+          }
+        : {}),
+      ...(reconstructedRezQuotes.length > 0
+        ? { engineAnalysis: { reconstructedRezQuotes } }
+        : {}),
+      provenance: {
+        persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"],
+        reconstructed: [
+          {
+            section: "actorStateAndLegalActions",
+            note: "current engine on exact persisted state snapshot",
+          },
+          ...(reconstructedRezQuotes.length > 0
+            ? [
+                {
+                  section: "corpRezQuotes",
+                  note: "current engine on exact persisted state snapshot",
+                },
+              ]
+            : []),
+        ],
+      },
       diagnostics,
     };
   }

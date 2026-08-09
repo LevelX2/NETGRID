@@ -330,11 +330,11 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
     snapshotId: "card-set-support-current",
     status: "active_card_set_support",
     createdAt: "2026-05-17T00:00:00.000+02:00",
-    sourceRegistryId: "card-set-support-current",
+    sourceRegistryId: "hybrid-card-set-support-current",
     copyrightNote:
-      "Aktive NETGRID-Karten- und Supportdaten werden aus data/cards/*-cards.json und data/manifests/*-card-support.json geladen. Kartentexte bleiben Anzeigeinformation und sind kein Regelparser.",
+      "Aktive NETGRID-Karten- und Supportdaten stammen aus dem gebundenen Hybrid-Readmodel: Legacy-Karten/Support aus data/cards und data/manifests, migrierte Karten/Support aus CardSpec-, SetSpec-, Registry- und Evidence-Projektionen. Kartentexte bleiben Anzeigeinformation und sind kein Regelparser.",
     normalization: {
-      algorithm: "card-set-support-v1",
+      algorithm: "card-set-support-hybrid-v1",
       sortOrder: ["setId", "cardId"],
       textPolicy: "display_only; card text is not parser input",
       assetPolicy: "no active artwork, frame, logo or card-back dependency",
@@ -425,9 +425,7 @@ function validateResolvedPlayCost(card: CatalogCard): string[] {
       !Number.isInteger(card.playCost.credits) ||
       card.playCost.credits < 0
     ) {
-      errors.push(
-        `Card ${card.catalogCardId} has an invalid fixed play cost.`,
-      );
+      errors.push(`Card ${card.catalogCardId} has an invalid fixed play cost.`);
     }
     if (card.numeric.cost !== card.playCost.credits) {
       errors.push(
@@ -466,10 +464,7 @@ function validateResolvedPlayCost(card: CatalogCard): string[] {
   return errors;
 }
 
-function hasExactKeys(
-  value: object,
-  expectedKeys: readonly string[],
-): boolean {
+function hasExactKeys(value: object, expectedKeys: readonly string[]): boolean {
   const expected = [...expectedKeys].sort();
   const actual = Object.keys(value).sort();
   return (

@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
 import { cardRolesForId } from "./runtime/card-role-lookup";
@@ -454,8 +455,7 @@ function evaluateKnownHqAccessPayoff(
     (card) => path.creditsAfterPath >= card.trashCost,
   );
   const currentlyProductiveTrashCards = affordableTrashCards.filter(
-    (card) =>
-      !recentRunnerDeclinedKnownHqTrash(input, card.definitionId),
+    (card) => !recentRunnerDeclinedKnownHqTrash(input, card.definitionId),
   );
   if (currentlyProductiveTrashCards.length > 0) {
     const cheapestTrashCard = [...currentlyProductiveTrashCards].sort(
@@ -967,7 +967,8 @@ function cardDefinitionTrashCost(definitionId: string): number | undefined {
 
 function cardDefinitionType(definitionId: string): string | undefined {
   return (
-    RUNTIME_CARDS[definitionId]?.type ?? CARD_DEFINITIONS_BY_ID[definitionId]?.type
+    RUNTIME_CARDS[definitionId]?.type ??
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type
   );
 }
 

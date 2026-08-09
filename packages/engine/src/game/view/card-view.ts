@@ -1,8 +1,8 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 // ARCH-6 read-only View-Helfer.
 // Keine State-Mutation, keine LegalAction-Erzeugung, kein Import aus index.ts,
 // keine PublicPayload-Vertragsaenderung.
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,

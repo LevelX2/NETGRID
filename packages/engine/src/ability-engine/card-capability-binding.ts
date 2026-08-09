@@ -14,7 +14,7 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import { legacyCardImplementationForDefinitionId } from "../card-implementations/registry";
 import type { CardImplementationDefinition } from "../card-implementations/types";
 import type { ActivatedCardAbilityImplementation } from "./definition-types";
 import type {
@@ -86,7 +86,7 @@ export type CardCapabilityAuthoritySources = {
 
 const DEFAULT_AUTHORITY_SOURCES: CardCapabilityAuthoritySources = {
   engineCardForDefinitionId: engineCardByDefinitionId,
-  legacyImplementationForDefinitionId: cardImplementationForDefinitionId,
+  legacyImplementationForDefinitionId: legacyCardImplementationForDefinitionId,
 };
 
 type CardCapabilityAuthority =

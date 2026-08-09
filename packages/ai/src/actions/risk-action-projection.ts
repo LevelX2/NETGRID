@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-  type LegalAction,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,

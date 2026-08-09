@@ -1,11 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type CardDefinition,
-  AiDecisionInput,
-  LegalAction,
-  VisibleCard,
-} from "@netgrid/shared";
-import { afterEach, describe, expect, it } from "vitest";
+import { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import { describe, expect, it } from "vitest";
 
 import { semanticRuntimeCorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
 import {
@@ -46,14 +40,7 @@ import {
   wallIce,
 } from "../semantic-runtime-corp-scoring-window.test-support";
 
-const DEFINITION_BACKED_AGENDA_ID =
-  "test_definition_backed_score_window_agenda";
-
 describe("semanticRuntimeCorpScoringWindowAssessment protection", () => {
-  afterEach(() => {
-    delete CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID];
-  });
-
   it("separates current access from Engine-certified fixed post-rez protection", () => {
     const input = corpInput({
       runnerCredits: 5,

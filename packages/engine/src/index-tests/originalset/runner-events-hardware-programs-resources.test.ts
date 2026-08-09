@@ -196,6 +196,41 @@ import {
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
 
+const BROKER_DEFINITION_ID = "onr_v1_154_broker";
+
+function isBrokerCapabilityAction(
+  action: LegalAction,
+  brokerId: string,
+  capabilityKey: "store_credits" | "withdraw_credits",
+): boolean {
+  return (
+    action.type === "activated_card_ability" &&
+    action.payload?.cardId === brokerId &&
+    action.payload?.cardImplementationCapabilityBindingKind ===
+      "card_spec_capability_key" &&
+    action.payload?.cardImplementationAbilityKey === capabilityKey &&
+    action.payload?.cardImplementationAbilityId ===
+      `${BROKER_DEFINITION_ID}:${capabilityKey}` &&
+    action.payload?.cardImplementationAbilityIndex === undefined &&
+    action.payload?.cardImplementationLifecycleIndex === undefined
+  );
+}
+
+function expectCanonicalBrokerCapability(
+  action: LegalAction,
+  brokerId: string,
+  capabilityKey: "store_credits" | "withdraw_credits",
+): void {
+  expect(action.payload).toMatchObject({
+    cardId: brokerId,
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    cardImplementationAbilityKey: capabilityKey,
+    cardImplementationAbilityId: `${BROKER_DEFINITION_ID}:${capabilityKey}`,
+  });
+  expect(action.payload).not.toHaveProperty("cardImplementationAbilityIndex");
+  expect(action.payload).not.toHaveProperty("cardImplementationLifecycleIndex");
+}
+
 describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
@@ -1093,13 +1128,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     );
     expect(brokerId).toBeDefined();
     if (!brokerId) throw new Error("Missing Broker");
-    const load = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 0,
+    const load = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "store_credits"),
     );
+    expectCanonicalBrokerCapability(load, brokerId, "store_credits");
     expect(load.payload).toMatchObject({
       cardImplementationAddsHostedCredits: true,
       hostedCreditAddAmount: 3,
@@ -1132,25 +1164,18 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload,
     ).not.toHaveProperty("sourceCardInstanceId");
     expect(
-      getLegalActions(state, "runner").some(
-        (action) =>
-          action.type === "activated_card_ability" &&
-          action.payload?.cardImplementationAbilityIndex === 1 &&
-          action.payload?.cardId === brokerId,
+      getLegalActions(state, "runner").some((action) =>
+        isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
       ),
     ).toBe(false);
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
     const creditsBefore = state.runner.credits;
-    const take = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationAbilityIndex === 1 &&
-        action.payload?.cardId === brokerId,
+    const take = mustAction(state, "runner", (action) =>
+      isBrokerCapabilityAction(action, brokerId, "withdraw_credits"),
     );
+    expectCanonicalBrokerCapability(take, brokerId, "withdraw_credits");
     expect(take.payload).toMatchObject({
       cardImplementationTakesHostedCredits: true,
       gainCreditsAmount: 3,

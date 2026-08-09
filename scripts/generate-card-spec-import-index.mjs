@@ -172,6 +172,12 @@ export function generateCardSpecImportIndex(root) {
   if (cards.length > 0 || sets.length > 0) lines.push("");
   lines.push(
     `export const GENERATED_CARD_SPECS = [${cards.map((_entry, index) => `cardSpec${index}`).join(", ")}] as const satisfies readonly CardSpec[];`,
+    `export const GENERATED_CARD_SPEC_SOURCE_REFS = [${cards
+      .map(
+        (entry) =>
+          `{ cardDefinitionId: ${JSON.stringify(entry.id)}, sourcePath: ${JSON.stringify(path.relative(root, entry.file).replaceAll(path.sep, "/"))} }`,
+      )
+      .join(", ")}] as const;`,
     `export const GENERATED_SET_SPECS = [${sets.map((_entry, index) => `setSpec${index}`).join(", ")}] as const satisfies readonly SetSpec[];`,
     "",
   );
@@ -230,6 +236,11 @@ function runSelfTest() {
     assert.equal(first, second);
     assert.ok(first.indexOf("a.card-spec") < first.indexOf("z.card-spec"));
     assert.ok(first.includes("GENERATED_SET_SPECS = [setSpec0]"));
+    assert.ok(
+      first.includes(
+        'cardDefinitionId: "a-card", sourcePath: "packages/cards/src/specs/a.card-spec.ts"',
+      ),
+    );
     const output = path.join(root, OUTPUT_RELATIVE);
     assert.equal(checkCardSpecImportIndex(root), false);
     writeCardSpecImportIndex(root);
@@ -244,7 +255,7 @@ function runSelfTest() {
       path.join(cards, "untracked.card-spec.ts"),
       'export const cardSpec = { identity: { cardDefinitionId: "m-card" } };\n',
     );
-    assert.ok(generateCardSpecImportIndex(root).includes("m-card") === false);
+    assert.ok(generateCardSpecImportIndex(root).includes("m-card"));
     assert.ok(
       generateCardSpecImportIndex(root).includes("untracked.card-spec"),
     );

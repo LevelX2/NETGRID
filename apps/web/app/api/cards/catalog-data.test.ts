@@ -5,6 +5,7 @@ import {
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
 import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import generatedCs06AiHints from "../../../../../data/ai/cs06-ai-hints-generated.json";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
 type CatalogAiHintExpectation = {
@@ -20,6 +21,7 @@ type CatalogAiHintExpectation = {
 type CatalogDetailAiHints = {
   card: {
     aiHints: {
+      cardId: string;
       roles: string[];
       planRoles: string[];
       requiredMechanics: string[];
@@ -34,6 +36,11 @@ type CatalogDetailAiInspector = {
   card: {
     aiInspector: {
       schemaVersion: string;
+      source: {
+        schemaVersion: string;
+        authority: string;
+        sourceRefs: readonly string[];
+      };
       supportStatus: {
         aiSupportStatus: string;
         hintFound: boolean;
@@ -174,6 +181,19 @@ const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
   "onr_proteus_148_runner-sensei",
   "onr_proteus_150_streetware-distributor",
   "onr_proteus_151_sunburst-cranial-interface",
+] as const;
+
+const CS06_CARD_DEFINITION_IDS = [
+  "onr_proteus_020_digiconda",
+  "onr_proteus_080_black-widow",
+  "onr_proteus_092_morphing-tool",
+  "onr_v1_110_sneak-preview",
+  "onr_v1_154_broker",
+  "onr_v1_168_loan-from-chiba",
+  "onr_v1_197_data-fort-reclamation",
+  "onr_v1_317_data-masons",
+  "onr_v1_348_virus-test-site",
+  "onr_v1_368_roving-submarine",
 ] as const;
 
 const CATALOG_AI_HINT_EXPECTATIONS = [
@@ -468,7 +488,12 @@ describe("catalog API filters", () => {
     expect(inspector).not.toBeNull();
     if (!inspector)
       throw new Error("Missing AI inspector for onr_v1_002_ai-boon");
-    expect(inspector.schemaVersion).toBe("ai-card-hints-active-v1");
+    expect(inspector.schemaVersion).toBe("catalog-ai-hint-inspector-v1");
+    expect(inspector.source).toEqual({
+      schemaVersion: "ai-hint-provenance-v1",
+      authority: "legacy_active_hint_json",
+      sourceRefs: ["data/ai/ai-card-hints-active.json"],
+    });
     expect(inspector.supportStatus).toMatchObject({
       aiSupportStatus: "ai_supported",
       hintFound: true,
@@ -494,6 +519,31 @@ describe("catalog API filters", () => {
       expect.arrayContaining(["program", "random"]),
     );
     expect(inspector.warnings.categories).toEqual([]);
+  });
+
+  it("attributes migrated inspector hints to the CardSpec compiler", () => {
+    const brokerArtifact = generatedCs06AiHints.cards.find(
+      (entry) => entry.cardId === "onr_v1_154_broker",
+    );
+    expect(brokerArtifact).toBeDefined();
+    const response = catalogDetailResponse("onr_v1_154_broker");
+    expect(response.status).toBe(200);
+    const body = response.body as CatalogDetailAiInspector;
+    expect(body.card.aiInspector?.source).toEqual({
+      schemaVersion: "ai-hint-provenance-v1",
+      authority: "card_spec_compiler",
+      artifactSchemaVersion: "cs06-ai-hint-artifact-v1",
+      compilerVersion: "cs06-ai-hint-compiler-v1",
+      cardRulesFingerprint: brokerArtifact?.cardRulesFingerprint,
+      planningAnnotationsFingerprint:
+        brokerArtifact?.planningAnnotationsFingerprint,
+      evidenceFingerprint: generatedCs06AiHints.evidence.fingerprint,
+      sourceRefs: [
+        "data/ai/cs06-ai-hints-generated.json",
+        "packages/ai/src/cs06-ai-hint-compiler.ts#deriveCs06AiHint",
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
+      ],
+    });
   });
 
   it("exposes explicit Agenda strategy support pairs through the inspector API", () => {
@@ -1159,6 +1209,34 @@ describe("catalog API filters", () => {
       expect(body.card.aiHints?.aiSupportStatus ?? "none", cardId).toBe(
         "ai_supported",
       );
+    }
+  });
+
+  it("serves effective compiled hints for every CS06 CardSpec", () => {
+    for (const cardId of CS06_CARD_DEFINITION_IDS) {
+      const response = catalogDetailResponse(cardId);
+      expect(response.status, cardId).toBe(200);
+      const body = response.body as CatalogDetailAiHints;
+      expect(body.card.aiHints?.cardId, cardId).toBe(cardId);
+      expect(body.card.aiHints?.aiSupportStatus, cardId).toBe("ai_supported");
+    }
+  });
+
+  it("keeps derived and legacy detail hints deeply immutable across API responses", () => {
+    for (const cardId of [
+      "onr_v1_154_broker",
+      "onr_proteus_001_ai-board-member",
+    ]) {
+      const first = catalogDetailResponse(cardId).body as CatalogDetailAiHints;
+      const roles = first.card.aiHints?.roles;
+      expect(roles, cardId).toBeDefined();
+      expect(Object.isFrozen(roles), cardId).toBe(true);
+      expect(() => roles?.push("cs06_poison"), cardId).toThrow(TypeError);
+
+      const second = catalogDetailResponse(cardId).body as CatalogDetailAiHints;
+      expect(second.card.aiHints?.roles, cardId).not.toContain("cs06_poison");
+      if (cardId === "onr_proteus_001_ai-board-member")
+        expect(second.card.aiHints).not.toBe(first.card.aiHints);
     }
   });
 

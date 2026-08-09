@@ -116,7 +116,7 @@ function main(): void {
     source: {
       mode: "productive_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
-      activeHints: "data/ai/ai-card-hints-active.json",
+      activeHints: "effective-ai-hints:legacy-json+generated-card-spec-v1",
       deckSnapshots: "data/decks/deck-snapshots-0.8.json",
       plannerEffect: "strategic_intent_input" as const,
     },

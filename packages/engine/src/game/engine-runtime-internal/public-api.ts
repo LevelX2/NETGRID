@@ -33,12 +33,11 @@ export {
   validateDeckDefinition,
   applyEffectCommands,
 } from "./runtime-bootstrap";
+export { DEMO_DECKS, CURRENT_RULES_BASELINE } from "@netgrid/shared";
 export {
   CARD_DEFINITIONS,
   CARD_DEFINITIONS_BY_ID,
-  DEMO_DECKS,
-  CURRENT_RULES_BASELINE,
-} from "@netgrid/shared";
+} from "../../card-definitions";
 export type {
   ActionType,
   ChoiceRequest,

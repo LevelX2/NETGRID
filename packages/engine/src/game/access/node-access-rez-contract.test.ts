@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type CardDefinitionId } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { type CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { CardAccessEffectImplementation } from "../../ability-engine/definition-types";
 import {

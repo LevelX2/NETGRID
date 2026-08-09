@@ -8,7 +8,6 @@ import { corporateCoupImplementation } from "../onr-v1/corp/agendas/corporate-co
 import { corporateDownsizingImplementation } from "../onr-v1/corp/agendas/corporate-downsizing";
 import { corporateRetreatImplementation } from "../onr-v1/corp/agendas/corporate-retreat";
 import { corporateWarImplementation } from "../onr-v1/corp/agendas/corporate-war";
-import { dataFortReclamationImplementation } from "../onr-v1/corp/agendas/data-fort-reclamation";
 import { detroitPoliceContractImplementation } from "../onr-v1/corp/agendas/detroit-police-contract";
 import { employeeEmpowermentImplementation } from "../onr-v1/corp/agendas/employee-empowerment";
 import { encryptionBreakthroughImplementation } from "../onr-v1/corp/agendas/encryption-breakthrough";
@@ -31,7 +30,6 @@ export const ONR_V1_CORP_AGENDA_ARTIFICIAL_SECURITY_DIRECTORS_TO_NETWATCH_OPERAT
     corporateDownsizingImplementation,
     corporateRetreatImplementation,
     corporateWarImplementation,
-    dataFortReclamationImplementation,
     detroitPoliceContractImplementation,
     employeeEmpowermentImplementation,
     encryptionBreakthroughImplementation,

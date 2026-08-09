@@ -14,9 +14,15 @@ importers:
       '@types/node':
         specifier: 24.12.2
         version: 24.12.2
+      esbuild:
+        specifier: 0.27.7
+        version: 0.27.7
       prettier:
         specifier: 3.8.3
         version: 3.8.3
+      tsx:
+        specifier: 4.21.0
+        version: 4.21.0
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -115,6 +121,9 @@ importers:
 
   packages/catalog:
     dependencies:
+      '@netgrid/cards':
+        specifier: workspace:*
+        version: link:../cards
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared

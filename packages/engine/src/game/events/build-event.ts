@@ -1,6 +1,6 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type EventVisibilityClass,

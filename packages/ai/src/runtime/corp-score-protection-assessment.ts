@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type SubroutineDefinition,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
@@ -953,10 +953,7 @@ function validRunnerRigCard(card: VisibleCard): boolean {
     return false;
   }
   if (!cardIsIcebreaker(card)) return true;
-  if (
-    card.type !== "program" ||
-    !nonNegativeSafeInteger(card.strength)
-  ) {
+  if (card.type !== "program" || !nonNegativeSafeInteger(card.strength)) {
     return false;
   }
   return true;

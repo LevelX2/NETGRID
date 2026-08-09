@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type CardDefinitionId,
-  type LegalAction,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type CardDefinitionId, type LegalAction } from "@netgrid/shared";
 import type {
   ActionAbilityBindingMethod,
   ActionGateResult,

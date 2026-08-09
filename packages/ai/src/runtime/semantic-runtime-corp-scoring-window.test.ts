@@ -1,10 +1,24 @@
 import {
-  CARD_DEFINITIONS_BY_ID,
+  type ResolvedCardDefinition,
   AiDecisionInput,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const testDefinitionAuthority = vi.hoisted(() => ({
+  byId: {} as Record<string, ResolvedCardDefinition>,
+}));
+
+vi.mock("../card-definition-compatibility", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../card-definition-compatibility")>();
+  Object.assign(testDefinitionAuthority.byId, actual.CARD_DEFINITIONS_BY_ID);
+  return {
+    ...actual,
+    CARD_DEFINITIONS_BY_ID: testDefinitionAuthority.byId,
+  };
+});
 
 import { semanticRuntimeCorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 import {
@@ -46,7 +60,7 @@ const DEFINITION_BACKED_AGENDA_ID =
 
 describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   afterEach(() => {
-    delete CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID];
+    delete testDefinitionAuthority.byId[DEFINITION_BACKED_AGENDA_ID];
   });
 
   it("allows an unprotected remote scoreline when the score completes before runner exposure", () => {
@@ -690,7 +704,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   });
 
   it("uses definition-backed advancement requirements for runner exposure before score", () => {
-    CARD_DEFINITIONS_BY_ID[DEFINITION_BACKED_AGENDA_ID] = {
+    testDefinitionAuthority.byId[DEFINITION_BACKED_AGENDA_ID] = {
       id: DEFINITION_BACKED_AGENDA_ID,
       title: "Definition Backed Agenda",
       side: "corp",

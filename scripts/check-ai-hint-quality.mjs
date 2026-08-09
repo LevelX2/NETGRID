@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..");
 
 const DEFAULT_HINTS_PATH = "data/ai/ai-card-hints-active.json";
+const GENERATED_HINTS_PATH = "data/ai/cs06-ai-hints-generated.json";
 const DEFAULT_INVENTORY_PATH =
   "docs/reviews/ai/ai-hint-consumer-contract-inventory-2026-05-25.json";
 const DEFAULT_REPORT_PATH =
@@ -67,17 +68,16 @@ const DIRECT_CLASSIFICATIONS = new Set([
 
 export function analyzeAiHintQuality(options = {}) {
   const repoRoot = options.repoRoot ?? REPO_ROOT;
-  const hintsPath = resolvePath(
-    repoRoot,
-    options.hintsPath ?? DEFAULT_HINTS_PATH,
-  );
   const inventoryPath = resolvePath(
     repoRoot,
     options.inventoryPath ?? DEFAULT_INVENTORY_PATH,
   );
   const deckFiles = options.deckFiles ?? defaultDeckFiles();
 
-  const hintsData = readJson(hintsPath);
+  const hintsData =
+    options.hintsPath === undefined
+      ? effectiveHintsData(repoRoot)
+      : readJson(resolvePath(repoRoot, options.hintsPath));
   const inventory = readJson(inventoryPath);
   const roleContract = readJson(resolvePath(repoRoot, ROLE_CONTRACT_PATH));
   const hints = hintsData.cards ?? [];
@@ -462,6 +462,21 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function effectiveHintsData(repoRoot) {
+  const legacy = readJson(resolvePath(repoRoot, DEFAULT_HINTS_PATH));
+  const generated = readJson(resolvePath(repoRoot, GENERATED_HINTS_PATH));
+  const cards = [
+    ...(legacy.cards ?? []),
+    ...(generated.cards ?? []).map((entry) => entry.hint),
+  ];
+  const ids = new Set(cards.map((card) => card.cardId));
+  if (cards.length !== 618 || ids.size !== cards.length)
+    throw new Error(
+      `effective_ai_hint_authority_mismatch: ${cards.length}/${ids.size}`,
+    );
+  return { cards };
+}
+
 function resolvePath(repoRoot, candidate) {
   return path.isAbsolute(candidate)
     ? candidate
@@ -473,7 +488,7 @@ function parseArgs(argv) {
     json: false,
     writeReport: false,
     reportPath: DEFAULT_REPORT_PATH,
-    hintsPath: DEFAULT_HINTS_PATH,
+    hintsPath: undefined,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];

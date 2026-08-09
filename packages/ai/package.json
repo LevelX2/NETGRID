@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./catalog": "./src/catalog-ai-hint-public.ts",
     "./simulation": "./src/simulation.ts"
   },
   "types": "./src/index.ts",

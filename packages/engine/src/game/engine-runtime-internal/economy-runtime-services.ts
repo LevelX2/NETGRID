@@ -1,8 +1,8 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -550,7 +550,6 @@ import {
   ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
   TEAM_COUNTER_OPERATION_SOURCE,
   ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-  ACCESS_NET_DAMAGE_ASSET_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
   INSTALLED_CARD_LIMIT_ASSET_SOURCE,
@@ -635,7 +634,6 @@ import {
   SHELL_TRADERS_ID,
   SKIVVISS_ID,
   SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
   TERRORIST_REPRISAL_ID,
   TOO_MANY_DOORS_ID,
 } from "../../compatibility/runtime-compatibility";
@@ -815,8 +813,7 @@ export function createEconomyRuntimeServices(
   function runnerInstallableProgramIdsForValuPak(
     state: GameState,
   ): CardInstanceId[] {
-    const activeBundle =
-      valuPakProgramInstallActionsRemaining(state) > 0;
+    const activeBundle = valuPakProgramInstallActionsRemaining(state) > 0;
     const prospectiveTemporaryCredit = activeBundle ? 0 : 1;
     return state.runner.grip.filter((cardId) => {
       const definition = definitionFor(state, cardId);
@@ -827,7 +824,7 @@ export function createEconomyRuntimeServices(
         definition.type === "program" &&
         !uniqueBlocked &&
         deps.availableRunnerProgramInstallCredits(state) +
-            prospectiveTemporaryCredit >=
+          prospectiveTemporaryCredit >=
           (definition.installCost ?? 0) &&
         runnerProgramInstallMemoryReachableAfterTrash(state, definition)
       );

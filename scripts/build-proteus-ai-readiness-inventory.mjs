@@ -1,6 +1,10 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  AI_HINTS_BY_CARD,
+  RUNTIME_CARDS,
+} from "../packages/ai/src/ai-hints.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outputPath = path.join(
@@ -10,18 +14,15 @@ const outputPath = path.join(
 const shouldWrite = process.argv.includes("--write");
 const shouldCheck = process.argv.includes("--check");
 
-const [manifest, activeHints, pilotDecks] = await Promise.all([
-  readJson("data/manifests/proteus-card-support.json"),
-  readJson("data/ai/ai-card-hints-active.json"),
-  readJson("data/decks/proteus-playtest-decks-2026-05-25.json"),
-]);
+const pilotDecks = await readJson(
+  "data/decks/proteus-playtest-decks-2026-05-25.json",
+);
 
-const manifestCards = [...(manifest.cards ?? [])].sort((left, right) =>
-  left.cardId.localeCompare(right.cardId),
-);
-const activeById = new Map(
-  (activeHints.cards ?? []).map((entry) => [entry.cardId, entry]),
-);
+const manifestCards = Object.values(RUNTIME_CARDS)
+  .filter((card) => card.setId === "proteus")
+  .map((card) => ({ cardId: card.catalogCardId }))
+  .sort((left, right) => left.cardId.localeCompare(right.cardId));
+const activeById = AI_HINTS_BY_CARD;
 const pilotDeckIdsByCard = buildPilotDeckIndex(pilotDecks.decks ?? []);
 
 const cards = manifestCards.map((manifestCard) => {
@@ -80,8 +81,8 @@ const inventory = {
   inventoryId: "proteus-ai-readiness-inventory-v1",
   asOf: "2026-07-09",
   generatedFrom: [
-    "data/manifests/proteus-card-support.json",
-    "data/ai/ai-card-hints-active.json",
+    "@netgrid/catalog#createRuntimeCardsById",
+    "@netgrid/ai#AI_HINTS_BY_CARD",
     "data/decks/proteus-playtest-decks-2026-05-25.json",
     "data/scenarios/proteus-ai-family-decision-smokes-v1.json",
   ],

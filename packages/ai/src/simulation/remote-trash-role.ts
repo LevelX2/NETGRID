@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
 import {
   getStructuredRemoteRoleForCard,
@@ -31,7 +31,8 @@ export function remoteTrashRoleForVisibleCard(
   const structuredRole = getStructuredRemoteRoleForCard(card.definitionId);
   if (structuredRole) {
     if (structuredRole.kind === "remote_capacity") return "remote_capacity";
-    if (structuredRole.kind === "score_acceleration") return "score_acceleration";
+    if (structuredRole.kind === "score_acceleration")
+      return "score_acceleration";
     if (structuredRole.kind === "asset_economy") return "economy";
     if (structuredRole.kind === "tag_punish_asset") return "tag_punish";
     if (structuredRole.kind === "bait" || structuredRole.kind === "ambush")
@@ -181,8 +182,7 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
       "finite_economy_pool",
       "hosted_credits",
       "bit_counter",
-    ]) ||
-    finitePoolRulesTextMatches(rulesText)
+    ]) || finitePoolRulesTextMatches(rulesText)
   );
 }
 

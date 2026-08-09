@@ -41,8 +41,15 @@ const workspaceGraph = buildExternalConsumerGraph(
   "workspace",
 );
 
+const packageManifest = JSON.parse(
+  readFileSync(path.join(repoRoot, "packages", "ai", "package.json"), "utf8"),
+);
+const publicRuntimeExportRoots = packageRuntimeExportRoots(
+  packageManifest.exports,
+);
+
 const roots = {
-  live: ["index.ts", "ai-runtime-public-entrypoints.ts"],
+  live: [...new Set([...publicRuntimeExportRoots, "ai-runtime-public-entrypoints.ts"])],
   simulation: ["simulation.ts", "ai-simulation-public-entrypoints.ts"],
   legacy: [
     "tactical-plans.ts",
@@ -498,6 +505,15 @@ function reachabilityCheckFailures(summary) {
 }
 
 function runSelfTest() {
+  const packageRoots = packageRuntimeExportRoots({
+    ".": "./src/index.ts",
+    "./catalog": "./src/catalog-ai-hint-public.ts",
+    "./simulation": "./src/simulation.ts",
+  });
+  if (
+    packageRoots.join(",") !== "index.ts,catalog-ai-hint-public.ts"
+  )
+    throw new Error("package export root self-test failed");
   const graph = new Map([
     ["live", new Set(["shared"])],
     ["legacy", new Set(["isolated"])],
@@ -542,4 +558,17 @@ function runSelfTest() {
     throw new Error("reachability self-test failed: retirement gate");
   }
   console.log("AI_SOURCE_REACHABILITY_AUDIT_SELFTEST OK");
+}
+
+function packageRuntimeExportRoots(exports) {
+  return Object.entries(exports)
+    .filter(
+      ([subpath, target]) =>
+        subpath !== "./simulation" && typeof target === "string",
+    )
+    .map(([, target]) => target)
+    .filter(
+      (target) => target.startsWith("./src/") && target.endsWith(".ts"),
+    )
+    .map((target) => target.slice("./src/".length));
 }

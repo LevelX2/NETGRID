@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstanceId,
   type GameState,
@@ -1101,6 +1101,7 @@ export function buildRunnerMainActions(
                 resourceAbility: "return_top_heap_card",
                 targetCardId,
                 targetCardDefinitionId: definitionFor(state, targetCardId).id,
+                targetCardTitle: definitionFor(state, targetCardId).title,
                 sourceDefinitionId: JUNKYARD_BBS_ID,
                 sourceZone: "heap",
                 destinationZone: "grip",

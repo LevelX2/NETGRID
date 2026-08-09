@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardInstance,
   type CardInstanceId,
   type GameState,
@@ -177,7 +177,8 @@ describe("encounter resolution boundary", () => {
   it("opens the stable Viral-15 post-pass program-trash choice only in the pass window", () => {
     const state = makeState();
     state.run!.activeIceProgramTrashSourceIceId = "ice_1" as CardInstanceId;
-    state.run!.activeIceProgramTrashPendingPassedIceId = "ice_1" as CardInstanceId;
+    state.run!.activeIceProgramTrashPendingPassedIceId =
+      "ice_1" as CardInstanceId;
     const legalAction = { payload: {} } as LegalAction;
 
     const result = handlePostPassProgramTrashChoices(
@@ -263,24 +264,27 @@ describe("encounter resolution boundary", () => {
     const dealt: unknown[] = [];
     let damagePayload: DamageSummary | undefined;
 
-    const result = resolvePostEncounterNetDamage(encounterResolutionHost(state), {
-      subroutines,
-      damageSummaries: [],
-      dealDamage: (input) => {
-        dealt.push(input);
-        return {
-          damageType: "net",
-          amount: input.amount,
-          cardsTrashed: 1,
-          flatline: false,
-          runnerGripBefore: 5,
-          runnerGripAfter: 2,
-        };
+    const result = resolvePostEncounterNetDamage(
+      encounterResolutionHost(state),
+      {
+        subroutines,
+        damageSummaries: [],
+        dealDamage: (input) => {
+          dealt.push(input);
+          return {
+            damageType: "net",
+            amount: input.amount,
+            cardsTrashed: 1,
+            flatline: false,
+            runnerGripBefore: 5,
+            runnerGripAfter: 2,
+          };
+        },
+        setDamagePayload: (summary) => {
+          damagePayload = summary;
+        },
       },
-      setDamagePayload: (summary) => {
-        damagePayload = summary;
-      },
-    });
+    );
 
     expect(result).toMatchObject({ handled: true, stateChanged: true });
     expect(dealt).toEqual([

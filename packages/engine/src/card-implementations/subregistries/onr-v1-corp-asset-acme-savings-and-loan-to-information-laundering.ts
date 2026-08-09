@@ -8,7 +8,6 @@ import { citySurveillanceImplementation } from "../onr-v1/corp/assets/city-surve
 import { corporateNegotiatingCenterImplementation } from "../onr-v1/corp/assets/corporate-negotiating-center";
 import { hardwareTrashByAdvancementAssetImplementation } from "../onr-v1/corp/assets/corprunners-shattered-remains";
 import { cowboySysopImplementation } from "../onr-v1/corp/assets/cowboy-sysop";
-import { dataMasonsHostingImplementation } from "../onr-v1/corp/assets/data-masons-hosting";
 import { departmentOfTruthEnhancementImplementation } from "../onr-v1/corp/assets/department-of-truth-enhancement";
 import { disinfectantIncImplementation } from "../onr-v1/corp/assets/disinfectant-inc";
 import { encoderIncImplementation } from "../onr-v1/corp/assets/encoder-inc";
@@ -31,7 +30,6 @@ export const ONR_V1_CORP_ASSET_ACME_SAVINGS_AND_LOAN_TO_INFORMATION_LAUNDERING_I
     corporateNegotiatingCenterImplementation,
     hardwareTrashByAdvancementAssetImplementation,
     cowboySysopImplementation,
-    dataMasonsHostingImplementation,
     departmentOfTruthEnhancementImplementation,
     disinfectantIncImplementation,
     encoderIncImplementation,

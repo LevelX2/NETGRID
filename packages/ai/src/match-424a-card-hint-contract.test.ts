@@ -1,12 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-
-const repoRoot = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../..",
-);
+import { createAiHintsByCard } from "./ai-hints";
 
 type HintEffect = {
   kind: string;
@@ -32,10 +25,7 @@ type HintCard = {
   }>;
 };
 
-const hintSources = [
-  "data/ai/ai-card-hints-active.json",
-  "data/ai/ai-card-hints-active.json",
-] as const;
+const hintSources = ["effective-ai-hint-readmodel"] as const;
 
 describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   const hints = readHints(source);
@@ -183,11 +173,8 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
   });
 });
 
-function readHints(relativePath: string): HintCard[] {
-  const artifact = JSON.parse(
-    fs.readFileSync(path.join(repoRoot, relativePath), "utf8"),
-  ) as { cards: HintCard[] };
-  return artifact.cards;
+function readHints(_source: string): HintCard[] {
+  return [...createAiHintsByCard().values()] as HintCard[];
 }
 
 function card(hints: HintCard[], cardId: string): HintCard {

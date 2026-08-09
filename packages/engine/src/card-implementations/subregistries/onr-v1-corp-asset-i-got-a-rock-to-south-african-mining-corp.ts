@@ -17,7 +17,6 @@ import { setupImplementation } from "../onr-v1/corp/assets/setup";
 import { vaporOpsImplementation } from "../onr-v1/corp/assets/vapor-ops";
 import { trapImplementation } from "../onr-v1/corp/assets/trap";
 import { advancementCoreDamageAssetImplementation } from "../onr-v1/corp/assets/vacant-soulkiller";
-import { advancementNetDamageAssetImplementation } from "../onr-v1/corp/assets/virus-test-site";
 import { southAfricanMiningCorpImplementation } from "../onr-v1/corp/assets/south-african-mining-corp";
 
 export const ONR_V1_CORP_ASSET_I_GOT_A_ROCK_TO_SOUTH_AFRICAN_MINING_CORP_IMPLEMENTATIONS =
@@ -40,6 +39,5 @@ export const ONR_V1_CORP_ASSET_I_GOT_A_ROCK_TO_SOUTH_AFRICAN_MINING_CORP_IMPLEME
     vaporOpsImplementation,
     trapImplementation,
     advancementCoreDamageAssetImplementation,
-    advancementNetDamageAssetImplementation,
     southAfricanMiningCorpImplementation,
   ] as const satisfies readonly CardImplementationDefinition[];

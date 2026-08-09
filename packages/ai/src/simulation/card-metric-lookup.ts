@@ -1,12 +1,13 @@
 import type { VisibleCard } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { RUNTIME_CARDS } from "../ai-hints";
 
 export function definitionTypeForMetrics(
   definitionId: string,
 ): string | undefined {
   return (
-    CARD_DEFINITIONS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type ??
+    RUNTIME_CARDS[definitionId]?.type
   );
 }
 

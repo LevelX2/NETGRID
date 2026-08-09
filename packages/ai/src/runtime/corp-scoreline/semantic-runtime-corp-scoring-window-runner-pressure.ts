@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-  type VisibleCard,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../../ai-hints";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { assessEngineCertifiedPostRezIcePath } from "../../visible-run-analysis";

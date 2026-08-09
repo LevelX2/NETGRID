@@ -2110,6 +2110,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         hiddenZoneAction: "p3_38_stack_or_trash_program_install",
         sourceDefinitionId: "onr_v1_110_sneak-preview",
+        sourceTitle: "Sneak Preview",
         searchReveal: "public",
         searchDestination: "install_program",
         installedProgramDefinitionId: "onr_classic_031_rent-i-con",
@@ -2131,16 +2132,16 @@ describe("formatChronicleEvent", () => {
     expect(installed.title).toBe(
       "Du hast Rent-I-Con mit Sneak Preview kostenlos und temporär aus dem Stack im Rig installiert.",
     );
-    expect(installed.description).toContain("kehrt am Zugende auf die Hand zurück");
+    expect(installed.description).toContain(
+      "kehrt am Zugende auf die Hand zurück",
+    );
     expect(installed.chips).toEqual(
       expect.arrayContaining(["Kostenlos", "Temporär", "Shuffle"]),
     );
     expect(returned.title).toBe(
       "Du hast Rent-I-Con vom Rig auf die Hand zurückgenommen.",
     );
-    expect(returned.chips).toEqual(
-      expect.arrayContaining(["Rig → Hand"]),
-    );
+    expect(returned.chips).toEqual(expect.arrayContaining(["Rig → Hand"]));
   });
 
   it("shows The Short Circuit activation and selected program concretely", () => {
@@ -2501,9 +2502,7 @@ describe("formatChronicleEvent", () => {
       "corp",
     );
 
-    expect(item.title).toBe(
-      "Der Runner hat 1 Doppelganger-Counter entfernt.",
-    );
+    expect(item.title).toBe("Der Runner hat 1 Doppelganger-Counter entfernt.");
     expect(item.chips).toEqual(
       expect.arrayContaining(["Doppelganger-Counter", "-1", "0 übrig"]),
     );

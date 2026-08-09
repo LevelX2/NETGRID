@@ -1,8 +1,8 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // ARCH-3: Setup functions are the first real game-facade extraction step.
 // No run/action/access/payment logic belongs here; GameState types stay in @netgrid/shared.
 import {
   CURRENT_RULES_BASELINE,
-  CARD_DEFINITIONS_BY_ID,
   DEMO_DECKS,
   type CardDefinition,
   type CardInstance,

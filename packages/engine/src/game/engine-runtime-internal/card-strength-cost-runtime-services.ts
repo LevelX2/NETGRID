@@ -1,8 +1,8 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -541,7 +541,6 @@ import {
   ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
   TEAM_COUNTER_OPERATION_SOURCE,
   ACCESS_CORE_DAMAGE_ASSET_SOURCE,
-  ACCESS_NET_DAMAGE_ASSET_SOURCE,
 } from "../../mechanics/agenda-operation-effects";
 import {
   INSTALLED_CARD_LIMIT_ASSET_SOURCE,
@@ -626,7 +625,6 @@ import {
   SHELL_TRADERS_ID,
   SKIVVISS_ID,
   SMARTEYE_ID,
-  SNEAK_PREVIEW_ID,
   TERRORIST_REPRISAL_ID,
   TOO_MANY_DOORS_ID,
 } from "../../compatibility/runtime-compatibility";
@@ -748,17 +746,23 @@ export function createCardStrengthCostRuntimeServices(
     breakerId: CardInstanceId,
   ): number {
     if (!run) return 0;
-    const genericBonus = ((run.breakerState
-      ?.strengthModifiersByBreakerInstanceId ?? {})[breakerId] ?? []).reduce(
+    const genericBonus = (
+      (run.breakerState?.strengthModifiersByBreakerInstanceId ?? {})[
+        breakerId
+      ] ?? []
+    ).reduce(
       (total, modifier) =>
         modifier.duration === "current_run"
           ? total + Math.max(0, Math.floor(modifier.amount))
           : total,
       0,
     );
-    return genericBonus + Math.max(
-      0,
-      Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0),
+    return (
+      genericBonus +
+      Math.max(
+        0,
+        Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0),
+      )
     );
   }
 

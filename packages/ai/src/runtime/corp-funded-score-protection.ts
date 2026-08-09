@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type LegalAction,
   type ServerId,
   type VisibleCard,

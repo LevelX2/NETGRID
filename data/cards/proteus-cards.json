@@ -9,11 +9,7 @@
       "title": "AI Board Member",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "ai",
-        "random",
-        "research"
-      ],
+      "subtypes": ["ai", "random", "research"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -43,10 +39,7 @@
       "title": "Charity Takeover",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "bad_publicity",
-        "black_ops"
-      ],
+      "subtypes": ["bad_publicity", "black_ops"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -76,9 +69,7 @@
       "title": "Corporate Headhunters",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "asset"
-      ],
+      "subtypes": ["asset"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -108,11 +99,7 @@
       "title": "Fetal AI",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "ai",
-        "ambush",
-        "asset"
-      ],
+      "subtypes": ["ai", "ambush", "asset"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -142,10 +129,7 @@
       "title": "Marked Accounts",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "ambush",
-        "gray_ops"
-      ],
+      "subtypes": ["ambush", "gray_ops"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -175,9 +159,7 @@
       "title": "Please Don't Choke Anyone",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "gray_ops"
-      ],
+      "subtypes": ["gray_ops"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -207,9 +189,7 @@
       "title": "Project Venice",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "asset"
-      ],
+      "subtypes": ["asset"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -244,9 +224,7 @@
       "title": "Project Zurich",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "asset"
-      ],
+      "subtypes": ["asset"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -281,11 +259,7 @@
       "title": "Viral Breeding Ground",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "ambush",
-        "research",
-        "virus"
-      ],
+      "subtypes": ["ambush", "research", "virus"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -315,9 +289,7 @@
       "title": "World Domination",
       "side": "corp",
       "type": "agenda",
-      "subtypes": [
-        "black_ops"
-      ],
+      "subtypes": ["black_ops"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -347,12 +319,7 @@
       "title": "Brain Wash",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "ap",
-        "black_ice",
-        "brainwipe",
-        "sentry"
-      ],
+      "subtypes": ["ap", "black_ice", "brainwipe", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -382,11 +349,7 @@
       "title": "Bug Zapper",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "ap",
-        "hellbolt",
-        "sentry"
-      ],
+      "subtypes": ["ap", "hellbolt", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -416,9 +379,7 @@
       "title": "Caryatid",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -448,11 +409,7 @@
       "title": "Chihuahua",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "ap",
-        "hellhound",
-        "sentry"
-      ],
+      "subtypes": ["ap", "hellhound", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -482,10 +439,7 @@
       "title": "Colonel Failure",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "killer",
-        "sentry"
-      ],
+      "subtypes": ["killer", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -515,10 +469,7 @@
       "title": "Coyote",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry",
-        "watchdog"
-      ],
+      "subtypes": ["sentry", "watchdog"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -548,9 +499,7 @@
       "title": "Credit Blocks",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry"
-      ],
+      "subtypes": ["sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -580,9 +529,7 @@
       "title": "Datacomb",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -612,12 +559,7 @@
       "title": "Death Yo-Yo",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "ap",
-        "black_ice",
-        "brainwipe",
-        "sentry"
-      ],
+      "subtypes": ["ap", "black_ice", "brainwipe", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -642,54 +584,12 @@
       }
     },
     {
-      "cardId": "onr_proteus_020_digiconda",
-      "setId": "proteus",
-      "title": "Digiconda",
-      "side": "corp",
-      "type": "ice",
-      "subtypes": [
-        "ap",
-        "sentry",
-        "sword"
-      ],
-      "numeric": {
-        "cost": null,
-        "installCost": null,
-        "memoryCost": null,
-        "strength": null,
-        "rezCost": 6,
-        "trashCost": null,
-        "advancementRequirement": null,
-        "agendaPoints": null
-      },
-      "variableStrength": {
-        "kind": "paid_x",
-        "minimumStrength": 0,
-        "maximumStrength": 6
-      },
-      "text": "*Do 2 Net damage. *End the run. Pay [X], above the rez cost, when you rez Digiconda. X is Digiconda 's strength, and X cannot be greater than 6.",
-      "displayOnlyText": true,
-      "faction": "onr_proteus",
-      "setName": "Proteus",
-      "collectorNumber": "P020",
-      "rarity": {
-        "code": "uncommon",
-        "labelDe": "Ungewöhnlich",
-        "labelEn": "Uncommon",
-        "sourceValue": "Uncommon",
-        "sourceId": "onr-proteus-spoiler"
-      }
-    },
-    {
       "cardId": "onr_proteus_021_dog-pile",
       "setId": "proteus",
       "title": "Dog Pile",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "ap",
-        "sentry"
-      ],
+      "subtypes": ["ap", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -719,10 +619,7 @@
       "title": "Food Fight",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "deckrash",
-        "sentry"
-      ],
+      "subtypes": ["deckrash", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -752,9 +649,7 @@
       "title": "Galatea",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -784,9 +679,7 @@
       "title": "Gatekeeper",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate"
-      ],
+      "subtypes": ["code_gate"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -816,9 +709,7 @@
       "title": "Homing Missile",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry"
-      ],
+      "subtypes": ["sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -853,10 +744,7 @@
       "title": "Hunting Pack",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "bloodhound",
-        "sentry"
-      ],
+      "subtypes": ["bloodhound", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -886,9 +774,7 @@
       "title": "Iceberg",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -918,9 +804,7 @@
       "title": "Lesser Arcana",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry"
-      ],
+      "subtypes": ["sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -950,10 +834,7 @@
       "title": "Marionette",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "killer",
-        "sentry"
-      ],
+      "subtypes": ["killer", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -983,12 +864,7 @@
       "title": "Mastermind",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "ap",
-        "black_ice",
-        "sentry",
-        "zombie"
-      ],
+      "subtypes": ["ap", "black_ice", "sentry", "zombie"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1018,9 +894,7 @@
       "title": "Minotaur",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry"
-      ],
+      "subtypes": ["sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1050,9 +924,7 @@
       "title": "Misleading Access Menus",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate"
-      ],
+      "subtypes": ["code_gate"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1082,9 +954,7 @@
       "title": "Mobile Barricade",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1114,9 +984,7 @@
       "title": "Riddler",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate"
-      ],
+      "subtypes": ["code_gate"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1146,10 +1014,7 @@
       "title": "Roadblock",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate",
-        "random"
-      ],
+      "subtypes": ["code_gate", "random"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1179,9 +1044,7 @@
       "title": "Sandstorm",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1211,9 +1074,7 @@
       "title": "Scaffolding",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1243,9 +1104,7 @@
       "title": "Snowbank",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1275,9 +1134,7 @@
       "title": "Sphinx 2006",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate"
-      ],
+      "subtypes": ["code_gate"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1307,9 +1164,7 @@
       "title": "Sumo 2008",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry"
-      ],
+      "subtypes": ["sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1339,9 +1194,7 @@
       "title": "Toughonium™ Wall",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1371,9 +1224,7 @@
       "title": "Tumblers",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate"
-      ],
+      "subtypes": ["code_gate"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1403,9 +1254,7 @@
       "title": "Twisty Passages",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate"
-      ],
+      "subtypes": ["code_gate"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1435,9 +1284,7 @@
       "title": "Walking Wall",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "wall"
-      ],
+      "subtypes": ["wall"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1467,10 +1314,7 @@
       "title": "Washed-Up Solo Construct",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "killer",
-        "sentry"
-      ],
+      "subtypes": ["killer", "sentry"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1530,9 +1374,7 @@
       "title": "Credit Consolidation",
       "side": "corp",
       "type": "operation",
-      "subtypes": [
-        "transactions"
-      ],
+      "subtypes": ["transactions"],
       "numeric": {
         "cost": 10,
         "installCost": null,
@@ -1592,9 +1434,7 @@
       "title": "Emergency Rig",
       "side": "corp",
       "type": "operation",
-      "subtypes": [
-        "transactions"
-      ],
+      "subtypes": ["transactions"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1632,9 +1472,7 @@
       "title": "Manhunt",
       "side": "corp",
       "type": "operation",
-      "subtypes": [
-        "gray_ops"
-      ],
+      "subtypes": ["gray_ops"],
       "numeric": {
         "cost": 4,
         "installCost": null,
@@ -1664,9 +1502,7 @@
       "title": "Rent-to-Own Contract",
       "side": "corp",
       "type": "operation",
-      "subtypes": [
-        "transactions"
-      ],
+      "subtypes": ["transactions"],
       "numeric": {
         "cost": 0,
         "installCost": null,
@@ -1726,9 +1562,7 @@
       "title": "Underworld Mole",
       "side": "corp",
       "type": "operation",
-      "subtypes": [
-        "gray_ops"
-      ],
+      "subtypes": ["gray_ops"],
       "numeric": {
         "cost": 6,
         "installCost": null,
@@ -1758,11 +1592,7 @@
       "title": "Bel-Digmo Antibody",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "ambush",
-        "node",
-        "virus"
-      ],
+      "subtypes": ["ambush", "node", "virus"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1792,10 +1622,7 @@
       "title": "Cybertech Think Tank",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "asset",
-        "node"
-      ],
+      "subtypes": ["asset", "node"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1825,10 +1652,7 @@
       "title": "Department of Misinformation",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "asset",
-        "node"
-      ],
+      "subtypes": ["asset", "node"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1858,11 +1682,7 @@
       "title": "Doppelganger Antibody",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "ambush",
-        "node",
-        "virus"
-      ],
+      "subtypes": ["ambush", "node", "virus"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1892,9 +1712,7 @@
       "title": "Executive Boot Camp",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "node"
-      ],
+      "subtypes": ["node"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1924,10 +1742,7 @@
       "title": "Government Contract",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "asset",
-        "node"
-      ],
+      "subtypes": ["asset", "node"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1957,9 +1772,7 @@
       "title": "Herman Revista",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -1989,10 +1802,7 @@
       "title": "LDL Traffic Analyzers",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "asset",
-        "node"
-      ],
+      "subtypes": ["asset", "node"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2022,9 +1832,7 @@
       "title": "Lesley Major",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2054,9 +1862,7 @@
       "title": "Lisa Blight",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2086,9 +1892,7 @@
       "title": "Marcel DeSoleil",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2118,10 +1922,7 @@
       "title": "Networked Center",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "asset",
-        "region"
-      ],
+      "subtypes": ["asset", "region"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2211,11 +2012,7 @@
       "title": "Pattel Antibody",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "ambush",
-        "node",
-        "virus"
-      ],
+      "subtypes": ["ambush", "node", "virus"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2245,9 +2042,7 @@
       "title": "Pavit Bharat",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2277,9 +2072,7 @@
       "title": "Rasmin Bridger",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2309,9 +2102,7 @@
       "title": "Raymond Ellison",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2341,10 +2132,7 @@
       "title": "Research Bunker",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "asset",
-        "region"
-      ],
+      "subtypes": ["asset", "region"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2374,9 +2162,7 @@
       "title": "Simon Francisco",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "sysop"
-      ],
+      "subtypes": ["sysop"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2406,9 +2192,7 @@
       "title": "Siren",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "node"
-      ],
+      "subtypes": ["node"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2438,11 +2222,7 @@
       "title": "Stereogram Antibody",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "ambush",
-        "node",
-        "virus"
-      ],
+      "subtypes": ["ambush", "node", "virus"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2472,10 +2252,7 @@
       "title": "Syd Meyer Superstores",
       "side": "corp",
       "type": "asset",
-      "subtypes": [
-        "asset",
-        "node"
-      ],
+      "subtypes": ["asset", "node"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2505,10 +2282,7 @@
       "title": "Weapons Depot",
       "side": "corp",
       "type": "upgrade",
-      "subtypes": [
-        "asset",
-        "region"
-      ],
+      "subtypes": ["asset", "region"],
       "numeric": {
         "cost": null,
         "installCost": null,
@@ -2538,10 +2312,7 @@
       "title": "Armageddon",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "random",
-        "virus"
-      ],
+      "subtypes": ["random", "virus"],
       "numeric": {
         "cost": null,
         "installCost": 1,
@@ -2571,10 +2342,7 @@
       "title": "Big Frackin' Gun",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "killer"
-      ],
+      "subtypes": ["icebreaker", "killer"],
       "numeric": {
         "cost": null,
         "installCost": 2,
@@ -2599,48 +2367,12 @@
       }
     },
     {
-      "cardId": "onr_proteus_080_black-widow",
-      "setId": "proteus",
-      "title": "Black Widow",
-      "side": "runner",
-      "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "killer"
-      ],
-      "numeric": {
-        "cost": null,
-        "installCost": 9,
-        "memoryCost": 1,
-        "strength": 2,
-        "rezCost": null,
-        "trashCost": null,
-        "advancementRequirement": null,
-        "agendaPoints": null
-      },
-      "text": "[1]: Break sentry subroutine. [2]: +1 strength. Choose an installed piece of ice when you install Black Widow. Black Widow gets +5 strength during each encounter with that piece of ice.",
-      "displayOnlyText": true,
-      "faction": "onr_proteus",
-      "setName": "Proteus",
-      "collectorNumber": "P080",
-      "rarity": {
-        "code": "uncommon",
-        "labelDe": "Ungewöhnlich",
-        "labelEn": "Uncommon",
-        "sourceValue": "Uncommon",
-        "sourceId": "onr-proteus-spoiler"
-      }
-    },
-    {
       "cardId": "onr_proteus_081_boring-bit",
       "setId": "proteus",
       "title": "Boring Bit",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "worm"
-      ],
+      "subtypes": ["icebreaker", "worm"],
       "numeric": {
         "cost": null,
         "installCost": 6,
@@ -2670,10 +2402,7 @@
       "title": "Bulldozer",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "noisy"
-      ],
+      "subtypes": ["icebreaker", "noisy"],
       "numeric": {
         "cost": null,
         "installCost": 7,
@@ -2703,10 +2432,7 @@
       "title": "Corrosion",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "worm"
-      ],
+      "subtypes": ["icebreaker", "worm"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -2736,9 +2462,7 @@
       "title": "Crumble",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "virus"
-      ],
+      "subtypes": ["virus"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -2828,10 +2552,7 @@
       "title": "Forward's Legacy",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "killer"
-      ],
+      "subtypes": ["icebreaker", "killer"],
       "numeric": {
         "cost": null,
         "installCost": 9,
@@ -2861,10 +2582,7 @@
       "title": "Fubar",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "noisy"
-      ],
+      "subtypes": ["icebreaker", "noisy"],
       "numeric": {
         "cost": null,
         "installCost": 10,
@@ -2894,9 +2612,7 @@
       "title": "Garbage In",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "virus"
-      ],
+      "subtypes": ["virus"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -2926,9 +2642,7 @@
       "title": "Highlighter",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "virus"
-      ],
+      "subtypes": ["virus"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -2983,47 +2697,12 @@
       }
     },
     {
-      "cardId": "onr_proteus_092_morphing-tool",
-      "setId": "proteus",
-      "title": "Morphing Tool",
-      "side": "runner",
-      "type": "program",
-      "subtypes": [
-        "icebreaker"
-      ],
-      "numeric": {
-        "cost": null,
-        "installCost": 10,
-        "memoryCost": 1,
-        "strength": 4,
-        "rezCost": null,
-        "trashCost": null,
-        "advancementRequirement": null,
-        "agendaPoints": null
-      },
-      "text": "[2]: Break a subroutine of the type last chosen for Morphing Tool. [1]: +1 strength. [1], A: Choose whether Morphing Tool breaks code gates, sentries, or walls. When you install Morphing Tool, choose whether it breaks code gates, sentries, or walls.",
-      "displayOnlyText": true,
-      "faction": "onr_proteus",
-      "setName": "Proteus",
-      "collectorNumber": "P092",
-      "rarity": {
-        "code": "uncommon",
-        "labelDe": "Ungewöhnlich",
-        "labelEn": "Uncommon",
-        "sourceValue": "Uncommon",
-        "sourceId": "onr-proteus-spoiler"
-      }
-    },
-    {
       "cardId": "onr_proteus_093_redecorator",
       "setId": "proteus",
       "title": "Redecorator",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "killer"
-      ],
+      "subtypes": ["icebreaker", "killer"],
       "numeric": {
         "cost": null,
         "installCost": 9,
@@ -3053,11 +2732,7 @@
       "title": "Scaldan",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "bad_publicity",
-        "random",
-        "virus"
-      ],
+      "subtypes": ["bad_publicity", "random", "virus"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -3087,9 +2762,7 @@
       "title": "Skeleton Passkeys",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker"
-      ],
+      "subtypes": ["icebreaker"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -3149,9 +2822,7 @@
       "title": "Taxman",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "virus"
-      ],
+      "subtypes": ["virus"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -3181,9 +2852,7 @@
       "title": "Vienna 22",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "virus"
-      ],
+      "subtypes": ["virus"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -3213,9 +2882,7 @@
       "title": "Viral Pipeline",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "virus"
-      ],
+      "subtypes": ["virus"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -3245,10 +2912,7 @@
       "title": "Wrecking Ball",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "noisy"
-      ],
+      "subtypes": ["icebreaker", "noisy"],
       "numeric": {
         "cost": null,
         "installCost": 4,
@@ -3398,9 +3062,7 @@
       "title": "Demolition Run",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "sabotage"
-      ],
+      "subtypes": ["sabotage"],
       "numeric": {
         "cost": 4,
         "installCost": null,
@@ -3430,9 +3092,7 @@
       "title": "Disgruntled Ice Technician",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "sabotage"
-      ],
+      "subtypes": ["sabotage"],
       "numeric": {
         "cost": 2,
         "installCost": null,
@@ -3492,9 +3152,7 @@
       "title": "Faked Hit",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "bad_publicity"
-      ],
+      "subtypes": ["bad_publicity"],
       "numeric": {
         "cost": 5,
         "installCost": null,
@@ -3524,9 +3182,7 @@
       "title": "Frame-Up",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "bad_publicity"
-      ],
+      "subtypes": ["bad_publicity"],
       "numeric": {
         "cost": 2,
         "installCost": null,
@@ -3616,9 +3272,7 @@
       "title": "Identity Donor",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "bad_publicity"
-      ],
+      "subtypes": ["bad_publicity"],
       "numeric": {
         "cost": 0,
         "installCost": null,
@@ -3648,9 +3302,7 @@
       "title": "Live News Feed",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "bad_publicity"
-      ],
+      "subtypes": ["bad_publicity"],
       "numeric": {
         "cost": 0,
         "installCost": null,
@@ -3770,9 +3422,7 @@
       "title": "Poisoned Water Supply",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "bad_publicity"
-      ],
+      "subtypes": ["bad_publicity"],
       "numeric": {
         "cost": 4,
         "installCost": null,
@@ -3892,9 +3542,7 @@
       "title": "Remote Detonator",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "sabotage"
-      ],
+      "subtypes": ["sabotage"],
       "numeric": {
         "cost": 7,
         "installCost": null,
@@ -3954,9 +3602,7 @@
       "title": "Senatorial Field Trip",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "bad_publicity"
-      ],
+      "subtypes": ["bad_publicity"],
       "numeric": {
         "cost": 1,
         "installCost": null,
@@ -4016,9 +3662,7 @@
       "title": "Subliminal Corruption",
       "side": "runner",
       "type": "event",
-      "subtypes": [
-        "bad_publicity"
-      ],
+      "subtypes": ["bad_publicity"],
       "numeric": {
         "cost": 2,
         "installCost": null,
@@ -4108,9 +3752,7 @@
       "title": "Airport Locker",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4140,10 +3782,7 @@
       "title": "Back Door to Netwatch",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "bad_publicity",
-        "hidden"
-      ],
+      "subtypes": ["bad_publicity", "hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4173,9 +3812,7 @@
       "title": "Back Door to Rivals",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "base_link"
-      ],
+      "subtypes": ["base_link"],
       "numeric": {
         "cost": null,
         "installCost": 2,
@@ -4205,9 +3842,7 @@
       "title": "Bargain with Viacox",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "random"
-      ],
+      "subtypes": ["random"],
       "numeric": {
         "cost": null,
         "installCost": 3,
@@ -4237,9 +3872,7 @@
       "title": "Bolt-Hole",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4269,9 +3902,7 @@
       "title": "Chiba Bank Account",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4301,10 +3932,7 @@
       "title": "Cortical Cybermodem",
       "side": "runner",
       "type": "hardware",
-      "subtypes": [
-        "cybernetics",
-        "deck"
-      ],
+      "subtypes": ["cybernetics", "deck"],
       "numeric": {
         "cost": null,
         "installCost": 11,
@@ -4334,9 +3962,7 @@
       "title": "Cortical Stimulators",
       "side": "runner",
       "type": "hardware",
-      "subtypes": [
-        "cybernetics"
-      ],
+      "subtypes": ["cybernetics"],
       "numeric": {
         "cost": null,
         "installCost": 1,
@@ -4366,10 +3992,7 @@
       "title": "Credit Subversion",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden",
-        "sabotage"
-      ],
+      "subtypes": ["hidden", "sabotage"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4399,10 +4022,7 @@
       "title": "Death from Above",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden",
-        "sabotage"
-      ],
+      "subtypes": ["hidden", "sabotage"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4432,10 +4052,7 @@
       "title": "Deck, The",
       "side": "runner",
       "type": "hardware",
-      "subtypes": [
-        "base_link",
-        "deck"
-      ],
+      "subtypes": ["base_link", "deck"],
       "numeric": {
         "cost": null,
         "installCost": 11,
@@ -4465,9 +4082,7 @@
       "title": "Eurocorpse (TM) Spin Chip",
       "side": "runner",
       "type": "hardware",
-      "subtypes": [
-        "chip"
-      ],
+      "subtypes": ["chip"],
       "numeric": {
         "cost": null,
         "installCost": 6,
@@ -4497,9 +4112,7 @@
       "title": "Expendable Family Member",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4529,10 +4142,7 @@
       "title": "Get Ready to Rumble",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "connection",
-        "hidden"
-      ],
+      "subtypes": ["connection", "hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4562,9 +4172,7 @@
       "title": "HQ Mole",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4594,9 +4202,7 @@
       "title": "Liberated Savings Account",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4656,10 +4262,7 @@
       "title": "Mercenary Subcontract",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden",
-        "sabotage"
-      ],
+      "subtypes": ["hidden", "sabotage"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4689,9 +4292,7 @@
       "title": "Precision Bribery",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "unique"
-      ],
+      "subtypes": ["unique"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4721,9 +4322,7 @@
       "title": "R&D Mole",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4753,10 +4352,7 @@
       "title": "Runner Sensei",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "base_link",
-        "position"
-      ],
+      "subtypes": ["base_link", "position"],
       "numeric": {
         "cost": null,
         "installCost": 4,
@@ -4786,10 +4382,7 @@
       "title": "Simulacrum",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "connection",
-        "hidden"
-      ],
+      "subtypes": ["connection", "hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4819,10 +4412,7 @@
       "title": "Streetware Distributor",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "bbs",
-        "position"
-      ],
+      "subtypes": ["bbs", "position"],
       "numeric": {
         "cost": null,
         "installCost": 1,
@@ -4852,11 +4442,7 @@
       "title": "Sunburst Cranial Interface",
       "side": "runner",
       "type": "hardware",
-      "subtypes": [
-        "cybernetics",
-        "deck",
-        "stealth"
-      ],
+      "subtypes": ["cybernetics", "deck", "stealth"],
       "numeric": {
         "cost": null,
         "installCost": 5,
@@ -4886,9 +4472,7 @@
       "title": "Swiss Bank Account",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4918,9 +4502,7 @@
       "title": "Time to Collect",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,
@@ -4950,9 +4532,7 @@
       "title": "Wired Switchboard",
       "side": "runner",
       "type": "resource",
-      "subtypes": [
-        "hidden"
-      ],
+      "subtypes": ["hidden"],
       "numeric": {
         "cost": null,
         "installCost": 0,

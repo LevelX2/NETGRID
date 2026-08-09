@@ -1,5 +1,5 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinitionId,
   type CardInstanceId,
   type GameState,
@@ -30,11 +30,7 @@ export function visibleEffectiveIceRunQuote(
   visibleIce: VisibleCard,
 ): VisibleEffectiveIceRunQuote | undefined {
   const definitionId = visibleIce.definitionId;
-  if (
-    !visibleIce.known ||
-    visibleIce.rezzed !== true ||
-    !definitionId
-  )
+  if (!visibleIce.known || visibleIce.rezzed !== true || !definitionId)
     return undefined;
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition || definition.type !== "ice") return undefined;
@@ -75,9 +71,8 @@ export function visibleEffectiveIceRunQuote(
     runBreakCost + breakCostQuote.perSubroutineAdditionalCost;
   const encounterTemporaryTraceCredits =
     publicEncounterTemporaryTraceCreditsForIce(state, iceId);
-  const conditionalEncounterEffects = visibleConditionalEncounterEffects(
-    definitionId,
-  );
+  const conditionalEncounterEffects =
+    visibleConditionalEncounterEffects(definitionId);
 
   return {
     iceInstanceId: visibleIce.instanceId,

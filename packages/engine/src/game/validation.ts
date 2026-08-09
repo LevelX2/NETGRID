@@ -1,7 +1,7 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // Read-only Game invariant validation. This module does not execute actions,
 // mutate state, or build PublicPayloads.
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
   type CardInstance,

@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type VisibleCard } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { type VisibleCard } from "@netgrid/shared";
 import {
   RUNTIME_CARDS,
   createAiHintsByCard,
@@ -258,9 +259,7 @@ function profileCoversCoverage(
   if (!profile || !coverage) return false;
   if (breakerProfileBlocksAccessReachability(profile)) return false;
   const profileCoverage = new Set(profile.coverage ?? []);
-  return (
-    profileCoverage.has("universal") || profileCoverage.has(coverage)
-  );
+  return profileCoverage.has("universal") || profileCoverage.has(coverage);
 }
 
 function breakerProfileQualityScore(

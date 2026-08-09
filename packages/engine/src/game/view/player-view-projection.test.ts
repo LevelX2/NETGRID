@@ -1,4 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../../card-implementations/registry", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("../../card-implementations/registry")
+    >();
+  const mutableImplementations = {
+    ...actual.CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
+  };
+  return {
+    ...actual,
+    CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: mutableImplementations,
+    cardImplementationForDefinitionId: (definitionId: string) =>
+      mutableImplementations[definitionId],
+  };
+});
 import {
   applyAction,
   createGameAfterSetup,
@@ -25,7 +42,7 @@ import {
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import { passRootRezWindowBeforeAccessIfOpen } from "../../test-fixtures/index-test-helpers";
-import { CARD_DEFINITIONS_BY_ID, type CardInstanceId } from "@netgrid/shared";
+import { type CardInstanceId } from "@netgrid/shared";
 import {
   CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
   cardImplementationForDefinitionId,
@@ -34,6 +51,14 @@ import {
   overadvanceViewFields,
   visibleFreeNetOrCoreDamagePreventionRemaining,
 } from "./card-view";
+
+const TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID =
+  CARD_IMPLEMENTATIONS_BY_DEFINITION_ID as Partial<
+    Record<
+      string,
+      NonNullable<ReturnType<typeof cardImplementationForDefinitionId>>
+    >
+  >;
 
 describe("PlayerView projection", () => {
   it("matches free prevention runtime capacity including use and cancellation", () => {
@@ -423,10 +448,10 @@ describe("PlayerView projection", () => {
 
     const definitionId = "onr_classic_044_crash-space";
     const originalImplementation =
-      CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId];
+      TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId];
     if (!originalImplementation)
       throw new Error("Missing Crash Space implementation");
-    CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] = {
+    TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] = {
       ...originalImplementation,
       abilities: [
         {
@@ -449,7 +474,7 @@ describe("PlayerView projection", () => {
         "Trace CardImplementation ability supports nonnegative credit and optional source costs.",
       );
     } finally {
-      CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] =
+      TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId] =
         originalImplementation;
     }
   });

@@ -1,4 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID, type VisibleCard } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 
 export function runtimeCardDefinitionForAi(definitionId: string) {
@@ -32,5 +33,7 @@ export function cardDefinitionTypeForAi(
 }
 
 export function visibleCardDefinition(card: VisibleCard) {
-  return card.definitionId ? CARD_DEFINITIONS_BY_ID[card.definitionId] : undefined;
+  return card.definitionId
+    ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+    : undefined;
 }

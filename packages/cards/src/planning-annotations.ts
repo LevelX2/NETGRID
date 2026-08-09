@@ -1,6 +1,22 @@
 import { capabilityKey, type CapabilityKey } from "./capability-identity";
 import { assertStrictlySerializable } from "./serializable";
 
+export const KNOWN_PLANNING_TACTIC_SIGNALS = [
+  "access.punish",
+  "corp.remote_protection",
+  "coverage.breaker",
+  "damage.payoff",
+  "economy.card",
+  "remote.ambush",
+] as const;
+
+export const KNOWN_PLANNING_TACTIC_USES = [
+  "corp.remote_protection",
+  "coverage.breaker",
+  "damage.payoff.runner",
+  "economy.card",
+] as const;
+
 export type CardPlanningAnnotations = {
   schemaVersion: "card-planning-annotations-v1";
   card?: readonly PlanningInterpretation[];
@@ -27,6 +43,22 @@ export type PlanningInterpretation =
       role: string;
     }
   | {
+      kind: "plan_role";
+      role: string;
+    }
+  | {
+      kind: "strategic_exchange";
+      exchange: string;
+    }
+  | {
+      kind: "strategy_support";
+      strategyKey: string;
+      role: string;
+      roleDetail: string;
+      confidence: "low" | "medium" | "high";
+      rationale?: string;
+    }
+  | {
       kind: "plan_owner";
       owner: string;
       route?: string;
@@ -51,8 +83,8 @@ export type PlanningInterpretation =
     }
   | {
       kind: "tactic_interpretation";
-      signal: string;
-      use: string;
+      signal: (typeof KNOWN_PLANNING_TACTIC_SIGNALS)[number];
+      use: (typeof KNOWN_PLANNING_TACTIC_USES)[number];
     }
   | {
       kind: "remote_role";
@@ -92,6 +124,16 @@ const INTERPRETATION_KEYS: Record<
   strategy_anchor: new Set(["kind", "strategyKey"]),
   line_support: new Set(["kind", "lineKey", "support"]),
   strategic_role: new Set(["kind", "role"]),
+  plan_role: new Set(["kind", "role"]),
+  strategic_exchange: new Set(["kind", "exchange"]),
+  strategy_support: new Set([
+    "kind",
+    "strategyKey",
+    "role",
+    "roleDetail",
+    "confidence",
+    "rationale",
+  ]),
   plan_owner: new Set(["kind", "owner", "route"]),
   target_preference: new Set(["kind", "purpose", "preferences", "avoid"]),
   value_interpretation: new Set(["kind", "axis", "rating", "rationale"]),
@@ -222,6 +264,19 @@ function assertInterpretationShape(
     case "strategic_role":
       stringField(record, "role", path);
       return;
+    case "plan_role":
+      stringField(record, "role", path);
+      return;
+    case "strategic_exchange":
+      stringField(record, "exchange", path);
+      return;
+    case "strategy_support":
+      stringField(record, "strategyKey", path);
+      stringField(record, "role", path);
+      stringField(record, "roleDetail", path);
+      enumField(record, "confidence", ["low", "medium", "high"], path);
+      optionalStringField(record, "rationale", path);
+      return;
     case "plan_owner":
       stringField(record, "owner", path);
       optionalStringField(record, "route", path);
@@ -242,8 +297,8 @@ function assertInterpretationShape(
       optionalStringField(record, "rationale", path);
       return;
     case "tactic_interpretation":
-      stringField(record, "signal", path);
-      stringField(record, "use", path);
+      enumField(record, "signal", KNOWN_PLANNING_TACTIC_SIGNALS, path);
+      enumField(record, "use", KNOWN_PLANNING_TACTIC_USES, path);
       return;
     case "remote_role":
       stringField(record, "role", path);

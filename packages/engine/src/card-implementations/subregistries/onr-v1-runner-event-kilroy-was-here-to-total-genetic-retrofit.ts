@@ -12,7 +12,6 @@ import { priorityWreckImplementation } from "../onr-v1/runner/preps/priority-wre
 import { privateLdlAccessImplementation } from "../onr-v1/runner/preps/private-ldl-access";
 import { rompThroughHqImplementation } from "../onr-v1/runner/preps/romp-through-hq";
 import { securityCodeWormChipImplementation } from "../onr-v1/runner/preps/security-code-worm-chip";
-import { sneakPreviewImplementation } from "../onr-v1/runner/preps/sneak-preview";
 import { socialEngineeringImplementation } from "../onr-v1/runner/preps/social-engineering";
 import { templeMicrocodeOutletImplementation } from "../onr-v1/runner/preps/temple-microcode-outlet";
 import { stumbleThroughWilderspaceImplementation } from "../onr-v1/runner/preps/stumble-through-wilderspace";
@@ -35,7 +34,6 @@ export const ONR_V1_RUNNER_EVENT_KILROY_WAS_HERE_TO_TOTAL_GENETIC_RETROFIT_IMPLE
     privateLdlAccessImplementation,
     rompThroughHqImplementation,
     securityCodeWormChipImplementation,
-    sneakPreviewImplementation,
     socialEngineeringImplementation,
     templeMicrocodeOutletImplementation,
     stumbleThroughWilderspaceImplementation,

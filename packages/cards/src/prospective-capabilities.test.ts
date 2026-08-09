@@ -69,6 +69,25 @@ function spec(id: string, title: string, side: "runner" | "corp" = "runner") {
   value.identity.title = title;
   value.identity.side = side;
   value.identity.cardType = side === "runner" ? "program" : "asset";
+  value.engine.characteristics.playCost = null;
+  value.engine.characteristics.numeric =
+    side === "runner"
+      ? {
+          installCost: 0,
+          memoryCost: 0,
+          rezCost: null,
+          trashCost: null,
+          advancementRequirement: null,
+          agendaPoints: null,
+        }
+      : {
+          installCost: null,
+          memoryCost: null,
+          rezCost: 0,
+          trashCost: 0,
+          advancementRequirement: null,
+          agendaPoints: null,
+        };
   value.printings = [{ ...value.printings[0]!, printingId: `${id}:test` }];
   return value;
 }
@@ -405,6 +424,15 @@ describe("compileProspectiveCapabilities", () => {
   it("keeps Sneak Preview at the hidden-zone choice boundary", () => {
     const sneak = spec("stress_sneak_preview", "Sneak Preview");
     sneak.identity.cardType = "event";
+    sneak.engine.characteristics.playCost = { kind: "fixed", credits: 0 };
+    sneak.engine.characteristics.numeric = {
+      installCost: null,
+      memoryCost: null,
+      rezCost: null,
+      trashCost: null,
+      advancementRequirement: null,
+      agendaPoints: null,
+    };
     sneak.engine.abilities = [
       {
         ...keyed("play_sneak_preview"),
@@ -493,6 +521,13 @@ describe("compileProspectiveCapabilities", () => {
 
     const digiconda = spec("stress_digiconda", "Digiconda", "corp");
     digiconda.identity.cardType = "ice";
+    digiconda.engine.characteristics.numeric.rezCost = 6;
+    digiconda.engine.characteristics.numeric.trashCost = null;
+    digiconda.engine.characteristics.strength = {
+      kind: "paid_x",
+      minimumStrength: 0,
+      maximumStrength: 6,
+    };
     digiconda.engine.variableRez = {
       ...keyed("choose_rez_x"),
       kind: "x_strength",
@@ -624,6 +659,14 @@ describe("compileProspectiveCapabilities", () => {
       "corp",
     );
     reclamation.identity.cardType = "agenda";
+    reclamation.engine.characteristics.numeric = {
+      installCost: null,
+      memoryCost: null,
+      rezCost: null,
+      trashCost: null,
+      advancementRequirement: 4,
+      agendaPoints: 2,
+    };
     reclamation.engine.scoredAgenda = {
       ...keyed("score_install_sequence"),
       kind: "score_install_hq_cards_into_new_remote_then_rez",
@@ -895,10 +938,7 @@ describe("compileProspectiveCapabilities", () => {
     expect(compileProspectiveCapabilities(annotationChanged)).not.toBe(first);
 
     const mechanicChanged = JSON.parse(JSON.stringify(annotated)) as CardSpec;
-    mechanicChanged.engine.characteristics.playCost = {
-      kind: "fixed",
-      credits: 1,
-    };
+    mechanicChanged.engine.characteristics.numeric.installCost = 1;
     expect(compileProspectiveCapabilities(mechanicChanged)).not.toBe(first);
 
     const editorialChanged = JSON.parse(JSON.stringify(annotated)) as CardSpec;

@@ -1,4 +1,4 @@
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { RUNTIME_CARDS } from "../ai-hints";
 
 export function titleForCardId(cardId: string | undefined): string | undefined {

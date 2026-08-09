@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import type { ResolvedCardDefinition } from "@netgrid/shared";
 import {
   applyAction,
   createGameAfterSetup,
@@ -23,81 +22,16 @@ import {
 
 const PROTEUS_ENTERPRISE_SHIELDS = "onr_proteus_086_enterprise-inc-shields";
 const PROTEUS_SKULLCAP = "onr_proteus_096_skullcap";
-const PROTEUS_CORTICAL_STIMULATORS =
-  "onr_proteus_135_cortical-stimulators";
+const PROTEUS_CORTICAL_STIMULATORS = "onr_proteus_135_cortical-stimulators";
 
 function ensureProteusProtectionCardDefinitions(): void {
-  CARD_DEFINITIONS_BY_ID[PROTEUS_ENTERPRISE_SHIELDS] ??= {
-    id: PROTEUS_ENTERPRISE_SHIELDS,
-    title: "Enterprise, Inc., Shields",
-    side: "runner",
-    type: "program",
-    playCost: null,
-    subtypes: [],
-    implementationStatus: "playable_mvp",
-    installCost: 0,
-    memoryCost: 1,
-    numeric: {
-      cost: null,
-      installCost: 0,
-      memoryCost: 1,
-      strength: null,
-      rezCost: null,
-      trashCost: null,
-      advancementRequirement: null,
-      agendaPoints: null,
-    },
-    strengthModel: { kind: "not_applicable" },
-    rulesText: "[1]: Prevent up to 2 Net damage. [1]: Prevent 1 brain damage.",
-    mechanics: ["install_program", "memory", "damage_prevention"],
-  } satisfies ResolvedCardDefinition;
-  CARD_DEFINITIONS_BY_ID[PROTEUS_SKULLCAP] ??= {
-    id: PROTEUS_SKULLCAP,
-    title: "Skullcap",
-    side: "runner",
-    type: "program",
-    playCost: null,
-    subtypes: [],
-    implementationStatus: "playable_mvp",
-    installCost: 0,
-    memoryCost: 1,
-    numeric: {
-      cost: null,
-      installCost: 0,
-      memoryCost: 1,
-      strength: null,
-      rezCost: null,
-      trashCost: null,
-      advancementRequirement: null,
-      agendaPoints: null,
-    },
-    strengthModel: { kind: "not_applicable" },
-    rulesText: "T: Prevent any amount of Net or brain damage.",
-    mechanics: ["install_program", "memory", "damage_prevention"],
-  } satisfies ResolvedCardDefinition;
-  CARD_DEFINITIONS_BY_ID[PROTEUS_CORTICAL_STIMULATORS] ??= {
-    id: PROTEUS_CORTICAL_STIMULATORS,
-    title: "Cortical Stimulators",
-    side: "runner",
-    type: "hardware",
-    playCost: null,
-    subtypes: ["cybernetics"],
-    implementationStatus: "playable_mvp",
-    installCost: 1,
-    numeric: {
-      cost: null,
-      installCost: 1,
-      memoryCost: null,
-      strength: null,
-      rezCost: null,
-      trashCost: null,
-      advancementRequirement: null,
-      agendaPoints: null,
-    },
-    strengthModel: { kind: "not_applicable" },
-    rulesText: "Prevents 1 Net or brain damage each turn.",
-    mechanics: ["install_hardware", "damage_prevention"],
-  } satisfies ResolvedCardDefinition;
+  for (const definitionId of [
+    PROTEUS_ENTERPRISE_SHIELDS,
+    PROTEUS_SKULLCAP,
+    PROTEUS_CORTICAL_STIMULATORS,
+  ])
+    if (CARD_DEFINITIONS_BY_ID[definitionId] === undefined)
+      throw new Error(`Missing canonical protection fixture ${definitionId}.`);
 }
 
 function proteusProtectionRunnerDeck() {

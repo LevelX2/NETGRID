@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type GameState,
-  type LegalAction,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { type GameState, type LegalAction } from "@netgrid/shared";
 import {
   activatedAbilityBindingsForDefinition,
   type CardCapabilityAuthoritySources,

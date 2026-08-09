@@ -1,5 +1,5 @@
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
+import { AI_HINTS_BY_CARD } from "./ai-hints";
 
 export const RUNNER_DECK_ENGINE_DOCTRINE_SCHEMA_VERSION =
   "runner-deck-engine-doctrine-v1" as const;
@@ -112,10 +112,7 @@ type DoctrineHint = {
 };
 
 const HINTS = new Map(
-  (activeAiHintsData.cards as DoctrineHint[]).map((hint) => [
-    hint.cardId,
-    hint,
-  ]),
+  [...AI_HINTS_BY_CARD.values()].map((hint) => [hint.cardId, hint]),
 );
 
 export function buildRunnerDeckEngineDoctrine(

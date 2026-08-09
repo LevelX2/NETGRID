@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
+import { listPublicCardViews } from "@netgrid/cards/server";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
   activeAiApprovedCardIds,
@@ -22,7 +22,18 @@ import {
   validateLoadedCardSets,
   validatePlayableNumericContract,
   validateSnapshot,
+  cardSetSupportEntries,
 } from "./index";
+
+function createActiveCatalogAiSupportEvidence() {
+  return cardSetSupportEntries
+    .filter((entry) => entry.statuses.ai_supported === true)
+    .map((entry) => ({
+      cardId: entry.cardId,
+      aiSupportStatus: "ai_supported",
+      scenarioRefs: entry.support.scenarioRefs,
+    }));
+}
 
 const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
   "onr_proteus_002_charity-takeover",
@@ -226,8 +237,7 @@ describe("card set support catalog source", () => {
     expect(agenda).toBeDefined();
     expect(variableBreaker).toBeDefined();
     expect(fixedIce).toBeDefined();
-    if (!hardware || !event || !agenda || !variableBreaker || !fixedIce)
-      return;
+    if (!hardware || !event || !agenda || !variableBreaker || !fixedIce) return;
 
     hardware.numeric.installCost = null;
     expect(validatePlayableNumericContract(hardware)).toEqual(
@@ -286,12 +296,26 @@ describe("card set support catalog source", () => {
 
   it("resolves every playable event and operation to the same exhaustive catalog/shared play-cost contract", () => {
     const cardsById = createRuntimeCardsById();
+    const publicCardViewsById = new Map(
+      listPublicCardViews().map((view) => [view.cardDefinitionId, view]),
+    );
     const variableCostIds: string[] = [];
     let playablePlayCardCount = 0;
 
     for (const cardId of activeRuntimeCardIds) {
       const card = cardsById[cardId];
-      const definition = CARD_DEFINITIONS_BY_ID[cardId];
+      const legacyDefinition = CARD_DEFINITIONS_BY_ID[cardId];
+      const cardSpecDefinition = publicCardViewsById.get(cardId);
+      const definition =
+        cardSpecDefinition === undefined
+          ? legacyDefinition
+          : {
+              type: cardSpecDefinition.cardType,
+              playCost: cardSpecDefinition.playCost,
+              ...(cardSpecDefinition.playCost?.kind === "fixed"
+                ? { cost: cardSpecDefinition.playCost.credits }
+                : {}),
+            };
       expect(card, cardId).toBeDefined();
       expect(definition, cardId).toBeDefined();
       if (!card || !definition) continue;
@@ -404,7 +428,7 @@ describe("card set support catalog source", () => {
     }
   });
 
-  it("keeps active AI support, active hints and the approval scenario aligned", () => {
+  it("keeps active AI support evidence and the approval scenario aligned", () => {
     const activeAiSupportScenario =
       cardSupportAiSupportedScenarioData.scenarios.find(
         (scenario) => scenario.id === "active_card_support_ai_supported",
@@ -416,20 +440,23 @@ describe("card set support catalog source", () => {
     expect(activeAiSupportScenario).toBeDefined();
 
     const cardsById = createRuntimeCardsById();
-    const hintsById = new Map(
-      activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+    const supportEvidenceById = new Map(
+      createActiveCatalogAiSupportEvidence().map((hint) => [hint.cardId, hint]),
     );
     const activeAiApprovedIdSet = new Set(activeAiApprovedCardIds);
-    const hintCardIds = activeAiHintsData.cards.map((hint) => hint.cardId);
+    const supportEvidenceCardIds = createActiveCatalogAiSupportEvidence().map(
+      (entry) => entry.cardId,
+    );
     const scenarioCardIds = activeAiSupportScenario?.coversCards ?? [];
     const runtimeIdsWithoutHints = activeRuntimeCardIds
-      .filter((cardId) => !hintsById.has(cardId))
+      .filter((cardId) => !supportEvidenceById.has(cardId))
       .sort();
 
-    expect(hintsById.size, "active AI hint card ids must be unique").toBe(
-      hintCardIds.length,
-    );
-    expect([...hintsById.keys()].sort()).toEqual(
+    expect(
+      supportEvidenceById.size,
+      "active AI support evidence card ids must be unique",
+    ).toBe(supportEvidenceCardIds.length);
+    expect([...supportEvidenceById.keys()].sort()).toEqual(
       activeAiApprovedCardIds.slice().sort(),
     );
     expect([...new Set(scenarioCardIds)].sort()).toEqual(
@@ -439,21 +466,27 @@ describe("card set support catalog source", () => {
 
     for (const cardId of activeAiApprovedCardIds) {
       const card = cardsById[cardId];
-      const hint = hintsById.get(cardId);
+      const evidence = supportEvidenceById.get(cardId);
       expect(card, cardId).toBeDefined();
       expect(card?.statuses.ai_supported, cardId).toBe(true);
-      expect(hint, cardId).toBeDefined();
-      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
-      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(evidence, cardId).toBeDefined();
+      expect(evidence?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(evidence?.scenarioRefs.length, cardId).toBeGreaterThan(0);
     }
 
-    for (const hint of activeAiHintsData.cards) {
-      const card = cardsById[hint.cardId];
-      expect(card, hint.cardId).toBeDefined();
-      if (hint.aiSupportStatus === "ai_supported")
-        expect(activeAiApprovedIdSet.has(hint.cardId), hint.cardId).toBe(true);
+    for (const evidence of createActiveCatalogAiSupportEvidence()) {
+      const card = cardsById[evidence.cardId];
+      expect(card, evidence.cardId).toBeDefined();
+      if (evidence.aiSupportStatus === "ai_supported")
+        expect(
+          activeAiApprovedIdSet.has(evidence.cardId),
+          evidence.cardId,
+        ).toBe(true);
       else
-        expect(activeAiApprovedIdSet.has(hint.cardId), hint.cardId).toBe(false);
+        expect(
+          activeAiApprovedIdSet.has(evidence.cardId),
+          evidence.cardId,
+        ).toBe(false);
     }
   });
 
@@ -473,8 +506,8 @@ describe("card set support catalog source", () => {
         blocked: false,
       });
     }
-    const activeHintsById = new Map(
-      activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+    const activeSupportEvidenceById = new Map(
+      createActiveCatalogAiSupportEvidence().map((hint) => [hint.cardId, hint]),
     );
     const aiSupportedProteus = Object.values(cardsById).filter(
       (card) =>
@@ -483,10 +516,11 @@ describe("card set support catalog source", () => {
     );
     expect(aiSupportedProteus).toHaveLength(PROTEUS_CARD_IDS.length);
     for (const cardId of PROTEUS_CARD_IDS) {
-      expect(activeHintsById.get(cardId)?.aiSupportStatus, cardId).toBe(
-        "ai_supported",
-      );
-      expect(activeHintsById.has(cardId), cardId).toBe(true);
+      expect(
+        activeSupportEvidenceById.get(cardId)?.aiSupportStatus,
+        cardId,
+      ).toBe("ai_supported");
+      expect(activeSupportEvidenceById.has(cardId), cardId).toBe(true);
       expect(cardsById[cardId]?.implementationManifest, cardId).toBeDefined();
     }
   });
@@ -512,14 +546,15 @@ describe("card set support catalog source", () => {
         blocked: false,
       });
     }
-    const activeHintsById = new Map(
-      activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+    const activeSupportEvidenceById = new Map(
+      createActiveCatalogAiSupportEvidence().map((hint) => [hint.cardId, hint]),
     );
     for (const cardId of CLASSIC_CARD_IDS) {
-      expect(activeHintsById.get(cardId)?.aiSupportStatus, cardId).toBe(
-        "ai_supported",
-      );
-      expect(activeHintsById.has(cardId), cardId).toBe(true);
+      expect(
+        activeSupportEvidenceById.get(cardId)?.aiSupportStatus,
+        cardId,
+      ).toBe("ai_supported");
+      expect(activeSupportEvidenceById.has(cardId), cardId).toBe(true);
     }
     expect(cardsById["onr_classic_001_data-fort-remapping"]?.rarity?.code).toBe(
       "common",

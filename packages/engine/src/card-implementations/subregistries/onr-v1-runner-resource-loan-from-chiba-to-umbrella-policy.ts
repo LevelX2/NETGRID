@@ -1,5 +1,4 @@
 import type { CardImplementationDefinition } from "../types";
-import { loanFromChibaImplementation } from "../onr-v1/runner/resources/loan-from-chiba";
 import { nEtoImplementation } from "../onr-v1/runner/resources/n-e-t-o";
 import { nomadAlliesImplementation } from "../onr-v1/runner/resources/nomad-allies";
 import { preyingMantisImplementation } from "../onr-v1/runner/resources/preying-mantis";
@@ -22,7 +21,6 @@ import { umbrellaPolicyImplementation } from "../onr-v1/runner/resources/umbrell
 
 export const ONR_V1_RUNNER_RESOURCE_LOAN_FROM_CHIBA_TO_UMBRELLA_POLICY_IMPLEMENTATIONS =
   [
-    loanFromChibaImplementation,
     nEtoImplementation,
     nomadAlliesImplementation,
     preyingMantisImplementation,

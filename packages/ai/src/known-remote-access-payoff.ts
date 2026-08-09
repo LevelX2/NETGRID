@@ -1,8 +1,5 @@
-import {
-  CARD_DEFINITIONS_BY_ID,
-  type AiDecisionInput,
-  type VisibleCard,
-} from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
+import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import {
   reconstructBeliefState,
@@ -401,9 +398,7 @@ function remoteEventServerId(
 ): string | undefined {
   const direct = serverIdFromEvent(event);
   if (direct) return direct;
-  const label = stringPayloadValue(event, "serverLabel")
-    ?.trim()
-    .toLowerCase();
+  const label = stringPayloadValue(event, "serverLabel")?.trim().toLowerCase();
   const match = /^remote[\s_-]+(\d+)$/.exec(label ?? "");
   return match?.[1] ? `remote_${Number.parseInt(match[1], 10)}` : undefined;
 }

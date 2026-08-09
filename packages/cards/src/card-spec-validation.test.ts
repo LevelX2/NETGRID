@@ -163,6 +163,111 @@ describe("CardSpec validation", () => {
     }
   });
 
+  it.each([
+    {
+      name: "event play cost",
+      mutate(spec: Record<string, unknown>) {
+        (engineOf(spec).characteristics as Record<string, unknown>).playCost =
+          null;
+      },
+    },
+    {
+      name: "resource rez cost",
+      mutate(spec: Record<string, unknown>) {
+        (spec.identity as Record<string, unknown>).cardType = "resource";
+        const characteristics = engineOf(spec).characteristics as Record<
+          string,
+          unknown
+        >;
+        characteristics.playCost = null;
+        (characteristics.numeric as Record<string, unknown>).installCost = 1;
+        (characteristics.numeric as Record<string, unknown>).rezCost = 1;
+      },
+    },
+    {
+      name: "non-breaker program strength",
+      mutate(spec: Record<string, unknown>) {
+        (spec.identity as Record<string, unknown>).cardType = "program";
+        const characteristics = engineOf(spec).characteristics as Record<
+          string,
+          unknown
+        >;
+        characteristics.playCost = null;
+        const numeric = characteristics.numeric as Record<string, unknown>;
+        numeric.installCost = 1;
+        numeric.memoryCost = 1;
+        characteristics.strength = { kind: "fixed", value: 1 };
+      },
+    },
+    {
+      name: "ICE without strength",
+      mutate(spec: Record<string, unknown>) {
+        (spec.identity as Record<string, unknown>).cardType = "ice";
+        const characteristics = engineOf(spec).characteristics as Record<
+          string,
+          unknown
+        >;
+        characteristics.playCost = null;
+        (characteristics.numeric as Record<string, unknown>).rezCost = 1;
+      },
+    },
+  ])("rejects characteristic ownership drift: $name", ({ mutate }) => {
+    const spec = untypedSpec();
+    mutate(spec);
+    expect(() => validateUntyped(spec)).toThrowError(CardSpecValidationError);
+  });
+
+  it("binds paid-X strength to ordered variable-rez bounds", () => {
+    const paidX = (): Record<string, unknown> => {
+      const spec = untypedSpec();
+      (spec.identity as Record<string, unknown>).cardType = "ice";
+      const characteristics = engineOf(spec).characteristics as Record<
+        string,
+        unknown
+      >;
+      characteristics.playCost = null;
+      (characteristics.numeric as Record<string, unknown>).rezCost = 6;
+      characteristics.strength = {
+        kind: "paid_x",
+        minimumStrength: 0,
+        maximumStrength: 6,
+      };
+      engineOf(spec).variableRez = {
+        capabilityKey: "variable_rez_x",
+        addressability: ["choice", "plan", "quote", "debug"],
+        kind: "x_strength",
+        additionalCostPerValue: 1,
+        minValue: 0,
+        maxValue: 6,
+        visibility: "public",
+      };
+      return spec;
+    };
+    expect(() => validateUntyped(paidX())).not.toThrow();
+
+    const mismatched = paidX();
+    (engineOf(mismatched).characteristics as Record<string, unknown>).strength =
+      {
+        kind: "paid_x",
+        minimumStrength: 0,
+        maximumStrength: 5,
+      };
+    expect(() => validateUntyped(mismatched)).toThrowError(
+      /x_strength bounds must match paid_x strength bounds/,
+    );
+
+    const reversed = paidX();
+    (engineOf(reversed).characteristics as Record<string, unknown>).strength = {
+      kind: "paid_x",
+      minimumStrength: 7,
+      maximumStrength: 6,
+    };
+    (engineOf(reversed).variableRez as Record<string, unknown>).minValue = 7;
+    expect(() => validateUntyped(reversed)).toThrowError(
+      /maximumStrength must not be below minimumStrength/,
+    );
+  });
+
   it("rejects mismatched ability aliases and duplicate keys", () => {
     const spec = untypedSpec();
     engineOf(spec).abilities = [

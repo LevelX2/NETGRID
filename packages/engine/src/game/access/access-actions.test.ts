@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -6,7 +7,6 @@ import type {
   CorpServer,
   GameState,
 } from "@netgrid/shared";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
 import {

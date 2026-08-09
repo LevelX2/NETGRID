@@ -1,6 +1,6 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { applyAction, createGameAfterSetup, getLegalActions } from "../index";
 import {
-  CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE,
   type CardInstanceId,
   type ChoiceRequest,
@@ -2203,15 +2203,20 @@ export function encounterIce(
   let next = apply(
     state,
     "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === serverId,
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === serverId,
   );
   next = apply(
     next,
     "corp",
     (action) =>
-      action.type === "rez_ice" && sourceDefinition(next, action) === definitionId,
+      action.type === "rez_ice" &&
+      sourceDefinition(next, action) === definitionId,
   );
-  if (next.timingPoint === "run.jack_out_window" && next.run?.phase === "movement") {
+  if (
+    next.timingPoint === "run.jack_out_window" &&
+    next.run?.phase === "movement"
+  ) {
     next = apply(next, "runner", (action) => action.type === "continue_run");
   }
   return next;
@@ -2362,20 +2367,17 @@ export function sourceDefinition(
 
 export function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
-  const scoredPoints = ids.reduce(
-    (sum, id) => {
-      const instance = state.cardInstances[id];
-      const basePoints =
-        CARD_DEFINITIONS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
-      const bonusPoints = instance?.counters?.agenda ?? 0;
-      const spentPoints = Math.max(
-        0,
-        Math.floor(instance?.agendaPointsSpent ?? 0),
-      );
-      return sum + Math.max(0, basePoints + bonusPoints - spentPoints);
-    },
-    0,
-  );
+  const scoredPoints = ids.reduce((sum, id) => {
+    const instance = state.cardInstances[id];
+    const basePoints =
+      CARD_DEFINITIONS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
+    const bonusPoints = instance?.counters?.agenda ?? 0;
+    const spentPoints = Math.max(
+      0,
+      Math.floor(instance?.agendaPointsSpent ?? 0),
+    );
+    return sum + Math.max(0, basePoints + bonusPoints - spentPoints);
+  }, 0);
   return side === "corp"
     ? scoredPoints + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0))
     : scoredPoints;
@@ -2607,7 +2609,10 @@ export function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
   }
 }
 
-export function keepOnlyCorpHqCards(state: GameState, ids: CardInstanceId[]): void {
+export function keepOnlyCorpHqCards(
+  state: GameState,
+  ids: CardInstanceId[],
+): void {
   const keep = new Set(ids);
   const movedToRd = state.corp.hq.filter((cardId) => !keep.has(cardId));
   state.corp.hq = ids.slice();
@@ -2825,7 +2830,7 @@ export function scoreTwoAgendasForTest(state: GameState): void {
         card.definitionId === "simple_agenda" &&
         !state.corp.scoreArea.includes(id),
     );
-      if (!entry) throw new Error("Missing agenda");
+    if (!entry) throw new Error("Missing agenda");
     const id = entry[0];
     removeEverywhere(state, id);
     state.corp.scoreArea.push(id);
@@ -2838,7 +2843,10 @@ export function scoreTwoAgendasForTest(state: GameState): void {
   }
 }
 
-export function findCard(state: GameState, definitionId: string): CardInstanceId {
+export function findCard(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
   const entries = Object.entries(state.cardInstances).filter(
     ([, card]) => card.definitionId === definitionId,
   );

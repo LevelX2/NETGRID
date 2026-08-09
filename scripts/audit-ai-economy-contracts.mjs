@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { AI_HINTS_BY_CARD } from "../packages/ai/src/ai-hints.ts";
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -56,8 +57,7 @@ const SCORED_AGENDA_ACTION_CONTRACTS = new Map([
 ]);
 
 export function buildAiEconomyContractAudit() {
-  const hints = readJson("data/ai/ai-card-hints-active.json");
-  const hintCards = Array.isArray(hints.cards) ? hints.cards : [];
+  const hintCards = [...AI_HINTS_BY_CARD.values()];
   const sourceFiles = sourceFilesUnder("packages/ai/src");
   const rawGainCreditConsumers = sourceFiles
     .flatMap((filePath) => {
@@ -188,7 +188,8 @@ export function buildAiEconomyContractAudit() {
 
   return {
     schemaVersion: "ai-economy-contract-audit-v1",
-    source: "data/ai/ai-card-hints-active.json",
+    source:
+      "@netgrid/ai#AI_HINTS_BY_CARD (legacy JSON + generated CardSpec hints)",
     counts: {
       hintCards: hintCards.length,
       cardsWithBroadEconomy: cardsWithBroadEconomy.length,

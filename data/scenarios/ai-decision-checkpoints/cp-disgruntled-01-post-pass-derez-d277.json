@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 277,
-    "stateHash": "fnv1a:f9f74d58",
+    "stateHash": "fnv1a:0a46eff5",
     "testOnlyGameState": {
       "matchId": "selfplay:neon-escrow-counterbank-rent-02",
       "baseline": {
@@ -29601,7 +29601,10 @@
                 "invocation": {
                   "semanticActionType": "breaker.break_subroutine",
                   "sourceCardInstanceId": "runner_onr_classic_031_rent-i-con_1",
-                  "sourceAbilityId": "onr_classic_031_rent-i-con.card_implementation.icebreaker.1.break_subroutine",
+                  "sourceAbilityBinding": {
+                    "kind": "legacy_ability_id",
+                    "abilityId": "onr_classic_031_rent-i-con.card_implementation.icebreaker.1.break_subroutine"
+                  },
                   "boundTargets": [
                     {
                       "slotId": "encounteredIce",
@@ -29625,7 +29628,7 @@
                     }
                   ],
                   "boundChoices": [],
-                  "routeKey": "fnv1a:d87712d0"
+                  "routeKey": "fnv1a:fd6224b3"
                 },
                 "expectation": {
                   "nodeId": "fnv1a:ef151d9b",
@@ -29677,7 +29680,7 @@
           "expectationId": "fnv1a:0a43c943",
           "phaseId": "fnv1a:60c4adf9",
           "nodeId": "fnv1a:ef151d9b",
-          "routeKey": "fnv1a:d87712d0",
+          "routeKey": "fnv1a:fd6224b3",
           "expectedStateDeltaCodes": [
             "action_applied:breaker.break_subroutine",
             "milestone_attempted:convert_active_run_window"
@@ -29693,7 +29696,7 @@
         "sourcePlanId": "fnv1a:c51cc578",
         "phaseId": "fnv1a:60c4adf9",
         "nodeId": "fnv1a:ef151d9b",
-        "routeKey": "fnv1a:d87712d0",
+        "routeKey": "fnv1a:fd6224b3",
         "stateIdentity": {
           "stateVersion": 275,
           "sideSafePlanningFingerprint": "fnv1a:4b63a3dc"

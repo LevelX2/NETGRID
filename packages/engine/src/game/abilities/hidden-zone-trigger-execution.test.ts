@@ -73,7 +73,9 @@ describe("hidden zone trigger execution", () => {
       actionType: "trigger_ability",
     });
 
-    expect(state.run?.hiddenStackInstallUsedSourceIdsThisRun).toEqual([sourceId]);
+    expect(state.run?.hiddenStackInstallUsedSourceIdsThisRun).toEqual([
+      sourceId,
+    ]);
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
       kind: "select_cards",
@@ -201,7 +203,6 @@ function testHost(
       randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
       stackProgramFreeInstallSourceId: "self_modifying_code",
       stackSearchGripSourceId: "short_circuit",
-      temporaryProgramInstallSourceId: "sneak_preview",
     },
     cards: {
       definitionFor: (cardId) => definitionFor(state, cardId),

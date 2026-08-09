@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 /**
  * Queries active declarative CardImplementation modifiers from the board state.
  *
@@ -6,7 +7,6 @@
  * must not contain concrete card IDs or execute modifier effects themselves.
  */
 import {
-  CARD_DEFINITIONS_BY_ID,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -65,7 +65,11 @@ export function cardHasNormalizedSubtype(
 
 export function cardMatchesModifierAppliesTo(
   definition: CardDefinition,
-  appliesTo: { cardType: CardType; subtype?: string; subtypeAnyOf?: readonly string[] },
+  appliesTo: {
+    cardType: CardType;
+    subtype?: string;
+    subtypeAnyOf?: readonly string[];
+  },
 ): boolean {
   if (definition.type !== appliesTo.cardType) return false;
   if (
@@ -108,7 +112,10 @@ export function sameServerAsSourceApplies(
   sameServerAsSource?: boolean,
 ): boolean {
   if (!sameServerAsSource) return true;
-  const targetServerId = corpServerIdForInstalledCard(state, targetCardInstanceId);
+  const targetServerId = corpServerIdForInstalledCard(
+    state,
+    targetCardInstanceId,
+  );
   return (
     Boolean(targetServerId) &&
     corpServerIdForInstalledCard(state, sourceCardInstanceId) === targetServerId

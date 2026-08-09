@@ -3,8 +3,8 @@
   "inventoryId": "proteus-ai-readiness-inventory-v1",
   "asOf": "2026-07-09",
   "generatedFrom": [
-    "data/manifests/proteus-card-support.json",
-    "data/ai/ai-card-hints-active.json",
+    "@netgrid/catalog#createRuntimeCardsById",
+    "@netgrid/ai#AI_HINTS_BY_CARD",
     "data/decks/proteus-playtest-decks-2026-05-25.json",
     "data/scenarios/proteus-ai-family-decision-smokes-v1.json"
   ],
@@ -1784,7 +1784,7 @@
         "hintReviewed": true,
         "strategyCovered": false,
         "benchmarkCovered": false,
-        "confidence": "medium",
+        "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
@@ -2086,7 +2086,7 @@
         "hintReviewed": true,
         "strategyCovered": false,
         "benchmarkCovered": false,
-        "confidence": "medium",
+        "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
@@ -3187,7 +3187,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 0,
-        "effectCount": 6
+        "effectCount": 5
       },
       "removalConditions": [
         "complex_multi_ability_decision_smoke_green",
@@ -3471,7 +3471,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 0,
-        "effectCount": 5
+        "effectCount": 6
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",

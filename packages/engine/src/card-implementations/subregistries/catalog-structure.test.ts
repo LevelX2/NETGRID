@@ -1,6 +1,13 @@
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { describe, expect, it } from "vitest";
-import { CARD_IMPLEMENTATIONS } from "../registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  legacyCardImplementationForDefinitionId,
+} from "../registry";
+import {
+  CS06_CARD_DEFINITION_IDS,
+  cs06CardImplementations,
+} from "@netgrid/cards/engine";
 import {
   CARD_IMPLEMENTATION_CATALOG,
   CARD_IMPLEMENTATION_CATALOG_GROUPS,
@@ -58,7 +65,19 @@ describe("semantic CardImplementation catalog", () => {
     expect(groupKeys).toEqual(EXPECTED_GROUP_KEYS);
     expect(new Set(groupKeys).size).toBe(groupKeys.length);
     expect(CARD_IMPLEMENTATION_CATALOG).toEqual(flattened);
-    expect(CARD_IMPLEMENTATIONS).toEqual(flattened);
+    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(573);
+    expect(cs06CardImplementations()).toHaveLength(10);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(583);
+    expect(CARD_IMPLEMENTATIONS.slice(0, flattened.length)).toEqual(flattened);
+    expect(
+      CARD_IMPLEMENTATIONS.slice(flattened.length).map(
+        (entry) => entry.cardDefinitionId,
+      ),
+    ).toEqual(CS06_CARD_DEFINITION_IDS);
+    for (const definitionId of CS06_CARD_DEFINITION_IDS)
+      expect(
+        legacyCardImplementationForDefinitionId(definitionId),
+      ).toBeUndefined();
     expect(new Set(flattened.map((entry) => entry.cardDefinitionId)).size).toBe(
       flattened.length,
     );

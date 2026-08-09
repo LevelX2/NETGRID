@@ -1477,7 +1477,12 @@ describe("Backend 0.5 private storage maintenance", () => {
       const activeBundle = (await activeResponse.json()) as {
         schemaVersion?: string;
         match?: { matchId?: string; status?: string; stateVersion?: number };
-        scope?: { turn?: number; side?: string; fromDecision?: number; toDecision?: number };
+        scope?: {
+          turn?: number;
+          side?: string;
+          fromDecision?: number;
+          toDecision?: number;
+        };
         events?: Array<{ eventId: string }>;
         decisions?: Array<{ decisionIndex: number; side: string }>;
         traces?: Array<{ detail: Record<string, unknown> }>;
@@ -1486,7 +1491,10 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(activeResponse.status).toBe(200);
       expect(activeBundle).toMatchObject({
         schemaVersion: "netgrid-match-analysis-bundle-v1",
-        match: { matchId: active.matchId, stateVersion: before.gameState.stateVersion },
+        match: {
+          matchId: active.matchId,
+          stateVersion: before.gameState.stateVersion,
+        },
         scope: { turn: 1, side: "corp", fromDecision: 1, toDecision: 1 },
       });
       expect(activeBundle.events?.length).toBeGreaterThan(0);
@@ -1506,7 +1514,11 @@ describe("Backend 0.5 private storage maintenance", () => {
       );
       const decisionContext = (await decisionResponse.json()) as {
         schemaVersion?: string;
-        decision?: { decisionIndex?: number; side?: string; stateVersion?: number };
+        decision?: {
+          decisionIndex?: number;
+          side?: string;
+          stateVersion?: number;
+        };
         state?: unknown;
         legalActions?: Array<{ actionId?: string }>;
         surroundingEvents?: Array<{ eventId?: string }>;
@@ -12436,6 +12448,7 @@ describe("MVP 0.2 multiplayer service", () => {
               kind: "meat_damage",
               sourceCardInstanceId: "missing-server-source",
               sourceCapabilityId: "ability:on_play:0",
+              sourceCapabilityBindingKind: "legacy_card_implementation_index",
             },
           ],
         });
