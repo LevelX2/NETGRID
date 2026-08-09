@@ -1,33 +1,35 @@
 # Zentrale Kartenspezifikation und Card Registry
 
 - Datum: 09.08.2026
-- Status: **Architekturentwurf – unabhängige Prüfung ausstehend**
-- Entscheidungsstand: noch nicht freigegeben, noch nicht zur Umsetzung autorisiert
+- Status: **verbindliche Umsetzungsbaseline – unabhängige Prüfung eingearbeitet**
+- Entscheidungsstand: für den sequenziellen Prozess CS00 bis CS13 freigegeben
 - Betroffener Bereich: Kartendaten, Card Implementations, KI-Hints, Katalog,
   Decks, Karteneditor, optionale Datenbankprojektion
 
-## 1. Vorläufige Empfehlung
+## 1. Architekturentscheidung
 
-NETGRID sollte die heute auf mehrere dauerhafte Quellen verteilten
+NETGRID führt die heute auf mehrere dauerhafte Quellen verteilten
 kartenspezifischen Informationen in einer kanonischen, versionierten
-`CardSpec` je Regelidentität zusammenführen.
+`CardSpec` je Regelidentität zusammen.
 
 Die zentrale Spezifikation soll:
 
 - gedruckte und regelrelevante Kartendaten enthalten;
 - die Karte durch deklarative, generische Engine-Fähigkeiten beschreiben;
-- statische KI-Semantik unmittelbar an die betreffende Fähigkeit binden;
-- Freigabe- und Nachweisreferenzen strukturiert führen;
+- ausschließlich nicht mechanisch ableitbare Planungsinterpretation unmittelbar
+  an die betreffende Fähigkeit binden;
+- redaktionelle Publication-Zustände strukturiert führen und tatsächlichen
+  Engine-/KI-Support aus Registry, Verträgen und Tests ableiten;
 - alle Druckvarianten der Regelidentität referenzieren;
 - zur Laufzeit genau einmal in eine unveränderliche In-Memory-Registry geladen
   werden;
 - den Verbrauchern ausschließlich zweckgebundene, typisierte Projektionen
   liefern.
 
-Die CardSpec wird damit die einzige redaktionelle Quelle kartenspezifischer
-Wahrheit. Generische Engine-Primitive, Tests, Szenarien, Set-Metadaten und
-Bilddateien bleiben eigenständige Artefakte, weil sie keine Duplikate der
-Kartenbeschreibung sind.
+Die CardSpec wird damit die einzige kartenspezifische Autorenquelle. Ihr
+Abschnitt `engine` ist die einzige mechanische Kartenwahrheit. Generische
+Engine-Primitive, Tests, Szenarien, Set-Metadaten und Bilddateien bleiben
+eigenständige Artefakte, weil sie keine Duplikate der Kartenbeschreibung sind.
 
 Eine SQLite-Spiegelung kann später für Suche, Editorentwürfe oder
 Massenauswertungen sinnvoll sein. Sie soll jedoch nur eine vollständig
@@ -60,10 +62,10 @@ Die bestehende Engine-Registry ist für ihren heutigen Zweck korrekt aufgebaut:
 Sie ordnet Card Implementations deterministisch nach Set, Seite und Kartentyp
 und trennt Lookup von Regelausführung. Das ist in
 [`docs/architecture/engine/card-registry-architecture.md`](engine/card-registry-architecture.md)
-als aktueller Stand dokumentiert. Der vorliegende Entwurf verwirft diese
-Qualitäten nicht. Er schlägt vor, die Registry zu einer gemeinsamen
-Kartenspezifikation weiterzuentwickeln und die bisherigen parallelen
-Autorenquellen danach zu entfernen.
+als aktueller Stand dokumentiert. Die beschlossene Zielarchitektur erhält
+diese Qualitäten, entwickelt die Registry zu einer gemeinsamen
+Kartenspezifikation weiter und entfernt danach die bisherigen parallelen
+Autorenquellen.
 
 ## 3. Findings zum heutigen Architekturstand
 
@@ -82,7 +84,7 @@ vollständig sein, fachlich aber erst durch weitere, separat gepflegte Quellen
 spielbar, freigegeben oder KI-verstehbar werden. Die Paritätsprüfungen
 begrenzen das Risiko, beseitigen aber nicht die mehrfache Autorenschaft.
 
-Empfehlung: eine CardSpec als einzige kartenspezifische Autorenquelle;
+Entscheidung: eine CardSpec als einzige kartenspezifische Autorenquelle;
 Verbrauchersichten werden daraus abgeleitet.
 
 ### Hoch: Fähigkeiten besitzen noch keine überall stabile semantische Identität
@@ -99,9 +101,10 @@ Bindung: Die KI muss dieselbe Fähigkeit vor einer Installation beschreiben und
 nach der Installation an der neu entstandenen `LegalAction` wiedererkennen
 können.
 
-Empfehlung: jede planungs- oder ausführungsrelevante Fähigkeit erhält einen
-innerhalb der Karte eindeutigen und stabilen `abilityKey`. Der Schlüssel ist
-Semantik, keine zukünftige `actionId`.
+Entscheidung: Jeder planungs- oder Action-adressierbare Capability-Knoten
+erhält einen innerhalb der CardSpec eindeutigen und stabilen `capabilityKey`.
+Für normale aktivierte Fähigkeiten darf `abilityKey` als typisierter Alias
+verwendet werden. Der Schlüssel ist Semantik, keine zukünftige `actionId`.
 
 ### Mittel: Paketgrenzen erlauben keine unmittelbare Zusammenführung am heutigen Ort
 
@@ -119,7 +122,7 @@ Abhängigkeiten. Würde die vollständige CardSpec einfach in Shared oder Engine
 gelegt, würden entweder Engine-Verantwortung, KI-Metadaten und
 Browserverwendung vermischt oder Abhängigkeitszyklen erzeugt.
 
-Empfehlung: ein neues, reines TypeScript-Paket `@netgrid/cards`, das nur von
+Entscheidung: ein neues, reines TypeScript-Paket `@netgrid/cards`, das nur von
 `@netgrid/shared` abhängt. Engine, Katalog und KI erhalten explizite,
 gerichtete Abhängigkeiten auf dieses Paket.
 
@@ -131,14 +134,16 @@ Betroffene Module:
 - `apps/web/app/api/cards/catalog-data.ts`
 - `apps/web/app/api/card-images/card-image-lookup.ts`
 
-Eine vollständige CardSpec enthält künftig auch Engine- und KI-Semantik. Sie
-darf deshalb nicht als bequemes Universalobjekt an den normalen Browser
+Eine vollständige CardSpec enthält künftig mechanische Semantik und nicht
+mechanisch ableitbare PlanningAnnotations. Sie darf deshalb nicht als
+bequemes Universalobjekt an den normalen Browser
 ausgeliefert werden. Das wäre unnötiger Code-/Datenumfang und könnte interne
 KI- oder Implementierungsdetails offenlegen.
 
-Empfehlung: getrennte, statisch typisierte Exports wie `PublicCardView`,
-`EngineCardView`, `AiCardView` und `EditorCardView`. Der normale Browser kann
-nur die öffentliche Sicht importieren oder über eine API empfangen.
+Entscheidung: getrennte, statisch typisierte Exports unter `/public`,
+`/engine`, `/planning` und `/editor`. Der normale Browser kann nur die
+öffentliche Sicht importieren oder über eine API empfangen. Package- und
+Source-Structure-Guards verbieten Vollsicht- und interne Subpath-Imports.
 
 ### Niedrig: SQLite löst die Autoren- und Konsistenzfrage nicht von selbst
 
@@ -150,9 +155,11 @@ Regelquelle, Backup-Kopplung und Versionsfrage erzeugen. Für rund 620 statische
 Karten ist ein In-Memory-Map-Lookup einfacher und schneller als eine
 datenbankgestützte Einzelabfrage.
 
-Empfehlung: SQLite nur als getrennte, wegwerfbare Read-Model-Datenbank
-einführen, wenn konkrete Editor-, Volltextsuch- oder Analyseanforderungen den
-zusätzlichen Betriebsaufwand rechtfertigen.
+Entscheidung: SQLite bleibt außerhalb des ersten Architekturumbaus und der
+Spiel-/Planungsruntime. Eine spätere SQLite-Nutzung ist nur als getrennte,
+wegwerfbare Read-Model-Datenbank zulässig, wenn konkrete Editor-,
+Volltextsuch- oder Analyseanforderungen den zusätzlichen Betriebsaufwand
+rechtfertigen.
 
 ## 4. Ziele und Nicht-Ziele
 
@@ -165,7 +172,7 @@ zusätzlichen Betriebsaufwand rechtfertigen.
 3. Engine, KI, Katalog, Decks und Editor sollen dieselben statischen Fakten
    konsumieren, ohne sie nochmals zu speichern.
 4. Installierte und nach Installation mögliche Fähigkeiten sollen anhand
-   stabiler Semantik vorplanbar sein.
+   stabiler Capability-Semantik vorplanbar sein.
 5. LegalActions, `applyAction`, Replay, StateHash und Hidden-Info-Grenzen
    bleiben unverändert autoritativ.
 6. Die Migration soll alte Quellen tatsächlich entfernen und nicht dauerhaft
@@ -204,6 +211,13 @@ Der Umbau ist nur zulässig, wenn folgende NETGRID-Grenzen erhalten bleiben:
 7. **Keine Legacy-Pflicht.** Version-0-Daten, alte lokale Replays und Fixtures
    können bei einem bewusst gesetzten Schnitt zurückgesetzt werden. Neue
    Replays bleiben deterministisch und prüfbar.
+8. **Strikte Serialisierbarkeit.** Finale CardSpecs enthalten ausschließlich
+   schemaerlaubte Plain Objects, Arrays, Strings, Zahlen, Booleans und `null`;
+   Funktionen, Runtimeobjekte, Zyklen und uneindeutiges `undefined` sind
+   unzulässig.
+9. **Konservative Longtails.** Nicht sicher statisch auswertbare Mechanik wird
+   als `requires_engine_quote` oder `unknown` ausgewiesen. Vollständige
+   Longtail-Normalisierung ist keine Vorbedingung der Zentralisierung.
 
 ## 6. Zielarchitektur
 
@@ -213,7 +227,7 @@ flowchart LR
     S["SetSpec-Module"] --> B
     B --> P["PublicCardView\nKatalog / Decks / Browser"]
     B --> E["EngineCardView\nRules Engine"]
-    B --> I["AiCardView\nPlanung / Bewertung"]
+    B --> I["PlanningCardView\nPlanung / Bewertung"]
     B --> D["EditorCardView\nEditor-API"]
     B -. "optional, rebuildable" .-> Q["SQLite Read Model\nSuche / Entwürfe / Analyse"]
     E --> L["aktuelle LegalActions"]
@@ -224,52 +238,60 @@ flowchart LR
 
 ### 6.1 Kanonische CardSpec
 
-Die genaue TypeScript-Oberfläche wird in einer Umsetzungsphase entschieden.
-Die fachliche Form soll ungefähr so gegliedert sein:
+Die genaue TypeScript-Oberfläche wird in CS02 typisiert. Ihre verbindliche
+fachliche Gliederung lautet:
 
 ```ts
-interface CardSpec {
-  identity: {
-    cardDefinitionId: CardDefinitionId;
-    title: string;
-    side: Side;
-    cardType: CardType;
-  };
-  canonicalText: {
-    rulesText: string;
-    flavorText?: string;
-  };
-  rules: {
-    uniqueness?: boolean;
-    installCost?: number;
-    playCost?: number;
-    strength?: number;
-    memoryUnits?: number;
-    subtypes: readonly string[];
-  };
-  engine: {
-    abilities: readonly DeclarativeAbilitySpec[];
-    staticModifiers?: readonly DeclarativeModifierSpec[];
-  };
-  ai: {
-    abilities: Readonly<Record<AbilityKey, AbilityAiSemantics>>;
-    cardRole?: readonly CardRole[];
-  };
+type CardSpec = {
+  identity: CardIdentitySpec;
+  text: CanonicalCardTextSpec;
+  rules: CardRulesSpec;
+  engine: CardMechanicalSpec;
+  planningAnnotations?: CardPlanningAnnotations;
   printings: readonly PrintingSpec[];
-  lifecycle: {
-    rulesStatus: RulesStatus;
-    engineStatus: EngineStatus;
-    aiStatus: AiStatus;
-    evidenceRefs: readonly EvidenceRef[];
-  };
-}
+  publication: CardPublicationSpec;
+};
 ```
 
-Das Beispiel ist bewusst nach Verantwortungsbereichen gegliedert. Es soll
-keinen unstrukturierten „God Object“-Typ erzeugen. Teiltypen werden fachlich
-komponiert und einzeln validiert.
+`engine` enthält die mechanische Wahrheit einschließlich Timing, Kosten,
+Conditions, Limits, Targets, Effekten, Installationsbindungen,
+Lifecycle-Folgen und sonstigen deklarativen Mechaniken.
 
-### 6.2 Regelidentität, Druck und Set
+`rules` enthält ausschließlich nicht ausführbare Regelstruktur und
+Regelquellenbezug. Es enthält keine Engine-Eingaben oder mechanischen Felder
+und darf `engine` weder spiegeln noch überschreiben. Sobald ein Wert
+Legalität, Kosten, Timing, Condition, Limit, Target, Effekt oder
+Zustandsänderung beeinflusst, liegt er allein in `engine`; öffentliche Regel-
+und Katalogsichten leiten ihn von dort ab. Damit entsteht auch zwischen
+`rules` und `engine` keine zweite mechanische Wahrheit.
+
+`planningAnnotations` enthält ausschließlich nicht mechanisch ableitbare
+Interpretation wie Taktiksignal, Strategy Support, strategische Rolle,
+Target-Präferenz, Value-/Risk-Interpretation oder die bewusste Zuordnung zu
+einem bestehenden Planowner. Kosten, Timing, Mengen, Limits, mechanische
+Conditions und Targets, Zustandsänderungen sowie aktuelle Legalität dürfen
+dort weder dupliziert noch überschrieben werden. Ein Strukturguard erzwingt
+diese Grenze.
+
+`publication` darf redaktionelle Zustände wie `active`, `experimental` oder
+`disabled` führen. Tatsächlicher Engine-/KI-Support und Testcoverage werden
+aus Registry, Verträgen und Tests abgeleitet und nicht als zweite manuelle
+Statuswahrheit gespeichert.
+
+Die Teiltypen verhindern einen unstrukturierten „God Object“-Typ und werden
+einzeln validiert.
+
+### 6.2 Serialisierbarkeitsvertrag
+
+Eine finale CardSpec besteht ausschließlich aus Plain Objects, Arrays,
+Strings, endlichen Zahlen, Booleans und `null`, soweit das Schema `null`
+ausdrücklich vorsieht. Funktionen, Closures, Klasseninstanzen, `Map`, `Set`,
+`Date`, RegExp, Symbole, zyklische Referenzen, umgebungsabhängige Werte und
+uneindeutige `undefined`-Eigenschaften sind ausgeschlossen. Pure Helper sind
+nur zulässig, wenn ihr Ergebnis den Vertrag erfüllt. JSON-Roundtrip,
+kanonische Serialisierung und Deep-Freeze werden durch Tests belegt.
+
+### 6.3 Regelidentität, Druck und Set
 
 Die Architektur unterscheidet drei Dinge:
 
@@ -284,17 +306,17 @@ Die Set-Zugehörigkeit einer Karte liegt damit in ihren `printings`. Das Set
 bleibt eine eigene Entität, weil sein Name, seine Veröffentlichung oder seine
 Sortierreihenfolge nicht pro Karte dupliziert werden sollen. Dieselbe
 Regelkarte kann mehrere Printings in unterschiedlichen Sets besitzen, ohne
-ihre Engine- oder KI-Beschreibung zu kopieren.
+ihre Engine- oder Planungsbeschreibung zu kopieren.
 
-`canonicalText.rulesText` ist der für die Regelidentität maßgebliche aktuelle
+`text.rulesText` ist der für die Regelidentität maßgebliche aktuelle
 Text. Soll ein historischer oder alternativer Druck sichtbar abweichenden
 Face-Text tragen, kann ausschließlich dessen Printing einen
 `faceTextOverride` führen. Dieser Override verändert nicht automatisch die
 ausführbare Regel; eine echte Regeländerung benötigt eine neue
-`rulesFingerprint`-Version oder, wenn sie nicht mehr dieselbe Regelidentität
+`cardRulesFingerprint`-Version oder, wenn sie nicht mehr dieselbe Regelidentität
 darstellt, eine neue `cardDefinitionId`.
 
-### 6.3 Bilder
+### 6.4 Bilder
 
 Bilddateien bleiben Assets außerhalb der CardSpec. Der Standardpfad wird aus
 der stabilen `printingId` abgeleitet, nicht aus dem veränderlichen Kartentitel.
@@ -305,25 +327,25 @@ Ein Printing kann optional benannte Varianten deklarieren, zum Beispiel
 braucht, genügt die abgeleitete Standardkonvention; es entsteht kein
 Pflichtfeld pro Karte.
 
-### 6.4 Generische Engine-Primitive bleiben eigenständig
+### 6.5 Generische Engine-Primitive bleiben eigenständig
 
 „Eine Datei pro Karte“ bedeutet nicht, dass dieselbe Mechanik in jeder Karte
 neu programmiert wird. Die heutigen generischen Helfer und deklarativen
-Ability-Verträge bleiben die Grundlage. Broker würde beispielsweise in seiner
-CardSpec generische Hosted-Credit-Fähigkeiten mit Betrag, Timing, Limit und
-stabilem `abilityKey` komponieren.
+Capability-Verträge bleiben die Grundlage. Broker würde beispielsweise in
+seiner CardSpec generische Hosted-Credit-Fähigkeiten mit Betrag, Timing, Limit
+und stabilem `capabilityKey` komponieren.
 
 Die konkrete Zustandsänderung bleibt im generischen Engine-Primitive. Ist
 eine neue Karte mit den vorhandenen Primitiven nicht ausdrückbar, wird zuerst
 der generische Vertrag und seine Engine-Ausführung erweitert. Ein versteckter
 per-card Switch oder ein KI-Sonderfall ist kein zulässiger Ersatz.
 
-### 6.5 Deterministische Registry-Erzeugung
+### 6.6 Deterministische Registry-Erzeugung
 
 TypeScript entdeckt neue Dateien nicht automatisch. Laufzeit-Scanning des
 Dateisystems wäre für Bundling, Engine-Reinheit und Determinismus ungeeignet.
 
-Empfohlen wird deshalb ein buildseitig erzeugter Importindex:
+Verbindlich ist deshalb ein buildseitig erzeugter Importindex:
 
 1. Ein Generator findet CardSpec-Module anhand einer festen Pfadkonvention.
 2. Er sortiert sie nach `cardDefinitionId`.
@@ -332,46 +354,57 @@ Empfohlen wird deshalb ein buildseitig erzeugter Importindex:
 5. CI schlägt fehl, wenn der Index nicht zum Quellenbestand passt.
 
 Der generierte Index enthält keine fachlichen Kartendaten und ist deshalb
-keine zweite Autorenquelle. Alternativ wäre eine manuelle Importliste möglich,
-würde aber das Ziel „Datei anlegen und Karte ist registriert“ abschwächen.
+keine zweite Autorenquelle. Eine manuelle produktive Importliste ist
+ausgeschlossen.
 
-### 6.6 Typisierte Projektionen statt Datenkopien
+### 6.7 Typisierte Projektionen statt Datenkopien
 
 Die Registry hält pro Regelidentität genau ein unveränderliches Objekt. Daraus
 werden schmale Sichten abgeleitet:
 
-| Sicht            | Erlaubter Inhalt                                       | Ausgeschlossen                                |
-| ---------------- | ------------------------------------------------------ | --------------------------------------------- |
-| `PublicCardView` | öffentliche Druck- und Regeltexte, Set-/Bildreferenzen | KI-Semantik, interne Handlerdaten             |
-| `EngineCardView` | Regelwerte, deklarative Abilities, Ability Keys        | Editorentwürfe, Suchindizes                   |
-| `AiCardView`     | side-sichere Regeln, Rollen und Ability-Semantik       | verdeckte Instanzdaten, zukünftige Action-IDs |
-| `EditorCardView` | editierbare CardSpec-Felder, Validierungsstatus        | Runtime-Matchzustand                          |
+| Sicht              | Erlaubter Inhalt                                       | Ausgeschlossen                                |
+| ------------------ | ------------------------------------------------------ | --------------------------------------------- |
+| `PublicCardView`   | öffentliche Druck- und Regeltexte, Set-/Bildreferenzen | PlanningAnnotations, interne Handlerdaten     |
+| `EngineCardView`   | Regelwerte, deklarative Abilities, Capability Keys     | Editorentwürfe, Suchindizes                   |
+| `PlanningCardView` | side-sichere Regeln und PlanningAnnotations            | verdeckte Instanzdaten, zukünftige Action-IDs |
+| `EditorCardView`   | editierbare CardSpec-Felder, Validierungsstatus        | Runtime-Matchzustand                          |
 
-Die Projektionen sollen pure Funktionen mit Compile-time-Typgrenzen sein. Sie
-werden nicht als zusätzliche JSON-Dateien dauerhaft gespeichert.
+Die Projektionen sind pure Funktionen mit Compile-time-Typgrenzen und werden
+nicht als zusätzliche JSON-Dateien dauerhaft gespeichert. Engine importiert
+ausschließlich `/engine`; AI importiert `/planning` sowie ausdrücklich
+erlaubte Public-/Engine-Deskriptoren. Der normale Browser importiert nur
+`/public` oder erhält öffentliche API-DTOs. Exportmaps allein reichen nicht:
+Package- und Source-Structure-Guards weisen verbotene Vollsicht- und
+Subpath-Imports nach.
 
-### 6.7 Abschnittsbezogene Fingerprints
+### 6.8 Abschnittsbezogene Fingerprints
 
-Ein einzelner Hash über die vollständige CardSpec würde harmlose Bild- oder
-KI-Änderungen mit Regeländerungen vermischen. Die Registry soll daher getrennt
-ableiten:
+Ein einzelner Hash über die vollständige CardSpec würde harmlose Bild-, Text-
+oder Planungsänderungen mit Regeländerungen vermischen. Die Registry leitet
+daher getrennt ab:
 
-- `rulesFingerprint` für Regelwerte und Engine-Fähigkeiten;
-- `aiFingerprint` für KI-Semantik;
+- `cardRulesFingerprint` für Regelwerte und mechanische CardSpec-Semantik;
+- `textFingerprint` für kanonischen und druckspezifischen Text;
 - `printingFingerprint` für Druck- und Bildzuordnung;
-- `approvalFingerprint` für Lifecycle- und Evidenzstatus.
+- `planningAnnotationsFingerprint` für nicht mechanische
+  Planungsinterpretation;
+- `publicationFingerprint` für den redaktionellen Publication-Zustand.
 
-Replay- und Matchkompatibilität beziehen sich nur auf den
-`rulesFingerprint`. Die genaue Speicherung in Match- oder Replaymetadaten ist
-in der Implementierungsplanung festzulegen; sie darf den StateHash nicht
-unnötig von reinen Katalogänderungen abhängig machen.
+Der `cardRulesFingerprint` ist ausdrücklich nicht der vollständige Rules- oder
+Replaykontext. Replay und Planung verwenden zusätzlich den übergreifenden
+Engine-Kontext: Engine-Schema, Card-Implementation-/Primitive-Version,
+Card-Pool sowie relevante Action-Semantic-/Planner-Versionen. Dadurch bleibt
+eine reine Text- oder Bildkorrektur ohne Mechanikänderung replayneutral,
+während eine geänderte generische Primitive-Ausführung auch bei unveränderter
+CardSpec im Rules-Kontext sichtbar wird. Die Speicherung darf den StateHash
+nicht von reinen Katalogänderungen abhängig machen.
 
-### 6.8 Laufzeit-, Geschwindigkeits- und Speichermodell
+### 6.9 Laufzeit-, Geschwindigkeits- und Speichermodell
 
 Die Registry wird pro Node-Prozess einmal aufgebaut und anschließend
 unveränderlich geteilt. Der einmalige Startaufwand ist linear zur Kartenzahl;
 der normale Lookup über `cardDefinitionId`, `printingId` oder
-`cardDefinitionId + abilityKey` ist danach ein Map-Zugriff. Matchzustände
+`cardDefinitionId + capabilityKey` ist danach ein Map-Zugriff. Matchzustände
 kopieren keine CardSpecs, sondern halten weiterhin nur Instanz- und
 Definitionsreferenzen.
 
@@ -382,52 +415,97 @@ Vertikalschnitt werden Startzeit, Registry-Heap, Browserbundle und Heap pro
 zusätzlichem Match erneut gemessen. Eine deutliche per-match Zunahme wäre ein
 Architekturfehler, weil statische Daten dann versehentlich kopiert würden.
 
-Statische Post-Install-Potenziale können je
-`cardDefinitionId + rulesFingerprint + aiFingerprint` einmal vorbereitet und
-geteilt werden. Nur die Machbarkeitsbewertung gegen den aktuellen sichtbaren
-Zustand wird bei einer relevanten Planentscheidung neu ausgeführt. Eine
-SQLite-Abfrage im Action- oder Planungsloop wäre langsamer und fügte einen
-unnötigen Fehlerpfad hinzu; sie ist daher ausdrücklich ausgeschlossen.
+Für CS06 und CS13 gelten bei identischem Messskript, Node-/pnpm-Stand und
+Buildkommando folgende Regressionsbudgets gegenüber dem CS00-Median:
 
-## 7. Fähigkeiten nach einer geplanten Installation
+- kumulierte Importstartzeit und statischer Heap dürfen jeweils höchstens um
+  25 Prozent steigen;
+- die Summe der einzeln gzip-komprimierten produktiven Browser-JavaScript-
+  Chunks darf höchstens um 10 Prozent steigen;
+- der Median des vorhandenen Retained-Match-Proxys darf höchstens um 10
+  Prozent steigen;
+- der in CS06 zusätzlich isoliert zu messende CardSpec-/Registry-Anteil darf
+  höchstens 4 KiB je Match betragen.
+
+Raw-, Brotli- und RSS-Werte bleiben zusätzliche Diagnosesignale. Eine
+Budgetüberschreitung wird ursachenbezogen optimiert oder stoppt das Paket als
+Architekturblocker; sie wird nicht durch einen abweichenden Messpfad oder ein
+gröberes Vergleichspanel kaschiert. Eine vollständige Registrykopie pro Match
+ist unabhängig vom gemessenen Heapwert unzulässig.
+
+Statische Post-Install-Potenziale können je `cardDefinitionId` und relevanten
+Abschnittsfingerprints einmal vorbereitet und geteilt werden. Nur die
+Machbarkeitsbewertung gegen den aktuellen sichtbaren Zustand wird bei einer
+relevanten Planentscheidung neu ausgeführt. Eine SQLite-Abfrage im Action-
+oder Planungsloop wäre langsamer und fügte einen unnötigen Fehlerpfad hinzu;
+sie ist daher ausdrücklich ausgeschlossen.
+
+## 7. Capability-Identität und prospektive Fähigkeiten
 
 Die CardSpec beseitigt die Informationslücke, ersetzt aber keine
-Zugsimulation. Für Karten wie Broker soll die KI zwei Ebenen unterscheiden.
+Zugsimulation und keine aktuelle Engine-Autorisierung.
 
-### 7.1 Statische Potenziale
+### 7.1 Stabile Capability-Identität
 
-Aus `engine.abilities` und der daran gebundenen `ai`-Semantik lässt sich ohne
-Spielkopie ableiten:
+Jeder planungs- oder Action-adressierbare mechanische Knoten erhält einen
+innerhalb der CardSpec stabilen `capabilityKey`. Für normale aktivierte
+Fähigkeiten darf `abilityKey` als typisierter Alias dienen. Die kanonische
+quellenweite Identität lautet:
 
-- welche Fähigkeiten nach einer Installation grundsätzlich existieren;
-- in welchem Timingfenster sie verwendbar sind;
-- welche Kosten, Limits und sichtbaren Vorbedingungen sie besitzen;
-- welchen funktionalen Effekt sie für einen Plan haben;
-- welche Fähigkeit durch denselben `abilityKey` nach der Installation an eine
-  LegalAction gebunden werden muss.
+```text
+<cardDefinitionId>:<capabilityKey>
+```
 
-### 7.2 Zustandsbezogene Machbarkeit
+Sie darf in einer `CanonicalLegalActionInvocation` als `sourceAbilityId`
+transportiert werden, ersetzt aber weder das `capabilityId` einer
+Plan-Step-Anforderung noch die `actionId` einer aktuellen LegalAction oder die
+`sourceCardInstanceId` einer konkreten Karteninstanz. Passive Knoten benötigen
+nur dann einen Key, wenn Planung, Action-, Choice- oder Quote-Bindung oder eine
+strukturierte Diagnose sie individuell adressieren muss.
 
-Eine side-sichere Ableitung kann ein geplantes Zwischenergebnis
-„Karte installiert“ auf den sichtbaren Zustand anwenden und Potenziale
-klassifizieren:
+### 7.2 Statische Prospective Capability View
 
-- `potential`: Fähigkeit existiert nach Installation grundsätzlich;
-- `feasible_this_turn`: sichtbare Kosten und Timingbedingungen sind im
-  geplanten Zug erreichbar;
-- `guaranteed_after_install`: alle sichtbaren Bedingungen sind erfüllt und
-  es gibt keine offene Auswahl oder Reaktion;
-- `blocked`: eine bekannte Bedingung ist nicht erfüllt;
-- `unknown`: verdeckte, zufällige oder komplexe Engine-Fortsetzung verhindert
-  eine sichere statische Aussage.
+`compileProspectiveCapabilities(CardSpec)` erzeugt eine
+`ProspectiveCapabilityView` und leitet ohne GameState, PlayerView, LegalAction
+oder AI-Plan mindestens ab:
 
-Diese Klassifikation bewertet Zielzustände für die Planung, autorisiert aber
-nichts. Nach der echten Installation muss die KI die aktuell von der Engine
-materialisierte LegalAction anhand von Quelleninstanz, `abilityKey` und
-`stateVersion` neu binden. Fehlt die exakte Bindung, wird der Plan nicht durch
-eine ähnliche Aktion ersetzt.
+- den Quellenzustand, in dem eine Capability existiert;
+- den deklarativen Übergang dorthin, etwa `install`, `play`, `rez` oder
+  `score`;
+- direkte deterministische Übergangsfolgen;
+- initialisierte Kartenwerte und gebundene Installationschoices;
+- entstehende Verpflichtungen und Lifecycle-Liabilities;
+- Kosten-, Timing-, Condition-, Limit-, Target- und Effect-Deskriptoren;
+- die stabile Capability-Identität;
+- die statische Unsicherheitsklasse.
 
-### 7.3 Wann weiterhin Simulation oder Engine-Quote nötig ist
+Diese Sicht wird ausschließlich aus `engine`, den generischen
+Primitivverträgen und nicht mechanischen `planningAnnotations` abgeleitet. Sie
+ist keine separat gepflegte Quelle.
+
+### 7.3 Zustandsbezogene side-sichere Projektion
+
+Eine side-sichere Projektion kann die statische Sicht gegen einen sichtbaren,
+geplanten Zielzustand konservativ klassifizieren:
+
+- `available_by_spec`: Die Capability existiert nach dem deklarierten
+  Übergang;
+- `feasible_in_projection`: Sichtbare Kosten, Timing und bekannte Bedingungen
+  erscheinen im geplanten Zug erreichbar;
+- `blocked`: Eine bekannte Bedingung ist nicht erfüllt;
+- `requires_engine_quote`: Nur eine exakt definierte Engine-Quote kann die
+  dynamische Frage beantworten;
+- `unknown`: Die statische Evidenz reicht für keine sichere Aussage.
+
+`feasible_in_projection` ist keine Legalitätsgarantie. Aktuelle Legalität kann
+nur eine aktuelle LegalAction oder eine exakt definierte Engine-Quote
+beweisen. Nach einer echten Zustandsänderung bindet die AI anhand von
+`sourceCardInstanceId`, kanonischer Capability-Identität und aktueller
+`stateVersion` auf die exakte aktuelle LegalAction neu. Eine fehlende oder
+mehrdeutige Bindung scheitert fail-closed; eine ähnliche Ersatzaktion ist
+unzulässig.
+
+### 7.4 Wann weiterhin Simulation oder Engine-Quote nötig ist
 
 Statische CardSpec-Auswertung genügt nicht für:
 
@@ -438,14 +516,15 @@ Statische CardSpec-Auswertung genügt nicht für:
 - variable Ziele oder Kosten, die erst die Engine exakt bestimmt;
 - Wechselwirkungen mehrerer permanenter Effekte.
 
-Für solche Fälle bleibt eine begrenzte Engine-Quote oder spätere
-Zugsimulation sinnvoll. Sie ist Ergänzung für dynamische Unsicherheit, nicht
-Voraussetzung, um die eigenen Fähigkeiten einer installierten Karte überhaupt
-zu kennen.
+Für solche Fälle bleibt eine begrenzte, generische Engine-Quote oder spätere
+Zugsimulation sinnvoll. Longtails werden bis dahin korrekt als
+`requires_engine_quote` oder `unknown` klassifiziert. Sie blockieren die
+Zentralisierung nicht und werden nicht durch einen Legacy-Fallback oder eine
+zweite Mechanikquelle kaschiert.
 
 ## 8. Optionale SQLite-Projektion
 
-### 8.1 Empfehlung
+### 8.1 Entscheidung
 
 Die erste Zentralisierung soll ohne Datenbankabhängigkeit umgesetzt werden.
 Die veröffentlichte Wahrheit bleibt in versionierten CardSpec-Modulen; die
@@ -505,8 +584,8 @@ nicht zur zweiten produktiven Autorität.
 ### 9.1 Verständlichkeit und Wartbarkeit
 
 - Eine Karte ist an einer Stelle fachlich lesbar.
-- Änderungen zeigen im Diff unmittelbar Regeln, Fähigkeiten, KI-Semantik und
-  Freigabestatus derselben Karte.
+- Änderungen zeigen im Diff unmittelbar Regeln, Fähigkeiten,
+  PlanningAnnotations und Publication-Zustand derselben Karte.
 - Navigieren und Reviewen erfordern keine gedankliche Verknüpfung mehrerer
   JSON- und TypeScript-Registries.
 
@@ -519,10 +598,12 @@ nicht zur zweiten produktiven Autorität.
 
 ### 9.3 Bessere KI-Planung
 
-- KI-Semantik ist exakt an die betreffende Fähigkeit gebunden.
+- nicht mechanische Planungsinterpretation ist exakt an die betreffende
+  Capability gebunden.
 - Installieren und anschließende Fähigkeit können als zusammenhängender Plan
   modelliert werden.
-- Stable Ability Keys erlauben fail-closed Rebinding nach Zustandsänderungen.
+- Stabile Capability Keys erlauben fail-closed Rebinding nach
+  Zustandsänderungen.
 - Einfache eigene Kartenfolgen brauchen keine vollständige Spielkopie.
 
 ### 9.4 Weniger Drift und weniger Konvertierung
@@ -581,22 +662,23 @@ keine zweite manuell gepflegte Runtime-Quelle.
 ### 10.5 Neues neutrales Paket verändert bestehende Grenzen
 
 `@netgrid/cards` verlangt neue Abhängigkeitsregeln und möglicherweise die
-Verlagerung rein deklarativer Ability-Verträge aus der Engine. Eine falsche
+Verlagerung rein deklarativer Capability-Verträge aus der Engine. Eine falsche
 Grenze könnte die Rules Engine von KI- oder Servercode abhängig machen.
 
 Gegenmaßnahme: `@netgrid/cards` bleibt pures TypeScript und hängt nur von
 Shared ab. Runtime-Ausführung, GameState und LegalAction-Materialisierung
 bleiben in Engine; KI-Planmodule bleiben in AI.
 
-### 10.6 Supportstatus ist nicht vollständig intrinsische Karteneigenschaft
+### 10.6 Supportstatus ist keine manuelle Karteneigenschaft
 
 Freigabe und Testnachweis verändern sich durch Projektarbeit, nicht durch die
 gedruckte Karte. Werden manuelle Statusfelder und tatsächliche Tests als
 gleichwertige Wahrheiten behandelt, kann erneut Drift entstehen.
 
-Gegenmaßnahme: Die CardSpec hält Zielstatus und Evidenzreferenzen. Gates leiten
-nachprüfbare Coverage aus Registry und Tests ab; sie kopieren Testergebnisse
-nicht als zweite Faktenliste.
+Gegenmaßnahme: Die CardSpec hält ausschließlich den redaktionellen
+Publication-Zustand. Gates leiten tatsächlichen Engine-/KI-Support und
+nachprüfbare Coverage aus Registry, Verträgen und Tests ab; sie kopieren
+Testergebnisse nicht als zweite Faktenliste.
 
 ### 10.7 Browser- und Speicherumfang
 
@@ -608,7 +690,7 @@ Gegenmaßnahme: eine pro Prozess geteilte immutable Registry; Matchinstanzen
 halten nur `cardDefinitionId` beziehungsweise Instanzreferenzen. Der Browser
 erhält ausschließlich `PublicCardView`.
 
-## 11. Vorgeschlagener Migrationsplan
+## 11. Verbindlicher Migrationsplan
 
 Jede Phase endet mit einem eigenen Review- und Integrationspunkt. Die
 Reihenfolge ist bewusst so gewählt, dass die zentrale Quelle erst nach
@@ -618,12 +700,13 @@ prüfbaren Verträgen produktiv wird.
 
 Ergebnisse:
 
-- diesen Entwurf unabhängig prüfen und Findings einarbeiten;
-- CardSpec-, Printing-, Set- und Ability-Key-Verträge entscheiden;
+- die unabhängigen Reviewfindings als verbindliche Architekturentscheidungen
+  festschreiben;
+- CardSpec-, Printing-, Set- und Capability-Key-Verträge entscheiden;
 - aktuelle Karten-, Registry-, Hint- und Verbraucherparität erfassen;
 - zulässige Paketabhängigkeiten und Browsergrenze festlegen;
 - aktive Version-0-Replays und lokale Daten bestimmen, die beim Schnitt
-  zurückgesetzt werden dürfen.
+  zurückgesetzt werden dürfen;
 - Startzeit, statischen Registry-/Hint-Heap, Browserbundle und ungefähren
   Heapzuwachs pro Match als Vergleichsbaseline messen.
 
@@ -631,7 +714,7 @@ Gate:
 
 - freigegebene Architecture Decision;
 - keine offene Autoritäts- oder Paketgrenzenfrage;
-- reproduzierbare Bestandsmetriken.
+- reproduzierbare Bestandsmetriken;
 - dokumentierte Laufzeit- und Speicherbaseline.
 
 ### Phase B – Fundament `@netgrid/cards`
@@ -649,48 +732,54 @@ Gate:
 
 - Paket hat keine Engine-, KI-, Server-, Browser-, DB- oder
   Dateisystem-Laufzeitabhängigkeit;
-- doppelter `cardDefinitionId`, `printingId` oder `abilityKey` scheitert;
+- doppelter `cardDefinitionId`, `printingId` oder adressierbarer
+  `capabilityKey` scheitert;
 - Public-Projektion enthält keine Engine-/KI-internen Felder;
 - Generierung ist deterministisch und driftgeprüft.
 
-### Phase C – Deklarative Ability-Grenze und stabile Ability Keys
+### Phase C – Deklarative Capability-Grenze und stabile Capability Keys
 
 Ergebnisse:
 
-- rein deklarative Ability-Verträge liegen an einer von Cards und Engine
+- rein deklarative Capability-Verträge liegen an einer von Cards und Engine
   gemeinsam nutzbaren, zyklenfreien Grenze;
-- alle materialisierten Fähigkeiten können einen stabilen `abilityKey`
-  tragen;
+- alle materialisierten und planungsadressierbaren Fähigkeiten tragen einen
+  stabilen `capabilityKey`;
 - LegalAction- und PlanExecution-Bindungen können diesen Schlüssel erhalten;
 - Arrayindex bleibt höchstens interne Reihenfolge, nicht fachliche Identität.
 
 Gate:
 
-- gleiche CardSpec erzeugt deterministisch dieselben Ability Keys;
+- gleiche CardSpec erzeugt deterministisch dieselben Capability Keys;
 - `applyAction` validiert weiterhin Action, Seite, Version, Timing, Kosten,
   Ziele und Choices;
 - Replay- und StateHash-Tests bleiben für den neuen Stand deterministisch;
 - Choice-Resolver ändern weder Action noch Planowner.
 
-### Phase D – Vertikalschnitt mit kleinem Set
+### Phase D – Heterogener Mechanik-Stresstest
 
-Empfehlung: zuerst `testset`, ergänzt um einen gezielten Broker-ähnlichen
-Regressionsträger. Broker selbst kann als fachliche Demonstration dienen,
-soll aber nicht als Sonderarchitektur implementiert werden.
+Der erste produktive Schnitt umfasst 8 bis 12 Karten und muss Broker, Loan
+from Chiba, Black Widow, Morphing Tool und Sneak Preview sowie passive
+Modifier-, Corp-Rez-/Variable-Rez-, Access-/Ambush-,
+Scored-Agenda-Capability- und Successful-Run-/Run-Window-Familien abdecken.
+Er beweist die Architektur über Set- und Mechanikgrenzen hinweg; keine Karte
+darf als Sonderarchitektur implementiert werden.
 
 Ergebnisse:
 
-- vollständige CardSpecs für das gewählte Set;
+- vollständige CardSpecs für den gewählten Querschnitt;
 - Engine-, Katalog-, Deck- und KI-Projektionen aus derselben Registry;
-- alte Karten-, Manifest-, Hint- und CardImplementation-Autorensicht für das
-  migrierte Set im selben Integrationsschritt entfernt;
+- alte Karten-, Manifest-, Hint-, Shared- und CardImplementation-Autorensicht
+  für jede migrierte Karte im selben Integrationsschritt entfernt;
 - bestehende generische Primitive werden weiterverwendet.
 
 Gate:
 
-- genau eine produktive Autorität für jede migrierte Karte;
+- genau eine produktive Autorität für jede migrierte Karte und disjunkte
+  Legacy-/CardSpec-Mengen;
 - kein „wenn CardSpec fehlt, nimm Legacy“-Fallback;
-- Regelwerte, LegalActions, Katalog und KI-Semantik entsprechen der Baseline;
+- Regelwerte, LegalActions, Katalog und Planungssemantik entsprechen der
+  Baseline;
 - Startzeit, Registry-Heap und Browserbundle liegen innerhalb der in Phase A
   beschlossenen Budgets;
 - fokussierte Engine-, KI-, Katalog- und Decktests grün.
@@ -700,19 +789,20 @@ Gate:
 Ergebnisse:
 
 - side-sichere Ableitung statischer Post-Install-Potenziale;
-- Zustandsklassifikation `potential`, `feasible_this_turn`,
-  `guaranteed_after_install`, `blocked`, `unknown`;
-- Erweiterung des bestehenden zuständigen Economy-/Resource-Plans, sodass
-  Installation und Fähigkeit in demselben Zugplan liegen können;
-- Rebinding nach echter Installation über Source-Instanz, `abilityKey` und
-  aktuelle LegalAction.
+- Zustandsklassifikation `available_by_spec`, `feasible_in_projection`,
+  `blocked`, `requires_engine_quote`, `unknown`;
+- Erweiterung des bestehenden Owners `runner.credit_bank`, sodass Broker-
+  Installation und Build in demselben Zugplan liegen können;
+- `runner.economy` bleibt ausschließlich gebundener Funding-Support;
+- Rebinding nach echter Installation über Source-Instanz, kanonische
+  Capability-Identität, `stateVersion` und aktuelle LegalAction.
 
 Gate:
 
 - Planowner und `PlanExecutionOrigin` bleiben erhalten;
 - kein zweiter Action-Chooser oder Choice-Resolver mit Strategielogik;
 - Tests sichern sowohl Ergebnis als auch Ownership;
-- fehlende oder mehrdeutige Ability-Bindung scheitert fail-closed;
+- fehlende oder mehrdeutige Capability-Bindung scheitert fail-closed;
 - Broker-Verhaltensbaseline zeigt die beabsichtigte frühere Nutzung, ohne
   globale Economy-Prioritäten pauschal zu erhöhen.
 
@@ -795,18 +885,18 @@ Ergebnisse bei positiver Entscheidung:
 
 ## 12. Verifikationsmatrix
 
-| Risiko                             | Mindestnachweis                                                     |
-| ---------------------------------- | ------------------------------------------------------------------- |
-| doppelte oder fehlende Karten      | Registry-Schema-, Uniqueness- und Vollständigkeitstest              |
-| instabile Ability-Bindung          | Ability-Key-Stabilitäts- und Rebinding-Test                         |
-| Regelabweichung                    | LegalAction-, Effect- und fokussierte Per-card-Parität              |
-| Replay-/StateHash-Drift            | deterministischer Replay-Wiederholungstest mit `rulesFingerprint`   |
-| Hidden-Info-Leak                   | PublicCardView-Typtest plus Golden-Payload-Test                     |
-| KI übernimmt Regelautorität        | Ownership-, Action-ID-, Executor- und PlanOrigin-Test               |
-| Browser importiert Vollsicht       | Package-/Source-Structure-Guard und Bundleprüfung                   |
-| Generator ist nicht reproduzierbar | zweimalige Generierung mit bytegleichem Ergebnis                    |
-| alte Quelle bleibt aktiv           | Quellscan und One-Authority-per-card/-set-Gate                      |
-| veraltete SQLite-Sicht             | Fingerprint-Mismatch-Test, atomarer Rebuild, fail-closed Fehlerpfad |
+| Risiko                             | Mindestnachweis                                                            |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| doppelte oder fehlende Karten      | Registry-Schema-, Uniqueness- und Vollständigkeitstest                     |
+| instabile Capability-Bindung       | Capability-Key-Stabilitäts- und Rebinding-Test                             |
+| Regelabweichung                    | LegalAction-, Effect- und fokussierte Per-card-Parität                     |
+| Replay-/StateHash-Drift            | deterministischer Replay-Wiederholungstest mit vollständigem Rules-Kontext |
+| Hidden-Info-Leak                   | PublicCardView-Typtest plus Golden-Payload-Test                            |
+| KI übernimmt Regelautorität        | Ownership-, Action-ID-, Executor- und PlanOrigin-Test                      |
+| Browser importiert Vollsicht       | Package-/Source-Structure-Guard und Bundleprüfung                          |
+| Generator ist nicht reproduzierbar | zweimalige Generierung mit bytegleichem Ergebnis                           |
+| alte Quelle bleibt aktiv           | Quellscan und One-Authority-per-card/-set-Gate                             |
+| veraltete SQLite-Sicht             | Fingerprint-Mismatch-Test, atomarer Rebuild, fail-closed Fehlerpfad        |
 
 Während einer Phase werden nur die fokussierten, direkt betroffenen Tests
 ausgeführt. Breite Engine-, KI- und Workspace-Gates gehören an die benannten
@@ -819,54 +909,61 @@ Commitpaket umgesetzt werden. Scheitert ein Gate, wird die Phase korrigiert
 oder vollständig zurückgenommen. Ein stiller Dual-Read, Ersatzwert oder
 „vorübergehend Legacy nehmen“ ist kein Abschlusszustand.
 
-Für die setweise Migration gilt:
+Für die Migration gilt:
 
-- nicht migrierte Sets haben vorübergehend genau ihre alte Quelle;
-- migrierte Sets haben genau ihre CardSpecs;
-- kein Set und keine Karte wird aus beiden Quellen gemischt;
+- nicht migrierte Karten haben vorübergehend genau ihre alte Quelle;
+- migrierte Karten haben genau ihre CardSpecs;
+- Legacy- und CardSpec-Mengen sind jederzeit disjunkt;
 - der Übergang endet verbindlich mit Phase H.
 
-## 14. Offene Entscheidungen für die unabhängige Prüfung
+## 14. Aufgelöste Architekturentscheidungen
 
-1. Ist `@netgrid/cards` die richtige neutrale Paketgrenze, oder sollten
-   deklarative Ability-Verträge in einem noch kleineren Vertragspaket liegen?
-2. Gehören Lifecycle-Status und Evidenzreferenzen in die CardSpec, oder sollte
-   nur der beabsichtigte Status dort stehen und der tatsächliche Status
-   vollständig aus Gates abgeleitet werden?
-3. Reicht `printingId` als Bildschlüssel, oder braucht NETGRID zusätzlich eine
-   stabile, explizite `assetKey`-Abstraktion?
-4. Welche Teile der heutigen Card Implementations sind noch nicht rein
-   deklarativ und benötigen vor der Zentralisierung eine generische
-   Primitive-Erweiterung?
-5. Soll der `rulesFingerprint` pro Match aufgezeichnet werden, und wie wird
-   ein bewusst inkompatibler Version-0-Schnitt diagnostiziert?
-6. Ist `testset` der beste Vertikalschnitt, oder bietet ein kleiner fachlicher
-   Querschnitt aus allen Sets bessere Evidenz?
-7. Welche konkrete Editoranforderung würde SQLite rechtfertigen, und welche
-   Anforderungen lassen sich bereits durch eine Registry-API erfüllen?
-8. Sind Abschnittsfingerprints ausreichend getrennt, oder muss gedruckter
-   Regeltext Teil des `rulesFingerprint` sein, obwohl die ausführbare Semantik
-   unverändert bleibt?
+1. `@netgrid/cards` ist die neutrale Paketgrenze und hängt ausschließlich von
+   Shared ab. Es entsteht kein weiteres Vertragspaket. Rein deklarative
+   Verträge werden in CS02 an die kleinste zyklenfreie Cards-/Shared-Grenze
+   gelegt; Runtimeausführung bleibt in Engine.
+2. `publication` enthält nur redaktionelle Zustände. Tatsächlicher Engine- und
+   KI-Support sowie Coverage werden aus Registry, Verträgen und Tests
+   abgeleitet.
+3. `printingId` ist der Standardbildschlüssel. Ein eigener `assetKey` entsteht
+   nur bei einem nachgewiesenen Auseinanderfallen von Printing- und
+   Assetidentität.
+4. Nicht rein deklarative Card-Implementation-Longtails werden in CS01
+   inventarisiert und als `statically_compilable`, `requires_engine_quote`
+   oder `unknown` klassifiziert. Erforderliche generische Erweiterungen werden
+   in den zuständigen Folgepaketen umgesetzt. Eine vollständige
+   Vorabnormalisierung ist keine Vorbedingung des Quell-Cutovers.
+5. `cardRulesFingerprint` bildet ausschließlich mechanische CardSpec-Semantik
+   ab. Replay und Planung verwenden zusätzlich einen vollständigen
+   Rules-/Engine-Kontext. Die konkrete Metadatenablage wird in CS03 so
+   umgesetzt, dass reine Text- und Katalogänderungen den StateHash nicht
+   verändern.
+6. Der erste produktive Schnitt ist der heterogene Mechanik-Stresstest aus
+   Phase D. Das vollständige Testset folgt anschließend als erster Set-Cutover.
+7. SQLite ist weder für Zentralisierung noch Editorprojektion im aktuellen
+   Prozess erforderlich und bleibt außerhalb der Spiel-/Planungsruntime.
+8. Gedruckter Regeltext besitzt einen eigenen `textFingerprint`. Nur eine
+   Änderung der ausführbaren Semantik verändert den
+   `cardRulesFingerprint`.
 
-## 15. Reviewauftrag an die zweite Instanz
+## 15. Ergebnis der unabhängigen Prüfung
 
-Die unabhängige Prüfung sollte nicht nur bestätigen, dass Zentralisierung
-bequem ist. Sie soll gezielt nach Gegenbeispielen und neuen Autoritätskonflikten
-suchen:
+Die Prüfung bestätigt die Zentralisierung unter verbindlichen Schärfungen:
 
-- Entsteht trotz Ein-Datei-Idee irgendwo eine zweite fachliche Wahrheit?
-- Kann das vorgeschlagene Paketmodell ohne Zyklus und ohne Engine-Abhängigkeit
-  auf KI, DB oder Dateisystem umgesetzt werden?
-- Sind per-card CardSpecs mit generischen Primitiven für den tatsächlichen
-  Longtail der heutigen Implementierungen ausreichend?
-- Bleiben Browser, PlayerView, Replay und StateHash sicher und deterministisch?
-- Ist die setweise Migration wirklich fail-closed und besitzt sie eine
-  überprüfbare Removal Condition?
-- Ist der Aufwand gegenüber dem Wartungs- und Planungsgewinn angemessen?
-- Reicht die CardSpec-Ableitung für Install-plus-Ability-Pläne, ohne eine
-  zweite Regel- oder Entscheidungsengine zu bauen?
-- Ist SQLite zu Recht optional, oder gibt es bereits einen konkreten
-  Zugriffspfad, der eine frühe Projektion wirtschaftlich macht?
+- `engine` ist die einzige mechanische Kartenwahrheit;
+- `planningAnnotations` dürfen keine ableitbare Mechanik duplizieren;
+- jede adressierbare Capability besitzt stabile semantische Identität;
+- die Prospective Capability View ist eine Ableitung, keine zweite Quelle;
+- Projektionsaussagen sind konservativ und niemals LegalAction-autorisierend;
+- Abschnittsfingerprints ersetzen keinen vollständigen Rules-/Engine-Kontext;
+- unbekannte Longtails bleiben explizit, ohne die Zentralisierung zu
+  blockieren;
+- der heterogene Stresstest geht dem vollständigen Set-Cutover voraus.
+
+Damit sind keine Architekturfragen mehr als offene Alternativen formuliert.
+CS01 ermittelt Tatsachen und Klassifikationen innerhalb dieser Grenzen; ein
+echter Widerspruch führt zum strukturierten Prozessblocker statt zu einem
+Fallback oder zweiten Datenmodell.
 
 ## 16. Gesamteinschätzung
 
@@ -878,8 +975,8 @@ und anschließend verfügbarer Kartenfähigkeit.
 
 Der Umbau ist dennoch kein kleiner Broker-Fix. Er verändert Paketgrenzen,
 Registries und zahlreiche Verbraucher. Sein Erfolg hängt daran, dass er alte
-Quellen entfernt, die Engine autoritativ lässt, stabile Ability Keys einführt
-und öffentliche Sichten strikt begrenzt. Unter diesen Bedingungen ist die
+Quellen entfernt, die Engine autoritativ lässt, stabile Capability Keys
+einführt und öffentliche Sichten strikt begrenzt. Unter diesen Bedingungen ist die
 Umstellung für die Version-0-Umgebung realistisch und empfehlenswert. SQLite
 sollte dabei als spätere Werkzeugprojektion offenbleiben, aber nicht den
 ersten Architekturumbau oder die Spiellaufzeit bestimmen.

@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **umsetzungsreifer Handoff-Entwurf; Umsetzung nicht gestartet**
+- Status: **in Umsetzung; CS00 abgeschlossen, CS01 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -393,22 +393,22 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 
 ## 11. Paketübersicht
 
-| Paket | Titel                                                  | Ausgangsstatus |
-| ----- | ------------------------------------------------------ | -------------- |
-| CS00  | Worktree-Preflight, Architekturfreeze und Baselines    | pending        |
-| CS01  | Capability-, Longtail- und Consumer-Inventar           | pending        |
-| CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | pending        |
-| CS03  | Registry, Projektionen, Importindex und Fingerprints   | pending        |
-| CS04  | Stabile Capability-Identität und Engine-Rebinding      | pending        |
-| CS05  | Prospective-Capability-Compiler                        | pending        |
-| CS06  | Heterogener produktiver Mechanik-Stresstest            | pending        |
-| CS07  | Testset-Migration und Migrationsautomatisierung        | pending        |
-| CS08  | Classic-Migration                                      | pending        |
-| CS09  | Proteus-Migration                                      | pending        |
-| CS10  | Originalset-v1-Migration                               | pending        |
-| CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | pending        |
-| CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | pending        |
-| CS13  | Gesamtevidence, aktuelle Dokumentation und Integration | pending        |
+| Paket | Titel                                                  | Status    |
+| ----- | ------------------------------------------------------ | --------- |
+| CS00  | Worktree-Preflight, Architekturfreeze und Baselines    | completed |
+| CS01  | Capability-, Longtail- und Consumer-Inventar           | pending   |
+| CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | pending   |
+| CS03  | Registry, Projektionen, Importindex und Fingerprints   | pending   |
+| CS04  | Stabile Capability-Identität und Engine-Rebinding      | pending   |
+| CS05  | Prospective-Capability-Compiler                        | pending   |
+| CS06  | Heterogener produktiver Mechanik-Stresstest            | pending   |
+| CS07  | Testset-Migration und Migrationsautomatisierung        | pending   |
+| CS08  | Classic-Migration                                      | pending   |
+| CS09  | Proteus-Migration                                      | pending   |
+| CS10  | Originalset-v1-Migration                               | pending   |
+| CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | pending   |
+| CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | pending   |
+| CS13  | Gesamtevidence, aktuelle Dokumentation und Integration | pending   |
 
 ## 12. Paketdetails
 
@@ -465,6 +465,35 @@ Done-Gate:
 Commit:
 
 `docs(architecture): freeze central card specification target`
+
+Ergebnis vom 09.08.2026:
+
+- Base-Commit `a0172b214320be51deca6eba46cdc29dc4e58391`, Branch und Worktree
+  wurden eindeutig verifiziert; Prozess- und Architekturquelle sind seit
+  `dc7cde76c71bed12d536ca2f09e3e9c0aaed8e94` versioniert.
+- Die unabhängigen Reviewkorrekturen sind im Architekturpapier verbindlich
+  eingefroren; keine Architekturentscheidung bleibt als offene Alternative.
+- Der reproduzierbare lokale Bericht liegt unter
+  `data/local/card-spec-registry-migration-cs00/baseline-report-2026-08-09.md`.
+  Das Verzeichnis ist absichtlich ignoriert und wird nicht committed.
+- Bestandsstand: 620 Card-JSON-Einträge, 620 Manifesteinträge, 618 aktive
+  Hints, 583 eindeutige CardImplementations sowie reproduzierte direkte
+  Consumer-Fan-outs. Die vollständige Klassifikation bleibt wie vorgesehen
+  CS01.
+- Drei isolierte Runtime-Messungen, ein erfolgreicher Next-Production-Build
+  und ein Standardlauf der AI Behavior Baseline v1 wurden am Base-Stand
+  erfasst.
+- Die verbindlichen CS06-/CS13-Regressionsbudgets sind eingefroren: maximal
+  25 Prozent für Importstartzeit und statischen Heap, 10 Prozent für
+  Browser-gzip und Retained-Match-Proxy sowie höchstens 4 KiB isolierter
+  CardSpec-/Registry-Heap je Match bei strikt geteilter Vollregistry.
+- Die AI Behavior Baseline ist als Ausgangsevidence rot: 10 IllegalActions,
+  10 klassifizierte Runtimefehler und zwei Action-Limit-Spiele. Das ist ein
+  explizites CS12-Vergleichs- und Hard-Gate-Risiko, kein in CS00 kaschierter
+  Verhaltensfix.
+- Keine Karten-, Engine- oder KI-Implementierung wurde begonnen. Breite
+  Workspace-, Engine- und AI-Tests blieben entsprechend der Paketregeln den
+  benannten Integrationspunkten vorbehalten.
 
 ### CS01 – Capability-, Longtail- und Consumer-Inventar
 
