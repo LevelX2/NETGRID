@@ -47,6 +47,25 @@ export type {
   Fingerprint,
   FingerprintContractErrorCode,
 } from "./fingerprints";
+export {
+  PROSPECTIVE_CAPABILITY_SCHEMA_VERSION,
+  PROSPECTIVE_CLASS_BY_FAMILY,
+  PROSPECTIVE_COMPILER_VERSION,
+  compileProspectiveCapabilities,
+} from "./prospective-capabilities";
+export type {
+  ProspectiveCapability,
+  ProspectiveCapabilityDescriptor,
+  ProspectiveCapabilityFamily,
+  ProspectiveCapabilityView,
+  ProspectiveDirectOutcome,
+  ProspectiveInitialConditionEvaluation,
+  ProspectiveInitializedValue,
+  ProspectiveInstallChoice,
+  ProspectiveLiability,
+  ProspectiveTransition,
+  ProspectiveUncertaintyClass,
+} from "./prospective-capabilities";
 
 export {
   CARD_FINGERPRINT_SCHEMA_VERSION,

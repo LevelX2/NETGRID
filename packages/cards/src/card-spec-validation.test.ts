@@ -136,10 +136,31 @@ describe("CardSpec validation", () => {
     expect(() => validateUntyped(spec)).toThrowError(/display copy/);
   });
 
-  it("keeps the unowned regionBaseline family fail-closed", () => {
+  it("accepts only the exact unowned regionBaseline declaration shape", () => {
     const spec = untypedSpec();
-    engineOf(spec).regionBaseline = { kind: "region" };
-    expect(() => validateUntyped(spec)).toThrowError(/unknown_contract_field/);
+    const exactRegion = {
+      kind: "region_baseline",
+      rezOnInstall: true,
+      installOnlyIfRezAffordable: true,
+      oneRegionPerFort: true,
+      trashOlderRegions: true,
+    };
+    engineOf(spec).regionBaseline = exactRegion;
+    expect(() => validateUntyped(spec)).not.toThrow();
+    for (const malformed of [
+      { ...exactRegion, kind: "region" },
+      { ...exactRegion, rezOnInstall: false },
+      { ...exactRegion, installOnlyIfRezAffordable: false },
+      { ...exactRegion, oneRegionPerFort: false },
+      { ...exactRegion, trashOlderRegions: false },
+      { ...exactRegion, extra: true },
+    ]) {
+      const invalid = untypedSpec();
+      engineOf(invalid).regionBaseline = malformed;
+      expect(() => validateUntyped(invalid)).toThrowError(
+        /invalid_contract_shape|unknown_contract_field/,
+      );
+    }
   });
 
   it("rejects mismatched ability aliases and duplicate keys", () => {

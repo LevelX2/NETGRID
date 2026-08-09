@@ -20,6 +20,19 @@ export type {
 export { assertCardRegistryPlanningContext, assertCardRegistryRulesContext };
 export type { PlanningCardView } from "../projections";
 export type { CardPlanningAnnotations } from "../planning-annotations";
+export type {
+  ProspectiveCapability,
+  ProspectiveCapabilityDescriptor,
+  ProspectiveCapabilityFamily,
+  ProspectiveCapabilityView,
+  ProspectiveDirectOutcome,
+  ProspectiveInitialConditionEvaluation,
+  ProspectiveInitializedValue,
+  ProspectiveInstallChoice,
+  ProspectiveLiability,
+  ProspectiveTransition,
+  ProspectiveUncertaintyClass,
+} from "../prospective-capabilities";
 export {
   assertCanonicalCapabilityId,
   assertAbilityRefIdentity,

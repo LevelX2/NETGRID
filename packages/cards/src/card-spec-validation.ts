@@ -95,6 +95,7 @@ const ENGINE_KEY_LIST = [
   "lifecycle",
   "modifiers",
   "printedSubroutines",
+  "regionBaseline",
   "relativeIce",
   "remainingReplacementLongtail",
   "restrictedHostedCreditSource",
@@ -360,6 +361,32 @@ export function assertCardSpecContract(spec: CardSpec): void {
     characteristics.strength,
     "$cardSpec.engine.characteristics.strength",
   );
+  if (engine.regionBaseline !== undefined) {
+    const region = closedObject(
+      engine.regionBaseline,
+      new Set([
+        "kind",
+        "rezOnInstall",
+        "installOnlyIfRezAffordable",
+        "oneRegionPerFort",
+        "trashOlderRegions",
+      ]),
+      "$cardSpec.engine.regionBaseline",
+    );
+    if (region.kind !== "region_baseline")
+      invalid(
+        "$cardSpec.engine.regionBaseline.kind",
+        "must be region_baseline",
+      );
+    for (const key of [
+      "rezOnInstall",
+      "installOnlyIfRezAffordable",
+      "oneRegionPerFort",
+      "trashOlderRegions",
+    ] as const)
+      if (region[key] !== true)
+        invalid(`$cardSpec.engine.regionBaseline.${key}`, "must be true");
+  }
 
   const capabilityKeys = assertCapabilityIdentities(engine, "$cardSpec.engine");
   for (const key of capabilityTextKeys)

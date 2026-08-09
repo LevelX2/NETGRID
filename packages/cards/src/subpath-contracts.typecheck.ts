@@ -3,6 +3,7 @@ import type { EngineCardView } from "./engine/index";
 import type { PlanningCardView } from "./planning/index";
 import * as PublicRuntime from "./public/index";
 import type * as PublicTypes from "./public/index";
+import * as PlanningRuntime from "./planning/index";
 
 declare const publicCard: PublicCardView;
 declare const engineCard: EngineCardView;
@@ -31,3 +32,5 @@ type MissingEngineView = PublicTypes.EngineCardView;
 type MissingPlanningView = PublicTypes.PlanningCardView;
 // @ts-expect-error Editor views are not public DTOs.
 type MissingEditorView = PublicTypes.EditorCardView;
+// @ts-expect-error AI/planning cannot import the raw CardSpec authoring compiler.
+PlanningRuntime.compileProspectiveCapabilities;

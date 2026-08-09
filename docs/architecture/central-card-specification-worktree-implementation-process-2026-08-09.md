@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS04 abgeschlossen, CS05 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS05 abgeschlossen, CS06 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -400,7 +400,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | completed |
 | CS03  | Registry, Projektionen, Importindex und Fingerprints   | completed |
 | CS04  | Stabile Capability-Identität und Engine-Rebinding      | completed |
-| CS05  | Prospective-Capability-Compiler                        | pending   |
+| CS05  | Prospective-Capability-Compiler                        | completed |
 | CS06  | Heterogener produktiver Mechanik-Stresstest            | pending   |
 | CS07  | Testset-Migration und Migrationsautomatisierung        | pending   |
 | CS08  | Classic-Migration                                      | pending   |
@@ -857,6 +857,40 @@ Done-Gate:
 Commit:
 
 `feat(cards): compile prospective card capabilities`
+
+Ergebnis am 09.08.2026:
+
+- `compileProspectiveCapabilities(CardSpec)` erzeugt eine tief immutable,
+  kanonisch serialisierbare statische Sicht ausschließlich aus dem
+  kanonischen `CardMechanicalSpec` und optionalen, geklonten
+  `planningAnnotations`. Root bleibt die Authoring-API; `/planning` exportiert
+  in diesem Paket nur die View-Typen und erhält keinen Raw-CardSpec- oder
+  Registry-Bypass.
+- Alle 48 inventarisierten Capability-Familien sind exhaustiv als
+  `statically_compilable`, `requires_engine_quote` oder `unknown`
+  klassifiziert. Die bisher bewusst ownerlose `regionBaseline`-Familie ist
+  jetzt als exakt geschlossene serialisierbare CardSpec-Shape zulässig, wird
+  aber weiterhin ausschließlich `unknown` mit Removal-/Owner-Diagnose
+  projiziert; daraus entsteht weder Engineausführung noch Legalität. Eine
+  produktive Roving-Submarine-Migration bleibt CS06 vorbehalten.
+- Family- und Lifecycle-Compiler erzeugen Quellenzustand, deklarative
+  Übergänge samt kanonischer Kostenquelle, nichtredundante Deskriptoren,
+  Pfadreferenzen auf direkte Folgen, Installationschoices, initialisierte
+  Werte und Liabilities. Nur eine geschlossene deterministische
+  Primitive-Menge darf eine deklarierte direkte Folge ausweisen; dynamische,
+  verdeckte, variable und unbekannte Pfade bleiben konservativ
+  `requires_engine_quote` oder `unknown`.
+- Der Cache bindet Compiler-Version, Regel- und Planning-Fingerprint. Reine
+  Text-, Printing- oder Publication-Änderungen invalidieren ihn nicht; Engine-
+  und Annotationänderungen schon. Es entstehen weder Matchkopien noch
+  Abhängigkeiten auf GameState, PlayerView, LegalAction, AI, Engine-Runtime,
+  Browser, Server oder Dateisystem.
+- Zehn typisierte synthetische Stressfixtures prüfen Broker, Loan from Chiba,
+  Black Widow, Morphing Tool, Sneak Preview, Data Masons, Digiconda, Virus Test
+  Site, Data Fort Reclamation und Roving Submarine. Zusätzlich sind
+  Determinismus, JSON-Roundtrip, Deep-Freeze, Annotation-Clone,
+  Cache-Invalidierung, Arrayreorder-Stabilität, dynamische Quote-Grenze,
+  Region-Schema und fehlende aktuelle Legalitätsbehauptung abgesichert.
 
 ### CS06 – Heterogener produktiver Mechanik-Stresstest
 

@@ -234,8 +234,8 @@ type AddressableMechanicalFamilyKey =
   | "virusCounter";
 
 type AddressableMechanicalFamily<Value> = Value extends readonly (infer Entry)[]
-  ? Entry extends object
-    ? readonly AddressableCardCapability<Entry>[]
+  ? [Entry] extends [object]
+    ? readonly AddressableCardCapability<Extract<Entry, object>>[]
     : never
   : Value extends object
     ? AddressableCardCapability<Value>
@@ -276,6 +276,7 @@ type CanonicalMechanicalFamilies = Omit<
     | "tagPreventionSources"
     | "trashPreventionSources"
     | "runEncounterInterventions"
+    | "regionBaseline"
     | "fortCapacityModifiers"
     | "leavePlayCleanup"
     | "variableRez"
