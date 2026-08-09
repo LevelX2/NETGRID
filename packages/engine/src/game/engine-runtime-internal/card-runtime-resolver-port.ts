@@ -41,7 +41,7 @@ export type CardRuntimeResolverPort = {
   installTargetBindingForDefinition: (
     definition: CardDefinition,
   ) =>
-    | import("../../ability-engine/definition-domain-contracts").CardInstallTargetBindingImplementation
+    | import("@netgrid/cards/engine").CardInstallTargetBindingImplementation
     | undefined;
   requiresDataFortInstallTarget: (definition: CardDefinition) => boolean;
   runnerEventLongtailForDefinition: (

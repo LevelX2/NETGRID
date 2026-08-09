@@ -104,6 +104,12 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
+  packages/cards:
+    dependencies:
+      '@netgrid/shared':
+        specifier: workspace:*
+        version: link:../shared
+
   packages/catalog:
     dependencies:
       '@netgrid/shared':
@@ -118,6 +124,9 @@ importers:
 
   packages/engine:
     dependencies:
+      '@netgrid/cards':
+        specifier: workspace:*
+        version: link:../cards
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared

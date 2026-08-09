@@ -1,11 +1,11 @@
 {
-  "name": "@netgrid/engine",
+  "name": "@netgrid/cards",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./game": "./src/game/index.ts"
+    "./engine": "./src/engine/index.ts"
   },
   "types": "./src/index.ts",
   "scripts": {
@@ -15,7 +15,6 @@
     "build": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@netgrid/cards": "workspace:*",
     "@netgrid/shared": "workspace:*"
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Defines effect commands interpreted by the Rules Engine.
+ * Defines serializable effect commands interpreted by the Rules Engine.
  *
  * This module is declarative only: it must not execute effects, query
  * GameState, or contain concrete card IDs.

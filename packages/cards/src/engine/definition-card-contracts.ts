@@ -1,5 +1,5 @@
 /**
- * Defines top-level CardImplementation ability and modifier unions.
+ * Defines top-level CardSpec ability and modifier unions.
  *
  * This module is declarative only: it must not execute effects, query
  * GameState, or contain concrete card IDs.

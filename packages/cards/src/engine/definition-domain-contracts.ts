@@ -1,5 +1,5 @@
 /**
- * Defines access, run, utility, lifecycle, and scored-agenda domains.
+ * Defines serializable access, run, utility, lifecycle, and scored-agenda domains.
  *
  * This module is declarative only: it must not execute effects, query
  * GameState, or contain concrete card IDs.

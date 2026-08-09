@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 und CS01 abgeschlossen, CS02 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS02 abgeschlossen, CS03 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -397,7 +397,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | ----- | ------------------------------------------------------ | --------- |
 | CS00  | Worktree-Preflight, Architekturfreeze und Baselines    | completed |
 | CS01  | Capability-, Longtail- und Consumer-Inventar           | completed |
-| CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | pending   |
+| CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | completed |
 | CS03  | Registry, Projektionen, Importindex und Fingerprints   | pending   |
 | CS04  | Stabile Capability-Identität und Engine-Rebinding      | pending   |
 | CS05  | Prospective-Capability-Compiler                        | pending   |
@@ -634,6 +634,40 @@ Commit:
 
 `feat(cards): establish serializable card specification contracts`
 
+Ergebnis:
+
+- `@netgrid/cards` ist als zyklenfreie, browser- und runtimefreie
+  Vertragsschicht angelegt. Das Root exportiert ausschließlich den
+  CardSpec-Autorenvertrag und seine Guards; Engine erhält die deklarative
+  mechanische Vocabulary ausschließlich über den kontrollierten Subpath
+  `@netgrid/cards/engine`.
+- Der geschlossene CardSpec-Vertrag trennt Identität, kanonischen Text,
+  Regelprovenienz, Mechanik, PlanningAnnotations, Printings und rein
+  redaktionelle Publication. Kosten und Stärke besitzen je genau eine
+  kanonische Mechanikrepräsentation; Faction und capabilityKey-gebundene
+  Aktionstexte gehen beim späteren Cutover nicht verloren.
+- Die 47 owner-geklärten Capabilityfamilien sind als positive kanonische
+  Feldliste erfasst. Das ownerlose `regionBaseline` bleibt ausschließlich im
+  gekennzeichneten Legacyvertrag und scheitert in CardSpec fail-closed.
+- Capability- und Ability-Keys verwenden eine gemeinsame geschlossene
+  ASCII-Domäne. Adressierbare Knoten, Aliasgleichheit, Eindeutigkeit sowie
+  Planning-/Textreferenzen auf bestehende Engine-Capabilities werden
+  strukturell geprüft.
+- Strikte Serialisierbarkeit, kanonische Serialisierung und atomarer
+  Deep-Freeze lehnen unter anderem Funktionen, `undefined`, nichtendliche
+  Zahlen, `-0`, Sonderobjekte, Accessors, Symbol-/verdeckte Eigenschaften,
+  sparse Arrays, Expandos und Zyklen pfadgenau ab.
+- Der Package-Boundary-Check scannt den aktuellen Dateibaum einschließlich
+  ungetrackter Dateien AST-basiert, prüft exakte Subpaths und Manifestzyklen.
+  Ein zusätzlicher Cards-Source-Guard erzwingt Shared-only, Quellreinheit und
+  Zyklenfreiheit; die Engine-Purity-Regel blockiert AI-, Server-, DB-, FS- und
+  Browserabhängigkeiten.
+- Fokussierte Cards-Vertrags-, Negativ-, Serialisierungs-, Freeze- und
+  Referenztests sowie Cards-/Shared-/Engine-Typechecks, Boundary-/Cycle-
+  Selftests, Engine-Strukturgates und Test-Discovery sind grün. Registry,
+  Projektionen, Importindex, Fingerprints und Karteninstanzen wurden nicht
+  begonnen; CS03 blieb unberührt.
+
 ### CS03 – Registry, Projektionen, Importindex und Fingerprints
 
 Ziel:
@@ -646,8 +680,9 @@ Konkrete Arbeit:
 - deterministischen buildseitigen Importindex-Generator erstellen;
 - keine Runtime-Dateisystemerkennung verwenden;
 - Registry mit Lookup nach CardDefinition, Printing und Capability aufbauen;
-- `/public`, `/engine`, `/planning` und `/editor` als kontrollierte Subpath-
-  Exports definieren;
+- den in CS02 ausschließlich für deklarative Engine-Verträge angelegten
+  `/engine`-Subpath um die Registry-/Engineprojektion ergänzen und `/public`,
+  `/planning` und `/editor` als kontrollierte Subpath-Exports definieren;
 - Public-Projektion als explizite Allowlist implementieren;
 - Abschnittsfingerprints und Registry-Aggregathashes erzeugen;
 - Rules-/Planning-Kontext um Card-Registry- und Primitivekontext ergänzen,

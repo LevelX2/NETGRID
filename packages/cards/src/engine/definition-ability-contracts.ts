@@ -1,5 +1,5 @@
 /**
- * Defines on-play, activated, lifecycle, and direct ability contracts.
+ * Defines serializable on-play, activated, lifecycle, and direct ability contracts.
  *
  * This module is declarative only: it must not execute effects, query
  * GameState, or contain concrete card IDs.

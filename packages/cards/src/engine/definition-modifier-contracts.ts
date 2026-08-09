@@ -1,5 +1,5 @@
 /**
- * Defines cost, strength, prevention, trace, and encounter modifiers.
+ * Defines serializable cost, strength, prevention, trace, and encounter modifiers.
  *
  * This module is declarative only: it must not execute effects, query
  * GameState, or contain concrete card IDs.

@@ -16,7 +16,7 @@ import {
   isPublicRunnerInstalledModifier,
   type ActiveCardImplementationModifier,
 } from "../../ability-engine/card-implementation-modifiers";
-import type { CardInstallCostModifierImplementation } from "../../ability-engine/definition-modifier-contracts";
+import type { CardInstallCostModifierImplementation } from "@netgrid/cards/engine";
 import { serverRunStartRestrictions } from "../run/server-run-start-restrictions";
 
 type ActiveInstallCostModifier =

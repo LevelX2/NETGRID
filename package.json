@@ -36,6 +36,8 @@
     "check:engine-cardimplementation-architecture-target:selftest": "node scripts/check-engine-cardimplementation-architecture-target.mjs --self-test",
     "check:engine-source-structure": "node scripts/check-engine-source-structure.mjs",
     "check:engine-source-structure:selftest": "node scripts/check-engine-source-structure.mjs --self-test",
+    "check:cards-source-structure": "node scripts/check-cards-source-structure.mjs",
+    "check:cards-source-structure:selftest": "node scripts/check-cards-source-structure.mjs --self-test",
     "check:engine-credit-gain-boundary": "node scripts/check-engine-credit-gain-boundary.mjs",
     "check:package-boundaries": "node scripts/check-package-boundaries.mjs",
     "check:package-boundaries:selftest": "node scripts/check-package-boundaries.mjs --self-test",
