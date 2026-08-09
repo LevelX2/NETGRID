@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 abgeschlossen, CS01 ausstehend**
+- Status: **in Umsetzung; CS00 und CS01 abgeschlossen, CS02 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -396,7 +396,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | Paket | Titel                                                  | Status    |
 | ----- | ------------------------------------------------------ | --------- |
 | CS00  | Worktree-Preflight, Architekturfreeze und Baselines    | completed |
-| CS01  | Capability-, Longtail- und Consumer-Inventar           | pending   |
+| CS01  | Capability-, Longtail- und Consumer-Inventar           | completed |
 | CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | pending   |
 | CS03  | Registry, Projektionen, Importindex und Fingerprints   | pending   |
 | CS04  | Stabile Capability-Identität und Engine-Rebinding      | pending   |
@@ -546,7 +546,9 @@ Checks:
 
 Done-Gate:
 
-- keine Capability- oder Consumer-Familie ist unbekannt;
+- keine Capability- oder Consumer-Familie ist unentdeckt oder
+  uninventarisiert; die bewusst inventarisierte Prospective-Klasse `unknown`
+  bleibt zulässig;
 - jede Longtail-Familie ist als statisch kompilierbar,
   `requires_engine_quote` oder `unknown` klassifiziert;
 - Stresstestmatrix deckt die Pflichtfamilien ab.
@@ -554,6 +556,42 @@ Done-Gate:
 Commit:
 
 `docs(architecture): inventory card capabilities and consumers`
+
+Ergebnis vom 09.08.2026:
+
+- Das vollständige Inventar ist unter
+  [`card-spec-capability-consumer-inventory-2026-08-09.md`](../reviews/architecture/card-spec-capability-consumer-inventory-2026-08-09.md)
+  versioniert. Die reproduzierbare maschinenlesbare Evidence und ihr lokaler
+  Audit liegen absichtlich ignoriert unter
+  `data/local/card-spec-registry-migration-cs01/`.
+- Alle 620 Karten sind disjunkt zugeordnet: 583
+  `implementation_backed_declarative`, eine
+  `definition_only_no_engine_behavior_required` und 36
+  `definition_only_test_fixture`. Die zwei Catalog-Previews sind die einzigen
+  Karten ohne aktiven Hint und bewusst als Publication-/Registry-Exklusion
+  disponiert.
+- Alle 48 Top-level-Capability-Familien sind gezählt, ihrem Runtime-Owner und
+  einer Prospective-Klasse zugewiesen. 16 sind `statically_compilable`, 31
+  `requires_engine_quote`; `regionBaseline` ist als vollständig inventarisierte
+  Klasse `unknown` ohne produktiven Owner fail-closed blockiert.
+- Der finale 583er-Registrygraph ist plain JSON, 186.575 UTF-8-Bytes groß und
+  besteht den Deep-Equality-Roundtrip. Verbotene Runtimewerte,
+  Fremdprototypen, Zyklen und umgebungsabhängige finale Werte wurden nicht
+  gefunden.
+- Produktive Direktconsumer sind vollständig klassifiziert: 105
+  CardDefinition-Consumer, 87 ausschließlich engine-interne
+  CardImplementation-Registry-Consumer und 66 aktive Hint-Consumer plus ein
+  separater Autorloader sowie die vier Raw-Card- und eine Manifestfläche.
+- Alle 32 aktiven Hintfelder und zwei heute inaktiven Vertragsfelder besitzen
+  eine Ziel-Disposition. Gemischte Felder werden nur über geschlossene,
+  feld-/wert-/präfixbasierte Mappingtabellen aufgespalten; unbekannte Keys und
+  Werte scheitern fail-closed.
+- Die heterogene Zehner-Stressmatrix deckt Broker, Loan from Chiba, Black
+  Widow, Morphing Tool, Sneak Preview sowie passive Modifier, Variable Rez,
+  Access/Ambush, Scored Agenda und Run Window ab. Mit Roving Submarine wird
+  zugleich das `regionBaseline`-Unknown-Gate bewusst belastet.
+- Keine Vertrags-, Registry-, Karten-, Engine- oder KI-Implementierung wurde
+  begonnen; CS02 blieb unberührt.
 
 ### CS02 – Paket-, Schema- und Serialisierbarkeitsfundament
 
