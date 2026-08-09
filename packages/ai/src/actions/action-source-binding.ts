@@ -11,6 +11,10 @@ import type {
   ActionSemanticSourceKind,
   SideSafeActionAbilityBinding,
 } from "../action-semantic-candidate-types";
+import {
+  assertAbilityRefIdentity,
+  parseCanonicalCapabilityId,
+} from "@netgrid/cards/planning";
 
 /**
  * @aiProjection Copies side-safe Engine source and CardImplementation primitive
@@ -41,7 +45,22 @@ export function applyCardActionSourceBinding(
     sourceCardInstanceId !== undefined
       ? visibleSourceDefinitionsByInstanceId?.[sourceCardInstanceId]
       : undefined;
+  const canonicalSourceDefinitionId =
+    abilityBinding?.method === "canonical_capability_id"
+      ? abilityBinding.sourceDefinitionId
+      : undefined;
+  if (
+    canonicalSourceDefinitionId !== undefined &&
+    ((payloadSourceDefinitionId !== undefined &&
+      payloadSourceDefinitionId !== canonicalSourceDefinitionId) ||
+      (visibleSourceDefinitionId !== undefined &&
+        visibleSourceDefinitionId !== canonicalSourceDefinitionId))
+  )
+    throw new Error(
+      "AI038 canonical capability definition conflicts with source metadata.",
+    );
   const sourceDefinitionId =
+    canonicalSourceDefinitionId ??
     payloadSourceDefinitionId ??
     abilityBinding?.sourceDefinitionId ??
     visibleSourceDefinitionId;
@@ -140,6 +159,64 @@ function abilityBindingForAction(
   sourceCardInstanceId: string | undefined,
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
 ): ResolvedAbilityBinding | undefined {
+  if (action.abilityRef) assertAbilityRefIdentity(action.abilityRef);
+  const canonicalAbilityRef =
+    action.abilityRef && "sourceAbilityId" in action.abilityRef
+      ? action.abilityRef
+      : undefined;
+  const canonicalPayloadId = stringPayload(
+    action,
+    "cardImplementationAbilityId",
+  );
+  const canonicalPayloadKey = stringPayload(
+    action,
+    "cardImplementationAbilityKey",
+  );
+  const canonicalBindingKind = stringPayload(
+    action,
+    "cardImplementationCapabilityBindingKind",
+  );
+  const canonicalSourceAbilityId = canonicalAbilityRef?.sourceAbilityId;
+  const hasCanonicalPayloadEvidence =
+    canonicalPayloadId !== undefined ||
+    canonicalPayloadKey !== undefined ||
+    canonicalBindingKind !== undefined;
+  const hasLegacyIndexEvidence =
+    action.payload?.cardImplementationAbilityIndex !== undefined ||
+    action.payload?.cardImplementationLifecycleAbilityIndex !== undefined;
+  if (
+    canonicalAbilityRef ||
+    canonicalBindingKind === "card_spec_capability_key"
+  ) {
+    if (
+      !canonicalAbilityRef ||
+      typeof canonicalSourceAbilityId !== "string" ||
+      sourceCardInstanceId !== canonicalAbilityRef.sourceCardInstanceId ||
+      action.source !== canonicalAbilityRef.sourceCardInstanceId ||
+      hasLegacyIndexEvidence ||
+      !hasCanonicalPayloadEvidence ||
+      canonicalPayloadId === undefined ||
+      canonicalPayloadKey === undefined ||
+      canonicalBindingKind !== "card_spec_capability_key"
+    )
+      throw new Error(
+        "AI038 canonical capability binding is incomplete or conflicts with its source.",
+      );
+    const parsed = parseCanonicalCapabilityId(canonicalSourceAbilityId);
+    if (
+      canonicalPayloadId !== canonicalSourceAbilityId ||
+      canonicalPayloadKey !== parsed.capabilityKey
+    )
+      throw new Error(
+        "AI038 canonical capability identity conflicts across AbilityRef and payload.",
+      );
+    return {
+      abilityId: canonicalSourceAbilityId,
+      method: "canonical_capability_id",
+      sourceDefinitionId: parsed.cardDefinitionId,
+      evidence: [`AI038 canonical AbilityRef: ${canonicalSourceAbilityId}`],
+    };
+  }
   if (action.abilityRef?.abilityId) {
     return {
       abilityId: action.abilityRef.abilityId,
@@ -175,6 +252,7 @@ function abilityBindingForAction(
     action,
     "cardImplementationAbilityKey",
   );
+
   const sourceDefinitionId = sourceDefinitionIdForAction(action);
   if (
     sourceDefinitionId !== undefined &&

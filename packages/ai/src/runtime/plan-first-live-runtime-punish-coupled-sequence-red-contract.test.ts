@@ -904,6 +904,7 @@ function punishRouteQuote(params: {
         order: step.order,
         kind: step.kind,
         sourceCardInstanceId: step.sourceCardInstanceId,
+        sourceCapabilityBindingKind: "legacy_card_implementation_index",
         sourceCapabilityId: step.sourceCapabilityId,
       })),
     },
@@ -994,6 +995,7 @@ function punishStep(params: {
     kind: params.kind,
     sourceCardInstanceId: params.card.instanceId,
     sourceCardDefinitionId: params.card.definitionId!,
+    sourceCapabilityBindingKind: "legacy_card_implementation_index",
     sourceCapabilityId:
       params.kind === "trace_tag"
         ? "play_operation.trace_tag"

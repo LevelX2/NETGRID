@@ -22,6 +22,7 @@ import type {
   CardInstallAdditionalCostImplementation,
   CardInstallTargetBindingImplementation,
   CardLifecycleImplementation,
+  CardLifecycleTriggeredAbilityImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
   CardRegionBaselineImplementation,
@@ -200,64 +201,114 @@ export type CanonicalAbilityAlias<Capability> = Capability extends object
     : Capability
   : Capability;
 
-type CanonicalMechanicalFamilies = Pick<
-  MechanicsOnly<CardMechanicalDefinition>,
-  | "corpRootRezCreditOutcome"
-  | "advanceable"
-  | "printedSubroutines"
-  | "selfRezCostModifiers"
-  | "selfRezAdditionalCosts"
-  | "iceEncounter"
-  | "hostedProgramCapacity"
-  | "hostedProgramModifiers"
-  | "modifiers"
-  | "selfStealCosts"
-  | "agendaAccessReplacement"
+type AddressableMechanicalFamilyKey =
+  | "abilities"
   | "accessEffects"
   | "accessHooks"
-  | "lifecycle"
-  | "runnerCounterEffects"
-  | "restrictedHostedCreditSource"
-  | "installAdditionalCosts"
-  | "installTargetBinding"
-  | "icebreakerEncounterStrengthBonus"
-  | "icebreakerSubtypeChange"
-  | "runnerRunStrengthBoost"
-  | "runnerEventTargetedEffect"
+  | "agendaAccessReplacement"
+  | "corpTrashInstalledRunnerSource"
+  | "corpUtility"
   | "damagePreventionSources"
   | "flatlineReplacementSources"
+  | "fortRunWindows"
+  | "hiddenReplacementLongtail"
+  | "iceEncounter"
+  | "icebreakerAbilities"
+  | "icebreakerSubtypeChange"
+  | "installTargetBinding"
+  | "printedSubroutines"
+  | "relativeIce"
+  | "remainingReplacementLongtail"
+  | "runEncounterInterventions"
+  | "runnerCounterEffects"
+  | "runnerEventLongtail"
+  | "runnerEventTargetedEffect"
+  | "runnerRunStrengthBoost"
+  | "runnerUtilityLongtail"
+  | "scoredAgenda"
+  | "successfulRunFollowups"
   | "tagPreventionSources"
   | "trashPreventionSources"
-  | "runEncounterInterventions"
-  | "fortCapacityModifiers"
-  | "leavePlayCleanup"
-  | "variableRez"
-  | "relativeIce"
-  | "virusCounter"
-  | "scoredAgenda"
-  | "corpUtility"
-  | "corpTrashInstalledRunnerSource"
-  | "hiddenReplacementLongtail"
-  | "runnerUtilityLongtail"
-  | "runnerEventLongtail"
   | "uniqueDirectLongtail"
-  | "remainingReplacementLongtail"
-  | "hardwareDeck"
-  | "unique"
+  | "variableRez"
+  | "virusCounter";
+
+type AddressableMechanicalFamily<Value> = Value extends readonly (infer Entry)[]
+  ? Entry extends object
+    ? readonly AddressableCardCapability<Entry>[]
+    : never
+  : Value extends object
+    ? AddressableCardCapability<Value>
+    : never;
+
+type CanonicalAddressableMechanicalFamilies = {
+  [Key in AddressableMechanicalFamilyKey]?: AddressableMechanicalFamily<
+    NonNullable<MechanicsOnly<CardMechanicalDefinition>[Key]>
+  >;
+};
+
+type CanonicalMechanicalFamilies = Omit<
+  Pick<
+    MechanicsOnly<CardMechanicalDefinition>,
+    | "corpRootRezCreditOutcome"
+    | "advanceable"
+    | "printedSubroutines"
+    | "selfRezCostModifiers"
+    | "selfRezAdditionalCosts"
+    | "iceEncounter"
+    | "hostedProgramCapacity"
+    | "hostedProgramModifiers"
+    | "modifiers"
+    | "selfStealCosts"
+    | "agendaAccessReplacement"
+    | "accessEffects"
+    | "accessHooks"
+    | "runnerCounterEffects"
+    | "restrictedHostedCreditSource"
+    | "installAdditionalCosts"
+    | "installTargetBinding"
+    | "icebreakerEncounterStrengthBonus"
+    | "icebreakerSubtypeChange"
+    | "runnerRunStrengthBoost"
+    | "runnerEventTargetedEffect"
+    | "damagePreventionSources"
+    | "flatlineReplacementSources"
+    | "tagPreventionSources"
+    | "trashPreventionSources"
+    | "runEncounterInterventions"
+    | "fortCapacityModifiers"
+    | "leavePlayCleanup"
+    | "variableRez"
+    | "relativeIce"
+    | "virusCounter"
+    | "scoredAgenda"
+    | "corpUtility"
+    | "corpTrashInstalledRunnerSource"
+    | "hiddenReplacementLongtail"
+    | "runnerUtilityLongtail"
+    | "runnerEventLongtail"
+    | "uniqueDirectLongtail"
+    | "remainingReplacementLongtail"
+    | "hardwareDeck"
+    | "unique"
+  >,
+  AddressableMechanicalFamilyKey | "lifecycle"
 >;
 
-export type CardMechanicalSpec = CanonicalMechanicalFamilies & {
-  schemaVersion: "card-mechanical-spec-v1";
-  characteristics: CardMechanicalCharacteristicsSpec;
-  abilities?: readonly AddressableCardCapability<CardAbilityImplementation>[];
-  icebreakerAbilities?: readonly AddressableCardCapability<CardIcebreakerAbilityImplementation>[];
-  fortRunWindows?: readonly CanonicalAbilityAlias<
-    MechanicsOnly<CardFortRunWindowImplementation>
-  >[];
-  installCapabilities?: readonly CanonicalAbilityAlias<
-    MechanicsOnly<CardInstallCapabilityImplementation>
-  >[];
-  successfulRunFollowups?: readonly CanonicalAbilityAlias<
-    MechanicsOnly<CardSuccessfulRunFollowupImplementation>
-  >[];
+export type CanonicalCardLifecycleSpec = Omit<
+  MechanicsOnly<CardLifecycleImplementation>,
+  "end_of_runner_turn"
+> & {
+  /** End-turn choices materialize LegalActions and therefore require keys. */
+  end_of_runner_turn?: readonly AddressableCardCapability<CardLifecycleTriggeredAbilityImplementation>[];
 };
+
+export type CardMechanicalSpec = CanonicalMechanicalFamilies &
+  CanonicalAddressableMechanicalFamilies & {
+    schemaVersion: "card-mechanical-spec-v1";
+    characteristics: CardMechanicalCharacteristicsSpec;
+    lifecycle?: CanonicalCardLifecycleSpec;
+    installCapabilities?: readonly CanonicalAbilityAlias<
+      MechanicsOnly<CardInstallCapabilityImplementation>
+    >[];
+  };

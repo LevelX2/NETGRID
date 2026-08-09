@@ -8,6 +8,92 @@ import {
 } from "./semantic-ai-runtime-cutover.test-support";
 
 describe("AI input DTO public event source binding", () => {
+  it("preserves exact actor-side canonical capability binding and rejects hybrid AbilityRef", () => {
+    const action = legalAction(
+      "canonical-action",
+      "runner",
+      "activated_card_ability",
+      "Use ability",
+      { credits: 0, clicks: 0 },
+    );
+    action.source = "source";
+    action.payload = {
+      cardId: "source",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityId: "test_card:gain",
+      cardImplementationAbilityKey: "gain",
+    };
+    action.abilityRef = {
+      sourceCardInstanceId: "source",
+      sourceAbilityId: "test_card:gain",
+    };
+    const view = playerView("runner", [action]);
+    const build = () =>
+      buildAiDecisionInputDto({
+        side: "runner",
+        playerView: view,
+        eventTail: [],
+        legalActions: [action],
+        difficulty: "normal",
+        seed: "canonical-binding",
+        decisionId: "canonical-binding:runner:1",
+        actionNumber: 1,
+        profileId: "canonical-binding-test",
+      });
+    expect(build().legalActions[0]).toMatchObject({
+      abilityRef: {
+        sourceCardInstanceId: "source",
+        sourceAbilityId: "test_card:gain",
+      },
+      payload: {
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityId: "test_card:gain",
+        cardImplementationAbilityKey: "gain",
+      },
+    });
+    action.payload.cardImplementationAbilityIndex = 0;
+    expect(build).toThrow(/conflicts with its AbilityRef/);
+    delete action.payload.cardImplementationAbilityIndex;
+    const exactPayload = action.payload;
+    delete action.payload;
+    expect(build).toThrow(/requires an exact payload binding/);
+    action.payload = exactPayload;
+    action.abilityRef = {
+      sourceCardInstanceId: "source",
+      abilityId: "legacy",
+      sourceAbilityId: "test_card:gain",
+    } as never;
+    expect(build).toThrow(/AbilityRef/);
+  });
+
+  it("does not expose legacy implementation identity through the AI DTO", () => {
+    const action = legalAction(
+      "legacy-action",
+      "runner",
+      "activated_card_ability",
+      "Use legacy ability",
+      { credits: 0, clicks: 0 },
+    );
+    action.payload = {
+      cardImplementationAbilityId: "legacy-primitive",
+      cardImplementationAbilityKey: "legacy-key",
+      cardImplementationAbilityIndex: 2,
+      cardImplementationLifecycleAbilityIndex: 3,
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView("runner", [action]),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "legacy-binding",
+      decisionId: "legacy-binding:runner:1",
+      actionNumber: 1,
+      profileId: "legacy-binding-test",
+    });
+    expect(input.legalActions[0]?.payload).toEqual({});
+  });
+
   it("preserves the structured actor-side source binding and drops unknown fields", () => {
     const action = legalAction(
       "runner.gain_credit",

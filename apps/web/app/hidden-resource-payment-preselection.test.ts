@@ -93,6 +93,58 @@ describe("hidden resource payment preselection", () => {
     ).toBe(true);
   });
 
+  it("matches canonical payment support without accepting hybrid identities", () => {
+    const canonical: VisibleRunnerPaymentSupportAbility = {
+      sourceAbilityId: "test_hidden_resource:withdraw",
+      capabilityKey: "withdraw",
+      timing: "runner_cost_penalty_support",
+      label: "Withdraw",
+      creditCost: 0,
+      gainCredits: 3,
+      trashesSource: false,
+    };
+    const source = card("canonical-a", [canonical]);
+    const selection = createHiddenResourcePaymentPreselection({
+      matchId: "match-1",
+      view: view([source]),
+      card: source,
+      ability: canonical,
+    })!;
+    const exact = action(
+      "canonical-support",
+      "activated_card_ability",
+      "canonical-a",
+      {
+        cardId: "canonical-a",
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityId: "test_hidden_resource:withdraw",
+        cardImplementationAbilityKey: "withdraw",
+        cardImplementationAbilityTiming: "runner_cost_penalty_support",
+        costPenaltySupportWindowId: "window-1",
+      },
+      12,
+    );
+    exact.abilityRef = {
+      sourceCardInstanceId: "canonical-a",
+      sourceAbilityId: "test_hidden_resource:withdraw",
+    };
+    expect(
+      resolveHiddenResourcePaymentPreselection(selection, [exact]),
+    ).toEqual({ kind: "match", windowId: "window-1", action: exact });
+    const hybrid = {
+      ...canonical,
+      abilityIndex: 0,
+    } as unknown as VisibleRunnerPaymentSupportAbility;
+    expect(
+      createHiddenResourcePaymentPreselection({
+        matchId: "match-1",
+        view: view([card("canonical-a", [hybrid])]),
+        card: card("canonical-a", [hybrid]),
+        ability: hybrid,
+      }),
+    ).toBeNull();
+  });
+
   it("waits outside a support window and falls back for stale or ambiguous actions", () => {
     const selection = createHiddenResourcePaymentPreselection({
       matchId: "match-1",
@@ -204,7 +256,7 @@ describe("hidden resource payment preselection", () => {
     expect(cardSource).toContain("paymentSupportShortcuts.map((shortcut)");
     expect(cardSource).toContain("aria-pressed={shortcut.selected}");
     expect(cardSource).toContain(
-      "data-testid={`payment-support-shortcut-${shortcut.abilityIndex}`}",
+      "data-testid={`payment-support-shortcut-${shortcut.identityKey}`}",
     );
     expect(boardSource).toContain(
       "rigCard.runnerPaymentSupportAbilities ?? []",

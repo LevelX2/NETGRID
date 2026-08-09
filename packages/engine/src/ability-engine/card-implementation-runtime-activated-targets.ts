@@ -20,13 +20,25 @@ import type {
   CardEffectImplementation,
 } from "./definition-types";
 import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
+import {
+  activatedAbilityBindingPayload,
+  type ActivatedAbilityBinding,
+} from "./card-capability-binding";
 
 export function activatedAbilityPayload(
   cardId: CardInstanceId,
   ability: ActivatedCardAbilityImplementation,
-  abilityIndex: number,
+  binding: ActivatedAbilityBinding | number,
   state?: GameState,
 ): Record<string, string | number | boolean> {
+  const abilityBinding =
+    typeof binding === "number"
+      ? ({
+          kind: "legacy_card_implementation_index",
+          ability,
+          abilityIndex: binding,
+        } satisfies ActivatedAbilityBinding)
+      : binding;
   const advancementCounterCreditPayout =
     gainCreditsPerAdvancementCounterOnSourceEffect(ability);
   const visibleAdvancementCounterCount =
@@ -99,7 +111,7 @@ export function activatedAbilityPayload(
   return {
     cardId,
     cardImplementationAbility: "activated",
-    cardImplementationAbilityIndex: abilityIndex,
+    ...activatedAbilityBindingPayload(abilityBinding),
     cardImplementationAbilityTiming: ability.timing,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
     ...(hostedCreditTakeAmount +

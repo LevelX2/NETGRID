@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   abilityKey,
+  assertAbilityRefIdentity,
   capabilityKey,
   canonicalCapabilityId,
   CapabilityIdentityError,
@@ -31,6 +32,32 @@ function validateUntyped(spec: Record<string, unknown>): void {
 }
 
 describe("CardSpec validation", () => {
+  it("keeps AbilityRef legacy and canonical identities mutually exclusive", () => {
+    expect(() =>
+      assertAbilityRefIdentity({
+        sourceCardInstanceId: "source",
+        abilityId: "legacy",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      assertAbilityRefIdentity({
+        sourceCardInstanceId: "source",
+        sourceAbilityId: "test_card:ability",
+      }),
+    ).not.toThrow();
+    for (const invalid of [
+      { sourceCardInstanceId: "source" },
+      {
+        sourceCardInstanceId: "source",
+        abilityId: "legacy",
+        sourceAbilityId: "test_card:ability",
+      },
+      { sourceCardInstanceId: "source", sourceAbilityId: "not-canonical" },
+    ])
+      expect(() => assertAbilityRefIdentity(invalid)).toThrow(
+        CapabilityIdentityError,
+      );
+  });
   it("roundtrips, canonically serializes, and deeply freezes a complete contract", () => {
     const spec = minimalCardSpec();
     assertCardSpecContract(spec);
@@ -73,6 +100,28 @@ describe("CardSpec validation", () => {
     const spec = untypedSpec();
     engineOf(spec).abilities = [{ kind: "on_play", costs: {}, effects: [] }];
     expect(() => validateUntyped(spec)).toThrowError(/missing_capability_key/);
+  });
+
+  it("requires addressability only on the capability root, not nested mechanics", () => {
+    const spec = untypedSpec();
+    engineOf(spec).abilities = [
+      {
+        kind: "activated",
+        timing: "runner_main",
+        costs: [{ kind: "credit", amount: 1 }],
+        effects: [
+          {
+            kind: "gain_credits",
+            recipient: "runner",
+            amount: 2,
+            visibility: "public",
+          },
+        ],
+        capabilityKey: "gain-credit",
+        addressability: ["action", "plan"],
+      },
+    ];
+    expect(() => validateUntyped(spec)).not.toThrow();
   });
 
   it("requires keys for conditionally addressable capability variants", () => {

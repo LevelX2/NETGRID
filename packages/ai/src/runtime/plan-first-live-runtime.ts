@@ -13798,7 +13798,20 @@ function turnPlanningProjectionDebug(params: {
     ...(candidate.sourceCardInstanceId
       ? { sourceCardInstanceId: candidate.sourceCardInstanceId }
       : {}),
-    ...(candidate.abilityId ? { sourceAbilityId: candidate.abilityId } : {}),
+    ...(candidate.abilityId
+      ? {
+          sourceAbilityBinding:
+            candidate.abilityBindingMethod === "canonical_capability_id"
+              ? {
+                  kind: "card_spec_capability_key" as const,
+                  sourceAbilityId: candidate.abilityId,
+                }
+              : {
+                  kind: "legacy_ability_id" as const,
+                  abilityId: candidate.abilityId,
+                },
+        }
+      : {}),
   });
   const rootPlanInstanceId =
     params.result.portfolio.rootForegroundInstanceId ??

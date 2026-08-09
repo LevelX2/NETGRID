@@ -163,6 +163,7 @@ export function buildBoundedCorpPunishRouteRequests(
           order,
           kind: component.adapter.kind,
           sourceCardInstanceId: component.card.instanceId,
+          sourceCapabilityBindingKind: "legacy_card_implementation_index",
           sourceCapabilityId: component.adapter.sourceCapabilityId,
           ...(currentLegalActionId ? { currentLegalActionId } : {}),
         };
@@ -479,6 +480,8 @@ function quoteMatchesRequest(
         echoed.order === requested.order &&
         echoed.kind === requested.kind &&
         echoed.sourceCardInstanceId === requested.sourceCardInstanceId &&
+        echoed.sourceCapabilityBindingKind ===
+          requested.sourceCapabilityBindingKind &&
         echoed.sourceCapabilityId === requested.sourceCapabilityId &&
         echoed.currentLegalActionId === requested.currentLegalActionId
       );

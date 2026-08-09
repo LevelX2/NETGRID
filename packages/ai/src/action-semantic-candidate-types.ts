@@ -24,6 +24,7 @@ export type ActionSemanticSourceKind =
   | "unknown";
 
 export type ActionAbilityBindingMethod =
+  | "canonical_capability_id"
   | "explicit_ability_id"
   | "engine_payload"
   | "single_legal_ability_inferred"

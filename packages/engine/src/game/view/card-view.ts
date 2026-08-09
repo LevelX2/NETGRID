@@ -32,6 +32,7 @@ import { serverChoiceDisplayLabel } from "./server-view";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 import { quoteStealCostForKnownInstalledAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { damagePreventionUsedThisTurn } from "../state/turn-flags-counters";
+import { activatedAbilityBindingsForDefinition } from "../../ability-engine/card-capability-binding";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -385,9 +386,9 @@ function visibleRunnerPaymentSupportAbilities(
     !cardHasSubtype(definition, "hidden")
   )
     return [];
-  const implementation = cardImplementationForDefinitionId(definition.id);
-  return (
-    implementation?.abilities?.flatMap((ability, abilityIndex) => {
+  return activatedAbilityBindingsForDefinition(definition).flatMap(
+    (binding) => {
+      const { ability } = binding;
       if (
         ability.kind !== "activated" ||
         ability.timing !== "runner_cost_penalty_support"
@@ -408,7 +409,12 @@ function visibleRunnerPaymentSupportAbilities(
       );
       return [
         {
-          abilityIndex,
+          ...(binding.kind === "legacy_card_implementation_index"
+            ? { abilityIndex: binding.abilityIndex }
+            : {
+                sourceAbilityId: binding.sourceAbilityId,
+                capabilityKey: binding.capabilityKey,
+              }),
           timing: ability.timing,
           label: ability.label ?? `${definition.title}: Fähigkeit nutzen`,
           creditCost,
@@ -418,7 +424,7 @@ function visibleRunnerPaymentSupportAbilities(
           ),
         },
       ];
-    }) ?? []
+    },
   );
 }
 

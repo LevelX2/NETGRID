@@ -11,11 +11,16 @@ import {
   type GameState,
   type LegalAction,
 } from "@netgrid/shared";
+import { CapabilityIdentityError } from "@netgrid/cards/engine";
 import type {
   CardConditionImplementation,
   CardEffectImplementation,
   OnPlayCardAbilityImplementation,
 } from "../../ability-engine/definition-types";
+import {
+  CardCapabilityBindingError,
+  onPlayAbilityForCapabilityIdentity,
+} from "../../ability-engine/card-capability-binding";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { applyAction } from "../apply-action";
 import { createRunnerInstalledTrashImminentEvent } from "../damage/damage-event-resolution";
@@ -578,6 +583,7 @@ export function corpPunishRouteRequestFingerprint(
       String(step.order),
       step.kind,
       step.sourceCardInstanceId,
+      step.sourceCapabilityBindingKind,
       step.sourceCapabilityId,
       ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
@@ -613,10 +619,21 @@ function certifyStep(
   if (request.sourceCapabilityId === CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID) {
     return certifyHardwareTrashStep(state, request, definition);
   }
-  const capability = onPlayCapability(
-    instance.definitionId,
-    request.sourceCapabilityId,
-  );
+  let capability: OnPlayCardAbilityImplementation | undefined;
+  try {
+    capability = onPlayCapability(
+      definition,
+      request.sourceCapabilityBindingKind,
+      request.sourceCapabilityId,
+    );
+  } catch (error) {
+    if (
+      error instanceof CardCapabilityBindingError ||
+      error instanceof CapabilityIdentityError
+    )
+      return { ok: false, reason: "source_capability_missing" };
+    throw error;
+  }
   if (!capability) {
     return { ok: false, reason: "source_capability_missing" };
   }
@@ -639,6 +656,7 @@ function certifyStep(
         kind: request.kind,
         sourceCardInstanceId: request.sourceCardInstanceId,
         sourceCardDefinitionId: instance.definitionId,
+        sourceCapabilityBindingKind: request.sourceCapabilityBindingKind,
         sourceCapabilityId: request.sourceCapabilityId,
         clicks: 1,
         credits,
@@ -659,6 +677,11 @@ function certifyHardwareTrashStep(
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason } {
+  if (
+    request.sourceCapabilityBindingKind !== "legacy_card_implementation_index"
+  ) {
+    return { ok: false, reason: "source_capability_missing" };
+  }
   if (request.kind !== "hardware_trash") {
     return { ok: false, reason: "source_effects_unsupported" };
   }
@@ -758,6 +781,7 @@ function certifyHardwareTrashStep(
         kind: request.kind,
         sourceCardInstanceId: request.sourceCardInstanceId,
         sourceCardDefinitionId: definition.id,
+        sourceCapabilityBindingKind: request.sourceCapabilityBindingKind,
         sourceCapabilityId: request.sourceCapabilityId,
         clicks: 1,
         credits,
@@ -839,15 +863,14 @@ function exactRequestedHardwareTrashAction(
 }
 
 function onPlayCapability(
-  definitionId: string,
+  definition: (typeof CARD_DEFINITIONS_BY_ID)[string] & {},
+  bindingKind: "legacy_card_implementation_index" | "card_spec_capability_key",
   capabilityId: string,
 ): OnPlayCardAbilityImplementation | undefined {
-  const match = /^ability:on_play:(0|[1-9]\d*)$/.exec(capabilityId);
-  if (!match) return undefined;
-  const index = Number(match[1]);
-  const ability =
-    cardImplementationForDefinitionId(definitionId)?.abilities?.[index];
-  return ability?.kind === "on_play" ? ability : undefined;
+  return onPlayAbilityForCapabilityIdentity(definition, {
+    kind: bindingKind,
+    sourceCapabilityId: capabilityId,
+  });
 }
 
 function supportedEffects(

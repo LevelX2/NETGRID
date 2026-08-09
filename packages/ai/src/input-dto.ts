@@ -36,6 +36,10 @@ import {
   type VisibleEffectiveSubroutine,
   type VisibleVariableCorpRezCostParameter,
 } from "@netgrid/shared";
+import {
+  assertAbilityRefIdentity,
+  parseCanonicalCapabilityId,
+} from "@netgrid/cards/planning";
 
 export type BuildAiDecisionInputDtoParams = {
   matchId?: string;
@@ -911,6 +915,7 @@ export function sanitizeCorpPunishRouteQuoteSet(
         kind: step.kind,
         sourceCardInstanceId: step.sourceCardInstanceId,
         sourceCardDefinitionId: step.sourceCardDefinitionId,
+        sourceCapabilityBindingKind: step.sourceCapabilityBindingKind,
         sourceCapabilityId: step.sourceCapabilityId,
         clicks: step.clicks,
         credits: step.credits,
@@ -1053,6 +1058,9 @@ function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
         step.order === index &&
         validPunishStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
+        (step.sourceCapabilityBindingKind ===
+          "legacy_card_implementation_index" ||
+          step.sourceCapabilityBindingKind === "card_spec_capability_key") &&
         nonblank(step.sourceCapabilityId) &&
         (step.currentLegalActionId === undefined ||
           (index === 0 && nonblank(step.currentLegalActionId))),
@@ -1066,6 +1074,8 @@ function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
           requested.order === quoted.order &&
           requested.kind === quoted.kind &&
           requested.sourceCardInstanceId === quoted.sourceCardInstanceId &&
+          requested.sourceCapabilityBindingKind ===
+            quoted.sourceCapabilityBindingKind &&
           requested.sourceCapabilityId === quoted.sourceCapabilityId
         );
       }))
@@ -1396,6 +1406,7 @@ function punishRequestFingerprint(
       String(step.order),
       step.kind,
       step.sourceCardInstanceId,
+      step.sourceCapabilityBindingKind,
       step.sourceCapabilityId,
       ...(step.currentLegalActionId ? [step.currentLegalActionId] : []),
     ]),
@@ -2883,9 +2894,12 @@ const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
 ] as const;
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {
-  const payload = action.payload
-    ? sanitizeLegalActionPayload(action)
-    : undefined;
+  if (action.abilityRef) assertAbilityRefIdentity(action.abilityRef);
+  const payload =
+    action.payload ||
+    (action.abilityRef && "sourceAbilityId" in action.abilityRef)
+      ? sanitizeLegalActionPayload(action)
+      : undefined;
   return {
     actionId: action.actionId,
     side: action.side,
@@ -2906,10 +2920,16 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
       : {}),
     ...(action.abilityRef
       ? {
-          abilityRef: {
-            sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
-            abilityId: action.abilityRef.abilityId,
-          },
+          abilityRef:
+            "sourceAbilityId" in action.abilityRef
+              ? {
+                  sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
+                  sourceAbilityId: action.abilityRef.sourceAbilityId,
+                }
+              : {
+                  sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
+                  abilityId: action.abilityRef.abilityId,
+                },
         }
       : {}),
     ...(action.effectRef ? { effectRef: action.effectRef } : {}),
@@ -3075,10 +3095,35 @@ function sanitizeLegalActionPayload(
   action: LegalAction,
 ): Record<string, string | number | boolean> {
   const payload = action.payload as Record<string, unknown> | undefined;
+  if (!payload && action.abilityRef && "sourceAbilityId" in action.abilityRef)
+    throw new Error(
+      "Canonical CardSpec capability Action requires an exact payload binding.",
+    );
   if (!payload) return {};
   const result: Record<string, string | number | boolean> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
+  if (action.abilityRef && "sourceAbilityId" in action.abilityRef) {
+    const parsed = parseCanonicalCapabilityId(
+      action.abilityRef.sourceAbilityId,
+    );
+    const bindingKind = payload.cardImplementationCapabilityBindingKind;
+    const abilityId = payload.cardImplementationAbilityId;
+    const abilityKey = payload.cardImplementationAbilityKey;
+    if (
+      bindingKind !== "card_spec_capability_key" ||
+      abilityId !== action.abilityRef.sourceAbilityId ||
+      abilityKey !== parsed.capabilityKey ||
+      payload.cardImplementationAbilityIndex !== undefined ||
+      payload.cardImplementationLifecycleAbilityIndex !== undefined
+    )
+      throw new Error(
+        "Canonical CardSpec capability payload conflicts with its AbilityRef.",
+      );
+    result.cardImplementationCapabilityBindingKind = "card_spec_capability_key";
+    result.cardImplementationAbilityId = action.abilityRef.sourceAbilityId;
+    result.cardImplementationAbilityKey = parsed.capabilityKey;
+  }
   const selectedCardId = payload.selectedCardId;
   if (
     action.type === "install_card" &&

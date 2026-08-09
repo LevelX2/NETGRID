@@ -50,4 +50,37 @@ describe("mechanical StateHash baseline", () => {
       cardPoolSnapshotIdentityForState(state("a", "b|runner:c")),
     );
   });
+
+  it("hashes canonical persisted capability identity deterministically", () => {
+    const state = {
+      baseline: CURRENT_RULES_BASELINE,
+      eventLog: [],
+      stateVersion: 3,
+      pendingCorpDraw: {
+        transactionId: "draw:capability",
+        baseDrawCount: 1,
+        replacementDrawCount: 0,
+        drawnCardIds: ["drawn"],
+        continuation: {
+          kind: "card_effect_activated",
+          sourceCardId: "source",
+          sourceDefinitionId: "test_card",
+          sourceAbilityId: "test_card:draw",
+          drawEffectIndex: 0,
+          nextEffectIndex: 1,
+          creditGainOrdinal: 0,
+          originalActionPayload: {},
+        },
+      },
+    } as unknown as GameState;
+    expect(hashStateSnapshot(structuredClone(state))).toBe(
+      hashStateSnapshot(state),
+    );
+    const changed = structuredClone(state);
+    changed.pendingCorpDraw!.continuation = {
+      ...changed.pendingCorpDraw!.continuation,
+      sourceAbilityId: "test_card:gain",
+    } as never;
+    expect(hashStateSnapshot(changed)).not.toBe(hashStateSnapshot(state));
+  });
 });

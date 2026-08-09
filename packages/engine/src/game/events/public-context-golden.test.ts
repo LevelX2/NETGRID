@@ -653,6 +653,35 @@ describe("PublicContext golden payload gate", () => {
       runApproachRootRezPass: true,
     });
   });
+
+  it("does not publish canonical CardSpec execution identity", () => {
+    const context = goldenContext(
+      goldenState("public-context-canonical-capability"),
+      goldenAction({
+        source: "visible-source",
+        type: "activated_card_ability",
+        abilityRef: {
+          sourceCardInstanceId: "visible-source",
+          sourceAbilityId: "test_card:gain",
+        },
+        payload: {
+          cardId: "visible-source",
+          cardImplementationAbility: "activated",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId: "test_card:gain",
+          cardImplementationAbilityKey: "gain",
+        },
+      }),
+    );
+    expect(context).toHaveProperty("cardImplementationAbility", "activated");
+    expect(context).not.toHaveProperty("cardImplementationAbilityIndex");
+    expect(context).not.toHaveProperty(
+      "cardImplementationCapabilityBindingKind",
+    );
+    expect(context).not.toHaveProperty("cardImplementationAbilityId");
+    expect(context).not.toHaveProperty("cardImplementationAbilityKey");
+    expect(context).not.toHaveProperty("abilityRef");
+  });
 });
 
 function goldenState(seed: string): GameState {

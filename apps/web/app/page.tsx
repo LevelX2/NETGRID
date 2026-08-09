@@ -3114,7 +3114,7 @@ export default function Page() {
       hiddenResourcePaymentPreselectionEquals(
         paymentSupportPreselection,
         card.instanceId,
-        ability.abilityIndex,
+        ability,
       )
     ) {
       setPaymentSupportPreselection(null);

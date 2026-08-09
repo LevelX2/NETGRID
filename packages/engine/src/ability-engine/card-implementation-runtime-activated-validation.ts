@@ -4,7 +4,6 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import {
   canPayActivatedCardImplementationCosts,
@@ -23,6 +22,18 @@ import {
 } from "./card-implementation-runtime-activated-targets";
 import { assertActivatedCardImplementationAbilityCanResolve } from "./card-implementation-runtime-legality";
 import type { ActivatedCardAbilityImplementation } from "./definition-types";
+import {
+  activatedAbilityBindingForLegalAction,
+  assertAbilityRefMatchesActivatedBinding,
+  type ActivatedAbilityBinding,
+} from "./card-capability-binding";
+
+export type ActivatedAbilityLegalActionMatch = {
+  cardId: CardInstanceId;
+  definition: CardDefinition;
+  binding: ActivatedAbilityBinding;
+  ability: ActivatedCardAbilityImplementation;
+};
 
 export function corpActivatedCardImplementationSourceIsAvailable(
   deps: CardImplementationRuntimeDependencies,
@@ -39,14 +50,7 @@ export function activatedAbilityForLegalAction(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
-):
-  | {
-      cardId: CardInstanceId;
-      definition: CardDefinition;
-      ability: ActivatedCardAbilityImplementation;
-      abilityIndex: number;
-    }
-  | undefined {
+): ActivatedAbilityLegalActionMatch | undefined {
   if (legalAction.payload?.cardImplementationAbility !== "activated")
     return undefined;
   const cardId = legalAction.payload.cardId;
@@ -54,32 +58,24 @@ export function activatedAbilityForLegalAction(
     throw new Error(
       "Die aktivierte Kartenfaehigkeit hat keine gueltige Quelle.",
     );
-  const definition = deps.definitionFor(state, cardId);
-  const abilityIndex = Number(
-    legalAction.payload.cardImplementationAbilityIndex,
-  );
-  if (!Number.isInteger(abilityIndex) || abilityIndex < 0)
+  if (legalAction.source !== cardId)
     throw new Error(
-      "Die aktivierte Kartenfaehigkeit hat keinen gueltigen Index.",
+      "Die aktivierte Kartenfaehigkeit widerspricht ihrer Action-Quelle.",
     );
-  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.[
-    abilityIndex
-  ];
-  if (!ability || ability.kind !== "activated")
-    throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zur Karte.");
-  return { cardId, definition, ability, abilityIndex };
+  const definition = deps.definitionFor(state, cardId);
+  const binding = activatedAbilityBindingForLegalAction(
+    definition,
+    legalAction,
+  );
+  assertAbilityRefMatchesActivatedBinding(legalAction, cardId, binding);
+  return { cardId, definition, ability: binding.ability, binding };
 }
 
 export function validateActivatedCardImplementationAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
-  match: {
-    cardId: CardInstanceId;
-    definition: CardDefinition;
-    ability: ActivatedCardAbilityImplementation;
-    abilityIndex: number;
-  },
+  match: ActivatedAbilityLegalActionMatch,
 ): void {
   const { cardId, ability } = match;
   const validateChosenIceStrengthTarget = (): void => {
@@ -128,10 +124,7 @@ export function validateActivatedCardImplementationAbility(
     throw new Error(
       "Die aktivierte Kartenfaehigkeit kann nicht bezahlt werden.",
     );
-  if (
-    legalAction.payload?.cardImplementationAbilityTiming !== ability.timing ||
-    legalAction.payload?.cardImplementationAbilityIndex !== match.abilityIndex
-  )
+  if (legalAction.payload?.cardImplementationAbilityTiming !== ability.timing)
     throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zum Profil.");
   if (ability.timing === "runner_main") {
     if (legalAction.side !== "runner")

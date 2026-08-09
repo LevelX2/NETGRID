@@ -4,7 +4,6 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { executeCardImplementationEffects } from "./effect-interpreter";
 import type {
   CardImplementationRuntimeDependencies,
@@ -12,41 +11,30 @@ import type {
 } from "./card-implementation-runtime-dependency-types";
 import { cardImplementationConditionMet } from "./card-implementation-runtime-shared";
 import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-types";
+import { lifecycleForDefinition } from "./card-capability-binding";
 
 export function cardImplementationStartOfCorpTurnAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.start_of_corp_turn ?? []
-  );
+  return lifecycleForDefinition(definition)?.start_of_corp_turn ?? [];
 }
 
 export function cardImplementationStartOfRunnerTurnAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.start_of_runner_turn ?? []
-  );
+  return lifecycleForDefinition(definition)?.start_of_runner_turn ?? [];
 }
 
 export function cardImplementationRunnerRunStartAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.on_runner_run_start ?? []
-  );
+  return lifecycleForDefinition(definition)?.on_runner_run_start ?? [];
 }
 
 function cardImplementationEndOfRunnerTurnAbilities(
   definition: CardDefinition,
 ): readonly CardLifecycleTriggeredAbilityImplementation[] {
-  return (
-    cardImplementationForDefinitionId(definition.id)?.lifecycle
-      ?.end_of_runner_turn ?? []
-  );
+  return lifecycleForDefinition(definition)?.end_of_runner_turn ?? [];
 }
 
 export function cardImplementationStartOfCorpTurnSourceIds(

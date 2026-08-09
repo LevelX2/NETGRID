@@ -568,10 +568,19 @@ export type ModifierDefinition = {
   sourceAbilityId?: string;
 };
 
-export type AbilityRef = {
-  sourceCardInstanceId: CardInstanceId;
-  abilityId: string;
-};
+export type AbilityRef =
+  | {
+      sourceCardInstanceId: CardInstanceId;
+      /** Legacy local ability identity. Never combine with sourceAbilityId. */
+      abilityId: string;
+      sourceAbilityId?: never;
+    }
+  | {
+      sourceCardInstanceId: CardInstanceId;
+      /** Canonical <cardDefinitionId>:<capabilityKey> identity. */
+      sourceAbilityId: string;
+      abilityId?: never;
+    };
 
 export type EffectSource =
   | { kind: "card"; cardInstanceId: CardInstanceId; abilityId?: string }
@@ -1588,16 +1597,18 @@ export type CorpDrawContinuation =
       nextEffectIndex: number;
       creditGainOrdinal: number;
     }
-  | {
+  | ({
       kind: "card_effect_activated";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
-      abilityIndex: number;
       drawEffectIndex: number;
       nextEffectIndex: number;
       creditGainOrdinal: number;
       originalActionPayload: LegalActionPayload;
-    }
+    } & (
+      | { abilityIndex: number; sourceAbilityId?: never }
+      | { sourceAbilityId: string; abilityIndex?: never }
+    ))
   | {
       kind: "corporate_shuffle_hq_to_rd";
       sourceCardId: CardInstanceId;
@@ -2729,8 +2740,18 @@ export type VisibleRunStartRandomStrengthState =
       currentStrengthAdjustment: number;
     };
 
-export type VisibleRunnerPaymentSupportAbility = {
-  abilityIndex: number;
+export type VisibleRunnerPaymentSupportAbility = (
+  | {
+      abilityIndex: number;
+      sourceAbilityId?: never;
+      capabilityKey?: never;
+    }
+  | {
+      sourceAbilityId: string;
+      capabilityKey: string;
+      abilityIndex?: never;
+    }
+) & {
   timing: "runner_cost_penalty_support";
   label: string;
   creditCost: number;
@@ -2817,6 +2838,9 @@ export type CorpPunishRouteStepRequest = {
   order: number;
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
+  sourceCapabilityBindingKind:
+    | "legacy_card_implementation_index"
+    | "card_spec_capability_key";
   sourceCapabilityId: string;
   /**
    * Exact current head action selected by the caller when multiple legal
@@ -2854,6 +2878,9 @@ export type CorpPunishRouteStepQuote = {
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
+  sourceCapabilityBindingKind:
+    | "legacy_card_implementation_index"
+    | "card_spec_capability_key";
   sourceCapabilityId: string;
   clicks: number;
   credits: number;

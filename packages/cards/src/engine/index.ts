@@ -1,5 +1,17 @@
 export type * from "./definition-types";
 export type * from "./card-mechanical-contracts";
+export {
+  CapabilityIdentityError,
+  assertCanonicalCapabilityId,
+  assertAbilityRefIdentity,
+  canonicalCapabilityId,
+  parseCanonicalCapabilityId,
+} from "../capability-identity";
+export type {
+  AbilityKey,
+  CanonicalCapabilityId,
+  CapabilityKey,
+} from "../capability-identity";
 import {
   engineCapabilityViewForId,
   engineCardViewForDefinitionId,

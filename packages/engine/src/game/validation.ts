@@ -15,6 +15,7 @@ import { runnerMemoryLimit } from "../ability-engine/effective-values";
 import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
 import { runnerMemoryCheckpointChoiceStateIsValid } from "./checkpoints/runner-memory-checkpoint";
 import { corpServerIdsAreCanonicalAndUnique } from "./state/remote-server-id";
+import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
 
 export function validateGameState(state: GameState): ValidationResult {
   const errors: string[] = [];
@@ -143,6 +144,38 @@ export function validateGameState(state: GameState): ValidationResult {
         transaction.continuation.creditGainOrdinal < 0
       )
         errors.push("Pending Corp draw card-effect continuation is invalid.");
+    }
+    if (transaction.continuation?.kind === "card_effect_activated") {
+      const continuation = transaction.continuation;
+      const hasLegacyIndex = continuation.abilityIndex !== undefined;
+      const hasCanonicalId = continuation.sourceAbilityId !== undefined;
+      if (hasLegacyIndex === hasCanonicalId) {
+        errors.push(
+          "Pending Corp draw activated continuation must have exactly one ability identity.",
+        );
+      } else if (
+        hasLegacyIndex &&
+        (!Number.isInteger(continuation.abilityIndex) ||
+          (continuation.abilityIndex ?? -1) < 0)
+      ) {
+        errors.push(
+          "Pending Corp draw activated continuation ability index is invalid.",
+        );
+      } else if (hasCanonicalId) {
+        try {
+          const parsed = parseCanonicalCapabilityId(
+            continuation.sourceAbilityId!,
+          );
+          if (parsed.cardDefinitionId !== continuation.sourceDefinitionId)
+            errors.push(
+              "Pending Corp draw activated continuation capability belongs to another definition.",
+            );
+        } catch {
+          errors.push(
+            "Pending Corp draw activated continuation capability identity is invalid.",
+          );
+        }
+      }
     }
     if (transaction.continuation?.kind === "corp_mandatory_draw") {
       const continuation = transaction.continuation;
@@ -290,7 +323,9 @@ export function validateGameState(state: GameState): ValidationResult {
       breakerState.strengthModifiersByBreakerInstanceId ?? {},
     )) {
       if (!state.cardInstances[breakerId])
-        errors.push(`Run breaker strength modifier references missing ${breakerId}.`);
+        errors.push(
+          `Run breaker strength modifier references missing ${breakerId}.`,
+        );
       for (const modifier of modifiers ?? []) {
         if (
           !Number.isInteger(modifier.amount) ||
@@ -298,7 +333,9 @@ export function validateGameState(state: GameState): ValidationResult {
           !["current_encounter", "current_run"].includes(modifier.duration) ||
           modifier.source.length === 0
         )
-          errors.push(`Run breaker strength modifier for ${breakerId} is invalid.`);
+          errors.push(
+            `Run breaker strength modifier for ${breakerId} is invalid.`,
+          );
       }
     }
     for (const [breakerId, count] of Object.entries(

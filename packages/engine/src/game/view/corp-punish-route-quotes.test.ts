@@ -1,4 +1,5 @@
 import {
+  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type CardDefinitionId,
   type CardInstanceId,
@@ -14,6 +15,56 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
+  it("never certifies a CardSpec hardware capability from legacy authority", () => {
+    const state = corpActionState("punish-route-hardware-owner-xor");
+    state.runner.tags = 1;
+    const source = addCorpCardToHqForTest(
+      state,
+      "onr_v1_299_power-grid-overload",
+      "hardware-trash",
+    );
+    const request = routeRequest(state, [
+      {
+        ...step("hardware-trash", 0, "hardware_trash", source),
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
+      },
+    ]);
+
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["source_capability_missing"],
+      },
+    });
+  });
+
+  it("returns a structured incomplete quote for a malformed canonical capability id", () => {
+    const state = corpActionState("punish-route-malformed-capability-id");
+    const source = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_048_data-sifters",
+      "tag",
+    );
+    const request = routeRequest(state, [
+      {
+        ...step("tag", 0, "tag", source),
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: "bad/id",
+      },
+    ]);
+
+    expect(() => quoteCorpPunishRoute(state, request)).not.toThrow();
+    expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["source_capability_missing"],
+      },
+    });
+  });
+
   it("certifies an adaptive Tag -> 4 meat damage route with exact action and response credits", () => {
     const state = corpActionState("punish-route-tag-four");
     const tag = addCorpCardToHqForTest(
@@ -601,6 +652,7 @@ function step(
     order,
     kind,
     sourceCardInstanceId,
+    sourceCapabilityBindingKind: "legacy_card_implementation_index",
     sourceCapabilityId: "ability:on_play:0",
   };
 }

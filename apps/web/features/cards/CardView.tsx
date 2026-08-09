@@ -65,7 +65,7 @@ type CardChoiceShortcut = {
 };
 
 export type PaymentSupportShortcut = {
-  abilityIndex: number;
+  identityKey: string;
   selected: boolean;
   disabled: boolean;
   label: string;
@@ -811,13 +811,13 @@ export function CardView({
         >
           {paymentSupportShortcuts.map((shortcut) => (
             <button
-              key={shortcut.abilityIndex}
+              key={shortcut.identityKey}
               className={`cardPaymentSupportShortcut${shortcut.selected ? " active" : ""}`}
               type="button"
               aria-label={shortcut.selected ? shortcut.selectedLabel : shortcut.label}
               aria-pressed={shortcut.selected}
               title={shortcut.selected ? shortcut.selectedLabel : shortcut.label}
-              data-testid={`payment-support-shortcut-${shortcut.abilityIndex}`}
+              data-testid={`payment-support-shortcut-${shortcut.identityKey}`}
               disabled={shortcut.disabled}
               onClick={(event) => {
                 event.preventDefault();

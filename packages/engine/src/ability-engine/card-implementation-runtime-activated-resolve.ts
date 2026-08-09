@@ -14,6 +14,7 @@ import {
   activatedAbilityForLegalAction,
   validateActivatedCardImplementationAbility,
 } from "./card-implementation-runtime-activated-validation";
+import { activatedAbilityBindingForPersistedIdentity } from "./card-capability-binding";
 import { markCardImplementationAbilityLimitUsed } from "./card-implementation-ability-limits";
 
 /**
@@ -394,7 +395,9 @@ export function resolveActivatedCardImplementationAbility(
       kind: "card_effect_activated",
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
-      abilityIndex: match.abilityIndex,
+      ...(match.binding.kind === "legacy_card_implementation_index"
+        ? { abilityIndex: match.binding.abilityIndex }
+        : { sourceAbilityId: match.binding.sourceAbilityId }),
       drawEffectIndex: result.suspendedAtEffectIndex,
       nextEffectIndex: result.suspendedAtEffectIndex + 1,
       creditGainOrdinal: result.creditGainOrdinal,
@@ -414,18 +417,18 @@ function activatedMatchForCorpDrawContinuation(
   const definition = deps.definitionFor(state, continuation.sourceCardId);
   if (definition.id !== continuation.sourceDefinitionId)
     throw new Error("Die aktivierte Draw-Quelle ist veraltet.");
-  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.[
-    continuation.abilityIndex
-  ];
-  if (ability?.kind !== "activated")
-    throw new Error("Die aktivierte Draw-Fortsetzung passt nicht zur Karte.");
+  const binding = activatedAbilityBindingForPersistedIdentity(
+    definition,
+    continuation,
+  );
+  const { ability } = binding;
   if (ability.effects[continuation.drawEffectIndex]?.kind !== "draw_cards")
     throw new Error("Die aktivierte Draw-Fortsetzung hat keinen Draw-Effekt.");
   return {
     cardId: continuation.sourceCardId,
     definition,
     ability,
-    abilityIndex: continuation.abilityIndex,
+    binding,
   };
 }
 

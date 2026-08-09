@@ -239,12 +239,14 @@ export function ActiveRunnerZoneBoard({
                                   paymentSupportShortcuts={(
                                     rigCard.runnerPaymentSupportAbilities ?? []
                                   ).map((ability) => ({
-                                    abilityIndex: ability.abilityIndex,
+                                    identityKey:
+                                      ability.sourceAbilityId ??
+                                      String(ability.abilityIndex),
                                     selected:
                                       hiddenResourcePaymentPreselectionEquals(
                                         paymentSupportPreselection,
                                         rigCard.instanceId,
-                                        ability.abilityIndex,
+                                        ability,
                                       ),
                                     disabled: actionDisabled,
                                     label: `${ability.label} für die nächste passende Zahlung vormerken`,

@@ -1,4 +1,4 @@
-import type { CardDefinitionId } from "@netgrid/shared";
+import type { AbilityRef, CardDefinitionId } from "@netgrid/shared";
 
 declare const capabilityKeyBrand: unique symbol;
 declare const abilityKeyBrand: unique symbol;
@@ -37,6 +37,8 @@ export type AddressableCapabilityContract = {
 export type CapabilityIdentityErrorCode =
   | "invalid_card_definition_id"
   | "invalid_capability_key"
+  | "invalid_canonical_capability_id"
+  | "invalid_ability_ref"
   | "ability_key_mismatch";
 
 export class CapabilityIdentityError extends Error {
@@ -82,6 +84,73 @@ export function canonicalCapabilityId(
   cardDefinitionId(definitionId);
   assertKeyText(key, "capabilityKey");
   return `${definitionId}:${key}` as CanonicalCapabilityId;
+}
+
+export function parseCanonicalCapabilityId(value: string): {
+  cardDefinitionId: CardDefinitionId;
+  capabilityKey: CapabilityKey;
+  canonicalCapabilityId: CanonicalCapabilityId;
+} {
+  const separator = value.lastIndexOf(":");
+  if (separator <= 0 || separator === value.length - 1)
+    throw new CapabilityIdentityError(
+      "invalid_canonical_capability_id",
+      "canonicalCapabilityId",
+      "must use <cardDefinitionId>:<capabilityKey>",
+    );
+  const definitionId = cardDefinitionId(value.slice(0, separator));
+  const key = capabilityKey(value.slice(separator + 1));
+  const canonicalId = canonicalCapabilityId(definitionId, key);
+  if (canonicalId !== value)
+    throw new CapabilityIdentityError(
+      "invalid_canonical_capability_id",
+      "canonicalCapabilityId",
+      "must be canonical",
+    );
+  return {
+    cardDefinitionId: definitionId,
+    capabilityKey: key,
+    canonicalCapabilityId: canonicalId,
+  };
+}
+
+export function assertCanonicalCapabilityId(
+  value: string,
+): asserts value is CanonicalCapabilityId {
+  parseCanonicalCapabilityId(value);
+}
+
+export function assertAbilityRefIdentity(
+  value: unknown,
+): asserts value is AbilityRef {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new CapabilityIdentityError(
+      "invalid_ability_ref",
+      String(value),
+      "AbilityRef must be an object",
+    );
+  const record = value as Record<string, unknown>;
+  const keys = Object.keys(record).sort();
+  const hasLegacy = typeof record.abilityId === "string";
+  const hasCanonical = typeof record.sourceAbilityId === "string";
+  const expectedKeys = hasLegacy
+    ? ["abilityId", "sourceCardInstanceId"]
+    : ["sourceAbilityId", "sourceCardInstanceId"];
+  if (
+    hasLegacy === hasCanonical ||
+    typeof record.sourceCardInstanceId !== "string" ||
+    record.sourceCardInstanceId.trim().length === 0 ||
+    keys.length !== expectedKeys.length ||
+    keys.some((key, index) => key !== expectedKeys[index]) ||
+    (hasLegacy && (record.abilityId as string).trim().length === 0)
+  )
+    throw new CapabilityIdentityError(
+      "invalid_ability_ref",
+      JSON.stringify(value),
+      "AbilityRef must contain exactly one non-empty legacy or canonical identity",
+    );
+  if (hasCanonical)
+    assertCanonicalCapabilityId(record.sourceAbilityId as string);
 }
 
 export function assertAbilityKeyAlias(

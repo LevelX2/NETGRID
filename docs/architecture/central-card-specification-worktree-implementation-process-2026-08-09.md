@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS03 abgeschlossen, CS04 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS04 abgeschlossen, CS05 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -399,7 +399,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS01  | Capability-, Longtail- und Consumer-Inventar           | completed |
 | CS02  | Paket-, Schema- und Serialisierbarkeitsfundament       | completed |
 | CS03  | Registry, Projektionen, Importindex und Fingerprints   | completed |
-| CS04  | Stabile Capability-Identität und Engine-Rebinding      | pending   |
+| CS04  | Stabile Capability-Identität und Engine-Rebinding      | completed |
 | CS05  | Prospective-Capability-Compiler                        | pending   |
 | CS06  | Heterogener produktiver Mechanik-Stresstest            | pending   |
 | CS07  | Testset-Migration und Migrationsautomatisierung        | pending   |
@@ -782,6 +782,40 @@ Done-Gate:
 Commit:
 
 `feat(engine): bind card capabilities by stable semantic key`
+
+Ergebnis am 09.08.2026:
+
+- `CapabilityKey`, kanonische Capability-ID und `AbilityRef` besitzen jetzt
+  geschlossene Syntax- und XOR-Verträge. Adressierbare CardSpec-Familien
+  verlangen den Key am Capability-Root, ohne Kosten, Effekte oder andere
+  untergeordnete Mechanikknoten fälschlich selbst zu adressieren.
+- Eine Definition besitzt exakt entweder CardSpec- oder Legacyautorität.
+  Aktivierte Fähigkeiten und adressierbare End-of-Runner-Turn-Lifecycle-
+  Fähigkeiten werden für migrierte Specs über
+  `<cardDefinitionId>:<capabilityKey>` materialisiert, revalidiert und
+  fortgesetzt; Legacykarten behalten ausschließlich ihren bisherigen Index.
+  Hybrid-, Missing-, Wrong-Definition-, Wrong-Source-, Stale- und
+  Mehrdeutigkeitsfälle scheitern ohne Ersatzaktion.
+- Kanonische Action-IDs, persistierte Continuations, Runner-Payment-Support
+  und Corp-Punish-Quotes verwenden dieselbe explizite Ownergrenze. Der
+  Hardware-Punish-Legacypfad kann keine CardSpec-Anfrage zertifizieren.
+- Der actor-seitige AI-DTO übernimmt kanonische Bindungsfelder nur nach
+  exakter AbilityRef-/Payload-Reconciliation; Legacy-Implementierungsfelder
+  bleiben wie zuvor ausgeblendet. Canonical Invocation und Rematerialisierung
+  binden exakt aktuelle Source-Instanz, Capability, `actionId` und
+  `stateVersion`, ohne Plan, Step, Route oder Executor umzudeuten.
+- PublicContext veröffentlicht weder Legacyindex noch kanonische
+  Ausführungsidentität. Persistierte kanonische Bindungen sind
+  serialisierungs- und StateHash-stabil; Replay, Hidden-Info und die
+  bestehenden Legacy-Action-IDs bleiben unverändert.
+- Fokussierte Cards-, Engine-, AI- und Webtests sowie Shared-, Cards-,
+  Engine-, AI- und Web-Typechecks, Package-/Source-/Cycle-, Discovery-,
+  Importindex- und Diff-Gates sind grün. `format:changed` bleibt ausschließlich
+  für drei bereits auf CS03-HEAD unformatierte Legacy-Gesamtdateien rot:
+  `CardView.tsx`, `ActiveRunnerZoneBoard.tsx` und `legalaction-witness.ts`.
+  Ein Line-Overlap-Audit bestätigt, dass die kleinen CS04-Hunks selbst keine
+  zusätzlichen Prettier-Deltas erzeugen; der kollisionsreiche Whole-file-
+  Formatterchurn wurde bewusst nicht in CS04 aufgenommen.
 
 ### CS05 – Prospective-Capability-Compiler
 

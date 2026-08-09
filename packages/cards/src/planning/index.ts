@@ -20,6 +20,12 @@ export type {
 export { assertCardRegistryPlanningContext, assertCardRegistryRulesContext };
 export type { PlanningCardView } from "../projections";
 export type { CardPlanningAnnotations } from "../planning-annotations";
+export {
+  assertCanonicalCapabilityId,
+  assertAbilityRefIdentity,
+  parseCanonicalCapabilityId,
+} from "../capability-identity";
+export type { CanonicalCapabilityId } from "../capability-identity";
 
 export const planningCardByDefinitionId = planningCardViewForDefinitionId.bind(
   undefined,

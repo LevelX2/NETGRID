@@ -43,6 +43,28 @@ describe("turn action builders", () => {
     ).toBe("runner.start_run.rd");
   });
 
+  it("does not reinterpret legacy primitive ability IDs as canonical action identity", () => {
+    expect(
+      makeActionId(
+        "trigger_ability",
+        "runner",
+        { cardImplementationAbilityId: "legacy:primitive" },
+        "legacy-source",
+      ),
+    ).toBe("runner.trigger_ability.legacy-source");
+    expect(
+      makeActionId(
+        "trigger_ability",
+        "runner",
+        {
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId: "test_card:gain",
+        },
+        "canonical-source",
+      ),
+    ).toBe("runner.trigger_ability.canonical-source.test_card:gain");
+  });
+
   it("distinguishes a bonus run from a normal run on the same server", () => {
     const normalRun = makeActionId(
       "start_run",
