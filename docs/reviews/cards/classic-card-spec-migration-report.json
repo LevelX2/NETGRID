@@ -326,6 +326,7 @@
     "mechanicalHintFields": "effects_conditions_functionSignals_breakerProfile_requiredMechanics_actionCapacityProfiles_and_mechanical_role_risk_tactic_cost_target_value_parts_derived_from_engine",
     "planningHintFields": "strategyAnchors_lineSupport_strategicRole_strategySupportPairs_actionStrategySupportPairs_strategicExchangeKinds_and_reviewed_plan_tactic_target_value_risk_interpretations_typed",
     "planningTacticSplit": "closed_known_planning_tactic_map_mechanical_effect_timing_scope_and_capability_tokens_discarded_for_engine_derivation",
+    "targetProfileSplit": "dumpster_fixed_archives_redirect_discarded_because_no_target_choice_exists",
     "evidenceHintFields": "aiSupportStatus_quality_scenarioRefs_bound_as_coverage_evidence_not_runtime_planning",
     "editorHintFields": "manualNotes_explicitly_discarded_editor_only"
   },
@@ -1332,7 +1333,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:fdb2d782c4faffef91d3e4aff5afb7d5ea331230c5c6c0b5c0c00fb715b24496",
-      "outputFingerprint": "sha256:c10be8d8345129b6bc1fe0c688e0687aecce19292eef87555cf822d6d26a1513"
+      "outputFingerprint": "sha256:65df5a5b2a09cbeca3fcf01c5eb8592ee33fe537955809c3418b678418b78828"
     },
     {
       "cardDefinitionId": "onr_classic_010_entrapment",
@@ -5389,5 +5390,5 @@
       "disposition": "explicit_reviewed_semantic_capability_key"
     }
   ],
-  "aggregateOutputFingerprint": "sha256:1c09e1392b6aac807dee267516774aa164fd1109aaa7af6fdd40cac4dae616a1"
+  "aggregateOutputFingerprint": "sha256:80ad9c62eb2655c6c6136e3ce6faea54b8c3c7ef45b18c8e19d91ac88ad46a59"
 }

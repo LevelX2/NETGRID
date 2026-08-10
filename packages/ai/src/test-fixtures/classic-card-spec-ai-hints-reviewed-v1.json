@@ -1,7 +1,7 @@
 {
   "schemaVersion": "classic-card-spec-ai-hint-reviewed-golden-v1",
-  "migrationReportFingerprint": "sha256:1c09e1392b6aac807dee267516774aa164fd1109aaa7af6fdd40cac4dae616a1",
-  "migrationReportSha256": "sha256:85672b66e808721a5f678556c03b1fed52e4b26a69d855531847886a34203fc3",
+  "migrationReportFingerprint": "sha256:80ad9c62eb2655c6c6136e3ce6faea54b8c3c7ef45b18c8e19d91ac88ad46a59",
+  "migrationReportSha256": "sha256:4168363470bcc21d8d474b61777a27a64fc83ef5b7da6c332d9739a00c2d5a96",
   "dispositions": {
     "mechanicalFacts": "derived_only_from_closed_typed_classic_card_spec_engine_nodes",
     "planningClassifications": "derived_only_from_closed_typed_card_and_capability_annotations",
@@ -9,6 +9,7 @@
     "legacyMechanicalHintConflicts": "discarded_stale_london_noisy_two_false_paid_tap_trapdoor_subsidiary_target_and_self_destruct_fixed_damage_claims",
     "breakerStrength": "canonical_card_spec_strength_replaces_five_uniform_legacy_base_strength_assumptions",
     "capabilityStrategyEvidence": "bound_to_exact_capability_key_with_non_tautological_role_detail_and_split_library_search_interfaces",
+    "fixedMechanicalTargets": "dumpster_archives_redirect_has_no_target_choice",
     "legacyEditorialNotes": "discarded_nonruntime_manual_notes"
   },
   "cards": [
@@ -1030,22 +1031,6 @@
             "evidence": ["corp_ice.encounter_tax", "run.corp_redirect"],
             "confidence": "high",
             "rationale": "v2: Redirect zu Archives ist primär Runpath-/Tax-Kontrolle; central_stabilize wäre nur abhängig vom Installationsfort."
-          }
-        ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "redirect_run_to_archives_outermost_rezzed_ice",
-            "preferences": [
-              "reduces_current_run_payoff",
-              "adds_relevant_encounter_tax",
-              "protects_central_access_pressure"
-            ],
-            "avoid": ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
-            "kind": "use_target",
-            "timing": "subroutine_resolution",
-            "targetType": "server",
-            "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
         "effects": [

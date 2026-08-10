@@ -97,16 +97,6 @@ export const cardSpec = {
         rationale:
           "v2: Redirect zu Archives ist primär Runpath-/Tax-Kontrolle; central_stabilize wäre nur abhängig vom Installationsfort.",
       },
-      {
-        kind: "target_preference",
-        purpose: "redirect_run_to_archives_outermost_rezzed_ice",
-        preferences: [
-          "reduces_current_run_payoff",
-          "adds_relevant_encounter_tax",
-          "protects_central_access_pressure",
-        ],
-        avoid: ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
-      },
     ],
     capabilities: [],
   },

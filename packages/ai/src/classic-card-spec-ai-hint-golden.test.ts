@@ -46,6 +46,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         "canonical_card_spec_strength_replaces_five_uniform_legacy_base_strength_assumptions",
       capabilityStrategyEvidence:
         "bound_to_exact_capability_key_with_non_tautological_role_detail_and_split_library_search_interfaces",
+      fixedMechanicalTargets: "dumpster_archives_redirect_has_no_target_choice",
       legacyEditorialNotes: "discarded_nonruntime_manual_notes",
     });
   });

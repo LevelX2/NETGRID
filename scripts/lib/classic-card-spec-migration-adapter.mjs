@@ -487,6 +487,8 @@ async function runClassicInventoryMigration() {
         "strategyAnchors_lineSupport_strategicRole_strategySupportPairs_actionStrategySupportPairs_strategicExchangeKinds_and_reviewed_plan_tactic_target_value_risk_interpretations_typed",
       planningTacticSplit:
         "closed_known_planning_tactic_map_mechanical_effect_timing_scope_and_capability_tokens_discarded_for_engine_derivation",
+      targetProfileSplit:
+        "dumpster_fixed_archives_redirect_discarded_because_no_target_choice_exists",
       evidenceHintFields:
         "aiSupportStatus_quality_scenarioRefs_bound_as_coverage_evidence_not_runtime_planning",
       editorHintFields: "manualNotes_explicitly_discarded_editor_only",
@@ -736,6 +738,12 @@ const CLASSIC_PLANNING_TACTIC_INTERPRETATIONS = Object.freeze({
   "tag.payoff": { signal: "tag.payoff", use: "tag.payoff" },
 });
 
+const CLASSIC_TARGET_PROFILE_DISPOSITIONS = Object.freeze({
+  onr_classic_009_dumpster: Object.freeze({
+    purpose: "redirect_run_to_archives_outermost_rezzed_ice",
+  }),
+});
+
 function classicPlanningAnnotations(cardDefinitionId, hint) {
   const card = [];
   for (const role of stringValues(
@@ -786,10 +794,22 @@ function classicPlanningAnnotations(cardDefinitionId, hint) {
   }
   for (const interpretation of planningTactics.values())
     card.push({ kind: "tactic_interpretation", ...interpretation });
-  for (const target of objectValues(
+  const targetProfiles = objectValues(
     hint.targetProfiles,
     `${cardDefinitionId}.targetProfiles`,
-  ))
+  );
+  const targetProfileDisposition =
+    CLASSIC_TARGET_PROFILE_DISPOSITIONS[cardDefinitionId];
+  if (targetProfileDisposition !== undefined) {
+    if (
+      targetProfiles.length !== 1 ||
+      targetProfiles[0]?.purpose !== targetProfileDisposition.purpose
+    )
+      fail(`classic_target_profile_disposition_drift:${cardDefinitionId}`);
+  }
+  for (const target of targetProfileDisposition === undefined
+    ? targetProfiles
+    : [])
     card.push({
       kind: "target_preference",
       purpose: requiredString(target.purpose, `${cardDefinitionId}.purpose`),

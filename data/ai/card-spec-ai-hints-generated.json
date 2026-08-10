@@ -1484,7 +1484,7 @@
     {
       "cardId": "onr_classic_009_dumpster",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6175a105e853e8f1",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fd82412278ba3246",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:3878899bc401cc7f",
       "hint": {
         "cardId": "onr_classic_009_dumpster",
         "side": "corp",
@@ -1522,25 +1522,6 @@
             ],
             "confidence": "high",
             "rationale": "v2: Redirect zu Archives ist primär Runpath-/Tax-Kontrolle; central_stabilize wäre nur abhängig vom Installationsfort."
-          }
-        ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "redirect_run_to_archives_outermost_rezzed_ice",
-            "preferences": [
-              "reduces_current_run_payoff",
-              "adds_relevant_encounter_tax",
-              "protects_central_access_pressure"
-            ],
-            "avoid": [
-              "hidden_info_dependent_choice",
-              "no_rezzed_ice_target"
-            ],
-            "kind": "use_target",
-            "timing": "subroutine_resolution",
-            "targetType": "server",
-            "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
         "effects": [
