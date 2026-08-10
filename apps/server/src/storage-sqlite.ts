@@ -4213,6 +4213,9 @@ function traceMeta(
     const value = traceJson[key];
     if (value !== undefined) meta[key] = value;
   }
+  const attempt = traceJson.attempt;
+  if (attempt && typeof attempt === "object" && !Array.isArray(attempt))
+    meta.attempt = attempt;
   for (const key of ["visibleReasons", "warnings", "longTermPlan"] as const) {
     const value = traceJson[key];
     if (Array.isArray(value)) meta[key] = value.slice(0, 6);
