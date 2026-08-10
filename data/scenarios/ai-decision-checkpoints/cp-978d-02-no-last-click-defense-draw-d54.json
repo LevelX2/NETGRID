@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 111,
-    "stateHash": "fnv1a:1ccf5a21",
+    "stateHash": "fnv1a:cfccf35f",
     "testOnlyGameState": {
       "matchId": "match_978da70c2bd72e61",
       "baseline": {
@@ -701,22 +701,15 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_261_quandary_1",
-              "corp_onr_v1_252_keeper_3"
-            ],
+            "ice": ["corp_onr_v1_261_quandary_1", "corp_onr_v1_252_keeper_3"],
             "root": []
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_249_hunter_2"
-            ],
-            "root": [
-              "corp_onr_v1_190_bioweapons-engineering_1"
-            ]
+            "ice": ["corp_onr_v1_249_hunter_2"],
+            "root": ["corp_onr_v1_190_bioweapons-engineering_1"]
           }
         ]
       },
@@ -770,12 +763,8 @@
           "runner_onr_v1_161_fall-guy_2",
           "runner_onr_v1_108_score_1"
         ],
-        "heap": [
-          "runner_onr_v1_079_bodyweight-synthetic-blood_2"
-        ],
-        "scoreArea": [
-          "corp_onr_v1_189_artificial-security-directors_1"
-        ],
+        "heap": ["runner_onr_v1_079_bodyweight-synthetic-blood_2"],
+        "scoreArea": ["corp_onr_v1_189_artificial-security-directors_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_016_cyfermaster_1",
@@ -2190,9 +2179,7 @@
         "counterPreventionUsedSourceIdsThisTurn": [],
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_2"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_2"],
         "pdcaUsedSourceIdsThisTurn": []
       },
       "turnSerial": 18
@@ -5478,12 +5465,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.score_agenda"
-      ],
-      "acceptableCapabilities": [
-        "advance_score_agenda"
-      ]
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["advance_score_agenda"]
     }
   }
 }

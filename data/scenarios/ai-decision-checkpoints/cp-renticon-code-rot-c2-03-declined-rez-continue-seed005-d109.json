@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 109,
-    "stateHash": "fnv1a:18107925",
+    "stateHash": "fnv1a:8c51f0a5",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-005_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -1016,19 +1016,14 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_221_asp_1",
-              "corp_onr_v1_236_data-raven_2"
-            ],
+            "ice": ["corp_onr_v1_221_asp_1", "corp_onr_v1_236_data-raven_2"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_221_asp_2"
-            ],
+            "ice": ["corp_onr_v1_221_asp_2"],
             "root": []
           },
           {
@@ -1047,9 +1042,7 @@
               "corp_onr_v1_243_fetch-4-0-1_2",
               "corp_onr_v1_243_fetch-4-0-1_1"
             ],
-            "root": [
-              "corp_onr_v1_203_hostile-takeover_3"
-            ]
+            "root": ["corp_onr_v1_203_hostile-takeover_3"]
           }
         ]
       },
@@ -2519,9 +2512,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2541,10 +2532,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2604,9 +2592,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2626,10 +2612,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -3188,9 +3171,7 @@
                 "clientKnownStateVersion": 10,
                 "selectedChoices": {
                   "choiceId": "run_8.corp_onr_v1_221_asp_2.0.trace.corp.bid.10",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-10"
               },
@@ -3210,10 +3191,7 @@
                     "choiceId": "run_8.corp_onr_v1_221_asp_2.0.trace.corp.bid.10",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -3282,9 +3260,7 @@
                 "clientKnownStateVersion": 11,
                 "selectedChoices": {
                   "choiceId": "run_8.corp_onr_v1_221_asp_2.0.trace.runner.bid.11",
-                  "selectedOptionIds": [
-                    "bid_5"
-                  ]
+                  "selectedOptionIds": ["bid_5"]
                 },
                 "idempotencyKey": "ai-sim-11"
               },
@@ -4417,9 +4393,7 @@
                 "clientKnownStateVersion": 30,
                 "selectedChoices": {
                   "choiceId": "run_28.corp_onr_v1_221_asp_1.0.trace.corp.bid.30",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-30"
               },
@@ -4439,9 +4413,7 @@
                     "choiceId": "run_28.corp_onr_v1_221_asp_1.0.trace.corp.bid.30",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0"
-                    ]
+                    "optionIds": ["bid_0"]
                   }
                 ],
                 "payload": {
@@ -4512,9 +4484,7 @@
                 "clientKnownStateVersion": 31,
                 "selectedChoices": {
                   "choiceId": "run_28.corp_onr_v1_221_asp_1.0.trace.runner.bid.31",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-31"
               },
@@ -4534,9 +4504,7 @@
                     "choiceId": "run_28.corp_onr_v1_221_asp_1.0.trace.runner.bid.31",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0"
-                    ]
+                    "optionIds": ["bid_0"]
                   }
                 ],
                 "payload": {
@@ -5749,9 +5717,7 @@
                 "clientKnownStateVersion": 52,
                 "selectedChoices": {
                   "choiceId": "v1911_temporary_program_install_source_52",
-                  "selectedOptionIds": [
-                    "source_stack"
-                  ]
+                  "selectedOptionIds": ["source_stack"]
                 },
                 "idempotencyKey": "ai-sim-52"
               },
@@ -5771,9 +5737,7 @@
                     "choiceId": "v1911_temporary_program_install_source_52",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "source_stack"
-                    ]
+                    "optionIds": ["source_stack"]
                   }
                 ],
                 "payload": {
@@ -9198,9 +9162,7 @@
                 "clientKnownStateVersion": 106,
                 "selectedChoices": {
                   "choiceId": "runner_program_trash_before_install_106",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_035_invisibility_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_035_invisibility_1"]
                 },
                 "idempotencyKey": "ai-sim-106"
               },
@@ -12021,9 +11983,7 @@
       "phase": "fund",
       "transitionStatus": "switched",
       "decisionsCommitted": 1,
-      "blockerIds": [
-        "runner.rnd_pressure:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.rnd_pressure:reserve_shortfall"],
       "ttlDecisionsRemaining": 2,
       "updatedAtStateVersion": 107,
       "state": {
@@ -12102,9 +12062,7 @@
               "support": 90,
               "final": 96
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -12149,9 +12107,7 @@
               "support": 73,
               "final": 72
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.interface_closeout",
               "confidence:high",
@@ -12434,10 +12390,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12517,10 +12470,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12778,10 +12728,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -12803,9 +12750,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -12865,10 +12810,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13103,10 +13045,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -13241,18 +13180,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Keeper",
-            "visibleSubtypes": [
-              "code_gate"
-            ],
+            "visibleSubtypes": ["code_gate"],
             "effectiveStrength": 4,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               }
             ],
             "breakerCoverage": [
@@ -13302,19 +13237,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Fetch 4.0.1",
-            "visibleSubtypes": [
-              "bloodhound",
-              "sentry"
-            ],
+            "visibleSubtypes": ["bloodhound", "sentry"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_survival",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:initiate_trace"
-                ]
+                "evidence": ["subroutine_type:initiate_trace"]
               }
             ],
             "breakerCoverage": [
@@ -13430,9 +13360,7 @@
       },
       "revalidation": {
         "status": "valid",
-        "reasons": [
-          "run_plan_created_from_selected_run_action"
-        ],
+        "reasons": ["run_plan_created_from_selected_run_action"],
         "checkedAtStateVersion": 107
       },
       "abortPolicy": {

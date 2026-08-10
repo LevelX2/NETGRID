@@ -1,7 +1,5 @@
 import originalsetCardsData from "../../../data/cards/originalset-v1-cards.json";
-import classicCardsData from "../../../data/cards/classic-cards.json";
 import proteusCardsData from "../../../data/cards/proteus-cards.json";
-import classicSupportData from "../../../data/manifests/classic-card-support.json";
 import originalsetSupportData from "../../../data/manifests/originalset-v1-card-support.json";
 import proteusSupportData from "../../../data/manifests/proteus-card-support.json";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
@@ -95,10 +93,6 @@ const LEGACY_CARD_SET_FILES: LoadedCardSet[] = [
   {
     set: proteusCardsData as CardSetFile,
     support: proteusSupportData as CardSupportFile,
-  },
-  {
-    set: classicCardsData as CardSetFile,
-    support: classicSupportData as CardSupportFile,
   },
 ];
 

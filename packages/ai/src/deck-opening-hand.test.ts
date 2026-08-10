@@ -227,6 +227,48 @@ describe("deck opening hand role classification", () => {
     }
   });
 
+  it("caps a three-card explicit run-pressure opening without breaker access", () => {
+    setTestCardRoles("local_true_run_pressure", {
+      cardId: "local_true_run_pressure",
+      side: "runner",
+      roles: ["run_pressure"],
+    });
+    setTestCardRoles("local_pressure_economy", {
+      cardId: "local_pressure_economy",
+      side: "runner",
+      roles: ["economy_event"],
+    });
+    setTestCardRoles("local_pressure_setup", {
+      cardId: "local_pressure_setup",
+      side: "runner",
+      roles: ["runner_program"],
+    });
+    try {
+      const evaluation = evaluateRunnerOpeningHand(
+        input("runner", [
+          "local_true_run_pressure",
+          "local_true_run_pressure",
+          "local_true_run_pressure",
+          "local_pressure_economy",
+          "local_pressure_setup",
+        ]),
+      );
+
+      expect(evaluation).toMatchObject({
+        decision: "mulligan",
+        score: 44,
+        evidence: expect.arrayContaining([
+          "opening_breaker_access:0",
+          "opening_pressure:3",
+        ]),
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete("local_true_run_pressure");
+      AI_HINTS_BY_CARD.delete("local_pressure_economy");
+      AI_HINTS_BY_CARD.delete("local_pressure_setup");
+    }
+  });
+
   it("counts an affordable in-hand search tool as opening breaker access when standard coverage is in the deck", () => {
     registerRunnerSearchOpeningRoles();
     try {

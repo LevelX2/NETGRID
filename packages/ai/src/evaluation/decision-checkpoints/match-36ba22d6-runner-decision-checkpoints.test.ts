@@ -10,44 +10,47 @@ describe("match 36BA22D6 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(openingSearchKeepJson));
   });
 
-  it("still mulligans the same pressure-heavy opening without the in-hand search line", () => {
-    const noSearchLine = mutateFixture(openingSearchKeepJson, (checkpoint) => {
-      const state = checkpoint.engine.testOnlyGameState;
-      const temple = "runner_onr_v1_114_temple-microcode-outlet_2";
-      const thirdPanzerRun = "runner_onr_classic_042_panzer-run_1";
-      if (
-        !state.runner.grip.includes(temple) ||
-        !state.runner.stack.includes(thirdPanzerRun)
-      ) {
-        throw new Error("Expected opening-hand control cards");
-      }
+  it("keeps the executable draw-and-economy opening without the in-hand search line", () => {
+    const executableDrawEconomy = mutateFixture(
+      openingSearchKeepJson,
+      (checkpoint) => {
+        const state = checkpoint.engine.testOnlyGameState;
+        const temple = "runner_onr_v1_114_temple-microcode-outlet_2";
+        const thirdPanzerRun = "runner_onr_classic_042_panzer-run_1";
+        if (
+          !state.runner.grip.includes(temple) ||
+          !state.runner.stack.includes(thirdPanzerRun)
+        ) {
+          throw new Error("Expected opening-hand control cards");
+        }
 
-      state.runner.grip = state.runner.grip.map((instanceId) =>
-        instanceId === temple ? thirdPanzerRun : instanceId,
-      );
-      state.runner.stack = state.runner.stack.map((instanceId) =>
-        instanceId === thirdPanzerRun ? temple : instanceId,
-      );
-      state.cardInstances[temple] = {
-        ...state.cardInstances[temple]!,
-        zone: { side: "runner", zone: "stack" },
-      };
-      state.cardInstances[thirdPanzerRun] = {
-        ...state.cardInstances[thirdPanzerRun]!,
-        zone: { side: "runner", zone: "grip" },
-      };
-      checkpoint.source.kind = "synthetic_companion";
-      checkpoint.source.findingId = "F1-NO-SEARCH-CONTROL";
-      checkpoint.expectation = {
-        contractKind: "correctness",
-        choice: {
-          mustSelectOptionIds: ["mulligan"],
-          mustNotSelectOptionIds: ["keep"],
-        },
-      };
-    });
+        state.runner.grip = state.runner.grip.map((instanceId) =>
+          instanceId === temple ? thirdPanzerRun : instanceId,
+        );
+        state.runner.stack = state.runner.stack.map((instanceId) =>
+          instanceId === thirdPanzerRun ? temple : instanceId,
+        );
+        state.cardInstances[temple] = {
+          ...state.cardInstances[temple]!,
+          zone: { side: "runner", zone: "stack" },
+        };
+        state.cardInstances[thirdPanzerRun] = {
+          ...state.cardInstances[thirdPanzerRun]!,
+          zone: { side: "runner", zone: "grip" },
+        };
+        checkpoint.source.kind = "synthetic_companion";
+        checkpoint.source.findingId = "F1-NO-SEARCH-CONTROL";
+        checkpoint.expectation = {
+          contractKind: "correctness",
+          choice: {
+            mustSelectOptionIds: ["keep"],
+            mustNotSelectOptionIds: ["mulligan"],
+          },
+        };
+      },
+    );
 
-    expectCheckpointToPass(noSearchLine);
+    expectCheckpointToPass(executableDrawEconomy);
   });
 });
 

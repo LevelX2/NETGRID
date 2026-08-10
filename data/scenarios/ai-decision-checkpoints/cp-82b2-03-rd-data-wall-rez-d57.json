@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 113,
-    "stateHash": "fnv1a:808bd8b1",
+    "stateHash": "fnv1a:5db3125a",
     "testOnlyGameState": {
       "matchId": "match_1bad991988b099b8",
       "baseline": {
@@ -1106,10 +1106,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2",
-              "corp_onr_v1_252_keeper_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2", "corp_onr_v1_252_keeper_2"],
             "root": []
           },
           {
@@ -1123,21 +1120,15 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_231_cortical-scrub_2"
-            ],
+            "ice": ["corp_onr_v1_231_cortical-scrub_2"],
             "root": []
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_252_keeper_1"
-            ],
-            "root": [
-              "corp_onr_v1_340_setup_1"
-            ]
+            "ice": ["corp_onr_v1_252_keeper_1"],
+            "root": ["corp_onr_v1_340_setup_1"]
           }
         ]
       },
@@ -1205,16 +1196,12 @@
             "runner_onr_v1_129_hq-interface_1",
             "runner_onr_v1_139_r-and-d-interface_1"
           ],
-          "resources": [
-            "runner_onr_v1_154_broker_2"
-          ]
+          "resources": ["runner_onr_v1_154_broker_2"]
         }
       },
       "specialZones": {
         "setAside": [],
-        "removedFromGame": [
-          "runner_onr_v1_101_mit-west-tier_2"
-        ]
+        "removedFromGame": ["runner_onr_v1_101_mit-west-tier_2"]
       },
       "cardInstances": {
         "runner_runner_identity_001_0": {
@@ -1936,9 +1923,7 @@
             "family": "alternate_subtype",
             "additionalCostPaid": 0,
             "value": 0,
-            "selectedSubtypes": [
-              "wall"
-            ]
+            "selectedSubtypes": ["wall"]
           }
         },
         "corp_onr_proteus_021_dog-pile_1": {
@@ -2643,13 +2628,9 @@
         "jackOutLockedUntilEncounterEnds": false,
         "fatalDamageActiveForEncounter": false,
         "nextEncounterFatalDamage": 0,
-        "fullyBrokenIceIds": [
-          "corp_onr_v1_252_keeper_2"
-        ],
+        "fullyBrokenIceIds": ["corp_onr_v1_252_keeper_2"],
         "lastPassedIceId": "corp_onr_v1_252_keeper_2",
-        "rootRezWindowPassedKeys": [
-          "run_103:ice:rd:0"
-        ]
+        "rootRezWindowPassedKeys": ["run_103:ice:rd:0"]
       }
     },
     "eventPrefix": [
@@ -6453,9 +6434,7 @@
               "support": 80,
               "final": 69
             },
-            "supportGaps": [
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -6506,9 +6485,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.ice_tax_glacier",
-          "evidence": [
-            "continued:corp.ice_tax_glacier"
-          ]
+          "evidence": ["continued:corp.ice_tax_glacier"]
         },
         "commitment": {
           "strategyId": "corp.ice_tax_glacier",
@@ -6750,10 +6727,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6806,10 +6780,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7021,9 +6992,7 @@
               "family": "corp_central_defense",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.central_stabilize"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.central_stabilize"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -7055,10 +7024,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7113,10 +7079,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7236,10 +7199,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7326,9 +7286,7 @@
                 "serverId": "rd",
                 "phase": "decline_rez",
                 "sourceDefinitionIds": [],
-                "actionIds": [
-                  "corp.decline_rez.rd"
-                ],
+                "actionIds": ["corp.decline_rez.rd"],
                 "urgent": false,
                 "value": 0,
                 "evidenceCode": "visible_rez_window_decline_without_defense_threat"
@@ -7371,10 +7329,7 @@
                   "serverBoundEffectIds": []
                 }
               },
-              "canonicalNearTieCandidateServerIds": [
-                "hq",
-                "rd"
-              ],
+              "canonicalNearTieCandidateServerIds": ["hq", "rd"],
               "hqHold": {
                 "status": "ineligible"
               }
@@ -7648,12 +7603,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.defend_servers"
-      ],
-      "acceptableCapabilities": [
-        "allocate_server_defense"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"]
     }
   }
 }

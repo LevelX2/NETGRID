@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 41,
-    "stateHash": "fnv1a:b8a65f6f",
+    "stateHash": "fnv1a:f6dbe48b",
     "testOnlyGameState": {
       "matchId": "match_f5d27033a083d6b8",
       "baseline": {
@@ -4757,15 +4757,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.contest_remote"
-      ],
-      "acceptableCapabilities": [
-        "contest_remote"
-      ],
-      "requiredAssessmentEvidence": [
-        "runner_direct_run_converts_now:remote_1"
-      ]
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": ["runner_direct_run_converts_now:remote_1"]
     }
   }
 }

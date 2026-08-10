@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 17,
-    "stateHash": "fnv1a:8b22cd8c",
+    "stateHash": "fnv1a:1c2b900c",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-004_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {

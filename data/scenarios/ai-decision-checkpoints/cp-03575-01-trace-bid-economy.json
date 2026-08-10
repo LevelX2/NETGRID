@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 61,
-    "stateHash": "fnv1a:39e1d589",
+    "stateHash": "fnv1a:eebd40ef",
     "testOnlyGameState": {
       "matchId": "match_03575bf4efae5bc7",
       "baseline": {
@@ -1090,9 +1090,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_236_data-raven_1"
-            ],
+            "ice": ["corp_onr_v1_236_data-raven_1"],
             "root": [
               "corp_onr_v1_356_dedicated-response-team_3",
               "corp_onr_v1_203_hostile-takeover_2"
@@ -1165,9 +1163,7 @@
           "corp_onr_v1_207_netwatch-operations-office_1"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_2"
-          ],
+          "programs": ["runner_onr_v1_039_krash_2"],
           "hardware": [],
           "resources": []
         }
@@ -2571,9 +2567,7 @@
           "iceIndex": 0
         },
         "brokenSubroutineIndexes": [],
-        "resolvedSubroutineIndexes": [
-          0
-        ],
+        "resolvedSubroutineIndexes": [0],
         "bartmossUsedBreakerIdsThisEncounter": [],
         "aardvarkInterceptionIceIds": [],
         "blinkUsedSubroutinesByBreakerThisEncounter": {},
@@ -2586,9 +2580,7 @@
         "jackOutLockedUntilEncounterEnds": false,
         "fatalDamageActiveForEncounter": false,
         "nextEncounterFatalDamage": 0,
-        "fullyBrokenIceIds": [
-          "corp_onr_proteus_026_hunting-pack_2"
-        ],
+        "fullyBrokenIceIds": ["corp_onr_proteus_026_hunting-pack_2"],
         "fullyBrokenPassedIcePendingId": "corp_onr_proteus_026_hunting-pack_2",
         "fullyBrokenPassedIceTrashPendingId": "corp_onr_proteus_026_hunting-pack_2",
         "lastPassedIceId": "corp_onr_proteus_026_hunting-pack_2",
@@ -4486,9 +4478,7 @@
               "support": 90,
               "final": 74
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -4553,19 +4543,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -4647,10 +4632,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4732,10 +4714,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4815,10 +4794,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4840,9 +4816,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4902,10 +4876,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5413,10 +5384,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5538,10 +5506,7 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Hunting Pack",
-            "visibleSubtypes": [
-              "bloodhound",
-              "sentry"
-            ],
+            "visibleSubtypes": ["bloodhound", "sentry"],
             "effectiveStrength": 4,
             "subroutineQuotes": [],
             "breakerCoverage": [
@@ -5679,9 +5644,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": [
-        "bid_0"
-      ]
+      "mustSelectOptionIds": ["bid_0"]
     }
   }
 }

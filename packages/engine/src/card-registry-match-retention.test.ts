@@ -14,25 +14,35 @@ import {
   registryFingerprintsFor,
 } from "../../cards/src/registry";
 import { CARD_REGISTRY } from "../../cards/src/registry-runtime";
-import { CS06_CARD_DEFINITION_IDS } from "../../cards/src/cs06-slice";
+import { cardSpecRuntimeDefinitionIds } from "../../cards/src/engine";
 import { CARD_IMPLEMENTATIONS_BY_DEFINITION_ID } from "./card-implementations/registry";
 import { CARD_DEFINITIONS, CARD_DEFINITIONS_BY_ID } from "./card-definitions";
 import { createGameAfterSetup } from "./game/create-game";
-import { cardRegistryRetentionDecks } from "./test-fixtures/card-registry-retention-decks";
+import {
+  CARD_REGISTRY_RETENTION_STRESS_IDS,
+  cardRegistryRetentionDecks,
+} from "./test-fixtures/card-registry-retention-decks";
 
 describe("CardSpec registry per-match retention", () => {
   it("retains no registry objects or CardSpec projection graphs in 500 matches", () => {
+    const activeCardSpecDefinitionIds = cardSpecRuntimeDefinitionIds();
+    expect(activeCardSpecDefinitionIds).toHaveLength(100);
+    expect(
+      CARD_REGISTRY_RETENTION_STRESS_IDS.every((definitionId) =>
+        activeCardSpecDefinitionIds.includes(definitionId),
+      ),
+    ).toBe(true);
     const rulesContext = createRulesContextForRegistry(CARD_REGISTRY, {
       engineSchemaVersion: "retention-probe-engine-v1",
       cardImplementationVersion: "retention-probe-implementation-v1",
       primitiveContractVersion: "retention-probe-primitives-v1",
       cardPoolSnapshotId: "retention-probe-pool-v1",
-      matchCardPoolDefinitionIds: CS06_CARD_DEFINITION_IDS,
+      matchCardPoolDefinitionIds: activeCardSpecDefinitionIds,
     });
     const authorityRoots = [
       CARD_REGISTRY,
       GENERATED_CARD_SPECS,
-      ...CS06_CARD_DEFINITION_IDS.map((definitionId) =>
+      ...activeCardSpecDefinitionIds.map((definitionId) =>
         cardSpecForDefinitionId(CARD_REGISTRY, definitionId),
       ),
       publicCardViews(CARD_REGISTRY),
@@ -54,8 +64,8 @@ describe("CardSpec registry per-match retention", () => {
     const stressDecks = cardRegistryRetentionDecks("stress");
     const states = Array.from({ length: 500 }, (_, index) =>
       createGameAfterSetup({
-        seed: `cs06-registry-retention-${index}`,
-        matchId: `cs06-registry-retention-${index}`,
+        seed: `card-spec-registry-retention-${index}`,
+        matchId: `card-spec-registry-retention-${index}`,
         ...stressDecks,
       }),
     );

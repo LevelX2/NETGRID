@@ -14,13 +14,23 @@ export const KNOWN_PLANNING_TACTIC_SIGNALS = [
 ] as const;
 
 export const KNOWN_PLANNING_TACTIC_USES = [
+  "access.punish",
   "corp.remote_protection",
   "coverage.breaker",
   "damage.payoff.runner",
   "draw.card",
   "economy.card",
   "punish.payoff",
+  "remote.ambush",
   "tag.payoff",
+] as const;
+
+export const KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS = [
+  "access.hq_multiaccess",
+  "access.rnd_multiaccess",
+  "tag.payoff",
+  "tag.source",
+  "trace.source",
 ] as const;
 
 export type CardPlanningAnnotations = {
@@ -61,6 +71,7 @@ export type PlanningInterpretation =
       strategyKey: string;
       role: string;
       roleDetail: string;
+      evidenceAnchor?: (typeof KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS)[number];
       confidence: "low" | "medium" | "high";
       rationale?: string;
     }
@@ -78,7 +89,7 @@ export type PlanningInterpretation =
   | {
       kind: "value_interpretation";
       axis: string;
-      rating: "low" | "medium" | "high";
+      rating: "low" | "medium" | "high" | "very_high" | "critical";
       rationale?: string;
     }
   | {
@@ -137,6 +148,7 @@ const INTERPRETATION_KEYS: Record<
     "strategyKey",
     "role",
     "roleDetail",
+    "evidenceAnchor",
     "confidence",
     "rationale",
   ]),
@@ -280,6 +292,13 @@ function assertInterpretationShape(
       stringField(record, "strategyKey", path);
       stringField(record, "role", path);
       stringField(record, "roleDetail", path);
+      if (record.evidenceAnchor !== undefined)
+        enumField(
+          record,
+          "evidenceAnchor",
+          KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS,
+          path,
+        );
       enumField(record, "confidence", ["low", "medium", "high"], path);
       optionalStringField(record, "rationale", path);
       return;
@@ -294,7 +313,12 @@ function assertInterpretationShape(
       return;
     case "value_interpretation":
       stringField(record, "axis", path);
-      enumField(record, "rating", ["low", "medium", "high"], path);
+      enumField(
+        record,
+        "rating",
+        ["low", "medium", "high", "very_high", "critical"],
+        path,
+      );
       optionalStringField(record, "rationale", path);
       return;
     case "risk_interpretation":

@@ -27,7 +27,9 @@ describe("icebreaker run semantics audit", () => {
         expect(
           ability.source,
           `${definition.title}: unbekannte Ability-Quelle`,
-        ).toMatch(/^(shared_card_definition|card_implementation)$/);
+        ).toMatch(
+          /^(shared_card_definition|card_implementation|card_spec_capability)$/,
+        );
       }
     }
   });

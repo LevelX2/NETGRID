@@ -1,7 +1,9 @@
 import {
   CS06_CARD_DEFINITION_IDS,
   cardSpecDefinitions,
+  cardSpecImplementationDefinitionIds,
   cardSpecImplementations,
+  cardSpecRuntimeDefinitionIds,
   cs06CardDefinitions,
   cs06CardImplementations,
 } from "@netgrid/cards/engine";
@@ -29,22 +31,24 @@ import { CARD_IMPLEMENTATION_CATALOG } from "./card-implementations/subregistrie
 
 describe("heterogeneous card authority composition", () => {
   it("composes exact disjoint definition and implementation partitions", () => {
-    expect(Object.keys(LEGACY_CARD_DEFINITIONS_BY_ID)).toHaveLength(588);
-    expect(cardSpecDefinitions()).toHaveLength(46);
+    expect(Object.keys(LEGACY_CARD_DEFINITIONS_BY_ID)).toHaveLength(534);
+    expect(cardSpecDefinitions()).toHaveLength(100);
     expect(cs06CardDefinitions()).toHaveLength(10);
     expect(CARD_DEFINITIONS).toHaveLength(634);
-    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(571);
-    expect(cardSpecImplementations()).toHaveLength(30);
+    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(517);
+    expect(cardSpecImplementations()).toHaveLength(80);
     expect(cs06CardImplementations()).toHaveLength(10);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(601);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(597);
     expect(Object.isFrozen(CARD_DEFINITIONS)).toBe(true);
     expect(Object.isFrozen(CARD_DEFINITIONS_BY_ID)).toBe(true);
     expect(Object.isFrozen(CARD_IMPLEMENTATIONS)).toBe(true);
     expect(Object.isFrozen(CARD_IMPLEMENTATIONS_BY_DEFINITION_ID)).toBe(true);
 
-    for (const definitionId of CS06_CARD_DEFINITION_IDS) {
+    for (const definitionId of cardSpecRuntimeDefinitionIds()) {
       expect(LEGACY_CARD_DEFINITIONS_BY_ID[definitionId]).toBeUndefined();
       expect(CARD_DEFINITIONS_BY_ID[definitionId]).toBeDefined();
+    }
+    for (const definitionId of cardSpecImplementationDefinitionIds()) {
       expect(
         legacyCardImplementationForDefinitionId(definitionId),
       ).toBeUndefined();

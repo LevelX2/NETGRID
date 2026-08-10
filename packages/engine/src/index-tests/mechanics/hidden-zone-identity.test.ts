@@ -515,10 +515,17 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      if (definitionId === "onr_v1_250_ice-pick-willie") {
+      if (definitionId === "onr_v1_110_sneak-preview") {
+        expect(definition?.mechanics).toContain(
+          "choose_stack_or_trash_program_install",
+        );
+      } else if (definitionId === "onr_v1_250_ice-pick-willie") {
         expect(definition?.mechanics).toContain("trash_installed_program");
       } else {
-        expect(definition?.mechanics).toContain("hidden_zone_tool");
+        if (!definition?.mechanics?.includes("hidden_zone_tool"))
+          throw new Error(
+            `Missing hidden_zone_tool mechanic for ${definitionId}: ${(definition?.mechanics ?? []).join(",")}`,
+          );
       }
     }
     expect(

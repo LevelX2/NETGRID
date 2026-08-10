@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 28,
-    "stateHash": "fnv1a:f16300dd",
+    "stateHash": "fnv1a:5338674d",
     "testOnlyGameState": {
       "matchId": "match_10311b60ca1364f6",
       "baseline": {
@@ -936,18 +936,14 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_classic_010_entrapment_2"
-            ],
+            "ice": ["corp_onr_classic_010_entrapment_2"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_classic_007_brain-drain_1"
-            ],
+            "ice": ["corp_onr_classic_007_brain-drain_1"],
             "root": []
           },
           {
@@ -961,9 +957,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_classic_008_deadeye_1"
-            ],
+            "ice": ["corp_onr_classic_008_deadeye_1"],
             "root": []
           }
         ]
@@ -3276,9 +3270,7 @@
       },
       "selectedStepKind": "gain_credits",
       "selectedActionId": "runner.gain_credit",
-      "blockedBy": [
-        "missing_credits"
-      ],
+      "blockedBy": ["missing_credits"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_central_probe_satisfied",
       "updatedAtStateVersion": 27
@@ -3449,9 +3441,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -3649,9 +3639,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3893,10 +3881,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4313,10 +4298,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4369,15 +4351,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.pressure_central"
-      ],
-      "acceptableCapabilities": [
-        "pressure_rd_information"
-      ],
-      "requiredAssessmentEvidence": [
-        "target:rd"
-      ]
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_rd_information"],
+      "requiredAssessmentEvidence": ["target:rd"]
     }
   }
 }

@@ -17,9 +17,13 @@ export type CardSpecCardImplementation = {
   CardMechanicalDefinition,
   | "abilities"
   | "accessEffects"
+  | "agendaAccessReplacement"
   | "advanceable"
+  | "corpUtility"
   | "corpRootRezCreditOutcome"
+  | "damagePreventionSources"
   | "fortRunWindows"
+  | "hardwareDeck"
   | "icebreakerAbilities"
   | "icebreakerEncounterStrengthBonus"
   | "icebreakerSubtypeChange"
@@ -27,7 +31,16 @@ export type CardSpecCardImplementation = {
   | "installTargetBinding"
   | "lifecycle"
   | "modifiers"
+  | "restrictedHostedCreditSource"
+  | "runnerCounterEffects"
+  | "runnerEventLongtail"
+  | "runnerUtilityLongtail"
   | "scoredAgenda"
+  | "selfRezAdditionalCosts"
+  | "selfRezCostModifiers"
+  | "successfulRunFollowups"
+  | "tagPreventionSources"
+  | "unique"
   | "variableRez"
 >;
 type CardSpecCardImplementationFamilies = Omit<
@@ -150,9 +163,13 @@ export function projectCardSpecImplementation(
 const CARD_SPEC_IMPLEMENTATION_FAMILIES = new Set([
   "abilities",
   "accessEffects",
+  "agendaAccessReplacement",
   "advanceable",
+  "corpUtility",
   "corpRootRezCreditOutcome",
+  "damagePreventionSources",
   "fortRunWindows",
+  "hardwareDeck",
   "icebreakerAbilities",
   "icebreakerEncounterStrengthBonus",
   "icebreakerSubtypeChange",
@@ -160,7 +177,16 @@ const CARD_SPEC_IMPLEMENTATION_FAMILIES = new Set([
   "installTargetBinding",
   "lifecycle",
   "modifiers",
+  "restrictedHostedCreditSource",
+  "runnerCounterEffects",
+  "runnerEventLongtail",
+  "runnerUtilityLongtail",
   "scoredAgenda",
+  "selfRezAdditionalCosts",
+  "selfRezCostModifiers",
+  "successfulRunFollowups",
+  "tagPreventionSources",
+  "unique",
   "variableRez",
 ]);
 
@@ -207,6 +233,58 @@ function projectPrintedSubroutines(
         id: subroutine.capabilityKey,
         type: "end_the_run",
       } satisfies SubroutineDefinition;
+    if (subroutine.kind === "end_the_run_and_trash_source_at_end_of_turn")
+      return {
+        id: subroutine.capabilityKey,
+        type: "end_the_run_and_trash_source_at_end_of_turn",
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "trash_program")
+      return {
+        id: subroutine.capabilityKey,
+        type: "trash_installed_program",
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "prohibit_break_next_ice")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_next_encounter_no_break_subroutines",
+        ...(subroutine.breakTags === undefined
+          ? {}
+          : { breakTags: [...subroutine.breakTags] }),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "deflect_run")
+      return {
+        id: subroutine.capabilityKey,
+        type: "deflect_run",
+        deflectorTarget: subroutine.target,
+        ...(subroutine.cost?.kind === "credit"
+          ? { deflectorCost: subroutine.cost.amount }
+          : {}),
+        ...(subroutine.autoBreakIfNoTarget
+          ? { deflectorAutoBreakIfNoTarget: true }
+          : {}),
+        ...(subroutine.breakTags === undefined
+          ? {}
+          : { breakTags: [...subroutine.breakTags] }),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "random_damage")
+      return {
+        id: subroutine.capabilityKey,
+        type: "random_damage",
+        dieFaces: subroutine.dieFaces,
+        damageOnResults: [...subroutine.damageOnResults],
+        damageType: "core",
+        amount: subroutine.amount,
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "trace")
+      return {
+        id: subroutine.capabilityKey,
+        type: "initiate_trace",
+        baseTraceStrength: subroutine.baseTraceStrength,
+        traceSuccessEffect: projectTraceSuccessEffect(subroutine.onSuccess),
+        ...(subroutine.breakTags === undefined
+          ? {}
+          : { breakTags: [...subroutine.breakTags] }),
+      } satisfies SubroutineDefinition;
     if (
       subroutine.kind === "corp_gain_credit" ||
       subroutine.kind === "runner_lose_credits" ||
@@ -221,6 +299,28 @@ function projectPrintedSubroutines(
       `card_spec_unsupported_printed_subroutine:${subroutine.kind}`,
     );
   });
+}
+
+function projectTraceSuccessEffect(
+  effects: Extract<
+    NonNullable<CardMechanicalSpec["printedSubroutines"]>[number],
+    { kind: "trace" }
+  >["onSuccess"],
+): NonNullable<SubroutineDefinition["traceSuccessEffect"]> {
+  if (effects.length === 1 && effects[0]?.kind === "add_counter") {
+    const effect = effects[0];
+    if (
+      typeof effect.counterType !== "string" ||
+      typeof effect.amount !== "number"
+    )
+      throw new Error("card_spec_invalid_trace_counter_effect");
+    return {
+      type: "add_counter",
+      counterType: effect.counterType,
+      amount: effect.amount,
+    };
+  }
+  throw new Error("card_spec_unsupported_trace_success_effect");
 }
 
 function deriveMechanicTokens(

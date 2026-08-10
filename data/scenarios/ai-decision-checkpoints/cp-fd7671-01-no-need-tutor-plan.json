@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 93,
-    "stateHash": "fnv1a:1be00d0c",
+    "stateHash": "fnv1a:7fac0511",
     "testOnlyGameState": {
       "matchId": "match_fd7671d270e1a716",
       "baseline": {
@@ -6113,7 +6113,7 @@
   "expectation": {
     "acceptableActions": [
       {
-      "actionId": "runner.start_run.hq"
+        "actionId": "runner.start_run.hq"
       }
     ],
     "forbiddenActions": [
@@ -6122,14 +6122,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-      "runner.pressure_central"
-      ],
-      "acceptableCapabilities": [
-      "pressure_hq_information"
-      ],
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_information"],
       "requiredAssessmentEvidence": [
-      "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice"
+        "runner_hq_success_window_setup:onr_v1_080_core-command-jettison-ice"
       ]
     }
   }

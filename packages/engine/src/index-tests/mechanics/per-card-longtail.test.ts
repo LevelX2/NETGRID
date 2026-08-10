@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import {
   applyAction,
   applyEffectCommands,
@@ -195,6 +196,10 @@ import {
   addRezzedCorpIceForTest,
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
+
+const CARD_SPEC_RUNTIME_DEFINITION_IDS = new Set(
+  cardSpecRuntimeDefinitionIds(),
+);
 
 describe("V1.9.22 Per-card Longtail WIP", () => {
   it("adds the first V1.9.22 runner hardware runtime definitions without catalog release promotion", () => {
@@ -7097,10 +7102,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         CARD_DEFINITIONS_BY_ID[definitionId]?.rulesText,
         definitionId,
       ).not.toContain("WIP");
-      expect(
-        CARD_DEFINITIONS_BY_ID[definitionId]?.mechanics.join(" "),
-        definitionId,
-      ).toContain("per_card_longtail");
+      const mechanics = CARD_DEFINITIONS_BY_ID[definitionId]?.mechanics ?? [];
+      if (CARD_SPEC_RUNTIME_DEFINITION_IDS.has(definitionId)) {
+        expect(mechanics.length, definitionId).toBeGreaterThan(0);
+        expect(mechanics, definitionId).not.toContain("per_card_longtail");
+      } else expect(mechanics, definitionId).toContain("per_card_longtail");
     }
   });
 });

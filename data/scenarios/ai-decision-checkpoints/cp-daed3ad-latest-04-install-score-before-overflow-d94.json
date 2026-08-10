@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 222,
-    "stateHash": "fnv1a:2cac968b",
+    "stateHash": "fnv1a:cdf96b19",
     "testOnlyGameState": {
       "matchId": "match_daed3ad3bead20fb",
       "baseline": {
@@ -13226,10 +13226,10 @@
   },
   "expectation": {
     "acceptableActions": [
-    {
-      "type": "install_card",
-      "sourceDefinitionId": "onr_v1_220_tycho-extension"
-    }
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_220_tycho-extension"
+      }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.score_agenda"],

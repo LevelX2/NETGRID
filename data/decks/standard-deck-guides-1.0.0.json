@@ -8,7 +8,7 @@
       "standardDeckId": "standard_corp_cheap_bag_tricks",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:ece21485",
-      "sourceAnalysisHash": "deck-analysis:d99179dd",
+      "sourceAnalysisHash": "deck-analysis:0017d0b6",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -74,7 +74,7 @@
       "standardDeckId": "standard_corp_chrome_rush_bureau",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:07d16c96",
-      "sourceAnalysisHash": "deck-analysis:903d7e33",
+      "sourceAnalysisHash": "deck-analysis:dd110158",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -140,7 +140,7 @@
       "standardDeckId": "standard_classic_corp_remote_lab_deflection_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:e3da269c",
-      "sourceAnalysisHash": "deck-analysis:484e4bcd",
+      "sourceAnalysisHash": "deck-analysis:a707417c",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -205,7 +205,7 @@
       "standardDeckId": "standard_classic_corp_superserum_control_grid_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:e8cfbd14",
-      "sourceAnalysisHash": "deck-analysis:94a2c2bf",
+      "sourceAnalysisHash": "deck-analysis:b223c9df",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -270,7 +270,7 @@
       "standardDeckId": "standard_corp_code_rot_bitte_eintreten_2026_07_16",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:40dc908e",
-      "sourceAnalysisHash": "deck-analysis:1b2c8fe1",
+      "sourceAnalysisHash": "deck-analysis:ab991ff4",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -278,9 +278,7 @@
           "corp.remote_scoring",
           "corp.damage_kill"
         ],
-        "secondaryStrategyIds": [
-          "corp.rush_score"
-        ],
+        "secondaryStrategyIds": ["corp.rush_score"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -332,7 +330,7 @@
       "standardDeckId": "standard_corp_mr96xg94",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:785f92db",
-      "sourceAnalysisHash": "deck-analysis:373a3ad0",
+      "sourceAnalysisHash": "deck-analysis:8fe75943",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -398,7 +396,7 @@
       "standardDeckId": "standard_corp_ivory_bastion",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:853309c9",
-      "sourceAnalysisHash": "deck-analysis:c5f3c2e1",
+      "sourceAnalysisHash": "deck-analysis:e0c5f76b",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -462,7 +460,7 @@
       "standardDeckId": "standard_corp_manhunt_pressure_bureau",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:3b7f48b0",
-      "sourceAnalysisHash": "deck-analysis:f850a270",
+      "sourceAnalysisHash": "deck-analysis:85be2457",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -471,9 +469,7 @@
           "corp.remote_scoring",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.fast_advance"
-        ],
+        "secondaryStrategyIds": ["corp.fast_advance"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -525,7 +521,7 @@
       "standardDeckId": "standard_corp_mph465dv",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:48b0da32",
-      "sourceAnalysisHash": "deck-analysis:e534d789",
+      "sourceAnalysisHash": "deck-analysis:ca11604c",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -591,7 +587,7 @@
       "standardDeckId": "standard_corp_neon_guillotine",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:7032817b",
-      "sourceAnalysisHash": "deck-analysis:3ac4f5ac",
+      "sourceAnalysisHash": "deck-analysis:d3f65d19",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -599,9 +595,7 @@
           "corp.damage_kill",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [
-          "corp.remote_scoring"
-        ],
+        "secondaryStrategyIds": ["corp.remote_scoring"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -648,7 +642,7 @@
       "standardDeckId": "standard_corp_neon_escrow",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:cefa12ef",
-      "sourceAnalysisHash": "deck-analysis:381a7796",
+      "sourceAnalysisHash": "deck-analysis:a2ffb4cf",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -714,7 +708,7 @@
       "standardDeckId": "standard_corp_original_speed_v10",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:e2e748fd",
-      "sourceAnalysisHash": "deck-analysis:1400be06",
+      "sourceAnalysisHash": "deck-analysis:1f082fe5",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -780,7 +774,7 @@
       "standardDeckId": "standard_proteus_corp_hidden_node_control_2026_05_25",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:0cf1c94a",
-      "sourceAnalysisHash": "deck-analysis:1bd110a6",
+      "sourceAnalysisHash": "deck-analysis:524d0427",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -846,7 +840,7 @@
       "standardDeckId": "standard_proteus_corp_variable_ice_gauntlet_2026_05_25",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:6a06a588",
-      "sourceAnalysisHash": "deck-analysis:cce73416",
+      "sourceAnalysisHash": "deck-analysis:fd88a337",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -912,7 +906,7 @@
       "standardDeckId": "standard_corp_rent_to_own_war_engine",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:75627d4c",
-      "sourceAnalysisHash": "deck-analysis:db5d89e9",
+      "sourceAnalysisHash": "deck-analysis:b0073244",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -976,7 +970,7 @@
       "standardDeckId": "standard_corp_shadoe_tag_bag",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:b87e535a",
-      "sourceAnalysisHash": "deck-analysis:2c9cd38e",
+      "sourceAnalysisHash": "deck-analysis:ed43b7c3",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1040,7 +1034,7 @@
       "standardDeckId": "standard_corp_salazar_toll_road",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:025808eb",
-      "sourceAnalysisHash": "deck-analysis:8732695f",
+      "sourceAnalysisHash": "deck-analysis:dd9d6f8a",
       "reviewedAt": "2026-08-03",
       "analysis": {
         "primaryStrategyIds": [
@@ -1104,7 +1098,7 @@
       "standardDeckId": "standard_corp_siren_fortress",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:887219db",
-      "sourceAnalysisHash": "deck-analysis:d0c724b2",
+      "sourceAnalysisHash": "deck-analysis:aec56989",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1112,10 +1106,7 @@
           "corp.asset_economy",
           "corp.damage_kill"
         ],
-        "secondaryStrategyIds": [
-          "corp.deck_recycle_engine",
-          "corp.rush_score"
-        ],
+        "secondaryStrategyIds": ["corp.deck_recycle_engine", "corp.rush_score"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -1167,7 +1158,7 @@
       "standardDeckId": "standard_corp_syds_ice_pfandhaus_2026_07_09",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:37313c78",
-      "sourceAnalysisHash": "deck-analysis:16c02794",
+      "sourceAnalysisHash": "deck-analysis:12ba7f0d",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1175,10 +1166,7 @@
           "corp.economy_rez_reserve",
           "corp.asset_economy"
         ],
-        "secondaryStrategyIds": [
-          "corp.rush_score",
-          "corp.damage_kill"
-        ],
+        "secondaryStrategyIds": ["corp.rush_score", "corp.damage_kill"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -1230,7 +1218,7 @@
       "standardDeckId": "standard_corp_mp1ddh7c",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:74ae2903",
-      "sourceAnalysisHash": "deck-analysis:89e01d0c",
+      "sourceAnalysisHash": "deck-analysis:6d99e09f",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1295,7 +1283,7 @@
       "standardDeckId": "standard_corp_tycho_ice_stack",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:035ca74a",
-      "sourceAnalysisHash": "deck-analysis:a390211d",
+      "sourceAnalysisHash": "deck-analysis:e5970fe6",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1303,10 +1291,7 @@
           "corp.remote_scoring",
           "corp.asset_economy"
         ],
-        "secondaryStrategyIds": [
-          "corp.fast_advance",
-          "corp.rush_score"
-        ],
+        "secondaryStrategyIds": ["corp.fast_advance", "corp.rush_score"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -1358,13 +1343,10 @@
       "standardDeckId": "standard_corp_mp6g9eku",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:20bd266d",
-      "sourceAnalysisHash": "deck-analysis:5922b1c0",
+      "sourceAnalysisHash": "deck-analysis:611336bf",
       "reviewedAt": "2026-08-02",
       "analysis": {
-        "primaryStrategyIds": [
-          "corp.remote_scoring",
-          "corp.rush_score"
-        ],
+        "primaryStrategyIds": ["corp.remote_scoring", "corp.rush_score"],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
@@ -1392,7 +1374,7 @@
       "standardDeckId": "standard_runner_bit_denial_lock",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:23264db8",
-      "sourceAnalysisHash": "deck-analysis:14bf09d2",
+      "sourceAnalysisHash": "deck-analysis:387d32ad",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1442,7 +1424,7 @@
       "standardDeckId": "standard_runner_blink_pressure_rig",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:5c3b8987",
-      "sourceAnalysisHash": "deck-analysis:33225db5",
+      "sourceAnalysisHash": "deck-analysis:72c1edd0",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1450,9 +1432,7 @@
           "runner.search.breaker",
           "runner.survival_defense"
         ],
-        "secondaryStrategyIds": [
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -1504,7 +1484,7 @@
       "standardDeckId": "standard_classic_runner_cybernetics_risk_rig_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:afcb633a",
-      "sourceAnalysisHash": "deck-analysis:c00ad8b3",
+      "sourceAnalysisHash": "deck-analysis:fa3201c5",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1570,7 +1550,7 @@
       "standardDeckId": "standard_classic_runner_prep_economy_pressure_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:34b312ba",
-      "sourceAnalysisHash": "deck-analysis:1aef2dad",
+      "sourceAnalysisHash": "deck-analysis:c913cfe3",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1635,13 +1615,10 @@
       "standardDeckId": "standard_runner_deep_market_engine",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:82157891",
-      "sourceAnalysisHash": "deck-analysis:d502bcf3",
+      "sourceAnalysisHash": "deck-analysis:56e9e329",
       "reviewedAt": "2026-08-02",
       "analysis": {
-        "primaryStrategyIds": [
-          "runner.search.breaker",
-          "runner.rig_first"
-        ],
+        "primaryStrategyIds": ["runner.search.breaker", "runner.rig_first"],
         "secondaryStrategyIds": [],
         "reviewStatus": "plausible"
       },
@@ -1679,7 +1656,7 @@
       "standardDeckId": "standard_runner_ghost_circuit",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:458584a6",
-      "sourceAnalysisHash": "deck-analysis:bb97fc4f",
+      "sourceAnalysisHash": "deck-analysis:d980eb8b",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [],
@@ -1710,7 +1687,7 @@
       "standardDeckId": "standard_runner_ice_destruction_runner",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:3bf13a4c",
-      "sourceAnalysisHash": "deck-analysis:ab35b1eb",
+      "sourceAnalysisHash": "deck-analysis:13c8e85c",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1718,10 +1695,7 @@
           "runner.survival_defense",
           "runner.hq_pressure"
         ],
-        "secondaryStrategyIds": [
-          "runner.rig_first",
-          "runner.remote_contest"
-        ],
+        "secondaryStrategyIds": ["runner.rig_first", "runner.remote_contest"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -1773,13 +1747,10 @@
       "standardDeckId": "standard_runner_inside_forgery_loop",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:618f5760",
-      "sourceAnalysisHash": "deck-analysis:74fff054",
+      "sourceAnalysisHash": "deck-analysis:414d1a55",
       "reviewedAt": "2026-08-02",
       "analysis": {
-        "primaryStrategyIds": [
-          "runner.run_event_tempo",
-          "runner.rig_first"
-        ],
+        "primaryStrategyIds": ["runner.run_event_tempo", "runner.rig_first"],
         "secondaryStrategyIds": [],
         "reviewStatus": "plausible"
       },
@@ -1812,7 +1783,7 @@
       "standardDeckId": "standard_runner_adb10896",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:d8fb54e8",
-      "sourceAnalysisHash": "deck-analysis:4ba9aa96",
+      "sourceAnalysisHash": "deck-analysis:02d04f83",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1876,7 +1847,7 @@
       "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:99165f80",
-      "sourceAnalysisHash": "deck-analysis:292d6f39",
+      "sourceAnalysisHash": "deck-analysis:1e68114a",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1926,7 +1897,7 @@
       "standardDeckId": "standard_runner_lucidrine_shell_traders",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:7214803a",
-      "sourceAnalysisHash": "deck-analysis:787b3a27",
+      "sourceAnalysisHash": "deck-analysis:6b6013eb",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1934,10 +1905,7 @@
           "runner.rnd_pressure",
           "runner.interface_closeout"
         ],
-        "secondaryStrategyIds": [
-          "runner.survival_defense",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.survival_defense", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -1984,7 +1952,7 @@
       "standardDeckId": "standard_runner_mit_ansage_der_perfekte_coup_2026_07_09",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:50f16c85",
-      "sourceAnalysisHash": "deck-analysis:eae9469f",
+      "sourceAnalysisHash": "deck-analysis:182aa514",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -1992,10 +1960,7 @@
           "runner.rnd_pressure",
           "runner.run_event_tempo"
         ],
-        "secondaryStrategyIds": [
-          "runner.hq_pressure",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.hq_pressure", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -2047,7 +2012,7 @@
       "standardDeckId": "standard_proteus_runner_breaker_lab_2026_05_25",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:3c6d47c9",
-      "sourceAnalysisHash": "deck-analysis:18dbb334",
+      "sourceAnalysisHash": "deck-analysis:f90e5c8b",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2055,10 +2020,7 @@
           "runner.run_event_tempo",
           "runner.hq_pressure"
         ],
-        "secondaryStrategyIds": [
-          "runner.rnd_pressure",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.rnd_pressure", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -2110,7 +2072,7 @@
       "standardDeckId": "standard_proteus_runner_hidden_sabotage_2026_05_25",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:2d97ff8d",
-      "sourceAnalysisHash": "deck-analysis:2b2356ec",
+      "sourceAnalysisHash": "deck-analysis:907264b5",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2176,7 +2138,7 @@
       "standardDeckId": "standard_runner_rnd_interface_dig",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:be046044",
-      "sourceAnalysisHash": "deck-analysis:75c9ea1a",
+      "sourceAnalysisHash": "deck-analysis:78376f25",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2184,10 +2146,7 @@
           "runner.search.breaker",
           "runner.interface_closeout"
         ],
-        "secondaryStrategyIds": [
-          "runner.run_event_tempo",
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.run_event_tempo", "runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -2239,7 +2198,7 @@
       "standardDeckId": "standard_runner_redline_riot",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:30933717",
-      "sourceAnalysisHash": "deck-analysis:e5edcf12",
+      "sourceAnalysisHash": "deck-analysis:b4bef6b3",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2303,7 +2262,7 @@
       "standardDeckId": "standard_runner_rent_i_con_shellspiel_2026_07_17",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:0697af2f",
-      "sourceAnalysisHash": "deck-analysis:f1fac74e",
+      "sourceAnalysisHash": "deck-analysis:41176416",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2367,7 +2326,7 @@
       "standardDeckId": "standard_runner_mp48400s",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:d01806fd",
-      "sourceAnalysisHash": "deck-analysis:fb9ee060",
+      "sourceAnalysisHash": "deck-analysis:88fb7146",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2375,9 +2334,7 @@
           "runner.interface_closeout",
           "runner.search.breaker"
         ],
-        "secondaryStrategyIds": [
-          "runner.rig_first"
-        ],
+        "secondaryStrategyIds": ["runner.rig_first"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -2419,7 +2376,7 @@
       "standardDeckId": "standard_runner_skivviss_mill_pressure",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:5e6fbf64",
-      "sourceAnalysisHash": "deck-analysis:b742c015",
+      "sourceAnalysisHash": "deck-analysis:61588106",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2483,7 +2440,7 @@
       "standardDeckId": "standard_runner_stealth_interface_starter",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:a657c8a8",
-      "sourceAnalysisHash": "deck-analysis:55ed24eb",
+      "sourceAnalysisHash": "deck-analysis:a94fc40f",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2547,7 +2504,7 @@
       "standardDeckId": "standard_runner_purge_window",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:6b7eca0c",
-      "sourceAnalysisHash": "deck-analysis:b0357dc0",
+      "sourceAnalysisHash": "deck-analysis:ead01dcd",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [
@@ -2555,10 +2512,7 @@
           "runner.interface_closeout",
           "runner.run_event_tempo"
         ],
-        "secondaryStrategyIds": [
-          "runner.rig_first",
-          "runner.search.breaker"
-        ],
+        "secondaryStrategyIds": ["runner.rig_first", "runner.search.breaker"],
         "reviewStatus": "plausible"
       },
       "content": {
@@ -2610,7 +2564,7 @@
       "standardDeckId": "standard_corp_universal_fast_advance",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:df5fee5f",
-      "sourceAnalysisHash": "deck-analysis:92cee394",
+      "sourceAnalysisHash": "deck-analysis:cb9c90fe",
       "reviewedAt": "2026-08-02",
       "analysis": {
         "primaryStrategyIds": [

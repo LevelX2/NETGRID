@@ -156,7 +156,7 @@
   },
   "engine": {
     "stateVersion": 191,
-    "stateHash": "fnv1a:b1a4b244",
+    "stateHash": "fnv1a:d091cd09",
     "testOnlyGameState": {
       "matchId": "match_7d14d0a3bc0ecd79",
       "baseline": {
@@ -1105,35 +1105,27 @@
           "corp_onr_v1_222_ball-and-chain_1",
           "corp_onr_v1_340_setup_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_207_netwatch-operations-office_1"
-        ],
+        "scoreArea": ["corp_onr_v1_207_netwatch-operations-office_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_228_cinderella_1"
-            ],
+            "ice": ["corp_onr_v1_228_cinderella_1"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_238_data-wall-2-0_1"
-            ],
+            "ice": ["corp_onr_v1_238_data-wall-2-0_1"],
             "root": []
           },
           {
             "id": "archives",
             "kind": "archives",
             "label": "Archives",
-            "ice": [
-              "corp_onr_v1_264_rex_2"
-            ],
+            "ice": ["corp_onr_v1_264_rex_2"],
             "root": []
           },
           {
@@ -1145,9 +1137,7 @@
               "corp_onr_v1_240_fang_1",
               "corp_onr_v1_242_fatal-attractor_1"
             ],
-            "root": [
-              "corp_onr_v1_363_olivia-salazar_1"
-            ]
+            "root": ["corp_onr_v1_363_olivia-salazar_1"]
           }
         ]
       },
@@ -1207,9 +1197,7 @@
           "runner_onr_v1_097_livewires-contacts_2",
           "runner_onr_v1_012_clown_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_193_corporate-coup_1"
-        ],
+        "scoreArea": ["corp_onr_v1_193_corporate-coup_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_014_codecracker_1",
@@ -7584,9 +7572,7 @@
       },
       "selectedStepKind": "gain_credits",
       "selectedActionId": "runner.gain_credit",
-      "blockedBy": [
-        "missing_credits"
-      ],
+      "blockedBy": ["missing_credits"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -7852,9 +7838,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -8292,10 +8276,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8404,9 +8385,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -8492,9 +8471,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -8525,10 +8502,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

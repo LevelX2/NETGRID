@@ -120,7 +120,7 @@
   },
   "engine": {
     "stateVersion": 180,
-    "stateHash": "fnv1a:b1382a78",
+    "stateHash": "fnv1a:48e0ea79",
     "testOnlyGameState": {
       "matchId": "match_520180ba217781ad",
       "baseline": {
@@ -1223,9 +1223,7 @@
           "corp_onr_proteus_055_cybertech-think-tank_1",
           "corp_onr_v1_302_scorched-earth_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_203_hostile-takeover_1"
-        ],
+        "scoreArea": ["corp_onr_v1_203_hostile-takeover_1"],
         "servers": [
           {
             "id": "hq",
@@ -1235,9 +1233,7 @@
               "corp_onr_proteus_026_hunting-pack_2",
               "corp_onr_v1_251_jack-attack_3"
             ],
-            "root": [
-              "corp_onr_v1_358_dr-dreff_1"
-            ]
+            "root": ["corp_onr_v1_358_dr-dreff_1"]
           },
           {
             "id": "rd",
@@ -1327,9 +1323,7 @@
           "runner_onr_classic_049_omnitech-wet-drive_1",
           "runner_onr_classic_046_executive-file-clerk_2"
         ],
-        "scoreArea": [
-          "corp_onr_proteus_005_marked-accounts_1"
-        ],
+        "scoreArea": ["corp_onr_proteus_005_marked-accounts_1"],
         "rig": {
           "programs": [
             "runner_onr_classic_030_psychic-friend_2",
@@ -1339,9 +1333,7 @@
           "hardware": [
             "runner_onr_classic_048_omnitech-spinal-tap-cybermodem_1"
           ],
-          "resources": [
-            "runner_onr_classic_050_sandbox-dig_1"
-          ]
+          "resources": ["runner_onr_classic_050_sandbox-dig_1"]
         }
       },
       "specialZones": {
@@ -7590,9 +7582,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 97,
-      "blockerIds": [
-        "runner.hq_pressure:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.hq_pressure:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 179,
       "state": {
@@ -7926,10 +7916,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8365,10 +8352,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8448,10 +8432,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8502,10 +8483,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8527,9 +8505,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -8589,10 +8565,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

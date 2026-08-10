@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { CS06_CARD_DEFINITION_IDS } from "@netgrid/cards/engine";
+import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import { describe, expect, it } from "vitest";
 import { createActivatedCardRuntimeHosts } from "./activated-card-runtime-hosts";
 import { configureActionRuntimeBootstrap } from "./action-runtime-bootstrap";
@@ -261,10 +261,10 @@ describe("engine runtime internal domains", () => {
     expect(typeof configureFlowRuntimeBootstrap).toBe("function");
     expect(typeof configureActionRuntimeBootstrap).toBe("function");
     expect(typeof initializeStateRuntimeBootstrap).toBe("function");
-    expect(typeof RUNNER_EVENT_RESOLVERS.simple_economy_event?.resolve).toBe(
+    expect(typeof RUNNER_EVENT_RESOLVERS.v097_deep_dive_event?.resolve).toBe(
       "function",
     );
-    for (const definitionId of CS06_CARD_DEFINITION_IDS)
+    for (const definitionId of cardSpecRuntimeDefinitionIds())
       expect(RUNNER_EVENT_RESOLVERS[definitionId]).toBeUndefined();
     expect(typeof validateDeckDefinition).toBe("function");
     expect(typeof delegatedCorpRunnerActionPaidWindowActions).toBe("function");

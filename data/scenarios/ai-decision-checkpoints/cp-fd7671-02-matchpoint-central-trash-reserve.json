@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 186,
-    "stateHash": "fnv1a:86be969d",
+    "stateHash": "fnv1a:e691d458",
     "testOnlyGameState": {
       "matchId": "match_fd7671d270e1a716",
       "baseline": {
@@ -8799,13 +8799,13 @@
   "expectation": {
     "acceptableActions": [
       {
-      "actionId": "runner.trash_accessed_card.corp_onr_v1_337_rockerboy-promotion_1.3"
+        "actionId": "runner.trash_accessed_card.corp_onr_v1_337_rockerboy-promotion_1.3"
+      }
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.convert_run_window"],
+      "acceptableCapabilities": ["convert_active_run_window"],
+      "requiredAssessmentEvidence": ["visible_active_run"]
     }
-  ],
-  "planExecution": {
-    "acceptablePlanKinds": ["runner.convert_run_window"],
-    "acceptableCapabilities": ["convert_active_run_window"],
-    "requiredAssessmentEvidence": ["visible_active_run"]
-  }
   }
 }

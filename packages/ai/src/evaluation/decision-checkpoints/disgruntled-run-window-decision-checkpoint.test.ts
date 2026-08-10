@@ -8,6 +8,54 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("Disgruntled Ice Technician run-window checkpoint", () => {
+  it("binds the persisted Rent-I-Con continuation to its canonical CardSpec capability", () => {
+    const checkpoint = structuredClone(
+      checkpointJson,
+    ) as AiDecisionCheckpointV1;
+    const portfolio = checkpoint.runtime.residentPlanPortfolio;
+    if (!portfolio)
+      throw new Error("Expected persisted resident plan portfolio");
+    const commitment = portfolio.turnPlanCommitment;
+    const lease = portfolio.turnPlanExecutionLease;
+    const invocation = commitment?.phases[0]?.nodes[0]?.invocation;
+
+    expect(invocation).toMatchObject({
+      semanticActionType: "breaker.break_subroutine",
+      sourceCardInstanceId: "runner_onr_classic_031_rent-i-con_1",
+      sourceAbilityBinding: {
+        kind: "card_spec_capability_key",
+        sourceAbilityId:
+          "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+      },
+      routeKey: "fnv1a:fd93466d",
+    });
+    expect(invocation?.sourceAbilityBinding).not.toHaveProperty("abilityId");
+    expect(commitment).toMatchObject({
+      commitmentId: "fnv1a:62bae3e8",
+      sourceLineHash: "fnv1a:a54e79d7",
+      nextExpectedTransition: {
+        expectationId: "fnv1a:43abb6cc",
+        routeKey: "fnv1a:fd93466d",
+      },
+    });
+    expect(lease).toMatchObject({
+      leaseId: "fnv1a:9e4d1b50",
+      commitmentId: "fnv1a:62bae3e8",
+      sourcePlanId: "fnv1a:c51cc578",
+      phaseId: "fnv1a:60c4adf9",
+      nodeId: "fnv1a:ef151d9b",
+      routeKey: "fnv1a:fd93466d",
+      expectationId: "fnv1a:43abb6cc",
+      currentBinding: {
+        actionId:
+          "runner.break_subroutine.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.corp_onr_v1_237_data-wall_1.0.card_implementation.onr_v1_237_data-wall.printed_subroutine.1.end_the_run.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+        stateVersion: 275,
+        semanticActionSetFingerprint: "fnv1a:27eefeda",
+        invocationKey: "fnv1a:95cb89ce",
+      },
+    });
+  });
+
   it("keeps the real post-pass ability inside runner.convert_run_window", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
@@ -67,9 +115,8 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
       legalActions: result.input.legalActions,
       observerSide: "runner",
       stateVersion: 277,
-      visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
-        result.input.playerView,
-      ),
+      visibleSourceDefinitionsByInstanceId:
+        visibleSourceDefinitionsByInstanceId(result.input.playerView),
       cardSemanticProfilesByDefinitionId:
         buildActionCardSemanticProfilesByDefinitionId(),
     }).find((entry) => entry.actionId === actionId);

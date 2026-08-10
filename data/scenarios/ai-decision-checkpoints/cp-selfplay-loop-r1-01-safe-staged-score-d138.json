@@ -132,7 +132,7 @@
   },
   "engine": {
     "stateVersion": 138,
-    "stateHash": "fnv1a:135384cb",
+    "stateHash": "fnv1a:bf4daffd",
     "testOnlyGameState": {
       "matchId": "selfplay:loop-20260802-1785650996082",
       "baseline": {
@@ -1151,17 +1151,13 @@
           "corp_onr_v1_283_audit-of-call-records_3",
           "corp_onr_v1_301_punitive-counterstrike_3"
         ],
-        "scoreArea": [
-          "corp_onr_v1_203_hostile-takeover_1"
-        ],
+        "scoreArea": ["corp_onr_v1_203_hostile-takeover_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_261_quandary_2"
-            ],
+            "ice": ["corp_onr_v1_261_quandary_2"],
             "root": []
           },
           {
@@ -1186,9 +1182,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_249_hunter_1"
-            ],
+            "ice": ["corp_onr_v1_249_hunter_1"],
             "root": []
           }
         ]
@@ -1254,9 +1248,7 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_1"
-          ],
+          "programs": ["runner_onr_v1_039_krash_1"],
           "hardware": [],
           "resources": []
         }
@@ -2690,9 +2682,7 @@
                 "clientKnownStateVersion": 0,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_runner_0",
-                  "selectedOptionIds": [
-                    "mulligan"
-                  ]
+                  "selectedOptionIds": ["mulligan"]
                 },
                 "idempotencyKey": "ai-sim-0"
               },
@@ -2712,10 +2702,7 @@
                     "choiceId": "setup_mulligan_runner_0",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -2775,9 +2762,7 @@
                 "clientKnownStateVersion": 1,
                 "selectedChoices": {
                   "choiceId": "setup_mulligan_corp_1",
-                  "selectedOptionIds": [
-                    "keep"
-                  ]
+                  "selectedOptionIds": ["keep"]
                 },
                 "idempotencyKey": "ai-sim-1"
               },
@@ -2797,10 +2782,7 @@
                     "choiceId": "setup_mulligan_corp_1",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "keep",
-                      "mulligan"
-                    ]
+                    "optionIds": ["keep", "mulligan"]
                   }
                 ],
                 "payload": {
@@ -3889,9 +3871,7 @@
                 "clientKnownStateVersion": 19,
                 "selectedChoices": {
                   "choiceId": "op_trace.19.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_1.corp.bid.19",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-19"
               },
@@ -3990,9 +3970,7 @@
                 "clientKnownStateVersion": 20,
                 "selectedChoices": {
                   "choiceId": "op_trace.19.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_1.runner.bid.20",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-20"
               },
@@ -4012,11 +3990,7 @@
                     "choiceId": "op_trace.19.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_1.runner.bid.20",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1",
-                      "bid_2"
-                    ]
+                    "optionIds": ["bid_0", "bid_1", "bid_2"]
                   }
                 ],
                 "payload": {
@@ -5201,9 +5175,7 @@
                 "clientKnownStateVersion": 39,
                 "selectedChoices": {
                   "choiceId": "p3_37_search_stack_to_grip_39",
-                  "selectedOptionIds": [
-                    "card_runner_onr_v1_039_krash_1"
-                  ]
+                  "selectedOptionIds": ["card_runner_onr_v1_039_krash_1"]
                 },
                 "idempotencyKey": "ai-sim-39"
               },
@@ -5623,9 +5595,7 @@
                 "clientKnownStateVersion": 46,
                 "selectedChoices": {
                   "choiceId": "discard_corp_46",
-                  "selectedOptionIds": [
-                    "card_corp_onr_v1_307_urban-renewal_1"
-                  ]
+                  "selectedOptionIds": ["card_corp_onr_v1_307_urban-renewal_1"]
                 },
                 "idempotencyKey": "ai-sim-46"
               },
@@ -10513,9 +10483,7 @@
                 "clientKnownStateVersion": 125,
                 "selectedChoices": {
                   "choiceId": "op_trace.125.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_3.corp.bid.125",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-125"
               },
@@ -10617,9 +10585,7 @@
                 "clientKnownStateVersion": 126,
                 "selectedChoices": {
                   "choiceId": "op_trace.125.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_3.runner.bid.126",
-                  "selectedOptionIds": [
-                    "bid_0"
-                  ]
+                  "selectedOptionIds": ["bid_0"]
                 },
                 "idempotencyKey": "ai-sim-126"
               },
@@ -10639,10 +10605,7 @@
                     "choiceId": "op_trace.125.onr_v1_283_audit-of-call-records.corp_onr_v1_283_audit-of-call-records_3.runner.bid.126",
                     "minSelections": 1,
                     "maxSelections": 1,
-                    "optionIds": [
-                      "bid_0",
-                      "bid_1"
-                    ]
+                    "optionIds": ["bid_0", "bid_1"]
                   }
                 ],
                 "payload": {
@@ -11373,9 +11336,7 @@
         "counterPreventionUsedSourceIdsThisTurn": [],
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "pdcaUsedSourceIdsThisTurn": []
       },
       "turnSerial": 18
@@ -14778,9 +14739,7 @@
               "support": 85,
               "final": 80
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -14897,9 +14856,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -15144,10 +15101,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15302,9 +15256,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 83,
@@ -15397,10 +15349,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15485,9 +15434,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -15518,10 +15465,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15577,10 +15521,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15636,10 +15577,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15695,10 +15633,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15752,10 +15687,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -15843,9 +15775,7 @@
               "currentCreditsAtRevalidation": 11,
               "gap": 3,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -16145,10 +16075,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:18",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:18", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -16335,10 +16262,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:18",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:18", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -16527,10 +16451,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:18",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:18", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -16708,10 +16629,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:18",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:18", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -17221,9 +17139,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -17633,9 +17549,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -18069,9 +17983,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -18454,9 +18366,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -18708,9 +18618,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -18962,9 +18870,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -19361,9 +19267,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -19759,9 +19663,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -20014,9 +19916,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -20269,9 +20169,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -20655,9 +20553,7 @@
           },
           "reaction": {
             "status": "expired",
-            "openWindowKinds": [
-              "trace"
-            ],
+            "openWindowKinds": ["trace"],
             "deadline": "none",
             "claimDisposition": "requote_required",
             "reasonCode": "campaign_reaction_deadline_expired_before_own_turn",
@@ -21048,9 +20944,7 @@
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:32347f75:agenda"
-            ],
+            "protectedValueClaimIds": ["fnv1a:32347f75:agenda"],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }
@@ -21070,13 +20964,8 @@
         "campaignIds": [
           "campaign:agenda:corp_onr_v1_209_political-coup_2:remote_1"
         ],
-        "quoteIds": [
-          "fnv1a:81967b68",
-          "fnv1a:9536e273"
-        ],
-        "valueClaimIds": [
-          "fnv1a:32347f75:agenda"
-        ],
+        "quoteIds": ["fnv1a:81967b68", "fnv1a:9536e273"],
+        "valueClaimIds": ["fnv1a:32347f75:agenda"],
         "priorityCoverage": {
           "requiredObligationIds": [],
           "satisfiedObligationIds": [],
@@ -21136,10 +21025,7 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.economy",
-        "corp.defend_servers"
-      ]
+      "acceptablePlanKinds": ["corp.economy", "corp.defend_servers"]
     }
   }
 }

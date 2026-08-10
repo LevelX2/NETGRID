@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 227,
-    "stateHash": "fnv1a:6e66ce1f",
+    "stateHash": "fnv1a:16e9a34f",
     "testOnlyGameState": {
       "matchId": "match_10311b60ca1364f6",
       "baseline": {
@@ -1130,17 +1130,13 @@
           "corp_onr_classic_008_deadeye_2",
           "corp_onr_classic_010_entrapment_3"
         ],
-        "scoreArea": [
-          "corp_onr_classic_003_unlisted-research-lab_1"
-        ],
+        "scoreArea": ["corp_onr_classic_003_unlisted-research-lab_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_classic_010_entrapment_2"
-            ],
+            "ice": ["corp_onr_classic_010_entrapment_2"],
             "root": []
           },
           {
@@ -1164,21 +1160,15 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_classic_008_deadeye_1"
-            ],
-            "root": [
-              "corp_onr_classic_021_satellite-monitors_2"
-            ]
+            "ice": ["corp_onr_classic_008_deadeye_1"],
+            "root": ["corp_onr_classic_021_satellite-monitors_2"]
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
             "ice": [],
-            "root": [
-              "corp_onr_classic_002_superserum_1"
-            ]
+            "root": ["corp_onr_classic_002_superserum_1"]
           }
         ]
       },
@@ -1239,18 +1229,14 @@
           "runner_onr_v1_039_krash_2",
           "runner_onr_v1_146_zetatech-mem-chip_1"
         ],
-        "scoreArea": [
-          "corp_onr_classic_001_data-fort-remapping_1"
-        ],
+        "scoreArea": ["corp_onr_classic_001_data-fort-remapping_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_039_krash_1",
             "runner_onr_v1_071_vewy-vewy-quiet_1"
           ],
           "hardware": [],
-          "resources": [
-            "runner_onr_proteus_150_streetware-distributor_2"
-          ]
+          "resources": ["runner_onr_proteus_150_streetware-distributor_2"]
         }
       },
       "specialZones": {
@@ -2656,10 +2642,7 @@
           "kind": "server",
           "serverId": "remote_1"
         },
-        "brokenSubroutineIndexes": [
-          0,
-          1
-        ],
+        "brokenSubroutineIndexes": [0, 1],
         "resolvedSubroutineIndexes": [],
         "bartmossUsedBreakerIdsThisEncounter": [],
         "aardvarkInterceptionIceIds": [],
@@ -2673,9 +2656,7 @@
         "jackOutLockedUntilEncounterEnds": false,
         "fatalDamageActiveForEncounter": false,
         "nextEncounterFatalDamage": 0,
-        "fullyBrokenIceIds": [
-          "corp_onr_classic_008_deadeye_1"
-        ],
+        "fullyBrokenIceIds": ["corp_onr_classic_008_deadeye_1"],
         "fullyBrokenPassedIcePendingId": "corp_onr_classic_008_deadeye_1",
         "fullyBrokenPassedIceTrashPendingId": "corp_onr_classic_008_deadeye_1",
         "lastPassedIceId": "corp_onr_classic_008_deadeye_1"
@@ -9459,19 +9440,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.search.breaker",
-          "evidence": [
-            "continued:runner.search.breaker"
-          ]
+          "evidence": ["continued:runner.search.breaker"]
         },
         "commitment": {
           "strategyId": "runner.search.breaker",
@@ -9553,10 +9529,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9636,10 +9609,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9661,9 +9631,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9723,10 +9691,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9901,10 +9866,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10321,10 +10283,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10454,19 +10413,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Trapdoor",
-            "visibleSubtypes": [
-              "code_gate",
-              "deflector"
-            ],
+            "visibleSubtypes": ["code_gate", "deflector"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "may_allow",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:deflect_run"
-                ]
+                "evidence": ["subroutine_type:deflect_run"]
               }
             ],
             "breakerCoverage": [
@@ -10545,20 +10499,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Brain Drain",
-            "visibleSubtypes": [
-              "ap",
-              "black_ice",
-              "sentry"
-            ],
+            "visibleSubtypes": ["ap", "black_ice", "sentry"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "may_allow",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:random_damage"
-                ]
+                "evidence": ["subroutine_type:random_damage"]
               }
             ],
             "breakerCoverage": [

@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 38,
-    "stateHash": "fnv1a:2e1e1957",
+    "stateHash": "fnv1a:a2c3b418",
     "testOnlyGameState": {
       "matchId": "match_e8886c6f5a9d0c24",
       "baseline": {
@@ -4555,9 +4555,7 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": [
-        "fund_onr_v1_094_inside-job"
-      ]
+      "acceptableCapabilities": ["fund_onr_v1_094_inside-job"]
     }
   }
 }

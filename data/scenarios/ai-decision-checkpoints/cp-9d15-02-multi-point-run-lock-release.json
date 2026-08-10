@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 147,
-    "stateHash": "fnv1a:c307a299",
+    "stateHash": "fnv1a:ac94f74e",
     "testOnlyGameState": {
       "matchId": "match_9d15b8e9a2d9269d",
       "baseline": {
@@ -1096,18 +1096,14 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_240_fang_1"
-            ],
+            "ice": ["corp_onr_v1_240_fang_1"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_245_fire-wall_1"
-            ],
+            "ice": ["corp_onr_v1_245_fire-wall_1"],
             "root": []
           },
           {
@@ -1125,9 +1121,7 @@
               "corp_onr_v1_266_scramble_1",
               "corp_onr_v1_222_ball-and-chain_1"
             ],
-            "root": [
-              "corp_onr_v1_214_project-babylon_1"
-            ]
+            "root": ["corp_onr_v1_214_project-babylon_1"]
           }
         ]
       },
@@ -1193,12 +1187,8 @@
             "runner_onr_v1_040_loony-goon_1",
             "runner_onr_v1_016_cyfermaster_2"
           ],
-          "hardware": [
-            "runner_onr_v1_129_hq-interface_3"
-          ],
-          "resources": [
-            "runner_onr_v1_154_broker_2"
-          ]
+          "hardware": ["runner_onr_v1_129_hq-interface_3"],
+          "resources": ["runner_onr_v1_154_broker_2"]
         }
       },
       "specialZones": {
@@ -7054,9 +7044,7 @@
             "support": 90,
             "final": 96
           },
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "evidence": [
             "strategy:runner.run_event_tempo",
             "confidence:high",
@@ -7078,9 +7066,7 @@
               "support": 90,
               "final": 96
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.interface_closeout",
               "confidence:high",
@@ -7101,9 +7087,7 @@
               "support": 90,
               "final": 96
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.rnd_pressure",
               "confidence:high",
@@ -7124,9 +7108,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.hq_pressure",
               "confidence:high",
@@ -7214,10 +7196,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [
           {
@@ -7225,9 +7204,7 @@
             "severity": "hard",
             "reason": "support_gap",
             "removalCondition": "resolve support gap weak_tag_damage_defense",
-            "evidence": [
-              "support_gap:weak_tag_damage_defense"
-            ]
+            "evidence": ["support_gap:weak_tag_damage_defense"]
           }
         ],
         "transition": {
@@ -7320,10 +7297,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7786,9 +7760,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -7999,10 +7971,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8148,9 +8117,7 @@
     "planExecution": {
       "acceptablePlanKinds": ["runner.contest_remote"],
       "acceptableCapabilities": ["contest_remote"],
-      "requiredAssessmentEvidence": [
-        "runner_matchpoint_run_lock_release"
-      ]
+      "requiredAssessmentEvidence": ["runner_matchpoint_run_lock_release"]
     }
   }
 }

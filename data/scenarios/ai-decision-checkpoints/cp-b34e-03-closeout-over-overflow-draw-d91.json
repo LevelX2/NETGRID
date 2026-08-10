@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 155,
-    "stateHash": "fnv1a:51ef10cb",
+    "stateHash": "fnv1a:38adf552",
     "testOnlyGameState": {
       "matchId": "match_b34e724e4cfc0362",
       "baseline": {
@@ -1431,19 +1431,14 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_277_virizz_3",
-              "corp_onr_v1_276_viral-15_2"
-            ],
+            "ice": ["corp_onr_v1_277_virizz_3", "corp_onr_v1_276_viral-15_2"],
             "root": []
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_247_haunting-inquisition_3"
-            ],
+            "ice": ["corp_onr_v1_247_haunting-inquisition_3"],
             "root": []
           }
         ]
@@ -1509,12 +1504,8 @@
           "corp_onr_v1_195_corporate-retreat_1"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_classic_030_psychic-friend_1"
-          ],
-          "hardware": [
-            "runner_onr_classic_052_zetatech-portastation_2"
-          ],
+          "programs": ["runner_onr_classic_030_psychic-friend_1"],
+          "hardware": ["runner_onr_classic_052_zetatech-portastation_2"],
           "resources": [
             "runner_onr_classic_046_executive-file-clerk_2",
             "runner_onr_classic_050_sandbox-dig_2"
@@ -7033,10 +7024,7 @@
       },
       "selectedStepKind": "draw_for_answer",
       "selectedActionId": "runner.play_event.runner_onr_classic_042_panzer-run_3.runner_onr_classic_042_panzer-run_3",
-      "blockedBy": [
-        "missing_breaker_coverage",
-        "search_target_not_available"
-      ],
+      "blockedBy": ["missing_breaker_coverage", "search_target_not_available"],
       "ttlDecisionsRemaining": 1,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -7591,10 +7579,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7823,10 +7808,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7906,10 +7888,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7931,9 +7910,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -7993,10 +7970,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8169,10 +8143,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

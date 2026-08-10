@@ -144,7 +144,7 @@
   },
   "engine": {
     "stateVersion": 102,
-    "stateHash": "fnv1a:55b1d054",
+    "stateHash": "fnv1a:d7716842",
     "testOnlyGameState": {
       "matchId": "match_94753a9d0503e91d",
       "baseline": {
@@ -1256,18 +1256,14 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_252_keeper_2"
-            ],
+            "ice": ["corp_onr_v1_252_keeper_2"],
             "root": []
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
@@ -1281,12 +1277,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_270_sleeper_2"
-            ],
-            "root": [
-              "corp_onr_v1_328_information-laundering_1"
-            ]
+            "ice": ["corp_onr_v1_270_sleeper_2"],
+            "root": ["corp_onr_v1_328_information-laundering_1"]
           }
         ]
       },
@@ -1352,9 +1344,7 @@
           "corp_onr_v1_214_project-babylon_2"
         ],
         "rig": {
-          "programs": [
-            "runner_onr_v1_005_bartmoss-memorial-icebreaker_2"
-          ],
+          "programs": ["runner_onr_v1_005_bartmoss-memorial-icebreaker_2"],
           "hardware": [
             "runner_onr_v1_139_r-and-d-interface_2",
             "runner_onr_v1_145_wutech-mem-chip_2"
@@ -6132,9 +6122,7 @@
               "support": 78,
               "final": 64
             },
-            "supportGaps": [
-              "low_bait_support"
-            ],
+            "supportGaps": ["low_bait_support"],
             "evidence": [
               "strategy:corp.asset_economy",
               "confidence:medium",
@@ -6185,9 +6173,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.ice_tax_glacier",
-          "evidence": [
-            "continued:corp.ice_tax_glacier"
-          ]
+          "evidence": ["continued:corp.ice_tax_glacier"]
         },
         "commitment": {
           "strategyId": "corp.ice_tax_glacier",
@@ -6365,10 +6351,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6484,10 +6467,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6668,10 +6648,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6731,10 +6708,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6792,10 +6766,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6851,10 +6822,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6909,10 +6877,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7124,9 +7089,7 @@
             "signal": {
               "handPlanId": "discard-window:discard_corp_100:100",
               "phase": "discard_window",
-              "actionIds": [
-                "corp.resolve_choice"
-              ],
+              "actionIds": ["corp.resolve_choice"],
               "exactActionRoute": true,
               "agendaCount": 0,
               "handSize": 6,
@@ -7423,9 +7386,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -7486,9 +7447,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {

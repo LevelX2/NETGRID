@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS07 abgeschlossen, CS08 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS08 abgeschlossen, CS09 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -403,7 +403,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS05  | Prospective-Capability-Compiler                        | completed |
 | CS06  | Heterogener produktiver Mechanik-Stresstest            | completed |
 | CS07  | Testset-Migration und Migrationsautomatisierung        | completed |
-| CS08  | Classic-Migration                                      | pending   |
+| CS08  | Classic-Migration                                      | completed |
 | CS09  | Proteus-Migration                                      | pending   |
 | CS10  | Originalset-v1-Migration                               | pending   |
 | CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | pending   |
@@ -1159,6 +1159,101 @@ Done-Gate:
 Commit:
 
 `feat(cards): migrate classic set to canonical specifications`
+
+Ergebnis vom 10.08.2026:
+
+- Classic ist vollständig auf 54 kanonische CardSpecs und eine SetSpec
+  migriert. 50 Karten projizieren eine generische CardImplementation; Brain
+  Drain, Entrapment, Puzzle und Vortex sind als reine
+  Printed-Subroutine-Definitionen vollständig und benötigen keine leere
+  zweite Implementierung. Die aktive CardSpec-Partition umfasst damit 100
+  Definitionen und 80 Implementierungen. Die kombinierte Engine-Registry
+  enthält 634 Definitionen sowie 597 Implementierungen, davon 517 Legacy und
+  80 CardSpec.
+- Alle 70 adressierbaren Classic-Knoten besitzen reviewte, eindeutige und
+  stabile Capability-Keys. Dazu gehören die getrennten A-/B-Subroutinen von
+  Glacier und Puzzle, beide Sterdroid-Timings sowie Deposit und Withdraw von
+  Protected Resources. London City Grid verwendet den kanonischen Subtyp
+  `region` und den echten Modifier; das redundante `regionBaseline` wurde
+  nicht als zweite Regelautorität übernommen. Die 54 Public-Projektionen, 50
+  Implementierungsprojektionen und 18 Printed-Subroutine-Formen sind
+  objektweise gegen die gepinnten Quellen belegt.
+- Die alten Classic-Autorquellen sind atomar entfernt: 54 Raw-Karten, 54
+  Manifesteinträge, 54 Legacy-Hints, 54 CardImplementation-Module und neun
+  Subregistries. Shared enthält keine Classic-Fallbackdefinition mehr. Der
+  dauerhafte Sourceguard belegt null Classic-IDs in Raw, Manifest,
+  Legacy-Hints, Shared-Fallback und Legacy-Implementierungen sowie exakt 54
+  Classic-CardSpec-Quellen. Der Katalog bleibt bei 620 Karten und der
+  stabilen Setreihenfolge Testset, Originalset-v1, Proteus, Classic.
+- Das setneutrale Migrationstool lädt ausschließlich den gewählten,
+  geschlossenen Setadapter. Classic und Testset teilen nur Core und CLI, aber
+  keinen semantischen Übersetzerzustand. Classic reproduziert im Einzelaufruf
+  54 Karten, 23 Familien und 70 adressierbare Knoten; Testset bleibt
+  bytegleich bei 38 Karten, 36 Definitionen und 36 Hints. `--check` und
+  `--dry-run` sind für beide Sets grün, der Core-Selftest ist `5/5` grün. Der
+  Classic-Report ist an Source-Commit
+  `a7f1409871e19d898deafa0d0c9aa6ca5118051f`, Aggregate-Fingerprint
+  `sha256:1c09e1392b6aac807dee267516774aa164fd1109aaa7af6fdd40cac4dae616a1`
+  und Datei-Hash
+  `sha256:85672b66e808721a5f678556c03b1fed52e4b26a69d855531847886a34203fc3`
+  gebunden.
+- Der generische Hintcompiler und das reine v2-Artefakt führen jetzt exakt 100
+  aktive CardSpec-Hints als disjunkte Union aus 10 CS06-, 36 Testset- und 54
+  Classic-IDs. Die zwei Previews bleiben ausgeschlossen; zusammen mit 518
+  Legacy-Hints bleibt das Effective-Readmodel bei 618. Das vollständige
+  Classic-Golden bindet alle 54 Hintobjekte, Abwesenheiten, Dispositionen und
+  Reportfingerprints. Vintage Camaros Action-Debt-Profil stammt ausschließlich
+  aus der typisierten Tag-Prevention-Mechanik; Action-Strategy-Evidence ist
+  capabilitygebunden und fail-closed. Der Quality-Lauf bleibt bei 618 Hints,
+  0 Fehlern und 0 Warnungen. Der Metadatavertrag meldet 202
+  Value-Zuweisungen; Self-Destructs früherer fixer Damagewert 2 entfällt
+  korrekt zugunsten des dynamischen `trashedCount * amountPerTrashed: 1`.
+- Der StateHash bindet generisch die aktive CardSpec-Runtimepartition. Alle
+  352 gespeicherten Checkpoints wurden deterministisch neu materialisiert:
+  351 ändern ausschließlich den StateHash; der Disgruntled-Checkpoint bindet
+  Rent-I-Con zusätzlich über `card_spec_capability_key` und die daraus
+  abgeleiteten Commitment-/Lease-Fingerprints. State, Choices, Ziele, Plan und
+  Owner bleiben unverändert. Der vollständige Checkpointlauf ist mit 89
+  Dateien und 484 Tests grün. Die Panzer-Opening-Hand bleibt wegen des
+  wahrheitsgetreuen Draw-/Economy-Hints ohne Event-Typfallback auf `keep`; ein
+  getrennter Unit-Control belegt weiterhin den Mulligan-Cap für drei echte
+  `run_pressure`-Rollen ohne Breaker.
+- Die drei vollständigen AI-Shards sind mit 1.567, 1.452 und 1.054 Tests grün.
+  Hinzu kommen Engine `1.929/1.929`, Web `787/787`, Server `223/223`, Cards
+  `87/87`, Catalog `26/26`, Decks `24/24`, Shared `16/16` und die acht
+  Contracts-Tests. Workspace-Typecheck und Workspace-Build sind grün.
+  Package-Boundaries prüfen 1.943 Dateien plus 45 Selftests; Cards-Source
+  meldet 137 Dateien, Engine-Source 940 und AI-Source 631, jeweils ohne
+  Runtimezyklen. Importindex, Artifact, Testdiscovery, Action-Capacity,
+  Checkpoints, Retention und `git diff --check` sind grün.
+- Das formgleiche Retention-Gate vergleicht zehn Classic-Stresskarten mit zehn
+  Legacykarten bei identischer Seiten-, Typ-, Karten- und Quantity-Verteilung.
+  Die aktuelle isolierte Fünf-Sample-Messung ergibt `48,048 B` je Match und
+  bleibt deutlich unter dem 4-KiB-Budget; der strukturelle Scan findet null
+  Registry-/View-/RulesContext-Referenzen oder -Klone im GameState.
+- Der historische absolute Retained-Match-Proxy ist ausdrücklich **formal
+  rot** und wird nicht als bestanden dargestellt. Neun identische frische
+  Prozesse ergeben für CS08 einen Median von `53.403,952 B` je Match, für den
+  unveränderten CS07-Commit `a7f140987` jedoch `71.367,088 B`; beide liegen
+  über dem historischen Grenzwert `24.610,098 B`, sind stark bimodal und
+  reproduzieren den früheren Drei-Sample-Wert nicht. CS08 verbessert denselben
+  Messpfad um `17.963,136 B` beziehungsweise `25,17 %`; zusammen mit dem
+  strukturellen Nullbefund und dem isolierten 48-B-Differential besteht kein
+  CS08-Retentionsregressionssignal. Diese eng begrenzte, dokumentierte
+  Prozessausnahme ist nicht blockierend und löst bewusst keinen
+  rauschorientierten Codefix aus. Removal Condition für CS13: Cold- und
+  Steady-State-Messung sowie das Fresh-Process-Protokoll mit mindestens neun
+  gepaarten Proben gegen die CS00-Intention stabilisieren und anschließend
+  den absoluten Grenzwert erfüllen oder das Gate formal neu baselinen.
+- Der frische Next-Production-Build enthält 22 produktive JavaScriptdateien
+  mit `4.312.164 B` raw, `1.063.371 B` GZip und `995.407 B` Brotli nach
+  derselben .NET-Optimal-Aggregation wie CS00 und CS07. Der GZip-Wert liegt
+  `7.626 B` über CS07 und besitzt `71.784 B` Reserve zum eingefrorenen Budget.
+- Der Architektur-Target-Scan bleibt ausschließlich wegen derselben am
+  gepinnten Basisstand unveränderten Edgerunner-Zeile in
+  `packages/engine/src/game/turn/corp-main-actions.ts` rot; eine Zeile wird in
+  zwei Kategorien gemeldet. Der Fund wird weder repariert noch allowgelistet
+  und bleibt beim Originalset-Cutover CS10, spätestens beim Cleanup CS11.
 
 ### CS09 – Proteus-Migration
 

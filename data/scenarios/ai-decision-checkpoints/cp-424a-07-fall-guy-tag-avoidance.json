@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 122,
-    "stateHash": "fnv1a:c50bda40",
+    "stateHash": "fnv1a:c4e70afb",
     "testOnlyGameState": {
       "matchId": "match_424abdd1c7ac054d",
       "baseline": {
@@ -782,9 +782,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_238_data-wall-2-0_2"
-            ],
+            "ice": ["corp_onr_v1_238_data-wall-2-0_2"],
             "root": []
           },
           {
@@ -796,9 +794,7 @@
               "corp_onr_v1_242_fatal-attractor_1",
               "corp_onr_v1_238_data-wall-2-0_1"
             ],
-            "root": [
-              "corp_onr_v1_367_rio-de-janeiro-city-grid_1"
-            ]
+            "root": ["corp_onr_v1_367_rio-de-janeiro-city-grid_1"]
           },
           {
             "id": "archives",
@@ -811,10 +807,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_266_scramble_1",
-              "corp_onr_v1_271_tko-2-0_1"
-            ],
+            "ice": ["corp_onr_v1_266_scramble_1", "corp_onr_v1_271_tko-2-0_1"],
             "root": []
           }
         ]
@@ -880,9 +873,7 @@
             "runner_onr_v1_016_cyfermaster_1",
             "runner_onr_v1_028_force-shield_1"
           ],
-          "hardware": [
-            "runner_onr_v1_133_militech-mram-chip_1"
-          ],
+          "hardware": ["runner_onr_v1_133_militech-mram-chip_1"],
           "resources": [
             "runner_onr_v1_154_broker_2",
             "runner_onr_v1_161_fall-guy_2"
@@ -2478,9 +2469,7 @@
           "iceIndex": 0
         },
         "brokenSubroutineIndexes": [],
-        "resolvedSubroutineIndexes": [
-          0
-        ],
+        "resolvedSubroutineIndexes": [0],
         "bartmossUsedBreakerIdsThisEncounter": [],
         "aardvarkInterceptionIceIds": [],
         "blinkUsedSubroutinesByBreakerThisEncounter": {},
@@ -6194,19 +6183,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.run_event_tempo",
-          "evidence": [
-            "continued:runner.run_event_tempo"
-          ]
+          "evidence": ["continued:runner.run_event_tempo"]
         },
         "commitment": {
           "strategyId": "runner.run_event_tempo",
@@ -6290,10 +6274,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6373,10 +6354,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6398,9 +6376,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6460,10 +6436,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6482,9 +6455,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6515,10 +6486,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6873,10 +6841,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7186,19 +7151,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Hunter",
-            "visibleSubtypes": [
-              "bloodhound",
-              "sentry"
-            ],
+            "visibleSubtypes": ["bloodhound", "sentry"],
             "effectiveStrength": 5,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_survival",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:initiate_trace"
-                ]
+                "evidence": ["subroutine_type:initiate_trace"]
               }
             ],
             "breakerCoverage": [
@@ -7326,9 +7286,7 @@
       "mustSelectOptionIds": [
         "card_implementation_avoid_tag_runner_onr_v1_161_fall-guy_2_0"
       ],
-      "mustNotSelectOptionIds": [
-        "pass"
-      ]
+      "mustNotSelectOptionIds": ["pass"]
     }
   }
 }

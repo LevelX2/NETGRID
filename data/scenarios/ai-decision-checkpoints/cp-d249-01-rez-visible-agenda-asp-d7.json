@@ -132,7 +132,7 @@
   },
   "engine": {
     "stateVersion": 13,
-    "stateHash": "fnv1a:1aa33585",
+    "stateHash": "fnv1a:0353b5aa",
     "testOnlyGameState": {
       "matchId": "match_d249f7fb9f8c1150",
       "baseline": {
@@ -706,9 +706,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_249_hunter_2"
-            ],
+            "ice": ["corp_onr_v1_249_hunter_2"],
             "root": []
           },
           {
@@ -729,12 +727,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_221_asp_1"
-            ],
-            "root": [
-              "corp_onr_v1_190_bioweapons-engineering_1"
-            ]
+            "ice": ["corp_onr_v1_221_asp_1"],
+            "root": ["corp_onr_v1_190_bioweapons-engineering_1"]
           }
         ]
       },
@@ -794,14 +788,10 @@
           "runner_onr_v1_095_jack-n-joe_1",
           "runner_onr_v1_063_signpost_1"
         ],
-        "heap": [
-          "runner_onr_v1_097_livewires-contacts_3"
-        ],
+        "heap": ["runner_onr_v1_097_livewires-contacts_3"],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_042_mouse_1"
-          ],
+          "programs": ["runner_onr_v1_042_mouse_1"],
           "hardware": [],
           "resources": []
         }
@@ -2690,9 +2680,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 6,
-      "blockerIds": [
-        "corp.tag_trace_punish:reserve_shortfall"
-      ],
+      "blockerIds": ["corp.tag_trace_punish:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 6,
       "state": {
@@ -2806,9 +2794,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -3020,9 +3006,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 59,
@@ -3080,9 +3064,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3113,10 +3095,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3170,10 +3149,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3229,10 +3205,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3287,10 +3260,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3571,9 +3541,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "corp.end_turn"
-            ]
+            "standardEndTurnActionIds": ["corp.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -3833,9 +3801,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -4020,9 +3986,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {

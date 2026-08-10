@@ -6,7 +6,8 @@ export const CARD_IMPLEMENTATION_PRIMITIVE_CONTRACT_VERSION =
 
 /**
  * Caller-owned engine/primitive versions complete CardSpec rules fingerprints.
- * The selected pool remains empty until productive CardSpecs migrate in CS06.
+ * The selected pool is the caller-bound active CardSpec partition present in
+ * the current match; catalog-only previews remain excluded.
  */
 export function createCurrentCardRegistryRulesContext(params: {
   cardPoolSnapshotId: string;

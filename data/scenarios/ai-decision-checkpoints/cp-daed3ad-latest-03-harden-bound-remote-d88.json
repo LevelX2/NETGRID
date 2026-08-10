@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 211,
-    "stateHash": "fnv1a:28c3dc6a",
+    "stateHash": "fnv1a:3fed114c",
     "testOnlyGameState": {
       "matchId": "match_daed3ad3bead20fb",
       "baseline": {
@@ -9328,21 +9328,21 @@
   },
   "expectation": {
     "acceptableActions": [
-    {
-      "type": "install_card",
-      "sourceDefinitionId": "onr_v1_228_cinderella",
-      "targetServerId": "remote_1"
-    },
-    {
-      "type": "install_card",
-      "sourceDefinitionId": "onr_v1_247_haunting-inquisition",
-      "targetServerId": "new_remote"
-    },
-    {
-      "type": "install_card",
-      "sourceDefinitionId": "onr_v1_228_cinderella",
-      "targetServerId": "hq"
-    }
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_228_cinderella",
+        "targetServerId": "remote_1"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_247_haunting-inquisition",
+        "targetServerId": "new_remote"
+      },
+      {
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_228_cinderella",
+        "targetServerId": "hq"
+      }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],

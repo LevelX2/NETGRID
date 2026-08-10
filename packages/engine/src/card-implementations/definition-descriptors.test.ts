@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 import { cardImplementationCoverageForDefinitionId } from "./coverage";
 import {
   CARD_IMPLEMENTATIONS,
@@ -1483,6 +1484,8 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_017_corporate-shuffle")
         ?.corpUtility,
     ).toEqual({
+      capabilityKey: "draw_five_then_shuffle_hq_card",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "draw_corp_cards_then_shuffle_hq_card_into_rd",
       drawCount: 5,
       playCost: { kind: "printed", additionalClicks: 1 },
@@ -1492,6 +1495,8 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_018_reclamation-project")
         ?.corpUtility,
     ).toEqual({
+      capabilityKey: "return_archives_ice_to_hq",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "corp_archives_to_hq",
       filter: { cardType: "ice" },
       maxSelections: "all",
@@ -1503,6 +1508,8 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_037_finders-keepers")
         ?.runnerEventLongtail,
     ).toEqual({
+      capabilityKey: "roll_three_dice_gain_credits",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "three_dice_gain_credits",
       dieFaces: 6,
       diceCount: 3,
@@ -1625,6 +1632,8 @@ describe("CardImplementation definition descriptors", () => {
         "onr_classic_032_schematics-search-engine",
       )?.runnerUtilityLongtail,
     ).toEqual({
+      capabilityKey: "hq_access_expose_installed_corp_cards",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "hq_access_expose_all_installed_corp_cards",
       visibility: "public",
     });
@@ -1632,6 +1641,8 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_classic_033_superglue")
         ?.runnerUtilityLongtail,
     ).toEqual({
+      capabilityKey: "derez_fully_broken_passed_ice",
+      addressability: ["plan", "action", "quote", "debug"],
       kind: "derez_fully_broken_passed_ice",
       cost: { kind: "tap_source" },
       timing: "after_passing_fully_broken_ice",
@@ -1667,29 +1678,27 @@ describe("CardImplementation definition descriptors", () => {
       },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_005_baskerville")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_classic_005_baskerville"]?.subroutines,
     ).toMatchObject([
-      { kind: "damage", damageType: "net", amount: 2 },
+      { type: "do_damage", damageType: "net", amount: 2 },
       {
-        kind: "trace",
+        type: "initiate_trace",
         baseTraceStrength: 5,
-        onSuccess: [
-          {
-            kind: "add_counter",
-            recipient: "runner",
-            counterType: "baskerville",
-            amount: 1,
-          },
-        ],
+        traceSuccessEffect: {
+          type: "add_counter",
+          counterType: "baskerville",
+          amount: 1,
+        },
       },
-      { kind: "end_the_run" },
+      { type: "end_the_run" },
     ]);
     expect(
       cardImplementationForDefinitionId("onr_classic_005_baskerville")
         ?.runnerCounterEffects,
     ).toEqual([
       {
+        capabilityKey: "baskerville_counter_run_start_damage",
+        addressability: ["plan", "action", "quote", "debug"],
         counterType: "baskerville",
         removeCost: 3,
         runStart: {
@@ -1702,45 +1711,42 @@ describe("CardImplementation definition descriptors", () => {
       },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_006_bolter-swarm")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_classic_006_bolter-swarm"]?.subroutines,
     ).toMatchObject([
-      { kind: "damage", damageType: "net", amount: 4 },
-      { kind: "prohibit_break_next_ice" },
+      { type: "do_damage", damageType: "net", amount: 4 },
+      { type: "set_next_encounter_no_break_subroutines" },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_007_brain-drain")
-        ?.printedSubroutines,
-    ).toEqual([
+      CARD_DEFINITIONS_BY_ID["onr_classic_007_brain-drain"]?.subroutines,
+    ).toMatchObject([
       {
-        kind: "random_damage",
+        type: "random_damage",
         dieFaces: 6,
         damageOnResults: [1],
-        damageType: "brain",
+        damageType: "core",
         amount: 3,
-        preventable: true,
-        text: "*Roll a die. On a 1, do 3 brain damage.",
       },
     ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_008_deadeye")
-        ?.printedSubroutines,
-    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+      CARD_DEFINITIONS_BY_ID["onr_classic_008_deadeye"]?.subroutines,
+    ).toMatchObject([
+      { type: "trash_installed_program" },
+      { type: "end_the_run" },
+    ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_012_imperial-guard")
-        ?.printedSubroutines,
-    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+      CARD_DEFINITIONS_BY_ID["onr_classic_012_imperial-guard"]?.subroutines,
+    ).toMatchObject([
+      { type: "trash_installed_program" },
+      { type: "end_the_run" },
+    ]);
     expect(
-      cardImplementationForDefinitionId("onr_classic_013_puzzle")
-        ?.printedSubroutines,
-    ).toEqual([
+      CARD_DEFINITIONS_BY_ID["onr_classic_013_puzzle"]?.subroutines,
+    ).toMatchObject([
       {
-        kind: "end_the_run_and_trash_source_at_end_of_turn",
-        text: "*End the run, and trash Puzzle at end of turn.",
+        type: "end_the_run_and_trash_source_at_end_of_turn",
       },
       {
-        kind: "end_the_run_and_trash_source_at_end_of_turn",
-        text: "*End the run, and trash Puzzle at end of turn.",
+        type: "end_the_run_and_trash_source_at_end_of_turn",
       },
     ]);
 
@@ -1755,7 +1761,13 @@ describe("CardImplementation definition descriptors", () => {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
         definitionId,
-      ).toBe("implemented");
+      ).toBe(
+        ["onr_classic_007_brain-drain", "onr_classic_013_puzzle"].includes(
+          definitionId,
+        )
+          ? "no_engine_behavior_required"
+          : "implemented",
+      );
     }
   });
 

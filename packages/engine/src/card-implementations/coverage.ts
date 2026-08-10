@@ -8,8 +8,9 @@ import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
  */
 import type { CardDefinitionId } from "@netgrid/shared";
 import {
-  CS06_CARD_DEFINITION_IDS,
-  cs06CardSpecSourceRefByDefinitionId,
+  cardSpecImplementationDefinitionIds,
+  cardSpecRuntimeDefinitionIds,
+  cardSpecSourceRefByDefinitionId,
 } from "@netgrid/cards/engine";
 import { CARD_IMPLEMENTATIONS } from "./registry";
 import { IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID } from "./coverage-source-locations";
@@ -108,7 +109,12 @@ const IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
 const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;
-const CARD_SPEC_DEFINITION_IDS = new Set<string>(CS06_CARD_DEFINITION_IDS);
+const CARD_SPEC_IMPLEMENTATION_DEFINITION_IDS = new Set<string>(
+  cardSpecImplementationDefinitionIds(),
+);
+const CARD_SPEC_RUNTIME_DEFINITION_IDS = new Set<string>(
+  cardSpecRuntimeDefinitionIds(),
+);
 
 export function isCurrentCardImplementationReleaseScopeDefinitionId(
   definitionId: CardDefinitionId,
@@ -119,8 +125,10 @@ export function isCurrentCardImplementationReleaseScopeDefinitionId(
 function implementedCoverageFor(
   implementation: (typeof CARD_IMPLEMENTATIONS)[number],
 ): CardImplementationCoverageEntry {
-  if (CARD_SPEC_DEFINITION_IDS.has(implementation.cardDefinitionId)) {
-    const sourceRef = cs06CardSpecSourceRefByDefinitionId(
+  if (
+    CARD_SPEC_IMPLEMENTATION_DEFINITION_IDS.has(implementation.cardDefinitionId)
+  ) {
+    const sourceRef = cardSpecSourceRefByDefinitionId(
       implementation.cardDefinitionId,
     );
     if (sourceRef === undefined)
@@ -494,6 +502,23 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
 function pendingCoverageFor(
   cardDefinitionId: CardDefinitionId,
 ): CardImplementationCoverageEntry {
+  if (
+    CARD_SPEC_RUNTIME_DEFINITION_IDS.has(cardDefinitionId) &&
+    !CARD_SPEC_IMPLEMENTATION_DEFINITION_IDS.has(cardDefinitionId)
+  ) {
+    const sourceRef = cardSpecSourceRefByDefinitionId(cardDefinitionId);
+    if (sourceRef === undefined)
+      throw new Error(
+        `card_spec_definition_coverage_source_ref_missing: ${cardDefinitionId}`,
+      );
+    return {
+      cardDefinitionId,
+      status: "no_engine_behavior_required",
+      reason:
+        "CardSpec definition and generic printed-card rules own runtime behavior without a projected CardImplementation.",
+      currentLocations: [sourceRef.sourcePath],
+    };
+  }
   if (!isCurrentCardImplementationReleaseScopeDefinitionId(cardDefinitionId)) {
     return {
       cardDefinitionId,

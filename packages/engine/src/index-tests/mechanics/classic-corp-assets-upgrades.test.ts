@@ -255,6 +255,8 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     ).toEqual({
       kind: "run_start_tax_runner_tags",
       visibility: "public",
+      capabilityKey: "run_start_tax_runner_tags",
+      addressability: ["plan", "action", "quote", "debug"],
     });
 
     for (const definitionId of CLASSIC_08_IDS) {

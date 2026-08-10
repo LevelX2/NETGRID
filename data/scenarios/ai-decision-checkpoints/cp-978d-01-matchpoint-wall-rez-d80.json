@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 177,
-    "stateHash": "fnv1a:1acd146b",
+    "stateHash": "fnv1a:3dc1a601",
     "testOnlyGameState": {
       "matchId": "match_978da70c2bd72e61",
       "baseline": {
@@ -702,40 +702,29 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_261_quandary_1",
-              "corp_onr_v1_252_keeper_3"
-            ],
+            "ice": ["corp_onr_v1_261_quandary_1", "corp_onr_v1_252_keeper_3"],
             "root": []
           },
           {
             "id": "remote_2",
             "kind": "remote",
             "label": "Remote 2",
-            "ice": [
-              "corp_onr_v1_249_hunter_2"
-            ],
+            "ice": ["corp_onr_v1_249_hunter_2"],
             "root": []
           },
           {
             "id": "remote_3",
             "kind": "remote",
             "label": "Remote 3",
-            "ice": [
-              "corp_onr_v1_249_hunter_3"
-            ],
+            "ice": ["corp_onr_v1_249_hunter_3"],
             "root": []
           },
           {
             "id": "remote_4",
             "kind": "remote",
             "label": "Remote 4",
-            "ice": [
-              "corp_onr_v1_279_wall-of-static_3"
-            ],
-            "root": [
-              "corp_onr_v1_203_hostile-takeover_2"
-            ]
+            "ice": ["corp_onr_v1_279_wall-of-static_3"],
+            "root": ["corp_onr_v1_203_hostile-takeover_2"]
           }
         ]
       },
@@ -808,9 +797,7 @@
             "runner_onr_v1_139_r-and-d-interface_2",
             "runner_onr_v1_139_r-and-d-interface_3"
           ],
-          "resources": [
-            "runner_onr_v1_154_broker_1"
-          ]
+          "resources": ["runner_onr_v1_154_broker_1"]
         }
       },
       "specialZones": {
@@ -2211,9 +2198,7 @@
         "counterPreventionUsedSourceIdsThisTurn": [],
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_4"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_4"],
         "pdcaUsedSourceIdsThisTurn": []
       },
       "turnSerial": 27,
@@ -7459,12 +7444,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.defend_servers"
-      ],
-      "acceptableCapabilities": [
-        "allocate_server_defense"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"]
     }
   }
 }

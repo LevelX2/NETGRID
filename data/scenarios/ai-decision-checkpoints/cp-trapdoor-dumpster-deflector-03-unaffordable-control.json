@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 97,
-    "stateHash": "fnv1a:3583ec74",
+    "stateHash": "fnv1a:5b7fe804",
     "testOnlyGameState": {
       "matchId": "match_f450485d3e5be1ab",
       "baseline": {
@@ -971,9 +971,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_classic_009_dumpster_1"
-            ],
+            "ice": ["corp_onr_classic_009_dumpster_1"],
             "root": []
           }
         ]
@@ -5362,9 +5360,7 @@
         "transition": {
           "status": "selected",
           "reason": "initial_strategy_selection",
-          "evidence": [
-            "selected:runner.rnd_pressure"
-          ]
+          "evidence": ["selected:runner.rnd_pressure"]
         },
         "commitment": {
           "strategyId": "runner.rnd_pressure",
@@ -5662,9 +5658,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -5815,10 +5809,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6235,10 +6226,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6375,19 +6363,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Trapdoor",
-            "visibleSubtypes": [
-              "code_gate",
-              "deflector"
-            ],
+            "visibleSubtypes": ["code_gate", "deflector"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "may_allow",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:deflect_run"
-                ]
+                "evidence": ["subroutine_type:deflect_run"]
               }
             ],
             "breakerCoverage": [
@@ -6449,9 +6432,7 @@
       },
       "revalidation": {
         "status": "valid",
-        "reasons": [
-          "run_plan_created_from_selected_run_action"
-        ],
+        "reasons": ["run_plan_created_from_selected_run_action"],
         "checkedAtStateVersion": 96
       },
       "abortPolicy": {

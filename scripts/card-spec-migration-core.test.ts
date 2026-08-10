@@ -4,6 +4,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   extractArrayObjects,
+  extractExportedConstObject,
+  extractSingleExportedConstObject,
   parseSetMigrationInvocation,
   renderValue,
   sha256,
@@ -21,6 +23,20 @@ afterEach(async () => {
 });
 
 describe("generic CardSpec migration core", () => {
+  it("dispatches isolated Testset and Classic adapters through the neutral CLI", () => {
+    for (const [setId, mode] of [
+      ["testset", "check"],
+      ["classic", "dry-run"],
+    ] as const)
+      expect(
+        execFileSync(
+          process.execPath,
+          ["scripts/migrate-card-specs.mjs", "--set", setId, `--${mode}`],
+          { cwd: process.cwd(), encoding: "utf8" },
+        ),
+      ).toContain(`${setId}_card_spec_`);
+  });
+
   it("selects one of multiple set descriptors and rejects invalid invocations", () => {
     const descriptors = {
       testset: { setId: "testset" },
@@ -68,6 +84,61 @@ describe("generic CardSpec migration core", () => {
         },
       ),
     ).toThrow(/unsupported_legacy_expression/);
+  });
+
+  it("parses closed implementation modules with reviewed helpers and local spreads", () => {
+    const source = `
+      const common = { kind: "activated", costs: [{ kind: "credit", amount: 2 }] } as const;
+      export const implementation: CardImplementationDefinition = {
+        cardDefinitionId: "card_a",
+        abilities: [{ ...common, timing: "runner_main" }],
+        printedSubroutines: [endTheRunSubroutine()],
+      };
+    `;
+    const fail = (message: string): never => {
+      throw new Error(message);
+    };
+    expect(
+      extractExportedConstObject(
+        source,
+        "implementation",
+        {
+          endTheRunSubroutine: (args: readonly unknown[]) => {
+            expect(args).toEqual([]);
+            return { kind: "end_the_run", text: "*End the run." };
+          },
+        },
+        fail,
+      ),
+    ).toEqual({
+      cardDefinitionId: "card_a",
+      abilities: [
+        {
+          kind: "activated",
+          costs: [{ kind: "credit", amount: 2 }],
+          timing: "runner_main",
+        },
+      ],
+      printedSubroutines: [{ kind: "end_the_run", text: "*End the run." }],
+    });
+    expect(() =>
+      extractExportedConstObject(
+        "export const implementation = unknownHelper();",
+        "implementation",
+        {},
+        fail,
+      ),
+    ).toThrow(/unknown_legacy_helper:unknownHelper/);
+    expect(
+      extractSingleExportedConstObject(
+        'export const implementation = { cardDefinitionId: "card_a" };',
+        {},
+        fail,
+      ),
+    ).toEqual({
+      exportName: "implementation",
+      value: { cardDefinitionId: "card_a" },
+    });
   });
 
   it("detects and removes only scoped unexpected generated outputs", async () => {
@@ -120,3 +191,4 @@ describe("generic CardSpec migration core", () => {
     expect(failures).toEqual([]);
   });
 });
+import { execFileSync } from "node:child_process";

@@ -35,6 +35,14 @@ const TEST_CARD_PRESENTATIONS = {
   },
   simple_fracter: { title: "Simple Fracter", type: "program" },
   simple_upgrade: { title: "Simple Upgrade", type: "upgrade" },
+  "onr_classic_031_rent-i-con": {
+    title: "Rent-I-Con",
+    type: "program",
+  },
+  "onr_classic_038_gypsytm-schedule-analyzer": {
+    title: "Gypsy™ Schedule Analyzer",
+    type: "hardware",
+  },
 } as const;
 
 const formatChronicleEvent: typeof formatChronicleEventWithoutCatalog = (

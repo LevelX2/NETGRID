@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+import { writeFileSync } from "node:fs";
 import process from "node:process";
 
 import { buildDeckStrategyProfile } from "../packages/ai/src/deck-doctrine-strategy";
@@ -24,6 +25,8 @@ const manifest = standardDeckGuideData as unknown;
 const activeDecks = catalog.decks.filter((deck) => deck.status === "active");
 const cardsById = createRuntimeCardsById();
 const findings: string[] = [];
+const analysisHashUpdates = new Map<string, string>();
+const writeAnalysisHashes = process.argv.includes("--write-analysis-hashes");
 
 for (const deck of activeDecks) {
   const profile = buildDeckStrategyProfile({
@@ -37,15 +40,31 @@ for (const deck of activeDecks) {
     manifest,
     currentAnalysisHash: analysisHash,
   });
-  if (resolution.status !== "available") {
+  const refreshableAnalysisDrift =
+    resolution.status === "stale" &&
+    resolution.reasons.length === 1 &&
+    resolution.reasons[0] === "standard_deck_guide_analysis_stale";
+  if (resolution.status !== "available" && !refreshableAnalysisDrift) {
     findings.push(
       `${deck.standardDeckId}: ${resolution.status} (${resolution.reasons.join(", ")})`,
     );
     continue;
   }
 
-  const guide = resolution.guide!;
-  if (!sameStrings(guide.analysis.primaryStrategyIds, profile.primaryStrategies)) {
+  const guide =
+    resolution.guide ??
+    manifestGuides(manifest).find(
+      (entry) => entry.standardDeckId === deck.standardDeckId,
+    );
+  if (!guide) {
+    findings.push(
+      `${deck.standardDeckId}: missing guide during analysis refresh`,
+    );
+    continue;
+  }
+  if (
+    !sameStrings(guide.analysis.primaryStrategyIds, profile.primaryStrategies)
+  ) {
     findings.push(`${deck.standardDeckId}: primary strategy list is stale`);
   }
   if (
@@ -68,6 +87,15 @@ for (const deck of activeDecks) {
       );
     }
   }
+  if (refreshableAnalysisDrift) {
+    if (writeAnalysisHashes) {
+      analysisHashUpdates.set(deck.standardDeckId, analysisHash);
+    } else {
+      findings.push(
+        `${deck.standardDeckId}: stale (standard_deck_guide_analysis_stale)`,
+      );
+    }
+  }
 }
 
 const activeIds = new Set(activeDecks.map((deck) => deck.standardDeckId));
@@ -77,7 +105,23 @@ for (const guide of manifestGuides(manifest)) {
   }
 }
 
-if (findings.length > 0) {
+if (findings.length === 0 && writeAnalysisHashes) {
+  const writable = structuredClone(
+    standardDeckGuideData,
+  ) as StandardDeckGuideManifest;
+  for (const guide of writable.guides) {
+    const analysisHash = analysisHashUpdates.get(guide.standardDeckId);
+    if (analysisHash) guide.sourceAnalysisHash = analysisHash;
+  }
+  writeFileSync(
+    new URL("../data/decks/standard-deck-guides-1.0.0.json", import.meta.url),
+    `${JSON.stringify(writable, null, 2)}\n`,
+    "utf8",
+  );
+  console.log(
+    `Standarddeck-Analysehashes aktualisiert: ${analysisHashUpdates.size}/${activeDecks.length}.`,
+  );
+} else if (findings.length > 0) {
   console.error(
     `Standarddeck-Anleitungen benötigen Pflege (${findings.length} Befunde):`,
   );

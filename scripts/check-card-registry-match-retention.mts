@@ -9,6 +9,7 @@ import {
   cardRegistryRetentionDecks,
 } from "../packages/engine/src/test-fixtures/card-registry-retention-decks";
 import type { GameState } from "../packages/shared/src/index";
+import { CARD_DEFINITIONS_BY_ID } from "../packages/engine/src/card-definitions";
 
 const MATCH_COUNT = 500;
 const SAMPLE_COUNT = 5;
@@ -24,6 +25,7 @@ if (invokedAsScript) {
 }
 
 function runParent(): void {
+  assertComparableFixtures();
   const scriptPath = fileURLToPath(import.meta.url);
   const samples = { stress: [] as number[], legacy: [] as number[] };
   for (let index = 0; index < SAMPLE_COUNT; index += 1)
@@ -66,6 +68,39 @@ function runParent(): void {
   } as const;
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   if (report.status !== "passed") process.exitCode = 1;
+}
+
+function assertComparableFixtures(): void {
+  const stressDecks = cardRegistryRetentionDecks("stress");
+  const legacyDecks = cardRegistryRetentionDecks("legacy");
+  const fixtureShape = (ids: readonly string[]) =>
+    Object.entries(
+      ids.reduce<Record<string, number>>((counts, definitionId) => {
+        const definition = CARD_DEFINITIONS_BY_ID[definitionId];
+        if (!definition)
+          throw new Error(
+            `card_registry_retention_missing_definition:${definitionId}`,
+          );
+        const key = `${definition.side}:${definition.type}`;
+        counts[key] = (counts[key] ?? 0) + 1;
+        return counts;
+      }, {}),
+    ).sort(([left], [right]) => left.localeCompare(right));
+  if (
+    JSON.stringify(fixtureShape(CARD_REGISTRY_RETENTION_STRESS_IDS)) !==
+    JSON.stringify(fixtureShape(CARD_REGISTRY_RETENTION_LEGACY_CONTROL_IDS))
+  )
+    throw new Error("card_registry_retention_fixture_shape_mismatch");
+  for (const [lane, decks] of [
+    ["stress", stressDecks],
+    ["legacy", legacyDecks],
+  ] as const) {
+    const cards = [...decks.runnerDeck.cards, ...decks.corpDeck.cards];
+    if (cards.length !== 10 || cards.some(({ quantity }) => quantity !== 3))
+      throw new Error(
+        `card_registry_retention_fixture_card_count_mismatch:${lane}`,
+      );
+  }
 }
 
 function runChild(lane: "stress" | "legacy"): never {

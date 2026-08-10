@@ -2,7 +2,12 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { CS06_CARD_DEFINITION_IDS } from "@netgrid/cards/engine";
+import {
+  CS06_CARD_DEFINITION_IDS,
+  cardSpecImplementationDefinitionIds,
+  cardSpecRuntimeDefinitionIds,
+  cardSpecSourceRefByDefinitionId,
+} from "@netgrid/cards/engine";
 import { CARD_DEFINITIONS_BY_ID } from "../index";
 import {
   CARD_IMPLEMENTATION_COVERAGE_ENTRIES,
@@ -42,31 +47,6 @@ type ProteusCardSupportManifest = {
     };
     support: {
       resolverRef: string | null;
-    };
-  }>;
-};
-
-type ClassicCardSet = ProteusCardSet;
-
-type ClassicCardSupportManifest = {
-  setId: string;
-  cards: Array<{
-    cardId: string;
-    setId: string;
-    statuses: {
-      implemented: boolean;
-      engine_supported: boolean;
-      playable: boolean;
-      human_playable: boolean;
-      ai_supported: boolean;
-      deck_legal: boolean;
-      format_legal: boolean;
-      blocked: boolean;
-    };
-    support: {
-      resolverRef: string | null;
-      aiHintRef: string | null;
-      scenarioRefs: string[];
     };
   }>;
 };
@@ -123,34 +103,6 @@ type ProteusCoverageReport = {
   manifestResolverDrift: string[];
   manifestHumanVsHumanFlagDrift: string[];
   manifestAiSupportDrift: string[];
-};
-
-type ClassicCoverageReport = {
-  cardSet: ClassicCardSet;
-  manifest: ClassicCardSupportManifest;
-  implementationRows: ProteusImplementationRow[];
-  classicCardIds: string[];
-  manifestCardIds: string[];
-  fileDefinitionIds: string[];
-  uniqueFileDefinitionIds: string[];
-  registryDefinitionIds: string[];
-  missingCards: Array<{ cardDefinitionId: string; title: string }>;
-  filesWithoutDefinitionId: string[];
-  nonClassicFiles: ProteusImplementationRow[];
-  unknownFileDefinitionIds: ProteusImplementationRow[];
-  unregisteredClassicFiles: ProteusImplementationRow[];
-  registeredClassicImplementationsWithoutFile: string[];
-  duplicateFileDefinitionIds: string[];
-  duplicateRegistryDefinitionIds: string[];
-  manifestImplementedIds: string[];
-  manifestImplementedWithoutFile: string[];
-  manifestMissingImplementedForFile: string[];
-  manifestStatusDrift: string[];
-  manifestResolverDrift: string[];
-  manifestHumanVsHumanFlagDrift: string[];
-  manifestAiSupportDrift: string[];
-  manifestAiHintDrift: string[];
-  manifestScenarioRefDrift: string[];
 };
 
 function buildProteusCoverageReport(): ProteusCoverageReport {
@@ -314,183 +266,6 @@ function buildProteusCoverageReport(): ProteusCoverageReport {
   };
 }
 
-function buildClassicCoverageReport(): ClassicCoverageReport {
-  const cardSet = readJson<ClassicCardSet>(
-    new URL("../../../../data/cards/classic-cards.json", import.meta.url),
-  );
-  const manifest = readJson<ClassicCardSupportManifest>(
-    new URL(
-      "../../../../data/manifests/classic-card-support.json",
-      import.meta.url,
-    ),
-  );
-  const implementationFiles = findTypeScriptFiles(
-    fileURLToPath(new URL("./classic", import.meta.url)),
-  );
-  const implementationRows = implementationFiles.map((filePath) => {
-    const match = readFileSync(filePath, "utf8").match(
-      /cardDefinitionId:\s*["']([^"']+)["']/,
-    );
-    return {
-      cardDefinitionId: match?.[1] ?? "",
-      filePath: toRepoPath(filePath),
-    };
-  });
-
-  const classicCardIds = cardSet.cards.map((card) => card.cardId);
-  const classicCardIdSet = new Set(classicCardIds);
-  const titleById = new Map(
-    cardSet.cards.map((card) => [card.cardId, card.title]),
-  );
-  const manifestCardIds = manifest.cards.map((card) => card.cardId);
-  const fileDefinitionIds = implementationRows.map(
-    (row) => row.cardDefinitionId,
-  );
-  const uniqueFileDefinitionIds = [
-    ...new Set(fileDefinitionIds.filter(Boolean)),
-  ].sort();
-  const uniqueFileDefinitionIdSet = new Set(uniqueFileDefinitionIds);
-  const registryDefinitionIds = CARD_IMPLEMENTATIONS.filter((implementation) =>
-    implementation.cardDefinitionId.startsWith("onr_classic_"),
-  ).map((implementation) => implementation.cardDefinitionId);
-  const registryDefinitionIdSet = new Set(registryDefinitionIds);
-  const manifestImplementedIds = manifest.cards
-    .filter((card) => card.statuses.implemented)
-    .map((card) => card.cardId)
-    .sort();
-
-  const filesWithoutDefinitionId = implementationRows
-    .filter((row) => row.cardDefinitionId === "")
-    .map((row) => row.filePath)
-    .sort();
-  const nonClassicFiles = implementationRows
-    .filter(
-      (row) =>
-        row.cardDefinitionId !== "" &&
-        !row.cardDefinitionId.startsWith("onr_classic_"),
-    )
-    .sort((a, b) => a.filePath.localeCompare(b.filePath));
-  const unknownFileDefinitionIds = implementationRows
-    .filter(
-      (row) =>
-        row.cardDefinitionId !== "" &&
-        !classicCardIdSet.has(row.cardDefinitionId),
-    )
-    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
-  const unregisteredClassicFiles = implementationRows
-    .filter(
-      (row) =>
-        row.cardDefinitionId.startsWith("onr_classic_") &&
-        !registryDefinitionIdSet.has(row.cardDefinitionId),
-    )
-    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
-  const registeredClassicImplementationsWithoutFile = registryDefinitionIds
-    .filter((definitionId) => !uniqueFileDefinitionIdSet.has(definitionId))
-    .sort();
-
-  const missingCards = cardSet.cards
-    .filter((card) => !uniqueFileDefinitionIdSet.has(card.cardId))
-    .map((card) => ({
-      cardDefinitionId: card.cardId,
-      title: titleById.get(card.cardId) ?? card.cardId,
-    }))
-    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
-
-  const manifestStatusDrift: string[] = [];
-  const manifestResolverDrift: string[] = [];
-  const manifestHumanVsHumanFlagDrift: string[] = [];
-  const manifestAiSupportDrift: string[] = [];
-  const manifestAiHintDrift: string[] = [];
-  const manifestScenarioRefDrift: string[] = [];
-
-  for (const card of manifest.cards) {
-    const isImplementedByFile = uniqueFileDefinitionIdSet.has(card.cardId);
-    if (card.statuses.ai_supported !== isImplementedByFile) {
-      manifestAiSupportDrift.push(card.cardId);
-    }
-
-    if (isImplementedByFile) {
-      if (
-        !card.statuses.implemented ||
-        !card.statuses.engine_supported ||
-        !card.statuses.playable ||
-        !card.statuses.human_playable ||
-        !card.statuses.deck_legal ||
-        !card.statuses.format_legal ||
-        card.statuses.blocked
-      ) {
-        manifestStatusDrift.push(card.cardId);
-      }
-      if (card.support.resolverRef !== `engine:${card.cardId}`) {
-        manifestResolverDrift.push(card.cardId);
-      }
-      if (!card.support.aiHintRef) {
-        manifestAiHintDrift.push(card.cardId);
-      }
-      if (card.support.scenarioRefs.length === 0) {
-        manifestScenarioRefDrift.push(card.cardId);
-      }
-    } else {
-      if (
-        card.statuses.implemented ||
-        card.statuses.engine_supported ||
-        card.statuses.playable ||
-        card.statuses.human_playable ||
-        card.statuses.deck_legal ||
-        card.statuses.format_legal ||
-        !card.statuses.blocked
-      ) {
-        manifestStatusDrift.push(card.cardId);
-      }
-      if (card.support.resolverRef !== null) {
-        manifestResolverDrift.push(card.cardId);
-      }
-      if (card.support.aiHintRef !== null) {
-        manifestAiHintDrift.push(card.cardId);
-      }
-      if (card.support.scenarioRefs.length !== 0) {
-        manifestScenarioRefDrift.push(card.cardId);
-      }
-    }
-
-    if (card.statuses.format_legal !== card.statuses.deck_legal) {
-      manifestHumanVsHumanFlagDrift.push(card.cardId);
-    }
-  }
-
-  return {
-    cardSet,
-    manifest,
-    implementationRows,
-    classicCardIds,
-    manifestCardIds,
-    fileDefinitionIds,
-    uniqueFileDefinitionIds,
-    registryDefinitionIds,
-    missingCards,
-    filesWithoutDefinitionId,
-    nonClassicFiles,
-    unknownFileDefinitionIds,
-    unregisteredClassicFiles,
-    registeredClassicImplementationsWithoutFile,
-    duplicateFileDefinitionIds: duplicateIds(fileDefinitionIds).sort(),
-    duplicateRegistryDefinitionIds: duplicateIds(registryDefinitionIds).sort(),
-    manifestImplementedIds,
-    manifestImplementedWithoutFile: manifestImplementedIds
-      .filter((definitionId) => !uniqueFileDefinitionIdSet.has(definitionId))
-      .sort(),
-    manifestMissingImplementedForFile: uniqueFileDefinitionIds
-      .filter((definitionId) => !manifestImplementedIds.includes(definitionId))
-      .sort(),
-    manifestStatusDrift: manifestStatusDrift.sort(),
-    manifestResolverDrift: manifestResolverDrift.sort(),
-    manifestHumanVsHumanFlagDrift: manifestHumanVsHumanFlagDrift.sort(),
-    manifestAiSupportDrift: manifestAiSupportDrift.sort(),
-    manifestAiHintDrift: manifestAiHintDrift.sort(),
-    manifestScenarioRefDrift: manifestScenarioRefDrift.sort(),
-  };
-}
-
 function formatProteusCoverageReport(report: ProteusCoverageReport): string {
   const lines = [
     "Proteus CardImplementation verify:",
@@ -515,36 +290,28 @@ function formatProteusCoverageReport(report: ProteusCoverageReport): string {
   return lines.join("\n");
 }
 
-function formatClassicCoverageReport(report: ClassicCoverageReport): string {
-  const lines = [
-    "Classic CardImplementation verify:",
-    `- total Classic cards: ${report.classicCardIds.length}`,
-    `- unique implemented Classic cardDefinitionIds from files: ${report.uniqueFileDefinitionIds.length}`,
-    `- missing CardImplementation files: ${report.missingCards.length}`,
-    `- unregistered Classic files: ${report.unregisteredClassicFiles.length}`,
-    `- registered Classic implementations without file: ${report.registeredClassicImplementationsWithoutFile.length}`,
-    `- duplicate file cardDefinitionIds: ${report.duplicateFileDefinitionIds.length}`,
-    `- duplicate registry cardDefinitionIds: ${report.duplicateRegistryDefinitionIds.length}`,
-    `- manifest implemented-without-file drift: ${report.manifestImplementedWithoutFile.length}`,
-    `- manifest missing-implemented-for-file drift: ${report.manifestMissingImplementedForFile.length}`,
-    `- manifest status drift: ${report.manifestStatusDrift.length}`,
-    `- manifest resolverRef drift: ${report.manifestResolverDrift.length}`,
-    `- manifest deck_legal/format_legal drift: ${report.manifestHumanVsHumanFlagDrift.length}`,
-    `- manifest ai_supported drift: ${report.manifestAiSupportDrift.length}`,
-    `- manifest aiHintRef drift: ${report.manifestAiHintDrift.length}`,
-    `- manifest scenarioRefs drift: ${report.manifestScenarioRefDrift.length}`,
-    "Missing Classic CardImplementation files:",
-    ...report.missingCards.map(
-      (card) => `- ${card.cardDefinitionId} :: ${card.title}`,
-    ),
-  ];
-  return lines.join("\n");
-}
-
 describe("CardImplementation coverage and registry invariants", () => {
-  it("reports exact CardSpec registry source authority for the CS06 slice", () => {
+  it("reports exact CardSpec registry source authority for the active runtime partition", () => {
     const paths = new Set<string>();
-    for (const definitionId of CS06_CARD_DEFINITION_IDS) {
+    const activeCardSpecDefinitionIds = cardSpecRuntimeDefinitionIds();
+    for (const definitionId of activeCardSpecDefinitionIds) {
+      const sourceRef = cardSpecSourceRefByDefinitionId(definitionId);
+      expect(sourceRef, definitionId).toBeDefined();
+      if (sourceRef === undefined)
+        throw new Error(`Missing CardSpec source ref for ${definitionId}`);
+      const sourcePath = sourceRef.sourcePath;
+      expect(sourcePath).toMatch(
+        /^packages\/cards\/src\/specs\/.+\.card-spec\.ts$/,
+      );
+      expect(sourcePath).not.toContain(
+        "packages/engine/src/card-implementations",
+      );
+      expect(existsSync(`${repoRoot}/${sourcePath}`)).toBe(true);
+      paths.add(sourcePath);
+    }
+    expect(paths.size).toBe(activeCardSpecDefinitionIds.length);
+
+    for (const definitionId of cardSpecImplementationDefinitionIds()) {
       const coverage = cardImplementationCoverageForDefinitionId(definitionId);
       expect(coverage).toMatchObject({
         cardDefinitionId: definitionId,
@@ -558,17 +325,27 @@ describe("CardImplementation coverage and registry invariants", () => {
       const locations = coverage.currentLocations;
       if (locations === undefined || locations.length !== 1)
         throw new Error(`Invalid source coverage for ${definitionId}`);
-      const sourcePath = locations[0]!;
-      expect(sourcePath).toMatch(
-        /^packages\/cards\/src\/specs\/.+\.card-spec\.ts$/,
+      expect(locations[0]).toBe(
+        cardSpecSourceRefByDefinitionId(definitionId)?.sourcePath,
       );
-      expect(sourcePath).not.toContain(
-        "packages/engine/src/card-implementations",
-      );
-      expect(existsSync(`${repoRoot}/${sourcePath}`)).toBe(true);
-      paths.add(sourcePath!);
     }
-    expect(paths.size).toBe(CS06_CARD_DEFINITION_IDS.length);
+
+    const implementationIds = new Set(cardSpecImplementationDefinitionIds());
+    const definitionOnlyIds = activeCardSpecDefinitionIds.filter(
+      (definitionId) => !implementationIds.has(definitionId),
+    );
+    expect(definitionOnlyIds).toHaveLength(20);
+    for (const definitionId of definitionOnlyIds) {
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toEqual({
+        cardDefinitionId: definitionId,
+        status: "no_engine_behavior_required",
+        reason:
+          "CardSpec definition and generic printed-card rules own runtime behavior without a projected CardImplementation.",
+        currentLocations: [
+          cardSpecSourceRefByDefinitionId(definitionId)?.sourcePath,
+        ],
+      });
+    }
   });
   it("keeps every avoid-tag card in the shared prevention registry with its printed cost", () => {
     const cases = [
@@ -2060,91 +1837,6 @@ describe("CardImplementation coverage and registry invariants", () => {
     }
   });
 
-  it("guards Classic manifest support against concrete files, registry, and AI refs", () => {
-    const report = buildClassicCoverageReport();
-    process.stdout.write(`${formatClassicCoverageReport(report)}\n`);
-
-    expect(report.cardSet.setId).toBe("classic");
-    expect(report.classicCardIds).toHaveLength(54);
-    expect(report.manifest.setId).toBe("classic");
-    expect(report.manifest.cards).toHaveLength(54);
-    expect([...report.manifestCardIds].sort()).toEqual(
-      [...report.classicCardIds].sort(),
-    );
-    expect(duplicateIds(report.classicCardIds)).toEqual([]);
-    expect(duplicateIds(report.manifestCardIds)).toEqual([]);
-
-    expect(report.filesWithoutDefinitionId).toEqual([]);
-    expect(report.nonClassicFiles).toEqual([]);
-    expect(report.unknownFileDefinitionIds).toEqual([]);
-    expect(report.duplicateFileDefinitionIds).toEqual([]);
-    expect(report.duplicateRegistryDefinitionIds).toEqual([]);
-    expect(report.unregisteredClassicFiles).toEqual([]);
-    expect(report.registeredClassicImplementationsWithoutFile).toEqual([]);
-    expect([...report.registryDefinitionIds].sort()).toEqual(
-      [...report.uniqueFileDefinitionIds].sort(),
-    );
-    expect(report.manifestImplementedIds).toEqual(
-      [...report.uniqueFileDefinitionIds].sort(),
-    );
-    expect(report.manifestImplementedWithoutFile).toEqual([]);
-    expect(report.manifestMissingImplementedForFile).toEqual([]);
-    expect(report.manifestStatusDrift).toEqual([]);
-    expect(report.manifestResolverDrift).toEqual([]);
-    expect(report.manifestHumanVsHumanFlagDrift).toEqual([]);
-    expect(report.manifestAiSupportDrift).toEqual([]);
-    expect(report.manifestAiHintDrift).toEqual([]);
-    expect(report.manifestScenarioRefDrift).toEqual([]);
-
-    for (const row of report.implementationRows) {
-      expect(row.cardDefinitionId, row.filePath).toMatch(/^onr_classic_/);
-      expect(report.classicCardIds, row.filePath).toContain(
-        row.cardDefinitionId,
-      );
-    }
-
-    for (const card of report.manifest.cards) {
-      const isImplemented = report.uniqueFileDefinitionIds.includes(
-        card.cardId,
-      );
-      expect(card.setId, card.cardId).toBe("classic");
-
-      if (isImplemented) {
-        expect(card.statuses, card.cardId).toMatchObject({
-          implemented: true,
-          engine_supported: true,
-          playable: true,
-          human_playable: true,
-          deck_legal: true,
-          format_legal: true,
-          ai_supported: true,
-          blocked: false,
-        });
-        expect(card.support.resolverRef, card.cardId).toBe(
-          `engine:${card.cardId}`,
-        );
-        expect(card.support.aiHintRef, card.cardId).toBeTruthy();
-        expect(card.support.scenarioRefs.length, card.cardId).toBeGreaterThan(
-          0,
-        );
-      } else {
-        expect(card.statuses, card.cardId).toMatchObject({
-          implemented: false,
-          engine_supported: false,
-          playable: false,
-          human_playable: false,
-          deck_legal: false,
-          format_legal: false,
-          ai_supported: false,
-          blocked: true,
-        });
-        expect(card.support.resolverRef, card.cardId).toBeNull();
-        expect(card.support.aiHintRef, card.cardId).toBeNull();
-        expect(card.support.scenarioRefs, card.cardId).toEqual([]);
-      }
-    }
-  });
-
   it("requires implementation coverage for every demo card", () => {
     const implementationIds = CARD_IMPLEMENTATIONS.map(
       (implementation) => implementation.cardDefinitionId,
@@ -2221,8 +1913,11 @@ describe("CardImplementation coverage and registry invariants", () => {
         (implementation) => implementation.cardDefinitionId,
       ),
     );
+    const cardSpecRuntimeIdSet = new Set(cardSpecRuntimeDefinitionIds());
     const expectedOutsideScopeCoverageCount = outsideScopeDefinitionIds.filter(
-      (definitionId) => !implementationIdSet.has(definitionId),
+      (definitionId) =>
+        !implementationIdSet.has(definitionId) &&
+        !cardSpecRuntimeIdSet.has(definitionId),
     ).length;
 
     expect(currentReleaseDefinitionIds).toHaveLength(374);
@@ -2231,7 +1926,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     expect(coverageByStatus.get("implemented")).toBe(
       CARD_IMPLEMENTATIONS.length,
     );
-    expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
+    expect(coverageByStatus.get("no_engine_behavior_required")).toBe(21);
     expect(coverageByStatus.get("outside_current_release_scope")).toBe(
       expectedOutsideScopeCoverageCount,
     );
@@ -2256,6 +1951,11 @@ describe("CardImplementation coverage and registry invariants", () => {
           cardImplementationCoverageForDefinitionId(definitionId)?.status,
           definitionId,
         ).toBe("implemented");
+      } else if (cardSpecRuntimeIdSet.has(definitionId)) {
+        expect(
+          cardImplementationCoverageForDefinitionId(definitionId)?.status,
+          definitionId,
+        ).toBe("no_engine_behavior_required");
       } else {
         expect(
           cardImplementationCoverageForDefinitionId(definitionId)?.status,

@@ -1,5 +1,4 @@
 import proteusCardsData from "../../../data/cards/proteus-cards.json";
-import classicCardsData from "../../../data/cards/classic-cards.json";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -8622,11 +8621,7 @@ export const CARD_DEFINITIONS_BY_ID: Record<
   CardDefinitionId,
   ResolvedCardDefinition
 > = Object.fromEntries(
-  [
-    ...classicCatalogFallbackCards(),
-    ...proteusCatalogFallbackCards(),
-    ...CARD_DEFINITIONS,
-  ].map((card) => {
+  [...proteusCatalogFallbackCards(), ...CARD_DEFINITIONS].map((card) => {
     const resolved = resolveCardDefinition(card);
     return [resolved.id, resolved] as const;
   }),
@@ -8653,13 +8648,6 @@ type CatalogFallbackCard = {
   text?: string;
   markCounterDisplay?: CardDefinition["markCounterDisplay"];
 };
-
-function classicCatalogFallbackCards(): CardDefinition[] {
-  return catalogFallbackCards(
-    classicCardsData.cards as CatalogFallbackCard[],
-    "classic_catalog_fallback",
-  );
-}
 
 function proteusCatalogFallbackCards(): CardDefinition[] {
   return catalogFallbackCards(

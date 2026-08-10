@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 529,
-    "stateHash": "fnv1a:a10c41ce",
+    "stateHash": "fnv1a:c6462faf",
     "testOnlyGameState": {
       "matchId": "match_1d63717d70fc81ef",
       "baseline": {
@@ -750,9 +750,7 @@
           "corp_onr_v1_309_bbs-whispering-campaign_2",
           "corp_onr_v1_284_chance-observation_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_196_corporate-war_1"
-        ],
+        "scoreArea": ["corp_onr_v1_196_corporate-war_1"],
         "servers": [
           {
             "id": "hq",
@@ -784,10 +782,7 @@
             "id": "archives",
             "kind": "archives",
             "label": "Archives",
-            "ice": [
-              "corp_onr_v1_244_filter_3",
-              "corp_onr_v1_261_quandary_1"
-            ],
+            "ice": ["corp_onr_v1_244_filter_3", "corp_onr_v1_261_quandary_1"],
             "root": []
           },
           {
@@ -800,9 +795,7 @@
               "corp_onr_v1_261_quandary_2",
               "corp_onr_v1_279_wall-of-static_1"
             ],
-            "root": [
-              "corp_onr_v1_313_city-surveillance_1"
-            ]
+            "root": ["corp_onr_v1_313_city-surveillance_1"]
           }
         ]
       },
@@ -869,9 +862,7 @@
             "runner_onr_classic_030_psychic-friend_3",
             "runner_onr_proteus_081_boring-bit_3"
           ],
-          "hardware": [
-            "runner_onr_v1_123_bodyweight-data-creche_1"
-          ],
+          "hardware": ["runner_onr_v1_123_bodyweight-data-creche_1"],
           "resources": [
             "runner_onr_v1_154_broker_2",
             "runner_onr_proteus_147_r-and-d-mole_3",
@@ -17526,9 +17517,7 @@
               "support": 85,
               "final": 94
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -17603,9 +17592,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.tag_trace_punish",
-          "evidence": [
-            "continued:corp.tag_trace_punish"
-          ]
+          "evidence": ["continued:corp.tag_trace_punish"]
         },
         "commitment": {
           "strategyId": "corp.tag_trace_punish",
@@ -17752,9 +17739,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -17812,9 +17797,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -17845,10 +17828,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -17867,9 +17847,7 @@
               "family": "corp_fast_advance",
               "candidateRole": "primary",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_runtime_blocker:scoreline_unreachable"
-              ],
+              "runtimeBlockers": ["hard_runtime_blocker:scoreline_unreachable"],
               "confidence": "high",
               "score": {
                 "anchor": 100,
@@ -17933,9 +17911,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -17966,10 +17942,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -18222,10 +18195,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -18278,9 +18248,7 @@
       }
     ],
     "choice": {
-      "mustSelectValues": [
-        5
-      ]
+      "mustSelectValues": [5]
     }
   }
 }

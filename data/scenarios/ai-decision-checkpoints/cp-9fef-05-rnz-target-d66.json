@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 108,
-    "stateHash": "fnv1a:50cea85d",
+    "stateHash": "fnv1a:c4bcb749",
     "testOnlyGameState": {
       "matchId": "match_9fef30abd4b16341",
       "baseline": {
@@ -766,9 +766,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_232_crystal-wall_2"
-            ],
+            "ice": ["corp_onr_v1_232_crystal-wall_2"],
             "root": []
           },
           {
@@ -782,9 +780,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_237_data-wall_1"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_1"],
             "root": []
           }
         ]
@@ -846,13 +842,9 @@
           "runner_onr_v1_105_priority-wreck_2",
           "runner_onr_v1_097_livewires-contacts_3"
         ],
-        "scoreArea": [
-          "corp_onr_v1_215_security-net-optimization_1"
-        ],
+        "scoreArea": ["corp_onr_v1_215_security-net-optimization_1"],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_1"
-          ],
+          "programs": ["runner_onr_v1_039_krash_1"],
           "hardware": [],
           "resources": [
             "runner_onr_v1_154_broker_2",
@@ -5728,9 +5720,7 @@
               "support": 80,
               "final": 92
             },
-            "supportGaps": [
-              "low_threat_assessment_support"
-            ],
+            "supportGaps": ["low_threat_assessment_support"],
             "evidence": [
               "strategy:runner.remote_contest",
               "confidence:high",
@@ -5811,9 +5801,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -6073,10 +6061,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6098,9 +6083,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6160,10 +6143,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6182,9 +6162,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -6215,10 +6193,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6482,10 +6457,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6715,15 +6687,9 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.pressure_central"
-      ],
-      "acceptableCapabilities": [
-        "pressure_hq_information"
-      ],
-      "requiredAssessmentEvidence": [
-        "target:hq"
-      ]
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_information"],
+      "requiredAssessmentEvidence": ["target:hq"]
     }
   }
 }

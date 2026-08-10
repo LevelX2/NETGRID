@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 256,
-    "stateHash": "fnv1a:9ecd6ded",
+    "stateHash": "fnv1a:95c3e153",
     "testOnlyGameState": {
       "matchId": "match_d1532f829371a95f",
       "baseline": {
@@ -958,9 +958,7 @@
           "corp_onr_v1_237_data-wall_1",
           "corp_onr_proteus_039_sphinx-2006_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_189_artificial-security-directors_1"
-        ],
+        "scoreArea": ["corp_onr_v1_189_artificial-security-directors_1"],
         "servers": [
           {
             "id": "hq",
@@ -976,9 +974,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_271_tko-2-0_1"
-            ],
+            "ice": ["corp_onr_v1_271_tko-2-0_1"],
             "root": []
           },
           {
@@ -1064,9 +1060,7 @@
             "runner_onr_v1_039_krash_2",
             "runner_onr_v1_068_startup-immolator_3"
           ],
-          "hardware": [
-            "runner_onr_v1_145_wutech-mem-chip_1"
-          ],
+          "hardware": ["runner_onr_v1_145_wutech-mem-chip_1"],
           "resources": [
             "runner_onr_v1_173_restrictive-net-zoning_1",
             "runner_onr_v1_173_restrictive-net-zoning_2",
@@ -2496,9 +2490,7 @@
         "fatalDamageActiveForEncounter": false,
         "nextEncounterFatalDamage": 0,
         "lastPassedIceId": "corp_onr_proteus_032_misleading-access-menus_2",
-        "rootRezWindowPassedKeys": [
-          "run_251:ice:remote_1:2"
-        ],
+        "rootRezWindowPassedKeys": ["run_251:ice:remote_1:2"],
         "encounteredIceId": "corp_onr_v1_230_cortical-scanner_1"
       }
     },
@@ -9580,9 +9572,7 @@
               "support": 80,
               "final": 64
             },
-            "supportGaps": [
-              "low_threat_assessment_support"
-            ],
+            "supportGaps": ["low_threat_assessment_support"],
             "evidence": [
               "strategy:runner.remote_contest",
               "confidence:medium",
@@ -9666,9 +9656,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -9845,10 +9833,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9962,9 +9947,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -10027,10 +10010,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10049,9 +10029,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -10082,10 +10060,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10266,10 +10241,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10354,10 +10326,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10601,9 +10570,7 @@
           "maxCreditLoss": 16,
           "maxDamage": 0,
           "allowEndTheRun": true,
-          "evidence": [
-            "run_objective:probe_unknown_ice"
-          ]
+          "evidence": ["run_objective:probe_unknown_ice"]
         }
       },
       "targetServer": {
@@ -10674,18 +10641,14 @@
             "known": true,
             "rezzed": false,
             "visibleName": "Mobile Barricade",
-            "visibleSubtypes": [
-              "wall"
-            ],
+            "visibleSubtypes": ["wall"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               }
             ],
             "breakerCoverage": [
@@ -10802,18 +10765,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Sandstorm",
-            "visibleSubtypes": [
-              "wall"
-            ],
+            "visibleSubtypes": ["wall"],
             "effectiveStrength": 4,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run_unless_runner_pays"
-                ]
+                "evidence": ["subroutine_type:end_the_run_unless_runner_pays"]
               }
             ],
             "breakerCoverage": [
@@ -10961,42 +10920,32 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Cortical Scanner",
-            "visibleSubtypes": [
-              "code_gate"
-            ],
+            "visibleSubtypes": ["code_gate"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               },
               {
                 "index": 1,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               },
               {
                 "index": 2,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run"
-                ]
+                "evidence": ["subroutine_type:end_the_run"]
               },
               {
                 "index": 3,
                 "threatClass": "must_break_for_access",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:end_the_run_unless_runner_pays"
-                ]
+                "evidence": ["subroutine_type:end_the_run_unless_runner_pays"]
               }
             ],
             "breakerCoverage": [

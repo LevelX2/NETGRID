@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 90,
-    "stateHash": "fnv1a:3c94749c",
+    "stateHash": "fnv1a:4399cc21",
     "testOnlyGameState": {
       "matchId": "match_b34e724e4cfc0362",
       "baseline": {
@@ -1384,9 +1384,7 @@
           "corp_onr_v1_287_datapool-by-zetatech_2",
           "corp_onr_v1_298_planning-consultants_1"
         ],
-        "archives": [
-          "corp_onr_v1_298_planning-consultants_2"
-        ],
+        "archives": ["corp_onr_v1_298_planning-consultants_2"],
         "scoreArea": [],
         "servers": [
           {
@@ -1400,10 +1398,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_274_tutor_3",
-              "corp_onr_v1_276_viral-15_3"
-            ],
+            "ice": ["corp_onr_v1_274_tutor_3", "corp_onr_v1_276_viral-15_3"],
             "root": []
           },
           {
@@ -1417,13 +1412,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_277_virizz_3",
-              "corp_onr_v1_276_viral-15_2"
-            ],
-            "root": [
-              "corp_onr_v1_336_rescheduler_1"
-            ]
+            "ice": ["corp_onr_v1_277_virizz_3", "corp_onr_v1_276_viral-15_2"],
+            "root": ["corp_onr_v1_336_rescheduler_1"]
           }
         ]
       },
@@ -1484,13 +1474,9 @@
           "runner_onr_classic_028_matador_3",
           "runner_onr_classic_040_meat-upgrade_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_216_security-purge_1"
-        ],
+        "scoreArea": ["corp_onr_v1_216_security-purge_1"],
         "rig": {
-          "programs": [
-            "runner_onr_classic_031_rent-i-con_1"
-          ],
+          "programs": ["runner_onr_classic_031_rent-i-con_1"],
           "hardware": [],
           "resources": [
             "runner_onr_classic_046_executive-file-clerk_2",
@@ -2854,9 +2840,7 @@
         "successfulRunThisTurn": true,
         "damagePreventionUsage": {},
         "runnerActionsTakenThisTurn": 4,
-        "stolenAgendaIdsThisTurn": [
-          "corp_onr_v1_216_security-purge_1"
-        ],
+        "stolenAgendaIdsThisTurn": ["corp_onr_v1_216_security-purge_1"],
         "runAttemptsThisGame": 11,
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
@@ -5654,9 +5638,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.rnd_pressure",
-          "evidence": [
-            "continued:runner.rnd_pressure"
-          ]
+          "evidence": ["continued:runner.rnd_pressure"]
         },
         "commitment": {
           "strategyId": "runner.rnd_pressure",
@@ -6018,10 +6000,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6248,10 +6227,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6273,9 +6249,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -6658,9 +6632,7 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Tutor",
-            "visibleSubtypes": [
-              "code_gate"
-            ],
+            "visibleSubtypes": ["code_gate"],
             "effectiveStrength": 5,
             "subroutineQuotes": [
               {
@@ -6718,18 +6690,14 @@
             "known": true,
             "rezzed": true,
             "visibleName": "Viral 15",
-            "visibleSubtypes": [
-              "sentry"
-            ],
+            "visibleSubtypes": ["sentry"],
             "effectiveStrength": 3,
             "subroutineQuotes": [
               {
                 "index": 0,
                 "threatClass": "may_allow",
                 "broken": false,
-                "evidence": [
-                  "subroutine_type:set_run_jack_out_additional_cost"
-                ]
+                "evidence": ["subroutine_type:set_run_jack_out_additional_cost"]
               },
               {
                 "index": 1,
@@ -6847,9 +6815,7 @@
       },
       "revalidation": {
         "status": "valid",
-        "reasons": [
-          "run_plan_created_from_selected_run_action"
-        ],
+        "reasons": ["run_plan_created_from_selected_run_action"],
         "checkedAtStateVersion": 89
       },
       "abortPolicy": {

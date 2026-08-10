@@ -120,7 +120,7 @@
   },
   "engine": {
     "stateVersion": 125,
-    "stateHash": "fnv1a:2d52657c",
+    "stateHash": "fnv1a:24d50443",
     "testOnlyGameState": {
       "matchId": "match_fd22cad3cc454a9e",
       "baseline": {
@@ -1071,17 +1071,13 @@
           "corp_onr_v1_356_dedicated-response-team_2",
           "corp_onr_proteus_026_hunting-pack_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_203_hostile-takeover_2"
-        ],
+        "scoreArea": ["corp_onr_v1_203_hostile-takeover_2"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
@@ -1110,9 +1106,7 @@
               "corp_onr_v1_243_fetch-4-0-1_2",
               "corp_onr_v1_221_asp_2"
             ],
-            "root": [
-              "corp_onr_v1_203_hostile-takeover_3"
-            ]
+            "root": ["corp_onr_v1_203_hostile-takeover_3"]
           }
         ]
       },
@@ -1172,18 +1166,14 @@
           "runner_onr_classic_037_finders-keepers_2",
           "runner_onr_classic_042_panzer-run_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_193_corporate-coup_2"
-        ],
+        "scoreArea": ["corp_onr_v1_193_corporate-coup_2"],
         "rig": {
           "programs": [
             "runner_onr_classic_028_matador_1",
             "runner_onr_classic_030_psychic-friend_1",
             "runner_onr_classic_032_schematics-search-engine_1"
           ],
-          "hardware": [
-            "runner_onr_classic_049_omnitech-wet-drive_1"
-          ],
+          "hardware": ["runner_onr_classic_049_omnitech-wet-drive_1"],
           "resources": []
         }
       },
@@ -6274,9 +6264,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -6547,10 +6535,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6817,10 +6802,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6903,10 +6885,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6957,10 +6936,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6982,9 +6958,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -7047,10 +7021,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

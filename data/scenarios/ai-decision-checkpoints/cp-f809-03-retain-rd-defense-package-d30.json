@@ -148,7 +148,7 @@
   },
   "engine": {
     "stateVersion": 66,
-    "stateHash": "fnv1a:da2c7dd3",
+    "stateHash": "fnv1a:c9708319",
     "testOnlyGameState": {
       "matchId": "match_f8096c690c233533",
       "baseline": {
@@ -725,17 +725,13 @@
           "corp_onr_v1_290_efficiency-experts_1",
           "corp_onr_proteus_047_credit-consolidation_1"
         ],
-        "scoreArea": [
-          "corp_onr_proteus_007_project-venice_2"
-        ],
+        "scoreArea": ["corp_onr_proteus_007_project-venice_2"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_proteus_044_walking-wall_1"
-            ],
+            "ice": ["corp_onr_proteus_044_walking-wall_1"],
             "root": []
           },
           {
@@ -756,9 +752,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_proteus_012_bug-zapper_2"
-            ],
+            "ice": ["corp_onr_proteus_012_bug-zapper_2"],
             "root": []
           }
         ]
@@ -821,9 +815,7 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_071_vewy-vewy-quiet_2"
-          ],
+          "programs": ["runner_onr_v1_071_vewy-vewy-quiet_2"],
           "hardware": [],
           "resources": [
             "runner_onr_v1_176_the-shell-traders_2",
@@ -832,9 +824,7 @@
         }
       },
       "specialZones": {
-        "setAside": [
-          "runner_onr_v1_144_tycho-mem-chip_1"
-        ],
+        "setAside": ["runner_onr_v1_144_tycho-mem-chip_1"],
         "removedFromGame": []
       },
       "cardInstances": {
@@ -2199,9 +2189,7 @@
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
         "installedResourceIdsThisTurn": [],
-        "installedResourceIdsLastTurn": [
-          "runner_onr_v1_165_junkyard-bbs_1"
-        ],
+        "installedResourceIdsLastTurn": ["runner_onr_v1_165_junkyard-bbs_1"],
         "abilityUsedSourceIdsByLimitKey": {},
         "startOfTurnFloatingCreditsApplied": true,
         "bonusRunPending": false,
@@ -4293,9 +4281,7 @@
       "phase": "assemble",
       "transitionStatus": "continued",
       "decisionsCommitted": 25,
-      "blockerIds": [
-        "corp.damage_kill:support_gap:low_ambush_support"
-      ],
+      "blockerIds": ["corp.damage_kill:support_gap:low_ambush_support"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 61,
       "state": {
@@ -4319,9 +4305,7 @@
             "support": 85,
             "final": 81
           },
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "evidence": [
             "strategy:corp.damage_kill",
             "confidence:high",
@@ -4343,9 +4327,7 @@
               "support": 85,
               "final": 73
             },
-            "supportGaps": [
-              "low_traceSupport_support"
-            ],
+            "supportGaps": ["low_traceSupport_support"],
             "evidence": [
               "strategy:corp.tag_trace_punish",
               "confidence:high",
@@ -4366,9 +4348,7 @@
               "support": 75,
               "final": 70
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.overadvance_value",
               "confidence:high",
@@ -4389,9 +4369,7 @@
               "support": 75,
               "final": 68
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.action_tempo",
               "confidence:high",
@@ -4433,9 +4411,7 @@
               "support": 52,
               "final": 56
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.ambush_bluff",
               "confidence:medium",
@@ -4456,9 +4432,7 @@
               "support": 60,
               "final": 46
             },
-            "supportGaps": [
-              "low_scoreAcceleration_support"
-            ],
+            "supportGaps": ["low_scoreAcceleration_support"],
             "evidence": [
               "strategy:corp.fast_advance",
               "confidence:medium",
@@ -4512,18 +4486,14 @@
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap low_ambush_support",
-            "evidence": [
-              "support_gap:low_ambush_support"
-            ]
+            "evidence": ["support_gap:low_ambush_support"]
           }
         ],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.damage_kill",
-          "evidence": [
-            "continued:corp.damage_kill"
-          ]
+          "evidence": ["continued:corp.damage_kill"]
         },
         "commitment": {
           "strategyId": "corp.damage_kill",
@@ -4767,10 +4737,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4890,10 +4857,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5048,9 +5012,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 94,
@@ -5143,10 +5105,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5165,9 +5124,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -5198,10 +5155,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5258,10 +5212,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5317,10 +5268,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5374,10 +5322,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5457,9 +5402,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "corp.end_turn"
-            ]
+            "standardEndTurnActionIds": ["corp.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -5719,10 +5662,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:6",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:6", "opening_corp_turn_ceiling:3"]
               }
             }
           },
@@ -5797,9 +5737,7 @@
               "actionIds": [
                 "corp.score_agenda.corp_onr_proteus_007_project-venice_2.corp_onr_proteus_007_project-venice_2"
               ],
-              "routeSemanticActionTypes": [
-                "score.agenda"
-              ],
+              "routeSemanticActionTypes": ["score.agenda"],
               "phase": "score_agenda",
               "sameTurnCloseout": true,
               "terminalScore": false,
@@ -5808,10 +5746,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:8",
-                  "opening_corp_turn_ceiling:3"
-                ]
+                "evidence": ["turn_serial:8", "opening_corp_turn_ceiling:3"]
               }
             },
             "choiceContinuation": {
@@ -5878,9 +5813,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {

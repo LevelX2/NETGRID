@@ -14,15 +14,6 @@ import {
 } from "./card-implementation-catalog";
 
 const EXPECTED_GROUP_KEYS = [
-  "classic:corp:agenda",
-  "classic:corp:asset",
-  "classic:corp:ice",
-  "classic:corp:operation",
-  "classic:corp:upgrade",
-  "classic:runner:event",
-  "classic:runner:hardware",
-  "classic:runner:program",
-  "classic:runner:resource",
   "onr-v1:corp:agenda",
   "onr-v1:corp:asset",
   "onr-v1:corp:ice",
@@ -61,9 +52,9 @@ describe("semantic CardImplementation catalog", () => {
     expect(groupKeys).toEqual(EXPECTED_GROUP_KEYS);
     expect(new Set(groupKeys).size).toBe(groupKeys.length);
     expect(CARD_IMPLEMENTATION_CATALOG).toEqual(flattened);
-    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(571);
-    expect(cardSpecImplementations()).toHaveLength(30);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(601);
+    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(517);
+    expect(cardSpecImplementations()).toHaveLength(80);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(597);
     expect(CARD_IMPLEMENTATIONS.slice(0, flattened.length)).toEqual(flattened);
     expect(
       CARD_IMPLEMENTATIONS.slice(flattened.length).map(

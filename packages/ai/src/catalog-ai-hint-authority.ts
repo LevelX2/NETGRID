@@ -6,8 +6,10 @@ import {
   type AiCardHint,
   type AiRuntimeValueHintKey,
   type AiRuntimeValueHints,
-  type CardSpecAiHintArtifact,
 } from "./ai-hint-contracts";
+import { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validation";
+
+export { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validation";
 
 export type { AiCardHint, AiRuntimeValueHintKey, AiRuntimeValueHints };
 
@@ -135,51 +137,6 @@ export function catalogAiHintSummaryForCardId(
   });
 }
 
-export function validateGeneratedArtifact(
-  value: unknown,
-): CardSpecAiHintArtifact {
-  if (typeof value !== "object" || value === null)
-    throw new Error("invalid_card_spec_ai_hint_artifact");
-  const artifact = value as Partial<CardSpecAiHintArtifact>;
-  if (
-    artifact.schemaVersion !== CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION ||
-    artifact.compilerVersion !== CARD_SPEC_AI_HINT_COMPILER_VERSION ||
-    artifact.evidence?.status !== "ai_supported" ||
-    artifact.evidence.scenarioPackId !== "card-support-ai-supported-current" ||
-    artifact.evidence.scenarioId !== "active_card_support_ai_supported" ||
-    !artifact.evidence.fingerprint.startsWith(
-      "fnv1a64x2:card-spec-ai-hint-evidence-v2:",
-    ) ||
-    !Array.isArray(artifact.cardIds) ||
-    !Array.isArray(artifact.cards) ||
-    artifact.cardIds.length !== 46 ||
-    artifact.cards.length !== 46
-  )
-    throw new Error("invalid_card_spec_ai_hint_artifact_contract");
-  const expectedIds = [...artifact.cardIds].sort(compareText);
-  const actualIds = artifact.cards
-    .map((record) => record.cardId)
-    .sort(compareText);
-  if (
-    new Set(expectedIds).size !== expectedIds.length ||
-    expectedIds.some((entry, index) => entry !== actualIds[index]) ||
-    artifact.cards.some(
-      (record) =>
-        record.hint.cardId !== record.cardId ||
-        record.hint.aiSupportStatus !== "ai_supported" ||
-        !record.hint.scenarioRefs?.includes(
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-        ) ||
-        !record.cardRulesFingerprint.startsWith("fnv1a64x2:card-rules-v1:") ||
-        !record.planningAnnotationsFingerprint.startsWith(
-          "fnv1a64x2:card-planning-annotations-v1:",
-        ),
-    )
-  )
-    throw new Error("invalid_card_spec_ai_hint_artifact_rows");
-  return artifact as CardSpecAiHintArtifact;
-}
-
 function hasCatalogMechanicalFacts(hint: AiCardHint): boolean {
   return Boolean(
     hint.effects?.length ||
@@ -196,8 +153,4 @@ function deepFreezeCatalogReadModel<T extends object>(value: T): T {
     if (typeof nested === "object" && nested !== null)
       deepFreezeCatalogReadModel(nested);
   return Object.freeze(value);
-}
-
-function compareText(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
 }

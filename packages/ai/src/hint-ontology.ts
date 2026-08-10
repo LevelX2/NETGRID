@@ -689,6 +689,7 @@ export type AiHintBreakerProfile = {
   breakCost?: number;
   maxSubroutinesPerBreak?: number;
   configurableCoverage?: boolean;
+  emergencyCoverage?: boolean;
   reconfigurableType?: boolean;
   oneTimeModeChoice?: boolean;
   multiSubroutineBreak?: boolean;
@@ -1282,6 +1283,7 @@ function validateBreakerProfile(
   }
   for (const key of [
     "configurableCoverage",
+    "emergencyCoverage",
     "reconfigurableType",
     "oneTimeModeChoice",
     "multiSubroutineBreak",

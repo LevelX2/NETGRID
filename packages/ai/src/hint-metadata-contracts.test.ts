@@ -36,7 +36,9 @@ describe("AI hint metadata contracts", () => {
     const current = report();
 
     expect(current.hardErrorCount).toBe(0);
-    expect(current.summary.valueHintAssignmentCount).toBe(203);
+    // Classic Self-Destruct no longer claims a fixed damage value: its
+    // canonical access effect scales by the cards actually trashed.
+    expect(current.summary.valueHintAssignmentCount).toBe(202);
     expect(current.summary.runtimePairCount).toBe(125);
     expect(current.summary.evidenceOnlyPairCount).toBe(117);
     expect(current.summary.runtimeMechanicCount).toBe(48);

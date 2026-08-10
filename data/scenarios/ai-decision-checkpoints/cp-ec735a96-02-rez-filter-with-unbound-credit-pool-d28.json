@@ -124,7 +124,7 @@
   },
   "engine": {
     "stateVersion": 50,
-    "stateHash": "fnv1a:ab8d92e5",
+    "stateHash": "fnv1a:046c0de8",
     "testOnlyGameState": {
       "matchId": "match_ec735a96b0695d93",
       "baseline": {
@@ -875,17 +875,13 @@
           "corp_onr_v1_297_overtime-incentives_3",
           "corp_onr_v1_307_urban-renewal_3"
         ],
-        "scoreArea": [
-          "corp_onr_v1_203_hostile-takeover_1"
-        ],
+        "scoreArea": ["corp_onr_v1_203_hostile-takeover_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_244_filter_1"
-            ],
+            "ice": ["corp_onr_v1_244_filter_1"],
             "root": []
           },
           {
@@ -963,9 +959,7 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_035_invisibility_1"
-          ],
+          "programs": ["runner_onr_v1_035_invisibility_1"],
           "hardware": [],
           "resources": [
             "runner_onr_classic_045_elena-laskova_1",
@@ -2372,9 +2366,7 @@
         "trashedNodeThisTurn": false,
         "trashedNodeLastTurn": false,
         "installedResourceIdsThisTurn": [],
-        "installedResourceIdsLastTurn": [
-          "runner_onr_v1_165_junkyard-bbs_1"
-        ],
+        "installedResourceIdsLastTurn": ["runner_onr_v1_165_junkyard-bbs_1"],
         "abilityUsedSourceIdsByLimitKey": {},
         "startOfTurnFloatingCreditsApplied": true,
         "bonusRunPending": false,

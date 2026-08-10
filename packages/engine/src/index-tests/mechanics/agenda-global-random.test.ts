@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import {
   applyAction,
   applyEffectCommands,
@@ -197,6 +198,10 @@ import {
   addInstalledRunnerProgramForTest,
 } from "../../test-fixtures/index-test-helpers";
 
+const CARD_SPEC_RUNTIME_DEFINITION_IDS = new Set(
+  cardSpecRuntimeDefinitionIds(),
+);
+
 describe("V1.9.19 Agenda/Overadvance WIP", () => {
   it("adds all V1.9.19 WIP runtime definitions without release-promoting the next slice", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.agendaScoring).toHaveLength(20);
@@ -205,9 +210,12 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/,
-      );
+      if (CARD_SPEC_RUNTIME_DEFINITION_IDS.has(definitionId))
+        expect(definition?.mechanics.length, definitionId).toBeGreaterThan(0);
+      else
+        expect(definition?.mechanics.join(" "), definitionId).toMatch(
+          /scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/,
+        );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
@@ -1346,9 +1354,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         "playable_mvp",
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier|meat_damage|tag_condition/,
-      );
+      if (CARD_SPEC_RUNTIME_DEFINITION_IDS.has(definitionId))
+        expect(definition?.mechanics.length, definitionId).toBeGreaterThan(0);
+      else
+        expect(definition?.mechanics.join(" "), definitionId).toMatch(
+          /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier|meat_damage|tag_condition/,
+        );
     }
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,

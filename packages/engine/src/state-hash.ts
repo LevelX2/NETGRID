@@ -1,5 +1,5 @@
 import type { GameState, StateHash } from "@netgrid/shared";
-import { CS06_CARD_DEFINITION_IDS } from "@netgrid/cards/engine";
+import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import { createCurrentCardRegistryRulesContext } from "./card-registry-rules-context";
 
 export function hashStateSnapshot(state: GameState): StateHash {
@@ -10,7 +10,9 @@ export function hashStateSnapshot(state: GameState): StateHash {
   return hashStateSnapshotWithRulesContext(state, rulesContext.fingerprint);
 }
 
-const cs06CardDefinitionIds = new Set<string>(CS06_CARD_DEFINITION_IDS);
+const activeCardSpecDefinitionIds = new Set<string>(
+  cardSpecRuntimeDefinitionIds(),
+);
 
 export class StateHashCardPoolError extends Error {
   readonly name = "StateHashCardPoolError";
@@ -34,7 +36,9 @@ export function matchCardSpecDefinitionIdsForState(state: GameState): string[] {
     ...new Set(
       Object.values(state.cardInstances)
         .map((card) => card.definitionId)
-        .filter((definitionId) => cs06CardDefinitionIds.has(definitionId)),
+        .filter((definitionId) =>
+          activeCardSpecDefinitionIds.has(definitionId),
+        ),
     ),
   ].sort();
 }

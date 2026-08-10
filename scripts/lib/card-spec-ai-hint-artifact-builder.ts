@@ -1,4 +1,9 @@
 import { fingerprint } from "../../packages/cards/src/index";
+import {
+  cardSpecRuntimeDefinitionIds,
+  cardSpecSourceRefs,
+  CS06_CARD_DEFINITION_IDS,
+} from "../../packages/cards/src/engine/index";
 import { cardSpecPlanningCards } from "../../packages/cards/src/planning/index";
 
 import aiSupportScenarioData from "../../data/scenarios/card-support-ai-supported-current.json";
@@ -33,13 +38,42 @@ export function buildCardSpecAiHintArtifact(options?: {
   const canonicalEntries = cardSpecPlanningCards();
   const entries = options?.entries ?? canonicalEntries;
   const scenarioPack = options?.scenarioPack ?? aiSupportScenarioData;
-  const expectedIds = canonicalEntries
-    .map((entry) => entry.definition.id)
-    .sort(compareText);
-  if (expectedIds.length !== 46 || new Set(expectedIds).size !== 46)
+  const activeIds = new Set(cardSpecRuntimeDefinitionIds());
+  const sourceRefs = cardSpecSourceRefs();
+  const classicIds = sourceRefs
+    .filter(
+      (ref) =>
+        ref.sourcePath.includes("/specs/classic/") &&
+        activeIds.has(ref.cardDefinitionId),
+    )
+    .map((ref) => ref.cardDefinitionId);
+  const testsetIds = sourceRefs
+    .filter(
+      (ref) =>
+        ref.sourcePath.includes("/specs/testset/") &&
+        activeIds.has(ref.cardDefinitionId),
+    )
+    .map((ref) => ref.cardDefinitionId);
+  const expectedIds = [
+    ...CS06_CARD_DEFINITION_IDS,
+    ...testsetIds,
+    ...classicIds,
+  ].sort(compareText);
+  if (
+    CS06_CARD_DEFINITION_IDS.length !== 10 ||
+    testsetIds.length !== 36 ||
+    classicIds.length !== 54 ||
+    expectedIds.length !== 100 ||
+    new Set(expectedIds).size !== 100
+  )
     throw new Error(
-      `card_spec_ai_hint_artifact_expected_46_active_cards: ${expectedIds.length}`,
+      `card_spec_ai_hint_artifact_expected_partition_mismatch: cs06=${CS06_CARD_DEFINITION_IDS.length},testset=${testsetIds.length},classic=${classicIds.length},total=${expectedIds.length}`,
     );
+  assertExactIds(
+    "card_spec_ai_hint_artifact_runtime_partition",
+    [...activeIds].sort(compareText),
+    expectedIds,
+  );
   const actualIds = entries
     .map((entry) => entry.definition.id)
     .sort(compareText);

@@ -104,7 +104,7 @@
   },
   "engine": {
     "stateVersion": 47,
-    "stateHash": "fnv1a:9a611154",
+    "stateHash": "fnv1a:e426653e",
     "testOnlyGameState": {
       "matchId": "match_d1532f829371a95f",
       "baseline": {
@@ -931,9 +931,7 @@
           "corp_onr_v1_290_efficiency-experts_3",
           "corp_onr_v1_281_accounts-receivable_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_189_artificial-security-directors_1"
-        ],
+        "scoreArea": ["corp_onr_v1_189_artificial-security-directors_1"],
         "servers": [
           {
             "id": "hq",
@@ -946,9 +944,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_271_tko-2-0_1"
-            ],
+            "ice": ["corp_onr_v1_271_tko-2-0_1"],
             "root": []
           },
           {
@@ -962,9 +958,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_proteus_036_sandstorm_1"
-            ],
+            "ice": ["corp_onr_proteus_036_sandstorm_1"],
             "root": []
           }
         ]
@@ -3755,10 +3749,7 @@
       "selectedStepKind": "draw_for_answer",
       "selectedActionId": "runner.draw_card",
       "selectedActionType": "draw_card",
-      "blockedBy": [
-        "missing_breaker_coverage",
-        "search_target_not_available"
-      ],
+      "blockedBy": ["missing_breaker_coverage", "search_target_not_available"],
       "ttlDecisionsRemaining": 1,
       "planProgressionReason": "previous_plan_considered",
       "progressBaseline": {
@@ -3844,9 +3835,7 @@
               "support": 80,
               "final": 64
             },
-            "supportGaps": [
-              "low_threat_assessment_support"
-            ],
+            "supportGaps": ["low_threat_assessment_support"],
             "evidence": [
               "strategy:runner.remote_contest",
               "confidence:medium",
@@ -3930,9 +3919,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -4109,10 +4096,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4226,9 +4210,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4291,10 +4273,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4313,9 +4292,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -4346,10 +4323,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4530,10 +4504,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4618,10 +4589,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",

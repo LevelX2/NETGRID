@@ -124,7 +124,7 @@
   },
   "engine": {
     "stateVersion": 120,
-    "stateHash": "fnv1a:1451d0d0",
+    "stateHash": "fnv1a:5a0cd1dd",
     "testOnlyGameState": {
       "matchId": "match_5a9cdbd00a029d2c",
       "baseline": {
@@ -988,17 +988,13 @@
           "corp_onr_v1_283_audit-of-call-records_2",
           "corp_onr_v1_306_trojan-horse_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_203_hostile-takeover_1"
-        ],
+        "scoreArea": ["corp_onr_v1_203_hostile-takeover_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_244_filter_1"
-            ],
+            "ice": ["corp_onr_v1_244_filter_1"],
             "root": []
           },
           {
@@ -1019,9 +1015,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           }
         ]
@@ -1078,18 +1072,14 @@
           "runner_onr_classic_043_running-interference_1",
           "runner_onr_classic_042_panzer-run_2"
         ],
-        "scoreArea": [
-          "corp_onr_v1_207_netwatch-operations-office_1"
-        ],
+        "scoreArea": ["corp_onr_v1_207_netwatch-operations-office_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_071_vewy-vewy-quiet_1",
             "runner_onr_v1_035_invisibility_2",
             "runner_onr_classic_031_rent-i-con_2"
           ],
-          "hardware": [
-            "runner_onr_v1_139_r-and-d-interface_1"
-          ],
+          "hardware": ["runner_onr_v1_139_r-and-d-interface_1"],
           "resources": [
             "runner_onr_v1_176_the-shell-traders_2",
             "runner_onr_proteus_133_chiba-bank-account_1"

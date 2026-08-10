@@ -136,7 +136,7 @@
   },
   "engine": {
     "stateVersion": 229,
-    "stateHash": "fnv1a:586a88f3",
+    "stateHash": "fnv1a:a757f3e1",
     "testOnlyGameState": {
       "matchId": "match_23d6dc3849db2566",
       "baseline": {
@@ -9845,15 +9845,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.pressure_central"
-      ],
-      "acceptableCapabilities": [
-        "pressure_hq_information"
-      ],
-      "requiredAssessmentEvidence": [
-        "target:hq"
-      ]
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_information"],
+      "requiredAssessmentEvidence": ["target:hq"]
     }
   }
 }

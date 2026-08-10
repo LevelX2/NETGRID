@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 96,
-    "stateHash": "fnv1a:82e66683",
+    "stateHash": "fnv1a:31528473",
     "testOnlyGameState": {
       "matchId": "match_f450485d3e5be1ab",
       "baseline": {
@@ -971,9 +971,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_classic_009_dumpster_1"
-            ],
+            "ice": ["corp_onr_classic_009_dumpster_1"],
             "root": []
           }
         ]
@@ -5092,15 +5090,9 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.pressure_central"
-      ],
-      "acceptableCapabilities": [
-        "pressure_hq_information"
-      ],
-      "requiredAssessmentEvidence": [
-        "target:hq"
-      ]
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_information"],
+      "requiredAssessmentEvidence": ["target:hq"]
     },
     "runTargets": [
       {

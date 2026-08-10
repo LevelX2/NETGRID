@@ -4,7 +4,7 @@ import {
   type ResolvedCardDefinition,
   type SubroutineDefinition,
 } from "@netgrid/shared";
-import { cardSpecPlanningCards } from "@netgrid/cards/planning";
+import { cardSpecPlanningCards, planningCards } from "@netgrid/cards/planning";
 
 export type AiCardDefinitionAuthorityErrorCode =
   | "overlapping_definition_authority"
@@ -23,13 +23,14 @@ export class AiCardDefinitionAuthorityError extends Error {
 }
 
 const cardSpecEntries = cardSpecPlanningCards();
+const planningEntries = planningCards();
 const expectedCardSpecIds = new Set<string>(
-  cardSpecEntries.map(({ definition }) => definition.id),
+  planningEntries.map(({ cardDefinitionId }) => cardDefinitionId),
 );
-if (expectedCardSpecIds.size !== 46)
+if (expectedCardSpecIds.size !== planningEntries.length)
   throw new AiCardDefinitionAuthorityError(
-    "missing_definition_authority",
-    `expected_46_active_card_specs_got_${expectedCardSpecIds.size}`,
+    "overlapping_definition_authority",
+    "unknown_duplicate_planning_card",
   );
 const cardSpecDefinitions = cardSpecEntries.map(({ definition }) =>
   mutableCompatibilityDefinition(definition),

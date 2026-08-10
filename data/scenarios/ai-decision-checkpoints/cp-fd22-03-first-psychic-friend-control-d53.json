@@ -120,7 +120,7 @@
   },
   "engine": {
     "stateVersion": 97,
-    "stateHash": "fnv1a:d8ca6604",
+    "stateHash": "fnv1a:e987e4b5",
     "testOnlyGameState": {
       "matchId": "match_fd22cad3cc454a9e",
       "baseline": {
@@ -1078,9 +1078,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_237_data-wall_2"
-            ],
+            "ice": ["corp_onr_v1_237_data-wall_2"],
             "root": []
           },
           {
@@ -1109,9 +1107,7 @@
               "corp_onr_v1_243_fetch-4-0-1_2",
               "corp_onr_v1_221_asp_2"
             ],
-            "root": [
-              "corp_onr_v1_203_hostile-takeover_2"
-            ]
+            "root": ["corp_onr_v1_203_hostile-takeover_2"]
           }
         ]
       },
@@ -1171,16 +1167,10 @@
           "runner_onr_classic_033_superglue_2",
           "runner_onr_classic_029_ms-todon_1"
         ],
-        "heap": [
-          "runner_onr_classic_037_finders-keepers_2"
-        ],
-        "scoreArea": [
-          "corp_onr_v1_193_corporate-coup_2"
-        ],
+        "heap": ["runner_onr_classic_037_finders-keepers_2"],
+        "scoreArea": ["corp_onr_v1_193_corporate-coup_2"],
         "rig": {
-          "programs": [
-            "runner_onr_classic_028_matador_1"
-          ],
+          "programs": ["runner_onr_classic_028_matador_1"],
           "hardware": [],
           "resources": []
         }
@@ -5296,9 +5286,7 @@
           "currentCredits": 4,
           "targetCredits": 6,
           "gap": 2,
-          "acceptedCreditRestrictions": [
-            "general"
-          ],
+          "acceptedCreditRestrictions": ["general"],
           "evidence": [
             "credit_base_explicit_demand:true",
             "credit_base_explicit_target:6",
@@ -5444,9 +5432,7 @@
             "currentCredits": 4,
             "targetCredits": 6,
             "gap": 2,
-            "acceptedCreditRestrictions": [
-              "general"
-            ],
+            "acceptedCreditRestrictions": ["general"],
             "evidence": [
               "credit_base_explicit_demand:true",
               "credit_base_explicit_target:6",
@@ -5910,9 +5896,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.hq_pressure",
-          "evidence": [
-            "continued:runner.hq_pressure"
-          ]
+          "evidence": ["continued:runner.hq_pressure"]
         },
         "commitment": {
           "strategyId": "runner.hq_pressure",
@@ -6183,10 +6167,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6601,10 +6582,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6626,9 +6604,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,

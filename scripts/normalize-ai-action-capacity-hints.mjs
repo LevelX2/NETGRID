@@ -279,18 +279,6 @@ const EXACT_PROFILES = new Map(
         repeatable: true,
       }),
     ],
-    "onr_classic_051_vintage-camaro": [
-      profile({
-        class: "action_debt",
-        timing: "prevention_window",
-        recipient: "runner",
-        reliability: "guaranteed",
-        sourceResource: "replacement_effect",
-        expiresAt: "debt_paid",
-        amount: 1,
-        repeatable: true,
-      }),
-    ],
     "onr_v1_022_emergency-self-construct": [
       profile({
         class: "action_loss",

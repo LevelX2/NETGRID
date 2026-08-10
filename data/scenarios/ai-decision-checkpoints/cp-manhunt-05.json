@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 307,
-    "stateHash": "fnv1a:1b418ebd",
+    "stateHash": "fnv1a:36ea2d2c",
     "testOnlyGameState": {
       "matchId": "match_606a546d0ba02826",
       "baseline": {
@@ -11641,18 +11641,12 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "corp.economy"
-      ],
-      "acceptableCapabilities": [
-        "develop_or_convert_corp_economy"
-      ],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-      "corp_visible_economy_campaign:onr_v1_309_bbs-whispering-campaign:install"
+        "corp_visible_economy_campaign:onr_v1_309_bbs-whispering-campaign:install"
       ],
-      "forbiddenCapabilities": [
-        "gain_general_liquid_credits"
-      ]
+      "forbiddenCapabilities": ["gain_general_liquid_credits"]
     }
   }
 }

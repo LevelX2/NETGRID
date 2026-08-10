@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 28,
-    "stateHash": "fnv1a:1a7dbe12",
+    "stateHash": "fnv1a:a74048e7",
     "testOnlyGameState": {
       "matchId": "match_e8886c6f5a9d0c24",
       "baseline": {
@@ -742,9 +742,7 @@
           "corp_onr_v1_264_rex_1",
           "corp_onr_v1_307_urban-renewal_1"
         ],
-        "archives": [
-          "corp_onr_v1_295_night-shift_2"
-        ],
+        "archives": ["corp_onr_v1_295_night-shift_2"],
         "scoreArea": [],
         "servers": [
           {
@@ -758,9 +756,7 @@
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_252_keeper_1"
-            ],
+            "ice": ["corp_onr_v1_252_keeper_1"],
             "root": []
           },
           {
@@ -774,9 +770,7 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_266_scramble_1"
-            ],
+            "ice": ["corp_onr_v1_266_scramble_1"],
             "root": []
           }
         ]
@@ -839,13 +833,9 @@
           "runner_onr_v1_095_jack-n-joe_3"
         ],
         "heap": [],
-        "scoreArea": [
-          "corp_onr_v1_205_main-office-relocation_1"
-        ],
+        "scoreArea": ["corp_onr_v1_205_main-office-relocation_1"],
         "rig": {
-          "programs": [
-            "runner_onr_v1_016_cyfermaster_1"
-          ],
+          "programs": ["runner_onr_v1_016_cyfermaster_1"],
           "hardware": [],
           "resources": []
         }
@@ -3236,9 +3226,7 @@
       },
       "selectedStepKind": "gain_credits",
       "selectedActionId": "runner.gain_credit",
-      "blockedBy": [
-        "missing_credits"
-      ],
+      "blockedBy": ["missing_credits"],
       "ttlDecisionsRemaining": 2,
       "planProgressionReason": "previous_central_probe_satisfied",
       "progressBaseline": {
@@ -3405,19 +3393,14 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "runner.run_event_tempo",
-          "evidence": [
-            "continued:runner.run_event_tempo"
-          ]
+          "evidence": ["continued:runner.run_event_tempo"]
         },
         "commitment": {
           "strategyId": "runner.run_event_tempo",
@@ -3501,10 +3484,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3584,10 +3564,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3609,9 +3586,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3671,10 +3646,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -3693,9 +3665,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -3726,10 +3696,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4084,10 +4051,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -4333,9 +4297,7 @@
       }
     ],
     "selectedScoreBreakdown": {
-      "forbiddenComponentKeys": [
-        "runner_install_economy"
-      ]
+      "forbiddenComponentKeys": ["runner_install_economy"]
     }
   }
 }

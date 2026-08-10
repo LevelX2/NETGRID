@@ -44,6 +44,7 @@
     "check:card-spec-import-index": "node scripts/generate-card-spec-import-index.mjs --check",
     "check:card-spec-import-index:selftest": "node scripts/generate-card-spec-import-index.mjs --self-test",
     "check:card-registry-match-retention": "tsx scripts/check-card-registry-match-retention.mts",
+    "check:card-spec-decision-checkpoints": "tsx scripts/rebase-card-spec-decision-checkpoints.mts --check",
     "check:engine-credit-gain-boundary": "node scripts/check-engine-credit-gain-boundary.mjs",
     "check:package-boundaries": "node scripts/check-package-boundaries.mjs",
     "check:package-boundaries:selftest": "node scripts/check-package-boundaries.mjs --self-test",

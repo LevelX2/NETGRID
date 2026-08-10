@@ -97,7 +97,16 @@ describe("mechanical StateHash baseline", () => {
       eventLog: [],
       cardInstances: {
         z: { instanceId: "z", definitionId: "onr_v1_154_broker" },
-        legacy: { instanceId: "legacy", definitionId: "simple_agenda" },
+        classic: {
+          instanceId: "classic",
+          definitionId: "onr_classic_031_rent-i-con",
+        },
+        testset: { instanceId: "testset", definitionId: "simple_agenda" },
+        preview: {
+          instanceId: "preview",
+          definitionId: "catalog_preview_resource_001",
+        },
+        legacy: { instanceId: "legacy", definitionId: "onr_v1_001_afreet" },
         a: { instanceId: "a", definitionId: "onr_v1_168_loan-from-chiba" },
         duplicate: {
           instanceId: "duplicate",
@@ -107,8 +116,10 @@ describe("mechanical StateHash baseline", () => {
     } as unknown as GameState;
 
     expect(matchCardSpecDefinitionIdsForState(state)).toEqual([
+      "onr_classic_031_rent-i-con",
       "onr_v1_154_broker",
       "onr_v1_168_loan-from-chiba",
+      "simple_agenda",
     ]);
     const reordered = structuredClone(state);
     reordered.cardInstances = Object.fromEntries(
@@ -124,7 +135,7 @@ describe("mechanical StateHash baseline", () => {
       baseline: CURRENT_RULES_BASELINE,
       eventLog: [],
       cardInstances: {
-        legacy: { instanceId: "legacy", definitionId: "simple_agenda" },
+        legacy: { instanceId: "legacy", definitionId: "onr_v1_001_afreet" },
       },
     } as unknown as GameState;
     expect(matchCardSpecDefinitionIdsForState(state)).toEqual([]);

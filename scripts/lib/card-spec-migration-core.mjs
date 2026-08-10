@@ -102,6 +102,116 @@ export function extractArrayObjects(sourceText, variableName, fail) {
     .map((element) => evaluateLiteral(element, fail));
 }
 
+export function extractExportedConstObject(
+  sourceText,
+  variableName,
+  helperCalls,
+  fail,
+) {
+  const sourceFile = ts.createSourceFile(
+    "legacy-module.ts",
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  if (sourceFile.parseDiagnostics.length > 0)
+    fail(`card_spec_migration_legacy_parse_error:${variableName}`);
+
+  const localValues = new Map();
+  let exportedInitializer;
+  sourceFile.forEachChild((node) => {
+    if (!ts.isVariableStatement(node)) return;
+    const exported = node.modifiers?.some(
+      (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+    );
+    for (const declaration of node.declarationList.declarations) {
+      if (
+        !ts.isIdentifier(declaration.name) ||
+        declaration.initializer === undefined
+      )
+        continue;
+      if (declaration.name.text === variableName && exported)
+        exportedInitializer = declaration.initializer;
+      else if (!exported)
+        localValues.set(declaration.name.text, declaration.initializer);
+    }
+  });
+  if (exportedInitializer === undefined)
+    fail(`card_spec_migration_legacy_export_missing:${variableName}`);
+
+  const evaluatedLocals = new Map();
+  const evaluatingLocals = new Set();
+  const evaluateLocal = (name) => {
+    if (evaluatedLocals.has(name)) return evaluatedLocals.get(name);
+    const initializer = localValues.get(name);
+    if (initializer === undefined)
+      fail(`card_spec_migration_unknown_legacy_identifier:${name}`);
+    if (evaluatingLocals.has(name))
+      fail(`card_spec_migration_cyclic_legacy_identifier:${name}`);
+    evaluatingLocals.add(name);
+    const value = evaluateClosedExpression(initializer, {
+      fail,
+      helperCalls,
+      evaluateLocal,
+    });
+    evaluatingLocals.delete(name);
+    evaluatedLocals.set(name, value);
+    return value;
+  };
+
+  return evaluateClosedExpression(exportedInitializer, {
+    fail,
+    helperCalls,
+    evaluateLocal,
+  });
+}
+
+export function extractSingleExportedConstObject(
+  sourceText,
+  helperCalls,
+  fail,
+) {
+  const sourceFile = ts.createSourceFile(
+    "legacy-module.ts",
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  if (sourceFile.parseDiagnostics.length > 0)
+    fail("card_spec_migration_legacy_parse_error:single_export");
+  const exportedNames = [];
+  sourceFile.forEachChild((node) => {
+    if (
+      !ts.isVariableStatement(node) ||
+      !node.modifiers?.some(
+        (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+      )
+    )
+      return;
+    for (const declaration of node.declarationList.declarations)
+      if (
+        ts.isIdentifier(declaration.name) &&
+        declaration.initializer !== undefined
+      )
+        exportedNames.push(declaration.name.text);
+  });
+  if (exportedNames.length !== 1)
+    fail(
+      `card_spec_migration_expected_single_export:${exportedNames.join(",")}`,
+    );
+  return {
+    exportName: exportedNames[0],
+    value: extractExportedConstObject(
+      sourceText,
+      exportedNames[0],
+      helperCalls,
+      fail,
+    ),
+  };
+}
+
 export async function verifyMigrationOutputs({
   mode,
   root,
@@ -182,6 +292,85 @@ function evaluateLiteral(node, fail) {
     return result;
   }
   fail(`card_spec_migration_unsupported_legacy_expression:${value.getText()}`);
+}
+
+function evaluateClosedExpression(node, context) {
+  const value = unwrapExpression(node);
+  if (ts.isStringLiteral(value) || ts.isNoSubstitutionTemplateLiteral(value))
+    return value.text;
+  if (ts.isNumericLiteral(value)) return Number(value.text);
+  if (value.kind === ts.SyntaxKind.TrueKeyword) return true;
+  if (value.kind === ts.SyntaxKind.FalseKeyword) return false;
+  if (value.kind === ts.SyntaxKind.NullKeyword) return null;
+  if (
+    ts.isPrefixUnaryExpression(value) &&
+    value.operator === ts.SyntaxKind.MinusToken
+  )
+    return -evaluateClosedExpression(value.operand, context);
+  if (ts.isIdentifier(value))
+    return cloneValue(context.evaluateLocal(value.text));
+  if (ts.isCallExpression(value)) {
+    if (!ts.isIdentifier(value.expression))
+      context.fail(
+        `card_spec_migration_unsupported_legacy_call:${value.expression.getText()}`,
+      );
+    const helper = context.helperCalls[value.expression.text];
+    if (helper === undefined)
+      context.fail(
+        `card_spec_migration_unknown_legacy_helper:${value.expression.text}`,
+      );
+    return helper(
+      value.arguments.map((argument) =>
+        evaluateClosedExpression(argument, context),
+      ),
+    );
+  }
+  if (ts.isArrayLiteralExpression(value)) {
+    const result = [];
+    for (const element of value.elements) {
+      if (ts.isSpreadElement(element)) {
+        const spread = evaluateClosedExpression(element.expression, context);
+        if (!Array.isArray(spread))
+          context.fail(
+            `card_spec_migration_invalid_legacy_array_spread:${element.getText()}`,
+          );
+        result.push(...cloneValue(spread));
+      } else result.push(evaluateClosedExpression(element, context));
+    }
+    return result;
+  }
+  if (ts.isObjectLiteralExpression(value)) {
+    const result = {};
+    for (const property of value.properties) {
+      if (ts.isSpreadAssignment(property)) {
+        const spread = evaluateClosedExpression(property.expression, context);
+        if (
+          spread === null ||
+          typeof spread !== "object" ||
+          Array.isArray(spread)
+        )
+          context.fail(
+            `card_spec_migration_invalid_legacy_object_spread:${property.getText()}`,
+          );
+        Object.assign(result, cloneValue(spread));
+        continue;
+      }
+      if (!ts.isPropertyAssignment(property))
+        context.fail(
+          `card_spec_migration_unsupported_legacy_property:${property.getText()}`,
+        );
+      result[propertyName(property.name, context.fail)] =
+        evaluateClosedExpression(property.initializer, context);
+    }
+    return result;
+  }
+  context.fail(
+    `card_spec_migration_unsupported_legacy_expression:${value.getText()}`,
+  );
+}
+
+function cloneValue(value) {
+  return structuredClone(value);
 }
 
 function unwrapExpression(node) {

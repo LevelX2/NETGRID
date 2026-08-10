@@ -27,12 +27,22 @@ describe("catalog card presentations", () => {
         type: "program",
         engine: { hidden: true },
       },
+      {
+        catalogCardId: "onr_classic_038_gypsytm-schedule-analyzer",
+        title: "Gypsy™ Schedule Analyzer",
+        type: "hardware",
+        planningAnnotations: { hidden: true },
+      },
     ];
     const presentations = catalogCardPresentationsFor(sourceRows);
 
     expect(presentations).toEqual({
       runner_identity_001: { title: "Runner Identity", type: "identity" },
       simple_fracter: { title: "Simple Fracter", type: "program" },
+      "onr_classic_038_gypsytm-schedule-analyzer": {
+        title: "Gypsy™ Schedule Analyzer",
+        type: "hardware",
+      },
     });
   });
 
@@ -40,10 +50,24 @@ describe("catalog card presentations", () => {
     expect(publicCardTitle("simple_fracter")).toBeUndefined();
     expect(publicCardPresentation("simple_fracter")).toBeUndefined();
     expect(
+      publicCardTitle("onr_classic_038_gypsytm-schedule-analyzer"),
+    ).toBeUndefined();
+    expect(
+      publicCardPresentation("onr_classic_038_gypsytm-schedule-analyzer"),
+    ).toBeUndefined();
+    expect(
       publicCardTitle("simple_fracter", {
         simple_fracter: { title: "Simple Fracter", type: "program" },
       }),
     ).toBe("Simple Fracter");
+    expect(
+      publicCardTitle("onr_classic_038_gypsytm-schedule-analyzer", {
+        "onr_classic_038_gypsytm-schedule-analyzer": {
+          title: "Gypsy™ Schedule Analyzer",
+          type: "hardware",
+        },
+      }),
+    ).toBe("Gypsy™ Schedule Analyzer");
   });
 
   it("makes an asynchronously replaceable DTO value visible to components", () => {

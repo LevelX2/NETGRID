@@ -1,13 +1,4 @@
 import type { CardImplementationDefinition } from "../types";
-import { CLASSIC_CORP_AGENDA_IMPLEMENTATIONS } from "./classic-corp-agenda-implementations";
-import { CLASSIC_CORP_ASSET_IMPLEMENTATIONS } from "./classic-corp-asset-implementations";
-import { CLASSIC_CORP_ICE_IMPLEMENTATIONS } from "./classic-corp-ice-implementations";
-import { CLASSIC_CORP_OPERATION_IMPLEMENTATIONS } from "./classic-corp-operation-implementations";
-import { CLASSIC_CORP_UPGRADE_IMPLEMENTATIONS } from "./classic-corp-upgrade-implementations";
-import { CLASSIC_RUNNER_EVENT_IMPLEMENTATIONS } from "./classic-runner-event-implementations";
-import { CLASSIC_RUNNER_HARDWARE_IMPLEMENTATIONS } from "./classic-runner-hardware-implementations";
-import { CLASSIC_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./classic-runner-program-implementations";
-import { CLASSIC_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./classic-runner-resource-implementations";
 import { ONR_V1_CORP_AGENDA_IMPLEMENTATIONS } from "./onr-v1-corp-agenda-implementations";
 import { ONR_V1_CORP_ASSET_IMPLEMENTATIONS } from "./onr-v1-corp-asset-implementations";
 import { ONR_V1_CORP_ICE_IMPLEMENTATIONS } from "./onr-v1-corp-ice-implementations";
@@ -28,7 +19,7 @@ import { PROTEUS_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./proteus-runner-program
 import { PROTEUS_RUNNER_RESOURCE_IMPLEMENTATIONS } from "./proteus-runner-resource-implementations";
 
 export type CardImplementationCatalogGroup = {
-  set: "classic" | "onr-v1" | "proteus";
+  set: "onr-v1" | "proteus";
   side: "corp" | "runner";
   cardType:
     | "agenda"
@@ -45,60 +36,6 @@ export type CardImplementationCatalogGroup = {
 
 // Set, side and type order is explicit so registry iteration and replay remain deterministic.
 export const CARD_IMPLEMENTATION_CATALOG_GROUPS = [
-  {
-    set: "classic",
-    side: "corp",
-    cardType: "agenda",
-    implementations: CLASSIC_CORP_AGENDA_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "corp",
-    cardType: "asset",
-    implementations: CLASSIC_CORP_ASSET_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "corp",
-    cardType: "ice",
-    implementations: CLASSIC_CORP_ICE_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "corp",
-    cardType: "operation",
-    implementations: CLASSIC_CORP_OPERATION_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "corp",
-    cardType: "upgrade",
-    implementations: CLASSIC_CORP_UPGRADE_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "runner",
-    cardType: "event",
-    implementations: CLASSIC_RUNNER_EVENT_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "runner",
-    cardType: "hardware",
-    implementations: CLASSIC_RUNNER_HARDWARE_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "runner",
-    cardType: "program",
-    implementations: CLASSIC_RUNNER_PROGRAM_IMPLEMENTATIONS,
-  },
-  {
-    set: "classic",
-    side: "runner",
-    cardType: "resource",
-    implementations: CLASSIC_RUNNER_RESOURCE_IMPLEMENTATIONS,
-  },
   {
     set: "onr-v1",
     side: "corp",
