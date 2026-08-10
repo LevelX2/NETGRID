@@ -475,16 +475,16 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       source: expect.stringContaining(
-        `proteus.pdca_damage_replacement:${pdcaId}`,
+        `damage_replacement:${pdcaId}`,
       ),
     });
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBeUndefined();
     expect(state.runner.grip).toHaveLength(1);
   });
 
-  it("Please Don't Choke Anyone can pass the damage through, including flatline", () => {
+  it("Please Don't Choke Anyone can choose zero replacement, including flatline", () => {
     let state = nextCorpActionPhase(baseState("pro017-pdca-pass"));
-    scoreCorpAgenda(state, PDCA, "pdca_pass");
+    const pdcaId = scoreCorpAgenda(state, PDCA, "pdca_pass");
     scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_pass");
     state.runner.tags = 1;
     clearRunnerGrip(state);
@@ -495,7 +495,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       (action) =>
         action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
-    state = applyChoice(state, "corp", "pass");
+    state = applyChoice(state, "corp", `replace_${pdcaId}_0`);
     expect(state.runner.grip).toHaveLength(0);
     expect(state.winner).toBe("corp");
     expect(state.gameEndReason).toBe("flatline");
@@ -515,9 +515,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       (action) =>
         action.payload?.agendaAbility === "proteus_corporate_headhunters",
     );
-    const replaceOption = state.pendingChoice?.options.find((option) =>
-      String(option.id).startsWith("replace_"),
-    )?.id;
+    const replaceOption = state.pendingChoice?.options.at(-1)?.id;
     expect(replaceOption).toBeDefined();
     state = applyChoice(state, "corp", String(replaceOption));
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBe(1);
@@ -540,9 +538,54 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     ).toBe(false);
   });
 
+  it("Please Don't Choke Anyone replaces an explicit partial damage quantity", () => {
+    let state = nextCorpActionPhase(baseState("pro017-pdca-partial"));
+    const pdcaId = scoreCorpAgenda(state, PDCA, "pdca_partial");
+    const cybertechId = installRezzedCorpRoot(
+      state,
+      CYBERTECH_THINK_TANK,
+      "cybertech_pdca_partial",
+      "remote_1",
+    );
+    state.cardInstances[cybertechId]!.advancementCounters = 1;
+    scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_partial");
+    state.runner.tags = 1;
+    clearRunnerGrip(state);
+    addRunnerGrip(state, RUNNER_EVENT, "runner_event_pdca_partial_a");
+    addRunnerGrip(
+      state,
+      RUNNER_INSTALLABLE_HARDWARE,
+      "runner_event_pdca_partial_b",
+    );
+    addRunnerGrip(state, RUNNER_EVENT, "runner_event_pdca_partial_c");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.payload?.agendaAbility === "proteus_corporate_headhunters",
+    );
+    state = applyChoice(
+      state,
+      "corp",
+      `cybertech_meat_damage_boost_${cybertechId}`,
+    );
+    const partialOption = `replace_${pdcaId}_1`;
+    expect(
+      state.pendingChoice?.options.some((option) => option.id === partialOption),
+    ).toBe(true);
+    state = applyChoice(state, "corp", partialOption);
+
+    expect(state.cardInstances[pdcaId]?.counters?.pdca).toBe(1);
+    expect(state.runner.grip).toHaveLength(2);
+    expect(state.runner.heap).toHaveLength(1);
+    expect(state.winner).toBeNull();
+    expect(state.cardInstances[cybertechId]?.advancementCounters).toBe(0);
+  });
+
   it("Please Don't Choke Anyone rejects stale or invalid choices", () => {
     let state = nextCorpActionPhase(baseState("pro017-pdca-invalid"));
-    scoreCorpAgenda(state, PDCA, "pdca_invalid");
+    const pdcaId = scoreCorpAgenda(state, PDCA, "pdca_invalid");
     scoreCorpAgenda(state, CORPORATE_HEADHUNTERS, "headhunter_invalid");
     state.runner.tags = 1;
     clearRunnerGrip(state);
@@ -563,7 +606,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
       actionId: choiceAction.actionId,
       clientKnownStateVersion: state.stateVersion - 1,
       idempotencyKey: "stale-pdca-choice",
-      selectedChoices: { selectedOptionIds: ["pass"] },
+      selectedChoices: { selectedOptionIds: [`replace_${pdcaId}_0`] },
     });
     expect(stale.ok).toBe(false);
     const invalid = applyAction(state, {
@@ -577,7 +620,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expect(invalid.ok).toBe(false);
   });
 
-  it("Please Don't Choke Anyone restores Runner encounter context after replace and pass", () => {
+  it("Please Don't Choke Anyone restores Runner encounter context after replacement choices", () => {
     let replaceState = baseState("pro017-2-pdca-encounter-replace");
     const replacePdcaId = scoreCorpAgenda(
       replaceState,
@@ -610,16 +653,14 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expect(replaceState.pendingChoice).toMatchObject({
       side: "corp",
       source: expect.stringContaining(
-        `proteus.pdca_damage_replacement:${replacePdcaId}`,
+        `damage_replacement:${replacePdcaId}`,
       ),
     });
     expect(replaceState.phase).toBe("run");
     expect(replaceState.timingPoint).toBe("run.encounter_ice");
 
     const replaceBefore = structuredClone(replaceState) as GameState;
-    const replaceOption = replaceState.pendingChoice?.options.find((option) =>
-      String(option.id).startsWith("replace_"),
-    )?.id;
+    const replaceOption = replaceState.pendingChoice?.options.at(-1)?.id;
     replaceState = applyChoice(replaceState, "corp", String(replaceOption));
     expect(replaceState.cardInstances[replacePdcaId]?.counters?.pdca).toBe(1);
     expect(replaceState.runner.grip).toHaveLength(2);
@@ -630,7 +671,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expectReplayStable(replaceBefore, replaceState);
 
     let passState = baseState("pro017-2-pdca-encounter-pass");
-    scoreCorpAgenda(passState, PDCA, "pdca_encounter_pass");
+    const passPdcaId = scoreCorpAgenda(passState, PDCA, "pdca_encounter_pass");
     clearRunnerGrip(passState);
     addRunnerGrip(passState, RUNNER_EVENT, "runner_event_encounter_pass_a");
     addRunnerGrip(
@@ -650,16 +691,16 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     );
     passState = applyChoice(passState, "corp", "bid_0");
     passState = applyChoice(passState, "runner", "bid_0");
-    passState = applyChoice(passState, "corp", "pass");
+    passState = applyChoice(passState, "corp", `replace_${passPdcaId}_0`);
     expect(passState.runner.grip).toHaveLength(1);
     expect(passState.phase).toBe("run");
     expect(passState.timingPoint).toBe("run.encounter_ice");
     expect(passState.activeSide).toBe("runner");
   });
 
-  it("Please Don't Choke Anyone preserves flatline game-over on pass", () => {
+  it("Please Don't Choke Anyone preserves flatline game-over at zero replacement", () => {
     let state = baseState("pro017-2-pdca-encounter-flatline");
-    scoreCorpAgenda(state, PDCA, "pdca_encounter_flatline");
+    const pdcaId = scoreCorpAgenda(state, PDCA, "pdca_encounter_flatline");
     clearRunnerGrip(state);
     state = startEncounterWithRezzedIce(
       state,
@@ -669,7 +710,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
     state = applyChoice(state, "runner", "bid_0");
-    state = applyChoice(state, "corp", "pass");
+    state = applyChoice(state, "corp", `replace_${pdcaId}_0`);
     expect(state.phase).toBe("game_over");
     expect(state.timingPoint).toBe("game.checkpoint");
     expect(state.activeSide).toBe("corp");
@@ -721,16 +762,14 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       source: expect.stringContaining(
-        `proteus.pdca_damage_replacement:${pdcaId}`,
+        `damage_replacement:${pdcaId}`,
       ),
     });
     state = applyChoice(
       state,
       "corp",
       String(
-        state.pendingChoice?.options.find((option) =>
-          String(option.id).startsWith("replace_"),
-        )?.id,
+        state.pendingChoice?.options.at(-1)?.id,
       ),
     );
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBe(2);
