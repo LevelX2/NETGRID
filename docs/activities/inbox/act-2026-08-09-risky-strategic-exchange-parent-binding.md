@@ -53,6 +53,20 @@ begründete Finanzierungslücke eines aussichtsreichen Run-Plans schließen.
   kartengebundene Aktion `Loan from Chiba trashen und Zug beenden` mit
   `runner_card_scoped_end_turn_missing_bound_lifecycle_contract` und wählte
   das normale Zugende. Beide Loans blieben dadurch bis zum Matchende liegen.
+- In der späten Partie verschärfte dieser Lifecycle-Fehler die strategische
+  Stagnation messbar: Zwei Loans entzogen zu Beginn jedes Runner-Zugs
+  zusammen 2 Credits. Vier reine Credit-Aktionen erzeugten dadurch über einen
+  vollständigen Zugzyklus nur 2 Credits Nettofortschritt.
+- Nach dem gescheiterten R&D-Run in Zug 30 musste der Runner für den nun
+  vollständig bekannten Pfad über `Cortical Scrub` und `Keeper` mit `Krash`
+  ungefähr 20 Credits aufbauen. Trotz 38 späterer Economy-Entscheidungen
+  erreichte er bis Zug 48 nur ungefähr 17 Credits, installierte kein
+  `R&D Interface` und baute keine gebundene Exit-/Recovery-Linie für die
+  beiden Loans auf.
+- Sobald mindestens 10 Credits verfügbar waren, hätte der Lifecycle-Owner
+  außerdem instanzbezogen prüfen müssen, ob das Bezahlen und Entfernen einer
+  Loan die langfristige Nettoökonomie gegenüber weiterem Halten verbessert.
+  Die fehlende Bindung verhinderte bereits diese fachliche Abwägung.
 - Kartentext: `data/cards/originalset-v1-cards.json`,
   `onr_v1_168_loan-from-chiba`. Regelrelevante Fakten sind 12 Credits bei
   Installation, 1 Credit Verlust zu Beginn jedes eigenen Zugs sowie beim
@@ -108,6 +122,15 @@ begründete Finanzierungslücke eines aussichtsreichen Run-Plans schließen.
   Exit- oder Recovery-Plan projizieren. Nach Installation muss der bestehende
   instanzgebundene `runner.resource_lifecycle`-Owner Halten oder Verlassen
   entscheiden und die exakte aktuelle LegalAction binden.
+- Während des Haltens die tatsächliche laufende Belastung jeder Instanz in
+  quantifizierte Funding-Ziele und Kampagnenhorizonte einrechnen. Ein
+  allgemeiner Credit-Reserve-Plan darf den Brutto-Creditgewinn nicht als
+  Fortschritt ausweisen, ohne den nächsten Start-of-turn-Verlust und den
+  gebundenen Exit-Bedarf zu berücksichtigen.
+- Bei mehreren Loan-Instanzen Halten und Verlassen instanzbezogen quotieren:
+  aktuelle Zahlungsfähigkeit, verbleibende Start-of-turn-Belastung,
+  strategischer Fundingbedarf und Folgefähigkeit der übrigen Instanzen
+  müssen zu einer deterministischen Reihenfolge führen.
 - Die verbleibende direkte Loan-Karten-ID-Erkennung im produktiven
   Entscheidungsweg entfernen, sobald der kanonische generische Vertrag sie
   ersetzt.
@@ -159,6 +182,15 @@ begründete Finanzierungslücke eines aussichtsreichen Run-Plans schließen.
       `runner.resource_lifecycle`-Child. Die kartengebundene EndTurn-Action
       wird nur bei erfülltem Zahlungs-/Verlustvertrag ausgewählt; andernfalls
       entsteht ein exakter Recovery-Bedarf statt eines Fallbacks.
+- [ ] Die laufende Belastung einer oder mehrerer Instanzen erscheint in der
+      Funding- und Kampagnenquote als Nettokosten. Vier Credit-Aktionen bei
+      zwei folgenden Loan-Zahlungen gelten nicht als vier Credits dauerhafter
+      Fortschritt.
+- [ ] Bei zwei installierten Loans und mindestens 10 Credits bewertet der
+      Lifecycle-Owner das instanzweise Entfernen gegen weiteres Halten und
+      bindet bei positiver Exit-Entscheidung die exakte kartengebundene
+      EndTurn-Action; das normale Zugende darf sie nicht ohne fachlichen
+      Vertrag verdrängen.
 - [ ] Eine zweite, nicht als Loan benannte Testkarte oder generische Fixture
       mit demselben Austauschvertrag belegt, dass die Lösung nicht
       kartenspezifisch ist.

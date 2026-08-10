@@ -53,6 +53,21 @@ Replanung auslösen können.
   Zufallsauflösung, eine gegnerische Aktion noch neu aufgedeckte Information.
   Der Planwechsel entstand daher nicht an einer fachlichen
   Erkenntnisgrenze.
+- Derselbe Bindungsverlust zeigt sich später in Runner-Zug 34,
+  Entscheidungen 124 bis 126: `runner.develop_board_and_hand` nahm zweimal
+  einen Credit, um eine konkrete `R&D Interface`-Instanz zu finanzieren, und
+  meldete anschließend `development_funding_route_gap:0` sowie
+  `development_funding_route_ready:true`. Sobald die Installation legal war
+  und noch zwei Klicks zur Verfügung standen, verlor der Entwicklungsplan
+  ohne neue Information die Ausführung an `runner.economy`; zugleich verwarf
+  `runner.pressure_central` die Installation wegen eines fehlenden bereits
+  gebundenen R&D-Zugriffsplans.
+- Die fachliche Frage, ob und wann eine Access-Payoff-Karte installiert
+  werden soll, gehört in
+  `act-2026-08-10-runner-access-payoff-campaign-binding`. Für dieses Paket ist
+  Zug 34 ein zweiter Architekturzeuge: Eine gebundene Funding-Folge darf
+  ihren vorgesehenen nächsten Meilenstein nicht allein durch erneutes
+  Ranking bereits bekannter Pläne verlieren.
 - Zugriffe und aufgedeckte Karten früher im Zug können legitime
   Replan-Grenzen darstellen. Der Befund verlangt deshalb keine einzige starre
   Vier-Klick-Linie vom Zuganfang bis zum Zugende.
@@ -92,6 +107,12 @@ Replanung auslösen können.
 - Den ersten Runner-Zug des Matches als fokussierte Regression verwenden,
   dabei die separate fachliche Conference-Bewertung nicht in den TurnPlanner
   hineinziehen.
+- Runner-Zug 34 als zweite, fachlich getrennte Sequenzregression verwenden:
+  Wenn ein Karten-Parent eine Funding-Folge rechtmäßig gebunden hat und der
+  geplante nächste Meilenstein legal wird, muss die Sequenz entweder beim
+  selben Root fortgesetzt oder an einer typisierten Grenze mit genauer
+  Evidence beendet werden. Der TurnPlanner entscheidet dabei nicht selbst,
+  ob `R&D Interface` strategisch installiert werden sollte.
 
 ## Nicht im Scope
 
@@ -125,6 +146,11 @@ Replanung auslösen können.
 - [ ] Die Regression verhindert im beobachteten unveränderten Zustand die
       widersprüchliche Folge `Conference installieren -> sofort Run starten`;
       die Karte wird dabei nicht im TurnPlanner namentlich erkannt.
+- [ ] Die Regression zu Entscheidungen 124 bis 126 belegt, dass eine
+      gebundene Funding-Sequenz nach Erreichen ihres Kostenmeilensteins nicht
+      ohne neue Evidence still an einen allgemeinen Economy-Plan fällt. Ein
+      fachlich begründeter Abbruch nennt Grenztyp, bisherigen Owner,
+      vorgesehenen nächsten Schritt und übernehmenden Owner.
 - [ ] Ein positiver Test belegt, dass ein neu entstandener höherwertiger
       Interrupt einen bestehenden Plan regelkonform übernehmen darf.
 - [ ] Ein Grenztest belegt, dass nach einem Draw oder Access mit neuer
