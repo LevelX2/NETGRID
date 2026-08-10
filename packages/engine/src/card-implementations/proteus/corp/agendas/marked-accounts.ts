@@ -5,8 +5,7 @@ export const markedAccountsImplementation: CardImplementationDefinition = {
   accessEffects: [
     {
       kind: "on_access",
-      sourceZones: ["installed", "hq", "rd"],
-      ignoreIfAccessedFrom: ["archives"],
+      sourceZones: ["installed", "hq", "rd", "archives"],
       revealIfAccessedFrom: ["rd"],
       effects: [
         {

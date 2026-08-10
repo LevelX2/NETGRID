@@ -102,8 +102,15 @@ export function installedAccessActivationMet(
   accessZone: CardAccessZone,
 ): boolean {
   if (accessZone !== "installed") return true;
+  const definition = host.cards.definitionFor(cardId);
   const rezzed = host.cards.mustInstance(cardId).rezzed === true;
-  switch (effect.installedSourceActivation ?? "requires_rezzed") {
+  // Agendas cannot be rezzed.  Their printed on-access effect is therefore
+  // active while installed unless the CardSpec says otherwise.  Rezzable
+  // sources remain fail-closed on the established rezzed default.
+  const activation =
+    effect.installedSourceActivation ??
+    (definition.type === "agenda" ? "any_rez_state" : "requires_rezzed");
+  switch (activation) {
     case "requires_rezzed":
       return rezzed;
     case "unrezzed_only":
@@ -111,10 +118,10 @@ export function installedAccessActivationMet(
     case "any_rez_state":
       return true;
     default: {
-      const unknown = effect as { installedSourceActivation?: string };
+      const unknown = activation as string;
       throw new Error(
         `Unsupported CardImplementation installed access activation: ${
-          unknown.installedSourceActivation ?? "unknown"
+          unknown
         }`,
       );
     }

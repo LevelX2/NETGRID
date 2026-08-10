@@ -6,7 +6,6 @@ export const fetalAiImplementation: CardImplementationDefinition = {
     {
       kind: "on_access",
       sourceZones: ["installed", "hq", "rd"],
-      ignoreIfAccessedFrom: ["archives"],
       revealIfAccessedFrom: ["rd"],
       effects: [
         {
@@ -25,8 +24,7 @@ export const fetalAiImplementation: CardImplementationDefinition = {
     {
       kind: "current_access_self_steal_cost",
       amount: 2,
-      sourceZones: ["installed", "hq", "rd"],
-      ignoreIfAccessedFrom: ["archives"],
+      sourceZones: ["installed", "hq", "rd", "archives"],
       visibility: "hidden_info_barrier",
     },
   ],

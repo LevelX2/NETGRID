@@ -159,15 +159,20 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
       seed: "proteus-8c-vbg-access",
       setupMode: "completed",
     });
+    const serverId = "remote_1";
+    installRemote(state, serverId);
+    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    if (!server) throw new Error("Missing remote");
     const agendaId = "proteus_8c_vbg_access" as CardInstanceId;
     state.cardInstances[agendaId] = {
       ...corpCard(agendaId, "onr_proteus_009_viral-breeding-ground", {
         side: "corp",
-        zone: "rd",
+        zone: "serverRoot",
+        serverId,
       }),
       advancementCounters: 2,
     };
-    state.corp.rd.unshift(agendaId);
+    server.root.unshift(agendaId);
     const daemonId = "proteus_8c_succubus" as CardInstanceId;
     const hostedId = "proteus_8c_dwarf" as CardInstanceId;
     state.cardInstances[daemonId] = runnerProgram(
@@ -185,23 +190,23 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     state.timingPoint = "access.resolve_card";
     state.run = {
       runId: "run_1",
-      attackedServerId: "rd",
+      attackedServerId: serverId,
       phase: "access",
-      position: { kind: "server", serverId: "rd" },
+      position: { kind: "server", serverId },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,
       accessCount: 1,
       breach: {
         breachId: "breach_1",
-        serverId: "rd",
+        serverId,
         accessMode: "single",
         queue: [
           {
             entryId: "entry_1",
             cardInstanceId: agendaId,
-            serverId: "rd",
-            zone: "rd",
+            serverId,
+            zone: "remote_root",
             status: "pending",
             hiddenInfo: true,
           },
