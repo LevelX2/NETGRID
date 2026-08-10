@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 277,
-    "stateHash": "fnv1a:fd076199",
+    "stateHash": "fnv1a:4ec2fd5d",
     "testOnlyGameState": {
       "matchId": "selfplay:neon-escrow-counterbank-rent-02",
       "baseline": {

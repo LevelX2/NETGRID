@@ -266,6 +266,94 @@ describe("CardSpec validation", () => {
     expect(() => validateUntyped(reversed)).toThrowError(
       /maximumStrength must not be below minimumStrength/,
     );
+
+    const wrongCost = paidX();
+    (
+      engineOf(wrongCost).variableRez as Record<string, unknown>
+    ).additionalCostPerValue = 2;
+    expect(() => validateUntyped(wrongCost)).toThrowError(
+      /x-strength requires cost 1/,
+    );
+
+    const forgedTraceFlag = paidX();
+    (
+      engineOf(forgedTraceFlag).variableRez as Record<string, unknown>
+    ).traceBaseFromValue = false;
+    expect(() => validateUntyped(forgedTraceFlag)).toThrowError(
+      /must be true when present/,
+    );
+
+    const missingVisibility = paidX();
+    delete (engineOf(missingVisibility).variableRez as Record<string, unknown>)
+      .visibility;
+    expect(() => validateUntyped(missingVisibility)).toThrowError(
+      /visibility.*must be public/,
+    );
+    const wrongVisibility = paidX();
+    (
+      engineOf(wrongVisibility).variableRez as Record<string, unknown>
+    ).visibility = "hidden_info_barrier";
+    expect(() => validateUntyped(wrongVisibility)).toThrowError(
+      /visibility.*must be public/,
+    );
+  });
+
+  it("validates both non-X variable-rez variants as closed required contracts", () => {
+    const variableRezSpec = (
+      variableRez: Record<string, unknown>,
+    ): Record<string, unknown> => {
+      const spec = untypedSpec();
+      (spec.identity as Record<string, unknown>).cardType = "ice";
+      const characteristics = engineOf(spec).characteristics as Record<
+        string,
+        unknown
+      >;
+      characteristics.playCost = null;
+      (characteristics.numeric as Record<string, unknown>).rezCost = 2;
+      characteristics.strength = { kind: "fixed", value: 1 };
+      engineOf(spec).variableRez = {
+        capabilityKey: "variable_rez_mode",
+        addressability: ["choice", "plan", "quote", "debug"],
+        visibility: "public",
+        ...variableRez,
+      };
+      return spec;
+    };
+
+    const alternate = () =>
+      variableRezSpec({
+        kind: "alternate_subtype",
+        additionalCost: 1,
+        baseSubtypes: ["wall"],
+        alternateSubtypes: ["code_gate"],
+      });
+    expect(() => validateUntyped(alternate())).not.toThrow();
+    const missingCost = alternate();
+    delete (engineOf(missingCost).variableRez as Record<string, unknown>)
+      .additionalCost;
+    expect(() => validateUntyped(missingCost)).toThrowError(
+      /alternate subtype requires cost/,
+    );
+    const emptySubtypes = alternate();
+    (
+      engineOf(emptySubtypes).variableRez as Record<string, unknown>
+    ).alternateSubtypes = [];
+    expect(() => validateUntyped(emptySubtypes)).toThrowError(
+      /both subtype sets/,
+    );
+
+    const paid = variableRezSpec({
+      kind: "paid_end_the_run_subroutines",
+      additionalCostPerSubroutine: 2,
+      minSubroutines: 0,
+    });
+    expect(() => validateUntyped(paid)).not.toThrow();
+    (
+      engineOf(paid).variableRez as Record<string, unknown>
+    ).additionalCostPerSubroutine = 1;
+    expect(() => validateUntyped(paid)).toThrowError(
+      /require cost 2 and minimum 0/,
+    );
   });
 
   it("rejects mismatched ability aliases and duplicate keys", () => {
@@ -318,6 +406,67 @@ describe("CardSpec validation", () => {
     };
     expect(() => validateUntyped(spec)).toThrowError(
       /orphan_planning_capability/,
+    );
+  });
+
+  it("keeps card evidence profiles and capability evidence anchors disjoint", () => {
+    const strategySupport = {
+      kind: "strategy_support",
+      strategyKey: "corp.tag_trace_punish",
+      role: "anchor_evidence",
+      roleDetail: "anchor_evidence_trace_source",
+      confidence: "high",
+    };
+    const cardAnchor = untypedSpec();
+    cardAnchor.planningAnnotations = {
+      schemaVersion: "card-planning-annotations-v1",
+      card: [{ ...strategySupport, evidenceAnchor: "trace.source" }],
+    };
+    expect(() => validateUntyped(cardAnchor)).toThrowError(
+      /forbidden on card annotations/,
+    );
+
+    const capabilityProfile = untypedSpec();
+    engineOf(capabilityProfile).abilities = [
+      {
+        kind: "on_play",
+        costs: {},
+        effects: [],
+        capabilityKey: "trace-source",
+        addressability: ["action"],
+      },
+    ];
+    capabilityProfile.planningAnnotations = {
+      schemaVersion: "card-planning-annotations-v1",
+      capabilities: [
+        {
+          capabilityKey: "trace-source",
+          annotations: [
+            {
+              ...strategySupport,
+              evidenceProfile: "x_strength_trace_ice",
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => validateUntyped(capabilityProfile)).toThrowError(
+      /forbidden on capability annotations/,
+    );
+
+    const both = untypedSpec();
+    both.planningAnnotations = {
+      schemaVersion: "card-planning-annotations-v1",
+      card: [
+        {
+          ...strategySupport,
+          evidenceProfile: "x_strength_trace_ice",
+          evidenceAnchor: "trace.source",
+        },
+      ],
+    };
+    expect(() => validateUntyped(both)).toThrowError(
+      /forbidden on card annotations/,
     );
   });
 

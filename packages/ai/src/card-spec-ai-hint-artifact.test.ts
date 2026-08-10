@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 import scenarioPack from "../../../data/scenarios/card-support-ai-supported-current.json";
 import classicReviewedGolden from "./test-fixtures/classic-card-spec-ai-hints-reviewed-v1.json";
+import proteusReviewedGolden from "./test-fixtures/proteus-card-spec-ai-hints-reviewed-v1.json";
 import testsetReviewedGolden from "./test-fixtures/testset-card-spec-ai-hints-reviewed-v1.json";
 import {
   buildCardSpecAiHintArtifact,
@@ -20,11 +21,11 @@ import {
 import { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validation";
 
 describe("CardSpec generated AI hint artifact", () => {
-  it("is the canonical exact-100 active output of the current compiler inputs", () => {
+  it("is the canonical exact-251 active output of the current compiler inputs", () => {
     const compiled = buildCardSpecAiHintArtifact();
 
     expect(compiled).toEqual(generatedArtifact);
-    expect(compiled.cardIds).toHaveLength(100);
+    expect(compiled.cardIds).toHaveLength(251);
     expect(compiled.cardIds).not.toContain("catalog_preview_operation_001");
     expect(compiled.cardIds).not.toContain("catalog_preview_resource_001");
     expect(compiled.cardIds).toEqual([...compiled.cardIds].sort());
@@ -75,12 +76,13 @@ describe("CardSpec generated AI hint artifact", () => {
       [...CS06_CARD_DEFINITION_IDS],
       testsetReviewedGolden.cards.map((record) => record.cardId),
       classicReviewedGolden.cards.map((record) => record.cardId),
+      proteusReviewedGolden.cards.map((record) => record.cardId),
     ];
     expect(partitions.map((partition) => partition.length)).toEqual([
-      10, 36, 54,
+      10, 36, 54, 151,
     ]);
     const reviewedExpectedIds = partitions.flat().sort();
-    expect(new Set(reviewedExpectedIds).size).toBe(100);
+    expect(new Set(reviewedExpectedIds).size).toBe(251);
     expect(generatedArtifact.cardIds).toEqual(reviewedExpectedIds);
     expect(entries.map((entry) => entry.definition.id).sort()).toEqual(
       reviewedExpectedIds,

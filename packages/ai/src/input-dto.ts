@@ -158,6 +158,12 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "cardImplementationFortRunRezSupportQuoteTotalCredits",
   "cardImplementationFortRunRezSupportQuoteTotalCreditsPayable",
   "cardImplementationFortRunRezSupportQuoteHasOwnHqIce",
+  "runnerEventInstallChoiceQuoteSchemaVersion",
+  "runnerEventInstallChoiceQuoteComplete",
+  "runnerEventInstallChoiceQuoteSourceCapabilityKey",
+  "runnerEventInstallChoiceQuoteTemporaryCredits",
+  "runnerEventInstallChoiceQuoteAllowedTypes",
+  "runnerEventInstallChoiceQuoteSelectableTargetIds",
   "regionReplacementWarning",
   "rootReplacement",
   "encounterContinue",
@@ -183,7 +189,10 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "sourceDefinitionId",
   "targetIceId",
   "targetIceDefinitionId",
+  "corpPostPassIceAbility",
+  "decision",
   "paymentAmount",
+  "gainCredits",
   "cardImplementationEconomyKind",
   "cardImplementationAmountPerAdvancementCounter",
   "advancementCounterCount",
@@ -2598,16 +2607,26 @@ function sanitizeVisibleChoiceRequest(
   const cardSearchPresentation = sanitizeCardSearchPresentation(
     choice.cardSearchPresentation,
   );
-  const continuation = sanitizeScoreChoiceContinuation(
+  const continuation = sanitizeChoiceContinuation(
     choice.continuation,
     playerViewStateVersion,
     playerViewSide,
     choice.side,
+    choice.sourceCardInstanceId,
+    choice.sourceCardDefinitionId,
   );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
+    ...(playerViewSide === choice.side &&
+    isNonEmptyString(choice.sourceCardInstanceId)
+      ? { sourceCardInstanceId: choice.sourceCardInstanceId }
+      : {}),
+    ...(playerViewSide === choice.side &&
+    isNonEmptyString(choice.sourceCardDefinitionId)
+      ? { sourceCardDefinitionId: choice.sourceCardDefinitionId }
+      : {}),
     ...(continuation ? { continuation } : {}),
     prompt: choice.prompt,
     kind: choice.kind,
@@ -2655,14 +2674,15 @@ function sanitizeVisibleChoiceRequest(
   };
 }
 
-function sanitizeScoreChoiceContinuation(
+function sanitizeChoiceContinuation(
   value: VisibleChoiceRequest["continuation"],
   stateVersion: number,
   playerViewSide: Side,
   choiceSide: Side,
+  sourceCardInstanceId: string | undefined,
+  sourceCardDefinitionId: string | undefined,
 ): VisibleChoiceRequest["continuation"] | undefined {
-  if (playerViewSide !== "corp" || choiceSide !== "corp" || !value)
-    return undefined;
+  if (playerViewSide !== choiceSide || !value) return undefined;
   if (
     typeof value.originActionId !== "string" ||
     value.originActionId.length === 0 ||
@@ -2670,15 +2690,61 @@ function sanitizeScoreChoiceContinuation(
   ) {
     return undefined;
   }
-  if (value.family === "corp_advancement_counter") return { ...value };
+  if (
+    value.family === "corp_advancement_counter" &&
+    playerViewSide === "corp" &&
+    choiceSide === "corp"
+  )
+    return { ...value };
   if (
     value.family === "corp_scored_agenda_hq_shuffle" &&
+    playerViewSide === "corp" &&
+    choiceSide === "corp" &&
     typeof value.agendaInstanceId === "string" &&
     value.agendaInstanceId.length > 0 &&
     Number.isSafeInteger(value.creditPerAgendaPoint) &&
     value.creditPerAgendaPoint > 0
   ) {
     return { ...value };
+  }
+  if (
+    value.family === "runner_hidden_draw_keep_or_top_replacement" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    isNonEmptyString(value.sourceCardInstanceId) &&
+    value.sourceCardInstanceId === sourceCardInstanceId &&
+    isNonEmptyString(value.sourceCardDefinitionId) &&
+    value.sourceCardDefinitionId === sourceCardDefinitionId &&
+    value.drawnCardInstanceIds.length > 0 &&
+    value.drawnCardInstanceIds.every(isNonEmptyString) &&
+    new Set(value.drawnCardInstanceIds).size ===
+      value.drawnCardInstanceIds.length
+  ) {
+    return {
+      ...value,
+      drawnCardInstanceIds: [...value.drawnCardInstanceIds],
+    };
+  }
+  if (
+    value.family === "runner_grip_install_with_temporary_credits" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    typeof value.sourceCardInstanceId === "string" &&
+    value.sourceCardInstanceId.length > 0 &&
+    typeof value.sourceCardDefinitionId === "string" &&
+    value.sourceCardDefinitionId.length > 0 &&
+    typeof value.sourceCapabilityKey === "string" &&
+    value.sourceCapabilityKey.length > 0 &&
+    Number.isSafeInteger(value.temporaryCredits) &&
+    value.temporaryCredits > 0 &&
+    value.allowedTypes.length > 0 &&
+    value.allowedTypes.length <= 2 &&
+    new Set(value.allowedTypes).size === value.allowedTypes.length &&
+    value.allowedTypes.every(
+      (cardType) => cardType === "program" || cardType === "hardware",
+    )
+  ) {
+    return { ...value, allowedTypes: [...value.allowedTypes] };
   }
   return undefined;
 }
@@ -3093,14 +3159,14 @@ function sanitizePublicPayload(
 
 function sanitizeLegalActionPayload(
   action: LegalAction,
-): Record<string, string | number | boolean> {
+): NonNullable<LegalAction["payload"]> {
   const payload = action.payload as Record<string, unknown> | undefined;
   if (!payload && action.abilityRef && "sourceAbilityId" in action.abilityRef)
     throw new Error(
       "Canonical CardSpec capability Action requires an exact payload binding.",
     );
   if (!payload) return {};
-  const result: Record<string, string | number | boolean> = {
+  const result: NonNullable<LegalAction["payload"]> = {
     ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
   };
   if (action.abilityRef && "sourceAbilityId" in action.abilityRef) {

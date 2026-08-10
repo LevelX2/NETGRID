@@ -28,20 +28,79 @@ export const KNOWN_PLANNING_TACTIC_USES = [
 export const KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS = [
   "access.hq_multiaccess",
   "access.rnd_multiaccess",
+  "damage.corp_tagged_meat_payoff",
   "tag.payoff",
   "tag.source",
   "trace.source",
 ] as const;
 
+export const KNOWN_STRATEGY_SUPPORT_EVIDENCE_PROFILES = [
+  "access_counter_credit_loss",
+  "access_counter_icebreaker_strength",
+  "access_net_damage_payoff_archives",
+  "access_net_damage_payoff_rnd",
+  "access_tag_ambush",
+  "access_tag_source",
+  "access_window_advancement_enabler",
+  "agenda_net_damage_ambush",
+  "black_ops_agenda_difficulty_discount",
+  "brain_damage_ice",
+  "central_multiaccess_reduction",
+  "damage_amplifier",
+  "damage_conversion_extra_action_bank",
+  "deep_server_damage_payoff_ice",
+  "future_strength_tax_ice",
+  "gray_ops_agenda_difficulty_discount",
+  "ice_order_control",
+  "ice_subroutine_repeat_support",
+  "install_rez_reserve_counter",
+  "install_rez_reserve_temporary",
+  "installment_free_rez_ice",
+  "multi_program_trash_tax_ice",
+  "net_damage_steal_tax",
+  "one_card_score_closeout",
+  "overadvance_extra_action_payoff",
+  "overadvance_recurring_credit_payoff",
+  "paid_end_run_subroutine_ice",
+  "paid_trace_tag_source",
+  "pass_ice_pay_or_end_remote_protection",
+  "pass_ice_pay_or_end_tax",
+  "pay_or_end_run_ice",
+  "position_scaling_etr_ice",
+  "position_scaling_net_damage_ice",
+  "position_scaling_strength_tax_ice",
+  "position_scaling_tax_ice",
+  "position_scaling_trace_tag_source",
+  "position_scaling_trace_tag_tax_ice",
+  "program_bounce_ambush",
+  "random_recurring_action_mode",
+  "recurring_extra_action_payoff",
+  "remote_content_swap_defense",
+  "remote_run_control",
+  "research_agenda_difficulty_discount",
+  "resource_install_retaliatory_trace_tag_source",
+  "retaliatory_node_trash_tag_source",
+  "rez_paid_scaling_ice",
+  "run_spend_cap_tax",
+  "run_temporary_credit_reserve",
+  "scaling_trace_margin_tag_source",
+  "tagged_meat_hand_size_pressure",
+  "tagged_runner_punish_payoff",
+  "trace_credit_enabler",
+  "trace_success_recent_resource_trash",
+  "temporary_free_rez_ice",
+  "x_strength_trace_ice",
+] as const;
+
 export type CardPlanningAnnotations = {
   schemaVersion: "card-planning-annotations-v1";
-  card?: readonly PlanningInterpretation[];
+  card?: readonly CardPlanningInterpretation[];
   capabilities?: readonly CapabilityPlanningAnnotations[];
 };
 
 export type CapabilityPlanningAnnotations = {
   capabilityKey: CapabilityKey;
-  annotations: readonly PlanningInterpretation[];
+  annotations: readonly CapabilityPlanningInterpretation[];
 };
 
 export type PlanningInterpretation =
@@ -71,6 +130,7 @@ export type PlanningInterpretation =
       strategyKey: string;
       role: string;
       roleDetail: string;
+      evidenceProfile?: (typeof KNOWN_STRATEGY_SUPPORT_EVIDENCE_PROFILES)[number];
       evidenceAnchor?: (typeof KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS)[number];
       confidence: "low" | "medium" | "high";
       rationale?: string;
@@ -114,6 +174,31 @@ export type PlanningInterpretation =
       evidencePolicy: "visible_evidence_only";
     };
 
+type StrategySupportInterpretation = Extract<
+  PlanningInterpretation,
+  { kind: "strategy_support" }
+>;
+
+export type CardPlanningInterpretation =
+  | Exclude<PlanningInterpretation, StrategySupportInterpretation>
+  | (Omit<
+      StrategySupportInterpretation,
+      "evidenceProfile" | "evidenceAnchor"
+    > & {
+      evidenceProfile?: (typeof KNOWN_STRATEGY_SUPPORT_EVIDENCE_PROFILES)[number];
+      evidenceAnchor?: never;
+    });
+
+export type CapabilityPlanningInterpretation =
+  | Exclude<PlanningInterpretation, StrategySupportInterpretation>
+  | (Omit<
+      StrategySupportInterpretation,
+      "evidenceProfile" | "evidenceAnchor"
+    > & {
+      evidenceProfile?: never;
+      evidenceAnchor?: (typeof KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS)[number];
+    });
+
 export type PlanningAnnotationErrorCode =
   | "planning_unknown_field"
   | "planning_mechanical_field"
@@ -148,6 +233,7 @@ const INTERPRETATION_KEYS: Record<
     "strategyKey",
     "role",
     "roleDetail",
+    "evidenceProfile",
     "evidenceAnchor",
     "confidence",
     "rationale",
@@ -211,7 +297,8 @@ export function assertPlanningAnnotations(
   assertAllowedKeys(root, ROOT_KEYS, path);
   if (root.schemaVersion !== "card-planning-annotations-v1")
     invalid(path, "schemaVersion must be card-planning-annotations-v1");
-  if (root.card !== undefined) assertInterpretations(root.card, `${path}.card`);
+  if (root.card !== undefined)
+    assertInterpretations(root.card, `${path}.card`, "card");
   if (root.capabilities !== undefined) {
     const capabilities = denseArray(root.capabilities, `${path}.capabilities`);
     const seenCapabilityKeys = new Set<CapabilityKey>();
@@ -237,12 +324,20 @@ export function assertPlanningAnnotations(
           key,
         );
       seenCapabilityKeys.add(key);
-      assertInterpretations(record.annotations, `${entryPath}.annotations`);
+      assertInterpretations(
+        record.annotations,
+        `${entryPath}.annotations`,
+        "capability",
+      );
     });
   }
 }
 
-function assertInterpretations(value: unknown, path: string): void {
+function assertInterpretations(
+  value: unknown,
+  path: string,
+  context: "card" | "capability",
+): void {
   denseArray(value, path).forEach((entry, index) => {
     const entryPath = `${path}[${index}]`;
     const record = objectRecord(entry, entryPath);
@@ -261,6 +356,7 @@ function assertInterpretations(value: unknown, path: string): void {
         kind: PlanningInterpretation["kind"];
       },
       entryPath,
+      context,
     );
   });
 }
@@ -270,6 +366,7 @@ function assertInterpretationShape(
     kind: PlanningInterpretation["kind"];
   },
   path: string,
+  context: "card" | "capability",
 ): void {
   switch (record.kind) {
     case "strategy_anchor":
@@ -292,12 +389,29 @@ function assertInterpretationShape(
       stringField(record, "strategyKey", path);
       stringField(record, "role", path);
       stringField(record, "roleDetail", path);
+      if (record.evidenceProfile !== undefined)
+        enumField(
+          record,
+          "evidenceProfile",
+          KNOWN_STRATEGY_SUPPORT_EVIDENCE_PROFILES,
+          path,
+        );
       if (record.evidenceAnchor !== undefined)
         enumField(
           record,
           "evidenceAnchor",
           KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS,
           path,
+        );
+      if (context === "card" && record.evidenceAnchor !== undefined)
+        invalid(
+          `${path}.evidenceAnchor`,
+          "is capability-bound and forbidden on card annotations",
+        );
+      if (context === "capability" && record.evidenceProfile !== undefined)
+        invalid(
+          `${path}.evidenceProfile`,
+          "is card-bound and forbidden on capability annotations",
         );
       enumField(record, "confidence", ["low", "medium", "high"], path);
       optionalStringField(record, "rationale", path);

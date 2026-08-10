@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { engineCardByDefinitionId } from "@netgrid/cards/engine";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -942,6 +943,15 @@ export function createCardRuntimeResolvers(
     definition: CardDefinition,
     longtail: GripInstallTemporaryCreditLongtail,
   ): void {
+    const canonicalLongtail = engineCardByDefinitionId(definition.id)?.engine
+      .runnerEventLongtail;
+    if (
+      canonicalLongtail?.kind !==
+      "grip_install_program_or_hardware_with_temporary_credits"
+    )
+      throw new Error(
+        "Die Runner-Event-Install-Choice besitzt keine eindeutige kanonische Capability.",
+      );
     const sourceCardId = String(
       legalAction.payload?.cardId ?? "",
     ) as CardInstanceId;
@@ -963,6 +973,16 @@ export function createCardRuntimeResolvers(
       kind: "select_cards",
       minSelections: 1,
       maxSelections: 1,
+      continuation: {
+        family: "runner_grip_install_with_temporary_credits",
+        originActionId: legalAction.actionId,
+        sourceCardInstanceId: sourceCardId,
+        sourceCardDefinitionId: definition.id,
+        sourceCapabilityKey: canonicalLongtail.capabilityKey,
+        temporaryCredits: longtail.temporaryCredits,
+        allowedTypes: [...longtail.allowedTypes],
+        createdAtStateVersion: state.stateVersion + 1,
+      },
       options: state.runner.grip
         .filter((cardId) => cardId !== sourceCardId)
         .map((cardId) => {
@@ -982,6 +1002,41 @@ export function createCardRuntimeResolvers(
       hiddenZoneAction: "pro018_grip_install_temporary_credits",
       sourceDefinitionId: definition.id,
       choiceVisibility: "runner_private",
+    };
+  }
+
+  function runnerEventInstallChoiceActionPayload(
+    state: GameState,
+    cardId: CardInstanceId,
+    definition: CardDefinition,
+  ): Record<string, unknown> | undefined {
+    const longtail = runnerEventLongtailForDefinition(definition);
+    const canonicalLongtail = engineCardByDefinitionId(definition.id)?.engine
+      .runnerEventLongtail;
+    if (
+      longtail?.kind !==
+        "grip_install_program_or_hardware_with_temporary_credits" ||
+      canonicalLongtail?.kind !==
+        "grip_install_program_or_hardware_with_temporary_credits"
+    )
+      return undefined;
+    const selectableTargetIds = pro018GripInstallCandidates(
+      state,
+      cardId,
+      longtail,
+    );
+    return {
+      runnerEventInstallChoiceQuoteSchemaVersion:
+        "runner-event-install-choice-quote-v1",
+      runnerEventInstallChoiceQuoteComplete: true,
+      runnerEventInstallChoiceQuoteSourceCapabilityKey:
+        canonicalLongtail.capabilityKey,
+      runnerEventInstallChoiceQuoteTemporaryCredits:
+        canonicalLongtail.temporaryCredits,
+      runnerEventInstallChoiceQuoteAllowedTypes:
+        canonicalLongtail.allowedTypes.join(","),
+      runnerEventInstallChoiceQuoteSelectableTargetIds:
+        selectableTargetIds.join(","),
     };
   }
 
@@ -1093,6 +1148,12 @@ export function createCardRuntimeResolvers(
             canPlay: (state) =>
               pro018GripInstallCandidates(state, "" as CardInstanceId, longtail)
                 .length > 0,
+            actionPayload: ({ state, cardId, definition: eventDefinition }) =>
+              runnerEventInstallChoiceActionPayload(
+                state,
+                cardId,
+                eventDefinition,
+              ) ?? {},
             resolve: (state, legalAction) =>
               startPro018GripInstallChoice(
                 state,
@@ -1639,6 +1700,7 @@ export function createCardRuntimeResolvers(
     runnerEventLongtailForDefinition,
     variableRezForDefinition,
     runnerEventLongtailKindForDefinition,
+    runnerEventInstallChoiceActionPayload,
     hiddenReplacementLongtailForDefinition,
     cardImplementationRunnerEventResolver,
     printedCostCardImplementationMakeRunEffect,

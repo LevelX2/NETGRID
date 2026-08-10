@@ -6,7 +6,7 @@ import type {
 import {
   capabilityKey,
   canonicalCapabilityId,
-  CS06_CARD_DEFINITION_IDS,
+  cardSpecRuntimeDefinitionIds,
 } from "@netgrid/cards/engine";
 import type {
   CardScoredAgendaImplementation,
@@ -40,7 +40,9 @@ export type CardImplementationEffectKind =
 
 type PrimitivePayload = NonNullable<LegalAction["payload"]>;
 
-const CARD_SPEC_DEFINITION_IDS = new Set<string>(CS06_CARD_DEFINITION_IDS);
+const CARD_SPEC_DEFINITION_IDS = new Set<string>(
+  cardSpecRuntimeDefinitionIds(),
+);
 
 export class CardImplementationPrimitiveIdentityError extends Error {
   readonly name = "CardImplementationPrimitiveIdentityError";

@@ -120,6 +120,7 @@ export let requiresDataFortInstallTarget: RuntimePortGroups["cardRuntimeResolver
 export let runnerEventLongtailForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventLongtailForDefinition"];
 export let variableRezForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["variableRezForDefinition"];
 export let runnerEventLongtailKindForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventLongtailKindForDefinition"];
+export let runnerEventInstallChoiceActionPayload: RuntimePortGroups["cardRuntimeResolvers"]["runnerEventInstallChoiceActionPayload"];
 export let hiddenReplacementLongtailForDefinition: RuntimePortGroups["cardRuntimeResolvers"]["hiddenReplacementLongtailForDefinition"];
 export let cardImplementationRunnerEventResolver: RuntimePortGroups["cardRuntimeResolvers"]["cardImplementationRunnerEventResolver"];
 export let printedCostCardImplementationMakeRunEffect: RuntimePortGroups["cardRuntimeResolvers"]["printedCostCardImplementationMakeRunEffect"];
@@ -646,6 +647,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.cardRuntimeResolvers.variableRezForDefinition;
   runnerEventLongtailKindForDefinition =
     ports.cardRuntimeResolvers.runnerEventLongtailKindForDefinition;
+  runnerEventInstallChoiceActionPayload =
+    ports.cardRuntimeResolvers.runnerEventInstallChoiceActionPayload;
   hiddenReplacementLongtailForDefinition =
     ports.cardRuntimeResolvers.hiddenReplacementLongtailForDefinition;
   cardImplementationRunnerEventResolver =

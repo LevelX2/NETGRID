@@ -25,9 +25,20 @@ export function primitiveContractRecords(
   for (const implementation of implementations) {
     implementation.successfulRunFollowups?.forEach((followup) => {
       if (followup.kind !== "successful_run_before_access_effect") return;
+      const capabilityKey =
+        "capabilityKey" in followup &&
+        typeof followup.capabilityKey === "string"
+          ? followup.capabilityKey
+          : undefined;
       records.push({
         cardDefinitionId: implementation.cardDefinitionId,
-        abilityKey: followup.abilityKey ?? "successful_run_before_access:0",
+        abilityKey: resolveCardImplementationPrimitiveIdentity({
+          sourceDefinitionId: implementation.cardDefinitionId,
+          primitiveKind: followup.kind,
+          effectKind: followup.effect.kind,
+          abilityKey: followup.abilityKey,
+          capabilityKey,
+        }).abilityKey,
         primitiveKind: followup.kind,
         effectKind: followup.effect.kind,
         timing: followup.timing,

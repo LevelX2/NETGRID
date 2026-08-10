@@ -24,8 +24,8 @@ export function validateGeneratedArtifact(
     !Array.isArray(artifact.cardIds) ||
     artifact.cardIds.some((cardId) => typeof cardId !== "string") ||
     !Array.isArray(artifact.cards) ||
-    artifact.cardIds.length !== 100 ||
-    artifact.cards.length !== 100
+    artifact.cardIds.length !== 251 ||
+    artifact.cards.length !== 251
   )
     throw new Error("invalid_card_spec_ai_hint_artifact_contract");
   if (

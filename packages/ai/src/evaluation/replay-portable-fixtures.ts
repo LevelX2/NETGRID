@@ -236,7 +236,7 @@ function legalAction(
     costs: [{ credits: 0, clicks: 1 }],
     targetRequirements: [],
     visibility: "public",
-    expiresAtStateVersion: 14,
+    expiresAtStateVersion: 13,
     payload,
   };
 }

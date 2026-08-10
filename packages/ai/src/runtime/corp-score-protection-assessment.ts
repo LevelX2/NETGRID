@@ -570,6 +570,7 @@ const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
   SubroutineDefinition["type"]
 >([
   "corp_gain_credit",
+  "end_the_run_unless_runner_pays",
   "runner_lose_credits",
   "give_runner_tag",
   "do_damage",

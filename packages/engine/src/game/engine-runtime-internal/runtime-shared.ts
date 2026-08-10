@@ -93,6 +93,11 @@ export type RunnerEventResolver = {
   requiresServer?: boolean;
   canPlay?: (state: GameState) => boolean;
   canPlayForServer?: (state: GameState, serverId: ServerId) => boolean;
+  actionPayload?: (input: {
+    state: GameState;
+    cardId: CardInstanceId;
+    definition: CardDefinition;
+  }) => Record<string, unknown>;
   legalActions?: (input: {
     state: GameState;
     cardId: CardInstanceId;

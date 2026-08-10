@@ -101,7 +101,13 @@ describe("shared card definition registry", () => {
   });
 
   it("exposes a current-state registry independent from the shared barrel implementation", () => {
-    expect(CARD_DEFINITIONS.length).toBeGreaterThan(0);
+    expect(CARD_DEFINITIONS).toHaveLength(383);
+    expect(Object.keys(CARD_DEFINITIONS_BY_ID)).toHaveLength(383);
+    expect(
+      CARD_DEFINITIONS.some((definition) =>
+        definition.id.startsWith("onr_proteus_"),
+      ),
+    ).toBe(false);
     expect(CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"]).toBe(
       CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"],
     );
@@ -161,10 +167,7 @@ describe("shared card definition registry", () => {
         });
       }
     }
-    expect(variableCostIds.sort()).toEqual([
-      "onr_proteus_049_emergency-rig",
-      "onr_v1_299_power-grid-overload",
-    ]);
+    expect(variableCostIds).toEqual(["onr_v1_299_power-grid-overload"]);
   });
 });
 

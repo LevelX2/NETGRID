@@ -842,7 +842,7 @@ export type ChoiceRequest = {
   source: string;
   sourceCardInstanceId?: CardInstanceId;
   sourceCardDefinitionId?: CardDefinitionId;
-  continuation?: ScoreChoiceContinuation;
+  continuation?: ChoiceContinuation;
   prompt: string;
   kind: ChoiceKind;
   options: ChoiceOption[];
@@ -854,7 +854,7 @@ export type ChoiceRequest = {
   cardSearchPresentation?: CardSearchPresentation;
 };
 
-export type ScoreChoiceContinuation =
+export type ChoiceContinuation =
   | {
       family: "corp_advancement_counter";
       originActionId: string;
@@ -865,6 +865,24 @@ export type ScoreChoiceContinuation =
       originActionId: string;
       agendaInstanceId: CardInstanceId;
       creditPerAgendaPoint: number;
+      createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_grip_install_with_temporary_credits";
+      originActionId: string;
+      sourceCardInstanceId: CardInstanceId;
+      sourceCardDefinitionId: CardDefinitionId;
+      sourceCapabilityKey: string;
+      temporaryCredits: number;
+      allowedTypes: Array<"hardware" | "program">;
+      createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_hidden_draw_keep_or_top_replacement";
+      originActionId: string;
+      sourceCardInstanceId: CardInstanceId;
+      sourceCardDefinitionId: CardDefinitionId;
+      drawnCardInstanceIds: CardInstanceId[];
       createdAtStateVersion: number;
     };
 

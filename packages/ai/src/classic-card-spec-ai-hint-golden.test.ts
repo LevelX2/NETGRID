@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import migrationReport from "../../../docs/reviews/cards/classic-card-spec-migration-report.json";
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 import reviewedGolden from "./test-fixtures/classic-card-spec-ai-hints-reviewed-v1.json";
+import proteusReviewedGolden from "./test-fixtures/proteus-card-spec-ai-hints-reviewed-v1.json";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 const reviewedIds = new Set(
@@ -80,7 +81,11 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
       cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
     );
     const priorGeneratedCards = generatedArtifact.cards.filter(
-      (record) => !reviewedIds.has(record.cardId),
+      (record) =>
+        !reviewedIds.has(record.cardId) &&
+        !proteusReviewedGolden.cards.some(
+          (proteusRecord) => proteusRecord.cardId === record.cardId,
+        ),
     );
     const compiled = priorGeneratedCards.map((record) => {
       const entry = entriesById.get(record.cardId);

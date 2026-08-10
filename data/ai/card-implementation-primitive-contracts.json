@@ -1,7 +1,7 @@
 [
   {
     "cardDefinitionId": "onr_proteus_136_credit-subversion",
-    "abilityKey": "successful_run_before_access:0",
+    "abilityKey": "hq_success_reveal_trash_source_corp_lose_three",
     "primitiveKind": "successful_run_before_access_effect",
     "effectKind": "corp_lose_credits",
     "timing": "immediately_after_successful_run_before_access",
@@ -15,7 +15,7 @@
   },
   {
     "cardDefinitionId": "onr_proteus_137_death-from-above",
-    "abilityKey": "successful_run_before_access:0",
+    "abilityKey": "remote_success_reveal_trash_source_and_fort",
     "primitiveKind": "successful_run_before_access_effect",
     "effectKind": "trash_remote_fort",
     "timing": "immediately_after_successful_run_before_access",

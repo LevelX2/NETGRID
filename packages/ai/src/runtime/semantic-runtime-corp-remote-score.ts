@@ -299,9 +299,7 @@ function semanticRuntimeCorpRemoteSupportInstallIsContestable(
   }
   const assessment = scoringWindowPostRezProtectionAssessment(
     input,
-    sourceCard
-      ? { ...server, root: [...server.root, sourceCard] }
-      : server,
+    sourceCard ? { ...server, root: [...server.root, sourceCard] } : server,
     semanticRuntimeCorpRunnerExposureCredits(input),
     corpRezCreditsAfterAction,
   );
@@ -524,9 +522,13 @@ export function semanticRuntimeCorpCentralIceProfile(
   hasTaxOrDamage: boolean;
   positionDependent: boolean;
   modeChoice: boolean;
+  alternateWallMode: boolean;
   definitionId?: string;
 } {
   const profile = buildCorpIceCardFacts(card);
+  const hint = profile.iceDefinitionId
+    ? AI_HINTS_BY_CARD.get(profile.iceDefinitionId)
+    : undefined;
   return {
     hasAccessStop: profile.immediateStop,
     hasTaxOrDamage:
@@ -537,6 +539,8 @@ export function semanticRuntimeCorpCentralIceProfile(
       profile.runLock,
     positionDependent: profile.positionDependent,
     modeChoice: profile.modeChoice,
+    alternateWallMode:
+      hint?.requiredMechanics?.includes("alternate_subtype_wall") === true,
     ...(profile.iceDefinitionId
       ? { definitionId: profile.iceDefinitionId }
       : {}),
@@ -561,7 +565,7 @@ function semanticRuntimeCorpVisibleRunnerCoverageCanBreakIce(
   );
   if (!rawCoverage) return false;
   if (
-    profile.definitionId === "onr_proteus_017_credit-blocks" &&
+    profile.alternateWallMode &&
     profile.modeChoice &&
     creditsAfterInstall >= rezCost + 1 &&
     !semanticRuntimeCorpVisibleRunnerHasBreakerRole(input, "fracter")

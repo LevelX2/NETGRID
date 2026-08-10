@@ -26,19 +26,20 @@ import {
   cardImplementationForDefinitionId,
   composeCardImplementationAuthorities,
   legacyCardImplementationForDefinitionId,
+  resolveUniqueCardImplementationCounterOwner,
 } from "./card-implementations/registry";
 import { CARD_IMPLEMENTATION_CATALOG } from "./card-implementations/subregistries/card-implementation-catalog";
 
 describe("heterogeneous card authority composition", () => {
   it("composes exact disjoint definition and implementation partitions", () => {
-    expect(Object.keys(LEGACY_CARD_DEFINITIONS_BY_ID)).toHaveLength(534);
-    expect(cardSpecDefinitions()).toHaveLength(100);
+    expect(Object.keys(LEGACY_CARD_DEFINITIONS_BY_ID)).toHaveLength(383);
+    expect(cardSpecDefinitions()).toHaveLength(251);
     expect(cs06CardDefinitions()).toHaveLength(10);
     expect(CARD_DEFINITIONS).toHaveLength(634);
-    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(517);
-    expect(cardSpecImplementations()).toHaveLength(80);
+    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(366);
+    expect(cardSpecImplementations()).toHaveLength(228);
     expect(cs06CardImplementations()).toHaveLength(10);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(597);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(594);
     expect(Object.isFrozen(CARD_DEFINITIONS)).toBe(true);
     expect(Object.isFrozen(CARD_DEFINITIONS_BY_ID)).toBe(true);
     expect(Object.isFrozen(CARD_IMPLEMENTATIONS)).toBe(true);
@@ -142,6 +143,37 @@ describe("heterogeneous card authority composition", () => {
       "duplicate_definition_authority",
       canonical.cardDefinitionId,
     );
+  });
+
+  it("derives counter owners from typed mechanics and fails closed on missing or duplicate owners", () => {
+    const owner = (cardDefinitionId: CardDefinitionId, counterKind: string) =>
+      ({
+        cardDefinitionId,
+        virusCounter: {
+          counterKind,
+          addOnSuccessfulRun: {
+            server: "hq",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      }) as (typeof CARD_IMPLEMENTATIONS)[number];
+    expect(
+      resolveUniqueCardImplementationCounterOwner(
+        [owner("counter_owner", "reviewed")],
+        "reviewed",
+      ),
+    ).toBe("counter_owner");
+    expect(() =>
+      resolveUniqueCardImplementationCounterOwner([], "missing"),
+    ).toThrow("card_implementation_counter_owner_not_unique:missing:0");
+    expect(() =>
+      resolveUniqueCardImplementationCounterOwner(
+        [owner("first", "duplicate"), owner("second", "duplicate")],
+        "duplicate",
+      ),
+    ).toThrow("card_implementation_counter_owner_not_unique:duplicate:2");
   });
 });
 

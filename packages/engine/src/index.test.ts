@@ -1535,6 +1535,31 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     );
     state = chipInstall.state;
     const chipId = chipInstall.cardId;
+    const oneMuBreakerId = addRunnerCardToGripForTest(
+      state,
+      "onr_v1_036_jackhammer",
+      "eurocorpse_one_mu_breaker",
+    );
+    const twoMuBreakerId = addRunnerCardToGripForTest(
+      state,
+      "onr_classic_031_rent-i-con",
+      "eurocorpse_two_mu_breaker",
+    );
+    const hostedInstallActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.hostOnCardId === chipId,
+    );
+    expect(
+      hostedInstallActions.some(
+        (action) => action.payload?.cardId === oneMuBreakerId,
+      ),
+    ).toBe(true);
+    expect(
+      hostedInstallActions.some(
+        (action) => action.payload?.cardId === twoMuBreakerId,
+      ),
+    ).toBe(false);
     state.cardInstances[chipId]!.counters = { bit: 2 };
     expect(
       getPlayerView(state, "runner").own.rig?.find(

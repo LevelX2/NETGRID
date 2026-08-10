@@ -53,6 +53,11 @@ export type CardRuntimeResolverPort = {
   runnerEventLongtailKindForDefinition: (
     definition: CardDefinition,
   ) => CardRunnerEventLongtailImplementation["kind"] | undefined;
+  runnerEventInstallChoiceActionPayload: (
+    state: GameState,
+    cardId: CardInstanceId,
+    definition: CardDefinition,
+  ) => Record<string, unknown> | undefined;
   hiddenReplacementLongtailForDefinition: (
     definition: CardDefinition,
   ) => CardHiddenReplacementLongtailImplementation | undefined;

@@ -43,6 +43,27 @@ const TEST_CARD_PRESENTATIONS = {
     title: "Gypsy™ Schedule Analyzer",
     type: "hardware",
   },
+  "onr_proteus_005_marked-accounts": {
+    title: "Marked Accounts",
+    type: "agenda",
+  },
+  onr_proteus_050_manhunt: { title: "Manhunt", type: "operation" },
+  "onr_proteus_057_doppelganger-antibody": {
+    title: "Doppelganger Antibody",
+    type: "asset",
+  },
+  "onr_proteus_068_pattel-antibody": {
+    title: "Pattel Antibody",
+    type: "asset",
+  },
+  onr_proteus_090_highlighter: {
+    title: "Highlighter",
+    type: "program",
+  },
+  "onr_proteus_111_ice-and-data-special-report": {
+    title: "Ice and Data Special Report",
+    type: "event",
+  },
 } as const;
 
 const formatChronicleEvent: typeof formatChronicleEventWithoutCatalog = (
@@ -8669,6 +8690,7 @@ describe("formatChronicleEvent", () => {
             counterType: "breaker_strength_penalty",
             addedCounterAmount: 2,
             remainingCounters: 2,
+            reason: "access_effect",
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
             sourceTitle: "Pattel Antibody",
           },
@@ -8699,6 +8721,26 @@ describe("formatChronicleEvent", () => {
       }),
       "runner",
     );
+    const sourceNameOnly = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        targetCount: 1,
+        resolvedEffects: [
+          {
+            effectId: "unbound.breaker.penalty",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            counterType: "breaker_strength_penalty",
+            addedCounterAmount: 1,
+            sourceDefinitionId: "onr_proteus_068_pattel-antibody",
+            sourceTitle: "Pattel Antibody",
+          },
+        ],
+      }),
+      "runner",
+    );
 
     expect(withTargets[0]?.title).toBe(
       "1 Pattel-Counter auf Bartmoss Memorial Icebreaker und Worm gelegt.",
@@ -8709,6 +8751,9 @@ describe("formatChronicleEvent", () => {
     expect(withTargets[0]?.groupLabel).toBe("Run");
     expect(withoutTargets[0]?.title).toBe(
       "Es wurden keine Pattel-Counter auf Icebrecher gelegt, da keine im Spiel waren.",
+    );
+    expect(sourceNameOnly[0]?.title).toBe(
+      "Du hast Pattel-Counter auf Pattel Antibody aufgefrischt.",
     );
   });
 
@@ -8726,6 +8771,7 @@ describe("formatChronicleEvent", () => {
             counterType: "breaker_strength_penalty",
             addedCounterAmount: 1,
             remainingCounters: 1,
+            reason: "access_effect",
             sourceDefinitionId: "onr_proteus_068_pattel-antibody",
             sourceTitle: "Pattel Antibody",
           },

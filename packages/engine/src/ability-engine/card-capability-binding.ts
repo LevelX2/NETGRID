@@ -2,6 +2,7 @@ import {
   CapabilityIdentityError,
   canonicalCapabilityId,
   assertAbilityRefIdentity,
+  cardSpecImplementationById,
   engineCardByDefinitionId,
   parseCanonicalCapabilityId,
   type CanonicalCapabilityId,
@@ -309,15 +310,27 @@ export function activatedAbilityBindingsForDefinition(
 
   return (authority.engineCard.engine.abilities ?? [])
     .filter((ability) => ability.kind === "activated")
-    .map((ability) => ({
-      kind: "card_spec_capability_key" as const,
-      ability: ability as ActivatedCardAbilityImplementation,
-      capabilityKey: ability.capabilityKey,
-      sourceAbilityId: canonicalCapabilityId(
-        definition.id,
-        ability.capabilityKey,
-      ),
-    }));
+    .map((ability) => {
+      const projectedAbility =
+        sources === DEFAULT_AUTHORITY_SOURCES
+          ? cardSpecImplementationById(definition.id)?.abilities?.find(
+              (candidate) =>
+                candidate.kind === "activated" &&
+                "capabilityKey" in candidate &&
+                candidate.capabilityKey === ability.capabilityKey,
+            )
+          : undefined;
+      return {
+        kind: "card_spec_capability_key" as const,
+        ability: (projectedAbility ??
+          ability) as ActivatedCardAbilityImplementation,
+        capabilityKey: ability.capabilityKey,
+        sourceAbilityId: canonicalCapabilityId(
+          definition.id,
+          ability.capabilityKey,
+        ),
+      };
+    });
 }
 
 function assertCanonicalPayloadBinding(

@@ -23,15 +23,6 @@ const EXPECTED_GROUP_KEYS = [
   "onr-v1:runner:hardware",
   "onr-v1:runner:program",
   "onr-v1:runner:resource",
-  "proteus:corp:agenda",
-  "proteus:corp:asset",
-  "proteus:corp:ice",
-  "proteus:corp:operation",
-  "proteus:corp:upgrade",
-  "proteus:runner:event",
-  "proteus:runner:hardware",
-  "proteus:runner:program",
-  "proteus:runner:resource",
 ] as const;
 
 const SET_PREFIX = {
@@ -52,9 +43,9 @@ describe("semantic CardImplementation catalog", () => {
     expect(groupKeys).toEqual(EXPECTED_GROUP_KEYS);
     expect(new Set(groupKeys).size).toBe(groupKeys.length);
     expect(CARD_IMPLEMENTATION_CATALOG).toEqual(flattened);
-    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(517);
-    expect(cardSpecImplementations()).toHaveLength(80);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(597);
+    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(366);
+    expect(cardSpecImplementations()).toHaveLength(228);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(594);
     expect(CARD_IMPLEMENTATIONS.slice(0, flattened.length)).toEqual(flattened);
     expect(
       CARD_IMPLEMENTATIONS.slice(flattened.length).map(

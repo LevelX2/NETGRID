@@ -1,8 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
-import { proteusArmageddonImplementation } from "../../card-implementations/proteus/runner/programs/armageddon";
-import { proteusScaldanImplementation } from "../../card-implementations/proteus/runner/programs/scaldan";
-import { proteusTaxmanImplementation } from "../../card-implementations/proteus/runner/programs/taxman";
 import {
   type ActionType,
   type ChoiceRequest,
@@ -534,6 +531,7 @@ import {
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
 import {
   CARD_IMPLEMENTATIONS,
+  cardImplementationCounterOwnerDefinitionId,
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
@@ -700,13 +698,13 @@ import type {
 
 export type AutomaticEffectCollector = ResolvedGameEffect[];
 export const PROTEUS_TAXMAN_ID =
-  proteusTaxmanImplementation.cardDefinitionId as CardDefinitionId;
+  cardImplementationCounterOwnerDefinitionId("tax");
 export const PROTEUS_SCALDAN_ID =
-  proteusScaldanImplementation.cardDefinitionId as CardDefinitionId;
+  cardImplementationCounterOwnerDefinitionId("scaldan");
 export const PIPE_COUNTER_CORP_START_EFFECT_SOURCE_ID =
   "pipe_counter_corp_start_effect" as CardDefinitionId;
 export const PROTEUS_ARMAGEDDON_ID =
-  proteusArmageddonImplementation.cardDefinitionId as CardDefinitionId;
+  cardImplementationCounterOwnerDefinitionId("doom");
 
 // Effective-value helpers are pure/read-only. Legacy agenda-difficulty pieces
 // are still injected through runtime wiring so this module avoids public-facade

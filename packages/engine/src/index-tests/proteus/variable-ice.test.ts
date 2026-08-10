@@ -244,10 +244,9 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
       let state = proteusVariableIceGame(`proteus-variable-digiconda-${x}`);
       state.corp.credits = 12;
       const iceId = putCorpIceOnServer(state, "rd", DIGICONDA);
-      const hiddenRunnerIce = getPlayerView(
-        state,
-        "runner",
-      ).servers.find((server) => server.id === "rd")?.ice[0];
+      const hiddenRunnerIce = getPlayerView(state, "runner").servers.find(
+        (server) => server.id === "rd",
+      )?.ice[0];
       expect(hiddenRunnerIce).toMatchObject({
         known: false,
         rezzed: false,
@@ -1575,6 +1574,8 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   const TUMBLERS = "onr_proteus_042_tumblers";
   const TWISTY_PASSAGES = "onr_proteus_043_twisty-passages";
   const WASHED_UP_SOLO_CONSTRUCT = "onr_proteus_045_washed-up-solo-construct";
+  const SUNBURST_CRANIAL_INTERFACE =
+    "onr_proteus_151_sunburst-cranial-interface";
   const RASMIN_BRIDGER = "onr_proteus_070_rasmin-bridger";
   const SOCIAL_ENGINEERING = "onr_v1_111_social-engineering";
   const hiddenPayloadMarkers =
@@ -1602,6 +1603,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "simple_decoder",
       "simple_fracter",
       "simple_killer",
+      SUNBURST_CRANIAL_INTERFACE,
     ]);
     return createGameAfterSetup({
       seed,
@@ -1612,6 +1614,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
           { id: "simple_decoder", quantity: 2 },
           { id: "simple_fracter", quantity: 2 },
           { id: "simple_killer", quantity: 2 },
+          { id: SUNBURST_CRANIAL_INTERFACE, quantity: 1 },
           ...ONR_V1_6_2_RUNNER_DECK.cards.filter(
             (card) => !runnerOverrideIds.has(card.id),
           ),
@@ -1774,7 +1777,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 1,
-      encounterSubroutineIds: `card_implementation.${BRAIN_WASH}.printed_subroutine.1.brain_damage`,
+      encounterSubroutineIds: "subroutine_brain_damage_one",
     });
 
     expect(
@@ -1865,11 +1868,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     });
     expect(continueAction.payload?.encounterSubroutineIds).toBe(
       [
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.1.trash_program`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.2.trash_program`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.3.trash_program`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.4.end_the_run`,
-        `card_implementation.${COLONEL_FAILURE}.printed_subroutine.5.end_the_run`,
+        "subroutine_trash_program_a",
+        "subroutine_trash_program_b",
+        "subroutine_trash_program_c",
+        "subroutine_end_run_a",
+        "subroutine_end_run_b",
       ].join(","),
     );
     state = apply(
@@ -2218,6 +2221,36 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
   });
 
+  it("PRO010 does not spend a Sunburst bit on Washed-Up without a bound icebreaker use", () => {
+    let state = startEncounterAndRezIce(
+      proteusSimpleCorpIceGame("proteus-pro010-washed-up-sunburst-bound"),
+      WASHED_UP_SOLO_CONSTRUCT,
+    ).state;
+    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const sunburstId = installRunnerHardwareForTest(
+      state,
+      SUNBURST_CRANIAL_INTERFACE,
+    );
+    setCardCounterForTest(state, sunburstId, "bit", 1);
+    state.runner.credits = 0;
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "continue_run" &&
+          action.payload?.payOrTrashProgramSubroutineIndexes === "0",
+      ),
+    ).toBe(false);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "continue_run" && action.costs.length === 0,
+    );
+
+    expect(state.runner.heap).toContain(programId);
+    expect(state.cardInstances[sunburstId]?.counters?.bit).toBe(1);
+  });
+
   it("PRO010 supports Washed-Up Solo Construct paid branch then reaching a second ICE and runner ending the run", () => {
     let state = proteusSimpleCorpIceGame(
       "proteus-pro010-washed-up-then-snowbank",
@@ -2344,8 +2377,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       );
       let { state, iceId } = setup;
       const subroutineCount =
-        cardImplementationForDefinitionId(definitionId)?.printedSubroutines
-          ?.length ?? 0;
+        CARD_DEFINITIONS_BY_ID[definitionId]?.subroutines?.length ?? 0;
       state.run!.brokenSubroutineIndexes = Array.from(
         { length: subroutineCount },
         (_, index) => index,

@@ -5840,17 +5840,8 @@ function pattelAccessCounterChronicleText(
   )
     return null;
   const payload = event.publicPayload ?? {};
-  const sourceDefinitionId =
-    stringValue(effect.sourceDefinitionId) ??
-    stringValue(payload.ambushDefinitionId) ??
-    stringValue(payload.accessEffectSourceDefinitionId);
-  const sourceTitle =
-    stringValue(effect.sourceTitle) ??
-    titleForDefinitionId(sourceDefinitionId, cardPresentationsById);
   const isPattelAccessCounter =
     effect.reason === "access_effect" ||
-    sourceDefinitionId === "onr_proteus_068_pattel-antibody" ||
-    sourceTitle === "Pattel Antibody" ||
     stringValue(payload.hiddenZoneAction) ===
       "proteus_breaker_strength_penalty_access_counters";
   if (!isPattelAccessCounter) return null;

@@ -22,8 +22,11 @@ export type CardSpecCardImplementation = {
   | "corpUtility"
   | "corpRootRezCreditOutcome"
   | "damagePreventionSources"
+  | "flatlineReplacementSources"
   | "fortRunWindows"
   | "hardwareDeck"
+  | "hostedProgramCapacity"
+  | "iceEncounter"
   | "icebreakerAbilities"
   | "icebreakerEncounterStrengthBonus"
   | "icebreakerSubtypeChange"
@@ -31,17 +34,24 @@ export type CardSpecCardImplementation = {
   | "installTargetBinding"
   | "lifecycle"
   | "modifiers"
+  | "relativeIce"
   | "restrictedHostedCreditSource"
   | "runnerCounterEffects"
   | "runnerEventLongtail"
+  | "runnerEventTargetedEffect"
+  | "runnerRunStrengthBoost"
   | "runnerUtilityLongtail"
   | "scoredAgenda"
   | "selfRezAdditionalCosts"
   | "selfRezCostModifiers"
+  | "selfStealCosts"
   | "successfulRunFollowups"
   | "tagPreventionSources"
+  | "trashPreventionSources"
   | "unique"
+  | "uniqueDirectLongtail"
   | "variableRez"
+  | "virusCounter"
 >;
 type CardSpecCardImplementationFamilies = Omit<
   CardSpecCardImplementation,
@@ -168,8 +178,11 @@ const CARD_SPEC_IMPLEMENTATION_FAMILIES = new Set([
   "corpUtility",
   "corpRootRezCreditOutcome",
   "damagePreventionSources",
+  "flatlineReplacementSources",
   "fortRunWindows",
   "hardwareDeck",
+  "hostedProgramCapacity",
+  "iceEncounter",
   "icebreakerAbilities",
   "icebreakerEncounterStrengthBonus",
   "icebreakerSubtypeChange",
@@ -177,17 +190,24 @@ const CARD_SPEC_IMPLEMENTATION_FAMILIES = new Set([
   "installTargetBinding",
   "lifecycle",
   "modifiers",
+  "relativeIce",
   "restrictedHostedCreditSource",
   "runnerCounterEffects",
   "runnerEventLongtail",
+  "runnerEventTargetedEffect",
+  "runnerRunStrengthBoost",
   "runnerUtilityLongtail",
   "scoredAgenda",
   "selfRezAdditionalCosts",
   "selfRezCostModifiers",
+  "selfStealCosts",
   "successfulRunFollowups",
   "tagPreventionSources",
+  "trashPreventionSources",
   "unique",
+  "uniqueDirectLongtail",
   "variableRez",
+  "virusCounter",
 ]);
 
 function assertCardSpecImplementationFamilies(
@@ -243,6 +263,33 @@ function projectPrintedSubroutines(
         id: subroutine.capabilityKey,
         type: "trash_installed_program",
       } satisfies SubroutineDefinition;
+    if (subroutine.kind === "trash_program_unless_runner_pays")
+      return {
+        id: subroutine.capabilityKey,
+        type: "trash_installed_program_unless_runner_pays",
+        amount: subroutine.amount,
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "end_the_run_unless_runner_pays")
+      return {
+        id: subroutine.capabilityKey,
+        type: "end_the_run_unless_runner_pays",
+        amount: subroutine.amount,
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "run_duration_ice_strength") {
+      const cancelPayment = subroutine.runnerMayCancelOnPassingSource?.amount;
+      if (
+        typeof cancelPayment !== "number" ||
+        !Number.isInteger(cancelPayment) ||
+        cancelPayment <= 0
+      )
+        throw new Error("card_spec_invalid_run_strength_cancel_payment");
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_run_future_strength_bonus",
+        amount: subroutine.amount,
+        runFutureStrengthCancelPaymentAmount: cancelPayment,
+      } satisfies SubroutineDefinition;
+    }
     if (subroutine.kind === "prohibit_break_next_ice")
       return {
         id: subroutine.capabilityKey,
@@ -319,6 +366,34 @@ function projectTraceSuccessEffect(
       counterType: effect.counterType,
       amount: effect.amount,
     };
+  }
+  if (effects.length === 1 && effects[0]?.kind === "preventable_damage") {
+    const effect = effects[0];
+    if (
+      effect.recipient !== "runner" ||
+      effect.damageType !== "net" ||
+      typeof effect.amount !== "number" ||
+      !Number.isInteger(effect.amount) ||
+      effect.amount <= 0 ||
+      effect.visibility !== "public"
+    )
+      throw new Error("card_spec_invalid_trace_damage_effect");
+    return { type: "net_damage", amount: effect.amount };
+  }
+  if (effects.length === 2) {
+    const endRun = effects.find((effect) => effect.kind === "end_run");
+    const runLock = effects.find(
+      (effect) => effect.kind === "runner_run_lock_until_action_paid",
+    );
+    if (
+      endRun?.visibility !== "public" ||
+      runLock?.kind !== "runner_run_lock_until_action_paid" ||
+      runLock.visibility !== "public" ||
+      !Number.isInteger(runLock.amount) ||
+      runLock.amount <= 0
+    )
+      throw new Error("card_spec_invalid_trace_run_lock_effect");
+    return { type: "end_run_and_run_lock", amount: runLock.amount };
   }
   throw new Error("card_spec_unsupported_trace_success_effect");
 }

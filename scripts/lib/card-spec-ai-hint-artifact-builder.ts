@@ -39,6 +39,7 @@ export function buildCardSpecAiHintArtifact(options?: {
   const entries = options?.entries ?? canonicalEntries;
   const scenarioPack = options?.scenarioPack ?? aiSupportScenarioData;
   const activeIds = new Set(cardSpecRuntimeDefinitionIds());
+  const cs06Ids = new Set<string>(CS06_CARD_DEFINITION_IDS);
   const sourceRefs = cardSpecSourceRefs();
   const classicIds = sourceRefs
     .filter(
@@ -54,20 +55,30 @@ export function buildCardSpecAiHintArtifact(options?: {
         activeIds.has(ref.cardDefinitionId),
     )
     .map((ref) => ref.cardDefinitionId);
+  const proteusIds = sourceRefs
+    .filter(
+      (ref) =>
+        ref.sourcePath.includes("/specs/proteus/") &&
+        activeIds.has(ref.cardDefinitionId) &&
+        !cs06Ids.has(ref.cardDefinitionId),
+    )
+    .map((ref) => ref.cardDefinitionId);
   const expectedIds = [
     ...CS06_CARD_DEFINITION_IDS,
     ...testsetIds,
     ...classicIds,
+    ...proteusIds,
   ].sort(compareText);
   if (
     CS06_CARD_DEFINITION_IDS.length !== 10 ||
     testsetIds.length !== 36 ||
     classicIds.length !== 54 ||
-    expectedIds.length !== 100 ||
-    new Set(expectedIds).size !== 100
+    proteusIds.length !== 151 ||
+    expectedIds.length !== 251 ||
+    new Set(expectedIds).size !== 251
   )
     throw new Error(
-      `card_spec_ai_hint_artifact_expected_partition_mismatch: cs06=${CS06_CARD_DEFINITION_IDS.length},testset=${testsetIds.length},classic=${classicIds.length},total=${expectedIds.length}`,
+      `card_spec_ai_hint_artifact_expected_partition_mismatch: cs06=${CS06_CARD_DEFINITION_IDS.length},testset=${testsetIds.length},classic=${classicIds.length},proteus=${proteusIds.length},total=${expectedIds.length}`,
     );
   assertExactIds(
     "card_spec_ai_hint_artifact_runtime_partition",

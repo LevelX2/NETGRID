@@ -292,8 +292,9 @@ describe("Proteus Visible Baseline", () => {
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
     expect(state.corp.credits).toBe(7);
     expect(state.run?.encounteredIceId).toBe(iceId);
+    expect(cardImplementationForDefinitionId(TOUGHONIUM)).toBeUndefined();
     expect(
-      cardImplementationForDefinitionId(TOUGHONIUM)?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID[TOUGHONIUM]?.subroutines,
     ).toHaveLength(4);
     expect(
       CARD_DEFINITIONS_BY_ID[TOUGHONIUM]?.subroutines?.every(

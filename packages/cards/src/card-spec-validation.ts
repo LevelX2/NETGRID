@@ -375,14 +375,68 @@ export function assertCardSpecContract(spec: CardSpec): void {
         "abilityKey",
         "addressability",
         "kind",
+        "additionalCost",
         "additionalCostPerValue",
+        "additionalCostPerSubroutine",
+        "alternateSubtypes",
+        "baseSubtypes",
         "minValue",
         "maxValue",
+        "minSubroutines",
+        "traceBaseFromValue",
+        "traceBidLimitFromValue",
         "visibility",
       ]),
       "$cardSpec.engine.variableRez",
     );
+    if (variableRez.visibility !== "public")
+      invalid("$cardSpec.engine.variableRez.visibility", "must be public");
     if (variableRez.kind === "x_strength") {
+      for (const key of Object.keys(variableRez))
+        if (
+          ![
+            "capabilityKey",
+            "addressability",
+            "kind",
+            "additionalCostPerValue",
+            "minValue",
+            "maxValue",
+            "traceBaseFromValue",
+            "traceBidLimitFromValue",
+            "visibility",
+          ].includes(key)
+        )
+          invalid(
+            `$cardSpec.engine.variableRez.${key}`,
+            "field is not valid for x-strength variable rez",
+          );
+      optionalNonNegativeNumber(
+        variableRez.additionalCostPerValue,
+        "$cardSpec.engine.variableRez.additionalCostPerValue",
+      );
+      optionalNonNegativeNumber(
+        variableRez.minValue,
+        "$cardSpec.engine.variableRez.minValue",
+      );
+      optionalNonNegativeNumber(
+        variableRez.maxValue,
+        "$cardSpec.engine.variableRez.maxValue",
+      );
+      if (
+        variableRez.additionalCostPerValue !== 1 ||
+        variableRez.minValue !== 0 ||
+        variableRez.maxValue === undefined
+      )
+        invalid(
+          "$cardSpec.engine.variableRez",
+          "x-strength requires cost 1, minimum 0, and a maximum",
+        );
+      for (const key of ["traceBaseFromValue", "traceBidLimitFromValue"])
+        if (variableRez[key] !== undefined && variableRez[key] !== true)
+          invalid(
+            `$cardSpec.engine.variableRez.${key}`,
+            "must be true when present",
+          );
       const strength = closedObject(
         characteristics.strength,
         new Set(["kind", "minimumStrength", "maximumStrength"]),
@@ -397,6 +451,72 @@ export function assertCardSpecContract(spec: CardSpec): void {
           "$cardSpec.engine.variableRez",
           "x_strength bounds must match paid_x strength bounds",
         );
+    } else if (variableRez.kind === "paid_end_the_run_subroutines") {
+      for (const key of Object.keys(variableRez))
+        if (
+          ![
+            "capabilityKey",
+            "addressability",
+            "kind",
+            "additionalCostPerSubroutine",
+            "minSubroutines",
+            "visibility",
+          ].includes(key)
+        )
+          invalid(
+            `$cardSpec.engine.variableRez.${key}`,
+            "field is not valid for paid subroutines variable rez",
+          );
+      if (
+        variableRez.additionalCostPerSubroutine !== 2 ||
+        variableRez.minSubroutines !== 0
+      )
+        invalid(
+          "$cardSpec.engine.variableRez",
+          "paid end-the-run subroutines require cost 2 and minimum 0",
+        );
+    } else if (variableRez.kind === "alternate_subtype") {
+      for (const key of Object.keys(variableRez))
+        if (
+          ![
+            "capabilityKey",
+            "addressability",
+            "kind",
+            "additionalCost",
+            "baseSubtypes",
+            "alternateSubtypes",
+            "visibility",
+          ].includes(key)
+        )
+          invalid(
+            `$cardSpec.engine.variableRez.${key}`,
+            "field is not valid for alternate-subtype variable rez",
+          );
+      optionalNonNegativeNumber(
+        variableRez.additionalCost,
+        "$cardSpec.engine.variableRez.additionalCost",
+      );
+      stringArray(
+        variableRez.baseSubtypes,
+        "$cardSpec.engine.variableRez.baseSubtypes",
+      );
+      stringArray(
+        variableRez.alternateSubtypes,
+        "$cardSpec.engine.variableRez.alternateSubtypes",
+      );
+      if (
+        variableRez.additionalCost === undefined ||
+        !Array.isArray(variableRez.baseSubtypes) ||
+        variableRez.baseSubtypes.length === 0 ||
+        !Array.isArray(variableRez.alternateSubtypes) ||
+        variableRez.alternateSubtypes.length === 0
+      )
+        invalid(
+          "$cardSpec.engine.variableRez",
+          "alternate subtype requires cost and both subtype sets",
+        );
+    } else {
+      invalid("$cardSpec.engine.variableRez.kind", "unknown variable rez kind");
     }
   }
   if (engine.regionBaseline !== undefined) {

@@ -875,6 +875,8 @@ export function configureActionRuntimeBootstrap({
       pushEndOfRunnerTurnActions: pushCardImplementationEndOfRunnerTurnActions,
       canPlayPrintedCostOnPlayImplementation,
       runnerEventResolver: runtimePorts.cardImplementationRunnerEventResolver,
+      runnerEventInstallChoiceActionPayload:
+        runtimePorts.runnerEventInstallChoiceActionPayload,
       printedCostMakeRunEffect:
         runtimePorts.printedCostCardImplementationMakeRunEffect,
       pushActivatedActions: pushActivatedCardImplementationActions,

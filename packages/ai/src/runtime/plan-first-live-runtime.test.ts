@@ -656,6 +656,173 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("binds Datacomb's exact post-pass pay action to corp.defend_servers", () => {
+    resetResidentPlanPortfolioMemory();
+    const pay = legalAction(
+      "corp.datacomb.pay",
+      "corp",
+      "continue_run",
+      "Datacomb behalten",
+      { credits: 1, clicks: 0 },
+      {
+        source: "datacomb-ice",
+        payload: {
+          corpPostPassIceAbility: "return_passed_ice_to_hq",
+          sourceDefinitionId: "onr_proteus_018_datacomb",
+          decision: "pay",
+          paymentAmount: 1,
+          serverId: "hq",
+        },
+      },
+    );
+    const returnToHq = legalAction(
+      "corp.datacomb.return_to_hq",
+      "corp",
+      "continue_run",
+      "Datacomb auf die HQ zurücknehmen",
+      { credits: 0, clicks: 0 },
+      {
+        source: "datacomb-ice",
+        payload: {
+          corpPostPassIceAbility: "return_passed_ice_to_hq",
+          sourceDefinitionId: "onr_proteus_018_datacomb",
+          decision: "return_to_hq",
+          serverId: "hq",
+        },
+      },
+    );
+    const input = aiInput("corp", [returnToHq, pay]);
+    pay.expiresAtStateVersion = input.playerView.stateVersion;
+    returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
+    input.playerView.phase = "run";
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.own.credits = 5;
+    input.playerView.run = {
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "server", serverId: "hq" },
+      successful: false,
+    };
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+    expect(
+      buildActionSemanticCandidates(input).map((candidate) => ({
+        actionId: candidate.actionId,
+        actionType: candidate.actionType,
+        semanticActionType: candidate.semanticActionType,
+      })),
+    ).toEqual([
+      {
+        actionId: returnToHq.actionId,
+        actionType: "continue_run",
+        semanticActionType: "run.continue",
+      },
+      {
+        actionId: pay.actionId,
+        actionType: "continue_run",
+        semanticActionType: "run.continue",
+      },
+    ]);
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: pay.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          selectedPlan: {
+            instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+          },
+          route: {
+            actionId: pay.actionId,
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_lane:plan",
+        "plan_module:corp.defend_servers",
+      ]),
+    );
+  });
+
+  it("binds Scaffolding's optional post-pass decline to corp.defend_servers", () => {
+    resetResidentPlanPortfolioMemory();
+    const decline = legalAction(
+      "corp.scaffolding.decline",
+      "corp",
+      "continue_run",
+      "Scaffolding liegen lassen",
+      { credits: 0, clicks: 0 },
+      {
+        source: "scaffolding-ice",
+        payload: {
+          corpPostPassIceAbility: "return_passed_ice_to_hq",
+          sourceDefinitionId: "onr_proteus_037_scaffolding",
+          decision: "decline",
+          serverId: "hq",
+        },
+      },
+    );
+    const returnToHq = legalAction(
+      "corp.scaffolding.return_to_hq",
+      "corp",
+      "continue_run",
+      "Scaffolding auf die HQ zurücknehmen",
+      { credits: 0, clicks: 0 },
+      {
+        source: "scaffolding-ice",
+        payload: {
+          corpPostPassIceAbility: "return_passed_ice_to_hq",
+          sourceDefinitionId: "onr_proteus_037_scaffolding",
+          decision: "return_to_hq",
+          gainCredits: 1,
+          serverId: "hq",
+        },
+      },
+    );
+    const input = aiInput("corp", [returnToHq, decline]);
+    decline.expiresAtStateVersion = input.playerView.stateVersion;
+    returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
+    input.playerView.phase = "run";
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.run = {
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "server", serverId: "hq" },
+      successful: false,
+    };
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: decline.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.defend_servers",
+        planFirstDecision: {
+          selectedPlan: {
+            instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+          },
+          route: {
+            actionId: decline.actionId,
+          },
+        },
+      },
+    });
+  });
+
   it("selects a blocked payoff Social Engineering route through central pressure and persists its exact continuation", () => {
     resetResidentPlanPortfolioMemory();
     const social = legalAction(

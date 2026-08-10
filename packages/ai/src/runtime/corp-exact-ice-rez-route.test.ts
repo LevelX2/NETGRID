@@ -294,6 +294,38 @@ describe("exact Corp ICE rez route", () => {
     ).toBe(fixture.engineAction.actionId);
   });
 
+  it("uses a canonical pay-or-end subroutine as qualitative encounter defense without inventing access prevention", () => {
+    const fixture = engineIceRezWindow(
+      "onr_proteus_032_misleading-access-menus",
+      0,
+    );
+
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "qualitative_encounter_defense",
+      effect: "progress",
+      totalRezCredits: 0,
+      before: {
+        runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      },
+      after: {
+        runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }).actionId,
+    ).toBe(fixture.engineAction.actionId);
+  });
+
   it("uses an Engine-certified current-run resource exchange when access remains possible", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {

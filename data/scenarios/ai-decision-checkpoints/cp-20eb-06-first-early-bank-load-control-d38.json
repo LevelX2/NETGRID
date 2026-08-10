@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 79,
-    "stateHash": "fnv1a:34838b43",
+    "stateHash": "fnv1a:6a1f793a",
     "testOnlyGameState": {
       "matchId": "match_20eb121f1a2b3b1b",
       "baseline": {
@@ -5563,7 +5563,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_proteus_150_streetware-distributor_2.runner_onr_proteus_150_streetware-distributor_2.activated.0"
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_proteus_150_streetware-distributor"
       }
     ]
   }

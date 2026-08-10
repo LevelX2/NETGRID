@@ -668,6 +668,16 @@ export function createLifecycleRuntime(
       source: `p3_61.crash_draw:${sourceCardId}:${drawnCardIds.join(",")}:${
         state.stateVersion + 1
       }`,
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: deps.definitionFor(state, sourceCardId).id,
+      continuation: {
+        family: "runner_hidden_draw_keep_or_top_replacement",
+        originActionId: "",
+        sourceCardInstanceId: sourceCardId,
+        sourceCardDefinitionId: deps.definitionFor(state, sourceCardId).id,
+        drawnCardInstanceIds: [...drawnCardIds],
+        createdAtStateVersion: state.stateVersion + 1,
+      },
       prompt: "Crash Everett: gezogene Karte waehlen",
       kind: "select_option",
       options,

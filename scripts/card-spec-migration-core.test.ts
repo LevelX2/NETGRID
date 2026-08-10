@@ -23,10 +23,11 @@ afterEach(async () => {
 });
 
 describe("generic CardSpec migration core", () => {
-  it("dispatches isolated Testset and Classic adapters through the neutral CLI", () => {
+  it("dispatches isolated Testset, Classic, and Proteus adapters through the neutral CLI", () => {
     for (const [setId, mode] of [
       ["testset", "check"],
       ["classic", "dry-run"],
+      ["proteus", "check"],
     ] as const)
       expect(
         execFileSync(
@@ -35,7 +36,7 @@ describe("generic CardSpec migration core", () => {
           { cwd: process.cwd(), encoding: "utf8" },
         ),
       ).toContain(`${setId}_card_spec_`);
-  });
+  }, 30_000);
 
   it("selects one of multiple set descriptors and rejects invalid invocations", () => {
     const descriptors = {

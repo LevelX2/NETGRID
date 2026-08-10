@@ -92,7 +92,7 @@
   },
   "engine": {
     "stateVersion": 20,
-    "stateHash": "fnv1a:5f8bf5a3",
+    "stateHash": "fnv1a:110b41a3",
     "testOnlyGameState": {
       "matchId": "match_a36a9664458303fc",
       "baseline": {
@@ -5639,7 +5639,7 @@
       {
         "type": "install_card",
         "sourceDefinitionId": "onr_proteus_038_snowbank",
-        "targetServerId": "new_remote"
+        "targetServerId": "rd"
       }
     ],
     "forbiddenActions": [
@@ -5649,9 +5649,9 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "score_protection_staging_install:agenda:corp_onr_v1_194_corporate-downsizing_1:new_remote:new_remote:development_risk_multi_point_steal_risk"
+        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.1"
       ]
     }
   }

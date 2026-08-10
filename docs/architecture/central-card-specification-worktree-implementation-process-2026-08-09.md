@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS08 abgeschlossen, CS09 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS09 abgeschlossen, CS10 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -404,7 +404,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS06  | Heterogener produktiver Mechanik-Stresstest            | completed |
 | CS07  | Testset-Migration und Migrationsautomatisierung        | completed |
 | CS08  | Classic-Migration                                      | completed |
-| CS09  | Proteus-Migration                                      | pending   |
+| CS09  | Proteus-Migration                                      | completed |
 | CS10  | Originalset-v1-Migration                               | pending   |
 | CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | pending   |
 | CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | pending   |
@@ -1289,6 +1289,50 @@ Done-Gate:
 Commit:
 
 `feat(cards): migrate proteus set to canonical specifications`
+
+Ergebnis:
+
+- Alle 154 Proteus-Karten liegen als kanonische CardSpecs vor. 151 besitzen
+  eine generisch projizierte CardImplementation; Brain Wash, Colonel Failure
+  und Toughonium Wall bleiben als reine Printed-Subroutine-Definitionen
+  bewusst definition-owned. Die Migration bindet 191 adressierbare
+  Mechanikknoten an reviewte, kartenlokal eindeutige Capability-Keys.
+- Die früheren Proteus-Raw-/Supportdateien, 151 Implementationmodule, 17
+  Subregistries, 151 Legacy-Hints sowie 46 statische Shared-Definitionen sind
+  aus den produktiven Quellen entfernt. Die Registry enthält jetzt 251
+  CardSpec-Definitionen und 228 CardSpec-Implementierungen; zusammen mit 383
+  verbleibenden Shared-Definitionen und 366 Legacy-Implementierungen bleiben
+  634 Definitionen und 594 Implementierungen. Das effektive KI-Readmodel
+  bleibt mit 367 Legacy- und 251 erzeugten Hints bei 618 Karten.
+- Der Migrationsadapter ist auf den Commit `e6d901e6832852f7ad70b81ae92b1c1a76a8a899`
+  gepinnt und inventarisiert die 151 zu migrierenden Quellen einschließlich
+  der früher zusätzlich in Shared gepflegten Subroutinen. Check und Dry-run
+  ergeben jeweils 151 Karten, 32 Familien und 191 adressierbare Knoten. Die
+  zuvor kanonischen Digiconda-, Black-Widow- und Morphing-Tool-Specs bleiben
+  bytegenau erhalten.
+- Der erzeugte AI-Hint-Artifact enthält exakt 251 disjunkte CardSpec-Hints.
+  Das Proteus-Golden deckt alle 151 neu migrierten Karten als Vollobjekte ab;
+  manuelle Editor-Notizen sind keine Runtime- oder Readiness-Autorität. Die
+  Proteus-Readiness bleibt bei 154/154 `default_pool_ready`; 54 Karten besitzen
+  belegte Strategy-Coverage und null Karten erben die früheren sechs
+  editorischen Benchmark-Flags.
+- 228 Decision Checkpoints mit Proteus-Zustand wurden deterministisch
+  aktualisiert. Gegen den Stand vor CS09 ändern sich über alle 352 Fixtures
+  345 ausschließlich im StateHash, eine zusätzlich durch eine kanonische
+  Capability-Bindung und sechs durch fachlich geprüfte
+  Erwartungsreconciliation; der aktuelle Rebase-Check meldet null Drift.
+- Der einmalige 16-Spiel-Pilot endet mit 2.445 Entscheidungen, fünf regulär
+  abgeschlossenen und elf am Actionlimit beendeten Spielen sowie null
+  Runtime-, IllegalAction-, Replay- oder Redaction-Fehlern. Hijack setzt
+  Choices in derselben Planinstanz fort; Crash Everett bewahrt die gebundene
+  Draw-Planherkunft; Datacomb, Sunburst und Washed-Up besitzen fokussierte
+  Engine-/Owner-Witnesses.
+- Engine-, Cards-, Catalog-, Shared-, AI-, Web-, Chronicle-, Replay-,
+  Hidden-Info-, StateHash-, Readiness-, Importindex-, Boundary- und
+  Source-Structure-Prüfungen sind grün. Der Chronicle-Fokus umfasst 210
+  Tests; AI-, Engine- und Web-Typechecks sind ohne Diagnosen abgeschlossen.
+  Ein vollständiger erneuter AI-Shard- oder Checkpoint-Lauf wurde gemäß dem
+  gebündelten Testvertrag nicht wiederholt.
 
 ### CS10 – Originalset-v1-Migration
 

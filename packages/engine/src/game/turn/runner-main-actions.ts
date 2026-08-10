@@ -107,6 +107,9 @@ export type RunnerMainActionGenerationHost = {
     pushEndOfRunnerTurnActions: HostFn<void>;
     canPlayPrintedCostOnPlayImplementation: HostFn<boolean>;
     runnerEventResolver: HostFn<any>;
+    runnerEventInstallChoiceActionPayload?: HostFn<
+      Record<string, unknown> | undefined
+    >;
     printedCostMakeRunEffect: HostFn<any>;
     pushActivatedActions: HostFn<void>;
   };
@@ -255,6 +258,9 @@ export function buildRunnerMainActions(
     host.cardImplementation.canPlayPrintedCostOnPlayImplementation;
   const cardImplementationRunnerEventResolver =
     host.cardImplementation.runnerEventResolver;
+  const runnerEventInstallChoiceActionPayload =
+    host.cardImplementation.runnerEventInstallChoiceActionPayload ??
+    (() => undefined);
   const printedCostCardImplementationMakeRunEffect =
     host.cardImplementation.printedCostMakeRunEffect;
   const pushActivatedCardImplementationActions =
@@ -732,18 +738,19 @@ export function buildRunnerMainActions(
         cardImplementationRunnerEventResolver(definition) ??
         RUNNER_EVENT_RESOLVERS[definition.id];
       if (!resolver && !canPlayCardImplementation) continue;
+      const resolverActionPayload =
+        resolver?.actionPayload?.({
+          state,
+          cardId: id,
+          definition,
+        }) ?? runnerEventInstallChoiceActionPayload(state, id, definition);
       const makeRunEffect = canPlayCardImplementation
         ? printedCostCardImplementationMakeRunEffect(definition)
         : undefined;
       if (!canStartRun && (resolver?.startsRun === true || makeRunEffect))
         continue;
-      if (
-        !canPlayCardImplementation &&
-        resolver?.canPlay &&
-        !resolver.canPlay(state, definition)
-      )
-        continue;
-      if (!canPlayCardImplementation && resolver?.legalActions) {
+      if (resolver?.canPlay && !resolver.canPlay(state, definition)) continue;
+      if (resolver?.legalActions) {
         actions.push(
           ...resolver.legalActions({
             state,
@@ -756,7 +763,7 @@ export function buildRunnerMainActions(
         );
         continue;
       }
-      if (!canPlayCardImplementation && resolver?.requiresServer) {
+      if (resolver?.requiresServer) {
         for (const server of state.corp.servers) {
           if (
             resolver.canPlayForServer &&
@@ -775,6 +782,7 @@ export function buildRunnerMainActions(
                 cardId: id,
                 serverId: server.id,
                 ...deterministicResourcePayload,
+                ...resolverActionPayload,
               },
             ),
           );
@@ -829,7 +837,11 @@ export function buildRunnerMainActions(
             `${definition.title} spielen`,
             id,
             [{ clicks: playEventClickCost, credits: eventPlayCost }],
-            { cardId: id, ...deterministicResourcePayload },
+            {
+              cardId: id,
+              ...deterministicResourcePayload,
+              ...resolverActionPayload,
+            },
           ),
         );
       }

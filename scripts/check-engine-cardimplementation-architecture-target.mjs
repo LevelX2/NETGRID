@@ -26,7 +26,6 @@ const runtimeEscapeScopes = tsNoCheckScopes;
 
 const allowedCardNameContexts = [
   "packages/engine/src/card-implementations/onr-v1/",
-  "packages/engine/src/card-implementations/proteus/",
   "packages/engine/src/card-implementations/subregistries/",
 ];
 

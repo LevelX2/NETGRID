@@ -32,8 +32,14 @@ const maxActions = 180;
 assert(runnerDecks.length === 2, "Expected two Proteus Runner pilot decks.");
 assert(corpDecks.length === 2, "Expected two Proteus Corp pilot decks.");
 
+const pilotFailureDiagnostics: Array<{
+  pairId: string;
+  seed: string;
+  errors: string[];
+}> = [];
 const pairResults = runnerDecks.flatMap((runnerDeck) =>
   corpDecks.map((corpDeck) => {
+    const pairId = `${runnerDeck.id}__${corpDeck.id}`;
     const result = runAiSelfplayTraceMining({
       seeds,
       maxActions,
@@ -43,8 +49,16 @@ const pairResults = runnerDecks.flatMap((runnerDeck) =>
       corpControllerMode: "current_candidate",
       maxFindings: 20,
     });
+    for (const summary of result.summaries) {
+      if (summary.errors.length > 0)
+        pilotFailureDiagnostics.push({
+          pairId,
+          seed: summary.seed,
+          errors: [...summary.errors],
+        });
+    }
     return {
-      pairId: `${runnerDeck.id}__${corpDeck.id}`,
+      pairId,
       runnerDeckId: runnerDeck.id,
       corpDeckId: corpDeck.id,
       aggregate: result.aggregate,
@@ -162,6 +176,10 @@ const report = {
 
 const serialized = `${JSON.stringify(report, null, 2)}\n`;
 if (shouldWrite) {
+  assert(
+    gatePassed,
+    `Proteus selected pilot gate failed: ${JSON.stringify(gateChecks)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`,
+  );
   writeFileSync(outputPath, serialized, "utf8");
   console.log(`Wrote ${outputRelative}; gatePassed=${gatePassed}.`);
 } else if (shouldCheck) {
@@ -178,7 +196,7 @@ if (shouldWrite) {
 }
 assert(
   gatePassed,
-  `Proteus selected pilot gate failed: ${JSON.stringify(gateChecks)}.`,
+  `Proteus selected pilot gate failed: ${JSON.stringify(gateChecks)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`,
 );
 
 function readJson<T>(relativePath: string): T {

@@ -198,24 +198,7 @@ export function runnerRunRecurringCreditSourceIds(
     ...state.runner.rig.programs,
     ...state.runner.rig.resources,
   ];
-  const restrictedRunCostSources =
-    breakerId === undefined
-      ? runnerRig.filter((cardId) => {
-          const source = restrictedHostedCreditSourceForDefinition(
-            definitionFor(state, cardId),
-          );
-          return (
-            Boolean(source) &&
-            source?.counterType === "bit" &&
-            source.usableFor.includes(
-              "using_icebreaker_during_run_non_noisy",
-            ) &&
-            cardCounter(state, cardId, "bit") > 0
-          );
-        })
-      : [];
   const restrictedSources = [
-    ...restrictedRunCostSources,
     ...restrictedHostedCreditSourceIds(state, "using_icebreaker_during_run", {
       breakerId,
     }),

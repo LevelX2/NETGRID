@@ -129,7 +129,8 @@ export type RunnerDevelopmentSignal = {
     | "prepare_restricted_sequence"
     | "open_restricted_sequence"
     | "execute_restricted_sequence"
-    | "complete_restricted_sequence";
+    | "complete_restricted_sequence"
+    | "resolve_event_install_choice";
   purposeCode?: string;
   assignedDomainPlanIds: string[];
   duplicateAlreadyInstalled: boolean;
@@ -142,6 +143,27 @@ export type RunnerDevelopmentSignal = {
   evidenceCode: string;
   evidenceCodes?: string[];
   restrictedProgramInstallCommitment?: RunnerRestrictedProgramInstallSequenceCommitment;
+  eventInstallChoiceCommitment?: {
+    sourceActionId: string;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    sourceCapabilityKey: string;
+    selectedAtStateVersion?: number;
+    targetCardInstanceId: string;
+    targetDefinitionId: string;
+  };
+  eventInstallChoiceBinding?: {
+    choiceId: string;
+    actionId: string;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    sourceCapabilityKey: string;
+    sourceStateVersion: number;
+    originSelectedAtStateVersion: number;
+    selectedOptionId: string;
+    targetCardInstanceId: string;
+    targetDefinitionId: string;
+  };
 };
 
 export type RunnerRunWindowSignal = {
@@ -711,6 +733,8 @@ function developmentModule(): PlanModule {
         current.signal.phase === "execute_restricted_sequence";
       const completingRestrictedSequence =
         current.signal.phase === "complete_restricted_sequence";
+      const resolvingEventInstallChoice =
+        current.signal.phase === "resolve_event_install_choice";
       return {
         step: {
           stepId: `${instance.instanceId}:${current.signal.phase}`,
@@ -723,14 +747,17 @@ function developmentModule(): PlanModule {
                   ? "execute_next_committed_program_install"
                   : completingRestrictedSequence
                     ? "complete_committed_program_install_sequence"
-                    : funding
-                      ? `fund_${current.signal.definitionId}`
-                      : `develop_${current.signal.definitionId}`,
+                    : resolvingEventInstallChoice
+                      ? "resolve_bound_event_install_choice"
+                      : funding
+                        ? `fund_${current.signal.definitionId}`
+                        : `develop_${current.signal.definitionId}`,
             semanticActionTypes: current.signal.semanticActionTypes,
             ...(funding ||
             openingRestrictedSequence ||
             executingRestrictedSequence ||
             completingRestrictedSequence ||
+            resolvingEventInstallChoice ||
             current.signal.targetKind === "capability"
               ? {}
               : {
@@ -741,6 +768,7 @@ function developmentModule(): PlanModule {
           openingRestrictedSequence ||
           executingRestrictedSequence ||
           completingRestrictedSequence ||
+          resolvingEventInstallChoice ||
           current.signal.targetKind === "capability"
             ? {}
             : {
@@ -757,9 +785,11 @@ function developmentModule(): PlanModule {
                 ? "Execute the next program in the committed Valu-Pak installation order."
                 : completingRestrictedSequence
                   ? "Close the completed Valu-Pak installation sequence without ending the Runner turn."
-                  : funding
-                    ? `Fund the resident ${current.signal.definitionId} development plan.`
-                    : `Develop ${current.signal.definitionId} for ${current.signal.purposeCode ?? "assigned domain plan"}.`,
+                  : resolvingEventInstallChoice
+                    ? "Resolve the Engine-opened event install choice from the exact resident development-plan target binding."
+                    : funding
+                      ? `Fund the resident ${current.signal.definitionId} development plan.`
+                      : `Develop ${current.signal.definitionId} for ${current.signal.purposeCode ?? "assigned domain plan"}.`,
         },
         candidates: developmentCandidates(context, current.signal),
       };
@@ -1187,6 +1217,7 @@ function developmentCandidates(
           signal.phase === "open_restricted_sequence" ||
           signal.phase === "execute_restricted_sequence" ||
           signal.phase === "complete_restricted_sequence" ||
+          signal.phase === "resolve_event_install_choice" ||
           signal.targetKind === "capability" ||
           candidate.sourceDefinitionId === signal.definitionId) &&
         signal.semanticActionTypes.includes(candidate.semanticActionType) &&

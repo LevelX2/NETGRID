@@ -8,6 +8,47 @@ import {
 } from "./semantic-ai-runtime-cutover.test-support";
 
 describe("AI input DTO public event source binding", () => {
+  it("preserves the Engine-owned post-pass ICE lifecycle quote", () => {
+    const action = legalAction(
+      "corp.datacomb.pay",
+      "corp",
+      "continue_run",
+      "Keep the passed ICE",
+      { credits: 1, clicks: 0 },
+    );
+    action.source = "datacomb-ice";
+    action.payload = {
+      corpPostPassIceAbility: "return_passed_ice_to_hq",
+      sourceDefinitionId: "onr_proteus_018_datacomb",
+      decision: "pay",
+      paymentAmount: 1,
+      serverId: "rd",
+      unapprovedLifecycleAlias: "must-not-cross-dto",
+    };
+    const view = playerView("corp", [action]);
+    action.expiresAtStateVersion = view.stateVersion;
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "post-pass-lifecycle",
+      decisionId: "post-pass-lifecycle:corp:1",
+      actionNumber: 1,
+      profileId: "post-pass-lifecycle-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toEqual({
+      corpPostPassIceAbility: "return_passed_ice_to_hq",
+      sourceDefinitionId: "onr_proteus_018_datacomb",
+      decision: "pay",
+      paymentAmount: 1,
+      serverId: "rd",
+    });
+  });
+
   it("preserves exact actor-side canonical capability binding and rejects hybrid AbilityRef", () => {
     const action = legalAction(
       "canonical-action",

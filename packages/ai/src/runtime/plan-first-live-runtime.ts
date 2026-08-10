@@ -92,6 +92,7 @@ import {
 } from "../plans/runner-core-plan-modules";
 import {
   createRunnerTacticalPlanModules,
+  type RunnerDevelopmentSignal,
   type RunnerPlanDomain,
   type RunnerRemoteContestSignal,
   type RunnerRestrictedProgramInstallSequenceCommitment,
@@ -432,7 +433,20 @@ export function choosePlanFirstLiveAction(
     actionCandidates: candidates,
     turnKey: turnKey(input),
   };
-  const context = resolveEngineWindow(windowContext)
+  const planBoundRunnerEventInstallChoice =
+    input.side === "runner" &&
+    input.playerView.pendingChoice?.continuation?.family ===
+      "runner_grip_install_with_temporary_credits";
+  const resolveCurrentEngineWindow = (
+    schedulerContext: PlanSchedulerContext,
+  ): EngineWindowResolution | undefined => {
+    if (planBoundRunnerEventInstallChoice) return undefined;
+    return (
+      resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
+      resolveEngineWindow(schedulerContext)
+    );
+  };
+  const context = resolveCurrentEngineWindow(windowContext)
     ? windowContext
     : input.side === "runner"
       ? runnerContext(input, candidates, dependencies, previous)
@@ -444,7 +458,7 @@ export function choosePlanFirstLiveAction(
     context,
     registry,
     ...(previous ? { previousPortfolio: previous } : {}),
-    resolveEngineWindow: resolveEngineWindow,
+    resolveEngineWindow: resolveCurrentEngineWindow,
   });
   if (input.side === "corp" && result.lane === "plan" && context.domain) {
     const domain = context.domain as CorpPlanDomain;
@@ -579,12 +593,14 @@ export function choosePlanFirstLiveAction(
     }
   }
   bindSelectedCoverageSearchAction(input, result);
+  bindSelectedRunnerEventInstallChoiceContinuation(input, result);
   bindSelectedRunnerTargetedBypassChoiceContinuation(input, result, candidates);
   bindSelectedCorpScoreChoiceContinuation(input, result);
   bindSelectedCorpDefenseDrawAttempt(input, result);
   bindSelectedCorpHandDrawAttempt(input, result);
   bindSelectedCorpHqOverflowConversion(input, result);
   bindSelectedCorpDefenseHqHold(input, result);
+  bindSelectedPlanActionOrigin(input, result, candidates);
   if (
     options.persistTacticalPlanMemory !== false &&
     result.portfolio &&
@@ -602,6 +618,64 @@ export function choosePlanFirstLiveAction(
     options,
     turnPlanningDebug,
   );
+}
+
+function bindSelectedPlanActionOrigin(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  candidates: readonly ActionSemanticCandidate[],
+): void {
+  if (input.side !== "runner" || result.lane !== "plan") return;
+  const rootPlanInstanceId = result.portfolio.rootForegroundInstanceId;
+  const executorInstanceId = result.portfolio.executorInstanceId;
+  const selectedAction = input.legalActions.find(
+    (action) => action.actionId === result.route.head.actionId,
+  );
+  const selectedCandidate = candidates.find(
+    (candidate) => candidate.actionId === result.route.head.actionId,
+  );
+  const canOpenRunnerDrawReplacement =
+    selectedAction?.type === "draw_card" ||
+    selectedCandidate?.functionalEffects?.some(
+      (effect) => effect.kind === "draw",
+    ) === true;
+  if (!canOpenRunnerDrawReplacement) return;
+  if (
+    !rootPlanInstanceId ||
+    !executorInstanceId ||
+    !selectedAction ||
+    selectedAction.side !== "runner" ||
+    selectedAction.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !result.portfolio.instances.some(
+      (instance) =>
+        instance.instanceId === rootPlanInstanceId &&
+        instance.side === "runner",
+    ) ||
+    !result.portfolio.instances.some(
+      (instance) =>
+        instance.instanceId === executorInstanceId &&
+        instance.executionState === "executor" &&
+        instance.side === "runner",
+    )
+  ) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [result.route.head.actionId],
+      owner: "continuation",
+      removalCondition:
+        "Persist a possible immediate Runner draw-replacement choice only with the exact selected current draw action, root plan and leaf executor.",
+    });
+  }
+  result.portfolio.selectedActionOrigin = {
+    rootPlanInstanceId,
+    executorInstanceId,
+    selectedActionId: selectedAction.actionId,
+    selectedAtStateVersion: input.playerView.stateVersion,
+    immediateChoicePolicy: "trash_lowest_visible_drawn_card",
+  };
 }
 
 function applyTurnPlannerCutoverSelection(
@@ -1101,6 +1175,64 @@ export function bindSelectedRunnerTargetedBypassChoiceContinuation(
     selectedActionId: result.route.head.actionId,
     selectedAtStateVersion: input.playerView.stateVersion,
   } satisfies RunnerTargetedBypassChoiceContinuation;
+}
+
+function bindSelectedRunnerEventInstallChoiceContinuation(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+): void {
+  if (
+    result.lane !== "plan" ||
+    result.route.head.semanticActionType !== "play.runner_event"
+  )
+    return;
+  const executor = result.portfolio.instances.find(
+    (instance) =>
+      instance.instanceId === result.portfolio.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand",
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+    | undefined;
+  const commitment = moduleState?.signal?.eventInstallChoiceCommitment;
+  if (!commitment) return;
+  const sourceAction = input.legalActions.find(
+    (action) => action.actionId === result.route.head.actionId,
+  );
+  const exactBinding =
+    input.side === "runner" &&
+    moduleState?.kind === "development" &&
+    moduleState.signal?.phase === "execute" &&
+    moduleState.signal.developmentId === executor?.dedupeKey &&
+    commitment.sourceActionId === result.route.head.actionId &&
+    commitment.selectedAtStateVersion === undefined &&
+    sourceAction?.side === "runner" &&
+    sourceAction.type === "play_event" &&
+    sourceAction.expiresAtStateVersion === input.playerView.stateVersion &&
+    sourceAction.payload?.cardId === commitment.sourceCardInstanceId &&
+    input.playerView.own.gripOrHq.some(
+      (card) =>
+        card.instanceId === commitment.targetCardInstanceId &&
+        card.known !== false &&
+        card.definitionId === commitment.targetDefinitionId,
+    );
+  if (!executor || !exactBinding) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [result.route.head.actionId],
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition:
+        "Select an event-install action only through the exact development executor that prebound its Engine-quoted visible target and canonical source capability.",
+    });
+  }
+  moduleState.signal!.eventInstallChoiceCommitment = {
+    ...commitment,
+    selectedAtStateVersion: input.playerView.stateVersion,
+  };
 }
 
 function bindSelectedCoverageSearchAction(
@@ -1676,6 +1808,11 @@ export function runnerActionDispositions(
     }
   }
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(domain);
+  const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
+    input,
+    candidates,
+    domain.coverageGaps,
+  );
   for (const candidate of candidates) {
     const strategicExchangeExclusion = runnerStrategicExchangeHardExclusion(
       input,
@@ -1736,7 +1873,12 @@ export function runnerActionDispositions(
     const unconcreteDevelopment = cardDevelopmentAdmissions.find(
       ({ admission }) => admission.reasonCode === "no_concrete_plan_purpose",
     );
-    if (unconcreteDevelopment && !cardDevelopmentOwnsActionRoute) {
+    if (
+      unconcreteDevelopment &&
+      !cardDevelopmentOwnsActionRoute &&
+      !delegatedFundingActionIds.has(candidate.actionId) &&
+      !coverageOwnedActionIds.has(candidate.actionId)
+    ) {
       add(
         candidate.actionId,
         "runner.develop_board_and_hand",
@@ -1746,6 +1888,7 @@ export function runnerActionDispositions(
     }
     if (
       !delegatedFundingActionIds.has(candidate.actionId) &&
+      !coverageOwnedActionIds.has(candidate.actionId) &&
       !cardDevelopmentOwnsActionRoute &&
       runnerImmediateGeneralLiquidEconomyRoute(candidate) &&
       !specializedEconomyActionIds.has(candidate.actionId)
@@ -1975,11 +2118,6 @@ export function runnerActionDispositions(
       );
     }
   }
-  const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
-    input,
-    candidates,
-    domain.coverageGaps,
-  );
   const coverageRejectedActionIds = new Set(
     domain.coverageGaps.flatMap((gap) => gap.rejectedSearchActionIds ?? []),
   );
@@ -3959,6 +4097,9 @@ function buildRunnerDomain(
               economy,
             )
           : undefined;
+      const eventInstallChoiceCommitment = candidate
+        ? runnerEventInstallChoiceCommitment(input, candidate, handDevelopment)
+        : undefined;
       if (
         executableNow &&
         candidate &&
@@ -4122,15 +4263,18 @@ function buildRunnerDomain(
                 evidenceCodes: restrictedProgramInstallCommitment.evidenceCodes,
                 restrictedProgramInstallCommitment,
               }
-            : fundingRoute
-              ? { evidenceCodes: fundingRoute.evidenceCodes }
-              : {}),
+            : eventInstallChoiceCommitment
+              ? { eventInstallChoiceCommitment }
+              : fundingRoute
+                ? { evidenceCodes: fundingRoute.evidenceCodes }
+                : {}),
         },
       ];
     });
   const restrictedProgramInstallSequenceDevelopments =
     runnerRestrictedProgramInstallSequenceSignals(input, candidates, previous);
   const developments = [
+    ...runnerEventInstallChoiceDevelopmentSignals(input, candidates, previous),
     ...cardDevelopments,
     ...restrictedProgramInstallSequenceDevelopments,
     ...runnerProgramSearchStrategyDevelopmentSignals(
@@ -4272,6 +4416,265 @@ function buildRunnerDomain(
     developments,
     runWindows,
   };
+}
+
+function runnerEventInstallChoiceCommitment(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerDevelopmentSignal["eventInstallChoiceCommitment"] | undefined {
+  if (candidate.actionType !== "play_event") return undefined;
+  const legalAction = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  );
+  const quote = legalAction?.payload;
+  if (!quote?.runnerEventInstallChoiceQuoteSchemaVersion) return undefined;
+  const targets = exactCommaSeparatedTokens(
+    quote.runnerEventInstallChoiceQuoteSelectableTargetIds,
+  );
+  const allowedTypes = exactCommaSeparatedTokens(
+    quote.runnerEventInstallChoiceQuoteAllowedTypes,
+  );
+  const exactQuote =
+    quote.runnerEventInstallChoiceQuoteSchemaVersion ===
+      "runner-event-install-choice-quote-v1" &&
+    quote.runnerEventInstallChoiceQuoteComplete === true &&
+    typeof quote.runnerEventInstallChoiceQuoteSourceCapabilityKey ===
+      "string" &&
+    quote.runnerEventInstallChoiceQuoteSourceCapabilityKey.length > 0 &&
+    Number.isSafeInteger(quote.runnerEventInstallChoiceQuoteTemporaryCredits) &&
+    Number(quote.runnerEventInstallChoiceQuoteTemporaryCredits) > 0 &&
+    allowedTypes !== undefined &&
+    allowedTypes.length > 0 &&
+    allowedTypes.every((type) => type === "program" || type === "hardware") &&
+    new Set(allowedTypes).size === allowedTypes.length &&
+    targets !== undefined &&
+    targets.length > 0 &&
+    legalAction?.side === "runner" &&
+    legalAction.type === "play_event" &&
+    legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
+    candidate.sourceCardInstanceId === legalAction.payload?.cardId &&
+    typeof candidate.sourceCardInstanceId === "string" &&
+    typeof candidate.sourceDefinitionId === "string";
+  if (!exactQuote) {
+    throw new PlanResolutionFailure("invalid_plan_identity", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [candidate.actionId],
+      owner: "plan_registry",
+      removalCondition:
+        "Admit an event-install development only from the Engine's exact current private target quote and canonical capability.",
+    });
+  }
+  const quotedTargets = new Set(targets);
+  const selectedEvaluation = handDevelopment.find((evaluation) => {
+    const visibleCard = input.playerView.own.gripOrHq.find(
+      (card) => card.instanceId === evaluation.cardInstanceId,
+    );
+    return (
+      quotedTargets.has(evaluation.cardInstanceId) &&
+      visibleCard !== undefined &&
+      visibleCard?.known !== false &&
+      visibleCard?.definitionId === evaluation.definitionId &&
+      new Set<string>(allowedTypes).has(visibleCard.type ?? "")
+    );
+  });
+  if (!selectedEvaluation?.definitionId) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [candidate.actionId],
+      owner: "plan_registry",
+      removalCondition:
+        "The development plan must bind one exact visible target from the Engine-quoted event-install candidates before selecting the event.",
+    });
+  }
+  return {
+    sourceActionId: candidate.actionId,
+    sourceCardInstanceId: candidate.sourceCardInstanceId!,
+    sourceDefinitionId: candidate.sourceDefinitionId!,
+    sourceCapabilityKey:
+      quote.runnerEventInstallChoiceQuoteSourceCapabilityKey as string,
+    targetCardInstanceId: selectedEvaluation.cardInstanceId,
+    targetDefinitionId: selectedEvaluation.definitionId,
+  };
+}
+
+function exactCommaSeparatedTokens(value: unknown): string[] | undefined {
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  const tokens = value.split(",");
+  return tokens.every(
+    (token) =>
+      token.length > 0 && token.trim() === token && !token.includes("|"),
+  ) && new Set(tokens).size === tokens.length
+    ? tokens
+    : undefined;
+}
+
+function runnerEventInstallChoiceDevelopmentSignals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  previous: ResidentPlanPortfolio | undefined,
+): RunnerPlanDomain["developments"] {
+  const choice = input.playerView.pendingChoice;
+  const continuation = choice?.continuation;
+  if (
+    input.side !== "runner" ||
+    !choice ||
+    continuation?.family !== "runner_grip_install_with_temporary_credits"
+  )
+    return [];
+  const previousInstance = previous?.instances.find((instance) => {
+    const moduleState = instance.moduleState as
+      | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+      | undefined;
+    return (
+      instance.instanceId === previous.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand" &&
+      instance.executionState === "executor" &&
+      moduleState?.kind === "development" &&
+      moduleState.signal?.eventInstallChoiceCommitment
+        ?.selectedAtStateVersion === previous.stateVersion
+    );
+  });
+  const previousSignal = (
+    previousInstance?.moduleState as
+      | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+      | undefined
+  )?.signal;
+  const commitment = previousSignal?.eventInstallChoiceCommitment;
+  const choiceCandidates = candidates.filter(
+    (candidate) =>
+      candidate.actionType === "resolve_choice" &&
+      candidate.semanticActionType === "choice.resolve",
+  );
+  const legalAction =
+    choiceCandidates.length === 1
+      ? input.legalActions.find(
+          (action) => action.actionId === choiceCandidates[0]!.actionId,
+        )
+      : undefined;
+  const requirement = legalAction?.choiceRequirements?.[0];
+  const selectableOptions = choice.options.filter(
+    (option) => option.selectable !== false && typeof option.value === "string",
+  );
+  const selectableOptionIds = selectableOptions.map((option) => option.id);
+  const exactChoiceContract =
+    choice.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    continuation.createdAtStateVersion === input.playerView.stateVersion &&
+    previous?.stateVersion === input.playerView.stateVersion - 1 &&
+    previousInstance !== undefined &&
+    previousSignal !== undefined &&
+    commitment !== undefined &&
+    commitment.selectedAtStateVersion === previous.stateVersion &&
+    commitment.sourceActionId === continuation.originActionId &&
+    commitment.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+    commitment.sourceDefinitionId === continuation.sourceCardDefinitionId &&
+    commitment.sourceCapabilityKey === continuation.sourceCapabilityKey &&
+    continuation.originActionId.length > 0 &&
+    continuation.sourceCardInstanceId.length > 0 &&
+    continuation.sourceCardDefinitionId.length > 0 &&
+    continuation.sourceCapabilityKey.length > 0 &&
+    Number.isSafeInteger(continuation.temporaryCredits) &&
+    continuation.temporaryCredits > 0 &&
+    continuation.allowedTypes.length > 0 &&
+    new Set(continuation.allowedTypes).size ===
+      continuation.allowedTypes.length &&
+    legalAction?.side === "runner" &&
+    legalAction.type === "resolve_choice" &&
+    legalAction.source === "game_rule" &&
+    legalAction.expiresAtStateVersion === input.playerView.stateVersion &&
+    legalAction.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choice.options.length &&
+    choice.options.every((option) => requirement.optionIds.includes(option.id));
+  if (!exactChoiceContract || !legalAction || choiceCandidates.length !== 1)
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: choiceCandidates.map(
+        (candidate) => candidate.actionId,
+      ),
+      owner: "continuation",
+      removalCondition:
+        "The Engine-opened event install choice must preserve its exact canonical capability, source action, selectable options and current resolve-choice LegalAction contract.",
+    });
+  const selectedOption = selectableOptions.find(
+    (option) => option.value === commitment?.targetCardInstanceId,
+  );
+  const selectedCard = commitment
+    ? input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === commitment.targetCardInstanceId,
+      )
+    : undefined;
+  if (
+    !commitment ||
+    !selectedOption ||
+    !selectedCard?.definitionId ||
+    selectedCard.known === false ||
+    selectedCard.definitionId !== commitment.targetDefinitionId ||
+    (selectedCard.type !== "program" && selectedCard.type !== "hardware") ||
+    !continuation.allowedTypes.includes(selectedCard.type) ||
+    !selectableOptionIds.includes(selectedOption.id)
+  )
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [legalAction.actionId],
+      owner: "continuation",
+      removalCondition:
+        "The resident runner development plan must bind one selectable visible program or hardware target before resolving the event-install choice.",
+    });
+  const originSelectedAtStateVersion = commitment.selectedAtStateVersion;
+  if (originSelectedAtStateVersion === undefined)
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [legalAction.actionId],
+      owner: "continuation",
+      removalCondition:
+        "The event-install choice must preserve the state version selected by its original development executor.",
+    });
+  return [
+    {
+      ...previousSignal,
+      targetKind: "capability",
+      phase: "resolve_event_install_choice",
+      semanticActionTypes: [choiceCandidates[0]!.semanticActionType],
+      actionIds: [legalAction.actionId],
+      evidenceCode:
+        "runner_event_install_choice_target_bound_by_development_plan",
+      eventInstallChoiceBinding: {
+        choiceId: choice.choiceId,
+        actionId: legalAction.actionId,
+        sourceCardInstanceId: continuation.sourceCardInstanceId,
+        sourceDefinitionId: continuation.sourceCardDefinitionId,
+        sourceCapabilityKey: continuation.sourceCapabilityKey,
+        sourceStateVersion: input.playerView.stateVersion,
+        originSelectedAtStateVersion,
+        selectedOptionId: selectedOption.id,
+        targetCardInstanceId: commitment.targetCardInstanceId,
+        targetDefinitionId: selectedCard.definitionId,
+      },
+    },
+  ];
 }
 
 function runnerTargetedBypassCentralPreparationSignals(
@@ -7540,8 +7943,10 @@ function corpCandidateIsImmediateRootRezEconomySource(
   ) {
     return false;
   }
+  const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
   return (
-    AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)?.effects?.some(
+    (hint?.cardType === "asset" || hint?.cardType === "upgrade") &&
+    hint.effects?.some(
       (effect) =>
         effect.kind === "economy" &&
         effect.scope === "corp" &&
@@ -8305,6 +8710,11 @@ function buildCorpDomain(
   const mergedDefenseNeeds: CorpCorePlanDomain["defenseNeeds"] =
     mergeDefenseSignals([
       ...candidates.flatMap((candidate): CorpDefenseSignal[] => {
+        const postPassIceLifecycle = corpPostPassIceLifecycleDefenseSignal(
+          input,
+          candidate,
+        );
+        if (postPassIceLifecycle) return [postPassIceLifecycle];
         const defensiveUpgradePlacement = corpDefensiveUpgradePlacement(
           input,
           candidate,
@@ -13389,6 +13799,103 @@ function actionIsCurrentlyAffordable(
   );
 }
 
+function resolvePlanBoundRunnerHiddenDrawChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  const continuation = choice?.continuation;
+  if (
+    context.input.side !== "runner" ||
+    continuation?.family !== "runner_hidden_draw_keep_or_top_replacement"
+  )
+    return undefined;
+  const origin = previous?.selectedActionOrigin;
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice?.options.map((option) => option.id) ?? [];
+  const exactBinding =
+    choice !== undefined &&
+    choice.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+    choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    continuation.createdAtStateVersion ===
+      context.input.playerView.stateVersion &&
+    continuation.originActionId.length > 0 &&
+    continuation.sourceCardInstanceId.length > 0 &&
+    continuation.sourceCardDefinitionId.length > 0 &&
+    continuation.drawnCardInstanceIds.length > 0 &&
+    new Set(continuation.drawnCardInstanceIds).size ===
+      continuation.drawnCardInstanceIds.length &&
+    previous !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion === context.input.playerView.stateVersion - 1 &&
+    origin !== undefined &&
+    origin.selectedAtStateVersion === previous.stateVersion &&
+    origin.selectedActionId === continuation.originActionId &&
+    origin.immediateChoicePolicy === "trash_lowest_visible_drawn_card" &&
+    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    previous.executorInstanceId === origin.executorInstanceId &&
+    root !== undefined &&
+    executor !== undefined &&
+    action !== undefined &&
+    action.side === "runner" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !action || !previous || !origin) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      removalCondition:
+        "Resolve a hidden draw replacement only from the immediately preceding Runner plan executor, its exact selected action and the Engine's current private choice contract.",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+    });
+  }
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_runner_hidden_draw_choice",
+    origin: {
+      rootPlanInstanceId: origin.rootPlanInstanceId,
+      leafPlanInstanceId: origin.executorInstanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
@@ -14120,7 +14627,9 @@ function decisionFromScheduler(
       ? result.portfolio.instances.find(
           (instance) => instance.instanceId === planId,
         )?.moduleId
-      : "engine_window";
+      : (result.portfolio?.instances.find(
+          (instance) => instance.instanceId === planId,
+        )?.moduleId ?? "engine_window");
   const selectedPlanActionAssessment =
     result.lane === "plan"
       ? (
@@ -14524,7 +15033,9 @@ function decisionFromScheduler(
     reasonCode:
       result.lane === "plan"
         ? `plan_first.${planKind ?? "unknown"}`
-        : "plan_first.engine_window",
+        : planKind !== "engine_window"
+          ? `plan_first.${planKind}`
+          : "plan_first.engine_window",
     explanation:
       result.lane === "plan"
         ? `Plan ${planKind ?? planId} materialized the current ${result.route.head.semanticActionType} route.`
@@ -14560,7 +15071,9 @@ function decisionFromScheduler(
     reason:
       result.lane === "plan"
         ? `plan_first.${planKind ?? "unknown"}`
-        : "plan_first.engine_window",
+        : planKind !== "engine_window"
+          ? `plan_first.${planKind}`
+          : "plan_first.engine_window",
   };
   const randomizedAgendaSlice = agendaSliceForRandomizedSelection({
     input,
@@ -17657,6 +18170,65 @@ function corpIceRezSupportOperationSignal(
     urgent: true,
     value,
     evidenceCode: `corp_revalidated_ice_rez_support:${serverId}:${liabilityKind}:duration_${duration}:direct_gap_${quote.finalCredits - input.playerView.own.credits}:action_cost_${creditCost}`,
+  };
+}
+
+function corpPostPassIceLifecycleDefenseSignal(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): CorpDefenseSignal | undefined {
+  if (
+    candidate.actionType !== "continue_run" ||
+    candidate.semanticActionType !== "run.continue"
+  ) {
+    return undefined;
+  }
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const sourceDefinitionId = action?.payload?.sourceDefinitionId;
+  const serverId = action?.payload?.serverId;
+  const decision = action?.payload?.decision;
+  const paymentAmount = action?.payload?.paymentAmount;
+  const creditCost = action ? legalActionCreditCost(action) : undefined;
+  if (
+    action?.type !== "continue_run" ||
+    action.side !== "corp" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.payload?.corpPostPassIceAbility !== "return_passed_ice_to_hq" ||
+    typeof action.source !== "string" ||
+    action.source.length === 0 ||
+    typeof sourceDefinitionId !== "string" ||
+    sourceDefinitionId.length === 0 ||
+    typeof serverId !== "string" ||
+    !isServerId(serverId) ||
+    !(
+      (decision === "pay" &&
+        typeof paymentAmount === "number" &&
+        Number.isSafeInteger(paymentAmount) &&
+        paymentAmount > 0 &&
+        creditCost === paymentAmount) ||
+      (decision === "return_to_hq" &&
+        paymentAmount === undefined &&
+        creditCost === 0) ||
+      (decision === "decline" &&
+        paymentAmount === undefined &&
+        creditCost === 0)
+    )
+  ) {
+    return undefined;
+  }
+  return {
+    kind: "generic",
+    defenseId: `post-pass-ice-lifecycle:${action.source}:${serverId}`,
+    serverId,
+    phase: "resolve_post_pass_ice_lifecycle",
+    sourceDefinitionIds: [sourceDefinitionId],
+    actionIds: [action.actionId],
+    targetIceInstanceId: action.source,
+    urgent: true,
+    value: 1,
+    evidenceCode: `corp_post_pass_ice_lifecycle:${sourceDefinitionId}:${serverId}`,
   };
 }
 

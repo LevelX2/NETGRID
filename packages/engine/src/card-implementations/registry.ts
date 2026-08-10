@@ -119,6 +119,37 @@ export function cardImplementationForDefinitionId(
   return CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId];
 }
 
+export function cardImplementationCounterOwnerDefinitionId(
+  counterType: string,
+): CardDefinitionId {
+  return resolveUniqueCardImplementationCounterOwner(
+    CARD_IMPLEMENTATIONS,
+    counterType,
+  );
+}
+
+export function resolveUniqueCardImplementationCounterOwner(
+  implementations: readonly CardImplementationDefinition[],
+  counterType: string,
+): CardDefinitionId {
+  const owners = implementations
+    .filter((implementation) => {
+      if (implementation.virusCounter?.counterKind === counterType) return true;
+      return implementation.successfulRunFollowups?.some(
+        (followup) =>
+          followup.kind ===
+            "skip_rd_access_add_purgeable_runner_virus_counter" &&
+          followup.counterType === counterType,
+      );
+    })
+    .map((implementation) => implementation.cardDefinitionId);
+  if (owners.length !== 1)
+    throw new Error(
+      `card_implementation_counter_owner_not_unique:${counterType}:${owners.length}`,
+    );
+  return owners[0]!;
+}
+
 /** CS06 hybrid authority: canonical CardSpecs must never fall back to legacy. */
 export function legacyCardImplementationForDefinitionId(
   definitionId: CardDefinitionId,

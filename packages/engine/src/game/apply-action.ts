@@ -103,10 +103,7 @@ export function buildApplyAction(
     next.stateVersion = before + 1;
     if (next.pendingChoice) {
       next.pendingChoice.stateVersion = next.stateVersion;
-      const continuation = scoreChoiceContinuation(
-        next.pendingChoice,
-        legalAction,
-      );
+      const continuation = choiceContinuation(next.pendingChoice, legalAction);
       if (continuation) next.pendingChoice.continuation = continuation;
       else delete next.pendingChoice.continuation;
     }
@@ -152,10 +149,58 @@ export function buildApplyAction(
   };
 }
 
-function scoreChoiceContinuation(
+function choiceContinuation(
   choice: NonNullable<GameState["pendingChoice"]>,
   legalAction: LegalAction,
 ): NonNullable<GameState["pendingChoice"]>["continuation"] | undefined {
+  if (choice.side === "runner") {
+    const continuation = choice.continuation;
+    if (
+      continuation?.family === "runner_hidden_draw_keep_or_top_replacement" &&
+      legalAction.side === "runner" &&
+      legalAction.actionId.length > 0 &&
+      continuation.originActionId.length === 0 &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+      choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+      continuation.sourceCardInstanceId.length > 0 &&
+      continuation.sourceCardDefinitionId.length > 0 &&
+      continuation.drawnCardInstanceIds.length > 0 &&
+      new Set(continuation.drawnCardInstanceIds).size ===
+        continuation.drawnCardInstanceIds.length &&
+      choice.kind === "select_option" &&
+      choice.visibility === "hidden_info_barrier" &&
+      choice.minSelections === 1 &&
+      choice.maxSelections === 1 &&
+      exactHiddenDrawChoiceOptions(
+        choice.options,
+        continuation.drawnCardInstanceIds,
+      )
+    ) {
+      return {
+        ...continuation,
+        originActionId: legalAction.actionId,
+      };
+    }
+    if (
+      continuation?.family === "runner_grip_install_with_temporary_credits" &&
+      legalAction.side === "runner" &&
+      legalAction.type === "play_event" &&
+      legalAction.payload?.cardId === continuation.sourceCardInstanceId &&
+      continuation.originActionId === legalAction.actionId &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      continuation.sourceCardInstanceId.length > 0 &&
+      continuation.sourceCardDefinitionId.length > 0 &&
+      continuation.sourceCapabilityKey.length > 0 &&
+      Number.isSafeInteger(continuation.temporaryCredits) &&
+      continuation.temporaryCredits > 0 &&
+      continuation.allowedTypes.length > 0 &&
+      new Set(continuation.allowedTypes).size ===
+        continuation.allowedTypes.length
+    )
+      return continuation;
+    return undefined;
+  }
   if (choice.side !== "corp") return undefined;
   if (
     choice.source.startsWith("p3_34.distribute_advancement:") ||
@@ -190,6 +235,25 @@ function scoreChoiceContinuation(
     creditPerAgendaPoint,
     createdAtStateVersion: choice.stateVersion,
   };
+}
+
+function exactHiddenDrawChoiceOptions(
+  options: NonNullable<GameState["pendingChoice"]>["options"],
+  drawnCardInstanceIds: readonly string[],
+): boolean {
+  if (options.length !== drawnCardInstanceIds.length * 2) return false;
+  const expected = new Set(
+    drawnCardInstanceIds.flatMap((cardId) => [
+      `${cardId}:trash`,
+      `${cardId}:top`,
+    ]),
+  );
+  const values = options.map((option) => option.value);
+  return (
+    values.every((value): value is string => typeof value === "string") &&
+    new Set(values).size === values.length &&
+    values.every((value) => expected.has(value))
+  );
 }
 
 function fail(

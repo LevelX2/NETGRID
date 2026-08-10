@@ -22,6 +22,59 @@ const RENT_I_CON_INSTANCE = "runner_onr_classic_031_rent-i-con_1";
 const RENT_I_CON_CAPABILITY_ID =
   "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run";
 const TARGET_ICE_INSTANCE = "corp_onr_v1_237_data-wall_1";
+const CS09_EXPECTED_RECONCILIATIONS = {
+  "corp-rez-payoff-menus.json": {
+    "expectation.acceptableActions.0.sourceDefinitionId":
+      "onr_proteus_032_misleading-access-menus",
+    "expectation.acceptableActions.0.type": "rez_ice",
+    "expectation.forbiddenActions.0.type": "decline_rez",
+    "expectation.planExecution.requiredAssessmentEvidence.0":
+      "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1",
+  },
+  "cp-20eb-01-background-bank-cadence-d39.json": {
+    "expectation.forbiddenActions.0.actionId": undefined,
+    "expectation.forbiddenActions.0.sourceDefinitionId":
+      "onr_proteus_150_streetware-distributor",
+    "expectation.forbiddenActions.0.type": "activated_card_ability",
+  },
+  "cp-20eb-06-first-early-bank-load-control-d38.json": {
+    "expectation.acceptableActions.0.actionId": undefined,
+    "expectation.acceptableActions.0.sourceDefinitionId":
+      "onr_proteus_150_streetware-distributor",
+    "expectation.acceptableActions.0.type": "activated_card_ability",
+  },
+  "cp-a36a-01-turn-completion-d11.json": {
+    "expectation.acceptableActions.0.targetServerId": "rd",
+    "expectation.planExecution.acceptableCapabilities.0":
+      "allocate_server_defense",
+    "expectation.planExecution.requiredAssessmentEvidence.0":
+      "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_proteus_038_snowbank_1.rd.corp_onr_proteus_038_snowbank_1.1",
+  },
+  "cp-a36a-07-counter-bank-ready-d89.json": {
+    "expectation.acceptableActions.0.sourceDefinitionId":
+      "onr_v1_279_wall-of-static",
+    "expectation.acceptableActions.0.targetServerId": "rd",
+    "expectation.planExecution": {
+      acceptablePlanKinds: ["corp.defend_servers"],
+      acceptableCapabilities: ["allocate_server_defense"],
+      requiredAssessmentEvidence: [
+        "engine_certified_global_defense_access_probability_reduced",
+      ],
+    },
+  },
+  "cp-d153-01-pay-for-early-remote-access-d7.json": {
+    "expectation.acceptableActions.0.actionId": undefined,
+    "expectation.acceptableActions.0.encounterWillEndRun": false,
+    "expectation.acceptableActions.0.sourceDefinitionId":
+      "onr_proteus_032_misleading-access-menus",
+    "expectation.acceptableActions.0.type": "continue_run",
+    "expectation.forbiddenActions.0.actionId": undefined,
+    "expectation.forbiddenActions.0.encounterWillEndRun": true,
+    "expectation.forbiddenActions.0.sourceDefinitionId":
+      "onr_proteus_032_misleading-access-menus",
+    "expectation.forbiddenActions.0.type": "continue_run",
+  },
+} satisfies Record<string, Record<string, unknown>>;
 
 const mode = process.argv.includes("--write") ? "write" : "check";
 const files = readdirSync(CHECKPOINT_DIRECTORY)
@@ -31,11 +84,9 @@ const changed: Array<{ file: string; paths: string[] }> = [];
 
 for (const file of files) {
   const filePath = path.join(CHECKPOINT_DIRECTORY, file);
-  const sourceText =
-    mode === "write"
-      ? readPinnedCheckpointText(file)
-      : readFileSync(filePath, "utf8");
+  const sourceText = readFileSync(filePath, "utf8");
   const original = JSON.parse(sourceText) as any;
+  assertExpectedCs09Reconciliation(file, original);
   const current = structuredClone(original);
   if (file === RENT_I_CON_CHECKPOINT) rematerializeRentIConBinding(current);
   current.engine.stateHash = hashGameState(current.engine.testOnlyGameState);
@@ -70,15 +121,20 @@ const baselineChangedCount = baselineChanges.filter(
 const baselineCanonicalBindingCount = baselineChanges.filter(
   ({ file, paths }) => file === RENT_I_CON_CHECKPOINT && paths.length > 1,
 ).length;
+const baselineExpectationReconciliationCount = baselineChanges.filter(
+  ({ file, paths }) =>
+    file in CS09_EXPECTED_RECONCILIATIONS && paths.length > 1,
+).length;
 if (
   mode === "check" &&
   changed.length === 0 &&
   (baselineChangedCount !== 352 ||
-    baselineHashOnlyCount !== 351 ||
-    baselineCanonicalBindingCount !== 1)
+    baselineHashOnlyCount !== 345 ||
+    baselineCanonicalBindingCount !== 1 ||
+    baselineExpectationReconciliationCount !== 6)
 )
   throw new Error(
-    `card_spec_checkpoint_baseline_audit_mismatch:${baselineChanges.length}:${baselineHashOnlyCount}:${baselineCanonicalBindingCount}`,
+    `card_spec_checkpoint_baseline_audit_mismatch:${baselineChanges.length}:${baselineHashOnlyCount}:${baselineCanonicalBindingCount}:${baselineExpectationReconciliationCount}`,
   );
 
 const report = {
@@ -96,6 +152,8 @@ const report = {
   baselineChangedCheckpointCount: baselineChangedCount,
   baselineHashOnlyCheckpointCount: baselineHashOnlyCount,
   baselineCanonicalBindingCheckpointCount: baselineCanonicalBindingCount,
+  baselineExpectationReconciliationCheckpointCount:
+    baselineExpectationReconciliationCount,
   changed,
 };
 process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
@@ -286,10 +344,11 @@ function assertAllowedLeafChanges(
   file: string,
   paths: readonly string[],
 ): void {
-  const allowed =
-    file === RENT_I_CON_CHECKPOINT
+  const allowed = [
+    "engine.stateHash",
+    ...Object.keys(CS09_EXPECTED_RECONCILIATIONS[file] ?? {}),
+    ...(file === RENT_I_CON_CHECKPOINT
       ? [
-          "engine.stateHash",
           "runtime.residentPlanPortfolio.turnPlanCommitment.commitmentId",
           "runtime.residentPlanPortfolio.turnPlanCommitment.sourceLineHash",
           "runtime.residentPlanPortfolio.turnPlanCommitment.phases.0.nodes.0.invocation.sourceAbilityBinding",
@@ -303,7 +362,8 @@ function assertAllowedLeafChanges(
           "runtime.residentPlanPortfolio.turnPlanExecutionLease.currentBinding",
           "runtime.residentPlanPortfolio.turnPlanExecutionLease.expectationId",
         ]
-      : ["engine.stateHash"];
+      : []),
+  ];
   const unexpected = paths.filter(
     (changedPath) =>
       !allowed.some(
@@ -316,4 +376,23 @@ function assertAllowedLeafChanges(
     throw new Error(
       `card_spec_checkpoint_unexpected_leaf_change:${file}:${unexpected.join(",")}`,
     );
+}
+
+function assertExpectedCs09Reconciliation(file: string, checkpoint: unknown) {
+  const expectations = CS09_EXPECTED_RECONCILIATIONS[file];
+  if (!expectations) return;
+  for (const [path, expected] of Object.entries(expectations)) {
+    const actual = valueAtPath(checkpoint, path);
+    if (JSON.stringify(actual) !== JSON.stringify(expected))
+      throw new Error(
+        `card_spec_checkpoint_reconciliation_value_mismatch:${file}:${path}`,
+      );
+  }
+}
+
+function valueAtPath(value: unknown, dottedPath: string): unknown {
+  return dottedPath.split(".").reduce<unknown>((current, segment) => {
+    if (current === null || typeof current !== "object") return undefined;
+    return (current as Record<string, unknown>)[segment];
+  }, value);
 }

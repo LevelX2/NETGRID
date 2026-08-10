@@ -439,7 +439,9 @@ describe("PRO011 hidden resource timing hardening", () => {
         ?.runnerPaymentSupportAbilities,
     ).toEqual([
       {
-        abilityIndex: 0,
+        sourceAbilityId:
+          "onr_proteus_133_chiba-bank-account:pay_and_trash_source_gain_four_credits",
+        capabilityKey: "pay_and_trash_source_gain_four_credits",
         timing: "runner_cost_penalty_support",
         label: "Chiba Bank Account: 4 Credits nehmen",
         creditCost: 1,
@@ -452,7 +454,9 @@ describe("PRO011 hidden resource timing hardening", () => {
         ?.runnerPaymentSupportAbilities,
     ).toEqual([
       {
-        abilityIndex: 0,
+        sourceAbilityId:
+          "onr_proteus_152_swiss-bank-account:trash_source_gain_two_credits",
+        capabilityKey: "trash_source_gain_two_credits",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 2 Credits nehmen",
         creditCost: 0,
@@ -460,7 +464,9 @@ describe("PRO011 hidden resource timing hardening", () => {
         trashesSource: true,
       },
       {
-        abilityIndex: 1,
+        sourceAbilityId:
+          "onr_proteus_152_swiss-bank-account:pay_three_trash_source_gain_six",
+        capabilityKey: "pay_three_trash_source_gain_six",
         timing: "runner_cost_penalty_support",
         label: "Swiss Bank Account: 6 Credits nehmen",
         creditCost: 3,
@@ -1573,8 +1579,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(runnerCreditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationAbilityKey:
+        "hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
       sourceCardId: creditSourceId,
@@ -1582,8 +1590,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     });
     expect(creditAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationAbilityKey:
+        "hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
       sourceCardId: creditSourceId,
@@ -1740,8 +1750,10 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(deathAction).toBeDefined();
     expect(deathAction?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_137_death-from-above:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_137_death-from-above:remote_success_reveal_trash_source_and_fort",
+      cardImplementationAbilityKey:
+        "remote_success_reveal_trash_source_and_fort",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "trash_remote_fort",
       sourceCardId: deathSourceId,

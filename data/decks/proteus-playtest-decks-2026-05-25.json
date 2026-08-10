@@ -10,8 +10,9 @@
     "Die Originalset-Füllkarten sind zur Spielbarkeit enthalten: Runner brauchen Breaker und Economy, Korp-Decks brauchen Economy und Draw."
   ],
   "sourceDocuments": [
-    "data/cards/proteus-cards.json",
-    "data/manifests/proteus-card-support.json",
+    "packages/cards/src/sets/proteus.set-spec.ts",
+    "packages/cards/src/generated/card-spec-import-index.ts",
+    "docs/reviews/cards/proteus-card-spec-migration-report.json",
     "data/cards/originalset-v1-cards.json",
     "data/manifests/originalset-v1-card-support.json",
     "docs/codex/CODEX_STATUS.md"

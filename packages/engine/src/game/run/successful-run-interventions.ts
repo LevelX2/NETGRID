@@ -105,9 +105,31 @@ export function successfulRunBeforeAccessEffectByEffectKind(
       followup.effect.kind === effectKind,
   );
   if (abilityKey) {
-    return matches?.find((followup) => followup.abilityKey === abilityKey);
+    return matches?.find(
+      (followup) => successfulRunFollowupBindingKey(followup) === abilityKey,
+    );
   }
   return matches?.[0];
+}
+
+function successfulRunFollowupBinding(
+  followup: SuccessfulRunBeforeAccessEffect,
+): { abilityKey?: string; capabilityKey?: string } {
+  const record = followup as SuccessfulRunBeforeAccessEffect & {
+    capabilityKey?: unknown;
+  };
+  if (typeof record.capabilityKey === "string")
+    return { capabilityKey: record.capabilityKey };
+  return typeof followup.abilityKey === "string"
+    ? { abilityKey: followup.abilityKey }
+    : {};
+}
+
+function successfulRunFollowupBindingKey(
+  followup: SuccessfulRunBeforeAccessEffect,
+): string | undefined {
+  const binding = successfulRunFollowupBinding(followup);
+  return binding.capabilityKey ?? binding.abilityKey;
 }
 
 export function successfulRunInterventionKindForDefinition(
@@ -223,7 +245,7 @@ export function buildSuccessfulRunFollowupActions(
               sourceDefinitionId: definition.id,
               primitiveKind: hqCreditLossFollowup.kind,
               effectKind: hqCreditLossFollowup.effect.kind,
-              abilityKey: hqCreditLossFollowup.abilityKey,
+              ...successfulRunFollowupBinding(hqCreditLossFollowup),
             }),
             cardId: sourceCardId,
             serverId: run.attackedServerId,
@@ -255,7 +277,7 @@ export function buildSuccessfulRunFollowupActions(
                 sourceDefinitionId: definition.id,
                 primitiveKind: remoteTrashFortFollowup.kind,
                 effectKind: remoteTrashFortFollowup.effect.kind,
-                abilityKey: remoteTrashFortFollowup.abilityKey,
+                ...successfulRunFollowupBinding(remoteTrashFortFollowup),
               }),
               cardId: sourceCardId,
               serverId: run.attackedServerId,
@@ -507,7 +529,7 @@ export function resolveHiddenSuccessfulRunBeforeAccessEffect(
       sourceDefinitionId: sourceDefinition.id,
       primitiveKind: followup.kind,
       effectKind: followup.effect.kind,
-      abilityKey: followup.abilityKey,
+      ...successfulRunFollowupBinding(followup),
     }),
     ...revealPayload,
     cardId: sourceCardId,
@@ -557,7 +579,7 @@ export function resolveHiddenSuccessfulRunTrashRemoteFortEffect(
       sourceDefinitionId,
       primitiveKind: followup.kind,
       effectKind: followup.effect.kind,
-      abilityKey: followup.abilityKey,
+      ...successfulRunFollowupBinding(followup),
     }),
     ...revealPayload,
     cardId: sourceCardId,

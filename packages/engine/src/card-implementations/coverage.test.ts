@@ -1,9 +1,7 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { relative, sep } from "node:path";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
-  CS06_CARD_DEFINITION_IDS,
   cardSpecImplementationDefinitionIds,
   cardSpecRuntimeDefinitionIds,
   cardSpecSourceRefByDefinitionId,
@@ -21,273 +19,10 @@ import {
   cardImplementationForDefinitionId,
 } from "./registry";
 
-type ProteusCardSet = {
-  setId: string;
-  cards: Array<{
-    cardId: string;
-    setId: string;
-    title: string;
-  }>;
-};
-
-type ProteusCardSupportManifest = {
-  setId: string;
-  cards: Array<{
-    cardId: string;
-    setId: string;
-    statuses: {
-      implemented: boolean;
-      engine_supported: boolean;
-      playable: boolean;
-      human_playable: boolean;
-      ai_supported: boolean;
-      deck_legal: boolean;
-      format_legal: boolean;
-      blocked: boolean;
-    };
-    support: {
-      resolverRef: string | null;
-    };
-  }>;
-};
-
 const repoRoot = fileURLToPath(new URL("../../../../", import.meta.url));
-
-function readJson<T>(url: URL): T {
-  return JSON.parse(readFileSync(url, "utf8")) as T;
-}
-
-function findTypeScriptFiles(directory: string): string[] {
-  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const path = `${directory}/${entry.name}`;
-    if (entry.isDirectory()) return findTypeScriptFiles(path);
-    if (entry.isFile() && path.endsWith(".ts")) return [path];
-    return [];
-  });
-}
 
 function duplicateIds(ids: readonly string[]): string[] {
   return ids.filter((id, index) => ids.indexOf(id) !== index);
-}
-
-function toRepoPath(path: string): string {
-  return relative(repoRoot, path).split(sep).join("/");
-}
-
-type ProteusImplementationRow = {
-  cardDefinitionId: string;
-  filePath: string;
-};
-
-type ProteusCoverageReport = {
-  cardSet: ProteusCardSet;
-  manifest: ProteusCardSupportManifest;
-  implementationRows: ProteusImplementationRow[];
-  proteusCardIds: string[];
-  manifestCardIds: string[];
-  fileDefinitionIds: string[];
-  uniqueFileDefinitionIds: string[];
-  registryDefinitionIds: string[];
-  missingCards: Array<{ cardDefinitionId: string; title: string }>;
-  filesWithoutDefinitionId: string[];
-  nonProteusFiles: ProteusImplementationRow[];
-  unknownFileDefinitionIds: ProteusImplementationRow[];
-  unregisteredProteusFiles: ProteusImplementationRow[];
-  registeredProteusImplementationsWithoutFile: string[];
-  duplicateFileDefinitionIds: string[];
-  duplicateRegistryDefinitionIds: string[];
-  manifestImplementedIds: string[];
-  manifestImplementedWithoutFile: string[];
-  manifestMissingImplementedForFile: string[];
-  manifestStatusDrift: string[];
-  manifestResolverDrift: string[];
-  manifestHumanVsHumanFlagDrift: string[];
-  manifestAiSupportDrift: string[];
-};
-
-function buildProteusCoverageReport(): ProteusCoverageReport {
-  const cardSet = readJson<ProteusCardSet>(
-    new URL("../../../../data/cards/proteus-cards.json", import.meta.url),
-  );
-  const manifest = readJson<ProteusCardSupportManifest>(
-    new URL(
-      "../../../../data/manifests/proteus-card-support.json",
-      import.meta.url,
-    ),
-  );
-  const implementationFiles = findTypeScriptFiles(
-    fileURLToPath(new URL("./proteus", import.meta.url)),
-  );
-  const implementationRows = implementationFiles.map((filePath) => {
-    const match = readFileSync(filePath, "utf8").match(
-      /cardDefinitionId:\s*["']([^"']+)["']/,
-    );
-    return {
-      cardDefinitionId: match?.[1] ?? "",
-      filePath: toRepoPath(filePath),
-    };
-  });
-
-  const proteusCardIds = cardSet.cards.map((card) => card.cardId);
-  const proteusCardIdSet = new Set(proteusCardIds);
-  const titleById = new Map(
-    cardSet.cards.map((card) => [card.cardId, card.title]),
-  );
-  const manifestCardIds = manifest.cards.map((card) => card.cardId);
-  const fileDefinitionIds = implementationRows.map(
-    (row) => row.cardDefinitionId,
-  );
-  const uniqueFileDefinitionIds = [
-    ...new Set(fileDefinitionIds.filter(Boolean)),
-  ].sort();
-  const uniqueFileDefinitionIdSet = new Set(uniqueFileDefinitionIds);
-  const registryDefinitionIds = CARD_IMPLEMENTATIONS.filter((implementation) =>
-    implementation.cardDefinitionId.startsWith("onr_proteus_"),
-  ).map((implementation) => implementation.cardDefinitionId);
-  const registryDefinitionIdSet = new Set(registryDefinitionIds);
-  const manifestImplementedIds = manifest.cards
-    .filter((card) => card.statuses.implemented)
-    .map((card) => card.cardId)
-    .sort();
-
-  const filesWithoutDefinitionId = implementationRows
-    .filter((row) => row.cardDefinitionId === "")
-    .map((row) => row.filePath)
-    .sort();
-  const nonProteusFiles = implementationRows
-    .filter(
-      (row) =>
-        row.cardDefinitionId !== "" &&
-        !row.cardDefinitionId.startsWith("onr_proteus_"),
-    )
-    .sort((a, b) => a.filePath.localeCompare(b.filePath));
-  const unknownFileDefinitionIds = implementationRows
-    .filter(
-      (row) =>
-        row.cardDefinitionId !== "" &&
-        !proteusCardIdSet.has(row.cardDefinitionId),
-    )
-    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
-  const unregisteredProteusFiles = implementationRows
-    .filter(
-      (row) =>
-        row.cardDefinitionId.startsWith("onr_proteus_") &&
-        !registryDefinitionIdSet.has(row.cardDefinitionId),
-    )
-    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
-  const registeredProteusImplementationsWithoutFile = registryDefinitionIds
-    .filter((definitionId) => !uniqueFileDefinitionIdSet.has(definitionId))
-    .sort();
-
-  const missingCards = cardSet.cards
-    .filter((card) => !uniqueFileDefinitionIdSet.has(card.cardId))
-    .map((card) => ({
-      cardDefinitionId: card.cardId,
-      title: titleById.get(card.cardId) ?? card.cardId,
-    }))
-    .sort((a, b) => a.cardDefinitionId.localeCompare(b.cardDefinitionId));
-
-  const manifestStatusDrift: string[] = [];
-  const manifestResolverDrift: string[] = [];
-  const manifestHumanVsHumanFlagDrift: string[] = [];
-  const manifestAiSupportDrift: string[] = [];
-
-  for (const card of manifest.cards) {
-    const isImplementedByFile = uniqueFileDefinitionIdSet.has(card.cardId);
-    if (card.statuses.ai_supported !== isImplementedByFile) {
-      manifestAiSupportDrift.push(card.cardId);
-    }
-
-    if (isImplementedByFile) {
-      if (
-        !card.statuses.implemented ||
-        !card.statuses.engine_supported ||
-        !card.statuses.playable ||
-        !card.statuses.human_playable ||
-        !card.statuses.deck_legal ||
-        !card.statuses.format_legal ||
-        card.statuses.blocked
-      ) {
-        manifestStatusDrift.push(card.cardId);
-      }
-      if (card.support.resolverRef !== `engine:${card.cardId}`) {
-        manifestResolverDrift.push(card.cardId);
-      }
-    } else {
-      if (
-        card.statuses.implemented ||
-        card.statuses.engine_supported ||
-        card.statuses.playable ||
-        card.statuses.human_playable ||
-        card.statuses.deck_legal ||
-        card.statuses.format_legal ||
-        !card.statuses.blocked
-      ) {
-        manifestStatusDrift.push(card.cardId);
-      }
-      if (card.support.resolverRef !== null) {
-        manifestResolverDrift.push(card.cardId);
-      }
-    }
-
-    if (card.statuses.format_legal !== card.statuses.deck_legal) {
-      manifestHumanVsHumanFlagDrift.push(card.cardId);
-    }
-  }
-
-  return {
-    cardSet,
-    manifest,
-    implementationRows,
-    proteusCardIds,
-    manifestCardIds,
-    fileDefinitionIds,
-    uniqueFileDefinitionIds,
-    registryDefinitionIds,
-    missingCards,
-    filesWithoutDefinitionId,
-    nonProteusFiles,
-    unknownFileDefinitionIds,
-    unregisteredProteusFiles,
-    registeredProteusImplementationsWithoutFile,
-    duplicateFileDefinitionIds: duplicateIds(fileDefinitionIds).sort(),
-    duplicateRegistryDefinitionIds: duplicateIds(registryDefinitionIds).sort(),
-    manifestImplementedIds,
-    manifestImplementedWithoutFile: manifestImplementedIds
-      .filter((definitionId) => !uniqueFileDefinitionIdSet.has(definitionId))
-      .sort(),
-    manifestMissingImplementedForFile: uniqueFileDefinitionIds
-      .filter((definitionId) => !manifestImplementedIds.includes(definitionId))
-      .sort(),
-    manifestStatusDrift: manifestStatusDrift.sort(),
-    manifestResolverDrift: manifestResolverDrift.sort(),
-    manifestHumanVsHumanFlagDrift: manifestHumanVsHumanFlagDrift.sort(),
-    manifestAiSupportDrift: manifestAiSupportDrift.sort(),
-  };
-}
-
-function formatProteusCoverageReport(report: ProteusCoverageReport): string {
-  const lines = [
-    "Proteus CardImplementation verify:",
-    `- total Proteus cards: ${report.proteusCardIds.length}`,
-    `- unique implemented Proteus cardDefinitionIds from files: ${report.uniqueFileDefinitionIds.length}`,
-    `- missing CardImplementation files: ${report.missingCards.length}`,
-    `- unregistered Proteus files: ${report.unregisteredProteusFiles.length}`,
-    `- registered Proteus implementations without file: ${report.registeredProteusImplementationsWithoutFile.length}`,
-    `- duplicate file cardDefinitionIds: ${report.duplicateFileDefinitionIds.length}`,
-    `- duplicate registry cardDefinitionIds: ${report.duplicateRegistryDefinitionIds.length}`,
-    `- manifest implemented-without-file drift: ${report.manifestImplementedWithoutFile.length}`,
-    `- manifest missing-implemented-for-file drift: ${report.manifestMissingImplementedForFile.length}`,
-    `- manifest status drift: ${report.manifestStatusDrift.length}`,
-    `- manifest resolverRef drift: ${report.manifestResolverDrift.length}`,
-    `- manifest deck_legal/format_legal drift: ${report.manifestHumanVsHumanFlagDrift.length}`,
-    `- manifest ai_supported drift: ${report.manifestAiSupportDrift.length}`,
-    "Missing Proteus CardImplementation files:",
-    ...report.missingCards.map(
-      (card) => `- ${card.cardDefinitionId} :: ${card.title}`,
-    ),
-  ];
-  return lines.join("\n");
 }
 
 describe("CardImplementation coverage and registry invariants", () => {
@@ -334,7 +69,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     const definitionOnlyIds = activeCardSpecDefinitionIds.filter(
       (definitionId) => !implementationIds.has(definitionId),
     );
-    expect(definitionOnlyIds).toHaveLength(20);
+    expect(definitionOnlyIds).toHaveLength(23);
     for (const definitionId of definitionOnlyIds) {
       expect(cardImplementationCoverageForDefinitionId(definitionId)).toEqual({
         cardDefinitionId: definitionId,
@@ -959,6 +694,16 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const definitionId of phase1aCards) {
+      if (definitionId === "onr_proteus_041_toughoniumtm-wall") {
+        expect(cardImplementationForDefinitionId(definitionId)).toBeUndefined();
+        expect(
+          cardImplementationCoverageForDefinitionId(definitionId),
+        ).toMatchObject({
+          cardDefinitionId: definitionId,
+          status: "no_engine_behavior_required",
+        });
+        continue;
+      }
       expect(
         cardImplementationForDefinitionId(definitionId),
         definitionId,
@@ -971,8 +716,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
     }
     expect(
-      cardImplementationForDefinitionId("onr_proteus_041_toughoniumtm-wall")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_proteus_041_toughoniumtm-wall"]?.subroutines,
     ).toHaveLength(4);
     expect(
       cardImplementationForDefinitionId(
@@ -1746,94 +1490,51 @@ describe("CardImplementation coverage and registry invariants", () => {
     });
   });
 
-  it("reconciles Proteus manifest support against concrete files and registry", () => {
-    const report = buildProteusCoverageReport();
-    process.stdout.write(`${formatProteusCoverageReport(report)}\n`);
-    const canonicalProteusIds = CS06_CARD_DEFINITION_IDS.filter((id) =>
+  it("keeps Proteus exclusively in the canonical CardSpec source partition", () => {
+    const proteusRuntimeIds = cardSpecRuntimeDefinitionIds().filter((id) =>
       id.startsWith("onr_proteus_"),
     );
-    const effectiveProteusIds = [
-      ...new Set([...report.proteusCardIds, ...canonicalProteusIds]),
-    ];
-
-    expect(report.cardSet.setId).toBe("proteus");
-    expect(report.proteusCardIds).toHaveLength(151);
-    expect(canonicalProteusIds).toHaveLength(3);
-    expect(effectiveProteusIds).toHaveLength(154);
-    expect(report.manifest.setId).toBe("proteus");
-    expect(report.manifest.cards).toHaveLength(151);
-    expect([...report.manifestCardIds].sort()).toEqual(
-      [...report.proteusCardIds].sort(),
-    );
-    expect(duplicateIds(report.proteusCardIds)).toEqual([]);
-    expect(duplicateIds(report.manifestCardIds)).toEqual([]);
-
-    expect(report.implementationRows.length).toBeGreaterThan(0);
-    expect(report.filesWithoutDefinitionId).toEqual([]);
-    expect(report.nonProteusFiles).toEqual([]);
-    expect(report.unknownFileDefinitionIds).toEqual([]);
-    expect(report.duplicateFileDefinitionIds).toEqual([]);
-    expect(report.duplicateRegistryDefinitionIds).toEqual([]);
-    expect(report.unregisteredProteusFiles).toEqual([]);
-    expect(report.registeredProteusImplementationsWithoutFile).toEqual(
-      [...canonicalProteusIds].sort(),
-    );
-    expect([...report.registryDefinitionIds].sort()).toEqual(
-      [
-        ...new Set([...report.uniqueFileDefinitionIds, ...canonicalProteusIds]),
-      ].sort(),
-    );
-    expect(report.manifestImplementedIds).toEqual(
-      [...report.uniqueFileDefinitionIds].sort(),
-    );
-    expect(report.manifestImplementedWithoutFile).toEqual([]);
-    expect(report.manifestMissingImplementedForFile).toEqual([]);
-    expect(report.manifestStatusDrift).toEqual([]);
-    expect(report.manifestResolverDrift).toEqual([]);
-    expect(report.manifestHumanVsHumanFlagDrift).toEqual([]);
-    expect(report.manifestAiSupportDrift).toEqual([]);
-
-    for (const row of report.implementationRows) {
-      expect(row.cardDefinitionId, row.filePath).toMatch(/^onr_proteus_/);
-      expect(report.proteusCardIds, row.filePath).toContain(
-        row.cardDefinitionId,
+    const proteusImplementationIds =
+      cardSpecImplementationDefinitionIds().filter((id) =>
+        id.startsWith("onr_proteus_"),
       );
-    }
+    const legacyProteusImplementationIds = CARD_IMPLEMENTATIONS.filter(
+      (implementation) =>
+        implementation.cardDefinitionId.startsWith("onr_proteus_") &&
+        !proteusImplementationIds.includes(implementation.cardDefinitionId),
+    );
 
-    for (const card of report.manifest.cards) {
-      const isImplemented = report.uniqueFileDefinitionIds.includes(
-        card.cardId,
+    expect(proteusRuntimeIds).toHaveLength(154);
+    expect(proteusImplementationIds).toHaveLength(151);
+    expect(legacyProteusImplementationIds).toEqual([]);
+    expect(existsSync(`${repoRoot}/data/cards/proteus-cards.json`)).toBe(false);
+    expect(
+      existsSync(`${repoRoot}/data/manifests/proteus-card-support.json`),
+    ).toBe(false);
+    expect(
+      existsSync(
+        `${repoRoot}/packages/engine/src/card-implementations/proteus`,
+      ),
+    ).toBe(false);
+    expect(
+      existsSync(
+        `${repoRoot}/packages/engine/src/card-implementations/subregistries/proteus-corp-agenda-implementations.ts`,
+      ),
+    ).toBe(false);
+
+    for (const definitionId of proteusRuntimeIds) {
+      const sourceRef = cardSpecSourceRefByDefinitionId(definitionId);
+      expect(sourceRef?.sourcePath, definitionId).toMatch(
+        /^packages\/cards\/src\/specs\/proteus\/.+\.card-spec\.ts$/,
       );
-      expect(card.setId, card.cardId).toBe("proteus");
-      expect(card.statuses.ai_supported, card.cardId).toBe(true);
-
-      if (isImplemented) {
-        expect(card.statuses, card.cardId).toMatchObject({
-          implemented: true,
-          engine_supported: true,
-          playable: true,
-          human_playable: true,
-          deck_legal: true,
-          format_legal: true,
-          ai_supported: true,
-          blocked: false,
-        });
-        expect(card.support.resolverRef, card.cardId).toBe(
-          `engine:${card.cardId}`,
-        );
-      } else {
-        expect(card.statuses.ai_supported, card.cardId).toBe(false);
-        expect(card.statuses, card.cardId).toMatchObject({
-          implemented: false,
-          engine_supported: false,
-          playable: false,
-          human_playable: false,
-          deck_legal: false,
-          format_legal: false,
-          blocked: true,
-        });
-        expect(card.support.resolverRef, card.cardId).toBeNull();
-      }
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe(
+        proteusImplementationIds.includes(definitionId)
+          ? "implemented"
+          : "no_engine_behavior_required",
+      );
     }
   });
 
@@ -1926,7 +1627,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     expect(coverageByStatus.get("implemented")).toBe(
       CARD_IMPLEMENTATIONS.length,
     );
-    expect(coverageByStatus.get("no_engine_behavior_required")).toBe(21);
+    expect(coverageByStatus.get("no_engine_behavior_required")).toBe(24);
     expect(coverageByStatus.get("outside_current_release_scope")).toBe(
       expectedOutsideScopeCoverageCount,
     );
@@ -2064,6 +1765,58 @@ describe("CardImplementation coverage and registry invariants", () => {
     ] as const;
 
     for (const testCase of cases) {
+      const definitionOnly =
+        testCase.definitionId === "onr_proteus_011_brain-wash" ||
+        testCase.definitionId === "onr_proteus_015_colonel-failure";
+      if (definitionOnly) {
+        expect(
+          cardImplementationForDefinitionId(testCase.definitionId),
+          testCase.definitionId,
+        ).toBeUndefined();
+        expect(
+          cardImplementationCoverageForDefinitionId(testCase.definitionId),
+        ).toMatchObject({
+          cardDefinitionId: testCase.definitionId,
+          status: "no_engine_behavior_required",
+        });
+        expect(
+          CARD_DEFINITIONS_BY_ID[testCase.definitionId]?.subroutines,
+          testCase.definitionId,
+        ).toEqual(
+          testCase.definitionId === "onr_proteus_011_brain-wash"
+            ? [
+                {
+                  id: "subroutine_brain_damage_one",
+                  type: "do_damage",
+                  damageType: "core",
+                  amount: 1,
+                },
+              ]
+            : [
+                {
+                  id: "subroutine_trash_program_a",
+                  type: "trash_installed_program",
+                },
+                {
+                  id: "subroutine_trash_program_b",
+                  type: "trash_installed_program",
+                },
+                {
+                  id: "subroutine_trash_program_c",
+                  type: "trash_installed_program",
+                },
+                {
+                  id: "subroutine_end_run_a",
+                  type: "end_the_run",
+                },
+                {
+                  id: "subroutine_end_run_b",
+                  type: "end_the_run",
+                },
+              ],
+        );
+        continue;
+      }
       expect(
         cardImplementationForDefinitionId(testCase.definitionId),
         testCase.definitionId,
@@ -2075,10 +1828,15 @@ describe("CardImplementation coverage and registry invariants", () => {
         status: "implemented",
       });
       expect(
-        cardImplementationForDefinitionId(testCase.definitionId)
-          ?.printedSubroutines,
+        CARD_DEFINITIONS_BY_ID[testCase.definitionId]?.subroutines,
         testCase.definitionId,
-      ).toEqual(testCase.printedSubroutines);
+      ).toEqual([
+        {
+          id: "subroutine_end_run_unless_runner_pays_one",
+          type: "end_the_run_unless_runner_pays",
+          amount: 1,
+        },
+      ]);
       if ("lifecycle" in testCase) {
         expect(
           cardImplementationForDefinitionId(testCase.definitionId)?.lifecycle,
@@ -2204,7 +1962,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       });
       expect(
         cardImplementationForDefinitionId(testCase.definitionId)?.abilities,
-      ).toContainEqual(testCase.ability);
+      ).toContainEqual(expect.objectContaining(testCase.ability));
     }
   });
 

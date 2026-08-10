@@ -139,6 +139,13 @@ export type ResidentPlanPortfolio = {
   campaigns?: ResidentCorpCampaign[];
   turnPlanCommitment?: TurnPlanCommitment;
   turnPlanExecutionLease?: TurnPlanExecutionLease;
+  selectedActionOrigin?: {
+    rootPlanInstanceId: string;
+    executorInstanceId: string;
+    selectedActionId: string;
+    selectedAtStateVersion: number;
+    immediateChoicePolicy: "trash_lowest_visible_drawn_card";
+  };
 };
 
 export type ReconcileResidentPlanPortfolioParams = {
@@ -506,6 +513,36 @@ export function assertResidentPlanPortfolio(
       portfolio.executorInstanceId,
       "Persist a TurnPlan execution lease only together with its commitment.",
     );
+  }
+  const selectedActionOrigin = portfolio.selectedActionOrigin;
+  if (selectedActionOrigin) {
+    const root = portfolio.instances.find(
+      (instance) =>
+        instance.instanceId === selectedActionOrigin.rootPlanInstanceId,
+    );
+    const executor = portfolio.instances.find(
+      (instance) =>
+        instance.instanceId === selectedActionOrigin.executorInstanceId,
+    );
+    if (
+      selectedActionOrigin.selectedActionId.trim().length === 0 ||
+      selectedActionOrigin.selectedAtStateVersion !== portfolio.stateVersion ||
+      selectedActionOrigin.immediateChoicePolicy !==
+        "trash_lowest_visible_drawn_card" ||
+      !root ||
+      !executor ||
+      portfolio.rootForegroundInstanceId !== root.instanceId ||
+      portfolio.executorInstanceId !== executor.instanceId ||
+      executor.executionState !== "executor"
+    ) {
+      throw portfolioFailure(
+        "executor_invariant_broken",
+        portfolio,
+        timingPoint,
+        selectedActionOrigin.executorInstanceId,
+        "Bind a possible immediate choice only to the exact current root, executor, selected action and state version.",
+      );
+    }
   }
 }
 

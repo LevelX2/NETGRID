@@ -147,6 +147,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "install_defense_support"
     | "resolve_install_targets"
     | "resolve_run_redirect"
+    | "resolve_post_pass_ice_lifecycle"
     | "draw_for_ice"
     | "rez_response"
     | "activate_run_defense"
@@ -1445,6 +1446,7 @@ export function corpGenericDefensePriorityClass(
           signal.phase === "install_defense_support" ||
           signal.phase === "resolve_install_targets" ||
           signal.phase === "resolve_run_redirect" ||
+          signal.phase === "resolve_post_pass_ice_lifecycle" ||
           signal.phase === "activate_run_defense" ||
           (signal.phase === "rez_response" &&
             signal.rezWindowVerdict === "productive")),
@@ -2443,6 +2445,50 @@ function defenseCandidates(
           ),
       )
       .map((candidate) => ({ candidate, stepValue: signal.value }));
+  }
+  if (signal.phase === "resolve_post_pass_ice_lifecycle") {
+    const routes = context.actionCandidates
+      .filter((candidate) => {
+        if (signal.actionIds?.includes(candidate.actionId) !== true) {
+          return false;
+        }
+        const action = context.input.legalActions.find(
+          (entry) => entry.actionId === candidate.actionId,
+        );
+        const sourceDefinitionId = signal.sourceDefinitionIds[0];
+        const creditCost = action
+          ? legalActionResourceCost(action, "credits")
+          : undefined;
+        const decision = action?.payload?.decision;
+        const paymentAmount = action?.payload?.paymentAmount;
+        return (
+          signal.sourceDefinitionIds.length === 1 &&
+          signal.targetIceInstanceId !== undefined &&
+          candidate.actionType === "continue_run" &&
+          candidate.semanticActionType === "run.continue" &&
+          action?.type === "continue_run" &&
+          action.side === "corp" &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion &&
+          action.source === signal.targetIceInstanceId &&
+          action.payload?.corpPostPassIceAbility ===
+            "return_passed_ice_to_hq" &&
+          action.payload.sourceDefinitionId === sourceDefinitionId &&
+          action.payload.serverId === signal.serverId &&
+          ((decision === "pay" &&
+            knownNonNegativeInteger(paymentAmount) &&
+            paymentAmount > 0 &&
+            creditCost === paymentAmount) ||
+            (decision === "return_to_hq" &&
+              paymentAmount === undefined &&
+              creditCost === 0) ||
+            (decision === "decline" &&
+              paymentAmount === undefined &&
+              creditCost === 0))
+        );
+      })
+      .map((candidate) => ({ candidate, stepValue: signal.value }));
+    return routes;
   }
   return context.actionCandidates
     .filter((candidate) => {
@@ -4401,6 +4447,11 @@ function isValidDefenseSignal(
             value.choiceResolution,
             value,
           ))) &&
+      (value.phase !== "resolve_post_pass_ice_lifecycle" ||
+        (value.sourceDefinitionIds.length === 1 &&
+          Array.isArray(value.actionIds) &&
+          value.actionIds.length > 0 &&
+          nonEmptyString(value.targetIceInstanceId))) &&
       (value.rezRoute === undefined ||
         (value.phase === "rez_response" &&
           validExactIceRezRoute(value.rezRoute))) &&
@@ -4623,6 +4674,7 @@ function genericDefensePhase(
     value === "install_defense_support" ||
     value === "resolve_install_targets" ||
     value === "resolve_run_redirect" ||
+    value === "resolve_post_pass_ice_lifecycle" ||
     value === "draw_for_ice" ||
     value === "rez_response" ||
     value === "activate_run_defense" ||
@@ -4952,7 +5004,8 @@ function urgentDefenseBand(
       signal.urgent &&
       (signal.phase === "rez_response" ||
         signal.phase === "decline_rez" ||
-        signal.phase === "activate_run_defense") &&
+        signal.phase === "activate_run_defense" ||
+        signal.phase === "resolve_post_pass_ice_lifecycle") &&
       defenseCandidates(context, signal).length > 0,
   );
   if (urgentWindowSignals.length > 0) return urgentWindowSignals;

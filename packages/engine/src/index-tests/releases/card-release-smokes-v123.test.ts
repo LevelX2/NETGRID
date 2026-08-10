@@ -1092,6 +1092,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
+    const drawActionId = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "draw_card",
+    ).actionId;
 
     state = apply(state, "runner", (action) => action.type === "draw_card");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1106,6 +1111,20 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.pendingChoice?.side).toBe("runner");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(state.pendingChoice?.options).toHaveLength(4);
+    expect(state.pendingChoice?.continuation).toMatchObject({
+      family: "runner_hidden_draw_keep_or_top_replacement",
+      originActionId: drawActionId,
+      sourceCardInstanceId: crashId,
+      sourceCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+      createdAtStateVersion: state.stateVersion,
+    });
+    const privateChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(privateChoice?.options).toHaveLength(4);
+    expect(
+      privateChoice?.options.every(
+        (option) => option.card?.known && option.card.definitionId,
+      ),
+    ).toBe(true);
 
     const topOption = state.pendingChoice?.options.find((option) =>
       option.id.startsWith("top_"),

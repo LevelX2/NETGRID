@@ -92,7 +92,7 @@
   },
   "engine": {
     "stateVersion": 62,
-    "stateHash": "fnv1a:20aa8ca8",
+    "stateHash": "fnv1a:58f7a1b6",
     "testOnlyGameState": {
       "matchId": "match_27195c96204c4515",
       "baseline": {
@@ -5157,20 +5157,21 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "decline_rez"
+        "type": "rez_ice",
+        "sourceDefinitionId": "onr_proteus_032_misleading-access-menus"
       }
     ],
     "contractKind": "correctness",
     "forbiddenActions": [
       {
-        "type": "rez_ice"
+        "type": "decline_rez"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "visible_rez_window_decline_without_defense_threat"
+        "engine_certified_ice_rez_qualitative_encounter_defense:rd:corp.rez_ice.corp_onr_proteus_032_misleading-access-menus_1.corp_onr_proteus_032_misleading-access-menus_1"
       ]
     }
   }

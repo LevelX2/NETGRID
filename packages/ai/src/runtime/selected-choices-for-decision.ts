@@ -14,7 +14,10 @@ import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement
 import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
-import type { DiscardChoiceKeepScore } from "./discard-choice-selection";
+import {
+  selectedDiscardChoiceOptionIds,
+  type DiscardChoiceKeepScore,
+} from "./discard-choice-selection";
 import type { CorpHandManagementSignal } from "../plans/corp-tactical-plan-modules";
 import {
   runnerDamagePreventionChoiceResolution,
@@ -215,6 +218,114 @@ function selectedCorpHqShuffleOptionIdsFromResidentHandPlan(
   return [...binding.selectedOptionIds];
 }
 
+function selectedRunnerHiddenDrawReplacementOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  scoreDiscardCandidate: SelectedChoicesForDecisionDependencies["discardKeepScore"],
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const continuation = choice.continuation;
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const origin = portfolio?.selectedActionOrigin;
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const root = portfolio?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const [requirement] = action.choiceRequirements ?? [];
+  const exactOptions =
+    continuation?.family === "runner_hidden_draw_keep_or_top_replacement" &&
+    selectableOptions.length === continuation.drawnCardInstanceIds.length * 2 &&
+    continuation.drawnCardInstanceIds.every((cardId) => {
+      const choices = selectableOptions.filter(
+        (option) =>
+          option.value === `${cardId}:trash` ||
+          option.value === `${cardId}:top`,
+      );
+      return (
+        choices.length === 2 &&
+        choices.every(
+          (option) =>
+            option.card?.instanceId === cardId &&
+            option.card.known !== false &&
+            typeof option.card.definitionId === "string" &&
+            option.card.definitionId.length > 0,
+        )
+      );
+    });
+  const exactBinding =
+    input.side === "runner" &&
+    continuation?.family === "runner_hidden_draw_keep_or_top_replacement" &&
+    choice.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+    choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+    continuation.createdAtStateVersion === input.playerView.stateVersion &&
+    continuation.originActionId.length > 0 &&
+    portfolio !== undefined &&
+    portfolio.side === "runner" &&
+    portfolio.stateVersion === input.playerView.stateVersion - 1 &&
+    origin !== undefined &&
+    origin.selectedAtStateVersion === portfolio.stateVersion &&
+    origin.selectedActionId === continuation.originActionId &&
+    origin.immediateChoicePolicy === "trash_lowest_visible_drawn_card" &&
+    portfolio.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    portfolio.executorInstanceId === origin.executorInstanceId &&
+    root !== undefined &&
+    executor !== undefined &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === selectableOptions.length &&
+    selectableOptions.every((option) =>
+      requirement.optionIds.includes(option.id),
+    ) &&
+    exactOptions;
+  if (!exactBinding || !continuation) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The hidden draw replacement must preserve the immediately preceding Runner plan executor, exact source action, complete private drawn-card options and bound discard policy.",
+    );
+  }
+  const discardOptions = selectableOptions
+    .filter((option) =>
+      continuation.drawnCardInstanceIds.some(
+        (cardId) => option.value === `${cardId}:trash`,
+      ),
+    )
+    .map((option) => ({
+      ...option,
+      value: option.card!.instanceId,
+    }));
+  const selected = selectedDiscardChoiceOptionIds(
+    input,
+    choice,
+    discardOptions,
+    scoreDiscardCandidate,
+  );
+  if (selected.length !== 1) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The bound hidden draw policy must select exactly one visible drawn card to trash.",
+    );
+  }
+  return selected;
+}
+
 export function selectedChoicesForDecision(
   input: AiDecisionInput,
   action: LegalAction,
@@ -248,6 +359,23 @@ export function selectedChoicesForDecision(
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "setup_mulligan",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.continuation?.family === "runner_hidden_draw_keep_or_top_replacement"
+  ) {
+    return resolved(
+      selectedRunnerHiddenDrawReplacementOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        dependencies.discardKeepScore,
+        currentPortfolio,
+      ),
+      "resident_runner_hidden_draw_replacement",
     );
   }
   if (
@@ -314,6 +442,22 @@ export function selectedChoicesForDecision(
         selectableOptions,
       ),
       "runner_checkpoint_memory_cleanup",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.continuation?.family === "runner_grip_install_with_temporary_credits"
+  ) {
+    return resolved(
+      selectedRunnerEventInstallChoiceOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_runner_event_install_choice",
     );
   }
   if (
@@ -756,13 +900,106 @@ export function selectedChoicesForDecision(
   );
 }
 
+function selectedRunnerEventInstallChoiceOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const continuation = choice.continuation;
+  const requirement = action.choiceRequirements?.[0];
+  const choiceOptionIds = choice.options.map((option) => option.id);
+  const exactChoiceAndAction =
+    continuation?.family === "runner_grip_install_with_temporary_credits" &&
+    choice.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    continuation.createdAtStateVersion === input.playerView.stateVersion &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choiceOptionIds.length &&
+    choiceOptionIds.every((optionId) =>
+      requirement.optionIds.includes(optionId),
+    );
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: {
+          phase?: unknown;
+          eventInstallChoiceBinding?: Record<string, unknown>;
+        };
+      }
+    | undefined;
+  const binding = moduleState?.signal?.eventInstallChoiceBinding;
+  const selectedOptionId = binding?.selectedOptionId;
+  const selectedOption = selectableOptions.find(
+    (option) => option.id === selectedOptionId,
+  );
+  const selectedTarget =
+    typeof binding?.targetCardInstanceId === "string"
+      ? input.playerView.own.gripOrHq.find(
+          (card) => card.instanceId === binding.targetCardInstanceId,
+        )
+      : undefined;
+  const exactPlanBinding =
+    exactChoiceAndAction &&
+    continuation !== undefined &&
+    portfolio?.side === "runner" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
+    executor !== undefined &&
+    moduleState?.kind === "development" &&
+    moduleState.signal?.phase === "resolve_event_install_choice" &&
+    binding?.choiceId === choice.choiceId &&
+    binding.actionId === action.actionId &&
+    binding.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+    binding.sourceDefinitionId === continuation.sourceCardDefinitionId &&
+    binding.sourceCapabilityKey === continuation.sourceCapabilityKey &&
+    binding.sourceStateVersion === input.playerView.stateVersion &&
+    binding.originSelectedAtStateVersion ===
+      input.playerView.stateVersion - 1 &&
+    typeof selectedOptionId === "string" &&
+    selectedOption?.value === binding.targetCardInstanceId &&
+    selectedTarget?.known !== false &&
+    selectedTarget?.definitionId === binding.targetDefinitionId &&
+    (selectedTarget?.type === "program" ||
+      selectedTarget?.type === "hardware") &&
+    continuation.allowedTypes.includes(selectedTarget.type);
+  if (!exactPlanBinding || typeof selectedOptionId !== "string") {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Resolve the event-install payload only from the current runner.develop_board_and_hand executor and its exact canonical source-capability and visible target binding.",
+    );
+  }
+  return [selectedOptionId];
+}
+
 function selectedCorpRezOrTrashIceOptionId(
   input: AiDecisionInput,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
 ): string | undefined {
-  const rezOptionId = selectableOptions.find((option) => option.id === "rez_ice")
-    ?.id;
+  const rezOptionId = selectableOptions.find(
+    (option) => option.id === "rez_ice",
+  )?.id;
   const trashOptionId = selectableOptions.find(
     (option) => option.id === "trash_ice",
   )?.id;

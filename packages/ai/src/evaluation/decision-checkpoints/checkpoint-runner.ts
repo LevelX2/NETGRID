@@ -511,7 +511,18 @@ function actionMatches(
         ...server.root,
       ]),
     ].find((card) => card.instanceId === sourceId);
-    if (source?.definitionId !== matcher.sourceDefinitionId) return false;
+    const sourceDefinitionId =
+      source?.definitionId ??
+      (typeof action.payload?.sourceDefinitionId === "string"
+        ? action.payload.sourceDefinitionId
+        : undefined);
+    if (sourceDefinitionId !== matcher.sourceDefinitionId) return false;
+  }
+  if (
+    matcher.encounterWillEndRun !== undefined &&
+    action.payload?.encounterWillEndRun !== matcher.encounterWillEndRun
+  ) {
+    return false;
   }
   const targetCardInstanceId =
     typeof action.payload?.targetCardId === "string"
