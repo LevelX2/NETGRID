@@ -203,8 +203,6 @@ export let startPaidSourceReturnToGripChoice: RuntimePortGroups["choiceHiddenZon
 export let resolvePaidSourceReturnToGripChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolvePaidSourceReturnToGripChoice"];
 export let corpAgendaPointTotal: RuntimePortGroups["choiceHiddenZoneRuntime"]["corpAgendaPointTotal"];
 export let chooseCorpAgendasForPointCost: RuntimePortGroups["choiceHiddenZoneRuntime"]["chooseCorpAgendasForPointCost"];
-export let startRunnerHostingChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["startRunnerHostingChoice"];
-export let resolveRunnerHostingChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveRunnerHostingChoice"];
 export let resolveIncubatorTransformChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveIncubatorTransformChoice"];
 export let resolveCardImplementationAccessPaymentChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveCardImplementationAccessPaymentChoice"];
 export let resolveRunnerProgramReturnChoice: RuntimePortGroups["choiceHiddenZoneRuntime"]["resolveRunnerProgramReturnChoice"];
@@ -427,8 +425,6 @@ export let runnerCanPayInstallCost: RuntimePortGroups["stateRuntimeResolvers"]["
 export let runnerCostPenaltySupportCreditCapacity: RuntimePortGroups["stateRuntimeResolvers"]["runnerCostPenaltySupportCreditCapacity"];
 export let openRunnerCostPenaltySupportWindow: RuntimePortGroups["stateRuntimeResolvers"]["openRunnerCostPenaltySupportWindow"];
 export let closeRunnerCostPenaltySupportWindowForPayment: RuntimePortGroups["stateRuntimeResolvers"]["closeRunnerCostPenaltySupportWindowForPayment"];
-export let runnerRecurringCredits: RuntimePortGroups["stateRuntimeResolvers"]["runnerRecurringCredits"];
-export let runnerProgramInstallRecurringCreditSourceIds: RuntimePortGroups["stateRuntimeResolvers"]["runnerProgramInstallRecurringCreditSourceIds"];
 export let spendRunnerInstallCredits: RuntimePortGroups["stateRuntimeResolvers"]["spendRunnerInstallCredits"];
 export let runnerTagRemovalRecurringCreditSourceIds: RuntimePortGroups["stateRuntimeResolvers"]["runnerTagRemovalRecurringCreditSourceIds"];
 export let runnerTagRemovalRecurringCredits: RuntimePortGroups["stateRuntimeResolvers"]["runnerTagRemovalRecurringCredits"];
@@ -803,10 +799,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   corpAgendaPointTotal = ports.choiceHiddenZoneRuntime.corpAgendaPointTotal;
   chooseCorpAgendasForPointCost =
     ports.choiceHiddenZoneRuntime.chooseCorpAgendasForPointCost;
-  startRunnerHostingChoice =
-    ports.choiceHiddenZoneRuntime.startRunnerHostingChoice;
-  resolveRunnerHostingChoice =
-    ports.choiceHiddenZoneRuntime.resolveRunnerHostingChoice;
   resolveIncubatorTransformChoice =
     ports.choiceHiddenZoneRuntime.resolveIncubatorTransformChoice;
   resolveCardImplementationAccessPaymentChoice =
@@ -1183,9 +1175,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.stateRuntimeResolvers.openRunnerCostPenaltySupportWindow;
   closeRunnerCostPenaltySupportWindowForPayment =
     ports.stateRuntimeResolvers.closeRunnerCostPenaltySupportWindowForPayment;
-  runnerRecurringCredits = ports.stateRuntimeResolvers.runnerRecurringCredits;
-  runnerProgramInstallRecurringCreditSourceIds =
-    ports.stateRuntimeResolvers.runnerProgramInstallRecurringCreditSourceIds;
   spendRunnerInstallCredits =
     ports.stateRuntimeResolvers.spendRunnerInstallCredits;
   runnerTagRemovalRecurringCreditSourceIds =

@@ -78,16 +78,6 @@ function main() {
     if (hint.aiSupportStatus !== "ai_supported")
       failures.push(`${cardId}: active AI hint is not ai_supported`);
 
-    const supportRef = entry.support?.aiHintRef;
-    const cardSpecDerived =
-      entry.support.coverage.includes("card_spec_registry") &&
-      entry.support.coverage.includes("planning_projection");
-    if (
-      (!cardSpecDerived && supportRef !== `ai-card-hints-active:${cardId}`) ||
-      (cardSpecDerived && supportRef !== null)
-    )
-      failures.push(`${cardId}: support aiHintRef authority mismatch`);
-
     const scenarioRefs = Array.isArray(entry.support?.scenarioRefs)
       ? entry.support.scenarioRefs
       : [];

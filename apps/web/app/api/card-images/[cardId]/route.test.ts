@@ -25,6 +25,7 @@ beforeEach(() => {
   lookupCardImage.mockReset();
   lookupCardImage.mockResolvedValue({
     cardId: "test_card",
+    printingId: "test_card_printing",
     kind: "generated",
     relativePath: "generated-test-card.png",
     absolutePath: imagePath,
@@ -84,6 +85,7 @@ describe("card image route cache contract", () => {
   it("keeps missing-image GET errors path-free and non-cacheable", async () => {
     lookupCardImage.mockResolvedValueOnce({
       cardId: "missing_card",
+      printingId: "missing_card_printing",
       kind: "generated",
       relativePath: "generated-missing-card.png",
       absolutePath: path.join(temporaryDirectory, "private", "missing-card.png"),

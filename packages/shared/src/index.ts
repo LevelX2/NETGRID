@@ -57,7 +57,6 @@ export type {
 export {
   CORE_DEMO_DECK_IDS,
   DEMO_DECK_IDS,
-  LEGACY_FIXTURE_DECK_IDS,
   type DemoDeckId,
 } from "./demo-fixtures";
 export { DEMO_DECKS } from "./demo-decks";
@@ -569,19 +568,11 @@ export type ModifierDefinition = {
   sourceAbilityId?: string;
 };
 
-export type AbilityRef =
-  | {
-      sourceCardInstanceId: CardInstanceId;
-      /** Legacy local ability identity. Never combine with sourceAbilityId. */
-      abilityId: string;
-      sourceAbilityId?: never;
-    }
-  | {
-      sourceCardInstanceId: CardInstanceId;
-      /** Canonical <cardDefinitionId>:<capabilityKey> identity. */
-      sourceAbilityId: string;
-      abilityId?: never;
-    };
+export type AbilityRef = {
+  sourceCardInstanceId: CardInstanceId;
+  /** Canonical <cardDefinitionId>:<capabilityKey> identity. */
+  sourceAbilityId: string;
+};
 
 export type EffectSource =
   | { kind: "card"; cardInstanceId: CardInstanceId; abilityId?: string }
@@ -1054,19 +1045,11 @@ export type CreateGameConfig = {
   runnerDeckId?:
     | "demo_runner_001"
     | "demo_runner_004"
-    | "demo_runner_008"
-    | "demo_runner_096"
-    | "demo_runner_097"
-    | "demo_runner_098"
-    | "demo_runner_099";
+    | "demo_runner_008";
   corpDeckId?:
     | "demo_corp_001"
     | "demo_corp_004"
-    | "demo_corp_008"
-    | "demo_corp_096"
-    | "demo_corp_097"
-    | "demo_corp_098"
-    | "demo_corp_099";
+    | "demo_corp_008";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -1426,6 +1409,7 @@ export type RunState = {
     brokenSubroutineBreakerByIndex?: Partial<Record<number, CardInstanceId>>;
     pendingFreeBreaks: Array<{
       sourceBreakerInstanceId: CardInstanceId;
+      sourceAbilityId: string;
       iceSubtype: "sentry";
       remainingUses: number;
       mustBeNextEncounteredIce: true;
@@ -1629,18 +1613,16 @@ export type CorpDrawContinuation =
       nextEffectIndex: number;
       creditGainOrdinal: number;
     }
-  | ({
+  | {
       kind: "card_effect_activated";
       sourceCardId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;
+      sourceAbilityId: string;
       drawEffectIndex: number;
       nextEffectIndex: number;
       creditGainOrdinal: number;
       originalActionPayload: LegalActionPayload;
-    } & (
-      | { abilityIndex: number; sourceAbilityId?: never }
-      | { sourceAbilityId: string; abilityIndex?: never }
-    ))
+    }
   | {
       kind: "corporate_shuffle_hq_to_rd";
       sourceCardId: CardInstanceId;
@@ -2777,18 +2759,9 @@ export type VisibleRunStartRandomStrengthState =
       currentStrengthAdjustment: number;
     };
 
-export type VisibleRunnerPaymentSupportAbility = (
-  | {
-      abilityIndex: number;
-      sourceAbilityId?: never;
-      capabilityKey?: never;
-    }
-  | {
-      sourceAbilityId: string;
-      capabilityKey: string;
-      abilityIndex?: never;
-    }
-) & {
+export type VisibleRunnerPaymentSupportAbility = {
+  sourceAbilityId: string;
+  capabilityKey: string;
   timing: "runner_cost_penalty_support";
   label: string;
   creditCost: number;
@@ -2841,8 +2814,6 @@ export type VisibleRunnerTraceSupportQuote = {
 
 export const CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION =
   "corp-punish-route-quote-v2" as const;
-export const CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID =
-  "corp_utility:installed_hardware_trash_by_counter" as const;
 
 export type CorpPunishRouteIncompleteReason =
   | "malformed_route_request"
@@ -2875,9 +2846,7 @@ export type CorpPunishRouteStepRequest = {
   order: number;
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
-  sourceCapabilityBindingKind:
-    | "legacy_card_implementation_index"
-    | "card_spec_capability_key";
+  sourceCapabilityBindingKind: "card_spec_capability_key";
   sourceCapabilityId: string;
   /**
    * Exact current head action selected by the caller when multiple legal
@@ -2915,9 +2884,7 @@ export type CorpPunishRouteStepQuote = {
   kind: CorpPunishRouteStepKind;
   sourceCardInstanceId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
-  sourceCapabilityBindingKind:
-    | "legacy_card_implementation_index"
-    | "card_spec_capability_key";
+  sourceCapabilityBindingKind: "card_spec_capability_key";
   sourceCapabilityId: string;
   clicks: number;
   credits: number;
@@ -5427,5 +5394,3 @@ export type AiDecision = AiDecisionBase &
         selectedChoices?: never;
       }
   );
-
-export { CARD_DEFINITIONS, CARD_DEFINITIONS_BY_ID } from "./card-definitions";

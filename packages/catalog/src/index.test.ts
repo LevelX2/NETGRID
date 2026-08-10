@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import { listPublicCardViews } from "@netgrid/cards/server";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
@@ -336,18 +335,14 @@ describe("card set support catalog source", () => {
 
     for (const cardId of activeRuntimeCardIds) {
       const card = cardsById[cardId];
-      const legacyDefinition = CARD_DEFINITIONS_BY_ID[cardId];
       const cardSpecDefinition = publicCardViewsById.get(cardId);
-      const definition =
-        cardSpecDefinition === undefined
-          ? legacyDefinition
-          : {
-              type: cardSpecDefinition.cardType,
-              playCost: cardSpecDefinition.playCost,
-              ...(cardSpecDefinition.playCost?.kind === "fixed"
-                ? { cost: cardSpecDefinition.playCost.credits }
-                : {}),
-            };
+      const definition = cardSpecDefinition && {
+        type: cardSpecDefinition.cardType,
+        playCost: cardSpecDefinition.playCost,
+        ...(cardSpecDefinition.playCost?.kind === "fixed"
+          ? { cost: cardSpecDefinition.playCost.credits }
+          : {}),
+      };
       expect(card, cardId).toBeDefined();
       expect(definition, cardId).toBeDefined();
       if (!card || !definition) continue;
@@ -609,6 +604,13 @@ describe("card set support catalog source", () => {
       activeAiApprovedCardIds.length,
     );
     expect(assertCatalogPayloadSafe(index)).toEqual({ ok: true, errors: [] });
+    expect(snapshot.cards).toHaveLength(620);
+    expect(new Set(snapshot.cards.map((card) => card.catalogCardId)).size).toBe(
+      620,
+    );
+    expect(new Set(snapshot.cards.map((card) => card.printingId)).size).toBe(
+      620,
+    );
   });
 
   it("includes the resolved play-cost contract in the deterministic snapshot hash", () => {

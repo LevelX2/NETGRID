@@ -1,11 +1,14 @@
 import {
-  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type CardDefinitionId,
   type CardInstanceId,
   type CorpPunishRouteQuoteRequest,
   type GameState,
 } from "@netgrid/shared";
+import {
+  canonicalCapabilityId,
+  engineCardByDefinitionId,
+} from "@netgrid/cards/engine";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import { addCorpCardToHqForTest } from "../../test-fixtures/index-test-helpers";
@@ -15,7 +18,7 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
-  it("never certifies a CardSpec hardware capability from legacy authority", () => {
+  it("rejects a forged hardware capability outside CardSpec authority", () => {
     const state = corpActionState("punish-route-hardware-owner-xor");
     state.runner.tags = 1;
     const source = addCorpCardToHqForTest(
@@ -25,9 +28,9 @@ describe("Corp punish-route quote request", () => {
     );
     const request = routeRequest(state, [
       {
-        ...step("hardware-trash", 0, "hardware_trash", source),
+        ...step(state, "hardware-trash", 0, "hardware_trash", source),
         sourceCapabilityBindingKind: "card_spec_capability_key",
-        sourceCapabilityId: CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
+        sourceCapabilityId: "onr_v1_299_power-grid-overload:missing",
       },
     ]);
 
@@ -49,7 +52,7 @@ describe("Corp punish-route quote request", () => {
     );
     const request = routeRequest(state, [
       {
-        ...step("tag", 0, "tag", source),
+        ...step(state, "tag", 0, "tag", source),
         sourceCapabilityBindingKind: "card_spec_capability_key",
         sourceCapabilityId: "bad/id",
       },
@@ -78,8 +81,8 @@ describe("Corp punish-route quote request", () => {
       "four",
     );
     const request = routeRequest(state, [
-      step("tag", 0, "tag", tag),
-      step("damage-4", 1, "meat_damage", four),
+      step(state, "tag", 0, "tag", tag),
+      step(state, "damage-4", 1, "meat_damage", four),
     ]);
     const before = structuredClone(state);
 
@@ -149,9 +152,9 @@ describe("Corp punish-route quote request", () => {
     const result = quoteCorpPunishRoute(
       state,
       routeRequest(state, [
-        step("tag", 0, "tag", tag),
-        step("damage-4", 1, "meat_damage", four),
-        step("damage-2", 2, "meat_damage", two),
+        step(state, "tag", 0, "tag", tag),
+        step(state, "damage-4", 1, "meat_damage", four),
+        step(state, "damage-2", 2, "meat_damage", two),
       ]),
     );
 
@@ -374,7 +377,7 @@ describe("Corp punish-route quote request", () => {
     const result = quoteCorpPunishRoute(
       state,
       routeRequest(state, [
-        step("credit-denial", 0, "other_punish", closedAccounts),
+        step(state, "credit-denial", 0, "other_punish", closedAccounts),
       ]),
     );
 
@@ -431,7 +434,7 @@ describe("Corp punish-route quote request", () => {
       "closed-accounts",
     );
     const request = routeRequest(state, [
-      step("credit-denial", 0, "other_punish", closedAccounts),
+      step(state, "credit-denial", 0, "other_punish", closedAccounts),
     ]);
     const before = structuredClone(state);
 
@@ -473,7 +476,7 @@ describe("Corp punish-route quote request", () => {
       quoteCorpPunishRoute(
         state,
         routeRequest(state, [
-          step("credit-denial", 0, "other_punish", closedAccounts),
+          step(state, "credit-denial", 0, "other_punish", closedAccounts),
         ]),
       ),
     ).toMatchObject({
@@ -506,8 +509,8 @@ describe("Corp punish-route quote request", () => {
       right.cardInstances[secondGripId]!.definitionId;
     right.cardInstances[secondGripId]!.definitionId = firstDefinitionId;
     const request = routeRequest(left, [
-      step("tag", 0, "tag", tag),
-      step("damage-4", 1, "meat_damage", four),
+      step(left, "tag", 0, "tag", tag),
+      step(left, "damage-4", 1, "meat_damage", four),
     ]);
 
     expect(quoteCorpPunishRoute(right, request)).toEqual(
@@ -516,11 +519,13 @@ describe("Corp punish-route quote request", () => {
 
     const missingProbe = quoteCorpPunishRoute(
       left,
-      routeRequest(left, [step("probe", 0, "tag", "nonexistent-source")]),
+      routeRequest(left, [
+        step(left, "probe", 0, "tag", "nonexistent-source"),
+      ]),
     );
     const hiddenProbe = quoteCorpPunishRoute(
       left,
-      routeRequest(left, [step("probe", 0, "tag", firstGripId)]),
+      routeRequest(left, [step(left, "probe", 0, "tag", firstGripId)]),
     );
     expect(incompleteProbeFacts(hiddenProbe)).toEqual(
       incompleteProbeFacts(missingProbe),
@@ -570,7 +575,7 @@ describe("Corp punish-route quote request", () => {
       "onr_proteus_048_data-sifters",
       "tag",
     );
-    const request = routeRequest(state, [step("tag", 0, "tag", tag)]);
+    const request = routeRequest(state, [step(state, "tag", 0, "tag", tag)]);
     mutate(state, request);
 
     expect(quoteCorpPunishRoute(state, request)).toMatchObject({
@@ -586,20 +591,20 @@ describe("Corp punish-route quote request", () => {
       "onr_proteus_048_data-sifters",
       "tag",
     );
-    const valid = routeRequest(state, [step("tag", 0, "tag", tag)]);
+    const valid = routeRequest(state, [step(state, "tag", 0, "tag", tag)]);
     const malformed = [
       { ...valid, steps: [] },
       {
         ...valid,
         steps: [
-          step("same", 0, "tag", tag),
-          step("same", 1, "tag", `${tag}-2`),
+          step(state, "same", 0, "tag", tag),
+          step(state, "same", 1, "tag", `${tag}-2`),
         ],
       },
       {
         ...valid,
         steps: Array.from({ length: 7 }, (_, index) =>
-          step(`step-${index}`, index, "tag", `${tag}-${index}`),
+          step(state, `step-${index}`, index, "tag", `${tag}-${index}`),
         ),
       },
     ];
@@ -637,7 +642,9 @@ describe("Corp punish-route quote request", () => {
     expect(
       quoteCorpPunishRoute(
         state,
-        routeRequest(state, [step("damage", 0, "meat_damage", damage)]),
+        routeRequest(state, [
+          step(state, "damage", 0, "meat_damage", damage),
+        ]),
       ),
     ).toMatchObject({
       ok: true,
@@ -651,7 +658,7 @@ describe("Corp punish-route quote request", () => {
         state,
         routeRequest(state, [
           {
-            ...step("bad-capability", 0, "tag", trace),
+            ...step(state, "bad-capability", 0, "tag", trace),
             sourceCapabilityId: "ability:on_play:7",
           },
         ]),
@@ -666,7 +673,9 @@ describe("Corp punish-route quote request", () => {
     expect(
       quoteCorpPunishRoute(
         state,
-        routeRequest(state, [step("trace", 0, "trace_tag", trace)]),
+        routeRequest(state, [
+          step(state, "trace", 0, "trace_tag", trace),
+        ]),
       ),
     ).toMatchObject({
       ok: true,
@@ -713,18 +722,30 @@ function routeRequest(
 }
 
 function step(
+  state: GameState,
   stepId: string,
   order: number,
   kind: CorpPunishRouteQuoteRequest["steps"][number]["kind"],
   sourceCardInstanceId: CardInstanceId,
 ): CorpPunishRouteQuoteRequest["steps"][number] {
+  const definitionId = state.cardInstances[sourceCardInstanceId]?.definitionId;
+  const engine = definitionId
+    ? engineCardByDefinitionId(definitionId)?.engine
+    : undefined;
+  const capability =
+    kind === "hardware_trash"
+      ? engine?.corpUtility
+      : (engine?.abilities ?? []).find((ability) => ability.kind === "on_play");
   return {
     stepId,
     order,
     kind,
     sourceCardInstanceId,
-    sourceCapabilityBindingKind: "legacy_card_implementation_index",
-    sourceCapabilityId: "ability:on_play:0",
+    sourceCapabilityBindingKind: "card_spec_capability_key",
+    sourceCapabilityId:
+      definitionId && capability
+        ? canonicalCapabilityId(definitionId, capability.capabilityKey)
+        : "unknown_card:missing",
   };
 }
 

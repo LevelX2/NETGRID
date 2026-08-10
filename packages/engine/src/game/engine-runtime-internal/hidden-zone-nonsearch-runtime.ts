@@ -638,53 +638,6 @@ export function createHiddenZoneNonSearchRuntime(
     };
   }
 
-  function startRunnerHostingChoice(
-    state: GameState,
-    hostId: CardInstanceId,
-    legalAction: LegalAction,
-  ): void {
-    const host = deps.mustInstance(state.cardInstances, hostId);
-    if (
-      host.definitionId !== "v099_host_resource" ||
-      !state.runner.rig.resources.includes(hostId)
-    )
-      throw new Error("Diese Karte kann in V0.99 nicht hosten.");
-    if (state.pendingChoice)
-      throw new Error("Es ist bereits eine Choice offen.");
-    const options = state.runner.grip
-      .filter((cardId) => {
-        const definition = deps.definitionFor(state, cardId);
-        return (
-          definition.type === "program" &&
-          state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-            deps.runnerMemoryLimit(state)
-        );
-      })
-      .map((cardId) => {
-        const definition = deps.definitionFor(state, cardId);
-        return { id: `card_${cardId}`, label: definition.title, value: cardId };
-      });
-    if (options.length === 0) return;
-    state.pendingChoice = {
-      choiceId: `v099_host_program_${state.stateVersion + 1}`,
-      side: "runner",
-      source: `v099.host_program:${hostId}:${state.stateVersion + 1}`,
-      prompt: "Programm hosten",
-      kind: "select_cards",
-      options,
-      minSelections: 1,
-      maxSelections: 1,
-      stateVersion: state.stateVersion + 1,
-      visibility: "hidden_info_barrier",
-    };
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "host_program",
-      hostId,
-    };
-  }
-
   function completeHiddenZoneRunnerProgramInstall(
     state: GameState,
     cardId: CardInstanceId,
@@ -705,48 +658,6 @@ export function createHiddenZoneNonSearchRuntime(
       shouldLoadLegacyRecurringCredits: deps.shouldLoadLegacyRecurringCredits,
       ...(instancePatch ? { instancePatch } : {}),
     });
-  }
-
-  function resolveRunnerHostingChoice(
-    state: GameState,
-    legalAction: LegalAction,
-    playerAction: PlayerAction,
-  ): void {
-    const choice = state.pendingChoice;
-    if (!choice) throw new Error("Es ist keine Hosting-Choice offen.");
-    const sourceParts = choice.source.split(":");
-    const hostId = sourceParts[1];
-    if (!hostId || !state.runner.rig.resources.includes(hostId))
-      throw new Error("Der Host ist nicht mehr installiert.");
-    const hostDefinition = deps.definitionFor(state, hostId);
-    if (hostDefinition.id !== "v099_host_resource")
-      throw new Error("Diese Karte kann in V0.99 nicht hosten.");
-    const cardId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (!cardId || !state.runner.grip.includes(cardId))
-      throw new Error("Die gewählte Karte liegt nicht in der Grip.");
-    const definition = deps.definitionFor(state, cardId);
-    if (definition.type !== "program")
-      throw new Error(
-        "Nur Programme können in dieser Hosting-Harness gehostet werden.",
-      );
-    if (
-      state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-      deps.runnerMemoryLimit(state)
-    )
-      throw new Error("Nicht genug Memory für das gehostete Programm.");
-    deps.setHostedOn(state, cardId, hostId);
-    deps.removeFromAllZones(state, cardId);
-    completeHiddenZoneRunnerProgramInstall(state, cardId, definition, {
-      hostedOn: hostId,
-    });
-    delete state.pendingChoice;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "host_program",
-      hostedCount: 1,
-      hostId,
-    };
   }
 
   function resolveIncubatorTransformChoice(
@@ -1349,7 +1260,6 @@ export function createHiddenZoneNonSearchRuntime(
     resolveIncubatorTransformChoice,
     resolvePaidSourceReturnToGripChoice,
     resolveRunnerProgramReturnChoice,
-    resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveTrashUnrezzedIceChoice,
     resolveStackInstallRunCleanupChoice,
@@ -1360,7 +1270,6 @@ export function createHiddenZoneNonSearchRuntime(
     startPayRezCostToTrashRezzedIceChoice,
     startCorpChoiceRezOrTrashIceChoice,
     startPaidSourceReturnToGripChoice,
-    startRunnerHostingChoice,
     startTrashUnrezzedIceChoice,
   };
 }

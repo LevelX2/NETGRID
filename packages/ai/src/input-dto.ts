@@ -1,6 +1,5 @@
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
-  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
@@ -1067,9 +1066,7 @@ function validPunishRequestEcho(route: CorpPunishRouteQuote): boolean {
         step.order === index &&
         validPunishStepKind(step.kind) &&
         nonblank(step.sourceCardInstanceId) &&
-        (step.sourceCapabilityBindingKind ===
-          "legacy_card_implementation_index" ||
-          step.sourceCapabilityBindingKind === "card_spec_capability_key") &&
+        step.sourceCapabilityBindingKind === "card_spec_capability_key" &&
         nonblank(step.sourceCapabilityId) &&
         (step.currentLegalActionId === undefined ||
           (index === 0 && nonblank(step.currentLegalActionId))),
@@ -1200,7 +1197,10 @@ function validHardwareTrashProjection(
   if (step.kind !== "hardware_trash") return projection === undefined;
   if (
     !projection ||
-    step.sourceCapabilityId !== CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID ||
+    !canonicalCapabilityMatchesDefinition(
+      step.sourceCapabilityId,
+      step.sourceCardDefinitionId,
+    ) ||
     projection.kind !== "installed_runner_hardware" ||
     projection.targetKnowledge !== "public_exact" ||
     projection.excludedSubtype !== "cybernetics" ||
@@ -1244,6 +1244,20 @@ function validHardwareTrashProjection(
     visibleEligibleIds.length === quotedIds.length &&
     visibleEligibleIds.every((cardId, index) => cardId === quotedIds[index])
   );
+}
+
+function canonicalCapabilityMatchesDefinition(
+  sourceCapabilityId: string,
+  sourceDefinitionId: string,
+): boolean {
+  try {
+    return (
+      parseCanonicalCapabilityId(sourceCapabilityId).cardDefinitionId ===
+      sourceDefinitionId
+    );
+  } catch {
+    return false;
+  }
 }
 
 function validCurrentHardwareTrashAction(
@@ -2966,8 +2980,7 @@ const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
 function sanitizeLegalAction(action: LegalAction): LegalAction {
   if (action.abilityRef) assertAbilityRefIdentity(action.abilityRef);
   const payload =
-    action.payload ||
-    (action.abilityRef && "sourceAbilityId" in action.abilityRef)
+    action.payload || action.abilityRef
       ? sanitizeLegalActionPayload(action)
       : undefined;
   return {
@@ -2990,16 +3003,10 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
       : {}),
     ...(action.abilityRef
       ? {
-          abilityRef:
-            "sourceAbilityId" in action.abilityRef
-              ? {
-                  sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
-                  sourceAbilityId: action.abilityRef.sourceAbilityId,
-                }
-              : {
-                  sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
-                  abilityId: action.abilityRef.abilityId,
-                },
+          abilityRef: {
+            sourceCardInstanceId: action.abilityRef.sourceCardInstanceId,
+            sourceAbilityId: action.abilityRef.sourceAbilityId,
+          },
         }
       : {}),
     ...(action.effectRef ? { effectRef: action.effectRef } : {}),

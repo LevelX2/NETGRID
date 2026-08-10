@@ -44,7 +44,7 @@ import {
   type ChronicleDetailMode,
 } from "../settings/settings-model";
 import type { OverlayPositionPreference } from "../../lib/overlay-position";
-import type { PublicCardPresentationsById } from "../../app/legacy-card-definition-compatibility";
+import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 
 const EMPTY_CARD_DETAILS = {};
 const EMPTY_ACTIONS: LegalAction[] = [];

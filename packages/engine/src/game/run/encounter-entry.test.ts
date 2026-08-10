@@ -310,6 +310,8 @@ describe("encounter entry", () => {
       pendingFreeBreaks: [
         {
           sourceBreakerInstanceId: "bulldozer",
+          sourceAbilityId:
+            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -328,6 +330,8 @@ describe("encounter entry", () => {
       pendingFreeBreaks: [
         {
           sourceBreakerInstanceId: "bulldozer",
+          sourceAbilityId:
+            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -344,6 +348,8 @@ describe("encounter entry", () => {
       pendingFreeBreaks: [
         {
           sourceBreakerInstanceId: "bulldozer",
+          sourceAbilityId:
+            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,

@@ -618,7 +618,6 @@ describe("deck validation and snapshots", () => {
         [blockedCardId]: {
           ...baseBlockedCard,
           catalogCardId: blockedCardId,
-          sourceCardId: blockedCardId,
           engineCardId: blockedCardId,
           statuses: {
             ...baseBlockedCard.statuses,
@@ -845,7 +844,6 @@ describe("deck validation and snapshots", () => {
         local_blocked_runner_card: {
           ...baseBlockedCard,
           catalogCardId: "local_blocked_runner_card",
-          sourceCardId: "local_blocked_runner_card",
           engineCardId: "local_blocked_runner_card",
           statuses: {
             ...baseBlockedCard.statuses,

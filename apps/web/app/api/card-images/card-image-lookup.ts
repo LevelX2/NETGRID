@@ -32,6 +32,7 @@ const LOCAL_ONR_ASSET_INDEX_PATH = path.join(
 
 export type CardImageLookupResult = {
   cardId: string;
+  printingId: string;
   kind: "generated" | "local_onr" | "localized_de";
   relativePath: string;
   absolutePath: string;
@@ -42,12 +43,16 @@ export async function lookupCardImage(
   cardId: string,
   requestUrl: string,
 ): Promise<CardImageLookupResult | null> {
+  const catalogCard = createRuntimeCardsById()[cardId];
+  if (catalogCard === undefined) return null;
+  const { printingId } = catalogCard;
   const request = safeRequestUrl(requestUrl);
   if (request?.searchParams.get("skin") === "de") {
-    const localizedPath = localizedDeCardImagePath(cardId);
+    const localizedPath = localizedDeCardImagePath(printingId);
     if (localizedPath)
       return imageResult(
         cardId,
+        printingId,
         "localized_de",
         localizedPath,
         request.searchParams.has("v"),
@@ -55,19 +60,20 @@ export async function lookupCardImage(
     return null;
   }
 
-  const generatedPath = GENERATED_CARD_IMAGES[cardId];
+  const generatedPath = GENERATED_CARD_IMAGES[printingId];
   if (generatedPath)
     return imageResult(
       cardId,
+      printingId,
       "generated",
       generatedPath,
       hasVersionParam(requestUrl),
     );
-  if (!isLocalOnrCatalogCardId(cardId)) return null;
+  if (!isLocalOnrPrintingId(printingId)) return null;
 
-  const localPath = (await localOnrImageLookup()).get(cardId);
+  const localPath = (await localOnrImageLookup()).get(printingId);
   if (!localPath) return null;
-  return imageResult(cardId, "local_onr", localPath, false);
+  return imageResult(cardId, printingId, "local_onr", localPath, false);
 }
 
 export function imageDir(): string {
@@ -76,6 +82,7 @@ export function imageDir(): string {
 
 function imageResult(
   cardId: string,
+  printingId: string,
   kind: CardImageLookupResult["kind"],
   relativePath: string,
   versioned: boolean,
@@ -84,7 +91,7 @@ function imageResult(
   const baseDir = imageBaseDir(kind);
   const absolutePath = path.resolve(baseDir, relativePath);
   if (!absolutePath.startsWith(`${baseDir}${path.sep}`)) return null;
-  return { cardId, kind, relativePath, absolutePath, versioned };
+  return { cardId, printingId, kind, relativePath, absolutePath, versioned };
 }
 
 function hasVersionParam(requestUrl: string): boolean {
@@ -107,7 +114,7 @@ async function localOnrImageLookup(): Promise<Map<string, string>> {
 async function readLocalOnrImageLookup(): Promise<Map<string, string>> {
   const lookup = new Map<string, string>();
   const catalogCards = Object.values(createRuntimeCardsById());
-  await addLocalOnrV1SnapshotImages(lookup);
+  await addLocalOnrV1SnapshotImages(lookup, catalogCards);
   await addLocalOnrSetIndexImages(
     lookup,
     catalogCards,
@@ -131,15 +138,26 @@ async function readLocalOnrImageLookup(): Promise<Map<string, string>> {
 
 async function addLocalOnrV1SnapshotImages(
   lookup: Map<string, string>,
+  catalogCards: readonly {
+    catalogCardId: string;
+    printingId: string;
+  }[],
 ): Promise<void> {
   try {
     const snapshot = JSON.parse(
       await readFile(LOCAL_ONR_SNAPSHOT_PATH, "utf8"),
     ) as LocalOnrSnapshot;
+    const printingIdByCardId = new Map(
+      catalogCards.map((card) => [card.catalogCardId, card.printingId]),
+    );
     for (const card of snapshot.cards) {
       const relativePath = card.onr?.imageAsset?.relativePath;
-      if (isSafeLocalImagePath(relativePath, "local_onr"))
-        lookup.set(card.catalogCardId, relativePath);
+      const printingId = printingIdByCardId.get(card.catalogCardId);
+      if (
+        printingId !== undefined &&
+        isSafeLocalImagePath(relativePath, "local_onr")
+      )
+        lookup.set(printingId, relativePath);
     }
   } catch (error) {
     if (!isOptionalLocalAssetReadFailure(error)) throw error;
@@ -166,11 +184,11 @@ function imageBaseDir(kind: CardImageLookupResult["kind"]): string {
   return kind === "localized_de" ? LOCALIZED_DE_IMAGE_DIR : IMAGE_DIR;
 }
 
-function isLocalOnrCatalogCardId(cardId: string): boolean {
+function isLocalOnrPrintingId(printingId: string): boolean {
   return (
-    cardId.startsWith("onr_v1_") ||
-    cardId.startsWith("onr_proteus_") ||
-    cardId.startsWith("onr_classic_")
+    printingId.startsWith("onr_v1_") ||
+    printingId.startsWith("onr_proteus_") ||
+    printingId.startsWith("onr_classic_")
   );
 }
 
@@ -178,6 +196,7 @@ async function addLocalOnrSetIndexImages(
   lookup: Map<string, string>,
   catalogCards: readonly {
     catalogCardId: string;
+    printingId: string;
     title: string;
     side: string;
     setId: string;
@@ -228,6 +247,7 @@ export class CardImageCatalogJoinError extends Error {
 export function matchCatalogCardsToLocalAssets(
   cards: readonly {
     catalogCardId: string;
+    printingId: string;
     title: string;
     side: string;
   }[],
@@ -264,7 +284,7 @@ export function matchCatalogCardsToLocalAssets(
   for (const card of cards) {
     const titleAsset = assetsByTitle.get(titleKey(card.side, card.title));
     const slugAsset = assetsBySlug.get(
-      `${card.side}:${slugFromOnrCardId(card.catalogCardId)}`,
+      `${card.side}:${slugFromOnrPrintingId(card.printingId)}`,
     );
     if (
       titleAsset !== undefined &&
@@ -273,11 +293,11 @@ export function matchCatalogCardsToLocalAssets(
     )
       throw new CardImageCatalogJoinError(
         "conflicting_asset_match",
-        card.catalogCardId,
+        card.printingId,
       );
     const asset = titleAsset ?? slugAsset;
     if (asset !== undefined)
-      matched.set(card.catalogCardId, asset.relativePath);
+      matched.set(card.printingId, asset.relativePath);
   }
   return matched;
 }
@@ -290,8 +310,8 @@ function titleKey(side: string, title: string): string {
   return `${side}:${title.trim().toLocaleLowerCase("en-US")}`;
 }
 
-function slugFromOnrCardId(cardId: string): string {
-  return cardId.replace(/^onr_(?:proteus|classic)_\d{3}_/, "");
+function slugFromOnrPrintingId(printingId: string): string {
+  return printingId.replace(/^onr_(?:proteus|classic)_\d{3}_/, "");
 }
 
 type LocalOnrSnapshot = {

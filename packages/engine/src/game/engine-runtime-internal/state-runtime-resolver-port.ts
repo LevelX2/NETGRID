@@ -130,10 +130,6 @@ export type StateRuntimeResolverPort = {
     legalAction: LegalAction,
     amount: number,
   ) => void;
-  runnerRecurringCredits: (state: GameState) => number;
-  runnerProgramInstallRecurringCreditSourceIds: (
-    state: GameState,
-  ) => CardInstanceId[];
   spendRunnerInstallCredits: (
     state: GameState,
     amount: number,

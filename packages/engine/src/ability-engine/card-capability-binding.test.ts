@@ -10,7 +10,6 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import type { CardImplementationDefinition } from "../card-implementations/types";
 import { buildLegalAction } from "../game/turn/action-builders";
 import {
   activatedAbilityBindingForLegalAction,
@@ -81,11 +80,9 @@ function engineCard(
 
 function sources(input: {
   engine?: EngineCardView;
-  legacy?: CardImplementationDefinition;
 }): CardCapabilityAuthoritySources {
   return {
     engineCardForDefinitionId: () => input.engine,
-    legacyImplementationForDefinitionId: () => input.legacy,
   };
 }
 
@@ -145,24 +142,17 @@ describe("stable CardSpec capability binding", () => {
     ).toBeUndefined();
   });
 
-  it("chooses authority by definition and rejects a hybrid owner", () => {
-    const legacy = {
-      cardDefinitionId: definition.id,
-      abilities: [
-        { kind: "activated", timing: "runner_main", costs: [], effects: [] },
-      ],
-    } satisfies CardImplementationDefinition;
-    expect(() =>
-      activatedAbilityBindingsForDefinition(definition, {
-        ...sources({ engine: engineCard([activated("gain", 1)]), legacy }),
-      }),
-    ).toThrowError(CardCapabilityBindingError);
+  it("fails closed when a definition has no CardSpec authority", () => {
     expect(
-      activatedAbilityBindingsForDefinition(definition, sources({ legacy }))[0],
-    ).toMatchObject({
-      kind: "legacy_card_implementation_index",
-      abilityIndex: 0,
-    });
+      activatedAbilityBindingsForDefinition(definition, sources({})),
+    ).toEqual([]);
+    expect(() =>
+      activatedAbilityBindingForLegalAction(
+        definition,
+        action({}),
+        sources({}),
+      ),
+    ).toThrowError(/keine CardSpec-Mechanikautoritaet/);
   });
 
   it("keeps canonical identity and action IDs stable across array reordering", () => {
@@ -355,15 +345,15 @@ describe("stable CardSpec capability binding", () => {
         registry,
       ),
     ).toMatchObject({ kind: "on_play" });
-    expect(() =>
+    expect(
       onPlayAbilityForCapabilityIdentity(
         definition,
         {
-          kind: "legacy_card_implementation_index",
-          sourceCapabilityId: "ability:on_play:0",
+          kind: "card_spec_capability_key",
+          sourceCapabilityId: "test_card:missing",
         },
         registry,
       ),
-    ).toThrowError(/Mechanikautoritaet/);
+    ).toBeUndefined();
   });
 });

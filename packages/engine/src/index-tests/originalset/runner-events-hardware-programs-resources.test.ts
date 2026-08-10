@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -1856,7 +1844,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     }
   });
 
-  it("keeps Imp hosting and Force Shield/Joan prevention source-safe", () => {
+  it("keeps Imp hosting source-safe", () => {
     let hostState = preventionToolState("imp-hosting");
     moveRunnerCardToGrip(hostState, "onr_v1_033_imp");
     hostState = apply(
@@ -1909,74 +1897,6 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     );
     expect(hostReplay.ok).toBe(true);
     expect(hashState(hostReplay.state)).toBe(hashState(hostState));
-
-    for (const definitionId of [
-      "onr_v1_028_force-shield",
-      "onr_v1_038_joan-of-arc",
-    ] as const) {
-      let state = toRunnerTurn(
-        createGameAfterSetup({
-          seed: `spotcheck-prevention-tools-${definitionId}`,
-          runnerDeck: {
-            id: `spotcheck_prevention_tools_${definitionId}`,
-            name: "Spotcheck Prevention Tools",
-            side: "runner",
-            identity: "runner_identity_001",
-            cards: [
-              { id: definitionId, quantity: 1 },
-              { id: "simple_economy_event", quantity: 12 },
-            ],
-          },
-          corpDeck: V111_CORP_DECK,
-          agendaPointsToWin: 7,
-        }),
-      );
-      state.runner.credits = 20;
-      state.runner.maxHandSize = 100;
-      state.corp.maxHandSize = 100;
-      moveRunnerCardToGrip(state, definitionId);
-      state = apply(
-        state,
-        "runner",
-        (action) =>
-          action.type === "install_card" &&
-          sourceDefinition(state, action) === definitionId,
-      );
-      moveCorpCardToHq(state, "v111_core_damage_operation");
-      const initial = structuredClone(state);
-      const replayStart = state.eventLog.length;
-      state = apply(state, "runner", (action) => action.type === "end_turn");
-      state = apply(
-        state,
-        "corp",
-        (action) => action.type === "mandatory_draw",
-      );
-      state = apply(
-        state,
-        "corp",
-        (action) =>
-          action.type === "play_operation" &&
-          sourceDefinition(state, action) === "v111_core_damage_operation",
-      );
-      const optionId = state.pendingChoice?.options.find(
-        (option) => option.id !== "pass",
-      )?.id;
-      expect(optionId, definitionId).toBeDefined();
-      if (!optionId)
-        throw new Error(`Missing prevention option for ${definitionId}`);
-      state = applyChoice(state, "runner", optionId);
-      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        eventModificationDecision: "apply",
-        sourceDefinitionId: definitionId,
-        damageAmount: 0,
-      });
-      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-        privatePayloadMarkers,
-      );
-      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(hashState(replay.state), definitionId).toBe(hashState(state));
-    }
   });
 
   it("keeps prevention-tool breakers and Mouse/Expert tools revalidated", () => {

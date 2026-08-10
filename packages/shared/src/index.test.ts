@@ -1,8 +1,7 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CURRENT_RULES_BASELINE } from "./baselines";
 import { ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS } from "./ability-payload";
-import { CORE_DEMO_DECK_IDS, LEGACY_FIXTURE_DECK_IDS } from "./demo-fixtures";
+import { CORE_DEMO_DECK_IDS } from "./demo-fixtures";
 import { DEMO_DECKS } from "./demo-decks";
 import {
   DEMO_DECK_IDS,
@@ -10,8 +9,6 @@ import {
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
-  CARD_DEFINITIONS,
-  CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS as INDEX_ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
@@ -56,20 +53,7 @@ describe("demo deck fixture registry", () => {
       "demo_runner_008",
       "demo_corp_008",
     ]);
-    expect(LEGACY_FIXTURE_DECK_IDS).toEqual([
-      "demo_runner_096",
-      "demo_corp_096",
-      "demo_runner_097",
-      "demo_corp_097",
-      "demo_runner_098",
-      "demo_corp_098",
-      "demo_runner_099",
-      "demo_corp_099",
-    ]);
-    expect(DEMO_DECK_IDS).toEqual([
-      ...CORE_DEMO_DECK_IDS,
-      ...LEGACY_FIXTURE_DECK_IDS,
-    ]);
+    expect(DEMO_DECK_IDS).toEqual(CORE_DEMO_DECK_IDS);
     expect(Object.keys(DEMO_DECKS).sort()).toEqual([...DEMO_DECK_IDS].sort());
     expect(INDEX_DEMO_DECKS).toBe(DEMO_DECKS);
   });
@@ -88,86 +72,6 @@ describe("Engine-randomized ICE install selection schema", () => {
     expect(ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION).toBe(
       "engine-randomized-ice-install-selection-v1",
     );
-  });
-});
-
-describe("shared card definition registry", () => {
-  it("keeps concrete card data out of the shared contract barrel", () => {
-    const barrel = readFileSync(new URL("./index.ts", import.meta.url), "utf8");
-
-    expect(barrel).toContain('from "./card-definitions"');
-    expect(barrel).not.toContain("ONR_V1_LIMITED_PLAYABLE_CARDS");
-    expect(barrel).not.toContain('id: "onr_v1_');
-  });
-
-  it("exposes a current-state registry independent from the shared barrel implementation", () => {
-    expect(CARD_DEFINITIONS).toHaveLength(383);
-    expect(Object.keys(CARD_DEFINITIONS_BY_ID)).toHaveLength(383);
-    expect(
-      CARD_DEFINITIONS.some((definition) =>
-        definition.id.startsWith("onr_proteus_"),
-      ),
-    ).toBe(false);
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"]).toBe(
-      CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"],
-    );
-  });
-
-  it("keeps Raven Microcyb Eagle on its real deck text and subtype", () => {
-    const raven = CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"];
-
-    expect(raven?.subtypes).toEqual(["deck"]);
-    expect(raven?.rulesText).toContain("Provides +1 MU");
-    expect(raven?.rulesText).toContain("Prevents up to 1 Net damage");
-    expect(raven?.rulesText).toContain(
-      "Use this bit only to pay for using icebreakers during runs",
-    );
-    expect(raven?.mechanics).toEqual(
-      expect.arrayContaining([
-        "memory",
-        "damage_prevention",
-        "recurring_credit",
-        "deck_unique",
-      ]),
-    );
-  });
-
-  it("keeps Asp on its complete printed ICE subtype list", () => {
-    const asp = CARD_DEFINITIONS_BY_ID["onr_v1_221_asp"];
-
-    expect(asp?.subtypes).toEqual(["sentry", "flatline"]);
-  });
-
-  it("exposes only resolved fixed, variable-X, or non-applicable play costs", () => {
-    const variableCostIds: string[] = [];
-    for (const [cardId, definition] of Object.entries(CARD_DEFINITIONS_BY_ID)) {
-      if (definition.type !== "event" && definition.type !== "operation") {
-        expect(definition.playCost, cardId).toBeNull();
-        continue;
-      }
-      expect(definition.playCost, cardId).not.toBeNull();
-      if (definition.playCost.kind === "fixed") {
-        expect(Object.keys(definition.playCost).sort(), cardId).toEqual([
-          "credits",
-          "kind",
-        ]);
-        expect(Number.isInteger(definition.playCost.credits), cardId).toBe(
-          true,
-        );
-        expect(definition.playCost.credits, cardId).toBeGreaterThanOrEqual(0);
-        expect(definition.cost, cardId).toBe(definition.playCost.credits);
-      } else {
-        variableCostIds.push(cardId);
-        expect(definition.cost, cardId).toBeUndefined();
-        expect(definition.playCost, cardId).toEqual({
-          kind: "variable_x",
-          minimumX: 1,
-          creditsPerX: 1,
-          maximumX: { kind: "context" },
-        });
-      }
-    }
-    expect(variableCostIds).toEqual(["onr_v1_299_power-grid-overload"]);
   });
 });
 

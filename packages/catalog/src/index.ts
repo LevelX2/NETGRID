@@ -110,11 +110,17 @@ export function validateSnapshot(
   if (snapshot.schemaVersion !== "card-snapshot-v0.5")
     errors.push("Snapshot schemaVersion must be card-snapshot-v0.5.");
   const seen = new Set<string>();
+  const seenPrintingIds = new Set<string>();
   for (const card of snapshot.cards) {
     if (!card.catalogCardId) errors.push("Card is missing catalogCardId.");
     if (seen.has(card.catalogCardId))
       errors.push(`Duplicate catalogCardId ${card.catalogCardId}.`);
     seen.add(card.catalogCardId);
+    if (!card.printingId)
+      errors.push(`Card ${card.catalogCardId} is missing printingId.`);
+    if (seenPrintingIds.has(card.printingId))
+      errors.push(`Duplicate printingId ${card.printingId}.`);
+    seenPrintingIds.add(card.printingId);
     if (!card.title)
       errors.push(`Card ${card.catalogCardId} is missing title.`);
     if (card.side !== "runner" && card.side !== "corp")
@@ -230,6 +236,7 @@ export function createCatalogIndex(
 export function toCatalogSummary(card: CatalogCard): CatalogCardSummary {
   return {
     catalogCardId: card.catalogCardId,
+    printingId: card.printingId,
     title: card.title,
     side: card.side,
     type: card.type,
@@ -330,11 +337,11 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
     snapshotId: "card-set-support-current",
     status: "active_card_set_support",
     createdAt: "2026-05-17T00:00:00.000+02:00",
-    sourceRegistryId: "hybrid-card-set-support-current",
+    sourceRegistryId: "card-spec-card-set-support-current",
     copyrightNote:
-      "Aktive NETGRID-Karten- und Supportdaten stammen aus dem gebundenen Hybrid-Readmodel: Legacy-Karten/Support aus data/cards und data/manifests, migrierte Karten/Support aus CardSpec-, SetSpec-, Registry- und Evidence-Projektionen. Kartentexte bleiben Anzeigeinformation und sind kein Regelparser.",
+      "Aktive NETGRID-Karten- und Supportdaten stammen ausschließlich aus validierten CardSpec-, SetSpec-, Registry- und Evidence-Projektionen. Kartentexte bleiben Anzeigeinformation und sind kein Regelparser.",
     normalization: {
-      algorithm: "card-set-support-hybrid-v1",
+      algorithm: "card-spec-card-set-support-v1",
       sortOrder: ["setId", "cardId"],
       textPolicy: "display_only; card text is not parser input",
       assetPolicy: "no active artwork, frame, logo or card-back dependency",

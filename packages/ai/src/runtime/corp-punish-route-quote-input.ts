@@ -1,5 +1,4 @@
 import {
-  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type CorpPunishRouteIncompleteReason,
@@ -15,6 +14,7 @@ import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { sanitizeCorpPunishRouteQuoteSet } from "../input-dto";
 import {
   corpDirectTagOperationProfile,
+  corpInstalledHardwareTrashOperationProfile,
   corpTaggedCreditDenialOperationProfile,
   corpTraceTagSourceProfile,
   corpTaggedMeatDamageOperationProfile,
@@ -31,9 +31,7 @@ type PunishComponentAdapter = {
   >;
   definitionId: string;
   routeOrder: number;
-  sourceCapabilityBindingKind:
-    | "legacy_card_implementation_index"
-    | "card_spec_capability_key";
+  sourceCapabilityBindingKind: "card_spec_capability_key";
   sourceCapabilityId: string;
 };
 
@@ -265,8 +263,10 @@ function structuredTraceTagAdapter(
 function structuredHardwareTrashAdapter(
   definitionId: string,
 ): PunishComponentAdapter | undefined {
+  const profile = corpInstalledHardwareTrashOperationProfile(definitionId);
   const hint = AI_HINTS_BY_CARD.get(definitionId);
   if (
+    !profile ||
     !hint ||
     hint.side !== "corp" ||
     hint.cardType !== "operation" ||
@@ -298,8 +298,8 @@ function structuredHardwareTrashAdapter(
     definitionId,
     kind: "hardware_trash",
     routeOrder: 6,
-    sourceCapabilityBindingKind: "legacy_card_implementation_index",
-    sourceCapabilityId: CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
+    sourceCapabilityBindingKind: "card_spec_capability_key",
+    sourceCapabilityId: profile.sourceCapabilityId,
   };
 }
 

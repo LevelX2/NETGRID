@@ -34,6 +34,7 @@ export type CardSupportSchemaVersion = "card-support-v1";
 
 export type CardSetCard = {
   cardId: string;
+  printingId: string;
   setId: string;
   title: string;
   side: CatalogSide;
@@ -64,7 +65,6 @@ export type CardSupportEntry = {
   support: {
     resolverRef: string | null;
     coverage: string[];
-    aiHintRef: string | null;
     scenarioRefs: string[];
   };
   blockReasons?: string[];
@@ -80,8 +80,6 @@ export type LoadedCardSet = {
   set: CardSetFile;
   support: CardSupportFile;
 };
-
-const LEGACY_CARD_SET_FILES: readonly LoadedCardSet[] = [];
 
 const CARD_SPEC_AI_SCENARIO_REF =
   "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported";
@@ -172,7 +170,6 @@ export function deriveCardSpecSupportEntry(
         ? `card-spec-registry:${cardDefinitionId}`
         : null,
       coverage,
-      aiHintRef: null,
       scenarioRefs: aiSupported ? [CARD_SPEC_AI_SCENARIO_REF] : [],
     },
     ...(evidence.catalogBlockReason !== undefined
@@ -205,9 +202,6 @@ function buildCardSetFiles(): LoadedCardSet[] {
   const publicSetViews = new Map(
     listPublicSetViews().map((set) => [set.setId, set]),
   );
-  const legacySetIds = new Set(
-    LEGACY_CARD_SET_FILES.map(({ set }) => set.setId),
-  );
   const cardSpecCardsBySet = new Map<string, CardSetCard[]>();
   const cardSpecSupportBySet = new Map<string, CardSupportEntry[]>();
   for (const view of listPublicCardViews()) {
@@ -234,6 +228,7 @@ function buildCardSetFiles(): LoadedCardSet[] {
     const cards = cardSpecCardsBySet.get(printing.setId) ?? [];
     cards.push({
       cardId: view.cardDefinitionId,
+      printingId: printing.printingId,
       setId: printing.setId,
       title: view.title,
       side: view.side,
@@ -277,25 +272,8 @@ function buildCardSetFiles(): LoadedCardSet[] {
     cardSpecSupportBySet.set(printing.setId, support);
   }
 
-  const cardSetFiles: LoadedCardSet[] = LEGACY_CARD_SET_FILES.map((loaded) => {
-    const setView = publicSetViews.get(loaded.set.setId);
-    const migratedCards = cardSpecCardsBySet.get(loaded.set.setId) ?? [];
-    const migratedSupport = cardSpecSupportBySet.get(loaded.set.setId) ?? [];
-    return {
-      set: {
-        ...loaded.set,
-        ...(setView !== undefined ? { setName: setView.name } : {}),
-        cards: [...loaded.set.cards, ...migratedCards],
-      },
-      support: {
-        ...loaded.support,
-        cards: [...loaded.support.cards, ...migratedSupport],
-      },
-    };
-  });
-
+  const cardSetFiles: LoadedCardSet[] = [];
   for (const [setId, cards] of cardSpecCardsBySet) {
-    if (legacySetIds.has(setId)) continue;
     const setView = publicSetViews.get(setId);
     if (setView === undefined)
       throw new Error(`CardSpec set ${setId} has no public SetSpec.`);
@@ -317,7 +295,6 @@ function buildCardSetFiles(): LoadedCardSet[] {
   const materializedCardSpecIds = new Set(
     cardSetFiles
       .flatMap(({ set }) => set.cards)
-      .filter((card) => cardSpecCardsBySet.get(card.setId)?.includes(card))
       .map((card) => card.cardId),
   );
   for (const view of listPublicCardViews())
@@ -395,6 +372,7 @@ export function validateLoadedCardSets(
 ): string[] {
   const errors: string[] = [];
   const seenCardIds = new Set<string>();
+  const seenPrintingIds = new Set<string>();
 
   for (const loaded of loadedSets) {
     if (loaded.set.schemaVersion !== "card-set-v1")
@@ -412,6 +390,11 @@ export function validateLoadedCardSets(
     const supportById = new Map<string, CardSupportEntry>();
 
     for (const card of loaded.set.cards) {
+      if (card.printingId.trim().length === 0)
+        errors.push(`${card.cardId}: printingId is missing.`);
+      if (seenPrintingIds.has(card.printingId))
+        errors.push(`${card.cardId}: duplicate printingId ${card.printingId}.`);
+      seenPrintingIds.add(card.printingId);
       if (card.setId !== loaded.set.setId)
         errors.push(`${card.cardId}: card setId must be ${loaded.set.setId}.`);
       if (seenCardIds.has(card.cardId))
@@ -488,15 +471,9 @@ function validateSupportEntry(entry: CardSupportEntry): string[] {
       errors.push(`${entry.cardId}: blocked card needs blockReasons.`);
   }
   if (statuses.ai_supported) {
-    const cardSpecDerived =
-      entry.support.coverage.includes("card_spec_registry") &&
-      entry.support.coverage.includes("planning_projection");
-    if (
-      entry.support.scenarioRefs.length === 0 ||
-      (!entry.support.aiHintRef && !cardSpecDerived)
-    )
+    if (entry.support.scenarioRefs.length === 0)
       errors.push(
-        `${entry.cardId}: ai_supported needs aiHintRef and scenarioRefs unless it is CardSpec-derived support evidence.`,
+        `${entry.cardId}: ai_supported needs scenarioRefs.`,
       );
   }
   const serialized = JSON.stringify(entry);
@@ -533,7 +510,7 @@ function toCatalogCard(
   const engineCardId = engineCardIdFromSupport(card.cardId, supportEntry);
   return {
     catalogCardId: card.cardId,
-    sourceCardId: card.cardId,
+    printingId: card.printingId,
     engineCardId,
     title: card.title,
     side: card.side,

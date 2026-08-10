@@ -34,7 +34,7 @@ import { readLocalStorage } from "../../lib/local-storage";
 import { CARD_DISPLAY_MODE_STORAGE_KEY } from "../../lib/storage-keys";
 import type { CardDisplayMode } from "../../features/settings/settings-model";
 import type { CatalogListResponse } from "../../features/catalog/catalog-types";
-import type { PublicCardPresentationsById } from "../legacy-card-definition-compatibility";
+import type { PublicCardPresentationsById } from "../public-card-presentation";
 import {
   CatalogCardPresentationsProvider,
   catalogCardPresentationsFor,

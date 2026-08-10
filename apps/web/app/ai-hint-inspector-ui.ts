@@ -32,7 +32,6 @@ export type CatalogAiInspector = {
     aiSupportStatus: string;
     hintFound: boolean;
     mechanicalFactsFound: boolean;
-    legacyFallbackOnly: boolean;
     warningCount: number;
   };
   cardHint: {
@@ -310,14 +309,6 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
       tone: "warning",
     });
   }
-  if (support.legacyFallbackOnly) {
-    entries.push({
-      label: "Legacy / Migration",
-      value: "Legacy-Fallback-only",
-      detail: RUNTIME_LEGACY_NOTICE,
-      tone: "legacy",
-    });
-  }
   const legacyCount = legacyDetailCount(inspector);
   if (legacyCount > 0) {
     entries.push({
@@ -416,7 +407,7 @@ function cardHintEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
   const entries: AiInspectorEntry[] = [
     {
       label: "Quelle",
-      value: String(inspector.source.activeHintsPath ?? "Karten-Hint"),
+      value: hintSourcePath(inspector) ?? "Karten-Hint",
       tone: "info",
     },
   ];
@@ -479,15 +470,21 @@ function mechanicalDetailsEntries(
   inspector: CatalogAiInspector,
 ): AiInspectorEntry[] {
   const entries = mechanicalFactEntries(inspector);
-  const activeHintsPath = inspector.source.activeHintsPath;
-  if (typeof activeHintsPath === "string") {
+  const sourcePath = hintSourcePath(inspector);
+  if (sourcePath !== undefined) {
     entries.push({
       label: "Hint-Quelle",
-      value: activeHintsPath,
+      value: sourcePath,
       tone: "info",
     });
   }
   return entries;
+}
+
+function hintSourcePath(inspector: CatalogAiInspector): string | undefined {
+  const sourceRefs = inspector.source.sourceRefs;
+  if (!Array.isArray(sourceRefs)) return undefined;
+  return sourceRefs.find((entry): entry is string => typeof entry === "string");
 }
 
 function classificationEntry(

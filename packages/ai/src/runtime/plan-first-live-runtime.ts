@@ -14231,18 +14231,13 @@ function turnPlanningProjectionDebug(params: {
     ...(candidate.sourceCardInstanceId
       ? { sourceCardInstanceId: candidate.sourceCardInstanceId }
       : {}),
-    ...(candidate.abilityId
+    ...(candidate.abilityId &&
+    candidate.abilityBindingMethod === "canonical_capability_id"
       ? {
-          sourceAbilityBinding:
-            candidate.abilityBindingMethod === "canonical_capability_id"
-              ? {
-                  kind: "card_spec_capability_key" as const,
-                  sourceAbilityId: candidate.abilityId,
-                }
-              : {
-                  kind: "legacy_ability_id" as const,
-                  abilityId: candidate.abilityId,
-                },
+          sourceAbilityBinding: {
+            kind: "card_spec_capability_key" as const,
+            sourceAbilityId: candidate.abilityId,
+          },
         }
       : {}),
   });
@@ -16704,15 +16699,16 @@ function runnerCoverageRecoveryTarget(
   const hint = sourceDefinitionId
     ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
     : undefined;
-  const recoveryKind =
-    runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects)
-      ? "top"
-      : hint?.functionSignals?.includes("setup.card_recovery") === true ||
-          hint?.functionSignals?.includes("setup.recovery") === true ||
-          hint?.functionSignals?.includes("setup.temporary_program_install") ===
-            true
-        ? "search"
-        : undefined;
+  const recoveryKind = runnerEffectsProvideTopTrashRecovery(
+    candidate.functionalEffects,
+  )
+    ? "top"
+    : hint?.functionSignals?.includes("setup.card_recovery") === true ||
+        hint?.functionSignals?.includes("setup.recovery") === true ||
+        hint?.functionSignals?.includes("setup.temporary_program_install") ===
+          true
+      ? "search"
+      : undefined;
   if (!recoveryKind) return undefined;
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,

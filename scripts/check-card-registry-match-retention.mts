@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { createGameAfterSetup } from "../packages/engine/src/game/create-game";
 import {
-  CARD_REGISTRY_RETENTION_LEGACY_CONTROL_IDS,
+  CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS,
   CARD_REGISTRY_RETENTION_STRESS_IDS,
   cardRegistryRetentionDecks,
 } from "../packages/engine/src/test-fixtures/card-registry-retention-decks";
@@ -20,16 +20,16 @@ const invokedAsScript =
     path.resolve(fileURLToPath(import.meta.url));
 if (invokedAsScript) {
   const childLane = process.argv[2];
-  if (childLane === "stress" || childLane === "legacy") runChild(childLane);
+  if (childLane === "stress" || childLane === "control") runChild(childLane);
   else runParent();
 }
 
 function runParent(): void {
   assertComparableFixtures();
   const scriptPath = fileURLToPath(import.meta.url);
-  const samples = { stress: [] as number[], legacy: [] as number[] };
+  const samples = { stress: [] as number[], control: [] as number[] };
   for (let index = 0; index < SAMPLE_COUNT; index += 1)
-    for (const lane of ["legacy", "stress"] as const) {
+    for (const lane of ["control", "stress"] as const) {
       const child = spawnSync(
         process.execPath,
         ["--expose-gc", ...process.execArgv, scriptPath, lane],
@@ -45,21 +45,23 @@ function runParent(): void {
       samples[lane].push(result.retainedBytes);
     }
 
-  const legacyMedian = median(samples.legacy);
+  const controlMedian = median(samples.control);
   const stressMedian = median(samples.stress);
   const differentialBytesPerMatch = Math.max(
     0,
-    (stressMedian - legacyMedian) / MATCH_COUNT,
+    (stressMedian - controlMedian) / MATCH_COUNT,
   );
   const report = {
     schemaVersion: "card-registry-match-retention-v1",
     matchCount: MATCH_COUNT,
     sampleCount: SAMPLE_COUNT,
     stressDefinitionIds: [...CARD_REGISTRY_RETENTION_STRESS_IDS],
-    legacyControlDefinitionIds: [...CARD_REGISTRY_RETENTION_LEGACY_CONTROL_IDS],
-    legacyRetainedByteSamples: samples.legacy,
+    cardSpecControlDefinitionIds: [
+      ...CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS,
+    ],
+    controlRetainedByteSamples: samples.control,
     stressRetainedByteSamples: samples.stress,
-    legacyMedianRetainedBytes: legacyMedian,
+    controlMedianRetainedBytes: controlMedian,
     stressMedianRetainedBytes: stressMedian,
     differentialBytesPerMatch,
     budgetBytesPerMatch: MAX_BYTES_PER_MATCH,
@@ -72,7 +74,7 @@ function runParent(): void {
 
 function assertComparableFixtures(): void {
   const stressDecks = cardRegistryRetentionDecks("stress");
-  const legacyDecks = cardRegistryRetentionDecks("legacy");
+  const controlDecks = cardRegistryRetentionDecks("control");
   const fixtureShape = (ids: readonly string[]) =>
     Object.entries(
       ids.reduce<Record<string, number>>((counts, definitionId) => {
@@ -88,12 +90,14 @@ function assertComparableFixtures(): void {
     ).sort(([left], [right]) => left.localeCompare(right));
   if (
     JSON.stringify(fixtureShape(CARD_REGISTRY_RETENTION_STRESS_IDS)) !==
-    JSON.stringify(fixtureShape(CARD_REGISTRY_RETENTION_LEGACY_CONTROL_IDS))
+    JSON.stringify(
+      fixtureShape(CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS),
+    )
   )
     throw new Error("card_registry_retention_fixture_shape_mismatch");
   for (const [lane, decks] of [
     ["stress", stressDecks],
-    ["legacy", legacyDecks],
+    ["control", controlDecks],
   ] as const) {
     const cards = [...decks.runnerDeck.cards, ...decks.corpDeck.cards];
     if (cards.length !== 10 || cards.some(({ quantity }) => quantity !== 3))
@@ -103,7 +107,7 @@ function assertComparableFixtures(): void {
   }
 }
 
-function runChild(lane: "stress" | "legacy"): never {
+function runChild(lane: "stress" | "control"): never {
   if (!global.gc) throw new Error("card_registry_retention_requires_expose_gc");
   const decks = cardRegistryRetentionDecks(lane);
   for (let index = 0; index < 20; index += 1)

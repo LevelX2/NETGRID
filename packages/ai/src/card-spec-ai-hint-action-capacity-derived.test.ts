@@ -1,6 +1,4 @@
 import { cardSpecPlanningCards } from "@netgrid/cards/planning";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
@@ -43,21 +41,6 @@ function syntheticHint(
 }
 
 describe("CardSpec action-capacity profile derivation", () => {
-  it("leaves Originalset action-capacity ownership entirely to typed CardSpecs", () => {
-    const normalizerSource = readFileSync(
-      fileURLToPath(
-        new URL(
-          "../../../scripts/normalize-ai-action-capacity-hints.mjs",
-          import.meta.url,
-        ),
-      ),
-      "utf8",
-    );
-
-    expect(normalizerSource).not.toContain("onr_v1_");
-    expect(normalizerSource).not.toContain("EXACT_PROFILES");
-  });
-
   it.each([
     [
       "runner program-install action bundle",

@@ -1,8 +1,0 @@
-{
-  "cards": [],
-  "description": "Redaktionell gepruefte Legacy-Hint-Partition; aktive CardSpec-Karten sind ausgeschlossen und werden kanonisch kompiliert.",
-  "generatedAt": "2026-06-03",
-  "hintsId": "ai-card-hints-active",
-  "schemaVersion": "ai-card-hints-v2",
-  "taskId": "AI022-1/AI030"
-}

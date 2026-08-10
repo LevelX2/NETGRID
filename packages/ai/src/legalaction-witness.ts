@@ -183,13 +183,9 @@ function abilityRefForAction(
 ): LegalActionWitnessAbilityRef | undefined {
   if (!action.abilityRef) return undefined;
   assertAbilityRefIdentity(action.abilityRef);
-  const abilityId =
-    "sourceAbilityId" in action.abilityRef
-      ? action.abilityRef.sourceAbilityId
-      : action.abilityRef.abilityId;
   return {
     kind: "ability",
-    abilityId: safeId(abilityId),
+    abilityId: safeId(action.abilityRef.sourceAbilityId),
     sourceRef,
     redactionPolicy: sourceRef.redactionPolicy,
   };

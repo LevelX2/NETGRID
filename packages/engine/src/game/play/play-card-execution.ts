@@ -225,19 +225,6 @@ function executePlayOperationAction(
       zone: { side: "corp", zone: "archives" },
     };
     host.operations.resolveCorpOperation(definition, legalAction);
-    if (definition.id === "v098_hq_rd_swap_operation") {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "swap_hq_rd",
-      };
-    }
-    if (definition.id === "v099_bad_publicity_operation") {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        badPublicityAfter: host.state.corp.badPublicity,
-      };
-    }
   }
 }
 

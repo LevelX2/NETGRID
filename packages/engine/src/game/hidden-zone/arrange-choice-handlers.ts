@@ -118,7 +118,7 @@ export function startRunnerStackArrangeChoice(
   const topCards = host.state.runner.stack.slice(0, 2);
   if (topCards.length < 2) throw new Error("Nicht genug Karten fuer Arrange.");
   const sourcePrefix = input.sourcePrefix ?? "v098.arrange_stack_top2";
-  const choiceIdPrefix = input.choiceIdPrefix ?? "v098_arrange_stack_top2";
+  const choiceIdPrefix = input.choiceIdPrefix ?? "runner_arrange_stack_top";
   host.state.pendingChoice = {
     choiceId: `${choiceIdPrefix}_${host.state.stateVersion + 1}`,
     side: "runner",

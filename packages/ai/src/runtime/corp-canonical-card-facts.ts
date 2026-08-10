@@ -240,6 +240,29 @@ export function corpTaggedCreditDenialOperationProfile(
     : undefined;
 }
 
+export function corpInstalledHardwareTrashOperationProfile(
+  definitionId: string | undefined,
+): CorpOnPlayCapabilityProfile | undefined {
+  const planning = planningCard(definitionId);
+  const utility = planning?.planning.engine.corpUtility;
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "operation" ||
+    utility?.kind !== "installed_hardware_trash_by_counter" ||
+    utility.excludesSubtype !== "cybernetics" ||
+    utility.visibility !== "public"
+  ) {
+    return undefined;
+  }
+  return {
+    capabilityKey: utility.capabilityKey,
+    sourceCapabilityId: canonicalCapabilityId(
+      planning.planning.cardDefinitionId,
+      utility.capabilityKey,
+    ),
+  };
+}
+
 export function corpTaggedMeatDamageOperationProfile(
   definitionId: string | undefined,
 ): CorpTaggedMeatDamageOperationProfile | undefined {

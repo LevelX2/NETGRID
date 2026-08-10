@@ -676,8 +676,6 @@ export function createCardLifecycleRuntimeHosts(
           deps.forfeitRunnerAgendaForPointCost(state, cardId),
         consumeValuPakProgramInstallAction: (legalAction) =>
           deps.consumeValuPakProgramInstallAction(state, legalAction),
-        startRunnerHostingChoice: (cardId, legalAction) =>
-          deps.startRunnerHostingChoice(state, cardId, legalAction),
         hiddenRunnerResourceSlotId,
       },
       corp: {

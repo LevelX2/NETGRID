@@ -147,34 +147,18 @@ export function validateGameState(state: GameState): ValidationResult {
     }
     if (transaction.continuation?.kind === "card_effect_activated") {
       const continuation = transaction.continuation;
-      const hasLegacyIndex = continuation.abilityIndex !== undefined;
-      const hasCanonicalId = continuation.sourceAbilityId !== undefined;
-      if (hasLegacyIndex === hasCanonicalId) {
-        errors.push(
-          "Pending Corp draw activated continuation must have exactly one ability identity.",
+      try {
+        const parsed = parseCanonicalCapabilityId(
+          continuation.sourceAbilityId,
         );
-      } else if (
-        hasLegacyIndex &&
-        (!Number.isInteger(continuation.abilityIndex) ||
-          (continuation.abilityIndex ?? -1) < 0)
-      ) {
-        errors.push(
-          "Pending Corp draw activated continuation ability index is invalid.",
-        );
-      } else if (hasCanonicalId) {
-        try {
-          const parsed = parseCanonicalCapabilityId(
-            continuation.sourceAbilityId!,
-          );
-          if (parsed.cardDefinitionId !== continuation.sourceDefinitionId)
-            errors.push(
-              "Pending Corp draw activated continuation capability belongs to another definition.",
-            );
-        } catch {
+        if (parsed.cardDefinitionId !== continuation.sourceDefinitionId)
           errors.push(
-            "Pending Corp draw activated continuation capability identity is invalid.",
+            "Pending Corp draw activated continuation capability belongs to another definition.",
           );
-        }
+      } catch {
+        errors.push(
+          "Pending Corp draw activated continuation capability identity is invalid.",
+        );
       }
     }
     if (transaction.continuation?.kind === "corp_mandatory_draw") {

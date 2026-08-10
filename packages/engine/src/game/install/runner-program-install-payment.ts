@@ -7,7 +7,6 @@ import {
 } from "@netgrid/shared";
 import {
   hostedPaymentCredits,
-  isRestrictedHostedCreditSource,
   restrictedHostedCreditSourceIds,
 } from "../run/run-duration-payment";
 import { makeActionId } from "../turn/action-builders";
@@ -35,34 +34,10 @@ export function runnerProgramInstallOptionalCreditSourceIds(
   });
 }
 
-export function runnerProgramInstallAutomaticCreditSourceIds(
-  state: GameState,
-): CardInstanceId[] {
-  return [
-    ...state.runner.rig.hardware.filter(
-      (cardId) => definitionFor(state, cardId).id === "v099_recurring_chip",
-    ),
-  ]
-    .filter(
-      (cardId) => !isRestrictedHostedCreditSource(definitionFor(state, cardId)),
-    )
-    .filter((cardId) => hostedPaymentCredits(state, cardId) > 0)
-    .sort();
-}
-
 export function runnerProgramInstallOptionalCreditTotal(
   state: GameState,
 ): number {
   return runnerProgramInstallOptionalCreditSourceIds(state).reduce(
-    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
-    0,
-  );
-}
-
-export function runnerProgramInstallAutomaticCreditTotal(
-  state: GameState,
-): number {
-  return runnerProgramInstallAutomaticCreditSourceIds(state).reduce(
     (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
     0,
   );

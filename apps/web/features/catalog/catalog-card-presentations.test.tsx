@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   publicCardPresentation,
   publicCardTitle,
-} from "../../app/legacy-card-definition-compatibility";
+} from "../../app/public-card-presentation";
 import {
   CatalogCardPresentationsProvider,
   catalogCardPresentationsFor,

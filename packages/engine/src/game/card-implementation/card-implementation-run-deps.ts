@@ -6,6 +6,10 @@ import type {
   RuntimePublicPayload,
   RuntimeState,
 } from "./card-implementation-runtime-deps-types";
+import {
+  creditGainPublicPayload,
+  prepareRunnerRunTemporaryCreditGain,
+} from "../economy/credit-gain";
 
 export function startRunForCardImplementation(
   host: GameCardImplementationRuntimeDepsHost,
@@ -33,6 +37,29 @@ export function startRunForCardImplementation(
     ordinarySuccessBonusCredits === undefined
       ? options
       : omitOrdinarySuccessBonus(options);
+  const temporaryCreditGain = options.runTemporaryCredits
+    ? (() => {
+        if (!sourceCardId || !sourceDefinitionId)
+          throw new Error("Temporäre Run-Credits benötigen ihre Kartenquelle.");
+        return prepareRunnerRunTemporaryCreditGain(state, {
+          side: "runner",
+          baseAmount: options.runTemporaryCredits.amount,
+          source: {
+            kind: "card_effect",
+            sourceCardId,
+            sourceDefinitionId,
+            gainOrdinal: 1,
+            reason: "make_run_temporary_credits",
+          },
+          destination: {
+            kind: "runner_run_temporary",
+            sourceDefinitionId,
+            returnUnusedAtRunEnd:
+              options.runTemporaryCredits.returnUnusedAtRunEnd,
+          },
+        });
+      })()
+    : undefined;
   host.run.startRun(
     state,
     serverId,
@@ -152,6 +179,15 @@ export function startRunForCardImplementation(
             runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
           }
         : {}),
+      ...(temporaryCreditGain && sourceDefinitionId
+        ? {
+            runnerRunTemporaryCredits: {
+              sourceDefinitionId,
+              remaining: temporaryCreditGain.creditedAmount,
+              returnUnusedAtRunEnd: true,
+            },
+          }
+        : {}),
       ...(sourceCardId && sourceDefinitionId
         ? {
             successfulRunSourceCardId: sourceCardId,
@@ -166,26 +202,6 @@ export function startRunForCardImplementation(
     ordinarySuccessBonusCredits,
     legalAction,
   );
-  const temporaryCreditGain = options.runTemporaryCredits
-    ? (() => {
-        if (!sourceCardId || !sourceDefinitionId)
-          throw new Error("Temporäre Run-Credits benötigen ihre Kartenquelle.");
-        return host.credits.gainCredits(state, {
-          side: "runner",
-          amount: options.runTemporaryCredits.amount,
-          sourceCardId,
-          sourceDefinitionId,
-          gainOrdinal: 1,
-          kind: "standard",
-          reason: "make_run_temporary_credits",
-          destination: {
-            kind: "runner_run_temporary",
-            sourceDefinitionId,
-            returnUnusedAtRunEnd: options.runTemporaryCredits.returnUnusedAtRunEnd,
-          },
-        });
-      })()
-    : undefined;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ...(options.followupRunOnEnd === "optional"
@@ -218,7 +234,9 @@ export function startRunForCardImplementation(
           temporaryRunCredits: temporaryCreditGain?.creditedAmount ?? 0,
           temporaryRunCreditsRemaining:
             state.run?.runnerRunTemporaryCredits?.remaining ?? 0,
-          ...(temporaryCreditGain?.publicPayload ?? {}),
+          ...(temporaryCreditGain
+            ? creditGainPublicPayload(temporaryCreditGain)
+            : {}),
         }
       : {}),
     ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined

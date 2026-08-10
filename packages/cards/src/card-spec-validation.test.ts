@@ -101,13 +101,7 @@ describe("CardSpec validation", () => {
     );
   });
 
-  it("keeps AbilityRef legacy and canonical identities mutually exclusive", () => {
-    expect(() =>
-      assertAbilityRefIdentity({
-        sourceCardInstanceId: "source",
-        abilityId: "legacy",
-      }),
-    ).not.toThrow();
+  it("accepts only canonical AbilityRef identities", () => {
     expect(() =>
       assertAbilityRefIdentity({
         sourceCardInstanceId: "source",
@@ -116,6 +110,7 @@ describe("CardSpec validation", () => {
     ).not.toThrow();
     for (const invalid of [
       { sourceCardInstanceId: "source" },
+      { sourceCardInstanceId: "source", abilityId: "legacy" },
       {
         sourceCardInstanceId: "source",
         abilityId: "legacy",

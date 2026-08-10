@@ -1,8 +1,7 @@
-import {
-  CARD_DEFINITIONS_BY_ID as LEGACY_CARD_DEFINITIONS_BY_ID,
-  type CardDefinitionId,
-  type ResolvedCardDefinition,
-  type SubroutineDefinition,
+import type {
+  CardDefinitionId,
+  ResolvedCardDefinition,
+  SubroutineDefinition,
 } from "@netgrid/shared";
 import { cardSpecPlanningCards, planningCards } from "@netgrid/cards/planning";
 
@@ -57,18 +56,8 @@ for (const definitionId of cardSpecIds)
       "unexpected_card_spec_authority",
       definitionId,
     );
-for (const definitionId of expectedCardSpecIds)
-  if (LEGACY_CARD_DEFINITIONS_BY_ID[definitionId] !== undefined)
-    throw new AiCardDefinitionAuthorityError(
-      "overlapping_definition_authority",
-      definitionId,
-    );
-
-const combinedDefinitions: ResolvedCardDefinition[] = [
-  ...Object.values(LEGACY_CARD_DEFINITIONS_BY_ID),
-  ...cardSpecDefinitions,
-];
-export const CARD_DEFINITIONS = Object.freeze(combinedDefinitions);
+export const CARD_DEFINITIONS: readonly ResolvedCardDefinition[] =
+  Object.freeze(cardSpecDefinitions);
 export const CARD_DEFINITIONS_BY_ID = Object.freeze(
   Object.fromEntries(
     CARD_DEFINITIONS.map((definition) => [definition.id, definition]),

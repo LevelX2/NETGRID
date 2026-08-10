@@ -121,8 +121,8 @@ describe("turn planning contracts", () => {
       semanticActionType: "install.card",
       sourceCardInstanceId: "corp_ice_1",
       sourceAbilityBinding: {
-        kind: "legacy_ability_id",
-        abilityId: "install",
+        kind: "card_spec_capability_key",
+        sourceAbilityId: "test_corp_ice:install",
       },
       boundTargets: [
         {

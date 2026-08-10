@@ -116,7 +116,7 @@ const CORP_TUTORIAL_DAMAGE_DECK: DeckDefinition = {
   side: "corp",
   identity: "corp_identity_001",
   cards: [
-    { id: "v094_neural_sentry_ice", quantity: 6 },
+    { id: "onr_proteus_027_iceberg", quantity: 6 },
     { id: "simple_agenda", quantity: 3 },
     { id: "simple_economy_operation", quantity: 3 }
   ]
@@ -339,7 +339,7 @@ const TUTORIAL_SCENARIO_DEFINITIONS: TutorialScenarioDefinition[] = [
     title: "Damage und Flatline",
     rulesBaseline: "0.94.0",
     allowedMechanics: ["mechanic.damage.net", "mechanic.game_end.flatline"],
-    deckSnapshotRefs: ["demo_runner_094", "demo_corp_094"],
+    deckSnapshotRefs: ["demo_runner_008", "demo_corp_008"],
     steps: [
       {
         stepId: "damage_window",
@@ -357,7 +357,7 @@ const TUTORIAL_SCENARIO_DEFINITIONS: TutorialScenarioDefinition[] = [
       state = applyScriptAction(state, { side: "corp", actionType: "end_turn" });
       state = resolvePendingDiscardChoice(state, "corp");
       state = applyScriptAction(state, { side: "runner", actionType: "start_run", serverId: "rd" });
-      state = applyIfAvailable(state, { side: "corp", actionType: "rez_ice", labelIncludes: "Neural Sentry" });
+      state = applyIfAvailable(state, { side: "corp", actionType: "rez_ice", labelIncludes: "Iceberg" });
       return { initial, state };
     }
   }

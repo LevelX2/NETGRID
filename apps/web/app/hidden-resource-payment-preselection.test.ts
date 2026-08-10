@@ -17,7 +17,8 @@ import {
 } from "./hidden-resource-payment-preselection";
 
 const ability: VisibleRunnerPaymentSupportAbility = {
-  abilityIndex: 1,
+  sourceAbilityId: "test_hidden_resource:withdraw-1",
+  capabilityKey: "withdraw-1",
   timing: "runner_cost_penalty_support",
   label: "Swiss Bank Account: 6 Credits nehmen",
   creditCost: 3,
@@ -39,7 +40,8 @@ describe("hidden resource payment preselection", () => {
       matchId: "match-1",
       side: "runner",
       sourceCardId: "swiss-a",
-      abilityIndex: 1,
+      sourceAbilityId: "test_hidden_resource:withdraw-1",
+      capabilityKey: "withdraw-1",
       selectedTurnSerial: 7,
       selectedRunId: "run-1",
     });
@@ -66,8 +68,18 @@ describe("hidden resource payment preselection", () => {
       card: card("swiss-a", [ability]),
       ability,
     })!;
-    const lowerAbility = supportAction("support-0", "swiss-a", 0, "window-1");
-    const exactAbility = supportAction("support-1", "swiss-a", 1, "window-1");
+    const lowerAbility = supportAction(
+      "support-0",
+      "swiss-a",
+      "withdraw-0",
+      "window-1",
+    );
+    const exactAbility = supportAction(
+      "support-1",
+      "swiss-a",
+      "withdraw-1",
+      "window-1",
+    );
 
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [
@@ -93,7 +105,7 @@ describe("hidden resource payment preselection", () => {
     ).toBe(true);
   });
 
-  it("matches canonical payment support without accepting hybrid identities", () => {
+  it("matches canonical payment support by exact capability identity", () => {
     const canonical: VisibleRunnerPaymentSupportAbility = {
       sourceAbilityId: "test_hidden_resource:withdraw",
       capabilityKey: "withdraw",
@@ -131,18 +143,6 @@ describe("hidden resource payment preselection", () => {
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [exact]),
     ).toEqual({ kind: "match", windowId: "window-1", action: exact });
-    const hybrid = {
-      ...canonical,
-      abilityIndex: 0,
-    } as unknown as VisibleRunnerPaymentSupportAbility;
-    expect(
-      createHiddenResourcePaymentPreselection({
-        matchId: "match-1",
-        view: view([card("canonical-a", [hybrid])]),
-        card: card("canonical-a", [hybrid]),
-        ability: hybrid,
-      }),
-    ).toBeNull();
   });
 
   it("waits outside a support window and falls back for stale or ambiguous actions", () => {
@@ -157,20 +157,25 @@ describe("hidden resource payment preselection", () => {
     });
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [
-        supportAction("wrong-source", "swiss-b", 1, "window-1"),
+        supportAction("wrong-source", "swiss-b", "withdraw-1", "window-1"),
         continuation("continue", "window-1"),
       ]),
     ).toEqual({ kind: "invalid", windowId: "window-1" });
     expect(
       resolveHiddenResourcePaymentPreselection(selection, [
-        supportAction("duplicate-a", "swiss-a", 1, "window-1"),
-        supportAction("duplicate-b", "swiss-a", 1, "window-1"),
+        supportAction("duplicate-a", "swiss-a", "withdraw-1", "window-1"),
+        supportAction("duplicate-b", "swiss-a", "withdraw-1", "window-1"),
       ]),
     ).toEqual({ kind: "invalid", windowId: "window-1" });
   });
 
   it("continues the original action only after bank support reached a fresh state", () => {
-    const support = supportAction("support-1", "swiss-a", 1, "window-1");
+    const support = supportAction(
+      "support-1",
+      "swiss-a",
+      "withdraw-1",
+      "window-1",
+    );
     support.payload = {
       ...support.payload,
       costPenaltySupportOriginalActionId: "running-interference",
@@ -204,7 +209,13 @@ describe("hidden resource payment preselection", () => {
     ).toEqual({ kind: "match", action: freshContinuation });
     expect(
       resolvePaymentSupportContinuation(pending!, 13, [
-        supportAction("more-support-needed", "chiba-a", 0, "window-1", 13),
+        supportAction(
+          "more-support-needed",
+          "chiba-a",
+          "withdraw-0",
+          "window-1",
+          13,
+        ),
       ]),
     ).toEqual({ kind: "invalid" });
   });
@@ -339,22 +350,27 @@ function viewWithoutRun(rig: VisibleCard[]): PlayerView {
 function supportAction(
   actionId: string,
   source: string,
-  abilityIndex: number,
+  capabilityKey: string,
   windowId: string,
   stateVersion = 12,
 ): LegalAction {
-  return action(
+  const sourceAbilityId = `test_hidden_resource:${capabilityKey}`;
+  const result = action(
     actionId,
     "activated_card_ability",
     source,
     {
       cardId: source,
-      cardImplementationAbilityIndex: abilityIndex,
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityId: sourceAbilityId,
+      cardImplementationAbilityKey: capabilityKey,
       cardImplementationAbilityTiming: "runner_cost_penalty_support",
       costPenaltySupportWindowId: windowId,
     },
     stateVersion,
   );
+  result.abilityRef = { sourceCardInstanceId: source, sourceAbilityId };
+  return result;
 }
 
 function continuation(

@@ -90,9 +90,10 @@ export type CanonicalChoiceBinding = {
 export type CanonicalLegalActionInvocation = {
   semanticActionType: string;
   sourceCardInstanceId?: string;
-  sourceAbilityBinding?:
-    | { kind: "legacy_ability_id"; abilityId: string }
-    | { kind: "card_spec_capability_key"; sourceAbilityId: string };
+  sourceAbilityBinding?: {
+    kind: "card_spec_capability_key";
+    sourceAbilityId: string;
+  };
   boundTargets: BoundTargetSlot[];
   boundChoices: CanonicalChoiceBinding[];
   invocationKey: string;
@@ -566,22 +567,17 @@ export function assertCanonicalLegalActionInvocation(
     issues.push("blank_semantic_action_type");
   }
   if (invocation.sourceAbilityBinding) {
-    if (invocation.sourceAbilityBinding.kind === "legacy_ability_id") {
-      if (blank(invocation.sourceAbilityBinding.abilityId))
-        issues.push("blank_legacy_ability_id");
-    } else {
-      if (
-        invocation.sourceCardInstanceId === undefined ||
-        blank(invocation.sourceCardInstanceId)
-      )
-        issues.push("canonical_capability_source_instance_missing");
-      try {
-        assertCanonicalCapabilityId(
-          invocation.sourceAbilityBinding.sourceAbilityId,
-        );
-      } catch {
-        issues.push("invalid_canonical_source_ability_id");
-      }
+    if (
+      invocation.sourceCardInstanceId === undefined ||
+      blank(invocation.sourceCardInstanceId)
+    )
+      issues.push("canonical_capability_source_instance_missing");
+    try {
+      assertCanonicalCapabilityId(
+        invocation.sourceAbilityBinding.sourceAbilityId,
+      );
+    } catch {
+      issues.push("invalid_canonical_source_ability_id");
     }
   }
   if (containsForbiddenActionId(invocation)) {

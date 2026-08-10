@@ -11,7 +11,7 @@ import { actionHasAbility } from "./action-payload";
 import {
   publicCardTitle,
   type PublicCardPresentationsById,
-} from "./legacy-card-definition-compatibility";
+} from "./public-card-presentation";
 export {
   DEFAULT_CUE_POSITION,
   clampCuePosition,

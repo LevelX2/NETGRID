@@ -1,22 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   activeAiApprovedCardIds,
+  createRuntimeCardsById,
   PROTEUS_CARD_IDS,
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
-import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import generatedCardSpecAiHints from "../../../../../data/ai/card-spec-ai-hints-generated.json";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
-
-type CatalogAiHintExpectation = {
-  title: string;
-  cardId: string;
-  roles?: string[];
-  planRoles?: string[];
-  requiredMechanics?: string[];
-  riskTags?: string[];
-  scenarioRefs?: string[];
-};
 
 type CatalogDetailAiHints = {
   card: {
@@ -183,134 +173,6 @@ const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
   "onr_proteus_151_sunburst-cranial-interface",
 ] as const;
 
-const CS06_CARD_DEFINITION_IDS = [
-  "onr_proteus_020_digiconda",
-  "onr_proteus_080_black-widow",
-  "onr_proteus_092_morphing-tool",
-  "onr_v1_110_sneak-preview",
-  "onr_v1_154_broker",
-  "onr_v1_168_loan-from-chiba",
-  "onr_v1_197_data-fort-reclamation",
-  "onr_v1_317_data-masons",
-  "onr_v1_348_virus-test-site",
-  "onr_v1_368_roving-submarine",
-] as const;
-
-const CATALOG_AI_HINT_EXPECTATIONS = [
-  {
-    title: "exposes killer breaker plan hints for King of the Road",
-    cardId: "onr_v1_006_black-dahlia",
-    roles: ["breaker_killer"],
-    planRoles: ["build_rig"],
-    scenarioRefs: [
-      "data/scenarios/ai-kotr-runner-approval-smokes.json#build_rig",
-    ],
-  },
-  {
-    title: "exposes decoder rig hints for runner rig approvals",
-    cardId: "onr_v1_014_codecracker",
-    roles: ["breaker_decoder"],
-    planRoles: ["build_rig"],
-    riskTags: ["credit_reserve"],
-    scenarioRefs: [
-      "data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#safe_probe_run",
-    ],
-  },
-  {
-    title: "exposes tag punishment operation hints",
-    cardId: "onr_v1_293_netwatch-credit-voucher",
-    roles: ["tag_punishment"],
-    planRoles: ["recover_economy"],
-    scenarioRefs: [
-      "data/scenarios/ai-corp-tag-approval-slice-smokes.json#tag_operation_punish_visible_tag",
-    ],
-  },
-  {
-    title: "exposes trace and tag enabler hints",
-    cardId: "onr_v1_306_trojan-horse",
-    roles: ["tag_enabler"],
-    planRoles: ["punish_tagged_runner", "bait_runner"],
-    scenarioRefs: [
-      "data/scenarios/ai-corp-tag-approval-slice-smokes.json#trojan_horse_after_agenda_theft",
-    ],
-  },
-  {
-    title: "exposes run-event pressure hints",
-    cardId: "onr_v1_094_inside-job",
-    roles: ["run_event"],
-    planRoles: ["pressure_hq"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure",
-    ],
-  },
-  {
-    title: "exposes random breaker hints",
-    cardId: "onr_v1_007_blink",
-    roles: ["random_breaker"],
-    planRoles: ["safe_probe_run"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v190-smokes.json#runner_v190_random_breakers_and_black_ops_punish",
-    ],
-  },
-  {
-    title: "exposes bonus-run pressure hints",
-    cardId: "onr_v1_076_all-nighter",
-    roles: ["bonus_run"],
-    planRoles: ["pressure_rnd"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v192_run_events_and_resource_lifecycle",
-    ],
-  },
-  {
-    title: "exposes Dropp emergency breaker hints",
-    cardId: "onr_v1_019_dropp",
-    roles: ["program", "icebreaker", "breaker_end_run", "emergency_breaker"],
-    requiredMechanics: ["end_run_after_breaker_use"],
-    riskTags: ["risk.access_loss_on_use"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v195-v198-smokes.json#runner_v198_dogcatcher_and_dropp_breakers",
-    ],
-  },
-  {
-    title: "exposes upgrade protection hints",
-    cardId: "onr_v1_349_aardvark",
-    roles: ["upgrade"],
-    planRoles: ["protect_rnd"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v199-smokes.json#corp_v199_aardvark_worm_intercept",
-    ],
-  },
-  {
-    title: "exposes hidden-zone protection hints",
-    cardId: "onr_v1_272_too-many-doors",
-    roles: ["hidden_zone_tool"],
-    planRoles: ["protect_rnd"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v1911-smokes.json#corp_v1911_rd_reveal_and_reorder",
-    ],
-  },
-  {
-    title: "exposes deterministic-random resolver hints",
-    cardId: "onr_v1_002_ai-boon",
-    roles: ["random"],
-    planRoles: ["runner_start_run_strength_roll"],
-    requiredMechanics: ["deterministic_random_card_resolver"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v1921-smokes.json#runner_v1921_random_programs",
-    ],
-  },
-  {
-    title: "exposes longtail program-install hints",
-    cardId: "onr_v1_075_zetatech-software-installer",
-    roles: ["per_card_longtail"],
-    planRoles: ["runner_install_program"],
-    requiredMechanics: ["per_card_longtail_resolver_gate"],
-    scenarioRefs: [
-      "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail",
-    ],
-  },
-] satisfies readonly CatalogAiHintExpectation[];
-
 describe("catalog API filters", () => {
   it("filters by ai_supported instead of falling back to the full catalog", () => {
     const response = catalogListResponse(
@@ -460,7 +322,7 @@ describe("catalog API filters", () => {
       code: "uncommon",
       labelDe: "Ungewöhnlich",
       labelEn: "Uncommon",
-      sourceId: "onr-v1-limited-runner-spoiler",
+      sourceId: "card-spec:onr_v1_001_afreet",
     });
 
     const listResponse = catalogListResponse(
@@ -749,7 +611,7 @@ describe("catalog API filters", () => {
     }
   });
 
-  it("serves corrected Runner icebreaker spoiler-aligned catalog and shared text", () => {
+  it("serves Runner icebreaker text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
         cardId: "onr_v1_015_codeslinger",
@@ -815,14 +677,12 @@ describe("catalog API filters", () => {
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
-        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+        createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
       }
-      for (const snippet of expectation.sharedContains) {
-        expect(sharedText, expectation.cardId).toContain(snippet);
-      }
+      expect(sharedText, expectation.cardId).toBe(body.card.text);
       for (const snippet of expectation.notContains) {
         expect(body.card.text, expectation.cardId).not.toContain(snippet);
         expect(sharedText, expectation.cardId).not.toContain(snippet);
@@ -830,27 +690,7 @@ describe("catalog API filters", () => {
     }
   });
 
-  it("exposes corrected Runner icebreaker AI hints", () => {
-    expectCatalogAiHints({
-      title: "Dogcatcher restriction",
-      cardId: "onr_v1_018_dogcatcher",
-      roles: ["restricted_breaker"],
-      requiredMechanics: ["restricted_breaker_targets"],
-    });
-    expectCatalogAiHints({
-      title: "Dropp end-run drawback",
-      cardId: "onr_v1_019_dropp",
-      roles: ["breaker_end_run"],
-      requiredMechanics: ["end_run_after_breaker_use"],
-    });
-    expectCatalogAiHints({
-      title: "Snowball run strength",
-      cardId: "onr_v1_066_snowball",
-      requiredMechanics: ["run_strength_modifier"],
-    });
-  });
-
-  it("serves corrected Runner prevention and tag-protection catalog and shared text", () => {
+  it("serves Runner prevention text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
         cardId: "onr_v1_038_joan-of-arc",
@@ -928,14 +768,12 @@ describe("catalog API filters", () => {
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
-        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+        createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
       }
-      for (const snippet of expectation.sharedContains) {
-        expect(sharedText, expectation.cardId).toContain(snippet);
-      }
+      expect(sharedText, expectation.cardId).toBe(body.card.text);
       for (const snippet of expectation.notContains) {
         expect(body.card.text, expectation.cardId).not.toContain(snippet);
         expect(sharedText, expectation.cardId).not.toContain(snippet);
@@ -943,43 +781,7 @@ describe("catalog API filters", () => {
     }
   });
 
-  it("exposes corrected Runner prevention and tag-protection AI hints", () => {
-    expectCatalogAiHints({
-      title: "Joan trash prevention",
-      cardId: "onr_v1_038_joan-of-arc",
-      roles: ["trash_prevention"],
-      requiredMechanics: ["program_trash_prevention", "return_to_hand"],
-    });
-    expectCatalogAiHints({
-      title: "Nasuko tag avoid",
-      cardId: "onr_v1_135_nasuko-cycle",
-      roles: ["tag_avoid"],
-      requiredMechanics: ["tag_avoid", "credit_cost"],
-    });
-    expectCatalogAiHints({
-      title: "Techtronica deck link package",
-      cardId: "onr_v1_143_techtronica-utility-suit",
-      roles: ["memory", "link", "deck"],
-      requiredMechanics: ["link_bits", "deck_unique_replacement"],
-    });
-    expectCatalogAiHints({
-      title: "Umbrella trash prevention",
-      cardId: "onr_v1_186_umbrella-policy",
-      roles: ["trash_prevention"],
-      requiredMechanics: [
-        "program_trash_prevention",
-        "hardware_trash_prevention",
-      ],
-    });
-    expectCatalogAiHints({
-      title: "Wilson run action and tag protection",
-      cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
-      roles: ["run_action", "tag_avoid"],
-      requiredMechanics: ["run_action_gain", "run_spending_cap"],
-    });
-  });
-
-  it("serves corrected Runner run, access and resource catalog and shared text", () => {
+  it("serves Runner utility text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
         cardId: "onr_v1_032_i-spy",
@@ -1068,14 +870,12 @@ describe("catalog API filters", () => {
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
-        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+        createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
       }
-      for (const snippet of expectation.sharedContains) {
-        expect(sharedText, expectation.cardId).toContain(snippet);
-      }
+      expect(sharedText, expectation.cardId).toBe(body.card.text);
       for (const snippet of expectation.notContains) {
         expect(body.card.text, expectation.cardId).not.toContain(snippet);
         expect(sharedText, expectation.cardId).not.toContain(snippet);
@@ -1083,40 +883,7 @@ describe("catalog API filters", () => {
     }
   });
 
-  it("exposes corrected Runner run, access and resource AI hints", () => {
-    expectCatalogAiHints({
-      title: "I Spy fort counter",
-      cardId: "onr_v1_032_i-spy",
-      roles: ["spy_counter"],
-      requiredMechanics: ["spy_counter", "expose_fort_cards"],
-    });
-    expectCatalogAiHints({
-      title: "R&D Protocol top-card replacement",
-      cardId: "onr_v1_050_r-and-d-protocol-files",
-      roles: ["rd_pressure", "access_replacement"],
-      requiredMechanics: ["top_rd_look"],
-    });
-    expectCatalogAiHints({
-      title: "Edited Shipping Manifests payout",
-      cardId: "onr_v1_084_edited-shipping-manifests",
-      roles: ["tag_self"],
-      requiredMechanics: ["runner_gain_credits", "runner_gain_tag"],
-    });
-    expectCatalogAiHints({
-      title: "Rigged Investments bit pool",
-      cardId: "onr_v1_174_rigged-investments",
-      roles: ["economy", "resource"],
-      requiredMechanics: ["bit_counter_pool_12", "trash_when_empty"],
-    });
-    expectCatalogAiHints({
-      title: "Top Runners Conference economy",
-      cardId: "onr_v1_184_top-runners-conference",
-      roles: ["run_drawback"],
-      requiredMechanics: ["start_turn_gain_2", "trash_on_run"],
-    });
-  });
-
-  it("serves corrected Runner virus-counter catalog and shared text", () => {
+  it("serves Runner virus text from the same CardSpec projection in catalog and runtime", () => {
     const expectations = [
       {
         cardId: "onr_v1_009_butcher-boy",
@@ -1151,14 +918,12 @@ describe("catalog API filters", () => {
       expect(response.status, expectation.cardId).toBe(200);
       const body = response.body as { card: { text: string } };
       const sharedText =
-        CARD_DEFINITIONS_BY_ID[expectation.cardId]?.rulesText ?? "";
+        createRuntimeCardsById()[expectation.cardId]?.text ?? "";
 
       for (const snippet of expectation.catalogContains) {
         expect(body.card.text, expectation.cardId).toContain(snippet);
       }
-      for (const snippet of expectation.sharedContains) {
-        expect(sharedText, expectation.cardId).toContain(snippet);
-      }
+      expect(sharedText, expectation.cardId).toBe(body.card.text);
       expect(body.card.text, expectation.cardId).not.toContain(
         "recurring credit for run costs",
       );
@@ -1166,33 +931,6 @@ describe("catalog API filters", () => {
         "recurring credit for run costs",
       );
     }
-  });
-
-  it("exposes corrected Runner virus-counter AI hints", () => {
-    expectCatalogAiHints({
-      title: "Butcher Boy counter economy",
-      cardId: "onr_v1_009_butcher-boy",
-      roles: ["hq_run_reward", "economy"],
-      requiredMechanics: ["butcher_boy_counter"],
-    });
-    expectCatalogAiHints({
-      title: "Cascade start-turn trash",
-      cardId: "onr_v1_010_cascade",
-      roles: ["corp_start_turn_pressure"],
-      requiredMechanics: ["cascade_counter", "corp_start_turn_trash_faceup_rd"],
-    });
-    expectCatalogAiHints({
-      title: "Deep Thought hidden look",
-      cardId: "onr_v1_017_deep-thought",
-      roles: ["hidden_zone_tool"],
-      requiredMechanics: ["thought_counter", "top_rd_look_threshold_3"],
-    });
-    expectCatalogAiHints({
-      title: "Skivviss draw pressure",
-      cardId: "onr_v1_064_skivviss",
-      roles: ["corp_draw_pressure"],
-      requiredMechanics: ["skivviss_counter", "corp_start_turn_extra_draw"],
-    });
   });
 
   it("shows promoted longtail card details in the web catalog API", () => {
@@ -1226,15 +964,25 @@ describe("catalog API filters", () => {
     }
   });
 
-  it("serves effective compiled hints for every CS06 CardSpec", () => {
-    for (const cardId of CS06_CARD_DEFINITION_IDS) {
-      const response = catalogDetailResponse(cardId);
-      expect(response.status, cardId).toBe(200);
+  it("serves the generated CardSpec hint projection for every runtime card", () => {
+    expect(generatedCardSpecAiHints.cards).toHaveLength(618);
+    for (const generated of generatedCardSpecAiHints.cards) {
+      const response = catalogDetailResponse(generated.cardId);
+      expect(response.status, generated.cardId).toBe(200);
       const body = response.body as CatalogDetailAiHints;
-      expect(body.card.aiHints?.cardId, cardId).toBe(cardId);
-      expect(body.card.aiHints?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(body.card.aiHints, generated.cardId).toMatchObject({
+        cardId: generated.hint.cardId,
+        roles: generated.hint.roles,
+        planRoles: generated.hint.planRoles,
+        requiredMechanics: generated.hint.requiredMechanics,
+        ...(generated.hint.riskTags === undefined
+          ? {}
+          : { riskTags: generated.hint.riskTags }),
+        scenarioRefs: generated.hint.scenarioRefs,
+        aiSupportStatus: "ai_supported",
+      });
     }
-  });
+  }, 30_000);
 
   it("keeps generated detail hints deeply immutable across API responses", () => {
     for (const cardId of [
@@ -1252,53 +1000,4 @@ describe("catalog API filters", () => {
       expect(second.card.aiHints).toBe(first.card.aiHints);
     }
   });
-
-  for (const expectation of CATALOG_AI_HINT_EXPECTATIONS) {
-    it(expectation.title, () => {
-      expectCatalogAiHints(expectation);
-    });
-  }
 });
-
-function expectCatalogAiHints(expectation: CatalogAiHintExpectation) {
-  const response = catalogDetailResponse(expectation.cardId);
-
-  expect(response.status).toBe(200);
-  const body = response.body as CatalogDetailAiHints;
-  const aiHints = body.card.aiHints;
-  expect(aiHints, expectation.cardId).not.toBeNull();
-  if (!aiHints) throw new Error(`Missing AI hints for ${expectation.cardId}`);
-
-  expect(aiHints.aiSupportStatus, expectation.cardId).toBe("ai_supported");
-  expectContainedValues(aiHints.roles, expectation.roles, expectation.cardId);
-  expectContainedValues(
-    aiHints.planRoles,
-    expectation.planRoles,
-    expectation.cardId,
-  );
-  expectContainedValues(
-    aiHints.requiredMechanics,
-    expectation.requiredMechanics,
-    expectation.cardId,
-  );
-  expectContainedValues(
-    aiHints.riskTags,
-    expectation.riskTags,
-    expectation.cardId,
-  );
-  expectContainedValues(
-    aiHints.scenarioRefs,
-    expectation.scenarioRefs,
-    expectation.cardId,
-  );
-}
-
-function expectContainedValues(
-  actual: readonly string[],
-  expected: readonly string[] | undefined,
-  cardId: string,
-) {
-  for (const value of expected ?? []) {
-    expect(actual, cardId).toContain(value);
-  }
-}

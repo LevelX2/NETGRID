@@ -266,7 +266,7 @@ describe("corp-operation-resolution", () => {
     expect(source).not.toMatch(/drawCorpCard(?!s)/);
   });
 
-  it("delegates canonical CardSpec on-play operations and resolves legacy damage through the boundary", () => {
+  it("delegates canonical CardSpec on-play operations through the boundary", () => {
     const targetState = state();
     const calls: string[] = [];
     const host = hostFor(targetState, calls);
@@ -283,11 +283,6 @@ describe("corp-operation-resolution", () => {
     );
     resolveCorpOperation(
       host,
-      definition("v111_core_damage_operation"),
-      action(),
-    );
-    resolveCorpOperation(
-      host,
       canonicalDefinition("simple_tag_punishment_operation"),
       action(),
     );
@@ -295,7 +290,6 @@ describe("corp-operation-resolution", () => {
     expect(calls).toEqual([
       `onPlay:simple_economy_operation:${OPERATION_ID}`,
       `onPlay:simple_draw_operation:${OPERATION_ID}`,
-      "damage:core:1:v111_core_damage_operation",
       `onPlay:simple_tag_punishment_operation:${OPERATION_ID}`,
     ]);
   });

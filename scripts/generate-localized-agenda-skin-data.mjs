@@ -19,6 +19,7 @@ const agendas = Object.values(createRuntimeCardsById())
   .filter((card) => card.type === "agenda")
   .map((card) => ({
     cardId: card.catalogCardId,
+    printingId: card.printingId,
     title: card.title,
     collectorNumber: card.collectorNumber,
     subtypes: card.subtypes,
@@ -496,7 +497,7 @@ for (const sourceCard of agendas) {
     ? `Projekt - ${classes.map((subtype) => projectClassLabels[subtype]).join(" / ")}`
     : "Projekt";
 
-  const artFileName = `${sourceCard.cardId}.png`;
+  const artFileName = `${sourceCard.printingId}.png`;
   const artPath = path.join(artRoot, artFileName);
   if (!existsSync(artPath)) {
     await generateProceduralArt(sourceCard, localization, artPath);
@@ -504,6 +505,7 @@ for (const sourceCard of agendas) {
 
   cards.push({
     cardId: sourceCard.cardId,
+    printingId: sourceCard.printingId,
     sourceTitle: sourceCard.title,
     localizedTitle: localization.localizedTitle,
     frameId: "project-frame-v1",
@@ -531,7 +533,7 @@ for (const sourceCard of agendas) {
     },
     art: `art/${artFileName}`,
     rendered: {
-      full: `rendered/full/${sourceCard.cardId}.png`,
+      full: `rendered/full/${sourceCard.printingId}.png`,
     },
   });
 }
@@ -543,7 +545,7 @@ const out = {
   status: "draft_complete_originalset_agendas_display_only",
   generatedAt: "2026-05-24",
   sourceSetId: "originalset-v1",
-  sourceCardFile: "@netgrid/catalog#createRuntimeCardsById",
+  sourceRegistry: "@netgrid/catalog#createRuntimeCardsById",
   scope: {
     cardType: "agenda",
     expectedCount: 33,
@@ -554,7 +556,7 @@ const out = {
   fallbackPolicy:
     "Wenn eine deutsche Skin-Karte vorhanden ist, kann sie als Anzeigeersatz dienen; fehlt sie, bleibt die Originalanzeige Fallback.",
   notes: [
-    "Die internen cardIds bleiben die Originalkarten-IDs.",
+    "cardId bleibt die Regelidentität; Bilddateien und Bildauflösung verwenden printingId.",
     "Diese Skin-Schicht ist keine Regelautorität und ändert keine LegalActions, Replay-, StateHash-, KI- oder Decklegalitätsdaten.",
     "sourceText ist Originaltext für Nachvollziehbarkeit; lokalisiert gerendert werden nur localizedTitle, localizedProjectClass und localizedRules.",
     "Projektklassen sind strukturiert als sourceProjectClasses und sichtbar als localizedProjectClass hinterlegt.",

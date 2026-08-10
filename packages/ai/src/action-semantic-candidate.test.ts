@@ -545,7 +545,13 @@ describe("buildActionSemanticCandidates", () => {
           source: "breaker-1",
           abilityRef: {
             sourceCardInstanceId: "breaker-1",
-            abilityId: "icebreaker.break.1",
+            sourceAbilityId: "test_breaker:break_1",
+          },
+          payload: {
+            cardId: "breaker-1",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId: "test_breaker:break_1",
+            cardImplementationAbilityKey: "break_1",
           },
         }),
         legalAction("trigger_ability", 1, {
@@ -583,8 +589,8 @@ describe("buildActionSemanticCandidates", () => {
     }
 
     expect(explicit.sourceCardId).toBe("breaker-1");
-    expect(explicit.abilityId).toBe("icebreaker.break.1");
-    expect(explicit.abilityBindingMethod).toBe("explicit_ability_id");
+    expect(explicit.abilityId).toBe("test_breaker:break_1");
+    expect(explicit.abilityBindingMethod).toBe("canonical_capability_id");
     expect(explicit.projectionIssues).not.toContain("ability_unresolved");
 
     expect(payload.sourceCardId).toBe("scored-agenda-1");
@@ -1492,10 +1498,16 @@ describe("buildActionSemanticCandidates", () => {
         }),
         legalAction("trigger_ability", 2, {
           source: "multi-ability-bound-instance",
-          payload: { sourceDefinitionId: "multi-ability-bound-card" },
+          payload: {
+            cardId: "multi-ability-bound-instance",
+            sourceDefinitionId: "multi-ability-bound-card",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId: "multi-ability-bound-card:ability_b",
+            cardImplementationAbilityKey: "ability_b",
+          },
           abilityRef: {
             sourceCardInstanceId: "multi-ability-bound-instance",
-            abilityId: "ability.b",
+            sourceAbilityId: "multi-ability-bound-card:ability_b",
           },
         }),
       ],
@@ -1554,7 +1566,10 @@ describe("buildActionSemanticCandidates", () => {
           tacticSignals: ["card.context.bound", "damage.payoff"],
           abilitySemantics: [
             { abilityId: "ability.a", tacticSignals: ["draw.card"] },
-            { abilityId: "ability.b", tacticSignals: ["tag.remove"] },
+            {
+              abilityId: "multi-ability-bound-card:ability_b",
+              tacticSignals: ["tag.remove"],
+            },
           ],
         },
       },
@@ -1598,10 +1613,16 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: [
         legalAction("activated_card_ability", 0, {
           source: "profile-only-instance",
-          payload: { sourceDefinitionId: "profile-only-card" },
+          payload: {
+            cardId: "profile-only-instance",
+            sourceDefinitionId: "profile-only-card",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId: "profile-only-card:profile_only",
+            cardImplementationAbilityKey: "profile_only",
+          },
           abilityRef: {
             sourceCardInstanceId: "profile-only-instance",
-            abilityId: "ability.profile_only",
+            sourceAbilityId: "profile-only-card:profile_only",
           },
         }),
       ],
@@ -1611,7 +1632,7 @@ describe("buildActionSemanticCandidates", () => {
           tacticSignals: [],
           abilitySemantics: [
             {
-              abilityId: "ability.profile_only",
+              abilityId: "profile-only-card:profile_only",
               tacticSignals: [],
               targetProfileMatches: [
                 {
@@ -1794,10 +1815,17 @@ describe("buildActionSemanticCandidates", () => {
           source: "dropp-instance",
           abilityRef: {
             sourceCardInstanceId: "dropp-instance",
-            abilityId: "dropp.break_subroutine",
+            sourceAbilityId:
+              "onr_v1_019_dropp:icebreaker_abilities_break_subroutine",
           },
           payload: {
+            cardId: "dropp-instance",
             sourceDefinitionId: "onr_v1_019_dropp",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "onr_v1_019_dropp:icebreaker_abilities_break_subroutine",
+            cardImplementationAbilityKey:
+              "icebreaker_abilities_break_subroutine",
             iceId: "ice-1",
             subroutineIndex: 0,
           },
@@ -1823,7 +1851,8 @@ describe("buildActionSemanticCandidates", () => {
           strategySupport: [],
           abilitySemantics: [
             {
-              abilityId: "dropp.break_subroutine",
+              abilityId:
+                "onr_v1_019_dropp:icebreaker_abilities_break_subroutine",
               tacticSignals: [
                 "breaker.break_any_subroutine",
                 "encounter.emergency_subroutine_prevention",

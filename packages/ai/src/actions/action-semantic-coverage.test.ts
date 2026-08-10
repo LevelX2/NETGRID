@@ -357,9 +357,16 @@ describe("Action semantic coverage", () => {
           source: "runner-hidden-instance",
           abilityRef: {
             sourceCardInstanceId: "runner-hidden-instance",
-            abilityId: "runner.visible.ability",
+            sourceAbilityId: "runner-visible-definition:visible_ability",
           },
-          payload: { sourceDefinitionId: "runner-visible-definition" },
+          payload: {
+            cardId: "runner-hidden-instance",
+            sourceDefinitionId: "runner-visible-definition",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "runner-visible-definition:visible_ability",
+            cardImplementationAbilityKey: "visible_ability",
+          },
         }),
         legalAction("install_card", 5, {
           side: "corp",
@@ -610,9 +617,16 @@ function coverageReportFixtureCandidates(): ActionSemanticCandidate[] {
         source: "runner-hidden-instance",
         abilityRef: {
           sourceCardInstanceId: "runner-hidden-instance",
-          abilityId: "runner.visible.ability",
+          sourceAbilityId: "runner-visible-definition:visible_ability",
         },
-        payload: { sourceDefinitionId: "runner-visible-definition" },
+        payload: {
+          cardId: "runner-hidden-instance",
+          sourceDefinitionId: "runner-visible-definition",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "runner-visible-definition:visible_ability",
+          cardImplementationAbilityKey: "visible_ability",
+        },
       }),
       legalAction("install_card", 6, {
         side: "corp",

@@ -15,7 +15,7 @@ Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blocki
 | Kategorie | Anzahl |
 | --- | ---: |
 | test_only_card_name | 37 |
-| false_positive | 5 |
+| false_positive | 2 |
 
 ## Problemstellen
 
@@ -41,10 +41,14 @@ Die Guard-Nachpflege, der `Quest for Cattekin`-Slice, die `Code Viral Cache`-Ins
 
 ## Automatisch abgeleiteter Guard
 
-Der Derived-Guard erzeugt 0 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 0 problemzonenrelevante Fingerprints als Baseline.
+Der Derived-Guard erzeugt 1891 Tokens aus Kartentiteln und `cardDefinitionId`-Varianten und hält 353 problemzonenrelevante Fingerprints als Baseline.
 Die kompakte Fingerprint-Baseline dient nur als New-Leak-Detektor; das lesbare Review-Inventar bleibt die Known-Token-Fundliste unten.
 
 | Kategorie | Anzahl |
 | --- | ---: |
+| new_unclassified_card_name_leak | 183 |
+| runtime_state_field_uses_card_name | 156 |
+| resolver_function_uses_card_name | 10 |
+| functional_kind_uses_card_name | 4 |
 
 ## Erlaubte Referenzen

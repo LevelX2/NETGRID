@@ -38,9 +38,8 @@ describe("AI game simulator randomized ICE-install selection", () => {
                   order: 0,
                   kind: "meat_damage",
                   sourceCardInstanceId: "missing-source",
-                  sourceCapabilityBindingKind:
-                    "legacy_card_implementation_index",
-                  sourceCapabilityId: "ability:on_play:0",
+                  sourceCapabilityBindingKind: "card_spec_capability_key",
+                  sourceCapabilityId: "missing_definition:missing_capability",
                 },
               ],
             },

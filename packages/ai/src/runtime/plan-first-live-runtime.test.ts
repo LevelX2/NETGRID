@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-  CARD_DEFINITIONS_BY_ID,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
 } from "@netgrid/shared";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";

@@ -119,7 +119,7 @@
       "title": "Damage und Flatline",
       "rulesBaseline": "0.94.0",
       "allowedMechanics": ["mechanic.damage.net", "mechanic.game_end.flatline"],
-      "deckSnapshotRefs": ["demo_runner_094", "demo_corp_094"],
+      "deckSnapshotRefs": ["demo_runner_008", "demo_corp_008"],
       "steps": [
         {
           "stepId": "damage_window",

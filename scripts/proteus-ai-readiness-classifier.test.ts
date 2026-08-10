@@ -78,14 +78,6 @@ describe("Proteus AI readiness typed classifier", () => {
   });
 
   it("leaves Proteus action capacity exclusively with the CardSpec compiler", () => {
-    const normalizerSource = readFileSync(
-      fileURLToPath(
-        new URL("./normalize-ai-action-capacity-hints.mjs", import.meta.url),
-      ),
-      "utf8",
-    );
-    expect(normalizerSource).not.toContain("onr_proteus_");
-
     const profiles = generatedArtifact.cards
       .filter((record) => record.cardId.startsWith("onr_proteus_"))
       .flatMap((record) => record.hint.actionCapacityProfiles ?? []);

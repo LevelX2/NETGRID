@@ -83,7 +83,7 @@ export function startRunnerStackSearchChoiceActivation(
   const state = host.state;
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const sourcePrefix = input.sourcePrefix ?? "v098.search_stack";
-  const choiceIdPrefix = input.choiceIdPrefix ?? "v098_search_stack";
+  const choiceIdPrefix = input.choiceIdPrefix ?? "runner_search_stack";
   const cardTypeFilter = input.filter?.cardType ?? "program";
   const hasSearchableCard = state.runner.stack.some((cardId) =>
     runnerStackSearchCardMatchesFilter(host, cardId, cardTypeFilter),

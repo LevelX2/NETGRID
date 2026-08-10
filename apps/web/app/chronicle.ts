@@ -7,7 +7,7 @@ import {
   publicCardPresentation,
   publicCardTitle,
   type PublicCardPresentationsById,
-} from "./legacy-card-definition-compatibility";
+} from "./public-card-presentation";
 import {
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,

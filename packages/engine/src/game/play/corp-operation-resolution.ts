@@ -151,34 +151,7 @@ export type CorpOperationResolutionHost = {
   };
 };
 
-const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
-  v111_core_damage_operation: {
-    name: "corp_operation_core_damage_1",
-    resolve: (host, legalAction) => {
-      host.damage.resolveDamageOperation(
-        legalAction,
-        "core",
-        1,
-        "v111_core_damage_operation" as CardDefinitionId,
-      );
-    },
-  },
-  v098_hq_rd_swap_operation: {
-    name: "corp_operation_swap_hq_rd",
-    canPlay: (host) =>
-      host.state.corp.hq.length > 1 && host.state.corp.rd.length > 0,
-    resolve: (host) => {
-      host.corp.swapCorpHqAndRdTop();
-    },
-  },
-  v099_bad_publicity_operation: {
-    name: "corp_operation_bad_publicity_credit",
-    resolve: (host) => {
-      host.economy.gainCorpCredits(3);
-      host.state.corp.badPublicity += 1;
-    },
-  },
-};
+const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {};
 
 export function corpUtilityImplementationForDefinition(
   definitionId: CardDefinitionId,

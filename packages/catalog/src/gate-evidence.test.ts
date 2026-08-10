@@ -7,7 +7,6 @@ import {
   CardSpecSupportError,
   deriveCardSpecSupportEntry,
   resolveCatalogSetName,
-  validateLoadedCardSets,
 } from "./card-set-loader";
 import {
   buildAiApprovedCardIds,
@@ -155,65 +154,6 @@ describe("card support evidence projections", () => {
     expect(entry.statuses.blocked).toBe(false);
     expect(entry.blockReasons).toBeUndefined();
     expect(entry.support.scenarioRefs).toEqual([]);
-  });
-
-  it("retains the legacy aiHintRef requirement", () => {
-    const errors = validateLoadedCardSets([
-      {
-        set: {
-          schemaVersion: "card-set-v1",
-          setId: "legacy",
-          cards: [
-            {
-              cardId: "legacy_event",
-              setId: "legacy",
-              title: "Legacy Event",
-              side: "runner",
-              type: "event",
-              subtypes: [],
-              numeric: {
-                cost: 0,
-                installCost: null,
-                memoryCost: null,
-                strength: null,
-                rezCost: null,
-                trashCost: null,
-                advancementRequirement: null,
-                agendaPoints: null,
-              },
-              text: "",
-              displayOnlyText: true,
-            },
-          ],
-        },
-        support: {
-          schemaVersion: "card-support-v1",
-          setId: "legacy",
-          cards: [
-            {
-              cardId: "legacy_event",
-              setId: "legacy",
-              statuses: {
-                human_playable: true,
-                deck_legal: true,
-                ai_supported: true,
-              },
-              support: {
-                resolverRef: "engine:legacy_event",
-                coverage: [],
-                aiHintRef: null,
-                scenarioRefs: ["legacy#scenario"],
-              },
-            },
-          ],
-        },
-      },
-    ]);
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("ai_supported needs aiHintRef"),
-      ]),
-    );
   });
 });
 

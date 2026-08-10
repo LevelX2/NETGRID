@@ -174,12 +174,8 @@ function hostFor(
         sourceCardInstanceId,
         abilityId,
         encounteredIceId,
-        bindingKind,
       ) => ({
-        abilityRef:
-          bindingKind === "card_spec_capability_key"
-            ? { sourceCardInstanceId, sourceAbilityId: abilityId }
-            : { sourceCardInstanceId, abilityId },
+        abilityRef: { sourceCardInstanceId, sourceAbilityId: abilityId },
         effectRef: `effect.${abilityId}`,
         targetRequirements: [
           { id: "encounteredIce", kind: "card", visibility: "public" },

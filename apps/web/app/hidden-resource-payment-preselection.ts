@@ -6,13 +6,10 @@ import type {
   VisibleRunnerPaymentSupportAbility,
 } from "@netgrid/shared";
 
-type PaymentSupportAbilityIdentity =
-  | { abilityIndex: number; sourceAbilityId?: never; capabilityKey?: never }
-  | {
-      sourceAbilityId: string;
-      capabilityKey: string;
-      abilityIndex?: never;
-    };
+type PaymentSupportAbilityIdentity = {
+  sourceAbilityId: string;
+  capabilityKey: string;
+};
 
 export type HiddenResourcePaymentPreselection =
   PaymentSupportAbilityIdentity & {
@@ -28,26 +25,12 @@ function samePaymentSupportAbilityIdentity(
   left: PaymentSupportAbilityIdentity,
   right: PaymentSupportAbilityIdentity,
 ): boolean {
-  const leftLegacy = Number.isInteger(left.abilityIndex);
-  const leftCanonical =
-    typeof left.sourceAbilityId === "string" &&
+  return (
     left.sourceAbilityId.length > 0 &&
-    typeof left.capabilityKey === "string" &&
-    left.capabilityKey.length > 0;
-  const rightLegacy = Number.isInteger(right.abilityIndex);
-  const rightCanonical =
-    typeof right.sourceAbilityId === "string" &&
-    right.sourceAbilityId.length > 0 &&
-    typeof right.capabilityKey === "string" &&
-    right.capabilityKey.length > 0;
-  if (leftLegacy === leftCanonical || rightLegacy === rightCanonical)
-    return false;
-  return leftLegacy
-    ? right.abilityIndex === left.abilityIndex &&
-        right.sourceAbilityId === undefined
-    : right.abilityIndex === undefined &&
-        right.sourceAbilityId === left.sourceAbilityId &&
-        right.capabilityKey === left.capabilityKey;
+    left.capabilityKey.length > 0 &&
+    right.sourceAbilityId === left.sourceAbilityId &&
+    right.capabilityKey === left.capabilityKey
+  );
 }
 
 export type PaymentSupportPreselectionResolution =
@@ -83,18 +66,12 @@ export function createHiddenResourcePaymentPreselection(input: {
     )
   )
     return null;
-  const identity: PaymentSupportAbilityIdentity =
-    input.ability.abilityIndex !== undefined
-      ? { abilityIndex: input.ability.abilityIndex }
-      : {
-          sourceAbilityId: input.ability.sourceAbilityId,
-          capabilityKey: input.ability.capabilityKey,
-        };
   return {
     matchId: input.matchId,
     side: "runner",
     sourceCardId: input.card.instanceId,
-    ...identity,
+    sourceAbilityId: input.ability.sourceAbilityId,
+    capabilityKey: input.ability.capabilityKey,
     timing: input.ability.timing,
     selectedTurnSerial: input.view.turnSerial ?? 0,
     ...(input.view.run?.runId ? { selectedRunId: input.view.run.runId } : {}),
@@ -104,13 +81,11 @@ export function createHiddenResourcePaymentPreselection(input: {
 export function hiddenResourcePaymentPreselectionEquals(
   selection: HiddenResourcePaymentPreselection | null,
   cardId: string,
-  ability: PaymentSupportAbilityIdentity | number,
+  ability: PaymentSupportAbilityIdentity,
 ): boolean {
-  const identity: PaymentSupportAbilityIdentity =
-    typeof ability === "number" ? { abilityIndex: ability } : ability;
   return Boolean(
     selection?.sourceCardId === cardId &&
-    samePaymentSupportAbilityIdentity(selection, identity),
+    samePaymentSupportAbilityIdentity(selection, ability),
   );
 }
 
@@ -159,17 +134,12 @@ export function resolveHiddenResourcePaymentPreselection(
       action.type === "activated_card_ability" &&
       action.source === selection.sourceCardId &&
       action.payload?.cardId === selection.sourceCardId &&
-      (selection.abilityIndex !== undefined
-        ? action.payload?.cardImplementationAbilityIndex ===
-            selection.abilityIndex &&
-          action.payload?.cardImplementationAbilityId === undefined
-        : action.payload?.cardImplementationAbilityIndex === undefined &&
-          action.payload?.cardImplementationAbilityId ===
-            selection.sourceAbilityId &&
-          action.payload?.cardImplementationAbilityKey ===
-            selection.capabilityKey &&
-          action.abilityRef?.sourceCardInstanceId === selection.sourceCardId &&
-          action.abilityRef.sourceAbilityId === selection.sourceAbilityId) &&
+      action.payload?.cardImplementationAbilityId ===
+        selection.sourceAbilityId &&
+      action.payload?.cardImplementationAbilityKey ===
+        selection.capabilityKey &&
+      action.abilityRef?.sourceCardInstanceId === selection.sourceCardId &&
+      action.abilityRef.sourceAbilityId === selection.sourceAbilityId &&
       action.payload?.cardImplementationAbilityTiming === selection.timing &&
       action.payload?.costPenaltySupportWindowId === windowId,
   );

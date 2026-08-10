@@ -9,8 +9,20 @@ const skinRoot = path.join(root, "data", "card-assets", "localized", "de");
 const manifestPath = path.join(skinRoot, "cards.de.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 const findings = [];
+const printingIds = new Set();
+
+if (manifest.sourceRegistry !== "@netgrid/catalog#createRuntimeCardsById") {
+  findings.push("localized manifest sourceRegistry is not the CardSpec-backed catalog");
+}
 
 for (const card of manifest.cards ?? []) {
+  if (typeof card.printingId !== "string" || card.printingId.length === 0) {
+    findings.push(`${card.cardId}: printingId fehlt`);
+  } else if (printingIds.has(card.printingId)) {
+    findings.push(`${card.cardId}: doppelte printingId ${card.printingId}`);
+  } else {
+    printingIds.add(card.printingId);
+  }
   const renderedKeys = Object.keys(card.rendered ?? {});
   if (renderedKeys.length !== 1 || renderedKeys[0] !== "full") {
     findings.push(
@@ -20,7 +32,7 @@ for (const card of manifest.cards ?? []) {
   }
   if (
     !card.rendered.full.startsWith("rendered/full/") ||
-    !card.rendered.full.endsWith(".png")
+    card.rendered.full !== `rendered/full/${card.printingId}.png`
   ) {
     findings.push(
       `${card.cardId}: unsicherer oder unerwarteter Full-Pfad ${card.rendered.full}`,
@@ -30,6 +42,8 @@ for (const card of manifest.cards ?? []) {
   if (!existsSync(path.join(skinRoot, card.rendered.full))) {
     findings.push(`${card.cardId}: Full-PNG fehlt`);
   }
+  if (card.art !== `art/${card.printingId}.png`)
+    findings.push(`${card.cardId}: Art-Pfad ist nicht aus printingId abgeleitet`);
   if (!existsSync(path.join(skinRoot, card.art)))
     findings.push(`${card.cardId}: Art-Quelle fehlt`);
 }

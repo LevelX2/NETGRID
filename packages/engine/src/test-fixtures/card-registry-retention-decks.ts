@@ -13,7 +13,7 @@ export const CARD_REGISTRY_RETENTION_STRESS_IDS = Object.freeze([
   "onr_classic_047_little-black-box",
   "onr_classic_051_vintage-camaro",
 ]);
-export const CARD_REGISTRY_RETENTION_LEGACY_CONTROL_IDS = Object.freeze([
+export const CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS = Object.freeze([
   "onr_proteus_014_chihuahua",
   "onr_v1_336_rescheduler",
   "onr_proteus_063_lisa-blight",
@@ -23,17 +23,17 @@ export const CARD_REGISTRY_RETENTION_LEGACY_CONTROL_IDS = Object.freeze([
   "onr_proteus_134_cortical-cybermodem",
   "onr_proteus_135_cortical-stimulators",
   "onr_proteus_090_highlighter",
-  "v099_host_resource",
+  "onr_v1_154_broker",
 ]);
 
-export function cardRegistryRetentionDecks(lane: "stress" | "legacy"): {
+export function cardRegistryRetentionDecks(lane: "stress" | "control"): {
   runnerDeck: DeckDefinition;
   corpDeck: DeckDefinition;
 } {
   const definitionIds =
     lane === "stress"
       ? CARD_REGISTRY_RETENTION_STRESS_IDS
-      : CARD_REGISTRY_RETENTION_LEGACY_CONTROL_IDS;
+      : CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS;
   const cardsBySide = { runner: [] as string[], corp: [] as string[] };
   for (const definitionId of definitionIds) {
     const definition = CARD_DEFINITIONS_BY_ID[definitionId];

@@ -19,7 +19,7 @@ import {
   type ChronicleContext,
   type ChronicleItem,
 } from "../../app/chronicle";
-import type { PublicCardPresentationsById } from "../../app/legacy-card-definition-compatibility";
+import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
   chronicleActionTypeBelongsToRunContext,

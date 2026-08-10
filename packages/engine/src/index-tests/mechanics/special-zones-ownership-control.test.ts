@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -99,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -128,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -324,8 +308,16 @@ describe("V1.2.2 Special Zones, Ownership and Control", () => {
   });
 
   it("keeps hosted card invariants when a controlled host is trashed", () => {
-    let state = installedResourceCorpTurn("v122-host-control-trash");
-    const resourceId = state.runner.rig.resources[0]!;
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("v122-host-control-trash"),
+    );
+    const resourceId = installRunnerResourceForTest(state, "onr_v1_154_broker");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 5;
+    state.runner.tags = 1;
     const hostedId = installRunnerProgramForTest(state, "simple_decoder");
     state.cardInstances[hostedId] = {
       ...state.cardInstances[hostedId]!,

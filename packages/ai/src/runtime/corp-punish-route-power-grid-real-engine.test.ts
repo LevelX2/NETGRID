@@ -5,7 +5,6 @@ import {
   quoteCorpPunishRoute,
 } from "@netgrid/engine";
 import {
-  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   DEMO_DECKS,
   type AiDecision,
   type CardInstanceId,
@@ -23,6 +22,7 @@ import {
 } from "./corp-punish-route-quote-input";
 
 const POWER_GRID = "onr_v1_299_power-grid-overload";
+const POWER_GRID_CAPABILITY_ID = `${POWER_GRID}:corp_utility_installed_hardware_trash_by_counter`;
 const RD_INTERFACE = "onr_v1_139_r-and-d-interface";
 const SIMPLE_HARDWARE = "simple_setup_hardware";
 const CYBERNETICS = "onr_v1_127_full-body-conversion";
@@ -101,7 +101,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
       steps: [
         {
           kind: "hardware_trash",
-          sourceCapabilityId: CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
+          sourceCapabilityId: POWER_GRID_CAPABILITY_ID,
           credits: 1,
           currentLegalAction: { actionId: actions[0]!.actionId },
           hardwareTrashProjection: {
@@ -378,9 +378,7 @@ function decisionInput(state: GameState) {
 
 function powerGridRoute(input: ReturnType<typeof decisionInput>) {
   return input.playerView.corpPunishRouteQuoteSet?.routes.find(
-    (route) =>
-      route.steps[0]?.sourceCapabilityId ===
-      CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
+    (route) => route.steps[0]?.sourceCapabilityId === POWER_GRID_CAPABILITY_ID,
   );
 }
 

@@ -6,7 +6,7 @@ import {
 } from "./card-image-lookup";
 
 describe("card image lookup", () => {
-  it("resolves registered German display-only skin assets by cardId", async () => {
+  it("resolves registered German display-only skin assets through printingId", async () => {
     const image = await lookupCardImage(
       "onr_v1_188_ai-chief-financial-officer",
       "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&v=test",
@@ -14,6 +14,7 @@ describe("card image lookup", () => {
 
     expect(image).toMatchObject({
       cardId: "onr_v1_188_ai-chief-financial-officer",
+      printingId: "onr_v1_188_ai-chief-financial-officer",
       kind: "localized_de",
       relativePath: "rendered/full/onr_v1_188_ai-chief-financial-officer.png",
       versioned: true,
@@ -34,27 +35,30 @@ describe("card image lookup", () => {
   it("joins migrated Proteus cards to local assets through the composed catalog", () => {
     const cards = [
       {
-        catalogCardId: "onr_proteus_020_digiconda",
+        catalogCardId: "definition_digiconda",
+        printingId: "onr_proteus_020_digiconda",
         title: "Digiconda",
         side: "corp",
       },
       {
         catalogCardId: "onr_proteus_080_black-widow",
+        printingId: "onr_proteus_080_black-widow",
         title: "Black Widow",
         side: "runner",
       },
       {
         catalogCardId: "onr_proteus_092_morphing-tool",
+        printingId: "onr_proteus_092_morphing-tool",
         title: "Morphing Tool",
         side: "runner",
       },
     ];
     const assets = cards.map((card) => ({
       title: card.title,
-      slug: card.catalogCardId.replace(/^onr_proteus_\d{3}_/, ""),
+      slug: card.printingId.replace(/^onr_proteus_\d{3}_/, ""),
       set: "v21-proteus",
       side: card.side,
-      relativePath: `onr-1996/${card.catalogCardId}.png`,
+      relativePath: `onr-1996/${card.printingId}.png`,
     }));
 
     expect(
@@ -72,6 +76,7 @@ describe("card image lookup", () => {
   it("fails closed for ambiguous or unsafe local asset joins", () => {
     const card = {
       catalogCardId: "onr_proteus_020_digiconda",
+      printingId: "onr_proteus_020_digiconda",
       title: "Digiconda",
       side: "corp",
     };

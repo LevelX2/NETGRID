@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS10 abgeschlossen, CS11 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS11 abgeschlossen, CS12 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -406,7 +406,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS08  | Classic-Migration                                      | completed |
 | CS09  | Proteus-Migration                                      | completed |
 | CS10  | Originalset-v1-Migration                               | completed |
-| CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | pending   |
+| CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | completed |
 | CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | pending   |
 | CS13  | Gesamtevidence, aktuelle Dokumentation und Integration | pending   |
 

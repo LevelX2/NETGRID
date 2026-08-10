@@ -904,7 +904,7 @@ function punishRouteQuote(params: {
         order: step.order,
         kind: step.kind,
         sourceCardInstanceId: step.sourceCardInstanceId,
-        sourceCapabilityBindingKind: "legacy_card_implementation_index",
+        sourceCapabilityBindingKind: "card_spec_capability_key",
         sourceCapabilityId: step.sourceCapabilityId,
       })),
     },
@@ -995,11 +995,11 @@ function punishStep(params: {
     kind: params.kind,
     sourceCardInstanceId: params.card.instanceId,
     sourceCardDefinitionId: params.card.definitionId!,
-    sourceCapabilityBindingKind: "legacy_card_implementation_index",
+    sourceCapabilityBindingKind: "card_spec_capability_key",
     sourceCapabilityId:
       params.kind === "trace_tag"
-        ? "play_operation.trace_tag"
-        : `play_operation.meat_damage_${params.credits === 3 ? 4 : 2}`,
+        ? `${params.card.definitionId!}:abilities_on_play_trace`
+        : `${params.card.definitionId!}:abilities_on_play_damage`,
     clicks: 1,
     credits: params.credits,
     ...(params.currentLegalAction

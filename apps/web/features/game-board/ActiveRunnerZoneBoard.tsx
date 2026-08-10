@@ -10,14 +10,22 @@ import type {
 } from "@netgrid/shared";
 
 import type { BoardHighlight } from "../../app/action-cues";
-import { runnerHostedCardsForHost, runnerRigCardInstanceMarker, type ActionContext } from "../../app/action-board-ui";
+import {
+  runnerHostedCardsForHost,
+  runnerRigCardInstanceMarker,
+  type ActionContext,
+} from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
 import type { FieldChoiceCardProps } from "./RunnerBoardStrips";
 import { RunnerHostedCardCluster } from "./RunnerHostedCardCluster";
 import { HandCardsRow, SideZoneFrame, zoneSideClass } from "./ZoneFrame";
-import { formatCardCount, formatHandLimitCount, zoneHighlighted } from "./board-view-helpers";
+import {
+  formatCardCount,
+  formatHandLimitCount,
+  zoneHighlighted,
+} from "./board-view-helpers";
 import {
   hiddenResourcePaymentPreselectionEquals,
   type HiddenResourcePaymentPreselection,
@@ -91,7 +99,10 @@ export function ActiveRunnerZoneBoard({
       <SideZoneFrame
         side="runner"
         label="Grip"
-        countLabel={formatHandLimitCount(view.own.gripOrHq.length, view.own.maxHandSize)}
+        countLabel={formatHandLimitCount(
+          view.own.gripOrHq.length,
+          view.own.maxHandSize,
+        )}
         iconKind="grip"
         highlighted={zoneHighlighted(activeHighlight, view.side, "grip")}
         className="runnerGripZone"
@@ -109,16 +120,21 @@ export function ActiveRunnerZoneBoard({
                 card={displayCard}
                 displayMode={cardDisplayMode}
                 hiddenSide={view.side}
-                selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                selected={
+                  selectedActionContext?.kind === "card" &&
+                  selectedActionContext.id === card.instanceId
+                }
                 actions={cardActionsFor(card)}
                 actionDisabled={actionDisabled}
                 {...(discardOption
                   ? {
                       discardShortcut: {
-                        selected: selectedDiscardOptionIdSet.has(discardOption.id),
+                        selected: selectedDiscardOptionIdSet.has(
+                          discardOption.id,
+                        ),
                         disabled: actionDisabled,
-                        onToggle: () => toggleDiscardOption(discardOption.id)
-                      }
+                        onToggle: () => toggleDiscardOption(discardOption.id),
+                      },
                     }
                   : {})}
                 onAction={onAction}
@@ -140,7 +156,11 @@ export function ActiveRunnerZoneBoard({
         collapsed={boardZoneCollapsedFor("runner:stack")}
         onToggleCollapse={() => toggleBoardZoneCollapsed("runner:stack")}
       >
-        <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(view.own.stackOrRdCount)}`}>
+        <div
+          className="runnerStackPreview"
+          style={zoneCardsStyle}
+          aria-label={`Stack ${formatCardCount(view.own.stackOrRdCount)}`}
+        >
           {view.own.stackOrRdCount > 0 ? (
             <div className="runnerStackBack" aria-hidden="true">
               <span />
@@ -165,10 +185,14 @@ export function ActiveRunnerZoneBoard({
         {view.own.heapOrArchives.length > 0 ? (
           <div
             className="runnerHeapOverlapRow"
-            style={{
-              ...zoneCardsStyle,
-              "--zone-stack-visible-steps": String(Math.max(0, view.own.heapOrArchives.length - 1))
-            } as CSSProperties}
+            style={
+              {
+                ...zoneCardsStyle,
+                "--zone-stack-visible-steps": String(
+                  Math.max(0, view.own.heapOrArchives.length - 1),
+                ),
+              } as CSSProperties
+            }
           >
             {view.own.heapOrArchives.map((card) => {
               const displayCard = enrichCard(card);
@@ -179,7 +203,10 @@ export function ActiveRunnerZoneBoard({
                   compact
                   displayMode={cardDisplayMode}
                   inactiveZone="heap"
-                  selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                  selected={
+                    selectedActionContext?.kind === "card" &&
+                    selectedActionContext.id === card.instanceId
+                  }
                   actions={cardActionsFor(card)}
                   actionDisabled={actionDisabled}
                   onAction={onAction}
@@ -190,7 +217,9 @@ export function ActiveRunnerZoneBoard({
             })}
           </div>
         ) : (
-          <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
+          <p className="archivesPileEmpty" style={zoneCardsStyle}>
+            Keine Karten im Heap.
+          </p>
         )}
       </SideZoneFrame>
       {view.own.rig ? (
@@ -209,12 +238,26 @@ export function ActiveRunnerZoneBoard({
           {ownRigGroups.length > 0 ? (
             <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
               {ownRigGroups.map((group) => (
-                <div className="rigGroup rigGroupHorizontal" key={group.key} style={ownRigCardsStyle}>
+                <div
+                  className="rigGroup rigGroupHorizontal"
+                  key={group.key}
+                  style={ownRigCardsStyle}
+                >
                   <div className="rigGroupLead">
-                    <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                    <h3
+                      className={`rigGroupSideLabel ${zoneSideClass("runner")}`}
+                    >
+                      {group.label}
+                    </h3>
                     {group.key === "program" ? (
-                      <span className="zoneLimitBadge rigMemoryBadge" aria-label={`MU ${view.own.memoryUsed ?? 0} von ${view.own.memoryLimit ?? 0}`}>
-                        MU <strong>{view.own.memoryUsed ?? 0}/{view.own.memoryLimit ?? 0}</strong>
+                      <span
+                        className="zoneLimitBadge rigMemoryBadge"
+                        aria-label={`MU ${view.own.memoryUsed ?? 0} von ${view.own.memoryLimit ?? 0}`}
+                      >
+                        MU{" "}
+                        <strong>
+                          {view.own.memoryUsed ?? 0}/{view.own.memoryLimit ?? 0}
+                        </strong>
                       </span>
                     ) : null}
                   </div>
@@ -225,23 +268,31 @@ export function ActiveRunnerZoneBoard({
                           <RunnerHostedCardCluster
                             key={card.instanceId}
                             hostCard={card}
-                            hostedCards={runnerHostedCardsForHost(runnerRig, card.instanceId)}
+                            hostedCards={runnerHostedCardsForHost(
+                              runnerRig,
+                              card.instanceId,
+                            )}
                             renderCard={(rigCard) => {
                               const displayCard = enrichCard(rigCard);
                               return (
                                 <CardView
                                   card={displayCard}
                                   displayMode={cardDisplayMode}
-                                  instanceMarker={runnerRigCardInstanceMarker(runnerRig, rigCard.instanceId)}
-                                  selected={selectedActionContext?.kind === "card" && selectedActionContext.id === rigCard.instanceId}
+                                  instanceMarker={runnerRigCardInstanceMarker(
+                                    runnerRig,
+                                    rigCard.instanceId,
+                                  )}
+                                  selected={
+                                    selectedActionContext?.kind === "card" &&
+                                    selectedActionContext.id ===
+                                      rigCard.instanceId
+                                  }
                                   actions={cardActionsFor(rigCard)}
                                   actionDisabled={actionDisabled}
                                   paymentSupportShortcuts={(
                                     rigCard.runnerPaymentSupportAbilities ?? []
                                   ).map((ability) => ({
-                                    identityKey:
-                                      ability.sourceAbilityId ??
-                                      String(ability.abilityIndex),
+                                    identityKey: ability.sourceAbilityId,
                                     selected:
                                       hiddenResourcePaymentPreselectionEquals(
                                         paymentSupportPreselection,
@@ -269,14 +320,19 @@ export function ActiveRunnerZoneBoard({
                         );
                       })
                     ) : (
-                      <span className="rigProgramEmptyPlaceholder" aria-hidden="true" />
+                      <span
+                        className="rigProgramEmptyPlaceholder"
+                        aria-hidden="true"
+                      />
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Rig.</p>
+            <p className="archivesPileEmpty" style={zoneCardsStyle}>
+              Keine Karten im Rig.
+            </p>
           )}
         </SideZoneFrame>
       ) : null}

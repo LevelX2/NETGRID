@@ -104,6 +104,38 @@ export function applyCreditGain(
   };
 }
 
+export function prepareRunnerRunTemporaryCreditGain(
+  state: GameState,
+  request: CreditGainRequest & {
+    side: "runner";
+    destination: Extract<
+      CreditGainDestination,
+      { kind: "runner_run_temporary" }
+    >;
+  },
+): CreditGainResult {
+  assertCreditGainRequest(request);
+  if (state.run)
+    throw new Error(
+      "Temporäre Run-Credits müssen vor Beginn ihres neuen Runs vorbereitet werden.",
+    );
+  const modifiers = activeCreditGainModifiers(state, request);
+  const requestedAmount = request.baseAmount + modifiers.amount;
+  return {
+    side: "runner",
+    baseAmount: request.baseAmount,
+    bonusAmount: modifiers.amount,
+    requestedAmount,
+    interceptedAmount: 0,
+    creditedAmount: requestedAmount,
+    creditsBefore: 0,
+    creditsAfter: requestedAmount,
+    destination: request.destination,
+    countsAsStandardGain: true,
+    modifierSourceDefinitionIds: modifiers.sourceDefinitionIds,
+  };
+}
+
 export function creditGainPublicPayload(
   result: CreditGainResult,
 ): Record<string, string | number | boolean> {

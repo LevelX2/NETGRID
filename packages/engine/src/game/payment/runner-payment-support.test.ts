@@ -63,18 +63,15 @@ describe("runner payment support", () => {
             ],
           },
         }) as never,
-      legacyImplementationForDefinitionId: () => undefined,
     } satisfies CardCapabilityAuthoritySources;
     expect(
       runnerCostPenaltySupportCreditCapacity(state, canonicalSources),
     ).toBe(2);
 
-    const hybridSources = {
-      ...canonicalSources,
-      legacyImplementationForDefinitionId: () => ({ abilities: [] }) as never,
-    } satisfies CardCapabilityAuthoritySources;
-    expect(() =>
-      runnerCostPenaltySupportCreditCapacity(state, hybridSources),
-    ).toThrow(/gleichzeitig CardSpec- und Legacy/);
+    expect(
+      runnerCostPenaltySupportCreditCapacity(state, {
+        engineCardForDefinitionId: () => undefined,
+      }),
+    ).toBe(0);
   });
 });

@@ -56,7 +56,6 @@ export type PendingChoiceResolutionHost = {
     resolveNonSearchProgramInstallMemoryChoice: HostFn<void>;
     resolveStackInstallRunCleanupChoice: HostFn<void>;
     resolvePaidSourceReturnToGripChoice: HostFn<void>;
-    resolveRunnerHostingChoice: HostFn<void>;
     resolveIncubatorTransformChoice: HostFn<void>;
     resolveVirusCounterPurgePreserveChoice: HostFn<void>;
     resolveRunnerProgramReturnChoice: HostFn<void>;
@@ -192,7 +191,6 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveStackInstallRunCleanupChoice;
   const resolvePaidSourceReturnToGripChoice =
     host.hiddenZone.resolvePaidSourceReturnToGripChoice;
-  const resolveRunnerHostingChoice = host.hiddenZone.resolveRunnerHostingChoice;
   const resolveIncubatorTransformChoice =
     host.hiddenZone.resolveIncubatorTransformChoice;
   const resolveVirusCounterPurgePreserveChoice =
@@ -664,10 +662,6 @@ export function resolvePendingChoice(
       legalAction,
       playerAction,
     );
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v099.host_program")) {
-    resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v191.incubator_transform")) {

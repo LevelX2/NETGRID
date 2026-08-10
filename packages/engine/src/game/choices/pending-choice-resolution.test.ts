@@ -313,7 +313,6 @@ function pendingChoiceHost(
       resolvePaidSourceReturnToGripChoice: unexpected(
         "resolvePaidSourceReturnToGripChoice",
       ),
-      resolveRunnerHostingChoice: unexpected("resolveRunnerHostingChoice"),
       resolveIncubatorTransformChoice: unexpected(
         "resolveIncubatorTransformChoice",
       ),

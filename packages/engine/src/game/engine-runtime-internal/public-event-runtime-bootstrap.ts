@@ -609,78 +609,7 @@ type RunnerEventResolver = {
   resolve: (state: GameState, legalAction: LegalAction) => void;
 };
 
-export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
-  v097_deep_dive_event: {
-    name: "runner_event_run_multiaccess_2",
-    startsRun: true,
-    requiresServer: true,
-    resolve: (state, legalAction) => {
-      runtimePorts.startRun(
-        state,
-        String(legalAction.payload?.serverId) as Exclude<
-          ServerId,
-          "new_remote"
-        >,
-        undefined,
-        2,
-      );
-    },
-  },
-  v098_stack_search_event: {
-    name: "runner_event_search_stack_program",
-    canPlay: (state) =>
-      state.runner.stack.some(
-        (id) => definitionFor(state, id).type === "program",
-      ),
-    resolve: (state, legalAction) => {
-      startRunnerStackSearchChoiceActivation(
-        runtimePorts.hiddenZoneSearchActivationHandlerHost(state, legalAction),
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "search_stack",
-      };
-    },
-  },
-  v098_stack_arrange_event: {
-    name: "runner_event_arrange_stack_top_2",
-    canPlay: (state) => state.runner.stack.length >= 2,
-    resolve: (state, legalAction) => {
-      startRunnerStackArrangeChoice(
-        runtimePorts.hiddenZoneArrangeChoiceHandlerHost(state, legalAction),
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "arrange_stack",
-      };
-    },
-  },
-  v098_reveal_top_event: {
-    name: "runner_event_reveal_stack_top",
-    canPlay: (state) => state.runner.stack.length > 0,
-    resolve: (state, legalAction) => {
-      runtimePorts.revealRunnerStackTop(state, legalAction);
-    },
-  },
-  v098_expose_event: {
-    name: "runner_event_expose_unrezzed_server_card",
-    requiresServer: true,
-    canPlayForServer: (state, serverId) =>
-      runtimePorts.exposedCorpCardInServer(state, serverId) !== undefined,
-    resolve: (state, legalAction) => {
-      runtimePorts.exposeCorpCardInServer(
-        state,
-        String(legalAction.payload?.serverId) as Exclude<
-          ServerId,
-          "new_remote"
-        >,
-        legalAction,
-      );
-    },
-  },
-};
+export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {};
 
 export function validateDeckDefinition(
   deck: DeckDefinition,

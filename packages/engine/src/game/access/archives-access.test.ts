@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  createGameAfterSetup,
   getLegalActions,
   getPlayerView,
   hashState,
@@ -12,13 +13,21 @@ import {
   MECHANIC_SMOKE_GAMES,
   moveCorpCardToArchives,
   toRunnerTurn,
-  v097RunGame,
   v199CardReleaseGame,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 
+function currentRunGame(seed: string) {
+  return createGameAfterSetup({
+    seed,
+    runnerDeckId: "demo_runner_008",
+    corpDeckId: "demo_corp_008",
+    agendaPointsToWin: 7,
+  });
+}
+
 describe("V1.1.2 Full Archives Access", () => {
   it("turns existing facedown Archives cards faceup at breach start and skips cards without decisions", () => {
-    let state = toRunnerTurn(v097RunGame("v112-archives-queue"));
+    let state = toRunnerTurn(currentRunGame("v112-archives-queue"));
     const faceupOperation = moveCorpCardToArchives(
       state,
       "simple_economy_operation",
@@ -101,7 +110,7 @@ describe("V1.1.2 Full Archives Access", () => {
   });
 
   it("preserves Archives queue progress, forbids Archives trash, and replays deterministically", () => {
-    let state = toRunnerTurn(v097RunGame("v112-archives-access"));
+    let state = toRunnerTurn(currentRunGame("v112-archives-access"));
     state.runner.credits = 10;
     const faceupOperation = moveCorpCardToArchives(
       state,
@@ -173,15 +182,24 @@ describe("V1.1.2 Full Archives Access", () => {
   });
 
   it("auto-accesses Archives assets whose access effects are ignored there", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("v112-archives-no-trash"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v112-archives-no-trash"),
+    );
     state.runner.credits = 10;
     const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
     keepOnlyCorpArchivesCards(state, [setupId]);
 
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
 
     const actions = getLegalActions(state, "runner");
-    expect(actions.some((action) => action.type === "trash_accessed_card")).toBe(false);
+    expect(
+      actions.some((action) => action.type === "trash_accessed_card"),
+    ).toBe(false);
     expect(actions.some((action) => action.type === "access_card")).toBe(false);
     expect(state.run).toBeUndefined();
     expect(state.corp.archives).toEqual([setupId]);
@@ -206,8 +224,7 @@ describe("V1.1.2 Full Archives Access", () => {
       state,
       "runner",
       (action) =>
-        action.type === "start_run" &&
-        action.payload?.serverId === "archives",
+        action.type === "start_run" && action.payload?.serverId === "archives",
     );
 
     expect(state.run).toBeUndefined();
@@ -226,7 +243,9 @@ describe("V1.1.2 Full Archives Access", () => {
 
   it("auto-accesses Experimental AI in Archives when no installed program can be trashed", () => {
     let state = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.agendaScoring("v112-archives-experimental-ai-no-target"),
+      MECHANIC_SMOKE_GAMES.agendaScoring(
+        "v112-archives-experimental-ai-no-target",
+      ),
     );
     const programTrashByAdvancementAssetId = moveCorpCardToArchives(
       state,
@@ -257,7 +276,9 @@ describe("V1.1.2 Full Archives Access", () => {
 
   it("auto-accesses Experimental AI in Archives even when an installed program exists", () => {
     let state = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.agendaScoring("v112-archives-experimental-ai-target"),
+      MECHANIC_SMOKE_GAMES.agendaScoring(
+        "v112-archives-experimental-ai-target",
+      ),
     );
     const programId = installRunnerProgramForTest(state, "simple_decoder");
     const programTrashByAdvancementAssetId = moveCorpCardToArchives(

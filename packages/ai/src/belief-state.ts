@@ -215,7 +215,6 @@ export type BeliefState = {
 };
 
 const BELIEF_VERSION_PREFIX = "belief-v1.4.4";
-const RD_SWAP_OPERATION_DEFINITION_ID = "v098_hq_rd_swap_operation";
 const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
   "belief_warning:hq_all_known_contradiction";
 
@@ -2428,8 +2427,6 @@ function invalidationReasonForEvent(
     (family === "install" || family === "advance")
   )
     return "remote_state_changed";
-  if (publicCardOrSourceDefinitionId(event) === RD_SWAP_OPERATION_DEFINITION_ID)
-    return "rd_swap_operation";
   return undefined;
 }
 
@@ -2470,11 +2467,6 @@ function eventFamily(
     if (revealKind(event) === "reveal") return "reveal";
   }
 
-  if (
-    actionType === "play_operation" &&
-    publicCardOrSourceDefinitionId(event) === RD_SWAP_OPERATION_DEFINITION_ID
-  )
-    return "swap";
   if (revealKind(event) === "reveal") return "reveal";
   if (revealKind(event) === "expose") return "expose";
   return "other";

@@ -49,7 +49,7 @@ function imageResponseHeaders(
 
 function imageValidators(image: CardImageLookupResult, fileStat: Awaited<ReturnType<typeof stat>>): { etag: string; lastModified: string } {
   const hash = createHash("sha256")
-    .update(`${image.kind}:${image.cardId}:${Number(fileStat.size)}:${Math.floor(Number(fileStat.mtimeMs))}`)
+    .update(`${image.kind}:${image.printingId}:${Number(fileStat.size)}:${Math.floor(Number(fileStat.mtimeMs))}`)
     .digest("base64url")
     .slice(0, 24);
   return {

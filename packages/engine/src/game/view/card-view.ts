@@ -409,12 +409,8 @@ function visibleRunnerPaymentSupportAbilities(
       );
       return [
         {
-          ...(binding.kind === "legacy_card_implementation_index"
-            ? { abilityIndex: binding.abilityIndex }
-            : {
-                sourceAbilityId: binding.sourceAbilityId,
-                capabilityKey: binding.capabilityKey,
-              }),
+          sourceAbilityId: binding.sourceAbilityId,
+          capabilityKey: binding.capabilityKey,
           timing: ability.timing,
           label: ability.label ?? `${definition.title}: Fähigkeit nutzen`,
           creditCost,

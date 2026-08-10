@@ -157,10 +157,7 @@ function abilityBindingForAction(
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
 ): ResolvedAbilityBinding | undefined {
   if (action.abilityRef) assertAbilityRefIdentity(action.abilityRef);
-  const canonicalAbilityRef =
-    action.abilityRef && "sourceAbilityId" in action.abilityRef
-      ? action.abilityRef
-      : undefined;
+  const canonicalAbilityRef = action.abilityRef;
   const canonicalPayloadId = stringPayload(
     action,
     "cardImplementationAbilityId",
@@ -214,14 +211,6 @@ function abilityBindingForAction(
       evidence: [`AI038 canonical AbilityRef: ${canonicalSourceAbilityId}`],
     };
   }
-  if (action.abilityRef?.abilityId) {
-    return {
-      abilityId: action.abilityRef.abilityId,
-      method: "explicit_ability_id",
-      evidence: [`AI038 abilityRef abilityId: ${action.abilityRef.abilityId}`],
-    };
-  }
-
   const payloadAbilityId = stringPayload(action, "abilityId");
   if (payloadAbilityId !== undefined) {
     return {

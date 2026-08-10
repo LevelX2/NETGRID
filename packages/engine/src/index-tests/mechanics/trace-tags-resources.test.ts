@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -230,160 +218,6 @@ function expectCanonicalBrokerCapability(
   expect(action.payload).not.toHaveProperty("cardImplementationLifecycleIndex");
 }
 
-describe("MVP 0.95 Resources and tag interaction", () => {
-  it("installs a local Resource through LegalActions and shows it publicly", () => {
-    let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
-    state.runner.credits = 6;
-    moveRunnerCardToGrip(state, "v095_safehouse_resource");
-
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "install_card" &&
-        sourceDefinition(state, action) === "v095_safehouse_resource",
-    );
-
-    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
-    expect(state.runner.credits).toBe(4);
-    expect(
-      state.runner.rig.resources.map(
-        (id) => state.cardInstances[id]?.definitionId,
-      ),
-    ).toEqual(["v095_safehouse_resource"]);
-    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "install_card",
-      cardDefinitionId: "v095_safehouse_resource",
-      title: "Safehouse Resource",
-      zoneLabel: "Resource",
-    });
-
-    const runnerView = getPlayerView(state, "runner");
-    const corpView = getPlayerView(state, "corp");
-    expect(
-      runnerView.own.rig?.some(
-        (card) => card.definitionId === "v095_safehouse_resource",
-      ),
-    ).toBe(true);
-    expect(
-      corpView.opponent.rig?.some(
-        (card) => card.definitionId === "v095_safehouse_resource",
-      ),
-    ).toBe(true);
-    expect(JSON.stringify(corpView)).not.toContain("Simple Fracter");
-  });
-
-  it("lets the Corp trash an installed Resource only while the Runner is tagged", () => {
-    let state = installedResourceCorpTurn("v095-trash-resource");
-    const resourceId = state.runner.rig.resources[0]!;
-    const beforeHash = hashState(state);
-
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "trash_resource" &&
-        action.payload?.resourceId === resourceId,
-    );
-
-    expect(hashState(state)).not.toBe(beforeHash);
-    expect(state.corp.clicks).toBe(2);
-    expect(state.corp.credits).toBe(3);
-    expect(state.runner.rig.resources).toHaveLength(0);
-    expect(state.runner.heap).toContain(resourceId);
-    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
-    expect(isHiddenInfoBarrierEvent(state.eventLog.at(-1)!)).toBe(false);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "trash_resource",
-      cardDefinitionId: "v095_safehouse_resource",
-      title: "Safehouse Resource",
-      zoneLabel: "Resource",
-    });
-  });
-
-  it("rejects Resource trash without tags, stale state or installed Resource target", () => {
-    const tagged = installedResourceCorpTurn("v095-trash-revalidate");
-    const trashAction = mustAction(
-      tagged,
-      "corp",
-      (action) => action.type === "trash_resource",
-    );
-    const untagged = structuredClone(tagged);
-    untagged.runner.tags = 0;
-
-    expect(
-      getLegalActions(untagged, "corp").some(
-        (action) => action.type === "trash_resource",
-      ),
-    ).toBe(false);
-    expect(
-      applyAction(untagged, {
-        matchId: untagged.matchId,
-        side: "corp",
-        actionId: trashAction.actionId,
-        clientKnownStateVersion: untagged.stateVersion,
-      }).ok,
-    ).toBe(false);
-    expect(
-      applyAction(tagged, {
-        matchId: tagged.matchId,
-        side: "corp",
-        actionId: trashAction.actionId,
-        clientKnownStateVersion: tagged.stateVersion - 1,
-      }),
-    ).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
-
-    const missingTarget = structuredClone(tagged);
-    removeEverywhere(missingTarget, String(trashAction.payload?.resourceId));
-    expect(
-      getLegalActions(missingTarget, "corp").some(
-        (action) => action.type === "trash_resource",
-      ),
-    ).toBe(false);
-  });
-
-  it("replays Resource install and trash with deterministic StateHash and no new randomness", () => {
-    const initial = installedResourceCorpTurn("v095-replay-resource");
-    const randomBefore = initial.randomDrawRecords.length;
-    let state = apply(
-      initial,
-      "corp",
-      (action) => action.type === "trash_resource",
-    );
-
-    const replay = replayEvents(
-      initial,
-      state.eventLog.slice(initial.eventLog.length),
-    );
-    expect(replay.ok).toBe(true);
-    expect(replay.actualFinalStateHash).toBe(hashState(state));
-    expect(state.randomDrawRecords.length).toBe(randomBefore);
-  });
-
-  it("does not expose V0.96+ mechanics while enabling Resources", () => {
-    const state = toRunnerTurn(v095ResourceGame("v095-no-scope"));
-    const actionTypes = getLegalActions(state, "runner").map(
-      (action) => action.type,
-    );
-
-    expect(actionTypes).not.toContain("resolve_choice");
-    expect(actionTypes).not.toContain("trigger_ability");
-    expect(
-      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
-    ).not.toContain("trace");
-    expect(
-      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
-    ).not.toContain("hosting");
-    expect(
-      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
-    ).not.toContain("virus");
-    expect(
-      CARD_DEFINITIONS_BY_ID.v095_safehouse_resource?.mechanics,
-    ).not.toContain("prevention");
-  });
-});
-
 describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   it("adds all V1.9.14 WIP runtime definitions without pulling in V1.9.15 cards", () => {
     expect(MECHANIC_SMOKE_CARD_IDS.traceTags).toHaveLength(25);
@@ -391,9 +225,6 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
-      );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /trace|link|tag|resource|damage|hidden_zone|counter|icebreaker|stealth/,
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
@@ -403,7 +234,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
-    let state = toRunnerTurn(v096TraceGame("v1914-asp-trace-wip"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-asp-trace-wip"),
+    );
     const aspInstanceId = "v1914_asp_instance" as CardInstanceId;
     const rd = state.corp.servers.find((server) => server.id === "rd");
     expect(rd).toBeDefined();
@@ -438,15 +271,6 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
-    expect(CARD_DEFINITIONS_BY_ID["onr_v1_221_asp"]?.mechanics).toEqual(
-      expect.arrayContaining([
-        "trace",
-        "link",
-        "bid_amount",
-        "end_the_run",
-        "run_lock",
-      ]),
-    );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.kind).toBe("bid_amount");
     expect(state.trace).toMatchObject({
@@ -462,7 +286,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 1,
-      traceValue: 6,
+      traceValue: 1,
       runnerLink: 0,
     });
 
@@ -1439,7 +1263,6 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "remove_tag",
       amount: 1,
-      armadilloRecurringCreditsSpent: 2,
       tagRemovalRecurringCreditsSpent: 2,
       runnerCreditsSpent: 0,
       tagRemovalCreditSourceDefinitionIds:

@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
-import type { PublicCardPresentationsById } from "../../app/legacy-card-definition-compatibility";
+import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 
 const EMPTY_CARD_PRESENTATIONS: PublicCardPresentationsById = {};
 

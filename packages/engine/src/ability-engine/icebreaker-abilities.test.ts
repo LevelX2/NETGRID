@@ -141,46 +141,4 @@ describe("icebreaker ability identity binding", () => {
     ).toThrow();
   });
 
-  it("preserves the legacy ability id and rejects canonical payload hybrids", () => {
-    const legacy = {
-      id: "legacy_pump",
-      type: "pump_strength",
-      cost: { credits: 1 },
-      amount: 1,
-      timingPoint: "run.encounter_ice",
-      source: "card_implementation",
-    } satisfies RuntimeIcebreakerAbility;
-    const legalAction = {
-      ...actionFor(canonicalPump("unused", 1)),
-      payload: { breakerId },
-      abilityRef: {
-        sourceCardInstanceId: breakerId,
-        abilityId: legacy.id,
-      },
-    } satisfies LegalAction;
-    expect(
-      resolveIcebreakerAbilityBinding(
-        [legacy],
-        definitionId,
-        breakerId,
-        legalAction,
-        "pump_strength",
-      ),
-    ).toBe(legacy);
-    expect(() =>
-      resolveIcebreakerAbilityBinding(
-        [legacy],
-        definitionId,
-        breakerId,
-        {
-          ...legalAction,
-          payload: {
-            ...legalAction.payload,
-            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          },
-        },
-        "pump_strength",
-      ),
-    ).toThrow();
-  });
 });

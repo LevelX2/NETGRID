@@ -42,7 +42,6 @@ export interface ChoiceHiddenZoneRuntimeLinks {
   resolveIncubatorTransformChoice: ChoiceHiddenZoneRuntimePort["resolveIncubatorTransformChoice"];
   resolvePaidSourceReturnToGripChoice: ChoiceHiddenZoneRuntimePort["resolvePaidSourceReturnToGripChoice"];
   resolveRunnerProgramReturnChoice: ChoiceHiddenZoneRuntimePort["resolveRunnerProgramReturnChoice"];
-  resolveRunnerHostingChoice: ChoiceHiddenZoneRuntimePort["resolveRunnerHostingChoice"];
   resolveRunnerInstalledConnectionTrashBadPublicityChoice: ChoiceHiddenZoneRuntimePort["resolveRunnerInstalledConnectionTrashBadPublicityChoice"];
   resolveTrashUnrezzedIceChoice: ChoiceHiddenZoneRuntimePort["resolveTrashUnrezzedIceChoice"];
   resolveStackInstallRunCleanupChoice: ChoiceResolver;
@@ -53,7 +52,6 @@ export interface ChoiceHiddenZoneRuntimeLinks {
   startPayRezCostToTrashRezzedIceChoice: ChoiceHiddenZoneRuntimePort["startPayRezCostToTrashRezzedIceChoice"];
   startCorpChoiceRezOrTrashIceChoice: ChoiceHiddenZoneRuntimePort["startCorpChoiceRezOrTrashIceChoice"];
   startPaidSourceReturnToGripChoice: ChoiceHiddenZoneRuntimePort["startPaidSourceReturnToGripChoice"];
-  startRunnerHostingChoice: ChoiceHiddenZoneRuntimePort["startRunnerHostingChoice"];
   startTrashUnrezzedIceChoice: ChoiceHiddenZoneRuntimePort["startTrashUnrezzedIceChoice"];
   continueRandomDiceLoop: ChoiceHiddenZoneRuntimePort["continueRandomDiceLoop"];
   creditTextForPrompt: ChoiceHiddenZoneRuntimePort["creditTextForPrompt"];

@@ -110,7 +110,6 @@ export function createPendingChoiceRuntimeHosts(
     resolveP358HiddenReplacementChoice,
     resolveRandomDiceLoopEvent,
     resolveRunnerProgramReturnChoice,
-    resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveTrashUnrezzedIceChoice,
     resolveStackInstallRunCleanupChoice,
@@ -130,7 +129,6 @@ export function createPendingChoiceRuntimeHosts(
     startCorpChoiceRezOrTrashIceChoice,
     startMultiExposeInstalledCorpCardsChoice,
     startPaidSourceReturnToGripChoice,
-    startRunnerHostingChoice,
     startTrashUnrezzedIceChoice,
     startRunnerProgramFreeMemoryChoice,
     startRandomDiceSplitChoice,
@@ -688,7 +686,6 @@ export function createPendingChoiceRuntimeHosts(
         resolveNonSearchProgramInstallMemoryChoice,
         resolveStackInstallRunCleanupChoice,
         resolvePaidSourceReturnToGripChoice,
-        resolveRunnerHostingChoice,
         resolveIncubatorTransformChoice,
         resolveVirusCounterPurgePreserveChoice:
           deps.resolveVirusCounterPurgePreserveChoice,

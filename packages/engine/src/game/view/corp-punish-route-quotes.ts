@@ -1,6 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
-  CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   CORP_PUNISH_ROUTE_QUOTE_SCHEMA_VERSION,
   type CorpPunishRouteIncompleteReason,
   type CorpPunishRouteQuote,
@@ -11,7 +10,11 @@ import {
   type GameState,
   type LegalAction,
 } from "@netgrid/shared";
-import { CapabilityIdentityError } from "@netgrid/cards/engine";
+import {
+  CapabilityIdentityError,
+  canonicalCapabilityId,
+  engineCardByDefinitionId,
+} from "@netgrid/cards/engine";
 import type {
   CardConditionImplementation,
   CardEffectImplementation,
@@ -648,7 +651,7 @@ function certifyStep(
   if (definition.type !== "operation") {
     return { ok: false, reason: "source_capability_unsupported" };
   }
-  if (request.sourceCapabilityId === CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID) {
+  if (request.kind === "hardware_trash") {
     return certifyHardwareTrashStep(state, request, definition);
   }
   let capability: OnPlayCardAbilityImplementation | undefined;
@@ -709,16 +712,19 @@ function certifyHardwareTrashStep(
 ):
   | { ok: true; step: CertifiedStep }
   | { ok: false; reason: CorpPunishRouteIncompleteReason } {
-  if (
-    request.sourceCapabilityBindingKind !== "legacy_card_implementation_index"
-  ) {
+  if (request.sourceCapabilityBindingKind !== "card_spec_capability_key") {
     return { ok: false, reason: "source_capability_missing" };
   }
   if (request.kind !== "hardware_trash") {
     return { ok: false, reason: "source_effects_unsupported" };
   }
   const utility = cardImplementationForDefinitionId(definition.id)?.corpUtility;
+  const canonicalUtility = engineCardByDefinitionId(definition.id)?.engine
+    .corpUtility;
   if (
+    canonicalUtility?.kind !== "installed_hardware_trash_by_counter" ||
+    request.sourceCapabilityId !==
+      canonicalCapabilityId(definition.id, canonicalUtility.capabilityKey) ||
     utility?.kind !== "installed_hardware_trash_by_counter" ||
     utility.excludesSubtype !== "cybernetics" ||
     utility.visibility !== "public"
@@ -896,7 +902,7 @@ function exactRequestedHardwareTrashAction(
 
 function onPlayCapability(
   definition: (typeof CARD_DEFINITIONS_BY_ID)[string] & {},
-  bindingKind: "legacy_card_implementation_index" | "card_spec_capability_key",
+  bindingKind: "card_spec_capability_key",
   capabilityId: string,
 ): OnPlayCardAbilityImplementation | undefined {
   return onPlayAbilityForCapabilityIdentity(definition, {

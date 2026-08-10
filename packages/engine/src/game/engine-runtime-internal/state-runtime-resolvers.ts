@@ -385,7 +385,6 @@ import {
 } from "../run/run-duration-payment";
 import {
   runnerInstallPaymentSourcePaymentsFromPayload,
-  runnerProgramInstallAutomaticCreditSourceIds,
   runnerProgramInstallOptionalCreditSourceIds,
   type RunnerInstallCreditSpendResult,
 } from "../install/runner-program-install-payment";
@@ -1257,7 +1256,6 @@ export function createStateRuntimeResolvers(
   function availableRunnerProgramInstallCredits(state: GameState): number {
     return (
       state.runner.credits +
-      runnerRecurringCredits(state) +
       restrictedHostedCredits(state, "install_programs", {
         installCardType: "program",
       }) +
@@ -1307,19 +1305,6 @@ export function createStateRuntimeResolvers(
       legalAction,
       amount,
     );
-  }
-
-  function runnerRecurringCredits(state: GameState): number {
-    return runnerProgramInstallRecurringCreditSourceIds(state).reduce(
-      (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
-      0,
-    );
-  }
-
-  function runnerProgramInstallRecurringCreditSourceIds(
-    state: GameState,
-  ): CardInstanceId[] {
-    return runnerProgramInstallAutomaticCreditSourceIds(state);
   }
 
   function spendRunnerInstallCredits(
@@ -1400,20 +1385,6 @@ export function createStateRuntimeResolvers(
         remaining -= temporary;
         result.temporaryCreditsSpent = temporary;
       }
-      for (const cardId of runnerProgramInstallRecurringCreditSourceIds(
-        state,
-      )) {
-        if (remaining <= 0) break;
-        const available = hostedPaymentCredits(state, cardId);
-        const spent = Math.min(available, remaining);
-        if (spent > 0) {
-          spendHostedPaymentCredits(state, cardId, spent);
-          remaining -= spent;
-          result.hostedCreditsSpent += spent;
-          result.recurringCreditsSpent += spent;
-          sourceDefinitionIds.add(definitionFor(state, cardId).id);
-        }
-      }
       spendCredits(state, "runner", remaining);
       result.normalCreditsSpent = remaining;
       result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
@@ -1450,18 +1421,6 @@ export function createStateRuntimeResolvers(
     result.hostedCreditsSpent += restricted.spent;
     for (const definitionId of restricted.sourceDefinitionIds)
       sourceDefinitionIds.add(definitionId);
-    for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
-      if (remaining <= 0) break;
-      const available = hostedPaymentCredits(state, cardId);
-      const spent = Math.min(available, remaining);
-      if (spent > 0) {
-        spendHostedPaymentCredits(state, cardId, spent);
-        remaining -= spent;
-        result.hostedCreditsSpent += spent;
-        result.recurringCreditsSpent += spent;
-        sourceDefinitionIds.add(definitionFor(state, cardId).id);
-      }
-    }
     spendCredits(state, "runner", remaining);
     result.normalCreditsSpent = remaining;
     result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
@@ -1496,7 +1455,6 @@ export function createStateRuntimeResolvers(
       throw new Error("Der Runner kann die Tag-Entfernung nicht bezahlen.");
     let remaining = amount;
     let recurringSpent = 0;
-    let armadilloRecurringSpent = 0;
     const recurringSourceDefinitionIds: string[] = [];
     for (const cardId of runnerTagRemovalRecurringCreditSourceIds(state)) {
       if (remaining <= 0) break;
@@ -1504,12 +1462,6 @@ export function createStateRuntimeResolvers(
       if (spent <= 0) continue;
       spendHostedPaymentCredits(state, cardId, spent);
       const sourceDefinitionId = definitionFor(state, cardId).id;
-      if (
-        restrictedHostedCreditSourceForDefinition(
-          definitionFor(state, cardId),
-        )?.usableFor.includes("remove_tags")
-      )
-        armadilloRecurringSpent += spent;
       recurringSourceDefinitionIds.push(sourceDefinitionId);
       recurringSpent += spent;
       remaining -= spent;
@@ -1520,9 +1472,6 @@ export function createStateRuntimeResolvers(
       removeTagAmount: 1,
       ...(recurringSpent > 0
         ? {
-            ...(armadilloRecurringSpent > 0
-              ? { armadilloRecurringCreditsSpent: armadilloRecurringSpent }
-              : {}),
             tagRemovalRecurringCreditsSpent: recurringSpent,
             runnerCreditsSpent: remaining,
             tagRemovalCreditSourceDefinitionIds:
@@ -1618,8 +1567,6 @@ export function createStateRuntimeResolvers(
     runnerCostPenaltySupportCreditCapacity,
     openRunnerCostPenaltySupportWindow,
     closeRunnerCostPenaltySupportWindowForPayment,
-    runnerRecurringCredits,
-    runnerProgramInstallRecurringCreditSourceIds,
     spendRunnerInstallCredits,
     runnerTagRemovalRecurringCreditSourceIds,
     runnerTagRemovalRecurringCredits,

@@ -569,18 +569,13 @@ function invocationFor(
     ...(candidate.sourceCardInstanceId
       ? { sourceCardInstanceId: candidate.sourceCardInstanceId }
       : {}),
-    ...(candidate.abilityId
+    ...(candidate.abilityId &&
+    candidate.abilityBindingMethod === "canonical_capability_id"
       ? {
-          sourceAbilityBinding:
-            candidate.abilityBindingMethod === "canonical_capability_id"
-              ? {
-                  kind: "card_spec_capability_key" as const,
-                  sourceAbilityId: candidate.abilityId,
-                }
-              : {
-                  kind: "legacy_ability_id" as const,
-                  abilityId: candidate.abilityId,
-                },
+          sourceAbilityBinding: {
+            kind: "card_spec_capability_key" as const,
+            sourceAbilityId: candidate.abilityId,
+          },
         }
       : {}),
     ...(targetIds.length > 0

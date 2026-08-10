@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -1242,16 +1243,13 @@ export function createCorpRuntimeResolvers(
 
   function abilityMetadata(
     sourceCardInstanceId: CardInstanceId,
-    abilityId: string,
+    sourceAbilityId: string,
     encounteredIceId?: CardInstanceId,
-    bindingKind?: "card_spec_capability_key",
   ): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
+    parseCanonicalCapabilityId(sourceAbilityId);
     return {
-      abilityRef:
-        bindingKind === "card_spec_capability_key"
-          ? { sourceCardInstanceId, sourceAbilityId: abilityId }
-          : { sourceCardInstanceId, abilityId },
-      effectRef: `effect.${abilityId}`,
+      abilityRef: { sourceCardInstanceId, sourceAbilityId },
+      effectRef: `effect.${sourceAbilityId}`,
       targetRequirements: [
         { id: "encounteredIce", kind: "card", visibility: "public" },
         {

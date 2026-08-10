@@ -8,6 +8,11 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardRunEncounterInterventionImplementation } from "../../ability-engine/definition-types";
+import {
+  canonicalCapabilityId,
+  engineCardByDefinitionId,
+  parseCanonicalCapabilityId,
+} from "@netgrid/cards/engine";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { buildLegalAction } from "../turn/action-builders";
@@ -407,6 +412,7 @@ export function runnerApproachIceExposeActions(
   const exposeActions = sources.map((sourceCardId) => {
     const definition = host.cards.definitionFor(sourceCardId);
     const abilityId = approachIceExposeAbilityIdForSource(host, sourceCardId);
+    const capabilityKey = parseCanonicalCapabilityId(abilityId).capabilityKey;
     return buildLegalAction(
       host.state,
       "runner",
@@ -417,10 +423,13 @@ export function runnerApproachIceExposeActions(
       {
         cardId: sourceCardId,
         iceId: approachedIceId,
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityKey: capabilityKey,
+        cardImplementationAbilityId: abilityId,
         approachIceExposeDecision: "expose",
       },
       {
-        abilityRef: { sourceCardInstanceId: sourceCardId, abilityId },
+        abilityRef: { sourceCardInstanceId: sourceCardId, sourceAbilityId: abilityId },
         effectRef: `effect.${abilityId}`,
         targetRequirements: [
           {
@@ -666,22 +675,19 @@ function approachIceExposeAbilityIdForSource(
   sourceCardId: CardInstanceId,
 ): string {
   const definition = host.cards.definitionFor(sourceCardId);
-  if (
-    hasRunEncounterInterventionKind(
-      host,
-      sourceCardId,
-      "approach_ice_expose_then_jack_out_before_rez",
-    )
-  )
-    return `card_implementation.${definition.id}.approach_ice_expose`;
-  const ability = definition.abilities?.find(
+  const matches = (
+    engineCardByDefinitionId(definition.id)?.engine
+      .runEncounterInterventions ?? []
+  ).filter(
     (candidate) =>
-      candidate.type === "approach_ice_expose" &&
-      candidate.timingPoint === "run.approach_ice",
+      candidate.kind ===
+      "approach_ice_expose_then_jack_out_before_rez",
   );
-  if (!ability)
-    throw new Error("Diese Karte hat keine Approach-Expose-Faehigkeit.");
-  return ability.id;
+  if (matches.length !== 1)
+    throw new Error(
+      "Die Approach-Expose-Faehigkeit ist nicht eindeutig an ihre CardSpec-Capability gebunden.",
+    );
+  return canonicalCapabilityId(definition.id, matches[0]!.capabilityKey);
 }
 
 function markApproachIceExposeSkippedForIce(

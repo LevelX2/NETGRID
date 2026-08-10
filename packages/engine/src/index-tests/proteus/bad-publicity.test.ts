@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -99,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -128,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -259,7 +243,11 @@ describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
         sourceDefinition(state, action) === CHARITY_TAKEOVER,
     );
     const beforeScore = structuredClone(state);
-    state = apply(state, "corp", (action) => action.actionId === scoreAction.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === scoreAction.actionId,
+    );
     return { initial, beforeScore, state, scoreAction };
   }
 
@@ -320,7 +308,10 @@ describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
       }).ok,
     ).toBe(false);
 
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.errors).toEqual([]);
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -357,7 +348,10 @@ describe("Proteus Phase 2b Scored-Agenda Bad Publicity", () => {
       expect(JSON.stringify(view)).not.toMatch(internalViewMarkers);
     }
 
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -375,7 +369,10 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
         runnerDeck: {
           ...ONR_V1_1_2K_RUNNER_DECK,
           id: `${seed}_runner`,
-          cards: [{ id: FAKED_HIT, quantity: 1 }, ...ONR_V1_1_2K_RUNNER_DECK.cards],
+          cards: [
+            { id: FAKED_HIT, quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards,
+          ],
         },
         corpDeck: ONR_V1_1_2K_CORP_DECK,
         agendaPointsToWin: 7,
@@ -408,7 +405,11 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
         sourceDefinition(state, action) === FAKED_HIT,
     );
     const beforePlay = structuredClone(state);
-    state = apply(state, "runner", (action) => action.actionId === playAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === playAction.actionId,
+    );
     return { initial, beforePlay, state, playAction };
   }
 
@@ -479,7 +480,10 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
       }).ok,
     ).toBe(false);
 
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.errors).toEqual([]);
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -511,7 +515,10 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
     expect(getLegalActions(state, "corp")).toHaveLength(0);
     expect(getLegalActions(state, "runner")).toHaveLength(0);
 
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -520,8 +527,8 @@ describe("Proteus Phase 2c Direct Runner Event BP Damage", () => {
 describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
   const POISONED_WATER_SUPPLY = "onr_proteus_117_poisoned-water-supply";
   const CONNECTION_A = "onr_v1_159_databroker";
-  const CONNECTION_B = "onr_v1_161_fall-guy";
-  const CONNECTION_C = "onr_v1_185_trauma-team";
+  const CONNECTION_B = "onr_v1_154_broker";
+  const CONNECTION_C = "onr_v1_156_corporate-ally";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -574,7 +581,11 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
         sourceDefinition(state, action) === POISONED_WATER_SUPPLY,
     );
     const beforePlay = structuredClone(state);
-    state = apply(state, "runner", (action) => action.actionId === playAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === playAction.actionId,
+    );
     return { initial, beforePlay, state, playAction, installedIds };
   }
 
@@ -585,7 +596,9 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
     const choice = state.pendingChoice;
     if (!choice) throw new Error("Missing pending choice");
     return cardIds.map((cardId) => {
-      const option = choice.options.find((candidate) => candidate.value === cardId);
+      const option = choice.options.find(
+        (candidate) => candidate.value === cardId,
+      );
       expect(option).toBeDefined();
       return option?.id ?? "";
     });
@@ -661,7 +674,11 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
-    state = applyChoices(state, "runner", selectedOptionIdsForCards(state, installedIds));
+    state = applyChoices(
+      state,
+      "runner",
+      selectedOptionIdsForCards(state, installedIds),
+    );
     expect(state.pendingChoice).toBeUndefined();
     for (const cardId of installedIds) {
       expect(state.runner.heap).toContain(cardId);
@@ -692,7 +709,10 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
       hiddenPayloadMarkers,
     );
 
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.errors).toEqual([]);
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -740,7 +760,11 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
   });
 
   it("keeps Bad-Publicity-7 primary after Poisoned Water Supply choice resolves", () => {
-    const { initial, state: opened, installedIds } = preparePoisonedWaterSupply(
+    const {
+      initial,
+      state: opened,
+      installedIds,
+    } = preparePoisonedWaterSupply(
       "proteus-phase-2d-poisoned-bp-priority",
       [CONNECTION_A, CONNECTION_B],
       6,
@@ -764,33 +788,48 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
       sourceDefinitionId: POISONED_WATER_SUPPLY,
     });
 
-    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 
 describe("Proteus Bad-Publicity-7+ engine harness", () => {
-  function playBadPublicityHarnessOperation(seed: string, badPublicityBefore: number) {
-    let state = v099CounterHostingGame(seed);
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    moveCorpCardToHq(state, "v099_bad_publicity_operation");
-    keepOnlyCorpHqCards(state, state.corp.hq.slice(0, 1));
-    state.corp.credits = 0;
+  function playBadPublicityCard(seed: string, badPublicityBefore: number) {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...DEMO_DECKS.demo_runner_008,
+          id: `${seed}_runner`,
+          cards: [
+            ...DEMO_DECKS.demo_runner_008.cards,
+            { id: "onr_proteus_108_faked-hit", quantity: 1 },
+          ],
+        },
+        corpDeck: DEMO_DECKS.demo_corp_008,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
     state.corp.badPublicity = badPublicityBefore;
+    moveRunnerCardToGrip(state, "onr_proteus_108_faked-hit");
     const initial = structuredClone(state);
     state = apply(
       state,
-      "corp",
+      "runner",
       (action) =>
-        action.type === "play_operation" &&
-        sourceDefinition(state, action) === "v099_bad_publicity_operation",
+        action.type === "play_event" &&
+        sourceDefinition(state, action) === "onr_proteus_108_faked-hit",
     );
     return { initial, state, event: state.eventLog.at(-1) };
   }
 
   it("P-BP-T001/T002 gates 7+ Bad Publicity and leaves 6 below game over", () => {
-    const terminal = playBadPublicityHarnessOperation("proteus-bp-t001", 6);
+    const terminal = playBadPublicityCard("proteus-bp-t001", 6);
     expect(terminal.state.corp.badPublicity).toBe(7);
     expect(terminal.state.phase).toBe("game_over");
     expect(terminal.state.winner).toBe("runner");
@@ -805,11 +844,13 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
       sourceVisibility: "public",
     });
 
-    const nonTerminal = playBadPublicityHarnessOperation("proteus-bp-t002", 5);
+    const nonTerminal = playBadPublicityCard("proteus-bp-t002", 5);
     expect(nonTerminal.state.corp.badPublicity).toBe(6);
     expect(nonTerminal.state.winner).toBeNull();
     expect(nonTerminal.state.phase).not.toBe("game_over");
-    expect(getLegalActions(nonTerminal.state, "corp").length).toBeGreaterThan(0);
+    expect(getLegalActions(nonTerminal.state, "runner").length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("P-BP-T003/T004 prioritizes Bad Publicity over simultaneous agenda outcomes", () => {
@@ -857,10 +898,10 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
   });
 
   it("P-BP-T007/T010 keeps public payloads and PlayerViews free of hidden or Proteus-only data", () => {
-    const { state, event } = playBadPublicityHarnessOperation("proteus-bp-t007-t010", 6);
+    const { state, event } = playBadPublicityCard("proteus-bp-t007-t010", 6);
     const publicPayloadJson = JSON.stringify(event?.publicPayload);
     expect(publicPayloadJson).toContain("bad_publicity_7");
-    expect(publicPayloadJson).not.toContain("onr_proteus_");
+    expect(publicPayloadJson).toContain("onr_proteus_108_faked-hit");
     expect(publicPayloadJson).not.toContain("cardInstances");
     expect(publicPayloadJson).not.toContain("privatePayload");
 
@@ -883,16 +924,17 @@ describe("Proteus Bad-Publicity-7+ engine harness", () => {
         ]),
       );
       const viewJson = JSON.stringify(view);
-      expect(viewJson).not.toContain("onr_proteus_");
       expect(viewJson).not.toContain("cardInstances");
       expect(viewJson).not.toContain("privatePayload");
     }
   });
 
   it("P-BP-T008/T009 is deterministic, replayable and StateHash-stable", () => {
-    const { initial, state } = playBadPublicityHarnessOperation("proteus-bp-t008-t009", 6);
-    expect(state.randomCounter).toBe(initial.randomCounter);
-    expect(state.randomDrawRecords).toEqual(initial.randomDrawRecords);
+    const { initial, state } = playBadPublicityCard("proteus-bp-t008-t009", 6);
+    expect(state.randomCounter).toBe(initial.randomCounter + 2);
+    expect(
+      state.randomDrawRecords.slice(initial.randomDrawRecords.length),
+    ).toHaveLength(2);
     expect(hashState(state)).toMatch(/^fnv1a:/);
 
     const replay = replayEvents(

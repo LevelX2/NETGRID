@@ -484,6 +484,7 @@ function recordNextSentryFreeBreakIfEarned(
   breakAbility: RuntimeIcebreakerAbility | undefined,
 ): void {
   if (
+    !breakAbility ||
     !icebreakerAbilityHasSpecialEffect(
       breakAbility,
       "set_next_sentry_free_break_after_fully_breaking_wall",
@@ -516,6 +517,7 @@ function recordNextSentryFreeBreakIfEarned(
       ...breakerState.pendingFreeBreaks,
       {
         sourceBreakerInstanceId: breakerId,
+        sourceAbilityId: breakAbility.id,
         iceSubtype: "sentry",
         remainingUses: 1,
         mustBeNextEncounteredIce: true,

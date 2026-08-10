@@ -34,23 +34,13 @@ export function endOfRunnerTurnPayload(
   state: GameState,
   definition: CardDefinition,
   cardId: CardInstanceId,
-  binding: EndOfRunnerTurnAbilityBinding | number,
+  binding: EndOfRunnerTurnAbilityBinding,
 ): Record<string, string | number | boolean> {
   const leavePlayPayment = leavePlayPaymentQuote(state, definition, cardId);
-  const resolvedBinding =
-    typeof binding === "number"
-      ? cardImplementationEndOfRunnerTurnAbilities(definition).find(
-          (candidate) =>
-            candidate.kind === "legacy_card_implementation_index" &&
-            candidate.abilityIndex === binding,
-        )
-      : binding;
-  if (!resolvedBinding)
-    throw new Error("Die End-of-turn-Faehigkeit passt nicht zur Karte.");
   return {
     cardId,
     cardImplementationLifecycleAction: "end_of_runner_turn",
-    ...endOfRunnerTurnBindingPayload(resolvedBinding),
+    ...endOfRunnerTurnBindingPayload(binding),
     ...(leavePlayPayment ?? {}),
   };
 }
@@ -109,13 +99,10 @@ export function pushCardImplementationEndOfRunnerTurnActions(
         !cardImplementationConditionMet(deps, state, ability.condition, cardId)
       )
         return;
-      const abilityRef =
-        binding.kind === "card_spec_capability_key"
-          ? {
-              sourceCardInstanceId: cardId,
-              sourceAbilityId: binding.sourceAbilityId,
-            }
-          : undefined;
+      const abilityRef = {
+        sourceCardInstanceId: cardId,
+        sourceAbilityId: binding.sourceAbilityId,
+      };
       actions.push({
         ...deps.createAction(
           state,
@@ -126,7 +113,7 @@ export function pushCardImplementationEndOfRunnerTurnActions(
           [],
           endOfRunnerTurnPayload(state, definition, cardId, binding),
         ),
-        ...(abilityRef ? { abilityRef } : {}),
+        abilityRef,
       });
     });
   }
@@ -160,19 +147,14 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
     definition,
     legalAction,
   );
-  if (binding.kind === "card_spec_capability_key") {
-    const abilityRef = legalAction.abilityRef;
-    assertAbilityRefIdentity(abilityRef);
-    if (
-      !abilityRef ||
-      !("sourceAbilityId" in abilityRef) ||
-      abilityRef.sourceCardInstanceId !== cardId ||
-      abilityRef.sourceAbilityId !== binding.sourceAbilityId
-    )
-      throw new Error("Die Lifecycle-AbilityRef ist nicht mehr gueltig.");
-  } else if (legalAction.abilityRef !== undefined) {
-    throw new Error("Eine Legacy-Lifecycle-Faehigkeit hat keine AbilityRef.");
-  }
+  const abilityRef = legalAction.abilityRef;
+  assertAbilityRefIdentity(abilityRef);
+  if (
+    !abilityRef ||
+    abilityRef.sourceCardInstanceId !== cardId ||
+    abilityRef.sourceAbilityId !== binding.sourceAbilityId
+  )
+    throw new Error("Die Lifecycle-AbilityRef ist nicht mehr gueltig.");
   const { ability } = binding;
   if (
     ability.condition &&

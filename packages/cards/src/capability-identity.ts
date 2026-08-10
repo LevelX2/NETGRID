@@ -131,26 +131,20 @@ export function assertAbilityRefIdentity(
     );
   const record = value as Record<string, unknown>;
   const keys = Object.keys(record).sort();
-  const hasLegacy = typeof record.abilityId === "string";
-  const hasCanonical = typeof record.sourceAbilityId === "string";
-  const expectedKeys = hasLegacy
-    ? ["abilityId", "sourceCardInstanceId"]
-    : ["sourceAbilityId", "sourceCardInstanceId"];
+  const expectedKeys = ["sourceAbilityId", "sourceCardInstanceId"];
   if (
-    hasLegacy === hasCanonical ||
+    typeof record.sourceAbilityId !== "string" ||
     typeof record.sourceCardInstanceId !== "string" ||
     record.sourceCardInstanceId.trim().length === 0 ||
     keys.length !== expectedKeys.length ||
-    keys.some((key, index) => key !== expectedKeys[index]) ||
-    (hasLegacy && (record.abilityId as string).trim().length === 0)
+    keys.some((key, index) => key !== expectedKeys[index])
   )
     throw new CapabilityIdentityError(
       "invalid_ability_ref",
       JSON.stringify(value),
-      "AbilityRef must contain exactly one non-empty legacy or canonical identity",
+      "AbilityRef must contain exactly one canonical capability identity",
     );
-  if (hasCanonical)
-    assertCanonicalCapabilityId(record.sourceAbilityId as string);
+  assertCanonicalCapabilityId(record.sourceAbilityId);
 }
 
 export function assertAbilityKeyAlias(

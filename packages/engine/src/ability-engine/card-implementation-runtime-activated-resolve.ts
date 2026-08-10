@@ -395,9 +395,7 @@ export function resolveActivatedCardImplementationAbility(
       kind: "card_effect_activated",
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
-      ...(match.binding.kind === "legacy_card_implementation_index"
-        ? { abilityIndex: match.binding.abilityIndex }
-        : { sourceAbilityId: match.binding.sourceAbilityId }),
+      sourceAbilityId: match.binding.sourceAbilityId,
       drawEffectIndex: result.suspendedAtEffectIndex,
       nextEffectIndex: result.suspendedAtEffectIndex + 1,
       creditGainOrdinal: result.creditGainOrdinal,

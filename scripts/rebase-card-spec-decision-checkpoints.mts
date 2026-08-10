@@ -257,14 +257,10 @@ function rematerializeRentIConBinding(checkpoint: any): void {
   const sourceAbilityBinding = node.invocation.sourceAbilityBinding;
   const hasExpectedSource =
     node.invocation.sourceCardInstanceId === RENT_I_CON_INSTANCE;
-  const hasLegacyBinding =
-    sourceAbilityBinding?.kind === "legacy_ability_id" &&
-    typeof sourceAbilityBinding.abilityId === "string";
   const hasCanonicalBinding =
     sourceAbilityBinding?.kind === "card_spec_capability_key" &&
-    sourceAbilityBinding.sourceAbilityId === RENT_I_CON_CAPABILITY_ID &&
-    !("abilityId" in sourceAbilityBinding);
-  if (!hasExpectedSource || (!hasLegacyBinding && !hasCanonicalBinding))
+    sourceAbilityBinding.sourceAbilityId === RENT_I_CON_CAPABILITY_ID;
+  if (!hasExpectedSource || !hasCanonicalBinding)
     throw new Error("rent_i_con_checkpoint_unexpected_source_binding");
 
   const encounterState = structuredClone(state);

@@ -188,7 +188,6 @@ function catalogAiInspectorForReadModel(
       aiSupportStatus: cardHint.aiSupportStatus,
       hintFound: true,
       mechanicalFactsFound: hasMechanicalFacts(cardHint),
-      legacyFallbackOnly: false,
       warningCount:
         (needsHumanReview ? 1 : 0) + (cardHint.descriptorGaps?.length ?? 0),
     },

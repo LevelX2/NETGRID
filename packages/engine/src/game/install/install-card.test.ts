@@ -495,7 +495,6 @@ function testHost(
       startRunnerProgramTrashBeforeInstallChoice: () => undefined,
       forfeitRunnerAgendaForPointCost: () => undefined,
       consumeValuPakProgramInstallAction: () => undefined,
-      startRunnerHostingChoice: () => undefined,
       hiddenRunnerResourceSlotId: (cardId) =>
         `hidden_runner_resource:${cardId}` as CardInstanceId,
     },

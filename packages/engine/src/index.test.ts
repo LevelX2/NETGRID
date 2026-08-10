@@ -95,12 +95,6 @@ import {
   ONR_V1_9_9_CORP_DECK,
   ONR_V1_RUNNER_DECK,
   ONR_V1_CORP_DECK,
-  V094_RUNNER_DECK,
-  V094_CORP_DECK,
-  V111_CORP_DECK,
-  V095_RUNNER_DECK,
-  V095_CORP_DECK,
-  v094DamageGame,
   onrV1Game,
   v105kCardReleaseGame,
   v106kCardReleaseGame,
@@ -124,12 +118,6 @@ import {
   v197CardReleaseGame,
   v198CardReleaseGame,
   v199CardReleaseGame,
-  v095ResourceGame,
-  v096TraceGame,
-  v097RunGame,
-  v098IdentityGame,
-  v099CounterHostingGame,
-  installedResourceCorpTurn,
   originalsetReorderCounterRunlockGame,
   encounterIce,
   breakCurrentSubroutine,
@@ -1459,6 +1447,8 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       pendingFreeBreaks: [
         {
           sourceBreakerInstanceId: bulldozerId,
+          sourceAbilityId:
+            "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
           iceSubtype: "sentry",
           remainingUses: 1,
           mustBeNextEncounteredIce: true,
@@ -2408,7 +2398,12 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
     for (let index = 0; index < 80; index += 1) {
       let state = toRunnerTurn(
-        v099CounterHostingGame(`hq-random-audit-${index}`),
+        createGameAfterSetup({
+          seed: `hq-random-audit-${index}`,
+          runnerDeckId: "demo_runner_008",
+          corpDeckId: "demo_corp_008",
+          agendaPointsToWin: 7,
+        }),
       );
       const hqIds = hqDefinitions.map((definitionId) =>
         moveCorpCardToHq(state, definitionId),

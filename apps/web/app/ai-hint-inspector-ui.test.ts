@@ -9,15 +9,14 @@ import {
 } from "./ai-hint-inspector-ui";
 
 const INSPECTOR_FIXTURE: CatalogAiInspector = {
-  schemaVersion: "ai-card-hints-active-v1",
+  schemaVersion: "ai-hint-provenance-v1",
   source: {
-    activeHintsPath: "data/ai/ai-card-hints-active.json",
+    sourceRefs: ["data/ai/card-spec-ai-hints-generated.json"],
   },
   supportStatus: {
     aiSupportStatus: "ai_supported",
     hintFound: true,
     mechanicalFactsFound: true,
-    legacyFallbackOnly: false,
     warningCount: 2,
   },
   cardHint: {
@@ -126,46 +125,6 @@ const INSPECTOR_FIXTURE: CatalogAiInspector = {
   },
 };
 
-const LEGACY_ONLY_FIXTURE: CatalogAiInspector = {
-  ...INSPECTOR_FIXTURE,
-  supportStatus: {
-    ...INSPECTOR_FIXTURE.supportStatus,
-    mechanicalFactsFound: false,
-    legacyFallbackOnly: true,
-    warningCount: 2,
-  },
-  cardHint: {
-    ...INSPECTOR_FIXTURE.cardHint!,
-    requiredMechanics: [],
-    valueHints: {},
-    riskTags: [],
-    scenarioRefs: [],
-  },
-  mechanicalFacts: null,
-  functionSignals: [],
-  strategyAnchors: [],
-  strategySupportPairs: [],
-  lineSupport: {
-    values: [],
-    classification: [],
-  },
-  strategicRole: [],
-  quality: null,
-  warnings: {
-    categories: ["legacy_fallback_only", "deferred_requires_human_review"],
-    descriptorGaps: [],
-    legacyStatus: {
-      rolesPresent: true,
-      planRolesPresent: true,
-    },
-    strategicRoleStatus: {
-      values: [],
-      validValues: [],
-      unknownValues: [],
-    },
-  },
-};
-
 const MECHANICAL_WITHOUT_TACTICS_FIXTURE: CatalogAiInspector = {
   ...INSPECTOR_FIXTURE,
   functionSignals: [],
@@ -254,7 +213,7 @@ describe("AI hint inspector UI view model", () => {
     expect(mechanicalText).toContain("remoteRole kind: ice_modifier");
     expect(mechanicalText).toContain("targetProfiles");
     expect(mechanicalText).toContain(
-      "Hint-Quelle data/ai/ai-card-hints-active.json",
+      "Hint-Quelle data/ai/card-spec-ai-hints-generated.json",
     );
     expect(qualityText).toContain("Reviewdaten hint reviewed: ja");
     expect(qualityText).toContain("Reviewdaten confidence: low");
@@ -331,22 +290,6 @@ describe("AI hint inspector UI view model", () => {
 
     expect(sectionText(sections, "strategyAnchors")).toContain(
       "Strategieanker Keine aktive Strategiezuordnung",
-    );
-  });
-
-  it("shows legacy-only cards as no active strategy plus compact legacy notice", () => {
-    const sections = aiInspectorSections(LEGACY_ONLY_FIXTURE);
-    const text = openText(sections);
-
-    expect(sectionText(sections, "tacticalSignals")).toContain(
-      "Keine Taktiksignale vorhanden",
-    );
-    expect(sectionText(sections, "strategyAnchors")).toContain(
-      "Strategieanker Keine aktive Strategiezuordnung",
-    );
-    expect(text).toContain("Legacy-Daten vorhanden");
-    expect(defaultCollapsedAiInspectorSections(sections).legacyDetails).toBe(
-      true,
     );
   });
 

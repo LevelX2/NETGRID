@@ -29,7 +29,7 @@ import type {
   CatalogCardSummary,
   CatalogListResponse,
 } from "./catalog-types";
-import type { PublicCardPresentationsById } from "../../app/legacy-card-definition-compatibility";
+import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 import { catalogCardPresentationsFor } from "./catalog-card-presentations";
 import { CatalogDetailRequestCoordinator } from "./catalog-detail-loader";
 

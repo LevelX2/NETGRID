@@ -428,7 +428,6 @@ export function publicContextForAction(
   if (legalAction.type === "remove_tag") {
     context.amount = Number(legalAction.payload?.removeTagAmount ?? 1);
     for (const key of [
-      "armadilloRecurringCreditsSpent",
       "tagRemovalRecurringCreditsSpent",
       "runnerCreditsSpent",
       "tagRemovalCreditSourceDefinitionIds",
@@ -1685,7 +1684,6 @@ export function publicContextForAction(
     context.cardImplementationAbility =
       legalAction.payload.cardImplementationAbility;
     for (const key of [
-      "cardImplementationAbilityIndex",
       "cardImplementationAbilityTiming",
       "sourceDefinitionId",
       "gainedCredits",

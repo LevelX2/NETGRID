@@ -912,19 +912,13 @@ export function currentTurnPlanningInvocationVariants(params: {
       ...(params.candidate.sourceCardInstanceId
         ? { sourceCardInstanceId: params.candidate.sourceCardInstanceId }
         : {}),
-      ...(params.candidate.abilityId
+      ...(params.candidate.abilityId &&
+      params.candidate.abilityBindingMethod === "canonical_capability_id"
         ? {
-            sourceAbilityBinding:
-              params.candidate.abilityBindingMethod ===
-              "canonical_capability_id"
-                ? {
-                    kind: "card_spec_capability_key" as const,
-                    sourceAbilityId: params.candidate.abilityId,
-                  }
-                : {
-                    kind: "legacy_ability_id" as const,
-                    abilityId: params.candidate.abilityId,
-                  },
+            sourceAbilityBinding: {
+              kind: "card_spec_capability_key" as const,
+              sourceAbilityId: params.candidate.abilityId,
+            },
           }
         : {}),
       boundTargets,

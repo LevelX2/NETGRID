@@ -91,8 +91,8 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
   const base = createGameAfterSetup({
     matchId,
     seed: "spectator-projection-v1",
-    runnerDeckId: "demo_runner_098",
-    corpDeckId: "demo_corp_098",
+    runnerDeckId: "demo_runner_008",
+    corpDeckId: "demo_corp_008",
     agendaPointsToWin: 7,
   });
   const initial = structuredClone(base);
@@ -196,8 +196,8 @@ function spectatorFixture(): { record: StoredMatch; secrets: string[] } {
         matchFormat: "single_game",
       },
       deckSetup: {
-        runnerSnapshotId: "demo_runner_098_snapshot_v0_98",
-        corpSnapshotId: "demo_corp_098_snapshot_v0_98",
+        runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpSnapshotId: "demo_corp_008_snapshot_v0_8",
         runner: {
           side: "runner",
           identityCardId: "runner_identity",

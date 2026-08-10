@@ -521,7 +521,7 @@ function legalActionMatchesInvocationSource(
   )
     return false;
   const binding = invocation.sourceAbilityBinding;
-  if (!binding || binding.kind === "legacy_ability_id") return true;
+  if (!binding) return true;
   try {
     assertAbilityRefIdentity(action.abilityRef);
     const parsed = parseCanonicalCapabilityId(binding.sourceAbilityId);
@@ -535,9 +535,7 @@ function legalActionMatchesInvocationSource(
       action.payload?.cardImplementationCapabilityBindingKind ===
         "card_spec_capability_key" &&
       action.payload?.cardImplementationAbilityId === binding.sourceAbilityId &&
-      action.payload?.cardImplementationAbilityKey === parsed.capabilityKey &&
-      action.payload?.cardImplementationAbilityIndex === undefined &&
-      action.payload?.cardImplementationLifecycleAbilityIndex === undefined,
+      action.payload?.cardImplementationAbilityKey === parsed.capabilityKey,
     );
   } catch {
     return false;

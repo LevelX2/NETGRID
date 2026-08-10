@@ -134,13 +134,16 @@ function hostFor(
     },
     events: {
       runnerEventResolver: () => ({
-        resolve: (_state, action) => calls.push(`runnerResolver:${action.type}`),
+        resolve: (_state, action) =>
+          calls.push(`runnerResolver:${action.type}`),
       }),
     },
     operations: {
       canPlayCorpOperation: () => true,
       resolveCorpOperation: (operationDefinition, action) =>
-        calls.push(`operationResolver:${operationDefinition.id}:${action.type}`),
+        calls.push(
+          `operationResolver:${operationDefinition.id}:${action.type}`,
+        ),
       resolveRunnerLastTurnInstalledResourceTargetId: (targetCardId) =>
         targetCardId ? (targetCardId as CardInstanceId) : undefined,
     },
@@ -279,21 +282,18 @@ describe("play-card-execution", () => {
     malformedAction.costs = [{ clicks: 1 }];
 
     expect(() =>
-      handlePlayCardExecution(
-        hostFor(targetState, calls),
-        malformedAction,
-      ),
+      handlePlayCardExecution(hostFor(targetState, calls), malformedAction),
     ).toThrow("Die Operation hat keine gueltigen Credit-Kosten.");
     expect(calls).toEqual([]);
     expect(targetState.corp.hq).toContain(OPERATION_ID);
   });
 
-  it("keeps printed-cost operation revalidation and hidden/bad-publicity payloads stable", () => {
+  it("does not synthesize card-specific hidden-zone or bad-publicity payloads", () => {
     const hiddenCalls: string[] = [];
     const hiddenState = state();
     hiddenState.cardInstances[OPERATION_ID] = instance(
       OPERATION_ID,
-      "v098_hq_rd_swap_operation",
+      "simple_economy_operation",
       { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
     );
     const hiddenAction = legalAction("play_operation", OPERATION_ID, 2);
@@ -313,16 +313,14 @@ describe("play-card-execution", () => {
       hiddenAction,
     );
 
-    expect(hiddenAction.payload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "swap_hq_rd",
-    });
+    expect(hiddenAction.payload).not.toHaveProperty("hiddenZoneBarrier");
+    expect(hiddenAction.payload).not.toHaveProperty("hiddenZoneAction");
 
     const badPublicityCalls: string[] = [];
     const badPublicityState = state();
     badPublicityState.cardInstances[OPERATION_ID] = instance(
       OPERATION_ID,
-      "v099_bad_publicity_operation",
+      "simple_economy_operation",
       { owner: "corp", controller: "corp", zone: { side: "corp", zone: "hq" } },
     );
     const badPublicityAction = legalAction("play_operation", OPERATION_ID);
@@ -332,8 +330,6 @@ describe("play-card-execution", () => {
       badPublicityAction,
     );
 
-    expect(badPublicityAction.payload).toMatchObject({
-      badPublicityAfter: 2,
-    });
+    expect(badPublicityAction.payload).not.toHaveProperty("badPublicityAfter");
   });
 });

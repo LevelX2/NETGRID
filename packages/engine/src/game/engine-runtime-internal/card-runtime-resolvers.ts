@@ -1188,6 +1188,33 @@ export function createCardRuntimeResolvers(
         },
       };
     }
+    if (
+      hiddenLongtail?.kind ===
+      "secret_spend_guess_then_targeted_bypass_run"
+    ) {
+      return {
+        name: "card_implementation_runner_event_secret_spend_guess_then_targeted_bypass_run",
+        canPlay: (state) =>
+          state.runner.credits >= Math.max(0, Math.floor(definition.cost ?? 0)) + 2,
+        resolve: (state, legalAction) => {
+          if (state.runner.credits < 2)
+            throw new Error(
+              "Social Engineering benoetigt nach den Spielkosten mindestens 2 Credits.",
+            );
+          startSecretSpendGuessThenTargetedBypassRunHideChoice(
+            deps.hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+            String(legalAction.payload?.cardId ?? ""),
+          );
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            hiddenZoneBarrier: true,
+            hiddenZoneAction:
+              "secret_spend_guess_then_targeted_bypass_run",
+            sourceDefinitionId: definition.id,
+          };
+        },
+      };
+    }
     return undefined;
   }
 

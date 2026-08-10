@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  DEMO_DECKS,
   applyAction,
   createGameAfterSetup,
   CARD_DEFINITIONS_BY_ID,
@@ -18,7 +19,6 @@ import {
   mustAction,
   sourceDefinition,
   toRunnerTurn,
-  V095_CORP_DECK,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import type {
   CardInstanceId,
@@ -180,7 +180,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
           { id: hiddenResourceDefinitionId, quantity: 2 },
         ],
       },
-      corpDeck: V095_CORP_DECK,
+      corpDeck: DEMO_DECKS.demo_corp_008,
       agendaPointsToWin: 7,
     });
   }
@@ -385,11 +385,11 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
           ],
         },
         corpDeck: {
-          ...V095_CORP_DECK,
+          ...DEMO_DECKS.demo_corp_008,
           id: "hidden_resource_activation_corp",
           cards: [
             { id: "onr_v1_306_trojan-horse", quantity: 1 },
-            ...V095_CORP_DECK.cards,
+            ...DEMO_DECKS.demo_corp_008.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -550,7 +550,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
             { id: hiddenActivatedAbilityDefinitionId, quantity: 1 },
           ],
         },
-        corpDeck: V095_CORP_DECK,
+        corpDeck: DEMO_DECKS.demo_corp_008,
         agendaPointsToWin: 7,
       }),
     );

@@ -88,7 +88,6 @@ export type RunnerEncounterActionHost = {
       sourceCardInstanceId: CardInstanceId,
       abilityId: string,
       encounteredIceId?: CardInstanceId,
-      bindingKind?: "card_spec_capability_key",
     ) => Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements">;
   };
   costs: {
@@ -268,7 +267,6 @@ export function buildRunnerEncounterActions(
                 breakerId,
                 pump.id,
                 encounteredIceId,
-                abilityBindingKind(pump),
               ),
             ),
           );
@@ -289,7 +287,6 @@ export function buildRunnerEncounterActions(
               breakerId,
               pump.id,
               encounteredIceId,
-              abilityBindingKind(pump),
             ),
           ),
         );
@@ -390,7 +387,6 @@ export function buildRunnerEncounterActions(
                 breakerId,
                 breakAbility.id,
                 encounteredIceId,
-                abilityBindingKind(breakAbility),
               ),
             ),
           );
@@ -570,7 +566,7 @@ function nextSentryFreeBreakActions(
         },
         host.actions.abilityMetadata(
           breakerId,
-          `${breakerId}.next_sentry_free_break`,
+          pending.sourceAbilityId,
           encounteredIceId,
         ),
       ),
@@ -729,7 +725,6 @@ function multiBreakSubroutineActions(
           breakerId,
           breakAbility.id,
           encounteredIceId,
-          abilityBindingKind(breakAbility),
         ),
       ),
     ];
@@ -775,7 +770,6 @@ function multiBreakSubroutineActions(
             breakerId,
             breakAbility.id,
             encounteredIceId,
-            abilityBindingKind(breakAbility),
           ),
         ),
       );
@@ -789,14 +783,6 @@ function multiBreakSubroutineActions(
   };
   visit(0);
   return actions;
-}
-
-function abilityBindingKind(
-  ability: RuntimeIcebreakerAbility,
-): "card_spec_capability_key" | undefined {
-  return ability.source === "card_spec_capability"
-    ? "card_spec_capability_key"
-    : undefined;
 }
 
 export function breakAbilityMatchesIce(

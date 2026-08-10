@@ -91,10 +91,6 @@ export type InstallCardHost = {
     ) => void;
     forfeitRunnerAgendaForPointCost: (cardId: CardInstanceId) => void;
     consumeValuPakProgramInstallAction: (legalAction: LegalAction) => void;
-    startRunnerHostingChoice: (
-      cardId: CardInstanceId,
-      legalAction: LegalAction,
-    ) => void;
     hiddenRunnerResourceSlotId: (cardId: CardInstanceId) => CardInstanceId;
   };
   corp: {
@@ -433,8 +429,6 @@ function installRunnerCard(
       recurringCreditsLoaded: definition.recurringCredits ?? 0,
     };
   }
-  if (definition.id === "v099_host_resource")
-    host.runner.startRunnerHostingChoice(cardId, legalAction);
   host.lifecycle.executeOnInstall(legalAction, definition, cardId);
 }
 

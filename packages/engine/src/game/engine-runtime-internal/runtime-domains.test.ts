@@ -41,7 +41,6 @@ import {
   corpRunnerActionPaidWindowActions as delegatedCorpRunnerActionPaidWindowActions,
   hiddenZoneSearchHandlerHostBase as delegatedHiddenZoneSearchHandlerHostBase,
   runMovementHostForState as delegatedRunMovementHostForState,
-  runnerRecurringCredits as delegatedRunnerRecurringCredits,
   triggerAbilityExecutionHost as delegatedTriggerAbilityExecutionHost,
 } from "./runtime-port-bindings";
 import { createStateRuntimeResolvers } from "./state-runtime-resolvers";
@@ -261,16 +260,13 @@ describe("engine runtime internal domains", () => {
     expect(typeof configureFlowRuntimeBootstrap).toBe("function");
     expect(typeof configureActionRuntimeBootstrap).toBe("function");
     expect(typeof initializeStateRuntimeBootstrap).toBe("function");
-    expect(typeof RUNNER_EVENT_RESOLVERS.v097_deep_dive_event?.resolve).toBe(
-      "function",
-    );
+    expect(RUNNER_EVENT_RESOLVERS).toEqual({});
     for (const definitionId of cardSpecRuntimeDefinitionIds())
       expect(RUNNER_EVENT_RESOLVERS[definitionId]).toBeUndefined();
     expect(typeof validateDeckDefinition).toBe("function");
     expect(typeof delegatedCorpRunnerActionPaidWindowActions).toBe("function");
     expect(typeof delegatedRunMovementHostForState).toBe("function");
     expect(typeof delegatedTriggerAbilityExecutionHost).toBe("function");
-    expect(typeof delegatedRunnerRecurringCredits).toBe("function");
     expect(typeof delegatedHiddenZoneSearchHandlerHostBase).toBe("function");
   });
 });

@@ -712,7 +712,7 @@ function handleRunnerStackSearchChoice(
         "Die Stack-Search-to-Grip-Quelle ist nicht mehr installiert.",
       );
   }
-  host.shuffleRunnerStack(`v098_search_stack:${choice.choiceId}:shuffle`);
+  host.shuffleRunnerStack(`runner_search_stack:${choice.choiceId}:shuffle`);
   const payload: HiddenZonePayload = {
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
