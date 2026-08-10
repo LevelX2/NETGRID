@@ -18,6 +18,15 @@ import type {
   CardSubroutineImplementation,
 } from "./definition-core-contracts";
 import type { CardTraceSuccessEffectImplementation } from "./definition-effect-contracts";
+import type { CapabilityKey } from "../capability-identity";
+
+export type CardPrintedDamageAmount =
+  | number
+  | {
+      kind: "derived";
+      source: "relative_ice_dynamic_damage";
+      ownerCapabilityKey: CapabilityKey;
+    };
 
 export type CardRezCostModifierImplementation = {
   kind: "rez_cost";
@@ -117,6 +126,8 @@ export type CardAdditionalSubroutineModifierImplementation = {
   subroutine: CardSubroutineImplementation;
   repeat?: {
     kind: "for_each_rezzed_installed_ice";
+    scope: "outside_source_same_server";
+    subtypeMatch: "effective_current_subtypes";
     subtypeAnyOf: readonly string[];
     excludeSource: true;
   };
@@ -173,6 +184,25 @@ export type CardTrashCostModifierImplementation = {
 
 export type CardBreakSubroutineCostModifierImplementation = {
   kind: "break_subroutine_cost";
+  operation: "increase";
+  amount: number;
+  activeWhile: "rezzed";
+  sourceZone: "corp_root";
+  side: "corp";
+  visibility: EventVisibilityClass;
+  appliesTo: {
+    cardType: Extract<CardType, "ice">;
+  };
+  appliesToRunner?: {
+    cardType: Extract<CardType, "program">;
+    subtype: string;
+  };
+  sameServerAsSource: true;
+};
+
+/** A tax on one icebreaker ability activation, regardless of its break count. */
+export type CardBreakAbilityUseCostModifierImplementation = {
+  kind: "break_ability_use_cost";
   operation: "increase";
   amount: number;
   activeWhile: "rezzed";
@@ -345,6 +375,7 @@ export type CardFlatlineReplacementSourceImplementation =
   | {
       kind: "flatline_replacement_from_grip";
       replacement: "flatline_tag_replacement";
+      resolution: CardFlatlineTagReplacementResolution;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -358,9 +389,30 @@ export type CardFlatlineReplacementSourceImplementation =
   | {
       kind: "flatline_replacement_installed";
       replacement: "installed_flatline_prevention";
+      resolution: CardInstalledFlatlinePreventionResolution;
       cost: { kind: "trash_source" };
       visibility: Extract<EventVisibilityClass, "public">;
     };
+
+/** Complete fixed outcome for Arasaka Owns You-style grip replacements. */
+export type CardFlatlineTagReplacementResolution = {
+  trashSource: true;
+  removeAllCoreDamage: true;
+  refreshGripToMax: true;
+  gainCredits: 10;
+  removeAllTags: true;
+  futureActionDebt: 4;
+  futureAgendaPointForfeit: 3;
+};
+
+/** Complete fixed outcome for Emergency Self-Construct-style replacements. */
+export type CardInstalledFlatlinePreventionResolution = {
+  trashAllGrip: true;
+  removeAllCoreDamage: true;
+  maxHandSizeModifier: -1;
+  runnerActionsPerTurnOverride: 3;
+  permanentMeatDamagePrevention: true;
+};
 
 export type CardTagPreventionSourceImplementation = {
   kind: "avoid_tag";
@@ -454,7 +506,7 @@ export type CardPrintedSubroutineImplementation =
   | {
       kind: "damage";
       damageType: "net" | "brain";
-      amount: number;
+      amount: CardPrintedDamageAmount;
       preventable: true;
       text: string;
     }
@@ -550,7 +602,7 @@ export type CardPrintedSubroutineImplementation =
     }
   | {
       kind: "trace";
-      baseTraceStrength: number;
+      traceLimit: number;
       onSuccess: readonly CardTraceSuccessEffectImplementation[];
       text: string;
       breakTags?: readonly string[];

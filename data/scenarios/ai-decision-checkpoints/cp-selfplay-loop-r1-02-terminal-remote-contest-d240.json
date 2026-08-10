@@ -124,7 +124,7 @@
   },
   "engine": {
     "stateVersion": 240,
-    "stateHash": "fnv1a:f750ab6f",
+    "stateHash": "fnv1a:cfd2cfde",
     "testOnlyGameState": {
       "matchId": "selfplay:loop-20260802-1785650996082",
       "baseline": {

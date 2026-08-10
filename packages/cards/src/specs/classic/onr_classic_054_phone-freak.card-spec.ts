@@ -80,22 +80,16 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_054_phone-freak.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_054_phone-freak.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_054_phone-freak.",
       },
     ],
     capabilities: [],

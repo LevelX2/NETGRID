@@ -51,7 +51,7 @@ export const cardSpec = {
         capabilityKey: capabilityKey("trash_source_look_at_rd_top_three"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
-        timing: "runner_main",
+        timing: "runner_paid",
         costs: [
           {
             kind: "credit",
@@ -103,15 +103,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_050_sandbox-dig.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_050_sandbox-dig.",
       },
     ],
     capabilities: [],

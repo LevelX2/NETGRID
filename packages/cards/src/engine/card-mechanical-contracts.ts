@@ -130,6 +130,11 @@ export type CardMechanicalDefinition = {
   successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
   fortRunWindows?: readonly CardFortRunWindowImplementation[];
   runEncounterInterventions?: readonly CardRunEncounterInterventionImplementation[];
+  /**
+   * Declarative authoring evidence for the generic region rules. It is not a
+   * CardImplementation runtime family: the Engine owns that baseline once
+   * for every region, rather than once per projected card.
+   */
   regionBaseline?: CardRegionBaselineImplementation;
   installCapabilities?: readonly CardInstallCapabilityImplementation[];
   fortCapacityModifiers?: readonly CardFortCapacityModifierImplementation[];

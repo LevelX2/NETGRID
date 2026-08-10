@@ -81,24 +81,20 @@ export const cardSpec = {
         kind: "target_preference",
         purpose: "choose_stack_cards_after_grip_trash",
         preferences: [
-          "program_repairs_missing_coverage",
-          "program_affordable_after_install",
+          "best_cards_for_current_plan",
+          "best_cards_for_current_state",
         ],
-        avoid: ["hidden_info_dependent_choice", "low_value_program"],
+        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_034_boostergang-connections.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_034_boostergang-connections.",
       },
     ],
     capabilities: [],

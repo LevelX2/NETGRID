@@ -21,8 +21,31 @@ describe("match 03575 runner decision checkpoints", () => {
       checkpoint.engine.testOnlyGameState.runner.clicks = 0;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "03575-C01-NO-TAG-CLEANUP-CLICK";
+      const trace = checkpoint.engine.testOnlyGameState.trace as unknown as
+        | Record<string, unknown>
+        | undefined;
+      if (!trace) throw new Error("Expected active trace state");
+      trace.traceLimit = 5;
+      trace.traceValue = 1;
+      delete trace.baseTraceStrength;
+      delete trace.corpBidMax;
+      delete trace.traceStrength;
+      const latestCorpBid = checkpoint.engine.eventPrefix
+        .slice()
+        .reverse()
+        .find(
+          (event) =>
+            event.publicPayload.traceStep === "corp_bid" &&
+            event.publicPayload.corpBid === 1,
+        );
+      if (!latestCorpBid) throw new Error("Expected latest Corp trace bid");
+      latestCorpBid.publicPayload.traceLimit = 5;
+      latestCorpBid.publicPayload.traceValue = 1;
+      delete latestCorpBid.publicPayload.baseTraceStrength;
+      delete latestCorpBid.publicPayload.corpBidMax;
+      delete latestCorpBid.publicPayload.traceStrength;
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["bid_6"] },
+        choice: { mustSelectOptionIds: ["bid_1"] },
       };
     });
 

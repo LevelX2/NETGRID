@@ -14,7 +14,7 @@ describe("Trace bid efficiency", () => {
         { id: "bid_2", amount: 2 },
       ],
       desiredAmount: 2,
-      traceStrength: 8,
+      traceValue: 8,
       runnerLink: 0,
       corpBid: 3,
     });
@@ -35,7 +35,7 @@ describe("Trace bid efficiency", () => {
         { id: "bid_3", amount: 3 },
       ],
       desiredAmount: 3,
-      traceStrength: 3,
+      traceValue: 3,
       runnerLink: 0,
       corpBid: 1,
     });
@@ -56,7 +56,7 @@ describe("Trace bid efficiency", () => {
         { id: "bid_3", amount: 3 },
       ],
       desiredAmount: 3,
-      traceStrength: 3,
+      traceValue: 3,
       runnerLink: 1,
       corpBid: 1,
     });
@@ -76,7 +76,7 @@ describe("Trace bid efficiency", () => {
         { id: "bid_2", amount: 2 },
       ],
       desiredAmount: 2,
-      traceStrength: 5,
+      traceValue: 5,
     });
 
     expect(selection).toEqual({
@@ -96,7 +96,7 @@ describe("Trace bid efficiency", () => {
         },
       ],
       fallbackOptionId: "trace_link_signpost",
-      traceStrength: 5,
+      traceValue: 5,
       runnerStrength: 5,
     });
 
@@ -122,7 +122,7 @@ describe("Trace bid efficiency", () => {
         },
       ],
       fallbackOptionId: "trace_link_signpost",
-      traceStrength: 1,
+      traceValue: 1,
       runnerLink: 0,
       runnerBid: 0,
     });
@@ -144,7 +144,7 @@ describe("Trace bid efficiency", () => {
         { id: "trace_link_signpost", label: "Signpost: +2 Link" },
       ],
       fallbackOptionId: "trace_link_signpost",
-      traceStrength: 2,
+      traceValue: 2,
       runnerLink: 0,
       runnerBid: 0,
     });
@@ -166,7 +166,7 @@ describe("Trace bid efficiency", () => {
         },
       ],
       fallbackOptionId: "trace_link_springboard",
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 0,
       runnerBid: 0,
     });
@@ -188,7 +188,7 @@ describe("Trace bid efficiency", () => {
         },
       ],
       fallbackOptionId: "trace_link_signpost",
-      traceStrength: 5,
+      traceValue: 5,
     });
 
     expect(selection).toEqual({

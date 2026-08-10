@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 38,
-    "stateHash": "fnv1a:a2c3b418",
+    "stateHash": "fnv1a:623f6310",
     "testOnlyGameState": {
       "matchId": "match_e8886c6f5a9d0c24",
       "baseline": {
@@ -4555,7 +4555,11 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["fund_onr_v1_094_inside-job"]
+      "acceptableCapabilities": ["fund_onr_v1_145_wutech-mem-chip"],
+      "requiredAssessmentEvidence": [
+        "development_funding_route_status:covered_guaranteed",
+        "source:own_runner_hand:card_specific_purpose:memory_support:setup"
+      ]
     }
   }
 }

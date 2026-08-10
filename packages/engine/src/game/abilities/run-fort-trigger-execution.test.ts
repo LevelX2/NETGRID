@@ -217,6 +217,10 @@ function testHost(
         if (!card) throw new Error(`CardInstance fehlt: ${cardId}`);
         return card;
       },
+      runnerUtilityLongtailKindForDefinition: (definitionToRead) =>
+        definitionToRead.id === MICROTECH_BACKUP_DRIVE_ID
+          ? "replace_installed_program_trash_with_host_on_source"
+          : undefined,
     },
     zones: {
       removeFromAllZones,
@@ -240,10 +244,6 @@ function testHost(
         overrides.resolveApproachIceExposeViewingDecision ?? (() => undefined),
       startHqIceSwapChoice:
         overrides.startHqIceSwapChoice ?? (() => undefined),
-    },
-    constants: {
-      HOST_RETURN_HARDWARE_SOURCE:
-        MICROTECH_BACKUP_DRIVE_ID,
     },
   };
 }

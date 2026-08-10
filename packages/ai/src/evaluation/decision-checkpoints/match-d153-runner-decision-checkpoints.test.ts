@@ -42,7 +42,7 @@ describe("match D153 Runner decision checkpoints", () => {
       cashoutForRdD179Json,
     ],
     [
-      "F06 completes the turn without an unbound Broker payout or credit route at D185",
+      "F06 takes certified immediate liquidity without an unbound Broker payout at D185",
       cashoutForRdD185Json,
     ],
     [

@@ -207,11 +207,11 @@ function visibleEffectiveSubroutine(
     id: subroutine.id,
     type: subroutine.type,
     ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
-    ...(subroutine.baseTraceStrength !== undefined
-      ? { baseTraceStrength: subroutine.baseTraceStrength }
+    ...(subroutine.traceLimit !== undefined
+      ? { traceLimit: subroutine.traceLimit }
       : {}),
-    ...(subroutine.traceBidLimit !== undefined
-      ? { traceBidLimit: subroutine.traceBidLimit }
+    ...(subroutine.traceLimit !== undefined
+      ? { traceLimit: subroutine.traceLimit }
       : {}),
     ...(subroutine.runFutureStrengthCancelPaymentAmount !== undefined
       ? {

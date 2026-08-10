@@ -105,15 +105,6 @@ export function startRunForCardImplementation(
       ...(options.runTraceLinkBonus !== undefined
         ? { runTraceLinkBonus: options.runTraceLinkBonus }
         : {}),
-      ...(options.runTemporaryCredits !== undefined
-        ? {
-            runnerRunTemporaryCredits: {
-              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
-              remaining: options.runTemporaryCredits.amount,
-              returnUnusedAtRunEnd: true,
-            },
-          }
-        : {}),
       ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
         ? {
             unpreventableCoreDamageAtRunEnd: {
@@ -175,6 +166,26 @@ export function startRunForCardImplementation(
     ordinarySuccessBonusCredits,
     legalAction,
   );
+  const temporaryCreditGain = options.runTemporaryCredits
+    ? (() => {
+        if (!sourceCardId || !sourceDefinitionId)
+          throw new Error("Temporäre Run-Credits benötigen ihre Kartenquelle.");
+        return host.credits.gainCredits(state, {
+          side: "runner",
+          amount: options.runTemporaryCredits.amount,
+          sourceCardId,
+          sourceDefinitionId,
+          gainOrdinal: 1,
+          kind: "standard",
+          reason: "make_run_temporary_credits",
+          destination: {
+            kind: "runner_run_temporary",
+            sourceDefinitionId,
+            returnUnusedAtRunEnd: options.runTemporaryCredits.returnUnusedAtRunEnd,
+          },
+        });
+      })()
+    : undefined;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ...(options.followupRunOnEnd === "optional"
@@ -204,9 +215,10 @@ export function startRunForCardImplementation(
     ...(options.runTemporaryCredits !== undefined
       ? {
           v1922RunnerEventAbility: "run_temporary_credits",
-          temporaryRunCredits: options.runTemporaryCredits.amount,
+          temporaryRunCredits: temporaryCreditGain?.creditedAmount ?? 0,
           temporaryRunCreditsRemaining:
             state.run?.runnerRunTemporaryCredits?.remaining ?? 0,
+          ...(temporaryCreditGain?.publicPayload ?? {}),
         }
       : {}),
     ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined

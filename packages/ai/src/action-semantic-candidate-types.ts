@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import type {
   AiHintActionCapacityProfile,
+  AiHintActionPlanOwnerBinding,
   AiHintStrategicExchangeKind,
   AiHintStructuredEffect,
 } from "./hint-ontology";
@@ -537,6 +538,7 @@ export type ActionSemanticCandidate = {
   costProfile: ActionCostProfile;
   economyProjection?: ActionEconomyProjection;
   actionCapacityProjection?: ActionCapacityProjection;
+  planOwnerBinding?: AiHintActionPlanOwnerBinding;
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;
@@ -625,4 +627,5 @@ export type ActionCardSemanticProfile = {
   targetProfileMatches?: readonly TargetProfileMatch[];
   abilitySemantics?: readonly ActionCardAbilitySemanticProfile[];
   actionCapacityProfiles?: readonly AiHintActionCapacityProfile[];
+  actionPlanOwnerBindings?: readonly AiHintActionPlanOwnerBinding[];
 };

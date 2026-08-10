@@ -19,11 +19,6 @@ import {
 } from "../../ability-engine/card-implementation-primitives";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
-import { COUNTER_GAIN_PROGRAM_SOURCE } from "../../mechanics/agenda-operation-effects";
-import {
-  SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE,
-  ICE_ORDER_REVERSAL_PROGRAM_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 import type {
   ActiveRun,
@@ -36,10 +31,6 @@ export function applyDirectSuccessfulRunTriggers(
   host: SuccessfulRunInterventionHost,
   legalAction?: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
-  const responseTeamResult = applyCorpShuffleRunnerGripAfterSuccessfulRun(
-    host,
-    legalAction,
-  );
   const karlSources = host.state.runner.rig.resources
     .slice()
     .sort()
@@ -75,8 +66,7 @@ export function applyDirectSuccessfulRunTriggers(
       runnerCreditsAfter: host.state.runner.credits,
     };
   }
-  if (!responseTeamResult.handled && gainedCredits <= 0)
-    return { handled: false };
+  if (gainedCredits <= 0) return { handled: false };
   return {
     handled: true,
     ...(gainedCredits > 0 ? { creditsGained: gainedCredits } : {}),
@@ -85,70 +75,79 @@ export function applyDirectSuccessfulRunTriggers(
   };
 }
 
-export function applyCorpShuffleRunnerGripAfterSuccessfulRun(
+export function resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice(
   host: SuccessfulRunInterventionHost,
-  legalAction?: LegalAction,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
 ): SuccessfulRunFollowupExecutionResult {
   const run = host.state.run;
-  if (!run) return { handled: false };
-  const sourceIds = host.state.corp.servers
-    .flatMap((server) => server.root)
-    .filter((cardId): cardId is CardInstanceId => {
-      const instance = host.state.cardInstances[cardId];
-      if (
-        !instance ||
-        instance.controller !== "corp" ||
-        instance.rezzed !== true ||
-        instance.zone.side !== "corp" ||
-        instance.zone.zone !== "serverRoot"
-      )
-        return false;
-      return (
-        cardImplementationForDefinitionId(
-          instance.definitionId as CardDefinitionId,
-        )?.successfulRunFollowups?.some(
-          (followup) =>
-            followup.kind ===
-            "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
-        ) === true
-      );
-    })
-    .sort();
-  if (sourceIds.length === 0 || host.state.runner.grip.length === 0)
-    return { handled: false };
-
-  let totalShuffled = 0;
-  let totalDrawn = 0;
-  const sourceDefinitionIds: CardDefinitionId[] = [];
-  for (const sourceId of sourceIds) {
-    const gripCount = host.state.runner.grip.length;
-    if (gripCount <= 0) continue;
-    const sourceDefinitionId = host.cards.definitionFor(sourceId).id;
-    const shuffledCount = host.runnerCards.shuffleGripIntoStack(
-      `classic.indiscriminate_response_team.${run.runId}.${sourceId}.${host.state.stateVersion}`,
-    );
-    if (shuffledCount <= 0) continue;
-    const drawSummary = host.runnerCards.drawCards(shuffledCount);
-    totalShuffled += shuffledCount;
-    totalDrawn += drawSummary.drawnCount;
-    sourceDefinitionIds.push(sourceDefinitionId);
-  }
-  if (totalShuffled <= 0) return { handled: false };
-  if (legalAction) {
+  const choice = host.state.pendingChoice;
+  if (
+    !run ||
+    !choice ||
+    !choice.source.startsWith("classic.indiscriminate_response_team:")
+  )
+    throw new Error("Es ist keine Indiscriminate-Response-Team-Choice offen.");
+  const [, sourceCardId = "", choiceRunId = ""] = choice.source.split(":");
+  if (!sourceCardId || choiceRunId !== run.runId)
+    throw new Error("Die Indiscriminate-Response-Team-Choice passt nicht zum Run.");
+  const sourceId = sourceCardId as CardInstanceId;
+  const instance = host.state.cardInstances[sourceId];
+  if (
+    !instance ||
+    instance.controller !== "corp" ||
+    instance.rezzed !== true ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "serverRoot" ||
+    !cardImplementationForDefinitionId(instance.definitionId)?.successfulRunFollowups?.some(
+      (followup) =>
+        followup.kind ===
+        "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
+    )
+  )
+    throw new Error("Die Indiscriminate-Response-Team-Quelle ist nicht mehr legal.");
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceId))
+    throw new Error("Diese Indiscriminate-Response-Team-Quelle wurde bereits behandelt.");
+  const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find((candidate) => candidate.id === selectedId);
+  if (!option || (option.value !== "decline" && option.value !== "shuffle_grip"))
+    throw new Error("Die Indiscriminate-Response-Team-Auswahl ist ungueltig.");
+  delete host.state.pendingChoice;
+  run.successfulRunAbilityUsedSourceIds = [...used, sourceId].sort();
+  const sourceDefinitionId = host.cards.definitionFor(sourceId).id;
+  if (option.value === "decline") {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       classicIndiscriminateResponseTeam: true,
-      runnerGripShuffledIntoStackCount: totalShuffled,
-      runnerCardsDrawnAfterGripShuffle: totalDrawn,
+      interventionDecision: "decline",
+      sourceCardId: sourceId,
+      sourceDefinitionId,
+      hiddenZoneBarrier: true,
+    };
+  } else {
+    const shuffledCount = host.runnerCards.shuffleGripIntoStack(
+      `classic.indiscriminate_response_team.${run.runId}.${sourceId}.${host.state.stateVersion}`,
+    );
+    const drawSummary = host.runnerCards.drawCards(shuffledCount);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      classicIndiscriminateResponseTeam: true,
+      interventionDecision: "apply",
+      runnerGripShuffledIntoStackCount: shuffledCount,
+      runnerCardsDrawnAfterGripShuffle: drawSummary.drawnCount,
       runnerGripAfter: host.state.runner.grip.length,
       runnerStackAfter: host.state.runner.stack.length,
-      classicIndiscriminateResponseTeamSourceDefinitionIds: sourceDefinitionIds
-        .sort()
-        .join(","),
+      sourceCardId: sourceId,
+      sourceDefinitionId,
+      hiddenZoneBarrier: true,
     };
   }
+  host.access.startAccessFromSuccessfulRun(legalAction);
   return {
     handled: true,
+    sourceCardId: sourceId,
+    sourceDefinitionId,
     stateChanged: true,
     ...resolvedPayloadFor(legalAction),
   };
@@ -220,13 +219,7 @@ export function resolveSuccessfulRunForceRez(
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("False Echo ist nicht installiert.");
   const sourceDefinitionId = host.cards.definitionFor(sourceCardId).id;
-  if (
-    !hasSuccessfulRunForceRezFollowup(sourceDefinitionId) &&
-    !(
-      !cardImplementationForDefinitionId(sourceDefinitionId) &&
-      sourceDefinitionId === SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE
-    )
-  )
+  if (!hasSuccessfulRunForceRezFollowup(sourceDefinitionId))
     throw new Error("Die False-Echo-Faehigkeit passt nicht zur Karte.");
   const abilityCost =
     successfulRunForceRezFollowupCreditCost(sourceDefinitionId);
@@ -308,10 +301,7 @@ export function resolveSuccessfulRunReverseIce(
     )?.successfulRunFollowups?.some(
       (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
     ) ?? false;
-  if (
-    !reverseFollowup &&
-    sourceDefinition.id !== ICE_ORDER_REVERSAL_PROGRAM_SOURCE
-  )
+  if (!reverseFollowup)
     throw new Error("Die Netspace-Inverter-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
@@ -364,7 +354,12 @@ export function resolveSuccessfulRunRemoteCounter(
     throw new Error("Fait Accompli markiert nur subsidiary data forts.");
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Fait Accompli ist nicht installiert.");
-  if (host.cards.definitionFor(sourceCardId).id !== COUNTER_GAIN_PROGRAM_SOURCE)
+  const sourceDefinition = host.cards.definitionFor(sourceCardId);
+  if (
+    sourceDefinition.type !== "program" ||
+    cardImplementationForDefinitionId(sourceDefinition.id)?.virusCounter
+      ?.addOnSuccessfulRun?.server !== "subsidiary_data_fort"
+  )
     throw new Error("Die Fait-Accompli-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
@@ -379,7 +374,7 @@ export function resolveSuccessfulRunRemoteCounter(
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: COUNTER_GAIN_PROGRAM_SOURCE,
+    sourceDefinitionId: sourceDefinition.id,
     serverLabel: host.servers.publicServerLabel(server.id) ?? server.id,
     addedCounterAmount: 1,
     remainingCounters: host.counters.cardCounter(sourceCardId, "power"),
@@ -389,7 +384,7 @@ export function resolveSuccessfulRunRemoteCounter(
   return {
     handled: true,
     sourceCardId,
-    sourceDefinitionId: COUNTER_GAIN_PROGRAM_SOURCE,
+    sourceDefinitionId: sourceDefinition.id,
     counterPlaced: true,
     stateChanged: true,
     ...resolvedPayloadFor(legalAction),

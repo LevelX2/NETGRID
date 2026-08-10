@@ -224,6 +224,14 @@ function contributeCorpActionDispositionForCandidate(
   ) => void,
   facts: CorpActionDispositionContributorFacts,
 ): void {
+  if (candidate.planOwnerBinding?.owner === "corp.score_agenda") {
+    add(
+      candidate.actionId,
+      "corp.score_agenda",
+      `capability_plan_owner:${candidate.planOwnerBinding.capabilityKey}`,
+    );
+    return;
+  }
   const drawArbitrations = (domain.drawArbitrations ?? []).filter(
     (assessment) => assessment.actionId === candidate.actionId,
   );

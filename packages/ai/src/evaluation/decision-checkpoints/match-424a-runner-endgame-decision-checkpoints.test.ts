@@ -27,7 +27,7 @@ describe("match 424A runner endgame decision checkpoints", () => {
       remoteInformationJson,
     ],
     [
-      "424A-F05 builds the resident bank instead of pretending a blocked matchpoint converts",
+      "424A-F05 builds immediate economy instead of pretending a blocked matchpoint converts",
       blockedMatchpointJson,
     ],
   ])("satisfies %s", (_label, json) => {

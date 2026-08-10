@@ -164,7 +164,7 @@
   },
   "engine": {
     "stateVersion": 88,
-    "stateHash": "fnv1a:6cc90b05",
+    "stateHash": "fnv1a:060dd318",
     "testOnlyGameState": {
       "matchId": "match_3bb14a8fd2102c9a",
       "baseline": {
@@ -6230,7 +6230,9 @@
       ],
       "acceptablePlanKinds": ["corp.score_agenda"],
       "acceptableCapabilities": ["advance_score_agenda"],
-      "requiredAssessmentEvidence": ["corp_score_protection_required:remote_1"]
+      "requiredAssessmentEvidence": [
+        "corp_score_protection_required:remote_1"
+      ]
     }
   }
 }

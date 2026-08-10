@@ -35,10 +35,7 @@ import {
   isFortTraceBitPoolSource,
   fortTraceBitPoolCapacityForCard,
 } from "../run/fort-run-side-families";
-import {
-  CASCADE_ID,
-  SKIVVISS_ID,
-} from "../../compatibility/runtime-compatibility";
+import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
 import { executeCardImplementationStartOfCorpTurnEffects } from "../../ability-engine/card-implementation-runtime";
 import type { AutomaticEffectCollector, RuntimeDeps } from "./runtime-shared";
 import {
@@ -204,7 +201,13 @@ export function createTurnCorpStartRuntimeResolvers(
       additionalSourceDefinitionIds: [
         ...mandatoryAgendaSources.map((source) => source.definitionId),
         ...optionalAgendaSources.map((source) => source.definitionId),
-        ...(skivvissCardCount > 0 ? [SKIVVISS_ID] : []),
+        ...(skivvissCardCount > 0
+          ? [
+              uniqueVirusCounterOwnerDefinitionId(
+                "draw_extra_cards_per_counter",
+              ),
+            ]
+          : []),
       ],
     };
   }
@@ -296,7 +299,9 @@ export function createTurnCorpStartRuntimeResolvers(
               "corp.start.skivviss",
               "corp",
               summary.skivvissCardCount,
-              SKIVVISS_ID,
+              uniqueVirusCounterOwnerDefinitionId(
+                "draw_extra_cards_per_counter",
+              ),
             ),
           ]
         : []),
@@ -532,6 +537,43 @@ export function createTurnCorpStartRuntimeResolvers(
           0,
           Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
         );
+        if (recurringTracePool.optional && runCount > 0) {
+          if (!legalAction)
+            throw new Error(
+              "Corp-Start-Satellite-Choice braucht eine LegalAction.",
+            );
+          if (state.pendingChoice || state.pendingAddTagContinuation)
+            throw new Error("Es ist bereits eine Corp-Start-Choice offen.");
+          state.pendingAddTagContinuation = {
+            kind: "corp_start_turn_satellite_choice",
+            sourceCardId: cardId,
+            sourceDefinitionId: definitionId,
+            nextRootCardIndex: rootCardIndex + 1,
+            runAttemptsLastTurn: runCount,
+          };
+          state.pendingChoice = {
+            choiceId: `classic_satellite_monitors_${state.stateVersion + 1}`,
+            side: "corp",
+            source: `classic.satellite_monitors:${cardId}:${state.stateVersion + 1}`,
+            prompt: `${links.publicCardTitle(definitionId)}: Würfelserie ausführen?`,
+            kind: "select_option",
+            options: [
+              { id: "use", label: "Würfelserie ausführen", value: "use" },
+              { id: "decline", label: "Nicht ausführen", value: "decline" },
+            ],
+            minSelections: 1,
+            maxSelections: 1,
+            stateVersion: state.stateVersion + 1,
+            visibility: "public",
+          };
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            satelliteMonitorsChoiceOpened: true,
+            sourceDefinitionId: definitionId,
+            runAttemptsLastTurn: runCount,
+          };
+          return true;
+        }
         let tagsAdded = 0;
         const dieRolls: number[] = [];
         for (let index = 0; index < runCount; index += 1) {
@@ -766,7 +808,11 @@ export function createTurnCorpStartRuntimeResolvers(
 
   function skivvissCounterTotal(state: GameState): number {
     return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-      if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
+      if (
+        deps.virusCounterImplementationForCard(state, cardId)?.startOfCorpTurn
+          ?.kind !== "draw_extra_cards_per_counter"
+      )
+        return sum;
       return sum + cardCounter(state, cardId, "virus");
     }, 0);
   }
@@ -800,9 +846,30 @@ export function createTurnCorpStartRuntimeResolvers(
       },
       {
         amount: corpCascadeTrash,
-        sourceDefinitionId: corpCascadeCounters > 0 ? CASCADE_ID : undefined,
+        sourceDefinitionId:
+          corpCascadeCounters > 0
+            ? uniqueVirusCounterOwnerDefinitionId(
+                "trash_faceup_rd_cards_per_two_counters",
+              )
+            : undefined,
       } as { amount: number; sourceDefinitionId?: CardDefinitionId },
     );
+  }
+
+  function uniqueVirusCounterOwnerDefinitionId(
+    startKind:
+      | "draw_extra_cards_per_counter"
+      | "trash_faceup_rd_cards_per_two_counters",
+  ): CardDefinitionId {
+    const ownerDefinitionIds = CARD_IMPLEMENTATIONS.filter(
+      (implementation) =>
+        implementation.virusCounter?.startOfCorpTurn?.kind === startKind,
+    ).map((implementation) => implementation.cardDefinitionId);
+    if (ownerDefinitionIds.length !== 1)
+      throw new Error(
+        `Expected exactly one virus-counter owner for ${startKind}; received ${ownerDefinitionIds.length}.`,
+      );
+    return ownerDefinitionIds[0]!;
   }
 
   function trashFaceupRdCardsForCascade(

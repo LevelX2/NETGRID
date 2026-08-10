@@ -27,9 +27,11 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 3,
         memoryRemaining: 1,
+        hasInstalledNonNoisyIcebreaker: false,
         rigRoles: new Set(),
         rigDefinitionIds: new Set(),
       },
+      effectsForCardId: () => [],
       rolesForCardId: (cardId) => {
         if (cardId === "memory") return ["support_memory"];
         if (cardId === "economy") return ["runner_economy"];
@@ -50,9 +52,11 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 5,
         memoryRemaining: 4,
+        hasInstalledNonNoisyIcebreaker: false,
         rigRoles: new Set(["breaker_fracter"]),
         rigDefinitionIds: new Set(),
       },
+      effectsForCardId: () => [],
       rolesForCardId: (cardId) => {
         if (cardId === "duplicate") return ["support_breaker_fracter"];
         if (cardId === "fresh") return ["breaker_decoder"];
@@ -78,9 +82,11 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 5,
         memoryRemaining: 3,
+        hasInstalledNonNoisyIcebreaker: false,
         rigRoles: new Set(["breaker_fracter"]),
         rigDefinitionIds: new Set(),
       },
+      effectsForCardId: () => [],
       rolesForCardId: () => [],
       requiredCoverage: "breaker_ap",
     });
@@ -107,6 +113,7 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 4,
         memoryRemaining: 2,
+        hasInstalledNonNoisyIcebreaker: false,
         rigRoles: new Set([
           "breaker_fracter",
           "breaker_decoder",
@@ -115,6 +122,7 @@ describe("selectedSearchChoiceOptionIds", () => {
         rigDefinitionIds: new Set(["krash"]),
         gripDefinitionCounts: new Map([["krash", 1]]),
       },
+      effectsForCardId: () => [],
       rolesForCardId: (cardId) =>
         cardId === "krash"
           ? ["breaker_fracter", "breaker_decoder", "breaker_killer"]
@@ -142,10 +150,12 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 4,
         memoryRemaining: 2,
+        hasInstalledNonNoisyIcebreaker: false,
         rigRoles: new Set(["breaker_universal"]),
         rigDefinitionIds: new Set(["krash"]),
         gripDefinitionCounts: new Map([["lockjaw", 1]]),
       },
+      effectsForCardId: () => [],
       rolesForCardId: (cardId) =>
         cardId === "lockjaw"
           ? ["icebreaker_support", "run_support"]
@@ -177,11 +187,13 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 3,
         memoryRemaining: 0,
+        hasInstalledNonNoisyIcebreaker: false,
         rigRoles: new Set(),
         rigDefinitionIds: new Set(),
       },
+      effectsForCardId: () => [],
       rolesForCardId: (cardId) => {
-        if (cardId === "cloak") return ["economy", "icebreaker_support"];
+        if (cardId === "cloak") return ["icebreaker_support"];
         if (cardId === "wiretaps") return ["multiaccess", "pressure_hq"];
         return ["hidden_zone_tool"];
       },
@@ -220,9 +232,25 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 8,
         memoryRemaining: 1,
+        hasInstalledNonNoisyIcebreaker: true,
         rigRoles: new Set(),
         rigDefinitionIds: new Set(),
       },
+      effectsForCardId: (cardId) =>
+        cardId === "cloak"
+          ? [
+              {
+                kind: "recurring_economy",
+                scope: "runner",
+                timing: "persistent",
+                resource: "credits",
+                target: "non_noisy_icebreaker",
+                amount: 3,
+                economyMode: "restricted_credit",
+                repeatable: true,
+              },
+            ]
+          : [],
       rolesForCardId: (cardId) => {
         if (cardId === "cloak") return ["economy", "icebreaker_support"];
         if (cardId === "wiretaps") return ["multiaccess", "pressure_hq"];
@@ -237,6 +265,61 @@ describe("selectedSearchChoiceOptionIds", () => {
     expect(selected.indexOf("cloak-b")).toBeGreaterThan(
       selected.indexOf("mouse"),
     );
+  });
+
+  it.each([
+    {
+      label: "only a noisy breaker can consume the restricted credits",
+      credits: 8,
+      memoryRemaining: 1,
+      hasInstalledNonNoisyIcebreaker: false,
+    },
+    {
+      label: "the recurring-credit program is not immediately usable",
+      credits: 6,
+      memoryRemaining: 1,
+      hasInstalledNonNoisyIcebreaker: true,
+    },
+  ])("keeps Mouse ahead when $label", (scenario) => {
+    const choice = takeOneArrangeRestChoice([
+      option("cloak", "Cloak", "program", {
+        memoryCost: 1,
+        installCost: 7,
+      }),
+      option("mouse", "Mouse", "program", {
+        memoryCost: 1,
+        installCost: 2,
+      }),
+    ]);
+    const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+      features: {
+        credits: scenario.credits,
+        memoryRemaining: scenario.memoryRemaining,
+        hasInstalledNonNoisyIcebreaker:
+          scenario.hasInstalledNonNoisyIcebreaker,
+        rigRoles: new Set(),
+        rigDefinitionIds: new Set(),
+      },
+      effectsForCardId: (cardId) =>
+        cardId === "cloak"
+          ? [
+              {
+                kind: "recurring_economy",
+                scope: "runner",
+                timing: "persistent",
+                resource: "credits",
+                target: "non_noisy_icebreaker",
+                amount: 3,
+                economyMode: "restricted_credit",
+                repeatable: true,
+              },
+            ]
+          : [],
+      rolesForCardId: (cardId) =>
+        cardId === "cloak" ? ["icebreaker_support"] : ["hidden_zone_tool"],
+    });
+
+    expect(selected?.[0]).toBe("mouse");
   });
 
   it("fails closed for a search-result event with missing play cost", () => {
@@ -256,9 +339,11 @@ describe("selectedSearchChoiceOptionIds", () => {
         features: {
           credits: 1,
           memoryRemaining: 4,
+          hasInstalledNonNoisyIcebreaker: false,
           rigRoles: new Set(),
           rigDefinitionIds: new Set(),
         },
+        effectsForCardId: () => [],
         rolesForCardId: () => [],
       }),
     ).toThrow(

@@ -607,13 +607,13 @@ describe("V1.9.3 Mechanikpaket L", () => {
     );
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_207_netwatch-operations-office",
       traceStarted: true,
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty("amount");
     state = applyChoice(state, "corp", "bid_2");
@@ -630,7 +630,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
     );
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 5,
+      traceLimit: 5,
     });
     state = applyChoice(state, "corp", "bid_0");
     state = applyChoice(state, "runner", "bid_0");

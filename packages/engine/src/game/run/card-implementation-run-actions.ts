@@ -56,6 +56,13 @@ export function buildRunnerDuringRunCardImplementationActions(
       definition,
       "during_run",
     );
+    host.runtime.pushActivatedActionsForTiming(
+      legalActions,
+      "runner",
+      cardId,
+      definition,
+      "runner_paid",
+    );
     const boost = host.cards.cardImplementationForDefinitionId?.(
       definition.id,
     )?.runnerRunStrengthBoost;

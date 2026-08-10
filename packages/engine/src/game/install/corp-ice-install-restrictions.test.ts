@@ -29,14 +29,14 @@ describe("Classic Corp ICE install restrictions", () => {
     expect(canInstallCorpIceInServer(trapdoor, newRemote)).toBe(false);
   });
 
-  it("allows Glacier only inside subsidiary data forts", () => {
+  it("allows Glacier on every data fort", () => {
     const glacier = ice("onr_classic_011_glacier");
 
     expect(canInstallCorpIceInServer(glacier, remote)).toBe(true);
     expect(canInstallCorpIceInServer(glacier, newRemote)).toBe(true);
-    expect(canInstallCorpIceInServer(glacier, hq)).toBe(false);
-    expect(canInstallCorpIceInServer(glacier, rd)).toBe(false);
-    expect(canInstallCorpIceInServer(glacier, archives)).toBe(false);
+    expect(canInstallCorpIceInServer(glacier, hq)).toBe(true);
+    expect(canInstallCorpIceInServer(glacier, rd)).toBe(true);
+    expect(canInstallCorpIceInServer(glacier, archives)).toBe(true);
   });
 });
 

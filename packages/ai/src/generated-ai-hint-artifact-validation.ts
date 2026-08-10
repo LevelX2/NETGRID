@@ -2,6 +2,7 @@ import {
   CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
   CARD_SPEC_AI_HINT_COMPILER_VERSION,
   type CardSpecAiHintArtifact,
+  validateAiHintActionPlanOwnerBindings,
 } from "./ai-hint-contracts";
 
 export function validateGeneratedArtifact(
@@ -24,8 +25,8 @@ export function validateGeneratedArtifact(
     !Array.isArray(artifact.cardIds) ||
     artifact.cardIds.some((cardId) => typeof cardId !== "string") ||
     !Array.isArray(artifact.cards) ||
-    artifact.cardIds.length !== 251 ||
-    artifact.cards.length !== 251
+    artifact.cardIds.length !== 618 ||
+    artifact.cards.length !== 618
   )
     throw new Error("invalid_card_spec_ai_hint_artifact_contract");
   if (
@@ -64,6 +65,16 @@ export function validateGeneratedArtifact(
     )
   )
     throw new Error("invalid_card_spec_ai_hint_artifact_rows");
+  for (const record of artifact.cards) {
+    const validation = validateAiHintActionPlanOwnerBindings(
+      record.hint.actionPlanOwnerBindings,
+      record.hint.side,
+    );
+    if (!validation.valid)
+      throw new Error(
+        `invalid_card_spec_ai_hint_artifact_hint:${record.cardId}:${validation.errors[0]?.path ?? "$"}`,
+      );
+  }
   return artifact as CardSpecAiHintArtifact;
 }
 

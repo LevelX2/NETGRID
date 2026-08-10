@@ -42,6 +42,7 @@ export let resumeStartOfTurnAfterTagPrevention: RuntimePortGroups["turnRuntimeRe
 export let untapRunnerCardsAtTurnStart: RuntimePortGroups["turnRuntimeResolvers"]["untapRunnerCardsAtTurnStart"];
 export let resolveDelayedAccessEffects: RuntimePortGroups["turnRuntimeResolvers"]["resolveDelayedAccessEffects"];
 export let applyCorpStartOfTurnEffects: RuntimePortGroups["turnRuntimeResolvers"]["applyCorpStartOfTurnEffects"];
+export let openCorpStartTurnRestrictedActionOffers: RuntimePortGroups["turnRuntimeResolvers"]["openCorpStartTurnRestrictedActionOffers"];
 export let applyPurgeableRunnerVirusCorpStartEffects: RuntimePortGroups["turnRuntimeResolvers"]["applyPurgeableRunnerVirusCorpStartEffects"];
 export let virusCounterDrawsAtCorpStart: RuntimePortGroups["turnRuntimeResolvers"]["virusCounterDrawsAtCorpStart"];
 export let skivvissCounterTotal: RuntimePortGroups["turnRuntimeResolvers"]["skivvissCounterTotal"];
@@ -501,6 +502,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.turnRuntimeResolvers.resolveDelayedAccessEffects;
   applyCorpStartOfTurnEffects =
     ports.turnRuntimeResolvers.applyCorpStartOfTurnEffects;
+  openCorpStartTurnRestrictedActionOffers =
+    ports.turnRuntimeResolvers.openCorpStartTurnRestrictedActionOffers;
   applyPurgeableRunnerVirusCorpStartEffects =
     ports.turnRuntimeResolvers.applyPurgeableRunnerVirusCorpStartEffects;
   virusCounterDrawsAtCorpStart =

@@ -24,14 +24,14 @@ describe("selectedBidChoiceOptionId", () => {
         input("corp", "hard", {
           ownCredits: 18,
           ownClicks: 1,
-          runnerCredits: 11,
+          runnerCredits: 6,
           hq: [
             card("closed", "onr_v1_285_closed-accounts", 1),
             card("scorched", "onr_v1_302_scorched-earth", 3),
           ],
         }),
         bidChoice("trace:corp", range(0, 11)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_7");
   });
@@ -45,7 +45,7 @@ describe("selectedBidChoiceOptionId", () => {
           runnerCredits: 11,
         }),
         bidChoice("trace:corp", range(0, 11)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
   });
@@ -56,11 +56,11 @@ describe("selectedBidChoiceOptionId", () => {
         input("corp", "hard", {
           ownCredits: 8,
           ownClicks: 0,
-          runnerCredits: 5,
+          runnerCredits: 0,
           encounteredIceDefinitionId: "onr_v1_264_rex",
         }),
         bidChoice("trace:run_1.rex.0.trace", range(0, 5)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_1");
   });
@@ -75,7 +75,7 @@ describe("selectedBidChoiceOptionId", () => {
           encounteredIceDefinitionId: "onr_v1_264_rex",
         }),
         bidChoice("trace:run_1.rex.0.trace", range(0, 8)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
   });
@@ -90,7 +90,7 @@ describe("selectedBidChoiceOptionId", () => {
           encounteredIceDefinitionId: "onr_v1_284_chance-observation",
         }),
         bidChoice("trace:chance-observation", range(0, 5)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
   });
@@ -105,7 +105,7 @@ describe("selectedBidChoiceOptionId", () => {
           hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
         }),
         bidChoice("trace:corp", range(0, 11)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
   });
@@ -116,11 +116,11 @@ describe("selectedBidChoiceOptionId", () => {
         input("corp", "hard", {
           ownCredits: 8,
           ownClicks: 1,
-          runnerCredits: 5,
+          runnerCredits: 0,
           hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
         }),
         bidChoice("trace:corp", range(0, 5)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_1");
   });
@@ -135,7 +135,7 @@ describe("selectedBidChoiceOptionId", () => {
           hq: [card("closed", "onr_v1_285_closed-accounts", 1)],
         }),
         bidChoice("trace:corp", range(0, 11)),
-        { traceStrength: 5, runnerLink: 0 },
+        { traceLimit: 5, runnerLink: 0 },
       ),
     ).toBe("bid_0");
   });
@@ -177,8 +177,8 @@ describe("selectedBidChoiceOptionId", () => {
         }),
         bidChoice("trace:seed7.fragmentation-storm", range(0, 6)),
         {
-          traceStrength: 4,
-          baseTraceStrength: 4,
+          traceValue: 4,
+          traceLimit: 4,
           runnerLink: 0,
           sourceDefinitionId: "onr_v1_246_fragmentation-storm",
         },

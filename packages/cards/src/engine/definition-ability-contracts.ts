@@ -33,10 +33,12 @@ export type ActivatedCardAbilityImplementation = {
   kind: "activated";
   timing:
     | "runner_main"
+    | "runner_paid"
     | "during_run"
     | "runner_cost_penalty_support"
     | "access_start"
     | "corp_main"
+    | "corp_paid"
     | "corp_encounter"
     | "corp_during_run"
     | "corp_trace_window"
@@ -140,7 +142,7 @@ export type CardRemainingReplacementLongtailImplementation =
       kind: "trace_bit_counter_pool_asset";
       counterType: Extract<CounterType, "bit">;
       addAfterTrace: 1;
-      traceStrengthAndLimitPerBit: 1;
+      traceValueAndLimitPerBit: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

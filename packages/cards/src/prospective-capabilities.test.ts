@@ -848,7 +848,7 @@ describe("compileProspectiveCapabilities", () => {
       on_install: [
         {
           kind: "trace",
-          baseTraceStrength: 1,
+          traceLimit: 1,
           onSuccess: [],
           visibility: "public",
         },

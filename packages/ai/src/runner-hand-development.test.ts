@@ -18,6 +18,7 @@ import {
 import { discardKeepScore } from "./runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "./runtime/search-choice-option";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -365,8 +366,8 @@ describe("RunnerHandDevelopmentEvaluation", () => {
 
   it("keeps defense cards without visible threat low and deferred", () => {
     const shield = visibleCard("shield-1", {
-      definitionId: "test-shield",
-      title: "Shield",
+      definitionId: "onr_v1_028_force-shield",
+      title: "Force Shield",
       type: "program",
       installCost: 0,
       memoryCost: 1,
@@ -507,14 +508,28 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       memoryLimit: 4,
     });
 
-    const evaluation = findByInstance(
-      evaluateRunnerHandDevelopment({
-        input,
-        strategicIntent: strategicIntent({
-          pressureVectors: ["runner.central_probe_pressure"],
-        }),
-      }),
-      "mouse-1",
+    const evaluation = withAiHint(
+      "onr_v1_042_mouse",
+      structuredRunnerHint("onr_v1_042_mouse", "program", [
+        {
+          kind: "expose_info",
+          timing: "action",
+          scope: "installed_card",
+          resource: "cards",
+          target: "info.expose_installed_card",
+          finite: true,
+        },
+      ]),
+      () =>
+        findByInstance(
+          evaluateRunnerHandDevelopment({
+            input,
+            strategicIntent: strategicIntent({
+              pressureVectors: ["runner.central_probe_pressure"],
+            }),
+          }),
+          "mouse-1",
+        ),
     );
 
     expect(evaluation).toMatchObject({
@@ -530,6 +545,29 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       evaluation.persistentInstallEvaluation?.finalInstallFit,
     ).toBeLessThan(0);
     expect(evaluation.priority).toBeGreaterThanOrEqual(300);
+  });
+
+  it("does not assign expose ownership from rules text without the structured fact", () => {
+    const textOnlyExpose = visibleCard("text-only-expose-1", {
+      definitionId: "test-text-only-expose",
+      title: "Text-only expose",
+      type: "program",
+      installCost: 0,
+      memoryCost: 1,
+      rulesText: "Expose one unrezzed installed Corp card.",
+    });
+    const input = runnerInput({
+      credits: 4,
+      hand: [textOnlyExpose],
+      legalActions: [installAction("install-text-only-expose", textOnlyExpose, 0)],
+    });
+
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        textOnlyExpose.instanceId,
+      ).developmentRole,
+    ).toBe("unknown");
   });
 
   it("bounds visible remote threat text to exact tokens", () => {
@@ -658,3 +696,30 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeLessThan(200);
   });
 });
+
+function structuredRunnerHint(
+  cardId: string,
+  cardType: string,
+  effects: NonNullable<AiCardHint["effects"]>,
+): AiCardHint {
+  return {
+    cardId,
+    side: "runner",
+    cardType,
+    roles: [],
+    planRoles: [],
+    aiSupportStatus: "ai_supported",
+    effects,
+  };
+}
+
+function withAiHint<T>(cardId: string, hint: AiCardHint, run: () => T): T {
+  const previous = AI_HINTS_BY_CARD.get(cardId);
+  AI_HINTS_BY_CARD.set(cardId, hint);
+  try {
+    return run();
+  } finally {
+    if (previous) AI_HINTS_BY_CARD.set(cardId, previous);
+    else AI_HINTS_BY_CARD.delete(cardId);
+  }
+}

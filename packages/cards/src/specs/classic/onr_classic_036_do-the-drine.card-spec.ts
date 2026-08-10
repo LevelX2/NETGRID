@@ -86,29 +86,21 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "very_high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_036_do-the-drine.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_036_do-the-drine.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_036_do-the-drine.",
       },
       {
         kind: "risk_interpretation",
         risk: "flatline_risk",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_036_do-the-drine.",
       },
     ],
     capabilities: [],

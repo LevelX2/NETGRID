@@ -10,8 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText:
-      "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+    rulesText: "*End the run.\n*End the run.\n*End the run.\n*End the run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

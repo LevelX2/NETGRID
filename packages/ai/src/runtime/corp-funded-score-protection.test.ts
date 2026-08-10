@@ -1304,11 +1304,8 @@ function variableInstallAction(
             parameter.maxValueFinalCredits,
           postInstallRezQuoteVariableEffectiveStrengthFromValue:
             parameter.effectiveStrengthFromValue,
-          ...(parameter.traceBaseFromValue
-            ? { postInstallRezQuoteVariableTraceBaseFromValue: true }
-            : {}),
-          ...(parameter.traceBidLimitFromValue
-            ? { postInstallRezQuoteVariableTraceBidLimitFromValue: true }
+          ...(parameter.traceLimitFromValue
+            ? { postInstallRezQuoteVariableTraceLimitFromValue: true }
             : {}),
         }
       : parameter.kind === "paid_end_the_run_subroutines"
@@ -1464,8 +1461,7 @@ function homingMissileRezParameter(): Extract<
     minValueFinalCredits: 4,
     maxValueFinalCredits: 12,
     effectiveStrengthFromValue: true,
-    traceBaseFromValue: true,
-    traceBidLimitFromValue: true,
+    traceLimitFromValue: true,
   };
 }
 

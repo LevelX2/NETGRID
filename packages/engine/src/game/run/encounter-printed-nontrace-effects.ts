@@ -9,10 +9,6 @@ import {
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import {
-  ICE_PICK_WILLIE_ID,
-  TOO_MANY_DOORS_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   appendResolvedSubroutineEffect,
   cleanupEncounterDurationMarkers,
   type EncounterResolutionHost,
@@ -38,9 +34,21 @@ type ClassicDeflectorChoiceContext = {
   cost: number;
   autoBreakIfNoTarget: boolean;
 };
+type TrashProgramChoiceContext = {
+  runId: string;
+  sourceIceId: CardInstanceId;
+  subroutineIndex: number;
+  sourceDefinitionId: string;
+  subroutineId: string;
+  subroutineType:
+    | "trash_installed_program"
+    | "trash_installed_program_unless_runner_pays";
+};
 
 export const CLASSIC_DEFLECTOR_CHOICE_SOURCE_PREFIX =
   "card_implementation.classic_deflector";
+export const TRASH_PROGRAM_CHOICE_SOURCE_PREFIX =
+  "card_implementation.trash_installed_program";
 
 export type EncounterPrintedNonTraceHost = {
   state: GameState;
@@ -285,14 +293,12 @@ export function resolveEncounterPrintedNonTraceEffect(
 
   if (subroutine.type === "reveal_corp_rd_top")
     return resolveDirectCorpRdRevealSubroutine(host, {
-      definition,
       legalAction,
       source,
     });
 
   if (subroutine.type === "reorder_corp_rd_top2")
     return resolveDirectCorpRdReorderSubroutine(host, {
-      definition,
       subroutineIndex,
       legalAction,
       source,
@@ -781,7 +787,6 @@ export function resolveDirectTrashProgramSubroutine(
     legalAction?: LegalAction | undefined;
   } = {},
 ): DirectTrashProgramSubroutineResult {
-  const targetProgramId = pickRunnerProgramForTrash(host);
   const base: EncounterPrintedNonTraceEffectResult = {
     handled: true,
     ...(options.definition
@@ -789,7 +794,7 @@ export function resolveDirectTrashProgramSubroutine(
       : {}),
     ...(options.subroutine ? { subroutineId: options.subroutine.id } : {}),
   };
-  if (!targetProgramId) {
+  if (host.state.runner.rig.programs.length === 0) {
     if (
       options.definition &&
       options.subroutine &&
@@ -805,65 +810,185 @@ export function resolveDirectTrashProgramSubroutine(
       );
     return { ...base, trashedCardIds: [], stateChanged: false };
   }
-  const targetDefinition = host.cards.definitionFor(targetProgramId);
   if (
-    options.legalAction &&
-    host.trash.openRunnerInstalledTrashPreventionWindow(
-      [targetProgramId],
-      "trash_program_subroutine",
-      options.legalAction,
-    )
-  ) {
-    if (
-      options.definition &&
-      options.subroutine &&
-      options.subroutineIndex !== undefined
-    )
-      appendResolvedSubroutineEffect(
-        options.legalAction,
-        options.definition,
-        options.subroutineIndex,
-        options.subroutine,
-        undefined,
-        { cardsTrashed: 0 },
-      );
-    return {
-      ...base,
-      trashedCardIds: [],
-      programTrashPreventionWindowOpened: true,
-      stateChanged: true,
-    };
-  }
-  host.trash.trashRunnerInstalledProgram(targetProgramId);
-  if (options.legalAction) {
-    options.legalAction.payload = {
-      ...(options.legalAction.payload ?? {}),
+    !options.definition ||
+    !options.subroutine ||
+    options.subroutineIndex === undefined ||
+    !options.legalAction
+  )
+    throw new Error("Programmtrash-Subroutine benötigt gebundene Source-Context.");
+  startTrashProgramChoice(host, {
+    definition: options.definition,
+    subroutine: options.subroutine,
+    subroutineIndex: options.subroutineIndex,
+    legalAction: options.legalAction,
+  });
+  return {
+    ...base,
+    trashedCardIds: [],
+    suspended: true,
+    stateChanged: true,
+  };
+}
+
+export function resolveTrashProgramChoice(
+  host: EncounterPrintedNonTraceHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = host.state.pendingChoice;
+  if (!choice?.source.startsWith(TRASH_PROGRAM_CHOICE_SOURCE_PREFIX))
+    throw new Error("Programmtrash-Choice ist nicht offen.");
+  const context = parseTrashProgramChoiceSource(choice.source);
+  const run = mustRun(host.state);
+  if (run.runId !== context.runId || run.encounteredIceId !== context.sourceIceId)
+    throw new Error("Die Programmtrash-Choice passt nicht mehr zum Encounter.");
+  const sourceInstance = host.state.cardInstances[context.sourceIceId];
+  if (
+    !sourceInstance?.rezzed ||
+    sourceInstance.zone.side !== "corp" ||
+    sourceInstance.zone.zone !== "serverIce"
+  )
+    throw new Error("Die Programmtrash-Choice-Quelle ist nicht mehr rezzed ICE.");
+  const sourceDefinition = host.cards.definitionFor(context.sourceIceId);
+  if (sourceDefinition.id !== context.sourceDefinitionId)
+    throw new Error("Die Programmtrash-Choice-Quelle passt nicht mehr.");
+  const subroutine = sourceDefinition.subroutines?.find(
+    (candidate) =>
+      candidate.id === context.subroutineId &&
+      candidate.type === context.subroutineType,
+  );
+  if (!subroutine)
+    throw new Error("Die Programmtrash-Subroutine passt nicht mehr.");
+  const selectedOptionId =
+    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const targetProgramId = choice.options.find(
+    (option) => option.id === selectedOptionId,
+  )?.value as CardInstanceId | undefined;
+  if (!targetProgramId || !host.state.runner.rig.programs.includes(targetProgramId))
+    throw new Error("Das gewählte Programm ist nicht mehr installiert.");
+  const targetDefinition = host.cards.definitionFor(targetProgramId);
+  const prevented = host.trash.openRunnerInstalledTrashPreventionWindow(
+    [targetProgramId],
+    "trash_program_subroutine",
+    legalAction,
+  );
+  if (!prevented) {
+    host.trash.trashRunnerInstalledProgram(targetProgramId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
       trashedCardDefinitionId: targetDefinition.id,
       trashedCardType: "program",
       trashedCount: 1,
     };
   }
-  if (
-    options.definition &&
-    options.subroutine &&
-    options.subroutineIndex !== undefined
-  )
-    appendResolvedSubroutineEffect(
-      options.legalAction,
-      options.definition,
-      options.subroutineIndex,
-      options.subroutine,
-      undefined,
-      {
-        cardDefinitionId: targetDefinition.id,
-        cardTitle: targetDefinition.title,
-        cardsTrashed: 1,
+  appendResolvedSubroutineEffect(
+    legalAction,
+    sourceDefinition,
+    context.subroutineIndex,
+    subroutine,
+    undefined,
+    prevented
+      ? { cardsTrashed: 0 }
+      : {
+          cardDefinitionId: targetDefinition.id,
+          cardTitle: targetDefinition.title,
+          cardsTrashed: 1,
       },
-    );
+  );
+  if (host.state.pendingChoice === choice) {
+    delete host.state.pendingChoice;
+    host.state.activeSide = "runner";
+  }
+}
+
+function startTrashProgramChoice(
+  host: EncounterPrintedNonTraceHost,
+  input: {
+    definition: CardDefinition;
+    subroutine: SubroutineDefinition;
+    subroutineIndex: number;
+    legalAction: LegalAction;
+  },
+): void {
+  if (
+    input.subroutine.type !== "trash_installed_program" &&
+    input.subroutine.type !== "trash_installed_program_unless_runner_pays"
+  )
+    throw new Error("Programmtrash-Choice benötigt eine Programmtrash-Subroutine.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
+  const run = mustRun(host.state);
+  const sourceIceId = run.encounteredIceId;
+  if (!sourceIceId)
+    throw new Error("Programmtrash-Choice benötigt ein Encounter-ICE.");
+  const choiceId = `trash_installed_program_${host.state.stateVersion + 1}`;
+  host.state.pendingChoice = {
+    choiceId,
+    side: "corp",
+    source: trashProgramChoiceSource({
+      runId: run.runId,
+      sourceIceId,
+      subroutineIndex: input.subroutineIndex,
+      sourceDefinitionId: input.definition.id,
+      subroutineId: input.subroutine.id,
+      subroutineType: input.subroutine.type,
+    }),
+    prompt: `${input.definition.title}: installiertes Programm zum Trashing wählen.`,
+    kind: "select_cards",
+    options: host.state.runner.rig.programs.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: host.cards.definitionFor(cardId).title,
+      value: cardId,
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: "public",
+  };
+  if (!run.resolvedSubroutineIndexes.includes(input.subroutineIndex))
+    run.resolvedSubroutineIndexes.push(input.subroutineIndex);
+  host.state.activeSide = "corp";
+  legalActionPayload(input.legalAction, {
+    sourceDefinitionId: input.definition.id,
+    programTrashChoiceOpened: true,
+    programTrashCandidateCount: host.state.runner.rig.programs.length,
+    choiceId,
+  });
+}
+
+function trashProgramChoiceSource(context: TrashProgramChoiceContext): string {
+  return [
+    TRASH_PROGRAM_CHOICE_SOURCE_PREFIX,
+    encodeURIComponent(context.runId),
+    encodeURIComponent(context.sourceIceId),
+    context.subroutineIndex,
+    encodeURIComponent(context.sourceDefinitionId),
+    encodeURIComponent(context.subroutineId),
+    context.subroutineType,
+  ].join(":");
+}
+
+function parseTrashProgramChoiceSource(source: string): TrashProgramChoiceContext {
+  const [prefix, runId, sourceIceId, index, sourceDefinitionId, subroutineId, subroutineType] =
+    source.split(":");
+  if (prefix !== TRASH_PROGRAM_CHOICE_SOURCE_PREFIX)
+    throw new Error("Programmtrash-Choice-Quelle ist ungültig.");
+  const subroutineIndex = Number(index);
+  if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
+    throw new Error("Programmtrash-Subroutine-Index ist ungültig.");
+  if (
+    subroutineType !== "trash_installed_program" &&
+    subroutineType !== "trash_installed_program_unless_runner_pays"
+  )
+    throw new Error("Programmtrash-Subroutinen-Typ ist ungültig.");
   return {
-    ...base,
-    trashedCardIds: [targetProgramId],
-    stateChanged: true,
+    runId: decodeURIComponent(runId ?? ""),
+    sourceIceId: decodeURIComponent(sourceIceId ?? "") as CardInstanceId,
+    subroutineIndex,
+    sourceDefinitionId: decodeURIComponent(sourceDefinitionId ?? ""),
+    subroutineId: decodeURIComponent(subroutineId ?? ""),
+    subroutineType,
   };
 }
 
@@ -912,13 +1037,10 @@ function resolveDirectRunLockSubroutine(
 function resolveDirectCorpRdRevealSubroutine(
   host: EncounterPrintedNonTraceHost,
   options: {
-    definition: CardDefinition;
     legalAction?: LegalAction | undefined;
     source: SourceMetadata;
   },
 ): EncounterPrintedNonTraceEffectResult {
-  if (options.definition.id !== ICE_PICK_WILLIE_ID)
-    throw new Error("Die R&D-Reveal-Subroutine passt nicht zum ICE.");
   if (!options.legalAction)
     throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reveal.");
   host.choices.revealCorpRdTop(options.legalAction);
@@ -928,14 +1050,11 @@ function resolveDirectCorpRdRevealSubroutine(
 function resolveDirectCorpRdReorderSubroutine(
   host: EncounterPrintedNonTraceHost,
   options: {
-    definition: CardDefinition;
     subroutineIndex: number;
     legalAction?: LegalAction | undefined;
     source: SourceMetadata;
   },
 ): EncounterPrintedNonTraceEffectResult & { suspended?: boolean } {
-  if (options.definition.id !== TOO_MANY_DOORS_ID)
-    throw new Error("Die R&D-Reorder-Subroutine passt nicht zum ICE.");
   const arrangeCount = host.state.corp.rd.slice(0, 2).length;
   const run = mustRun(host.state);
   if (arrangeCount < 2) {
@@ -1058,22 +1177,6 @@ function resolveDirectEndRunSubroutine(
     paidCredits: 0,
     stateChanged: false,
   };
-}
-
-function pickRunnerProgramForTrash(
-  host: EncounterPrintedNonTraceHost,
-): CardInstanceId | undefined {
-  return host.state.runner.rig.programs.slice().sort((left, right) => {
-    const leftDefinition = host.cards.definitionFor(left);
-    const rightDefinition = host.cards.definitionFor(right);
-    const byInstallCost =
-      (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
-    if (byInstallCost !== 0) return byInstallCost;
-    const byMemoryCost =
-      (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
-    if (byMemoryCost !== 0) return byMemoryCost;
-    return left.localeCompare(right);
-  })[0];
 }
 
 function sourceMetadata(

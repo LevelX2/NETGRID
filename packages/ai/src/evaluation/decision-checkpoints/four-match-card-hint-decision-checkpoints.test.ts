@@ -91,13 +91,15 @@ describe("four-match card-hint decision checkpoints", () => {
     expect(directHqEvaluation).toMatchObject({
       targetServerId: "hq",
       accessServerId: "hq",
-      pathPassability: "reachable",
+      pathPassability: "blocked_unpayable",
+      pathCost: 8,
+      creditsAfterRun: -2,
       routeQuote: {
-        reachability: "guaranteed_access",
-        fundingGap: 0,
+        reachability: "no_access",
+        fundingGap: 2,
         unknownIceCount: 0,
       },
-      unavoidableVisibleIceHazardCount: 1,
+      unavoidableVisibleIceHazardCount: 0,
     });
     expect(directHqEvaluation?.score).toBeLessThan(0);
   });

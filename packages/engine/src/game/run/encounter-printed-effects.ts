@@ -11,7 +11,7 @@ import {
   type TraceSuccessEffect,
   type ServerId,
 } from "@netgrid/shared";
-import { MICROTECH_TRODE_SET_ID } from "../../compatibility/runtime-compatibility";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { describeTraceResultFromTrace } from "../trace/trace-result";
 import { credits } from "../state/economy-mutation";
 import {
@@ -47,7 +47,6 @@ export type EncounterPrintedEffectHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
     finishRun: (successful: boolean) => void;
-    hasInstalledRunnerApDamageReducerHardware: () => boolean;
     corpTraceCounterPoolTotal: () => number;
     recurringTraceCreditPoolTotal: () => number;
     openEventModificationWindow: (
@@ -108,7 +107,7 @@ export type PrintedDamageResult = EncounterPrintedEffectResult & {
 
 export type PrintedTraceStartResult = EncounterPrintedEffectResult & {
   traceId?: string;
-  baseTraceStrength?: number;
+  traceLimit?: number;
   corpBidMax?: number;
 };
 
@@ -187,12 +186,19 @@ export function resolvePrintedDamageSubroutine(
   const run = mustRun(state);
   const { definition, subroutine, subroutineIndex, legalAction } = options;
   const damageType = subroutine.damageType ?? "net";
+  if (
+    subroutine.derivedAmount?.kind === "relative_ice_dynamic_damage" &&
+    subroutine.amount === undefined
+  )
+    throw new Error("runtime_unresolved_derived_damage_subroutine");
   const printedAmount = subroutine.amount ?? 1;
+  const apNetDamageReducerSourceDefinitionId =
+    runnerApNetDamageReducerSourceDefinitionId(host);
   const microtechApNetReduction =
     damageType === "net" &&
     printedAmount > 1 &&
     cardHasSubtype(definition, "ap") &&
-    host.callbacks.hasInstalledRunnerApDamageReducerHardware();
+    apNetDamageReducerSourceDefinitionId !== undefined;
   const damageAmount = microtechApNetReduction ? 1 : printedAmount;
   if (damageAmount <= 0) {
     if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
@@ -214,7 +220,7 @@ export function resolvePrintedDamageSubroutine(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerHardwareAbility: "runner_hardware_ap_net_damage_reduction",
-      sourceDefinitionId: MICROTECH_TRODE_SET_ID,
+      sourceDefinitionId: apNetDamageReducerSourceDefinitionId,
       printedDamageAmount: printedAmount,
       damageAmount,
     };
@@ -258,6 +264,18 @@ export function resolvePrintedDamageSubroutine(
     damageAmount,
     stateChanged: true,
   };
+}
+
+function runnerApNetDamageReducerSourceDefinitionId(
+  host: EncounterPrintedEffectHost,
+): string | undefined {
+  return host.state.runner.rig.hardware
+    .map((cardId) => host.callbacks.definitionFor(cardId))
+    .find(
+      (definition) =>
+        cardImplementationForDefinitionId(definition.id)?.runnerUtilityLongtail
+          ?.kind === "access_point_subroutine_modifier",
+    )?.id;
 }
 
 export function resolvePrintedRandomDamageSubroutine(
@@ -381,14 +399,13 @@ export function startTraceFromPrintedSubroutine(
   if (subroutine.type !== "initiate_trace") return { handled: false };
   if (state.trace || state.pendingChoice)
     throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
-  const baseTraceStrength =
-    subroutine.baseTraceStrength ?? subroutine.amount ?? 0;
-  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
-    throw new Error("Trace strength ist ungueltig.");
-  const traceBidLimit =
-    typeof subroutine.traceBidLimit === "number"
-      ? Math.max(0, Math.floor(subroutine.traceBidLimit))
-      : undefined;
+  const traceLimit = subroutine.traceLimit;
+  if (
+    typeof traceLimit !== "number" ||
+    !Number.isInteger(traceLimit) ||
+    traceLimit < 0
+  )
+    throw new Error("Trace-Limit ist ungueltig.");
   const successEffect = subroutine.traceSuccessEffect;
   if (
     !successEffect ||
@@ -421,18 +438,22 @@ export function startTraceFromPrintedSubroutine(
     fortTraceBits;
   const rabbitTraceLimitReduction =
     host.callbacks.rabbitTraceLimitReductionForIceTrace();
-  const corpBidMax = Math.max(
+  const effectiveBaseTraceLimit = Math.max(
     0,
-    Math.min(baseCorpBidMax, traceBidLimit ?? baseCorpBidMax) -
-      rabbitTraceLimitReduction,
+    traceLimit - rabbitTraceLimitReduction,
+  );
+  const corpTraceCounterPool = host.callbacks.corpTraceCounterPoolTotal();
+  const corpBidMax = Math.min(
+    baseCorpBidMax,
+    effectiveBaseTraceLimit + corpTraceCounterPool,
   );
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinition.id,
     subroutineIndex,
-    baseTraceStrength,
-    ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
+    traceLimit,
+    effectiveTraceLimit: effectiveBaseTraceLimit,
     corpBidMax,
     ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
     ...(fortTraceBitPoolSource
@@ -453,7 +474,7 @@ export function startTraceFromPrintedSubroutine(
   state.pendingChoice = host.callbacks.traceBidChoice(
     "corp",
     traceId,
-    `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
+    `Korp Trace-Wert wählen (Limit ${traceLimit})`,
     corpBidMax,
   );
   state.activeSide = "corp";
@@ -465,8 +486,8 @@ export function startTraceFromPrintedSubroutine(
       traceId,
       sourceCardId: sourceCardInstanceId,
       sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength,
-      ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
+      traceLimit,
+      effectiveTraceLimit: effectiveBaseTraceLimit,
       corpBidMax,
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
       ...(fortTraceBitPoolSource
@@ -488,7 +509,7 @@ export function startTraceFromPrintedSubroutine(
     handled: true,
     suspended: true,
     traceId,
-    baseTraceStrength,
+    traceLimit,
     corpBidMax,
     stateChanged: true,
   };
@@ -512,10 +533,10 @@ export function applyPrintedTraceSuccessFollowups(
     runnerLinkFallback:
       options.runnerLinkFallback ?? host.callbacks.calculateRunnerLink(),
   });
-  const traceStrength = result.corpTraceStrength;
+  const traceValue = result.traceValue;
   const runnerLink = result.runnerLink;
   const runnerBid = result.runnerBid;
-  const runnerStrength = result.runnerTraceStrength;
+  const runnerStrength = result.runnerStrength;
   const successful = result.successful;
   const tagAmount =
     traceSuccessTagAmount(trace.successEffect, successful, result) +
@@ -644,10 +665,10 @@ export function applyPrintedTraceSuccessFollowups(
   const payload = {
     traceId: trace.traceId,
     traceStep,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
-    traceStrength,
+    traceValue,
     runnerLink,
     runnerBid,
     ...(options.extraPayload ?? {}),
@@ -741,7 +762,7 @@ function traceSuccessTagAmount(
     return successEffect.tagAmount;
   if (successEffect.type === "add_tag") return successEffect.amount;
   if (successEffect.type === "add_tags_by_trace_margin_over_runner_link")
-    return Math.max(0, result.corpTraceStrength - result.runnerLink);
+    return Math.max(0, result.traceValue - result.runnerLink);
   if (successEffect.type === "trash_runner_resource_and_add_tag") return 1;
   return 0;
 }

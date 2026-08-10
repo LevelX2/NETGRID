@@ -870,7 +870,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
-    for (const [definitionId, baseTraceStrength] of [
+    for (const [definitionId, traceLimit] of [
       ["onr_v1_227_cerberus", 5],
       ["onr_v1_255_mastiff", 5],
     ] as const) {
@@ -908,7 +908,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       ).toBeUndefined();
       expect(state.trace, definitionId).toMatchObject({
         status: "corp_bid",
-        baseTraceStrength,
+        traceLimit,
       });
     }
   });

@@ -106,11 +106,6 @@ function makeHost(input: {
     state,
     legalAction: input.legalAction ?? action(),
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
-    constants: {
-      corpRdTop5ReorderOperationCardId: planningId,
-      runnerStackArrangeSourceId: roninId,
-      corpRdTopArrangeSourceId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
       hiddenReplacementLongtailKind: (definitionId) =>
@@ -233,6 +228,7 @@ describe("hidden-zone arrange choice handlers", () => {
     const host = makeHost({
       corpRd: cards,
       definitions: { [source]: definition(planningId, "operation", "Planning Consultants") },
+      utilitySources: [source],
     });
 
     startCorpRdTopReorderChoice(host, source);

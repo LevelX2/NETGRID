@@ -10,10 +10,6 @@ import {
   type ServerId,
   type Side,
 } from "@netgrid/shared";
-import {
-  ABLATIVE_COUNTER_HARDWARE_SOURCE,
-  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-} from "../../mechanics/damage-prevention";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
 import { assertCorpIceInstallAllowed } from "./corp-ice-install-restrictions";
@@ -497,22 +493,6 @@ function installRunnerHardware(
       "recurring_credit",
       definition.recurringCredits ?? 0,
     );
-  if (
-    definition.id === ABLATIVE_COUNTER_HARDWARE_SOURCE &&
-    host.cards.damagePreventionSourcesForDefinition(definition).length === 0
-  ) {
-    host.counters.setCardCounter(
-      cardId,
-      "power",
-      ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-    );
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      counterType: "power",
-      addedCounterAmount: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-      remainingCounters: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
-    };
-  }
   if (trashedDeckDefinitionIds.length > 0) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

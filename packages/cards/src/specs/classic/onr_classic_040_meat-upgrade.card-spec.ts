@@ -95,15 +95,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_040_meat-upgrade.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_040_meat-upgrade.",
       },
     ],
     capabilities: [],

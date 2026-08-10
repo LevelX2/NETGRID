@@ -1060,7 +1060,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "private_police_1",
         agendaAbility: "private_cybernet_police",
-        traceStrength: 5,
+        traceValue: 5,
       },
     );
     const seeya = legalAction(
@@ -1113,7 +1113,7 @@ describe("V1.0.5 action board UI helpers", () => {
       {
         cardId: "blood_cat_1",
         v1917AssetAbility: "trace_3_tag",
-        traceStrength: 5,
+        traceValue: 5,
       },
     );
     const southAfrican = legalAction(

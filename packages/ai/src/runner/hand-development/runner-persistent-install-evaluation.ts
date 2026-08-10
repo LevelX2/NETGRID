@@ -14,6 +14,14 @@ import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { persistentDevelopmentActionProjection } from "../../actions/persistent-development-action";
 import { actionClickCost } from "../../runtime/action-cost";
+import {
+  runnerHintProvidesDamagePrevention,
+  runnerHintProvidesExposeInformation,
+  runnerHintProvidesMultiaccess,
+  runnerHintProvidesNonNoisyBreakerCredits,
+  runnerHintProvidesSearch,
+  runnerHintProvidesTopTrashRecovery,
+} from "../../runner-canonical-hint-semantics";
 import type {
   BreakerVariantAssessment,
   CardContext,
@@ -41,7 +49,6 @@ import {
   runnerHandTextHasBankToolSignal,
   runnerHandTextHasBreakerStrengthSupportSignal,
   runnerHandTextHasCodeGateCoverageSignal,
-  runnerHandTextHasDamagePreventionSignal,
   runnerHandTextHasDefenseSignal,
   runnerHandTextHasDrawOrSearchSignal,
   runnerHandTextHasEconomyToolSignal,
@@ -51,14 +58,10 @@ import {
   runnerHandTextHasIceSubroutineBreakSignal,
   runnerHandTextHasMemorySupportSignal,
   runnerHandTextHasPlayableSignal,
-  runnerHandTextHasProgramSearchUtilitySignal,
-  runnerHandTextHasRecurringBreakerEconomySignal,
-  runnerHandTextHasRecoveryUtilitySignal,
   runnerHandTextHasRepeatUsefulSignal,
   runnerHandTextHasRiskyBreakerSignal,
   runnerHandTextHasRunEventSignal,
   runnerHandTextHasSentryCoverageSignal,
-  runnerHandTextHasStackSearchUtilitySignal,
   runnerHandTextHasTemporaryCounterSignal,
   runnerHandTextHasTraceCoverageSignal,
   runnerHandTextHasVisibleThreatSignal,
@@ -138,6 +141,7 @@ export function signalsForCard(
     planRoles,
     candidateSignals,
     effectTargets,
+    structuredEffects: [...(hint?.effects ?? [])],
     requiresSameTurnAccess,
     requiresHostedIcebreaker,
   };
@@ -179,11 +183,14 @@ export function persistentFunctionalProfileForCard(
   const breakerCoverage = breakerCoverageForPersistentCard(card, text);
   const randomBreakOrDamageProfile =
     randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId);
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
   const riskyBreaker =
     breakerCoverage.length > 0 &&
     (randomBreakOrDamageProfile !== undefined ||
       runnerHandTextHasRiskyBreakerSignal(text));
-  const damagePrevention = runnerHandTextHasDamagePreventionSignal(text);
+  const damagePrevention = runnerHintProvidesDamagePrevention(hint);
   const handSizeSupport = runnerHandTextHasHandSizeSignal(text);
   const memorySupport = looksLikeMemorySupport(card, text);
   const breakerStrengthSupport =
@@ -191,7 +198,7 @@ export function persistentFunctionalProfileForCard(
   const iceStrengthReduction =
     runnerHandTextHasIceStrengthReductionSignal(text);
   const recurringBreakerEconomy =
-    runnerHandTextHasRecurringBreakerEconomySignal(text);
+    runnerHintProvidesNonNoisyBreakerCredits(hint);
   const runOnlyEconomyPool = cardHasRunOnlyEconomyPool(card);
   const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
   const economyTool =
@@ -199,8 +206,14 @@ export function persistentFunctionalProfileForCard(
     breakerCoverage.length === 0 &&
     looksLikeEconomyTool(text);
   const actionEconomy = runnerHandTextHasActionEconomySignal(text);
-  const accessSupport = looksLikeAccessPayoff(text);
-  const searchSupport = looksLikeDrawOrSearch(text);
+  const accessSupport =
+    runnerHintProvidesExposeInformation(hint) ||
+    runnerHintProvidesMultiaccess(hint) ||
+    looksLikeAccessPayoff(text);
+  const searchSupport =
+    runnerHintProvidesSearch(hint) ||
+    runnerHintProvidesTopTrashRecovery(hint) ||
+    looksLikeDrawOrSearch(text);
   const nonAdditiveUtilityFamilies =
     nonAdditiveUtilityFamiliesForPersistentCard(card, text);
   const actionGatedUtility =
@@ -307,9 +320,17 @@ export function nonAdditiveUtilityFamiliesForPersistentCard(
 ): string[] {
   if (card.type !== "resource") return [];
   const families = new Set<string>();
-  const recovery = runnerHandTextHasRecoveryUtilitySignal(text);
-  const programSearch = runnerHandTextHasProgramSearchUtilitySignal(text);
-  const stackSearch = runnerHandTextHasStackSearchUtilitySignal(text);
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
+  const recovery = runnerHintProvidesTopTrashRecovery(hint);
+  const searchEffects = hint?.effects?.filter(
+    (effect) => effect.kind === "search",
+  );
+  const programSearch =
+    searchEffects?.some((effect) => effect.target?.includes("program")) ?? false;
+  const stackSearch =
+    searchEffects?.some((effect) => effect.scope === "stack") ?? false;
   const hiddenZoneSearch = runnerHandTextHasHiddenZoneSearchSignal(text);
 
   if (recovery) families.add("non_additive_utility:recovery");

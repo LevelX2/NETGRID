@@ -6,6 +6,7 @@ import {
   cardSpecPlanningCards,
   CS06_CARD_DEFINITION_IDS,
 } from "@netgrid/cards/planning";
+import { cardSpecSourceRefs } from "@netgrid/cards/engine";
 import { build } from "esbuild";
 import { describe, expect, it } from "vitest";
 
@@ -21,13 +22,16 @@ import {
 import { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validation";
 
 describe("CardSpec generated AI hint artifact", () => {
-  it("is the canonical exact-251 active output of the current compiler inputs", () => {
+  it("is the canonical exact-618 active output of the current compiler inputs", () => {
     const compiled = buildCardSpecAiHintArtifact();
 
     expect(compiled).toEqual(generatedArtifact);
-    expect(compiled.cardIds).toHaveLength(251);
-    expect(compiled.cardIds).not.toContain("catalog_preview_operation_001");
-    expect(compiled.cardIds).not.toContain("catalog_preview_resource_001");
+    expect(compiled.cardIds).toHaveLength(618);
+    expect(
+      compiled.cardIds.filter((cardId) =>
+        cardId.startsWith("catalog_preview_"),
+      ),
+    ).toEqual([]);
     expect(compiled.cardIds).toEqual([...compiled.cardIds].sort());
     expect(compiled.cards.map((entry) => entry.cardId)).toEqual(
       compiled.cardIds,
@@ -77,12 +81,21 @@ describe("CardSpec generated AI hint artifact", () => {
       testsetReviewedGolden.cards.map((record) => record.cardId),
       classicReviewedGolden.cards.map((record) => record.cardId),
       proteusReviewedGolden.cards.map((record) => record.cardId),
+      cardSpecSourceRefs()
+        .filter(
+          (ref) =>
+            ref.sourcePath.includes("/specs/originalset-v1/") &&
+            !CS06_CARD_DEFINITION_IDS.includes(
+              ref.cardDefinitionId as (typeof CS06_CARD_DEFINITION_IDS)[number],
+            ),
+        )
+        .map((ref) => ref.cardDefinitionId),
     ];
     expect(partitions.map((partition) => partition.length)).toEqual([
-      10, 36, 54, 151,
+      10, 36, 54, 151, 367,
     ]);
     const reviewedExpectedIds = partitions.flat().sort();
-    expect(new Set(reviewedExpectedIds).size).toBe(251);
+    expect(new Set(reviewedExpectedIds).size).toBe(618);
     expect(generatedArtifact.cardIds).toEqual(reviewedExpectedIds);
     expect(entries.map((entry) => entry.definition.id).sort()).toEqual(
       reviewedExpectedIds,
@@ -180,8 +193,8 @@ describe("CardSpec generated AI hint artifact", () => {
 
     expect(inputs).toEqual(
       [
-        "data/ai/ai-card-hints-active.json",
         "data/ai/card-spec-ai-hints-generated.json",
+        "packages/ai/src/action-plan-owner-contracts.ts",
         "packages/ai/src/ai-hint-contracts.ts",
         "packages/ai/src/catalog-ai-hint-authority.ts",
         "packages/ai/src/catalog-ai-hint-public.ts",

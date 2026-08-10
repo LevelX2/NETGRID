@@ -391,9 +391,9 @@ function visibleCorpTraceBidCapacity(
   const available =
     Math.max(0, Math.floor(visibleCorpCredits)) +
     Math.max(0, Math.floor(quote.encounterTemporaryTraceCredits ?? 0));
-  return subroutine.traceBidLimit === undefined
+  return subroutine.traceLimit === undefined
     ? available
-    : Math.min(available, Math.max(0, Math.floor(subroutine.traceBidLimit)));
+    : Math.min(available, Math.max(0, Math.floor(subroutine.traceLimit)));
 }
 
 export function visibleIceRunHazardForTraceEffect(
@@ -834,8 +834,8 @@ export function cheapestTraceAvoidanceCandidate(
 export function traceBaseStrengthForVisibleSubroutine(
   subroutine: VisibleEffectiveSubroutine,
 ): number | undefined {
-  if (typeof subroutine.baseTraceStrength === "number") {
-    return Math.max(0, Math.floor(subroutine.baseTraceStrength));
+  if (typeof subroutine.traceLimit === "number") {
+    return Math.max(0, Math.floor(subroutine.traceLimit));
   }
   return undefined;
 }
@@ -930,8 +930,8 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
   if ((effect.createsRunLockOrActionTax ?? 0) <= 0) return undefined;
   if (sourceSubroutine.type !== "initiate_trace") return undefined;
   const traceBaseStrength =
-    typeof sourceSubroutine.baseTraceStrength === "number"
-      ? Math.max(0, Math.floor(sourceSubroutine.baseTraceStrength))
+    typeof sourceSubroutine.traceLimit === "number"
+      ? Math.max(0, Math.floor(sourceSubroutine.traceLimit))
       : typeof sourceSubroutine.amount === "number"
         ? Math.max(0, Math.floor(sourceSubroutine.amount))
         : undefined;

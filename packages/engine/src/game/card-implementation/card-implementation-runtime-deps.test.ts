@@ -109,6 +109,21 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       spendClick: () => undefined,
       spendCredits: () => undefined,
       gainCredits: (gameState, input) => {
+        if (input.destination?.kind === "runner_run_temporary") {
+          if (!gameState.run) throw new Error("Missing run");
+          gameState.run.runnerRunTemporaryCredits = {
+            sourceDefinitionId: input.destination.sourceDefinitionId,
+            remaining:
+              (gameState.run.runnerRunTemporaryCredits?.remaining ?? 0) +
+              input.amount,
+            returnUnusedAtRunEnd: input.destination.returnUnusedAtRunEnd,
+          };
+          return {
+            creditedAmount: input.amount,
+            creditsAfter: gameState.run.runnerRunTemporaryCredits.remaining,
+            publicPayload: { gainedCredits: input.amount },
+          };
+        }
         if (input.side === "corp") gameState.corp.credits += input.amount;
         else gameState.runner.credits += input.amount;
         return {

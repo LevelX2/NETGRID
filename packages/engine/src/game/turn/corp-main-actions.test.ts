@@ -175,7 +175,6 @@ function testCorpMainHost(
       cardImplementationForDefinitionId: () => undefined,
       rezzedCorpRootCardIds: () => [],
       corpInstalledCardIds: () => [],
-      visibleVirusCounterTargetIds: () => [],
     },
     agenda: {
       effectiveAgendaDifficulty: unexpected("effectiveAgendaDifficulty"),
@@ -201,7 +200,6 @@ function testCorpMainHost(
       cardImplementationOperationLegalActions: () => [],
       corpUtilityImplementationForDefinition: () => undefined,
       hardwareTrashByCounterLegalActions: () => [],
-      advancementPlacementLegalActions: () => [],
       corpAgendaPointTotal: () => 0,
       hasCorpUtilityKind: () => false,
       uniqueDirectLongtailKindForDefinition: () => undefined,
@@ -253,10 +251,7 @@ function testCorpMainHost(
       edgerunnerTempsInstallActionsRemaining: () => 0,
     },
     constants: {
-      INSTALLED_CARD_LIMIT_ASSET_SOURCE: "cowboy_sysop",
-      VIRUS_COUNTER_ASSET_SOURCE: "disinfectant",
       COUNTER_UPGRADE_SOURCES: new Set(),
-      ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: "systematic_layoffs",
     },
   };
 }

@@ -91,8 +91,7 @@ describe("runner run plan path quote", () => {
             ...fragmentationStormTraceSubroutine(),
             id: "homing-missile-trace",
             amount: 5,
-            baseTraceStrength: 5,
-            traceBidLimit: 5,
+            traceLimit: 5,
           },
         ],
         legalActions: [
@@ -992,7 +991,7 @@ function fragmentationStormTraceSubroutine(): NonNullable<
     id: "fragmentation-storm-trace",
     type: "initiate_trace",
     amount: 4,
-    baseTraceStrength: 4,
+    traceLimit: 4,
     traceSuccessEffect: {
       type: "end_run_trash_program_and_run_lock",
       amount: 2,

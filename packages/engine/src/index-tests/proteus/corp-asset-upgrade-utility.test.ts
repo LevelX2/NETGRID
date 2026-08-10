@@ -281,7 +281,7 @@ function openCorpTraceBidWindow(
     traceId: "pro014_trace",
     sourceCardInstanceId: sourceCardId,
     sourceDefinitionId: state.cardInstances[sourceCardId]!.definitionId,
-    baseTraceStrength: 0,
+    traceLimit: 0,
     corpBidMax: 5,
     status: "corp_bid",
     successEffect: { type: "none" },

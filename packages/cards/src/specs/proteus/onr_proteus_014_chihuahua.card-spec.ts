@@ -46,7 +46,6 @@ export const cardSpec = {
         capabilityKey: capabilityKey("subroutine_trace_one_net_damage"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "trace",
-        baseTraceStrength: 1,
         onSuccess: [
           {
             kind: "preventable_damage",
@@ -56,6 +55,7 @@ export const cardSpec = {
             visibility: "public",
           },
         ],
+        traceLimit: 1,
       },
     ],
     lifecycle: {

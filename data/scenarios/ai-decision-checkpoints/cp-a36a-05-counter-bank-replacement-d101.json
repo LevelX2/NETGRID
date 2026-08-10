@@ -92,7 +92,7 @@
   },
   "engine": {
     "stateVersion": 231,
-    "stateHash": "fnv1a:29fc29e3",
+    "stateHash": "fnv1a:22cb262d",
     "testOnlyGameState": {
       "matchId": "match_a36a9664458303fc",
       "baseline": {
@@ -18653,6 +18653,17 @@
         "type": "install_card",
         "targetServerId": "remote_1"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_counter_bank_score_agenda"],
+      "requiredAssessmentEvidence": [
+        "engine_certified_counter_bank_cross_remote_handoff:corp_onr_v1_347_vapor-ops_3:corp_onr_v1_196_corporate-war_2:remote_1:new_remote",
+        "transient_plan_signal:goal:tactical:corp-score:counter-bank:handoff:corp_onr_v1_347_vapor-ops_3:corp_onr_v1_196_corporate-war_2:remote_1:new_remote",
+        "transient_plan_signal_plan:corp.score_agenda",
+        "transient_plan_signal_evidence:engine_certified_counter_bank_cross_remote_handoff:corp_onr_v1_347_vapor-ops_3:corp_onr_v1_196_corporate-war_2:remote_1:new_remote",
+        "transient_plan_signal_guarantee:robust_but_reactive"
+      ]
+    }
   }
 }

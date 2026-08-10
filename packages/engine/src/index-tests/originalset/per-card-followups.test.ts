@@ -3004,7 +3004,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
   });
 
   it("resolves Cinderella and Homewrecker as unpreventable hardware-trash trace ICE", () => {
-    for (const [definitionId, traceStrength] of [
+    for (const [definitionId, traceValue] of [
       ["onr_v1_228_cinderella", 6],
       ["onr_v1_248_homewrecker", 5],
     ] as const) {
@@ -3043,7 +3043,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         "runner",
         (action) => action.type === "continue_run",
       );
-      expect(state.trace).toMatchObject({ baseTraceStrength: traceStrength });
+      expect(state.trace).toMatchObject({ traceLimit: traceValue });
       state = applyChoice(state, "corp", "bid_10");
       state = applyChoice(state, "runner", "bid_0");
       expect(state.runner.tags).toBe(0);
@@ -3159,7 +3159,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       traceSuccessful: false,
       corpBid: 0,
       runnerBid: 6,
-      traceStrength: 6,
+      traceValue: 6,
       runnerStrength: 6,
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toMatchObject({

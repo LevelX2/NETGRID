@@ -18,6 +18,9 @@ export type RunFortTriggerExecutionHost = {
       source: Record<CardInstanceId, CardInstance>,
       cardId: CardInstanceId,
     ) => CardInstance;
+    runnerUtilityLongtailKindForDefinition: (
+      definition: CardDefinition,
+    ) => string | undefined;
   };
   zones: {
     removeFromAllZones: (state: GameState, cardId: CardInstanceId) => void;
@@ -38,9 +41,6 @@ export type RunFortTriggerExecutionHost = {
       legalAction: LegalAction,
     ) => void;
     startHqIceSwapChoice: (legalAction: LegalAction) => void;
-  };
-  constants: {
-    HOST_RETURN_HARDWARE_SOURCE: string;
   };
 };
 
@@ -147,8 +147,7 @@ function resolveTopHostedProgramReturn(
   if (!state.runner.rig.hardware.includes(sourceCardId))
     throw new Error("Microtech Backup Drive ist nicht installiert.");
   if (
-    host.cards.definitionFor(state, sourceCardId).id !==
-    host.constants.HOST_RETURN_HARDWARE_SOURCE
+    !isHostedProgramReturnSource(host, sourceCardId)
   )
     throw new Error("Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.");
   const targetProgramId = String(legalAction.payload?.targetProgramId ?? "");
@@ -172,12 +171,23 @@ function resolveTopHostedProgramReturn(
     ...(legalAction.payload ?? {}),
     v1922RunnerHardwareAbility: "return_top_hosted_program",
     sourceDefinitionId:
-      host.constants.HOST_RETURN_HARDWARE_SOURCE,
+      host.cards.definitionFor(state, sourceCardId).id,
     returnedCardDefinitionId: targetDefinitionId,
     returnedToGrip: true,
     hostedProgramCountAfter: hostedProgramIdsOnHardware(host, sourceCardId)
       .length,
   };
+}
+
+function isHostedProgramReturnSource(
+  host: RunFortTriggerExecutionHost,
+  sourceCardId: CardInstanceId,
+): boolean {
+  return (
+    host.cards.runnerUtilityLongtailKindForDefinition(
+      host.cards.definitionFor(host.state, sourceCardId),
+    ) === "replace_installed_program_trash_with_host_on_source"
+  );
 }
 
 function hostedCardsOn(

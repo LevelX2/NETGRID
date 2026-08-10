@@ -117,11 +117,6 @@ export function createHiddenZoneArrangeRuntime(
       state,
       legalAction,
       ...(playerAction ? { playerAction } : {}),
-      constants: {
-        corpRdTop5ReorderOperationCardId: deps.RD_TOP5_REORDER_OPERATION_SOURCE,
-        runnerStackArrangeSourceId: deps.RONIN_AROUND_ID,
-        corpRdTopArrangeSourceId: deps.TOO_MANY_DOORS_ID,
-      },
       cards: {
         definitionFor: (cardId) => deps.definitionFor(state, cardId),
         hiddenReplacementLongtailKind: (definitionId) =>

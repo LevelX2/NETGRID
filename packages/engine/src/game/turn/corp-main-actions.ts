@@ -37,7 +37,6 @@ export type CorpMainActionGenerationHost = {
     cardImplementationForDefinitionId: HostFn<any>;
     rezzedCorpRootCardIds: HostFn<string[]>;
     corpInstalledCardIds: HostFn<string[]>;
-    visibleVirusCounterTargetIds: HostFn<string[]>;
   };
   agenda: {
     effectiveAgendaDifficulty: HostFn<number>;
@@ -65,7 +64,6 @@ export type CorpMainActionGenerationHost = {
       { kind?: string } | undefined
     >;
     hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
-    advancementPlacementLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
     hasCorpUtilityKind: HostFn<boolean>;
     uniqueDirectLongtailKindForDefinition: HostFn<string | undefined>;
@@ -107,10 +105,7 @@ export type CorpMainActionGenerationHost = {
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
   constants: {
-    INSTALLED_CARD_LIMIT_ASSET_SOURCE: string;
-    VIRUS_COUNTER_ASSET_SOURCE: string;
     COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
-    ADVANCEMENT_PLACEMENT_OPERATION_SOURCE: string;
   };
 };
 
@@ -147,7 +142,6 @@ export function buildCorpMainActions(
     host.cards.cardImplementationForDefinitionId;
   const rezzedCorpRootCardIds = host.cards.rezzedCorpRootCardIds;
   const corpInstalledCardIds = host.cards.corpInstalledCardIds;
-  const visibleVirusCounterTargetIds = host.cards.visibleVirusCounterTargetIds;
   const effectiveAgendaDifficulty = host.agenda.effectiveAgendaDifficulty;
   const effectiveAgendaDifficultyDeps =
     host.agenda.effectiveAgendaDifficultyDeps;
@@ -172,8 +166,6 @@ export function buildCorpMainActions(
     host.corp.corpUtilityImplementationForDefinition;
   const hardwareTrashByCounterLegalActions =
     host.corp.hardwareTrashByCounterLegalActions;
-  const advancementPlacementLegalActions =
-    host.corp.advancementPlacementLegalActions;
   const hasCorpUtilityKind = host.corp.hasCorpUtilityKind;
   const uniqueDirectLongtailKindForDefinition =
     host.corp.uniqueDirectLongtailKindForDefinition;
@@ -206,12 +198,7 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const INSTALLED_CARD_LIMIT_ASSET_SOURCE =
-    host.constants.INSTALLED_CARD_LIMIT_ASSET_SOURCE;
-  const VIRUS_COUNTER_ASSET_SOURCE = host.constants.VIRUS_COUNTER_ASSET_SOURCE;
   const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
-  const ADVANCEMENT_PLACEMENT_OPERATION_SOURCE =
-    host.constants.ADVANCEMENT_PLACEMENT_OPERATION_SOURCE;
 
   const actions: LegalAction[] = [];
   if (state.actionEconomy?.pendingOffer?.side === "corp") {
@@ -461,12 +448,6 @@ export function buildCorpMainActions(
         );
         continue;
       }
-      if (definition.id === ADVANCEMENT_PLACEMENT_OPERATION_SOURCE) {
-        actions.push(
-          ...advancementPlacementLegalActions(state, id, definition),
-        );
-        continue;
-      }
       const implementationActions =
         host.corp.cardImplementationOperationLegalActions(
           state,
@@ -693,31 +674,6 @@ export function buildCorpMainActions(
         );
       }
     }
-    if (
-      definition.id === VIRUS_COUNTER_ASSET_SOURCE &&
-      !hasCorpUtilityKind(state, assetId, "counter_prevention_replacement")
-    ) {
-      for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
-        const targetDefinition = definitionFor(state, targetCardId);
-        actions.push(
-          action(
-            state,
-            "corp",
-            "gain_credit",
-            `${definition.title}: Virus-Counter von ${targetDefinition.title} entfernen`,
-            assetId,
-            [{ clicks: 1 }],
-            {
-              cardId: assetId,
-              v1917AssetAbility: "remove_virus_counter",
-              targetCardId,
-              counterType: "virus",
-              removeCounterAmount: 1,
-            },
-          ),
-        );
-      }
-    }
     if (COUNTER_UPGRADE_SOURCES.has(definition.id)) {
       actions.push(
         action(
@@ -759,6 +715,13 @@ export function buildCorpMainActions(
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
+    const sourceDefinitionId =
+      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install
+        ?.sourceDefinitionId;
+    if (!sourceDefinitionId)
+      throw new Error(
+        "Restricted install actions require their typed source definition.",
+      );
     actions.push(
       action(
         state,
@@ -769,7 +732,7 @@ export function buildCorpMainActions(
         [],
         {
           actionEconomyAbility: "decline_edgerunner_temps_install_actions",
-          sourceDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+          sourceDefinitionId,
         },
       ),
     );

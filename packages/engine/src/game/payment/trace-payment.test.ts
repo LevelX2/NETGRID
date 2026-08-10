@@ -17,12 +17,36 @@ import {
 } from "./trace-payment";
 
 describe("trace payment pools", () => {
+  it("requires an actual Hacker Tracker counter for each point above the trace limit", () => {
+    const trace = corpBidTrace({ traceLimit: 2 });
+    const state = stateForTrace(trace, { corpCredits: 10 });
+
+    expect(
+      quoteCorpTraceBidPayment(
+        corpDeps({ corpTraceCounterPoolTotal: () => 0 }),
+        state,
+        trace,
+        3,
+      ),
+    ).toMatchObject({ canPay: false, corpTraceCountersToPay: 0 });
+
+    expect(
+      quoteCorpTraceBidPayment(
+        corpDeps({ corpTraceCounterPoolTotal: () => 1 }),
+        state,
+        trace,
+        3,
+      ),
+    ).toMatchObject({ canPay: true, corpTraceCountersToPay: 1 });
+  });
+
   it("quotes and spends Corp trace pools through shared priority allocation", () => {
     const fortPoolId = "fort_pool_1" as CardInstanceId;
     let fortBits = 2;
     let corpTraceBits = 1;
     let corpTraceCounters = 2;
     const trace = corpBidTrace({
+      traceLimit: 5,
       fortTraceBitPoolSourceCardInstanceId: fortPoolId,
       fortTraceBitPoolServerId: "remote_1",
     });
@@ -81,7 +105,7 @@ describe("trace payment pools", () => {
       fortTraceBitPoolServerId: "remote_1",
       recurringTraceCreditPoolSpent: 1,
       hackerTrackerCountersSpent: 1,
-      traceHostedCreditBoost: 1,
+      traceLimitAndValueBoost: 1,
     });
     expect(state.corp.credits).toBe(0);
     expect(fortBits).toBe(0);
@@ -242,7 +266,7 @@ function corpBidTrace(extras: Partial<TraceState> = {}): TraceState {
     traceId: "trace_1",
     sourceCardInstanceId: "source_1" as CardInstanceId,
     sourceDefinitionId: "trace_source" as CardDefinitionId,
-    baseTraceStrength: 2,
+    traceLimit: 2,
     status: "corp_bid",
     successEffect: { type: "add_tag", amount: 1 },
     ...extras,

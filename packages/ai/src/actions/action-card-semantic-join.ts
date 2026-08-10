@@ -7,6 +7,7 @@ import type {
 } from "../action-semantic-candidate-types";
 import type { AiHintActionCapacityProfile } from "../hint-ontology";
 import type { AiHintStructuredEffect } from "../hint-ontology";
+import { parseCanonicalCapabilityId } from "@netgrid/cards/planning";
 
 export function applyCardSemanticJoin(
   candidate: ActionSemanticCandidate,
@@ -132,6 +133,7 @@ export function applyCardSemanticJoin(
     candidate,
     profile.actionCapacityProfiles,
   );
+  const planOwnerBinding = exactActionPlanOwnerBinding(candidate, profile);
 
   return {
     ...candidate,
@@ -141,6 +143,7 @@ export function applyCardSemanticJoin(
     ...(actionCapacityProjection !== undefined
       ? { actionCapacityProjection }
       : {}),
+    ...(planOwnerBinding !== undefined ? { planOwnerBinding } : {}),
     costProfile,
     ...(functionalEffects.length > 0 ? { functionalEffects } : {}),
     ...(cardContextFunctionalEffects.length > 0
@@ -180,11 +183,47 @@ export function applyCardSemanticJoin(
       ...(actionAbility !== undefined
         ? [`AI041 ability semantic joined: ${actionAbility.abilityId}`]
         : []),
+      ...(planOwnerBinding !== undefined
+        ? [
+            `AI041 capability plan owner joined: ${planOwnerBinding.capabilityKey}:${planOwnerBinding.owner}${planOwnerBinding.route === undefined ? "" : `:${planOwnerBinding.route}`}`,
+          ]
+        : []),
       ...(compatibilitySignals.length > 0
         ? ["AI041 compatibility signals retained outside action scoring"]
         : []),
     ],
   };
+}
+
+function exactActionPlanOwnerBinding(
+  candidate: ActionSemanticCandidate,
+  profile: ActionCardSemanticProfile,
+): NonNullable<ActionSemanticCandidate["planOwnerBinding"]> | undefined {
+  const bindings = profile.actionPlanOwnerBindings ?? [];
+  if (bindings.length === 0) return undefined;
+  if (
+    candidate.abilityBindingMethod !== "canonical_capability_id" ||
+    candidate.abilityId === undefined ||
+    candidate.abilityKey === undefined ||
+    candidate.sourceDefinitionId === undefined
+  )
+    return undefined;
+  const parsed = parseCanonicalCapabilityId(candidate.abilityId);
+  if (
+    parsed.cardDefinitionId !== candidate.sourceDefinitionId ||
+    parsed.capabilityKey !== candidate.abilityKey
+  )
+    throw new Error("AI041 forged canonical plan-owner capability binding.");
+  const matching = bindings.filter(
+    (binding) => binding.capabilityKey === parsed.capabilityKey,
+  );
+  if (matching.length > 1)
+    throw new Error("AI041 duplicate plan-owner capability binding.");
+  const binding = matching[0];
+  if (binding === undefined) return undefined;
+  if (!binding.owner.startsWith(`${candidate.actorSide}.`))
+    throw new Error("AI041 plan-owner side mismatch.");
+  return binding;
 }
 
 function actionCapacityProjectionWithHintContract(
@@ -364,6 +403,15 @@ function actionBoundFunctionalEffects(
     );
   }
 
+  if (candidate.economyProjection?.kind === "stored_credit_build") {
+    return effects.filter(
+      (effect) =>
+        effect.kind === "counter_economy" &&
+        effect.economyMode === "bank_load" &&
+        effect.timing === "action",
+    );
+  }
+
   if (
     candidate.actionType === "play_event" ||
     candidate.actionType === "play_operation"
@@ -393,6 +441,7 @@ function engineEffectKindMatchesHintEffect(
   if (engineEffectKind === hintEffectKind) return true;
   const mappedKinds: Readonly<Record<string, readonly string[]>> = {
     search_stack_to_grip: ["search"],
+    move_top_trash_to_grip: ["card_recovery", "search"],
     make_run: ["future_run_effect"],
     distribute_advancement_counters: [
       "advance",

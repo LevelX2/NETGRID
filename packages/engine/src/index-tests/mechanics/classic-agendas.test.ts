@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   replayEvents,
 } from "../../index";
 import {
   agendaPoints,
   apply,
+  applyChoice,
   applyChoices,
   cardCounterAmount,
   installRunnerProgramForTest,
@@ -264,6 +266,76 @@ describe("Classic Agenda Implementation Smokes", () => {
       scoredAgendaPointValue: 3,
       runnerMemoryUsedAfter: 0,
     });
+  });
+
+  it("scores declined Theorem Proof from the same fort at the next Runner turn with replay-safe state", () => {
+    let state = classicAgendaGame("classic-theorem-proof-declined-delayed-score");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    const theoremId = putCorpRootInRemote(state, THEOREM_PROOF);
+    const hiddenHqId = state.corp.hq[0];
+    if (!hiddenHqId) throw new Error("HQ-Testkarte fehlt.");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "decline_trash" &&
+        action.payload?.cardId === theoremId &&
+        action.payload?.agendaAccessReplacement ===
+          "declined_install_as_runner_program",
+    );
+
+    expect(state.runner.scoreArea).not.toContain(theoremId);
+    expect(state.delayedAccessEffects).toEqual([
+      expect.objectContaining({
+        agendaId: theoremId,
+        serverId: "remote_1",
+        sourceDefinitionId: THEOREM_PROOF,
+        resolveAt: "runner_start_turn",
+      }),
+    ]);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(hiddenHqId);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (
+      state.pendingChoice?.source === "discard_phase" &&
+      state.pendingChoice.side === "corp"
+    ) {
+      state = applyChoice(
+        state,
+        "corp",
+        String(state.pendingChoice.options[0]?.id),
+      );
+    }
+
+    expect(state.runner.scoreArea).toContain(theoremId);
+    expect(state.delayedAccessEffects).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "steal_agenda",
+          side: "runner",
+          sourceDefinitionId: THEOREM_PROOF,
+        }),
+      ]),
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("offers Theorem Proof at full MU and installs it after a private two-program trash choice", () => {

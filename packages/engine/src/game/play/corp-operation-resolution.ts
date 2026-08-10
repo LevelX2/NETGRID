@@ -19,23 +19,10 @@ import { scoreConversionCapabilityPayloadForEffects } from "../../ability-engine
 import { actionCapacityLegalActionPayloadForEffects } from "../../ability-engine/card-implementation-action-capacity";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  COUNTER_CREDIT_OPERATION_SOURCE,
-  ADVANCEMENT_REASSIGN_OPERATION_SOURCE,
-  AGENDA_ADVANCE_OPERATION_SOURCE,
-  ECONOMY_RECOVERY_OPERATION_SOURCE,
-  ADVANCEMENT_PLACEMENT_OPERATION_SOURCE,
-  TEAM_COUNTER_OPERATION_SOURCE,
-} from "../../mechanics/agenda-operation-effects";
-import {
-  ARCHIVES_TO_HQ_OPERATION_SOURCE,
-  RD_TOP5_REORDER_OPERATION_SOURCE,
-} from "../../mechanics/hidden-zone";
-import { RUNNER_CARD_INSTALL_OPERATION_SOURCE } from "../../mechanics/longtail-card-effects";
-import {
   fixedPlayCostCredits,
   minimumPlayCostCredits,
 } from "../payment/play-cost";
-import { definitionFor, mustInstance } from "../state/card-server-lookup";
+import { definitionFor } from "../state/card-server-lookup";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,
   setRestrictedActionGrant,
@@ -190,153 +177,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       host.economy.gainCorpCredits(3);
       host.state.corp.badPublicity += 1;
     },
-  },
-  [ARCHIVES_TO_HQ_OPERATION_SOURCE]: {
-    name: "onr_v1922_corp_operation_private_archives_to_hq",
-    canPlay: (host) => host.state.corp.archives.length > 0,
-    resolve: (host, legalAction) => {
-      const sourceCardId = String(
-        legalAction.payload?.cardId ?? "",
-      ) as CardInstanceId;
-      if (
-        !sourceCardId ||
-        definitionFor(host.state, sourceCardId).id !==
-          ARCHIVES_TO_HQ_OPERATION_SOURCE
-      )
-        throw new Error("Off-Site Backups fehlt als Quelle.");
-      host.hiddenZone.startCorpArchivesToHqChoice(legalAction, sourceCardId);
-    },
-  },
-  [RD_TOP5_REORDER_OPERATION_SOURCE]: {
-    name: "onr_v1922_corp_operation_private_rd_top5_reorder",
-    canPlay: (host) => host.state.corp.rd.length >= 2,
-    resolve: (host, legalAction) => {
-      const sourceCardId = String(
-        legalAction.payload?.cardId ?? "",
-      ) as CardInstanceId;
-      if (
-        !sourceCardId ||
-        definitionFor(host.state, sourceCardId).id !==
-          RD_TOP5_REORDER_OPERATION_SOURCE
-      )
-        throw new Error("Planning Consultants fehlt als Quelle.");
-      host.hiddenZone.startCorpRdTopReorderChoice(legalAction, sourceCardId);
-    },
-  },
-  [RUNNER_CARD_INSTALL_OPERATION_SOURCE]: {
-    name: "onr_v1922_corp_operation_install_action_bundle",
-    canPlay: (host) =>
-      host.state.corp.hq.some((cardId) =>
-        host.cards.isCorpInstallableCardType(definitionFor(host.state, cardId)),
-      ),
-    resolve: (host, legalAction) => {
-      if (
-        !host.state.corp.hq.some((cardId) =>
-          host.cards.isCorpInstallableCardType(
-            definitionFor(host.state, cardId),
-          ),
-        )
-      ) {
-        throw new Error(
-          "Edgerunner, Inc., Temps findet keine installierbare Korp-Karte.",
-        );
-      }
-      const flags = host.corp.ensureTurnFlags();
-      const sourceCardId = sourceCardIdFromAction(legalAction);
-      setRestrictedActionGrant(
-        flags,
-        RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
-        {
-          side: "corp",
-          sourceCardInstanceId: sourceCardId,
-          sourceDefinitionId:
-            RUNNER_CARD_INSTALL_OPERATION_SOURCE as CardDefinitionId,
-          actionType: "install_card",
-          remainingActions: 3,
-          costProfile: "extra_click",
-          cleanupTiming: "side_turn_end",
-        },
-      );
-      flags.edgerunnerTempsInstallActionsRemaining = 3;
-      host.state.corp.clicks += 3;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1922CorpOperationAbility: "install_action_bundle",
-        gainedActions: 3,
-        edgerunnerTempsInstallActionsRemaining:
-          flags.edgerunnerTempsInstallActionsRemaining,
-        corpClicksAfter: host.state.corp.clicks,
-      };
-    },
-  },
-  [COUNTER_CREDIT_OPERATION_SOURCE]: {
-    name: "onr_v1919_corp_operation_add_power_counter",
-    canPlay: (host) => corpAgendaCounterOperationTarget(host) !== undefined,
-    resolve: (host, legalAction) =>
-      host.board.resolveAgendaCounterOperation(
-        legalAction,
-        COUNTER_CREDIT_OPERATION_SOURCE as CardDefinitionId,
-      ),
-  },
-  [ADVANCEMENT_REASSIGN_OPERATION_SOURCE]: {
-    name: "onr_v1919_corp_operation_add_three_advancement_counters",
-    canPlay: (host) => host.board.advanceableInstalledCardTargets().length > 0,
-    resolve: (host, legalAction) =>
-      host.board.resolveCorpOperationAddAdvancementCounters(legalAction),
-  },
-  [AGENDA_ADVANCE_OPERATION_SOURCE]: {
-    name: "onr_v1919_corp_operation_advance_installed_agenda",
-    canPlay: (host) =>
-      host.board.installedAgendaOperationTarget() !== undefined,
-    resolve: (host, legalAction) => {
-      const targetAgendaId = host.board.installedAgendaOperationTarget();
-      if (!targetAgendaId)
-        throw new Error(
-          "Project Consultants findet keine installierte Agenda.",
-        );
-      mustInstance(
-        host.state.cardInstances,
-        targetAgendaId,
-      ).advancementCounters += 1;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919OperationAbility: "advance_installed_agenda",
-        targetCardId: targetAgendaId,
-        targetCardDefinitionId: definitionFor(host.state, targetAgendaId).id,
-        addedAdvancementCounters: 1,
-        advancementCountersAfter: mustInstance(
-          host.state.cardInstances,
-          targetAgendaId,
-        ).advancementCounters,
-      };
-    },
-  },
-  [ECONOMY_RECOVERY_OPERATION_SOURCE]: {
-    name: "onr_v1919_corp_operation_gain_credits_3",
-    resolve: (host, legalAction) => {
-      host.economy.gainCorpCredits(3);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919OperationAbility: "gain_credits",
-        gainedCredits: 3,
-        corpCreditsAfter: host.state.corp.credits,
-      };
-    },
-  },
-  [ADVANCEMENT_PLACEMENT_OPERATION_SOURCE]: {
-    name: "onr_v1919_corp_operation_add_two_advancement_counters",
-    canPlay: (host) => host.board.advanceableInstalledCardTargets().length > 0,
-    resolve: (host, legalAction) =>
-      host.board.resolveAdvancementPlacementOperation(legalAction),
-  },
-  [TEAM_COUNTER_OPERATION_SOURCE]: {
-    name: "onr_v1919_corp_operation_add_power_counter",
-    canPlay: (host) => corpAgendaCounterOperationTarget(host) !== undefined,
-    resolve: (host, legalAction) =>
-      host.board.resolveAgendaCounterOperation(
-        legalAction,
-        TEAM_COUNTER_OPERATION_SOURCE as CardDefinitionId,
-      ),
   },
 };
 
@@ -711,9 +551,9 @@ export function onPlayCardImplementationAdditionalOperationCost(
     if (effect.kind !== "trace") return sum;
     const perPoint = Math.max(
       0,
-      Math.floor(effect.additionalPlayCostPerBaseTracePointAboveZero ?? 0),
+      Math.floor(effect.additionalPlayCostPerTraceLimitPointAboveZero ?? 0),
     );
-    return sum + perPoint * Math.max(0, effect.baseTraceStrength);
+    return sum + perPoint * Math.max(0, effect.traceLimit);
   }, 0);
 }
 
@@ -1064,10 +904,4 @@ function runnerLastTurnResourceTargetPayload(
 
 function sourceCardIdFromAction(legalAction: LegalAction): CardInstanceId {
   return String(legalAction.payload?.cardId ?? "") as CardInstanceId;
-}
-
-function corpAgendaCounterOperationTarget(
-  host: CorpOperationResolutionHost,
-): CardInstanceId | undefined {
-  return host.board.installedAgendaOperationTarget();
 }

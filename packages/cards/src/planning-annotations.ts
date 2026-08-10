@@ -25,9 +25,22 @@ export const KNOWN_PLANNING_TACTIC_USES = [
   "tag.payoff",
 ] as const;
 
+export const KNOWN_PLANNING_PLAN_OWNERS = [
+  "corp.score_agenda",
+  "runner.credit_bank",
+  "runner.resource_lifecycle",
+] as const;
+
+export const KNOWN_PLANNING_PLAN_OWNER_ROUTES = ["build", "cash_out"] as const;
+
+export type PlanningPlanOwner = (typeof KNOWN_PLANNING_PLAN_OWNERS)[number];
+export type PlanningPlanOwnerRoute =
+  (typeof KNOWN_PLANNING_PLAN_OWNER_ROUTES)[number];
+
 export const KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS = [
   "access.hq_multiaccess",
   "access.rnd_multiaccess",
+  "corp_ice.runner_action_loss",
   "damage.corp_tagged_meat_payoff",
   "tag.payoff",
   "tag.source",
@@ -137,8 +150,8 @@ export type PlanningInterpretation =
     }
   | {
       kind: "plan_owner";
-      owner: string;
-      route?: string;
+      owner: PlanningPlanOwner;
+      route?: PlanningPlanOwnerRoute;
     }
   | {
       kind: "target_preference";
@@ -203,7 +216,8 @@ export type PlanningAnnotationErrorCode =
   | "planning_unknown_field"
   | "planning_mechanical_field"
   | "planning_invalid_shape"
-  | "planning_duplicate_capability_key";
+  | "planning_duplicate_capability_key"
+  | "planning_duplicate_plan_owner";
 
 export class PlanningAnnotationError extends Error {
   readonly name = "PlanningAnnotationError";
@@ -338,7 +352,22 @@ function assertInterpretations(
   path: string,
   context: "card" | "capability",
 ): void {
-  denseArray(value, path).forEach((entry, index) => {
+  const interpretations = denseArray(value, path);
+  if (
+    interpretations.filter(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        !Array.isArray(entry) &&
+        Object.getOwnPropertyDescriptor(entry, "kind")?.value === "plan_owner",
+    ).length > 1
+  )
+    throw new PlanningAnnotationError(
+      "planning_duplicate_plan_owner",
+      path,
+      "a capability may declare at most one plan_owner",
+    );
+  interpretations.forEach((entry, index) => {
     const entryPath = `${path}[${index}]`;
     const record = objectRecord(entry, entryPath);
     if (
@@ -417,8 +446,15 @@ function assertInterpretationShape(
       optionalStringField(record, "rationale", path);
       return;
     case "plan_owner":
-      stringField(record, "owner", path);
-      optionalStringField(record, "route", path);
+      if (context !== "capability")
+        invalid(path, "plan_owner is capability-bound");
+      enumField(record, "owner", KNOWN_PLANNING_PLAN_OWNERS, path);
+      if (record.route !== undefined)
+        enumField(record, "route", KNOWN_PLANNING_PLAN_OWNER_ROUTES, path);
+      if (record.owner === "runner.credit_bank" && record.route === undefined)
+        invalid(`${path}.route`, "is required for runner.credit_bank");
+      if (record.owner !== "runner.credit_bank" && record.route !== undefined)
+        invalid(`${path}.route`, "is only valid for runner.credit_bank");
       return;
     case "target_preference":
       stringField(record, "purpose", path);

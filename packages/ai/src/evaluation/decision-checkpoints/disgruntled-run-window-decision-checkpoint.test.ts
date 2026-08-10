@@ -31,16 +31,16 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
     });
     expect(invocation?.sourceAbilityBinding).not.toHaveProperty("abilityId");
     expect(commitment).toMatchObject({
-      commitmentId: "fnv1a:62bae3e8",
-      sourceLineHash: "fnv1a:a54e79d7",
+      commitmentId: "fnv1a:830dc6b3",
+      sourceLineHash: "fnv1a:a96a603c",
       nextExpectedTransition: {
         expectationId: "fnv1a:43abb6cc",
         routeKey: "fnv1a:fd93466d",
       },
     });
     expect(lease).toMatchObject({
-      leaseId: "fnv1a:9e4d1b50",
-      commitmentId: "fnv1a:62bae3e8",
+      leaseId: "fnv1a:9f371af3",
+      commitmentId: "fnv1a:830dc6b3",
       sourcePlanId: "fnv1a:c51cc578",
       phaseId: "fnv1a:60c4adf9",
       nodeId: "fnv1a:ef151d9b",
@@ -48,9 +48,9 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
       expectationId: "fnv1a:43abb6cc",
       currentBinding: {
         actionId:
-          "runner.break_subroutine.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.corp_onr_v1_237_data-wall_1.0.card_implementation.onr_v1_237_data-wall.printed_subroutine.1.end_the_run.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+          "runner.break_subroutine.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.runner_onr_classic_031_rent-i-con_1.corp_onr_v1_237_data-wall_1.0.printed_subroutines_end_the_run.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
         stateVersion: 275,
-        semanticActionSetFingerprint: "fnv1a:27eefeda",
+        semanticActionSetFingerprint: "fnv1a:b805b3ca",
         invocationKey: "fnv1a:95cb89ce",
       },
     });

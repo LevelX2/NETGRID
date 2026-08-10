@@ -488,11 +488,25 @@ describe("catalog API filters", () => {
     expect(inspector).not.toBeNull();
     if (!inspector)
       throw new Error("Missing AI inspector for onr_v1_002_ai-boon");
+    const aiBoonArtifact = generatedCardSpecAiHints.cards.find(
+      (entry) => entry.cardId === "onr_v1_002_ai-boon",
+    );
+    expect(aiBoonArtifact).toBeDefined();
     expect(inspector.schemaVersion).toBe("catalog-ai-hint-inspector-v1");
     expect(inspector.source).toEqual({
       schemaVersion: "ai-hint-provenance-v1",
-      authority: "legacy_active_hint_json",
-      sourceRefs: ["data/ai/ai-card-hints-active.json"],
+      authority: "card_spec_compiler",
+      artifactSchemaVersion: "card-spec-ai-hint-artifact-v2",
+      compilerVersion: "card-spec-ai-hint-compiler-v2",
+      cardRulesFingerprint: aiBoonArtifact?.cardRulesFingerprint,
+      planningAnnotationsFingerprint:
+        aiBoonArtifact?.planningAnnotationsFingerprint,
+      evidenceFingerprint: generatedCardSpecAiHints.evidence.fingerprint,
+      sourceRefs: [
+        "data/ai/card-spec-ai-hints-generated.json",
+        "packages/ai/src/card-spec-ai-hint-compiler.ts#deriveCardSpecAiHint",
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
+      ],
     });
     expect(inspector.supportStatus).toMatchObject({
       aiSupportStatus: "ai_supported",
@@ -516,7 +530,7 @@ describe("catalog API filters", () => {
       "economyQuality",
     );
     expect(inspector.legacyRoles.roles).toEqual(
-      expect.arrayContaining(["program", "random"]),
+      expect.arrayContaining(["program", "breaker_killer"]),
     );
     expect(inspector.warnings.categories).toEqual([]);
   });
@@ -1222,7 +1236,7 @@ describe("catalog API filters", () => {
     }
   });
 
-  it("keeps derived and legacy detail hints deeply immutable across API responses", () => {
+  it("keeps generated detail hints deeply immutable across API responses", () => {
     for (const cardId of [
       "onr_v1_154_broker",
       "onr_proteus_001_ai-board-member",
@@ -1235,8 +1249,7 @@ describe("catalog API filters", () => {
 
       const second = catalogDetailResponse(cardId).body as CatalogDetailAiHints;
       expect(second.card.aiHints?.roles, cardId).not.toContain("cs06_poison");
-      if (cardId === "onr_proteus_001_ai-board-member")
-        expect(second.card.aiHints).not.toBe(first.card.aiHints);
+      expect(second.card.aiHints).toBe(first.card.aiHints);
     }
   });
 

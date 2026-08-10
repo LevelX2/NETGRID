@@ -9,7 +9,7 @@ import { scoringWindowPostRezProtectionAssessment } from "../../runtime/corp-sco
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
     [
-      "draws exact defense instead of exposing Strike Force Kali to the staged breaker",
+      "funds exact score protection instead of exposing Strike Force Kali to the staged breaker",
       scoredOnlyTimingJson,
       [
         "plan_priority_class:P4",
@@ -17,7 +17,7 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       ],
     ],
     [
-      "draws defense for the exact Private Cybernet Police score parent",
+      "funds defense for the exact Private Cybernet Police score parent",
       realisticScoreHorizonJson,
       [
         "plan_priority_class:P3",

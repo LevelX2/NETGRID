@@ -36,6 +36,7 @@ import type {
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
 import { runnerRunTargetHasOptionalBonusRunValue } from "../runner-run-target-guidance";
+import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
@@ -82,6 +83,7 @@ import {
   runnerRolesCoverCoverageGap,
   runnerDevelopmentCardAdmission,
   runnerExactBasicLiquidCreditCandidate,
+  runnerTurnLiquidityCandidateIsMaterializable,
   runnerFundingRouteCandidateIsMaterializable,
   runnerInstalledCardLiquidationChoiceSignal,
   type RunnerCoverageGapSignal,
@@ -136,6 +138,14 @@ import {
   type CorpDefenseDomainSignalFacts,
 } from "../plans/corp-defense-domain-signals";
 import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
+import {
+  corpCandidateProvidesScoreConversion,
+  corpConditionalScoreCreditProfile,
+  corpDefinitionHasTraceSource,
+  corpHostedCreditBankProfile,
+  corpImmediateEconomyGainFromHint,
+  corpScoreConversionProfile,
+} from "./corp-canonical-card-facts";
 import { selectableChoiceOptions } from "./choice-option";
 import { discardOptionInstanceId } from "./discard-choice-option";
 import {
@@ -2415,8 +2425,7 @@ export function runnerActionDispositions(
     const structuredTopHeapRecovery =
       (candidate.actionType === "activated_card_ability" ||
         candidate.actionType === "trigger_ability") &&
-      candidate.actionTacticSignals.includes("setup.search") &&
-      (candidate.effectTargets ?? []).includes("setup.top_trash_recovery");
+      runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects);
     if (
       structuredTopHeapRecovery &&
       domain.defense.handSize >= domain.defense.minimumHandBuffer &&
@@ -2749,23 +2758,22 @@ function buildRunnerDomain(
   const remainingClicks = input.playerView.own.clicks;
   const installedCardLiquidationChoice =
     runnerInstalledCardLiquidationChoiceSignal(input, candidates);
-  const exactBasicCreditActionIds = uniqueBy(
+  const turnLiquidityActionIds = uniqueBy(
     candidates
-      .filter(runnerExactBasicLiquidCreditCandidate)
+      .filter(runnerTurnLiquidityCandidateIsMaterializable)
       .map((candidate) => candidate.actionId),
     (actionId) => actionId,
   );
   const turnLiquidityFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
-    remainingClicks > 0 && exactBasicCreditActionIds.length === 1
+    remainingClicks > 0 && turnLiquidityActionIds.length > 0
       ? [
           {
             kind: "develop_liquidity",
             needId: `economy-liquidity-development:${turnKey(input)}`,
-            actionIds: exactBasicCreditActionIds,
+            actionIds: turnLiquidityActionIds,
             currentCreditsAtRevalidation: currentCredits,
             targetCredits: currentCredits + remainingClicks,
             gap: remainingClicks,
-            projectedCreditGain: 1,
             priorityClass: "P6",
             cadence: {
               kind: "remaining_turn_capacity",
@@ -2778,7 +2786,8 @@ function buildRunnerDomain(
               stateVersion: input.playerView.stateVersion,
               status: "turn_liquidity_open",
             },
-            evidenceCode: "runner_engine_certified_basic_liquidity_development",
+            evidenceCode:
+              "runner_engine_certified_immediate_liquidity_development",
           },
         ]
       : [];
@@ -3041,9 +3050,8 @@ function buildRunnerDomain(
               candidate.semanticActionType !== "install.card") ||
             ((candidate.actionType === "activated_card_ability" ||
               candidate.actionType === "trigger_ability") &&
-              candidate.actionTacticSignals.includes("setup.search") &&
-              (candidate.effectTargets ?? []).includes(
-                "setup.top_trash_recovery",
+              runnerEffectsProvideTopTrashRecovery(
+                candidate.functionalEffects,
               ))),
       )
       .map((candidate) => candidate.actionId),
@@ -8077,24 +8085,7 @@ function corpCandidateIsScoreAccelerationSupport(
   ) {
     return false;
   }
-  const hint = candidate.sourceDefinitionId
-    ? AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)
-    : undefined;
-  return (
-    hint?.functionSignals?.includes("score.advance_burst") === true ||
-    hint?.functionSignals?.includes("action.corp_extra_action_burst") ===
-      true ||
-    hint?.functionSignals?.includes("action.corp_extra_action_support") ===
-      true ||
-    hint?.actionCapacityProfiles?.some(
-      (profile) =>
-        profile.recipient === "corp" &&
-        typeof profile.amount === "number" &&
-        profile.amount > 0,
-    ) === true ||
-    hint?.actionTacticSignals?.includes("corp.score_progress") === true ||
-    hint?.actionTacticSignals?.includes("corp.score_closeout") === true
-  );
+  return corpCandidateProvidesScoreConversion(candidate);
 }
 
 function corpCandidateProjectsCardDraw(
@@ -11643,44 +11634,7 @@ function corpConditionalScoreCreditReserve(
 ): number {
   if (terminalScore) return 0;
   const definition = requireVisibleCardDefinition(input, agenda, "agenda");
-  const hint = AI_HINTS_BY_CARD.get(definition.id);
-  const requiresThreshold =
-    hint?.tacticSignals?.includes("risk.requires_corp_credit_threshold") ===
-    true;
-  const crashesBelowThreshold =
-    hint?.tacticSignals?.includes("risk.economy_crash_on_score") === true;
-  if (!requiresThreshold && !crashesBelowThreshold) return 0;
-  if (!requiresThreshold || !crashesBelowThreshold)
-    throw new PlanResolutionFailure("missing_card_definition", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "rules_contract",
-      removalCondition: `Define both conditional score-threshold risk signals for ${definition.id}.`,
-    });
-  const thresholdEffect = hint?.effects?.find(
-    (effect) =>
-      effect.kind === "economy" &&
-      effect.timing === "when_scored" &&
-      effect.scope === "corp" &&
-      effect.resource === "credits",
-  );
-  const threshold = thresholdEffect?.amount;
-  if (
-    typeof threshold !== "number" ||
-    !Number.isFinite(threshold) ||
-    threshold <= 0
-  )
-    throw new PlanResolutionFailure("missing_card_definition", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "rules_contract",
-      removalCondition: `Define a finite positive conditional score credit threshold for ${definition.id}.`,
-    });
-  return threshold;
+  return corpConditionalScoreCreditProfile(definition.id)?.threshold ?? 0;
 }
 
 function corpScoreProtectionPolicy(
@@ -12054,21 +12008,12 @@ function corpEconomyDevelopmentCampaigns(
       hint?.planRoles?.includes("remote_asset_economy") !== true ||
       hint.quality?.hintReviewed !== true ||
       hint.quality.strategyCovered !== true ||
-      hint.quality.confidence !== "high"
+      hint.quality.needsHumanReview === true
     ) {
       return;
     }
-    const finitePoolCredits = Math.max(
-      0,
-      ...(hint.effects ?? [])
-        .filter(
-          (effect) =>
-            effect.kind === "finite_economy_pool" &&
-            typeof effect.amount === "number" &&
-            effect.amount > 0,
-        )
-        .map((effect) => effect.amount!),
-    );
+    const finitePoolCredits =
+      corpHostedCreditBankProfile(card.definitionId)?.poolCredits ?? 0;
     const automaticStartOfTurnCredits = Math.max(
       0,
       ...(hint.effects ?? [])
@@ -12364,7 +12309,8 @@ function corpVisibleCardEconomyWithdrawals(
           hint?.planRoles?.includes("remote_asset_economy") === true &&
           hint.quality?.hintReviewed === true &&
           hint.quality.strategyCovered === true &&
-          hint.quality.confidence === "high";
+          hint.quality.needsHumanReview !== true &&
+          corpHostedCreditBankProfile(sourceDefinitionId) !== undefined;
     const hostedCreditPayout =
       action?.payload?.cardImplementationTakesHostedCredits === true &&
       (hostedCreditTakeMode === "up_to_amount_if_available" ||
@@ -12536,30 +12482,15 @@ function corpImmediateOperationThresholdPreparations(
         hint?.aiSupportStatus !== "ai_supported" ||
         hint.cardType !== "operation" ||
         hint.quality?.hintReviewed !== true ||
-        hint.quality.confidence !== "high" ||
         hint.quality.needsHumanReview === true ||
         hint.roles.includes("economy_operation") !== true ||
         hint.planRoles.includes("recover_economy") !== true ||
-        hint.functionSignals?.includes("economy.corp_credit_burst") !== true ||
+        corpImmediateEconomyGainFromHint(hint) === undefined ||
         !Number.isSafeInteger(hint.valueHints?.economy) ||
         (hint.valueHints?.economy ?? 0) < 3 ||
         hint.costProfile?.clicks !== 1 ||
         (hint.conditions?.length ?? 0) > 0 ||
         (hint.targetProfiles?.length ?? 0) > 0
-      ) {
-        return [];
-      }
-      const effects = hint.effects ?? [];
-      if (
-        effects.length === 0 ||
-        effects.some(
-          (effect) =>
-            effect.kind !== "economy" ||
-            effect.timing !== "action" ||
-            effect.scope !== "corp" ||
-            effect.resource !== "credits" ||
-            effect.finite !== true,
-        )
       ) {
         return [];
       }
@@ -13630,12 +13561,7 @@ function corpDefinitionIsTraceSupport(
 function corpDefinitionIsTraceSource(
   definitionId: string | undefined,
 ): boolean {
-  if (!definitionId) return false;
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
-    hint?.tacticSignals?.includes("trace.source") === true ||
-    hint?.functionSignals?.includes("corp_ice.trace_source") === true
-  );
+  return corpDefinitionHasTraceSource(definitionId);
 }
 
 function corpTraceSupportTargetHasVisibleTraceSource(
@@ -15278,7 +15204,15 @@ function runnerCreditBankSignals(
       tool.status === "in_hand" ||
       tool.status === "installed" ||
       tool.buildActionLegal ||
-      tool.cashOutActionLegal,
+      tool.cashOutActionLegal ||
+      candidates.some(
+        (candidate) =>
+          candidate.sourceDefinitionId === tool.cardId &&
+          (tool.sourceCardInstanceId === undefined ||
+            candidate.sourceCardInstanceId === tool.sourceCardInstanceId) &&
+          (candidate.planOwnerBinding?.owner === "runner.credit_bank" ||
+            runnerCandidateProvidesCreditBankBuild(candidate)),
+      ),
   );
   const portfolioStoredCredits = tools.reduce(
     (sum, tool) =>
@@ -15292,6 +15226,29 @@ function runnerCreditBankSignals(
       0,
       tool.estimatedPayout ?? currentStoredCredits,
     );
+    const exactBankOwnerCandidates = candidates.filter(
+      (candidate) =>
+        candidate.sourceDefinitionId === tool.cardId &&
+        (tool.sourceCardInstanceId === undefined ||
+          candidate.sourceCardInstanceId === tool.sourceCardInstanceId) &&
+        (candidate.planOwnerBinding?.owner === "runner.credit_bank" ||
+          runnerCandidateProvidesCreditBankBuild(candidate)),
+    );
+    const buildActionIds = exactBankOwnerCandidates
+      .filter(
+        (candidate) =>
+          candidate.planOwnerBinding?.route === "build" ||
+          (candidate.planOwnerBinding === undefined &&
+            runnerCandidateProvidesCreditBankBuild(candidate)),
+      )
+      .map((candidate) => candidate.actionId)
+      .sort();
+    const cashOutActionIds = exactBankOwnerCandidates
+      .filter((candidate) => candidate.planOwnerBinding?.route === "cash_out")
+      .map((candidate) => candidate.actionId)
+      .sort();
+    const buildActionLegal = buildActionIds.length > 0;
+    const cashOutActionLegal = cashOutActionIds.length > 0;
     const installActionIds = candidates
       .filter((candidate) => {
         if (
@@ -15397,7 +15354,7 @@ function runnerCreditBankSignals(
       candidates,
       economy,
       runTargets,
-      cashOutActionIds: tool.cashOutActionIds,
+      cashOutActionIds,
       estimatedPayout,
     });
     const convertibleRunFundingNeed = convertibleRunFundingRoute !== undefined;
@@ -15428,7 +15385,7 @@ function runnerCreditBankSignals(
             developmentCashOutTarget,
           )
         : undefined;
-    const exactCashOutActionIds = new Set(tool.cashOutActionIds);
+    const exactCashOutActionIds = new Set(cashOutActionIds);
     const materializedDevelopmentCashOutActionIds =
       developmentCashOutFundingRoute?.actionIds.filter((actionId) =>
         exactCashOutActionIds.has(actionId),
@@ -15453,7 +15410,7 @@ function runnerCreditBankSignals(
     // A mature bank may also replace a repeated basic-credit funding sequence
     // even when the eventual install remains deferred by another guard.
     const shouldCashOut =
-      tool.cashOutActionLegal &&
+      cashOutActionLegal &&
       estimatedPayout > 0 &&
       (convertibleRunFundingNeed ||
         convertibleDevelopmentFundingNeed ||
@@ -15463,8 +15420,8 @@ function runnerCreditBankSignals(
         {
           bankId: tool.sourceCardInstanceId ?? tool.cardId,
           phase: "cash_out" as const,
-          actionIds: tool.cashOutActionIds,
-          rejectedActionIds: tool.buildActionIds,
+          actionIds: cashOutActionIds,
+          rejectedActionIds: buildActionIds,
           priorityClass: "P2" as const,
           currentStoredCredits,
           portfolioStoredCredits,
@@ -15490,7 +15447,7 @@ function runnerCreditBankSignals(
       input.playerView.own.credits + currentStoredCredits;
     const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool);
     const shouldBuild =
-      tool.buildActionLegal &&
+      buildActionLegal &&
       !alreadyBuiltThisTurn &&
       !convertibleRunFundingNeed &&
       !convertibleDevelopmentFundingNeed &&
@@ -15505,8 +15462,8 @@ function runnerCreditBankSignals(
           phase: "hold" as const,
           actionIds: [],
           rejectedActionIds: [
-            ...tool.buildActionIds,
-            ...(convertibleDevelopmentFundingNeed ? [] : tool.cashOutActionIds),
+            ...buildActionIds,
+            ...(convertibleDevelopmentFundingNeed ? [] : cashOutActionIds),
           ],
           priorityClass: "P5" as const,
           currentStoredCredits,
@@ -15538,10 +15495,10 @@ function runnerCreditBankSignals(
       {
         bankId: tool.sourceCardInstanceId ?? tool.cardId,
         phase: "build" as const,
-        actionIds: tool.buildActionIds,
+        actionIds: buildActionIds,
         rejectedActionIds: convertibleDevelopmentFundingNeed
           ? []
-          : tool.cashOutActionIds,
+          : cashOutActionIds,
         priorityClass: "P5" as const,
         currentStoredCredits,
         portfolioStoredCredits,
@@ -15561,6 +15518,25 @@ function runnerCreditBankSignals(
       },
     ];
   });
+}
+
+function runnerCandidateProvidesCreditBankBuild(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  return (
+    candidate.planOwnerBinding === undefined &&
+    candidate.economyProjection?.kind === "stored_credit_build" &&
+    candidate.economyProjection.storedCreditsAdded !== undefined &&
+    candidate.economyProjection.storedCreditsAdded > 0 &&
+    candidate.functionalEffects?.some(
+      (effect) =>
+        effect.kind === "counter_economy" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.economyMode === "bank_load" &&
+        effect.resource === "credits",
+    ) === true
+  );
 }
 
 function runnerDevelopmentCashOutTargetCanMaterialize(
@@ -16729,7 +16705,7 @@ function runnerCoverageRecoveryTarget(
     ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
     : undefined;
   const recoveryKind =
-    hint?.functionSignals?.includes("setup.top_trash_recovery") === true
+    runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects)
       ? "top"
       : hint?.functionSignals?.includes("setup.card_recovery") === true ||
           hint?.functionSignals?.includes("setup.recovery") === true ||
@@ -19686,11 +19662,12 @@ function corpScoreAccelerationSetupBinding(
       const source = input.playerView.own.gripOrHq.find(
         (card) => card.instanceId === candidate.sourceCardInstanceId,
       );
-      const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
+      const scoreConversion = corpScoreConversionProfile(
+        candidate.sourceDefinitionId,
+      );
       return (
         source?.definitionId === candidate.sourceDefinitionId &&
-        (hint?.functionSignals?.includes("score.advance_burst") === true ||
-          hint?.remoteRole?.kind === "score_acceleration")
+        scoreConversion?.movesAdvancementCounters === true
       );
     })
     .sort((left, right) =>
@@ -19773,13 +19750,14 @@ function corpCardDevelopmentSignals(
       const economyRole =
         hint?.roles?.includes("economy") === true ||
         hint?.planRoles?.includes("remote_asset_economy") === true ||
+        corpHostedCreditBankProfile(candidate.sourceDefinitionId) !==
+          undefined ||
         hint?.effects?.some((effect) =>
           [
             "economy",
             "action_economy",
             "start_of_turn_economy",
             "recurring_economy",
-            "finite_economy_pool",
           ].includes(effect.kind),
         ) === true;
       const ownedByEconomyPlan = economyNeeds.some(

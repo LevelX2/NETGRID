@@ -13,11 +13,16 @@ import {
 } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { sanitizeCorpPunishRouteQuoteSet } from "../input-dto";
+import {
+  corpDirectTagOperationProfile,
+  corpTaggedCreditDenialOperationProfile,
+  corpTraceTagSourceProfile,
+  corpTaggedMeatDamageOperationProfile,
+} from "./corp-canonical-card-facts";
 
 const MAX_PUNISH_ROUTES = 8;
 const MAX_PUNISH_ROUTE_STEPS = 6;
 const PUNISH_CAMPAIGN_ID = "corp-punish:engine-certified-payoff";
-const ON_PLAY_CAPABILITY_ID = "ability:on_play:0";
 
 type PunishComponentAdapter = {
   kind: Extract<
@@ -26,9 +31,10 @@ type PunishComponentAdapter = {
   >;
   definitionId: string;
   routeOrder: number;
-  sourceCapabilityId:
-    | typeof ON_PLAY_CAPABILITY_ID
-    | typeof CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID;
+  sourceCapabilityBindingKind:
+    | "legacy_card_implementation_index"
+    | "card_spec_capability_key";
+  sourceCapabilityId: string;
 };
 
 /**
@@ -163,7 +169,8 @@ export function buildBoundedCorpPunishRouteRequests(
           order,
           kind: component.adapter.kind,
           sourceCardInstanceId: component.card.instanceId,
-          sourceCapabilityBindingKind: "legacy_card_implementation_index",
+          sourceCapabilityBindingKind:
+            component.adapter.sourceCapabilityBindingKind,
           sourceCapabilityId: component.adapter.sourceCapabilityId,
           ...(currentLegalActionId ? { currentLegalActionId } : {}),
         };
@@ -238,38 +245,14 @@ function structuredPunishComponentAdapter(
 function structuredTraceTagAdapter(
   definitionId: string,
 ): PunishComponentAdapter | undefined {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  if (
-    !hint ||
-    hint.side !== "corp" ||
-    hint.cardType !== "operation" ||
-    hint.conditions?.some(
-      (condition) => condition.kind === "requires_trace_success",
-    ) !== true ||
-    hint.effects?.some(
-      (effect) =>
-        effect.kind === "trace" &&
-        effect.scope === "runner" &&
-        effect.timing === "action" &&
-        effect.finite === true,
-    ) !== true ||
-    hint.effects.some(
-      (effect) =>
-        effect.kind === "tag_source" &&
-        effect.scope === "runner" &&
-        effect.timing === "trace_success" &&
-        effect.finite === true &&
-        Number.isSafeInteger(effect.amount) &&
-        Number(effect.amount) > 0,
-    ) !== true
-  ) {
-    return undefined;
-  }
+  const profile = corpTraceTagSourceProfile(definitionId);
+  if (!profile) return undefined;
   return {
     definitionId,
     kind: "trace_tag",
     routeOrder: 1,
-    sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+    sourceCapabilityBindingKind: "card_spec_capability_key",
+    sourceCapabilityId: profile.sourceCapabilityId,
   };
 }
 
@@ -315,6 +298,7 @@ function structuredHardwareTrashAdapter(
     definitionId,
     kind: "hardware_trash",
     routeOrder: 6,
+    sourceCapabilityBindingKind: "legacy_card_implementation_index",
     sourceCapabilityId: CORP_HARDWARE_TRASH_PUNISH_CAPABILITY_ID,
   };
 }
@@ -322,25 +306,14 @@ function structuredHardwareTrashAdapter(
 function structuredDirectTagAdapter(
   definitionId: string,
 ): PunishComponentAdapter | undefined {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  if (!hint || hint.side !== "corp" || hint.cardType !== "operation")
-    return undefined;
-  const matches =
-    hint.effects?.some(
-      (effect) =>
-        effect.kind === "tag_source" &&
-        effect.scope === "runner" &&
-        effect.timing === "action" &&
-        effect.finite === true &&
-        Number.isSafeInteger(effect.amount) &&
-        Number(effect.amount) > 0,
-    ) === true && hint.effects.every((effect) => effect.kind !== "trace");
-  return matches
+  const profile = corpDirectTagOperationProfile(definitionId);
+  return profile
     ? {
         definitionId,
         kind: "tag",
         routeOrder: 0,
-        sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: profile.sourceCapabilityId,
       }
     : undefined;
 }
@@ -348,27 +321,14 @@ function structuredDirectTagAdapter(
 function structuredTaggedCreditDenialAdapter(
   definitionId: string,
 ): PunishComponentAdapter | undefined {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  const matches =
-    hint?.side === "corp" &&
-    hint.cardType === "operation" &&
-    hint.conditions?.some(
-      (condition) => condition.kind === "requires_runner_tagged",
-    ) === true &&
-    hint.effects?.some(
-      (effect) =>
-        effect.kind === "tag_punish_payoff" &&
-        effect.scope === "runner" &&
-        effect.timing === "action" &&
-        effect.finite === true &&
-        effect.resource === "credits",
-    ) === true;
-  return matches
+  const profile = corpTaggedCreditDenialOperationProfile(definitionId);
+  return profile
     ? {
         definitionId,
         kind: "other_punish",
         routeOrder: 5,
-        sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: profile.sourceCapabilityId,
       }
     : undefined;
 }
@@ -376,37 +336,14 @@ function structuredTaggedCreditDenialAdapter(
 function structuredTaggedDamageAdapter(
   definitionId: string,
 ): PunishComponentAdapter | undefined {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  const matches =
-    hint?.side === "corp" &&
-    hint.cardType === "operation" &&
-    hint.tacticSignals?.includes("damage.corp_meat_source") === true &&
-    hint.conditions?.some(
-      (condition) => condition.kind === "requires_runner_tagged",
-    ) === true &&
-    hint.effects?.some(
-      (effect) =>
-        effect.kind === "damage" &&
-        effect.scope === "runner" &&
-        effect.timing === "action" &&
-        effect.finite === true &&
-        Number.isSafeInteger(effect.amount) &&
-        Number(effect.amount) > 0,
-    ) === true &&
-    hint.effects.some(
-      (effect) =>
-        effect.kind === "tag_punish_payoff" &&
-        effect.scope === "runner" &&
-        effect.timing === "action" &&
-        effect.finite === true &&
-        effect.resource === "damage",
-    );
-  return matches
+  const profile = corpTaggedMeatDamageOperationProfile(definitionId);
+  return profile
     ? {
         definitionId,
         kind: "meat_damage",
         routeOrder: 10,
-        sourceCapabilityId: ON_PLAY_CAPABILITY_ID,
+        sourceCapabilityBindingKind: "card_spec_capability_key",
+        sourceCapabilityId: profile.sourceCapabilityId,
       }
     : undefined;
 }

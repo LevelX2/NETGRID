@@ -735,7 +735,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     );
     expect(trace.trace).toMatchObject({
       sourceDefinitionId: "onr_v1_310_blood-cat",
-      baseTraceStrength: 5,
+      traceLimit: 5,
     });
     trace = applyChoice(trace, "corp", "bid_0");
     trace = applyChoice(trace, "runner", "bid_0");

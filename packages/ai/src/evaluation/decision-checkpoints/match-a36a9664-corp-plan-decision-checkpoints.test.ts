@@ -27,7 +27,7 @@ describe("match a36a9664 Corp plan decision checkpoints", () => {
       overtimeOverflowJson,
     ],
     [
-      "installs the agenda away from its bound counter bank",
+      "protects terminal R&D before opening another agenda remote",
       counterBankReplacementJson,
     ],
     [

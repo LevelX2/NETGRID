@@ -23,12 +23,12 @@ export type CorpZoneChoiceHandlerHost = {
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;
-  constants: {
-    corpHqAgendaRevealCardId: CardDefinitionId;
-  };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    hasCardImplementation: (definitionId: CardDefinitionId) => boolean;
+    hasLifecycleEffect: (
+      cardId: CardInstanceId,
+      effectKind: "show_hq_agendas_for_credits",
+    ) => boolean;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
     scoredAgendaKind: (cardId: CardInstanceId) => string | undefined;
     scoredAgendaDrawCount: (cardId: CardInstanceId) => number;
@@ -85,10 +85,9 @@ export function startCorpHqAgendaRevealChoice(
   const sourceIds = host.zones
     .rezzedCorpRootCardIds()
     .filter((cardId) => {
-      const definition = host.cards.definitionFor(cardId);
-      return (
-        definition.id === host.constants.corpHqAgendaRevealCardId &&
-        !host.cards.hasCardImplementation(definition.id)
+      return host.cards.hasLifecycleEffect(
+        cardId,
+        "show_hq_agendas_for_credits",
       );
     })
     .sort();
@@ -287,8 +286,10 @@ function resolveCorpHqAgendaRevealChoice(
     sourceIds.some(
       (sourceId) =>
         !host.zones.rezzedCorpRootCardIds().includes(sourceId) ||
-        host.cards.definitionFor(sourceId).id !==
-          host.constants.corpHqAgendaRevealCardId,
+        !host.cards.hasLifecycleEffect(
+          sourceId,
+          "show_hq_agendas_for_credits",
+        ),
     )
   )
     throw new Error("Die HQ-Agenda-Reveal-Quelle ist nicht mehr aktiv.");

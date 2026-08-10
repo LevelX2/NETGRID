@@ -53,7 +53,7 @@ function traceTagImplementation(
         effects: [
           {
             kind: "trace",
-            baseTraceStrength: traceBase,
+            traceLimit: traceBase,
             onSuccess: [
               {
                 kind: "add_tags",

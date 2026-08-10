@@ -5,7 +5,6 @@ import {
   type GameState,
   type LegalAction,
 } from "@netgrid/shared";
-import { ZETATECH_SOFTWARE_INSTALLER_SOURCE } from "../../mechanics/longtail-card-effects";
 import {
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
@@ -42,10 +41,6 @@ export function runnerProgramInstallAutomaticCreditSourceIds(
   return [
     ...state.runner.rig.hardware.filter(
       (cardId) => definitionFor(state, cardId).id === "v099_recurring_chip",
-    ),
-    ...state.runner.rig.programs.filter(
-      (cardId) =>
-        definitionFor(state, cardId).id === ZETATECH_SOFTWARE_INSTALLER_SOURCE,
     ),
   ]
     .filter(
@@ -268,15 +263,7 @@ function paymentLabel(
   sourcePayments: RunnerProgramInstallPaymentSourcePayment[],
 ): string {
   const active = sourcePayments.filter((payment) => payment.amount > 0);
-  if (active.length === 0) return "Ohne Zeta-Bits";
-  if (
-    sourcePayments.length === 1 &&
-    definitionFor(state, sourcePayments[0]!.sourceCardId).id ===
-      ZETATECH_SOFTWARE_INSTALLER_SOURCE
-  ) {
-    const amount = active[0]!.amount;
-    return `Mit ${amount} Zeta-Bit${amount === 1 ? "" : "s"}`;
-  }
+  if (active.length === 0) return "Ohne Kartencredits";
   return `Mit ${active
     .map(
       (payment) =>

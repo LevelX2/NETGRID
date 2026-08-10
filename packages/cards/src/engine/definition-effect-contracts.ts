@@ -538,8 +538,8 @@ export type CardTraceSuccessEffectImplementation =
 
 export type TraceEffectImplementation = {
   kind: "trace";
-  baseTraceStrength: number;
-  additionalPlayCostPerBaseTracePointAboveZero?: number;
+  traceLimit: number;
+  additionalPlayCostPerTraceLimitPointAboveZero?: number;
   onSuccess: readonly CardTraceSuccessEffectImplementation[];
   onFailure?: readonly CardTraceSuccessEffectImplementation[];
   visibility: EventVisibilityClass;

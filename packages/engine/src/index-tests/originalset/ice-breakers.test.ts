@@ -1168,14 +1168,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           sourceDefinition(traceState, action) === definitionId,
       );
       expect(traceState.trace).toMatchObject({
-        baseTraceStrength: 5,
+        traceLimit: 5,
         sourceDefinitionId: definitionId,
       });
       expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "play_operation",
         cardDefinitionId: definitionId,
         traceStarted: true,
-        baseTraceStrength: 5,
+        traceLimit: 5,
       });
       expect(
         JSON.stringify(traceState.eventLog.at(-1)?.publicPayload),
@@ -1419,13 +1419,13 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
       if (kind === "trace") {
         expect(state.trace).toMatchObject({
           sourceDefinitionId: definitionId,
-          baseTraceStrength: 5,
+          traceLimit: 5,
         });
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
           actionType: "continue_run",
           traceStarted: true,
           sourceDefinitionId: definitionId,
-          baseTraceStrength: 5,
+          traceLimit: 5,
         });
         state = applyChoice(state, "corp", "bid_5");
         state = applyChoice(state, "runner", "bid_0");

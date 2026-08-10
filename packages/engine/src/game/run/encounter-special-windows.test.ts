@@ -374,6 +374,12 @@ describe("encounter special windows boundary", () => {
           rezzed: false,
         };
       },
+      trashRunnerInstalledCardToHeap: (cardId) => {
+        state.runner.rig.programs = state.runner.rig.programs.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.heap = [...(state.runner.heap ?? []), cardId];
+      },
     });
 
     const actions = fullyBrokenPassedIcePostPassActions(host);
@@ -391,7 +397,7 @@ describe("encounter special windows boundary", () => {
         targetIceDefinitionId: "onr_v1_272_too-many-doors",
         runnerUtilityAbility: "derez_fully_broken_passed_ice",
         abilityKind: "derez_fully_broken_passed_ice",
-        cardImplementationTapSourceCost: true,
+        cardImplementationTrashSourceCost: true,
       },
     });
 
@@ -406,13 +412,13 @@ describe("encounter special windows boundary", () => {
       stateChanged: true,
     });
     expect(derezzed).toEqual(["ice_current"]);
-    expect(state.cardInstances.superglue_1?.tapped).toBe(true);
+    expect(state.runner.rig.programs).not.toContain("superglue_1");
     expect(state.run?.fullyBrokenPassedIcePendingId).toBeUndefined();
     expect(actions[0]!.payload).toMatchObject({
       sourceDefinitionId: "onr_classic_033_superglue",
       derezzedCount: 1,
-      sourceTapped: true,
-      cardImplementationTapSourceCost: true,
+      sourceTrashed: true,
+      cardImplementationTrashSourceCost: true,
     });
   });
 

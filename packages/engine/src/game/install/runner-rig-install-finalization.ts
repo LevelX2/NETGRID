@@ -6,10 +6,6 @@ import type {
   GameState,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  BUTCHER_BOY_ID,
-  SKIVVISS_ID,
-} from "../../compatibility/runtime-compatibility";
 
 export type RunnerProgramInstallInstancePatch = Partial<
   Pick<
@@ -43,9 +39,7 @@ export function shouldAddGenericInstallVirusCounter(
 ): boolean {
   return (
     definition.mechanics.includes("virus") &&
-    !cardImplementationForDefinitionId(definition.id)?.virusCounter &&
-    definition.id !== BUTCHER_BOY_ID &&
-    definition.id !== SKIVVISS_ID
+    !cardImplementationForDefinitionId(definition.id)?.virusCounter
   );
 }
 

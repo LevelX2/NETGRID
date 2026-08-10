@@ -883,7 +883,7 @@
     "sharedSubtypeOrder": "canonical_raw_subtype_order_preserves_exact_subtype_sets_and_intentionally_reorders_only_bel_digmo_doppelganger_pattel_stereogram_bug_zapper_dog_pile_food_fight_hunting_pack_mastermind",
     "sharedMechanicTokens": "legacy_shared_mechanics_are_not_a_second_runtime_authority_typed_card_spec_nodes_replace_consumed_tokens_armageddon_does_not_gain_an_unprinted_install_virus_counter",
     "sharedDynamicSubroutineBinding": "relative_ice_dynamic_damage_references_are_rebound_from_legacy_shared_subroutine_ids_to_the_reviewed_canonical_printed_subroutine_capability_keys",
-    "sharedHomingTraceBidLimit": "legacy_shared_zero_placeholder_is_replaced_by_typed_variable_rez_trace_base_and_bid_limit_from_rez_value_runtime_projection",
+    "sharedHomingTraceLimit": "legacy_shared_zero_placeholder_is_replaced_by_typed_variable_rez_trace_limit_from_rez_value_runtime_projection",
     "sharedDynamicHintBinding": "relative_ice_and_x_trace_shared_zero_placeholders_never_compile_as_fixed_zero_hint_values_typed_dynamic_owners_supply_amount_scope_timing_and_run_lock",
     "mechanicPresentationSplit": "nested_legacy_text_removed_from_engine_nodes_canonical_rules_text_and_capability_text_own_public_copy",
     "printedOnlyRuntime": "brain_wash_colonel_failure_toughonium_wall_definition_owned_without_fake_implementation",
@@ -898,6 +898,9 @@
     "disintegratorTargetProfile": "canonical_breaker_effect_owner_uses_encounter_resolution_and_visible_or_known_policy_instead_of_stale_legacy_during_ice_encounter_public_claim",
     "canonicalDamageValues": "fixed_damage_values_for_fetal_ai_bel_digmo_and_stereogram_derive_from_typed_mechanics_instead_of_legacy_empty_value_hints",
     "streetwareEconomyValue": "typed_three_credit_recurring_mechanic_replaces_stale_legacy_economy_one_evaluation",
+    "fetalAiAccessEffects": "canonical_rules_text_excludes_archives_only_from_fetal_access_damage_and_removes_the_redundant_legacy_ignore_marker",
+    "fetalAiSelfStealCosts": "canonical_rules_text_keeps_fetal_self_steal_cost_two_in_archives_while_access_damage_remains_excluded",
+    "markedAccountsAccessEffects": "canonical_rules_text_applies_marked_accounts_on_access_tag_in_archives",
     "existingSpecs": "digiconda_black_widow_morphing_tool_preserved_byte_for_byte",
     "sourceCut": "not_authorized_old_sources_remain_until_projector_and_exact151_ai_review",
     "knownBaselineCoverageGap": "charity_takeover_current_locations_empty_must_close_during_cutover",
@@ -1135,6 +1138,20 @@
       ],
       "sourceFingerprint": "sha256:1ad8444eed2ba5e5783e42e27215d24310942b9ac464b4d513dc870de5a66fb0",
       "implementationFingerprint": "sha256:a727224a558ce22498619c1f1bcae4d2abf7eff5d864dbde5241830d4788f9fe",
+      "mechanicalReconciliation": {
+        "accessEffects": {
+          "legacySourceZones": ["installed", "hq", "rd"],
+          "canonicalSourceZones": ["installed", "hq", "rd"],
+          "removeIgnoredAccessZone": "archives",
+          "disposition": "canonical_rules_text_excludes_archives_only_from_fetal_access_damage_and_removes_the_redundant_legacy_ignore_marker"
+        },
+        "selfStealCosts": {
+          "legacySourceZones": ["installed", "hq", "rd"],
+          "canonicalSourceZones": ["installed", "hq", "rd", "archives"],
+          "removeIgnoredAccessZone": "archives",
+          "disposition": "canonical_rules_text_keeps_fetal_self_steal_cost_two_in_archives_while_access_damage_remains_excluded"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_004_fetal-ai",
         "setId": "proteus",
@@ -1228,7 +1245,7 @@
           }
         ]
       },
-      "outputFingerprint": "sha256:5f227c3200ed3a3de0800367b8a4745e2ee8547455070699c168fce92685a5ae"
+      "outputFingerprint": "sha256:3fa406ca2d41270d7d68ea97170ce8afcdc49550a474e3611bdbe185268f6e93"
     },
     {
       "cardDefinitionId": "onr_proteus_005_marked-accounts",
@@ -1245,6 +1262,14 @@
       ],
       "sourceFingerprint": "sha256:eac3421ed958021d972a5839fd03c32821a80671decd20d17f9818c898ff86e7",
       "implementationFingerprint": "sha256:19d87a1a8a816784f0aeca4dd7c9dbca7554a8a18b8512ae710bdc455093fcc6",
+      "mechanicalReconciliation": {
+        "accessEffects": {
+          "legacySourceZones": ["installed", "hq", "rd"],
+          "canonicalSourceZones": ["installed", "hq", "rd", "archives"],
+          "removeIgnoredAccessZone": "archives",
+          "disposition": "canonical_rules_text_applies_marked_accounts_on_access_tag_in_archives"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_005_marked-accounts",
         "setId": "proteus",
@@ -1316,7 +1341,7 @@
           }
         ]
       },
-      "outputFingerprint": "sha256:90d8924966f96a581cfe68e226dd163966663506eb784a8574078a0f3a998dc6"
+      "outputFingerprint": "sha256:22864f4fd7575e1efb9de22fdcb3d9763299a49125165659268fb8a0adda5795"
     },
     {
       "cardDefinitionId": "onr_proteus_006_please-dont-choke-anyone",
@@ -2879,7 +2904,7 @@
         {
           "family": "printedSubroutines",
           "sourceIndex": 0,
-          "sourceFingerprint": "sha256:98cfa94edf371925c0be3854810e672b263efcecd0b4da86b8e6bc72b6200b9e"
+          "sourceFingerprint": "sha256:9bb45a8c1fd92baac617116642eaae70352d58970c7adec1f583c3cff740fc04"
         },
         {
           "family": "printedSubroutines",
@@ -2889,12 +2914,26 @@
         {
           "family": "relativeIce",
           "sourceIndex": 0,
-          "sourceFingerprint": "sha256:fa184b6d043da5fc8f275c5b5e6125c714d1ff33b773609920ef5bf372cc8d7e"
+          "sourceFingerprint": "sha256:d7d1454730c4eceda8cab65b98cc16b650009d90f02703d42d36b021ad5a0a7f"
         }
       ],
       "sourceFingerprint": "sha256:d93b64428b622525885228a9bc55e53ba59020532072f33b84675395ebd3b8c0",
-      "implementationFingerprint": "sha256:0b9068071d9391e882a079fe30d108a41a5a76f0a028cc605be40ef895755496",
+      "implementationFingerprint": "sha256:7777b9ddaa4672df947a6001f0ce6092d3ba6277e59cf09ba32386f88b6822dc",
       "sharedSubroutineFingerprint": "sha256:39026ed325d48145385a06be380b6b7e10d35a3b9d531814a938b6e3511afe1f",
+      "mechanicalReconciliation": {
+        "relativeIce": {
+          "kind": "dynamic_damage_binding",
+          "subroutineCapabilityKey": "subroutine_relative_net_damage",
+          "ownerCapabilityKey": "outside_rezzed_ice_dynamic_net_damage",
+          "disposition": "legacy_shared_zero_amount_and_subroutine_id_are_replaced_by_an_exact_capability_key_binding_and_a_closed_derived_damage_owner"
+        },
+        "printedSubroutines": {
+          "kind": "dynamic_damage_binding",
+          "subroutineCapabilityKey": "subroutine_relative_net_damage",
+          "ownerCapabilityKey": "outside_rezzed_ice_dynamic_net_damage",
+          "disposition": "legacy_shared_zero_amount_and_subroutine_id_are_replaced_by_an_exact_capability_key_binding_and_a_closed_derived_damage_owner"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_012_bug-zapper",
         "setId": "proteus",
@@ -2931,16 +2970,20 @@
         "relativeIce": {
           "kind": "rezzed_ice_outside_this_ice",
           "dynamicDamageSubroutine": {
-            "subroutineId": "subroutine_relative_net_damage",
             "amountPerCount": 2,
-            "visibility": "public"
+            "visibility": "public",
+            "subroutineCapabilityKey": "subroutine_relative_net_damage"
           }
         },
         "printedSubroutines": [
           {
             "kind": "damage",
             "damageType": "net",
-            "amount": 0,
+            "amount": {
+              "kind": "derived",
+              "source": "relative_ice_dynamic_damage",
+              "ownerCapabilityKey": "outside_rezzed_ice_dynamic_net_damage"
+            },
             "preventable": true,
             "text": "*Do dynamic damage."
           },
@@ -2985,7 +3028,7 @@
           "dynamic_subroutine"
         ]
       },
-      "outputFingerprint": "sha256:d41a0962245393d124d209cbd29560c2715999179faa36efb90089a8d535214c"
+      "outputFingerprint": "sha256:22dda5680b3f8e90193e03065344b1cfc87c888d7448311302b25980b7538c22"
     },
     {
       "cardDefinitionId": "onr_proteus_013_caryatid",
@@ -3189,7 +3232,7 @@
           ]
         }
       },
-      "outputFingerprint": "sha256:c4ec4a38a5a9f3fbe116495cc4275a9456ec531a36a9d8c51a425f18e9b1e78b"
+      "outputFingerprint": "sha256:3bd9819f446feb46a4fcbec29d12cb460067d4f952af13699a5ce2c1c0b966eb"
     },
     {
       "cardDefinitionId": "onr_proteus_015_colonel-failure",
@@ -3662,7 +3705,7 @@
         {
           "family": "printedSubroutines",
           "sourceIndex": 0,
-          "sourceFingerprint": "sha256:98cfa94edf371925c0be3854810e672b263efcecd0b4da86b8e6bc72b6200b9e"
+          "sourceFingerprint": "sha256:0f58e5c72d7b4f897be547b10d2a6763e4d50e588cf2fb154c4452318309e8b1"
         },
         {
           "family": "printedSubroutines",
@@ -3672,12 +3715,26 @@
         {
           "family": "relativeIce",
           "sourceIndex": 0,
-          "sourceFingerprint": "sha256:dadfe5c61dd47e68da9e1286e66cd50eb00ea691ec1af6146faf0626d8bea74f"
+          "sourceFingerprint": "sha256:b2a32bba2b45f1a74836f3411082fc268f2af53fe8c41388da270fb789b65b36"
         }
       ],
       "sourceFingerprint": "sha256:7742d6ff48494cae6db5ccfa504cc55713549884b2660410016554968cb46f77",
-      "implementationFingerprint": "sha256:08d2c74b6ca1ddff9b3b5af6e2b3f36ab44558fcb34eb0613cef38a1a51ef277",
+      "implementationFingerprint": "sha256:345e77711769a6db410dc72118bfa837019aa46d0596896a268fdcb59db8e847",
       "sharedSubroutineFingerprint": "sha256:34fafd1c437746f8a001857a2496528564ed06b3a9483704490d19189276fcc2",
+      "mechanicalReconciliation": {
+        "relativeIce": {
+          "kind": "dynamic_damage_binding",
+          "subroutineCapabilityKey": "subroutine_relative_net_damage",
+          "ownerCapabilityKey": "outside_rezzed_ice_strength_and_net_damage",
+          "disposition": "legacy_shared_zero_amount_and_subroutine_id_are_replaced_by_an_exact_capability_key_binding_and_a_closed_derived_damage_owner"
+        },
+        "printedSubroutines": {
+          "kind": "dynamic_damage_binding",
+          "subroutineCapabilityKey": "subroutine_relative_net_damage",
+          "ownerCapabilityKey": "outside_rezzed_ice_strength_and_net_damage",
+          "disposition": "legacy_shared_zero_amount_and_subroutine_id_are_replaced_by_an_exact_capability_key_binding_and_a_closed_derived_damage_owner"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_021_dog-pile",
         "setId": "proteus",
@@ -3715,16 +3772,20 @@
           "kind": "rezzed_ice_outside_this_ice",
           "strengthBonusPerCount": 1,
           "dynamicDamageSubroutine": {
-            "subroutineId": "subroutine_relative_net_damage",
             "amountPerCount": 1,
-            "visibility": "public"
+            "visibility": "public",
+            "subroutineCapabilityKey": "subroutine_relative_net_damage"
           }
         },
         "printedSubroutines": [
           {
             "kind": "damage",
             "damageType": "net",
-            "amount": 0,
+            "amount": {
+              "kind": "derived",
+              "source": "relative_ice_dynamic_damage",
+              "ownerCapabilityKey": "outside_rezzed_ice_strength_and_net_damage"
+            },
             "preventable": true,
             "text": "*Do dynamic damage."
           },
@@ -3771,7 +3832,7 @@
           "dynamic_subroutine"
         ]
       },
-      "outputFingerprint": "sha256:cf02ac68250c29cc7e816c29e7c9013489709047bb3527e09d0a9d3af0d943db"
+      "outputFingerprint": "sha256:3ac3a4a45f11c20caf4083f783c6416257e939cb94496e74d7ea50123d7b08b6"
     },
     {
       "cardDefinitionId": "onr_proteus_022_food-fight",
@@ -4051,7 +4112,7 @@
         {
           "family": "printedSubroutines",
           "sourceIndex": 0,
-          "sourceFingerprint": "sha256:8ede7bb78d4909c5aa8b326fb6f3f8c4795043d3d52bc82ff820721874647783"
+          "sourceFingerprint": "sha256:16f8d1c4bec58a1dabdce41c18af07a3cce2617203ea1d3bb536d4383b814c58"
         },
         {
           "family": "variableRez",
@@ -4060,7 +4121,7 @@
         }
       ],
       "sourceFingerprint": "sha256:ea2e78959f4bb73944ad985929953194d580a8ad0d8c46f4e5d124f6a0469ef4",
-      "implementationFingerprint": "sha256:51e09f2c2d393aedd70bfea62af97eed9cf9050e4f1b78b82f29097fc7ebf2e8",
+      "implementationFingerprint": "sha256:86481d116a0e3ac62094cfef389611fe2749e2b44100e8a7c84415a7ffdba05d",
       "sharedSubroutineFingerprint": "sha256:00644aeb4c6bada96b54fd5f0cf83b2e662e165d4cdd70b89c98ae5a2648023e",
       "rawCard": {
         "cardId": "onr_proteus_025_homing-missile",
@@ -4112,7 +4173,7 @@
         "printedSubroutines": [
           {
             "kind": "trace",
-            "baseTraceStrength": 0,
+            "traceLimit": 0,
             "onSuccess": [
               { "kind": "end_run", "visibility": "public" },
               {
@@ -4173,7 +4234,7 @@
           "run_lock"
         ]
       },
-      "outputFingerprint": "sha256:66cce818cc994fe9ce2e50553e2c8a37d95c49451061a18eea5a564a118b49e3"
+      "outputFingerprint": "sha256:95850fabe477b8c6b78919e8a1a7233d2e9c5ce3402596df642bb7964f1fada8"
     },
     {
       "cardDefinitionId": "onr_proteus_026_hunting-pack",
@@ -4264,7 +4325,7 @@
           "add_tag"
         ]
       },
-      "outputFingerprint": "sha256:af4e24c3dbf086f2937f87b83b7a6ee6173a0d20cd455ec48e7847b1d0ed8fcc"
+      "outputFingerprint": "sha256:bba244f650b6733f846636af078db2ae1d127aab181666cb3b3c0e98432440c2"
     },
     {
       "cardDefinitionId": "onr_proteus_027_iceberg",
@@ -4583,7 +4644,7 @@
         {
           "family": "printedSubroutines",
           "sourceIndex": 0,
-          "sourceFingerprint": "sha256:69627d1815c29f8e96b056ea955e3e704db8b1f409b46dd0bcfc3be1236b48cf"
+          "sourceFingerprint": "sha256:a6d867bb4b6d097b723d19c641cc55b27267ceb0bcf3865cb5c6e340cd96046f"
         },
         {
           "family": "printedSubroutines",
@@ -4593,12 +4654,26 @@
         {
           "family": "relativeIce",
           "sourceIndex": 0,
-          "sourceFingerprint": "sha256:1f5607f7dbe1b50f8198bccf82b0673dd99050bd0388c867e6e246eb94a8fce0"
+          "sourceFingerprint": "sha256:67d6aaddd139de25a8eef0c2a07a196c2cfaa24e1350815b3a4c0c2a9a0839d7"
         }
       ],
       "sourceFingerprint": "sha256:10f5f6f4e5dc130ae0f4176e07b533fa0d41c4bcfdac58ca0a2e211571f5fe1b",
-      "implementationFingerprint": "sha256:7a7673891a0d015d4cc7b16458de87d8fbf23952acfe1262f12a2982744b8d3c",
+      "implementationFingerprint": "sha256:ed8cc6f0cac1dc2b68857e6901d9233064eca912c9ffe59bed8c888e152627cf",
       "sharedSubroutineFingerprint": "sha256:997764c58ac36b377a9c26c2330ed45f7b0bd56fc0ddcee107d0175f0cc0cbce",
+      "mechanicalReconciliation": {
+        "relativeIce": {
+          "kind": "dynamic_damage_binding",
+          "subroutineCapabilityKey": "subroutine_relative_brain_damage",
+          "ownerCapabilityKey": "outside_rezzed_ice_strength_and_core_damage",
+          "disposition": "legacy_shared_zero_amount_and_subroutine_id_are_replaced_by_an_exact_capability_key_binding_and_a_closed_derived_damage_owner"
+        },
+        "printedSubroutines": {
+          "kind": "dynamic_damage_binding",
+          "subroutineCapabilityKey": "subroutine_relative_brain_damage",
+          "ownerCapabilityKey": "outside_rezzed_ice_strength_and_core_damage",
+          "disposition": "legacy_shared_zero_amount_and_subroutine_id_are_replaced_by_an_exact_capability_key_binding_and_a_closed_derived_damage_owner"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_030_mastermind",
         "setId": "proteus",
@@ -4636,16 +4711,20 @@
           "kind": "rezzed_ice_outside_this_ice",
           "strengthBonusPerCount": 1,
           "dynamicDamageSubroutine": {
-            "subroutineId": "subroutine_relative_brain_damage",
             "amountPerCount": 1,
-            "visibility": "public"
+            "visibility": "public",
+            "subroutineCapabilityKey": "subroutine_relative_brain_damage"
           }
         },
         "printedSubroutines": [
           {
             "kind": "damage",
             "damageType": "brain",
-            "amount": 0,
+            "amount": {
+              "kind": "derived",
+              "source": "relative_ice_dynamic_damage",
+              "ownerCapabilityKey": "outside_rezzed_ice_strength_and_core_damage"
+            },
             "preventable": true,
             "text": "*Do dynamic damage."
           },
@@ -4692,7 +4771,7 @@
           "dynamic_subroutine"
         ]
       },
-      "outputFingerprint": "sha256:140d3e324d04d85c10927c141da409386d2c3813de686ad18104899090d98311"
+      "outputFingerprint": "sha256:f120718ec705d62cb93606b3feeb4595827603901215060df77f9d1da098bed0"
     },
     {
       "cardDefinitionId": "onr_proteus_031_minotaur",
@@ -4703,6 +4782,14 @@
       "addressableNodes": [],
       "sourceFingerprint": "sha256:4b8df2b155cf79c816b615b9026543505fec8efdc56b477a2ed08a395d1cb146",
       "implementationFingerprint": "sha256:c61b5772edcf489b4a18e8d7fefb3483f4f60f824e95656ed9bee7d9bba8bce1",
+      "mechanicalReconciliation": {
+        "modifiers": {
+          "kind": "minotaur_repeat_scope",
+          "scope": "outside_source_same_server",
+          "subtypeMatch": "effective_current_subtypes",
+          "disposition": "the_repeat_count_uses_rezzed_ice_outside_the_source_on_its_current_server_and_matches_effective_current_subtypes"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_031_minotaur",
         "setId": "proteus",
@@ -4807,7 +4894,7 @@
           "proteus_dynamic_public_etr_ice"
         ]
       },
-      "outputFingerprint": "sha256:765562e5e2349368f967a3a1df3624448d279db8a4dc4f38d3b5e66fe5a39c22"
+      "outputFingerprint": "sha256:447d4539261ba5006ace25f0f8035d7c08de1f8afaf1c0898b5b36a47f60a708"
     },
     {
       "cardDefinitionId": "onr_proteus_032_misleading-access-menus",
@@ -5710,6 +5797,13 @@
       ],
       "sourceFingerprint": "sha256:7a11552eddf78a01aa992918039fe4a5ed30681da31fd7b588e5af4da44c1659",
       "implementationFingerprint": "sha256:f8b8de02d239a87e41fb98353d9d334da1b5a86b3e5c2a9a31cb848c2e80848a",
+      "mechanicalReconciliation": {
+        "rulesText": {
+          "legacy": "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+          "canonical": "*End the run.\n*End the run.\n*End the run.\n*End the run.",
+          "disposition": "canonical_rules_text_uses_the_same_star_subroutine_notation_as_the_four_typed_end_the_run_nodes"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_041_toughoniumtm-wall",
         "setId": "proteus",
@@ -5795,7 +5889,7 @@
           "proteus_visible_baseline"
         ]
       },
-      "outputFingerprint": "sha256:a0e810928a9ffaa43d01659333462914edd5d3d02349f92b20a7bbff263b8868"
+      "outputFingerprint": "sha256:5f5ab413780db9d22a7a9530bef7456118dfa462164d7a52b3c28b4718ce466d"
     },
     {
       "cardDefinitionId": "onr_proteus_042_tumblers",
@@ -6582,7 +6676,7 @@
           }
         ]
       },
-      "outputFingerprint": "sha256:362c542a046d8004466fa8871549477591f6851f394b806a68c8871e59312dcb"
+      "outputFingerprint": "sha256:1b7de3dbf0479ae84441c1333eba09c3f970755257042a50b1406dec6fb95c70"
     },
     {
       "cardDefinitionId": "onr_proteus_051_rent-to-own-contract",
@@ -6774,7 +6868,7 @@
           }
         ]
       },
-      "outputFingerprint": "sha256:32e3fa6862b80825c84f21e8e9bc95d00a908738fe2636fc874461fc1232149b"
+      "outputFingerprint": "sha256:a106d5f7b2f33c37c1d34de5d913e0190c31e929fc98d3d872aafab2b242f4a8"
     },
     {
       "cardDefinitionId": "onr_proteus_053_underworld-mole",
@@ -6870,7 +6964,7 @@
           }
         ]
       },
-      "outputFingerprint": "sha256:aa553582dad8ead2936864b98e4e2e4932407f7a43bf8b20d977832b219b1ddf"
+      "outputFingerprint": "sha256:5230d4bc16203fdddf9da942d413bfdd0fe6b2e78505b6e7c7471a9981e81307"
     },
     {
       "cardDefinitionId": "onr_proteus_060_herman-revista",
@@ -10766,6 +10860,12 @@
       "addressableNodes": [],
       "sourceFingerprint": "sha256:c3beda8363a1729bd24fbf5b376868a9734ca06621f37ad0d306b2f602a813b1",
       "implementationFingerprint": "sha256:2d772a0c95508a4f7680f136b8726861ac632dd513d74852b54f2a14c8e64b79",
+      "mechanicalReconciliation": {
+        "hostedProgramCapacity": {
+          "capacityMu": 1,
+          "disposition": "canonical_rules_text_limits_the_single_hosted_icebreaker_to_mu_one_legacy_99_was_an_invalid_unbounded_placeholder"
+        }
+      },
       "rawCard": {
         "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
         "setId": "proteus",
@@ -15164,7 +15264,7 @@
       "cardDefinitionId": "onr_proteus_012_bug-zapper",
       "family": "printedSubroutines",
       "sourceIndex": 0,
-      "sourceFingerprint": "sha256:98cfa94edf371925c0be3854810e672b263efcecd0b4da86b8e6bc72b6200b9e",
+      "sourceFingerprint": "sha256:9bb45a8c1fd92baac617116642eaae70352d58970c7adec1f583c3cff740fc04",
       "capabilityKey": "subroutine_relative_net_damage",
       "addressability": ["plan", "action", "quote", "debug"],
       "disposition": "explicit_reviewed_semantic_capability_key"
@@ -15182,7 +15282,7 @@
       "cardDefinitionId": "onr_proteus_012_bug-zapper",
       "family": "relativeIce",
       "sourceIndex": 0,
-      "sourceFingerprint": "sha256:fa184b6d043da5fc8f275c5b5e6125c714d1ff33b773609920ef5bf372cc8d7e",
+      "sourceFingerprint": "sha256:d7d1454730c4eceda8cab65b98cc16b650009d90f02703d42d36b021ad5a0a7f",
       "capabilityKey": "outside_rezzed_ice_dynamic_net_damage",
       "addressability": ["plan", "action", "quote", "debug"],
       "disposition": "explicit_reviewed_semantic_capability_key"
@@ -15335,7 +15435,7 @@
       "cardDefinitionId": "onr_proteus_021_dog-pile",
       "family": "printedSubroutines",
       "sourceIndex": 0,
-      "sourceFingerprint": "sha256:98cfa94edf371925c0be3854810e672b263efcecd0b4da86b8e6bc72b6200b9e",
+      "sourceFingerprint": "sha256:0f58e5c72d7b4f897be547b10d2a6763e4d50e588cf2fb154c4452318309e8b1",
       "capabilityKey": "subroutine_relative_net_damage",
       "addressability": ["plan", "action", "quote", "debug"],
       "disposition": "explicit_reviewed_semantic_capability_key"
@@ -15353,7 +15453,7 @@
       "cardDefinitionId": "onr_proteus_021_dog-pile",
       "family": "relativeIce",
       "sourceIndex": 0,
-      "sourceFingerprint": "sha256:dadfe5c61dd47e68da9e1286e66cd50eb00ea691ec1af6146faf0626d8bea74f",
+      "sourceFingerprint": "sha256:b2a32bba2b45f1a74836f3411082fc268f2af53fe8c41388da270fb789b65b36",
       "capabilityKey": "outside_rezzed_ice_strength_and_net_damage",
       "addressability": ["plan", "action", "quote", "debug"],
       "disposition": "explicit_reviewed_semantic_capability_key"
@@ -15398,7 +15498,7 @@
       "cardDefinitionId": "onr_proteus_025_homing-missile",
       "family": "printedSubroutines",
       "sourceIndex": 0,
-      "sourceFingerprint": "sha256:8ede7bb78d4909c5aa8b326fb6f3f8c4795043d3d52bc82ff820721874647783",
+      "sourceFingerprint": "sha256:16f8d1c4bec58a1dabdce41c18af07a3cce2617203ea1d3bb536d4383b814c58",
       "capabilityKey": "subroutine_trace_x_end_run_and_run_lock",
       "addressability": ["plan", "action", "quote", "debug"],
       "disposition": "explicit_reviewed_semantic_capability_key"
@@ -15488,7 +15588,7 @@
       "cardDefinitionId": "onr_proteus_030_mastermind",
       "family": "printedSubroutines",
       "sourceIndex": 0,
-      "sourceFingerprint": "sha256:69627d1815c29f8e96b056ea955e3e704db8b1f409b46dd0bcfc3be1236b48cf",
+      "sourceFingerprint": "sha256:a6d867bb4b6d097b723d19c641cc55b27267ceb0bcf3865cb5c6e340cd96046f",
       "capabilityKey": "subroutine_relative_brain_damage",
       "addressability": ["plan", "action", "quote", "debug"],
       "disposition": "explicit_reviewed_semantic_capability_key"
@@ -15506,7 +15606,7 @@
       "cardDefinitionId": "onr_proteus_030_mastermind",
       "family": "relativeIce",
       "sourceIndex": 0,
-      "sourceFingerprint": "sha256:1f5607f7dbe1b50f8198bccf82b0673dd99050bd0388c867e6e246eb94a8fce0",
+      "sourceFingerprint": "sha256:67d6aaddd139de25a8eef0c2a07a196c2cfaa24e1350815b3a4c0c2a9a0839d7",
       "capabilityKey": "outside_rezzed_ice_strength_and_core_damage",
       "addressability": ["plan", "action", "quote", "debug"],
       "disposition": "explicit_reviewed_semantic_capability_key"
@@ -16682,6 +16782,6 @@
       "disposition": "explicit_reviewed_semantic_capability_key"
     }
   ],
-  "aggregateInventoryFingerprint": "sha256:28c0bb3676042eeca718628f45b76efde30fc00939cc94990e510f5b253a822c",
-  "aggregateOutputFingerprint": "sha256:4c10b57d58db0c018549c8a2fbcfaa87041b51aa3f18de4aa4f7e8ab2bbf1fbf"
+  "aggregateInventoryFingerprint": "sha256:2472fdab93797e0479b0d1754283c0fc78105541350060dbf75dbaf88068bb3b",
+  "aggregateOutputFingerprint": "sha256:c5f61e6fbaf70d44526d43c820e4682de3e8e5dc900b2f5dae2f922c237f5bff"
 }

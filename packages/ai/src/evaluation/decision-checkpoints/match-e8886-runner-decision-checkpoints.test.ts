@@ -62,12 +62,12 @@ describe("match E8886 runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "E8886-C04-RECOVERY-TARGET";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.draw_card" }],
+        acceptableActions: [{ actionId: "runner.gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["runner.rig_and_coverage"],
-          acceptableCapabilities: ["draw_for_answer_breaker_sentry"],
+          acceptablePlanKinds: ["runner.economy"],
+          acceptableCapabilities: ["gain_general_liquid_credits"],
           requiredAssessmentEvidence: [
-            "deck_strategy_open_sentry_coverage",
+            "runner_finite_portfolio_credit_reserve",
           ],
         },
       };

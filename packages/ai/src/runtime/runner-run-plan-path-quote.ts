@@ -652,7 +652,7 @@ function visibleCorpTraceBidCapacity(
   const available =
     Math.max(0, Math.floor(visibleCorpCredits)) +
     Math.max(0, Math.floor(quote?.encounterTemporaryTraceCredits ?? 0));
-  const bidLimit = subroutine?.traceBidLimit;
+  const bidLimit = subroutine?.traceLimit;
   return bidLimit === undefined
     ? available
     : Math.min(available, Math.max(0, Math.floor(bidLimit)));

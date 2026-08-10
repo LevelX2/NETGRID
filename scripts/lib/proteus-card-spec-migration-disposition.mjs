@@ -78,6 +78,71 @@ export const PROTEUS_HELPER_MODULE_DISPOSITIONS = Object.freeze({
 });
 
 export const PROTEUS_MECHANICAL_RECONCILIATIONS = Object.freeze({
+  "onr_proteus_012_bug-zapper": dynamicDamageSubroutineReconciliation(
+    "subroutine_relative_net_damage",
+    "outside_rezzed_ice_dynamic_net_damage",
+  ),
+  "onr_proteus_021_dog-pile": dynamicDamageSubroutineReconciliation(
+    "subroutine_relative_net_damage",
+    "outside_rezzed_ice_strength_and_net_damage",
+  ),
+  onr_proteus_030_mastermind: dynamicDamageSubroutineReconciliation(
+    "subroutine_relative_brain_damage",
+    "outside_rezzed_ice_strength_and_core_damage",
+  ),
+  onr_proteus_031_minotaur: Object.freeze({
+    modifiers: Object.freeze({
+      kind: "minotaur_repeat_scope",
+      scope: "outside_source_same_server",
+      subtypeMatch: "effective_current_subtypes",
+      disposition:
+        "the_repeat_count_uses_rezzed_ice_outside_the_source_on_its_current_server_and_matches_effective_current_subtypes",
+    }),
+  }),
+  "onr_proteus_041_toughoniumtm-wall": Object.freeze({
+    rulesText: Object.freeze({
+      legacy:
+        "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+      canonical: "*End the run.\n*End the run.\n*End the run.\n*End the run.",
+      disposition:
+        "canonical_rules_text_uses_the_same_star_subroutine_notation_as_the_four_typed_end_the_run_nodes",
+    }),
+  }),
+  "onr_proteus_004_fetal-ai": Object.freeze({
+    accessEffects: Object.freeze({
+      legacySourceZones: Object.freeze(["installed", "hq", "rd"]),
+      canonicalSourceZones: Object.freeze(["installed", "hq", "rd"]),
+      removeIgnoredAccessZone: "archives",
+      disposition:
+        "canonical_rules_text_excludes_archives_only_from_fetal_access_damage_and_removes_the_redundant_legacy_ignore_marker",
+    }),
+    selfStealCosts: Object.freeze({
+      legacySourceZones: Object.freeze(["installed", "hq", "rd"]),
+      canonicalSourceZones: Object.freeze([
+        "installed",
+        "hq",
+        "rd",
+        "archives",
+      ]),
+      removeIgnoredAccessZone: "archives",
+      disposition:
+        "canonical_rules_text_keeps_fetal_self_steal_cost_two_in_archives_while_access_damage_remains_excluded",
+    }),
+  }),
+  "onr_proteus_005_marked-accounts": Object.freeze({
+    accessEffects: Object.freeze({
+      legacySourceZones: Object.freeze(["installed", "hq", "rd"]),
+      canonicalSourceZones: Object.freeze([
+        "installed",
+        "hq",
+        "rd",
+        "archives",
+      ]),
+      removeIgnoredAccessZone: "archives",
+      disposition:
+        "canonical_rules_text_applies_marked_accounts_on_access_tag_in_archives",
+    }),
+  }),
   "onr_proteus_139_eurocorpse-tm-spin-chip": Object.freeze({
     hostedProgramCapacity: Object.freeze({
       capacityMu: 1,
@@ -86,6 +151,28 @@ export const PROTEUS_MECHANICAL_RECONCILIATIONS = Object.freeze({
     }),
   }),
 });
+
+function dynamicDamageSubroutineReconciliation(
+  subroutineCapabilityKey,
+  ownerCapabilityKey,
+) {
+  const disposition =
+    "legacy_shared_zero_amount_and_subroutine_id_are_replaced_by_an_exact_capability_key_binding_and_a_closed_derived_damage_owner";
+  return Object.freeze({
+    relativeIce: Object.freeze({
+      kind: "dynamic_damage_binding",
+      subroutineCapabilityKey,
+      ownerCapabilityKey,
+      disposition,
+    }),
+    printedSubroutines: Object.freeze({
+      kind: "dynamic_damage_binding",
+      subroutineCapabilityKey,
+      ownerCapabilityKey,
+      disposition,
+    }),
+  });
+}
 
 // Capability-bound planning evidence is authored against the reviewed semantic
 // keys above. Hunting Pack's legacy action pair is intentionally absent: its

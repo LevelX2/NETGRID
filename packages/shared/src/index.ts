@@ -277,11 +277,14 @@ export type SubroutineDefinition = {
   id: string;
   type: SubroutineType;
   amount?: number;
+  derivedAmount?: {
+    kind: "relative_ice_dynamic_damage";
+    ownerCapabilityKey: string;
+  };
   damageType?: DamageType;
   dieFaces?: 6;
   damageOnResults?: number[];
-  baseTraceStrength?: number;
-  traceBidLimit?: number;
+  traceLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   runFutureStrengthCancelPaymentAmount?: number;
   requiresSuccessfulTraceSubroutineIndex?: number;
@@ -884,6 +887,15 @@ export type ChoiceContinuation =
       sourceCardDefinitionId: CardDefinitionId;
       drawnCardInstanceIds: CardInstanceId[];
       createdAtStateVersion: number;
+    }
+  | {
+      family: "runner_program_trash_before_install";
+      originActionId: string;
+      sourceCardInstanceId: CardInstanceId;
+      sourceCardDefinitionId: CardDefinitionId;
+      selectedCardId?: CardInstanceId;
+      selectedSubtype?: string;
+      createdAtStateVersion: number;
     };
 
 export type PendingChoice = ChoiceRequest;
@@ -1124,7 +1136,7 @@ export type CardInstance = {
     strength?: number;
     subroutineCount?: number;
     selectedSubtypes?: string[];
-    traceBidLimit?: number;
+    traceLimit?: number;
   };
 };
 
@@ -1310,7 +1322,9 @@ export type RunState = {
   runTraceLinkBonusSourceDefinitionId?: CardDefinitionId;
   bypassFirstIceRemaining?: boolean;
   encounterTaxForFutureIce?: number;
+  encounterTaxSourceDefinitionId?: CardDefinitionId;
   breakSubroutineAdditionalCost?: number;
+  breakSubroutineAdditionalCostSourceDefinitionId?: CardDefinitionId;
   futureEncounterEndTheRunSourceIceId?: CardInstanceId;
   turbeauAccessTraceConsumedByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, CardInstanceId[]>
@@ -1377,8 +1391,10 @@ export type RunState = {
   jackOutLockedUntilEncounterEnds?: boolean;
   jackOutLockedForRun?: boolean;
   nextEncounterFatalDamage?: number;
+  nextEncounterFatalDamageSourceDefinitionId?: CardDefinitionId;
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
+  fatalDamageSourceDefinitionId?: CardDefinitionId;
   fullyBrokenIceIds?: CardInstanceId[];
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
@@ -1516,8 +1532,8 @@ export type TraceState = {
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   subroutineIndex?: number;
-  baseTraceStrength: number;
-  traceBidLimit?: number;
+  traceLimit: number;
+  effectiveTraceLimit?: number;
   corpBidMax?: number;
   rabbitTraceLimitReduction?: number;
   fortTraceBitPoolSourceCardInstanceId?: CardInstanceId;
@@ -1535,7 +1551,7 @@ export type TraceState = {
   returnTimingPoint?: TimingPointId;
   returnActiveSide?: Side;
   corpBid?: number;
-  traceStrength?: number;
+  traceValue?: number;
   runnerLink?: number;
   baseLinkSourceId?: CardInstanceId;
   baseLinkValue?: number;
@@ -1684,6 +1700,13 @@ export type PendingAddTagContinuation =
       sourceCardId: CardInstanceId;
       sourceIndex: number;
       runnerTagsBefore: number;
+    }
+  | {
+      kind: "corp_start_turn_satellite_choice";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      nextRootCardIndex: number;
+      runAttemptsLastTurn: number;
     }
   | {
       kind: "corp_start_turn";
@@ -2391,8 +2414,7 @@ export type VisibleEffectiveSubroutine = {
   id: string;
   type: SubroutineType;
   amount?: number;
-  baseTraceStrength?: number;
-  traceBidLimit?: number;
+  traceLimit?: number;
   runFutureStrengthCancelPaymentAmount?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
@@ -2528,8 +2550,7 @@ export type VisibleVariableCorpRezCostParameter =
       minValueFinalCredits: number;
       maxValueFinalCredits: number;
       effectiveStrengthFromValue: true;
-      traceBaseFromValue?: true;
-      traceBidLimitFromValue?: true;
+      traceLimitFromValue?: true;
     }
   | {
       kind: "paid_end_the_run_subroutines";
@@ -2936,7 +2957,7 @@ export type CorpPunishRouteTagTriggerQuote =
       currentRunnerTags: number;
       requiredRunnerTags: number;
       sourceStepId: string;
-      baseTraceStrength: number;
+      traceLimit: number;
     }
   | {
       kind: "none";

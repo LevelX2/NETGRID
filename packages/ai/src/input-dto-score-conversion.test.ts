@@ -790,8 +790,7 @@ describe("AI input DTO score-conversion contract", () => {
         {
           id: "homing-missile:trace",
           type: "initiate_trace" as const,
-          baseTraceStrength: 5,
-          traceBidLimit: 5,
+          traceLimit: 5,
           runFutureStrengthCancelPaymentAmount: 2,
         },
       ],
@@ -858,7 +857,7 @@ describe("AI input DTO score-conversion contract", () => {
                 {
                   id: "malformed-ice:trace",
                   type: "initiate_trace",
-                  traceBidLimit: -1,
+                  traceLimit: -1,
                 },
               ],
               conditionalEncounterEffects: [

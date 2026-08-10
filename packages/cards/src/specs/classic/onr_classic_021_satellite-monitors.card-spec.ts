@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "At the start of each of your turns, you may roll a die for each run Runner made during his or her last turn. Dor each 1, give Runner a tag.",
+      "At the start of each of your turns, you may roll a die for each run Runner made during his or her last turn. For each 1, give Runner a tag.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -47,6 +47,7 @@ export const cardSpec = {
       dieFaces: 6,
       tagOn: 1,
       visibility: "public",
+      optional: true,
     },
   },
   planningAnnotations: {
@@ -54,7 +55,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "punish_tagged_runner",
+        role: "tag_source",
       },
       {
         kind: "strategic_role",
@@ -82,8 +83,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_021_satellite-monitors.",
       },
     ],
     capabilities: [

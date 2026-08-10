@@ -104,7 +104,7 @@ export type AccessFlowCompositionHost = {
     startTraceFromOperation: (
       state: GameState,
       sourceDefinitionId: CardDefinitionId,
-      baseTraceStrength: number,
+      traceLimit: number,
       legalAction: LegalAction,
       successEffect?: TraceSuccessEffect,
     ) => void;
@@ -420,14 +420,14 @@ export function createAccessFlowAdapters(
       trace: {
         startTraceFromOperation: (
           sourceDefinitionId,
-          baseTraceStrength,
+          traceLimit,
           successEffect,
         ) => {
           if (!legalAction) throw new Error("Trace-Aktion fehlt.");
           host.trace.startTraceFromOperation(
             state,
             sourceDefinitionId,
-            baseTraceStrength,
+            traceLimit,
             legalAction,
             successEffect as TraceSuccessEffect | undefined,
           );

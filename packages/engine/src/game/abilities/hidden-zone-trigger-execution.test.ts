@@ -198,12 +198,6 @@ function testHost(
   return {
     state,
     legalAction,
-    constants: {
-      topStackTakeMatchingSourceId: "aujourd_oui",
-      randomStackProgramInstallSourceId: MYSTERY_BOX_ID,
-      stackProgramFreeInstallSourceId: "self_modifying_code",
-      stackSearchGripSourceId: "short_circuit",
-    },
     cards: {
       definitionFor: (cardId) => definitionFor(state, cardId),
       isUniqueRunnerDefinitionInstalled: () => false,

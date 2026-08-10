@@ -249,6 +249,8 @@ describe("encounter entry", () => {
     state.run!.nextEncounterNoBreakSubroutines = true;
     state.run!.nextEncounterJackOutLock = true;
     state.run!.nextEncounterFatalDamage = 2;
+    state.run!.nextEncounterFatalDamageSourceDefinitionId =
+      "fatal_source" as never;
     const { host } = hostFor(state);
 
     const result = beginEncounter(host, "ice_1" as CardInstanceId);
@@ -269,6 +271,7 @@ describe("encounter entry", () => {
       jackOutLockedUntilEncounterEnds: true,
       fatalDamageActiveForEncounter: true,
       fatalDamageAmountForEncounter: 2,
+      fatalDamageSourceDefinitionId: "fatal_source",
       nextEncounterFatalDamage: 0,
     });
     expect(state.timingPoint).toBe("run.encounter_ice");
@@ -278,6 +281,7 @@ describe("encounter entry", () => {
   it("attaches a paid run-wide encounter tax and its public ICE target to the entry action", () => {
     const state = makeState({ iceDefinitionId: "simple_ice" });
     state.run!.encounterTaxForFutureIce = 2;
+    state.run!.encounterTaxSourceDefinitionId = "tax_source" as never;
     const { host, calls } = hostFor(state);
     const legalAction = runnerAction(state);
 
@@ -292,7 +296,7 @@ describe("encounter entry", () => {
     expect(legalAction.payload).toMatchObject({
       encounterTaxForFutureIce: 2,
       encounterTaxPaid: 2,
-      encounterTaxSource: "onr_v1_222_ball-and-chain",
+      encounterTaxSource: "tax_source",
       targetIceDefinitionId: "simple_ice",
     });
     expect(calls.finish).toEqual([]);

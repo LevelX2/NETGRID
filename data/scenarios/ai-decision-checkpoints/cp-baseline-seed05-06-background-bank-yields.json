@@ -123,7 +123,7 @@
   },
   "engine": {
     "stateVersion": 212,
-    "stateHash": "fnv1a:38dba882",
+    "stateHash": "fnv1a:b9571b2d",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-behavior-baseline-v1-05_local_realistic_runner_blink_pressure_rig_snapshot_v1_local_realistic_corp_cheap_bag_tricks_snapshot_v1",
       "baseline": {
@@ -23239,9 +23239,10 @@
   },
   "expectation": {
     "contractKind": "correctness",
-    "acceptableActions": [
-      {
-        "type": "draw_card"
+  "acceptableActions": [
+    {
+      "type": "activated_card_ability",
+      "sourceDefinitionId": "onr_v1_045_newsgroup-filter"
       }
     ],
     "forbiddenActions": [
@@ -23251,8 +23252,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.defense_and_recovery"],
-      "acceptableCapabilities": ["build_required_hand_buffer"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": [
+        "runner_viable_followup_run_lock_release|run_lock_release_projection_status:blocked_funding|run_lock_release_target_credits:10|run_lock_release_funding_gap:1|run"
+      ]
     }
   }
 }

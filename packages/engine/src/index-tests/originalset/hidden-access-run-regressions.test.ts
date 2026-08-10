@@ -1093,7 +1093,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       "corp",
       (action) => action.actionId === policeAction.actionId,
     );
-    expect(policeState.trace).toMatchObject({ baseTraceStrength: 5 });
+    expect(policeState.trace).toMatchObject({ traceLimit: 5 });
     policeState = applyChoice(policeState, "corp", "bid_0");
     policeState = applyChoice(policeState, "runner", "bid_0");
     expect(policeState.runner.tags).toBe(1);
@@ -1475,12 +1475,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     expect(state.trace).toMatchObject({
       status: "base_link",
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 0,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerLink: 0,
-      traceStrength: 5,
+      traceValue: 5,
     });
     state = applyChoice(
       state,
@@ -3310,7 +3310,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = encounterIce(state, "rd", "onr_v1_240_fang");
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.trace).toMatchObject({
-      baseTraceStrength: 4,
+      traceLimit: 4,
       sourceDefinitionId: "onr_v1_240_fang",
     });
     state = applyChoice(state, "corp", "bid_5");
@@ -3781,7 +3781,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.run?.jackOutLockedForRun).toBe(true);
     expect(state.trace).toMatchObject({
-      baseTraceStrength: 5,
+      traceLimit: 5,
       sourceDefinitionId: "onr_v1_251_jack-attack",
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3795,7 +3795,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       actionType: "resolve_choice",
       traceSuccessful: true,
       tagsAdded: 1,
-      baseTraceStrength: 5,
+      traceLimit: 5,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/,
@@ -4477,7 +4477,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(state.run?.futureEncounterIceStrengthBonus).toBe(1);
     expect(state.trace).toMatchObject({
       sourceDefinitionId: "onr_v1_255_mastiff",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       successEffect: {
         type: "add_counter",
         counterType: "mastiff",

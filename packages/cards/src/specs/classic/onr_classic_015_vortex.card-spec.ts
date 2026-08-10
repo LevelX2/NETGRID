@@ -131,15 +131,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_015_vortex.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_015_vortex.",
       },
     ],
     capabilities: [],

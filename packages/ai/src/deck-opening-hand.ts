@@ -330,6 +330,8 @@ export function evaluateRunnerOpeningHand(
       role === "remote_contest" ||
       role === "multiaccess",
   );
+  const executableDrawEconomyCount =
+    runnerExecutableDrawEconomyOpeningCount(input);
   const handSize = input.playerView.own.gripOrHq.length;
   const semanticContext = openingSemanticContext(input);
   const strategySet = new Set(semanticContext.strategies);
@@ -344,6 +346,7 @@ export function evaluateRunnerOpeningHand(
     `opening_economy:${economyCount}`,
     `opening_setup:${setupCount}`,
     `opening_pressure:${pressureCount}`,
+    `opening_executable_draw_economy:${executableDrawEconomyCount}`,
     ...semanticOpeningEvidence(semanticContext),
   ];
 
@@ -366,6 +369,10 @@ export function evaluateRunnerOpeningHand(
         ? 4
         : 0;
   score += handSize >= 4 && handSize <= 6 ? 14 : handSize >= 3 ? 8 : 0;
+  if (breakerAccessCount === 0 && executableDrawEconomyCount > 0) {
+    score += 20;
+    reasons.push("opening_draw_economy_bridge_to_breaker_access");
+  }
 
   if (
     strategySet.has("runner.rig_first") ||
@@ -407,6 +414,40 @@ export function evaluateRunnerOpeningHand(
     reasons: reasons.length > 0 ? reasons : ["opening_hand_acceptable"],
     evidence,
   };
+}
+
+function runnerExecutableDrawEconomyOpeningCount(
+  input: AiDecisionInput,
+): number {
+  return input.playerView.own.gripOrHq.filter((card) => {
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId ?? "");
+    if (!hint) return false;
+    const immediateCost =
+      card.type === "event" ? card.cost : (card.installCost ?? card.cost);
+    if (
+      immediateCost === undefined ||
+      immediateCost > input.playerView.own.credits
+    ) {
+      return false;
+    }
+    const effects = hint.effects ?? [];
+    const drawsCards = effects.some(
+      (effect) =>
+        effect.kind === "draw" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        (effect.amount ?? 0) > 0,
+    );
+    const gainsCredits = effects.some(
+      (effect) =>
+        effect.kind === "economy" &&
+        effect.scope === "runner" &&
+        effect.timing === "action" &&
+        effect.resource === "credits" &&
+        (effect.amount ?? 0) > 0,
+    );
+    return drawsCards && gainsCredits;
+  }).length;
 }
 
 type OpeningSemanticContext = {

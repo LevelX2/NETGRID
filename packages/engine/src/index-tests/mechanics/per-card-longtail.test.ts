@@ -3202,7 +3202,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect([...byAmount.keys()].sort()).toEqual(["0", "1", "2"]);
     expect(
       installActions.map((action) => action.payload?.runnerInstallPaymentLabel),
-    ).toEqual(["Ohne Zeta-Bits", "Mit 1 Zeta-Bit", "Mit 2 Zeta-Bits"]);
+    ).toEqual([
+      "Ohne Kartencredits",
+      "Mit Zetatech Software Installer: 1 Bit",
+      "Mit Zetatech Software Installer: 2 Bits",
+    ]);
 
     const zeroBitState = apply(
       structuredClone(state),

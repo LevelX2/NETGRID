@@ -57,17 +57,22 @@ export function pushActivatedCardImplementationActions(
   definition: CardDefinition,
   options: { canStartRun?: boolean } = {},
 ): void {
-  const timing = side === "corp" ? "corp_main" : "runner_main";
-  pushActivatedCardImplementationActionsForTiming(
-    deps,
-    state,
-    actions,
-    side,
-    sourceCardId,
-    definition,
-    timing,
-    options,
-  );
+  const timings =
+    side === "corp"
+      ? (["corp_main", "corp_paid"] as const)
+      : (["runner_main", "runner_paid"] as const);
+  for (const timing of timings) {
+    pushActivatedCardImplementationActionsForTiming(
+      deps,
+      state,
+      actions,
+      side,
+      sourceCardId,
+      definition,
+      timing,
+      options,
+    );
+  }
 }
 
 export function pushActivatedCardImplementationActionsForTiming(

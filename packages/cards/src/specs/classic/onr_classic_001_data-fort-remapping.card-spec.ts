@@ -103,15 +103,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_001_data-fort-remapping.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_001_data-fort-remapping.",
       },
     ],
     capabilities: [],

@@ -17,25 +17,34 @@ export type CardSpecCardImplementation = {
   CardMechanicalDefinition,
   | "abilities"
   | "accessEffects"
+  | "accessHooks"
   | "agendaAccessReplacement"
   | "advanceable"
+  | "corpTrashInstalledRunnerSource"
   | "corpUtility"
   | "corpRootRezCreditOutcome"
   | "damagePreventionSources"
   | "flatlineReplacementSources"
+  | "fortCapacityModifiers"
   | "fortRunWindows"
   | "hardwareDeck"
+  | "hiddenReplacementLongtail"
   | "hostedProgramCapacity"
+  | "hostedProgramModifiers"
   | "iceEncounter"
   | "icebreakerAbilities"
   | "icebreakerEncounterStrengthBonus"
   | "icebreakerSubtypeChange"
+  | "installAdditionalCosts"
   | "installCapabilities"
   | "installTargetBinding"
+  | "leavePlayCleanup"
   | "lifecycle"
   | "modifiers"
   | "relativeIce"
+  | "remainingReplacementLongtail"
   | "restrictedHostedCreditSource"
+  | "runEncounterInterventions"
   | "runnerCounterEffects"
   | "runnerEventLongtail"
   | "runnerEventTargetedEffect"
@@ -152,6 +161,7 @@ export function projectCardSpecImplementation(
     schemaVersion: _schemaVersion,
     characteristics: _characteristics,
     printedSubroutines: _printedSubroutines,
+    regionBaseline: _regionBaseline,
     ...families
   } = engineView.engine;
   assertCardSpecImplementationFamilies(families);
@@ -170,28 +180,37 @@ export function projectCardSpecImplementation(
   }) as CardSpecCardImplementation;
 }
 
-const CARD_SPEC_IMPLEMENTATION_FAMILIES = new Set([
+const CARD_SPEC_IMPLEMENTATION_FAMILY_LIST = [
   "abilities",
   "accessEffects",
+  "accessHooks",
   "agendaAccessReplacement",
   "advanceable",
+  "corpTrashInstalledRunnerSource",
   "corpUtility",
   "corpRootRezCreditOutcome",
   "damagePreventionSources",
   "flatlineReplacementSources",
+  "fortCapacityModifiers",
   "fortRunWindows",
   "hardwareDeck",
+  "hiddenReplacementLongtail",
   "hostedProgramCapacity",
+  "hostedProgramModifiers",
   "iceEncounter",
   "icebreakerAbilities",
   "icebreakerEncounterStrengthBonus",
   "icebreakerSubtypeChange",
+  "installAdditionalCosts",
   "installCapabilities",
   "installTargetBinding",
+  "leavePlayCleanup",
   "lifecycle",
   "modifiers",
   "relativeIce",
+  "remainingReplacementLongtail",
   "restrictedHostedCreditSource",
+  "runEncounterInterventions",
   "runnerCounterEffects",
   "runnerEventLongtail",
   "runnerEventTargetedEffect",
@@ -208,7 +227,11 @@ const CARD_SPEC_IMPLEMENTATION_FAMILIES = new Set([
   "uniqueDirectLongtail",
   "variableRez",
   "virusCounter",
-]);
+] as const satisfies readonly (keyof CardSpecCardImplementationFamilies)[];
+
+const CARD_SPEC_IMPLEMENTATION_FAMILIES = new Set<string>(
+  CARD_SPEC_IMPLEMENTATION_FAMILY_LIST,
+);
 
 function assertCardSpecImplementationFamilies(
   families: Record<string, unknown>,
@@ -226,6 +249,7 @@ export function hasCardSpecImplementation(
       family !== "schemaVersion" &&
       family !== "characteristics" &&
       family !== "printedSubroutines" &&
+      family !== "regionBaseline" &&
       value !== undefined &&
       (!Array.isArray(value) || value.length > 0),
   );
@@ -239,15 +263,28 @@ export const projectCs06CardImplementation = projectCardSpecImplementation;
 function projectPrintedSubroutines(
   engine: DeepReadonly<CardMechanicalSpec>,
 ): SubroutineDefinition[] {
+  assertDynamicDamageSubroutineBinding(engine);
   return (engine.printedSubroutines ?? []).map((subroutine) => {
-    if (subroutine.kind === "damage")
+    if (subroutine.kind === "damage") {
+      const amount =
+        typeof subroutine.amount === "number"
+          ? { amount: subroutine.amount }
+          : {
+              derivedAmount: {
+                kind: "relative_ice_dynamic_damage" as const,
+                ownerCapabilityKey: String(
+                  subroutine.amount.ownerCapabilityKey,
+                ),
+              },
+            };
       return {
         id: subroutine.capabilityKey,
         type: "do_damage",
         damageType:
           subroutine.damageType === "brain" ? "core" : subroutine.damageType,
-        amount: subroutine.amount,
+        ...amount,
       } satisfies SubroutineDefinition;
+    }
     if (subroutine.kind === "end_the_run")
       return {
         id: subroutine.capabilityKey,
@@ -278,18 +315,130 @@ function projectPrintedSubroutines(
     if (subroutine.kind === "run_duration_ice_strength") {
       const cancelPayment = subroutine.runnerMayCancelOnPassingSource?.amount;
       if (
-        typeof cancelPayment !== "number" ||
-        !Number.isInteger(cancelPayment) ||
-        cancelPayment <= 0
+        cancelPayment !== undefined &&
+        (!Number.isInteger(cancelPayment) || cancelPayment <= 0)
       )
         throw new Error("card_spec_invalid_run_strength_cancel_payment");
       return {
         id: subroutine.capabilityKey,
         type: "set_run_future_strength_bonus",
-        amount: subroutine.amount,
-        runFutureStrengthCancelPaymentAmount: cancelPayment,
+        amount: requirePositiveSubroutineAmount(
+          subroutine.amount,
+          subroutine.kind,
+        ),
+        ...(cancelPayment === undefined
+          ? {}
+          : { runFutureStrengthCancelPaymentAmount: cancelPayment }),
       } satisfies SubroutineDefinition;
     }
+    if (subroutine.kind === "prohibit_break_and_jack_out_next_ice")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_next_encounter_lock",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "run_duration_additional_subroutine") {
+      if (
+        subroutine.append !== "after_existing" ||
+        subroutine.subroutine.kind !== "end_the_run"
+      )
+        throw new Error("card_spec_invalid_run_duration_additional_subroutine");
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_run_future_end_the_run_subroutine",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    }
+    if (subroutine.kind === "run_duration_break_subroutine_cost")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_run_break_subroutine_cost_modifier",
+        amount: requirePositiveSubroutineAmount(
+          subroutine.amount,
+          subroutine.kind,
+        ),
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "run_duration_cannot_jack_out")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_run_jack_out_lock",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "run_duration_encounter_cost_or_end_run")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_run_encounter_tax",
+        amount: requirePositiveSubroutineAmount(
+          subroutine.amount,
+          subroutine.kind,
+        ),
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "run_duration_jack_out_cost")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_run_jack_out_additional_cost",
+        amount: requirePositiveSubroutineAmount(
+          subroutine.amount,
+          subroutine.kind,
+        ),
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (
+      subroutine.kind ===
+      "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out"
+    )
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_run_pass_rezzed_ice_program_trash",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (
+      subroutine.kind ===
+      "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
+    ) {
+      if (subroutine.allowedAmounts.join(",") !== "0,1,2")
+        throw new Error("card_spec_invalid_secret_spend_allowed_amounts");
+      return {
+        id: subroutine.capabilityKey,
+        type: "secret_spend_compare_end_run_unless_corp_spent_at_least_runner",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    }
+    if (subroutine.kind === "random_resume_from_rezzed_ice_back_or_jack_out")
+      return {
+        id: subroutine.capabilityKey,
+        type: "rewind_run_to_rezzed_ice_by_die",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "next_encounter_unless_fully_break_damage")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_next_encounter_unless_fully_break_damage",
+        damageType: subroutine.damageType,
+        amount: requirePositiveSubroutineAmount(
+          subroutine.amount,
+          subroutine.kind,
+        ),
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "runner_run_lock_actions")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_runner_run_lock_actions",
+        amount: requirePositiveSubroutineAmount(
+          subroutine.amount,
+          subroutine.kind,
+        ),
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    if (subroutine.kind === "runner_forgoes_next_action")
+      return {
+        id: subroutine.capabilityKey,
+        type: "set_runner_forgo_next_action",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
     if (subroutine.kind === "prohibit_break_next_ice")
       return {
         id: subroutine.capabilityKey,
@@ -326,7 +475,7 @@ function projectPrintedSubroutines(
       return {
         id: subroutine.capabilityKey,
         type: "initiate_trace",
-        baseTraceStrength: subroutine.baseTraceStrength,
+        traceLimit: subroutine.traceLimit,
         traceSuccessEffect: projectTraceSuccessEffect(subroutine.onSuccess),
         ...(subroutine.breakTags === undefined
           ? {}
@@ -343,9 +492,66 @@ function projectPrintedSubroutines(
         amount: subroutine.amount,
       } satisfies SubroutineDefinition;
     throw new Error(
-      `card_spec_unsupported_printed_subroutine:${subroutine.kind}`,
+      `card_spec_unsupported_printed_subroutine:${(subroutine as { kind: string }).kind}`,
     );
   });
+}
+
+function assertDynamicDamageSubroutineBinding(
+  engine: DeepReadonly<CardMechanicalSpec>,
+): void {
+  const binding = engine.relativeIce?.dynamicDamageSubroutine;
+  const printed = engine.printedSubroutines ?? [];
+  const derivedDamage = printed.filter(
+    (subroutine) =>
+      subroutine.kind === "damage" && typeof subroutine.amount !== "number",
+  );
+  if (binding === undefined) {
+    if (derivedDamage.length > 0)
+      throw new Error("card_spec_orphan_derived_damage_subroutine");
+    return;
+  }
+  if (
+    !Number.isInteger(binding.amountPerCount) ||
+    binding.amountPerCount <= 0 ||
+    binding.visibility !== "public"
+  )
+    throw new Error("card_spec_invalid_dynamic_damage_binding");
+  const targets = printed.filter(
+    (subroutine) =>
+      subroutine.capabilityKey === binding.subroutineCapabilityKey,
+  );
+  if (targets.length === 0)
+    throw new Error("card_spec_dynamic_damage_target_missing");
+  if (targets.length > 1)
+    throw new Error("card_spec_dynamic_damage_target_duplicate");
+  const target = targets[0];
+  if (
+    target?.kind !== "damage" ||
+    typeof target.amount === "number" ||
+    target.amount.kind !== "derived" ||
+    target.amount.source !== "relative_ice_dynamic_damage" ||
+    target.amount.ownerCapabilityKey !== engine.relativeIce?.capabilityKey
+  )
+    throw new Error("card_spec_dynamic_damage_target_mismatch");
+  if (
+    derivedDamage.length !== 1 ||
+    derivedDamage[0]?.capabilityKey !== binding.subroutineCapabilityKey
+  )
+    throw new Error("card_spec_dynamic_damage_binding_duplicate");
+}
+
+function requirePositiveSubroutineAmount(value: number, kind: string): number {
+  if (!Number.isInteger(value) || value <= 0)
+    throw new Error(`card_spec_invalid_printed_subroutine_amount:${kind}`);
+  return value;
+}
+
+function projectBreakTags(
+  breakTags: readonly string[] | undefined,
+): Pick<SubroutineDefinition, "breakTags"> {
+  if (breakTags === undefined || breakTags.length === 0) return {};
+  return { breakTags: [...breakTags] };
 }
 
 function projectTraceSuccessEffect(
@@ -354,6 +560,45 @@ function projectTraceSuccessEffect(
     { kind: "trace" }
   >["onSuccess"],
 ): NonNullable<SubroutineDefinition["traceSuccessEffect"]> {
+  const tagEffects = effects.filter((effect) => effect.kind === "add_tags");
+  const counterEffects = effects.filter(
+    (effect) => effect.kind === "add_counter",
+  );
+  const marginTagEffects = effects.filter(
+    (effect) => effect.kind === "add_tags_by_trace_margin_over_runner_link",
+  );
+  const preventableDamageEffects = effects.filter(
+    (effect) => effect.kind === "preventable_damage",
+  );
+  const endRunEffects = effects.filter((effect) => effect.kind === "end_run");
+  const runLockEffects = effects.filter(
+    (effect) => effect.kind === "runner_run_lock_until_action_paid",
+  );
+  const trashProgramEffects = effects.filter(
+    (effect) => effect.kind === "trash_program",
+  );
+  const trashHardwareEffects = effects.filter(
+    (effect) => effect.kind === "trash_hardware",
+  );
+  const unpreventableMeatEffects = effects.filter(
+    (effect) => effect.kind === "unpreventable_meat_damage",
+  );
+  if (
+    tagEffects.length === 1 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
+    endRunEffects.length === 0 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
+  ) {
+    const amount = tagEffects[0]?.amount ?? 0;
+    if (!Number.isInteger(amount) || amount <= 0)
+      throw new Error("card_spec_invalid_trace_tag_effect");
+    return { type: "add_tag", amount };
+  }
   if (effects.length === 1 && effects[0]?.kind === "add_counter") {
     const effect = effects[0];
     if (
@@ -380,11 +625,56 @@ function projectTraceSuccessEffect(
       throw new Error("card_spec_invalid_trace_damage_effect");
     return { type: "net_damage", amount: effect.amount };
   }
-  if (effects.length === 2) {
-    const endRun = effects.find((effect) => effect.kind === "end_run");
-    const runLock = effects.find(
-      (effect) => effect.kind === "runner_run_lock_until_action_paid",
-    );
+  if (
+    tagEffects.length === 1 &&
+    counterEffects.length === 1 &&
+    marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
+    endRunEffects.length === 0 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
+  ) {
+    const tagAmount = tagEffects[0]?.amount ?? 0;
+    const counterAmount = counterEffects[0]?.amount ?? 0;
+    if (!Number.isInteger(tagAmount) || tagAmount <= 0)
+      throw new Error("card_spec_invalid_trace_tag_effect");
+    if (!Number.isInteger(counterAmount) || counterAmount <= 0)
+      throw new Error("card_spec_invalid_trace_counter_effect");
+    return {
+      type: "add_tag_and_counter",
+      tagAmount,
+      counterType: counterEffects[0]!.counterType,
+      amount: counterAmount,
+    };
+  }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 1 &&
+    preventableDamageEffects.length === 0 &&
+    endRunEffects.length === 0 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0 &&
+    effects.length === 0
+  )
+    return { type: "add_tags_by_trace_margin_over_runner_link" };
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
+    endRunEffects.length === 1 &&
+    runLockEffects.length === 1 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
+  ) {
+    const endRun = endRunEffects[0];
+    const runLock = runLockEffects[0];
     if (
       endRun?.visibility !== "public" ||
       runLock?.kind !== "runner_run_lock_until_action_paid" ||
@@ -395,6 +685,55 @@ function projectTraceSuccessEffect(
       throw new Error("card_spec_invalid_trace_run_lock_effect");
     return { type: "end_run_and_run_lock", amount: runLock.amount };
   }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
+    endRunEffects.length === 1 &&
+    runLockEffects.length === 1 &&
+    trashProgramEffects.length === 1 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
+  ) {
+    const amount = runLockEffects[0]?.amount ?? 0;
+    if (!Number.isInteger(amount) || amount <= 0)
+      throw new Error("card_spec_invalid_trace_run_lock_effect");
+    return { type: "end_run_trash_program_and_run_lock", amount };
+  }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
+    endRunEffects.length === 1 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 1 &&
+    unpreventableMeatEffects.length === 1
+  ) {
+    const amount = unpreventableMeatEffects[0]?.amount ?? 0;
+    if (!Number.isInteger(amount) || amount <= 0)
+      throw new Error(
+        "card_spec_invalid_trace_unpreventable_meat_damage_effect",
+      );
+    return {
+      type: "end_run_trash_hardware_and_unpreventable_meat_damage",
+      amount,
+    };
+  }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    marginTagEffects.length === 0 &&
+    preventableDamageEffects.length === 0 &&
+    endRunEffects.length === 0 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
+  )
+    return { type: "none" };
   throw new Error("card_spec_unsupported_trace_success_effect");
 }
 

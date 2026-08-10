@@ -86,13 +86,13 @@ export function executeOnPlayCardImplementationAbility(
           damageType,
           amount,
         ),
-      startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
+      startTrace: (sourceCardId, traceLimit, successEffect) => ({
         ...deps.startTrace(
           state,
           legalAction,
           sourceCardId,
           definition.id,
-          baseTraceStrength,
+          traceLimit,
           successEffect,
         ),
       }),

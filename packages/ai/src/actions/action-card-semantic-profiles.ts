@@ -93,6 +93,13 @@ function actionCardSemanticProfileFromHint(
     ...(extendedHint.actionCapacityProfiles?.length
       ? { actionCapacityProfiles: extendedHint.actionCapacityProfiles }
       : {}),
+    ...(hint.actionPlanOwnerBindings?.length
+      ? {
+          actionPlanOwnerBindings: hint.actionPlanOwnerBindings.map(
+            (binding) => ({ ...binding }),
+          ),
+        }
+      : {}),
     ...(abilitySemantics.length > 0 ? { abilitySemantics } : {}),
   };
 }

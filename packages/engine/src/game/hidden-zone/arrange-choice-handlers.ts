@@ -38,11 +38,6 @@ export type HiddenZoneArrangeChoiceHandlerHost = {
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;
-  constants: {
-    corpRdTop5ReorderOperationCardId: CardDefinitionId;
-    runnerStackArrangeSourceId: CardDefinitionId;
-    corpRdTopArrangeSourceId: CardDefinitionId;
-  };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     hiddenReplacementLongtailKind: (definitionId: CardDefinitionId) => string | undefined;
@@ -452,8 +447,7 @@ function resolveRunnerStackArrangeChoice(
       | undefined;
     if (
       !sourceCardId ||
-      !host.state.runner.rig.resources.includes(sourceCardId) ||
-      host.cards.definitionFor(sourceCardId).id !== host.constants.runnerStackArrangeSourceId
+      !host.state.runner.rig.resources.includes(sourceCardId)
     ) {
       throw new Error("Die Stack-Reorder-Quelle ist nicht mehr installiert.");
     }
@@ -552,8 +546,7 @@ function resolveCorpRdArrangeChoice(
     throw new Error("Es ist keine R&D-Arrange-Choice offen.");
   const [, sourceIceId, subroutineIndexRaw] = choice.source.split(":");
   if (
-    !sourceIceId ||
-    host.cards.definitionFor(sourceIceId).id !== host.constants.corpRdTopArrangeSourceId
+    !sourceIceId
   )
     throw new Error("Die R&D-Arrange-Choice gehoert nicht zu Secret Spend Compare.");
   const subroutineIndex = Number(subroutineIndexRaw);
@@ -822,11 +815,7 @@ function isCorpRdTopReorderSource(
   host: HiddenZoneArrangeChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): boolean {
-  return (
-    host.cards.definitionFor(sourceCardId).id ===
-      host.constants.corpRdTop5ReorderOperationCardId ||
-    host.cards.hasCorpUtilityKind(sourceCardId, "corp_rd_top_reorder")
-  );
+  return host.cards.hasCorpUtilityKind(sourceCardId, "corp_rd_top_reorder");
 }
 
 function selectedChoiceCardIds(

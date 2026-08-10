@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS09 abgeschlossen, CS10 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS10 abgeschlossen, CS11 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -405,7 +405,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS07  | Testset-Migration und Migrationsautomatisierung        | completed |
 | CS08  | Classic-Migration                                      | completed |
 | CS09  | Proteus-Migration                                      | completed |
-| CS10  | Originalset-v1-Migration                               | pending   |
+| CS10  | Originalset-v1-Migration                               | completed |
 | CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | pending   |
 | CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | pending   |
 | CS13  | Gesamtevidence, aktuelle Dokumentation und Integration | pending   |
@@ -1371,6 +1371,45 @@ Done-Gate:
 Commit:
 
 `feat(cards): migrate original set to canonical specifications`
+
+Ergebnis:
+
+- Alle 374 Originalset-v1-Karten liegen als kanonische CardSpecs vor. 367
+  wurden aus dem gepinnten Vor-CS10-Stand migriert, sieben bereits bestehende
+  Specs blieben erhalten. 373 Karten besitzen eine CardImplementation; Tycho
+  Extension bleibt bewusst definition-only. Die 406 migrierten und neun
+  bereits bestehenden adressierbaren Mechanikknoten ergeben 415 stabile,
+  kartenlokale Capability-Bindungen.
+- Die 367 Raw-Karten, 367 Supporteinträge, 367 Legacy-Hints, 366 alten
+  Implementationmodule, 32 nummerierten Subregistries sowie der geschlossene
+  Originalset-Definitionsblock in Shared sind aus den produktiven Quellen
+  entfernt. Runtime-Kompatibilitätsdatei und karten-ID-gesteuerte
+  Regelentscheidungen sind ebenfalls entfallen; Coverage verweist nur noch
+  auf CardSpec-Quellen.
+- Der gepinnte Originalset-Adapter inventarisiert 37 Mechanikfamilien und
+  bindet 406/406 adressierbare Altquellknoten explizit. Classic-, Proteus- und
+  Originalset-Adapterchecks sind grün. Der Importindex umfasst alle 620
+  kanonischen Specs, das aktive erzeugte KI-Readmodel exakt 618 Karten bei
+  null Legacy-Hints.
+- Die bei der Migration geprüften Regelabweichungen wurden an den
+  verursachenden generischen Verträgen geschlossen: unter anderem
+  dynamische Subroutinen über Capability-Keys, `Trace N` als maximales Gebot
+  mit Startwert null, partielle Damage-Replacements, echte Zielwahl bei
+  Programmtrash sowie capabilitygebundene PlanOwner. Unknown- und
+  Longtail-Fälle bleiben explizit und fail-closed; es existiert kein
+  Altquellen- oder ID-Fallback.
+- Die 352 Decision Checkpoints sind auf dem kanonischen Stand ohne Drift:
+  324 reine StateHash-Aktualisierungen, eine kanonische Bindung und 27
+  fachlich geprüfte Erwartungsreconciliationen. Der vollständige
+  AI-Checkpointlauf umfasst 89 Dateien und 484 grüne Tests.
+- Cards-, Deck-, Shared-, Catalog-, Engine- und AI-Typechecks sowie
+  Importindex-, Hint-, Boundary-, Source-Structure-, Replay-, StateHash-,
+  Hidden-Info-, Authority-, Vollständigkeits- und Abstraktionsprüfungen sind
+  grün. Die Architekturzielprüfung meldet null aktive Karten-ID-Entscheidungen
+  und ausschließlich drei bereits vor CS10 vorhandene generische
+  `Record<string, unknown>`-Dependency-Bags; sie sind kein
+  Originalset-Autoritäts- oder Fallbackpfad und bleiben als explizite
+  Architekturschuld sichtbar.
 
 ### CS11 – Consumer-, Altquellen-, Printing- und Asset-Cleanup
 

@@ -406,7 +406,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
 
     state = playCorpOperationByDefinition(state, "onr_proteus_050_manhunt");
     expect(state.trace).toMatchObject({
-      baseTraceStrength: 6,
+      traceLimit: 6,
       successEffect: { type: "add_tags_by_trace_margin_over_runner_link" },
     });
     state = resolveTraceWithZeroBids(state);
@@ -484,7 +484,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       (action) => action.actionId === legal[0]?.actionId,
     );
     expect(state.trace).toMatchObject({
-      baseTraceStrength: 4,
+      traceLimit: 4,
       successEffect: {
         type: "trash_runner_resource_and_add_tag",
         targetCardInstanceId: resourceId,
@@ -559,7 +559,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       (action) => action.actionId === legal[0]?.actionId,
     );
     expect(state.trace).toMatchObject({
-      baseTraceStrength: 4,
+      traceLimit: 4,
       successEffect: {
         type: "trash_runner_resource_and_add_tag",
         targetCardInstanceId: hiddenResourceId,
@@ -1273,6 +1273,62 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       selectedSubtype: "wall",
       selectedSubtypeLabel: "Wall",
     });
+  });
+
+  it("preserves Black Widow's chosen ICE through a program-trash installation choice", () => {
+    let state = runnerMain("proteus-pro009-black-widow-trash-install-target");
+    const targetIceId = putCorpIceOnServer(state, "rd", "onr_v1_245_fire-wall");
+    const installedProgramIds = [
+      addInstalledRunnerProgramForTest(state, "simple_decoder", "trash_a"),
+      addInstalledRunnerProgramForTest(state, "simple_fracter", "trash_b"),
+      addInstalledRunnerProgramForTest(state, "simple_killer", "trash_c"),
+      addInstalledRunnerProgramForTest(state, "simple_decoder", "trash_d"),
+    ];
+    state.runner.memoryUsed = 4;
+    expect(state.runner.memoryUsed).toBe(4);
+    const sourceCardId = addRunnerCardToGripForTest(
+      state,
+      "onr_proteus_080_black-widow",
+      "black_widow_trash_install_target",
+    );
+    const initial = structuredClone(state);
+    const installAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === sourceCardId &&
+        action.payload?.runnerProgramTrashBeforeInstall === true &&
+        action.payload?.selectedCardId === targetIceId,
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === installAction.actionId,
+    );
+    expect(state.pendingChoice?.continuation).toMatchObject({
+      family: "runner_program_trash_before_install",
+      originActionId: installAction.actionId,
+      sourceCardInstanceId: sourceCardId,
+      selectedCardId: targetIceId,
+    });
+    const trashOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === installedProgramIds[0],
+    )?.id;
+    if (!trashOptionId) throw new Error("Missing program-trash option.");
+    state = applyChoice(state, "runner", trashOptionId);
+
+    expect(state.runner.heap).toContain(installedProgramIds[0]);
+    expect(state.runner.rig.programs).toContain(sourceCardId);
+    expect(state.cardInstances[sourceCardId]?.selectedCardId).toBe(targetIceId);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
   it("revalidates chosen breaker types and Black Widow selected ICE strength", () => {

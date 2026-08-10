@@ -35,6 +35,9 @@ export type RunnerSpecialTriggerExecutionHost = {
       definition: CardDefinition,
     ) => boolean;
     shouldLoadLegacyRecurringCredits: (definition: CardDefinition) => boolean;
+    hiddenReplacementLongtailKindForDefinition: (
+      definition: CardDefinition,
+    ) => string | undefined;
     publicTitle: (definitionId: CardDefinitionId) => string;
   };
   credits: {
@@ -95,13 +98,6 @@ export type RunnerSpecialTriggerExecutionHost = {
       effects?: ResolvedGameEffect[],
     ) => void;
   };
-  constants: {
-    BUTCHER_BOY_ID: string;
-    JUNKYARD_BBS_ID: string;
-    SELF_MODIFYING_CODE_ID: string;
-    SHELL_TRADERS_ID: string;
-    SKIVVISS_ID: string;
-  };
 };
 
 export type RunnerSpecialTriggerExecutionResult = {
@@ -115,17 +111,6 @@ export function handleRunnerSpecialTriggerExecution(
 ): RunnerSpecialTriggerExecutionResult {
   if (legalAction.type !== "trigger_ability") return { handled: false };
 
-  if (
-    legalAction.payload?.v1911HiddenZoneAbility ===
-    "hidden_stack_program_install"
-  ) {
-    resolveHiddenStackProgramInstallAbility(host, legalAction);
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.resourceAbility === "return_top_heap_card") {
-    resolveTopHeapCardReturnAbility(host, legalAction);
-    return handled(legalAction);
-  }
   if (legalAction.payload?.delayedInstallAbility === "set_aside_from_grip") {
     resolveDelayedInstallSetAside(host, legalAction);
     return handled(legalAction);
@@ -149,6 +134,27 @@ export function delayedInstallCounterCost(definition: CardDefinition): number {
   if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0)
     throw new Error("Shell-Traders-Installationskosten sind ungueltig.");
   return value;
+}
+
+function isShellTradersSource(
+  host: RunnerSpecialTriggerExecutionHost,
+  sourceCardId: CardInstanceId,
+): boolean {
+  return (
+    host.cards.hiddenReplacementLongtailKindForDefinition(
+      host.cards.definitionFor(host.state, sourceCardId),
+    ) === "delayed_install_with_counter_countdown"
+  );
+}
+
+function shellTradersDefinitionId(
+  host: RunnerSpecialTriggerExecutionHost,
+  sourceCardId: CardInstanceId,
+): CardDefinitionId {
+  const definition = host.cards.definitionFor(host.state, sourceCardId);
+  if (!isShellTradersSource(host, sourceCardId))
+    throw new Error("Die verzögerte Installationsfähigkeit passt nicht zur Karte.");
+  return definition.id;
 }
 
 export function delayedInstallPrepareTargetIds(
@@ -217,8 +223,7 @@ export function applyDelayedInstallStartOfTurn(
     []);
   for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
     if (
-      host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.SHELL_TRADERS_ID
+      !isShellTradersSource(host, sourceCardId)
     )
       continue;
     if (resolvedSourceIds.includes(sourceCardId)) continue;
@@ -268,8 +273,7 @@ export function resolveDelayedInstallStartTurnChoice(
   if (
     !sourceCardId ||
     !state.runner.rig.resources.includes(sourceCardId) ||
-    host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.SHELL_TRADERS_ID
+    !isShellTradersSource(host, sourceCardId)
   )
     throw new Error("The Shell Traders ist nicht mehr installiert.");
 
@@ -317,7 +321,7 @@ export function resolveDelayedInstallStartTurnChoice(
     delayedInstallAbility: "start_turn_remove_shell_counter",
     abilityFamily: "hosting-counters",
     effectKind: "counter_change",
-    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
     targetCardId,
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
@@ -354,8 +358,7 @@ export function resolveDelayedInstallMemoryChoice(
   if (
     !sourceCardId ||
     !state.runner.rig.resources.includes(sourceCardId) ||
-    host.cards.definitionFor(state, sourceCardId).id !==
-      host.constants.SHELL_TRADERS_ID
+    !isShellTradersSource(host, sourceCardId)
   )
     throw new Error("The Shell Traders ist nicht mehr installiert.");
   if (!targetCardId) throw new Error("Die Shell-Traders-Zielkarte fehlt.");
@@ -428,7 +431,7 @@ export function resolveDelayedInstallMemoryChoice(
     abilityFamily: "hosting-counters",
     abilityId: "resolve_delayed_install_memory",
     effectKind: "counter_change",
-    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
     targetCardId,
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
@@ -453,7 +456,7 @@ function startDelayedInstallStartTurnChoice(
     side: "runner",
     source: `runner_start.delayed_install:${sourceCardId}:${nextStateVersion}`,
     prompt: `${host.cards.publicTitle(
-      host.constants.SHELL_TRADERS_ID as CardDefinitionId,
+      shellTradersDefinitionId(host, sourceCardId),
     )}: Wähle eine Karte, von der 1 Shell-Counter entfernt wird.`,
     kind: "select_cards",
     options: targetCardIds.map((cardId) => {
@@ -494,69 +497,12 @@ function delayedInstallStartTurnCounterEffect(
     counterType: "shell",
     removedCounterAmount: 1,
     remainingCounters: result.remainingCounters,
-    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
     sourceTitle: host.cards.publicTitle(
-      host.constants.SHELL_TRADERS_ID as CardDefinitionId,
+      shellTradersDefinitionId(host, sourceCardId),
     ),
     cardDefinitionId: targetDefinition.id,
     cardTitle: host.cards.publicTitle(targetDefinition.id),
-  };
-}
-
-function resolveTopHeapCardReturnAbility(
-  host: RunnerSpecialTriggerExecutionHost,
-  legalAction: LegalAction,
-): void {
-  const { state } = host;
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Junkyard BBS nutzen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!state.runner.rig.resources.includes(sourceCardId))
-    throw new Error("Junkyard BBS ist nicht installiert.");
-  if (
-    host.cards.definitionFor(state, sourceCardId).id !==
-    host.constants.JUNKYARD_BBS_ID
-  )
-    throw new Error("Die Junkyard-BBS-Faehigkeit passt nicht zur Karte.");
-  if (
-    clickCostForAction(legalAction) !== 1 ||
-    creditCostForAction(legalAction) !== 1
-  )
-    throw new Error("Junkyard BBS verlangt genau 1 Klick und 1 Credit.");
-
-  const targetCardId = String(legalAction.payload?.targetCardId ?? "");
-  const currentTopCardId = topRunnerHeapCardId(state);
-  if (!targetCardId || !currentTopCardId || targetCardId !== currentTopCardId)
-    throw new Error("Die Zielkarte ist nicht die oberste Karte im Heap.");
-  if (!state.runner.heap.includes(targetCardId))
-    throw new Error("Die Junkyard-BBS-Zielkarte liegt nicht im Heap.");
-  const targetDefinition = host.cards.definitionFor(state, targetCardId);
-  if (
-    typeof legalAction.payload?.targetCardDefinitionId === "string" &&
-    legalAction.payload.targetCardDefinitionId !== targetDefinition.id
-  )
-    throw new Error("Die Junkyard-BBS-Zielkarte hat sich geaendert.");
-
-  host.actions.spendClick(state, "runner");
-  host.credits.spend(state, "runner", 1);
-  state.runner.heap = state.runner.heap.filter((id) => id !== targetCardId);
-  state.runner.grip.unshift(targetCardId);
-  state.cardInstances[targetCardId] = {
-    ...host.cards.mustInstance(state.cardInstances, targetCardId),
-    zone: { side: "runner", zone: "grip" },
-    faceup: true,
-    rezzed: true,
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: host.constants.JUNKYARD_BBS_ID,
-    targetCardDefinitionId: targetDefinition.id,
-    returnedCardDefinitionId: targetDefinition.id,
-    returnedCount: 1,
-    sourceZone: "heap",
-    destinationZone: "grip",
-    returnedToGrip: true,
-    runnerCreditsAfter: state.runner.credits,
   };
 }
 
@@ -578,8 +524,7 @@ function resolveDelayedInstallSetAside(
   if (!state.runner.rig.resources.includes(sourceCardId))
     throw new Error("The Shell Traders ist nicht installiert.");
   if (
-    host.cards.definitionFor(state, sourceCardId).id !==
-    host.constants.SHELL_TRADERS_ID
+    !isShellTradersSource(host, sourceCardId)
   )
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
@@ -627,7 +572,7 @@ function resolveDelayedInstallSetAside(
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "delayed_install_set_aside",
-    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
     addedCounterAmount: shellCounterAmount,
@@ -656,8 +601,7 @@ function resolveDelayedInstallRemoveCounter(
   if (!state.runner.rig.resources.includes(sourceCardId))
     throw new Error("The Shell Traders ist nicht installiert.");
   if (
-    host.cards.definitionFor(state, sourceCardId).id !==
-    host.constants.SHELL_TRADERS_ID
+    !isShellTradersSource(host, sourceCardId)
   )
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
@@ -678,7 +622,7 @@ function resolveDelayedInstallRemoveCounter(
   });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: host.constants.SHELL_TRADERS_ID,
+    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
     removeCounterAmount: result.memoryChoiceOpened ? 0 : 1,
@@ -922,47 +866,6 @@ function delayedInstallCanResolveFinalCounter(
       reclaimableMemory <=
     host.runner.runnerMemoryLimit(host.state)
   );
-}
-
-function resolveHiddenStackProgramInstallAbility(
-  host: RunnerSpecialTriggerExecutionHost,
-  legalAction: LegalAction,
-): void {
-  const { state } = host;
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Self-Modifying Code nutzen.");
-  if (state.timingPoint !== "run.encounter_ice" || !state.run?.encounteredIceId)
-    throw new Error(
-      "Self-Modifying Code ist nur während eines ICE-Encounters legal.",
-    );
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!state.runner.rig.programs.includes(sourceCardId))
-    throw new Error("Self-Modifying Code ist nicht installiert.");
-  if (
-    host.cards.definitionFor(state, sourceCardId).id !==
-    host.constants.SELF_MODIFYING_CODE_ID
-  )
-    throw new Error("Die Self-Modifying-Code-Fähigkeit passt nicht zur Karte.");
-  if (
-    !state.runner.stack.some(
-      (cardId) => host.cards.definitionFor(state, cardId).type === "program",
-    )
-  )
-    throw new Error("Keine suchbare Programmkarte im Stack.");
-
-  host.zones.trashRunnerInstalledCardToHeap(state, sourceCardId);
-  host.hiddenZone.startHiddenStackProgramInstallActivation(
-    sourceCardId,
-    legalAction,
-  );
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneBarrier: true,
-    sourceDefinitionId: host.constants.SELF_MODIFYING_CODE_ID,
-    hiddenZoneAction: "hidden_stack_program_install",
-    trashOnUse: true,
-    trashedCardDefinitionId: host.constants.SELF_MODIFYING_CODE_ID,
-  };
 }
 
 function delayedInstallCanPrepareTarget(

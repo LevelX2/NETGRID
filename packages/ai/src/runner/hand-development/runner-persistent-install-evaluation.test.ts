@@ -17,6 +17,7 @@ import {
 } from "../../runner-strategic-intent";
 import { discardKeepScore } from "../../runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import {
   breakerVariantDeckCapabilities,
@@ -295,8 +296,11 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
           rigRoles: new Set(rolesByCardId.krash),
           rigDefinitionIds: new Set(["krash"]),
           gripDefinitionCounts: new Map([["krash", 1]]),
+          hasInstalledNonNoisyIcebreaker: true,
         },
         rolesForCardId: (cardId) => rolesByCardId[cardId ?? ""] ?? [],
+        effectsForCardId: (cardId) =>
+          AI_HINTS_BY_CARD.get(cardId ?? "")?.effects ?? [],
       }),
     ).toEqual(["lockjaw", "clown"]);
 
@@ -662,8 +666,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("bounds non-additive search utility signals to exact tokens", () => {
     const searchResource = visibleCard("search-resource-1", {
-      definitionId: "test-search-resource",
-      title: "Search Resource",
+      definitionId: "onr_v1_177_the-short-circuit",
+      title: "The Short Circuit",
       type: "resource",
       installCost: 0,
       rulesText: "program_search hidden_zone_tool search",
@@ -830,7 +834,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
     expect(evaluation.persistentInstallEvaluation).toMatchObject({
       capabilityDelta: "new_coverage",
-      duplicateRole: "none",
+      duplicateRole: "useful_backup",
       newFunctionalCoverage: expect.arrayContaining([
         "non_additive_utility:recovery",
       ]),
@@ -882,20 +886,20 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("keeps cumulative damage prevention useful under risky breaker pressure", () => {
     const prevention = visibleCard("prevention-2", {
-      definitionId: "test-damage-prevention",
-      title: "Net Shield",
-      type: "resource",
+      definitionId: "onr_v1_061_shield",
+      title: "Shield",
+      type: "program",
       installCost: 0,
       rulesText: "Prevent 2 net damage.",
     });
     const installedPrevention = visibleCard("prevention-installed", {
-      definitionId: "test-damage-prevention",
-      title: "Net Shield",
-      type: "resource",
+      definitionId: "onr_v1_061_shield",
+      title: "Shield",
+      type: "program",
       rulesText: "Prevent 2 net damage.",
     });
     const installedBlink = visibleCard("blink-installed", {
-      definitionId: "test-risky-universal-breaker",
+      definitionId: "onr_v1_007_blink",
       title: "Blink",
       type: "program",
       subtypes: ["icebreaker"],

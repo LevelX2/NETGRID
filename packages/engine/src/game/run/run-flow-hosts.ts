@@ -15,6 +15,7 @@ import type {
   TraceSuccessEffect,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { credits } from "../state/economy-mutation";
 import {
   addRunnerTagsWithPrevention,
@@ -216,12 +217,18 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       callbacks: {
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
-        icebreakerHasBartmossPostEncounterSelfTrashCheck: (breakerId) =>
-          host.ice.icebreakerHasSpecial(
-            state,
-            breakerId,
-            "bartmoss_post_encounter_self_trash_check",
-          ),
+        icebreakerSpecialSourceDefinitionId: (breakerId, special) => {
+          const definition = host.cards.definitionFor(state, breakerId);
+          const hasSpecial = (
+            cardImplementationForDefinitionId(definition.id)?.icebreakerAbilities ??
+            []
+          ).some(
+            (ability) =>
+              ability.kind === "break_subroutine" &&
+              ability.special?.kind === special,
+          );
+          return hasSpecial ? definition.id : undefined;
+        },
         rollDeterministicDie: (purpose) => host.rng.rollDie(state, purpose),
         trashRunnerInstalledProgram: (breakerId) =>
           host.zones.trashRunnerInstalledProgram(state, breakerId),
@@ -721,8 +728,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
       ensureRunnerTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
       finishRun: (successful) => host.callbacks.finishRun(state, successful),
-      hasInstalledRunnerApDamageReducerHardware: () =>
-        host.callbacks.hasInstalledRunnerApDamageReducerHardware(state),
       corpTraceCounterPoolTotal: () =>
         host.trace.corpTraceCounterPoolTotal(state),
       recurringTraceCreditPoolTotal: () =>

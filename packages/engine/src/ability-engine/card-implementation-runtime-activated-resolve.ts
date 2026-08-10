@@ -102,13 +102,13 @@ export function resolveActivatedCardImplementationAbility(
           damageType,
           amount,
         ),
-      startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
+      startTrace: (sourceCardId, traceLimit, successEffect) => ({
         ...deps.startTrace(
           state,
           legalAction,
           sourceCardId,
           match.definition.id,
-          baseTraceStrength,
+          traceLimit,
           successEffect,
         ),
       }),

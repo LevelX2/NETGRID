@@ -50,7 +50,9 @@ export function printedSubroutineDefinitionForImplementation(
   if (subroutine.kind === "trash_program_unless_runner_pays") {
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
-      throw new Error("Pay-or-trash-program subroutines require a positive amount.");
+      throw new Error(
+        "Pay-or-trash-program subroutines require a positive amount.",
+      );
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "trash_installed_program_unless_runner_pays",
@@ -75,7 +77,9 @@ export function printedSubroutineDefinitionForImplementation(
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
-      throw new Error("Run-duration ICE-strength subroutines require a positive amount.");
+      throw new Error(
+        "Run-duration ICE-strength subroutines require a positive amount.",
+      );
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "set_run_future_strength_bonus",
@@ -108,7 +112,9 @@ export function printedSubroutineDefinitionForImplementation(
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
-      throw new Error("Run-duration break-cost subroutines require a positive amount.");
+      throw new Error(
+        "Run-duration break-cost subroutines require a positive amount.",
+      );
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "set_run_break_subroutine_cost_modifier",
@@ -128,7 +134,9 @@ export function printedSubroutineDefinitionForImplementation(
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
-      throw new Error("Run-duration encounter-tax subroutines require a positive amount.");
+      throw new Error(
+        "Run-duration encounter-tax subroutines require a positive amount.",
+      );
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "set_run_encounter_tax",
@@ -140,7 +148,9 @@ export function printedSubroutineDefinitionForImplementation(
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
-      throw new Error("Run-duration jack-out-cost subroutines require a positive amount.");
+      throw new Error(
+        "Run-duration jack-out-cost subroutines require a positive amount.",
+      );
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "set_run_jack_out_additional_cost",
@@ -184,7 +194,9 @@ export function printedSubroutineDefinitionForImplementation(
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
-      throw new Error("Next-encounter damage subroutines require a positive amount.");
+      throw new Error(
+        "Next-encounter damage subroutines require a positive amount.",
+      );
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "set_next_encounter_unless_fully_break_damage",
@@ -233,6 +245,25 @@ export function printedSubroutineDefinitionForImplementation(
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");
+    if (typeof subroutine.amount !== "number") {
+      const capabilityKey = (subroutine as { capabilityKey?: string })
+        .capabilityKey;
+      if (
+        capabilityKey === undefined ||
+        subroutine.amount.kind !== "derived" ||
+        subroutine.amount.source !== "relative_ice_dynamic_damage"
+      )
+        throw new Error("Invalid derived printed damage subroutine binding.");
+      return {
+        id: capabilityKey,
+        type: "do_damage",
+        damageType: subroutine.damageType === "brain" ? "core" : "net",
+        derivedAmount: {
+          kind: "relative_ice_dynamic_damage",
+          ownerCapabilityKey: subroutine.amount.ownerCapabilityKey,
+        },
+      };
+    }
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
       throw new Error("Printed damage subroutines require a positive amount.");
@@ -245,12 +276,16 @@ export function printedSubroutineDefinitionForImplementation(
   }
   if (subroutine.kind === "random_damage") {
     if (subroutine.preventable !== true)
-      throw new Error("Unsupported unpreventable printed random damage subroutine.");
+      throw new Error(
+        "Unsupported unpreventable printed random damage subroutine.",
+      );
     if (subroutine.dieFaces !== 6)
       throw new Error("Printed random damage supports only six-sided dice.");
     const amount = Math.max(0, Math.floor(subroutine.amount));
     if (amount <= 0)
-      throw new Error("Printed random damage subroutines require a positive amount.");
+      throw new Error(
+        "Printed random damage subroutines require a positive amount.",
+      );
     const damageOnResults = [...new Set(subroutine.damageOnResults)]
       .map((result) => Math.floor(result))
       .filter((result) => result >= 1 && result <= subroutine.dieFaces)
@@ -268,21 +303,23 @@ export function printedSubroutineDefinitionForImplementation(
   }
   if (subroutine.kind === "trace") {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
-    const baseTraceStrength = Math.max(
+    const traceLimit = Math.max(
       0,
-      Math.floor(subroutine.baseTraceStrength),
+      Math.floor(subroutine.traceLimit),
     );
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "initiate_trace",
-      baseTraceStrength,
+      traceLimit,
       traceSuccessEffect: traceSuccessEffectForCardImplementation(
         subroutine.onSuccess,
       ),
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
-  throw new Error(`Unsupported printed subroutine: ${JSON.stringify(subroutine)}`);
+  throw new Error(
+    `Unsupported printed subroutine: ${JSON.stringify(subroutine)}`,
+  );
 }
 
 /**

@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 202,
-    "stateHash": "fnv1a:e8cb4452",
+    "stateHash": "fnv1a:12c4fe94",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-005_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -20602,8 +20602,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "start_run",
-        "targetServerId": "archives"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_139_r-and-d-interface"
       }
     ],
     "forbiddenActions": [
@@ -20612,9 +20612,11 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_archives_information"],
-      "requiredAssessmentEvidence": ["target:archives"]
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["develop_onr_v1_139_r-and-d-interface"],
+      "requiredAssessmentEvidence": [
+        "source:own_runner_hand:card_specific_purpose:access_payoff:setup"
+      ]
     }
   }
 }

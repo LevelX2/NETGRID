@@ -16,6 +16,7 @@ import type {
   AiHintStructuredEffect,
   KnownHintBreakerCoverage,
 } from "./hint-ontology";
+import { runnerEffectsProvideMultiaccess } from "./runner-canonical-hint-semantics";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
   "deck-capability-profile-v1" as const;
@@ -998,8 +999,10 @@ function buildMemoryCapabilityProfile(
 function buildRunnerAttackPlanProfile(
   records: readonly CardCapabilityRecord[],
 ): RunnerAttackPlanProfile {
-  const centralPressureToolsKnown = records.filter((record) =>
-    rolesMatch(record.roles, ["pressure_rnd", "pressure_hq", "multiaccess"]),
+  const centralPressureToolsKnown = records.filter(
+    (record) =>
+      runnerEffectsProvideMultiaccess(record.effects) ||
+      rolesMatch(record.roles, ["pressure_rnd", "pressure_hq"]),
   ).length;
   const remoteContestToolsKnown = records.filter(
     (record) =>

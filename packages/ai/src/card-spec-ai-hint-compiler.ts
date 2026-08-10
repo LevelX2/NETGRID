@@ -34,28 +34,38 @@ const CARD_SPEC_HINT_ENGINE_FIELDS = new Set([
   "corpRootRezCreditOutcome",
   "abilities",
   "accessEffects",
+  "accessHooks",
   "agendaAccessReplacement",
   "advanceable",
+  "corpTrashInstalledRunnerSource",
   "corpUtility",
   "damagePreventionSources",
   "flatlineReplacementSources",
+  "fortCapacityModifiers",
   "fortRunWindows",
   "hardwareDeck",
+  "hiddenReplacementLongtail",
   "hostedProgramCapacity",
+  "hostedProgramModifiers",
   "iceEncounter",
   "icebreakerAbilities",
   "icebreakerEncounterStrengthBonus",
   "icebreakerSubtypeChange",
   "installCapabilities",
+  "installAdditionalCosts",
   "installTargetBinding",
+  "leavePlayCleanup",
   "lifecycle",
   "modifiers",
   "printedSubroutines",
   "relativeIce",
+  "regionBaseline",
+  "remainingReplacementLongtail",
   "restrictedHostedCreditSource",
   "runnerCounterEffects",
   "runnerEventLongtail",
   "runnerEventTargetedEffect",
+  "runEncounterInterventions",
   "runnerRunStrengthBoost",
   "runnerUtilityLongtail",
   "scoredAgenda",
@@ -177,19 +187,22 @@ export function deriveCardSpecAiHint(
           ],
     ),
   );
+  const actionPlanOwnerBindings = deriveActionPlanOwnerBindings(entry);
   const targetProfiles = deriveTargetProfiles(entry);
+  const genericTypedHint = deriveGenericTypedHintOverlay(entry);
   const breakerProfile = deriveBreakerProfile(entry.planning.engine);
-  const actionCapacityProfiles = deriveActionCapacityProfiles(
-    entry.planning.engine,
-  );
+  const actionCapacityProfiles = deriveActionCapacityProfiles(entry);
   const closedMechanicalHint = deriveClosedMechanicalHintOverlay(entry);
   const effects = appendUniqueObjects(
-    deriveHintEffects(entry),
-    closedMechanicalHint.effects,
+    appendUniqueObjects(deriveHintEffects(entry), closedMechanicalHint.effects),
+    genericTypedHint.effects,
   );
   const functionSignals = appendUniqueStrings(
-    derivedFunctionSignals(entry),
-    closedMechanicalHint.functionSignals,
+    appendUniqueStrings(
+      derivedFunctionSignals(entry),
+      closedMechanicalHint.functionSignals,
+    ),
+    genericTypedHint.functionSignals,
   );
   const tacticSignals = appendUniqueStrings(
     derivedTacticSignals(entry),
@@ -197,8 +210,11 @@ export function deriveCardSpecAiHint(
   );
   const actionTacticSignals = deriveActionTacticSignals(entry, effects);
   const conditions = appendUniqueObjects(
-    deriveConditions(entry),
-    closedMechanicalHint.conditions,
+    appendUniqueObjects(
+      deriveConditions(entry),
+      closedMechanicalHint.conditions,
+    ),
+    genericTypedHint.conditions,
   );
   const costProfile = deriveCostProfile(annotations, entry);
   const riskTags = deriveRiskTags(annotations, entry);
@@ -233,7 +249,18 @@ export function deriveCardSpecAiHint(
           ) === true
         ? { actionStrategySupportPairs: strategySupportPairs }
         : {}),
-    ...(targetProfiles.length === 0 ? {} : { targetProfiles }),
+    ...(actionPlanOwnerBindings.length === 0
+      ? {}
+      : { actionPlanOwnerBindings }),
+    ...(targetProfiles.length === 0 &&
+    genericTypedHint.targetProfiles.length === 0
+      ? {}
+      : {
+          targetProfiles: appendUniqueObjects(
+            targetProfiles,
+            genericTypedHint.targetProfiles,
+          ),
+        }),
     ...(breakerProfile === undefined ? {} : { breakerProfile }),
     ...(actionCapacityProfiles.length === 0 ? {} : { actionCapacityProfiles }),
     ...(effects.length === 0 ? {} : { effects }),
@@ -266,6 +293,65 @@ export function deriveCardSpecAiHint(
   return hint;
 }
 
+function deriveActionPlanOwnerBindings(
+  entry: ReturnType<typeof cardSpecPlanningCards>[number],
+): NonNullable<AiCardHint["actionPlanOwnerBindings"]> {
+  const result: NonNullable<AiCardHint["actionPlanOwnerBindings"]> = [];
+  for (const capability of entry.planning.planningAnnotations?.capabilities ??
+    []) {
+    const annotations = capability.annotations.filter(
+      (annotation) => annotation.kind === "plan_owner",
+    );
+    if (annotations.length === 0) continue;
+    if (annotations.length !== 1)
+      throw new Error(
+        `card_spec_plan_owner_duplicate: ${capability.capabilityKey}`,
+      );
+    const ownerNodeCount = countAddressableEngineNodes(
+      entry.planning.engine,
+      capability.capabilityKey,
+    );
+    if (ownerNodeCount === 0)
+      throw new Error(
+        `card_spec_plan_owner_capability_missing: ${capability.capabilityKey}`,
+      );
+    if (ownerNodeCount !== 1)
+      throw new Error(
+        `card_spec_plan_owner_capability_duplicate: ${capability.capabilityKey}`,
+      );
+    const annotation = annotations[0]!;
+    result.push({
+      capabilityKey: capability.capabilityKey,
+      owner: annotation.owner,
+      ...(annotation.route === undefined ? {} : { route: annotation.route }),
+    });
+  }
+  return result.sort((left, right) =>
+    left.capabilityKey.localeCompare(right.capabilityKey),
+  );
+}
+
+function countAddressableEngineNodes(
+  value: unknown,
+  capabilityKey: string,
+): number {
+  if (Array.isArray(value))
+    return value.reduce(
+      (count, entry) =>
+        count + countAddressableEngineNodes(entry, capabilityKey),
+      0,
+    );
+  if (!isRecord(value)) return 0;
+  return (
+    (value.capabilityKey === capabilityKey ? 1 : 0) +
+    Object.values(value).reduce<number>(
+      (count, entry) =>
+        count + countAddressableEngineNodes(entry, capabilityKey),
+      0,
+    )
+  );
+}
+
 type ClosedMechanicalHintOverlay = {
   effects: NonNullable<AiCardHint["effects"]>;
   conditions: NonNullable<AiCardHint["conditions"]>;
@@ -274,6 +360,1268 @@ type ClosedMechanicalHintOverlay = {
   roles: string[];
   remoteRole?: NonNullable<AiCardHint["remoteRole"]>;
 };
+
+type PlanningEntry = ReturnType<typeof cardSpecPlanningCards>[number];
+type PlanningFlatlineReplacementSource = NonNullable<
+  PlanningEntry["planning"]["engine"]["flatlineReplacementSources"]
+>[number];
+type PlanningAbility = NonNullable<
+  PlanningEntry["planning"]["engine"]["abilities"]
+>[number];
+type PlanningEffect = PlanningAbility["effects"][number];
+type GenericTypedHintOverlay = Pick<
+  ClosedMechanicalHintOverlay,
+  "effects" | "conditions" | "functionSignals"
+> & {
+  targetProfiles: NonNullable<AiCardHint["targetProfiles"]>;
+};
+
+/**
+ * Projects only closed CardSpec unions. This deliberately does not consult
+ * card ids, rules text, labels, or legacy hint payloads.
+ */
+function deriveGenericTypedHintOverlay(
+  entry: PlanningEntry,
+): GenericTypedHintOverlay {
+  const overlay: GenericTypedHintOverlay = {
+    effects: [],
+    conditions: [],
+    functionSignals: [],
+    targetProfiles: [],
+  };
+  const engine = entry.planning.engine;
+
+  for (const ability of engine.abilities ?? []) {
+    appendTypedCondition(overlay.conditions, ability.condition);
+    for (const effect of ability.effects ?? []) {
+      appendGenericAbilityEffect(overlay, entry, ability, effect);
+      appendGenericTargetProfile(overlay.targetProfiles, ability, effect);
+    }
+  }
+
+  for (const subroutine of engine.printedSubroutines ?? []) {
+    if (subroutine.kind === "trace") {
+      overlay.effects.push({
+        kind: "trace",
+        scope: "trace",
+        timing: "encounter_resolution",
+        target: "trace.source",
+        finite: true,
+      });
+      overlay.functionSignals.push("corp_ice.trace_source", "trace.source");
+      overlay.conditions.push({ kind: "requires_trace_attempt" });
+      for (const success of subroutine.onSuccess)
+        appendTraceOutcome(
+          overlay,
+          success,
+          "encounter_resolution",
+          "corp_ice",
+        );
+    }
+    if (subroutine.kind === "prohibit_break_and_jack_out_next_ice") {
+      overlay.effects.push(
+        {
+          kind: "future_encounter_effect",
+          scope: "run_path",
+          timing: "encounter_resolution",
+          target: "corp_ice.next_ice_break_lock",
+          finite: true,
+        },
+        {
+          kind: "no_jack_out",
+          scope: "run_path",
+          timing: "encounter_resolution",
+          target: "corp_ice.next_ice_jack_out_lock",
+          finite: true,
+        },
+      );
+      overlay.conditions.push({ kind: "requires_remaining_ice" });
+      overlay.functionSignals.push(
+        "corp_ice.next_ice_break_lock",
+        "corp_ice.next_ice_jack_out_lock",
+      );
+    }
+    if (subroutine.kind === "runner_run_lock_actions") {
+      overlay.effects.push({
+        kind: "run_lock",
+        scope: "runner",
+        timing: "encounter_resolution",
+        resource: "actions",
+        target: "corp_ice.run_lock",
+        amount: subroutine.amount,
+        finite: true,
+      });
+      overlay.functionSignals.push("corp_ice.run_lock", "run.lock");
+    }
+  }
+
+  const virus = engine.virusCounter;
+  if (virus?.addOnSuccessfulRun !== undefined) {
+    overlay.effects.push({
+      kind: "persistent_counter_effect",
+      scope:
+        virus.addOnSuccessfulRun.target === "successful_run_server"
+          ? "server"
+          : "runner",
+      timing: "successful_run",
+      resource: "counters",
+      target: `virus.${virus.addOnSuccessfulRun.target}`,
+      amount: virus.addOnSuccessfulRun.amount,
+      repeatable: true,
+    });
+    overlay.conditions.push({ kind: "requires_successful_run" });
+    overlay.functionSignals.push(
+      "virus.counter_gain_on_successful_run",
+      "virus.corp_purgeable_counter",
+    );
+  }
+  if (virus?.centralAccessCountModifier !== undefined) {
+    overlay.effects.push({
+      kind: "multiaccess",
+      scope: virus.centralAccessCountModifier.server === "rd" ? "rnd" : "hq",
+      timing: "persistent",
+      resource: "cards",
+      target: "virus.central_access_per_counter",
+      repeatable: true,
+    });
+    overlay.functionSignals.push("virus.central_access_per_counter");
+  }
+
+  for (const modifier of engine.modifiers ?? []) {
+    if (modifier.kind !== "access_count") continue;
+    if (!Number.isInteger(modifier.amount) || modifier.amount <= 0)
+      throw new Error("card_spec_unknown_access_count_modifier_shape");
+    const server = modifier.server === "rd" ? "rnd" : modifier.server;
+    overlay.effects.push({
+      kind: "multiaccess",
+      scope: server,
+      timing: "persistent",
+      resource: "cards",
+      target: `access.${server}_multiaccess`,
+      amount: modifier.amount,
+      repeatable: true,
+    });
+    overlay.functionSignals.push(`access.${server}_multiaccess`);
+  }
+
+  const remaining = engine.remainingReplacementLongtail;
+  if (remaining?.kind === "runner_draw_tax_tag") {
+    overlay.effects.push({
+      kind: "tag_source",
+      scope: "runner",
+      timing: "persistent",
+      resource: "tags",
+      target: "runner_draw_tax_tag",
+      amount: 1,
+      repeatable: true,
+    });
+    overlay.conditions.push(
+      { kind: "requires_runner_draw" },
+      { kind: "requires_runner_pay_or_take_tag" },
+    );
+    overlay.functionSignals.push("draw.runner_tax", "tag.source");
+  }
+  if (remaining?.kind === "trace_bit_counter_pool_asset") {
+    if (
+      remaining.counterType !== "bit" ||
+      !Number.isInteger(remaining.addAfterTrace) ||
+      remaining.addAfterTrace <= 0 ||
+      !Number.isInteger(remaining.traceValueAndLimitPerBit) ||
+      remaining.traceValueAndLimitPerBit <= 0 ||
+      remaining.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_trace_counter_pool_shape");
+    overlay.effects.push(
+      {
+        kind: "persistent_counter_effect",
+        scope: "corp",
+        timing: "trace_window",
+        resource: "counters",
+        target: "trace.counter_pool_after_attempt",
+        amount: remaining.addAfterTrace,
+        repeatable: true,
+      },
+      {
+        kind: "trace_credit",
+        scope: "trace",
+        timing: "trace_window",
+        resource: "credits",
+        target: "trace.value_and_limit_per_counter",
+        amount: remaining.traceValueAndLimitPerBit,
+        repeatable: true,
+      },
+    );
+    overlay.functionSignals.push(
+      "trace.counter_pool",
+      "trace.value_support",
+      "trace.limit_support",
+    );
+  }
+
+  const hiddenReplacement = engine.hiddenReplacementLongtail;
+  if (hiddenReplacement?.kind === "delayed_install_with_counter_countdown") {
+    if (hiddenReplacement.visibility !== "hidden_info_barrier")
+      throw new Error("card_spec_unknown_delayed_install_countdown_shape");
+    overlay.effects.push({
+      kind: "install",
+      scope: "runner",
+      timing: "persistent",
+      resource: "cards",
+      target: "setup.install_countdown",
+      repeatable: true,
+    });
+    overlay.functionSignals.push(
+      "setup.delayed_install",
+      "setup.install_countdown",
+    );
+  }
+
+  const uniqueDirect = engine.uniqueDirectLongtail;
+  if (uniqueDirect?.kind === "tagged_meat_damage") {
+    if (
+      uniqueDirect.requiredRunnerTags <= 0 ||
+      uniqueDirect.damageType !== "meat" ||
+      uniqueDirect.damageAmount <= 0 ||
+      uniqueDirect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_tagged_meat_damage_shape");
+    overlay.effects.push(
+      {
+        kind: "damage",
+        scope: "runner",
+        timing: "action",
+        resource: "meat_damage",
+        target: "tagged_runner_meat_damage",
+        amount: uniqueDirect.damageAmount,
+        finite: true,
+      },
+      {
+        kind: "tag_punish_payoff",
+        scope: "runner",
+        timing: "action",
+        resource: "tags",
+        target: "tagged_runner_meat_damage",
+        amount: uniqueDirect.requiredRunnerTags,
+        finite: true,
+      },
+    );
+    overlay.conditions.push({ kind: "requires_runner_tagged" });
+    overlay.functionSignals.push("damage.payoff", "tag.payoff");
+  }
+
+  for (const source of engine.damagePreventionSources ?? []) {
+    if (source.damageTypes.length === 0)
+      throw new Error("card_spec_unknown_damage_prevention_shape");
+    overlay.effects.push({
+      kind: "damage_prevention",
+      scope: "runner",
+      timing: "prevention_window",
+      resource: "damage",
+      target: `prevent.${[...source.damageTypes].sort().join("_and_")}_damage`,
+      ...(typeof source.amount === "number" ? { amount: source.amount } : {}),
+      repeatable: source.limit?.kind === "per_turn",
+    });
+    overlay.functionSignals.push("defense.damage_prevention");
+  }
+  for (const source of engine.tagPreventionSources ?? []) {
+    if (source.kind !== "avoid_tag" || source.amount !== 1)
+      throw new Error(
+        source.cost.kind === "credit_and_forgo_next_action"
+          ? "card_spec_unknown_action_debt_tag_prevention_shape"
+          : "card_spec_unknown_tag_prevention_shape",
+      );
+    overlay.effects.push({
+      kind: "tag_prevention",
+      scope: "runner",
+      timing: "prevention_window",
+      resource: "tags",
+      target: "avoid_tag",
+      amount: source.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("defense.tag_prevention");
+  }
+
+  for (const effect of engine.lifecycle?.on_score ?? [])
+    appendHostedCreditLifecycleEffect(
+      overlay,
+      entry.definition.side,
+      effect,
+      "when_scored",
+    );
+  for (const effect of engine.lifecycle?.on_rez ?? [])
+    appendHostedCreditLifecycleEffect(
+      overlay,
+      entry.definition.side,
+      effect,
+      "on_rez",
+    );
+  for (const trigger of engine.lifecycle?.start_of_corp_turn ?? []) {
+    appendTypedCondition(overlay.conditions, trigger.condition);
+    for (const effect of trigger.effects)
+      appendHostedCreditLifecycleEffect(
+        overlay,
+        entry.definition.side,
+        effect,
+        "start_of_turn",
+      );
+  }
+
+  appendScoredAgendaProjection(overlay, engine.scoredAgenda);
+  return overlay;
+}
+
+function appendHostedCreditLifecycleEffect(
+  overlay: GenericTypedHintOverlay,
+  side: "runner" | "corp",
+  effect: PlanningEffect,
+  timing: NonNullable<AiCardHint["effects"]>[number]["timing"],
+): void {
+  if (effect.kind === "add_hosted_credits") {
+    if (
+      effect.target !== "source" ||
+      !Number.isInteger(effect.amount) ||
+      effect.amount <= 0
+    )
+      throw new Error("card_spec_unknown_hosted_credit_bank_load_shape");
+    overlay.effects.push({
+      kind: "counter_economy",
+      scope: side,
+      timing,
+      resource: "credits",
+      target: "economy.hosted_credit_bank",
+      amount: effect.amount,
+      economyMode: "bank_load",
+    });
+    overlay.functionSignals.push("economy.hosted_credit_bank");
+  }
+  if (effect.kind === "take_hosted_credits") {
+    overlay.effects.push({
+      kind: "economy",
+      scope: side,
+      timing,
+      resource: "credits",
+      target: "economy.hosted_credit_cashout",
+      amountKind: effect.mode === "all" ? "all_available" : "dynamic",
+      economyMode: "bank_cashout",
+    });
+    overlay.functionSignals.push("economy.hosted_credit_cashout");
+  }
+}
+
+function typedEffectTiming(
+  ability: PlanningAbility,
+): NonNullable<AiCardHint["effects"]>[number]["timing"] {
+  if (ability.kind === "on_play") return "action";
+  if (ability.timing === "access_start") return "on_access";
+  if (ability.timing === "corp_start_run_window") return "start_of_run";
+  if (
+    ability.timing === "corp_encounter" ||
+    ability.timing === "runner_cost_penalty_support"
+  )
+    return "during_ice_encounter";
+  if (ability.timing === "during_run" || ability.timing === "corp_during_run")
+    return "during_run";
+  if (ability.timing === "trace_success_cancel_window") return "trace_success";
+  if (
+    ability.timing === "corp_trace_window" ||
+    ability.timing === "trace_base_link_window" ||
+    ability.timing === "trace_post_bid_link_window"
+  )
+    return "trace_window";
+  return "action";
+}
+
+function controlledSide(
+  entry: PlanningEntry,
+  recipient: "controller" | "runner" | "corp",
+): "runner" | "corp" {
+  return recipient === "controller" ? entry.definition.side : recipient;
+}
+
+function appendGenericAbilityEffect(
+  overlay: GenericTypedHintOverlay,
+  entry: PlanningEntry,
+  ability: PlanningAbility,
+  effect: PlanningEffect,
+): void {
+  const timing = typedEffectTiming(ability);
+  if (effect.kind === "gain_credits") {
+    overlay.effects.push({
+      kind: "economy",
+      scope: controlledSide(entry, effect.recipient),
+      timing,
+      resource: "credits",
+      target: "economy.burst_credit",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("economy.burst_credit", "economy.generic");
+  }
+  if (effect.kind === "draw_cards") {
+    overlay.effects.push({
+      kind: "draw",
+      scope: controlledSide(entry, effect.recipient),
+      timing,
+      resource: "cards",
+      target: "setup.draw",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("setup.draw");
+  }
+  if (effect.kind === "damage") {
+    overlay.effects.push({
+      kind: "damage",
+      scope: "runner",
+      timing,
+      resource: hintDamageResource(effect.damageType),
+      target: `damage.${effect.damageType}`,
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("damage.payoff");
+  }
+  if (effect.kind === "add_tags") {
+    overlay.effects.push({
+      kind: "tag_source",
+      scope: "runner",
+      timing,
+      resource: "tags",
+      target: "tag.source",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("tag.source");
+  }
+  if (effect.kind === "trash_source") {
+    overlay.effects.push({
+      kind:
+        entry.definition.type === "program"
+          ? "program_trash"
+          : entry.definition.type === "hardware"
+            ? "hardware_trash"
+            : "resource_trash",
+      scope:
+        entry.definition.type === "program"
+          ? "installed_program"
+          : entry.definition.type === "hardware"
+            ? "hardware"
+            : "installed_card",
+      timing,
+      target: "source.trash",
+      finite: true,
+    });
+    overlay.functionSignals.push("risk.self_trash");
+  }
+  if (effect.kind === "trace") {
+    overlay.effects.push({
+      kind: "trace",
+      scope: "trace",
+      timing,
+      target: "trace.source",
+      finite: true,
+    });
+    overlay.functionSignals.push("trace.source");
+    overlay.conditions.push({ kind: "requires_trace_attempt" });
+    for (const success of effect.onSuccess)
+      appendTraceOutcome(overlay, success, timing, "trace");
+  }
+  if (effect.kind === "make_run") appendMakeRunProjection(overlay, effect);
+  if (effect.kind === "move_top_trash_to_grip") {
+    if (
+      effect.recipient !== "runner" ||
+      effect.visibility !== "hidden_info_barrier"
+    )
+      throw new Error("card_spec_unknown_top_trash_recovery_shape");
+    overlay.effects.push({
+      kind: "card_recovery",
+      scope: "heap",
+      timing,
+      resource: "cards",
+      target: "move_top_trash_to_grip",
+      amount: 1,
+      finite: true,
+    });
+    overlay.effects.push({
+      kind: "search",
+      scope: "heap",
+      timing,
+      resource: "cards",
+      target: "top_trash_card",
+      amount: 1,
+      finite: true,
+    });
+    overlay.functionSignals.push(
+      "setup.recovery",
+      "setup.search",
+      "setup.top_trash_recovery",
+    );
+  }
+  if (effect.kind === "search_stack_to_grip") {
+    if (
+      !["program", "any_card"].includes(effect.filter) ||
+      effect.shuffleAfterwards !== true ||
+      effect.visibility !== "hidden_info_barrier"
+    )
+      throw new Error("card_spec_unknown_stack_search_to_grip_shape");
+    overlay.effects.push({
+      kind: "search",
+      scope: "stack",
+      timing,
+      resource: "cards",
+      target: effect.filter,
+      finite: true,
+    });
+    overlay.functionSignals.push("setup.search");
+  }
+  if (effect.kind === "expose_installed_card") {
+    if (
+      effect.target !== "chosen_installed_corp_card" ||
+      !["inside_data_fort", "any_installed"].includes(effect.scope) ||
+      effect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_expose_installed_card_shape");
+    overlay.effects.push({
+      kind: "expose_info",
+      scope: "installed_card",
+      timing,
+      resource: "cards",
+      target: "info.expose_installed_card",
+      finite: true,
+    });
+    overlay.functionSignals.push("info.expose_installed_card");
+  }
+  if (effect.kind === "pay_rez_cost_to_trash_rezzed_ice") {
+    if (effect.target !== "chosen_rezzed_ice" || effect.visibility !== "public")
+      throw new Error("card_spec_unknown_pay_rez_cost_trash_ice_shape");
+    overlay.effects.push({
+      kind: "ice_trash",
+      scope: "ice",
+      timing,
+      resource: "credits",
+      target: "pay_rez_cost_to_trash_rezzed_ice",
+      finite: true,
+    });
+    overlay.functionSignals.push("ice.trash", "economy.dynamic_rez_cost");
+  }
+  if (effect.kind === "corp_choice_rez_or_trash_ice") {
+    if (
+      effect.target !== "chosen_installed_ice" ||
+      effect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_corp_rez_or_trash_ice_shape");
+    overlay.effects.push(
+      {
+        kind: "rez",
+        scope: "ice",
+        timing,
+        target: "corp_choice_rez_or_trash_ice",
+        finite: true,
+      },
+      {
+        kind: "ice_trash",
+        scope: "ice",
+        timing,
+        target: "corp_choice_rez_or_trash_ice",
+        finite: true,
+      },
+    );
+    overlay.functionSignals.push("ice.corp_rez_choice", "ice.trash");
+  }
+  if (effect.kind === "distribute_advancement_counters") {
+    if (
+      effect.target !== "installed_advanceable_cards" ||
+      !Number.isInteger(effect.amount) ||
+      effect.amount <= 0
+    )
+      throw new Error("card_spec_unknown_distribute_advancement_shape");
+    overlay.effects.push({
+      kind: "advance_burst",
+      scope: "installed_card",
+      timing,
+      resource: "advancement_counters",
+      target: `advance.${effect.distribution}`,
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push(
+      "advance.counter_manipulation",
+      "score.fast_advance_support",
+    );
+  }
+  if (effect.kind === "move_advancement_counters") {
+    if (
+      effect.target !== "chosen_installed_advanceable_card" ||
+      !["chosen_card", "source_card"].includes(effect.source) ||
+      (effect.maxAmount !== "all" &&
+        (!Number.isInteger(effect.maxAmount) || effect.maxAmount <= 0))
+    )
+      throw new Error("card_spec_unknown_move_advancement_shape");
+    overlay.effects.push({
+      kind: "advance",
+      scope: "installed_card",
+      timing,
+      resource: "advancement_counters",
+      target: "advance.counter_transfer",
+      ...(effect.maxAmount === "all"
+        ? { amountKind: "all_available" as const }
+        : { amount: effect.maxAmount }),
+      finite: true,
+    });
+    overlay.functionSignals.push(
+      "advance.counter_manipulation",
+      "score.fast_advance_support",
+    );
+  }
+  if (effect.kind === "look_top_stack_take_matching") {
+    overlay.effects.push(
+      {
+        kind: "topdeck_info",
+        scope: "stack",
+        timing,
+        resource: "cards",
+        target: "look_top_stack",
+        amount: effect.count,
+        finite: true,
+      },
+      {
+        kind: "search",
+        scope: "stack",
+        timing,
+        resource: "cards",
+        target:
+          effect.allowedTypes.length === 1
+            ? effect.allowedTypes[0]!
+            : "take_matching_cards",
+        finite: true,
+      },
+    );
+    overlay.functionSignals.push("setup.search", "info.stack_top");
+  }
+  if (effect.kind === "use_base_link") {
+    overlay.effects.push({
+      kind: "base_link",
+      scope: "runner",
+      timing: "trace_window",
+      resource: "link",
+      target: "trace.base_link",
+      amount: effect.baseLink,
+      finite: true,
+    });
+    overlay.functionSignals.push("defense.trace_defense", "trace.base_link");
+  }
+  if (effect.kind === "increase_trace_link") {
+    overlay.effects.push({
+      kind: "link",
+      scope: "runner",
+      timing: "trace_window",
+      resource: "link",
+      target: "trace.link_boost",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("defense.trace_defense", "trace.link_boost");
+  }
+  if (effect.kind === "add_hosted_credits") {
+    overlay.effects.push({
+      kind: "counter_economy",
+      scope: entry.definition.side,
+      timing,
+      resource: "credits",
+      target: "economy.hosted_credit_bank",
+      amount: effect.amount,
+      economyMode: "bank_load",
+    });
+    overlay.functionSignals.push("economy.hosted_credit_bank");
+  }
+  if (effect.kind === "take_hosted_credits") {
+    overlay.effects.push({
+      kind: "economy",
+      scope: entry.definition.side,
+      timing,
+      resource: "credits",
+      target: "economy.hosted_credit_cashout",
+      amountKind: effect.mode === "all" ? "all_available" : "dynamic",
+      economyMode: "bank_cashout",
+    });
+    overlay.functionSignals.push("economy.hosted_credit_cashout");
+  }
+}
+
+function appendTraceOutcome(
+  overlay: GenericTypedHintOverlay,
+  outcome: Extract<PlanningEffect, { kind: "trace" }>["onSuccess"][number],
+  sourceTiming: NonNullable<AiCardHint["effects"]>[number]["timing"],
+  targetPrefix: string,
+): void {
+  const timing =
+    sourceTiming === "encounter_resolution" ? "trace_success" : sourceTiming;
+  if (
+    outcome.kind === "add_tags" ||
+    outcome.kind === "add_tags_by_trace_margin_over_runner_link"
+  ) {
+    overlay.effects.push({
+      kind: "tag_source",
+      scope: "runner",
+      timing,
+      resource: "tags",
+      target: `${targetPrefix}.trace_tag`,
+      ...(outcome.kind === "add_tags"
+        ? { amount: outcome.amount }
+        : { amountKind: "dynamic" }),
+      finite: true,
+    });
+    overlay.functionSignals.push("tag.source");
+  }
+  if (outcome.kind === "end_run") {
+    overlay.effects.push({
+      kind: "etr",
+      scope: "run_path",
+      timing,
+      target: `${targetPrefix}.conditional_end_run`,
+      finite: true,
+    });
+    overlay.functionSignals.push("ice.etr");
+  }
+  if (outcome.kind === "runner_run_lock_until_action_paid") {
+    overlay.effects.push({
+      kind: "run_lock",
+      scope: "runner",
+      timing,
+      resource: "actions",
+      target: `${targetPrefix}.run_lock`,
+      amount: outcome.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("run.lock");
+  }
+  if (
+    outcome.kind === "unpreventable_meat_damage" ||
+    outcome.kind === "preventable_damage"
+  ) {
+    const damageType =
+      outcome.kind === "unpreventable_meat_damage"
+        ? "meat"
+        : outcome.damageType;
+    overlay.effects.push({
+      kind: "damage",
+      scope: "runner",
+      timing,
+      resource: hintDamageResource(damageType),
+      target: `${targetPrefix}.${damageType}_damage`,
+      amount: outcome.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("damage.payoff");
+  }
+  if (outcome.kind === "add_counter") {
+    overlay.effects.push({
+      kind: "persistent_counter_effect",
+      scope: "runner",
+      timing,
+      resource: "counters",
+      target: `${targetPrefix}.${outcome.counterType}_counter`,
+      amount: outcome.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("trace.counter");
+  }
+  if (outcome.kind === "trash_hardware" || outcome.kind === "trash_program") {
+    overlay.effects.push({
+      kind:
+        outcome.kind === "trash_hardware" ? "hardware_trash" : "program_trash",
+      scope:
+        outcome.kind === "trash_hardware" ? "hardware" : "installed_program",
+      timing,
+      target: `${targetPrefix}.${outcome.kind}`,
+      finite: true,
+    });
+    overlay.functionSignals.push(
+      outcome.kind === "trash_hardware"
+        ? "access.corp_hardware_trash"
+        : "access.corp_program_trash",
+    );
+  }
+  overlay.conditions.push({ kind: "requires_trace_success" });
+}
+
+function appendMakeRunProjection(
+  overlay: GenericTypedHintOverlay,
+  effect: Extract<PlanningEffect, { kind: "make_run" }>,
+): void {
+  const server =
+    effect.target.kind === "central_server"
+      ? effect.target.server === "rd"
+        ? "rnd"
+        : effect.target.server
+      : "runner";
+  overlay.effects.push({
+    kind: "future_run_effect",
+    scope: server,
+    timing: "action",
+    target: "make_run",
+    finite: true,
+  });
+  overlay.functionSignals.push(
+    "run.make_run",
+    effect.target.kind === "central_server"
+      ? `run.${effect.target.server === "rd" ? "rnd" : effect.target.server}`
+      : "run.any_server",
+  );
+  if ((effect.accessCount ?? 1) > 1)
+    overlay.effects.push({
+      kind: "multiaccess",
+      scope: server,
+      timing: "successful_run",
+      resource: "cards",
+      target: "run.additional_access",
+      amount: (effect.accessCount ?? 1) - 1,
+      finite: true,
+    });
+  if (effect.bypassFirstIce === true) {
+    overlay.effects.push({
+      kind: "future_encounter_effect",
+      scope: "run_path",
+      timing: "during_run",
+      target: "bypass_first_ice",
+      finite: true,
+    });
+    overlay.functionSignals.push("run.bypass_first_ice");
+  }
+  if (effect.runTemporaryCredits !== undefined) {
+    overlay.effects.push({
+      kind: "finite_economy_pool",
+      scope: "runner",
+      timing: "during_run",
+      resource: "credits",
+      target: "run.temporary_credits",
+      amount: effect.runTemporaryCredits.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("economy.run_credits");
+  }
+  if (effect.successfulRunRunnerCreditGain !== undefined) {
+    overlay.effects.push({
+      kind: "economy",
+      scope: "runner",
+      timing: "successful_run",
+      resource: "credits",
+      target: "run.successful_run_credit_gain",
+      amount: effect.successfulRunRunnerCreditGain,
+      finite: true,
+    });
+    overlay.functionSignals.push("economy.burst_credit");
+  }
+  if (effect.successfulRunRunnerTagGain !== undefined) {
+    overlay.effects.push({
+      kind: "tag",
+      scope: "runner",
+      timing: "successful_run",
+      resource: "tags",
+      target: "run.successful_run_self_tag",
+      amount: effect.successfulRunRunnerTagGain,
+      finite: true,
+    });
+    overlay.functionSignals.push("risk.self_tag");
+  }
+  if (effect.afterRunCompletedUnpreventableCoreDamage !== undefined) {
+    overlay.effects.push({
+      kind: "damage",
+      scope: "runner",
+      timing: "during_run",
+      resource: "brain_damage",
+      target: "run.after_completed_self_damage",
+      amount: effect.afterRunCompletedUnpreventableCoreDamage,
+      finite: true,
+    });
+    overlay.functionSignals.push("risk.self_damage");
+  }
+  if (effect.runTraceLinkBonus !== undefined) {
+    overlay.effects.push({
+      kind: "link",
+      scope: "runner",
+      timing: "during_run",
+      resource: "link",
+      target: "run.trace_link_bonus",
+      amount: effect.runTraceLinkBonus,
+      finite: true,
+    });
+    overlay.functionSignals.push("defense.trace_defense");
+  }
+}
+
+function appendGenericTargetProfile(
+  profiles: NonNullable<AiCardHint["targetProfiles"]>,
+  ability: PlanningAbility,
+  effect: PlanningEffect,
+): void {
+  const timing =
+    ability.kind === "on_play"
+      ? ("on_play" as const)
+      : effect.kind === "make_run"
+        ? ("activated_ability" as const)
+        : ("activated_ability" as const);
+  const purpose = `${effect.kind}:${ability.capabilityKey}`;
+  if (effect.kind === "make_run" && effect.target.kind === "chosen_server")
+    profiles.push({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing,
+      targetType: "server",
+      purpose,
+      hiddenInfoPolicy: "legal_targets_only",
+    });
+  if (effect.kind === "search_stack_install")
+    profiles.push({
+      schemaVersion: "target-profile-v1",
+      kind: "search_install_target",
+      timing,
+      targetType: "program",
+      purpose,
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    });
+  if (effect.kind === "look_top_stack_take_matching")
+    profiles.push({
+      zone: "stack_top",
+      ...(effect.allowedTypes.length === 1
+        ? { targetCardType: effect.allowedTypes[0] }
+        : {}),
+      lookCount: effect.count,
+      showToOpponent: effect.revealTakenToCorp,
+      shuffleAfter: effect.shuffleRemainder,
+    });
+  if (effect.kind === "look_top_stack_show_to_corp_then_install_matching")
+    profiles.push({
+      zone: "stack_top",
+      ...(effect.allowedTypes.length === 1
+        ? { targetCardType: effect.allowedTypes[0] }
+        : {}),
+      lookCount: effect.count,
+      showToOpponent: true,
+      shuffleAfter: effect.shuffleAfterwards,
+    });
+  if (effect.kind === "choose_stack_or_trash_program_install")
+    profiles.push({
+      schemaVersion: "target-profile-v1",
+      kind: "search_install_target",
+      timing,
+      targetType: "program",
+      purpose,
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    });
+  if (effect.kind === "expose_installed_card")
+    profiles.push({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing,
+      targetType: "card",
+      purpose,
+      hiddenInfoPolicy: "legal_targets_only",
+    });
+  if (
+    effect.kind === "pay_rez_cost_to_trash_rezzed_ice" ||
+    effect.kind === "corp_choice_rez_or_trash_ice"
+  )
+    profiles.push({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing,
+      targetType: "installed_ice",
+      purpose,
+      hiddenInfoPolicy: "legal_targets_only",
+    });
+  if (effect.kind === "move_advancement_counters")
+    profiles.push({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing,
+      targetType: "card",
+      purpose,
+      hiddenInfoPolicy: "legal_targets_only",
+    });
+}
+
+function appendTypedCondition(
+  conditions: NonNullable<AiCardHint["conditions"]>,
+  condition: PlanningAbility["condition"],
+): void {
+  if (condition === undefined) return;
+  if (
+    condition.kind === "runner_is_tagged" ||
+    condition.kind === "runner_tags_at_least"
+  )
+    conditions.push({ kind: "requires_runner_tagged" });
+  if (condition.kind === "source_has_hosted_credits")
+    conditions.push({ kind: "requires_credit_pool" });
+  if (condition.kind === "source_has_advancement_counters")
+    conditions.push({ kind: "requires_advancement_counter" });
+  if (condition.kind === "runner_attempted_run_last_turn")
+    conditions.push(
+      condition.minimumRuns > 1
+        ? { kind: "requires_runner_attempted_multiple_runs_last_turn" }
+        : { kind: "requires_runner_attempted_run_last_turn" },
+    );
+  if (condition.kind === "runner_attempted_run_this_game")
+    conditions.push({ kind: "requires_runner_attempted_run_this_game" });
+  if (condition.kind === "runner_trashed_node_last_turn")
+    conditions.push({ kind: "requires_runner_trashed_node_last_turn" });
+  if (condition.kind === "runner_installed_resource_last_turn")
+    conditions.push({ kind: "requires_runner_installed_resource_last_turn" });
+  if (condition.kind === "runner_liberated_agenda_subtype_this_turn")
+    conditions.push({
+      kind:
+        condition.subtype === "black_ops"
+          ? "requires_liberated_black_ops_agenda"
+          : condition.subtype === "gray_ops"
+            ? "requires_liberated_gray_ops_agenda"
+            : "requires_liberated_agenda_this_turn",
+    });
+  if (condition.kind === "runner_made_successful_hq_and_rd_runs_this_turn")
+    conditions.push({ kind: "requires_successful_run" });
+  if (condition.kind === "runner_made_successful_run_on_server_this_turn")
+    conditions.push({
+      kind:
+        condition.server === "hq"
+          ? "requires_successful_hq_run"
+          : "requires_successful_run",
+    });
+  if (
+    condition.kind === "current_encounter_ice" ||
+    condition.kind === "current_encounter_ice_subtype"
+  )
+    conditions.push({ kind: "requires_encounter" });
+  if (condition.kind === "current_run_server")
+    conditions.push({ kind: "requires_during_run" });
+}
+
+function appendScoredAgendaProjection(
+  overlay: GenericTypedHintOverlay,
+  scored: PlanningEntry["planning"]["engine"]["scoredAgenda"],
+): void {
+  if (scored === undefined) return;
+  if (scored.kind === "add_counters_on_score")
+    overlay.functionSignals.push(
+      "score.action_counter_bank",
+      "score.run_end_counter_bank",
+    );
+  if (scored.kind === "purge_runner_virus_counters_and_prevent_next")
+    overlay.functionSignals.push(
+      "virus.corp_counter_clear",
+      "virus.corp_counter_prevention",
+    );
+  if (scored.kind === "gain_credits_on_score") {
+    overlay.effects.push({
+      kind: "economy",
+      scope: "corp",
+      timing: "when_scored",
+      resource: "credits",
+      target: "score.credit_gain",
+      amount: scored.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("economy.burst_credit", "score.credit_gain");
+  }
+  if (scored.kind === "score_credit_swing_if_corp_credit_threshold_met") {
+    if (
+      !Number.isInteger(scored.threshold) ||
+      scored.threshold <= 0 ||
+      !Number.isInteger(scored.gainAmount) ||
+      scored.gainAmount <= 0
+    )
+      throw new Error("card_spec_unknown_score_credit_threshold_shape");
+    overlay.effects.push(
+      {
+        kind: "economy",
+        scope: "corp",
+        timing: "when_scored",
+        resource: "credits",
+        target: "score.credit_threshold_swing",
+        amount: scored.threshold,
+        finite: true,
+      },
+      {
+        kind: "delayed_penalty",
+        scope: "corp",
+        timing: "when_scored",
+        resource: "credits",
+        target: "score.lose_all_credits_below_threshold",
+        amountKind: "all_available",
+        finite: true,
+      },
+    );
+    overlay.conditions.push({ kind: "requires_corp_credits_threshold" });
+    overlay.functionSignals.push(
+      "economy.burst_credit",
+      "score.credit_threshold_swing",
+      "risk.economy_crash_on_score",
+    );
+  }
+  if (scored.kind === "scored_agenda_credit_until_install_or_rez") {
+    overlay.effects.push({
+      kind: "finite_economy_pool",
+      scope: "corp",
+      timing: "when_scored",
+      resource: "credits",
+      target: "score.install_or_rez_credit",
+      amount: scored.gainAmount,
+      finite: true,
+    });
+    overlay.functionSignals.push("economy.corp_install_rez_budget");
+  }
+  if (scored.kind === "shuffle_hq_archives_into_rd_then_draw") {
+    overlay.effects.push(
+      {
+        kind: "zone_shuffle",
+        scope: "rnd",
+        timing: "when_scored",
+        resource: "cards",
+        target: "score.shuffle_hq_archives_into_rnd",
+        finite: true,
+      },
+      {
+        kind: "draw",
+        scope: "corp",
+        timing: "when_scored",
+        resource: "cards",
+        target: "score.draw",
+        amount: scored.drawCount,
+        finite: true,
+      },
+    );
+    overlay.functionSignals.push("setup.draw", "zone.shuffle");
+  }
+  if (scored.kind === "meat_damage_bonus") {
+    overlay.effects.push({
+      kind: "global_modifier",
+      scope: "damage",
+      timing: "persistent",
+      resource: "meat_damage",
+      target: "score.meat_damage_bonus",
+      amount: scored.amount,
+    });
+    overlay.functionSignals.push("damage.corp_damage_amplifier");
+  }
+  if (
+    scored.kind === "overadvance_bonus_agenda_points" ||
+    scored.kind === "fixed_bonus_agenda_points_on_score"
+  ) {
+    overlay.effects.push({
+      kind: "score_acceleration",
+      scope: "score_area",
+      timing: "when_scored",
+      target: "score.bonus_agenda_points",
+      ...(scored.kind === "fixed_bonus_agenda_points_on_score"
+        ? { amount: scored.amount }
+        : {}),
+      finite: true,
+    });
+    overlay.functionSignals.push("score.bonus_agenda_point");
+  }
+  if (scored.kind === "overadvance_start_of_corp_turn_credits") {
+    overlay.effects.push({
+      kind: "start_of_turn_economy",
+      scope: "corp",
+      timing: "start_of_turn",
+      resource: "credits",
+      target: "score.overadvance_credit",
+      amount: scored.creditPerGroup,
+      repeatable: true,
+    });
+    overlay.functionSignals.push("economy.turn_start_credit");
+  }
+  if (scored.kind === "overadvance_start_of_corp_turn_actions")
+    overlay.functionSignals.push("economy.action", "score.overadvance_action");
+  if (scored.kind === "corp_start_turn_random_restricted_optional_action")
+    overlay.functionSignals.push("economy.action", "risk.random_outcome");
+  if (scored.kind === "corp_damage_replacement_pdca_action_counter")
+    overlay.functionSignals.push(
+      "damage.corp_damage_replacement",
+      "score.action_counter_bank",
+    );
+  if (
+    scored.kind === "corp_start_turn_optional_draw" ||
+    scored.kind === "corp_start_turn_mandatory_draw"
+  ) {
+    overlay.effects.push({
+      kind: "draw",
+      scope: "corp",
+      timing: "start_of_turn",
+      resource: "cards",
+      target: "score.recurring_draw",
+      amount: scored.drawCount,
+      repeatable: true,
+    });
+    overlay.functionSignals.push("setup.draw", "draw.corp_recurring");
+  }
+  if (scored.kind === "tagged_runner_meat_damage_reduce_hand_size_on_success") {
+    overlay.effects.push(
+      {
+        kind: "damage",
+        scope: "runner",
+        timing: "scored_activated",
+        resource: "meat_damage",
+        target: "score.tagged_runner_meat_damage",
+        amount: scored.damageAmount,
+        finite: true,
+      },
+      {
+        kind: "hand_size_modifier",
+        scope: "runner",
+        timing: "persistent",
+        resource: "hand_size",
+        target: "score.damage_hand_size_reduction",
+        amount: -scored.handSizeReduction,
+      },
+    );
+    overlay.conditions.push({ kind: "requires_runner_tagged" });
+    overlay.functionSignals.push("damage.payoff", "tag.payoff");
+  }
+  if (
+    scored.kind === "choose_fort_ice_strength_bonus" ||
+    scored.kind === "select_rezzed_ice_mark_modifier"
+  ) {
+    overlay.effects.push({
+      kind: "global_modifier",
+      scope: "ice",
+      timing: "scored_activated",
+      resource: "strength",
+      target: "score.ice_strength_modifier",
+      amount:
+        scored.kind === "choose_fort_ice_strength_bonus"
+          ? scored.amount
+          : scored.strengthBonusPerCounter,
+    });
+    overlay.functionSignals.push("ice.corp_strength_support");
+  }
+  if (
+    scored.kind === "score_rez_installed_ice_at_no_cost" ||
+    scored.kind === "reveal_top_rd_install_and_rez_ice_trash_rest"
+  ) {
+    overlay.effects.push({
+      kind: "rez",
+      scope: "ice",
+      timing: "when_scored",
+      target: "score.free_rez_ice",
+      finite: true,
+    });
+    overlay.functionSignals.push("ice.corp_free_rez");
+  }
+  if (scored.kind === "reveal_installed_ice_subtype_for_credits")
+    overlay.functionSignals.push(
+      "economy.burst_credit",
+      "info.expose_installed_card",
+    );
+  if (scored.kind === "shuffle_selected_hq_agendas_into_rd_gain_credits")
+    overlay.functionSignals.push("economy.burst_credit", "zone.shuffle");
+  if (scored.kind === "score_install_hq_cards_into_new_remote_then_rez")
+    overlay.functionSignals.push(
+      "economy.corp_install_rez_budget",
+      "install.corp_new_remote_fort_from_hq",
+      "score.remote_fort_creation",
+      "score.remote_install_budget",
+    );
+}
 
 function deriveClosedMechanicalHintOverlay(
   entry: ReturnType<typeof cardSpecPlanningCards>[number],
@@ -534,6 +1882,26 @@ function deriveClosedMechanicalHintOverlay(
   }
 
   for (const source of engine.flatlineReplacementSources ?? []) {
+    if (source.kind === "flatline_replacement_from_grip") {
+      if (
+        source.replacement !== "flatline_tag_replacement" ||
+        source.visibility !== "public"
+      ) {
+        throw new Error(
+          "card_spec_unknown_flatline_replacement_from_grip_shape",
+        );
+      }
+      overlay.effects.push({
+        kind: "flatline_prevention",
+        resource: "damage",
+        scope: "runner",
+        target: "flatline",
+        timing: "prevention_window",
+      });
+      overlay.conditions.push({ kind: "requires_prevention_window" });
+      overlay.functionSignals.push("defense.damage_prevention");
+      continue;
+    }
     if (source.kind !== "damage_replacement_from_grip") continue;
     if (
       source.replacement !== "prevent_meat_damage_add_bad_publicity" ||
@@ -741,8 +2109,18 @@ function deriveClosedMechanicalHintOverlay(
       source.cost.kind !== "trash_source" ||
       source.priority !== 30 ||
       source.visibility !== "public"
-    )
-      throw new Error("card_spec_unknown_resource_trash_prevention_shape");
+    ) {
+      overlay.effects.push({
+        kind: "prevention_replacement",
+        scope: "installed_card",
+        target: "defense.installed_card_trash_prevention",
+        timing: "prevention_window",
+      });
+      overlay.conditions.push({ kind: "requires_prevention_window" });
+      overlay.functionSignals.push("defense.installed_card_trash_prevention");
+      overlay.roles.push("trash_prevention");
+      continue;
+    }
     appendHiddenResourceEffects(overlay.effects);
     overlay.effects.push({
       kind: "prevention_replacement",
@@ -899,10 +2277,10 @@ function derivedMechanicalPlanRoles(
 }
 
 function deriveActionCapacityProfiles(
-  engine: ReturnType<
-    typeof cardSpecPlanningCards
-  >[number]["planning"]["engine"],
+  entry: ReturnType<typeof cardSpecPlanningCards>[number],
 ): NonNullable<AiCardHint["actionCapacityProfiles"]> {
+  const engine = entry.planning.engine;
+  const controller = entry.definition.side;
   const profiles: NonNullable<AiCardHint["actionCapacityProfiles"]> = (
     engine.tagPreventionSources ?? []
   ).flatMap((source) => {
@@ -925,6 +2303,183 @@ function deriveActionCapacityProfiles(
       },
     ];
   });
+  for (const ability of engine.abilities ?? []) {
+    for (const effect of ability.effects)
+      if (effect.kind === "start_runner_program_install_action_bundle")
+        profiles.push({
+          class: "restricted_gain",
+          timing: "immediate",
+          recipient: "runner",
+          restriction: "program_install_only",
+          reliability: "guaranteed",
+          sourceResource: "source_card",
+          expiresAt: "side_turn_end",
+          amount: effect.actionCount,
+          amountKind: "fixed",
+          bankable: false,
+          repeatable: false,
+          actionTypes: ["install_card"],
+        });
+    const actionGains = gainActions(ability.effects);
+    if (actionGains.length === 0) continue;
+    if (ability.kind === "on_play") {
+      for (const effect of actionGains)
+        profiles.push(immediateActionGain(effect, controller));
+      continue;
+    }
+    const sourceCounterCost = ability.costs.find(
+      (cost) => cost.kind === "source_counter",
+    );
+    const advancementCounterCost = ability.costs.find(
+      (cost) => cost.kind === "advancement_counter",
+    );
+    if (sourceCounterCost !== undefined) {
+      for (const effect of actionGains)
+        profiles.push({
+          class: "finite_bank",
+          timing:
+            entry.definition.type === "agenda"
+              ? "scored_activated"
+              : "immediate",
+          recipient: actionCapacityRecipient(effect, controller),
+          restriction: "unrestricted",
+          reliability: "guaranteed",
+          sourceResource: "counter",
+          expiresAt: "source_leaves_play",
+          amount: effect.amount,
+          amountKind: "fixed",
+          bankable: true,
+          repeatable: true,
+        });
+      continue;
+    }
+    if (advancementCounterCost !== undefined) {
+      for (const effect of actionGains)
+        profiles.push({
+          class: "finite_bank",
+          timing: "immediate",
+          recipient: actionCapacityRecipient(effect, controller),
+          restriction: "unrestricted",
+          reliability: "guaranteed",
+          sourceResource: "advancement_counter",
+          expiresAt: "source_leaves_play",
+          amount: effect.amount,
+          amountKind: "fixed",
+          bankable: true,
+          repeatable: true,
+        });
+      continue;
+    }
+    throw new Error("card_spec_unknown_action_capacity_activated_gain_shape");
+  }
+  for (const effect of gainActions(engine.lifecycle?.on_rez ?? []))
+    profiles.push({
+      ...immediateActionGain(effect, controller),
+      timing: "on_rez",
+    });
+  for (const trigger of engine.lifecycle?.start_of_corp_turn ?? [])
+    for (const effect of gainActions(trigger.effects))
+      profiles.push({
+        class: "recurring_gain",
+        timing: "start_of_turn",
+        recipient: actionCapacityRecipient(effect, "corp"),
+        restriction: "unrestricted",
+        reliability:
+          engine.uniqueDirectLongtail?.kind === "rezzed_leave_action_gain_asset"
+            ? "conditional"
+            : "guaranteed",
+        sourceResource: "source_card",
+        expiresAt: "source_leaves_play",
+        amount: effect.amount,
+        amountKind: "fixed",
+        bankable: false,
+        repeatable: true,
+      });
+  if (engine.corpUtility?.kind === "gain_restricted_install_actions")
+    profiles.push({
+      class: "restricted_gain",
+      timing: "immediate",
+      recipient: "corp",
+      restriction: "install_only",
+      reliability: "guaranteed",
+      sourceResource: "source_card",
+      expiresAt: "side_turn_end",
+      amount: engine.corpUtility.amount,
+      amountKind: "fixed",
+      bankable: false,
+      repeatable: false,
+      actionTypes: ["install_card"],
+    });
+  if (
+    engine.runnerUtilityLongtail?.kind ===
+    "optional_extra_action_with_delayed_damage"
+  )
+    profiles.push({
+      class: "recurring_gain",
+      timing: "immediate",
+      recipient: "runner",
+      restriction: "unrestricted",
+      reliability: "conditional",
+      sourceResource: "source_card",
+      expiresAt: "side_turn_end",
+      amount: engine.runnerUtilityLongtail.extraActions,
+      amountKind: "fixed",
+      bankable: false,
+      repeatable: true,
+    });
+  if (engine.runnerUtilityLongtail?.kind === "start_turn_random_effect_table") {
+    const persistentAction = engine.runnerUtilityLongtail.outcomes.find(
+      (outcome) =>
+        outcome.kind === "trash_source_and_grant_persistent_extra_action",
+    );
+    if (persistentAction !== undefined)
+      profiles.push({
+        class: "random_gain",
+        timing: "start_of_turn",
+        recipient: "runner",
+        restriction: "random_action",
+        reliability: "random",
+        sourceResource: "die_roll",
+        expiresAt: "persistent",
+        amount: persistentAction.extraActions,
+        amountKind: "fixed",
+        bankable: false,
+        repeatable: true,
+      });
+  }
+  if (engine.remainingReplacementLongtail?.kind === "run_action_spending_cap")
+    profiles.push({
+      class: "restricted_gain",
+      timing: "immediate",
+      recipient: "runner",
+      restriction: "run_only",
+      reliability: "conditional",
+      sourceResource: "source_card",
+      expiresAt: "resolution",
+      amount: engine.remainingReplacementLongtail.actionGain,
+      amountKind: "fixed",
+      bankable: false,
+      repeatable: true,
+      actionTypes: ["start_run"],
+    });
+  for (const subroutine of engine.printedSubroutines ?? [])
+    if (subroutine.kind === "runner_forgoes_next_action")
+      profiles.push({
+        class: "action_loss",
+        timing: "encounter",
+        recipient: "runner",
+        restriction: "unrestricted",
+        reliability: "conditional",
+        sourceResource: "encounter_effect",
+        expiresAt: "side_turn_end",
+        amount: 1,
+        amountKind: "fixed",
+        bankable: false,
+        repeatable: true,
+      });
+  profiles.push(
+    ...flatlineActionCapacityProfiles(engine.flatlineReplacementSources),
+  );
   if (
     engine.scoredAgenda?.kind ===
     "corp_start_turn_random_restricted_optional_action"
@@ -1070,9 +2625,9 @@ function deriveActionCapacityProfiles(
       (effect) => effect.kind === "runner_run_lock_until_action_paid",
     );
     if (
-      runLockTrace.baseTraceStrength !== 0 ||
       runLock === undefined ||
-      runLock.amount !== 2 ||
+      !Number.isInteger(runLock.amount) ||
+      runLock.amount <= 0 ||
       runLock.visibility !== "public"
     )
       throw new Error("card_spec_unknown_trace_run_lock_shape");
@@ -1089,6 +2644,89 @@ function deriveActionCapacityProfiles(
       repeatable: true,
       actionTypes: ["start_run"],
     });
+  }
+  return profiles;
+}
+
+type ActionCapacityProfile = NonNullable<
+  AiCardHint["actionCapacityProfiles"]
+>[number];
+
+type GainActionsEffect = Extract<PlanningEffect, { kind: "gain_actions" }>;
+
+function gainActions(effects: readonly PlanningEffect[]): GainActionsEffect[] {
+  return effects.filter(
+    (effect): effect is GainActionsEffect => effect.kind === "gain_actions",
+  );
+}
+
+function actionCapacityRecipient(
+  effect: GainActionsEffect,
+  controller: "corp" | "runner",
+): "corp" | "runner" {
+  return effect.recipient === "controller" ? controller : effect.recipient;
+}
+
+function immediateActionGain(
+  effect: GainActionsEffect,
+  controller: "corp" | "runner",
+): ActionCapacityProfile {
+  return {
+    class: "immediate_gain",
+    timing: "immediate",
+    recipient: actionCapacityRecipient(effect, controller),
+    restriction: "unrestricted",
+    reliability: "guaranteed",
+    sourceResource: "source_card",
+    expiresAt: "side_turn_end",
+    amount: effect.amount,
+    amountKind: "fixed",
+    bankable: false,
+    repeatable: false,
+  };
+}
+
+function flatlineActionCapacityProfiles(
+  sources: readonly PlanningFlatlineReplacementSource[] | undefined,
+): ActionCapacityProfile[] {
+  const profiles: ActionCapacityProfile[] = [];
+  for (const source of sources ?? []) {
+    if (source.kind === "flatline_replacement_from_grip") {
+      profiles.push({
+        class: "action_debt",
+        timing: "prevention_window",
+        recipient: "runner",
+        restriction: "unrestricted",
+        reliability: "guaranteed",
+        sourceResource: "replacement_effect",
+        expiresAt: "debt_paid",
+        amount: source.resolution.futureActionDebt,
+        amountKind: "fixed",
+        bankable: false,
+        repeatable: false,
+      });
+      continue;
+    }
+    if (source.kind === "flatline_replacement_installed") {
+      const actionLoss = 4 - source.resolution.runnerActionsPerTurnOverride;
+      if (actionLoss <= 0)
+        throw new Error(
+          "card_spec_unknown_action_capacity_flatline_action_loss_shape",
+        );
+      profiles.push({
+        class: "action_loss",
+        timing: "persistent",
+        recipient: "runner",
+        restriction: "unrestricted",
+        reliability: "guaranteed",
+        sourceResource: "replacement_effect",
+        expiresAt: "persistent",
+        amount: actionLoss,
+        amountKind: "fixed",
+        bankable: false,
+        repeatable: false,
+      });
+    }
   }
   return profiles;
 }
@@ -1264,9 +2902,12 @@ function usesClosedExtendedMechanicalProfile(
       "purge_runner_virus_counters_and_prevent_next" ||
     engine.scoredAgenda?.kind === "corp_start_turn_mandatory_draw" ||
     engine.modifiers?.some((modifier) =>
-      ["break_subroutine_cost", "hand_size", "memory_units"].includes(
-        modifier.kind,
-      ),
+      [
+        "break_subroutine_cost",
+        "break_ability_use_cost",
+        "hand_size",
+        "memory_units",
+      ].includes(modifier.kind),
     ) === true ||
     engine.printedSubroutines?.some((subroutine) =>
       [
@@ -1472,6 +3113,8 @@ function deriveExtendedRequiredMechanics(
   for (const modifier of engine.modifiers ?? []) {
     if (modifier.kind === "break_subroutine_cost")
       mechanics.add("break_subroutine_cost_modifier");
+    if (modifier.kind === "break_ability_use_cost")
+      mechanics.add("break_ability_use_cost_modifier");
     if (modifier.kind === "hand_size") mechanics.add("hand_size_modifier");
     if (modifier.kind === "memory_units") mechanics.add("memory_modifier");
   }
@@ -1505,7 +3148,7 @@ function deriveExtendedRequiredMechanics(
   if (utilityKind === "corp_draw_extra_then_bottom_one")
     for (const token of ["corp_draw_replacement", "extra_draw", "bottom_rd"])
       mechanics.add(token);
-  if (utilityKind === "run_start_tax_runner_tags")
+  if (utilityKind === "run_start_lose_runner_credits_per_tag")
     for (const token of ["run_start_tax", "runner_tags", "same_fort"])
       mechanics.add(token);
   if (utilityKind === "start_run_redirect_to_source_fort")
@@ -1792,9 +3435,12 @@ function usesExtendedMechanicalSemantics(
         annotation.use === "coverage.breaker",
     ) === true ||
     engine.modifiers?.some((modifier) =>
-      ["break_subroutine_cost", "hand_size", "memory_units"].includes(
-        modifier.kind,
-      ),
+      [
+        "break_subroutine_cost",
+        "break_ability_use_cost",
+        "hand_size",
+        "memory_units",
+      ].includes(modifier.kind),
     ) === true ||
     engine.printedSubroutines?.some((subroutine) =>
       [
@@ -1939,6 +3585,14 @@ function deriveRoles(
   if (engine.corpRootRezCreditOutcome !== undefined) {
     roles.add("asset_trash_target");
     roles.add("economy_asset");
+  }
+  if (
+    engine.hiddenReplacementLongtail?.kind ===
+    "delayed_install_with_counter_countdown"
+  ) {
+    if (engine.hiddenReplacementLongtail.visibility !== "hidden_info_barrier")
+      throw new Error("card_spec_unknown_delayed_install_countdown_shape");
+    roles.add("delayed_install");
   }
   for (const ability of engine.abilities ?? [])
     for (const effect of ability.effects ?? []) {
@@ -2144,7 +3798,7 @@ function deriveRoles(
       "corp_start_turn_tag_roll_per_runner_run_last_turn"
     )
       roles.add("tag_punishment");
-    if (engine.corpUtility?.kind === "run_start_tax_runner_tags")
+    if (engine.corpUtility?.kind === "run_start_lose_runner_credits_per_tag")
       roles.add("tag_punishment");
     if (
       engine.accessEffects?.some((access) =>
@@ -2438,6 +4092,13 @@ function deriveRiskTags(
   )
     risks.push("leave_play_penalty");
   if (
+    entry.planning.engine.scoredAgenda?.kind ===
+    "score_credit_swing_if_corp_credit_threshold_met"
+  )
+    risks.push("credit_threshold", "credit_swing", "economy_crash_on_score");
+  if (entry.planning.engine.uniqueDirectLongtail?.kind === "tagged_meat_damage")
+    risks.push("tag", "damage_window", "flatline_pressure");
+  if (
     entry.planning.engine.abilities?.some((ability) =>
       ability.effects?.some(
         (effect) => effect.kind === "choose_stack_or_trash_program_install",
@@ -2546,7 +4207,7 @@ function deriveClosedExtendedRiskTags(
   if (utility === "corp_draw_extra_then_bottom_one")
     for (const risk of ["hidden_zone", "draw_replacement", "unique"])
       risks.add(risk);
-  if (utility === "run_start_tax_runner_tags")
+  if (utility === "run_start_lose_runner_credits_per_tag")
     for (const risk of ["run_cost_modifier", "tag_synergy"]) risks.add(risk);
   if (engine.successfulRunFollowups !== undefined)
     for (const risk of ["hidden_zone", "successful_run"]) risks.add(risk);
@@ -2756,7 +4417,10 @@ function deriveCostProfile(
   entry: ReturnType<typeof cardSpecPlanningCards>[number],
 ): AiCardHint["costProfile"] {
   if (usesClosedExtendedMechanicalProfile(entry))
-    return deriveClosedExtendedCostProfile(annotations, entry);
+    return applyStaticCardCosts(
+      deriveClosedExtendedCostProfile(annotations, entry),
+      entry,
+    );
   const engine = entry.planning.engine;
   const opportunity = annotations.find(
     (annotation) =>
@@ -2782,16 +4446,55 @@ function deriveCostProfile(
     opportunity === undefined &&
     reserve === undefined
   )
-    return undefined;
-  return {
-    ...(clicks === undefined ? {} : { clicks }),
-    ...(opportunity?.kind === "risk_interpretation"
-      ? { opportunityCost: opportunity.severity }
-      : {}),
-    ...(reserve?.kind === "risk_interpretation"
-      ? { reserveRisk: reserve.severity }
-      : {}),
-  };
+    return applyStaticCardCosts(undefined, entry);
+  return applyStaticCardCosts(
+    {
+      ...(clicks === undefined ? {} : { clicks }),
+      ...(opportunity?.kind === "risk_interpretation"
+        ? { opportunityCost: opportunity.severity }
+        : {}),
+      ...(reserve?.kind === "risk_interpretation"
+        ? { reserveRisk: reserve.severity }
+        : {}),
+    },
+    entry,
+  );
+}
+
+function applyStaticCardCosts(
+  current: AiCardHint["costProfile"],
+  entry: PlanningEntry,
+): AiCardHint["costProfile"] {
+  const result: NonNullable<AiCardHint["costProfile"]> = { ...(current ?? {}) };
+  const characteristics = entry.planning.engine.characteristics;
+  if (
+    entry.definition.type === "event" ||
+    entry.definition.type === "operation"
+  ) {
+    result.clicks = 1;
+    if (characteristics.playCost?.kind === "fixed")
+      result.credits = characteristics.playCost.credits;
+  }
+  if (
+    entry.definition.type === "program" ||
+    entry.definition.type === "hardware" ||
+    entry.definition.type === "resource"
+  ) {
+    result.clicks = 1;
+    if (characteristics.numeric.installCost !== null)
+      result.credits = characteristics.numeric.installCost;
+  }
+  if (
+    entry.definition.type === "asset" ||
+    entry.definition.type === "ice" ||
+    entry.definition.type === "upgrade"
+  ) {
+    if (characteristics.numeric.rezCost !== null)
+      result.credits = characteristics.numeric.rezCost;
+  }
+  if (characteristics.numeric.memoryCost !== null)
+    result.memory = characteristics.numeric.memoryCost;
+  return Object.keys(result).length === 0 ? undefined : result;
 }
 
 function deriveClosedExtendedCostProfile(
@@ -2933,7 +4636,6 @@ function deriveConditions(
     conditions.push({ kind: "requires_start_of_turn" });
   if (engine.scoredAgenda !== undefined)
     conditions.push(
-      { kind: "requires_hq_agenda" },
       { kind: "requires_score_window" },
       { kind: "requires_scored_agenda" },
     );
@@ -3006,7 +4708,7 @@ function deriveConditions(
       conditions.push({ kind: "requires_archives_card" });
     if (corpUtilityKind === "corp_start_turn_tag_roll_per_runner_run_last_turn")
       conditions.push({ kind: "requires_start_of_turn" });
-    if (corpUtilityKind === "run_start_tax_runner_tags")
+    if (corpUtilityKind === "run_start_lose_runner_credits_per_tag")
       conditions.push(
         { kind: "requires_during_run" },
         { kind: "requires_runner_tagged" },
@@ -3016,7 +4718,9 @@ function deriveConditions(
       conditions.push({ kind: "requires_successful_run" });
     if (
       engine.modifiers?.some(
-        (modifier) => modifier.kind === "break_subroutine_cost",
+        (modifier) =>
+          modifier.kind === "break_subroutine_cost" ||
+          modifier.kind === "break_ability_use_cost",
       )
     )
       conditions.push(
@@ -3223,15 +4927,19 @@ function allPlanningAnnotations(
 function deriveTargetProfiles(
   entry: ReturnType<typeof cardSpecPlanningCards>[number],
 ): NonNullable<AiCardHint["targetProfiles"]> {
-  const preference = entry.planning.planningAnnotations?.card?.find(
-    (annotation) => annotation.kind === "target_preference",
-  );
+  const preferences =
+    entry.planning.planningAnnotations?.card?.filter(
+      (annotation) => annotation.kind === "target_preference",
+    ) ?? [];
+  const preference = preferences[0];
   if (
-    preference?.kind === "target_preference" &&
+    preferences.length > 0 &&
     (usesClosedExtendedMechanicalProfile(entry) ||
       hasClosedTargetPreferenceOwner(entry.planning.engine))
   )
-    return [deriveClosedExtendedTargetProfile(entry, preference)];
+    return preferences.map((targetPreference) =>
+      deriveClosedExtendedTargetProfile(entry, targetPreference),
+    );
   const requiredSubtype = entry.planning.engine.modifiers?.flatMap(
     (modifier) =>
       (modifier.kind === "rez_cost" || modifier.kind === "ice_strength") &&
@@ -3430,6 +5138,7 @@ function hasClosedTargetPreferenceOwner(
     engine.runnerRunStrengthBoost !== undefined ||
     engine.runnerEventTargetedEffect !== undefined ||
     engine.hostedProgramCapacity !== undefined ||
+    engine.restrictedHostedCreditSource !== undefined ||
     engine.trashPreventionSources !== undefined ||
     engine.virusCounter !== undefined ||
     engine.successfulRunFollowups !== undefined ||
@@ -3747,6 +5456,30 @@ function deriveClosedExtendedTargetProfile(
       targetType: "server",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
+  if (engine.corpUtility?.kind === "gain_restricted_install_actions")
+    return {
+      ...planningFields,
+      kind: "install_target",
+      timing: "on_play",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (engine.corpUtility?.kind === "corp_rd_top_reorder")
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (engine.corpUtility?.kind === "move_installed_corp_card_to_hq")
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "activated_ability",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
   if (engine.accessEffects !== undefined)
     return {
       ...planningFields,
@@ -3908,6 +5641,16 @@ function deriveClosedExtendedTargetProfile(
       targetType: "icebreaker",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
+  if (
+    engine.restrictedHostedCreditSource?.usableFor.includes("install_programs")
+  )
+    return {
+      ...planningFields,
+      kind: "install_target",
+      timing: "paid_action",
+      targetType: "program",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
   if (engine.trashPreventionSources !== undefined)
     return {
       ...planningFields,
@@ -3915,6 +5658,33 @@ function deriveClosedExtendedTargetProfile(
       timing: "on_use",
       targetType: "card",
       hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.successfulRunFollowups?.some(
+      (followup) =>
+        followup.kind === "force_rez_ice_outermost_inward_after_successful_run",
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "after_successful_run",
+      targetType: "server",
+      hiddenInfoPolicy: "legal_targets_only",
+      serverScope: "source_fort",
+    };
+  if (
+    engine.successfulRunFollowups?.some(
+      (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "after_successful_run",
+      targetType: "server",
+      hiddenInfoPolicy: "legal_targets_only",
+      serverScope: "source_fort",
     };
   if (
     engine.successfulRunFollowups?.some(
@@ -3929,7 +5699,20 @@ function deriveClosedExtendedTargetProfile(
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (engine.virusCounter?.addOnSuccessfulRun !== undefined) {
-    const server = engine.virusCounter.addOnSuccessfulRun.server;
+    const addOnSuccessfulRun = engine.virusCounter.addOnSuccessfulRun;
+    if (
+      addOnSuccessfulRun.server === "any" &&
+      addOnSuccessfulRun.target === "chosen_fully_broken_ice"
+    )
+      return {
+        ...planningFields,
+        kind: "use_target",
+        timing: "after_successful_run",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "visible_or_known_only",
+        serverScope: "source_fort",
+      };
+    const server = addOnSuccessfulRun.server;
     if (server !== "hq" && server !== "rd")
       throw new Error("card_spec_unknown_virus_counter_target_profile_server");
     return {
@@ -3940,6 +5723,37 @@ function deriveClosedExtendedTargetProfile(
       hiddenInfoPolicy: "current_access_only",
     };
   }
+  if (
+    engine.runnerUtilityLongtail?.kind === "successful_run_fort_counter_expose"
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "after_successful_run",
+      targetType: "server",
+      hiddenInfoPolicy: "legal_targets_only",
+      serverScope: "source_fort",
+    };
+  if (engine.runnerUtilityLongtail?.kind === "trash_fully_broken_passed_ice")
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "encounter_resolution",
+      targetType: "installed_ice",
+      hiddenInfoPolicy: "visible_or_known_only",
+      serverScope: "source_fort",
+    };
+  if (
+    engine.runnerUtilityLongtail?.kind ===
+    "replace_installed_program_trash_with_host_on_source"
+  )
+    return {
+      ...planningFields,
+      kind: "replacement_target",
+      timing: "replacement_window",
+      targetType: "program",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
   if (
     engine.runnerUtilityLongtail?.kind ===
     "hidden_resource_current_access_free_trash"
@@ -4015,7 +5829,20 @@ function deriveBreakerProfile(
       sideEffects: ["random_failure"],
     };
   if (pump?.kind !== "increase_strength")
-    throw new Error("card_spec_breaker_pump_missing");
+    return {
+      ...breakerProfileWithoutPump(engine, breaker),
+      ...(breaker.special?.kind === "blink_random_break_or_net_damage"
+        ? {
+            sideEffects: ["random_failure"],
+            randomOutcome: {
+              kind: "random_break_or_damage",
+              successProbabilityPerAttempt: 0.5,
+              failureDamageType: "net",
+              maxSingleFailureDamage: 3,
+            },
+          }
+        : {}),
+    };
   if (breaker.matches.kind === "selected_ice_subtype")
     return {
       configurableCoverage: true,
@@ -4062,9 +5889,11 @@ function deriveBreakerProfile(
         : {}),
     };
   if (breaker.matches.kind !== "ice_subtype")
-    throw new Error(
-      `card_spec_unsupported_breaker_matcher: ${breaker.matches.kind}`,
-    );
+    return {
+      ...breakerProfileWithoutPump(engine, breaker),
+      pumpCost: pump.cost.amount,
+      pumpStrengthAmount: pump.amount,
+    };
   return {
     coverage: [
       closedPlanningValue(
@@ -4121,6 +5950,72 @@ function breakerCoverageForSubtype(
     KNOWN_HINT_BREAKER_COVERAGES,
     "breaker_coverage",
   );
+}
+
+function breakerProfileWithoutPump(
+  engine: ReturnType<
+    typeof cardSpecPlanningCards
+  >[number]["planning"]["engine"],
+  breaker: Extract<
+    NonNullable<
+      ReturnType<
+        typeof cardSpecPlanningCards
+      >[number]["planning"]["engine"]["icebreakerAbilities"]
+    >[number],
+    { kind: "break_subroutine" }
+  >,
+): NonNullable<AiCardHint["breakerProfile"]> {
+  const coverage = breakerCoverageForMatches(breaker.matches);
+  return {
+    coverage,
+    ...(breaker.matches.kind === "any" ? { emergencyCoverage: true } : {}),
+    breakCost: breaker.cost.amount,
+    ...(engine.characteristics.strength.kind === "fixed"
+      ? { baseStrength: engine.characteristics.strength.value }
+      : {}),
+    ...(breaker.count === undefined
+      ? { maxSubroutinesPerBreak: 1 }
+      : {
+          maxSubroutinesPerBreak: breaker.count,
+          multiSubroutineBreak: breaker.count > 1,
+        }),
+  };
+}
+
+function breakerCoverageForMatches(
+  matches: Extract<
+    NonNullable<
+      ReturnType<
+        typeof cardSpecPlanningCards
+      >[number]["planning"]["engine"]["icebreakerAbilities"]
+    >[number],
+    { kind: "break_subroutine" }
+  >["matches"],
+): NonNullable<NonNullable<AiCardHint["breakerProfile"]>["coverage"]> {
+  if (matches.kind === "any") return ["universal"];
+  if (matches.kind === "ice_subtype")
+    return [breakerCoverageForSubtype(matches.subtype)];
+  if (matches.kind === "ice_subtype_any_of")
+    return [
+      ...new Set(
+        matches.subtypes.map((subtype) =>
+          breakerCoverageForSpecializedSubtype(subtype),
+        ),
+      ),
+    ];
+  if (matches.kind === "subroutine_traces") return ["trace"];
+  if (matches.kind === "subroutine_tag")
+    return [breakerCoverageForSpecializedSubtype(matches.tag)];
+  return ["unknown_special"];
+}
+
+function breakerCoverageForSpecializedSubtype(
+  subtype: string,
+): (typeof KNOWN_HINT_BREAKER_COVERAGES)[number] {
+  if (subtype === "barrier") return "wall";
+  if (KNOWN_HINT_BREAKER_COVERAGES.includes(subtype as never))
+    return subtype as (typeof KNOWN_HINT_BREAKER_COVERAGES)[number];
+  return "unknown_special";
 }
 
 function deriveHintEffects(
@@ -4257,7 +6152,9 @@ function deriveHintEffects(
         scope: "runner",
         timing: "encounter_resolution",
         resource: hintDamageResource(subroutine.damageType),
-        amount: subroutine.amount,
+        ...(typeof subroutine.amount === "number"
+          ? { amount: subroutine.amount }
+          : { amountKind: "dynamic" as const }),
         finite: true,
         target: `corp_ice.${subroutine.damageType}_damage`,
       });
@@ -4448,9 +6345,8 @@ function deriveClosedExtendedHintEffects(
     (subroutine) =>
       subroutine.kind === "trace" &&
       engine.variableRez?.kind === "x_strength" &&
-      engine.variableRez.traceBaseFromValue === true &&
-      engine.variableRez.traceBidLimitFromValue === true &&
-      subroutine.baseTraceStrength === 0 &&
+      engine.variableRez.traceLimitFromValue === true &&
+      subroutine.traceLimit === 0 &&
       subroutine.onSuccess.some((effect) => effect.kind === "end_run") &&
       subroutine.onSuccess.some(
         (effect) =>
@@ -4464,7 +6360,8 @@ function deriveClosedExtendedHintEffects(
     !engine.printedSubroutines?.some(
       (subroutine) =>
         subroutine.kind === "damage" &&
-        subroutine.capabilityKey === relativeDynamicDamage.subroutineId,
+        subroutine.capabilityKey ===
+          relativeDynamicDamage.subroutineCapabilityKey,
     )
   )
     throw new Error("card_spec_unknown_relative_ice_dynamic_damage_binding");
@@ -4640,8 +6537,15 @@ function deriveClosedExtendedHintEffects(
           timing: "action",
           resource: "tags",
           target: "remove_tags",
-          amount: requiredFiniteNumber(effect.amount, "remove_tags.amount"),
           finite: true,
+          ...(effect.mode === "all"
+            ? {}
+            : {
+                amount: requiredFiniteNumber(
+                  effect.amount,
+                  "remove_tags.amount",
+                ),
+              }),
         });
       if (effect.kind === "private_look")
         effects.push({
@@ -4717,7 +6621,8 @@ function deriveClosedExtendedHintEffects(
     const isRelativeDynamicDamage =
       subroutine.kind === "damage" &&
       engine.relativeIce?.kind === "rezzed_ice_outside_this_ice" &&
-      relativeDynamicDamage?.subroutineId === subroutine.capabilityKey;
+      relativeDynamicDamage?.subroutineCapabilityKey ===
+        subroutine.capabilityKey;
     if (subroutine.kind === "damage") {
       if (isRelativeDynamicDamage && relativeDynamicDamage !== undefined)
         if (relativeDynamicDamage.amountPerCount <= 0)
@@ -4733,7 +6638,11 @@ function deriveClosedExtendedHintEffects(
             target: "corp_ice.outer_ice_scaling",
             amount: relativeDynamicDamage.amountPerCount,
           });
-      else
+      else {
+        if (typeof subroutine.amount !== "number")
+          throw new Error(
+            "card_spec_unknown_relative_ice_dynamic_damage_binding",
+          );
         effects.push({
           kind: "damage",
           scope: "runner",
@@ -4743,6 +6652,7 @@ function deriveClosedExtendedHintEffects(
           amount: subroutine.amount,
           finite: true,
         });
+      }
     }
     if (subroutine.kind === "random_damage")
       effects.push({
@@ -4783,7 +6693,6 @@ function deriveClosedExtendedHintEffects(
           scope: "runner",
           timing: "encounter",
           target: "trace.source",
-          amount: subroutine.baseTraceStrength,
           finite: true,
         });
     }
@@ -4944,7 +6853,14 @@ function deriveClosedExtendedHintEffects(
         timing: "persistent",
         resource: "counters",
       });
-    else throw new Error("card_spec_unknown_runner_counter_effect_shape");
+    else
+      effects.push({
+        kind: "persistent_counter_effect",
+        scope: "runner",
+        timing: "persistent",
+        resource: "counters",
+        target: "runner_counter_effect",
+      });
   }
   for (const window of engine.fortRunWindows ?? [])
     if (window.kind === "move_self_to_outermost_position_on_other_fort")
@@ -5075,7 +6991,7 @@ function appendClosedCorpUtilityEffects(
         repeatable: true,
       },
     );
-  if (utility?.kind === "run_start_tax_runner_tags")
+  if (utility?.kind === "run_start_lose_runner_credits_per_tag")
     effects.push(
       {
         kind: "run_tax",
@@ -5457,7 +7373,10 @@ function appendClosedHardwareEffects(
         resource: "hand_size",
         amount: modifier.amount,
       });
-    if (modifier.kind === "break_subroutine_cost")
+    if (
+      modifier.kind === "break_subroutine_cost" ||
+      modifier.kind === "break_ability_use_cost"
+    )
       effects.push(
         {
           kind: "run_tax",
@@ -5485,36 +7404,12 @@ function appendClosedHardwareEffects(
         scope: "runner",
         timing: "persistent",
         resource: "credits",
-        target:
-          use === "using_icebreaker_during_run"
-            ? "icebreaker"
-            : use === "play_events"
-              ? "play_events"
-              : "link",
+        target: restrictedHostedCreditTarget(use),
         amount: source.capacity,
+        economyMode: "restricted_credit",
         repeatable: true,
       });
-  for (const source of engine.damagePreventionSources ?? [])
-    for (const damageType of source.damageTypes)
-      effects.push({
-        kind:
-          damageType === "net"
-            ? "net_damage_prevention"
-            : "brain_damage_prevention",
-        scope: "runner",
-        timing: "prevention_window",
-        resource: damageType === "net" ? "net_damage" : "brain_damage",
-        ...(typeof source.amount === "number" ? { amount: source.amount } : {}),
-      });
-  for (const source of engine.tagPreventionSources ?? []) {
-    effects.push({
-      kind: "tag_prevention",
-      scope: "runner",
-      timing: "prevention_window",
-      resource: "tags",
-      target: "avoid_tag",
-      amount: source.amount,
-    });
+  for (const source of engine.tagPreventionSources ?? [])
     if (source.cost.kind === "credit_and_forgo_next_action")
       effects.push({
         kind: "action_penalty",
@@ -5524,7 +7419,6 @@ function appendClosedHardwareEffects(
         target: "action_loss",
         amount: 1,
       });
-  }
   for (const trigger of engine.lifecycle?.start_of_runner_turn ?? [])
     for (const effect of trigger.effects)
       if (effect.kind === "gain_credits")
@@ -5576,6 +7470,33 @@ function appendClosedHardwareEffects(
         });
 }
 
+function restrictedHostedCreditTarget(
+  use: NonNullable<
+    PlanningEntry["planning"]["engine"]["restrictedHostedCreditSource"]
+  >["usableFor"][number],
+): string {
+  switch (use) {
+    case "using_icebreaker_during_run":
+      return "icebreaker";
+    case "using_icebreaker_during_run_non_noisy":
+      return "non_noisy_icebreaker";
+    case "using_killer_during_run":
+      return "killer";
+    case "increase_link":
+      return "link";
+    case "trash_nodes":
+      return "node_trash";
+    case "trash_upgrades":
+      return "upgrade_trash";
+    case "install_programs":
+      return "program_install";
+    case "remove_tags":
+      return "tag_clear";
+    case "play_events":
+      return "play_events";
+  }
+}
+
 function hintDamageResource(
   damageType: "net" | "meat" | "core" | "brain",
 ): "net_damage" | "meat_damage" | "brain_damage" {
@@ -5595,9 +7516,8 @@ function derivedFunctionSignals(
     (subroutine) =>
       subroutine.kind === "trace" &&
       engine.variableRez?.kind === "x_strength" &&
-      engine.variableRez.traceBaseFromValue === true &&
-      engine.variableRez.traceBidLimitFromValue === true &&
-      subroutine.baseTraceStrength === 0 &&
+      engine.variableRez.traceLimitFromValue === true &&
+      subroutine.traceLimit === 0 &&
       subroutine.onSuccess.some((effect) => effect.kind === "end_run") &&
       subroutine.onSuccess.some(
         (effect) =>
@@ -5644,7 +7564,8 @@ function derivedFunctionSignals(
     if (subroutine.kind === "damage") {
       if (
         engine.relativeIce?.kind === "rezzed_ice_outside_this_ice" &&
-        relativeDynamicDamage?.subroutineId === subroutine.capabilityKey
+        relativeDynamicDamage?.subroutineCapabilityKey ===
+          subroutine.capabilityKey
       ) {
         signals.add("corp_ice.outer_ice_scaling");
         signals.add("damage.payoff");
@@ -5759,15 +7680,6 @@ function derivedFunctionSignals(
     signals.add("breaker.strength_bonus_vs_chosen_ice");
     signals.add("breaker.targeted_ice_bonus");
   }
-  if (engine.scoredAgenda !== undefined)
-    for (const signal of [
-      "economy.corp_install_rez_budget",
-      "economy.generic",
-      "install.corp_new_remote_fort_from_hq",
-      "score.remote_fort_creation",
-      "score.remote_install_budget",
-    ])
-      signals.add(signal);
   if (
     entry.definition.type === "resource" &&
     entry.definition.subtypes.includes("connection")
@@ -5919,7 +7831,7 @@ function derivedFunctionSignals(
   if (engine.corpUtility?.kind === "corp_draw_extra_then_bottom_one")
     for (const signal of ["draw.corp_draw", "hq.corp_hand_filter"])
       signals.add(signal);
-  if (engine.corpUtility?.kind === "run_start_tax_runner_tags")
+  if (engine.corpUtility?.kind === "run_start_lose_runner_credits_per_tag")
     for (const signal of [
       "condition.runner_has_one_or_more_tags",
       "tag.payoff",
@@ -6035,7 +7947,9 @@ function derivedFunctionSignals(
     if (engine.fortRunWindows !== undefined) signals.add("ice.future_pressure");
     if (
       engine.modifiers?.some(
-        (modifier) => modifier.kind === "break_subroutine_cost",
+        (modifier) =>
+          modifier.kind === "break_subroutine_cost" ||
+          modifier.kind === "break_ability_use_cost",
       )
     )
       for (const signal of ["run.break_cost_penalty", "tax.runner_persistent"])
@@ -6226,9 +8140,8 @@ function derivedTacticSignals(
     (subroutine) =>
       subroutine.kind === "trace" &&
       engine.variableRez?.kind === "x_strength" &&
-      engine.variableRez.traceBaseFromValue === true &&
-      engine.variableRez.traceBidLimitFromValue === true &&
-      subroutine.baseTraceStrength === 0 &&
+      engine.variableRez.traceLimitFromValue === true &&
+      subroutine.traceLimit === 0 &&
       subroutine.onSuccess.some((effect) => effect.kind === "end_run") &&
       subroutine.onSuccess.some(
         (effect) =>
@@ -6245,6 +8158,10 @@ function derivedTacticSignals(
       signals.add("ice.corp_strength_support");
     if (modifier.kind === "rez_cost" || modifier.kind === "ice_strength")
       signals.add("tax.ice");
+    if (modifier.kind === "access_count")
+      signals.add(
+        `access.${modifier.server === "rd" ? "rnd" : modifier.server}_multiaccess`,
+      );
   }
   for (const access of engine.accessEffects ?? []) {
     if (access.ignoreIfAccessedFrom?.includes("archives"))
@@ -6271,7 +8188,8 @@ function derivedTacticSignals(
       signals.add(`corp_ice.${subroutine.damageType}_damage`);
       if (
         engine.relativeIce?.kind === "rezzed_ice_outside_this_ice" &&
-        relativeDynamicDamage?.subroutineId === subroutine.capabilityKey
+        relativeDynamicDamage?.subroutineCapabilityKey ===
+          subroutine.capabilityKey
       )
         for (const signal of [
           "corp_ice.outer_ice_scaling",
@@ -6303,6 +8221,18 @@ function derivedTacticSignals(
         signals.add(`economy.${effect.recipient}_credit_burst`);
       if (effect.kind === "draw_cards")
         signals.add(`draw.${effect.recipient}_draw`);
+      if (effect.kind === "distribute_advancement_counters")
+        for (const signal of [
+          "advance.corp_counter_placement",
+          "advance.score_window_support",
+        ])
+          signals.add(signal);
+      if (effect.kind === "move_advancement_counters")
+        for (const signal of [
+          "advance.corp_counter_transfer",
+          "advance.score_window_support",
+        ])
+          signals.add(signal);
       if (
         effect.kind === "lose_credits" &&
         effect.recipient === "runner" &&
@@ -6330,6 +8260,13 @@ function derivedTacticSignals(
   ) {
     signals.add("score.remote_fort_creation");
     signals.add("score.remote_install_budget");
+  }
+  if (
+    engine.scoredAgenda?.kind ===
+    "score_credit_swing_if_corp_credit_threshold_met"
+  ) {
+    signals.add("risk.requires_corp_credit_threshold");
+    signals.add("risk.economy_crash_on_score");
   }
   if (usesClosedExtendedMechanicalProfile(entry)) {
     const tacticFunctionSignals = new Set([
@@ -6493,12 +8430,15 @@ function derivedActionStrategyEvidence(
   const nodeEffects = Array.isArray(node.effects)
     ? node.effects.filter(isRecord)
     : [];
+  const nodeCondition = isRecord(node.condition) ? node.condition : undefined;
   const makeRun = nodeEffects.find((effect) => effect.kind === "make_run");
   const trace = nodeEffects.find((effect) => effect.kind === "trace");
   const traceSuccessEffects =
     trace !== undefined && Array.isArray(trace.onSuccess)
       ? trace.onSuccess.filter(isRecord)
-      : [];
+      : kind === "trace" && Array.isArray(node.onSuccess)
+        ? node.onSuccess.filter(isRecord)
+        : [];
   const traceAddsTag = traceSuccessEffects.some(
     (effect) =>
       effect.kind === "add_tags" ||
@@ -6517,6 +8457,9 @@ function derivedActionStrategyEvidence(
       effect.kind ===
       "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
   );
+  const taggedPayoffEffect = nodeEffects.some((effect) =>
+    ["add_tags", "damage", "lose_credits"].includes(String(effect.kind)),
+  );
   if (kind === "tagged_runner_meat_damage_reduce_hand_size_on_success") {
     expectedAnchor = "damage.corp_tagged_meat_payoff";
     expectedRole = "payoff_anchor";
@@ -6528,17 +8471,34 @@ function derivedActionStrategyEvidence(
     expectedAnchor = "tag.source";
     expectedRole = "anchor_evidence";
     expectedStrategies = new Set(["corp.tag_trace_punish"]);
-  } else if (kind === "on_play" && trace !== undefined) {
+  } else if (
+    (kind === "on_play" || kind === "activated" || kind === "on_access") &&
+    trace !== undefined
+  ) {
     if (evidenceAnchor === "trace.source") expectedAnchor = evidenceAnchor;
     else if (evidenceAnchor === "tag.source" && traceAddsTag)
       expectedAnchor = evidenceAnchor;
     expectedRole = "anchor_evidence";
     expectedStrategies = new Set(["corp.tag_trace_punish"]);
   } else if (
+    (kind === "on_play" || kind === "activated" || kind === "on_access") &&
+    nodeCondition?.kind === "runner_is_tagged" &&
+    taggedPayoffEffect
+  ) {
+    if (evidenceAnchor === "tag.payoff") {
+      expectedAnchor = evidenceAnchor;
+      expectedRole = "payoff_anchor";
+    } else if (evidenceAnchor === "tag.source" && addTags !== undefined) {
+      expectedAnchor = evidenceAnchor;
+      expectedRole = "anchor_evidence";
+    }
+    expectedStrategies = new Set(["corp.tag_trace_punish"]);
+  } else if (
     kind === "on_play" &&
     (addTags !== undefined ||
       taggedRunReplacement !== undefined ||
       taggedFortTrash !== undefined ||
+      makeRun?.successfulRunRunnerTagGain !== undefined ||
       makeRun?.badPublicityRunAftermath === "successful_run_draw_event")
   ) {
     expectedAnchor = "tag.source";
@@ -6605,17 +8565,42 @@ function derivedActionStrategyEvidence(
     expectedAnchor = "tag.source";
     expectedRole = "anchor_evidence";
   } else if (
+    kind === "encounter_tag" ||
+    kind === "runner_draw_tax_tag" ||
+    kind === "end_turn_tag_if_runner_received_tag"
+  ) {
+    expectedAnchor = "tag.source";
+    expectedRole = "anchor_evidence";
+    expectedStrategies = new Set(["corp.tag_trace_punish"]);
+  } else if (
     kind === "runner_memory_limit_modifier_until_end_of_turn" ||
-    kind === "run_start_tax_runner_tags" ||
+    kind === "run_start_lose_runner_credits_per_tag" ||
+    kind === "run_start_tax" ||
     (kind === "on_access" &&
       isRecord(node.condition) &&
       node.condition.kind === "runner_tags_at_least")
   ) {
     expectedAnchor = "tag.payoff";
     expectedRole = "payoff_anchor";
-  } else if (kind === "trace") {
-    expectedAnchor = "trace.source";
+  } else if (
+    kind === "trash_runner_resources_if_tagged" ||
+    kind === "installed_hardware_trash_by_counter" ||
+    kind === "tagged_meat_damage" ||
+    kind === "tag_threshold_meat_damage_asset"
+  ) {
+    expectedAnchor = "tag.payoff";
+    expectedRole = "payoff_anchor";
+    expectedStrategies = new Set(["corp.tag_trace_punish"]);
+  } else if (kind === "runner_forgoes_next_action") {
+    expectedAnchor = "corp_ice.runner_action_loss";
     expectedRole = "anchor_evidence";
+    expectedStrategies = new Set(["corp.ice_tax_glacier"]);
+  } else if (kind === "trace") {
+    if (evidenceAnchor === "trace.source") expectedAnchor = evidenceAnchor;
+    else if (evidenceAnchor === "tag.source" && traceAddsTag)
+      expectedAnchor = evidenceAnchor;
+    expectedRole = "anchor_evidence";
+    expectedStrategies = new Set(["corp.tag_trace_punish"]);
   } else if (kind === "library_search_run") {
     expectedRole = "payoff_anchor";
     if (strategyId === "runner.hq_pressure")
@@ -6718,7 +8703,8 @@ function derivedCardStrategyEvidence(
       : printedSubroutines.find(
           (subroutine) =>
             subroutine.capabilityKey ===
-            engine.relativeIce?.dynamicDamageSubroutine?.subroutineId,
+            engine.relativeIce?.dynamicDamageSubroutine
+              ?.subroutineCapabilityKey,
         );
   const checked = (
     expectedStrategyId: string,
@@ -7031,10 +9017,9 @@ function derivedCardStrategyEvidence(
         "tax_tool",
         profile,
         engine.variableRez?.kind === "x_strength" &&
-          engine.variableRez.traceBaseFromValue === true &&
-          engine.variableRez.traceBidLimitFromValue === true &&
+          engine.variableRez.traceLimitFromValue === true &&
           runLockTrace?.kind === "trace" &&
-          runLockTrace.baseTraceStrength === 0,
+          runLockTrace.traceLimit === 0,
         ["corp_ice.rez_paid_scaling", "corp_ice.run_lock"],
       );
     case "position_scaling_trace_tag_tax_ice":
@@ -7194,7 +9179,7 @@ function derivedCardStrategyEvidence(
             ability.effects?.some(
               (effect) =>
                 effect.kind === "trace" &&
-                effect.additionalPlayCostPerBaseTracePointAboveZero === 1 &&
+                effect.additionalPlayCostPerTraceLimitPointAboveZero === 1 &&
                 effect.onSuccess?.some(
                   (success) => success.kind === "add_tags",
                 ),
@@ -7576,6 +9561,266 @@ function derivedStrategyEvidence(
   const evidence = new Set<string>();
   const add = (...signals: string[]) =>
     signals.forEach((signal) => evidence.add(signal));
+  const abilityEffects = (engine.abilities ?? []).flatMap(
+    (ability) => ability.effects ?? [],
+  );
+  const accessEffects = (engine.accessEffects ?? []).flatMap(
+    (access) => access.effects,
+  );
+  const printedKinds = new Set<string>(
+    printed.map((subroutine) => subroutine.kind),
+  );
+  const scoredKind = engine.scoredAgenda?.kind;
+  if (
+    strategyId === "corp.deck_recycle_engine" &&
+    scoredKind === "shuffle_hq_archives_into_rd_then_draw"
+  )
+    add("deck.corp_recycle", "draw.corp_action", "archives.corp_recycle");
+  if (
+    strategyId === "corp.central_stabilize" &&
+    scoredKind === "shuffle_selected_hq_agendas_into_rd_gain_credits"
+  )
+    add("hq.corp_agenda_flood_control", "rnd.corp_agenda_recycle");
+  if (
+    strategyId === "corp.draw_engine" &&
+    scoredKind === "corp_start_turn_optional_draw" &&
+    abilityEffects.some((effect) => effect.kind === "draw_cards")
+  )
+    add("draw.corp_recurring", "score.recurring_draw");
+  if (
+    strategyId === "corp.overadvance_value" &&
+    scoredKind === "overadvance_bonus_agenda_points"
+  )
+    add("score.overadvance_bonus", "score.agenda_point_payoff");
+  if (
+    strategyId === "corp.action_tempo" &&
+    engine.lifecycle?.start_of_corp_turn?.some((entry) =>
+      entry.effects.some(
+        (effect) =>
+          effect.kind === "gain_actions" && effect.recipient === "controller",
+      ),
+    )
+  )
+    add("action.corp_recurring", "score.extra_action_engine");
+  if (strategyId === "corp.damage_kill") {
+    if (scoredKind === "meat_damage_bonus") add("damage.corp_meat_amplifier");
+    if (
+      (engine.abilities ?? []).some(
+        (ability) =>
+          ability.condition?.kind === "runner_is_tagged" &&
+          ability.effects.some((effect) => effect.kind === "damage"),
+      )
+    )
+      add("condition.runner_tagged", "damage.corp_tagged_payoff");
+    if (
+      printed.some(
+        (subroutine) =>
+          subroutine.kind === "damage" ||
+          subroutine.kind === "random_damage" ||
+          subroutine.kind === "next_encounter_unless_fully_break_damage",
+      )
+    )
+      add("corp_ice.damage_source", "damage.payoff");
+    if (
+      engine.uniqueDirectLongtail?.kind === "tagged_meat_damage" ||
+      engine.uniqueDirectLongtail?.kind === "tag_threshold_meat_damage_asset"
+    )
+      add("condition.runner_tagged", "damage.corp_tagged_meat_payoff");
+    if (
+      accessEffects.some(
+        (effect) =>
+          effect.kind === "damage" ||
+          effect.kind === "damage_from_source_advancement_counters",
+      )
+    )
+      add("access.corp_damage_ambush", "damage.payoff");
+  }
+  if (strategyId === "corp.ice_tax_glacier") {
+    if (
+      [
+        "select_rezzed_ice_mark_modifier",
+        "score_rez_installed_ice_at_no_cost",
+        "choose_fort_ice_strength_bonus",
+        "reveal_top_rd_install_and_rez_ice_trash_rest",
+      ].includes(String(scoredKind))
+    )
+      add("ice.corp_defense_support", "tax.ice");
+    if (
+      [
+        "run_duration_encounter_cost_or_end_run",
+        "run_duration_ice_strength",
+        "runner_run_lock_actions",
+        "prohibit_break_and_jack_out_next_ice",
+        "runner_forgoes_next_action",
+        "run_duration_additional_subroutine",
+        "random_resume_from_rezzed_ice_back_or_jack_out",
+        "run_duration_jack_out_cost",
+        "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out",
+        "run_duration_break_subroutine_cost",
+      ].some((kind) => printedKinds.has(kind))
+    )
+      add("corp_ice.encounter_tax", "tax.ice");
+    if (
+      engine.hiddenReplacementLongtail?.kind ===
+      "conceal_and_reorder_installed_ice"
+    )
+      add("ice.corp_reorder", "defense.corp_hidden_ice");
+    if (
+      engine.fortRunWindows?.some((window) =>
+        [
+          "temporary_hq_ice_encounter_after_successful_run",
+          "install_hq_ice_innermost_after_successful_run",
+          "discounted_rez_ice_on_this_fort",
+          "swap_unrezzed_fort_ice_with_hq_ice",
+        ].includes(window.kind),
+      )
+    )
+      add("ice.corp_fort_defense", "tax.ice");
+  }
+  if (strategyId === "corp.fast_advance") {
+    if (
+      abilityEffects.some((effect) =>
+        [
+          "move_advancement_counters",
+          "distribute_advancement_counters",
+        ].includes(effect.kind),
+      )
+    )
+      add("advance.counter_manipulation", "score.fast_advance_support");
+    if (
+      (engine.abilities ?? []).some(
+        (ability) =>
+          ability.condition?.kind === "source_has_advancement_counters" &&
+          ability.effects.some((effect) => effect.kind === "gain_actions"),
+      ) ||
+      abilityEffects.some((effect) => effect.kind === "gain_actions")
+    )
+      add("action.corp_burst", "score.fast_advance_action_support");
+  }
+  if (strategyId === "corp.asset_economy") {
+    if (
+      abilityEffects.some((effect) =>
+        [
+          "add_hosted_credits",
+          "take_hosted_credits",
+          "gain_credits_per_advancement_counter_on_source",
+        ].includes(effect.kind),
+      ) ||
+      engine.lifecycle?.on_rez?.some(
+        (effect) => effect.kind === "add_hosted_credits",
+      ) ||
+      engine.remainingReplacementLongtail?.kind ===
+        "basic_credit_diversion_to_recurring_credits"
+    )
+      add("economy.corp_installed_engine", "economy.corp_recurring");
+  }
+  if (strategyId === "corp.ambush_bluff") {
+    if (
+      accessEffects.some((effect) =>
+        [
+          "trash_installed_runner_cards",
+          "damage",
+          "damage_from_source_advancement_counters",
+          "add_runner_counter",
+        ].includes(effect.kind),
+      )
+    )
+      add("remote.ambush", "access.punish");
+  }
+  if (strategyId === "corp.remote_scoring") {
+    if (
+      [
+        "score_rez_installed_ice_at_no_cost",
+        "choose_fort_ice_strength_bonus",
+      ].includes(String(scoredKind))
+    )
+      add("score.remote_defense", "ice.corp_defense_support");
+    if (
+      abilityEffects.some(
+        (effect) => effect.kind === "distribute_advancement_counters",
+      )
+    )
+      add("advance.counter_distribution", "score.remote_advancement_support");
+    if (
+      engine.hiddenReplacementLongtail?.kind ===
+      "delayed_agenda_access_replacement"
+    )
+      add("access.corp_agenda_delay", "score.remote_window");
+    if (
+      engine.fortRunWindows?.some((window) =>
+        [
+          "temporary_hq_ice_encounter_after_successful_run",
+          "install_hq_ice_innermost_after_successful_run",
+          "roll_die_on_pass_rezzed_ice_on_same_fort",
+        ].includes(window.kind),
+      )
+    )
+      add("score.remote_defense", "ice.corp_fort_defense");
+    if (
+      engine.fortCapacityModifiers?.some(
+        (modifier) =>
+          modifier.kind === "additional_agenda_or_node_slot_inside_fort",
+      )
+    )
+      add("score.remote_capacity", "remote.corp_slot_expansion");
+  }
+  if (strategyId === "corp.tag_trace_punish") {
+    const traceEffects = abilityEffects.filter(
+      (effect) => effect.kind === "trace",
+    );
+    if (
+      traceEffects.some((effect) =>
+        effect.onSuccess.some((entry) => entry.kind === "add_tags"),
+      ) ||
+      printed.some(
+        (subroutine) =>
+          subroutine.kind === "trace" &&
+          subroutine.onSuccess.some((effect) => effect.kind === "add_tags"),
+      ) ||
+      accessEffects.some(
+        (effect) =>
+          effect.kind === "trace" &&
+          effect.onSuccess.some((entry) => entry.kind === "add_tags"),
+      )
+    )
+      add("trace.source", "tag.source");
+    if (
+      (engine.abilities ?? []).some(
+        (ability) =>
+          ability.condition?.kind === "runner_is_tagged" &&
+          ability.effects.some((effect) =>
+            ["add_tags", "damage", "lose_credits"].includes(effect.kind),
+          ),
+      ) ||
+      engine.accessEffects?.some(
+        (access) =>
+          access.condition?.kind === "runner_is_tagged" &&
+          access.effects.some((effect) => effect.kind === "damage"),
+      )
+    )
+      add("condition.runner_tagged", "tag.payoff");
+    if (
+      [
+        "trash_runner_resources_if_tagged",
+        "installed_hardware_trash_by_counter",
+        "encounter_tag",
+        "end_turn_tag_if_runner_received_tag",
+        "recurring_trace_credit_pool",
+      ].includes(String(engine.corpUtility?.kind)) ||
+      [
+        "runner_draw_tax_tag",
+        "trace_bit_counter_pool_asset",
+        "link_reduction_counter_upgrade",
+      ].includes(String(engine.remainingReplacementLongtail?.kind)) ||
+      ["tagged_meat_damage", "tag_threshold_meat_damage_asset"].includes(
+        String(engine.uniqueDirectLongtail?.kind),
+      ) ||
+      engine.fortRunWindows?.some(
+        (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
+      )
+    )
+      add("tag.trace_typed_support");
+  }
   for (const scored of engine.scoredAgenda === undefined
     ? []
     : [engine.scoredAgenda]) {
@@ -7614,7 +9859,10 @@ function derivedStrategyEvidence(
       add("condition.runner_attempted_run_last_turn", "tag.source");
     if (utility.kind === "corp_draw_extra_then_bottom_one")
       add("draw.corp_draw", "draw.corp_recurring", "hq.corp_hand_filter");
-    if (utility.kind === "run_start_tax_runner_tags")
+    if (
+      utility.kind === "run_start_lose_runner_credits_per_tag" ||
+      utility.kind === "run_start_tax"
+    )
       add("tag.payoff", "tag.runner_credit_loss_payoff");
     if (utility.kind === "runner_memory_limit_modifier_until_end_of_turn")
       add(

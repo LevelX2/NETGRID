@@ -145,7 +145,7 @@ export function executeEncounterTraceMovementEffect(
       return true;
     }
     case "trace": {
-      assertPositiveIntegerAmount("trace", effect.baseTraceStrength);
+      assertPositiveIntegerAmount("trace", effect.traceLimit);
       assertPublicVisibility("trace", effect.visibility);
       if (effect.onFailure && effect.onFailure.length > 0)
         throw new Error("Trace onFailure effects are not supported yet.");
@@ -155,7 +155,7 @@ export function executeEncounterTraceMovementEffect(
         );
       const traceResult = context.startTrace(
         context.sourceCardId,
-        effect.baseTraceStrength,
+        effect.traceLimit,
         effect.onSuccess,
       );
       mergePublicPayload(publicPayload, traceResult.publicPayload);

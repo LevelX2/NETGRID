@@ -15,10 +15,6 @@ import {
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  MYSTERY_BOX_ID,
-  SELF_MODIFYING_CODE_ID,
-} from "../../compatibility/runtime-compatibility";
 import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 
@@ -663,13 +659,12 @@ function paidStackProgramInstallEncounterActions(
   return state.runner.rig.programs
     .slice()
     .sort()
-    .filter(
-      (cardId) =>
-        host.cards.definitionFor(cardId).id === SELF_MODIFYING_CODE_ID,
-    )
-    .filter(
-      (cardId) =>
-        !cardImplementationForDefinitionId(host.cards.definitionFor(cardId).id),
+    .filter((cardId) =>
+      cardImplementationForDefinitionId(
+        host.cards.definitionFor(cardId).id,
+      )?.abilities?.some((ability) =>
+        ability.effects?.some((effect) => effect.kind === "search_stack_install"),
+      ),
     )
     .map((cardId) => buildRunnerHiddenStackProgramInstallAction(state, cardId));
 }
@@ -970,10 +965,15 @@ export function buildRevealedStackProgramInstallRunActions(
     .slice()
     .sort()
     .filter((cardId) => !used.has(cardId))
-    .filter((cardId) => host.cards.definitionFor(cardId).id === MYSTERY_BOX_ID)
-    .filter(
-      (cardId) =>
-        !cardImplementationForDefinitionId(host.cards.definitionFor(cardId).id),
+    .filter((cardId) =>
+      cardImplementationForDefinitionId(
+        host.cards.definitionFor(cardId).id,
+      )?.abilities?.some((ability) =>
+        ability.effects?.some(
+          (effect) =>
+            effect.kind === "look_top_stack_show_to_corp_then_install_matching",
+        ),
+      ),
     )
     .map((sourceCardId) => {
       const topCards = state.runner.stack.slice(0, 5);

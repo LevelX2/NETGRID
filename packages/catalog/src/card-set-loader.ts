@@ -1,5 +1,3 @@
-import originalsetCardsData from "../../../data/cards/originalset-v1-cards.json";
-import originalsetSupportData from "../../../data/manifests/originalset-v1-card-support.json";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
   getCardSpecSupportSummary,
@@ -83,12 +81,7 @@ export type LoadedCardSet = {
   support: CardSupportFile;
 };
 
-const LEGACY_CARD_SET_FILES: LoadedCardSet[] = [
-  {
-    set: originalsetCardsData as CardSetFile,
-    support: originalsetSupportData as CardSupportFile,
-  },
-];
+const LEGACY_CARD_SET_FILES: readonly LoadedCardSet[] = [];
 
 const CARD_SPEC_AI_SCENARIO_REF =
   "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported";

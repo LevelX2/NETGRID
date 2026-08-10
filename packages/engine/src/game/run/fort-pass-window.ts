@@ -216,7 +216,6 @@ export function buildStartRunIceRepositionActions(
   const otherFortActions = host.state.corp.servers.flatMap((sourceServer) =>
     sourceServer.ice
       .map((sourceCardId, sourceIceIndex) => ({ sourceCardId, sourceIceIndex }))
-      .filter(({ sourceCardId }) => !used.has(sourceCardId))
       .flatMap(({ sourceCardId, sourceIceIndex }) => {
         const implementation = fortRunWindowImplementationForCard(
           host,
@@ -224,6 +223,11 @@ export function buildStartRunIceRepositionActions(
           "move_self_to_outermost_position_on_other_fort",
         );
         if (!implementation) return [];
+        if (
+          implementation.limit === "once_per_run_per_source" &&
+          used.has(sourceCardId)
+        )
+          return [];
         const cost = Math.max(0, Math.floor(implementation.cost.amount));
         if (host.state.corp.credits < cost) return [];
         const definition = host.cards.definitionFor(sourceCardId);
@@ -387,10 +391,6 @@ export function resolveStartRunIceRepositionWindow(
     targetIceIndex === sourceIceIndex
   )
     throw new Error("Die ICE-Zielposition ist nicht legal.");
-  if (run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error(
-      "Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.",
-    );
   const implementation = fortRunWindowImplementationForCard(
     host,
     sourceCardId,
@@ -398,6 +398,13 @@ export function resolveStartRunIceRepositionWindow(
   );
   if (!implementation)
     throw new Error("Die ICE-Quelle hat keine passende Bewegungsfaehigkeit.");
+  if (
+    implementation.limit === "once_per_run_per_source" &&
+    run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId)
+  )
+    throw new Error(
+      "Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.",
+    );
   const cost = Math.max(0, Math.floor(implementation.cost.amount));
   if (creditCostForAction(legalAction) !== cost)
     throw new Error("Die ICE-Bewegungskosten passen nicht mehr.");
@@ -427,10 +434,11 @@ export function resolveStartRunIceRepositionWindow(
   };
   run.approachedIceId = approachedIceId;
   delete run.encounteredIceId;
-  run.iceRepositionUsedSourceIdsThisRun = [
-    ...(run.iceRepositionUsedSourceIdsThisRun ?? []),
-    sourceCardId,
-  ].sort();
+  if (implementation.limit === "once_per_run_per_source")
+    run.iceRepositionUsedSourceIdsThisRun = [
+      ...(run.iceRepositionUsedSourceIdsThisRun ?? []),
+      sourceCardId,
+    ].sort();
   host.state.activeSide = "corp";
   host.state.timingPoint = "run.approach_ice";
   const revealPayload =
@@ -498,10 +506,6 @@ function resolveStartRunOtherFortIceMove(
     sourceServer.ice[sourceIceIndex] !== sourceCardId
   )
     throw new Error("Die ICE-Quellposition ist nicht mehr legal.");
-  if (run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId))
-    throw new Error(
-      "Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.",
-    );
   const implementation = fortRunWindowImplementationForCard(
     host,
     sourceCardId,
@@ -509,6 +513,13 @@ function resolveStartRunOtherFortIceMove(
   );
   if (!implementation)
     throw new Error("Die ICE-Quelle hat keine passende Bewegungsfaehigkeit.");
+  if (
+    implementation.limit === "once_per_run_per_source" &&
+    run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId)
+  )
+    throw new Error(
+      "Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.",
+    );
   const cost = Math.max(0, Math.floor(implementation.cost.amount));
   if (creditCostForAction(legalAction) !== cost)
     throw new Error("Die ICE-Bewegungskosten passen nicht mehr.");
@@ -534,10 +545,11 @@ function resolveStartRunOtherFortIceMove(
     sourceServer,
     targetServer,
   );
-  run.iceRepositionUsedSourceIdsThisRun = [
-    ...(run.iceRepositionUsedSourceIdsThisRun ?? []),
-    sourceCardId,
-  ].sort();
+  if (implementation.limit === "once_per_run_per_source")
+    run.iceRepositionUsedSourceIdsThisRun = [
+      ...(run.iceRepositionUsedSourceIdsThisRun ?? []),
+      sourceCardId,
+    ].sort();
   host.state.activeSide = "corp";
   const revealPayload =
     !wasRevealed && implementation.revealIfUnrezzed

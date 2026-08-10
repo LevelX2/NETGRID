@@ -463,7 +463,6 @@ export function fullyBrokenPassedIcePostPassActions(
     .filter((cardId) =>
       fullyBrokenPassedIceDerezOnlyImplementationForCard(state, cardId),
     )
-    .filter((cardId) => state.cardInstances[cardId]?.tapped !== true)
     .sort()
     .map((sourceCardId) => {
       const sourceDefinition = definitionFor(state, sourceCardId);
@@ -480,7 +479,7 @@ export function fullyBrokenPassedIcePostPassActions(
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "derez_fully_broken_passed_ice",
           abilityKind: "derez_fully_broken_passed_ice",
-          cardImplementationTapSourceCost: true,
+          cardImplementationTrashSourceCost: true,
         },
       );
     });
@@ -583,8 +582,6 @@ export function resolveFullyBrokenPassedIceDerez(
   ) as CardInstanceId;
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
-  if (state.cardInstances[sourceCardId]?.tapped === true)
-    throw new Error("Die Post-Pass-Quelle ist bereits getappt.");
   if (!fullyBrokenPassedIceDerezOnlyImplementationForCard(state, sourceCardId))
     throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
   if (
@@ -598,13 +595,9 @@ export function resolveFullyBrokenPassedIceDerez(
   if (!host.callbacks?.derezCorpInstalledCard)
     throw new Error("Corp-Derez-Callback fehlt.");
   host.callbacks.derezCorpInstalledCard(targetIceId);
-  const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
-  state.cardInstances[sourceCardId] = {
-    ...sourceInstance,
-    faceup: true,
-    rezzed: true,
-    tapped: true,
-  };
+  if (!host.callbacks?.trashRunnerInstalledCardToHeap)
+    throw new Error("Runner-Trash-Callback fehlt.");
+  host.callbacks.trashRunnerInstalledCardToHeap(sourceCardId, legalAction);
   const {
     fullyBrokenPassedIcePendingId: _fullyBrokenPassedIcePendingId,
     ...runWithoutPending
@@ -619,8 +612,8 @@ export function resolveFullyBrokenPassedIceDerez(
     targetIceDefinitionId: targetDefinitionId,
     targetCardDefinitionId: targetDefinitionId,
     derezzedCount: 1,
-    sourceTapped: true,
-    cardImplementationTapSourceCost: true,
+    sourceTrashed: true,
+    cardImplementationTrashSourceCost: true,
   };
   return {
     handled: true,
@@ -864,7 +857,7 @@ function fullyBrokenPassedIceDerezOnlyImplementationForCard(
 ):
   | {
       kind: "derez_fully_broken_passed_ice";
-      cost: { kind: "tap_source" };
+      cost: { kind: "trash_source" };
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
       visibility: "public";

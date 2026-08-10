@@ -160,6 +160,9 @@ export function activatedAbilityPayload(
     ...(hasTapSourceCostForActivatedAbility(ability)
       ? { cardImplementationTapSourceCost: true }
       : {}),
+    ...(hasTrashSourceEffectForActivatedAbility(ability)
+      ? { cardImplementationTrashesSource: true }
+      : {}),
     ...(advancementCounterCreditPayout
       ? {
           cardImplementationEconomyKind:

@@ -45,8 +45,7 @@ export const cardSpec = {
         capabilityKey: capabilityKey("access_add_tags"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_access",
-        sourceZones: ["installed", "hq", "rd"],
-        ignoreIfAccessedFrom: ["archives"],
+        sourceZones: ["installed", "hq", "rd", "archives"],
         revealIfAccessedFrom: ["rd"],
         effects: [
           {

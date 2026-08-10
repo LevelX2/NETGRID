@@ -196,8 +196,22 @@ describe("Corp punish-route quote request", () => {
       "scorched",
     );
     const request = routeRequest(state, [
-      step("trace-tag", 0, "trace_tag", chance),
-      step("damage-4", 1, "meat_damage", scorched),
+      canonicalStep(
+        "trace-tag",
+        0,
+        "trace_tag",
+        chance,
+        "onr_v1_284_chance-observation",
+        "abilities_on_play_trace",
+      ),
+      canonicalStep(
+        "damage-4",
+        1,
+        "meat_damage",
+        scorched,
+        "onr_v1_302_scorched-earth",
+        "abilities_on_play_damage",
+      ),
     ]);
     const before = structuredClone(state);
 
@@ -211,7 +225,7 @@ describe("Corp punish-route quote request", () => {
         totalActionCredits: 5,
         tagTrigger: {
           kind: "trace_tag_step",
-          baseTraceStrength: 5,
+          traceLimit: 5,
           sourceStepId: "trace-tag",
         },
         responsePaymentEnvelope: {
@@ -286,6 +300,63 @@ describe("Corp punish-route quote request", () => {
           corpResponseCredits: { maximum: 5 },
           totalCorpCredits: { maximum: 10 },
         },
+      },
+    });
+  });
+
+  it("keeps a visible extra base-link response window fail-closed", () => {
+    const state = corpActionState("punish-route-visible-base-link-window");
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const chance = addCorpCardToHqForTest(
+      state,
+      "onr_v1_284_chance-observation",
+      "chance",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched",
+    );
+    const baseLink = addConcealedRunnerResource(
+      state,
+      "onr_v1_148_access-through-alpha",
+      "visible-base-link",
+    );
+    state.cardInstances[baseLink]!.faceup = true;
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-tag",
+            0,
+            "trace_tag",
+            chance,
+            "onr_v1_284_chance-observation",
+            "abilities_on_play_trace",
+          ),
+          canonicalStep(
+            "damage-4",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: false,
+        incompleteReasons: ["response_window_unknown"],
       },
     });
   });
@@ -654,6 +725,24 @@ function step(
     sourceCardInstanceId,
     sourceCapabilityBindingKind: "legacy_card_implementation_index",
     sourceCapabilityId: "ability:on_play:0",
+  };
+}
+
+function canonicalStep(
+  stepId: string,
+  order: number,
+  kind: CorpPunishRouteQuoteRequest["steps"][number]["kind"],
+  sourceCardInstanceId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
+  capabilityKey: string,
+): CorpPunishRouteQuoteRequest["steps"][number] {
+  return {
+    stepId,
+    order,
+    kind,
+    sourceCardInstanceId,
+    sourceCapabilityBindingKind: "card_spec_capability_key",
+    sourceCapabilityId: `${sourceDefinitionId}:${capabilityKey}`,
   };
 }
 

@@ -1573,12 +1573,24 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"grip"|"stack"/,
     );
+    const afterPermanentPrevention = applyEffectCommands(state, [
+      {
+        type: "do_damage",
+        damageType: "meat",
+        amount: 1,
+        source: "typed_emergency_flatline_replacement_witness",
+      },
+    ]);
+    expect(afterPermanentPrevention.runner.grip).toEqual(state.runner.grip);
+    expect(afterPermanentPrevention.runnerPermanentMeatDamagePrevention).toBe(
+      true,
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("uses Emergency Self-Construct as side-safe meat-damage prevention", () => {
+  it("does not offer Emergency Self-Construct as ordinary meat-damage prevention before flatlining", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1920-emergency-self-construct-prevention",
@@ -1613,29 +1625,16 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_302_scorched-earth",
     );
-    expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(state.pendingChoice).toBeUndefined();
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-    const preventionOption = getPlayerView(
-      state,
-      "runner",
-    ).pendingChoice?.options.find((option) => option.id !== "pass")?.id;
-    expect(preventionOption).toBeDefined();
-
-    state = applyChoice(state, "runner", String(preventionOption));
-
     expect(state.winner).toBeNull();
-    expect(state.runner.grip).toHaveLength(2);
+    expect(state.runner.grip).toHaveLength(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
-      eventModificationDecision: "apply",
-      eventModificationOutcome: "partially_prevented",
-      sourceDefinitionId: "onr_v1_022_emergency-self-construct",
+      actionType: "play_operation",
       originalAmount: 4,
-      preventedAmount: 1,
-      finalAmount: 3,
       damageResolved: true,
       damageType: "meat",
-      damageAmount: 3,
+      damageAmount: 4,
       flatline: false,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(

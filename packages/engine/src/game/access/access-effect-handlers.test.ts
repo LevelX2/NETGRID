@@ -184,7 +184,7 @@ function makeHost(legalAction: LegalAction) {
         effects: [
           {
             kind: "trace",
-            baseTraceStrength: 10,
+            traceLimit: 10,
             onSuccess: [
               {
                 kind: "add_tags",
@@ -538,7 +538,7 @@ describe("access effect handlers", () => {
     ]);
     expect(traceAction.payload).toMatchObject({
       hiddenZoneAction: "v1918_upgrade_access_trace",
-      baseTraceStrength: 10,
+      traceLimit: 10,
     });
     expect(counter.calls.counters).toEqual([
       { cardId: "runner_identity", counterType: "crying", amount: 1 },

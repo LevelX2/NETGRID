@@ -959,7 +959,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
   it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
     const traceAssets = [["onr_v1_310_blood-cat", 5]] as const;
-    for (const [definitionId, baseTraceStrength] of traceAssets) {
+    for (const [definitionId, traceLimit] of traceAssets) {
       let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
         `v1917-trace-asset-window-${definitionId}`,
       );
@@ -997,7 +997,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
       expect(state.trace).toMatchObject({
         status: "corp_bid",
-        baseTraceStrength,
+        traceLimit,
         sourceDefinitionId: definitionId,
       });
       expect(state.pendingChoice?.side).toBe("corp");
@@ -1844,7 +1844,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 10,
+      traceLimit: 10,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
     });
     expect(state.pendingChoice?.side).toBe("corp");
@@ -1857,7 +1857,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       hiddenZoneAction: "v1918_upgrade_access_trace",
       ambushDefinitionId: "onr_v1_372_turbeau-delacroix",
       oncePerRunConsumed: true,
-      baseTraceStrength: 10,
+      traceLimit: 10,
     });
 
     state = applyChoice(state, "corp", "bid_0");
@@ -2919,7 +2919,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(traceState.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 10,
+      traceLimit: 10,
       corpBidMax: 8,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
       fortTraceBitPoolSourceCardInstanceId: parisId,

@@ -586,5 +586,19 @@ describe("fort pass window", () => {
       revealedSource: true,
       corpCreditsAfter: 7,
     });
+    const returnAction = buildStartRunIceRepositionActions(
+      host,
+      state.run!,
+      host.servers.mustServer("rd"),
+    ).find(
+      (candidate) =>
+        candidate.payload?.cardId === "glacier" &&
+        candidate.payload?.targetServerId === "remote_1",
+    );
+    expect(returnAction).toBeDefined();
+    resolveStartRunIceRepositionWindow(host, returnAction!);
+    expect(state.corp.credits).toBe(6);
+    expect(state.run?.iceRepositionUsedSourceIdsThisRun).toBeUndefined();
+    expect(host.servers.mustServer("remote_1").ice).toEqual(["glacier"]);
   });
 });

@@ -61,7 +61,6 @@ export const cardSpec = {
         capabilityKey: capabilityKey("subroutine_trace_baskerville_counter"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "trace",
-        baseTraceStrength: 5,
         onSuccess: [
           {
             kind: "add_counter",
@@ -71,6 +70,7 @@ export const cardSpec = {
             visibility: "public",
           },
         ],
+        traceLimit: 5,
       },
       {
         capabilityKey: capabilityKey("subroutine_end_run"),
@@ -170,15 +170,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_005_baskerville.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_005_baskerville.",
       },
     ],
     capabilities: [

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[3], [T]: Choose a piece of ice. That ice's strength is doubled until end of turn. If this would raise the ice's strength above 10, ist strength becomes 10.",
+      "[3], [T]: Choose a piece of ice. That ice's strength is doubled until end of turn. If this would raise the ice's strength above 10, its strength becomes 10.",
     capabilityText: [
       {
         capabilityKey: capabilityKey("corp_main_double_chosen_ice_strength"),
@@ -61,7 +61,7 @@ export const cardSpec = {
             amount: 3,
           },
           {
-            kind: "tap_source",
+            kind: "trash_source",
             amount: 1,
           },
         ],
@@ -85,7 +85,7 @@ export const cardSpec = {
             amount: 3,
           },
           {
-            kind: "tap_source",
+            kind: "trash_source",
             amount: 1,
           },
         ],
@@ -157,22 +157,16 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_024_sterdroid.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_024_sterdroid.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_024_sterdroid.",
       },
     ],
     capabilities: [],

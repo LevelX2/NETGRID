@@ -35,7 +35,7 @@ import {
 import {
   describeTraceResultFromTrace,
   isTraceSuccessful,
-  traceCorpStrength,
+  traceCorpValue,
   traceRunnerStrength,
 } from "./trace/trace-result";
 
@@ -150,7 +150,7 @@ describe("game facade", () => {
       traceId: "arch-12.trace",
       sourceCardInstanceId: state.runner.identity,
       sourceDefinitionId: "demo_runner_identity",
-      baseTraceStrength: 2,
+      traceLimit: 2,
       status: "corp_bid",
       successEffect: { type: "add_tag", amount: 1 },
     };
@@ -165,7 +165,7 @@ describe("game facade", () => {
     expect(describeCurrentTraceWindow(state)).toMatchObject({
       traceId: "arch-12.trace",
       phase: "corp_bid",
-      baseTraceStrength: 2,
+      traceLimit: 2,
       hasCorpBid: false,
       hasRunnerBid: false,
       postBidLinkSourceIds: [],
@@ -177,10 +177,11 @@ describe("game facade", () => {
       traceId: "arch-13.trace",
       sourceCardInstanceId: "runner-identity",
       sourceDefinitionId: "demo_runner_identity",
-      baseTraceStrength: 4,
+      traceLimit: 4,
       status: "post_bid_link",
       successEffect: { type: "add_tag", amount: 1 },
       corpBid: 2,
+      traceValue: 6,
       runnerLink: 3,
       baseLinkValue: 1,
       runnerBid: 2,
@@ -190,29 +191,29 @@ describe("game facade", () => {
     } as NonNullable<ReturnType<typeof createGame>["trace"]>;
     const before = structuredClone(trace);
 
-    expect(traceCorpStrength(trace)).toBe(6);
+    expect(traceCorpValue(trace)).toBe(6);
     expect(traceRunnerStrength(trace)).toBe(6);
     expect(isTraceSuccessful(trace)).toBe(false);
     expect(describeTraceResultFromTrace(trace)).toEqual({
-      baseTraceStrength: 4,
+      traceLimit: 4,
       corpBid: 2,
-      corpTraceStrength: 6,
+      traceValue: 6,
       baseLinkValue: 1,
       runnerLink: 3,
       runnerBid: 2,
       postBidLinkValue: 1,
-      runnerTraceStrength: 6,
+      runnerStrength: 6,
       successful: false,
     });
     expect(trace).toEqual(before);
   });
 
-  it("keeps trace success strict and includes bid/link fallbacks", () => {
+  it("starts the trace value at zero and keeps ties Runner-favorable", () => {
     const trace = {
       traceId: "arch-13.strict-success",
       sourceCardInstanceId: "runner-identity",
       sourceDefinitionId: "demo_runner_identity",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       status: "post_bid_link",
       successEffect: { type: "add_tag", amount: 1 },
       corpBid: 1,
@@ -221,15 +222,15 @@ describe("game facade", () => {
 
     expect(describeTraceResultFromTrace(trace, { runnerLinkFallback: 4 })).toEqual(
       {
-        baseTraceStrength: 5,
+        traceLimit: 5,
         corpBid: 1,
-        corpTraceStrength: 6,
+        traceValue: 1,
         baseLinkValue: 0,
         runnerLink: 4,
         runnerBid: 1,
         postBidLinkValue: 0,
-        runnerTraceStrength: 5,
-        successful: true,
+        runnerStrength: 5,
+        successful: false,
       },
     );
   });

@@ -160,8 +160,7 @@ export function createLifecycleRuntime(
       (hostDefinition.type === "program" &&
         deps.cardHasSubtype(hostDefinition, "daemon")) ||
       deps.runnerUtilityLongtailKindForDefinition(hostDefinition.id) ===
-        "replace_installed_program_trash_with_host_on_source" ||
-      hostDefinition.id === deps.HOST_RETURN_HARDWARE_SOURCE
+        "replace_installed_program_trash_with_host_on_source"
     )
       return false;
     return true;
@@ -368,11 +367,8 @@ export function createLifecycleRuntime(
           cleanup.target === "agenda_or_node_inside_same_fort",
       );
     const rezzedNevinyrralLeftPlay =
-      (deps.uniqueDirectLongtailKindForDefinition(definition.id) ===
-        "rezzed_leave_action_gain_asset" ||
-        (definition.id === deps.NEVINYRRAL_ID &&
-          !deps.cardImplementationForDefinitionId(definition.id))) &&
-      instance.rezzed === true;
+      deps.uniqueDirectLongtailKindForDefinition(definition.id) ===
+        "rezzed_leave_action_gain_asset" && instance.rezzed === true;
     const { hostedOn: _hostedOn, ...withoutHost } = instance;
     void _hostedOn;
     deps.removeFromAllZones(state, cardId);

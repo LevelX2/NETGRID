@@ -14,6 +14,7 @@ import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement
 import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
+import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
 import {
   selectedDiscardChoiceOptionIds,
   type DiscardChoiceKeepScore,
@@ -41,6 +42,7 @@ import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import type { StrategicIntentState } from "../strategic-intent-state";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
+import type { AiHintStructuredEffect } from "../hint-ontology";
 import {
   isRunnerTargetedBypassChoice,
   isRunnerTargetedBypassHideChoice,
@@ -81,6 +83,9 @@ export type SelectedChoicesForDecisionDependencies = {
     input: AiDecisionInput,
   ) => SearchChoiceFeatureSnapshot;
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly effectsForCardId: (
+    cardId: string | undefined,
+  ) => readonly AiHintStructuredEffect[];
 };
 
 function selectedCorpDiscardOptionIdsFromResidentHandPlan(
@@ -641,6 +646,27 @@ export function selectedChoicesForDecision(
     return resolved(selected, "corp_hardware_trash_by_counter");
   }
   if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("card_implementation.trash_installed_program:")
+  ) {
+    const selected = selectedCorpProgramTrashChoiceOptionIds(
+      input,
+      action,
+      choice,
+      selectableOptions,
+      dependencies.rolesForCardId,
+    );
+    if (!selected) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Preserve the exact run, encountered ICE, printed subroutine, public installed-program target set and resolve-choice LegalAction binding.",
+      );
+    }
+    return resolved(selected, "corp_program_trash_subroutine");
+  }
+  if (
     choice.kind === "select_cards" &&
     isHqToNewRemoteOptionalRezChoice(choice)
   ) {
@@ -776,6 +802,7 @@ export function selectedChoicesForDecision(
       {
         features: dependencies.extractAiFeatures(input),
         rolesForCardId: dependencies.rolesForCardId,
+        effectsForCardId: dependencies.effectsForCardId,
         ...(coverageBinding
           ? {
               requiredCoverage: coverageBinding.requiredCoverage,
@@ -855,7 +882,6 @@ export function selectedChoicesForDecision(
             input,
             choice,
             selectableOptions,
-            dependencies.rolesForCardId,
           ),
           selectableOptions,
         );

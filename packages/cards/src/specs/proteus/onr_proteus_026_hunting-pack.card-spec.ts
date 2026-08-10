@@ -46,12 +46,12 @@ export const cardSpec = {
       addressability: ["plan", "action", "quote", "debug"],
       kind: "rezzed_ice_outside_this_ice",
       dynamicTraceSubroutines: {
-        baseTraceStrength: 5,
         traceSuccessEffect: {
           type: "add_tag",
           amount: 1,
         },
         visibility: "public",
+        traceLimit: 5,
       },
     },
   },

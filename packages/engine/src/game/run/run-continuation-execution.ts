@@ -5,7 +5,6 @@ import type {
   LegalAction,
   SubroutineDefinition,
 } from "@netgrid/shared";
-import { BARTMOSS_ID } from "../../compatibility/runtime-compatibility";
 import type { DamageSummary as CoreDamageSummary } from "../damage/damage-core";
 import {
   appendResolvedSubroutineEffect,
@@ -77,9 +76,10 @@ export type RunContinuationExecutionHost = {
   };
   callbacks: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    icebreakerHasBartmossPostEncounterSelfTrashCheck: (
+    icebreakerSpecialSourceDefinitionId: (
       breakerId: CardInstanceId,
-    ) => boolean;
+      special: "bartmoss_post_encounter_self_trash_check",
+    ) => string | undefined;
     rollDeterministicDie: (purpose: string) => number;
     trashRunnerInstalledProgram: (breakerId: CardInstanceId) => void;
   };
@@ -294,14 +294,14 @@ function applyBartmossPostEncounterTrigger(
   }> = [];
   for (const breakerId of usedBreakerIds) {
     if (!host.state.runner.rig.programs.includes(breakerId)) continue;
-    if (
-      !host.callbacks.icebreakerHasBartmossPostEncounterSelfTrashCheck(
+    const sourceDefinitionId =
+      host.callbacks.icebreakerSpecialSourceDefinitionId(
         breakerId,
-      )
-    )
-      continue;
+        "bartmoss_post_encounter_self_trash_check",
+      );
+    if (!sourceDefinitionId) continue;
     const die = host.callbacks.rollDeterministicDie(
-      `${BARTMOSS_ID}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
+      `${sourceDefinitionId}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
     );
     const trashed = die === 1;
     if (trashed) host.callbacks.trashRunnerInstalledProgram(breakerId);

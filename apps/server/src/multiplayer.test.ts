@@ -7337,7 +7337,7 @@ describe("MVP 0.2 multiplayer service", () => {
       actionType: "resolve_choice",
       traceStep: "corp_bid",
       corpBid: 1,
-      traceStrength: 3,
+      traceValue: 3,
     });
     expect(corpBid.opponentPayload.pendingChoice?.kind).toBe("bid_amount");
 

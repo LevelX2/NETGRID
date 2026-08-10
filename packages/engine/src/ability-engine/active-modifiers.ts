@@ -21,7 +21,6 @@ import {
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
 } from "./card-implementation-modifiers";
-import { BREAK_COST_MODIFIER_SOURCE } from "../compatibility/runtime-compatibility";
 import {
   currentTemporaryBreakerStrengthModifiers,
 } from "../game/state/temporary-breaker-strength";
@@ -44,6 +43,7 @@ export type ActiveModifierKind =
   | "agenda_difficulty"
   | "trash_cost"
   | "break_subroutine_cost"
+  | "break_ability_use_cost"
   | "jack_out_cost";
 
 export type ActiveModifier = {
@@ -132,6 +132,27 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
       amount,
       duration: "while_rezzed",
       target: { kind: "side", id: active.modifier.side },
+      visibility: "public",
+    });
+  }
+  for (const active of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "break_ability_use_cost",
+  )) {
+    if (!isPublicRezzedCorpRootModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `rezzed.break_ability_use_cost.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "break_ability_use_cost",
+      side: "runner",
+      amount,
+      duration: "while_rezzed",
+      target: {
+        kind: active.modifier.sameServerAsSource ? "server" : "subtype",
+      },
       visibility: "public",
     });
   }
@@ -332,9 +353,14 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
 
   const breakCostAmount = positiveInteger(run.breakSubroutineAdditionalCost);
   if (breakCostAmount > 0) {
+    const sourceDefinitionId = run.breakSubroutineAdditionalCostSourceDefinitionId;
+    if (!sourceDefinitionId)
+      throw new Error(
+        "Run break-subroutine cost modifier requires its source definition.",
+      );
     modifiers.push({
-      id: `run.break_subroutine_cost.${BREAK_COST_MODIFIER_SOURCE}`,
-      sourceDefinitionId: BREAK_COST_MODIFIER_SOURCE,
+      id: `run.break_subroutine_cost.${sourceDefinitionId}`,
+      sourceDefinitionId,
       kind: "break_subroutine_cost",
       side: "runner",
       amount: breakCostAmount,

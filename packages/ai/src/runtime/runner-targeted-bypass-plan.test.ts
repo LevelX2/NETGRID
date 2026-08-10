@@ -591,9 +591,11 @@ function choiceDependencies(): Parameters<
     extractAiFeatures: () => ({
       credits: 0,
       memoryRemaining: 4,
+      hasInstalledNonNoisyIcebreaker: false,
       rigRoles: new Set(),
       rigDefinitionIds: new Set(),
     }),
     rolesForCardId: () => [],
+    effectsForCardId: () => [],
   };
 }

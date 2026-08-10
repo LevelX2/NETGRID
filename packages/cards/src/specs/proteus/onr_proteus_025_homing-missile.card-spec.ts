@@ -49,16 +49,15 @@ export const cardSpec = {
       additionalCostPerValue: 1,
       minValue: 0,
       maxValue: 8,
-      traceBaseFromValue: true,
-      traceBidLimitFromValue: true,
       visibility: "public",
+      traceLimitFromValue: true,
     },
     printedSubroutines: [
       {
         capabilityKey: capabilityKey("subroutine_trace_x_end_run_and_run_lock"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "trace",
-        baseTraceStrength: 0,
+        traceLimit: 0,
         onSuccess: [
           {
             kind: "end_run",

@@ -81,15 +81,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_027_early-worm.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_027_early-worm.",
       },
     ],
     capabilities: [],

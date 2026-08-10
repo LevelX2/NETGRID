@@ -12,6 +12,7 @@ import type {
   CardAccessCountModifierImplementation,
   CardAdditionalSubroutineModifierImplementation,
   CardAgendaDifficultyModifierImplementation,
+  CardBreakAbilityUseCostModifierImplementation,
   CardBreakSubroutineCostModifierImplementation,
   CardHandSizeModifierImplementation,
   CardIceStrengthModifierImplementation,
@@ -35,6 +36,7 @@ export type CardModifierImplementation =
   | CardAgendaDifficultyModifierImplementation
   | CardTrashCostModifierImplementation
   | CardBreakSubroutineCostModifierImplementation
+  | CardBreakAbilityUseCostModifierImplementation
   | CardAccessCountModifierImplementation;
 
 export type CardAbilityImplementation =

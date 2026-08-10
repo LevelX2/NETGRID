@@ -13,7 +13,6 @@ import type { RunFortTriggerExecutionResult } from "./run-fort-trigger-execution
 import type { RunnerSpecialTriggerExecutionResult } from "./runner-special-trigger-execution";
 import type { CounterUtilityTriggerExecutionResult } from "./counter-utility-trigger-execution";
 import type { HiddenZoneTriggerExecutionResult } from "./hidden-zone-trigger-execution";
-import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,
   restrictedActionGrantRemaining,
@@ -255,9 +254,15 @@ export function handleTriggerAbilityExecution(
     if (!sourceCardId || !state.runner.rig.hardware.includes(sourceCardId))
       throw new Error("Bodyweight Data Crèche ist nicht installiert.");
     const sourceDefinitionId = host.cards.definitionFor(state, sourceCardId).id;
+    const implementation = host.cards.cardImplementationForDefinitionId?.(
+      sourceDefinitionId,
+    );
     if (
-      sourceDefinitionId !== BODYWEIGHT_DATA_CRECHE_ID ||
-      legalAction.payload?.sourceDefinitionId !== BODYWEIGHT_DATA_CRECHE_ID
+      !implementation?.successfulRunFollowups?.some(
+        (followup: { kind?: string }) =>
+          followup.kind === "optional_make_run_after_successful_run",
+      ) ||
+      legalAction.payload?.sourceDefinitionId !== sourceDefinitionId
     )
       throw new Error("Die Quelle des Bodyweight-Fensters ist ungültig.");
     flags.successfulRunExtraRunPending = false;

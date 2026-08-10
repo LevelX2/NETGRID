@@ -47,8 +47,9 @@ describe("trace orchestration", () => {
       traceId: "op_trace.2.trace_source.source_1",
       sourceCardInstanceId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
-      corpBidMax: 5,
+      traceLimit: 2,
+      effectiveTraceLimit: 2,
+      corpBidMax: 2,
       status: "corp_bid",
     });
     expect(state.pendingChoice).toMatchObject({
@@ -59,12 +60,17 @@ describe("trace orchestration", () => {
       stateVersion: 2,
       visibility: "public",
     });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_0",
+      "bid_1",
+      "bid_2",
+    ]);
     expect(action.payload).toMatchObject({
       traceStarted: true,
       traceId: "op_trace.2.trace_source.source_1",
       sourceCardId: sourceId,
       sourceDefinitionId: sourceDefinition.id,
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
   });
 
@@ -92,7 +98,7 @@ describe("trace orchestration", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 2,
       runnerLink: 1,
     });
     expect(state.pendingChoice).toMatchObject({
@@ -103,10 +109,10 @@ describe("trace orchestration", () => {
     expect(action.payload).toMatchObject({
       traceId: "trace_1",
       traceStep: "corp_bid",
-      baseTraceStrength: 2,
+      traceLimit: 2,
       corpBid: 2,
       corpCreditBid: 2,
-      traceStrength: 4,
+      traceValue: 2,
       runnerLink: 1,
       traceBaseLinkChoiceOpened: false,
     });
@@ -122,7 +128,7 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -172,7 +178,7 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 2,
+      traceValue: 2,
       runnerLink: 1,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -226,7 +232,7 @@ describe("trace orchestration", () => {
     state.runner.credits = 2;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -270,7 +276,7 @@ describe("trace orchestration", () => {
     state.run = { runId: "run_1", attackedServerId: "rd" } as any;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 3,
+      traceValue: 3,
       runnerLink: 0,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -325,7 +331,7 @@ describe("trace orchestration", () => {
     state.runner.credits = 5;
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 8,
+      traceValue: 8,
       runnerLink: 0,
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 12);
@@ -420,9 +426,9 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
       corpBid: 0,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 1,
-      baseTraceStrength: 5,
+      traceLimit: 5,
       successEffect: { type: "net_damage", amount: 1 },
     });
     state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
@@ -473,7 +479,7 @@ describe("trace orchestration", () => {
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "post_bid_link", {
       corpBid: 2,
-      traceStrength: 4,
+      traceValue: 4,
       runnerLink: 1,
       runnerBid: 2,
       runnerStrength: 3,
@@ -552,7 +558,7 @@ describe("trace orchestration", () => {
       runnerResources: [accessId],
     });
     state.trace = activeTrace(sourceId, sourceDefinition.id, "base_link", {
-      traceStrength: 4,
+      traceValue: 4,
     });
     state.run = { runId: "run_1", attackedServerId: "rd" } as any;
     state.pendingChoice = {
@@ -615,7 +621,7 @@ describe("trace orchestration", () => {
     const action = actionFor("corp", "trigger_ability", {
       cardId: sourceId,
       v1918UpgradeAbility: "trace_2_tag",
-      traceStrength: 2,
+      traceValue: 2,
     });
 
     const result = handleTraceOrchestrationAction(
@@ -746,7 +752,7 @@ function activeTrace(
     traceId: "trace_1",
     sourceCardInstanceId,
     sourceDefinitionId,
-    baseTraceStrength: 2,
+    traceLimit: 2,
     status,
     successEffect: { type: "add_tag", amount: 1 },
     ...extras,

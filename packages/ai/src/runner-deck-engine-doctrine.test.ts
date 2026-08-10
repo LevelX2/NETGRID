@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import standardDeckCatalog from "../../../data/decks/standard-deck-catalog-1.0.0.json";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildRunnerDeckEngineDoctrine } from "./runner-deck-engine-doctrine";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
 
 describe("runner deck engine doctrine", () => {
   it("derives the Shell-game engine generically from providers and dependencies", () => {
@@ -146,6 +147,70 @@ describe("runner deck engine doctrine", () => {
     ).not.toBe("coherent");
   });
 
+  it("binds recovery and compatible recurring economy only from structured facts", () => {
+    const recoveryId = "test-structured-top-trash-recovery";
+    const breakerCreditId = "test-structured-non-noisy-breaker-credit";
+    const legacyOnlyId = "test-legacy-runner-support-signals";
+    const doctrine = withAiHints(
+      [
+        structuredHint(recoveryId, "resource", {
+          kind: "card_recovery",
+          timing: "action",
+          scope: "heap",
+          resource: "cards",
+          target: "move_top_trash_to_grip",
+          amount: 1,
+          finite: true,
+        }),
+        structuredHint(breakerCreditId, "program", {
+          kind: "recurring_economy",
+          timing: "persistent",
+          scope: "runner",
+          resource: "credits",
+          target: "non_noisy_icebreaker",
+          amount: 2,
+          repeatable: true,
+        }),
+        {
+          ...structuredHint(legacyOnlyId, "resource"),
+          roles: ["trash_recovery", "icebreaker_support"],
+          functionSignals: [
+            "setup.top_trash_recovery",
+            "economy.recurring",
+          ],
+        },
+      ],
+      () =>
+        buildRunnerDeckEngineDoctrine({
+          deckSnapshotId: "structured-runner-provider-witnesses",
+          side: "runner",
+          cards: [recoveryId, breakerCreditId, legacyOnlyId].map((cardId) => ({
+            cardId,
+            quantity: 1,
+          })),
+        }),
+    );
+
+    expect(
+      doctrine?.providers.find((provider) => provider.cardId === recoveryId)
+        ?.capabilities,
+    ).toContain("runner.recovery.program_or_hardware");
+    expect(
+      doctrine?.providers.find(
+        (provider) => provider.cardId === breakerCreditId,
+      )?.capabilities,
+    ).toContain("runner.economy.recurring_breaker");
+    const legacyOnlyProvider = doctrine?.providers.find(
+      (provider) => provider.cardId === legacyOnlyId,
+    );
+    expect(legacyOnlyProvider?.capabilities).not.toContain(
+      "runner.recovery.program_or_hardware",
+    );
+    expect(legacyOnlyProvider?.capabilities).not.toContain(
+      "runner.economy.recurring_breaker",
+    );
+  });
+
   it("keeps sparse throughput support below high-strength development", () => {
     const doctrine = buildRunnerDeckEngineDoctrine({
       deckSnapshotId: "sparse-throughput",
@@ -177,6 +242,38 @@ function standardDeck(standardDeckId: string): AiDeckStrategyDeckSnapshot {
     formatProfileId: deck.formatProfileId,
     cards: deck.cards.map((entry) => ({ ...entry })),
   };
+}
+
+function structuredHint(
+  cardId: string,
+  cardType: string,
+  effect?: NonNullable<AiCardHint["effects"]>[number],
+): AiCardHint {
+  return {
+    cardId,
+    side: "runner",
+    cardType,
+    roles: [],
+    planRoles: [],
+    aiSupportStatus: "ai_supported",
+    ...(effect ? { effects: [effect] } : {}),
+  };
+}
+
+function withAiHints<T>(hints: readonly AiCardHint[], run: () => T): T {
+  const previous = new Map(
+    hints.map((hint) => [hint.cardId, AI_HINTS_BY_CARD.get(hint.cardId)]),
+  );
+  for (const hint of hints) AI_HINTS_BY_CARD.set(hint.cardId, hint);
+  try {
+    return run();
+  } finally {
+    for (const hint of hints) {
+      const prior = previous.get(hint.cardId);
+      if (prior) AI_HINTS_BY_CARD.set(hint.cardId, prior);
+      else AI_HINTS_BY_CARD.delete(hint.cardId);
+    }
+  }
 }
 
 function removeCards(

@@ -928,15 +928,15 @@ export function formatChronicleEvent(
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const hackerTrackerCountersSpent =
           numberValue(payload.hackerTrackerCountersSpent) ?? 0;
-        const traceStrength = numberValue(payload.traceStrength);
+        const traceValue = numberValue(payload.traceValue);
         const runnerLink = numberValue(payload.runnerLink);
         category = "danger";
         importance = "important";
         visibility = "public";
         title = phrase(subject, `im Trace ${creditText(corpBid)} geboten`);
         description =
-          traceStrength !== undefined
-            ? `Trace-Stärke: ${traceStrength}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}${hackerTrackerCountersSpent > 0 ? `; ${hackerTrackerCountersSpent} Hacker-Tracker-Counter eingesetzt` : ""}.`
+          traceValue !== undefined
+            ? `Trace-Wert: ${traceValue}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}${hackerTrackerCountersSpent > 0 ? `; ${hackerTrackerCountersSpent} Hacker-Tracker-Counter eingesetzt` : ""}.`
             : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
@@ -945,7 +945,7 @@ export function formatChronicleEvent(
           ...(hackerTrackerCountersSpent > 0
             ? [`HTC -${hackerTrackerCountersSpent}`]
             : []),
-          ...(traceStrength !== undefined ? [`Trace ${traceStrength}`] : []),
+          ...(traceValue !== undefined ? [`Trace ${traceValue}`] : []),
           ...(runnerLink !== undefined ? [`Link ${runnerLink}`] : []),
         );
         break;
@@ -990,7 +990,7 @@ export function formatChronicleEvent(
       if (payload.traceStep === "runner_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const runnerBid = numberValue(payload.runnerBid) ?? 0;
-        const traceStrength = numberValue(payload.traceStrength);
+        const traceValue = numberValue(payload.traceValue);
         const runnerStrength = numberValue(payload.runnerStrength);
         const tagsAdded = tagGainAmountFromPublicPayload(payload);
         const addedCounterAmount = numberValue(payload.addedCounterAmount) ?? 0;
@@ -1014,16 +1014,16 @@ export function formatChronicleEvent(
         visibility = "public";
         title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}${tagsAdded > 0 ? `; ${runnerTagGainOutcomeText(side, tagsAdded)}` : ""}`;
         description =
-          traceStrength !== undefined && runnerStrength !== undefined
-            ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${addedCounterAmount > 0 && addedCounterLabel ? `; Runner erhält ${addedCounterAmount} ${addedCounterLabel}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.`
+          traceValue !== undefined && runnerStrength !== undefined
+            ? `Endstand: Trace ${traceValue} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${addedCounterAmount > 0 && addedCounterLabel ? `; Runner erhält ${addedCounterAmount} ${addedCounterLabel}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.`
             : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
           `Korp ${corpBid}`,
           `Runner ${runnerBid}`,
-          ...(traceStrength !== undefined && runnerStrength !== undefined
-            ? [`${traceStrength}:${runnerStrength}`]
+          ...(traceValue !== undefined && runnerStrength !== undefined
+            ? [`${traceValue}:${runnerStrength}`]
             : []),
           successful ? "Erfolg" : "Fehlschlag",
           ...(tagsAdded > 0
@@ -1061,7 +1061,7 @@ export function formatChronicleEvent(
           "eine Link-Fähigkeit";
         const runnerLink = numberValue(payload.runnerLink);
         const runnerStrength = numberValue(payload.runnerStrength);
-        const traceStrength = numberValue(payload.traceStrength);
+        const traceValue = numberValue(payload.traceValue);
         const runnerBid = numberValue(payload.runnerBid) ?? 0;
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const successful = payload.traceSuccessful === true;
@@ -1085,9 +1085,9 @@ export function formatChronicleEvent(
           title = `${title}; ${runnerTagGainOutcomeText(side, tagsAdded)}`;
         description =
           resolved &&
-          traceStrength !== undefined &&
+          traceValue !== undefined &&
           runnerStrength !== undefined
-            ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${linkBonus > 0 ? `; Post-Bid-Link: +${linkBonus}` : ""}.`
+            ? `Endstand: Trace ${traceValue} gegen Runner-Stärke ${runnerStrength}${linkBonus > 0 ? `; Post-Bid-Link: +${linkBonus}` : ""}.`
             : runnerLink !== undefined || runnerStrength !== undefined
               ? `Runner-Link: ${runnerLink ?? 0}${runnerStrength !== undefined ? `, Runner-Stärke: ${runnerStrength}` : ""}${openedNext ? "; weitere Link-Fähigkeiten verfügbar" : ""}.`
               : undefined;
@@ -1101,8 +1101,8 @@ export function formatChronicleEvent(
             ? [`-${linkCost} Credit${linkCost === 1 ? "" : "s"}`]
             : []),
           ...(linkBonus > 0 ? [`Gesamt +${linkBonus}`] : []),
-          ...(traceStrength !== undefined && runnerStrength !== undefined
-            ? [`${traceStrength}:${runnerStrength}`]
+          ...(traceValue !== undefined && runnerStrength !== undefined
+            ? [`${traceValue}:${runnerStrength}`]
             : []),
           ...(resolved ? [successful ? "Erfolg" : "Fehlschlag"] : []),
           ...(tagsAdded > 0
@@ -2284,16 +2284,16 @@ export function formatChronicleEvent(
         break;
       }
       if (payload.traceStarted === true) {
-        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        const traceLimit = numberValue(payload.traceLimit);
         category = "danger";
         importance = "important";
         visibility = "public";
-        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        title = traceStartTitle(subject, cardTitle, traceLimit);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(baseTraceStrength !== undefined
-            ? [`Base ${baseTraceStrength}`]
+          ...(traceLimit !== undefined
+            ? [`Limit ${traceLimit}`]
             : []),
         );
         break;
@@ -2611,16 +2611,16 @@ export function formatChronicleEvent(
         break;
       }
       if (payload.traceStarted === true) {
-        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        const traceLimit = numberValue(payload.traceLimit);
         category = "danger";
         importance = "important";
         visibility = "public";
-        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        title = traceStartTitle(subject, cardTitle, traceLimit);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(baseTraceStrength !== undefined
-            ? [`Base ${baseTraceStrength}`]
+          ...(traceLimit !== undefined
+            ? [`Limit ${traceLimit}`]
             : []),
           actionType === "play_event" ? "Event" : "Operation",
         );
@@ -3472,16 +3472,16 @@ export function formatChronicleEvent(
         }
       }
       if (payload.traceStarted === true) {
-        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        const traceLimit = numberValue(payload.traceLimit);
         category = "danger";
         importance = "important";
         visibility = "public";
-        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        title = traceStartTitle(subject, cardTitle, traceLimit);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(baseTraceStrength !== undefined
-            ? [`Base ${baseTraceStrength}`]
+          ...(traceLimit !== undefined
+            ? [`Limit ${traceLimit}`]
             : []),
         );
         break;
@@ -5640,11 +5640,11 @@ function resolvedSubroutineOutcomeText(
     case "give_runner_tag":
       return `gibt dem Runner ${normalizedAmount || 1} ${normalizedAmount === 1 ? "Tag" : "Tags"}`;
     case "initiate_trace": {
-      const baseTraceStrength = Math.max(
+      const traceLimit = Math.max(
         0,
-        Math.floor(numberValue(payload.baseTraceStrength) ?? normalizedAmount),
+        Math.floor(numberValue(payload.traceLimit) ?? normalizedAmount),
       );
-      return `startet einen Trace mit Basisstärke ${baseTraceStrength}`;
+      return `startet einen Trace mit Limit ${traceLimit}`;
     }
     case "end_the_run_and_trash_source_at_end_of_turn":
       return "beendet den Run und sorgt dafür, dass das ICE am Ende des Zuges getrasht wird";
@@ -7021,11 +7021,11 @@ function traceParticipantLabel(participant: Side, viewer: Side): string {
 function traceStartTitle(
   subject: string,
   cardTitle: string | undefined,
-  baseTraceStrength: number | undefined,
+  traceLimit: number | undefined,
 ): string {
   return phrase(
     subject,
-    `${cardTitle ? `mit ${cardTitle} ` : ""}einen Trace${baseTraceStrength !== undefined ? ` ${baseTraceStrength}` : ""} ausgelöst`,
+    `${cardTitle ? `mit ${cardTitle} ` : ""}einen Trace${traceLimit !== undefined ? ` mit Limit ${traceLimit}` : ""} ausgelöst`,
   );
 }
 

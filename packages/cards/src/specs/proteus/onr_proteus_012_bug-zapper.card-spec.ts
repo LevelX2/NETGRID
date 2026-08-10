@@ -46,9 +46,11 @@ export const cardSpec = {
       addressability: ["plan", "action", "quote", "debug"],
       kind: "rezzed_ice_outside_this_ice",
       dynamicDamageSubroutine: {
-        subroutineId: "subroutine_relative_net_damage",
         amountPerCount: 2,
         visibility: "public",
+        subroutineCapabilityKey: capabilityKey(
+          "subroutine_relative_net_damage",
+        ),
       },
     },
     printedSubroutines: [
@@ -57,7 +59,13 @@ export const cardSpec = {
         addressability: ["plan", "action", "quote", "debug"],
         kind: "damage",
         damageType: "net",
-        amount: 0,
+        amount: {
+          kind: "derived",
+          source: "relative_ice_dynamic_damage",
+          ownerCapabilityKey: capabilityKey(
+            "outside_rezzed_ice_dynamic_net_damage",
+          ),
+        },
         preventable: true,
       },
       {

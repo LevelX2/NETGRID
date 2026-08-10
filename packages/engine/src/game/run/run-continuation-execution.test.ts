@@ -284,7 +284,7 @@ function hostFor(
       },
       callbacks: {
         finishRun: (successful) => calls.push(`finishRun:${successful}`),
-        icebreakerHasBartmossPostEncounterSelfTrashCheck: () => true,
+        icebreakerSpecialSourceDefinitionId: () => "bartmoss_def",
         rollDeterministicDie: () => 1,
         trashRunnerInstalledProgram: (breakerId) =>
           calls.push(`trashRunnerInstalledProgram:${breakerId}`),

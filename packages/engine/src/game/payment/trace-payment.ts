@@ -471,8 +471,30 @@ export function quoteCorpTraceBidPayment(
     trace.fortTraceBitPoolSourceCardInstanceId && trace.fortTraceBitPoolServerId
       ? deps.fortTraceBitPoolTotal(state)
       : 0;
+  const corpTraceCounterPoolAvailable = Math.max(
+    0,
+    Math.floor(deps.corpTraceCounterPoolTotal(state)),
+  );
+  const effectiveBaseTraceLimit = Math.max(
+    0,
+    trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0),
+  );
+  const requiredTraceCounters = Math.max(0, bid - effectiveBaseTraceLimit);
+  if (requiredTraceCounters > corpTraceCounterPoolAvailable) {
+    return {
+      side: "corp",
+      bid,
+      canPay: false,
+      breakdown: [],
+      normalCreditsToPay: 0,
+      temporaryTraceCreditsToPay: 0,
+      fortTraceBitPoolToPay: 0,
+      corpTraceBitsToPay: 0,
+      corpTraceCountersToPay: 0,
+    };
+  }
   const breakdown = allocatedPaymentBreakdowns<CorpTracePaymentSourceKind>(
-    bid,
+    bid - requiredTraceCounters,
     [
       {
         kind: "temporary_trace_credit",
@@ -521,10 +543,24 @@ export function quoteCorpTraceBidPayment(
       {
         kind: "corp_trace_counter_pool",
         priority: 50,
-        available: deps.corpTraceCounterPoolTotal(state),
+        available: corpTraceCounterPoolAvailable - requiredTraceCounters,
       },
     ],
   );
+  if (requiredTraceCounters > 0) {
+    const existingCounterPayment = breakdown.find(
+      (entry) => entry.kind === "corp_trace_counter_pool",
+    );
+    if (existingCounterPayment)
+      existingCounterPayment.amount += requiredTraceCounters;
+    else
+      breakdown.push({
+        kind: "corp_trace_counter_pool",
+        priority: 50,
+        available: corpTraceCounterPoolAvailable,
+        amount: requiredTraceCounters,
+      });
+  }
   const paidTotal = breakdown.reduce((sum, entry) => sum + entry.amount, 0);
   const temporaryTraceCreditsToPay = allocatedAmount(
     breakdown,
@@ -958,7 +994,7 @@ export function corpTracePaymentPublicPayload(
     ...(receipt.corpTraceCountersSpent > 0
       ? {
           hackerTrackerCountersSpent: receipt.corpTraceCountersSpent,
-          traceHostedCreditBoost: receipt.corpTraceCountersSpent,
+          traceLimitAndValueBoost: receipt.corpTraceCountersSpent,
         }
       : {}),
   };

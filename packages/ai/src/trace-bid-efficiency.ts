@@ -15,7 +15,7 @@ export type TraceBidEfficiencyInput = {
   side: Side;
   bidOptions: readonly TraceBidOption[];
   desiredAmount: number;
-  traceStrength?: number;
+  traceValue?: number;
   runnerLink?: number;
   corpBid?: number;
 };
@@ -41,7 +41,7 @@ export type PostBidTraceLinkEfficiencyReason =
 export type PostBidTraceLinkEfficiencyInput = {
   options: readonly PostBidTraceLinkOption[];
   fallbackOptionId?: string;
-  traceStrength?: number;
+  traceValue?: number;
   runnerLink?: number;
   runnerBid?: number;
   runnerStrength?: number;
@@ -72,18 +72,18 @@ export function selectEfficientTraceBidOption(
     return { option: desiredOption, reason: "trace_bid_unknown_context" };
   }
 
-  const traceStrength = input.traceStrength;
+  const traceValue = input.traceValue;
   const runnerLink = input.runnerLink;
   if (
-    typeof traceStrength !== "number" ||
+    typeof traceValue !== "number" ||
     typeof runnerLink !== "number" ||
-    !Number.isInteger(traceStrength) ||
+    !Number.isInteger(traceValue) ||
     !Number.isInteger(runnerLink)
   ) {
     return { option: desiredOption, reason: "trace_bid_unknown_context" };
   }
 
-  const corpTotal = Math.max(0, traceStrength);
+  const corpTotal = Math.max(0, traceValue);
   const runnerBase = Math.max(0, runnerLink);
   const desiredOutcome = runnerAvoidsTrace(
     runnerBase,
@@ -114,11 +114,11 @@ export function selectEfficientPostBidLinkOption(
     input.options.find((option) => option.id === input.fallbackOptionId) ??
     input.options[0];
   const passOption = input.options.find((option) => option.id === "pass");
-  const traceStrength = input.traceStrength;
+  const traceValue = input.traceValue;
   const runnerBase = currentRunnerTraceStrength(input);
   if (
-    typeof traceStrength !== "number" ||
-    !Number.isInteger(traceStrength) ||
+    typeof traceValue !== "number" ||
+    !Number.isInteger(traceValue) ||
     typeof runnerBase !== "number" ||
     !Number.isInteger(runnerBase)
   ) {
@@ -128,7 +128,7 @@ export function selectEfficientPostBidLinkOption(
     );
   }
 
-  const corpTotal = Math.max(0, traceStrength);
+  const corpTotal = Math.max(0, traceValue);
   const currentRunnerTotal = Math.max(0, runnerBase);
   if (currentRunnerTotal >= corpTotal) {
     return postBidTraceLinkSelection(

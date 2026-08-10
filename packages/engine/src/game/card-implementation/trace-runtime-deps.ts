@@ -55,7 +55,7 @@ export function createTraceCardImplementationRuntimeDeps(
       legalAction,
       sourceCardId,
       sourceDefinitionId,
-      baseTraceStrength,
+      traceLimit,
       successEffect,
     ) => {
       legalAction.payload = {
@@ -71,7 +71,7 @@ export function createTraceCardImplementationRuntimeDeps(
       return startTraceFromOperation(
         host.trace.orchestrationHost(state),
         sourceDefinitionId,
-        baseTraceStrength,
+        traceLimit,
         legalAction,
         targetedSuccessEffect,
       );

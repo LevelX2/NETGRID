@@ -19,11 +19,6 @@ import {
 } from "../../ability-engine/card-implementation-primitives";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
-import { COUNTER_GAIN_PROGRAM_SOURCE } from "../../mechanics/agenda-operation-effects";
-import {
-  SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE,
-  ICE_ORDER_REVERSAL_PROGRAM_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 
 export type ActiveRun = NonNullable<GameState["run"]>;

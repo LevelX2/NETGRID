@@ -77,7 +77,7 @@ export type AccessEffectHandlerHost = {
   trace: {
     startTraceFromOperation: (
       sourceDefinitionId: CardDefinitionId,
-      baseTraceStrength: number,
+      traceLimit: number,
       successEffect?: unknown,
     ) => void;
     traceSuccessEffectForCardImplementation: (

@@ -445,6 +445,8 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "high_rez_cost_relief",
   "high_value_accessed_card",
   "current_access_only",
+  "best_cards_for_current_plan",
+  "best_cards_for_current_state",
   "denies_corp_economy_or_combo_piece",
   "normally_untrashable_payoff",
   "denies_corp_agenda_or_combo_piece",
@@ -764,6 +766,14 @@ export type AiHintStrategySupportPair = {
   rationale?: string;
 };
 
+import {
+  type AiHintActionPlanOwnerBinding,
+  validateAiHintActionPlanOwnerBindings,
+} from "./action-plan-owner-contracts";
+
+export type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts";
+export { validateAiHintActionPlanOwnerBindings } from "./action-plan-owner-contracts";
+
 export type AiHintOntologyExtension = {
   strategicExchangeKinds?: AiHintStrategicExchangeKind[];
   effects?: AiHintStructuredEffect[];
@@ -780,6 +790,7 @@ export type AiHintOntologyExtension = {
   lineSupport?: KnownHintLineSupport[];
   strategySupportPairs?: AiHintStrategySupportPair[];
   actionStrategySupportPairs?: AiHintStrategySupportPair[];
+  actionPlanOwnerBindings?: AiHintActionPlanOwnerBinding[];
   opponentSignals?: AiHintOpponentSignal[];
   quality?: AiHintQuality;
 };
@@ -902,6 +913,12 @@ function validateExtensionFields(
     input.actionStrategySupportPairs,
     `${path}.actionStrategySupportPairs`,
     issues,
+  );
+  issues.push(
+    ...validateAiHintActionPlanOwnerBindings(
+      input.actionPlanOwnerBindings,
+      input.side,
+    ).errors,
   );
   validateOpponentSignals(
     input.opponentSignals,

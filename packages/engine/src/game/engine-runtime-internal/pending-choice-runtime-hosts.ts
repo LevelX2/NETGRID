@@ -21,7 +21,10 @@ import type {
 } from "./runtime-shared";
 import type { CorpDrawContinuation } from "@netgrid/shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
-import { resolveClassicDeflectorChoice as resolveClassicDeflectorChoiceInRunModule } from "../run/encounter-printed-nontrace-effects";
+import {
+  resolveClassicDeflectorChoice as resolveClassicDeflectorChoiceInRunModule,
+  resolveTrashProgramChoice as resolveTrashProgramChoiceInRunModule,
+} from "../run/encounter-printed-nontrace-effects";
 import { resumeAccessEffectAfterTagPrevention } from "../access/access-effect-handlers";
 import {
   resumeActivatedCardImplementationAfterCorpDraw,
@@ -32,6 +35,9 @@ import { startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handl
 import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
 import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
 import {
+  appendResolvedEffectsToPayload,
+  applyCorpStartOfTurnEffects,
+  openCorpStartTurnRestrictedActionOffers,
   resumeEndTurnAfterTagPrevention,
   resumeRunnerDrawSequenceAfterTagPrevention,
   resumeStartOfTurnAfterTagPrevention,
@@ -39,6 +45,8 @@ import {
 import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
 import { resolveRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
 import { resolveStrategicPlanningGroupDrawChoice } from "../choices/strategic-planning-group-draw-choice";
+import { addRunnerTagsWithPrevention } from "../damage/damage-core";
+import { rollDeterministicDie } from "../state/draw-random";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
@@ -515,6 +523,18 @@ export function createPendingChoiceRuntimeHosts(
     );
   }
 
+  function resolveTrashProgramChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    resolveTrashProgramChoiceInRunModule(
+      deps.encounterPrintedNonTraceHostForState(state, legalAction),
+      legalAction,
+      playerAction,
+    );
+  }
+
   function resumeAddTagContinuation(
     state: GameState,
     legalAction: LegalAction,
@@ -777,6 +797,7 @@ export function createPendingChoiceRuntimeHosts(
           deps.resolvePostMeatDamageHiddenResourceChoice,
         resolveStartOfRunFortUtilityChoice,
         resolveClassicDeflectorChoice,
+        resolveTrashProgramChoice,
       },
       access: {
         resolveAccessProgramInstallMemoryChoice: (
@@ -804,6 +825,9 @@ export function createPendingChoiceRuntimeHosts(
           deps.resolveCardImplementationAdvancementDistributionChoice,
         resolveCardImplementationMoveAdvancementChoice:
           deps.resolveCardImplementationMoveAdvancementChoice,
+      },
+      turn: {
+        resolveSatelliteMonitorsStartChoice,
       },
       constants: {
         RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
@@ -895,7 +919,7 @@ export function createPendingChoiceRuntimeHosts(
       selectedCards = deps.discardRandomCorpHqCards(
         state,
         expectedCount,
-        `v191.random.${deps.COCKROACH_ID}.hq_discard_phase`,
+        "v191.random.runner_virus_hq_discard_phase",
       );
     } else {
       const selectedIds = deps.selectedChoiceIds(playerAction.selectedChoices);
@@ -1076,6 +1100,121 @@ export function createPendingChoiceRuntimeHosts(
       "setup.draw.corp.mulligan_hand",
       hq.length,
     );
+  }
+
+  function resolveSatelliteMonitorsStartChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    const continuation = state.pendingAddTagContinuation;
+    if (
+      !choice?.source.startsWith("classic.satellite_monitors") ||
+      !continuation ||
+      continuation.kind !== "corp_start_turn_satellite_choice"
+    )
+      throw new Error("Es ist keine Satellite-Monitors-Choice offen.");
+    const rootCardIds = deps.rezzedCorpRootCardIds(state);
+    if (
+      continuation.nextRootCardIndex <= 0 ||
+      rootCardIds[continuation.nextRootCardIndex - 1] !==
+        continuation.sourceCardId ||
+      deps.definitionFor(state, continuation.sourceCardId).id !==
+        continuation.sourceDefinitionId
+    )
+      throw new Error("Die Satellite-Monitors-Choice ist nicht mehr gültig.");
+    const selected =
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    if (selected !== "use" && selected !== "decline")
+      throw new Error("Die Satellite-Monitors-Auswahl ist ungültig.");
+    delete state.pendingChoice;
+    const effects: ResolvedGameEffect[] = [];
+    if (selected === "decline") {
+      delete state.pendingAddTagContinuation;
+      const suspended = applyCorpStartOfTurnEffects(
+        state,
+        effects,
+        legalAction,
+        continuation.nextRootCardIndex,
+        true,
+      );
+      if (!suspended) openCorpStartTurnRestrictedActionOffers(state, effects);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        satelliteMonitorsDeclined: true,
+        sourceDefinitionId: continuation.sourceDefinitionId,
+      };
+      appendResolvedEffectsToPayload(legalAction, effects);
+      return;
+    }
+    const rolls: number[] = [];
+    let tagsAdded = 0;
+    for (let index = 0; index < continuation.runAttemptsLastTurn; index += 1) {
+      const roll = rollDeterministicDie(
+        state,
+        `classic.satellite_monitors.corp_start.${state.stateVersion}.${continuation.sourceCardId}.${index}`,
+      );
+      rolls.push(roll);
+      if (roll === 1) tagsAdded += 1;
+    }
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      satelliteMonitorsUsed: true,
+      sourceDefinitionId: continuation.sourceDefinitionId,
+      runAttemptsLastTurn: continuation.runAttemptsLastTurn,
+    };
+    if (tagsAdded > 0) {
+      const runnerTagsBefore = state.runner.tags;
+      state.pendingAddTagContinuation = {
+        kind: "corp_start_turn",
+        sourceCardId: continuation.sourceCardId,
+        sourceDefinitionId: continuation.sourceDefinitionId,
+        nextRootCardIndex: continuation.nextRootCardIndex,
+        runAttemptsLastTurn: continuation.runAttemptsLastTurn,
+        dieRolls: rolls,
+        tagAmount: tagsAdded,
+        runnerTagsBefore,
+      };
+      if (
+        addRunnerTagsWithPrevention(
+          state,
+          legalAction,
+          tagsAdded,
+          continuation.sourceDefinitionId,
+        )
+      )
+        return;
+      delete state.pendingAddTagContinuation;
+      tagsAdded = Math.max(0, state.runner.tags - runnerTagsBefore);
+    } else {
+      delete state.pendingAddTagContinuation;
+    }
+    effects.push({
+      effectId: `corp.start.classic.satellite_monitors.${continuation.sourceCardId}`,
+      kind: tagsAdded > 0 ? "add_tags" : "counter_change",
+      visibility: "public",
+      side: "runner",
+      amount: tagsAdded,
+      reason: "start_of_turn",
+      sourceDefinitionId: continuation.sourceDefinitionId,
+      sourceTitle: deps.definitionFor(state, continuation.sourceCardId).title,
+      runAttemptsLastTurn: continuation.runAttemptsLastTurn,
+      dieSize: 6,
+      dieRolls: rolls.join(","),
+      tagsAdded,
+      runnerTagsAfter: state.runner.tags,
+      randomCounterAfter: state.randomCounter,
+    });
+    const suspended = applyCorpStartOfTurnEffects(
+      state,
+      effects,
+      legalAction,
+      continuation.nextRootCardIndex,
+      true,
+    );
+    if (!suspended) openCorpStartTurnRestrictedActionOffers(state, effects);
+    appendResolvedEffectsToPayload(legalAction, effects);
   }
 
   return {

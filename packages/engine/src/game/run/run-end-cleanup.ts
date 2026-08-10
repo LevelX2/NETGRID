@@ -14,7 +14,6 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
-import { TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE } from "../../compatibility/runtime-compatibility";
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
   applyV181SuccessfulRunCounterTriggers,
@@ -122,11 +121,10 @@ export function handleRunEndCleanup(
   host.credits.gainRunner(bonus);
   host.credits.gainCorp(corpBonus.amount);
   if (run && corpBonus.amount > 0 && legalAction) {
-    const sourceDefinition = corpBonus.sourceCardId
-      ? host.cards.definitionFor(corpBonus.sourceCardId)
-      : undefined;
-    const sourceDefinitionId =
-      sourceDefinition?.id ?? TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE;
+    if (!corpBonus.sourceCardId)
+      throw new Error("Unsuccessful-run credit bonus requires its source card.");
+    const sourceDefinition = host.cards.definitionFor(corpBonus.sourceCardId);
+    const sourceDefinitionId = sourceDefinition.id;
     const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

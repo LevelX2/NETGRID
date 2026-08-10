@@ -67,7 +67,7 @@ export type CardEffectExecutionContext = {
   trashSource?: (sourceCardId: CardInstanceId) => CardEffectTrashSourceResult;
   startTrace?: (
     sourceCardId: CardInstanceId,
-    baseTraceStrength: number,
+    traceLimit: number,
     successEffects: readonly CardTraceSuccessEffectImplementation[],
   ) => CardEffectTraceResult;
   startRun?: (

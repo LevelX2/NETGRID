@@ -387,10 +387,8 @@ function variableIceStateForRezAction(
       value > variableRez.maxValue ||
       legalAction.payload.variableRezCap !== variableRez.maxValue ||
       legalAction.payload.effectiveStrengthAfterRez !== value ||
-      (variableRez.traceBaseFromValue &&
-        legalAction.payload.effectiveTraceBaseAfterRez !== value) ||
-      (variableRez.traceBidLimitFromValue &&
-        legalAction.payload.effectiveTraceBidLimitAfterRez !== value)
+      (variableRez.traceLimitFromValue &&
+        legalAction.payload.effectiveTraceLimitAfterRez !== value)
     )
       throw new Error("Variable X-Staerke ist nicht legal.");
     return {
@@ -399,7 +397,7 @@ function variableIceStateForRezAction(
       value,
       cap: variableRez.maxValue,
       strength: value,
-      ...(variableRez.traceBidLimitFromValue ? { traceBidLimit: value } : {}),
+      ...(variableRez.traceLimitFromValue ? { traceLimit: value } : {}),
     };
   }
   if (variableRez.kind === "alternate_subtype") {

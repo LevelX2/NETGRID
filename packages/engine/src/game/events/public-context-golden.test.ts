@@ -183,7 +183,6 @@ describe("PublicContext golden payload gate", () => {
         payload: {
           baseLinkUsed: true,
           baseLinkValue: 1,
-          baseTraceStrength: 4,
           choiceId: "trace_golden_choice",
           choiceKind: "select_option",
           choiceVisibility: "public",
@@ -197,7 +196,7 @@ describe("PublicContext golden payload gate", () => {
           tagsAdded: 1,
           traceBaseLinkCostPaid: 1,
           traceBaseLinkSourceDefinitionId: "simple_economy_event",
-          traceBidLimit: 6,
+          traceLimit: 6,
           traceId: "trace_public_context_golden",
           traceStep: "result",
           traceSuccessEffect: "tag",
@@ -211,7 +210,6 @@ describe("PublicContext golden payload gate", () => {
     expectGoldenPayload(context, {
       baseLinkUsed: true,
       baseLinkValue: 1,
-      baseTraceStrength: 4,
       choiceId: "trace_golden_choice",
       choiceKind: "select_option",
       corpBid: 2,
@@ -224,7 +222,7 @@ describe("PublicContext golden payload gate", () => {
       tagsAdded: 1,
       traceBaseLinkCostPaid: 1,
       traceBaseLinkSourceDefinitionId: "simple_economy_event",
-      traceBidLimit: 6,
+      traceLimit: 6,
       traceId: "trace_public_context_golden",
       traceStep: "result",
       traceSuccessEffect: "tag",

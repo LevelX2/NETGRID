@@ -69,7 +69,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     const definitionOnlyIds = activeCardSpecDefinitionIds.filter(
       (definitionId) => !implementationIds.has(definitionId),
     );
-    expect(definitionOnlyIds).toHaveLength(23);
+    expect(definitionOnlyIds).toHaveLength(24);
     for (const definitionId of definitionOnlyIds) {
       expect(cardImplementationCoverageForDefinitionId(definitionId)).toEqual({
         cardDefinitionId: definitionId,
@@ -227,7 +227,10 @@ describe("CardImplementation coverage and registry invariants", () => {
     expect(
       cardImplementationForDefinitionId("onr_v1_353_chimera")?.accessEffects,
     ).toEqual([
-      {
+      expect.objectContaining({
+        capabilityKey:
+          "access_effects_on_access_trash_installed_runner_cards",
+        addressability: ["plan", "action", "quote", "debug"],
         kind: "on_access",
         sourceZones: ["installed"],
         visibility: "hidden_info_barrier",
@@ -239,7 +242,7 @@ describe("CardImplementation coverage and registry invariants", () => {
             visibility: "hidden_info_barrier",
           },
         ],
-      },
+      }),
     ]);
     expect(
       cardImplementationCoverageForDefinitionId("onr_v1_353_chimera"),
@@ -501,26 +504,38 @@ describe("CardImplementation coverage and registry invariants", () => {
       }),
     );
     expect(
-      cardImplementationForDefinitionId("onr_v1_242_fatal-attractor")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_v1_242_fatal-attractor"]?.subroutines,
     ).toContainEqual(
       expect.objectContaining({
-        kind: "next_encounter_unless_fully_break_damage",
+        type: "set_next_encounter_unless_fully_break_damage",
         amount: 3,
       }),
     );
     expect(
+      cardImplementationForDefinitionId("onr_v1_242_fatal-attractor")
+        ?.printedSubroutines,
+    ).toBeUndefined();
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_247_haunting-inquisition"]?.subroutines,
+    ).toContainEqual(
+      expect.objectContaining({
+        type: "set_runner_run_lock_actions",
+        amount: 6,
+      }),
+    );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_271_tko-2-0"]?.subroutines,
+    ).toContainEqual(
+      expect.objectContaining({ type: "set_runner_forgo_next_action" }),
+    );
+    expect(
       cardImplementationForDefinitionId("onr_v1_247_haunting-inquisition")
         ?.printedSubroutines,
-    ).toContainEqual(
-      expect.objectContaining({ kind: "runner_run_lock_actions", amount: 6 }),
-    );
+    ).toBeUndefined();
     expect(
       cardImplementationForDefinitionId("onr_v1_271_tko-2-0")
         ?.printedSubroutines,
-    ).toContainEqual(
-      expect.objectContaining({ kind: "runner_forgoes_next_action" }),
-    );
+    ).toBeUndefined();
   });
 
   it("migrates P3.54 delayed fort run windows into CardImplementation coverage", () => {
@@ -574,7 +589,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     ).toContainEqual(
       expect.objectContaining({
         kind: "trace",
-        baseTraceStrength: 10,
+        traceLimit: 10,
       }),
     );
   });
@@ -679,9 +694,12 @@ describe("CardImplementation coverage and registry invariants", () => {
       amount: 4,
     });
     expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.subroutines,
+    ).toHaveLength(2);
+    expect(
       cardImplementationForDefinitionId("onr_v1_276_viral-15")
         ?.printedSubroutines,
-    ).toHaveLength(2);
+    ).toBeUndefined();
   });
 
   it("migrates Proteus Phase 1a reuse-only cards into CardImplementation coverage", () => {
@@ -1032,8 +1050,7 @@ describe("CardImplementation coverage and registry invariants", () => {
         variableRez: {
           kind: "x_strength",
           maxValue: 8,
-          traceBaseFromValue: true,
-          traceBidLimitFromValue: true,
+          traceLimitFromValue: true,
         },
       },
       {
@@ -1888,7 +1905,7 @@ describe("CardImplementation coverage and registry invariants", () => {
           effects: [
             {
               kind: "trace",
-              baseTraceStrength: 6,
+              traceLimit: 6,
               visibility: "public",
               onSuccess: [
                 {
@@ -1910,8 +1927,8 @@ describe("CardImplementation coverage and registry invariants", () => {
           effects: [
             {
               kind: "trace",
-              baseTraceStrength: 3,
-              additionalPlayCostPerBaseTracePointAboveZero: 1,
+              traceLimit: 3,
+              additionalPlayCostPerTraceLimitPointAboveZero: 1,
               visibility: "public",
               onSuccess: [
                 {
@@ -1934,7 +1951,7 @@ describe("CardImplementation coverage and registry invariants", () => {
           effects: [
             {
               kind: "trace",
-              baseTraceStrength: 4,
+              traceLimit: 4,
               visibility: "public",
               onSuccess: [
                 {

@@ -57,6 +57,8 @@ export const cardSpec = {
           kind: "for_each_rezzed_installed_ice",
           subtypeAnyOf: ["code_gate", "wall"],
           excludeSource: true,
+          scope: "outside_source_same_server",
+          subtypeMatch: "effective_current_subtypes",
         },
         subroutine: {
           kind: "end_the_run",

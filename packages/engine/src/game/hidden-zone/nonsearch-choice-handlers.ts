@@ -40,10 +40,6 @@ export type HiddenZoneNonSearchChoiceHandlerHost = {
   >;
   legalAction: LegalAction;
   playerAction?: PlayerAction;
-  constants: {
-    corpArchivesToHqOperationCardId: CardDefinitionId;
-    runAccessPressureEventCardId: CardDefinitionId;
-  };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     corpUtilityForCard?: (
@@ -773,8 +769,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
   if (!choice || !isSecretSpendGuessTargetedBypassRunChoiceSource(choice.source))
     throw new Error("Es ist keine Secret-Spend-Guess-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
-  if (host.cards.definitionFor(sourceCardId).id !== host.constants.runAccessPressureEventCardId)
-    throw new Error("Die Secret-Spend-Guess-Quelle passt nicht zur Karte.");
+  const sourceDefinitionId = host.cards.definitionFor(sourceCardId).id;
   const playerAction = requirePlayerAction(host);
   if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:")) {
     const hiddenAmount = selectedBidAmount(choice, playerAction);
@@ -787,7 +782,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
     host.state.pendingChoice = secretSpendGuessChoice(host, sourceCardId);
     host.state.activeSide = "corp";
     const payload = {
-      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
+      sourceDefinitionId,
       secretSpendGuessRunStep: "runner_hidden_amount_selected",
       hiddenZoneBarrier: true,
     };
@@ -809,7 +804,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
       delete host.state.pendingChoice;
       host.state.activeSide = "runner";
       const payload = {
-        sourceDefinitionId: host.constants.runAccessPressureEventCardId,
+        sourceDefinitionId,
         secretSpendGuessRunGuessCorrect: true,
         secretHiddenAmountRevealed: secret.hiddenAmount,
         secretGuessAmount: guess,
@@ -821,7 +816,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
     }
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
-      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
+      sourceDefinitionId,
       secretSpendGuessRunGuessCorrect: false,
       secretHiddenAmountRevealed: secret.hiddenAmount,
       secretGuessAmount: guess,
@@ -844,7 +839,7 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
     delete host.state.secretSpendGuessRunSecret;
     delete host.state.pendingChoice;
     const payload = {
-      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
+      sourceDefinitionId,
       secretSpendGuessRunGuessCorrect: false,
       autoPassChosenIce: true,
       secretSpendGuessRun: true,
@@ -875,7 +870,7 @@ function startSecretSpendGuessTargetedBypassRunTargetChoice(
     host.state.activeSide = "runner";
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
-      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
+    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
       secretSpendGuessRunGuessCorrect: false,
       secretSpendGuessRunNoIceTarget: true,
       hiddenZoneBarrier: true,
@@ -1038,11 +1033,7 @@ function isCorpArchivesToHqSource(
   sourceCardId: string,
 ): sourceCardId is CardInstanceId {
   if (!sourceCardId) return false;
-  return (
-    host.cards.definitionFor(sourceCardId).id ===
-      host.constants.corpArchivesToHqOperationCardId ||
-      host.cards.hasCorpUtilityKind(sourceCardId, "corp_archives_to_hq")
-  );
+  return host.cards.hasCorpUtilityKind(sourceCardId, "corp_archives_to_hq");
 }
 
 function corpArchivesToHqUtility(

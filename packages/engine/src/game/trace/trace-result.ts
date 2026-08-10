@@ -12,14 +12,14 @@ import type { GameState } from "@netgrid/shared";
 import { requireCurrentTrace, type CurrentTrace } from "./trace-state";
 
 export type TraceResultDescriptor = {
-  baseTraceStrength: number;
+  traceLimit: number;
   corpBid: number;
-  corpTraceStrength: number;
+  traceValue: number;
   baseLinkValue: number;
   runnerLink: number;
   runnerBid: number;
   postBidLinkValue: number;
-  runnerTraceStrength: number;
+  runnerStrength: number;
   successful: boolean;
 };
 
@@ -27,8 +27,8 @@ export type TraceResultOptions = {
   runnerLinkFallback?: number;
 };
 
-export function traceCorpStrength(trace: CurrentTrace): number {
-  return trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
+export function traceCorpValue(trace: CurrentTrace): number {
+  return trace.traceValue ?? trace.corpBid ?? 0;
 }
 
 export function traceRunnerStrength(
@@ -44,7 +44,10 @@ export function isTraceSuccessful(
   trace: CurrentTrace,
   options: TraceResultOptions = {},
 ): boolean {
-  return traceCorpStrength(trace) > traceRunnerStrength(trace, options);
+  return (
+    trace.successful ??
+    (traceCorpValue(trace) > traceRunnerStrength(trace, options))
+  );
 }
 
 export function describeTraceResultFromTrace(
@@ -52,18 +55,19 @@ export function describeTraceResultFromTrace(
   options: TraceResultOptions = {},
 ): TraceResultDescriptor {
   const runnerLink = trace.runnerLink ?? options.runnerLinkFallback ?? 0;
-  const corpTraceStrength = traceCorpStrength(trace);
-  const runnerTraceStrength = traceRunnerStrength(trace, options);
+  const traceValue = traceCorpValue(trace);
+  const runnerStrength = traceRunnerStrength(trace, options);
   return {
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     corpBid: trace.corpBid ?? 0,
-    corpTraceStrength,
+    traceValue,
     baseLinkValue: trace.baseLinkValue ?? 0,
     runnerLink,
     runnerBid: trace.runnerBid ?? 0,
     postBidLinkValue: trace.postBidLinkBonus ?? 0,
-    runnerTraceStrength,
-    successful: corpTraceStrength > runnerTraceStrength,
+    runnerStrength,
+    successful:
+      trace.successful ?? (traceValue > runnerStrength),
   };
 }
 

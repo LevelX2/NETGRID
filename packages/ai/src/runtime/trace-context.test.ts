@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { latestTraceContext } from "./trace-context";
 
 describe("latestTraceContext", () => {
-  it("reads the public base trace strength at the Corp bid window", () => {
+  it("reads the public trace limit without inventing a starting value", () => {
     const input = traceInput();
     input.eventTail = [
       {
@@ -13,15 +13,15 @@ describe("latestTraceContext", () => {
         stateVersionBefore: 1,
         stateVersionAfter: 2,
         stateHashAfter: "hash",
-        publicPayload: { baseTraceStrength: 5 },
+        publicPayload: { traceLimit: 5 },
       },
     ];
 
     expect(latestTraceContext(input)).toMatchObject({
-      baseTraceStrength: 5,
-      traceStrength: 5,
+      traceLimit: 5,
       runnerLink: 0,
     });
+    expect(latestTraceContext(input).traceValue).toBeUndefined();
   });
 
   it("includes visible static Runner link before the Runner bid", () => {

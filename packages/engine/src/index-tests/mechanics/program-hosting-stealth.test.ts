@@ -259,7 +259,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 4,
+      traceLimit: 4,
     });
 
     state = applyChoice(state, "corp", "bid_1");
@@ -267,7 +267,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(state.trace).toMatchObject({
       status: "base_link",
       corpBid: 1,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 0,
     });
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
@@ -288,7 +288,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 1,
-      traceStrength: 5,
+      traceValue: 5,
       runnerLink: 9,
     });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();

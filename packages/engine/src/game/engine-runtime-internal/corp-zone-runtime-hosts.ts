@@ -95,13 +95,16 @@ export function createCorpZoneRuntimeHosts(
       state,
       legalAction,
       ...(playerAction ? { playerAction } : {}),
-      constants: {
-        corpHqAgendaRevealCardId: deps.HQ_AGENDA_REVEAL_ASSET_SOURCE,
-      },
       cards: {
         definitionFor: (cardId) => deps.definitionFor(state, cardId),
-        hasCardImplementation: (definitionId) =>
-          Boolean(deps.cardImplementationForDefinitionId(definitionId)),
+        hasLifecycleEffect: (cardId, effectKind) =>
+          deps
+            .cardImplementationForDefinitionId(
+              deps.definitionFor(state, cardId).id,
+            )
+            ?.lifecycle?.start_of_corp_turn?.some((ability) =>
+              ability.effects.some((effect) => effect.kind === effectKind),
+            ) === true,
         mustInstance: (cardId) =>
           deps.mustInstance(state.cardInstances, cardId),
         scoredAgendaKind: (cardId) =>
@@ -507,9 +510,13 @@ export function createCorpZoneRuntimeHosts(
       "militech",
       1,
     );
+    const sourceCardId = String(legalAction.payload?.cardId ?? "");
+    if (!state.runner.grip.includes(sourceCardId))
+      throw new Error("Die Militech-Quelle ist nicht mehr im Grip.");
+    const sourceDefinitionId = deps.definitionFor(state, sourceCardId).id;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: deps.DEAL_WITH_MILITECH_ID,
+      sourceDefinitionId,
       ...result.publicPayload,
     };
   }

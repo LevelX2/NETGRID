@@ -745,6 +745,47 @@ export function declineCurrentAccess(
   host: AccessFlowHost,
   legalAction?: LegalAction,
 ): AccessExecutionResult {
+  const run = host.state.run;
+  const cardId = run?.accessedCardId;
+  if (run && cardId) {
+    const definition = host.cards.definitionFor(cardId);
+    const replacement = cardImplementationForDefinitionId(
+      definition.id,
+    )?.agendaAccessReplacement;
+    const instance = host.cards.cardInstanceFor(cardId);
+    const serverId = run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
+    if (
+      replacement?.onDecline?.kind ===
+        "score_if_still_installed_in_same_fort_at_runner_start" &&
+      instance.zone.side === "corp" &&
+      instance.zone.zone === "serverRoot" &&
+      instance.zone.serverId === serverId
+    ) {
+      const delayed = host.state.delayedAccessEffects ?? [];
+      if (!delayed.some((entry) => entry.agendaId === cardId)) {
+        host.state.delayedAccessEffects = [
+          ...delayed,
+          {
+            kind: "delayed_agenda_access_replacement",
+            agendaId: cardId,
+            serverId,
+            sourceCardInstanceId: cardId,
+            sourceDefinitionId: definition.id,
+            resolveAt: "runner_start_turn",
+          },
+        ];
+      }
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          agendaAccessReplacement: "declined_install_as_runner_program",
+          delayedAgendaAccessScoreScheduled: true,
+          sourceDefinitionId: definition.id,
+          serverId,
+        };
+      }
+    }
+  }
   if (host.state.run?.breach) {
     return completeCurrentBreachAccess(host, "declined", legalAction);
   }

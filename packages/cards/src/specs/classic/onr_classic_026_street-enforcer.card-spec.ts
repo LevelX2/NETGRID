@@ -41,9 +41,9 @@ export const cardSpec = {
       },
     },
     corpUtility: {
-      capabilityKey: capabilityKey("run_start_tax_runner_tags"),
+      capabilityKey: capabilityKey("run_start_lose_runner_credits_per_tag"),
       addressability: ["plan", "action", "quote", "debug"],
-      kind: "run_start_tax_runner_tags",
+      kind: "run_start_lose_runner_credits_per_tag",
       visibility: "public",
     },
   },
@@ -99,13 +99,11 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_026_street-enforcer.",
       },
     ],
     capabilities: [
       {
-        capabilityKey: capabilityKey("run_start_tax_runner_tags"),
+        capabilityKey: capabilityKey("run_start_lose_runner_credits_per_tag"),
         annotations: [
           {
             kind: "strategy_support",

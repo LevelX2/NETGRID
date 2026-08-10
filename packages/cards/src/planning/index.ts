@@ -28,9 +28,13 @@ export { assertCardRegistryPlanningContext, assertCardRegistryRulesContext };
 export type { PlanningCardView } from "../projections";
 export type {
   CardPlanningAnnotations,
+  PlanningPlanOwner,
+  PlanningPlanOwnerRoute,
   PlanningInterpretation,
 } from "../planning-annotations";
 export {
+  KNOWN_PLANNING_PLAN_OWNERS,
+  KNOWN_PLANNING_PLAN_OWNER_ROUTES,
   KNOWN_PLANNING_TACTIC_SIGNALS,
   KNOWN_PLANNING_TACTIC_USES,
 } from "../planning-annotations";
@@ -48,6 +52,7 @@ export type {
   ProspectiveUncertaintyClass,
 } from "../prospective-capabilities";
 export {
+  canonicalCapabilityId,
   assertCanonicalCapabilityId,
   assertAbilityRefIdentity,
   parseCanonicalCapabilityId,

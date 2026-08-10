@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 202,
-    "stateHash": "fnv1a:184d322f",
+    "stateHash": "fnv1a:5f080f47",
     "testOnlyGameState": {
       "matchId": "match_424abdd1c7ac054d",
       "baseline": {
@@ -9152,8 +9152,8 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["install_breaker_wall"],
-      "requiredAssessmentEvidence": ["target:rd"]
+      "acceptableCapabilities": ["install_breaker_ap"],
+      "requiredAssessmentEvidence": ["target:remote_1"]
     }
   }
 }

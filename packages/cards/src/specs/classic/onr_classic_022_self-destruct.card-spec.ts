@@ -62,6 +62,11 @@ export const cardSpec = {
             visibility: "hidden_info_barrier",
           },
         ],
+        installedSourceActivation: "requires_rezzed",
+        cost: {
+          kind: "trash_source",
+        },
+        optional: true,
       },
     ],
   },
@@ -131,8 +136,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_022_self-destruct.",
       },
     ],
     capabilities: [],

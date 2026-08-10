@@ -3,6 +3,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
 import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { rolesMatch } from "../runtime/role-match";
+import { runnerEffectsProvideDamagePrevention } from "../runner-canonical-hint-semantics";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
   PlanAssessment,
@@ -85,7 +86,6 @@ export type RunnerFundingNeedSignal =
       currentCreditsAtRevalidation: number;
       targetCredits: number;
       gap: number;
-      projectedCreditGain: 1;
       priorityClass: "P6";
       cadence: {
         kind: "remaining_turn_capacity";
@@ -350,6 +350,30 @@ export function runnerFundingRouteCandidateIsMaterializable(
     typeof candidate.economyProjection.netLiquidCreditGain === "number" &&
     Number.isFinite(candidate.economyProjection.netLiquidCreditGain) &&
     candidate.economyProjection.netLiquidCreditGain > 0
+  );
+}
+
+export function runnerTurnLiquidityCandidateIsMaterializable(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const projection = candidate.economyProjection;
+  return (
+    runnerFundingRouteCandidateIsMaterializable(candidate) &&
+    candidate.costProfile.clickCost === 1 &&
+    (candidate.costProfile.creditCost === undefined ||
+      candidate.costProfile.creditCost === 0) &&
+    candidate.costProfile.additionalCosts.length === 0 &&
+    projection?.clickCost === 1 &&
+    projection.creditCost === 0 &&
+    projection.cardsDrawn === 0 &&
+    projection.cardsConsumed === 0 &&
+    projection.netHandDelta === 0 &&
+    projection.payoutMode === "fixed" &&
+    projection.reliability === "guaranteed" &&
+    ((projection.source === "basic_action_contract" &&
+      projection.confidence === "medium") ||
+      (projection.source === "legal_action_payload" &&
+        projection.confidence === "high"))
   );
 }
 
@@ -1055,7 +1079,7 @@ function economyModule(): PlanModule {
           },
           purpose:
             need.kind === "develop_liquidity"
-              ? "Develop one exact unit of unrestricted Runner liquidity with the current basic credit action."
+              ? "Develop guaranteed immediate unrestricted Runner liquidity through the strongest exact current route."
               : `Close the bound credit gap ${need.needId}.`,
         },
         candidates,
@@ -1530,15 +1554,18 @@ function economyCandidates(
       (candidate) =>
         routeActionIds.has(candidate.actionId) &&
         (need.kind === "develop_liquidity"
-          ? runnerExactBasicLiquidCreditCandidate(candidate) &&
-            candidate.economyProjection?.netLiquidCreditGain ===
-              need.projectedCreditGain
+          ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
           : runnerFundingRouteCandidateIsMaterializable(candidate)),
     )
-    .map((candidate) => ({
-      candidate,
-      stepValue: candidate.economyProjection!.netLiquidCreditGain!,
-    }));
+    .map((candidate) => {
+      const netLiquidCreditGain =
+        candidate.economyProjection!.netLiquidCreditGain!;
+      const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
+      return {
+        candidate,
+        stepValue: fundingGapProgress * 100 + netLiquidCreditGain,
+      };
+    });
 }
 
 function validRunnerFundingNeedContract(
@@ -1550,7 +1577,7 @@ function validRunnerFundingNeedContract(
     return (
       need.needId.startsWith("economy-liquidity-development:") &&
       actionIds.length === need.actionIds.length &&
-      actionIds.length === 1 &&
+      actionIds.length > 0 &&
       Number.isSafeInteger(need.currentCreditsAtRevalidation) &&
       Number.isSafeInteger(need.targetCredits) &&
       Number.isSafeInteger(need.gap) &&
@@ -1558,7 +1585,6 @@ function validRunnerFundingNeedContract(
       need.targetCredits >= 0 &&
       need.gap > 0 &&
       need.targetCredits === need.currentCreditsAtRevalidation + need.gap &&
-      need.projectedCreditGain === 1 &&
       need.priorityClass === "P6" &&
       need.cadence.kind === "remaining_turn_capacity" &&
       Number.isSafeInteger(need.cadence.maximumConversions) &&
@@ -1751,7 +1777,14 @@ function bankCandidates(
 ): PlanMaterialization["candidates"] {
   const actionIds = new Set(signal.actionIds);
   return context.actionCandidates
-    .filter((candidate) => actionIds.has(candidate.actionId))
+    .filter((candidate) => {
+      if (!actionIds.has(candidate.actionId)) return false;
+      if (signal.phase !== "build" && signal.phase !== "cash_out") return true;
+      return (
+        candidate.planOwnerBinding?.owner === "runner.credit_bank" &&
+        candidate.planOwnerBinding.route === signal.phase
+      );
+    })
     .map((candidate) => ({
       candidate,
       stepValue:
@@ -1788,7 +1821,8 @@ function resourceLifecycleCandidates(
         actionIds.has(candidate.actionId) &&
         candidate.sourceKind === "card" &&
         candidate.sourceDefinitionId === signal.definitionId &&
-        candidate.sourceCardInstanceId === signal.sourceCardInstanceId,
+        candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+        candidate.planOwnerBinding?.owner === "runner.resource_lifecycle",
     )
     .map((candidate) => ({
       candidate,
@@ -1953,29 +1987,27 @@ function coverageDrawCandidates(
   const drawForAnswerIds = new Set(gap.drawForAnswerActionIds);
   const drawAllowed = domain(context).defense.drawAllowed;
   return context.actionCandidates
-    .filter(
-      (candidate) => {
-        const isCoverageRoute =
-          directSearchIds.has(candidate.actionId) ||
-          searchSetupIds.has(candidate.actionId) ||
-          drawForAnswerIds.has(candidate.actionId) ||
-          (drawAllowed && candidate.semanticActionType === "draw.card");
-        const isDrawRoute =
-          drawForAnswerIds.has(candidate.actionId) ||
-          (drawAllowed && candidate.semanticActionType === "draw.card");
-        const displacedByGeneralHandDevelopment =
-          context.actionDispositions?.some(
-            (disposition) =>
-              disposition.actionId === candidate.actionId &&
-              disposition.disposition === "explicitly_nonproductive",
-          ) ?? false;
-        return (
-          isCoverageRoute &&
-          (!displacedByGeneralHandDevelopment ||
-            (gap.deckHasAnswer && isDrawRoute))
-        );
-      },
-    )
+    .filter((candidate) => {
+      const isCoverageRoute =
+        directSearchIds.has(candidate.actionId) ||
+        searchSetupIds.has(candidate.actionId) ||
+        drawForAnswerIds.has(candidate.actionId) ||
+        (drawAllowed && candidate.semanticActionType === "draw.card");
+      const isDrawRoute =
+        drawForAnswerIds.has(candidate.actionId) ||
+        (drawAllowed && candidate.semanticActionType === "draw.card");
+      const displacedByGeneralHandDevelopment =
+        context.actionDispositions?.some(
+          (disposition) =>
+            disposition.actionId === candidate.actionId &&
+            disposition.disposition === "explicitly_nonproductive",
+        ) ?? false;
+      return (
+        isCoverageRoute &&
+        (!displacedByGeneralHandDevelopment ||
+          (gap.deckHasAnswer && isDrawRoute))
+      );
+    })
     .map((candidate) => ({
       candidate,
       stepValue: directSearchIds.has(candidate.actionId)
@@ -2089,7 +2121,7 @@ function defenseCandidates(
       if (phase === "prevent_damage")
         return (
           candidate.semanticActionType.startsWith("damage.prevent") ||
-          candidate.actionTacticSignals.includes("damage_prevention")
+          runnerEffectsProvideDamagePrevention(candidate.functionalEffects)
         );
       if (phase === "build_reaction_reserve")
         return reactionReserveActionIds.has(candidate.actionId);

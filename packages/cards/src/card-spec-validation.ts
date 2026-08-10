@@ -218,6 +218,22 @@ const CONDITIONALLY_ADDRESSABLE_KINDS = new Set([
   "select_rezzed_ice_mark_modifier",
   "score_install_hq_cards_into_new_remote_then_rez",
 ]);
+const FLATLINE_REPLACEMENT_SOURCE_BASE_KEYS = new Set([
+  "capabilityKey",
+  "abilityKey",
+  "addressability",
+  "kind",
+  "replacement",
+  "visibility",
+]);
+const FLATLINE_REPLACEMENT_SOURCE_KEYS = new Set([
+  ...FLATLINE_REPLACEMENT_SOURCE_BASE_KEYS,
+  "resolution",
+  "cost",
+  "damageType",
+  "activeOnlyDuring",
+  "badPublicity",
+]);
 
 /**
  * Validates a compile-time typed CardSpec's envelope, authority boundaries,
@@ -383,8 +399,7 @@ export function assertCardSpecContract(spec: CardSpec): void {
         "minValue",
         "maxValue",
         "minSubroutines",
-        "traceBaseFromValue",
-        "traceBidLimitFromValue",
+        "traceLimitFromValue",
         "visibility",
       ]),
       "$cardSpec.engine.variableRez",
@@ -401,8 +416,7 @@ export function assertCardSpecContract(spec: CardSpec): void {
             "additionalCostPerValue",
             "minValue",
             "maxValue",
-            "traceBaseFromValue",
-            "traceBidLimitFromValue",
+            "traceLimitFromValue",
             "visibility",
           ].includes(key)
         )
@@ -431,7 +445,7 @@ export function assertCardSpecContract(spec: CardSpec): void {
           "$cardSpec.engine.variableRez",
           "x-strength requires cost 1, minimum 0, and a maximum",
         );
-      for (const key of ["traceBaseFromValue", "traceBidLimitFromValue"])
+      for (const key of ["traceLimitFromValue"])
         if (variableRez[key] !== undefined && variableRez[key] !== true)
           invalid(
             `$cardSpec.engine.variableRez.${key}`,
@@ -545,6 +559,12 @@ export function assertCardSpecContract(spec: CardSpec): void {
       if (region[key] !== true)
         invalid(`$cardSpec.engine.regionBaseline.${key}`, "must be true");
   }
+  if (engine.flatlineReplacementSources !== undefined)
+    assertFlatlineReplacementSources(
+      engine.flatlineReplacementSources,
+      "$cardSpec.engine.flatlineReplacementSources",
+    );
+  assertDynamicDamageSubroutineBinding(engine);
 
   const capabilityKeys = assertCapabilityIdentities(engine, "$cardSpec.engine");
   for (const key of capabilityTextKeys)
@@ -589,6 +609,262 @@ export function assertCardSpecContract(spec: CardSpec): void {
     },
   );
   assertPublication(root.publication, "$cardSpec.publication");
+}
+
+function assertFlatlineReplacementSources(value: unknown, path: string): void {
+  denseArray(value, path).forEach((entry, index) => {
+    const sourcePath = `${path}[${index}]`;
+    const source = closedObject(
+      entry,
+      FLATLINE_REPLACEMENT_SOURCE_KEYS,
+      sourcePath,
+    );
+    const baseKeys = new Set(FLATLINE_REPLACEMENT_SOURCE_BASE_KEYS);
+    if (source.kind === "flatline_replacement_from_grip") {
+      baseKeys.add("resolution");
+      assertExactKeys(source, baseKeys, sourcePath);
+      if (source.replacement !== "flatline_tag_replacement")
+        invalid(
+          `${sourcePath}.replacement`,
+          "must be flatline_tag_replacement",
+        );
+      assertFlatlineTagReplacementResolution(
+        source.resolution,
+        `${sourcePath}.resolution`,
+      );
+    } else if (source.kind === "flatline_replacement_installed") {
+      baseKeys.add("resolution");
+      baseKeys.add("cost");
+      assertExactKeys(source, baseKeys, sourcePath);
+      if (source.replacement !== "installed_flatline_prevention")
+        invalid(
+          `${sourcePath}.replacement`,
+          "must be installed_flatline_prevention",
+        );
+      const cost = closedObject(
+        source.cost,
+        new Set(["kind"]),
+        `${sourcePath}.cost`,
+      );
+      if (cost.kind !== "trash_source")
+        invalid(`${sourcePath}.cost.kind`, "must be trash_source");
+      assertInstalledFlatlinePreventionResolution(
+        source.resolution,
+        `${sourcePath}.resolution`,
+      );
+    } else if (source.kind === "damage_replacement_from_grip") {
+      for (const key of ["damageType", "activeOnlyDuring", "badPublicity"])
+        baseKeys.add(key);
+      assertExactKeys(source, baseKeys, sourcePath);
+      if (source.replacement !== "prevent_meat_damage_add_bad_publicity")
+        invalid(
+          `${sourcePath}.replacement`,
+          "must be prevent_meat_damage_add_bad_publicity",
+        );
+      if (source.damageType !== "meat")
+        invalid(`${sourcePath}.damageType`, "must be meat");
+      if (source.activeOnlyDuring !== "corp_turn")
+        invalid(`${sourcePath}.activeOnlyDuring`, "must be corp_turn");
+      if (source.badPublicity !== 2)
+        invalid(`${sourcePath}.badPublicity`, "must be 2");
+    } else invalid(`${sourcePath}.kind`, "unknown flatline replacement kind");
+    if (source.visibility !== "public")
+      invalid(`${sourcePath}.visibility`, "must be public");
+  });
+}
+
+function assertDynamicDamageSubroutineBinding(
+  engine: Record<string, unknown>,
+): void {
+  const printed =
+    engine.printedSubroutines === undefined
+      ? []
+      : denseArray(
+          engine.printedSubroutines,
+          "$cardSpec.engine.printedSubroutines",
+        );
+  const derivedDamage = printed.filter((entry) => {
+    if (entry === null || typeof entry !== "object" || Array.isArray(entry))
+      return false;
+    const record = entry as Record<string, unknown>;
+    return (
+      record.kind === "damage" &&
+      record.amount !== null &&
+      typeof record.amount === "object" &&
+      !Array.isArray(record.amount)
+    );
+  });
+  const relativeIce =
+    engine.relativeIce === undefined
+      ? undefined
+      : closedObject(
+          engine.relativeIce,
+          new Set([
+            "capabilityKey",
+            "abilityKey",
+            "addressability",
+            "kind",
+            "strengthBonusPerCount",
+            "dynamicDamageSubroutine",
+            "dynamicTraceSubroutines",
+          ]),
+          "$cardSpec.engine.relativeIce",
+        );
+  if (relativeIce?.dynamicDamageSubroutine === undefined) {
+    if (derivedDamage.length > 0)
+      invalid(
+        "$cardSpec.engine.printedSubroutines",
+        "derived damage requires a relative ICE dynamic-damage owner",
+      );
+    return;
+  }
+  if (typeof relativeIce.capabilityKey !== "string")
+    invalid(
+      "$cardSpec.engine.relativeIce.capabilityKey",
+      "must be a capability key",
+    );
+  const ownerCapabilityKey = capabilityKey(relativeIce.capabilityKey as string);
+  const binding = closedObject(
+    relativeIce.dynamicDamageSubroutine,
+    new Set(["subroutineCapabilityKey", "amountPerCount", "visibility"]),
+    "$cardSpec.engine.relativeIce.dynamicDamageSubroutine",
+  );
+  if (typeof binding.subroutineCapabilityKey !== "string")
+    invalid(
+      "$cardSpec.engine.relativeIce.dynamicDamageSubroutine.subroutineCapabilityKey",
+      "must be a capability key",
+    );
+  const targetCapabilityKey = capabilityKey(
+    binding.subroutineCapabilityKey as string,
+  );
+  if (
+    !Number.isInteger(binding.amountPerCount) ||
+    (binding.amountPerCount as number) <= 0
+  )
+    invalid(
+      "$cardSpec.engine.relativeIce.dynamicDamageSubroutine.amountPerCount",
+      "must be a positive integer",
+    );
+  if (binding.visibility !== "public")
+    invalid(
+      "$cardSpec.engine.relativeIce.dynamicDamageSubroutine.visibility",
+      "must be public",
+    );
+  const targets = printed.filter((entry) => {
+    if (entry === null || typeof entry !== "object" || Array.isArray(entry))
+      return false;
+    return (
+      (entry as Record<string, unknown>).capabilityKey === targetCapabilityKey
+    );
+  });
+  if (targets.length !== 1)
+    invalid(
+      "$cardSpec.engine.relativeIce.dynamicDamageSubroutine.subroutineCapabilityKey",
+      targets.length === 0
+        ? "must reference exactly one printed subroutine"
+        : "must not reference duplicate printed subroutines",
+    );
+  const target = targets[0] as Record<string, unknown>;
+  if (target.kind !== "damage")
+    invalid(
+      "$cardSpec.engine.relativeIce.dynamicDamageSubroutine.subroutineCapabilityKey",
+      "must reference a damage subroutine",
+    );
+  const amount = closedObject(
+    target.amount,
+    new Set(["kind", "source", "ownerCapabilityKey"]),
+    "$cardSpec.engine.printedSubroutines.dynamicDamage.amount",
+  );
+  if (
+    amount.kind !== "derived" ||
+    amount.source !== "relative_ice_dynamic_damage"
+  )
+    invalid(
+      "$cardSpec.engine.printedSubroutines.dynamicDamage.amount",
+      "must declare the closed relative ICE derived source",
+    );
+  if (amount.ownerCapabilityKey !== ownerCapabilityKey)
+    invalid(
+      "$cardSpec.engine.printedSubroutines.dynamicDamage.amount.ownerCapabilityKey",
+      "must reference the owning relative ICE capability",
+    );
+  if (derivedDamage.length !== 1 || derivedDamage[0] !== targets[0])
+    invalid(
+      "$cardSpec.engine.printedSubroutines",
+      "must contain exactly one derived damage subroutine for the relative ICE owner",
+    );
+}
+
+function assertFlatlineTagReplacementResolution(
+  value: unknown,
+  path: string,
+): void {
+  const resolution = closedObject(
+    value,
+    new Set([
+      "trashSource",
+      "removeAllCoreDamage",
+      "refreshGripToMax",
+      "gainCredits",
+      "removeAllTags",
+      "futureActionDebt",
+      "futureAgendaPointForfeit",
+    ]),
+    path,
+  );
+  const required: Record<string, true | number> = {
+    trashSource: true,
+    removeAllCoreDamage: true,
+    refreshGripToMax: true,
+    gainCredits: 10,
+    removeAllTags: true,
+    futureActionDebt: 4,
+    futureAgendaPointForfeit: 3,
+  };
+  for (const [key, expected] of Object.entries(required))
+    if (resolution[key] !== expected)
+      invalid(`${path}.${key}`, `must be ${String(expected)}`);
+}
+
+function assertInstalledFlatlinePreventionResolution(
+  value: unknown,
+  path: string,
+): void {
+  const resolution = closedObject(
+    value,
+    new Set([
+      "trashAllGrip",
+      "removeAllCoreDamage",
+      "maxHandSizeModifier",
+      "runnerActionsPerTurnOverride",
+      "permanentMeatDamagePrevention",
+    ]),
+    path,
+  );
+  const required: Record<string, true | number> = {
+    trashAllGrip: true,
+    removeAllCoreDamage: true,
+    maxHandSizeModifier: -1,
+    runnerActionsPerTurnOverride: 3,
+    permanentMeatDamagePrevention: true,
+  };
+  for (const [key, expected] of Object.entries(required))
+    if (resolution[key] !== expected)
+      invalid(`${path}.${key}`, `must be ${String(expected)}`);
+}
+
+function assertExactKeys(
+  value: Record<string, unknown>,
+  allowed: ReadonlySet<string>,
+  path: string,
+): void {
+  for (const key of Object.keys(value))
+    if (!allowed.has(key))
+      throw new CardSpecValidationError(
+        "unknown_contract_field",
+        `${path}.${key}`,
+        "field is outside the closed CardSpec contract",
+      );
 }
 
 function assertCharacteristicOwnership(

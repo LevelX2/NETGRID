@@ -1644,7 +1644,7 @@ describe("CardImplementation definition descriptors", () => {
       capabilityKey: "derez_fully_broken_passed_ice",
       addressability: ["plan", "action", "quote", "debug"],
       kind: "derez_fully_broken_passed_ice",
-      cost: { kind: "tap_source" },
+      cost: { kind: "trash_source" },
       timing: "after_passing_fully_broken_ice",
       target: "that_ice",
       visibility: "public",
@@ -1683,7 +1683,7 @@ describe("CardImplementation definition descriptors", () => {
       { type: "do_damage", damageType: "net", amount: 2 },
       {
         type: "initiate_trace",
-        baseTraceStrength: 5,
+        traceLimit: 5,
         traceSuccessEffect: {
           type: "add_counter",
           counterType: "baskerville",
@@ -1880,8 +1880,7 @@ describe("CardImplementation definition descriptors", () => {
       additionalCostPerValue: 1,
       minValue: 0,
       maxValue: 8,
-      traceBaseFromValue: true,
-      traceBidLimitFromValue: true,
+      traceLimitFromValue: true,
       visibility: "public",
     });
     expect(
@@ -1915,10 +1914,11 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_012_bug-zapper")
         ?.relativeIce,
-    ).toEqual({
+    ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_dynamic_net_damage",
       kind: "rezzed_ice_outside_this_ice",
       dynamicDamageSubroutine: {
-        subroutineId: "onr_proteus_012_bug_zapper_net_damage",
+        subroutineCapabilityKey: "subroutine_relative_net_damage",
         amountPerCount: 2,
         visibility: "public",
       },
@@ -1927,16 +1927,23 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_proteus_021_dog-pile")
         ?.relativeIce,
     ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_strength_and_net_damage",
       kind: "rezzed_ice_outside_this_ice",
       strengthBonusPerCount: 1,
+      dynamicDamageSubroutine: {
+        subroutineCapabilityKey: "subroutine_relative_net_damage",
+        amountPerCount: 1,
+        visibility: "public",
+      },
     });
     expect(
       cardImplementationForDefinitionId("onr_proteus_026_hunting-pack")
         ?.relativeIce,
-    ).toEqual({
+    ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_dynamic_trace",
       kind: "rezzed_ice_outside_this_ice",
       dynamicTraceSubroutines: {
-        baseTraceStrength: 5,
+        traceLimit: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
         visibility: "public",
       },
@@ -1945,8 +1952,14 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId("onr_proteus_030_mastermind")
         ?.relativeIce,
     ).toMatchObject({
+      capabilityKey: "outside_rezzed_ice_strength_and_core_damage",
       kind: "rezzed_ice_outside_this_ice",
       strengthBonusPerCount: 1,
+      dynamicDamageSubroutine: {
+        subroutineCapabilityKey: "subroutine_relative_brain_damage",
+        amountPerCount: 1,
+        visibility: "public",
+      },
     });
     for (const definitionId of [
       "onr_proteus_012_bug-zapper",

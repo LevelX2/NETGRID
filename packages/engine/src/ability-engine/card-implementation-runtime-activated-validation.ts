@@ -160,6 +160,24 @@ export function validateActivatedCardImplementationAbility(
     }
     return;
   }
+  if (ability.timing === "runner_paid") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf diese Paid-Faehigkeit nutzen.");
+    if (
+      state.activeSide !== "runner" ||
+      (state.phase !== "runner_action_phase" && state.phase !== "run")
+    )
+      throw new Error("Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.");
+    if (!deps.runnerInstalledCardIds(state).includes(cardId))
+      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
   if (ability.timing === "during_run") {
     if (legalAction.side !== "runner")
       throw new Error(
@@ -297,6 +315,32 @@ export function validateActivatedCardImplementationAbility(
       throw new Error(
         "Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.",
       );
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
+    return;
+  }
+  if (ability.timing === "corp_paid") {
+    if (legalAction.side !== "corp")
+      throw new Error("Nur die Korp darf diese Paid-Faehigkeit nutzen.");
+    if (
+      state.phase !== "corp_action_phase" &&
+      state.phase !== "runner_action_phase" &&
+      !state.run
+    )
+      throw new Error("Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.");
+    if (
+      !corpActivatedCardImplementationSourceIsAvailable(
+        deps,
+        state,
+        cardId,
+        match.definition,
+      )
+    )
+      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,

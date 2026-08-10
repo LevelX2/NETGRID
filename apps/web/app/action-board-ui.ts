@@ -1394,9 +1394,9 @@ function installedCardAbilityContextLabel(action: LegalAction): string | null {
           : stripActionSourcePrefix(action.label);
       }
       case "trace_3_tag": {
-        const strength = Number(action.payload.traceStrength ?? 3);
-        return Number.isFinite(strength) && strength > 0
-          ? `Trace ${strength} starten`
+        const limit = Number(action.payload.traceLimit ?? 3);
+        return Number.isFinite(limit) && limit > 0
+          ? `Trace ${limit} starten`
           : stripActionSourcePrefix(action.label);
       }
       case "reveal_rd_top":

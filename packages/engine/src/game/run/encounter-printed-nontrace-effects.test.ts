@@ -14,6 +14,7 @@ import {
   resolveClassicDeflectorChoice,
   resolveDirectTrashProgramSubroutine,
   resolveEncounterPrintedNonTraceEffect,
+  resolveTrashProgramChoice,
   type EncounterPrintedNonTraceHost,
 } from "./encounter-printed-nontrace-effects";
 
@@ -372,72 +373,110 @@ describe("encounter printed non-trace effects boundary", () => {
     ]);
   });
 
-  it("trashes the deterministic installed program target and keeps payload metadata stable", () => {
+  it("opens a Corp target choice for program trash and resolves the selected program", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;
-    const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
-      definition: definition("test_ice", "Test ICE", "ice"),
-      subroutine: {
-        id: "trash_program",
-        type: "trash_installed_program",
-      } as SubroutineDefinition,
-      subroutineIndex: 1,
+    const subroutine = {
+      id: "trash_program",
+      type: "trash_installed_program",
+    } as SubroutineDefinition;
+    const ice = definition("test_ice", "Test ICE", "ice", {
+      subroutines: [subroutine],
+    });
+    const host = makeHost(state, { definitions: { test_ice: ice } });
+    const result = resolveEncounterPrintedNonTraceEffect(host, {
+      definition: ice,
+      subroutine,
+      subroutineIndex: 0,
       legalAction,
     });
 
     expect(result).toMatchObject({
       handled: true,
-      trashedCardIds: ["expensive_program"],
+      suspended: true,
+      trashedCardIds: [],
     });
-    expect(state.runner.rig.programs).toEqual(["cheap_program"]);
-    expect(state.runner.heap).toEqual(["expensive_program"]);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "select_cards",
+      options: expect.arrayContaining([
+        expect.objectContaining({ id: "card_cheap_program" }),
+        expect.objectContaining({ id: "card_expensive_program" }),
+      ]),
+    });
+    resolveTrashProgramChoice(host, { payload: {} } as LegalAction, {
+      selectedChoices: { optionIds: ["card_cheap_program"] },
+    } as unknown as PlayerAction);
+    expect(state.runner.rig.programs).toEqual(["expensive_program"]);
+    expect(state.runner.heap).toEqual(["cheap_program"]);
     expect(legalAction.payload).toMatchObject({
-      trashedCardDefinitionId: "expensive_program_def",
-      trashedCardType: "program",
-      trashedCount: 1,
+      programTrashChoiceOpened: true,
     });
-    expect(legalAction.resolvedEffects).toEqual([
-      expect.objectContaining({
-        subroutineType: "trash_installed_program",
-        cardDefinitionId: "expensive_program_def",
-        cardTitle: "Expensive Program",
-        cardsTrashed: 1,
-      }),
-    ]);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.activeSide).toBe("runner");
   });
 
-  it("uses the same trash-prevention source without leaking hidden target metadata", () => {
+  it("opens the trash-prevention window only after Corp selects its target", () => {
     const state = makeState();
-    const legalAction = { payload: {} } as LegalAction;
-    const result = resolveDirectTrashProgramSubroutine(
-      makeHost(state, { preventTrash: true }),
-      {
-        definition: definition("test_ice", "Test ICE", "ice"),
-        subroutine: {
-          id: "trash_program",
-          type: "trash_installed_program",
-        } as SubroutineDefinition,
-        subroutineIndex: 1,
-        legalAction,
-      },
-    );
-
-    expect(result).toMatchObject({
-      handled: true,
-      trashedCardIds: [],
-      programTrashPreventionWindowOpened: true,
+    const openAction = { payload: {} } as LegalAction;
+    const subroutine = {
+      id: "trash_program",
+      type: "trash_installed_program",
+    } as SubroutineDefinition;
+    const ice = definition("test_ice", "Test ICE", "ice", {
+      subroutines: [subroutine],
     });
+    const host = makeHost(state, {
+      definitions: { test_ice: ice },
+      preventTrash: true,
+    });
+    resolveDirectTrashProgramSubroutine(host, {
+      definition: ice,
+      subroutine,
+      subroutineIndex: 0,
+      legalAction: openAction,
+    });
+    const resolveAction = { payload: {} } as LegalAction;
+    resolveTrashProgramChoice(host, resolveAction, {
+      selectedChoices: { optionIds: ["card_expensive_program"] },
+    } as unknown as PlayerAction);
+
     expect(state.runner.rig.programs).toEqual([
       "cheap_program",
       "expensive_program",
     ]);
-    expect(legalAction.payload).toEqual({});
-    expect(legalAction.resolvedEffects).toEqual([
+    expect(resolveAction.payload).toEqual({});
+    expect(resolveAction.resolvedEffects).toEqual([
       expect.objectContaining({
         subroutineType: "trash_installed_program",
         cardsTrashed: 0,
       }),
     ]);
+  });
+
+  it("revalidates the selected program when resolving the Corp choice", () => {
+    const state = makeState();
+    const subroutine = {
+      id: "trash_program",
+      type: "trash_installed_program",
+    } as SubroutineDefinition;
+    const ice = definition("test_ice", "Test ICE", "ice", {
+      subroutines: [subroutine],
+    });
+    const host = makeHost(state, { definitions: { test_ice: ice } });
+    resolveDirectTrashProgramSubroutine(host, {
+      definition: ice,
+      subroutine,
+      subroutineIndex: 0,
+      legalAction: { payload: {} } as LegalAction,
+    });
+    state.runner.rig.programs = ["cheap_program"] as CardInstanceId[];
+
+    expect(() =>
+      resolveTrashProgramChoice(host, { payload: {} } as LegalAction, {
+        selectedChoices: { optionIds: ["card_expensive_program"] },
+      } as unknown as PlayerAction),
+    ).toThrow("nicht mehr installiert");
   });
 
   it("delegates direct action-forgo markers through the encounter-resolution callback", () => {

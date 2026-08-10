@@ -63,6 +63,39 @@ export function cardHasNormalizedSubtype(
   );
 }
 
+/**
+ * Returns the subtype set currently carried by a card.  Alternate-subtype ICE
+ * replaces its printed subtype set once rezzed; board selectors must use this
+ * helper instead of reading CardDefinition.subtypes directly.
+ */
+export function effectiveSubtypesForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition = cardDefinitionForInstance(state, cardId),
+): string[] {
+  const instance = cardInstanceFor(state, cardId);
+  const selectedSubtypes = instance.variableIceState?.selectedSubtypes;
+  const subtypes =
+    definition.type === "ice" &&
+    instance.rezzed &&
+    selectedSubtypes &&
+    selectedSubtypes.length > 0
+      ? selectedSubtypes
+      : definition.subtypes;
+  return [...new Set(subtypes.map(normalizeSubtypeLabel))].sort();
+}
+
+export function effectiveCardHasNormalizedSubtype(
+  state: GameState,
+  cardId: CardInstanceId,
+  subtype: string,
+  definition = cardDefinitionForInstance(state, cardId),
+): boolean {
+  return effectiveSubtypesForCard(state, cardId, definition).includes(
+    normalizeSubtypeLabel(subtype),
+  );
+}
+
 export function cardMatchesModifierAppliesTo(
   definition: CardDefinition,
   appliesTo: {

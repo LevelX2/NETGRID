@@ -132,15 +132,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_048_omnitech-spinal-tap-cybermodem.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_048_omnitech-spinal-tap-cybermodem.",
       },
     ],
     capabilities: [],

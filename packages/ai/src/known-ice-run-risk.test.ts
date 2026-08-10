@@ -44,7 +44,7 @@ describe("known visible ICE run risk", () => {
 
     expect(playerViewHunter?.effectiveRunQuote?.subroutines[0]).toMatchObject({
       type: "initiate_trace",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       traceSuccessEffect: { type: "add_tag", amount: 1 },
     });
 
@@ -64,7 +64,7 @@ describe("known visible ICE run risk", () => {
     )?.ice[0];
     expect(dtoHunter?.effectiveRunQuote?.subroutines[0]).toMatchObject({
       type: "initiate_trace",
-      baseTraceStrength: 5,
+      traceLimit: 5,
       traceSuccessEffect: { type: "add_tag", amount: 1 },
     });
 
@@ -496,7 +496,7 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
-          baseTraceStrength: 5,
+          traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
         },
       ],
@@ -525,7 +525,7 @@ function traceEffectIce(
           type: "initiate_trace",
           sourceDefinitionId: "test_visible_trace_effect_ice",
           sourceTitle: "Trace Risk ICE",
-          baseTraceStrength: 5,
+          traceLimit: 5,
           traceSuccessEffect: effect,
           ...(effect.type === "end_run_and_run_lock" ||
           effect.type === "end_run_trash_program_and_run_lock"

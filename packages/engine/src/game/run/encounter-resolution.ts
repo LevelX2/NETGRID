@@ -11,8 +11,7 @@ import {
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
-import { FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE } from "../../compatibility/runtime-compatibility";
-import { ACTIVE_ICE_TRASH_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   payEncounterSubroutineRunCost,
   runDurationPaymentHost,
@@ -217,11 +216,15 @@ export function resolveRunDurationMarkerSubroutine(
     const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
     run.encounterTaxForFutureIce =
       Math.max(0, Math.floor(run.encounterTaxForFutureIce ?? 0)) + amount;
+    run.encounterTaxSourceDefinitionId = definition.id;
     return {
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["encounterTaxForFutureIce"],
+      setRunMarkers: [
+        "encounterTaxForFutureIce",
+        "encounterTaxSourceDefinitionId",
+      ],
       encounterTaxAmount: amount,
       stateChanged: amount > 0,
     };
@@ -230,6 +233,7 @@ export function resolveRunDurationMarkerSubroutine(
     const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
     run.breakSubroutineAdditionalCost =
       runBreakSubroutineAdditionalCost(run) + amount;
+    run.breakSubroutineAdditionalCostSourceDefinitionId = definition.id;
     legalActionPayload(legalAction, {
       v1922CorpIceAbility: "virizz_break_cost_modifier",
       breakSubroutineAdditionalCost: run.breakSubroutineAdditionalCost,
@@ -239,7 +243,10 @@ export function resolveRunDurationMarkerSubroutine(
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["breakSubroutineAdditionalCost"],
+      setRunMarkers: [
+        "breakSubroutineAdditionalCost",
+        "breakSubroutineAdditionalCostSourceDefinitionId",
+      ],
       stateChanged: amount > 0,
     };
   }
@@ -344,11 +351,15 @@ export function resolveRunDurationMarkerSubroutine(
     const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
     run.nextEncounterFatalDamage =
       Math.max(0, Math.floor(run.nextEncounterFatalDamage ?? 0)) + amount;
+    run.nextEncounterFatalDamageSourceDefinitionId = definition.id;
     return {
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["nextEncounterFatalDamage"],
+      setRunMarkers: [
+        "nextEncounterFatalDamage",
+        "nextEncounterFatalDamageSourceDefinitionId",
+      ],
       nextEncounterDamage: amount,
       stateChanged: amount > 0,
     };
@@ -460,7 +471,7 @@ export function resolvePostEncounterNetDamage(
         damageId: `${run.runId}.${encounteredIceId}.post_encounter_net_damage`,
         damageType: "net",
         amount: fatalDamageAmount,
-        source: FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
+        source: nextEncounterFatalDamageSource(run),
       });
       options.damageSummaries.push(summary);
       options.setDamagePayload(
@@ -480,6 +491,12 @@ export function cleanupEncounterDurationMarkers(
   delete run.fatalDamageAmountForEncounter;
   run.noBreakSubroutinesActive = false;
   run.jackOutLockedUntilEncounterEnds = false;
+}
+
+function nextEncounterFatalDamageSource(run: ActiveRun): string {
+  if (!run.fatalDamageSourceDefinitionId)
+    throw new Error("Naechste-Encounter-Schaden hat keine Quellenbindung.");
+  return `subroutine:${run.fatalDamageSourceDefinitionId}:next_encounter`;
 }
 
 export function passedIceFollowupMarkersForCurrentIce(
@@ -544,7 +561,14 @@ export function startActiveIceProgramTrashChoice(
   const run = mustRun(state);
   const sourceIceId = run.activeIceProgramTrashSourceIceId;
   if (!sourceIceId) return { handled: false };
-  if (definitionFor(state, sourceIceId).id !== ACTIVE_ICE_TRASH_PROGRAM_SOURCE)
+  const sourceDefinition = definitionFor(state, sourceIceId);
+  if (
+    !cardImplementationForDefinitionId(sourceDefinition.id)?.printedSubroutines?.some(
+      (subroutine) =>
+        subroutine.kind ===
+        "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out",
+    )
+  )
     throw new Error("Active-ICE-Program-Trash-Quelle ist ungueltig.");
   const programOptions = state.runner.rig.programs
     .filter((cardId) => state.cardInstances[cardId])
@@ -556,14 +580,14 @@ export function startActiveIceProgramTrashChoice(
   if (programOptions.length === 0) {
     legalActionPayload(legalAction, {
       v1922CorpIceAbility: "active_ice_program_trash",
-      sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+      sourceDefinitionId: sourceDefinition.id,
       activeIceProgramTrashChoiceOpened: false,
       trashedCount: 0,
     });
     return {
       handled: true,
       choiceOpened: false,
-      sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+      sourceDefinitionId: sourceDefinition.id,
     };
   }
   state.pendingChoice = {
@@ -580,7 +604,7 @@ export function startActiveIceProgramTrashChoice(
   };
   legalActionPayload(legalAction, {
     v1922CorpIceAbility: "active_ice_program_trash",
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: sourceDefinition.id,
     activeIceProgramTrashChoiceOpened: true,
     activeIceProgramTrashCandidateCount: programOptions.length,
     hiddenZoneBarrier: true,
@@ -589,7 +613,7 @@ export function startActiveIceProgramTrashChoice(
   return {
     handled: true,
     choiceOpened: true,
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: sourceDefinition.id,
     stateChanged: true,
   };
 }
@@ -666,7 +690,13 @@ export function resolveActiveIceProgramTrashChoice(
   if (
     !sourceIceId ||
     !state.cardInstances[sourceIceId] ||
-    definitionFor(state, sourceIceId).id !== ACTIVE_ICE_TRASH_PROGRAM_SOURCE
+    !cardImplementationForDefinitionId(
+      definitionFor(state, sourceIceId).id,
+    )?.printedSubroutines?.some(
+      (subroutine) =>
+        subroutine.kind ===
+        "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out",
+    )
   )
     throw new Error("Active-ICE-Program-Trash-Quelle ist nicht mehr gueltig.");
   if (!passedIceId || !state.cardInstances[passedIceId])
@@ -685,7 +715,7 @@ export function resolveActiveIceProgramTrashChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922CorpIceAbility: "active_ice_program_trash",
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: definitionFor(state, sourceIceId).id,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "active_ice_program_trash",
     trashedCount: 1,
@@ -693,7 +723,7 @@ export function resolveActiveIceProgramTrashChoice(
   };
   return {
     handled: true,
-    sourceDefinitionId: ACTIVE_ICE_TRASH_PROGRAM_SOURCE,
+    sourceDefinitionId: definitionFor(state, sourceIceId).id,
     stateChanged: true,
   };
 }

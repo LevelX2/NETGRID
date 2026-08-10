@@ -330,6 +330,125 @@
     "evidenceHintFields": "aiSupportStatus_quality_scenarioRefs_bound_as_coverage_evidence_not_runtime_planning",
     "editorHintFields": "manualNotes_explicitly_discarded_editor_only"
   },
+  "reviewedRuleReconciliations": [
+    {
+      "cardDefinitionId": "onr_classic_004_theorem-proof",
+      "reconciliations": [
+        "declined_install_scores_next_runner_start_if_unchanged"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_011_glacier",
+      "reconciliations": [
+        "remove_subsidiary_install_restriction",
+        "repeatable_other_fort_move"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_020_london-city-grid",
+      "reconciliations": [
+        "tax_per_break_ability_use"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_021_satellite-monitors",
+      "reconciliations": [
+        "optional_corp_roll_sequence",
+        "tag_source_role",
+        "correct_for_typo"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_022_self-destruct",
+      "reconciliations": [
+        "optional_rezzed_access_activation_with_trash_source_cost"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_023_shock-treatment",
+      "reconciliations": [
+        "corp_chooses_exactly_two_programs",
+        "remove_hidden_choice_heuristic"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_024_sterdroid",
+      "reconciliations": [
+        "trash_source_not_tap_source",
+        "correct_its_typo"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_026_street-enforcer",
+      "reconciliations": [
+        "lose_credits_at_run_start_per_tag"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_033_superglue",
+      "reconciliations": [
+        "trash_source_not_tap_source"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_034_boostergang-connections",
+      "reconciliations": [
+        "generic_current_plan_target_preference"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_035_corruption",
+      "reconciliations": [
+        "remove_opponent_tag_punish_strategy_support"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_044_crash-space",
+      "reconciliations": [
+        "trash_source_is_effect_not_cost"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_046_executive-file-clerk",
+      "reconciliations": [
+        "runner_paid_timing"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_050_sandbox-dig",
+      "reconciliations": [
+        "runner_paid_timing"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_052_zetatech-portastation",
+      "reconciliations": [
+        "correct_portastation_typo"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    },
+    {
+      "cardDefinitionId": "onr_classic_053_protected-resources",
+      "reconciliations": [
+        "corp_paid_deposit_timing"
+      ],
+      "disposition": "explicit_reviewed_rule_reconciliation"
+    }
+  ],
   "cards": [
     {
       "cardDefinitionId": "onr_classic_001_data-fort-remapping",
@@ -417,7 +536,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:552a8be41c8da4875d4715f6165f411a7d6c79f80bf3b8661c196981b13a431d",
-      "outputFingerprint": "sha256:5416dfb5d8ff907dcce89546f698c3d8053844e3175a1993741f7fcad0d392a5"
+      "outputFingerprint": "sha256:b7d7695910d93897cb456882cc8ad0b1953e4cc1ae6272984e156a8c91d7cbd8"
     },
     {
       "cardDefinitionId": "onr_classic_002_superserum",
@@ -562,7 +681,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:ed5a2a2f1cc6674c70062c99eb20a1756adb4d72de5c07a278f55319fd565b64",
-      "outputFingerprint": "sha256:cf1927528aedb212e9dab4e70f63da0e0fe671c7ada2a78618d8ddf76d148cff"
+      "outputFingerprint": "sha256:72b4e492c527e1384c07fdb972042353b4b4e177270a8b44dcbdbad2bef0d60e"
     },
     {
       "cardDefinitionId": "onr_classic_003_unlisted-research-lab",
@@ -685,7 +804,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:c66abce4e3cc8def055d424af2f7a2ae829fff8be6a2e0b0ac883c4548a2748a",
-      "outputFingerprint": "sha256:7679abdd62254e5d4e606b92099deaced5ab734fbc9fc1200d1a661b0bce101e"
+      "outputFingerprint": "sha256:f21f466312ef4657455f52e40ceac8ce4933e4007c398d56df0acc3568a01ad4"
     },
     {
       "cardDefinitionId": "onr_classic_053_protected-resources",
@@ -786,7 +905,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:1ad37ec369d8a1715ee8c3506a663e448c609a8eea60ccb2f6f504b04a157661",
-      "outputFingerprint": "sha256:a15b0a23be094c4764daca2bd0b42d38d512b07ce2baee92e67fc60d03d6bef9"
+      "outputFingerprint": "sha256:9d769432fa3289670553947ae3005486aea610f323103410297067a246a2dd9b"
     },
     {
       "cardDefinitionId": "onr_classic_021_satellite-monitors",
@@ -846,7 +965,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:751aa42e064acc91fdea92d6ebff553d7ddfd843efa93fc21d31f2186bf6d1df",
-      "outputFingerprint": "sha256:ef887282b1e7ea8f5fc91146f300cf228f38f8936c96d5874bb8c2fcbf8a0007"
+      "outputFingerprint": "sha256:aba55a7c683636259ed974e372c6120e01efe45bf7652af39c9a51ba825218c1"
     },
     {
       "cardDefinitionId": "onr_classic_025_strategic-planning-group",
@@ -912,7 +1031,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:12d52fc8b734dab49d06d45c2ea1547b714e16a49ddeb32875dbeb985b6fd79c",
-      "outputFingerprint": "sha256:e6e81f00f8a896cf58ccc2dc081cd1be9829949d88a2b5eec340765e76fa2f97"
+      "outputFingerprint": "sha256:0a8ba93b87d5f36cdfa3dedfa33feca799d92cb33f8a010cde9a3be23b2835a3"
     },
     {
       "cardDefinitionId": "onr_classic_005_baskerville",
@@ -1033,7 +1152,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:445c5561eb7e8607ca9f9ceb9357835a87200f9016e0b8e1ed6a43c117d92593",
-      "outputFingerprint": "sha256:0d308d97ea6bb1c10d35cf0d0bc598c059f251077b455afff24fb1fa9943c250"
+      "outputFingerprint": "sha256:cbbfa38679e461d9b69050fae88a8bf93ff7626cccec3a321f196857efa88706"
     },
     {
       "cardDefinitionId": "onr_classic_006_bolter-swarm",
@@ -1399,7 +1518,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:f3d04e2ad863205ab872eb7245953a791ec9ff90338367b1a91799a9dc382fe3",
-      "outputFingerprint": "sha256:baefc8e1b97e36ba212ae06e37d8fcdd95ef270e3163a530dd3fbfdccb381d0a"
+      "outputFingerprint": "sha256:a7818c0212069d0590d1aea4cff4f3bcea75d77bccfe5f749571a88f182637cd"
     },
     {
       "cardDefinitionId": "onr_classic_011_glacier",
@@ -1503,7 +1622,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:0b72344ce02ac2ae222a8e47491a700c6c3160948d4a36d4b0663d4e2897ef8d",
-      "outputFingerprint": "sha256:8d2923c23f54b5714294cd09bae878b61a8d251c7234627aa20827acbc30e365"
+      "outputFingerprint": "sha256:24e4b99daad9bdfb35900dfcff0c5a40c3974baaff27a43a2a2de975f7639a05"
     },
     {
       "cardDefinitionId": "onr_classic_012_imperial-guard",
@@ -1787,7 +1906,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:972fa23029776ca5e78196c3f7c79b0320f5ac5eccae5bc0c8087447c7829c6f",
-      "outputFingerprint": "sha256:81747cde8a26ba06f1f7158766a3bfbff3bff60ba244f344f069d9dec41ba180"
+      "outputFingerprint": "sha256:681fbb912be3a86aaad5532310896e73cd247b694d98c3f9a82e124afd9bafdc"
     },
     {
       "cardDefinitionId": "onr_classic_016_badtimes",
@@ -1848,7 +1967,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:7488866ed232dc3c3c21d7f00c52bc4f3f12a1ebbe33b524fa6f0bc6335b7eb8",
-      "outputFingerprint": "sha256:2f9404a9999a83d3bd8e15b2481e25f0f1e8ad9ea205142197efd5188eab6e56"
+      "outputFingerprint": "sha256:33eafa78e23de2c826defa88edfa69c0309f97cd467b671fc399e84008e5c3e8"
     },
     {
       "cardDefinitionId": "onr_classic_017_corporate-shuffle",
@@ -1911,7 +2030,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:01dce6c977cac477d4bfeb90336d0385a3b27a36ecfd8bbb938805d3b2c22ae2",
-      "outputFingerprint": "sha256:cab568ca3d0e638b60e9c7a723de2cad06f6d5f9c0734fcb02767d50beac8f66"
+      "outputFingerprint": "sha256:de4080be2f67e3fdd9e0ad3e0aebf85090024065a47b8229566c63f979c2f272"
     },
     {
       "cardDefinitionId": "onr_classic_018_reclamation-project",
@@ -1978,7 +2097,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:43849bf34675b0ddba43860f0e245726f5ad410681eef198ae5d29785627c98d",
-      "outputFingerprint": "sha256:cd2fc4506ac96b221637e56cedf9b7dbcb2bc3c64f89eccde73fd8f51d7725d5"
+      "outputFingerprint": "sha256:87abb27f146990fda67f94a0f599c56892714bd69aac4aead4d686766f7d4ccb"
     },
     {
       "cardDefinitionId": "onr_classic_020_london-city-grid",
@@ -2053,7 +2172,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:f0b633cdb9d01b06a020f6ef64cc559ffa3f52f82b7b65e77fa3245b9373a911",
-      "outputFingerprint": "sha256:aa3b1180c71d0c787fe94261cbb48a81c892594fe49f2a6515e6875d0a435b54"
+      "outputFingerprint": "sha256:06c48ad9bb40fc203072d0000b984de33b36c52bf084a82f9d8df772378ca95e"
     },
     {
       "cardDefinitionId": "onr_classic_022_self-destruct",
@@ -2132,7 +2251,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:0a53842f079e4b8b3ae020a1506666dde6b603a764acfe547f949d13d305e97e",
-      "outputFingerprint": "sha256:2f216ebf416eeea74d1391420dae4b244677b90b40371c83fc26f257c2a0f82e"
+      "outputFingerprint": "sha256:a473c3e90c867b601ff141033800ba76f708534aa37cc2bdf59e28deefcfcc8c"
     },
     {
       "cardDefinitionId": "onr_classic_023_shock-treatment",
@@ -2207,7 +2326,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:0d80ad1ade48b4a67c7d5e0a7ed500a8ea35b2afdd063d6ab93083912bfc7b11",
-      "outputFingerprint": "sha256:2570682e2d625141fd8506a63aeaaee69f2572284c047832fb7520faa3620367"
+      "outputFingerprint": "sha256:38907447e3f1e561967eb323404a9fe4995e39aa11ad0545c2518aff9636366a"
     },
     {
       "cardDefinitionId": "onr_classic_024_sterdroid",
@@ -2312,7 +2431,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:119b570411ef6ce9b41ca3fab8d2d48f76c665dc4bdbadf2dd499d5549591685",
-      "outputFingerprint": "sha256:95b45183bc2ba734e1d4c7feac571b86cd5cab729c53ec1a74b6df3d5e407e15"
+      "outputFingerprint": "sha256:3413d5a0abdb3e9fcc6b9e636eb45c38136b79f2e0f72d0ed56dd3aac701f9c7"
     },
     {
       "cardDefinitionId": "onr_classic_026_street-enforcer",
@@ -2370,7 +2489,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:d3b37c8c085c012d50742e04d00f2853452888794f7f5837a3f45a48e48b088b",
-      "outputFingerprint": "sha256:5a15b24d548268ea72378cace08fb4c6100be8567126cf79e93255b9089e93a8"
+      "outputFingerprint": "sha256:7f23fbdc4b1f6a1e9f28b91af14246b6a814f73004e92b301c98b90a5b02da37"
     },
     {
       "cardDefinitionId": "onr_classic_034_boostergang-connections",
@@ -2427,7 +2546,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:12bea7142929bd834690d1d160ce729b12823c481c27a85d89e7fbe9425a491c",
-      "outputFingerprint": "sha256:9ad544e5b4dbbb8e442e28d418d48957efe6ed3243ad069093d7dd4813cfa633"
+      "outputFingerprint": "sha256:5e795beabd245fd88a43c250a66da8fcdd5edfcf0d2e5a07de47686608498859"
     },
     {
       "cardDefinitionId": "onr_classic_035_corruption",
@@ -2485,7 +2604,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:b9e800e5e02bad9336915dafc8f38179ccd8e1e167b67d54ff8dae25c3e27301",
-      "outputFingerprint": "sha256:4cd47080dbdf3e828654566ec0c144a2cced2355056967ee8e29962302c0dac9"
+      "outputFingerprint": "sha256:8a5d3f557cfe4effe229e0c111d75fe68203c14d29b1f7fa49034bdf0a438e86"
     },
     {
       "cardDefinitionId": "onr_classic_036_do-the-drine",
@@ -2542,7 +2661,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:ca032b7c680326d9ce203f145aa44b7c61017fac7d55b035fab7635e8c6d98eb",
-      "outputFingerprint": "sha256:0dfde5e5c409021dab3cf907b7caea741fe589185e0129919be8cffd8b2dd1e6"
+      "outputFingerprint": "sha256:851ba522369b1a00728695f2ffad01156efb37147e25dd6ae1dd702723649f35"
     },
     {
       "cardDefinitionId": "onr_classic_037_finders-keepers",
@@ -2603,7 +2722,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:938ba16fa2d73583c9b55cf149c46f1902598f50f03875116fe8db97f36f568d",
-      "outputFingerprint": "sha256:1d0cf5bf4690c768c33c916127e264f2d89ca43b1172188ce3a054e6629ab23d"
+      "outputFingerprint": "sha256:5fc068403eed98035394a8606c28105ac95b3893e6ad2d67e2fe7ff2cc3336ca"
     },
     {
       "cardDefinitionId": "onr_classic_038_gypsytm-schedule-analyzer",
@@ -2672,7 +2791,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:003845bfc0df1c748097ca9e6c3f8d9da386cb773acb53cc3e6b57059eb3aea7",
-      "outputFingerprint": "sha256:3c626bb293637b4eb58cce552982995cc2e41c0211aca692e04d54da37fcdf2f"
+      "outputFingerprint": "sha256:10c46d5c36761aa4cbc11fadcda9671a51385cdeb4cec4f8f98e90e12bf5d6a3"
     },
     {
       "cardDefinitionId": "onr_classic_039_library-search",
@@ -2734,7 +2853,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:3a1ad11c17696bfea5ddb8f25974050a2223c2b521ff381de096576bd6755671",
-      "outputFingerprint": "sha256:4a9516f0cb3eb383764c475ee5eccd8393a84dcc75040da78ac6c16fdbf3bad0"
+      "outputFingerprint": "sha256:eefa5ab0fbc1551e180d1a6f86b8a02f42e5da09bd573228332b5f633bae091c"
     },
     {
       "cardDefinitionId": "onr_classic_040_meat-upgrade",
@@ -2812,7 +2931,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:861334c1054b4fbc9020d0c23df9e9cc65f56a09db447390d5c317c99025f3c5",
-      "outputFingerprint": "sha256:8b4125e325eebb467d05cd49634b8f3b0650f055a109a67c986972c2944da7ad"
+      "outputFingerprint": "sha256:b46abb301a0488c791d824325f5de830b792561862edcc278c9382ac51d07280"
     },
     {
       "cardDefinitionId": "onr_classic_041_networking",
@@ -2883,7 +3002,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:b42fc7071d8225feb31f22ad57eec0377ba2b9359a22b5a0e479d12a45172eb8",
-      "outputFingerprint": "sha256:8660039fad87023f11409e3dcd66076ac210287170151b8f381e0522b2a6f4d4"
+      "outputFingerprint": "sha256:e5fc6472672fad45f7ec2e6076992d3bcf4e90a722104d8b207b747217abdeb4"
     },
     {
       "cardDefinitionId": "onr_classic_042_panzer-run",
@@ -2960,7 +3079,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:c1196789427209cd017fd6cd40069d8a9c38eef96f0f208eb083a70fb693c8c5",
-      "outputFingerprint": "sha256:55dcb1fb0201beafe5b92dcfa65e6930a8633aa79438b15eed455313e4768bd8"
+      "outputFingerprint": "sha256:34caf942a19192adab6957d5205bb5a6bb750f2369bde6ccbcfb45956b773064"
     },
     {
       "cardDefinitionId": "onr_classic_043_running-interference",
@@ -3035,7 +3154,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:fcb3cb47a3d9d5ffd9eccf76ecce183475633b596e3feb2a1ef58fe7ff8fd421",
-      "outputFingerprint": "sha256:8e5a2279fdd9c13b6d308eb5bce1284d7bc16c3bff82c8ffff0a54fed41391c6"
+      "outputFingerprint": "sha256:ecb3d021bec1fec5e498e1ee2a8fd48216298932ae374a660a6fe7ea67a64a06"
     },
     {
       "cardDefinitionId": "onr_classic_047_little-black-box",
@@ -3154,7 +3273,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:92483e551f1220f8e97e721a907bd51bd5ed6aaf988d9c295aa56978793a26a1",
-      "outputFingerprint": "sha256:354ae77a27d2990780ac6afde066cf9ecf3091d8a3043ba19f7441ecab00411b"
+      "outputFingerprint": "sha256:02989ffc5f4f48431810bbe227646e440c9ea88750db27ea6476298bc0d1f2de"
     },
     {
       "cardDefinitionId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
@@ -3274,7 +3393,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:8ba5534fcc66107a49aa7b73e5d16dda96151e0e0cee65755d8f0e9d057831f0",
-      "outputFingerprint": "sha256:cfa6b610b0f3ea62704d0ff08200702d0e96390d67cc60922cb5f4c102ce7a11"
+      "outputFingerprint": "sha256:d1bd188c90110c346174ca7a09d588d7b78037c590d9e5aa171bf69fd7bdf346"
     },
     {
       "cardDefinitionId": "onr_classic_049_omnitech-wet-drive",
@@ -3332,7 +3451,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:c302c089d6841ba3afce6cce22e2c3d996e499876618acea6e120d5e90bddeda",
-      "outputFingerprint": "sha256:634d8f85f4c19dc5b8f2f2aee07184f7b2b79910982176b9854f466cd3a063de"
+      "outputFingerprint": "sha256:f2c3c07f64e8b4534c77e39e5a9e34fdd9070d8fad126de6cd219220e8239ad5"
     },
     {
       "cardDefinitionId": "onr_classic_051_vintage-camaro",
@@ -3398,7 +3517,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:1990ce46b4c078861f30586e5aaaf417fa98dafaf01973d4d4d1c62208a71783",
-      "outputFingerprint": "sha256:67e78cf5fb3e851049e0c58d6f530263fc9b3dd3a579daa28df02cd8ca16496e"
+      "outputFingerprint": "sha256:4ec8879e50562fe605724999e3bb8f9a7113059222bb29a28db26932bbc7abc4"
     },
     {
       "cardDefinitionId": "onr_classic_052_zetatech-portastation",
@@ -3466,7 +3585,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:047272cc10d55f7238d0f08fd363c654087ccffbfe5fad68737b2426305d97f5",
-      "outputFingerprint": "sha256:205cc20a2dc14fd260fd69ee58a05be769e7630f06240bb5ca1aece199366cee"
+      "outputFingerprint": "sha256:c10fbc094c55d5e7c10fdd9ca2ae50598a7859b277afab5a8f4f8c83eef87520"
     },
     {
       "cardDefinitionId": "onr_classic_027_early-worm",
@@ -3550,7 +3669,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:0fa185a6a463d4d81c572c839eb54e6dd6e804498aea843101ade75dadb43378",
-      "outputFingerprint": "sha256:8f2c336d33b2cf5cc593353ecc90a8fa2ef3072b84148aa5a2fb56d2071449be"
+      "outputFingerprint": "sha256:e59c72ebe682fe4ec17bc5dfd432c7c8822c0f603135579159a95468688d74c9"
     },
     {
       "cardDefinitionId": "onr_classic_028_matador",
@@ -3634,7 +3753,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:520b3af4df3efc3348ddc8bab2d0e31da4dbe1cabba3010fef13eb83823b15c5",
-      "outputFingerprint": "sha256:6ad620c2d8176643c1969f81315b993a0e0b1f001273aef458bebe9e7ae60c2a"
+      "outputFingerprint": "sha256:01e0f076698a2527f34f56eb274a196c447e13eaac49e817116ba07df586b537"
     },
     {
       "cardDefinitionId": "onr_classic_029_ms-todon",
@@ -3722,7 +3841,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:6ff04cceb1d3b1c2244af17c5c0649669cebfc77d9382c36abfc936399ef26fb",
-      "outputFingerprint": "sha256:41a01f5f21b1e1046efb27faffc0a314fe1fbab32f8396d6dd83843c80d64437"
+      "outputFingerprint": "sha256:eb81ad35fb02acabba54d4e5561c453f7aac5e5b5994013a3946b1af689de472"
     },
     {
       "cardDefinitionId": "onr_classic_030_psychic-friend",
@@ -3805,7 +3924,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:6be24a349688b40c4d165f49961c97d719c5f6d1d6cbc5a2cb6e3b5b0eb716b8",
-      "outputFingerprint": "sha256:6781b57815045f70c64bedb93cae59ead22dbfab8862a24162963a42d81a4385"
+      "outputFingerprint": "sha256:dbee790323d65196eb046d407d8a14fc2ad8198598266ff2fd7cf1db1c6bab43"
     },
     {
       "cardDefinitionId": "onr_classic_031_rent-i-con",
@@ -3890,7 +4009,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:01e279e8bdbc075ccc0c91e4986b129fe7dcbc2c80337556a5ec0543ff844299",
-      "outputFingerprint": "sha256:8c846d43b9386d85ef7ef46c410f5974f7d474ffbf5b386e96cedb5ff3d91508"
+      "outputFingerprint": "sha256:6bcdcb58d22d4f26994d18f6e090823143190d8f2504d5aa2b0e06cd26fc3ae5"
     },
     {
       "cardDefinitionId": "onr_classic_032_schematics-search-engine",
@@ -3946,7 +4065,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:1343cee0e11d8562e07c9ee84841dacde3edf8bcec29371a3311cf2f05935dec",
-      "outputFingerprint": "sha256:59a10610e177b3cc9d1705d442dff679e7f38ed8a2ef763ef2cfaead6092b3e7"
+      "outputFingerprint": "sha256:ca73f644259cb3c689c3c7205b61919157814558135664f2aca01040e600de02"
     },
     {
       "cardDefinitionId": "onr_classic_033_superglue",
@@ -4007,7 +4126,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:baf60f842b066331944c8bd19aeb68d0c8a9360819449f6508e3b86101c4c560",
-      "outputFingerprint": "sha256:dd8b65241f27d3f2bb8cd9dca026a7bc82a2ed85e1040c0f75eb256670307956"
+      "outputFingerprint": "sha256:9ed99bef4bfdf121f5f2d7c304cb3c477f1c060d44143039b74d62bebb8e5f8b"
     },
     {
       "cardDefinitionId": "onr_classic_044_crash-space",
@@ -4117,7 +4236,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:eac3d36ffdcc1e6f55597907aa14fff33c3725d68957bb00dfac3049b4d372d3",
-      "outputFingerprint": "sha256:450daf6ced235e04d8f98b13603f496c7ae72d98c92f1d2f75d191324822ded8"
+      "outputFingerprint": "sha256:948fce3111325daf8eeff6eeb26a18eb596efecdcaf31dc78cb7e4927cb1500b"
     },
     {
       "cardDefinitionId": "onr_classic_045_elena-laskova",
@@ -4183,7 +4302,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:218180ae6bffb2ffcaec4875b585b8a59b018847f3163717e7425aad5dd38fdc",
-      "outputFingerprint": "sha256:33d289e47cc783055451868cd4e800231d54cac4d833d34eb1830215df373524"
+      "outputFingerprint": "sha256:ff85b46ac408e9013abfda31f20a4fccc992fb01581b4b67e1f03935c98d0a2f"
     },
     {
       "cardDefinitionId": "onr_classic_046_executive-file-clerk",
@@ -4263,7 +4382,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:623148ccf4080b8dbe6d33d2c7feaf37b333668ea813e767f5cae45a0512a0c8",
-      "outputFingerprint": "sha256:bd70deab96780b4550cc60e95ab1a40dde2c1780ffbaf860d2f5c780555c0385"
+      "outputFingerprint": "sha256:9fd8253195fd0164615d8fcf5bcc05ce2772690d363b34810e0e33d31bc0239e"
     },
     {
       "cardDefinitionId": "onr_classic_054_phone-freak",
@@ -4326,7 +4445,7 @@
         }
       },
       "legacyHintFingerprint": "sha256:16cdf16d30ea1a2d9efbcaf04c626b6b01405da0ac20ccdfb5adf82d2e559cf1",
-      "outputFingerprint": "sha256:48c7722e0b2a6742071936167f06bc31584221bbb606dfc4de847bdf676bcbdf"
+      "outputFingerprint": "sha256:d0610e4ad269274027d2724d78e50958252793b91c8ade3de8646f24f4589ce5"
     },
     {
       "cardDefinitionId": "onr_classic_050_sandbox-dig",
@@ -4405,7 +4524,7 @@
         ]
       },
       "legacyHintFingerprint": "sha256:abb9b3994eee6e3f9ebbec47ba650a88325851863af3729555dae7e2a692119d",
-      "outputFingerprint": "sha256:91a1e74c027d3d3389170cb951c62aeb9bf91829058938ade6d748ac6967b208"
+      "outputFingerprint": "sha256:a8410b62ec17399c5b246e36cd39ddfda3586f6f82dcebd0f34cae0f8600a2d3"
     }
   ],
   "addressableNodes": [
@@ -5390,5 +5509,5 @@
       "disposition": "explicit_reviewed_semantic_capability_key"
     }
   ],
-  "aggregateOutputFingerprint": "sha256:80ad9c62eb2655c6c6136e3ce6faea54b8c3c7ef45b18c8e19d91ac88ad46a59"
+  "aggregateOutputFingerprint": "sha256:c368ea514f839861e34603717f02f11808ab3fc840f1d7effffe24bfdea99597"
 }

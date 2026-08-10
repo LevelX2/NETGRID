@@ -199,6 +199,26 @@ function choiceContinuation(
         continuation.allowedTypes.length
     )
       return continuation;
+    if (
+      continuation?.family === "runner_program_trash_before_install" &&
+      legalAction.side === "runner" &&
+      legalAction.type === "install_card" &&
+      legalAction.payload?.runnerProgramTrashBeforeInstall === true &&
+      legalAction.payload.cardId === continuation.sourceCardInstanceId &&
+      continuation.originActionId === legalAction.actionId &&
+      continuation.createdAtStateVersion === choice.stateVersion &&
+      choice.sourceCardInstanceId === continuation.sourceCardInstanceId &&
+      choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+      legalAction.payload.selectedCardId === continuation.selectedCardId &&
+      legalAction.payload.selectedSubtype === continuation.selectedSubtype &&
+      choice.kind === "select_cards" &&
+      choice.visibility === "hidden_info_barrier" &&
+      choice.minSelections === 0 &&
+      choice.maxSelections === choice.options.length &&
+      continuation.sourceCardInstanceId.length > 0 &&
+      continuation.sourceCardDefinitionId.length > 0
+    )
+      return continuation;
     return undefined;
   }
   if (choice.side !== "corp") return undefined;

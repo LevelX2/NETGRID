@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 79,
-    "stateHash": "fnv1a:6a1f793a",
+    "stateHash": "fnv1a:80a26835",
     "testOnlyGameState": {
       "matchId": "match_20eb121f1a2b3b1b",
       "baseline": {
@@ -5563,9 +5563,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_proteus_150_streetware-distributor"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["develop_onr_v1_114_temple-microcode-outlet"],
+      "requiredAssessmentEvidence": [
+        "source:own_runner_hand:card_specific_purpose:draw_or_search_engine:setup"
+      ]
+    }
   }
 }

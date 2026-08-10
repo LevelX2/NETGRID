@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 283,
-    "stateHash": "fnv1a:e09b257d",
+    "stateHash": "fnv1a:f964e515",
     "testOnlyGameState": {
       "matchId": "match_424abdd1c7ac054d",
       "baseline": {
@@ -11234,7 +11234,7 @@
       "acceptablePlanKinds": ["runner.develop_board_and_hand"],
       "acceptableCapabilities": ["develop_onr_v1_097_livewires-contacts"],
       "requiredAssessmentEvidence": [
-        "source:own_runner_hand:card_specific_purpose:economy_engine:useful_now"
+        "source:own_runner_hand:card_specific_purpose:economy_engine:setup"
       ]
     },
     "forbiddenActions": [

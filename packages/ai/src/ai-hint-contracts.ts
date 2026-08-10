@@ -2,6 +2,18 @@ import type { Side } from "@netgrid/shared";
 
 import type { AiHintOntologyExtension } from "./hint-ontology";
 
+export {
+  AI_ACTION_PLAN_OWNERS,
+  AI_ACTION_PLAN_OWNER_ROUTES,
+  validateAiHintActionPlanOwnerBindings,
+} from "./action-plan-owner-contracts";
+export type {
+  AiActionPlanOwner,
+  AiActionPlanOwnerRoute,
+  AiHintActionPlanOwnerBinding,
+  AiHintActionPlanOwnerBindingIssue,
+} from "./action-plan-owner-contracts";
+
 export type AiCardHint = AiHintOntologyExtension & {
   cardId: string;
   side: Side;

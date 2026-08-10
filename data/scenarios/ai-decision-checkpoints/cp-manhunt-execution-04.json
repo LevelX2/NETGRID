@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 362,
-    "stateHash": "fnv1a:a436a1c1",
+    "stateHash": "fnv1a:18cf7fc6",
     "testOnlyGameState": {
       "matchId": "match_fa11540b1f1e08b6",
       "baseline": {
@@ -12152,11 +12152,13 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_313_city-surveillance"
-      }
-    ]
+    "acceptableActions": [{ "type": "gain_credit" }],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_basic_liquidity_development"
+      ]
+    }
   }
 }

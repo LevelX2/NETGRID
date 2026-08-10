@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 80,
-    "stateHash": "fnv1a:1a0c3cea",
+    "stateHash": "fnv1a:f5954a5b",
     "testOnlyGameState": {
       "matchId": "match_ecfe3ce373a56823",
       "baseline": {

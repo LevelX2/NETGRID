@@ -99,10 +99,18 @@ export function beginEncounter(
     Math.floor(run.nextEncounterFatalDamage ?? 0),
   );
   run.fatalDamageActiveForEncounter = queuedFatalDamage > 0;
-  if (queuedFatalDamage > 0)
+  if (queuedFatalDamage > 0) {
+    if (!run.nextEncounterFatalDamageSourceDefinitionId)
+      throw new Error("Naechste-Encounter-Schaden hat keine Quellenbindung.");
     run.fatalDamageAmountForEncounter = queuedFatalDamage;
-  else delete run.fatalDamageAmountForEncounter;
+    run.fatalDamageSourceDefinitionId =
+      run.nextEncounterFatalDamageSourceDefinitionId;
+  } else {
+    delete run.fatalDamageAmountForEncounter;
+    delete run.fatalDamageSourceDefinitionId;
+  }
   run.nextEncounterFatalDamage = 0;
+  delete run.nextEncounterFatalDamageSourceDefinitionId;
   const encounterTaxPayment = payEncounterTaxForFutureIce(
     runDurationPaymentHost(host.state),
     legalAction,

@@ -93,8 +93,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_025_strategic-planning-group.",
       },
     ],
     capabilities: [],

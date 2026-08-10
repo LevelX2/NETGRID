@@ -41,12 +41,6 @@ export const cardSpec = {
         value: 5,
       },
     },
-    installCapabilities: [
-      {
-        kind: "install_only_inside_subsidiary_data_fort",
-        visibility: "public",
-      },
-    ],
     selfRezAdditionalCosts: [
       {
         kind: "agenda_point",
@@ -78,7 +72,6 @@ export const cardSpec = {
         },
         target: "outermost_position_on_other_data_fort",
         revealIfUnrezzed: true,
-        limit: "once_per_run_per_source",
         visibility: "public",
       },
     ],
@@ -134,15 +127,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_011_glacier.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_011_glacier.",
       },
     ],
     capabilities: [],

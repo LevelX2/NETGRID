@@ -209,7 +209,7 @@ describe("printed subroutine implementations", () => {
           expect.objectContaining({ kind: "run_duration_cannot_jack_out" }),
           expect.objectContaining({
             kind: "trace",
-            baseTraceStrength: 5,
+            traceLimit: 5,
           }),
         ],
       },

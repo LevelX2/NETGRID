@@ -117,6 +117,8 @@ export type CardRuntimeHostPort = {
   ) => {
     amount: number;
     sourceDefinitionIds: CardDefinitionId[];
+    runStartLossAmount?: number;
+    runStartLossSourceDefinitionIds?: CardDefinitionId[];
   };
   runStartTaxForCorpRootAssets: (state: GameState) => {
     amount: number;

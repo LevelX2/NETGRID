@@ -45,7 +45,7 @@ export const cardSpec = {
       addressability: ["plan", "action", "quote", "debug"],
       kind: "derez_fully_broken_passed_ice",
       cost: {
-        kind: "tap_source",
+        kind: "trash_source",
       },
       timing: "after_passing_fully_broken_ice",
       target: "that_ice",
@@ -74,15 +74,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_033_superglue.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_033_superglue.",
       },
     ],
     capabilities: [],

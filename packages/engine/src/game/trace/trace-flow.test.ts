@@ -64,14 +64,14 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     expect(state.pendingChoice?.kind).toBe("bid_amount");
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       traceStarted: true,
       sourceDefinitionId: "v096_trace_probe_ice",
-      baseTraceStrength: 2,
+      traceLimit: 2,
     });
     expect(getPlayerView(state, "corp").pendingChoice?.choiceId).toBe(
       state.pendingChoice?.choiceId,
@@ -84,7 +84,7 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 1,
-      traceStrength: 3,
+      traceValue: 1,
       runnerLink: 0,
     });
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
@@ -92,7 +92,7 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
       actionType: "resolve_choice",
       traceStep: "corp_bid",
       corpBid: 1,
-      traceStrength: 3,
+      traceValue: 1,
       runnerLink: 0,
     });
 
@@ -136,13 +136,13 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     state = enterEncounterFromMovementWindow(state);
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
-    state = applyChoice(state, "runner", "bid_3");
+    state = applyChoice(state, "runner", "bid_0");
 
     expect(state.runner.tags).toBe(0);
-    expect(state.runner.credits).toBe(1);
+    expect(state.runner.credits).toBe(4);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      traceStrength: 2,
-      runnerStrength: 3,
+      traceValue: 0,
+      runnerStrength: 0,
       traceSuccessful: false,
       tagsAdded: 0,
     });

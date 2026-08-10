@@ -41,10 +41,19 @@ export type TemporaryCreditGrantSource = {
   reason: string;
 };
 
+export type CreditGainDestination =
+  | { kind: "normal_pool" }
+  | {
+      kind: "runner_run_temporary";
+      sourceDefinitionId: CardDefinitionId;
+      returnUnusedAtRunEnd: true;
+    };
+
 export type CreditGainRequest = {
   side: Side;
   baseAmount: number;
   source: StandardCreditGainSource | TemporaryCreditGrantSource;
+  destination?: CreditGainDestination;
 };
 
 export type CreditGainResult = {
@@ -56,6 +65,7 @@ export type CreditGainResult = {
   creditedAmount: number;
   creditsBefore: number;
   creditsAfter: number;
+  destination: CreditGainDestination;
   countsAsStandardGain: boolean;
   modifierSourceDefinitionIds: CardDefinitionId[];
 };
@@ -65,21 +75,19 @@ export function applyCreditGain(
   request: CreditGainRequest,
 ): CreditGainResult {
   assertCreditGainRequest(request);
+  const destination = request.destination ?? { kind: "normal_pool" };
   const countsAsStandardGain = request.source.kind !== "temporary_grant";
-  const creditsBefore = creditsForSide(state, request.side);
+  const creditsBefore = creditsForDestination(state, request.side, destination);
   const modifiers = countsAsStandardGain
     ? activeCreditGainModifiers(state, request)
     : { amount: 0, sourceDefinitionIds: [] };
   const requestedAmount = request.baseAmount + modifiers.amount;
-  const interceptedAmount = countsAsStandardGain
+  const interceptedAmount = countsAsStandardGain && destination.kind === "normal_pool"
     ? interceptCorpCreditForfeitDebt(state, request.side, requestedAmount)
     : 0;
   const creditedAmount = requestedAmount - interceptedAmount;
 
-  if (creditedAmount > 0) {
-    if (request.side === "corp") state.corp.credits += creditedAmount;
-    else state.runner.credits += creditedAmount;
-  }
+  creditDestination(state, request.side, destination, creditedAmount);
 
   return {
     side: request.side,
@@ -89,7 +97,8 @@ export function applyCreditGain(
     interceptedAmount,
     creditedAmount,
     creditsBefore,
-    creditsAfter: creditsForSide(state, request.side),
+    creditsAfter: creditsForDestination(state, request.side, destination),
+    destination,
     countsAsStandardGain,
     modifierSourceDefinitionIds: modifiers.sourceDefinitionIds,
   };
@@ -100,8 +109,12 @@ export function creditGainPublicPayload(
 ): Record<string, string | number | boolean> {
   return {
     gainedCredits: result.creditedAmount,
-    [result.side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"]:
-      result.creditsAfter,
+    ...(result.destination.kind === "normal_pool"
+      ? {
+          [result.side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"]:
+            result.creditsAfter,
+        }
+      : { runnerRunTemporaryCreditsAfter: result.creditsAfter }),
     ...(result.bonusAmount > 0
       ? {
           creditGainBaseAmount: result.baseAmount,
@@ -133,6 +146,11 @@ function assertCreditGainRequest(request: CreditGainRequest): void {
       request.source.gainOrdinal <= 0)
   )
     throw new Error("Credit-Gain-Ordinal ist ungueltig.");
+  if (
+    request.destination?.kind === "runner_run_temporary" &&
+    request.side !== "runner"
+  )
+    throw new Error("Temporäre Run-Credits gehören dem Runner.");
 }
 
 function activeCreditGainModifiers(
@@ -197,4 +215,37 @@ function interceptCorpCreditForfeitDebt(
 
 function creditsForSide(state: GameState, side: Side): number {
   return side === "corp" ? state.corp.credits : state.runner.credits;
+}
+
+function creditsForDestination(
+  state: GameState,
+  side: Side,
+  destination: CreditGainDestination,
+): number {
+  if (destination.kind === "normal_pool") return creditsForSide(state, side);
+  return state.run?.runnerRunTemporaryCredits?.remaining ?? 0;
+}
+
+function creditDestination(
+  state: GameState,
+  side: Side,
+  destination: CreditGainDestination,
+  amount: number,
+): void {
+  if (amount <= 0) return;
+  if (destination.kind === "normal_pool") {
+    if (side === "corp") state.corp.credits += amount;
+    else state.runner.credits += amount;
+    return;
+  }
+  if (side !== "runner" || !state.run)
+    throw new Error("Temporäre Run-Credits benötigen einen aktiven Run.");
+  const current = state.run.runnerRunTemporaryCredits;
+  if (current && current.sourceDefinitionId !== destination.sourceDefinitionId)
+    throw new Error("Temporäre Run-Credits haben eine fremde Quellbindung.");
+  state.run.runnerRunTemporaryCredits = {
+    sourceDefinitionId: destination.sourceDefinitionId,
+    remaining: Math.max(0, Math.floor(current?.remaining ?? 0)) + amount,
+    returnUnusedAtRunEnd: destination.returnUnusedAtRunEnd,
+  };
 }

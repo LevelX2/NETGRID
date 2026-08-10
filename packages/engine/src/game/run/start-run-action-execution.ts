@@ -7,7 +7,6 @@ import type {
 } from "@netgrid/shared";
 import type { StartRunOptions } from "./run-core-execution";
 import type { RunTaxPaymentResult } from "./run-duration-payment";
-import { BODYWEIGHT_DATA_CRECHE_ID } from "../../compatibility/runtime-compatibility";
 import { assertRunStartEligible } from "./run-start-eligibility";
 
 export type StartRunActionExecutionHost = {
@@ -58,7 +57,7 @@ export function executeStartRunAction(
   if (bodyweightExtraRunPending) {
     if (
       legalAction.payload?.bonusRunNoClick !== true ||
-      legalAction.payload?.bonusRunSource !== BODYWEIGHT_DATA_CRECHE_ID ||
+      typeof legalAction.payload?.bonusRunSource !== "string" ||
       legalAction.payload?.multiServerSuccessSequenceRun === true
     )
       throw new Error(
@@ -130,6 +129,31 @@ export function executeStartRunAction(
       ? { activeSequence: pendingSequence }
       : undefined;
   host.run.startRun(serverId, legalAction, startRunOptions);
+  const runStartLossCredits = Math.max(
+    0,
+    Math.floor(Number(legalAction.payload?.runStartLossCredits ?? 0)),
+  );
+  if (runStartLossCredits > 0) {
+    const lost = Math.min(host.state.runner.credits, runStartLossCredits);
+    host.state.runner.credits -= lost;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runStartLossCredits,
+      runStartLossApplied: lost,
+      runnerCreditsAfter: host.state.runner.credits,
+    };
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      {
+        effectId: `run.start.lose_runner_credits.${serverId}`,
+        kind: "lose_credits",
+        visibility: "public",
+        side: "runner",
+        amount: lost,
+        reason: "start_of_run",
+      },
+    ];
+  }
   if (legalAction.payload?.runOnlyAction === true && host.state.run) {
     if (!runOnlyActionSourceCardId)
       throw new Error("Diese Run-Aktion benoetigt eine installierte Quelle.");

@@ -2,8 +2,7 @@ import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { reconstructBeliefState, type BeliefState } from "./belief-state";
-import { cardRolesForId } from "./runtime/card-role-lookup";
-import { rolesMatch } from "./role-match";
+import { runnerHintProvidesMultiaccess } from "./runner-canonical-hint-semantics";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export type KnownCentralAccessPayoffKind =
@@ -900,61 +899,13 @@ function installedRdAccessDepthEstimate(input: AiDecisionInput): number {
   return hasInstalledRdMultiaccess ? 2 : 1;
 }
 
-type AccessHintEffect = {
-  kind?: string;
-  scope?: string;
-  target?: string;
-};
-
-type AiCardHintWithAccessSignals = {
-  tacticSignals?: readonly string[];
-  effects?: unknown;
-};
-
 function runnerCardProvidesInstalledRdMultiaccess(
   definitionId: string | undefined,
 ): boolean {
   if (!definitionId) return false;
-  const hint = AI_HINTS_BY_CARD.get(definitionId) as
-    | AiCardHintWithAccessSignals
-    | undefined;
-  if (hint?.tacticSignals?.includes("access.rnd_multiaccess")) return true;
-  if (
-    rolesMatch(cardRolesForId(definitionId, AI_HINTS_BY_CARD), [
-      "rd_multiaccess",
-      "rnd_multiaccess",
-    ])
-  ) {
-    return true;
-  }
-  return hintEffects(hint).some(
-    (effect) =>
-      effect.kind === "multiaccess" &&
-      centralAccessScopeIsRd(effect.scope ?? effect.target),
-  );
-}
-
-function hintEffects(
-  hint: AiCardHintWithAccessSignals | undefined,
-): AccessHintEffect[] {
-  return Array.isArray(hint?.effects)
-    ? hint.effects.filter(
-        (effect): effect is AccessHintEffect =>
-          typeof effect === "object" && effect !== null,
-      )
-    : [];
-}
-
-function centralAccessScopeIsRd(value: string | undefined): boolean {
-  if (!value) return false;
-  const normalized = value.trim().toLocaleLowerCase("en-US");
-  return (
-    normalized === "rd" ||
-    normalized === "rnd" ||
-    normalized === "r&d" ||
-    normalized === "r_and_d" ||
-    normalized === "research and development" ||
-    normalized === "research & development"
+  return runnerHintProvidesMultiaccess(
+    AI_HINTS_BY_CARD.get(definitionId),
+    "rd",
   );
 }
 

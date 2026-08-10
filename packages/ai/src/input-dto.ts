@@ -111,8 +111,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "postInstallRezQuoteVariableMinValueFinalCredits",
   "postInstallRezQuoteVariableMaxValueFinalCredits",
   "postInstallRezQuoteVariableEffectiveStrengthFromValue",
-  "postInstallRezQuoteVariableTraceBaseFromValue",
-  "postInstallRezQuoteVariableTraceBidLimitFromValue",
+  "postInstallRezQuoteVariableTraceLimitFromValue",
   "postInstallRezQuoteVariableAdditionalCreditsPerSubroutine",
   "postInstallRezQuoteVariableMinSubroutines",
   "postInstallRezQuoteVariableMinSubroutinesFinalCredits",
@@ -268,7 +267,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "remainingCountersBefore",
   "shellCounterAmount",
   "counterType",
-  "traceStrength",
+  "traceValue",
   "runnerLink",
   "drawTaxSourceCount",
   "drawTaxDecision",
@@ -346,8 +345,9 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "traceStarted",
   "traceStep",
   "corpBid",
-  "baseTraceStrength",
-  "traceStrength",
+  "traceLimit",
+  "effectiveTraceLimit",
+  "traceValue",
   "runnerLink",
   "successful",
   "setupStatus",
@@ -1296,7 +1296,7 @@ function validTagTrigger(
         trigger.status === "response_required" &&
         nonblank(trigger.sourceStepId) &&
         route.steps.some((step) => step.stepId === trigger.sourceStepId) &&
-        nonNegativeInteger(trigger.baseTraceStrength)
+        nonNegativeInteger(trigger.traceLimit)
       );
     case "none":
       return (
@@ -1963,8 +1963,7 @@ function sanitizeVisibleVariableCorpRezCostParameter(
           additionalCreditsPerValue,
         ) ||
       parameter.effectiveStrengthFromValue !== true ||
-      !optionalTrue(parameter.traceBaseFromValue) ||
-      !optionalTrue(parameter.traceBidLimitFromValue)
+      !optionalTrue(parameter.traceLimitFromValue)
     ) {
       return undefined;
     }
@@ -1976,11 +1975,8 @@ function sanitizeVisibleVariableCorpRezCostParameter(
       minValueFinalCredits,
       maxValueFinalCredits,
       effectiveStrengthFromValue: true,
-      ...(parameter.traceBaseFromValue === true
-        ? { traceBaseFromValue: true }
-        : {}),
-      ...(parameter.traceBidLimitFromValue === true
-        ? { traceBidLimitFromValue: true }
+      ...(parameter.traceLimitFromValue === true
+        ? { traceLimitFromValue: true }
         : {}),
     };
   }
@@ -2296,10 +2292,8 @@ function sanitizeVisibleEffectiveSubroutine(
     !isNonEmptyString(value.id) ||
     !isVisibleEffectiveSubroutineType(value.type) ||
     (value.amount !== undefined && !isNonNegativeSafeInteger(value.amount)) ||
-    (value.baseTraceStrength !== undefined &&
-      !isNonNegativeSafeInteger(value.baseTraceStrength)) ||
-    (value.traceBidLimit !== undefined &&
-      !isNonNegativeSafeInteger(value.traceBidLimit)) ||
+    (value.traceLimit !== undefined &&
+      !isNonNegativeSafeInteger(value.traceLimit)) ||
     (value.runFutureStrengthCancelPaymentAmount !== undefined &&
       !isNonNegativeSafeInteger(value.runFutureStrengthCancelPaymentAmount)) ||
     (value.traceSuccessEffect !== undefined &&
@@ -2327,12 +2321,7 @@ function sanitizeVisibleEffectiveSubroutine(
     id: value.id,
     type: value.type,
     ...(value.amount !== undefined ? { amount: value.amount } : {}),
-    ...(value.baseTraceStrength !== undefined
-      ? { baseTraceStrength: value.baseTraceStrength }
-      : {}),
-    ...(value.traceBidLimit !== undefined
-      ? { traceBidLimit: value.traceBidLimit }
-      : {}),
+    ...(value.traceLimit !== undefined ? { traceLimit: value.traceLimit } : {}),
     ...(value.runFutureStrengthCancelPaymentAmount !== undefined
       ? {
           runFutureStrengthCancelPaymentAmount:
@@ -2745,6 +2734,21 @@ function sanitizeChoiceContinuation(
     )
   ) {
     return { ...value, allowedTypes: [...value.allowedTypes] };
+  }
+  if (
+    value.family === "runner_program_trash_before_install" &&
+    playerViewSide === "runner" &&
+    choiceSide === "runner" &&
+    isNonEmptyString(value.sourceCardInstanceId) &&
+    value.sourceCardInstanceId === sourceCardInstanceId &&
+    isNonEmptyString(value.sourceCardDefinitionId) &&
+    value.sourceCardDefinitionId === sourceCardDefinitionId &&
+    (value.selectedCardId === undefined ||
+      isNonEmptyString(value.selectedCardId)) &&
+    (value.selectedSubtype === undefined ||
+      isNonEmptyString(value.selectedSubtype))
+  ) {
+    return { ...value };
   }
   return undefined;
 }

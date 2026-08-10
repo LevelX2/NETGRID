@@ -1093,10 +1093,12 @@ describe("authoritative plan-first live runtime", () => {
             extractAiFeatures: () => ({
               credits: 0,
               memoryRemaining: 4,
+              hasInstalledNonNoisyIcebreaker: false,
               rigRoles: new Set(),
               rigDefinitionIds: new Set(),
             }),
             rolesForCardId: () => [],
+            effectsForCardId: () => [],
           } as Parameters<typeof selectedChoicesForDecision>[2],
           portfolio,
         ),
@@ -12443,11 +12445,13 @@ describe("authoritative plan-first live runtime", () => {
         extractAiFeatures: () => ({
           credits: 0,
           memoryRemaining: 4,
+          hasInstalledNonNoisyIcebreaker: false,
           rigRoles: new Set(),
           rigDefinitionIds: new Set(),
         }),
         rolesForCardId: (definitionId) =>
           definitionId === "onr_v1_007_blink" ? ["breaker_universal"] : [],
+        effectsForCardId: () => [],
       } as Parameters<typeof selectedChoicesForDecision>[2]),
     ).toEqual({
       choiceId: "temple-search-choice",
@@ -12803,10 +12807,12 @@ describe("authoritative plan-first live runtime", () => {
         extractAiFeatures: () => ({
           credits: 4,
           memoryRemaining: 4,
+          hasInstalledNonNoisyIcebreaker: false,
           rigRoles: new Set(),
           rigDefinitionIds: new Set(),
         }),
         rolesForCardId: () => ["breaker_universal"],
+        effectsForCardId: () => [],
       } as Parameters<typeof selectedChoicesForDecision>[2]),
     ).toEqual({
       choiceId: "gideon-search-choice",
@@ -13500,6 +13506,7 @@ describe("authoritative plan-first live runtime", () => {
       extractAiFeatures: () => ({
         credits: 0,
         memoryRemaining: 4,
+        hasInstalledNonNoisyIcebreaker: false,
         rigRoles: new Set(),
         rigDefinitionIds: new Set(),
       }),
@@ -13509,6 +13516,7 @@ describe("authoritative plan-first live runtime", () => {
           : definitionId === "trace-breaker-definition"
             ? ["breaker_trace"]
             : [],
+      effectsForCardId: () => [],
     } as Parameters<typeof selectedChoicesForDecision>[2];
     const selected = selectedChoicesForDecision(
       choiceInput,

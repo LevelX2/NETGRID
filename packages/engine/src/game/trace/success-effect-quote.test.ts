@@ -11,7 +11,7 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
     ).toEqual([
       {
         sourceDefinitionId: "onr_proteus_026_hunting-pack",
-        baseTraceStrength: 5,
+        traceLimit: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 },
       },
     ]);
@@ -25,7 +25,7 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
     ).toEqual([
       {
         sourceDefinitionId: "onr_v1_264_rex",
-        baseTraceStrength: 3,
+        traceLimit: 3,
         traceSuccessEffect: {
           type: "end_run_and_run_lock",
           amount: 2,

@@ -8,6 +8,7 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   accessCountPayloadForBreach,
   buildBreachState,
@@ -128,6 +129,12 @@ export function enterAccessFromSuccessfulRun(
 ): RunAccessTransitionResult {
   let run = mustRun(host);
   if (startSuccessfulRunInterventionChoice(host, run, legalAction))
+    return {
+      handled: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
+  if (startCorpShuffleRunnerGripAfterSuccessfulRunChoice(host, run, legalAction))
     return {
       handled: true,
       stateChanged: true,
@@ -538,6 +545,78 @@ export function startSuccessfulRunInterventionChoice(
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_54_delayed_success_intervention_choice",
       serverId: run.attackedServerId,
+    };
+  }
+  return true;
+}
+
+/** Opens one rezzed Corp post-success source at a time before access. */
+export function startCorpShuffleRunnerGripAfterSuccessfulRunChoice(
+  host: RunAccessTransitionHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): boolean {
+  if (run.successfulRunInterventionWindowClosed) return false;
+  const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
+  const sourceCardId = host.state.corp.servers
+    .flatMap((server) => server.root)
+    .slice()
+    .sort()
+    .find((cardId) => {
+      if (used.has(cardId)) return false;
+      const instance = host.state.cardInstances[cardId];
+      if (
+        !instance ||
+        instance.controller !== "corp" ||
+        instance.rezzed !== true ||
+        instance.zone.side !== "corp" ||
+        instance.zone.zone !== "serverRoot"
+      )
+        return false;
+      return (
+        cardImplementationForDefinitionId(instance.definitionId)?.successfulRunFollowups?.some(
+          (followup) =>
+            followup.kind ===
+            "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
+        ) === true
+      );
+    });
+  if (!sourceCardId) return false;
+  const definition = host.cards.definitionFor(sourceCardId);
+  host.state.pendingChoice = {
+    choiceId: `classic_indiscriminate_response_team_${host.state.stateVersion + 1}`,
+    side: "corp",
+    source: `classic.indiscriminate_response_team:${sourceCardId}:${run.runId}:${host.state.stateVersion + 1}`,
+    prompt: `${definition.title}: Runner-Grip mischen?`,
+    kind: "select_option",
+    options: [
+      {
+        id: "decline",
+        label: "Nicht nutzen",
+        publicLabel: `${definition.title} wird nicht genutzt`,
+        value: "decline",
+      },
+      {
+        id: "shuffle_grip",
+        label: "Runner-Grip mischen und nachziehen lassen",
+        publicLabel: `${definition.title} wird genutzt`,
+        value: "shuffle_grip",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  host.state.activeSide = "corp";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      classicIndiscriminateResponseTeamChoiceOpened: true,
+      sourceCardId,
+      sourceDefinitionId: definition.id,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "classic_indiscriminate_response_team_choice",
     };
   }
   return true;

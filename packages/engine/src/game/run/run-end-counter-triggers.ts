@@ -14,7 +14,6 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
-import { TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE } from "../../compatibility/runtime-compatibility";
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
   CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS,

@@ -59,6 +59,7 @@ export const cardSpec = {
             hardwareAmount: "all",
             programAmount: 2,
             visibility: "hidden_info_barrier",
+            chooser: "corp",
           },
         ],
       },
@@ -135,17 +136,9 @@ export const cardSpec = {
         use: "punish.payoff",
       },
       {
-        kind: "target_preference",
-        purpose: "trash_high_value_installed_runner_card",
-        preferences: ["high_install_cost_or_memory", "currently_used_breaker"],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_023_shock-treatment.",
       },
     ],
     capabilities: [

@@ -7,10 +7,6 @@ import type {
   ImminentEvent,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import {
-  RUNTIME_DAMAGE_PREVENTION_PROFILES,
-  SELF_REPAIR_DAMAGE_PREVENTION_PROGRAM_SOURCE,
-} from "../../mechanics/damage-prevention";
 import type {
   CardDamagePreventionSourceImplementation,
   CardTagPreventionSourceImplementation,
@@ -178,28 +174,6 @@ export function collectRuntimeDamagePreventionCandidates(
       );
       continue;
     }
-    const profile = RUNTIME_DAMAGE_PREVENTION_PROFILES[definition.id];
-    if (!profile || !profile.damageTypes.includes(damageType)) continue;
-    const used = damagePreventionUsedThisTurn(state, cardId);
-    const remaining = Math.max(0, profile.maxPerTurn - used);
-    if (remaining <= 0) continue;
-    const preventAmount = Math.min(amount, remaining);
-    candidates.push({
-      candidateId: `v161_damage_prevent_${sanitizeId(cardId)}_${preventAmount}`,
-      eventId: event.eventId,
-      kind: "prevent",
-      controller: "runner",
-      sourceRef: {
-        kind: "card",
-        instanceId: cardId,
-        definitionId: definition.id,
-        label: definition.title,
-      },
-      priority: profile.priority,
-      visibility: "hidden_info_barrier",
-      optional: true,
-      preventAmount,
-    });
   }
   return candidates;
 }

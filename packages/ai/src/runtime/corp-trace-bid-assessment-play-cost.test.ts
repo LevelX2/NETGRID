@@ -14,7 +14,7 @@ describe("Corp trace-bid play-cost projection", () => {
           maximumX: { kind: "context" },
         }),
       ),
-      traceContext: { traceStrength: 1, runnerLink: 0 },
+      traceContext: { traceLimit: 1, runnerLink: 0 },
       maxBid: 1,
     });
 
@@ -30,7 +30,7 @@ describe("Corp trace-bid play-cost projection", () => {
   it("does not invent a free payoff when the visible cost model is missing", () => {
     const assessment = assessCorpTraceBid({
       input: inputWithPayoff(payoffCard()),
-      traceContext: { traceStrength: 1, runnerLink: 0 },
+      traceContext: { traceLimit: 1, runnerLink: 0 },
       maxBid: 1,
     });
 

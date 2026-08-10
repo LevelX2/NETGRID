@@ -1,4 +1,3 @@
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import generatedCardSpecAiHints from "../../../data/ai/card-spec-ai-hints-generated.json";
 import {
   CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
@@ -21,14 +20,7 @@ export function cardIdHasGeneratedCardSpecAiHint(cardId: string): boolean {
   return derivedCardSpecAiHintIds.has(cardId);
 }
 
-for (const hint of activeAiHintsData.cards as AiCardHint[]) {
-  if (AI_HINTS_BY_CARD.has(hint.cardId))
-    throw new Error(`duplicate_legacy_ai_hint_authority: ${hint.cardId}`);
-  AI_HINTS_BY_CARD.set(hint.cardId, hint);
-}
 for (const record of generatedArtifact.cards) {
-  if (AI_HINTS_BY_CARD.has(record.cardId))
-    throw new Error(`overlapping_ai_hint_authority: ${record.cardId}`);
   AI_HINTS_BY_CARD.set(record.cardId, deepFreezeCatalogReadModel(record.hint));
 }
 
@@ -36,26 +28,20 @@ export function createAiHintsByCard(): Map<string, AiCardHint> {
   return new Map(AI_HINTS_BY_CARD);
 }
 
-export type CatalogAiHintProvenance =
-  | {
-      schemaVersion: "ai-hint-provenance-v1";
-      authority: "legacy_active_hint_json";
-      sourceRefs: readonly ["data/ai/ai-card-hints-active.json"];
-    }
-  | {
-      schemaVersion: "ai-hint-provenance-v1";
-      authority: "card_spec_compiler";
-      artifactSchemaVersion: typeof CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION;
-      compilerVersion: typeof CARD_SPEC_AI_HINT_COMPILER_VERSION;
-      cardRulesFingerprint: string;
-      planningAnnotationsFingerprint: string;
-      evidenceFingerprint: string;
-      sourceRefs: readonly [
-        "data/ai/card-spec-ai-hints-generated.json",
-        "packages/ai/src/card-spec-ai-hint-compiler.ts#deriveCardSpecAiHint",
-        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-      ];
-    };
+export type CatalogAiHintProvenance = {
+  schemaVersion: "ai-hint-provenance-v1";
+  authority: "card_spec_compiler";
+  artifactSchemaVersion: typeof CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION;
+  compilerVersion: typeof CARD_SPEC_AI_HINT_COMPILER_VERSION;
+  cardRulesFingerprint: string;
+  planningAnnotationsFingerprint: string;
+  evidenceFingerprint: string;
+  sourceRefs: readonly [
+    "data/ai/card-spec-ai-hints-generated.json",
+    "packages/ai/src/card-spec-ai-hint-compiler.ts#deriveCardSpecAiHint",
+    "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
+  ];
+};
 
 export type CatalogAiHintReadModel = {
   hint: AiCardHint;
@@ -70,26 +56,12 @@ export type CatalogAiHintSummaryReadModel = {
   hasWarnings: boolean;
 };
 
-const LEGACY_AI_HINT_PROVENANCE: Extract<
-  CatalogAiHintProvenance,
-  { authority: "legacy_active_hint_json" }
-> = Object.freeze({
-  schemaVersion: "ai-hint-provenance-v1" as const,
-  authority: "legacy_active_hint_json" as const,
-  sourceRefs: Object.freeze(["data/ai/ai-card-hints-active.json"] as const),
-});
-
-/** Keyed server/API detail view. Legacy values are copied per response. */
+/** Keyed server/API detail view from the canonical generated artifact. */
 export function catalogAiHintReadModelForCardId(
   cardId: string,
 ): CatalogAiHintReadModel | undefined {
   const hint = AI_HINTS_BY_CARD.get(cardId);
   if (hint === undefined) return undefined;
-  if (!derivedCardSpecAiHintIds.has(cardId))
-    return Object.freeze({
-      hint: deepFreezeCatalogReadModel(structuredClone(hint)),
-      provenance: LEGACY_AI_HINT_PROVENANCE,
-    });
 
   const record = generatedArtifact.cards.find(
     (candidate) => candidate.cardId === cardId,

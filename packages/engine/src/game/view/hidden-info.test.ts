@@ -113,7 +113,7 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
   const hiddenActivationDefinitionId = "onr_v1_161_fall-guy";
   const hiddenActivationTitle = "Fall Guy";
   const hiddenActivatedAbilityDefinitionId = "onr_v1_158_danshis-second-id";
-  const hiddenActivatedAbilityTitle = "Danshi's Second ID";
+  const hiddenActivatedAbilityTitle = "Danshi’s Second ID";
   const hiddenOriginalSubtypesByDefinitionId = new Map<string, string[]>();
 
   afterEach(() => {

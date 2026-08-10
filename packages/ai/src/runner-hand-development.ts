@@ -10,7 +10,7 @@ import type {
   DeckCapabilityProfile,
 } from "./deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
-import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import { RUNTIME_CARDS } from "./ai-hints";
 import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
 import {
   actionDevelopsPersistentCardNow,
@@ -115,13 +115,14 @@ import {
   visibleRunnerThreat,
 } from "./runner/hand-development/runner-persistent-install-evaluation";
 import {
-  runnerHandTextHasProgramSearchUtilitySignal,
-  runnerHandTextHasRecoveryUtilitySignal,
-  runnerHandTextHasRecurringBreakerEconomySignal,
-  runnerHandTextHasStackSearchUtilitySignal,
-} from "./runner/hand-development/runner-hand-text-signals";
-
-const AI_HINTS = createAiHintsByCard();
+  runnerEffectsProvideDamagePrevention,
+  runnerEffectsProvideExposeInformation,
+  runnerEffectsProvideMultiaccess,
+  runnerEffectsProvideNonNoisyBreakerCredits,
+  runnerEffectsProvideSearch,
+  runnerEffectsProvideTagPrevention,
+  runnerEffectsProvideTopTrashRecovery,
+} from "./runner-canonical-hint-semantics";
 
 export function evaluateRunnerHandDevelopment(
   params: EvaluateRunnerHandDevelopmentParams,
@@ -422,7 +423,11 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (context.duplicateInstalled && !looksRepeatUseful(text)) {
     return "duplicate_or_low_value";
   }
-  if (runnerHandTextHasRecurringBreakerEconomySignal(text)) {
+  if (
+    runnerEffectsProvideNonNoisyBreakerCredits(
+      context.signals.structuredEffects,
+    )
+  ) {
     return "economy_engine";
   }
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
@@ -431,9 +436,19 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (looksLikeRunEvent(context.card, context.card.rulesText ?? text))
     return "run_event";
   if (looksLikeEconomyTool(text)) return "economy_engine";
-  if (looksLikeDrawOrSearch(text)) return "draw_or_search_engine";
+  if (
+    runnerEffectsProvideSearch(context.signals.structuredEffects) ||
+    runnerEffectsProvideTopTrashRecovery(context.signals.structuredEffects) ||
+    looksLikeDrawOrSearch(text)
+  )
+    return "draw_or_search_engine";
   if (looksLikeDefense(text)) return "defense_support";
-  if (looksLikeAccessPayoff(text)) return "access_payoff";
+  if (
+    runnerEffectsProvideExposeInformation(context.signals.structuredEffects) ||
+    runnerEffectsProvideMultiaccess(context.signals.structuredEffects) ||
+    looksLikeAccessPayoff(text)
+  )
+    return "access_payoff";
   if (context.duplicateInstalled) return "duplicate_or_low_value";
   return "unknown";
 }
@@ -576,11 +591,9 @@ function defenseSupportNeed(
 ): RunnerHandDevelopmentCurrentNeed {
   if (!visibleRunnerThreat(input)) return "none";
   const damage = runnerDamageThreatAssessment(input).flatlineRisk;
-  const damagePrevention =
-    context.signals.effectTargets.some((target) => target.includes("damage")) ||
-    context.signals.text.includes("damage_prevention") ||
-    (context.signals.text.includes("damage") &&
-      context.signals.text.includes("prevent"));
+  const damagePrevention = runnerEffectsProvideDamagePrevention(
+    context.signals.structuredEffects,
+  );
   if (damagePrevention) {
     return damage.level === "confirmed" || damage.level === "critical"
       ? "acute"
@@ -591,9 +604,9 @@ function defenseSupportNeed(
       ? "useful_now"
       : "none";
   }
-  const tagPrevention =
-    context.signals.roles.includes("tag_avoid") ||
-    context.signals.effectTargets.some((target) => target.includes("tag_"));
+  const tagPrevention = runnerEffectsProvideTagPrevention(
+    context.signals.structuredEffects,
+  );
   if (tagPrevention) {
     return input.playerView.own.tags > 0 ? "none" : "setup";
   }
@@ -653,18 +666,13 @@ function recoveryOnlySearchHasNoVisibleTarget(
   input: AiDecisionInput,
   context: CardContext,
 ): boolean {
-  const text = context.signals.text;
-  const explicitRecoveryRole = context.signals.roles.includes("trash_recovery");
-  const explicitIndependentSearchRole = context.signals.roles.some(
-    (role) =>
-      role !== "trash_recovery" &&
-      (role.includes("search") || role === "draw" || role === "card_draw"),
-  );
-  const recoveryOnly = explicitRecoveryRole
-    ? !explicitIndependentSearchRole
-    : runnerHandTextHasRecoveryUtilitySignal(text) &&
-      !runnerHandTextHasProgramSearchUtilitySignal(text) &&
-      !runnerHandTextHasStackSearchUtilitySignal(text);
+  const recoveryOnly =
+    runnerEffectsProvideTopTrashRecovery(context.signals.structuredEffects) &&
+    !context.signals.structuredEffects.some(
+      (effect) =>
+        effect.kind === "draw" ||
+        (effect.kind === "search" && effect.target !== "top_trash_card"),
+    );
   if (!recoveryOnly) return false;
   const boundRecoveryTarget =
     typeof context.legalAction?.payload?.targetCardId === "string" ||

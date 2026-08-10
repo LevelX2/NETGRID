@@ -115,12 +115,12 @@ function mutableSubroutineDefinition(
     ...(subroutine.damageOnResults === undefined
       ? {}
       : { damageOnResults: [...subroutine.damageOnResults] }),
-    ...(subroutine.baseTraceStrength === undefined
+    ...(subroutine.traceLimit === undefined
       ? {}
-      : { baseTraceStrength: subroutine.baseTraceStrength }),
-    ...(subroutine.traceBidLimit === undefined
+      : { traceLimit: subroutine.traceLimit }),
+    ...(subroutine.traceLimit === undefined
       ? {}
-      : { traceBidLimit: subroutine.traceBidLimit }),
+      : { traceLimit: subroutine.traceLimit }),
     ...(subroutine.traceSuccessEffect === undefined
       ? {}
       : { traceSuccessEffect: structuredClone(subroutine.traceSuccessEffect) }),

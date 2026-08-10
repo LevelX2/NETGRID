@@ -188,13 +188,13 @@ describe("trace card implementation runtime deps", () => {
       traceId: "op_trace.11.source_def.source",
       sourceCardId,
       sourceDefinitionId,
-      baseTraceStrength: 4,
+      traceLimit: 4,
     });
     expect(gameState.trace).toMatchObject({
       traceId: "op_trace.11.source_def.source",
       sourceCardInstanceId: sourceCardId,
       sourceDefinitionId,
-      baseTraceStrength: 4,
+      traceLimit: 4,
       corpBidMax: 4,
       status: "corp_bid",
       successEffect: { type: "add_tag", amount: 1 },
@@ -216,7 +216,7 @@ describe("trace card implementation runtime deps", () => {
       traceStarted: true,
       traceId: "op_trace.11.source_def.source",
       sourceDefinitionId,
-      baseTraceStrength: 4,
+      traceLimit: 4,
     });
   });
 

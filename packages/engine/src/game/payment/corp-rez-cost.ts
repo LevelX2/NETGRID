@@ -199,11 +199,8 @@ function projectVariableCorpRezParameter(
       minValueFinalCredits,
       maxValueFinalCredits,
       effectiveStrengthFromValue: true,
-      ...(variableRez.traceBaseFromValue
-        ? { traceBaseFromValue: true as const }
-        : {}),
-      ...(variableRez.traceBidLimitFromValue
-        ? { traceBidLimitFromValue: true as const }
+      ...(variableRez.traceLimitFromValue
+        ? { traceLimitFromValue: true as const }
         : {}),
     };
   }
@@ -880,11 +877,8 @@ function projectCertifiedVariableRezPayload(
         parameter.maxValueFinalCredits,
       postInstallRezQuoteVariableEffectiveStrengthFromValue:
         parameter.effectiveStrengthFromValue,
-      ...(parameter.traceBaseFromValue
-        ? { postInstallRezQuoteVariableTraceBaseFromValue: true }
-        : {}),
-      ...(parameter.traceBidLimitFromValue
-        ? { postInstallRezQuoteVariableTraceBidLimitFromValue: true }
+      ...(parameter.traceLimitFromValue
+        ? { postInstallRezQuoteVariableTraceLimitFromValue: true }
         : {}),
     };
   }

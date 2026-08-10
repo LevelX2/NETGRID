@@ -1458,7 +1458,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
               {
                 id: "onr_v1_264_rex_trace",
                 type: "initiate_trace",
-                baseTraceStrength: 3,
+                traceLimit: 3,
                 traceSuccessEffect: {
                   type: "end_run_and_run_lock",
                   amount: 2,

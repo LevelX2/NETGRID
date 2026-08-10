@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put [1] from the bank on Zetatech Portostation when it is installed. Use this bit only to pay for playing preps. If you use the bit, replace it from the bank at the start of your next turn.",
+      "Put [1] from the bank on Zetatech Portastation when it is installed. Use this bit only to pay for playing preps. If you use the bit, replace it from the bank at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -80,22 +80,16 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_052_zetatech-portastation.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_052_zetatech-portastation.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_052_zetatech-portastation.",
       },
     ],
     capabilities: [],

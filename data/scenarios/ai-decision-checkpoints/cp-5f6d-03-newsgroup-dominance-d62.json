@@ -156,7 +156,7 @@
   },
   "engine": {
     "stateVersion": 109,
-    "stateHash": "fnv1a:a5cc4e1b",
+    "stateHash": "fnv1a:bec24a8f",
     "testOnlyGameState": {
       "matchId": "match_5f6d027aecbe34e2",
       "baseline": {
@@ -7042,8 +7042,17 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.activated_card_ability.runner_onr_v1_045_newsgroup-filter_1.runner_onr_v1_045_newsgroup-filter_1.activated.0"
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_v1_045_newsgroup-filter"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["fund_onr_v1_021_dwarf"],
+      "requiredAssessmentEvidence": [
+        "development_funding_route_status:covered_guaranteed",
+        "source:own_runner_hand:card_specific_purpose:breaker_or_rig_piece:acute"
+      ]
+    }
   }
 }

@@ -921,7 +921,7 @@ function punishRouteQuote(params: {
             currentRunnerTags: params.runnerTags,
             requiredRunnerTags: 1,
             sourceStepId: `${params.routeId}:tag`,
-            baseTraceStrength: 5,
+            traceLimit: 5,
           }
         : {
             kind: "existing_tag",

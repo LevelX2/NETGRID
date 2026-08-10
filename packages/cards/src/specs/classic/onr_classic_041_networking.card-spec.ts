@@ -79,22 +79,16 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "very_high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_041_networking.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_041_networking.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_041_networking.",
       },
     ],
     capabilities: [],

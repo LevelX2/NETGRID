@@ -19,11 +19,6 @@ import {
 } from "../../ability-engine/card-implementation-primitives";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
-import { COUNTER_GAIN_PROGRAM_SOURCE } from "../../mechanics/agenda-operation-effects";
-import {
-  SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE,
-  ICE_ORDER_REVERSAL_PROGRAM_SOURCE,
-} from "../../mechanics/longtail-card-effects";
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 import {
   hasSuccessfulRunForceRezFollowup,
@@ -31,6 +26,7 @@ import {
   resolvedPayloadFor,
   resolveSuccessfulRunForceRez,
   resolveSuccessfulRunFortCounterExpose,
+  resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice,
   resolveSuccessfulRunRemoteCounter,
   resolveSuccessfulRunReverseIce,
   runnerUtilityLongtailKindForDefinition,
@@ -170,9 +166,7 @@ export function buildSuccessfulRunFollowupActions(
     if (used.has(sourceCardId)) continue;
     const definition = host.cards.definitionFor(sourceCardId);
     const forceRezFollowup =
-      hasSuccessfulRunForceRezFollowup(definition.id) ||
-      (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === SUCCESSFUL_RUN_FORCE_REZ_PROGRAM_SOURCE);
+      hasSuccessfulRunForceRezFollowup(definition.id);
     if (forceRezFollowup) {
       const server = host.servers.mustServer(run.attackedServerId);
       const unrezzedCount = server.ice.filter(
@@ -291,9 +285,7 @@ export function buildSuccessfulRunFollowupActions(
     if (
       successfulRunFollowups.some(
         (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
-      ) ||
-      (!cardImplementationForDefinitionId(definition.id) &&
-        definition.id === ICE_ORDER_REVERSAL_PROGRAM_SOURCE)
+      )
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
       if (server.kind !== "archives" && server.ice.length > 1) {
@@ -313,8 +305,8 @@ export function buildSuccessfulRunFollowupActions(
       }
     }
     if (
-      definition.id === COUNTER_GAIN_PROGRAM_SOURCE &&
-      !cardImplementationForDefinitionId(definition.id)?.virusCounter
+      cardImplementationForDefinitionId(definition.id)?.virusCounter
+        ?.addOnSuccessfulRun?.server === "subsidiary_data_fort"
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
       if (server.kind === "remote") {
@@ -662,6 +654,12 @@ export function resolveSuccessfulRunInterventionChoice(
   playerAction: PlayerAction,
 ): SuccessfulRunInterventionExecutionResult {
   const choice = host.state.pendingChoice;
+  if (choice?.source.startsWith("classic.indiscriminate_response_team:"))
+    return resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice(
+      host,
+      legalAction,
+      playerAction,
+    );
   if (!choice || !choice.source.startsWith("p3_54.delayed_success"))
     throw new Error("Es ist keine Delayed-Success-Choice offen.");
   const [, sourceCardId = "", kind = "", serverId = ""] =

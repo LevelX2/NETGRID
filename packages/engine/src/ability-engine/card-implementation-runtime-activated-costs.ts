@@ -188,9 +188,12 @@ export function canPayActivatedCardImplementationCosts(
     const source = state.cardInstances[cardId];
     if (
       !source ||
-      source.controller !== "runner" ||
-      source.zone.side !== "runner" ||
-      source.zone.zone !== "rig"
+      source.controller !== side ||
+      source.zone.side !== side ||
+      (side === "runner" && source.zone.zone !== "rig") ||
+      (side === "corp" &&
+        source.zone.zone !== "serverRoot" &&
+        source.zone.zone !== "serverIce")
     )
       return false;
   }

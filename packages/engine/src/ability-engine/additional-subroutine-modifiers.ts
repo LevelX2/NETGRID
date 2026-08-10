@@ -17,8 +17,8 @@ import {
   activeCardImplementationModifiersForCorpRoot,
   cardDefinitionForInstance,
   cardInstanceFor,
-  cardHasNormalizedSubtype,
   cardMatchesModifierAppliesTo,
+  effectiveCardHasNormalizedSubtype,
   isPublicRezzedCorpRootModifier,
   sameServerAsSourceApplies,
   type ActiveCardImplementationModifier,
@@ -123,21 +123,38 @@ function rezzedInstalledIceRepeatCount(
   if (!repeat) return 1;
   if (repeat.kind !== "for_each_rezzed_installed_ice")
     throw new Error("Unsupported additional subroutine repeat kind.");
-  return state.corp.servers.reduce((count, server) => {
-    for (const cardId of server.ice) {
-      if (repeat.excludeSource && cardId === sourceCardInstanceId)
-        continue;
-      const instance = state.cardInstances[cardId];
-      if (!instance?.rezzed) continue;
-      const definition = cardDefinitionForInstance(state, cardId);
-      if (
-        repeat.subtypeAnyOf.some((subtype) =>
-          cardHasNormalizedSubtype(definition, subtype),
-        )
-      )
-        count += 1;
-    }
-    return count;
+  if (
+    repeat.scope !== "outside_source_same_server" ||
+    repeat.subtypeMatch !== "effective_current_subtypes" ||
+    !repeat.excludeSource
+  )
+    throw new Error("Unsupported additional subroutine repeat contract.");
+  const source = state.cardInstances[sourceCardInstanceId];
+  if (
+    !source ||
+    source.zone.side !== "corp" ||
+    source.zone.zone !== "serverIce"
+  )
+    throw new Error("Additional subroutine repeat source is not installed ICE.");
+  const sourceZone = source.zone;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === sourceZone.serverId,
+  );
+  if (!server)
+    throw new Error("Additional subroutine repeat source server is missing.");
+  const sourceIndex = server.ice.indexOf(sourceCardInstanceId);
+  if (sourceIndex < 0)
+    throw new Error("Additional subroutine repeat source is absent from its server.");
+  return server.ice.slice(sourceIndex + 1).reduce((count, cardId) => {
+    if (cardId === sourceCardInstanceId) return count;
+    const instance = state.cardInstances[cardId];
+    if (!instance?.rezzed) return count;
+    const definition = cardDefinitionForInstance(state, cardId);
+    return repeat.subtypeAnyOf.some((subtype) =>
+      effectiveCardHasNormalizedSubtype(state, cardId, subtype, definition),
+    )
+      ? count + 1
+      : count;
   }, 0);
 }
 

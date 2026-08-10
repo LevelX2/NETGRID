@@ -6738,7 +6738,7 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         traceStarted: true,
         sourceDefinitionId: "onr_v1_249_hunter",
-        baseTraceStrength: 4,
+        traceLimit: 4,
       }),
       "runner",
       { cardTitle: "Hunter" },
@@ -6749,9 +6749,9 @@ describe("formatChronicleEvent", () => {
         aiReasonCode: "corp.trace.bid",
         traceStep: "corp_bid",
         sourceDefinitionId: "onr_v1_249_hunter",
-        baseTraceStrength: 4,
+        traceLimit: 4,
         corpBid: 2,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 0,
       }),
       "runner",
@@ -6761,9 +6761,9 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         traceStep: "runner_bid",
         sourceDefinitionId: "onr_v1_249_hunter",
-        baseTraceStrength: 4,
+        traceLimit: 4,
         corpBid: 2,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 0,
         runnerBid: 1,
         runnerStrength: 1,
@@ -6773,11 +6773,13 @@ describe("formatChronicleEvent", () => {
       "runner",
     );
 
-    expect(started.title).toBe("Du hast mit Hunter einen Trace 4 ausgelöst.");
+    expect(started.title).toBe(
+      "Du hast mit Hunter einen Trace mit Limit 4 ausgelöst.",
+    );
     expect(started.category).toBe("danger");
     expect(started.cardDefinitionId).toBe("onr_v1_249_hunter");
     expect(corpBid.title).toBe("Die Korp-KI hat im Trace 2 Credits geboten.");
-    expect(corpBid.description).toBe("Trace-Stärke: 6, Runner-Link: 0.");
+    expect(corpBid.description).toBe("Trace-Wert: 6, Runner-Link: 0.");
     expect(corpBid.chips).toContain("Korp-Gebot 2");
     expect(runnerBid.title).toBe(
       "Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich; Du hast 1 Tag erhalten.",
@@ -6802,7 +6804,7 @@ describe("formatChronicleEvent", () => {
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_proteus_050_manhunt",
       corpBid: 0,
-      traceStrength: 6,
+      traceValue: 6,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,
@@ -6845,7 +6847,7 @@ describe("formatChronicleEvent", () => {
         traceStep: "base_link",
         sourceDefinitionId: "onr_v1_284_chance-observation",
         corpBid: 1,
-        traceStrength: 6,
+        traceValue: 6,
         baseLinkUsed: true,
         traceBaseLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
         traceBaseLinkCostPaid: 0,
@@ -6865,7 +6867,7 @@ describe("formatChronicleEvent", () => {
         postBidTraceLinkDelta: 1,
         postBidTraceLinkBonus: 1,
         corpBid: 1,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 2,
         runnerBid: 4,
         runnerStrength: 6,
@@ -6881,7 +6883,7 @@ describe("formatChronicleEvent", () => {
         sourceDefinitionId: "onr_v1_284_chance-observation",
         postBidTraceLinkBonus: 1,
         corpBid: 1,
-        traceStrength: 6,
+        traceValue: 6,
         runnerLink: 2,
         runnerBid: 4,
         runnerStrength: 6,
@@ -6934,7 +6936,7 @@ describe("formatChronicleEvent", () => {
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_v1_228_cinderella",
       corpBid: 1,
-      traceStrength: 7,
+      traceValue: 7,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,
@@ -7012,7 +7014,7 @@ describe("formatChronicleEvent", () => {
         traceStep: "runner_bid",
         sourceDefinitionId: "onr_v1_241_fang-2-0",
         corpBid: 6,
-        traceStrength: 11,
+        traceValue: 11,
         runnerBid: 0,
         runnerStrength: 0,
         traceSuccessful: true,

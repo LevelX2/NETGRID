@@ -736,18 +736,18 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       expect(state.trace).toMatchObject({
         status: "corp_bid",
         sourceDefinitionId: definitionId,
-        baseTraceStrength: 3,
+        traceLimit: 3,
       });
       state = applyChoice(state, "corp", "bid_0");
       expect(state.trace).toMatchObject({
         status: "base_link",
         runnerLink: 0,
-        traceStrength: 3,
+        traceValue: 3,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "corp_bid",
         runnerLink: 0,
-        traceStrength: 3,
+        traceValue: 3,
       });
       state = applyChoice(
         state,
@@ -763,7 +763,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         status: "runner_bid",
         runnerLink: 4,
         baseLinkValue: 4,
-        traceStrength: 3,
+        traceValue: 3,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "base_link",
@@ -1977,7 +1977,7 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
     state = applyChoice(state, "corp", "bid_0");
     expect(state.trace).toMatchObject({
       status: "runner_bid",
-      traceStrength: 3,
+      traceValue: 3,
       runnerLink: 0,
     });
     state = applyChoice(state, "runner", "bid_0");

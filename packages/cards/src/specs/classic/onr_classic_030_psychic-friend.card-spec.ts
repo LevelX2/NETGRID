@@ -82,15 +82,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_030_psychic-friend.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_030_psychic-friend.",
       },
     ],
     capabilities: [],

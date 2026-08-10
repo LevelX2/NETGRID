@@ -15,11 +15,12 @@ export type TraceWindowDescriptor = {
   traceId: string;
   phase: TracePhase;
   sourceCardInstanceId: CardInstanceId;
-  baseTraceStrength: number;
+  traceLimit: number;
+  effectiveTraceLimit?: number;
   hasCorpBid: boolean;
   hasRunnerBid: boolean;
   corpBid?: number;
-  traceStrength?: number;
+  traceValue?: number;
   runnerLink?: number;
   baseLinkSourceId?: CardInstanceId;
   baseLinkValue?: number;
@@ -105,12 +106,15 @@ export function describeCurrentTraceWindow(
     traceId: trace.traceId,
     phase: trace.status,
     sourceCardInstanceId: trace.sourceCardInstanceId,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
+    ...(trace.effectiveTraceLimit === undefined
+      ? {}
+      : { effectiveTraceLimit: trace.effectiveTraceLimit }),
     hasCorpBid: trace.corpBid !== undefined,
     hasRunnerBid: trace.runnerBid !== undefined,
     ...(trace.corpBid !== undefined ? { corpBid: trace.corpBid } : {}),
-    ...(trace.traceStrength !== undefined
-      ? { traceStrength: trace.traceStrength }
+    ...(trace.traceValue !== undefined
+      ? { traceValue: trace.traceValue }
       : {}),
     ...(trace.runnerLink !== undefined ? { runnerLink: trace.runnerLink } : {}),
     ...(trace.baseLinkSourceId !== undefined

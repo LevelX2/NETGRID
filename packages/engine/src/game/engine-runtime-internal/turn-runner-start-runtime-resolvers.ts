@@ -30,7 +30,6 @@ import {
 import { startInstalledCardTrashForCreditsChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { publicServerLabel } from "../../public-context";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { INCUBATOR_ID } from "../../compatibility/runtime-compatibility";
 import { executeCardImplementationStartOfRunnerTurnEffects } from "../../ability-engine/card-implementation-runtime";
 import type { CardRunnerUtilityLongtailImplementation } from "../../ability-engine/definition-types";
 import type {
@@ -771,11 +770,19 @@ export function createTurnRunnerStartRuntimeResolvers(
     const flags = ensureRunnerTurnFlags(state);
     if (flags.incubatorPendingTransforms === undefined) {
       const counterTotal = deps.incubatorCounterTotal(state);
+      if (counterTotal <= 0) {
+        flags.incubatorPendingTransforms = 0;
+        return false;
+      }
+      const sourceDefinitionId = uniqueInstalledVirusCounterOwnerDefinitionId(
+        state,
+        "incubator_duplicate_virus_counter",
+      );
       let pending = 0;
       for (let index = 0; index < counterTotal; index += 1) {
         const die = rollDeterministicDie(
           state,
-          `v191.die.${INCUBATOR_ID}.start_of_turn.roll.${state.stateVersion}.${index}`,
+          `virus_counter.${sourceDefinitionId}.start_of_turn.roll.${state.stateVersion}.${index}`,
         );
         if (die === 6) pending += 1;
       }
@@ -783,6 +790,34 @@ export function createTurnRunnerStartRuntimeResolvers(
     }
     if ((flags.incubatorPendingTransforms ?? 0) <= 0) return false;
     return startIncubatorTransformChoice(state);
+  }
+
+  function uniqueInstalledVirusCounterOwnerDefinitionId(
+    state: GameState,
+    startKind: "incubator_duplicate_virus_counter",
+  ): CardDefinitionId {
+    const ownerDefinitionIds = [
+      ...new Set(
+        runnerInstalledCardIds(state)
+          .filter((cardId) => {
+            if (cardCounter(state, cardId, "virus") <= 0) return false;
+            const virusCounter = cardImplementationForDefinitionId(
+              definitionFor(state, cardId).id,
+            )?.virusCounter;
+            return (
+              virusCounter?.startOfRunnerTurn?.kind === startKind &&
+              virusCounter.startOfRunnerTurn.rollPerCounter === true &&
+              virusCounter.startOfRunnerTurn.successDieValue === 6
+            );
+          })
+          .map((cardId) => definitionFor(state, cardId).id),
+      ),
+    ];
+    if (ownerDefinitionIds.length !== 1)
+      throw new Error(
+        `Expected exactly one installed virus-counter owner for ${startKind}; received ${ownerDefinitionIds.length}.`,
+      );
+    return ownerDefinitionIds[0]!;
   }
 
   function startIncubatorTransformChoice(state: GameState): boolean {

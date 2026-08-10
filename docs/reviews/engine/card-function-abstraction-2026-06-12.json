@@ -24,93 +24,16 @@
     "false_positive"
   ],
   "summary": {
-    "allowed_catalog_reference": 43,
-    "test_only_card_name": 45,
-    "mechanics_constant_controls_behavior_by_card_id": 28,
-    "false_positive": 2
+    "test_only_card_name": 37,
+    "false_positive": 5
   },
   "derivedCatalogGuard": {
     "status": "baseline_enforced",
     "tokenSource": "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
-    "tokenCount": 1317,
-    "baselineCount": 72,
-    "summary": {
-      "new_unclassified_card_name_leak": 72
-    },
-    "fingerprints": [
-      "scripts/audit-ai-action-capacity-contracts.mjs|19|15|valu-pak-software-bundle|Valu-Pak Software Bundle|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|20|15|preying-mantis|Preying Mantis|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|21|15|quest-for-cattekin|Quest for Cattekin|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|22|15|wilson-weeflerunner-apprentice|Wilson, Weeflerunner Apprentice|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|23|15|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|24|15|subsidiary-branch|Subsidiary Branch|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|25|15|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|26|15|edgerunner-inc-temps|Edgerunner, Inc., Temps|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|28|15|pacifica-regional-ai|Pacifica Regional AI|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|35|25|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|41|25|subsidiary-branch|Subsidiary Branch|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|47|25|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|59|25|pacifica-regional-ai|Pacifica Regional AI|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|68|25|valu-pak-software-bundle|Valu-Pak Software Bundle|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|75|25|quest-for-cattekin|Quest for Cattekin|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|82|25|wilson-weeflerunner-apprentice|Wilson, Weeflerunner Apprentice|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|89|25|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|96|25|edgerunner-inc-temps|Edgerunner, Inc., Temps|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|103|25|overtime-incentives|Overtime Incentives|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|110|25|pacifica-regional-ai|Pacifica Regional AI|new_unclassified_card_name_leak",
-      "scripts/audit-ai-action-capacity-contracts.mjs|131|25|arasaka-owns-you|Arasaka Owns You|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|45|15|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|46|15|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|51|16|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|52|16|corporate-retreat|Corporate Retreat|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|53|16|marine-arcology|Marine Arcology|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|54|16|political-coup|Political Coup|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|55|16|political-overthrow|Political Overthrow|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|280|17|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|288|17|political-coup|Political Coup|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|296|17|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|302|41|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|314|21|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/audit-ai-economy-contracts.mjs|326|21|bbs-whispering-campaign|BBS Whispering Campaign|new_unclassified_card_name_leak",
-      "scripts/check-ai-hint-quality.mjs|54|15|crystal-palace-station-grid|Crystal Palace Station Grid|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|36|15|ai-chief-financial-officer|AI Chief Financial Officer|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|49|15|artificial-security-directors|Artificial Security Directors|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|59|15|bioweapons-engineering|Bioweapons Engineering|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|67|15|black-ice-quality-assurance|Black Ice Quality Assurance|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|75|15|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|77|16|corporate-boon|Corporate Boon|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|86|15|corporate-coup|Corporate Coup|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|97|15|corporate-downsizing|Corporate Downsizing|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|109|15|corporate-retreat|Corporate Retreat|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|120|15|corporate-war|Corporate War|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|130|15|data-fort-reclamation|Data Fort Reclamation|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|144|15|detroit-police-contract|Detroit Police Contract|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|155|15|employee-empowerment|Employee Empowerment|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|166|15|encryption-breakthrough|Encryption Breakthrough|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|177|15|executive-extraction|Executive Extraction|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|187|15|genetics-visionary-acquisition|Genetics-Visionary Acquisition|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|197|15|hostile-takeover|Hostile Takeover|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|199|16|hostile-takeover|Hostile Takeover|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|205|15|ice-transmutation|Ice Transmutation|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|207|16|ice-transmutation|Ice Transmutation|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|215|15|main-office-relocation|Main-Office Relocation|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|223|15|marine-arcology|Marine Arcology|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|231|15|netwatch-operations-office|Netwatch Operations Office|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|241|15|on-call-solo-team|On-Call Solo Team|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|251|15|political-coup|Political Coup|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|253|16|political-coup|Political Coup|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|262|15|political-overthrow|Political Overthrow|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|270|15|polymer-breakthrough|Polymer Breakthrough|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|278|15|priority-requisition|Priority Requisition|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|286|15|private-cybernet-police|Private Cybernet Police|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|296|15|project-babylon|Project Babylon|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|306|15|security-net-optimization|Security Net Optimization|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|316|15|security-purge|Security Purge|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|326|15|strike-force-kali|Strike Force Kali|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|336|15|subsidiary-branch|Subsidiary Branch|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|344|15|superior-net-barriers|Superior Net Barriers|new_unclassified_card_name_leak",
-      "scripts/generate-localized-agenda-skin-data.mjs|355|15|tycho-extension|Tycho Extension|new_unclassified_card_name_leak"
-    ]
+    "tokenCount": 0,
+    "baselineCount": 0,
+    "summary": {},
+    "fingerprints": []
   },
   "abstractionPlan": [
     {
@@ -146,7 +69,9 @@
         "questForCattekinPermanentActionGain"
       ],
       "targetKind": "start_turn_random_effect_table",
-      "targetState": ["runnerTurnFlags.persistentModifiers[]"],
+      "targetState": [
+        "runnerTurnFlags.persistentModifiers[]"
+      ],
       "params": {
         "dieFaces": 6,
         "outcomes": [
@@ -168,7 +93,9 @@
         "multiServerSuccessSequenceRun"
       ],
       "targetKind": "multi_server_success_sequence",
-      "targetState": ["runnerTurnFlags.pendingSequences[]"],
+      "targetState": [
+        "runnerTurnFlags.pendingSequences[]"
+      ],
       "params": {
         "sequence": "run_each_data_fort",
         "advanceOnSuccessfulRun": true,
@@ -185,7 +112,10 @@
         "delayedAccessEffects"
       ],
       "targetKind": "delayed_agenda_access_replacement",
-      "targetState": ["runDurationEffects[]", "delayedAccessEffects[]"],
+      "targetState": [
+        "runDurationEffects[]",
+        "delayedAccessEffects[]"
+      ],
       "params": {
         "replacementWindow": "agenda_access",
         "delay": "after_current_access_sequence"
@@ -200,7 +130,9 @@
         "codeViralCachePurgePreserveTargets"
       ],
       "targetKind": "purge_replacement_with_runner_virus_counter_cleanup",
-      "targetState": ["replacementEffects[]"],
+      "targetState": [
+        "replacementEffects[]"
+      ],
       "params": {
         "interruptedEvent": "corp_purge_virus_counters",
         "runnerVirusCounterCleanup": true
@@ -233,7 +165,9 @@
         "spendRecurringTraceCreditPool"
       ],
       "targetKind": "recurring_trace_credit_pool",
-      "targetState": ["recurringCreditPools[]"],
+      "targetState": [
+        "recurringCreditPools[]"
+      ],
       "params": {
         "amount": 1,
         "spendWindow": "trace",
@@ -249,7 +183,9 @@
         "runStartInterventions"
       ],
       "targetKind": "start_run_redirect_to_source_fort",
-      "targetState": ["runStartInterventions[]"],
+      "targetState": [
+        "runStartInterventions[]"
+      ],
       "params": {
         "redirectTarget": "source_fort",
         "triggerWindow": "run_start"
@@ -264,7 +200,9 @@
         "overadvance_bonus_agenda_points"
       ],
       "targetKind": "score_credit_swing_if_corp_credit_threshold_met / overadvance_bonus_agenda_points",
-      "targetState": ["scoredAgendaAbilities[]"],
+      "targetState": [
+        "scoredAgendaAbilities[]"
+      ],
       "params": {
         "triggerWindow": "agenda_scored",
         "conditionSource": "agenda_params"
@@ -274,52 +212,8 @@
   ],
   "findings": [
     {
-      "path": "packages/engine/src/card-implementations/coverage-source-locations.ts",
-      "line": 81,
-      "column": 15,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "\"onr_v1_319_disinfectant-inc\":"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/coverage-source-locations.ts",
-      "line": 82,
-      "column": 66,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "\"packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts\","
-    },
-    {
-      "path": "packages/engine/src/card-implementations/coverage-source-locations.ts",
-      "line": 95,
-      "column": 14,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "onr_v1_330_krumz:"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/coverage-source-locations.ts",
-      "line": 96,
-      "column": 66,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "\"packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts\","
-    },
-    {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 838,
+      "line": 382,
       "column": 19,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -330,7 +224,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 840,
+      "line": 384,
       "column": 19,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -341,7 +235,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 856,
+      "line": 400,
       "column": 53,
       "token": "disinfectant",
       "cardTitle": "Disinfectant",
@@ -352,7 +246,7 @@
     },
     {
       "path": "packages/engine/src/card-implementations/coverage.test.ts",
-      "line": 860,
+      "line": 404,
       "column": 53,
       "token": "krumz",
       "cardTitle": "Krumz",
@@ -360,435 +254,6 @@
       "category": "test_only_card_name",
       "targetAbstraction": "recurring_trace_credit_pool",
       "snippet": "cardImplementationForDefinitionId(\"onr_v1_330_krumz\")?.corpUtility,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts",
-      "line": 5,
-      "column": 14,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "export const disinfectantIncImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts",
-      "line": 6,
-      "column": 33,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "cardDefinitionId: \"onr_v1_319_disinfectant-inc\","
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts",
-      "line": 4,
-      "column": 15,
-      "token": "Krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "// card name: Krumz"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts",
-      "line": 5,
-      "column": 35,
-      "token": "Krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "// text: Put [1] from the bank on Krumz when you rez it. Use this bit only to pay for traces. If you use this bit, replace it at the start of your next turn."
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts",
-      "line": 6,
-      "column": 14,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "export const krumzImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts",
-      "line": 7,
-      "column": 33,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "cardDefinitionId: \"onr_v1_330_krumz\","
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/assets/newsgroup-taunting.ts",
-      "line": 5,
-      "column": 14,
-      "token": "newsgroupTaunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "export const newsgroupTauntingImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/corp/upgrades/bizarre-encryption-scheme.ts",
-      "line": 5,
-      "column": 14,
-      "token": "bizarreEncryption",
-      "cardTitle": "Bizarre Encryption Scheme",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "runDurationEffects.access_replacement",
-      "snippet": "export const bizarreEncryptionSchemeImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/runner/programs/startup-immolator.ts",
-      "line": 5,
-      "column": 14,
-      "token": "startupImmolator",
-      "cardTitle": "Startup Immolator",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "abilityUseLedger",
-      "snippet": "export const startupImmolatorImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/runner/resources/preying-mantis.ts",
-      "line": 5,
-      "column": 14,
-      "token": "preyingMantis",
-      "cardTitle": "Preying Mantis",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "abilityUseLedger / delayedEndTurnEffects",
-      "snippet": "export const preyingMantisImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/onr-v1/runner/resources/quest-for-cattekin.ts",
-      "line": 5,
-      "column": 14,
-      "token": "questForCattekin",
-      "cardTitle": "Quest for Cattekin",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "persistentModifiers / start_turn_random_effect_table",
-      "snippet": "export const questForCattekinImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/proteus/corp/assets/siren.ts",
-      "line": 3,
-      "column": 15,
-      "token": "Siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "// card name: Siren"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/proteus/corp/assets/siren.ts",
-      "line": 4,
-      "column": 14,
-      "token": "Siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "// text: Rez Siren when you install it. Install Siren only if you can pay to rez it. [1]: Runner must make a run on the fort Siren is installed in, if possible, instead of on the fort he or she was originally going to make a run on. Use this ability only at the start of a run."
-    },
-    {
-      "path": "packages/engine/src/card-implementations/proteus/corp/assets/siren.ts",
-      "line": 4,
-      "column": 49,
-      "token": "Siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "// text: Rez Siren when you install it. Install Siren only if you can pay to rez it. [1]: Runner must make a run on the fort Siren is installed in, if possible, instead of on the fort he or she was originally going to make a run on. Use this ability only at the start of a run."
-    },
-    {
-      "path": "packages/engine/src/card-implementations/proteus/corp/assets/siren.ts",
-      "line": 4,
-      "column": 126,
-      "token": "Siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "// text: Rez Siren when you install it. Install Siren only if you can pay to rez it. [1]: Runner must make a run on the fort Siren is installed in, if possible, instead of on the fort he or she was originally going to make a run on. Use this ability only at the start of a run."
-    },
-    {
-      "path": "packages/engine/src/card-implementations/proteus/corp/assets/siren.ts",
-      "line": 5,
-      "column": 21,
-      "token": "Siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "export const proteusSirenImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/proteus/corp/assets/siren.ts",
-      "line": 6,
-      "column": 38,
-      "token": "siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "cardDefinitionId: \"onr_proteus_074_siren\","
-    },
-    {
-      "path": "packages/engine/src/card-implementations/proteus/runner/events/pirate-broadcast.ts",
-      "line": 3,
-      "column": 14,
-      "token": "pirateBroadcast",
-      "cardTitle": "Pirate Broadcast",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "pendingSequences.multi_server_success_sequence",
-      "snippet": "export const pirateBroadcastImplementation: CardImplementationDefinition = {"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-acme-savings-and-loan-to-information-laundering.ts",
-      "line": 13,
-      "column": 10,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "import { disinfectantIncImplementation } from \"../onr-v1/corp/assets/disinfectant-inc\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-acme-savings-and-loan-to-information-laundering.ts",
-      "line": 13,
-      "column": 70,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "import { disinfectantIncImplementation } from \"../onr-v1/corp/assets/disinfectant-inc\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-acme-savings-and-loan-to-information-laundering.ts",
-      "line": 36,
-      "column": 5,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "disinfectantIncImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts",
-      "line": 4,
-      "column": 10,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "import { krumzImplementation } from \"../onr-v1/corp/assets/krumz\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts",
-      "line": 4,
-      "column": 60,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "import { krumzImplementation } from \"../onr-v1/corp/assets/krumz\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts",
-      "line": 6,
-      "column": 10,
-      "token": "newsgroupTaunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "import { newsgroupTauntingImplementation } from \"../onr-v1/corp/assets/newsgroup-taunting\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts",
-      "line": 27,
-      "column": 5,
-      "token": "krumz",
-      "cardTitle": "Krumz",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "recurring_trace_credit_pool",
-      "snippet": "krumzImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-asset-i-got-a-rock-to-south-african-mining-corp.ts",
-      "line": 29,
-      "column": 5,
-      "token": "newsgroupTaunting",
-      "cardTitle": "Newsgroup Taunting",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "run_start_tax",
-      "snippet": "newsgroupTauntingImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-upgrade-aardvark-to-roving-submarine.ts",
-      "line": 4,
-      "column": 10,
-      "token": "bizarreEncryption",
-      "cardTitle": "Bizarre Encryption Scheme",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "runDurationEffects.access_replacement",
-      "snippet": "import { bizarreEncryptionSchemeImplementation } from \"../onr-v1/corp/upgrades/bizarre-encryption-scheme\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-corp-upgrade-aardvark-to-roving-submarine.ts",
-      "line": 27,
-      "column": 5,
-      "token": "bizarreEncryption",
-      "cardTitle": "Bizarre Encryption Scheme",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "runDurationEffects.access_replacement",
-      "snippet": "bizarreEncryptionSchemeImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-runner-program-shield-to-zetatech-software-installer.ts",
-      "line": 9,
-      "column": 10,
-      "token": "startupImmolator",
-      "cardTitle": "Startup Immolator",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "abilityUseLedger",
-      "snippet": "import { startupImmolatorImplementation } from \"../onr-v1/runner/programs/startup-immolator\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-runner-program-shield-to-zetatech-software-installer.ts",
-      "line": 27,
-      "column": 5,
-      "token": "startupImmolator",
-      "cardTitle": "Startup Immolator",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "abilityUseLedger",
-      "snippet": "startupImmolatorImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts",
-      "line": 5,
-      "column": 10,
-      "token": "preyingMantis",
-      "cardTitle": "Preying Mantis",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "abilityUseLedger / delayedEndTurnEffects",
-      "snippet": "import { preyingMantisImplementation } from \"../onr-v1/runner/resources/preying-mantis\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts",
-      "line": 6,
-      "column": 10,
-      "token": "questForCattekin",
-      "cardTitle": "Quest for Cattekin",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "persistentModifiers / start_turn_random_effect_table",
-      "snippet": "import { questForCattekinImplementation } from \"../onr-v1/runner/resources/quest-for-cattekin\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts",
-      "line": 28,
-      "column": 5,
-      "token": "preyingMantis",
-      "cardTitle": "Preying Mantis",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "abilityUseLedger / delayedEndTurnEffects",
-      "snippet": "preyingMantisImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/onr-v1-runner-resource-loan-from-chiba-to-umbrella-policy.ts",
-      "line": 29,
-      "column": 5,
-      "token": "questForCattekin",
-      "cardTitle": "Quest for Cattekin",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "persistentModifiers / start_turn_random_effect_table",
-      "snippet": "questForCattekinImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/proteus-corp-asset-implementations.ts",
-      "line": 7,
-      "column": 68,
-      "token": "siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "import { proteusSirenImplementation } from \"../proteus/corp/assets/siren\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/proteus-corp-asset-implementations.ts",
-      "line": 7,
-      "column": 17,
-      "token": "Siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "import { proteusSirenImplementation } from \"../proteus/corp/assets/siren\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/proteus-corp-asset-implementations.ts",
-      "line": 20,
-      "column": 10,
-      "token": "Siren",
-      "cardTitle": "Siren",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "start_run_redirect_to_source_fort",
-      "snippet": "proteusSirenImplementation,"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/proteus-runner-event-faked-hit-to-remote-detonator.ts",
-      "line": 17,
-      "column": 10,
-      "token": "pirateBroadcast",
-      "cardTitle": "Pirate Broadcast",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "pendingSequences.multi_server_success_sequence",
-      "snippet": "import { pirateBroadcastImplementation } from \"../proteus/runner/events/pirate-broadcast\";"
-    },
-    {
-      "path": "packages/engine/src/card-implementations/subregistries/proteus-runner-event-faked-hit-to-remote-detonator.ts",
-      "line": 40,
-      "column": 5,
-      "token": "pirateBroadcast",
-      "cardTitle": "Pirate Broadcast",
-      "tokenSource": "known_watch_token",
-      "category": "allowed_catalog_reference",
-      "targetAbstraction": "pendingSequences.multi_server_success_sequence",
-      "snippet": "pirateBroadcastImplementation,"
     },
     {
       "path": "packages/engine/src/game/abilities/counter-utility-trigger-execution.test.ts",
@@ -924,7 +389,7 @@
     },
     {
       "path": "packages/engine/src/game/corp/scored-agenda-flow.test.ts",
-      "line": 267,
+      "line": 268,
       "column": 9,
       "token": "project_babylon",
       "cardTitle": "Project Babylon",
@@ -934,338 +399,8 @@
       "snippet": "project_babylon: {"
     },
     {
-      "path": "packages/engine/src/game/economy/credit-economy-execution.test.ts",
-      "line": 275,
-      "column": 36,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "VIRUS_COUNTER_ASSET_SOURCE: \"disinfectant\","
-    },
-    {
-      "path": "packages/engine/src/game/economy/credit-economy-execution.test.ts",
-      "line": 278,
-      "column": 32,
-      "token": "quest_for_cattekin",
-      "cardTitle": "Quest for Cattekin",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "start_turn_random_effect_table",
-      "snippet": "RANDOM_RESOURCE_SOURCE: \"quest_for_cattekin\","
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/access-flow-runtime-hosts.ts",
-      "line": 607,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/action-runtime-bootstrap.ts",
-      "line": 621,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/activated-card-runtime-hosts.ts",
-      "line": 607,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/apply-action-runtime-hosts.ts",
-      "line": 607,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts",
-      "line": 615,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/card-runtime-bootstrap.ts",
-      "line": 619,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/card-runtime-deps-hosts.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/card-runtime-resolvers.ts",
-      "line": 613,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/card-strength-cost-runtime-services.ts",
-      "line": 607,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/choice-hidden-zone-resolvers.ts",
-      "line": 610,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/corp-runtime-resolvers.ts",
-      "line": 615,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/counter-turn-runtime-services.ts",
-      "line": 607,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/damage-trace-runtime-hosts.ts",
-      "line": 607,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/economy-runtime-services.ts",
-      "line": 616,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/encounter-movement-runtime-hosts.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/flow-runtime-bootstrap.ts",
-      "line": 621,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/install-rez-runtime-hosts.ts",
-      "line": 607,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/legal-action-runtime-hosts.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/lookup-runtime-services.ts",
-      "line": 606,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/play-board-runtime-hosts.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/public-event-runtime-bootstrap.ts",
-      "line": 622,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/run-flow-runtime-hosts.ts",
-      "line": 600,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/runtime-bootstrap-support.ts",
-      "line": 625,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/scored-economy-runtime-hosts.ts",
-      "line": 614,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/state-corp-runtime-resolvers.ts",
-      "line": 616,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/state-runtime-bootstrap.ts",
-      "line": 628,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/trigger-ability-runtime-hosts.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
-      "path": "packages/engine/src/game/engine-runtime-internal/zone-runtime-services.ts",
-      "line": 608,
-      "column": 3,
-      "token": "CODE_VIRAL_CACHE",
-      "cardTitle": "Code Viral Cache",
-      "tokenSource": "known_watch_token",
-      "category": "mechanics_constant_controls_behavior_by_card_id",
-      "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
-      "snippet": "CODE_VIRAL_CACHE_ID,"
-    },
-    {
       "path": "packages/engine/src/game/events/public-context-golden.test.ts",
-      "line": 460,
+      "line": 458,
       "column": 31,
       "token": "newsgroup_taunting",
       "cardTitle": "Newsgroup Taunting",
@@ -1276,7 +411,7 @@
     },
     {
       "path": "packages/engine/src/game/events/public-context-golden.test.ts",
-      "line": 463,
+      "line": 461,
       "column": 40,
       "token": "quest_for_cattekin",
       "cardTitle": "Quest for Cattekin",
@@ -1287,7 +422,7 @@
     },
     {
       "path": "packages/engine/src/game/events/public-context-golden.test.ts",
-      "line": 489,
+      "line": 487,
       "column": 27,
       "token": "newsgroup_taunting",
       "cardTitle": "Newsgroup Taunting",
@@ -1298,7 +433,7 @@
     },
     {
       "path": "packages/engine/src/game/events/public-context-golden.test.ts",
-      "line": 492,
+      "line": 490,
       "column": 36,
       "token": "quest_for_cattekin",
       "cardTitle": "Quest for Cattekin",
@@ -1309,7 +444,7 @@
     },
     {
       "path": "packages/engine/src/game/hidden-zone/arrange-choice-handlers.test.ts",
-      "line": 294,
+      "line": 290,
       "column": 21,
       "token": "new_blood",
       "cardTitle": "New Blood",
@@ -1320,7 +455,7 @@
     },
     {
       "path": "packages/engine/src/game/hidden-zone/arrange-choice-handlers.test.ts",
-      "line": 304,
+      "line": 300,
       "column": 44,
       "token": "new_blood",
       "cardTitle": "New Blood",
@@ -1331,7 +466,7 @@
     },
     {
       "path": "packages/engine/src/game/hidden-zone/arrange-choice-handlers.test.ts",
-      "line": 305,
+      "line": 301,
       "column": 22,
       "token": "new_blood",
       "cardTitle": "New Blood",
@@ -1352,19 +487,8 @@
       "snippet": "const socialId = \"social_engineering\" as CardDefinitionId;"
     },
     {
-      "path": "packages/engine/src/game/turn/corp-main-actions.test.ts",
-      "line": 257,
-      "column": 36,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "VIRUS_COUNTER_ASSET_SOURCE: \"disinfectant\","
-    },
-    {
       "path": "packages/engine/src/game/turn/main-action-hosts.test.ts",
-      "line": 392,
+      "line": 377,
       "column": 31,
       "token": "code_viral_cache",
       "cardTitle": "Code Viral Cache",
@@ -1375,7 +499,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/main-action-hosts.test.ts",
-      "line": 392,
+      "line": 377,
       "column": 9,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -1383,61 +507,6 @@
       "category": "test_only_card_name",
       "targetAbstraction": "purge_replacement_with_runner_virus_counter_cleanup",
       "snippet": "CODE_VIRAL_CACHE_ID: \"code_viral_cache\","
-    },
-    {
-      "path": "packages/engine/src/game/turn/main-action-hosts.test.ts",
-      "line": 394,
-      "column": 38,
-      "token": "disinfectant",
-      "cardTitle": "Disinfectant",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "counter_prevention_replacement",
-      "snippet": "VIRUS_COUNTER_ASSET_SOURCE: \"disinfectant\","
-    },
-    {
-      "path": "packages/engine/src/game/turn/main-action-hosts.test.ts",
-      "line": 407,
-      "column": 34,
-      "token": "quest_for_cattekin",
-      "cardTitle": "Quest for Cattekin",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "start_turn_random_effect_table",
-      "snippet": "RANDOM_RESOURCE_SOURCE: \"quest_for_cattekin\","
-    },
-    {
-      "path": "packages/engine/src/game/turn/main-action-hosts.test.ts",
-      "line": 410,
-      "column": 28,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "SHELL_TRADERS_ID: \"shell_traders\","
-    },
-    {
-      "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 479,
-      "column": 32,
-      "token": "quest_for_cattekin",
-      "cardTitle": "Quest for Cattekin",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "start_turn_random_effect_table",
-      "snippet": "RANDOM_RESOURCE_SOURCE: \"quest_for_cattekin\","
-    },
-    {
-      "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 482,
-      "column": 26,
-      "token": "shell_traders",
-      "cardTitle": "Shell Traders",
-      "tokenSource": "known_watch_token",
-      "category": "test_only_card_name",
-      "targetAbstraction": "delayed_install_sequence",
-      "snippet": "SHELL_TRADERS_ID: \"shell_traders\","
     },
     {
       "path": "packages/engine/src/game/turn/runner-special-zone-install-actions.test.ts",
@@ -1551,7 +620,7 @@
     },
     {
       "path": "scripts/check-engine-cardimplementation-architecture-target.mjs",
-      "line": 47,
+      "line": 45,
       "column": 4,
       "token": "silver_lining",
       "cardTitle": "Silver Lining Recovery Protocol",
@@ -1562,7 +631,7 @@
     },
     {
       "path": "scripts/check-engine-cardimplementation-architecture-target.mjs",
-      "line": 48,
+      "line": 46,
       "column": 4,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",
@@ -1570,6 +639,39 @@
       "category": "false_positive",
       "targetAbstraction": "delayed_install_sequence",
       "snippet": "\"shell_traders_delayed_install\","
+    },
+    {
+      "path": "scripts/lib/originalset-v1-card-spec-migration-disposition.mjs",
+      "line": 439,
+      "column": 15,
+      "token": "disinfectant",
+      "cardTitle": "Disinfectant",
+      "tokenSource": "known_watch_token",
+      "category": "false_positive",
+      "targetAbstraction": "counter_prevention_replacement",
+      "snippet": "\"onr_v1_319_disinfectant-inc:corpUtility:0\":"
+    },
+    {
+      "path": "scripts/lib/originalset-v1-card-spec-migration-disposition.mjs",
+      "line": 451,
+      "column": 15,
+      "token": "krumz",
+      "cardTitle": "Krumz",
+      "tokenSource": "known_watch_token",
+      "category": "false_positive",
+      "targetAbstraction": "recurring_trace_credit_pool",
+      "snippet": "\"onr_v1_330_krumz:corpUtility:0\":"
+    },
+    {
+      "path": "scripts/lib/proteus-card-spec-migration-disposition.mjs",
+      "line": 450,
+      "column": 19,
+      "token": "siren",
+      "cardTitle": "Siren",
+      "tokenSource": "known_watch_token",
+      "category": "false_positive",
+      "targetAbstraction": "start_run_redirect_to_source_fort",
+      "snippet": "onr_proteus_074_siren: {"
     }
   ]
 }

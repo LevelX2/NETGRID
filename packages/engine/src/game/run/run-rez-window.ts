@@ -12,7 +12,6 @@ import type {
   CardVariableRezImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { REZ_INTERRUPT_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
 import {
   corpFortRunRezSupportQuotePayload,
   costQuotePublicPayload,
@@ -554,9 +553,7 @@ export function resolveRezInterruptJackOutChoice(
       host,
       rezInterruptSourceCardId,
       "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
-    ) &&
-    (cardImplementationForDefinitionId(rezInterruptSourceDefinitionId) ||
-      rezInterruptSourceDefinitionId !== REZ_INTERRUPT_PROGRAM_SOURCE)
+    )
   )
     throw new Error("Die Rez-Interrupt-Quelle ist nicht mehr installiert.");
   const run = mustRun(host.state);
@@ -675,11 +672,8 @@ function variableIceRezActions(
           variableRezCap: variableRez.maxValue,
           rezCostPaid: totalCost,
           effectiveStrengthAfterRez: x,
-          ...(variableRez.traceBaseFromValue
-            ? { effectiveTraceBaseAfterRez: x }
-            : {}),
-          ...(variableRez.traceBidLimitFromValue
-            ? { effectiveTraceBidLimitAfterRez: x }
+          ...(variableRez.traceLimitFromValue
+            ? { effectiveTraceLimitAfterRez: x }
             : {}),
           ...(rezCostReductionSourceDefinitionIds.length > 0
             ? {
@@ -841,10 +835,7 @@ function installedRezInterruptJackOutSourceIds(
         )
       )
         return true;
-      return (
-        !cardImplementationForDefinitionId(definitionId) &&
-        definitionId === REZ_INTERRUPT_PROGRAM_SOURCE
-      );
+      return false;
     })
     .sort();
 }

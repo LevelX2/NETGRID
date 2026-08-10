@@ -160,15 +160,15 @@ export type TraceOrchestrationHost = {
 export function startTraceFromOperation(
   host: TraceOrchestrationHost,
   sourceDefinitionId: string,
-  baseTraceStrength: number,
+  traceLimit: number,
   legalAction: LegalAction,
   successEffect: TraceSuccessEffect = { type: "add_tag", amount: 1 },
 ): Record<string, string | number | boolean> {
   const { state } = host;
   if (state.trace || state.pendingChoice)
     throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
-  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
-    throw new Error("Trace strength ist ungueltig.");
+  if (!Number.isInteger(traceLimit) || traceLimit < 0)
+    throw new Error("Trace-Limit ist ungueltig.");
   if (!host.trace.supportsTraceSuccessEffect(successEffect))
     throw new Error("Dieser Trace-Erfolgseffekt wird nicht unterstuetzt.");
   const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
@@ -176,18 +176,24 @@ export function startTraceFromOperation(
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
   const traceId = `op_trace.${state.stateVersion + 1}.${host.callbacks.sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
   const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
-  const corpBidMax =
+  const corpTraceCounterPool = host.counters.corpTraceCounterPoolTotal();
+  const paymentCapacity =
     state.corp.credits +
-    host.counters.corpTraceCounterPoolTotal() +
+    corpTraceCounterPool +
     host.counters.recurringTraceCreditPoolTotal() +
     (fortTraceBitPoolSource
       ? host.counters.cardCounter(fortTraceBitPoolSource.cardId, "bit")
       : 0);
+  const corpBidMax = Math.min(
+    paymentCapacity,
+    traceLimit + corpTraceCounterPool,
+  );
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
-    baseTraceStrength,
+    traceLimit,
+    effectiveTraceLimit: traceLimit,
     corpBidMax,
     status: "corp_bid",
     successEffect,
@@ -205,7 +211,7 @@ export function startTraceFromOperation(
     state,
     "corp",
     traceId,
-    `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
+    `Korp Trace-Wert wählen (Limit ${traceLimit})`,
     corpBidMax,
   );
   state.activeSide = "corp";
@@ -214,7 +220,8 @@ export function startTraceFromOperation(
     traceId,
     sourceCardId: sourceCardInstanceId,
     sourceDefinitionId,
-    baseTraceStrength,
+    traceLimit,
+    effectiveTraceLimit: traceLimit,
     ...(fortTraceBitPoolSource
       ? {
           corpBidMax,
@@ -318,7 +325,12 @@ function resolveTraceCorpBid(
     tracePaymentQuote,
     tracePaymentReceipt,
   );
-  const traceStrength = trace.baseTraceStrength + bid;
+  const traceValue = bid;
+  const effectiveTraceLimit =
+    Math.max(
+      0,
+      trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0),
+    ) + tracePaymentReceipt.corpTraceCountersSpent;
   const runnerLink = calculateRunnerLink(host);
   const cryingCounterCount = host.counters.cardCounter(
     state.runner.identity,
@@ -328,7 +340,8 @@ function resolveTraceCorpBid(
     ...trace,
     status: "base_link" as const,
     corpBid: bid,
-    traceStrength,
+    traceValue,
+    effectiveTraceLimit,
     runnerLink,
   };
   if (startTraceBaseLinkChoice(host, baseLinkTrace)) {
@@ -337,7 +350,8 @@ function resolveTraceCorpBid(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "corp_bid",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
+      effectiveTraceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       ...(typeof trace.corpBidMax === "number"
         ? { corpBidMax: trace.corpBidMax }
@@ -347,7 +361,7 @@ function resolveTraceCorpBid(
         : {}),
       ...tracePaymentPayload,
       corpBid: bid,
-      traceStrength,
+      traceValue,
       runnerLink,
       traceBaseLinkChoiceOpened: true,
       ...(cryingCounterCount > 0
@@ -375,12 +389,12 @@ function resolveTraceCorpBid(
     "runner",
     trace.traceId,
     runnerTraceLinkCreditCapacity > 0 && runnerSupportCreditCapacity > 0
-      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
+      ? `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
       : runnerTraceLinkCreditCapacity > 0
-        ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+        ? `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
         : runnerSupportCreditCapacity > 0
-          ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
-          : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+          ? `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
+          : `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink})`,
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
       ? "Gesamtbid"
@@ -391,7 +405,8 @@ function resolveTraceCorpBid(
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep: "corp_bid",
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
+    effectiveTraceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     ...(typeof trace.corpBidMax === "number"
       ? { corpBidMax: trace.corpBidMax }
@@ -401,7 +416,7 @@ function resolveTraceCorpBid(
       : {}),
     ...tracePaymentPayload,
     corpBid: bid,
-    traceStrength,
+    traceValue,
     runnerLink,
     ...(cryingCounterCount > 0
       ? { cryingCounterCount, cryingLinkReduction: cryingCounterCount * 2 }
@@ -457,19 +472,19 @@ function openTraceRunnerBidChoice(
     state.runner.credits +
     runnerTraceLinkCreditCapacity +
     runnerSupportCreditCapacity;
-  const traceStrength = trace.traceStrength ?? trace.baseTraceStrength;
+  const traceValue = trace.traceValue ?? trace.traceLimit;
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
     runnerTraceLinkCreditCapacity > 0 && runnerSupportCreditCapacity > 0
-      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
+      ? `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
       : runnerTraceLinkCreditCapacity > 0
-        ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+        ? `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
         : runnerSupportCreditCapacity > 0
-          ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
-          : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
+          ? `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
+          : `Runner Link-Bid wählen (Trace ${traceValue}, Link ${runnerLink})`,
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
       ? "Gesamtbid"
@@ -498,10 +513,10 @@ function resolveTraceBaseLinkChoice(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "base_link",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       corpBid: trace.corpBid ?? 0,
-      traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
+      traceValue: trace.traceValue ?? trace.traceLimit,
       baseLinkUsed: false,
       runnerLink: baseRunnerLink,
     };
@@ -550,10 +565,10 @@ function resolveTraceBaseLinkChoice(
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep: "base_link",
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
-    traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
+    traceValue: trace.traceValue ?? trace.traceLimit,
     ...traceBaseLinkChoicePublicPayload(candidate),
     runnerLink,
     runnerCreditsAfter: state.runner.credits,
@@ -632,11 +647,11 @@ function finishTraceRunnerBid(
   const result = describeTraceResultFromTrace(postBidTraceBase, {
     runnerLinkFallback: runnerLink,
   });
-  const traceStrength = result.corpTraceStrength;
-  const runnerStrength = result.runnerTraceStrength;
+  const traceValue = result.traceValue;
+  const runnerStrength = result.runnerStrength;
   const postBidTrace = {
     ...postBidTraceBase,
-    traceStrength,
+    traceValue,
     runnerStrength,
   };
   const crashSpaceSource = traceAutoSuccessSource(host);
@@ -669,10 +684,10 @@ function finishTraceRunnerBid(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "runner_bid",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       corpBid: trace.corpBid ?? 0,
-      traceStrength,
+      traceValue,
       runnerLink,
       runnerBid: bid,
       ...tracePaymentPayload,
@@ -686,10 +701,10 @@ function finishTraceRunnerBid(
       ...(legalAction.payload ?? {}),
       traceId: trace.traceId,
       traceStep: "runner_bid",
-      baseTraceStrength: trace.baseTraceStrength,
+      traceLimit: trace.traceLimit,
       sourceDefinitionId: trace.sourceDefinitionId,
       corpBid: trace.corpBid ?? 0,
-      traceStrength,
+      traceValue,
       runnerLink,
       runnerBid: bid,
       ...tracePaymentPayload,
@@ -741,9 +756,9 @@ function startRunnerBidPaymentChoice(
     traceId: trace.traceId,
     traceStep: "runner_bid",
     sourceDefinitionId: trace.sourceDefinitionId,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     corpBid: trace.corpBid ?? 0,
-    traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
+    traceValue: trace.traceValue ?? trace.traceLimit,
     runnerLink: trace.runnerLink ?? calculateRunnerLink(host),
     runnerBid: bid,
     traceLinkPaymentChoiceOpened: true,
@@ -1088,14 +1103,10 @@ function traceAutoSuccessSource(
 
 function forceTraceSuccessful(trace: CurrentTrace): CurrentTrace {
   const result = describeTraceResultFromTrace(trace);
-  const forcedTraceStrength = Math.max(
-    result.corpTraceStrength,
-    result.runnerTraceStrength + 1,
-  );
   return {
     ...trace,
-    traceStrength: forcedTraceStrength,
-    runnerStrength: result.runnerTraceStrength,
+    successful: true,
+    runnerStrength: result.runnerStrength,
   };
 }
 
@@ -1156,14 +1167,14 @@ function completeTraceWithoutRun(
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep,
-    baseTraceStrength: trace.baseTraceStrength,
+    traceLimit: trace.traceLimit,
     sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
-    traceStrength: result.corpTraceStrength,
+    traceValue: result.traceValue,
     runnerLink: result.runnerLink,
     runnerBid: result.runnerBid,
     ...(options.extraPayload ?? {}),
-    runnerStrength: result.runnerTraceStrength,
+    runnerStrength: result.runnerStrength,
     ...(traceStep === "post_bid_link"
       ? { postBidTraceLinkBonus: trace.postBidLinkBonus ?? 0 }
       : {}),
@@ -1204,7 +1215,7 @@ function traceSuccessTagAmountForOperation(
     return successEffect.tagAmount;
   if (successEffect.type === "add_tag") return successEffect.amount;
   if (successEffect.type === "add_tags_by_trace_margin_over_runner_link")
-    return Math.max(0, result.corpTraceStrength - result.runnerLink);
+    return Math.max(0, result.traceValue - result.runnerLink);
   if (successEffect.type === "trash_runner_resource_and_add_tag") return 1;
   return 0;
 }

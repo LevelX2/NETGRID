@@ -23,7 +23,7 @@ describe("post-bid link choice option", () => {
 
     expect(
       selectedPostBidLinkChoiceOptionId(choice, {
-        traceStrength: 1,
+        traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
       }),
@@ -38,7 +38,7 @@ describe("post-bid link choice option", () => {
 
     expect(
       selectedPostBidLinkChoiceOptionId(choice, {
-        traceStrength: 1,
+        traceValue: 1,
         runnerLink: 0,
         runnerBid: 0,
       }),

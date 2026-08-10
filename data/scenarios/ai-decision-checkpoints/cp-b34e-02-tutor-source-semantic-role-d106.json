@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 188,
-    "stateHash": "fnv1a:7354347a",
+    "stateHash": "fnv1a:89bf6f45",
     "testOnlyGameState": {
       "matchId": "match_b34e724e4cfc0362",
       "baseline": {
@@ -9258,8 +9258,15 @@
     },
     "acceptableActions": [
       {
-        "actionId": "runner.continue_run.card_implementation.onr_v1_274_tutor.printed_subroutine.1.run_duration_additional_subroutine"
+        "type": "continue_run"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.convert_run_window"],
+      "acceptableCapabilities": ["convert_active_run_window"],
+      "requiredAssessmentEvidence": [
+        "runner_visible_encounter_requires_mitigation:onr_v1_274_tutor"
+      ]
+    }
   }
 }

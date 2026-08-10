@@ -117,7 +117,10 @@ describe("encounter resolution boundary", () => {
     expect(result).toMatchObject({
       handled: true,
       encounterTaxAmount: 2,
-      setRunMarkers: ["encounterTaxForFutureIce"],
+      setRunMarkers: [
+        "encounterTaxForFutureIce",
+        "encounterTaxSourceDefinitionId",
+      ],
     });
     expect(state.run?.encounterTaxForFutureIce).toBe(2);
     expect(legalAction.payload).toEqual({});
@@ -258,6 +261,8 @@ describe("encounter resolution boundary", () => {
     const state = makeState();
     state.run!.fatalDamageActiveForEncounter = true;
     state.run!.fatalDamageAmountForEncounter = 3;
+    state.run!.fatalDamageSourceDefinitionId =
+      "onr_v1_242_fatal-attractor";
     const subroutines = [
       { id: "etr", type: "end_the_run" },
     ] as SubroutineDefinition[];
@@ -303,6 +308,8 @@ describe("encounter resolution boundary", () => {
     const fullyBroken = makeState();
     fullyBroken.run!.fatalDamageActiveForEncounter = true;
     fullyBroken.run!.fatalDamageAmountForEncounter = 3;
+    fullyBroken.run!.fatalDamageSourceDefinitionId =
+      "onr_v1_242_fatal-attractor";
     fullyBroken.run!.brokenSubroutineIndexes = [0];
     const fullyBrokenDealt: unknown[] = [];
     resolvePostEncounterNetDamage(encounterResolutionHost(fullyBroken), {

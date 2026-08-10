@@ -97,7 +97,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("retains Tycho and discards the lower-value CFO through the hand plan", () => {
+  it("retains Tycho and the typed recycle agenda before redundant score material", () => {
     const result = runAiDecisionCheckpoint(
       fixture(retainTychoDiscardCfoD97Json),
     );

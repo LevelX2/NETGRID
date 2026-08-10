@@ -1,0 +1,147 @@
+import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
+
+export const cardSpec = {
+  schemaVersion: "card-spec-v1",
+  identity: {
+    cardDefinitionId: cardDefinitionId("onr_v1_207_netwatch-operations-office"),
+    title: "Netwatch Operations Office",
+    side: "corp",
+    cardType: "agenda",
+  },
+  text: {
+    schemaVersion: "canonical-card-text-v1",
+    rulesText: "[A]: Trace 2 - If trace is successful, give Runner a tag.",
+  },
+  rules: {
+    schemaVersion: "card-rules-v1",
+    references: [
+      {
+        source: "card_text",
+        reference: "onr_v1_207_netwatch-operations-office",
+      },
+    ],
+  },
+  engine: {
+    schemaVersion: "card-mechanical-spec-v1",
+    characteristics: {
+      faction: "onr1996_neutral",
+      subtypes: ["asset"],
+      numeric: {
+        installCost: null,
+        memoryCost: null,
+        rezCost: null,
+        trashCost: null,
+        advancementRequirement: 5,
+        agendaPoints: 2,
+      },
+      playCost: null,
+      strength: {
+        kind: "not_applicable",
+      },
+    },
+    abilities: [
+      {
+        capabilityKey: capabilityKey("abilities_activated_corp_main_trace"),
+        addressability: ["plan", "action", "quote", "debug"],
+        kind: "activated",
+        timing: "corp_main",
+        costs: [
+          {
+            kind: "action",
+            amount: 1,
+          },
+        ],
+        effects: [
+          {
+            kind: "trace",
+            traceLimit: 2,
+            visibility: "public",
+            onSuccess: [
+              {
+                kind: "add_tags",
+                recipient: "runner",
+                amount: 1,
+                visibility: "public",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  planningAnnotations: {
+    schemaVersion: "card-planning-annotations-v1",
+    card: [
+      {
+        kind: "plan_role",
+        role: "score_now",
+      },
+      {
+        kind: "plan_role",
+        role: "score_next_turn",
+      },
+      {
+        kind: "plan_role",
+        role: "protect_hq",
+      },
+      {
+        kind: "strategic_role",
+        role: "enabler",
+      },
+      {
+        kind: "strategy_anchor",
+        strategyKey: "corp.tag_trace_punish",
+      },
+      {
+        kind: "line_support",
+        lineKey: "corp.tag_trace_punish",
+        support: "supports",
+      },
+      {
+        kind: "strategy_support",
+        strategyKey: "corp.tag_trace_punish",
+        role: "enabler",
+        roleDetail: "trace_tag_source",
+        confidence: "high",
+        rationale:
+          "Agenda Semantic Review v1 maps Netwatch Operations Office to corp.tag_trace_punish as enabler/trace_tag_source.",
+      },
+    ],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("abilities_activated_corp_main_trace"),
+        annotations: [
+          {
+            kind: "strategy_support",
+            strategyKey: "corp.tag_trace_punish",
+            role: "anchor_evidence",
+            roleDetail: "anchor_evidence_tag_source",
+            evidenceAnchor: "tag.source",
+            confidence: "high",
+          },
+          {
+            kind: "strategy_support",
+            strategyKey: "corp.tag_trace_punish",
+            role: "anchor_evidence",
+            roleDetail: "anchor_evidence_trace_source",
+            evidenceAnchor: "trace.source",
+            confidence: "high",
+          },
+        ],
+      },
+    ],
+  },
+  printings: [
+    {
+      schemaVersion: "printing-spec-v1",
+      printingId: "onr_v1_207_netwatch-operations-office",
+      setId: "originalset-v1",
+      collectorNumber: "207",
+      rarity: "vital",
+    },
+  ],
+  publication: {
+    schemaVersion: "card-publication-v1",
+    status: "active",
+  },
+} satisfies CardSpec;

@@ -164,7 +164,7 @@
   },
   "engine": {
     "stateVersion": 87,
-    "stateHash": "fnv1a:e301f175",
+    "stateHash": "fnv1a:e01c3bd4",
     "testOnlyGameState": {
       "matchId": "match_3bb14a8fd2102c9a",
       "baseline": {
@@ -6194,20 +6194,14 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "draw_card"
-      }
-    ],
+    "acceptableActions": [{ "type": "draw_card" }],
     "forbiddenActions": [
       {
         "actionId": "corp.install_card.corp_onr_v1_217_strike-force-kali_1.remote_1.corp_onr_v1_217_strike-force-kali_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanIds": [
-        "plan:corp.defend_servers:server-defense-portfolio"
-      ],
+      "acceptablePlanIds": ["plan:corp.defend_servers:server-defense-portfolio"],
       "acceptablePlanKinds": ["corp.defend_servers"],
       "forbiddenPlanKinds": [
         "corp.punish_campaign",

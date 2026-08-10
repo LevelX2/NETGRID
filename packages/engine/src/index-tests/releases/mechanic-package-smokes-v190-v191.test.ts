@@ -1222,7 +1222,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const dieRecords = state.randomDrawRecords.filter((record) =>
       record.purpose.startsWith(
-        "v191.die.onr_v1_034_incubator.start_of_turn.roll.",
+        "v190.die.virus_counter.onr_v1_034_incubator.start_of_turn.roll.",
       ),
     );
     expect(dieRecords.length).toBeGreaterThan(0);

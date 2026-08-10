@@ -173,12 +173,37 @@ for (const fileName of readdirSync(cardSubregistryRoot)) {
       `card-implementations/subregistries/${fileName} uses a numbered registry group`,
     );
 }
-const coverageSourceLocations = path.join(
+const legacyCoverageSourceLocations = path.join(
   cardImplementationRoot,
   "coverage-source-locations.ts",
 );
-if (!existsSync(coverageSourceLocations))
-  findings.push("card-implementations/coverage-source-locations.ts is missing");
+if (existsSync(legacyCoverageSourceLocations))
+  findings.push(
+    "card-implementations/coverage-source-locations.ts must stay removed; CardSpec source refs own coverage locations",
+  );
+
+const coverageMetadata = path.join(cardImplementationRoot, "coverage.ts");
+if (!existsSync(coverageMetadata)) {
+  findings.push("card-implementations/coverage.ts is missing");
+} else {
+  const coverageSource = parseSource(
+    coverageMetadata,
+    readFileSync(coverageMetadata, "utf8"),
+  );
+  const cardSpecCoverageImports = importedBindingNames(
+    coverageSource,
+    "@netgrid/cards/engine",
+  );
+  for (const requiredImport of [
+    "cardSpecImplementationDefinitionIds",
+    "cardSpecRuntimeDefinitionIds",
+    "cardSpecSourceRefByDefinitionId",
+  ])
+    if (!cardSpecCoverageImports.has(requiredImport))
+      findings.push(
+        `card-implementations/coverage.ts must derive coverage from CardSpec ${requiredImport}`,
+      );
+}
 
 const runtimePortContracts = path.join(
   runtimeRoot,
@@ -314,6 +339,23 @@ function countUnsafeDelegateSignatures(source) {
     if (hasAnyReturn || hasAnyRestArray) count += 1;
   }
   return count;
+}
+
+function importedBindingNames(source, moduleSpecifier) {
+  const names = new Set();
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      statement.moduleSpecifier.text !== moduleSpecifier ||
+      !statement.importClause ||
+      !ts.isNamedImports(statement.importClause.namedBindings)
+    )
+      continue;
+    for (const element of statement.importClause.namedBindings.elements)
+      names.add(element.propertyName?.text ?? element.name.text);
+  }
+  return names;
 }
 
 function countExportedFunctions(source) {

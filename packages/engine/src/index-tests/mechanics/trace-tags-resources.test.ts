@@ -451,7 +451,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.pendingChoice?.kind).toBe("bid_amount");
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 5,
+      traceLimit: 5,
     });
     expect(getPlayerView(state, "corp").pendingChoice?.choiceId).toBe(
       state.pendingChoice?.choiceId,
@@ -462,7 +462,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 1,
-      traceStrength: 6,
+      traceValue: 6,
       runnerLink: 0,
     });
 
@@ -490,7 +490,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       ["onr_v1_264_rex", 3],
     ] as const;
 
-    for (const [definitionId, baseTraceStrength] of traceIce) {
+    for (const [definitionId, traceLimit] of traceIce) {
       let state = toRunnerTurn(
         MECHANIC_SMOKE_GAMES.traceTags(`v1914-trace-${definitionId}`),
       );
@@ -525,7 +525,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       ).toBeUndefined();
       expect(state.trace, definitionId).toMatchObject({
         status: "corp_bid",
-        baseTraceStrength,
+        traceLimit,
       });
     }
   });
@@ -624,7 +624,8 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       corpBid: 6,
       corpCreditBid: 4,
       hackerTrackerCountersSpent: 2,
-      traceStrength: 11,
+      effectiveTraceLimit: 7,
+      traceValue: 6,
     });
 
     state = applyChoice(state, "runner", "bid_0");

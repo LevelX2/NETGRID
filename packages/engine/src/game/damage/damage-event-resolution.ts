@@ -233,23 +233,21 @@ export function openPdcaDamageReplacementChoice(
   const definition = definitionFor(state, sourceCardId);
   state.imminentEvent = pdcaEventWithReturnContext(state, event);
   state.pendingChoice = {
-    choiceId: `proteus_pdca_${state.stateVersion + 1}_${sourceCardId}`,
+    choiceId: `damage_replacement_${state.stateVersion + 1}_${sourceCardId}`,
     side: "corp",
-    source: `proteus.pdca_damage_replacement:${sourceCardId}:${event.eventId}`,
+    source: `damage_replacement:${sourceCardId}:${event.eventId}`,
     prompt: "Please Don't Choke Anyone nutzen",
     kind: "select_option",
     options: [
-      {
-        id: `replace_${sourceCardId}`,
-        label: "Damage durch PDCA-Counter ersetzen",
+      ...Array.from({ length: amount + 1 }, (_, preventedAmount) => ({
+        id: `replace_${sourceCardId}_${preventedAmount}`,
+        label:
+          preventedAmount === 0
+            ? "Keinen Damage durch PDCA-Counter ersetzen"
+            : `${preventedAmount} Damage durch PDCA-Counter ersetzen`,
         publicLabel: "PDCA-Entscheidung",
-        value: sourceCardId,
-      },
-      {
-        id: "pass",
-        label: "Damage normal anwenden",
-        publicLabel: "PDCA-Entscheidung",
-      },
+        value: `${sourceCardId}:${preventedAmount}`,
+      })),
     ],
     minSelections: 1,
     maxSelections: 1,
@@ -265,7 +263,7 @@ export function openPdcaDamageReplacementChoice(
     originalDamageAmount: amount,
     damageType: damageTypePayload(event),
     imminentEventId: event.eventId,
-    replacementModel: "all_or_nothing_damage_slice",
+    replacementModel: "per_damage_unit",
   };
   return true;
 }
@@ -470,7 +468,7 @@ export function resolvePdcaDamageReplacementChoice(
   const event = state.imminentEvent;
   if (
     !choice ||
-    !choice.source.startsWith("proteus.pdca_damage_replacement:") ||
+    !choice.source.startsWith("damage_replacement:") ||
     !event
   )
     throw new Error("Es ist kein PDCA-Damage-Replacement-Fenster offen.");
@@ -494,43 +492,57 @@ export function resolvePdcaDamageReplacementChoice(
     originalDamageAmount: amount,
     damageType: damageTypePayload(event),
     imminentEventId: event.eventId,
-    replacementModel: "all_or_nothing_damage_slice",
+    replacementModel: "per_damage_unit",
   };
-  if (selected === "pass") {
+  const prefix = `replace_${sourceId}_`;
+  if (!selected.startsWith(prefix))
+    throw new Error("Die PDCA-Auswahl ist nicht legal.");
+  const preventedAmount = Number(selected.slice(prefix.length));
+  if (
+    !Number.isInteger(preventedAmount) ||
+    preventedAmount < 0 ||
+    preventedAmount > amount
+  )
+    throw new Error("Die PDCA-Menge ist nicht legal.");
+  if (preventedAmount === 0) {
     delete state.pendingChoice;
     delete state.imminentEvent;
     const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
       ...basePayload,
-      pdcaDecision: "pass",
+      pdcaDecision: "replace_0",
       replacementOutcome: "original_resolved",
     };
     setDamagePayload(legalAction, summary);
     restorePdcaReturnContext(state, event);
     return;
   }
-  if (selected !== `replace_${sourceId}`)
-    throw new Error("Die PDCA-Auswahl ist nicht legal.");
   source.counters = {
     ...(source.counters ?? {}),
-    pdca: Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + amount,
+    pdca:
+      Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + preventedAmount,
   };
   const remainingCounters = Math.max(0, Math.floor(source.counters.pdca ?? 0));
   delete state.pendingChoice;
   delete state.imminentEvent;
+  const summary = resolveDamageImminentEvent(state, {
+    ...event,
+    payload: {
+      ...event.payload,
+      amount: amount - preventedAmount,
+    },
+  });
   legalAction.payload = {
     ...basePayload,
     pdcaDecision: "replace",
     replacementOutcome: "replaced",
-    preventedAmount: amount,
-    addedCounterAmount: amount,
+    preventedAmount,
+    addedCounterAmount: preventedAmount,
     counterType: "pdca",
     remainingCounters,
     damageResolved: true,
-    damageAmount: 0,
-    cardsTrashed: 0,
-    flatline: false,
   };
+  setDamagePayload(legalAction, summary);
   restorePdcaReturnContext(state, event);
 }
 

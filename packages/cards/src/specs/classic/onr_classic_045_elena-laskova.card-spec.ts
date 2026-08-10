@@ -73,22 +73,16 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_045_elena-laskova.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_045_elena-laskova.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "low",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_045_elena-laskova.",
       },
     ],
     capabilities: [],

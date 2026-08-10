@@ -78,41 +78,19 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "critical",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_035_corruption.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_035_corruption.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_035_corruption.",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey(
-          "transfer_agenda_points_for_credits_and_tag",
-        ),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "medium",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

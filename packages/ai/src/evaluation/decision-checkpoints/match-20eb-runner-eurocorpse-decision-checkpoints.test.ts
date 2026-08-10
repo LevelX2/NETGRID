@@ -40,7 +40,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("keeps the first early background-bank load available", () => {
+  it("uses the productive program search before an early background-bank load", () => {
     expectCheckpointToPass(fixture(firstEarlyBankLoadJson));
   });
 
@@ -118,7 +118,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(belowHandLimit);
   });
 
-  it("uses direct code-gate search before another background-bank load", () => {
+  it("uses productive program search before another background-bank load", () => {
     const noMeaningfulAlternative = mutateFixture(
       repeatedEarlyBankJson,
       (checkpoint) => {
@@ -130,8 +130,8 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.expectation = {
           acceptableActions: [
             {
-              type: "activated_card_ability",
-              sourceDefinitionId: "onr_v1_177_the-short-circuit",
+              type: "play_event",
+              sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
             },
           ],
           forbiddenActions: [
@@ -141,10 +141,12 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
             },
           ],
           planExecution: {
-            acceptablePlanKinds: ["runner.rig_and_coverage"],
-            acceptableCapabilities: ["search_answer_breaker_code_gate"],
+            acceptablePlanKinds: ["runner.develop_board_and_hand"],
+            acceptableCapabilities: [
+              "develop_onr_v1_114_temple-microcode-outlet",
+            ],
             requiredAssessmentEvidence: [
-              "deck_strategy_open_code_gate_coverage",
+              "source:own_runner_hand:card_specific_purpose:draw_or_search_engine:setup",
             ],
           },
         };

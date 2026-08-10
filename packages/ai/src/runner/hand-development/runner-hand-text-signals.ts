@@ -172,17 +172,9 @@ export function runnerHandTextHasAccessPayoffSignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
   return (
     runnerHandTokensIncludeAny(tokens, [
-      "multiaccess",
-      "interface",
       "access",
-      "expose",
-      "exposes",
-      "reveal",
-      "reveals",
     ]) ||
     runnerHandTokensIncludePhrase(tokens, ["access", "payoff"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["hidden", "zone", "tool"]) ||
-    runnerHandTokensIncludePhrase(tokens, ["installed", "corp", "card"]) ||
     runnerHandTokensIncludePhrase(tokens, ["r", "d"]) ||
     runnerHandTokensIncludePhrase(tokens, ["rd", "pressure"]) ||
     runnerHandTokensIncludePhrase(tokens, ["hq", "pressure"]) ||

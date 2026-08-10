@@ -9,8 +9,13 @@ import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
-import { isRunnerNonAdditiveUtilityRole } from "./runner-role-classification";
 import { createAiHintsByCard } from "../ai-hints";
+import {
+  runnerHintProvidesExposeInformation,
+  runnerHintProvidesNonNoisyBreakerCredits,
+  runnerHintProvidesSearch,
+  runnerHintProvidesTopTrashRecovery,
+} from "../runner-canonical-hint-semantics";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   corpHandDuplicateCount,
@@ -18,6 +23,12 @@ import {
   type CorpHandPressureAssessment,
 } from "./corp-hand-inventory-facts";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
+import {
+  corpDefinitionHasTagSource,
+  corpScoreConversionProfile,
+  corpTaggedDamagePayoffProfile,
+  corpTaggedMeatDamageOperationProfile,
+} from "./corp-canonical-card-facts";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -128,7 +139,35 @@ export function discardKeepScore(
   const runnerNonAdditiveDuplicate =
     input.side === "runner" &&
     (duplicateCount > 1 || installedSameDefinition) &&
-    roles.some((role) => isRunnerNonAdditiveUtilityRole(role));
+    (runnerHintProvidesExposeInformation(
+      AI_HINTS_BY_CARD.get(card.definitionId),
+    ) ||
+      runnerHintProvidesSearch(AI_HINTS_BY_CARD.get(card.definitionId)) ||
+      runnerHintProvidesTopTrashRecovery(
+        AI_HINTS_BY_CARD.get(card.definitionId),
+      ));
+  const runnerUsableNonNoisyBreakerCreditSupport =
+    input.side === "runner" &&
+    runnerHintProvidesNonNoisyBreakerCredits(
+      AI_HINTS_BY_CARD.get(card.definitionId),
+    ) &&
+    input.playerView.own.rig?.some((rigCard) => {
+      const rigRoles = dependencies.rolesForCardId(rigCard.definitionId);
+      const subtypes = new Set(
+        (rigCard.subtypes ?? []).map((subtype) => subtype.toLowerCase()),
+      );
+      const isBreaker =
+        subtypes.has("icebreaker") ||
+        rolesMatch(rigRoles, [
+          "icebreaker",
+          "universal_breaker",
+          "breaker_fracter",
+          "breaker_decoder",
+          "breaker_killer",
+        ]);
+      const isNoisy = subtypes.has("noisy") || rolesMatch(rigRoles, ["noisy"]);
+      return isBreaker && !isNoisy;
+    }) === true;
   const runnerImmediateLiquidityBonus = runnerImmediateLiquidityKeepBonus(
     input,
     card.definitionId,
@@ -140,6 +179,8 @@ export function discardKeepScore(
     duplicateCount,
     installedSameDefinition,
   });
+  const runnerSaturatedFiniteBurstPenalty =
+    runnerSaturatedFiniteBurstEconomyPenalty(input, card.definitionId);
   const runnerPlanDisposition =
     input.side === "runner"
       ? dependencies.runnerPlanHandDisposition?.(input, card)
@@ -191,6 +232,7 @@ export function discardKeepScore(
     if (runnerPlanRelevantBreaker) baseValue += 360;
     if (runnerMissingBreakerSearchAccess) baseValue += 420;
     if (runnerBadPublicityTraceTech) baseValue += 240;
+    if (runnerUsableNonNoisyBreakerCreditSupport) baseValue += 260;
     if (runnerFundingEconomyCard) baseValue += 260;
     baseValue += runnerImmediateLiquidityBonus;
     baseValue += runnerMatchpointCloseoutBonus;
@@ -238,6 +280,7 @@ export function discardKeepScore(
   )
     baseValue -= 70;
   baseValue += corpConditionalPayoff.value;
+  baseValue -= runnerSaturatedFiniteBurstPenalty;
   if (roles.length === 0 && type !== "agenda" && !runnerBadPublicityTraceTech)
     baseValue -= 60;
 
@@ -287,6 +330,12 @@ export function discardKeepScore(
       ...(runnerMatchpointCloseoutBonus > 0
         ? ["discard_score:runner_matchpoint_closeout"]
         : []),
+      ...(runnerUsableNonNoisyBreakerCreditSupport
+        ? ["discard_score:runner_usable_non_noisy_breaker_credit_support"]
+        : []),
+      ...(runnerSaturatedFiniteBurstPenalty > 0
+        ? ["discard_score:runner_saturated_finite_burst_economy"]
+        : []),
       ...(runnerPlanDisposition
         ? [`discard_score:runner_plan_disposition:${runnerPlanDisposition}`]
         : []),
@@ -295,6 +344,32 @@ export function discardKeepScore(
       ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
+}
+
+function runnerSaturatedFiniteBurstEconomyPenalty(
+  input: AiDecisionInput,
+  definitionId: string,
+): number {
+  if (input.side !== "runner") return 0;
+  const burstAmount = Math.max(
+    0,
+    ...(AI_HINTS_BY_CARD.get(definitionId)?.effects ?? []).map((effect) =>
+      effect.kind === "economy" &&
+      effect.timing === "action" &&
+      effect.resource === "credits" &&
+      effect.target === "economy.burst_credit" &&
+      effect.finite === true
+        ? (effect.amount ?? 0)
+        : 0,
+    ),
+  );
+  if (
+    burstAmount <= 0 ||
+    input.playerView.own.credits < Math.max(10, burstAmount * 2)
+  ) {
+    return 0;
+  }
+  return 220;
 }
 
 function runnerImmediateLiquidityKeepBonus(
@@ -397,7 +472,7 @@ function runnerCardProvidesConditionalHqSuccessIceTrash(
     (effect) =>
       effect.kind === "ice_trash" &&
       "target" in effect &&
-      effect.target === "rezzed_ice",
+      effect.target === "pay_rez_cost_to_trash_rezzed_ice",
   );
   return (
     requiresSuccessfulHqRun &&
@@ -448,18 +523,23 @@ function corpConditionalPayoffKeepAdjustment(
   const runnerTags = input.playerView.opponent.tags;
   const ownAgendaPoints = input.playerView.own.agendaPoints;
   const reachableTagSource = corpHasReachableTagSource(input);
-  if (
-    signals.has("condition.runner_has_two_or_more_tags") ||
-    signals.has("risk.agenda_point_cost")
-  ) {
-    const payoffLive = runnerTags >= 2 && ownAgendaPoints >= 3;
+  const taggedDamagePayoff = corpTaggedDamagePayoffProfile(definitionId);
+  const taggedMeatDamageOperation =
+    corpTaggedMeatDamageOperationProfile(definitionId);
+  if (taggedDamagePayoff) {
+    const payoffLive =
+      runnerTags >= taggedDamagePayoff.requiredRunnerTags &&
+      ownAgendaPoints >= taggedDamagePayoff.agendaPointCost;
     if (payoffLive) {
       return {
         value: 320,
         evidence: ["discard_score:corp_conditional_payoff_live"],
       };
     }
-    if (ownAgendaPoints >= 3 && reachableTagSource) {
+    if (
+      ownAgendaPoints >= taggedDamagePayoff.agendaPointCost &&
+      reachableTagSource
+    ) {
       return {
         value: 300,
         evidence: ["discard_score:corp_conditional_payoff_reachable"],
@@ -469,6 +549,23 @@ function corpConditionalPayoffKeepAdjustment(
       value: -420,
       evidence: ["discard_score:corp_conditional_payoff_blocked"],
     };
+  }
+  if (taggedMeatDamageOperation) {
+    if (runnerTags > 0) {
+      return {
+        value: 320,
+        evidence: ["discard_score:corp_conditional_payoff_live"],
+      };
+    }
+    return reachableTagSource
+      ? {
+          value: 300,
+          evidence: ["discard_score:corp_conditional_payoff_reachable"],
+        }
+      : {
+          value: -180,
+          evidence: ["discard_score:corp_tag_payoff_prerequisite_missing"],
+        };
   }
   if (signals.has("tag.corp_persistent_source")) {
     const value = diminishedConditionalEnablerValue(
@@ -486,7 +583,7 @@ function corpConditionalPayoffKeepAdjustment(
     };
   }
   if (
-    signals.has("tag.source") &&
+    corpDefinitionHasTagSource(definitionId) &&
     corpHasReachableCardWithAnySignal(input, ["tag.payoff", "damage.payoff"])
   ) {
     const value = diminishedConditionalEnablerValue(320, duplicateCount);
@@ -503,8 +600,7 @@ function corpConditionalPayoffKeepAdjustment(
   if (signals.has("risk.requires_tagged_runner") && runnerTags <= 0) {
     if (reachableTagSource) {
       const hardDamagePayoff =
-        signals.has("damage.corp_tagged_meat_payoff") ||
-        signals.has("damage.payoff");
+        taggedDamagePayoff !== undefined || signals.has("damage.payoff");
       return hardDamagePayoff
         ? {
             value: 240,
@@ -531,7 +627,48 @@ function diminishedConditionalEnablerValue(
 }
 
 function corpHasReachableTagSource(input: AiDecisionInput): boolean {
-  return corpHasReachableCardWithAnySignal(input, ["tag.source"]);
+  return corpHasReachableCardMatching(input, corpDefinitionHasTagSource);
+}
+
+function corpHasReachableCardMatching(
+  input: AiDecisionInput,
+  matches: (definitionId: string) => boolean,
+): boolean {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
+  const snapshot = semanticInput.ownDeckSnapshot;
+  if (input.side !== "corp") return false;
+  const activeVisibleCards = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers
+      .filter((server) => server.id !== "archives")
+      .flatMap((server) => [...server.ice, ...server.root]),
+  ];
+  if (
+    activeVisibleCards.some(
+      (card) => card.definitionId && matches(card.definitionId),
+    )
+  ) {
+    return true;
+  }
+  if (!snapshot) return false;
+  const allVisibleCards = [
+    ...activeVisibleCards,
+    ...input.playerView.own.heapOrArchives,
+    ...input.playerView.own.scoreArea,
+  ];
+  const visibleCountByDefinitionId = new Map<string, number>();
+  for (const card of allVisibleCards) {
+    if (!card.definitionId) continue;
+    visibleCountByDefinitionId.set(
+      card.definitionId,
+      (visibleCountByDefinitionId.get(card.definitionId) ?? 0) + 1,
+    );
+  }
+  return snapshot.cards.some(
+    (entry) =>
+      matches(entry.cardId) &&
+      entry.quantity > (visibleCountByDefinitionId.get(entry.cardId) ?? 0),
+  );
 }
 
 function corpHasReachableCardWithAnySignal(
@@ -602,19 +739,7 @@ function cardSemanticSignals(hint: unknown): ReadonlySet<string> {
 }
 
 function corpCardIsReviewedAdvancementBurst(definitionId: string): boolean {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
-    hint?.aiSupportStatus === "ai_supported" &&
-    hint.quality?.hintReviewed === true &&
-    (hint.effects ?? []).some(
-      (effect) =>
-        effect.timing === "action" &&
-        effect.resource === "advancement_counters" &&
-        (effect.amount ?? 0) > 0 &&
-        (effect.kind === "advance_burst" ||
-          effect.kind === "score_acceleration"),
-    )
-  );
+  return corpScoreConversionProfile(definitionId) !== undefined;
 }
 
 function corpHasVisibleAgendaDevelopmentTarget(

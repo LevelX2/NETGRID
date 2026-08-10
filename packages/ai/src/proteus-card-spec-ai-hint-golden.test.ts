@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 import migrationReport from "../../../docs/reviews/cards/proteus-card-spec-migration-report.json";
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
+import originalsetReviewedGolden from "./test-fixtures/originalset-v1-card-spec-ai-hints-reviewed-v1.json";
 import reviewedGolden from "./test-fixtures/proteus-card-spec-ai-hints-reviewed-v1.json";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
@@ -127,8 +128,12 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     const entriesById = new Map(
       cardSpecPlanningCards().map((entry) => [entry.definition.id, entry]),
     );
+    const originalsetIds = new Set(
+      originalsetReviewedGolden.cards.map((record) => record.cardId),
+    );
     const priorGeneratedCards = generatedArtifact.cards.filter(
-      (record) => !reviewedIds.has(record.cardId),
+      (record) =>
+        !reviewedIds.has(record.cardId) && !originalsetIds.has(record.cardId),
     );
     const compiled = priorGeneratedCards.map((record) => {
       const entry = entriesById.get(record.cardId);
@@ -149,7 +154,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:408279ce7ea1e465dea8f09cb04d12a7bc4c41f9f6535cd3d0600271dff819c0",
+      "sha256:b3768bb340c651ed79f50c574924228476ed9bbc81f7449b842e620517362335",
     );
   });
 
@@ -565,6 +570,29 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         resource: "strength",
         target: "corp_ice.rez_paid_scaling",
       },
+      {
+        kind: "trace",
+        scope: "trace",
+        timing: "encounter_resolution",
+        target: "trace.source",
+        finite: true,
+      },
+      {
+        kind: "etr",
+        scope: "run_path",
+        timing: "trace_success",
+        target: "corp_ice.conditional_end_run",
+        finite: true,
+      },
+      {
+        kind: "run_lock",
+        scope: "runner",
+        timing: "trace_success",
+        resource: "actions",
+        target: "corp_ice.run_lock",
+        amount: 2,
+        finite: true,
+      },
     ]);
     for (const cardId of [
       "onr_proteus_012_bug-zapper",
@@ -592,7 +620,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       [
         "onr_proteus_030_mastermind",
         (entry) =>
-          (entry.planning.engine.relativeIce.dynamicDamageSubroutine.subroutineId =
+          (entry.planning.engine.relativeIce.dynamicDamageSubroutine.subroutineCapabilityKey =
             "unbound_dynamic_damage"),
       ],
       [
@@ -706,6 +734,13 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         )!,
       );
       mutate(entry);
+      if (cardId === "onr_proteus_153_time-to-collect") {
+        const canonical = reviewedGolden.cards.find(
+          (record) => record.cardId === cardId,
+        )!.hint;
+        expect(deriveCardSpecAiHint(entry), cardId).not.toEqual(canonical);
+        continue;
+      }
       expect(() => deriveCardSpecAiHint(entry), cardId).toThrow(
         /card_spec_unknown_/,
       );
@@ -735,7 +770,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       [
         "onr_proteus_052_schlaghund-pointers",
         (entry) =>
-          (entry.planning.engine.abilities[0].effects[0].additionalPlayCostPerBaseTracePointAboveZero = 2),
+          (entry.planning.engine.abilities[0].effects[0].additionalPlayCostPerTraceLimitPointAboveZero = 2),
       ],
       [
         "onr_proteus_027_iceberg",

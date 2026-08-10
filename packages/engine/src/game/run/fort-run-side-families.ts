@@ -16,10 +16,6 @@ import type { RuntimeIcebreakerAbility } from "../../ability-engine/icebreaker-a
 import type { CardFortRunWindowImplementation } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  PILE_DRIVER_ID,
-  RAMMING_PISTON_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   clearFortActivitySinceCorpTurnStart,
   markFortActivitySinceCorpTurnStart,
   serverRunStartRestrictions,
@@ -540,7 +536,6 @@ export function applyPostBreakStealthLoss(
   breakerId: CardInstanceId,
   legalAction: LegalAction,
 ): FortRunStealthLossResult {
-  const breakerDefinition = host.cards.definitionFor(breakerId);
   const ability = host.breaker.breakAbilityForLegalAction(legalAction);
   const lossAmount = ability?.postBreakStealthLoss ?? 0;
   if (lossAmount <= 0) return { handled: false };
@@ -613,10 +608,7 @@ export function applyPostBreakStealthLoss(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     postBreakStealthLoss: spent,
-    ...(breakerDefinition.id === RAMMING_PISTON_ID
-      ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
-      : {}),
-    ...(breakerDefinition.id === PILE_DRIVER_ID
+    ...(ability?.postBreakStealthLoss !== undefined
       ? { v1922RunnerProgramAbility: "post_break_stealth_loss" }
       : {}),
   };

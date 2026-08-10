@@ -54,6 +54,9 @@ export const cardSpec = {
       scoreAsAgendaAction: true,
       removeFromGameOnLeavePlay: true,
       visibility: "public",
+      onDecline: {
+        kind: "score_if_still_installed_in_same_fort_at_runner_start",
+      },
     },
     abilities: [
       {
@@ -111,15 +114,11 @@ export const cardSpec = {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_004_theorem-proof.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_004_theorem-proof.",
       },
     ],
     capabilities: [],

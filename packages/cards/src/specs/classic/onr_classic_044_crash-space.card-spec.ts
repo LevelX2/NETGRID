@@ -83,12 +83,13 @@ export const cardSpec = {
             kind: "action",
             amount: 1,
           },
+        ],
+        effects: [
           {
             kind: "trash_source",
-            amount: 1,
+            visibility: "public",
           },
         ],
-        effects: [],
       },
     ],
     runnerUtilityLongtail: {
@@ -118,22 +119,16 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_044_crash-space.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_044_crash-space.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_044_crash-space.",
       },
     ],
     capabilities: [

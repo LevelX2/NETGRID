@@ -42,7 +42,7 @@ type CertifiedStep = {
 
 type CertifiedTraceTagResponse = {
   sourceStepId: string;
-  baseTraceStrength: number;
+  traceLimit: number;
   corpResponseCredits: number;
   runnerResponseCredits: number;
   tagAmount: number;
@@ -249,7 +249,7 @@ export function quoteCorpPunishRoute(
                   currentRunnerTags: 0,
                   requiredRunnerTags: traceTagResponse.tagAmount,
                   sourceStepId: traceTagStepId,
-                  baseTraceStrength: traceTagResponse.baseTraceStrength,
+                  traceLimit: traceTagResponse.traceLimit,
                 }
               : {
                   kind: "none",
@@ -381,45 +381,19 @@ function certifyExactTraceTagResponse(
     played.state.trace?.status !== "corp_bid" ||
     played.state.pendingChoice?.side !== "corp" ||
     played.state.pendingChoice.kind !== "bid_amount" ||
-    played.state.trace.baseTraceStrength !== traceEffect.baseTraceStrength
+    played.state.trace.traceLimit !== traceEffect.traceLimit
   ) {
     return undefined;
   }
-  const afterHead = played.state;
-  const zeroBid = numericBidOptions(afterHead).find(
-    (option) => option.value === 0,
-  );
-  if (!zeroBid) return undefined;
-  const zeroProbe = applyExactChoice(afterHead, "corp", zeroBid.id);
-  if (
-    !zeroProbe ||
-    zeroProbe.trace?.status !== "runner_bid" ||
-    zeroProbe.pendingChoice?.side !== "runner" ||
-    zeroProbe.pendingChoice.kind !== "bid_amount" ||
-    !Number.isSafeInteger(zeroProbe.trace.runnerLink) ||
-    zeroProbe.trace.runnerLink! < 0
-  ) {
-    return undefined;
-  }
-  const maximumRunnerBid = numericBidOptions(zeroProbe).sort(
+  let verifiedAfterHead = played.state;
+  let corpBidOptions = numericBidOptions(verifiedAfterHead);
+  let maximumCorpBid = corpBidOptions.sort(
     (left, right) => right.value - left.value,
   )[0];
-  if (!maximumRunnerBid) return undefined;
-  const requiredBidValue = Math.max(
-    0,
-    zeroProbe.trace.runnerLink! +
-      maximumRunnerBid.value -
-      traceEffect.baseTraceStrength +
-      1,
-  );
-  let verifiedAfterHead = afterHead;
-  let requiredCorpBid = numericBidOptions(verifiedAfterHead).find(
-    (option) => option.value === requiredBidValue,
-  );
-  if (!requiredCorpBid) {
+  if (!maximumCorpBid || maximumCorpBid.value < traceEffect.traceLimit) {
     const { state: fundedSimulationState } = publicTraceSimulationState(state);
     fundedSimulationState.corp.credits =
-      traceStep.quote.credits + requiredBidValue;
+      traceStep.quote.credits + traceEffect.traceLimit;
     const fundedHeadAction = exactCurrentHeadAction(
       fundedSimulationState,
       traceStep.quote,
@@ -440,45 +414,103 @@ function certifyExactTraceTagResponse(
       return undefined;
     }
     verifiedAfterHead = fundedHead.state;
-    requiredCorpBid = numericBidOptions(verifiedAfterHead).find(
-      (option) => option.value === requiredBidValue,
-    );
+    corpBidOptions = numericBidOptions(verifiedAfterHead);
+    maximumCorpBid = corpBidOptions.sort(
+      (left, right) => right.value - left.value,
+    )[0];
   }
-  if (!requiredCorpBid) return undefined;
+  if (
+    !maximumCorpBid ||
+    maximumCorpBid.value !== traceEffect.traceLimit ||
+    corpBidOptions.some((option) => option.value > traceEffect.traceLimit) ||
+    !corpBidOptions.some((option) => option.value === 0)
+  ) {
+    return undefined;
+  }
   const afterCorpBid = applyExactChoice(
     verifiedAfterHead,
     "corp",
-    requiredCorpBid.id,
+    maximumCorpBid.id,
   );
   if (
     !afterCorpBid ||
     afterCorpBid.trace?.status !== "runner_bid" ||
     afterCorpBid.pendingChoice?.side !== "runner" ||
-    afterCorpBid.pendingChoice.kind !== "bid_amount"
+    afterCorpBid.pendingChoice.kind !== "bid_amount" ||
+    afterCorpBid.trace.corpBid !== maximumCorpBid.value ||
+    afterCorpBid.trace.traceValue !== maximumCorpBid.value ||
+    !Number.isSafeInteger(afterCorpBid.trace.runnerLink) ||
+    afterCorpBid.trace.runnerLink! < 0
   ) {
     return undefined;
   }
-  const verifiedRunnerBid = numericBidOptions(afterCorpBid).find(
-    (option) => option.value === maximumRunnerBid.value,
+  const runnerBidOptions = numericBidOptions(afterCorpBid);
+  const maximumRunnerBid = runnerBidOptions.sort(
+    (left, right) => right.value - left.value,
+  )[0];
+  const zeroRunnerBid = runnerBidOptions.find((option) => option.value === 0);
+  if (!maximumRunnerBid || !zeroRunnerBid) return undefined;
+
+  // Original Trace is open and sequential: Corp bids first from zero up to
+  // the Trace limit, then Runner responds. A tie belongs to the Runner, so a
+  // successful tag branch exists only if the maximum Corp bid exceeds Link.
+  const runnerLink = afterCorpBid.trace.runnerLink!;
+  if (maximumCorpBid.value <= runnerLink) return undefined;
+  const tieCorpBid = corpBidOptions.find(
+    (option) => option.value === runnerLink,
   );
-  if (!verifiedRunnerBid) return undefined;
-  const resolved = applyExactChoice(
-    afterCorpBid,
+  if (tieCorpBid) {
+    const tieRunnerWindow = applyExactChoice(
+      structuredClone(verifiedAfterHead),
+      "corp",
+      tieCorpBid.id,
+    );
+    const tieRunnerZero = tieRunnerWindow
+      ? numericBidOptions(tieRunnerWindow).find((option) => option.value === 0)
+      : undefined;
+    const tied =
+      tieRunnerWindow && tieRunnerZero
+        ? applyExactChoice(tieRunnerWindow, "runner", tieRunnerZero.id)
+        : undefined;
+    if (
+      !tied ||
+      tied.trace !== undefined ||
+      tied.pendingChoice !== undefined ||
+      tied.runner.tags !== simulationState.runner.tags
+    ) {
+      return undefined;
+    }
+  }
+
+  const successful = applyExactChoice(
+    structuredClone(afterCorpBid),
     "runner",
-    verifiedRunnerBid.id,
+    zeroRunnerBid.id,
   );
   if (
-    !resolved ||
-    resolved.trace !== undefined ||
-    resolved.pendingChoice !== undefined ||
-    resolved.runner.tags < simulationState.runner.tags + tagEffect.amount
+    !successful ||
+    successful.trace !== undefined ||
+    successful.pendingChoice !== undefined ||
+    successful.runner.tags < simulationState.runner.tags + tagEffect.amount
+  ) {
+    return undefined;
+  }
+  const maximumRunnerResponse = applyExactChoice(
+    structuredClone(afterCorpBid),
+    "runner",
+    maximumRunnerBid.id,
+  );
+  if (
+    !maximumRunnerResponse ||
+    maximumRunnerResponse.trace !== undefined ||
+    maximumRunnerResponse.pendingChoice !== undefined
   ) {
     return undefined;
   }
   const corpResponseCredits =
     verifiedAfterHead.corp.credits - afterCorpBid.corp.credits;
   const runnerResponseCredits =
-    afterCorpBid.runner.credits - resolved.runner.credits;
+    afterCorpBid.runner.credits - maximumRunnerResponse.runner.credits;
   if (
     !Number.isSafeInteger(corpResponseCredits) ||
     corpResponseCredits < 0 ||
@@ -489,7 +521,7 @@ function certifyExactTraceTagResponse(
   }
   return {
     sourceStepId: traceStep.quote.stepId,
-    baseTraceStrength: traceEffect.baseTraceStrength,
+    traceLimit: traceEffect.traceLimit,
     corpResponseCredits,
     runnerResponseCredits,
     tagAmount: tagEffect.amount,

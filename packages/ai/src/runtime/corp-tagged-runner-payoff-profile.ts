@@ -6,6 +6,10 @@ import type {
 
 import type { StructuredTagPunishPayoffKind } from "../tag-punish-ontology-consumer";
 import type { CorpTaggedRunnerPayoffActionProfile } from "./corp-scoring-assessment-types";
+import {
+  corpTaggedDamagePayoffProfile,
+  corpTaggedMeatDamageOperationProfile,
+} from "./corp-canonical-card-facts";
 
 type CorpTagPunishPayoffAssessment = {
   isPunishPayoff: boolean;
@@ -53,8 +57,8 @@ export function createCorpTaggedRunnerPayoffProfileContext(
   ): CorpTaggedRunnerPayoffActionProfile | undefined => {
     if (input.side !== "corp" || action.side !== "corp") return undefined;
     const runnerTags = input.playerView.opponent.tags;
-    if (runnerTags <= 0) return undefined;
     if (action.type === "trash_resource") {
+      if (runnerTags <= 0) return undefined;
       const target = dependencies.runnerRigTrashTarget(input, action);
       if (!target?.definitionId) return undefined;
       const storedCredits = dependencies.visibleCardStoredCredits(target);
@@ -81,19 +85,38 @@ export function createCorpTaggedRunnerPayoffProfileContext(
         ],
       };
     }
-    const assessment = dependencies.tagPunishAssessmentForAction(input, action);
-    if (!assessment?.isPunishPayoff) return undefined;
     const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
       input,
       action,
     );
+    const taggedDamagePayoff = corpTaggedDamagePayoffProfile(
+      sourceDefinitionId,
+    );
+    const taggedMeatDamageOperation =
+      corpTaggedMeatDamageOperationProfile(sourceDefinitionId);
+    const directTaggedDamage =
+      taggedDamagePayoff !== undefined ||
+      taggedMeatDamageOperation !== undefined;
+    if (
+      taggedDamagePayoff !== undefined &&
+      runnerTags < taggedDamagePayoff.requiredRunnerTags
+    ) {
+      return undefined;
+    }
+    if (!directTaggedDamage && runnerTags <= 0) return undefined;
+    if (taggedMeatDamageOperation !== undefined && runnerTags <= 0)
+      return undefined;
+    const assessment = dependencies.tagPunishAssessmentForAction(input, action);
+    if (!directTaggedDamage && !assessment?.isPunishPayoff)
+      return undefined;
     const affordabilityPressure =
       input.playerView.own.credits >= dependencies.actionCreditCost(action)
         ? 0
         : -400;
     if (
-      assessment.payoffKind === "damage" ||
-      assessment.payoffKind === "scored_agenda_damage_like"
+      directTaggedDamage ||
+      assessment?.payoffKind === "damage" ||
+      assessment?.payoffKind === "scored_agenda_damage_like"
     ) {
       return {
         kind: "damage",
@@ -104,10 +127,11 @@ export function createCorpTaggedRunnerPayoffProfileContext(
           `runner_tags:${runnerTags}`,
           `source_definition:${sourceDefinitionId || "unknown"}`,
           ...dependencies.runnerDamagePreventionEvidence(input),
-          ...assessment.evidence,
+          ...(assessment?.evidence ?? []),
         ],
       };
     }
+    if (!assessment) return undefined;
     if (assessment.payoffKind === "economic") {
       if (input.playerView.opponent.credits <= 0) return undefined;
       const runnerCreditPressure =

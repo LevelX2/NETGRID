@@ -28,6 +28,7 @@ type RuntimeContextDiagnosticsDependencyKeys =
   | "closeout"
   | "extractFeatures"
   | "hasKnownUnaffordableLegalRun"
+  | "hintForDefinitionId"
   | "remoteTrashAccessContext"
   | "tagPunishAssessmentForAction"
   | "trashAccessContext";

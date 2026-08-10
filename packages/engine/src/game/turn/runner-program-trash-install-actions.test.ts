@@ -52,4 +52,61 @@ describe("runner program trash install action builder", () => {
     expect(action.payload?.targetCardId).toBeUndefined();
     expect(state).toEqual(before);
   });
+
+  it("binds an installed ICE target into the program-trash install action", () => {
+    const state = createGame({
+      seed: "arch-9-runner-program-trash-install-ice-target",
+      setupMode: "completed",
+    });
+    const cardId = "runner_program_trash_target" as CardInstanceId;
+    const targetIceId = "corp_target_ice" as CardInstanceId;
+
+    const action = buildRunnerProgramTrashBeforeInstallAction(
+      state,
+      cardId,
+      runnerProgramDefinition(cardId, "Test Program", 2),
+      { kind: "installed_ice", selectedCardId: targetIceId },
+    );
+
+    expect(action.actionId).toContain(`.${targetIceId}.`);
+    expect(action.actionId).toMatch(/runner_program_trash_before_install$/);
+    expect(action.payload).toMatchObject({
+      cardId,
+      selectedCardId: targetIceId,
+      runnerProgramTrashBeforeInstall: true,
+    });
+    expect(action.targetRequirements).toEqual([
+      {
+        id: "targetIce",
+        kind: "card",
+        side: "corp",
+        zoneScope: ["corp.servers.ice"],
+        visibility: "public",
+      },
+    ]);
+  });
+
+  it("binds an icebreaker subtype into the program-trash install action", () => {
+    const state = createGame({
+      seed: "arch-9-runner-program-trash-install-subtype",
+      setupMode: "completed",
+    });
+    const cardId = "runner_program_trash_target" as CardInstanceId;
+
+    const action = buildRunnerProgramTrashBeforeInstallAction(
+      state,
+      cardId,
+      runnerProgramDefinition(cardId, "Test Program", 2),
+      { kind: "icebreaker_subtype", selectedSubtype: "wall" },
+    );
+
+    expect(action.actionId).toContain(".wall.");
+    expect(action.actionId).toMatch(/runner_program_trash_before_install$/);
+    expect(action.payload).toMatchObject({
+      cardId,
+      selectedSubtype: "wall",
+      runnerProgramTrashBeforeInstall: true,
+    });
+    expect(action.targetRequirements).toEqual([]);
+  });
 });

@@ -5,6 +5,20 @@ import {
   RUNTIME_CARDS,
 } from "./ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
+import type {
+  AiHintActionCapacityProfile,
+  AiHintEffectTargetProfile,
+  AiHintStructuredEffect,
+  AiHintTargetProfileV1,
+} from "./hint-ontology";
+import {
+  runnerEffectsProvideDamagePrevention,
+  runnerEffectsProvideMultiaccess,
+  runnerEffectsProvideSearch,
+  runnerEffectsProvideTagPrevention,
+  runnerEffectsProvideTopTrashRecovery,
+  runnerTargetProfilesProvideSearch,
+} from "./runner-canonical-hint-semantics";
 import {
   buildRunnerDeckEngineDoctrine,
   type RunnerDeckEngineDoctrine,
@@ -331,10 +345,13 @@ type AiCardHint = {
   strategyAnchors?: string[];
   requiredMechanics?: string[];
   riskTags?: string[];
-  effects?: Array<{ kind?: string; scope?: string; timing?: string }>;
+  effects?: AiHintStructuredEffect[];
+  targetProfiles?: Array<AiHintEffectTargetProfile | AiHintTargetProfileV1>;
+  actionCapacityProfiles?: AiHintActionCapacityProfile[];
   remoteRole?: { kind?: string; serverScope?: string; threatLevel?: string };
   costProfile?: { reserveRisk?: string; opportunityCost?: string };
   breakerProfile?: {
+    emergencyCoverage?: boolean;
     sideEffects?: string[];
     restrictions?: string[];
   };
@@ -367,7 +384,9 @@ type DeckCardStrategyFacts = {
   requiredMechanics: string[];
   riskTags: string[];
   accessBreakerCoverageBlocked: boolean;
-  effects: Array<{ kind?: string; scope?: string; timing?: string }>;
+  effects: AiHintStructuredEffect[];
+  targetProfiles: Array<AiHintEffectTargetProfile | AiHintTargetProfileV1>;
+  hasActionDebt: boolean;
   remoteRoleKind?: string;
   costProfileReserveRisk?: string;
   runtimeSubtypes: string[];
@@ -642,6 +661,51 @@ export function buildDeckDoctrineV2Diagnostic(
   };
 }
 
+function canonicalDoctrineFunctionSignals(
+  hint: AiCardHint | undefined,
+): string[] {
+  if (!hint) return [];
+  const signals = new Set<string>();
+  if (
+    hint.side === "runner" &&
+    (runnerEffectsProvideSearch(hint.effects) ||
+      runnerTargetProfilesProvideSearch(hint.targetProfiles))
+  )
+    signals.add("setup.search");
+
+  if (
+    hint.side === "corp" &&
+    hint.actionCapacityProfiles?.some(
+      (profile) =>
+        profile.recipient === "corp" &&
+        !["action_debt", "action_loss", "action_cost", "action_lock"].includes(
+          profile.class,
+        ),
+    )
+  )
+    signals.add("action.corp_extra_action_support");
+
+  for (const effect of hint.effects ?? []) {
+    if (
+      hint.side === "corp" &&
+      effect.kind === "draw" &&
+      effect.scope === "corp"
+    )
+      signals.add("draw.corp_draw");
+    if (
+      hint.side === "corp" &&
+      effect.kind === "zone_shuffle" &&
+      effect.scope === "rnd" &&
+      effect.target === "score.shuffle_hq_archives_into_rnd"
+    ) {
+      signals.add("archives.corp_recycle_to_rnd");
+      signals.add("hq.corp_hand_to_rnd_shuffle");
+      signals.add("rnd.corp_shuffle_recycle");
+    }
+  }
+  return [...signals];
+}
+
 function deckStrategyStats(
   snapshot: AiDeckStrategyDeckSnapshot,
 ): DeckStrategyStats {
@@ -661,7 +725,10 @@ function deckStrategyStats(
       | RuntimeCardForStrategy
       | undefined;
     const cardType = hint?.cardType ?? runtimeCard?.type;
-    const functionSignals = sortedUnique(hint?.functionSignals ?? []);
+    const functionSignals = sortedUnique([
+      ...(hint?.functionSignals ?? []),
+      ...canonicalDoctrineFunctionSignals(hint),
+    ]);
     const derivedStrategyAnchors = sortedUnique(
       (hint?.strategyAnchors ?? []).filter((strategyId) =>
         strategyMatchesSide(strategyId, snapshot.side),
@@ -708,6 +775,11 @@ function deckStrategyStats(
         riskTags: sortedUnique(hint?.riskTags ?? []),
         accessBreakerCoverageBlocked,
         effects: hint?.effects ?? [],
+        targetProfiles: hint?.targetProfiles ?? [],
+        hasActionDebt:
+          hint?.actionCapacityProfiles?.some(
+            (profile) => profile.class === "action_debt",
+          ) ?? false,
         ...(hint?.remoteRole?.kind
           ? { remoteRoleKind: hint.remoteRole.kind }
           : {}),
@@ -1520,9 +1592,16 @@ function accessCapableSignalCount(
 }
 
 function breakerProfileBlocksAccessCoverage(
-  profile: { sideEffects?: string[]; restrictions?: string[] } | undefined,
+  profile:
+    | {
+        emergencyCoverage?: boolean;
+        sideEffects?: string[];
+        restrictions?: string[];
+      }
+    | undefined,
 ): boolean {
   if (!profile) return false;
+  if (profile.emergencyCoverage === true) return true;
   const sideEffects = new Set(profile.sideEffects ?? []);
   if (sideEffects.has("ends_run_after_use")) return true;
   return (profile.restrictions ?? []).some((restriction) =>
@@ -1668,7 +1747,8 @@ function memorySupport(
       roles.has("memory") ||
       requiredMechanics.has("memory") ||
       card.effects.some(
-        (effect) => effect.kind === "memory" || effect.kind === "hand_size",
+        (effect) =>
+          effect.resource === "memory" || effect.resource === "hand_size",
       )
     );
   });
@@ -2024,7 +2104,33 @@ function buildRunnerProfiles(
   stats: DeckStrategyStats,
   strategyScores: Record<string, DeckStrategyScore>,
 ): RunnerDeckStrategyProfiles {
-  const search = stats.functionSignalCounts["setup.search"] ?? 0;
+  const search = runnerStructuredFactCount(stats, runnerEffectsProvideSearch);
+  const targetProfileSearch = stats.cards.reduce(
+    (sum, card) =>
+      sum +
+      (runnerTargetProfilesProvideSearch(card.targetProfiles)
+        ? card.quantity
+        : 0),
+    0,
+  );
+  const recovery = runnerStructuredFactCount(
+    stats,
+    runnerEffectsProvideTopTrashRecovery,
+  );
+  const rndMultiaccess = runnerStructuredFactCount(stats, (effects) =>
+    runnerEffectsProvideMultiaccess(effects, "rd"),
+  );
+  const hqMultiaccess = runnerStructuredFactCount(stats, (effects) =>
+    runnerEffectsProvideMultiaccess(effects, "hq"),
+  );
+  const damagePrevention = runnerStructuredFactCount(
+    stats,
+    runnerEffectsProvideDamagePrevention,
+  );
+  const tagPrevention = runnerStructuredFactCount(
+    stats,
+    runnerEffectsProvideTagPrevention,
+  );
   const universal = accessCapableSignalCount(stats, "breaker.universal");
   const special =
     accessCapableSignalCount(stats, "breaker.ap") +
@@ -2063,21 +2169,21 @@ function buildRunnerProfiles(
       actionBased: stats.functionSignalCounts["economy.action"] ?? 0,
     },
     setupProfile: {
-      search,
+      search: Math.max(search, targetProfileSearch),
       draw: stats.functionSignalCounts["setup.draw"] ?? 0,
-      recovery: stats.functionSignalCounts["setup.recovery"] ?? 0,
+      recovery,
       installSupport: stats.functionSignalCounts["setup.install_discount"] ?? 0,
       memoryHandSize: memoryCount > 0 ? memoryCount : "unknown",
     },
     pressureProfile: {
       rnd:
-        (stats.functionSignalCounts["access.rnd_multiaccess"] ?? 0) +
+        rndMultiaccess +
         (stats.functionSignalCounts["info.rnd_topdeck"] ?? 0) +
         Math.round(
           (strategyScores["runner.rnd_pressure"]?.anchorScore ?? 0) / 30,
         ),
       hq:
-        (stats.functionSignalCounts["access.hq_multiaccess"] ?? 0) +
+        hqMultiaccess +
         (stats.functionSignalCounts["info.hq"] ?? 0) +
         Math.round(
           (strategyScores["runner.hq_pressure"]?.anchorScore ?? 0) / 30,
@@ -2090,12 +2196,22 @@ function buildRunnerProfiles(
       archives: "unknown",
     },
     defenseProfile: {
-      tag: stats.functionSignalCounts["defense.tag_prevention"] ?? 0,
+      tag: tagPrevention,
       trace: stats.functionSignalCounts["defense.trace_defense"] ?? 0,
-      damage: stats.functionSignalCounts["defense.damage_prevention"] ?? 0,
+      damage: damagePrevention,
       programTrash: programTrashCount > 0 ? programTrashCount : "unknown",
     },
   };
+}
+
+function runnerStructuredFactCount(
+  stats: DeckStrategyStats,
+  predicate: (effects: readonly AiHintStructuredEffect[]) => boolean,
+): number {
+  return stats.cards.reduce(
+    (sum, card) => sum + (predicate(card.effects) ? card.quantity : 0),
+    0,
+  );
 }
 
 function buildCorpProfiles(
@@ -2251,7 +2367,7 @@ function riskyEconomyCount(stats: DeckStrategyStats): number | "unknown" {
         card.functionSignals.some((signal) => signal.startsWith("economy.")) &&
         (riskTags.has("tag_self") ||
           card.costProfileReserveRisk === "high" ||
-          card.effects.some((effect) => effect.kind === "forgo_actions"))
+          card.hasActionDebt)
       );
     })
     .reduce((sum, card) => sum + card.quantity, 0);

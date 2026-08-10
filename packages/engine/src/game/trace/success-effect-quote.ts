@@ -8,7 +8,7 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 
 export type TraceSuccessEffectCardImplementationQuote = {
   sourceDefinitionId: CardDefinitionId;
-  baseTraceStrength: number;
+  traceLimit: number;
   traceSuccessEffect: TraceSuccessEffect;
 };
 
@@ -22,7 +22,7 @@ export function traceSuccessEffectCardImplementationQuotesForDefinition(
   if (relativeTrace?.visibility === "public") {
     quotes.push({
       sourceDefinitionId: definitionId,
-      baseTraceStrength: relativeTrace.baseTraceStrength,
+      traceLimit: relativeTrace.traceLimit,
       traceSuccessEffect: relativeTrace.traceSuccessEffect,
     });
   }
@@ -30,7 +30,7 @@ export function traceSuccessEffectCardImplementationQuotesForDefinition(
     if (subroutine.kind !== "trace") continue;
     quotes.push({
       sourceDefinitionId: definitionId,
-      baseTraceStrength: subroutine.baseTraceStrength,
+      traceLimit: subroutine.traceLimit,
       traceSuccessEffect: traceSuccessEffectForCardImplementation(
         subroutine.onSuccess,
       ),

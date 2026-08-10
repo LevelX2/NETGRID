@@ -66,6 +66,13 @@ export type CardImplementationRuntimeCoreDependencies = {
       gainOrdinal: number;
       kind: "standard" | "temporary_grant";
       reason: string;
+      destination?:
+        | { kind: "normal_pool" }
+        | {
+            kind: "runner_run_temporary";
+            sourceDefinitionId: CardDefinition["id"];
+            returnUnusedAtRunEnd: true;
+          };
     },
   ) => CardEffectCreditGainResult;
   createAction: (
@@ -105,7 +112,7 @@ export type CardImplementationRuntimeCoreDependencies = {
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
-    baseTraceStrength: number,
+    traceLimit: number,
     successEffects: readonly CardTraceSuccessEffectImplementation[],
   ) => Record<string, string | number | boolean>;
   startRun: (

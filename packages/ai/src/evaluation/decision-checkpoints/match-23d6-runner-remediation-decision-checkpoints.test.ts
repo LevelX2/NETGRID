@@ -119,9 +119,11 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["runner.rig_and_coverage"],
-          acceptableCapabilities: ["setup_search_engine_breaker_sentry"],
-          requiredAssessmentEvidence: ["deck_strategy_open_sentry_coverage"],
+          acceptablePlanKinds: ["runner.develop_board_and_hand"],
+          acceptableCapabilities: ["develop_onr_v1_151_aujourdoui"],
+          requiredAssessmentEvidence: [
+            "source:own_runner_hand:card_specific_purpose:draw_or_search_engine:useful_now",
+          ],
         },
       };
     });

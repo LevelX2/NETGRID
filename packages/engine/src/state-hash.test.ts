@@ -117,6 +117,7 @@ describe("mechanical StateHash baseline", () => {
 
     expect(matchCardSpecDefinitionIdsForState(state)).toEqual([
       "onr_classic_031_rent-i-con",
+      "onr_v1_001_afreet",
       "onr_v1_154_broker",
       "onr_v1_168_loan-from-chiba",
       "simple_agenda",
@@ -130,7 +131,7 @@ describe("mechanical StateHash baseline", () => {
     );
   });
 
-  it("keeps a legacy-only match outside the CardSpec rules slice", () => {
+  it("includes a formerly legacy-only Originalset card in the CardSpec rules slice", () => {
     const state = {
       baseline: CURRENT_RULES_BASELINE,
       eventLog: [],
@@ -138,7 +139,9 @@ describe("mechanical StateHash baseline", () => {
         legacy: { instanceId: "legacy", definitionId: "onr_v1_001_afreet" },
       },
     } as unknown as GameState;
-    expect(matchCardSpecDefinitionIdsForState(state)).toEqual([]);
+    expect(matchCardSpecDefinitionIdsForState(state)).toEqual([
+      "onr_v1_001_afreet",
+    ]);
   });
 
   it("binds a migrated match to its CardSpec rules fingerprint", () => {

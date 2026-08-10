@@ -1252,10 +1252,7 @@ function postInstallVariableRezParameter(
         ) ||
       payload.postInstallRezQuoteVariableEffectiveStrengthFromValue !== true ||
       !optionalTrueValue(
-        payload.postInstallRezQuoteVariableTraceBaseFromValue,
-      ) ||
-      !optionalTrueValue(
-        payload.postInstallRezQuoteVariableTraceBidLimitFromValue,
+        payload.postInstallRezQuoteVariableTraceLimitFromValue,
       )
     ) {
       return undefined;
@@ -1268,11 +1265,8 @@ function postInstallVariableRezParameter(
       minValueFinalCredits,
       maxValueFinalCredits,
       effectiveStrengthFromValue: true,
-      ...(payload.postInstallRezQuoteVariableTraceBaseFromValue === true
-        ? { traceBaseFromValue: true }
-        : {}),
-      ...(payload.postInstallRezQuoteVariableTraceBidLimitFromValue === true
-        ? { traceBidLimitFromValue: true }
+      ...(payload.postInstallRezQuoteVariableTraceLimitFromValue === true
+        ? { traceLimitFromValue: true }
         : {}),
     };
   }

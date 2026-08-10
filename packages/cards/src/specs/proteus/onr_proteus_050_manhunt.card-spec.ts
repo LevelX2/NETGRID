@@ -56,7 +56,6 @@ export const cardSpec = {
         effects: [
           {
             kind: "trace",
-            baseTraceStrength: 6,
             visibility: "public",
             onSuccess: [
               {
@@ -65,6 +64,7 @@ export const cardSpec = {
                 visibility: "public",
               },
             ],
+            traceLimit: 6,
           },
         ],
       },

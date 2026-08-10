@@ -360,7 +360,7 @@ export function hunterTraceTagIce(
           type: "initiate_trace",
           sourceDefinitionId: "onr_v1_249_hunter",
           sourceTitle: "Hunter",
-          baseTraceStrength: 5,
+          traceLimit: 5,
           traceSuccessEffect: { type: "add_tag", amount: 1 },
         },
       ],

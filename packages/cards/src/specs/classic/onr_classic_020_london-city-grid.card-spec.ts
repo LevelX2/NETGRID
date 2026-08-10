@@ -42,7 +42,7 @@ export const cardSpec = {
     },
     modifiers: [
       {
-        kind: "break_subroutine_cost",
+        kind: "break_ability_use_cost",
         operation: "increase",
         amount: 1,
         activeWhile: "rezzed",
@@ -76,8 +76,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_020_london-city-grid.",
       },
     ],
     capabilities: [],

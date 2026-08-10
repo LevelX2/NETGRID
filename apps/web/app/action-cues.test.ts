@@ -375,7 +375,7 @@ describe("deriveOpponentActionCues", () => {
       traceStep: "runner_bid",
       sourceDefinitionId: "onr_proteus_050_manhunt",
       corpBid: 0,
-      traceStrength: 6,
+      traceValue: 6,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,

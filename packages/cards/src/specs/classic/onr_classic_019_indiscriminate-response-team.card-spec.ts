@@ -104,8 +104,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_019_indiscriminate-response-team.",
       },
     ],
     capabilities: [],

@@ -32,6 +32,75 @@ function validateUntyped(spec: Record<string, unknown>): void {
 }
 
 describe("CardSpec validation", () => {
+  it("validates an exact relative-ICE derived-damage capability binding", () => {
+    const spec = untypedSpec();
+    const engine = engineOf(spec);
+    engine.relativeIce = {
+      capabilityKey: "relative_dynamic_damage_owner",
+      addressability: ["quote", "debug"],
+      kind: "rezzed_ice_outside_this_ice",
+      dynamicDamageSubroutine: {
+        subroutineCapabilityKey: "relative_dynamic_damage_subroutine",
+        amountPerCount: 2,
+        visibility: "public",
+      },
+    };
+    engine.printedSubroutines = [
+      {
+        capabilityKey: "relative_dynamic_damage_subroutine",
+        addressability: ["quote", "debug"],
+        kind: "damage",
+        damageType: "net",
+        amount: {
+          kind: "derived",
+          source: "relative_ice_dynamic_damage",
+          ownerCapabilityKey: "relative_dynamic_damage_owner",
+        },
+        preventable: true,
+      },
+    ];
+    expect(() => validateUntyped(spec)).not.toThrow();
+
+    const forged = JSON.parse(JSON.stringify(spec)) as Record<string, unknown>;
+    const forgedEngine = engineOf(forged);
+    const forgedRelative = forgedEngine.relativeIce as Record<string, unknown>;
+    forgedRelative.dynamicDamageSubroutine = {
+      subroutineCapabilityKey: "forged_missing_subroutine",
+      amountPerCount: 2,
+      visibility: "public",
+    };
+    expect(() => validateUntyped(forged)).toThrow(
+      "must reference exactly one printed subroutine",
+    );
+
+    const mismatch = JSON.parse(JSON.stringify(spec)) as Record<
+      string,
+      unknown
+    >;
+    const mismatchPrinted = engineOf(mismatch).printedSubroutines as Record<
+      string,
+      unknown
+    >[];
+    (mismatchPrinted[0]!.amount as Record<string, unknown>).ownerCapabilityKey =
+      "forged_owner";
+    expect(() => validateUntyped(mismatch)).toThrow(
+      "must reference the owning relative ICE capability",
+    );
+
+    const duplicate = JSON.parse(JSON.stringify(spec)) as Record<
+      string,
+      unknown
+    >;
+    const duplicatePrinted = engineOf(duplicate).printedSubroutines as Record<
+      string,
+      unknown
+    >[];
+    duplicatePrinted.push({ ...duplicatePrinted[0]! });
+    expect(() => validateUntyped(duplicate)).toThrow(
+      "must not reference duplicate printed subroutines",
+    );
+  });
+
   it("keeps AbilityRef legacy and canonical identities mutually exclusive", () => {
     expect(() =>
       assertAbilityRefIdentity({
@@ -163,6 +232,80 @@ describe("CardSpec validation", () => {
     }
   });
 
+  it("requires complete literal-only flatline replacement resolutions", () => {
+    const flatlineTagReplacement = {
+      capabilityKey: "flatline_tag_replacement",
+      addressability: ["action"],
+      kind: "flatline_replacement_from_grip",
+      replacement: "flatline_tag_replacement",
+      resolution: {
+        trashSource: true,
+        removeAllCoreDamage: true,
+        refreshGripToMax: true,
+        gainCredits: 10,
+        removeAllTags: true,
+        futureActionDebt: 4,
+        futureAgendaPointForfeit: 3,
+      },
+      visibility: "public",
+    };
+    const installedFlatlinePrevention = {
+      capabilityKey: "installed_flatline_prevention",
+      addressability: ["action"],
+      kind: "flatline_replacement_installed",
+      replacement: "installed_flatline_prevention",
+      resolution: {
+        trashAllGrip: true,
+        removeAllCoreDamage: true,
+        maxHandSizeModifier: -1,
+        runnerActionsPerTurnOverride: 3,
+        permanentMeatDamagePrevention: true,
+      },
+      cost: { kind: "trash_source" },
+      visibility: "public",
+    };
+    for (const replacement of [
+      flatlineTagReplacement,
+      installedFlatlinePrevention,
+    ]) {
+      const valid = untypedSpec();
+      engineOf(valid).flatlineReplacementSources = [replacement];
+      expect(() => validateUntyped(valid)).not.toThrow();
+    }
+
+    const missingResolution = untypedSpec();
+    const { resolution: _missingResolution, ...withoutResolution } =
+      flatlineTagReplacement;
+    engineOf(missingResolution).flatlineReplacementSources = [
+      withoutResolution,
+    ];
+    expect(() => validateUntyped(missingResolution)).toThrowError(
+      /invalid_contract_shape/,
+    );
+
+    const wrongLiteral = untypedSpec();
+    engineOf(wrongLiteral).flatlineReplacementSources = [
+      {
+        ...installedFlatlinePrevention,
+        resolution: {
+          ...installedFlatlinePrevention.resolution,
+          runnerActionsPerTurnOverride: 4,
+        },
+      },
+    ];
+    expect(() => validateUntyped(wrongLiteral)).toThrowError(
+      /runnerActionsPerTurnOverride.*must be 3/,
+    );
+
+    const wrongCost = untypedSpec();
+    engineOf(wrongCost).flatlineReplacementSources = [
+      { ...installedFlatlinePrevention, cost: { kind: "none" } },
+    ];
+    expect(() => validateUntyped(wrongCost)).toThrowError(
+      /cost.kind.*must be trash_source/,
+    );
+  });
+
   it.each([
     {
       name: "event play cost",
@@ -278,7 +421,7 @@ describe("CardSpec validation", () => {
     const forgedTraceFlag = paidX();
     (
       engineOf(forgedTraceFlag).variableRez as Record<string, unknown>
-    ).traceBaseFromValue = false;
+    ).traceLimitFromValue = false;
     expect(() => validateUntyped(forgedTraceFlag)).toThrowError(
       /must be true when present/,
     );

@@ -310,6 +310,47 @@ const CLASSIC_SOURCE_SLICE_FINGERPRINTS = Object.freeze({
     "sha256:506be8f64ea38d47cc98c464565af862595e0dc826c873bfe053f4705e9c2fe0",
 });
 
+// These are reviewed rule reconciliations made after the pinned legacy slice.
+// They are intentionally explicit per card: the generator never infers rules
+// from text, collector order, or runtime card IDs.
+const CLASSIC_REVIEWED_RULE_RECONCILIATIONS = Object.freeze({
+  "onr_classic_004_theorem-proof": [
+    "declined_install_scores_next_runner_start_if_unchanged",
+  ],
+  onr_classic_011_glacier: [
+    "remove_subsidiary_install_restriction",
+    "repeatable_other_fort_move",
+  ],
+  "onr_classic_020_london-city-grid": ["tax_per_break_ability_use"],
+  "onr_classic_021_satellite-monitors": [
+    "optional_corp_roll_sequence",
+    "tag_source_role",
+    "correct_for_typo",
+  ],
+  "onr_classic_022_self-destruct": [
+    "optional_rezzed_access_activation_with_trash_source_cost",
+  ],
+  "onr_classic_023_shock-treatment": [
+    "corp_chooses_exactly_two_programs",
+    "remove_hidden_choice_heuristic",
+  ],
+  onr_classic_024_sterdroid: [
+    "trash_source_not_tap_source",
+    "correct_its_typo",
+  ],
+  "onr_classic_026_street-enforcer": ["lose_credits_at_run_start_per_tag"],
+  onr_classic_033_superglue: ["trash_source_not_tap_source"],
+  "onr_classic_034_boostergang-connections": [
+    "generic_current_plan_target_preference",
+  ],
+  onr_classic_035_corruption: ["remove_opponent_tag_punish_strategy_support"],
+  "onr_classic_044_crash-space": ["trash_source_is_effect_not_cost"],
+  "onr_classic_046_executive-file-clerk": ["runner_paid_timing"],
+  "onr_classic_050_sandbox-dig": ["runner_paid_timing"],
+  "onr_classic_052_zetatech-portastation": ["correct_portastation_typo"],
+  "onr_classic_053_protected-resources": ["corp_paid_deposit_timing"],
+});
+
 async function runClassicInventoryMigration() {
   const classicIds = new Set(sourceCards.map((card) => card.cardId));
   const classicHints = sourceHints.filter((hint) =>
@@ -493,6 +534,13 @@ async function runClassicInventoryMigration() {
         "aiSupportStatus_quality_scenarioRefs_bound_as_coverage_evidence_not_runtime_planning",
       editorHintFields: "manualNotes_explicitly_discarded_editor_only",
     },
+    reviewedRuleReconciliations: Object.entries(
+      CLASSIC_REVIEWED_RULE_RECONCILIATIONS,
+    ).map(([cardDefinitionId, reconciliations]) => ({
+      cardDefinitionId,
+      reconciliations,
+      disposition: "explicit_reviewed_rule_reconciliation",
+    })),
     cards: mechanics.map((entry) => ({
       ...entry,
       rawCard: sourceCards.find(
@@ -534,7 +582,7 @@ function migrateClassicCard(sourceCard, implementation, hint) {
     sourceCard.cardId,
     hint,
   );
-  return {
+  return applyClassicReviewedRuleReconciliation(sourceCard.cardId, {
     schemaVersion: "card-spec-v1",
     identity: {
       cardDefinitionId: expression(
@@ -577,7 +625,193 @@ function migrateClassicCard(sourceCard, implementation, hint) {
       cardDefinitionId: sourceCard.cardId,
       implementationCoverage: "legacy_implementation_backed_declarative",
     },
-  };
+  });
+}
+
+function applyClassicReviewedRuleReconciliation(cardDefinitionId, spec) {
+  const reconciliation =
+    CLASSIC_REVIEWED_RULE_RECONCILIATIONS[cardDefinitionId];
+  if (reconciliation === undefined) return spec;
+  const engine = spec.engine;
+  const abilities = engine.abilities ?? [];
+  const planningCard = spec.planningAnnotations?.card ?? [];
+  switch (cardDefinitionId) {
+    case "onr_classic_004_theorem-proof":
+      requireClassicReconciliationEntry(
+        engine.agendaAccessReplacement,
+        cardDefinitionId,
+        "agendaAccessReplacement",
+      ).onDecline = {
+        kind: "score_if_still_installed_in_same_fort_at_runner_start",
+      };
+      break;
+    case "onr_classic_011_glacier":
+      if (!Array.isArray(engine.installCapabilities))
+        fail(
+          `classic_reviewed_reconciliation_drift:${cardDefinitionId}:installCapabilities`,
+        );
+      delete engine.installCapabilities;
+      delete requireClassicReconciliationEntry(
+        engine.fortRunWindows,
+        cardDefinitionId,
+        "fortRunWindows",
+      ).limit;
+      break;
+    case "onr_classic_020_london-city-grid":
+      requireClassicReconciliationEntry(
+        engine.modifiers,
+        cardDefinitionId,
+        "modifiers",
+      ).kind = "break_ability_use_cost";
+      break;
+    case "onr_classic_021_satellite-monitors":
+      spec.text.rulesText =
+        "At the start of each of your turns, you may roll a die for each run Runner made during his or her last turn. For each 1, give Runner a tag.";
+      requireClassicReconciliationEntry(
+        engine.corpUtility,
+        cardDefinitionId,
+        "corpUtility",
+      ).optional = true;
+      requireClassicPlanningEntry(
+        planningCard,
+        "plan_role",
+        cardDefinitionId,
+      ).role = "tag_source";
+      break;
+    case "onr_classic_022_self-destruct": {
+      const accessEffect = requireClassicReconciliationEntry(
+        engine.accessEffects,
+        cardDefinitionId,
+        "accessEffects",
+      );
+      accessEffect.installedSourceActivation = "requires_rezzed";
+      accessEffect.cost = { kind: "trash_source" };
+      accessEffect.optional = true;
+      break;
+    }
+    case "onr_classic_023_shock-treatment":
+      requireClassicReconciliationEntry(
+        requireClassicReconciliationEntry(
+          engine.accessEffects,
+          cardDefinitionId,
+          "accessEffects",
+        ).effects,
+        cardDefinitionId,
+        "accessEffects.effects",
+      ).chooser = "corp";
+      spec.planningAnnotations.card = planningCard.filter(
+        (entry) => entry.kind !== "target_preference",
+      );
+      break;
+    case "onr_classic_024_sterdroid":
+      spec.text.rulesText = spec.text.rulesText.replace(
+        "ist strength",
+        "its strength",
+      );
+      for (const ability of abilities)
+        for (const cost of ability.costs ?? [])
+          if (cost.kind === "tap_source") cost.kind = "trash_source";
+      break;
+    case "onr_classic_026_street-enforcer":
+      requireClassicReconciliationEntry(
+        engine.corpUtility,
+        cardDefinitionId,
+        "corpUtility",
+      ).capabilityKey = expression(
+        'capabilityKey("run_start_lose_runner_credits_per_tag")',
+      );
+      engine.corpUtility.kind = "run_start_lose_runner_credits_per_tag";
+      if (spec.planningAnnotations?.capabilities?.[0])
+        spec.planningAnnotations.capabilities[0].capabilityKey = expression(
+          'capabilityKey("run_start_lose_runner_credits_per_tag")',
+        );
+      else
+        fail(
+          `classic_reviewed_reconciliation_drift:${cardDefinitionId}:planningCapability`,
+        );
+      break;
+    case "onr_classic_033_superglue":
+      requireClassicReconciliationEntry(
+        engine.runnerUtilityLongtail,
+        cardDefinitionId,
+        "runnerUtilityLongtail",
+      ).cost.kind = "trash_source";
+      break;
+    case "onr_classic_034_boostergang-connections": {
+      const target = requireClassicPlanningEntry(
+        planningCard,
+        "target_preference",
+        cardDefinitionId,
+      );
+      target.preferences = [
+        "best_cards_for_current_plan",
+        "best_cards_for_current_state",
+      ];
+      target.avoid = ["hidden_info_dependent_choice"];
+      break;
+    }
+    case "onr_classic_035_corruption":
+      if (spec.planningAnnotations === undefined)
+        fail(
+          `classic_reviewed_reconciliation_drift:${cardDefinitionId}:planningAnnotations`,
+        );
+      spec.planningAnnotations.capabilities = [];
+      break;
+    case "onr_classic_044_crash-space": {
+      const ability = requireClassicReconciliationEntry(
+        abilities,
+        cardDefinitionId,
+        "abilities",
+      );
+      ability.costs = ability.costs.filter(
+        (cost) => cost.kind !== "trash_source",
+      );
+      ability.effects = [{ kind: "trash_source", visibility: "public" }];
+      break;
+    }
+    case "onr_classic_046_executive-file-clerk":
+    case "onr_classic_050_sandbox-dig":
+      requireClassicReconciliationEntry(
+        abilities,
+        cardDefinitionId,
+        "abilities",
+      ).timing = "runner_paid";
+      break;
+    case "onr_classic_052_zetatech-portastation":
+      spec.text.rulesText = spec.text.rulesText.replace(
+        "Portostation",
+        "Portastation",
+      );
+      break;
+    case "onr_classic_053_protected-resources":
+      requireClassicReconciliationEntry(
+        abilities,
+        cardDefinitionId,
+        "abilities",
+      ).timing = "corp_paid";
+      break;
+    default:
+      fail(`classic_reviewed_reconciliation_unhandled:${cardDefinitionId}`);
+  }
+  return spec;
+}
+
+function requireClassicReconciliationEntry(value, cardDefinitionId, pathLabel) {
+  const entry = Array.isArray(value) ? value[0] : value;
+  if (entry === undefined || entry === null || typeof entry !== "object")
+    fail(
+      `classic_reviewed_reconciliation_drift:${cardDefinitionId}:${pathLabel}`,
+    );
+  return entry;
+}
+
+function requireClassicPlanningEntry(entries, kind, cardDefinitionId) {
+  const entry = entries.find((candidate) => candidate.kind === kind);
+  if (entry === undefined)
+    fail(
+      `classic_reviewed_reconciliation_drift:${cardDefinitionId}:planning:${kind}`,
+    );
+  return entry;
 }
 
 function classicCharacteristics(sourceCard) {
@@ -659,11 +893,29 @@ function classicMechanicalFamilies(implementation) {
 function mechanicsOnly(value) {
   if (Array.isArray(value)) return value.map(mechanicsOnly);
   if (value === null || typeof value !== "object") return value;
-  return Object.fromEntries(
+  const result = Object.fromEntries(
     Object.entries(value)
       .filter(([key]) => key !== "label" && key !== "text")
       .map(([key, entry]) => [key, mechanicsOnly(entry)]),
   );
+  return canonicalizeTraceFields(result);
+}
+
+function canonicalizeTraceFields(value) {
+  if (value.baseTraceStrength !== undefined) {
+    value.traceLimit = value.traceBidLimit ?? value.baseTraceStrength;
+    delete value.baseTraceStrength;
+    delete value.traceBidLimit;
+  }
+  if (
+    value.traceBaseFromValue !== undefined ||
+    value.traceBidLimitFromValue !== undefined
+  ) {
+    value.traceLimitFromValue = true;
+    delete value.traceBaseFromValue;
+    delete value.traceBidLimitFromValue;
+  }
+  return value;
 }
 
 function capabilityTextFor(implementation) {
@@ -835,7 +1087,6 @@ function classicPlanningAnnotations(cardDefinitionId, hint) {
       kind: "value_interpretation",
       axis: axis === "remoteRootValue" ? "remote_root_value" : "economy",
       rating: numericRating(value, `${cardDefinitionId}.${axis}`),
-      rationale: `Migrated from reviewed Classic hint ${cardDefinitionId}.`,
     });
   }
   const costProfile = hint.costProfile ?? {};
@@ -853,7 +1104,6 @@ function classicPlanningAnnotations(cardDefinitionId, hint) {
       kind: "risk_interpretation",
       risk,
       severity,
-      rationale: `Migrated from reviewed Classic hint ${cardDefinitionId}.`,
     });
   }
   if (hint.riskTags?.includes("flatline_risk"))
@@ -861,7 +1111,6 @@ function classicPlanningAnnotations(cardDefinitionId, hint) {
       kind: "risk_interpretation",
       risk: "flatline_risk",
       severity: "high",
-      rationale: `Migrated from reviewed Classic hint ${cardDefinitionId}.`,
     });
 
   const actionPairs = objectValues(

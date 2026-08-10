@@ -13,7 +13,10 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardLifecycleTriggeredAbilityImplementation } from "./definition-ability-contracts";
-import type { AddressableCapabilityContract } from "../capability-identity";
+import type {
+  AddressableCapabilityContract,
+  CapabilityKey,
+} from "../capability-identity";
 import type {
   CardAccessZone,
   CardConditionImplementation,
@@ -131,13 +134,14 @@ export type CardCorpUtilityImplementation = (
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "run_start_tax_runner_tags";
+      kind: "run_start_lose_runner_credits_per_tag";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
       kind: "corp_start_turn_tag_roll_per_runner_run_last_turn";
       dieFaces: 6;
       tagOn: number;
+      optional: true;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -289,7 +293,7 @@ export type CardRunnerUtilityLongtailImplementation =
     }
   | {
       kind: "derez_fully_broken_passed_ice";
-      cost: { kind: "tap_source" };
+      cost: { kind: "trash_source" };
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
       visibility: Extract<EventVisibilityClass, "public">;
@@ -395,6 +399,9 @@ export type CardAgendaAccessReplacementImplementation = {
   memoryCost: number;
   scoreAsAgendaAction: true;
   removeFromGameOnLeavePlay: true;
+  onDecline?: {
+    kind: "score_if_still_installed_in_same_fort_at_runner_start";
+  };
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
@@ -408,10 +415,11 @@ export type CardAccessEffectImplementation = {
   ignoreIfAccessedFrom?: readonly CardAccessZone[];
   revealIfAccessedFrom?: readonly Extract<CardAccessZone, "rd">[];
   condition?: CardConditionImplementation;
-  cost?: {
-    kind: "corp_may_pay_credits";
-    amount: number;
-  };
+  cost?:
+    | { kind: "corp_may_pay_credits"; amount: number }
+    | { kind: "tap_source" }
+    | { kind: "trash_source" };
+  optional?: boolean;
   effects: readonly CardAccessEffectStepImplementation[];
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
@@ -426,7 +434,7 @@ export type CardAccessEffectStepImplementation =
     }
   | {
       kind: "trace";
-      baseTraceStrength: number;
+      traceLimit: number;
       onSuccess: readonly CardTraceSuccessEffectImplementation[];
       limit: "once_per_run_on_this_fort_per_source";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
@@ -463,6 +471,7 @@ export type CardAccessEffectStepImplementation =
       kind: "trash_installed_runner_hardware_and_programs";
       hardwareAmount: "all";
       programAmount: number;
+      chooser: "corp";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
@@ -632,7 +641,7 @@ export type CardFortRunWindowImplementation =
       cost: { kind: "credit"; amount: number };
       target: "outermost_position_on_other_data_fort";
       revealIfUnrezzed: true;
-      limit: "once_per_run_per_source";
+      limit?: "once_per_run_per_source";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | ({
@@ -705,8 +714,7 @@ export type CardVariableRezImplementation =
       additionalCostPerValue: 1;
       minValue: 0;
       maxValue: number;
-      traceBaseFromValue?: true;
-      traceBidLimitFromValue?: true;
+      traceLimitFromValue?: true;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -724,15 +732,17 @@ export type CardVariableRezImplementation =
     };
 
 export type CardRelativeIceImplementation = {
+  /** Present on canonical CardSpec projections; legacy declarations may omit it. */
+  capabilityKey?: CapabilityKey;
   kind: "rezzed_ice_outside_this_ice";
   strengthBonusPerCount?: number;
   dynamicDamageSubroutine?: {
-    subroutineId: string;
+    subroutineCapabilityKey: CapabilityKey;
     amountPerCount: number;
     visibility: Extract<EventVisibilityClass, "public">;
   };
   dynamicTraceSubroutines?: {
-    baseTraceStrength: number;
+    traceLimit: number;
     traceSuccessEffect: { type: "add_tag"; amount: number };
     visibility: Extract<EventVisibilityClass, "public">;
   };

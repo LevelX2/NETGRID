@@ -53,7 +53,7 @@ describe("runner special trigger execution", () => {
     expect(JSON.stringify(state)).toBe(before);
   });
 
-  it("moves the top heap card to grip through Junkyard BBS", () => {
+  it("leaves the retired Junkyard BBS payload for the canonical ability interpreter", () => {
     const sourceId = "junkyard_1" as CardInstanceId;
     const heapId = "heap_top" as CardInstanceId;
     const state = baseState();
@@ -88,21 +88,10 @@ describe("runner special trigger execution", () => {
       [{ clicks: 1, credits: 1 }],
     );
 
-    expect(handleRunnerSpecialTriggerExecution(host, action)).toMatchObject({
-      handled: true,
-      actionType: "trigger_ability",
+    expect(handleRunnerSpecialTriggerExecution(host, action)).toEqual({
+      handled: false,
     });
-    expect(state.runner.clicks).toBe(1);
-    expect(state.runner.credits).toBe(2);
-    expect(state.runner.heap).toEqual([]);
-    expect(state.runner.grip[0]).toBe(heapId);
-    expect(topRunnerHeapCardId(state)).toBeUndefined();
-    expect(action.payload).toMatchObject({
-      sourceDefinitionId: JUNKYARD_BBS_ID,
-      returnedCardDefinitionId: "heap_card",
-      returnedToGrip: true,
-      runnerCreditsAfter: 2,
-    });
+    expect(state.runner.heap).toEqual([heapId]);
   });
 
   it("sets aside a Shell Traders target with stable public marker payload", () => {
@@ -503,7 +492,7 @@ describe("runner special trigger execution", () => {
     expect(counter(state, secondTargetId, "shell")).toBe(2);
   });
 
-  it("starts the same Self-Modifying Code hidden-zone search after trashing source", () => {
+  it("leaves the retired Self-Modifying Code payload for the canonical ability interpreter", () => {
     const sourceId = "smc_1" as CardInstanceId;
     const stackProgramId = "stack_program" as CardInstanceId;
     const state = baseState();
@@ -556,19 +545,11 @@ describe("runner special trigger execution", () => {
       v1911HiddenZoneAbility: "hidden_stack_program_install",
     });
 
-    handleRunnerSpecialTriggerExecution(host, action);
-
-    expect(state.runner.rig.programs).toEqual([]);
-    expect(state.runner.heap).toEqual([sourceId]);
-    expect(activations).toEqual([sourceId]);
-    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
-    expect(action.payload).toMatchObject({
-      hiddenZoneBarrier: true,
-      sourceDefinitionId: SELF_MODIFYING_CODE_ID,
-      hiddenZoneAction: "hidden_stack_program_install",
-      trashOnUse: true,
-      trashedCardDefinitionId: SELF_MODIFYING_CODE_ID,
+    expect(handleRunnerSpecialTriggerExecution(host, action)).toEqual({
+      handled: false,
     });
+    expect(state.runner.rig.programs).toEqual([sourceId]);
+    expect(activations).toEqual([]);
   });
 
   it("does not import from the public engine index", () => {
@@ -660,6 +641,10 @@ function testHost(
       hasCardImplementationMemoryUnitModifier: () => false,
       shouldLoadLegacyRecurringCredits: (definitionToRead) =>
         (definitionToRead.recurringCredits ?? 0) > 0,
+      hiddenReplacementLongtailKindForDefinition: (definitionToRead) =>
+        definitionToRead.id === SHELL_TRADERS_ID
+          ? "delayed_install_with_counter_countdown"
+          : undefined,
       publicTitle: (definitionId) => String(definitionId),
     },
     credits: {
@@ -715,13 +700,6 @@ function testHost(
     },
     lifecycle: {
       executeOnInstall: () => undefined,
-    },
-    constants: {
-      BUTCHER_BOY_ID: "successful_hq_run_pair_credit",
-      JUNKYARD_BBS_ID,
-      SELF_MODIFYING_CODE_ID,
-      SHELL_TRADERS_ID,
-      SKIVVISS_ID: "skivviss",
     },
   };
 }

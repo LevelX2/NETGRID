@@ -341,8 +341,7 @@ export function publicContextForAction(
       "variableRezValue",
       "variableRezCap",
       "effectiveStrengthAfterRez",
-      "effectiveTraceBaseAfterRez",
-      "effectiveTraceBidLimitAfterRez",
+      "effectiveTraceLimitAfterRez",
       "effectiveSubroutineCountAfterRez",
       "selectedSubtypesAfterRez",
       "discountedRezSourceCardId",
@@ -580,13 +579,13 @@ export function publicContextForAction(
     for (const key of [
       "traceId",
       "traceStep",
-      "baseTraceStrength",
-      "traceBidLimit",
+      "traceLimit",
+      "effectiveTraceLimit",
       "corpBidMax",
       "rabbitTraceLimitReduction",
       "sourceDefinitionId",
       "corpBid",
-      "traceStrength",
+      "traceValue",
       "runnerLink",
       "baseLinkUsed",
       "traceBaseLinkChoiceOpened",
@@ -742,9 +741,10 @@ export function publicContextForAction(
     context.traceId = legalAction.payload.traceId;
     context.sourceCardId = legalAction.payload.sourceCardId;
     context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
-    context.baseTraceStrength = legalAction.payload.baseTraceStrength;
-    if (typeof legalAction.payload.traceBidLimit === "number")
-      context.traceBidLimit = legalAction.payload.traceBidLimit;
+    if (typeof legalAction.payload.traceLimit === "number")
+      context.traceLimit = legalAction.payload.traceLimit;
+    if (typeof legalAction.payload.effectiveTraceLimit === "number")
+      context.effectiveTraceLimit = legalAction.payload.effectiveTraceLimit;
     if (typeof legalAction.payload.corpBidMax === "number")
       context.corpBidMax = legalAction.payload.corpBidMax;
     if (typeof legalAction.payload.rabbitTraceLimitReduction === "number")
@@ -1460,7 +1460,7 @@ export function publicContextForAction(
     "obligationDebtActive",
     "creditGainDiverted",
     "traceHostedCreditsAdded",
-    "traceHostedCreditBoost",
+    "traceLimitAndValueBoost",
     "cryingCountersAfter",
     "linkModifierAmount",
     "runSpendingCap",
@@ -1774,6 +1774,13 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.runStartTaxSourceDefinitionIds === "string")
     context.runStartTaxSourceDefinitionIds =
       legalAction.payload.runStartTaxSourceDefinitionIds;
+  if (typeof legalAction.payload?.runStartLossCredits === "number")
+    context.runStartLossCredits = legalAction.payload.runStartLossCredits;
+  if (typeof legalAction.payload?.runStartLossApplied === "number")
+    context.runStartLossApplied = legalAction.payload.runStartLossApplied;
+  if (typeof legalAction.payload?.runStartLossSourceDefinitionIds === "string")
+    context.runStartLossSourceDefinitionIds =
+      legalAction.payload.runStartLossSourceDefinitionIds;
   if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
     context.v1918UpgradeAbility = legalAction.payload.v1918UpgradeAbility;
     if (typeof legalAction.payload.runStartTaxPaid === "number")

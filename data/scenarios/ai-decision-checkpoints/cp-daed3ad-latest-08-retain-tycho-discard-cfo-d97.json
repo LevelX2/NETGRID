@@ -116,7 +116,7 @@
   },
   "engine": {
     "stateVersion": 225,
-    "stateHash": "fnv1a:76a9adae",
+    "stateHash": "fnv1a:370d46b1",
     "testOnlyGameState": {
       "matchId": "match_daed3ad3bead20fb",
       "baseline": {
@@ -11066,8 +11066,11 @@
       "acceptableCapabilities": ["discard_window"]
     },
     "discardChoice": {
-      "mustRetainDefinitionIds": ["onr_v1_220_tycho-extension"],
-      "mustDiscardDefinitionIds": ["onr_v1_188_ai-chief-financial-officer"]
+      "mustRetainDefinitionIds": [
+        "onr_v1_188_ai-chief-financial-officer",
+        "onr_v1_220_tycho-extension"
+      ],
+      "mustDiscardDefinitionIds": ["onr_v1_204_ice-transmutation"]
     }
   }
 }

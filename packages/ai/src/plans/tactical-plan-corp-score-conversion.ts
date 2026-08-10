@@ -487,7 +487,11 @@ function conversionCapabilities(
               (effect.kind === "advance_burst" ||
                 effect.kind === "score_acceleration"),
           )
-          .map((effect) => effect.amount ?? 0),
+          .map((effect) =>
+            effect.target === "advance.up_to_distinct_targets_one_each"
+              ? Math.min(1, effect.amount ?? 0)
+              : (effect.amount ?? 0),
+          ),
       );
       if (amount <= 0) return [];
       const creditCost = visibleCardCost(card);

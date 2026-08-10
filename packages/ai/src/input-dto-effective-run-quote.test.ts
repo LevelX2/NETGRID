@@ -219,8 +219,7 @@ function validEffectiveRunQuote(): VisibleEffectiveIceRunQuote {
         id: "trace-and-deflect",
         type: "initiate_trace",
         amount: 2,
-        baseTraceStrength: 3,
-        traceBidLimit: 5,
+        traceLimit: 3,
         runFutureStrengthCancelPaymentAmount: 1,
         traceSuccessEffect: {
           type: "add_tag_and_counter",
@@ -334,11 +333,11 @@ function malformedQuoteCases(): Array<{
     },
     {
       label: "fractional base trace",
-      mutate: (quote) => (subroutine(quote).baseTraceStrength = 1.5),
+      mutate: (quote) => (subroutine(quote).traceLimit = 1.5),
     },
     {
       label: "non-finite trace bid limit",
-      mutate: (quote) => (subroutine(quote).traceBidLimit = Number.NaN),
+      mutate: (quote) => (subroutine(quote).traceLimit = Number.NaN),
     },
     {
       label: "negative future-strength cancel payment",

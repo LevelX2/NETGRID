@@ -75,13 +75,23 @@ const expectedCardSpecRuntimeDefinitionIds = Object.freeze(
       : [];
   }),
 );
+function hasRuntimeCardSpecImplementation(
+  definitionId: string,
+): boolean {
+  const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
+  if (spec === undefined)
+    throw new Error(`card_spec_runtime_missing_spec:${definitionId}`);
+  if (hasCardSpecImplementation(spec.engine)) return true;
+  // CS10 transfers Originalset ICE authority to the canonical printed
+  // subroutine projection. Other active sets keep their existing staged
+  // implementation partitions until their own sourcecut.
+  return (
+    spec.printings.some((printing) => printing.setId === "originalset-v1") &&
+    (spec.engine.printedSubroutines?.length ?? 0) > 0
+  );
+}
 const expectedCardSpecImplementationIds = Object.freeze(
-  expectedCardSpecRuntimeDefinitionIds.filter((definitionId) => {
-    const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
-    if (spec === undefined)
-      throw new Error(`card_spec_runtime_missing_spec:${definitionId}`);
-    return hasCardSpecImplementation(spec.engine);
-  }),
+  expectedCardSpecRuntimeDefinitionIds.filter(hasRuntimeCardSpecImplementation),
 );
 if (
   cardSpecEngineViews.length !== expectedCardSpecRuntimeDefinitionIds.length ||
@@ -109,7 +119,7 @@ const cachedCardSpecDefinitionsById = new Map<
 >(cachedCardSpecDefinitions.map((definition) => [definition.id, definition]));
 const cachedCardSpecImplementations = Object.freeze(
   cardSpecEngineViews.flatMap((engine) => {
-    if (!hasCardSpecImplementation(engine.engine)) return [];
+    if (!hasRuntimeCardSpecImplementation(engine.cardDefinitionId)) return [];
     const spec = cardSpecForDefinitionId(
       CARD_REGISTRY,
       engine.cardDefinitionId,

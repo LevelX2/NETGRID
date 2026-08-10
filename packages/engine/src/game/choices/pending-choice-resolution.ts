@@ -97,6 +97,7 @@ export type PendingChoiceResolutionHost = {
     resolvePostMeatDamageHiddenResourceChoice: HostFn<void>;
     resolveStartOfRunFortUtilityChoice: HostFn<void>;
     resolveClassicDeflectorChoice: HostFn<void>;
+    resolveTrashProgramChoice: HostFn<void>;
   };
   access: {
     resolveAccessProgramInstallMemoryChoice: HostFn<void>;
@@ -109,6 +110,9 @@ export type PendingChoiceResolutionHost = {
     resolveCardImplementationAccessPaymentChoice: HostFn<void>;
     resolveCardImplementationAdvancementDistributionChoice: HostFn<void>;
     resolveCardImplementationMoveAdvancementChoice: HostFn<void>;
+  };
+  turn: {
+    resolveSatelliteMonitorsStartChoice: HostFn<void>;
   };
   constants: {
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE: string;
@@ -249,6 +253,7 @@ export function resolvePendingChoice(
   const resolveStartOfRunFortUtilityChoice =
     host.run.resolveStartOfRunFortUtilityChoice;
   const resolveClassicDeflectorChoice = host.run.resolveClassicDeflectorChoice;
+  const resolveTrashProgramChoice = host.run.resolveTrashProgramChoice;
   const resolveSuccessfulRunCreditLossSpendChoice =
     host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const resolveAccessProgramInstallMemoryChoice =
@@ -265,6 +270,8 @@ export function resolvePendingChoice(
       .resolveCardImplementationAdvancementDistributionChoice;
   const resolveCardImplementationMoveAdvancementChoice =
     host.cardImplementation.resolveCardImplementationMoveAdvancementChoice;
+  const resolveSatelliteMonitorsStartChoice =
+    host.turn.resolveSatelliteMonitorsStartChoice;
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
     host.constants
       .RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE;
@@ -320,6 +327,14 @@ export function resolvePendingChoice(
     )
   ) {
     resolveClassicDeflectorChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.trash_installed_program",
+    )
+  ) {
+    resolveTrashProgramChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
@@ -449,6 +464,10 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {
     resolveCrashEverettDrawChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("classic.satellite_monitors")) {
+    resolveSatelliteMonitorsStartChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -679,7 +698,10 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_54.delayed_success")) {
+  if (
+    state.pendingChoice.source.startsWith("p3_54.delayed_success") ||
+    state.pendingChoice.source.startsWith("classic.indiscriminate_response_team:")
+  ) {
     resolveSuccessfulRunInterventionChoiceInRunModule(
       successfulRunInterventionHost(state),
       legalAction,
@@ -687,11 +709,17 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("proteus.return_runner_programs")) {
+  if (
+    state.pendingChoice.source.startsWith("proteus.return_runner_programs") ||
+    state.pendingChoice.source.startsWith("classic.shock_treatment_programs")
+  ) {
     resolveRunnerProgramReturnChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_35.access_payment")) {
+  if (
+    state.pendingChoice.source.startsWith("p3_35.access_payment") ||
+    state.pendingChoice.source.startsWith("p3_35.access_activation")
+  ) {
     resolveCardImplementationAccessPaymentChoice(
       state,
       legalAction,

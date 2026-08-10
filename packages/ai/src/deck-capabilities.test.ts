@@ -888,11 +888,22 @@ describe("DeckCapabilityProfile", () => {
     expect(profile.corp?.remotePlanProfile.remoteEconomyToolsKnown).toBe(2);
   });
 
-  it("matches runner attack plan roles by bounded role terms", () => {
+  it("derives Runner multiaccess pressure from structured access facts", () => {
     setTestCardRoles("local_runner_attack_a", {
       cardId: "local_runner_attack_a",
       side: "runner",
-      roles: ["interface_multiaccess"],
+      roles: [],
+      effects: [
+        {
+          kind: "multiaccess",
+          timing: "persistent",
+          scope: "rnd",
+          resource: "cards",
+          target: "access.rnd_multiaccess",
+          amount: 1,
+          repeatable: true,
+        },
+      ],
     });
     setTestCardRoles("local_runner_attack_b", {
       cardId: "local_runner_attack_b",
@@ -908,7 +919,7 @@ describe("DeckCapabilityProfile", () => {
       cardId: "local_runner_attack_noise",
       side: "runner",
       roles: [
-        "multiaccessory_noise",
+        "interface_multiaccess",
         "remote_contestish_noise",
         "setupish_noise",
       ],

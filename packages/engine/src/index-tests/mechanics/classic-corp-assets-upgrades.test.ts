@@ -27,6 +27,7 @@ import {
 import {
   apply,
   applyChoice,
+  applyChoices,
   emptyRunnerGripForTest,
   installRunnerHardwareForTest,
   installRunnerProgramForTest,
@@ -215,7 +216,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(
       cardImplementationForDefinitionId(LONDON_CITY_GRID)?.modifiers?.[0],
     ).toMatchObject({
-      kind: "break_subroutine_cost",
+      kind: "break_ability_use_cost",
       amount: 1,
       appliesToRunner: { cardType: "program", subtype: "noisy" },
       sameServerAsSource: true,
@@ -253,9 +254,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expect(
       cardImplementationForDefinitionId(STREET_ENFORCER)?.corpUtility,
     ).toEqual({
-      kind: "run_start_tax_runner_tags",
+      kind: "run_start_lose_runner_credits_per_tag",
       visibility: "public",
-      capabilityKey: "run_start_tax_runner_tags",
+      capabilityKey: "run_start_lose_runner_credits_per_tag",
       addressability: ["plan", "action", "quote", "debug"],
     });
 
@@ -267,10 +268,10 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     }
   });
 
-  it("taxes runs on Street Enforcer forts by the Runner's current tags", () => {
+  it("makes the Runner lose credits at run start for Street Enforcer tags without making the run unaffordable", () => {
     let state = toRunnerClassic08Game("classic-08-street-enforcer");
     state.runner.tags = 3;
-    state.runner.credits = 5;
+    state.runner.credits = 2;
     addRezzedCorpRootForTest(state, STREET_ENFORCER, "remote_1", "street");
 
     const legal = mustAction(
@@ -279,10 +280,10 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    expect(legal.costs[0]?.credits).toBe(3);
+    expect(legal.costs[0]?.credits).toBeUndefined();
     expect(legal.payload).toMatchObject({
-      runStartTaxCredits: 3,
-      runStartTaxSourceDefinitionIds: STREET_ENFORCER,
+      runStartLossCredits: 3,
+      runStartLossSourceDefinitionIds: STREET_ENFORCER,
     });
 
     state = apply(
@@ -291,17 +292,18 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       (action) => action.actionId === legal.actionId,
     );
 
-    expect(state.runner.credits).toBe(2);
+    expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
-      runStartTaxCredits: 3,
-      runStartTaxSourceDefinitionIds: STREET_ENFORCER,
-      runnerCreditsAfter: 2,
+      runStartLossCredits: 3,
+      runStartLossSourceDefinitionIds: STREET_ENFORCER,
+      runStartLossApplied: 2,
+      runnerCreditsAfter: 0,
     });
     expectValid(state);
   });
 
-  it("adds London City Grid's extra cost only to noisy breaker use on its fort", () => {
+  it("adds London City Grid's extra cost once to each noisy breaker ability use on its fort", () => {
     let state = toRunnerClassic08Game("classic-08-london-city-grid");
     addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "remote_1", "london");
     const dataWallId = addRezzedCorpIceForTest(
@@ -356,7 +358,59 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expectValid(state);
   });
 
-  it("rolls Satellite Monitors once per Runner run attempt at Corp turn start", () => {
+  it("charges London City Grid once when a noisy breaker breaks multiple subroutines", () => {
+    let state = toRunnerClassic08Game("classic-08-london-city-grid-multi-break");
+    addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "remote_1", "london");
+    const laserWireId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_253_laser-wire",
+      "remote_1",
+      "laser_wire",
+    );
+    const pileDriverId = addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_047_pile-driver",
+      "pile_driver",
+    );
+    state.cardInstances[pileDriverId] = {
+      ...state.cardInstances[pileDriverId]!,
+      strengthModifier: 10,
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = enterEncounterFromMovementWindow(state);
+    expect(state.run?.encounteredIceId).toBe(laserWireId);
+
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.breakerId === pileDriverId &&
+        action.payload?.multiBreakSubroutines === true &&
+        action.payload?.breakSubroutineCount === 2,
+    );
+    expect(breakAction.costs[0]?.credits).toBe(4);
+    expect(breakAction.payload).toMatchObject({
+      breakSubroutineBaseCost: 3,
+      breakSubroutineAdditionalCost: 1,
+      breakSubroutineTotalCost: 4,
+      breakAbilityUseAdditionalCost: 1,
+      breakAbilityUseCostSourceDefinitionIds: LONDON_CITY_GRID,
+    });
+
+    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toEqual(expect.arrayContaining([0, 1]));
+    expect(state.runner.credits).toBe(36);
+    expectValid(state);
+  });
+
+  it("lets the Corp use Satellite Monitors once per source before rolling for Runner run attempts", () => {
     let state = corpMainClassic08Game("classic-08-satellite-monitors");
     addRezzedCorpRootForTest(
       state,
@@ -372,6 +426,12 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     const randomBefore = state.randomDrawRecords.length;
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("classic.satellite_monitors"),
+    });
+    expect(state.randomDrawRecords).toHaveLength(randomBefore);
+    state = applyChoice(state, "corp", "use");
 
     const payload = latestResolvedEffect(
       state,
@@ -429,6 +489,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
         "runner",
         (action) => action.type === "end_turn",
       );
+      candidate = applyChoice(candidate, "corp", "use");
       if (candidate.pendingAddTagContinuation?.kind === "corp_start_turn") {
         opened = { initial, replayStart, state: candidate, fallGuyId };
       }
@@ -500,10 +561,15 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("p3_35.access_activation"),
+    });
+    state = applyChoice(state, "corp", "use");
 
     expect(state.corp.archives).toContain(otherRootId);
-    expect(state.corp.archives).not.toContain(selfId);
-    expect(state.cardInstances[selfId]?.tapped).toBe(true);
+    expect(state.corp.archives).toContain(selfId);
+    expect(state.cardInstances[selfId]?.tapped).not.toBe(true);
     expect(state.runner.grip.length).toBe(gripBefore - 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "classic_self_destruct_access",
@@ -551,6 +617,55 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expectValid(state);
   });
 
+  it("lets the Corp choose exactly two Shock Treatment program targets when more are installed", () => {
+    let state = toRunnerClassic08Game("classic-08-shock-treatment-choice");
+    state.runner.tags = 4;
+    const firstProgramId = installRunnerProgramForTest(state, "simple_fracter");
+    const secondProgramId = installRunnerProgramForTest(
+      state,
+      "simple_decoder",
+    );
+    const thirdProgramId = moveRunnerCardCopyToGrip(state, "simple_fracter");
+    state.runner.grip = state.runner.grip.filter((cardId) => cardId !== thirdProgramId);
+    state.runner.rig.programs.push(thirdProgramId);
+    state.runner.memoryUsed += 1;
+    state.cardInstances[thirdProgramId] = {
+      ...state.cardInstances[thirdProgramId]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+    addRezzedCorpRootForTest(state, SHOCK_TREATMENT, "remote_1", "shock");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = passRootRezWindowBeforeAccessIfOpen(state);
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("classic.shock_treatment_programs"),
+      minSelections: 2,
+      maxSelections: 2,
+    });
+    const optionFor = (cardId: string) =>
+      state.pendingChoice?.options.find((option) => option.value === cardId)?.id;
+    state = applyChoices(state, "corp", [
+      String(optionFor(firstProgramId)),
+      String(optionFor(thirdProgramId)),
+    ]);
+
+    expect(state.runner.heap).toEqual(
+      expect.arrayContaining([firstProgramId, thirdProgramId]),
+    );
+    expect(state.runner.rig.programs).toContain(secondProgramId);
+    expectValid(state);
+  });
+
   it("doubles chosen ICE strength with Sterdroid until the current turn ends", () => {
     let state = corpMainClassic08Game("classic-08-sterdroid");
     const sterdroidId = addRezzedCorpRootForTest(
@@ -581,6 +696,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     );
 
     expect(state.cardInstances[iceId]?.strengthModifier).toBeGreaterThan(0);
+    expect(state.corp.archives).toContain(sterdroidId);
     expect(state.temporaryIceStrengthModifiersUntilEndOfTurn).toEqual([
       expect.objectContaining({
         sourceCardInstanceId: sterdroidId,
@@ -1211,7 +1327,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expectValid(state);
   });
 
-  it("uses Indiscriminate Response Team after a successful run to redraw the Runner grip", () => {
+  it("offers each Indiscriminate Response Team source as an optional Corp post-run choice", () => {
     let state = toRunnerClassic08Game(
       "classic-08-indiscriminate-response-team",
     );
@@ -1230,6 +1346,18 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
 
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("classic.indiscriminate_response_team:"),
+    });
+    const runnerGripCardId = state.runner.grip[0];
+    if (!runnerGripCardId) throw new Error("Runner-Grip-Testkarte fehlt.");
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      runnerGripCardId,
+    );
+    expect(state.randomDrawRecords.length).toBe(randomBefore);
+
+    state = applyChoice(state, "corp", "shuffle_grip");
     const payload = latestPayload(
       state,
       (candidate) => candidate.classicIndiscriminateResponseTeam === true,
@@ -1239,7 +1367,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       runnerGripShuffledIntoStackCount: gripBefore,
       runnerCardsDrawnAfterGripShuffle: gripBefore,
       runnerGripAfter: gripBefore,
-      classicIndiscriminateResponseTeamSourceDefinitionIds: IRT,
+      sourceDefinitionId: IRT,
     });
     expect(state.runner.grip.length).toBe(gripBefore);
     expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);

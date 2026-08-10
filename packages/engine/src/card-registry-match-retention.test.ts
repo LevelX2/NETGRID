@@ -26,7 +26,7 @@ import {
 describe("CardSpec registry per-match retention", () => {
   it("retains no registry objects or CardSpec projection graphs in 500 matches", () => {
     const activeCardSpecDefinitionIds = cardSpecRuntimeDefinitionIds();
-    expect(activeCardSpecDefinitionIds).toHaveLength(100);
+    expect(activeCardSpecDefinitionIds).toHaveLength(618);
     expect(
       CARD_REGISTRY_RETENTION_STRESS_IDS.every((definitionId) =>
         activeCardSpecDefinitionIds.includes(definitionId),

@@ -49,9 +49,11 @@ export const cardSpec = {
       kind: "rezzed_ice_outside_this_ice",
       strengthBonusPerCount: 1,
       dynamicDamageSubroutine: {
-        subroutineId: "subroutine_relative_brain_damage",
         amountPerCount: 1,
         visibility: "public",
+        subroutineCapabilityKey: capabilityKey(
+          "subroutine_relative_brain_damage",
+        ),
       },
     },
     printedSubroutines: [
@@ -60,7 +62,13 @@ export const cardSpec = {
         addressability: ["plan", "action", "quote", "debug"],
         kind: "damage",
         damageType: "brain",
-        amount: 0,
+        amount: {
+          kind: "derived",
+          source: "relative_ice_dynamic_damage",
+          ownerCapabilityKey: capabilityKey(
+            "outside_rezzed_ice_strength_and_core_damage",
+          ),
+        },
         preventable: true,
       },
       {

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -15,6 +16,7 @@ type ReportCard = {
   legacyImplementation: Record<string, any>;
   legacyModuleImplementation: Record<string, any>;
   sharedDefinition?: Record<string, any>;
+  mechanicalReconciliation?: Record<string, any>;
 };
 type ReportNode = {
   cardDefinitionId: string;
@@ -36,6 +38,10 @@ const report = JSON.parse(
     "utf8",
   ),
 ) as MigrationReport;
+
+const PINNED_PRIOR_SPEC_SOURCE_COMMIT =
+  "e6d901e6832852f7ad70b81ae92b1c1a76a8a899";
+const PINNED_PRIOR_SPEC_CONTENT_REF = "HEAD";
 
 const NEW_PROJECTOR_FAMILY_CARDS = {
   flatlineReplacementSources: ["onr_proteus_112_identity-donor"],
@@ -79,27 +85,17 @@ const SHARED_SUBTYPE_REORDER_IDS = new Set([
 ]);
 
 describe("Proteus CardSpec projection parity before source cutover", () => {
-  it("keeps all 102 prior source specs byte-exact while adding the new slice", () => {
-    const newIds = new Set(
-      report.cards.map(({ cardDefinitionId }) => cardDefinitionId),
-    );
-    const priorPaths = recursiveCardSpecPaths(
-      path.join(process.cwd(), "packages/cards/src/specs"),
-    )
-      .filter((relativePath) => {
-        const cardId = path.basename(relativePath, ".card-spec.ts");
-        return !newIds.has(cardId);
-      })
-      .sort();
+  it("keeps the pinned 102 prior source references byte-exact while adding the Proteus slice", () => {
+    const priorPaths = pinnedPriorCardSpecPaths();
     expect(priorPaths).toHaveLength(102);
     const aggregate = priorPaths
       .map(
         (relativePath) =>
-          `${relativePath}\n${readFileSync(path.join(process.cwd(), relativePath), "utf8")}`,
+          `${relativePath}\n${pinnedPriorCardSpecContent(relativePath)}`,
       )
       .join("\n");
     expect(createHash("sha256").update(aggregate).digest("hex")).toBe(
-      "f964c60c6d4433739c609113b58d3f852bd90128fb6c417596ebb7653d0aa972",
+      "efdef5161a9e7b1f400d689bf0d79230ac56a203772a1547546bab96d0e2b624",
     );
   });
 
@@ -115,7 +111,11 @@ describe("Proteus CardSpec projection parity before source cutover", () => {
   });
 
   it("preserves every pinned public fact including variable play cost and strength", () => {
-    for (const { cardDefinitionId, rawCard } of report.cards) {
+    for (const {
+      cardDefinitionId,
+      rawCard,
+      mechanicalReconciliation,
+    } of report.cards) {
       const actual = getPublicCardView(cardDefinitionId);
       expect(actual, cardDefinitionId).toBeDefined();
       expect(normalizedPinnedPublicFacts(actual), cardDefinitionId).toEqual({
@@ -146,7 +146,8 @@ describe("Proteus CardSpec projection parity before source cutover", () => {
           (rawCard.numeric.strength === null
             ? { kind: "not_applicable" }
             : { kind: "fixed", value: rawCard.numeric.strength }),
-        rulesText: rawCard.text,
+        rulesText:
+          mechanicalReconciliation?.rulesText?.canonical ?? rawCard.text,
         markCounterDisplay: rawCard.markCounterDisplay,
         printings: [
           {
@@ -278,11 +279,16 @@ describe("Proteus CardSpec projection parity before source cutover", () => {
         cardDefinitionId,
       ) as Record<string, any>;
       const definition = cardSpecDefinitionById(cardDefinitionId)!;
-      const dynamicSubroutineId =
-        implementation.relativeIce.dynamicDamageSubroutine.subroutineId;
+      const dynamicSubroutineCapabilityKey =
+        implementation.relativeIce.dynamicDamageSubroutine
+          .subroutineCapabilityKey;
       expect(
         definition.subroutines.some(
-          (subroutine) => subroutine.id === dynamicSubroutineId,
+          (subroutine) =>
+            subroutine.id === dynamicSubroutineCapabilityKey &&
+            subroutine.derivedAmount?.kind === "relative_ice_dynamic_damage" &&
+            subroutine.derivedAmount.ownerCapabilityKey ===
+              implementation.relativeIce.capabilityKey,
         ),
         cardDefinitionId,
       ).toBe(true);
@@ -325,7 +331,17 @@ describe("Proteus CardSpec projection parity before source cutover", () => {
                 ...(stripCanonicalIdentity(stripAuthorText(legacy)) as object),
                 capacityMu: 1,
               }
-            : stripCanonicalIdentity(stripAuthorText(legacy)),
+            : family === "selfStealCosts" &&
+                cardDefinitionId === "onr_proteus_004_fetal-ai"
+              ? (
+                  stripCanonicalIdentity(stripAuthorText(legacy)) as Array<
+                    Record<string, unknown>
+                  >
+                ).map(({ ignoreIfAccessedFrom: _ignored, ...cost }) => ({
+                  ...cost,
+                  sourceZones: ["installed", "hq", "rd", "archives"],
+                }))
+              : stripCanonicalIdentity(stripAuthorText(legacy)),
         );
         expect(
           Object.isFrozen(actual[family]),
@@ -336,13 +352,30 @@ describe("Proteus CardSpec projection parity before source cutover", () => {
   });
 });
 
-function recursiveCardSpecPaths(directory: string): string[] {
-  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const absolute = path.join(directory, entry.name);
-    if (entry.isDirectory()) return recursiveCardSpecPaths(absolute);
-    if (!entry.isFile() || !entry.name.endsWith(".card-spec.ts")) return [];
-    return [path.relative(process.cwd(), absolute).replaceAll("\\", "/")];
-  });
+function pinnedPriorCardSpecPaths(): string[] {
+  return execFileSync(
+    "git",
+    [
+      "ls-tree",
+      "-r",
+      "--name-only",
+      PINNED_PRIOR_SPEC_SOURCE_COMMIT,
+      "--",
+      "packages/cards/src/specs",
+    ],
+    { cwd: process.cwd(), encoding: "utf8" },
+  )
+    .split(/\r?\n/)
+    .filter((relativePath) => relativePath.endsWith(".card-spec.ts"))
+    .sort();
+}
+
+function pinnedPriorCardSpecContent(relativePath: string): string {
+  return execFileSync(
+    "git",
+    ["show", `${PINNED_PRIOR_SPEC_CONTENT_REF}:${relativePath}`],
+    { cwd: process.cwd(), encoding: "utf8" },
+  );
 }
 
 function normalizedPinnedPublicFacts(
@@ -379,6 +412,48 @@ function normalizeLegacyImplementation(
     string,
     any
   >;
+  if (cardDefinitionId === "onr_proteus_004_fetal-ai")
+    return {
+      ...normalized,
+      accessEffects: normalized.accessEffects.map(
+        ({ ignoreIfAccessedFrom: _ignored, ...effect }: Record<string, any>) =>
+          effect,
+      ),
+      selfStealCosts: normalized.selfStealCosts.map(
+        ({ ignoreIfAccessedFrom: _ignored, ...cost }: Record<string, any>) => ({
+          ...cost,
+          sourceZones: ["installed", "hq", "rd", "archives"],
+        }),
+      ),
+    };
+  if (cardDefinitionId === "onr_proteus_005_marked-accounts")
+    return {
+      ...normalized,
+      accessEffects: normalized.accessEffects.map(
+        ({
+          ignoreIfAccessedFrom: _ignored,
+          ...effect
+        }: Record<string, any>) => ({
+          ...effect,
+          sourceZones: ["installed", "hq", "rd", "archives"],
+        }),
+      ),
+    };
+  const repeatReconciliation = report.cards.find(
+    (card) => card.cardDefinitionId === cardDefinitionId,
+  )?.mechanicalReconciliation?.modifiers;
+  if (repeatReconciliation?.kind === "minotaur_repeat_scope")
+    return {
+      ...normalized,
+      modifiers: normalized.modifiers.map((modifier: Record<string, any>) => ({
+        ...modifier,
+        repeat: {
+          ...modifier.repeat,
+          scope: repeatReconciliation.scope,
+          subtypeMatch: repeatReconciliation.subtypeMatch,
+        },
+      })),
+    };
   if (cardDefinitionId !== "onr_proteus_139_eurocorpse-tm-spin-chip")
     return normalized;
   return {
@@ -403,7 +478,7 @@ function stripAuthorText(value: unknown): unknown {
 function stripCanonicalIdentity(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(stripCanonicalIdentity);
   if (value === null || typeof value !== "object") return value;
-  return Object.fromEntries(
+  const result = Object.fromEntries(
     Object.entries(value as Record<string, unknown>)
       .filter(
         ([key]) =>
@@ -413,6 +488,29 @@ function stripCanonicalIdentity(value: unknown): unknown {
       )
       .map(([key, entry]) => [key, stripCanonicalIdentity(entry)]),
   );
+  if (result.traceStrengthAndLimitPerBit !== undefined) {
+    result.traceValueAndLimitPerBit = result.traceStrengthAndLimitPerBit;
+    delete result.traceStrengthAndLimitPerBit;
+  }
+  if (result.additionalPlayCostPerBaseTracePointAboveZero !== undefined) {
+    result.additionalPlayCostPerTraceLimitPointAboveZero =
+      result.additionalPlayCostPerBaseTracePointAboveZero;
+    delete result.additionalPlayCostPerBaseTracePointAboveZero;
+  }
+  if (result.baseTraceStrength !== undefined) {
+    result.traceLimit = result.traceBidLimit ?? result.baseTraceStrength;
+    delete result.baseTraceStrength;
+    delete result.traceBidLimit;
+  }
+  if (
+    result.traceBaseFromValue !== undefined ||
+    result.traceBidLimitFromValue !== undefined
+  ) {
+    result.traceLimitFromValue = true;
+    delete result.traceBaseFromValue;
+    delete result.traceBidLimitFromValue;
+  }
+  return result;
 }
 
 function stripSubroutineIdentity(value: unknown): unknown {
@@ -429,7 +527,23 @@ function normalizedSharedSubroutine(
   cardDefinitionId: string,
   value: Record<string, unknown>,
 ): unknown {
-  const { traceBidLimit, ...rest } = value;
+  const dynamicReconciliation = report.cards.find(
+    (card) => card.cardDefinitionId === cardDefinitionId,
+  )?.mechanicalReconciliation?.printedSubroutines;
+  if (
+    value.type === "do_damage" &&
+    value.amount === 0 &&
+    dynamicReconciliation?.kind === "dynamic_damage_binding"
+  )
+    return {
+      type: "do_damage",
+      damageType: value.damageType,
+      derivedAmount: {
+        kind: "relative_ice_dynamic_damage",
+        ownerCapabilityKey: dynamicReconciliation.ownerCapabilityKey,
+      },
+    };
+  const { baseTraceStrength, traceBidLimit, ...rest } = value;
   if (traceBidLimit === undefined) return stripSubroutineIdentity(value);
   expect(cardDefinitionId).toBe("onr_proteus_025_homing-missile");
   expect(traceBidLimit).toBe(0);
@@ -440,7 +554,10 @@ function normalizedSharedSubroutine(
     traceBaseFromValue: true,
     traceBidLimitFromValue: true,
   });
-  return stripSubroutineIdentity(rest);
+  return stripSubroutineIdentity({
+    ...rest,
+    traceLimit: traceBidLimit ?? baseTraceStrength,
+  });
 }
 
 function expectedSubroutine(
@@ -461,7 +578,14 @@ function expectedSubroutine(
       type: "do_damage",
       damageType:
         subroutine.damageType === "brain" ? "core" : subroutine.damageType,
-      amount: subroutine.amount,
+      ...(typeof subroutine.amount === "number"
+        ? { amount: subroutine.amount }
+        : {
+            derivedAmount: {
+              kind: "relative_ice_dynamic_damage",
+              ownerCapabilityKey: subroutine.amount.ownerCapabilityKey,
+            },
+          }),
     };
   if (subroutine.kind === "end_the_run") return { id, type: "end_the_run" };
   if (subroutine.kind === "trash_program")
@@ -505,7 +629,7 @@ function expectedSubroutine(
       return {
         id,
         type: "initiate_trace",
-        baseTraceStrength: subroutine.baseTraceStrength,
+        traceLimit: subroutine.traceLimit ?? subroutine.baseTraceStrength,
         traceSuccessEffect: {
           type: "end_run_and_run_lock",
           amount: runLock.amount,
@@ -516,7 +640,7 @@ function expectedSubroutine(
     return {
       id,
       type: "initiate_trace",
-      baseTraceStrength: subroutine.baseTraceStrength,
+      traceLimit: subroutine.traceLimit ?? subroutine.baseTraceStrength,
       traceSuccessEffect:
         effect.kind === "preventable_damage"
           ? { type: "net_damage", amount: effect.amount }

@@ -507,7 +507,7 @@ describe("selectedChoicesForDecision", () => {
   it("uses the first legal Runner damage-prevention source instead of passing", () => {
     const forceShield = {
       instanceId: "runner_force_shield_1",
-      definitionId: "runner_force_shield",
+      definitionId: "onr_v1_028_force-shield",
       known: true,
       type: "program",
     } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
@@ -539,7 +539,7 @@ describe("selectedChoicesForDecision", () => {
       resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
-        rolesForCardId: () => ["damage_prevention", "rig_defense"],
+        rolesForCardId: () => [],
       },
     );
 
@@ -551,7 +551,7 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("preserves a non-routine prevention source outside acute damage pressure", () => {
+  it("does not treat legacy prevention roles as a structured prevention fact", () => {
     const oneShot = {
       instanceId: "runner_one_shot_1",
       definitionId: "runner_one_shot",
@@ -587,7 +587,7 @@ describe("selectedChoicesForDecision", () => {
       resolveChoiceAction("runner"),
       {
         ...unusedDependencies(),
-        rolesForCardId: () => ["program"],
+        rolesForCardId: () => ["damage_prevention", "rig_defense"],
       },
     );
 
@@ -2398,5 +2398,6 @@ function unusedDependencies(): Parameters<
     selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
     extractAiFeatures: () => ({}) as never,
     rolesForCardId: () => [],
+    effectsForCardId: () => [],
   };
 }

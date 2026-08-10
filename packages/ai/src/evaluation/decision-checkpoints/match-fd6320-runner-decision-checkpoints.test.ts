@@ -34,7 +34,7 @@ describe("match FD6320 runner decision checkpoints", () => {
     expectCheckpointToPass(freshRnd);
   });
 
-  it("funds the hand instead of drawing into overflow below matchpoint", () => {
+  it("installs immediate AP coverage instead of drawing into overflow below matchpoint", () => {
     const belowMatchpoint = mutateFixture(
       reachableHqMatchpointJson,
       (checkpoint) => {
@@ -54,7 +54,17 @@ describe("match FD6320 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "FD6320-C02-NO-MATCHPOINT-FORCE";
         checkpoint.expectation = {
-          acceptableActions: [{ type: "gain_credit" }],
+          acceptableActions: [
+            {
+              type: "install_card",
+              sourceDefinitionId: "onr_v1_039_krash",
+            },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["runner.rig_and_coverage"],
+            acceptableCapabilities: ["install_breaker_ap"],
+            requiredAssessmentEvidence: ["target:rd"],
+          },
         };
       },
     );

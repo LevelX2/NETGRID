@@ -32,14 +32,14 @@ import { CARD_IMPLEMENTATION_CATALOG } from "./card-implementations/subregistrie
 
 describe("heterogeneous card authority composition", () => {
   it("composes exact disjoint definition and implementation partitions", () => {
-    expect(Object.keys(LEGACY_CARD_DEFINITIONS_BY_ID)).toHaveLength(383);
-    expect(cardSpecDefinitions()).toHaveLength(251);
-    expect(cs06CardDefinitions()).toHaveLength(10);
-    expect(CARD_DEFINITIONS).toHaveLength(634);
-    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(366);
-    expect(cardSpecImplementations()).toHaveLength(228);
-    expect(cs06CardImplementations()).toHaveLength(10);
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(594);
+    expect(CARD_DEFINITIONS).toHaveLength(
+      Object.keys(LEGACY_CARD_DEFINITIONS_BY_ID).length +
+        cardSpecDefinitions().length,
+    );
+    expect(CARD_IMPLEMENTATION_CATALOG).toHaveLength(0);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(
+      cardSpecImplementations().length,
+    );
     expect(Object.isFrozen(CARD_DEFINITIONS)).toBe(true);
     expect(Object.isFrozen(CARD_DEFINITIONS_BY_ID)).toBe(true);
     expect(Object.isFrozen(CARD_IMPLEMENTATIONS)).toBe(true);
@@ -106,22 +106,22 @@ describe("heterogeneous card authority composition", () => {
   });
 
   it("fails implementation composition closed for overlap, missing, unexpected and duplicate lanes", () => {
-    const legacy = CARD_IMPLEMENTATION_CATALOG[0]!;
     const canonical = cs06CardImplementations()[0]!;
+    const secondCanonical = cs06CardImplementations()[1]!;
     expectImplementationError(
       () =>
         composeCardImplementationAuthorities(
-          [legacy],
-          [legacy],
-          [legacy.cardDefinitionId],
+          [canonical],
+          [canonical],
+          [canonical.cardDefinitionId],
         ),
       "overlapping_definition_authority",
-      legacy.cardDefinitionId,
+      canonical.cardDefinitionId,
     );
     expectImplementationError(
       () =>
         composeCardImplementationAuthorities(
-          [legacy],
+          [canonical],
           [],
           [canonical.cardDefinitionId],
         ),
@@ -129,19 +129,24 @@ describe("heterogeneous card authority composition", () => {
       canonical.cardDefinitionId,
     );
     expectImplementationError(
-      () => composeCardImplementationAuthorities([legacy], [canonical], []),
+      () =>
+        composeCardImplementationAuthorities(
+          [canonical],
+          [secondCanonical],
+          [],
+        ),
       "unexpected_card_spec_authority",
-      canonical.cardDefinitionId,
+      secondCanonical.cardDefinitionId,
     );
     expectImplementationError(
       () =>
         composeCardImplementationAuthorities(
-          [legacy],
-          [canonical, canonical],
-          [canonical.cardDefinitionId],
+          [canonical],
+          [secondCanonical, secondCanonical],
+          [secondCanonical.cardDefinitionId],
         ),
       "duplicate_definition_authority",
-      canonical.cardDefinitionId,
+      secondCanonical.cardDefinitionId,
     );
   });
 

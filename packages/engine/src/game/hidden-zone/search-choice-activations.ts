@@ -41,12 +41,6 @@ export type HiddenZoneSearchActivationBaseHost = {
     GameState,
     "runner" | "pendingChoice" | "stateVersion" | "run" | "randomCounter"
   >;
-  constants: {
-    topStackTakeMatchingSourceId: CardDefinitionId;
-    randomStackProgramInstallSourceId: CardDefinitionId;
-    stackProgramFreeInstallSourceId: CardDefinitionId;
-    stackSearchGripSourceId: CardDefinitionId;
-  };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     isUniqueRunnerDefinitionInstalled: (definition: CardDefinition) => boolean;
@@ -437,11 +431,7 @@ export function startAujourdOuiTop5Activation(
 ): void {
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
-  if (
-    !host.state.runner.rig.resources.includes(sourceCardId) ||
-    host.cards.definitionFor(sourceCardId).id !==
-      host.constants.topStackTakeMatchingSourceId
-  ) {
+  if (!host.state.runner.rig.resources.includes(sourceCardId)) {
     throw new Error("Aujourd'Oui ist nicht mehr installiert.");
   }
   const topCards = host.state.runner.stack.slice(0, 5);
@@ -590,13 +580,6 @@ export function handleTopFiveProgramInstallActivation(
   ) as CardInstanceId;
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die offengelegte Stack-Quelle ist nicht installiert.");
-  if (
-    host.cards.definitionFor(sourceCardId).id !==
-    host.constants.randomStackProgramInstallSourceId
-  )
-    throw new Error(
-      "Die Revealed-Stack-Program-Install-Faehigkeit passt nicht zur Karte.",
-    );
   const oncePerRunPlan = createSourceOncePerRunPostInstallPlan({
     sourceCardId,
     usedSourceIdsThisRun: run.hiddenStackInstallUsedSourceIdsThisRun ?? [],

@@ -69,8 +69,7 @@ describe("AI input DTO Corp rez projection contract", () => {
         postInstallRezQuoteVariableMinValueFinalCredits: 3,
         postInstallRezQuoteVariableMaxValueFinalCredits: 11,
         postInstallRezQuoteVariableEffectiveStrengthFromValue: true,
-        postInstallRezQuoteVariableTraceBaseFromValue: true,
-        postInstallRezQuoteVariableTraceBidLimitFromValue: true,
+        postInstallRezQuoteVariableTraceLimitFromValue: true,
       },
     ],
     [
@@ -818,8 +817,7 @@ function variableInstalledRezQuote(
         minValueFinalCredits: 3,
         maxValueFinalCredits: 11,
         effectiveStrengthFromValue: true,
-        traceBaseFromValue: true,
-        traceBidLimitFromValue: true,
+        traceLimitFromValue: true,
       },
     };
   }

@@ -6,6 +6,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { createAiHintsByCard } from "./ai-hints";
+import {
+  runnerHintProvidesDamagePrevention,
+  runnerHintProvidesTagPrevention,
+} from "./runner-canonical-hint-semantics";
 
 export type RunnerDamageDeckBeliefLevel = "none" | "suspected" | "confirmed";
 
@@ -474,22 +478,18 @@ function runnerLockedHandInstallIsImmediateDefense(card: VisibleCard): boolean {
   const hint = card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
   if (!hint) return false;
   if (hint.breakerProfile) return true;
-  if (
-    hint.roles.some((role) =>
-      ["damage_prevention", "icebreaker", "tag_avoid"].includes(role),
-    )
-  ) {
+  if (hint.roles.includes("icebreaker")) {
     return true;
   }
-  return (hint.effects ?? []).some((effect) => {
-    const kind = String(effect.kind);
-    return (
-      kind === "remove_brain_damage" ||
-      kind === "tag_prevention" ||
-      kind === "hand_size_modifier" ||
-      kind.includes("damage_prevention")
-    );
-  });
+  return (
+    runnerHintProvidesDamagePrevention(hint) ||
+    runnerHintProvidesTagPrevention(hint) ||
+    (hint.effects ?? []).some(
+      (effect) =>
+        effect.kind === "remove_brain_damage" ||
+        effect.kind === "hand_size_modifier",
+    )
+  );
 }
 
 export function runnerDamageThreatRunScoreComponent(

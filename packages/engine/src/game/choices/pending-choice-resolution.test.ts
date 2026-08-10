@@ -397,6 +397,7 @@ function pendingChoiceHost(
       resolveClassicDeflectorChoice: unexpected(
         "resolveClassicDeflectorChoice",
       ),
+      resolveTrashProgramChoice: unexpected("resolveTrashProgramChoice"),
     },
     access: {
       resolveAccessProgramInstallMemoryChoice: unexpected(
@@ -419,6 +420,11 @@ function pendingChoiceHost(
       ),
       resolveCardImplementationMoveAdvancementChoice: unexpected(
         "resolveCardImplementationMoveAdvancementChoice",
+      ),
+    },
+    turn: {
+      resolveSatelliteMonitorsStartChoice: unexpected(
+        "resolveSatelliteMonitorsStartChoice",
       ),
     },
     constants: {

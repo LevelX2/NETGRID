@@ -3,8 +3,8 @@ import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
 
 export type LatestTraceContext = {
   sourceDefinitionId?: string;
-  baseTraceStrength?: number;
-  traceStrength?: number;
+  traceLimit?: number;
+  traceValue?: number;
   runnerLink?: number;
   corpBid?: number;
   runnerBid?: number;
@@ -15,10 +15,8 @@ export type LatestTraceContext = {
 export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerLink = visibleRunnerLinkAtCorpBid(input);
   for (const event of input.eventTail.slice().reverse()) {
-    const baseTraceStrength = event.publicPayload.baseTraceStrength;
-    const traceStrength =
-      event.publicPayload.traceStrength ??
-      baseTraceStrength;
+    const traceLimit = event.publicPayload.traceLimit;
+    const traceValue = event.publicPayload.traceValue;
     const runnerLink = event.publicPayload.runnerLink;
     const corpBid = event.publicPayload.corpBid;
     const runnerBid = event.publicPayload.runnerBid;
@@ -26,7 +24,8 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
     const postBidTraceLinkBonus = event.publicPayload.postBidTraceLinkBonus;
     const sourceDefinitionId = event.publicPayload.sourceDefinitionId;
     if (
-      typeof traceStrength === "number" ||
+      typeof traceLimit === "number" ||
+      typeof traceValue === "number" ||
       typeof runnerLink === "number" ||
       typeof corpBid === "number" ||
       typeof runnerBid === "number" ||
@@ -38,10 +37,10 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
         sourceDefinitionId.length > 0
           ? { sourceDefinitionId }
           : {}),
-        ...(typeof baseTraceStrength === "number"
-          ? { baseTraceStrength }
+        ...(typeof traceLimit === "number"
+          ? { traceLimit }
           : {}),
-        ...(typeof traceStrength === "number" ? { traceStrength } : {}),
+        ...(typeof traceValue === "number" ? { traceValue } : {}),
         ...(typeof runnerLink === "number"
           ? { runnerLink }
           : { runnerLink: visibleRunnerLink }),

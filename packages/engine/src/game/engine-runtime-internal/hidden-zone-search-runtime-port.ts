@@ -22,12 +22,6 @@ export type HiddenZoneSearchRuntimePort = {
   ) => HiddenZoneSearchActivationHandlerHost;
   hiddenZoneSearchActivationTargetHost: (state: GameState) => {
     state: GameState;
-    constants: {
-      topStackTakeMatchingSourceId: string;
-      randomStackProgramInstallSourceId: string;
-      stackProgramFreeInstallSourceId: string;
-      stackSearchGripSourceId: string;
-    };
     cards: {
       definitionFor: (cardId: CardInstanceId) => CardDefinition;
       isUniqueRunnerDefinitionInstalled: (
@@ -85,5 +79,6 @@ export type HiddenZoneSearchRuntimePort = {
   startRunnerProgramFreeMemoryChoice: (
     state: GameState,
     selectedProgramId: CardInstanceId,
+    sourceCardId: CardInstanceId,
   ) => boolean;
 };

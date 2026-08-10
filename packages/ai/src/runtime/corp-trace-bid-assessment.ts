@@ -39,11 +39,8 @@ export function assessCorpTraceBid(params: {
   maxBid: number;
   sourceDefinitionId?: string;
 }): CorpTraceBidAssessment {
-  const traceStrength = params.traceContext.traceStrength;
   const runnerLink = params.traceContext.runnerLink;
   if (
-    !Number.isInteger(traceStrength) ||
-    typeof traceStrength !== "number" ||
     !Number.isInteger(runnerLink) ||
     typeof runnerLink !== "number"
   ) {
@@ -56,8 +53,7 @@ export function assessCorpTraceBid(params: {
   const minimumGuaranteedBid = Math.max(
     0,
     Math.max(0, runnerLink) +
-      Math.max(0, params.input.playerView.opponent.credits) -
-      Math.max(0, traceStrength) +
+      Math.max(0, params.input.playerView.opponent.credits) +
       1,
   );
   if (

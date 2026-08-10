@@ -9,10 +9,12 @@ import {
   accessEffectApplies,
   accessEffectId,
   maxRunnerProgramReturnCount,
+  runnerInstalledTrashCandidatesForAccessEffect,
   resolveCardImplementationAccessEffects,
   runnerInstalledProgramReturnCandidates,
   selectedCardIdsFromChoice,
   setAccessEffectBasePayload,
+  trashInstalledRunnerHardwareAndProgramsForAccessEffect,
 } from "./access-effect-execution";
 import {
   requireLegalAction,
@@ -74,7 +76,11 @@ export function resolveAccessPaymentChoice(
 ): AccessPaymentChoiceResult {
   const legalAction = requireLegalAction(host);
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_35.access_payment"))
+  if (
+    !choice ||
+    (!choice.source.startsWith("p3_35.access_payment") &&
+      !choice.source.startsWith("p3_35.access_activation"))
+  )
     throw new Error(
       "Es ist keine CardImplementation-Access-Payment-Choice offen.",
     );
@@ -94,7 +100,7 @@ export function resolveAccessPaymentChoice(
   const effect = host.cards.accessEffectsForDefinition(definition.id)[
     effectIndex
   ];
-  if (!effect?.cost || effect.cost.kind !== "corp_may_pay_credits")
+  if (!effect?.cost)
     throw new Error("Die Access-Payment-Choice passt nicht zur Karte.");
   const accessZone = cardImplementationAccessZone(host, sourceId);
   if (
@@ -102,12 +108,16 @@ export function resolveAccessPaymentChoice(
     !accessEffectApplies(host, sourceId, effect, accessZone)
   )
     throw new Error("Der Access-Payment-Kontext ist nicht mehr gueltig.");
-  if (selectedOptionId !== "pay" && selectedOptionId !== "decline")
+  const useOption =
+    effect.cost.kind === "corp_may_pay_credits" ? "pay" : "use";
+  if (selectedOptionId !== useOption && selectedOptionId !== "decline")
     throw new Error("Die Access-Payment-Auswahl ist ungueltig.");
   setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    ambushPaymentAmount: effect.cost.amount,
+    ...(effect.cost.kind === "corp_may_pay_credits"
+      ? { ambushPaymentAmount: effect.cost.amount }
+      : {}),
   };
   if (selectedOptionId === "decline") {
     legalAction.payload = {
@@ -127,12 +137,36 @@ export function resolveAccessPaymentChoice(
       resolvedPayload: legalAction.payload as AccessPayload,
     };
   }
-  if (host.state.corp.credits < effect.cost.amount)
-    throw new Error("Die Korp kann die Access-Ambush-Kosten nicht bezahlen.");
-  host.payment.spendCorpCredits(effect.cost.amount);
+  if (effect.cost.kind === "corp_may_pay_credits") {
+    if (host.state.corp.credits < effect.cost.amount)
+      throw new Error("Die Korp kann die Access-Ambush-Kosten nicht bezahlen.");
+    host.payment.spendCorpCredits(effect.cost.amount);
+  } else {
+    const source = host.cards.mustInstance(sourceId);
+    if (effect.cost.kind === "tap_source" && source.tapped)
+      throw new Error("Die Access-Ambush-Quelle ist bereits getappt.");
+    if (effect.cost.kind === "tap_source") source.tapped = true;
+    const sourceServerId =
+      source.zone.side === "corp" &&
+      (source.zone.zone === "serverRoot" || source.zone.zone === "serverIce")
+        ? source.zone.serverId
+        : undefined;
+    if (effect.cost.kind === "trash_source")
+      host.trash.trashCorpInstalledCardToArchives(sourceId);
+    if (sourceServerId) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        accessEffectSourceServerId: sourceServerId,
+      };
+    }
+  }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    ambushPaidCost: effect.cost.amount,
+    ...(effect.cost.kind === "corp_may_pay_credits"
+      ? { ambushPaidCost: effect.cost.amount }
+      : effect.cost.kind === "tap_source"
+        ? { accessEffectSourceTapped: true }
+        : { accessEffectSourceTrashed: true }),
     corpCreditsAfter: host.state.corp.credits,
   };
   delete host.state.pendingChoice;
@@ -148,7 +182,7 @@ export function resolveAccessPaymentChoice(
     sourceCardId: sourceId,
     sourceDefinitionId: definition.id,
     accessZone,
-    paidCredits: effect.cost.amount,
+    paidCredits: effect.cost.kind === "corp_may_pay_credits" ? effect.cost.amount : 0,
     deletePendingChoice: true,
     resolvedPayload: legalAction.payload as AccessPayload,
     ...(host.legalAction?.resolvedEffects
@@ -236,6 +270,10 @@ export function resolveAccessInstalledRunnerProgramReturnChoice(
 ): AccessEffectHandlerResult {
   const legalAction = requireLegalAction(host);
   const choice = host.state.pendingChoice;
+  if (
+    choice?.source.startsWith("classic.shock_treatment_programs")
+  )
+    return resolveShockTreatmentProgramChoice(host, selectedOptionIds);
   if (!choice || !choice.source.startsWith("proteus.return_runner_programs"))
     throw new Error("Es ist keine Runner-Program-Return-Choice offen.");
   if (legalAction.side !== "corp")
@@ -291,6 +329,75 @@ export function resolveAccessInstalledRunnerProgramReturnChoice(
     ...result.publicPayload,
   };
   delete host.state.pendingChoice;
+  return {
+    handled: true,
+    sourceCardId: sourceId,
+    sourceDefinitionId: definition.id,
+    accessZone,
+    deletePendingChoice: true,
+    resolvedPayload: legalAction.payload as AccessPayload,
+    stateChanged: true,
+  };
+}
+
+export function resolveShockTreatmentProgramChoice(
+  host: AccessEffectHandlerHost,
+  selectedOptionIds: readonly string[],
+): AccessEffectHandlerResult {
+  const legalAction = requireLegalAction(host);
+  const choice = host.state.pendingChoice;
+  if (!choice || !choice.source.startsWith("classic.shock_treatment_programs"))
+    throw new Error("Es ist keine Shock-Treatment-Programm-Choice offen.");
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Shock-Treatment-Ziele wählen.");
+  const [, sourceCardId = "", effectIndexRaw = "", accessZoneRaw = ""] =
+    choice.source.split(":");
+  const effectIndex = Number(effectIndexRaw);
+  if (
+    !sourceCardId ||
+    host.state.run?.accessedCardId !== sourceCardId ||
+    !Number.isInteger(effectIndex) ||
+    effectIndex < 0
+  )
+    throw new Error("Die Shock-Treatment-Choice ist nicht mehr gültig.");
+  const sourceId = sourceCardId as CardInstanceId;
+  const definition = host.cards.definitionFor(sourceId);
+  const effect = host.cards.accessEffectsForDefinition(definition.id)[effectIndex];
+  const accessZone = cardImplementationAccessZone(host, sourceId);
+  if (
+    accessZone !== accessZoneRaw ||
+    !effect ||
+    !accessEffectApplies(host, sourceId, effect, accessZone)
+  )
+    throw new Error("Der Shock-Treatment-Access-Kontext ist nicht mehr gültig.");
+  const step = effect.effects.find(
+    (candidate) => candidate.kind === "trash_installed_runner_hardware_and_programs",
+  );
+  if (!step || step.chooser !== "corp")
+    throw new Error("Die Shock-Treatment-Choice passt nicht zur Karte.");
+  const selectedIds = selectedCardIdsFromChoice(choice, selectedOptionIds);
+  const candidates = runnerInstalledTrashCandidatesForAccessEffect(host, "program");
+  if (selectedIds.length !== Math.min(step.programAmount, candidates.length))
+    throw new Error("Die falsche Anzahl Runner-Programme wurde gewählt.");
+  for (const selectedId of selectedIds) {
+    if (!candidates.includes(selectedId))
+      throw new Error("Das gewählte Runner-Programm ist nicht mehr installiert.");
+  }
+  delete host.state.pendingChoice;
+  trashInstalledRunnerHardwareAndProgramsForAccessEffect(
+    host,
+    definition,
+    step.hardwareAmount,
+    step.programAmount,
+    legalAction.resolvedEffects ?? (legalAction.resolvedEffects = []),
+    effectIndex,
+    selectedIds,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    shockTreatmentProgramChoiceResolved: true,
+    selectedProgramCount: selectedIds.length,
+  };
   return {
     handled: true,
     sourceCardId: sourceId,

@@ -447,6 +447,14 @@ async function runProteusInventoryMigration() {
         translateSharedPrintedSubroutine(
           entry.implementation.cardDefinitionId,
           subroutine,
+          entry.implementation.relativeIce?.dynamicDamageSubroutine ===
+            undefined
+            ? undefined
+            : requiredProteusCapabilityKey(
+                entry.implementation.cardDefinitionId,
+                "relativeIce",
+                0,
+              ),
         ),
       ),
     };
@@ -743,8 +751,8 @@ async function runProteusInventoryMigration() {
         "legacy_shared_mechanics_are_not_a_second_runtime_authority_typed_card_spec_nodes_replace_consumed_tokens_armageddon_does_not_gain_an_unprinted_install_virus_counter",
       sharedDynamicSubroutineBinding:
         "relative_ice_dynamic_damage_references_are_rebound_from_legacy_shared_subroutine_ids_to_the_reviewed_canonical_printed_subroutine_capability_keys",
-      sharedHomingTraceBidLimit:
-        "legacy_shared_zero_placeholder_is_replaced_by_typed_variable_rez_trace_base_and_bid_limit_from_rez_value_runtime_projection",
+      sharedHomingTraceLimit:
+        "legacy_shared_zero_placeholder_is_replaced_by_typed_variable_rez_trace_limit_from_rez_value_runtime_projection",
       sharedDynamicHintBinding:
         "relative_ice_and_x_trace_shared_zero_placeholders_never_compile_as_fixed_zero_hint_values_typed_dynamic_owners_supply_amount_scope_timing_and_run_lock",
       mechanicPresentationSplit:
@@ -773,6 +781,15 @@ async function runProteusInventoryMigration() {
         "fixed_damage_values_for_fetal_ai_bel_digmo_and_stereogram_derive_from_typed_mechanics_instead_of_legacy_empty_value_hints",
       streetwareEconomyValue:
         "typed_three_credit_recurring_mechanic_replaces_stale_legacy_economy_one_evaluation",
+      fetalAiAccessEffects:
+        PROTEUS_MECHANICAL_RECONCILIATIONS["onr_proteus_004_fetal-ai"]
+          .accessEffects.disposition,
+      fetalAiSelfStealCosts:
+        PROTEUS_MECHANICAL_RECONCILIATIONS["onr_proteus_004_fetal-ai"]
+          .selfStealCosts.disposition,
+      markedAccountsAccessEffects:
+        PROTEUS_MECHANICAL_RECONCILIATIONS["onr_proteus_005_marked-accounts"]
+          .accessEffects.disposition,
       existingSpecs:
         "digiconda_black_widow_morphing_tool_preserved_byte_for_byte",
       sourceCut:
@@ -788,6 +805,13 @@ async function runProteusInventoryMigration() {
     },
     cards: mechanics.map((entry) => ({
       ...entry,
+      ...(PROTEUS_MECHANICAL_RECONCILIATIONS[entry.cardDefinitionId] ===
+      undefined
+        ? {}
+        : {
+            mechanicalReconciliation:
+              PROTEUS_MECHANICAL_RECONCILIATIONS[entry.cardDefinitionId],
+          }),
       rawCard: sourceCards.find(
         (card) => card.cardId === entry.cardDefinitionId,
       ),
@@ -857,7 +881,7 @@ function migrateProteusCard(sourceCard, implementation, hint) {
     },
     text: {
       schemaVersion: "canonical-card-text-v1",
-      rulesText: sourceCard.text,
+      rulesText: reconciledProteusRulesText(sourceCard),
       ...(capabilityText.length === 0 ? {} : { capabilityText }),
       ...(sourceCard.markCounterDisplay === undefined
         ? {}
@@ -1286,8 +1310,15 @@ function proteusMechanicalFamilies(implementation) {
   const result = {};
   for (const [family, value] of Object.entries(implementation)) {
     if (family === "cardDefinitionId" || family === "regionBaseline") continue;
+    const reconciledValue = reconciledProteusMechanic(
+      implementation.cardDefinitionId,
+      family,
+      mechanicsOnly(value),
+    );
     if (PROTEUS_ADDRESSABLE_FAMILIES.has(family)) {
-      const entries = Array.isArray(value) ? value : [value];
+      const entries = Array.isArray(reconciledValue)
+        ? reconciledValue
+        : [reconciledValue];
       const migrated = entries.map((entry, sourceIndex) => ({
         capabilityKey: expression(
           `capabilityKey(${JSON.stringify(
@@ -1299,16 +1330,12 @@ function proteusMechanicalFamilies(implementation) {
           )})`,
         ),
         addressability: ["plan", "action", "quote", "debug"],
-        ...mechanicsOnly(entry),
+        ...entry,
       }));
-      result[family] = Array.isArray(value) ? migrated : migrated[0];
+      result[family] = Array.isArray(reconciledValue) ? migrated : migrated[0];
       continue;
     }
-    result[family] = reconciledProteusMechanic(
-      implementation.cardDefinitionId,
-      family,
-      mechanicsOnly(value),
-    );
+    result[family] = reconciledValue;
   }
   return result;
 }
@@ -1317,6 +1344,73 @@ function reconciledProteusMechanic(cardDefinitionId, family, value) {
   const reconciliation =
     PROTEUS_MECHANICAL_RECONCILIATIONS[cardDefinitionId]?.[family];
   if (reconciliation === undefined) return value;
+  if (family === "accessEffects" || family === "selfStealCosts")
+    return reconcileAccessZoneMechanic(
+      cardDefinitionId,
+      family,
+      value,
+      reconciliation,
+    );
+  if (reconciliation.kind === "dynamic_damage_binding") {
+    assertDynamicDamageReconciliation(
+      cardDefinitionId,
+      family,
+      value,
+      reconciliation,
+    );
+    if (family === "relativeIce")
+      return {
+        ...value,
+        dynamicDamageSubroutine: {
+          ...value.dynamicDamageSubroutine,
+          subroutineCapabilityKey: expression(
+            `capabilityKey(${JSON.stringify(
+              value.dynamicDamageSubroutine.subroutineCapabilityKey,
+            )})`,
+          ),
+        },
+      };
+    return value.map((entry) =>
+      entry?.amount?.kind === "derived"
+        ? {
+            ...entry,
+            amount: {
+              ...entry.amount,
+              ownerCapabilityKey: expression(
+                `capabilityKey(${JSON.stringify(
+                  entry.amount.ownerCapabilityKey,
+                )})`,
+              ),
+            },
+          }
+        : entry,
+    );
+  }
+  if (reconciliation.kind === "minotaur_repeat_scope") {
+    if (
+      family !== "modifiers" ||
+      !Array.isArray(value) ||
+      value.length !== 1 ||
+      value[0]?.kind !== "additional_subroutine" ||
+      value[0].repeat?.kind !== "for_each_rezzed_installed_ice" ||
+      value[0].repeat.excludeSource !== true ||
+      JSON.stringify(value[0].repeat.subtypeAnyOf) !==
+        JSON.stringify(["code_gate", "wall"]) ||
+      Object.hasOwn(value[0].repeat, "scope") ||
+      Object.hasOwn(value[0].repeat, "subtypeMatch")
+    )
+      fail(`proteus_minotaur_repeat_source_shape:${cardDefinitionId}`);
+    return [
+      {
+        ...value[0],
+        repeat: {
+          ...value[0].repeat,
+          scope: reconciliation.scope,
+          subtypeMatch: reconciliation.subtypeMatch,
+        },
+      },
+    ];
+  }
   if (
     family !== "hostedProgramCapacity" ||
     value === null ||
@@ -1330,10 +1424,108 @@ function reconciledProteusMechanic(cardDefinitionId, family, value) {
   return { ...value, capacityMu: reconciliation.capacityMu };
 }
 
+function reconciledProteusRulesText(sourceCard) {
+  const reconciliation =
+    PROTEUS_MECHANICAL_RECONCILIATIONS[sourceCard.cardId]?.rulesText;
+  if (reconciliation === undefined) return sourceCard.text;
+  if (
+    sourceCard.text !== reconciliation.legacy ||
+    typeof reconciliation.canonical !== "string" ||
+    reconciliation.canonical.split("\n").length !== 4 ||
+    reconciliation.canonical
+      .split("\n")
+      .some((line) => line !== "*End the run.")
+  )
+    fail(`proteus_rules_text_reconciliation_mismatch:${sourceCard.cardId}`);
+  return reconciliation.canonical;
+}
+
+function assertDynamicDamageReconciliation(
+  cardDefinitionId,
+  family,
+  value,
+  reconciliation,
+) {
+  if (family === "relativeIce") {
+    const binding = value?.dynamicDamageSubroutine;
+    if (
+      value?.kind !== "rezzed_ice_outside_this_ice" ||
+      binding?.subroutineCapabilityKey !==
+        reconciliation.subroutineCapabilityKey ||
+      !Number.isInteger(binding.amountPerCount) ||
+      binding.amountPerCount <= 0 ||
+      binding.visibility !== "public"
+    )
+      fail(
+        `proteus_dynamic_damage_relative_ice_reconciliation_mismatch:${cardDefinitionId}`,
+      );
+    return;
+  }
+  if (family === "printedSubroutines") {
+    const entries = Array.isArray(value) ? value : [];
+    const targetIndex =
+      PROTEUS_CAPABILITY_KEYS[cardDefinitionId]?.printedSubroutines?.indexOf(
+        reconciliation.subroutineCapabilityKey,
+      ) ?? -1;
+    const target = entries[targetIndex];
+    const derivedTargets = entries.filter(
+      (entry) => entry?.amount?.kind === "derived",
+    );
+    if (
+      targetIndex < 0 ||
+      derivedTargets.length !== 1 ||
+      target?.kind !== "damage" ||
+      target.amount?.kind !== "derived" ||
+      target.amount.source !== "relative_ice_dynamic_damage" ||
+      target.amount.ownerCapabilityKey !== reconciliation.ownerCapabilityKey
+    )
+      fail(
+        `proteus_dynamic_damage_printed_reconciliation_mismatch:${cardDefinitionId}`,
+      );
+    return;
+  }
+  fail(
+    `proteus_dynamic_damage_reconciliation_family_mismatch:${cardDefinitionId}:${family}`,
+  );
+}
+
+function reconcileAccessZoneMechanic(
+  cardDefinitionId,
+  family,
+  value,
+  reconciliation,
+) {
+  const entries = Array.isArray(value) ? value : [value];
+  const expectedKind =
+    family === "accessEffects" ? "on_access" : "current_access_self_steal_cost";
+  if (
+    entries.length !== 1 ||
+    entries[0] === null ||
+    typeof entries[0] !== "object" ||
+    Array.isArray(entries[0]) ||
+    entries[0].kind !== expectedKind ||
+    JSON.stringify(entries[0].sourceZones) !==
+      JSON.stringify(reconciliation.legacySourceZones) ||
+    JSON.stringify(entries[0].ignoreIfAccessedFrom) !==
+      JSON.stringify([reconciliation.removeIgnoredAccessZone]) ||
+    !Array.isArray(reconciliation.canonicalSourceZones) ||
+    reconciliation.removeIgnoredAccessZone !== "archives"
+  )
+    fail(
+      `proteus_invalid_access_zone_reconciliation_source:${cardDefinitionId}:${family}`,
+    );
+  const { ignoreIfAccessedFrom: _ignored, ...entry } = entries[0];
+  const reconciled = {
+    ...entry,
+    sourceZones: [...reconciliation.canonicalSourceZones],
+  };
+  return Array.isArray(value) ? [reconciled] : reconciled;
+}
+
 function mechanicsOnly(value) {
   if (Array.isArray(value)) return value.map(mechanicsOnly);
   if (value === null || typeof value !== "object") return value;
-  return Object.fromEntries(
+  const result = Object.fromEntries(
     Object.entries(value)
       .filter(
         ([key]) =>
@@ -1345,6 +1537,33 @@ function mechanicsOnly(value) {
       )
       .map(([key, entry]) => [key, mechanicsOnly(entry)]),
   );
+  return canonicalizeTraceFields(result);
+}
+
+function canonicalizeTraceFields(value) {
+  if (value.traceStrengthAndLimitPerBit !== undefined) {
+    value.traceValueAndLimitPerBit = value.traceStrengthAndLimitPerBit;
+    delete value.traceStrengthAndLimitPerBit;
+  }
+  if (value.additionalPlayCostPerBaseTracePointAboveZero !== undefined) {
+    value.additionalPlayCostPerTraceLimitPointAboveZero =
+      value.additionalPlayCostPerBaseTracePointAboveZero;
+    delete value.additionalPlayCostPerBaseTracePointAboveZero;
+  }
+  if (value.baseTraceStrength !== undefined) {
+    value.traceLimit = value.traceBidLimit ?? value.baseTraceStrength;
+    delete value.baseTraceStrength;
+    delete value.traceBidLimit;
+  }
+  if (
+    value.traceBaseFromValue !== undefined ||
+    value.traceBidLimitFromValue !== undefined
+  ) {
+    value.traceLimitFromValue = true;
+    delete value.traceBaseFromValue;
+    delete value.traceBidLimitFromValue;
+  }
+  return value;
 }
 
 function capabilityTextFor(implementation) {
@@ -1499,7 +1718,11 @@ function literalAstValue(node, pathLabel) {
   fail(`proteus_shared_definition_nonliteral_value:${pathLabel}`);
 }
 
-function translateSharedPrintedSubroutine(cardDefinitionId, subroutine) {
+function translateSharedPrintedSubroutine(
+  cardDefinitionId,
+  subroutine,
+  relativeIceCapabilityKey,
+) {
   const type = requiredString(
     subroutine.type,
     `${cardDefinitionId}.sharedSubroutine.type`,
@@ -1509,13 +1732,18 @@ function translateSharedPrintedSubroutine(cardDefinitionId, subroutine) {
   if (type === "do_damage") {
     if (
       subroutine.amount !== 0 ||
-      (subroutine.damageType !== "net" && subroutine.damageType !== "core")
+      (subroutine.damageType !== "net" && subroutine.damageType !== "core") ||
+      relativeIceCapabilityKey === undefined
     )
       fail(`proteus_shared_dynamic_damage_shape:${cardDefinitionId}`);
     return {
       kind: "damage",
       damageType: subroutine.damageType === "core" ? "brain" : "net",
-      amount: 0,
+      amount: {
+        kind: "derived",
+        source: "relative_ice_dynamic_damage",
+        ownerCapabilityKey: relativeIceCapabilityKey,
+      },
       preventable: true,
       text: "*Do dynamic damage.",
     };
@@ -1534,7 +1762,7 @@ function translateSharedPrintedSubroutine(cardDefinitionId, subroutine) {
       fail(`proteus_shared_homing_trace_shape:${cardDefinitionId}`);
     return {
       kind: "trace",
-      baseTraceStrength: 0,
+      traceLimit: 0,
       onSuccess: [
         { kind: "end_run", visibility: "public" },
         {
@@ -1570,13 +1798,30 @@ function reconcileSharedSubroutineReferences(
     "printedSubroutines",
     sourceIndex,
   );
+  const ownerCapabilityKey = requiredProteusCapabilityKey(
+    implementation.cardDefinitionId,
+    "relativeIce",
+    0,
+  );
+  const canonicalTarget = implementation.printedSubroutines?.[sourceIndex];
+  if (
+    canonicalTarget?.kind !== "damage" ||
+    canonicalTarget.amount?.kind !== "derived" ||
+    canonicalTarget.amount.source !== "relative_ice_dynamic_damage" ||
+    canonicalTarget.amount.ownerCapabilityKey !== ownerCapabilityKey
+  )
+    fail(
+      `proteus_relative_ice_dynamic_damage_target_mismatch:${implementation.cardDefinitionId}`,
+    );
+  const { subroutineId: _legacySubroutineId, ...dynamicDamage } =
+    dynamicDamageSubroutine;
   return {
     ...implementation,
     relativeIce: {
       ...relativeIce,
       dynamicDamageSubroutine: {
-        ...dynamicDamageSubroutine,
-        subroutineId: canonicalSubroutineKey,
+        ...dynamicDamage,
+        subroutineCapabilityKey: canonicalSubroutineKey,
       },
     },
   };

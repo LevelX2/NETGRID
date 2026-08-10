@@ -8,8 +8,6 @@ import type {
   LegalAction,
   ServerId,
 } from "@netgrid/shared";
-import { POLTERGEIST_ID } from "../../compatibility/runtime-compatibility";
-import { UPGRADE_TRASH_PROGRAM_SOURCE } from "../../mechanics/longtail-card-effects";
 import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { quoteAccessTrashCost } from "../../ability-engine/trash-cost-modifiers";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
@@ -644,14 +642,6 @@ function upgradeTrashRecurringCreditSourceIds(
     ...host.payment.restrictedHostedCreditSourceIds("trash_upgrades", {
       accessedCardId,
     }),
-    ...host.state.runner.rig.programs.filter((cardId) => {
-      const definition = host.cards.definitionFor(cardId);
-      return (
-        !host.payment.isRestrictedHostedCreditSource(definition) &&
-        definition.id === UPGRADE_TRASH_PROGRAM_SOURCE &&
-        host.counters.cardCounter(cardId, "recurring_credit") > 0
-      );
-    }),
   ].sort();
 }
 
@@ -664,14 +654,6 @@ function poltergeistRecurringCreditSourceIds(
   return [
     ...host.payment.restrictedHostedCreditSourceIds("trash_nodes", {
       accessedCardId,
-    }),
-    ...host.state.runner.rig.programs.filter((cardId) => {
-      const definition = host.cards.definitionFor(cardId);
-      return (
-        !host.payment.isRestrictedHostedCreditSource(definition) &&
-        definition.id === POLTERGEIST_ID &&
-        host.counters.cardCounter(cardId, "recurring_credit") > 0
-      );
     }),
   ].sort();
 }

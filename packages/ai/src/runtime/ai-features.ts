@@ -25,6 +25,7 @@ export type AiFeatures = {
   opponentCredits: number;
   opponentTags: number;
   memoryRemaining: number;
+  hasInstalledNonNoisyIcebreaker: boolean;
   handCount: number;
   rigRoles: Set<string>;
   rigDefinitionIds: Set<string>;
@@ -65,6 +66,22 @@ export function extractAiFeatures(
     (input.playerView.own.rig ?? []).flatMap((card) =>
       dependencies.rolesForCardId(card.definitionId),
     ),
+  );
+  const hasInstalledNonNoisyIcebreaker = (input.playerView.own.rig ?? []).some(
+    (card) => {
+      const subtypes = new Set(
+        (card.subtypes ?? []).map((subtype) =>
+          subtype.trim().toLocaleLowerCase("en-US"),
+        ),
+      );
+      return (
+        (subtypes.has("icebreaker") ||
+          ["fracter", "decoder", "killer", "worm"].some((subtype) =>
+            subtypes.has(subtype),
+          )) &&
+        !subtypes.has("noisy")
+      );
+    },
   );
   const rigDefinitionIds = new Set(
     (input.playerView.own.rig ?? [])
@@ -120,6 +137,7 @@ export function extractAiFeatures(
     memoryRemaining:
       (input.playerView.own.memoryLimit ?? 0) -
       (input.playerView.own.memoryUsed ?? 0),
+    hasInstalledNonNoisyIcebreaker,
     handCount: input.playerView.own.gripOrHq.length,
     rigRoles,
     rigDefinitionIds,

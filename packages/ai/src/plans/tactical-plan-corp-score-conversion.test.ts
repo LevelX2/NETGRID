@@ -509,6 +509,27 @@ describe("Corp same-turn score conversion", () => {
     expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
   });
 
+  it("counts a projected distinct-target operation as one counter on the agenda", () => {
+    const agenda = card("agenda", "agenda", { advancementRequirement: 2 });
+    const teamRestructuring = card("team", "operation", {
+      definitionId: "onr_v1_305_team-restructuring",
+      playCost: { kind: "fixed", credits: 1 },
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 1,
+      hq: [agenda, teamRestructuring],
+      actions: [
+        action("install", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+      ],
+    });
+
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
   it("binds Falsified Transactions to the chosen funded source", () => {
     const agenda = card("agenda", "agenda", { advancementRequirement: 3 });
     const funded = card("funded", "asset", { advancementCounters: 3 });

@@ -177,6 +177,7 @@ describe("run duration payment", () => {
   it("pays or ends Ball-and-Chain-style encounter tax without changing payload fields", () => {
     const state = makeState();
     state.run!.encounterTaxForFutureIce = 3;
+    state.run!.encounterTaxSourceDefinitionId = "onr_v1_222_ball-and-chain";
     const legalAction = { payload: {} } as LegalAction;
 
     const paid = payEncounterTaxForFutureIce(
@@ -204,6 +205,8 @@ describe("run duration payment", () => {
       sourceDefinitionId: "lucidrine_def",
     };
     cannotPay.run!.encounterTaxForFutureIce = 3;
+    cannotPay.run!.encounterTaxSourceDefinitionId =
+      "onr_v1_222_ball-and-chain";
     const unpaidAction = { payload: {} } as LegalAction;
 
     const unpaid = payEncounterTaxForFutureIce(

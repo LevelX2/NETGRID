@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
+import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 import type { AiCardHint } from "./ai-hints";
 
-const hints = activeAiHintsData.cards as AiCardHint[];
+const hints = generatedArtifact.cards.map(({ hint }) => hint) as AiCardHint[];
 const hintsByCard = new Map(hints.map((hint) => [hint.cardId, hint]));
 
 describe("action-capacity hint contracts", () => {

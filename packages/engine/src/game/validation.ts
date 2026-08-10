@@ -420,16 +420,22 @@ export function validateGameState(state: GameState): ValidationResult {
     if (!state.cardInstances[state.trace.sourceCardInstanceId])
       errors.push("Trace references missing source card.");
     if (
-      !Number.isInteger(state.trace.baseTraceStrength) ||
-      state.trace.baseTraceStrength < 0
+      !Number.isInteger(state.trace.traceLimit) ||
+      state.trace.traceLimit < 0
     )
-      errors.push("Trace base strength is invalid.");
+      errors.push("Trace limit is invalid.");
     if (
-      state.trace.traceBidLimit !== undefined &&
-      (!Number.isInteger(state.trace.traceBidLimit) ||
-        state.trace.traceBidLimit < 0)
+      state.trace.effectiveTraceLimit !== undefined &&
+      (!Number.isInteger(state.trace.effectiveTraceLimit) ||
+        state.trace.effectiveTraceLimit < 0)
     )
-      errors.push("Trace bid limit is invalid.");
+      errors.push("Effective trace limit is invalid.");
+    if (
+      state.trace.traceValue !== undefined &&
+      state.trace.effectiveTraceLimit !== undefined &&
+      state.trace.traceValue > state.trace.effectiveTraceLimit
+    )
+      errors.push("Trace value exceeds the effective trace limit.");
     if (!isSupportedTraceSuccessEffect(state.trace.successEffect))
       errors.push("Trace success effect is outside supported scope.");
     if (!state.pendingChoice)
@@ -448,7 +454,7 @@ export function validateGameState(state: GameState): ValidationResult {
         errors.push("Runner trace step requires Runner choice.");
       if (
         state.trace.corpBid === undefined ||
-        state.trace.traceStrength === undefined ||
+        state.trace.traceValue === undefined ||
         state.trace.runnerLink === undefined
       )
         errors.push("Runner trace step is missing Corp bid context.");
@@ -557,7 +563,10 @@ export function validateGameState(state: GameState): ValidationResult {
       "Data Fort Reclamation rez choice requires its sequence state.",
     );
   }
-  if (state.pendingAddTagContinuation) {
+  if (
+    state.pendingAddTagContinuation &&
+    state.pendingAddTagContinuation.kind !== "corp_start_turn_satellite_choice"
+  ) {
     if (state.imminentEvent?.eventType !== "add_tag")
       errors.push("Add-tag continuation requires an Add-Tag imminent event.");
     if (!state.eventModificationWindow)

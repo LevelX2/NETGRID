@@ -47,7 +47,7 @@ export function selectedBidChoiceOptionId(
   } else {
     const tieBid = Math.max(
       0,
-      (traceContext.traceStrength ?? 0) - (traceContext.runnerLink ?? 0),
+      (traceContext.traceValue ?? 0) - (traceContext.runnerLink ?? 0),
     );
     desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, tieBid);
   }
@@ -78,16 +78,16 @@ function runnerRunBudgetPreservingBidOption(
   selected: { id: string; amount: number },
   traceContext: LatestTraceContext,
 ): { id: string; amount: number } | undefined {
-  const traceStrength = traceContext.traceStrength;
+  const traceValue = traceContext.traceValue;
   const runnerLink = traceContext.runnerLink;
   if (
     input.side !== "runner" ||
     !input.playerView.run ||
-    !Number.isInteger(traceStrength) ||
+    !Number.isInteger(traceValue) ||
     !Number.isInteger(runnerLink) ||
-    typeof traceStrength !== "number" ||
+    typeof traceValue !== "number" ||
     typeof runnerLink !== "number" ||
-    !runnerAvoidsTrace(runnerLink, selected.amount, traceStrength)
+    !runnerAvoidsTrace(runnerLink, selected.amount, traceValue)
   ) {
     return undefined;
   }
@@ -107,7 +107,7 @@ function runnerRunBudgetPreservingBidOption(
   const reserve = runnerRunPlanReserveTarget(plan);
   const credits = input.playerView.own.credits;
   const minimumLosingBid = bidOptions.find(
-    (option) => !runnerAvoidsTrace(runnerLink, option.amount, traceStrength),
+    (option) => !runnerAvoidsTrace(runnerLink, option.amount, traceValue),
   );
   if (!minimumLosingBid) return undefined;
   const basicTagCleanupCost = tagAmount * 2;
@@ -147,8 +147,8 @@ function currentTraceTagAmount(
       sourceDefinitionId as CardDefinitionId,
     ).filter(
       (quote) =>
-        traceContext.baseTraceStrength === undefined ||
-        quote.baseTraceStrength === traceContext.baseTraceStrength,
+        traceContext.traceLimit === undefined ||
+        quote.traceLimit === traceContext.traceLimit,
     );
   const implementationTagAmounts = implementationQuotes.flatMap((quote) =>
     quote.traceSuccessEffect.type === "add_tag"
@@ -250,9 +250,9 @@ function runnerRunPlanReserveTarget(plan: RunnerRunPlan): number {
 function runnerAvoidsTrace(
   runnerLink: number,
   runnerBid: number,
-  traceStrength: number,
+  traceValue: number,
 ): boolean {
-  return Math.max(0, runnerLink) + runnerBid >= Math.max(0, traceStrength);
+  return Math.max(0, runnerLink) + runnerBid >= Math.max(0, traceValue);
 }
 
 function corpDesiredBidAmount(

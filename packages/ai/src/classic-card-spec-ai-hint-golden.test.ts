@@ -8,6 +8,7 @@ import migrationReport from "../../../docs/reviews/cards/classic-card-spec-migra
 import generatedArtifact from "../../../data/ai/card-spec-ai-hints-generated.json";
 import reviewedGolden from "./test-fixtures/classic-card-spec-ai-hints-reviewed-v1.json";
 import proteusReviewedGolden from "./test-fixtures/proteus-card-spec-ai-hints-reviewed-v1.json";
+import originalsetReviewedGolden from "./test-fixtures/originalset-v1-card-spec-ai-hints-reviewed-v1.json";
 import { deriveCardSpecAiHint } from "./card-spec-ai-hint-compiler";
 
 const reviewedIds = new Set(
@@ -86,6 +87,9 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         !reviewedIds.has(record.cardId) &&
         !proteusReviewedGolden.cards.some(
           (proteusRecord) => proteusRecord.cardId === record.cardId,
+        ) &&
+        !originalsetReviewedGolden.cards.some(
+          (originalsetRecord) => originalsetRecord.cardId === record.cardId,
         ),
     );
     const compiled = priorGeneratedCards.map((record) => {
@@ -107,7 +111,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:4149b7e9740701500c5209c9d38770c320eae179706595c497ee72bdcf7e6dd1",
+      "sha256:149f28f12e1baf297595f71f28888aaaa0f37c6875d8ae28ee005c132c9195d9",
     );
   });
 
@@ -154,7 +158,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         pair,
       })),
     );
-    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(9);
+    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(8);
     expect(
       actionPairs.every(
         ({ pair }) =>

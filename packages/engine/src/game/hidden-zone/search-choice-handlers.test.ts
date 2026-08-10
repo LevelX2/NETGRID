@@ -176,13 +176,6 @@ function host(
         HiddenZoneSearchChoiceHandlerHost["state"]["run"]
       >,
     },
-    constants: {
-      topStackTakeMatchingSourceId: aujourdOuiId,
-      randomStackProgramInstallSourceId:
-        "revealed_stack_program_install" as CardDefinitionId,
-      stackProgramFreeInstallSourceId,
-      stackSearchGripSourceId: shortCircuitId,
-    },
     cards: {
       definitionFor: (cardId) => {
         const cardDefinition = definitions[cardId];

@@ -6,6 +6,7 @@ import {
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
 import { visibleBreakerEncounterQuote } from "@netgrid/engine";
+import { AI_HINTS_BY_CARD } from "../catalog-ai-hint-authority";
 import { creditsToBreakEndTheRunSubroutinesWithBreaker } from "../visible-run-analysis";
 import type {
   BreakAssessment,
@@ -1208,12 +1209,22 @@ function visiblePreparedRunnerBreakerCandidates(
     ) {
       return false;
     }
-    const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
     return Boolean(
-      definition &&
-      definition.side === "runner" &&
-      definition.mechanics.includes("shell_counter") &&
-      definition.mechanics.includes("delayed_install"),
+      hint?.side === "runner" &&
+      hint.cardType === "resource" &&
+      hint.requiredMechanics?.includes(
+        "delayed_install_with_counter_countdown",
+      ) &&
+      hint.effects?.some(
+        (effect) =>
+          effect.kind === "install" &&
+          effect.scope === "runner" &&
+          effect.timing === "persistent" &&
+          effect.resource === "cards" &&
+          effect.target === "setup.install_countdown" &&
+          effect.repeatable === true,
+      ),
     );
   }).length;
   if (automaticRemovals === 0) return { status: "known", candidates: [] };

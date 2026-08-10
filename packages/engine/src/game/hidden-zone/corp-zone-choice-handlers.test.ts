@@ -143,13 +143,12 @@ function makeHost(input: {
     state,
     legalAction,
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
-    constants: {
-      corpHqAgendaRevealCardId: cncDefinitionId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId, "operation"),
-      hasCardImplementation: (definitionId) =>
-        input.hasImplementation?.has(definitionId) ?? false,
+      hasLifecycleEffect: (cardId, effectKind) =>
+        effectKind === "show_hq_agendas_for_credits" &&
+        definitions[cardId]?.id === cncDefinitionId &&
+        !(input.hasImplementation?.has(cncDefinitionId) ?? false),
       mustInstance: (cardId) => {
         const found = cardInstances[cardId];
         if (!found) throw new Error(`missing instance ${cardId}`);

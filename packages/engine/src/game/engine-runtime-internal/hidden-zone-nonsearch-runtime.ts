@@ -88,10 +88,6 @@ export function createHiddenZoneNonSearchRuntime(
       state,
       legalAction,
       ...(playerAction ? { playerAction } : {}),
-      constants: {
-        corpArchivesToHqOperationCardId: deps.ARCHIVES_TO_HQ_OPERATION_SOURCE,
-        runAccessPressureEventCardId: deps.RUN_ACCESS_PRESSURE_EVENT_SOURCE,
-      },
       cards: {
         definitionFor: (cardId) => deps.definitionFor(state, cardId),
         corpUtilityForCard: (cardId) =>

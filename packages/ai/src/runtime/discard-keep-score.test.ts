@@ -433,6 +433,80 @@ describe("discard keep score", () => {
     );
   });
 
+  it("devalues a canonical finite burst only after current liquidity is already saturated", () => {
+    const scoreEvent = runnerCard("onr_v1_108_score", "event");
+    const saturated = score(
+      scoreEvent,
+      ["economy", "event"],
+      "runner",
+      [],
+      {},
+      { credits: 18, cardCost: 5, legalActionForCard: true },
+    );
+    const lowLiquidity = score(
+      scoreEvent,
+      ["economy", "event"],
+      "runner",
+      [],
+      {},
+      { credits: 6, cardCost: 5, legalActionForCard: true },
+    );
+
+    expect(saturated.total).toBeLessThan(lowLiquidity.total - 200);
+    expect(saturated.evidence).toContain(
+      "discard_score:runner_saturated_finite_burst_economy",
+    );
+    expect(lowLiquidity.evidence).not.toContain(
+      "discard_score:runner_saturated_finite_burst_economy",
+    );
+  });
+
+  it("keeps canonical non-noisy breaker credits only when a compatible breaker is installed", () => {
+    const cloak = runnerCard("onr_v1_011_cloak", "program");
+    const compatibleBreaker = runnerCard("compatible-breaker", "program");
+    const noisyBreaker = runnerCard("noisy-breaker", "program");
+    const rolesByCardId = {
+      "compatible-breaker": ["icebreaker"],
+      "noisy-breaker": ["icebreaker", "noisy"],
+    };
+    const usable = score(
+      cloak,
+      ["economy_recurring", "run_support"],
+      "runner",
+      [compatibleBreaker],
+      rolesByCardId,
+      { credits: 18, cardCost: 7 },
+    );
+    const noisyOnly = score(
+      cloak,
+      ["economy_recurring", "run_support"],
+      "runner",
+      [noisyBreaker],
+      rolesByCardId,
+      { credits: 18, cardCost: 7 },
+    );
+    const unusable = score(
+      cloak,
+      ["economy_recurring", "run_support"],
+      "runner",
+      [],
+      rolesByCardId,
+      { credits: 18, cardCost: 7 },
+    );
+
+    expect(usable.total).toBeGreaterThan(noisyOnly.total + 200);
+    expect(usable.total).toBeGreaterThan(unusable.total + 200);
+    expect(usable.evidence).toContain(
+      "discard_score:runner_usable_non_noisy_breaker_credit_support",
+    );
+    expect(noisyOnly.evidence).not.toContain(
+      "discard_score:runner_usable_non_noisy_breaker_credit_support",
+    );
+    expect(unusable.evidence).not.toContain(
+      "discard_score:runner_usable_non_noisy_breaker_credit_support",
+    );
+  });
+
   it("adds unique strategy-aligned multiaccess value only at matchpoint", () => {
     const hqInterface = runnerCard("onr_v1_129_hq-interface", "hardware");
     const matchpoint = score(
@@ -535,16 +609,16 @@ describe("discard keep score", () => {
 
   it("devalues non-additive Runner utility duplicates already represented in the rig", () => {
     const freshUtility = score(
-      runnerCard("runner-stack-filter", "resource"),
+      runnerCard("onr_v1_177_the-short-circuit", "resource"),
       ["program_search"],
       "runner",
       [],
     ).baseValue;
     const installedDuplicate = score(
-      runnerCard("runner-stack-filter", "resource"),
+      runnerCard("onr_v1_177_the-short-circuit", "resource"),
       ["program_search"],
       "runner",
-      [runnerCard("runner-stack-filter", "resource")],
+      [runnerCard("onr_v1_177_the-short-circuit", "resource")],
     ).baseValue;
 
     expect(installedDuplicate).toBeLessThan(freshUtility - 100);

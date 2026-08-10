@@ -30,6 +30,76 @@ describe("planning annotation boundary", () => {
     expect(() => assertPlanningAnnotations(valid)).not.toThrow();
   });
 
+  it("accepts only closed capability-bound plan owners and routes", () => {
+    expect(() =>
+      assertPlanningAnnotations({
+        schemaVersion: "card-planning-annotations-v1",
+        capabilities: [
+          {
+            capabilityKey: "bank-build",
+            annotations: [
+              {
+                kind: "plan_owner",
+                owner: "runner.credit_bank",
+                route: "build",
+              },
+            ],
+          },
+          {
+            capabilityKey: "loan-leave-play",
+            annotations: [
+              { kind: "plan_owner", owner: "runner.resource_lifecycle" },
+            ],
+          },
+        ],
+      }),
+    ).not.toThrow();
+  });
+
+  it.each([
+    {
+      schemaVersion: "card-planning-annotations-v1",
+      card: [{ kind: "plan_owner", owner: "corp.score_agenda" }],
+    },
+    {
+      schemaVersion: "card-planning-annotations-v1",
+      capabilities: [
+        {
+          capabilityKey: "forged-owner",
+          annotations: [{ kind: "plan_owner", owner: "runner.unknown" }],
+        },
+      ],
+    },
+    {
+      schemaVersion: "card-planning-annotations-v1",
+      capabilities: [
+        {
+          capabilityKey: "missing-route",
+          annotations: [{ kind: "plan_owner", owner: "runner.credit_bank" }],
+        },
+      ],
+    },
+    {
+      schemaVersion: "card-planning-annotations-v1",
+      capabilities: [
+        {
+          capabilityKey: "duplicate-owner",
+          annotations: [
+            { kind: "plan_owner", owner: "runner.resource_lifecycle" },
+            { kind: "plan_owner", owner: "runner.resource_lifecycle" },
+          ],
+        },
+      ],
+    },
+  ])(
+    "rejects unbound, forged, incomplete or duplicate plan owners",
+    (value) => {
+      expect(() => assertPlanningAnnotations(value)).toThrow(
+        PlanningAnnotationError,
+      );
+    },
+  );
+
   it.each([
     [
       {

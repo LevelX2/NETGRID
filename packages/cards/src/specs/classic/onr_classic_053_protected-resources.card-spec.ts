@@ -55,7 +55,7 @@ export const cardSpec = {
         capabilityKey: capabilityKey("deposit_hosted_credits"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
-        timing: "corp_main",
+        timing: "corp_paid",
         costs: [
           {
             kind: "credit",
@@ -127,29 +127,21 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_053_protected-resources.",
       },
       {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_053_protected-resources.",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_053_protected-resources.",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
         severity: "high",
-        rationale:
-          "Migrated from reviewed Classic hint onr_classic_053_protected-resources.",
       },
     ],
     capabilities: [],

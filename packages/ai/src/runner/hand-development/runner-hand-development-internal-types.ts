@@ -1,6 +1,7 @@
 import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import type { BreakerCoverageKind } from "../../deck-capabilities";
+import type { AiHintStructuredEffect } from "../../hint-ontology";
 
 export type CardSignals = {
   text: string;
@@ -8,6 +9,7 @@ export type CardSignals = {
   planRoles: string[];
   candidateSignals: string[];
   effectTargets: string[];
+  structuredEffects: AiHintStructuredEffect[];
   requiresSameTurnAccess: boolean;
   requiresHostedIcebreaker: boolean;
 };

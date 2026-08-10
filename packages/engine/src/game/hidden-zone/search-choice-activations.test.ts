@@ -73,13 +73,6 @@ function makeHost(
         },
       },
     } as unknown as HiddenZoneSearchActivationHost["state"],
-    constants: {
-      topStackTakeMatchingSourceId: "aujourd" as CardDefinitionId,
-      randomStackProgramInstallSourceId:
-        "revealed_stack_program_install" as CardDefinitionId,
-      stackProgramFreeInstallSourceId: "smc" as CardDefinitionId,
-      stackSearchGripSourceId: "short_circuit" as CardDefinitionId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? card(cardId, "program"),
       isUniqueRunnerDefinitionInstalled: () => false,

@@ -561,7 +561,7 @@ describe("PlayerView projection", () => {
         ).toBeDefined();
         if (subroutine.type === "initiate_trace") {
           expect(
-            subroutine.baseTraceStrength,
+            subroutine.traceLimit,
             `${definition.title}: fehlende explizite Trace-Basis`,
           ).toBeTypeOf("number");
         }

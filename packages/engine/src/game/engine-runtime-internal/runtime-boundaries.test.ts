@@ -19,20 +19,35 @@ function allFiles(dir: string): string[] {
 describe("engine runtime boundaries", () => {
   it("keeps the staged public API explicit", () => {
     const indexSource = readFileSync(join(srcDir, "index.ts"), "utf8");
-    const engineRuntimeSource = readFileSync(join(gameDir, "engine-runtime.ts"), "utf8");
-    const publicApiSource = readFileSync(join(runtimeInternalDir, "public-api.ts"), "utf8");
+    const engineRuntimeSource = readFileSync(
+      join(gameDir, "engine-runtime.ts"),
+      "utf8",
+    );
+    const publicApiSource = readFileSync(
+      join(runtimeInternalDir, "public-api.ts"),
+      "utf8",
+    );
 
     expect(indexSource).not.toContain('export * from "./game/engine-runtime"');
-    expect(engineRuntimeSource).not.toContain('export * from "./engine-runtime-internal"');
-    expect(publicApiSource).not.toContain('export * from "./runtime-implementation"');
+    expect(engineRuntimeSource).not.toContain(
+      'export * from "./engine-runtime-internal"',
+    );
+    expect(publicApiSource).not.toContain(
+      'export * from "./runtime-implementation"',
+    );
   });
 
   it("keeps production imports out of public and runtime facades", () => {
-    const productionGameFiles = allFiles(gameDir).filter((path) => path.endsWith(".ts") && !path.endsWith(".test.ts"));
+    const productionGameFiles = allFiles(gameDir).filter(
+      (path) => path.endsWith(".ts") && !path.endsWith(".test.ts"),
+    );
 
     for (const path of productionGameFiles) {
       const source = readFileSync(path, "utf8");
-      expect(source, `${relative(srcDir, path)} imports public index`).not.toMatch(/from ["'](?:\.\.\/index|\.\.\/\.\.\/index)["']/);
+      expect(
+        source,
+        `${relative(srcDir, path)} imports public index`,
+      ).not.toMatch(/from ["'](?:\.\.\/index|\.\.\/\.\.\/index)["']/);
     }
 
     const deepProductionFiles = productionGameFiles.filter(
@@ -43,7 +58,10 @@ describe("engine runtime boundaries", () => {
 
     for (const path of deepProductionFiles) {
       const source = readFileSync(path, "utf8");
-      expect(source, `${relative(srcDir, path)} imports runtime boundary`).not.toMatch(/from ["'].*engine-runtime(?:-internal)?/);
+      expect(
+        source,
+        `${relative(srcDir, path)} imports runtime boundary`,
+      ).not.toMatch(/from ["'].*engine-runtime(?:-internal)?/);
     }
   });
 });

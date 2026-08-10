@@ -260,8 +260,7 @@ describe("Corp ICE rez projection contract", () => {
         minValueFinalCredits: 4,
         maxValueFinalCredits: 12,
         effectiveStrengthFromValue: true,
-        traceBaseFromValue: true,
-        traceBidLimitFromValue: true,
+        traceLimitFromValue: true,
       },
     });
     expect(action.payload).toMatchObject({
@@ -279,8 +278,7 @@ describe("Corp ICE rez projection contract", () => {
       postInstallRezQuoteVariableMinValueFinalCredits: 4,
       postInstallRezQuoteVariableMaxValueFinalCredits: 12,
       postInstallRezQuoteVariableEffectiveStrengthFromValue: true,
-      postInstallRezQuoteVariableTraceBaseFromValue: true,
-      postInstallRezQuoteVariableTraceBidLimitFromValue: true,
+      postInstallRezQuoteVariableTraceLimitFromValue: true,
     });
   });
 

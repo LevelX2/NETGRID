@@ -156,10 +156,6 @@ function makeHost(input: {
     state,
     legalAction,
     ...(input.playerAction ? { playerAction: input.playerAction } : {}),
-    constants: {
-      corpArchivesToHqOperationCardId: offSiteId,
-      runAccessPressureEventCardId: socialId,
-    },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
       corpUtilityForCard: (cardId) => input.corpUtilities?.[cardId],
@@ -244,7 +240,15 @@ function makeHost(input: {
 describe("hidden-zone nonsearch choice handlers", () => {
   it("starts and resolves Corp Archives-to-HQ without public card identity payload", () => {
     const archived = "archived" as CardInstanceId;
-    const host = makeHost({ corpArchives: [sourceId, archived] });
+    const host = makeHost({
+      corpArchives: [sourceId, archived],
+      corpUtilities: {
+        [sourceId]: {
+          kind: "corp_archives_to_hq",
+          visibility: "hidden_info_barrier",
+        },
+      },
+    });
 
     startCorpArchivesToHqChoice(host, sourceId);
     expect(host.state.pendingChoice?.source).toContain("v1922.corp_archives_to_hq");
