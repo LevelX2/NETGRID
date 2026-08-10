@@ -320,7 +320,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     });
   });
 
-  it("Fetal AI and Marked Accounts fire only outside Archives, keep R&D reveal scoped, and Fetal AI revalidates steal cost/context", () => {
+  it("keeps Fetal AI damage out of Archives while charging its steal cost, applies Marked Accounts there, and keeps R&D reveal scoped", () => {
     let fetal = baseState("pro013-fetal");
     addCorpCard(fetal, MARKED_ACCOUNTS, "pro013_marked_hidden_rd", "rd");
     const fetalId = addCorpCard(fetal, FETAL_AI, "pro013_fetal_rd", "rd");
@@ -375,12 +375,6 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     expect(declinedFetal.runner.scoreArea).not.toContain(fetalId);
     expect(declinedFetal.run).toBeUndefined();
     expectReplayStable(before, declinedFetal);
-    const staleZone = structuredClone(fetal);
-    staleZone.cardInstances[fetalId] = {
-      ...staleZone.cardInstances[fetalId]!,
-      zone: { side: "corp", zone: "archives" },
-    };
-    expect(applyLegal(staleZone, "runner", steal, "fetal-zone").ok).toBe(false);
     const brokeRunner = structuredClone(fetal);
     brokeRunner.runner.credits = 1;
     expect(applyLegal(brokeRunner, "runner", steal, "fetal-cost").ok).toBe(
@@ -400,6 +394,10 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     addRunnerGripCard(archives, "onr_v1_010_cascade", "pro013_archives_grip");
     archives = accessTopCard(archives, "archives");
     expect(archives.runner.heap).not.toContain("pro013_archives_grip");
+    expect(
+      mustAction(archives, "runner", (action) => action.type === "steal_agenda")
+        .costs,
+    ).toEqual([{ credits: 2 }]);
 
     let marked = baseState("pro013-marked");
     addCorpCard(marked, FETAL_AI, "pro013_fetal_hidden_rd", "rd");
@@ -431,7 +429,36 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       "archives",
     );
     markedArchives = accessTopCard(markedArchives, "archives");
-    expect(markedArchives.runner.tags).toBe(0);
+    expect(markedArchives.runner.tags).toBe(1);
+  });
+
+  it("activates non-rezzable agenda on-access effects while installed", () => {
+    let fetal = baseState("pro013-fetal-installed");
+    const fetalId = addCorpCard(
+      fetal,
+      FETAL_AI,
+      "pro013_fetal_installed",
+      "remote_1",
+    );
+    addRunnerGripCard(fetal, "onr_v1_010_cascade", "pro013_fetal_installed_1");
+    addRunnerGripCard(fetal, "onr_v1_011_cloak", "pro013_fetal_installed_2");
+    const heapBefore = fetal.runner.heap.length;
+    openAccess(fetal, "remote_1");
+    fetal = apply(fetal, "runner", (action) => action.type === "access_card");
+    expect(fetal.run?.accessedCardId).toBe(fetalId);
+    expect(fetal.runner.heap).toHaveLength(heapBefore + 2);
+
+    let marked = baseState("pro013-marked-installed");
+    const markedId = addCorpCard(
+      marked,
+      MARKED_ACCOUNTS,
+      "pro013_marked_installed",
+      "remote_1",
+    );
+    openAccess(marked, "remote_1");
+    marked = apply(marked, "runner", (action) => action.type === "access_card");
+    expect(marked.run?.accessedCardId).toBe(markedId);
+    expect(marked.runner.tags).toBe(1);
   });
 
   it("quotes combined self and server steal costs atomically and allows declining them", () => {

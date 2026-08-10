@@ -299,9 +299,7 @@ export function resolvePendingChoice(
       resumeAddTagContinuation(state, legalAction);
     return;
   }
-  if (
-    state.pendingChoice.source.startsWith("proteus.pdca_damage_replacement")
-  ) {
+  if (state.pendingChoice.source.startsWith("damage_replacement:")) {
     resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
     return;
   }

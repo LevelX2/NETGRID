@@ -238,17 +238,15 @@ export function openPdcaDamageReplacementChoice(
     source: `damage_replacement:${sourceCardId}:${event.eventId}`,
     prompt: "Please Don't Choke Anyone nutzen",
     kind: "select_option",
-    options: [
-      ...Array.from({ length: amount + 1 }, (_, preventedAmount) => ({
-        id: `replace_${sourceCardId}_${preventedAmount}`,
-        label:
-          preventedAmount === 0
-            ? "Keinen Damage durch PDCA-Counter ersetzen"
-            : `${preventedAmount} Damage durch PDCA-Counter ersetzen`,
-        publicLabel: "PDCA-Entscheidung",
-        value: `${sourceCardId}:${preventedAmount}`,
-      })),
-    ],
+    options: Array.from({ length: amount + 1 }, (_, preventedAmount) => ({
+      id: `replace_${sourceCardId}_${preventedAmount}`,
+      label:
+        preventedAmount === 0
+          ? "Keinen Damage durch PDCA-Counter ersetzen"
+          : `${preventedAmount} Damage durch PDCA-Counter ersetzen`,
+      publicLabel: "PDCA-Entscheidung",
+      value: String(preventedAmount),
+    })),
     minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
@@ -494,16 +492,16 @@ export function resolvePdcaDamageReplacementChoice(
     imminentEventId: event.eventId,
     replacementModel: "per_damage_unit",
   };
-  const prefix = `replace_${sourceId}_`;
-  if (!selected.startsWith(prefix))
+  const replacementPrefix = `replace_${sourceId}_`;
+  if (!selected.startsWith(replacementPrefix))
     throw new Error("Die PDCA-Auswahl ist nicht legal.");
-  const preventedAmount = Number(selected.slice(prefix.length));
+  const preventedAmount = Number(selected.slice(replacementPrefix.length));
   if (
     !Number.isInteger(preventedAmount) ||
     preventedAmount < 0 ||
     preventedAmount > amount
   )
-    throw new Error("Die PDCA-Menge ist nicht legal.");
+    throw new Error("Die PDCA-Auswahl ist nicht legal.");
   if (preventedAmount === 0) {
     delete state.pendingChoice;
     delete state.imminentEvent;
@@ -512,6 +510,8 @@ export function resolvePdcaDamageReplacementChoice(
       ...basePayload,
       pdcaDecision: "replace_0",
       replacementOutcome: "original_resolved",
+      preventedAmount: 0,
+      addedCounterAmount: 0,
     };
     setDamagePayload(legalAction, summary);
     restorePdcaReturnContext(state, event);
@@ -534,13 +534,13 @@ export function resolvePdcaDamageReplacementChoice(
   });
   legalAction.payload = {
     ...basePayload,
-    pdcaDecision: "replace",
-    replacementOutcome: "replaced",
+    pdcaDecision: "replace_partial",
+    replacementOutcome:
+      preventedAmount === amount ? "replaced" : "partially_replaced",
     preventedAmount,
     addedCounterAmount: preventedAmount,
     counterType: "pdca",
     remainingCounters,
-    damageResolved: true,
   };
   setDamagePayload(legalAction, summary);
   restorePdcaReturnContext(state, event);

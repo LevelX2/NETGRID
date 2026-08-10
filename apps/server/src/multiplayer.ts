@@ -23,7 +23,6 @@ import {
   isHiddenInfoBarrierEvent,
   replayEvents,
   quoteCorpPunishRoute,
-  quoteCorpRezCost,
   quoteRandomizedIceInstallSelection,
   quoteRandomizedTurnPlanSelection,
   CARD_DEFINITIONS_BY_ID,
@@ -419,6 +418,90 @@ export type AiDecisionTraceRecord = {
   createdAt: string;
   schemaVersion: string;
   traceJson: Record<string, unknown>;
+};
+
+export type HistoricalAuditAvailability = {
+  status: "persisted" | "reconstructed" | "unavailable";
+  schemaVersion?: string;
+  reason?: string;
+};
+
+export type AiDecisionHistoricalLegalAction = {
+  actionId: string;
+  actionType: LegalAction["type"];
+  source: {
+    kind: "card" | "basic_action" | "game_rule";
+    sourceCardInstanceId?: string;
+    sourceDefinitionId?: string;
+  };
+  timingPoint: LegalAction["timingPoint"];
+  costs: LegalAction["costs"];
+  targetRequirements: LegalAction["targetRequirements"];
+  choiceRequirements?: LegalAction["choiceRequirements"];
+  abilityRef?: LegalAction["abilityRef"];
+  effectRef?: string;
+  resolvedEffects?: LegalAction["resolvedEffects"];
+  visibility: LegalAction["visibility"];
+  expiresAtStateVersion: number;
+  payload?: LegalAction["payload"];
+  bindings: {
+    lifecycle?: Record<string, string | number | boolean>;
+    parentOrContinuation?: Record<string, string | number | boolean>;
+  };
+};
+
+export type AiDecisionHistoricalAudit = {
+  schemaVersion: "ai-decision-historical-audit-v1";
+  capture: "persisted";
+  actor: Side;
+  legalActions: {
+    schemaVersion: "netgrid-historical-legal-actions-v1";
+    actions: AiDecisionHistoricalLegalAction[];
+    selectedActionId: string;
+    actionSetSha256: string;
+  };
+  engineEvidence: {
+    schemaVersion: "netgrid-decision-engine-evidence-v1";
+    stateHash: string;
+    stateVersion: number;
+    matchVersion: number;
+    rulesBaseline: RulesBaseline;
+    decisionEventId: string;
+    selectedActionId: string;
+    validation: {
+      actor: Side;
+      actionWasInHistoricalLegalActions: true;
+      engineApplyActionValidated: true;
+      bindingFields: Array<
+        "side" | "actionId" | "stateVersion" | "timingPoint" | "costs" | "targets" | "choices" | "lifecycle" | "parentOrContinuation"
+      >;
+    };
+  };
+  analysisSnapshot: {
+    schemaVersion: "netgrid-actor-analysis-snapshot-v1";
+    stateHash: string;
+    stateVersion: number;
+    matchVersion: number;
+    verification: {
+      status: "verified_at_capture";
+      algorithm: "engine_hash_state";
+    };
+    actorState: Omit<PlayerView, "legalActions" | "publicEvents">;
+  };
+  runAndEncounterProjection:
+    | {
+        schemaVersion: "netgrid-run-encounter-projection-v1";
+        status: "persisted";
+        run: NonNullable<PlayerView["run"]>;
+        attackedServer?: PlayerView["servers"][number];
+        ownRig?: PlayerView["own"]["rig"];
+        selectedActionEffects?: LegalAction["resolvedEffects"];
+      }
+    | {
+        schemaVersion: "netgrid-run-encounter-projection-v1";
+        status: "unavailable";
+        reason: "not_in_run_at_decision";
+      };
 };
 
 export type MultiplayerStorage = {
@@ -4330,121 +4413,31 @@ export class MultiplayerService {
       decisionIndex,
     );
     if (!source) return undefined;
+    const audit = historicalAuditFromTrace(source.trace.detail);
     const diagnostics = {
       warnings: [] as string[],
       unavailableSections: [] as string[],
     };
-    if (!source.snapshot) {
+    const unavailableAudit = unavailableHistoricalAudit();
+    if (!audit) {
       diagnostics.unavailableSections.push(
-        source.snapshotIssue ?? "snapshot_missing",
         "historicalLegalActions",
-        "historicalActorState",
+        "engineEvidence",
+        "analysisSnapshot",
+        "runAndEncounterProjection",
       );
-      return {
-        schemaVersion: "netgrid-decision-analysis-context-v1",
-        decision: source.trace,
-        surroundingEvents: source.surroundingEvents,
-        aiTrace: source.trace,
-        provenance: {
-          persisted: ["decisionTrace", "surroundingEvents"],
-          reconstructed: [],
-        },
-        diagnostics,
-      };
     }
-    const state = JSON.parse(source.snapshot.gameStateJson) as GameState;
-    if (
-      state.stateVersion !== source.trace.stateVersion ||
-      hashState(state) !== source.snapshot.stateHash
-    ) {
-      diagnostics.unavailableSections.push(
-        "historical_state_not_reconstructable",
-        "historicalLegalActions",
-        "historicalActorState",
-      );
-      return {
-        schemaVersion: "netgrid-decision-analysis-context-v1",
-        decision: source.trace,
-        surroundingEvents: source.surroundingEvents,
-        aiTrace: source.trace,
-        provenance: {
-          persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"],
-          reconstructed: [],
-        },
-        diagnostics,
-      };
-    }
-    const playerView = getPlayerView(state, source.trace.side);
-    const {
-      publicEvents: _events,
-      legalActions: _actions,
-      ...actorState
-    } = playerView;
-    const legalActions = getLegalActions(state, source.trace.side);
-    const reconstructedRezQuotes =
-      source.trace.side === "corp"
-        ? legalActions.flatMap((action) => {
-            const cardId =
-              action.type === "rez_ice" &&
-              typeof action.payload?.cardId === "string"
-                ? action.payload.cardId
-                : undefined;
-            return cardId
-              ? [
-                  {
-                    actionId: action.actionId,
-                    quote: quoteCorpRezCost(state, cardId as never),
-                  },
-                ]
-              : [];
-          })
-        : [];
-    const runEvents = source.surroundingEvents.filter((event) => {
-      const type =
-        typeof event.publicPayload.type === "string"
-          ? event.publicPayload.type
-          : "";
-      return (
-        type.includes("run") ||
-        type.includes("encounter") ||
-        type.includes("access")
-      );
-    });
     return {
-      schemaVersion: "netgrid-decision-analysis-context-v1",
+      schemaVersion: "netgrid-decision-analysis-context-v2",
       decision: source.trace,
-      state: actorState,
-      legalActions,
       aiTrace: source.trace,
       surroundingEvents: source.surroundingEvents,
-      ...(runEvents.length > 0
-        ? {
-            runContext: {
-              selectedActionId: source.trace.selectedActionId,
-              selectedActionType: source.trace.selectedActionType,
-              events: runEvents,
-            },
-          }
-        : {}),
-      ...(reconstructedRezQuotes.length > 0
-        ? { engineAnalysis: { reconstructedRezQuotes } }
-        : {}),
+      audit: audit ?? unavailableAudit,
       provenance: {
-        persisted: ["decisionTrace", "surroundingEvents", "stateSnapshot"],
-        reconstructed: [
-          {
-            section: "actorStateAndLegalActions",
-            note: "current engine on exact persisted state snapshot",
-          },
-          ...(reconstructedRezQuotes.length > 0
-            ? [
-                {
-                  section: "corpRezQuotes",
-                  note: "current engine on exact persisted state snapshot",
-                },
-              ]
-            : []),
-        ],
+        persisted: audit
+          ? ["decisionTrace", "historicalDecisionAudit", "surroundingEvents"]
+          : ["decisionTrace", "surroundingEvents"],
+        reconstructed: [],
       },
       diagnostics,
     };
@@ -5716,6 +5709,9 @@ export class MultiplayerService {
       record,
       event,
       side,
+      state,
+      snapshot,
+      legalActions,
       legalAction,
       decision,
       normalizeAiDecisionTraceMode(record.match.aiTraceMode),
@@ -6627,15 +6623,29 @@ function aiDecisionTraceFor(
   record: StoredMatch,
   event: GameEvent,
   side: Side,
+  state: GameState,
+  snapshot: StateSnapshot,
+  historicalLegalActions: readonly LegalAction[],
   legalAction: LegalAction,
   decision: AiDecision,
   mode: AiDecisionTraceMode,
   createdAt: string,
 ): AiDecisionTraceRecord | undefined {
-  if (mode === "off" || !decision.decisionDebug) return undefined;
-  const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
-  if (!safeDebug) return undefined;
-  const traceJson = aiDecisionTraceJson(safeDebug, side, legalAction, mode);
+  if (mode === "off") return undefined;
+  const safeDebug = decision.decisionDebug
+    ? sanitizeAiDecisionDebug(decision.decisionDebug)
+    : undefined;
+  const traceJson = safeDebug
+    ? aiDecisionTraceJson(safeDebug, side, legalAction, mode)
+    : minimalAiDecisionTraceJson(side, legalAction, mode);
+  traceJson.historicalAudit = historicalAuditFor(
+    state,
+    snapshot,
+    event,
+    side,
+    historicalLegalActions,
+    legalAction,
+  );
   const baseline = record.actionPersistenceBaseline;
   const newTraceCount = baseline
     ? Math.max(
@@ -6676,8 +6686,217 @@ function aiDecisionTraceFor(
     ...(score !== undefined ? { score } : {}),
     ...(confidence !== undefined ? { confidence } : {}),
     createdAt,
-    schemaVersion: "ai-decision-trace-v1",
+    schemaVersion: "ai-decision-trace-v2",
     traceJson,
+  };
+}
+
+function minimalAiDecisionTraceJson(
+  actor: Side,
+  legalAction: LegalAction,
+  mode: Exclude<AiDecisionTraceMode, "off">,
+): Record<string, unknown> {
+  return {
+    schemaVersion: "ai-decision-trace-v2",
+    traceMode: mode,
+    actor,
+    selectedActionId: legalAction.actionId,
+    selectedActionType: legalAction.type,
+    debugSelectionMatchesApplied: true,
+  };
+}
+
+function historicalAuditFor(
+  state: GameState,
+  snapshot: StateSnapshot,
+  event: GameEvent,
+  side: Side,
+  legalActions: readonly LegalAction[],
+  selectedAction: LegalAction,
+): AiDecisionHistoricalAudit {
+  const actorView = getPlayerView(state, side);
+  const { legalActions: _legalActions, publicEvents: _publicEvents, ...actorState } =
+    actorView;
+  const actions = legalActions.map((action) =>
+    historicalLegalActionFor(state, action),
+  );
+  const selectedActionId = selectedAction.actionId;
+  const actionSetSha256 = createHash("sha256")
+    .update(JSON.stringify(actions))
+    .digest("hex");
+  const selectedActionEffects = actions.find(
+    (action) => action.actionId === selectedActionId,
+  )?.resolvedEffects;
+  const run = actorView.run;
+  const attackedServer = run
+    ? actorView.servers.find((server) => server.id === run.attackedServerId)
+    : undefined;
+  return {
+    schemaVersion: "ai-decision-historical-audit-v1",
+    capture: "persisted",
+    actor: side,
+    legalActions: {
+      schemaVersion: "netgrid-historical-legal-actions-v1",
+      actions,
+      selectedActionId,
+      actionSetSha256,
+    },
+    engineEvidence: {
+      schemaVersion: "netgrid-decision-engine-evidence-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      rulesBaseline: state.baseline,
+      decisionEventId: event.eventId,
+      selectedActionId,
+      validation: {
+        actor: side,
+        actionWasInHistoricalLegalActions: true,
+        engineApplyActionValidated: true,
+        bindingFields: [
+          "side",
+          "actionId",
+          "stateVersion",
+          "timingPoint",
+          "costs",
+          "targets",
+          "choices",
+          "lifecycle",
+          "parentOrContinuation",
+        ],
+      },
+    },
+    analysisSnapshot: {
+      schemaVersion: "netgrid-actor-analysis-snapshot-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      verification: {
+        status: "verified_at_capture",
+        algorithm: "engine_hash_state",
+      },
+      actorState,
+    },
+    runAndEncounterProjection: run
+      ? {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "persisted",
+          run,
+          ...(attackedServer ? { attackedServer } : {}),
+          ...(actorView.own.rig ? { ownRig: actorView.own.rig } : {}),
+          ...(selectedActionEffects
+            ? { selectedActionEffects }
+            : {}),
+        }
+      : {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "unavailable",
+          reason: "not_in_run_at_decision",
+        },
+  };
+}
+
+function historicalLegalActionFor(
+  state: GameState,
+  action: LegalAction,
+): AiDecisionHistoricalLegalAction {
+  const sourceCard =
+    typeof action.source === "string" &&
+    action.source !== "basic_action" &&
+    action.source !== "game_rule"
+      ? state.cardInstances[action.source]
+      : undefined;
+  const payload = action.payload ? { ...action.payload } : undefined;
+  const lifecycle = payloadBindings(payload, /lifecycle|leavePlay|payment/i);
+  const parentOrContinuation = payloadBindings(payload, /parent|continuation/i);
+  return {
+    actionId: action.actionId,
+    actionType: action.type,
+    source:
+      action.source === "basic_action" || action.source === "game_rule"
+        ? { kind: action.source }
+        : {
+            kind: "card",
+            sourceCardInstanceId: action.source,
+            ...(sourceCard ? { sourceDefinitionId: sourceCard.definitionId } : {}),
+          },
+    timingPoint: action.timingPoint,
+    costs: action.costs.map((cost) => ({ ...cost })),
+    targetRequirements: action.targetRequirements.map((target) => ({ ...target })),
+    ...(action.choiceRequirements
+      ? {
+          choiceRequirements: action.choiceRequirements.map((choice) => ({
+            ...choice,
+            optionIds: [...choice.optionIds],
+          })),
+        }
+      : {}),
+    ...(action.abilityRef ? { abilityRef: { ...action.abilityRef } } : {}),
+    ...(action.effectRef ? { effectRef: action.effectRef } : {}),
+    ...(action.resolvedEffects
+      ? { resolvedEffects: action.resolvedEffects.map((effect) => ({ ...effect })) }
+      : {}),
+    visibility: action.visibility,
+    expiresAtStateVersion: action.expiresAtStateVersion,
+    ...(payload ? { payload } : {}),
+    bindings: {
+      ...(lifecycle ? { lifecycle } : {}),
+      ...(parentOrContinuation ? { parentOrContinuation } : {}),
+    },
+  };
+}
+
+function payloadBindings(
+  payload: LegalAction["payload"] | undefined,
+  pattern: RegExp,
+): Record<string, string | number | boolean> | undefined {
+  if (!payload) return undefined;
+  const entries = Object.entries(payload).filter(([key]) => pattern.test(key));
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
+export function historicalAuditFromTrace(
+  traceJson: Record<string, unknown>,
+): AiDecisionHistoricalAudit | undefined {
+  const audit = traceJson.historicalAudit;
+  if (!audit || typeof audit !== "object" || Array.isArray(audit)) return undefined;
+  const candidate = audit as Partial<AiDecisionHistoricalAudit>;
+  return candidate.schemaVersion === "ai-decision-historical-audit-v1" &&
+    candidate.capture === "persisted" &&
+    candidate.actor !== undefined &&
+    candidate.legalActions !== undefined &&
+    candidate.engineEvidence !== undefined &&
+    candidate.analysisSnapshot !== undefined &&
+    candidate.runAndEncounterProjection !== undefined
+    ? (candidate as AiDecisionHistoricalAudit)
+    : undefined;
+}
+
+export function unavailableHistoricalAudit(): {
+  schemaVersion: "ai-decision-historical-audit-v1";
+  capture: "unavailable";
+  reason: "historical_audit_not_persisted";
+  availability: {
+    historicalLegalActions: HistoricalAuditAvailability;
+    engineEvidence: HistoricalAuditAvailability;
+    analysisSnapshot: HistoricalAuditAvailability;
+    runAndEncounterProjection: HistoricalAuditAvailability;
+  };
+} {
+  const unavailable = {
+    status: "unavailable" as const,
+    reason: "historical_audit_not_persisted",
+  };
+  return {
+    schemaVersion: "ai-decision-historical-audit-v1",
+    capture: "unavailable",
+    reason: "historical_audit_not_persisted",
+    availability: {
+      historicalLegalActions: unavailable,
+      engineEvidence: unavailable,
+      analysisSnapshot: unavailable,
+      runAndEncounterProjection: unavailable,
+    },
   };
 }
 

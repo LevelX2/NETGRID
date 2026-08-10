@@ -16,6 +16,8 @@ import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
 import {
   replayDecisionDebugFromTrace,
+  historicalAuditFromTrace,
+  unavailableHistoricalAudit,
   type ActionPersistenceLoadInput,
   type AiDecisionTraceRecord,
   type MatchMode,
@@ -354,6 +356,13 @@ export type StorageMaintenanceAiDecisionTraceIndexEntry = {
   createdAt: string;
   schemaVersion: string;
   meta: Record<string, unknown>;
+  auditAvailability: {
+    schemaVersion: "netgrid-decision-audit-availability-v1";
+    historicalLegalActions: { status: "persisted" | "reconstructed" | "unavailable"; schemaVersion?: string; reason?: string };
+    engineEvidence: { status: "persisted" | "reconstructed" | "unavailable"; schemaVersion?: string; reason?: string };
+    analysisSnapshot: { status: "persisted" | "reconstructed" | "unavailable"; schemaVersion?: string; reason?: string };
+    runAndEncounterProjection: { status: "persisted" | "reconstructed" | "unavailable"; schemaVersion?: string; reason?: string };
+  };
 };
 
 export type StorageMaintenanceAiDecisionTraceDetail =
@@ -381,7 +390,11 @@ export type StorageMaintenanceMatchAnalysisEvent = {
 };
 
 export type StorageMaintenanceMatchAnalysisBundle = {
-  schemaVersion: "netgrid-match-analysis-bundle-v1";
+  schemaVersion: "netgrid-match-analysis-bundle-v2";
+  schemaVersions: {
+    decisionIndex: "netgrid-decision-audit-availability-v1";
+    historicalAudit: "ai-decision-historical-audit-v1";
+  };
   match: {
     matchId: string;
     status: MatchStatus;
@@ -996,14 +1009,12 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       warnings.push("Für den gewählten Entscheidungsbereich sind keine KI-Traces gespeichert.");
 
     const decisions = decisionRecords.map(aiDecisionTraceIndexEntry);
-    const unavailableSections = [
-      "historicalLegalActions",
-      "engineQuotes",
-      "analysisSnapshots",
-      "runAndEncounterProjection",
-    ];
     return {
-      schemaVersion: "netgrid-match-analysis-bundle-v1",
+      schemaVersion: "netgrid-match-analysis-bundle-v2",
+      schemaVersions: {
+        decisionIndex: "netgrid-decision-audit-availability-v1",
+        historicalAudit: "ai-decision-historical-audit-v1",
+      },
       match: {
         matchId: materialized.match.matchId,
         status: materialized.match.status,
@@ -1029,7 +1040,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             })),
           }
         : {}),
-      diagnostics: { warnings, unavailableSections },
+      diagnostics: { warnings, unavailableSections: [] },
     };
   }
 
@@ -4140,6 +4151,45 @@ function aiDecisionTraceIndexEntry(
     createdAt: trace.createdAt,
     schemaVersion: trace.schemaVersion,
     meta: traceMeta(trace.traceJson),
+    auditAvailability: historicalAuditAvailability(trace.traceJson),
+  };
+}
+
+function historicalAuditAvailability(
+  traceJson: Record<string, unknown>,
+): StorageMaintenanceAiDecisionTraceIndexEntry["auditAvailability"] {
+  const audit = historicalAuditFromTrace(traceJson);
+  if (!audit) {
+    const unavailable = unavailableHistoricalAudit().availability;
+    return {
+      schemaVersion: "netgrid-decision-audit-availability-v1",
+      historicalLegalActions: unavailable.historicalLegalActions,
+      engineEvidence: unavailable.engineEvidence,
+      analysisSnapshot: unavailable.analysisSnapshot,
+      runAndEncounterProjection: unavailable.runAndEncounterProjection,
+    };
+  }
+  return {
+    schemaVersion: "netgrid-decision-audit-availability-v1",
+    historicalLegalActions: {
+      status: "persisted",
+      schemaVersion: audit.legalActions.schemaVersion,
+    },
+    engineEvidence: {
+      status: "persisted",
+      schemaVersion: audit.engineEvidence.schemaVersion,
+    },
+    analysisSnapshot: {
+      status: "persisted",
+      schemaVersion: audit.analysisSnapshot.schemaVersion,
+    },
+    runAndEncounterProjection: {
+      status: audit.runAndEncounterProjection.status,
+      schemaVersion: audit.runAndEncounterProjection.schemaVersion,
+      ...(audit.runAndEncounterProjection.status === "unavailable"
+        ? { reason: audit.runAndEncounterProjection.reason }
+        : {}),
+    },
   };
 }
 
