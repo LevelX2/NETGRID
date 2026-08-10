@@ -14,6 +14,22 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Put [3] from the bank on Department of Truth Enhancement. A: Take all the bits from Department of Truth Enhancement.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_add_hosted_credits",
+        ),
+        actionLabel:
+          "Department of Truth Enhancement: 3 Credits auf die Karte legen",
+      },
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_take_hosted_credits",
+        ),
+        actionLabel:
+          "Department of Truth Enhancement: alle gehosteten Credits nehmen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

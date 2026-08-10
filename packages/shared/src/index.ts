@@ -622,6 +622,12 @@ export type EventModificationCandidate = {
   visibility: EventVisibilityClass;
   optional: boolean;
   preventAmount?: number;
+  /**
+   * The controller may choose any positive quantity up to preventAmount.
+   * This is intentionally a candidate property rather than a card-specific
+   * action shape: one prevention source can cover only part of one event.
+   */
+  selectablePreventAmount?: boolean;
   increaseAmount?: number;
   preventionSourceIndex?: number;
   preventedTags?: number;
@@ -1042,14 +1048,8 @@ export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?:
-    | "demo_runner_001"
-    | "demo_runner_004"
-    | "demo_runner_008";
-  corpDeckId?:
-    | "demo_corp_001"
-    | "demo_corp_004"
-    | "demo_corp_008";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;

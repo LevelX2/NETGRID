@@ -13,6 +13,8 @@ import {
 } from "@netgrid/shared";
 import type {
   ActivatedCardAbilityImplementation,
+  AddBadPublicityIfCancelledTraceHasNonTagEffectImplementation,
+  CancelSuccessfulTraceEffectImplementation,
   IncreaseTraceLinkEffectImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -64,6 +66,7 @@ type TracePostBidLinkCandidate = {
   trashSource: boolean;
   limitOncePerTrace: boolean;
   rewardCreditsOnAvoidTrace?: number;
+  badPublicityIfCancelledTraceHasNonTagEffect?: number;
 };
 
 export type TraceOrchestrationHost = {
@@ -327,10 +330,8 @@ function resolveTraceCorpBid(
   );
   const traceValue = bid;
   const effectiveTraceLimit =
-    Math.max(
-      0,
-      trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0),
-    ) + tracePaymentReceipt.corpTraceCountersSpent;
+    Math.max(0, trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0)) +
+    tracePaymentReceipt.corpTraceCountersSpent;
   const runnerLink = calculateRunnerLink(host);
   const cryingCounterCount = host.counters.cardCounter(
     state.runner.identity,
@@ -1257,6 +1258,7 @@ function traceSuccessCancelCandidates(
       definition,
       "trace_success_cancel_window",
     )) {
+      if (!successfulTraceCancelEffect(ability)) continue;
       const traceCost = costForTraceAbility(ability);
       if (!traceCost.tapSource && !traceCost.trashSource) continue;
       if (traceCost.tapSource && instance.tapped === true) continue;
@@ -1270,6 +1272,12 @@ function traceSuccessCancelCandidates(
         tapSource: traceCost.tapSource,
         trashSource: traceCost.trashSource,
         limitOncePerTrace: false,
+        ...(badPublicityForCancelledTrace(ability) > 0
+          ? {
+              badPublicityIfCancelledTraceHasNonTagEffect:
+                badPublicityForCancelledTrace(ability),
+            }
+          : {}),
       });
     }
   }
@@ -1354,8 +1362,10 @@ function resolveTraceSuccessCancelChoice(
     candidate,
     legalAction,
   );
-  const addsBadPublicity = traceEffectHasNonTagComponent(trace.successEffect);
-  if (addsBadPublicity) host.state.corp.badPublicity += 1;
+  const badPublicityAdded = traceEffectHasNonTagComponent(trace.successEffect)
+    ? (candidate.badPublicityIfCancelledTraceHasNonTagEffect ?? 0)
+    : 0;
+  if (badPublicityAdded > 0) host.state.corp.badPublicity += badPublicityAdded;
   delete host.state.pendingChoice;
   delete host.state.trace;
   if (trace.returnTimingPoint && trace.returnActiveSide && trace.returnPhase) {
@@ -1375,9 +1385,9 @@ function resolveTraceSuccessCancelChoice(
     traceSuccessful: true,
     traceSuccessCancelCostPaid: candidate.creditCost,
     ...sourceCostPayload,
-    ...(addsBadPublicity
+    ...(badPublicityAdded > 0
       ? {
-          badPublicityAdded: 1,
+          badPublicityAdded,
           corpBadPublicityAfter: host.state.corp.badPublicity,
         }
       : {}),
@@ -1390,6 +1400,37 @@ function traceEffectHasNonTagComponent(effect: TraceSuccessEffect): boolean {
     effect.type === "add_tag" ||
     effect.type === "add_tags_by_trace_margin_over_runner_link"
   );
+}
+
+function successfulTraceCancelEffect(
+  ability: ActivatedCardAbilityImplementation,
+): CancelSuccessfulTraceEffectImplementation | undefined {
+  const effects = ability.effects.filter(
+    (effect): effect is CancelSuccessfulTraceEffectImplementation =>
+      effect.kind === "cancel_successful_trace_effect",
+  );
+  if (effects.length > 1)
+    throw new Error("Trace-Cancel-Fähigkeit enthält mehrere Cancel-Effekte.");
+  return effects[0];
+}
+
+function badPublicityForCancelledTrace(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  const effects = ability.effects.filter(
+    (
+      effect,
+    ): effect is AddBadPublicityIfCancelledTraceHasNonTagEffectImplementation =>
+      effect.kind === "add_bad_publicity_if_cancelled_trace_has_non_tag_effect",
+  );
+  if (effects.length > 1)
+    throw new Error(
+      "Trace-Cancel-Fähigkeit enthält mehrere Bad-Publicity-Folgen.",
+    );
+  const amount = effects[0]?.amount ?? 0;
+  if (!Number.isInteger(amount) || amount < 0)
+    throw new Error("Trace-Cancel-Bad-Publicity ist ungültig.");
+  return amount;
 }
 
 function runnerTraceLinkCredits(host: TraceOrchestrationHost): number {

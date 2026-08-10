@@ -12,6 +12,20 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "You may advance Vapor Ops before and after you rez it.\nVapor Ops advancement counter: Gain 1.\n[A]: Move any number of advancement counters from Vapor Ops to another installed card that can be advanced.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_gain_credits",
+        ),
+        actionLabel: "Vapor Ops: Advancement-Counter für 1 Credit ausgeben",
+      },
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_move_advancement_counters",
+        ),
+        actionLabel: "Vapor Ops: Advancement-Counter bewegen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

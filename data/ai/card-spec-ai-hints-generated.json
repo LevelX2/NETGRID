@@ -6412,7 +6412,7 @@
     },
     {
       "cardId": "onr_classic_047_little-black-box",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:eb9434aa8c0a81ae",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:164735eee40dd67a",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b751fb342050e570",
       "hint": {
         "cardId": "onr_classic_047_little-black-box",
@@ -15143,7 +15143,7 @@
     },
     {
       "cardId": "onr_proteus_086_enterprise-inc-shields",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f42c90ce1837e11a",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:341a1e0e86b3b872",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_086_enterprise-inc-shields",
@@ -18061,7 +18061,7 @@
     {
       "cardId": "onr_proteus_121_remote-detonator",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e17dd3ed171773b1",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e45e5a78691a0d94",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a8c6098640de4b92",
       "hint": {
         "cardId": "onr_proteus_121_remote-detonator",
         "side": "runner",
@@ -18074,17 +18074,6 @@
         "valueHints": {},
         "strategicExchangeKinds": [
           "self_tag"
-        ],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": [
-              "tactic_signal_anchor:tag.source"
-            ],
-            "confidence": "medium"
-          }
         ],
         "conditions": [
           {
@@ -18562,7 +18551,7 @@
     },
     {
       "cardId": "onr_proteus_128_airport-locker",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:31f7ebbf009d7983",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:728223c1cb0e761d",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4abfdf395b993ad5",
       "hint": {
         "cardId": "onr_proteus_128_airport-locker",
@@ -18608,21 +18597,8 @@
             "kind": "search_install_target",
             "timing": "activated_ability",
             "targetType": "program",
-            "purpose": "search_stack_install:runner_main_search_install_program",
+            "purpose": "search_stack_install:search_install_program",
             "hiddenInfoPolicy": "public_or_controller_known_only"
-          },
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "search_install_target",
-            "timing": "activated_ability",
-            "targetType": "program",
-            "purpose": "search_stack_install:during_run_search_install_program",
-            "hiddenInfoPolicy": "public_or_controller_known_only"
-          }
-        ],
-        "conditions": [
-          {
-            "kind": "requires_encounter"
           }
         ],
         "costProfile": {
@@ -18650,8 +18626,8 @@
     },
     {
       "cardId": "onr_proteus_129_back-door-to-netwatch",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6ee6d065b047a1f9",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:717bb3644f0b84e8",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:36ee119e67a01f8a",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_129_back-door-to-netwatch",
         "side": "runner",
@@ -18663,25 +18639,6 @@
           "safe_probe_run"
         ],
         "valueHints": {},
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "payoff_anchor",
-            "roleDetail": "payoff_anchor_tag_payoff",
-            "evidence": [
-              "tactic_signal_anchor:tag.payoff"
-            ],
-            "confidence": "medium"
-          }
-        ],
-        "tacticSignals": [
-          "punish.payoff",
-          "tag.payoff"
-        ],
-        "actionTacticSignals": [
-          "punish.payoff",
-          "tag.payoff"
-        ],
         "costProfile": {
           "clicks": 1,
           "credits": 0
@@ -18697,6 +18654,8 @@
         "requiredMechanics": [
           "abilities",
           "activated",
+          "add_bad_publicity_if_cancelled_trace_has_non_tag_effect",
+          "cancel_successful_trace_effect",
           "credit",
           "install_resource",
           "trash_source"
@@ -18779,7 +18738,7 @@
     },
     {
       "cardId": "onr_proteus_131_bargain-with-viacox",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:91c009946421be68",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d3b3aa3df925fa81",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4cb1979d0a6e95a1",
       "hint": {
         "cardId": "onr_proteus_131_bargain-with-viacox",
@@ -28968,7 +28927,7 @@
     },
     {
       "cardId": "onr_v1_120_armadillo-armored-road-home",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1870fa409e0e9124",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:64836800b5381c7c",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d0a5853da1cb56f9",
       "hint": {
         "cardId": "onr_v1_120_armadillo-armored-road-home",

@@ -45,6 +45,18 @@ export const cardSpec = {
       addressability: ["plan", "action", "quote", "debug"],
       kind: "runner_start_turn_forced_random_action",
       startsTurnAfterInstall: true,
+      mustTakeIfPossible: true,
+      outcomes: [
+        { dieRoll: 1, action: "draw_card" },
+        { dieRoll: 2, action: "gain_credit" },
+        { dieRoll: 3, action: "make_run_rd" },
+        { dieRoll: 4, action: "make_run_hq" },
+        { dieRoll: 5, action: "make_run_remote" },
+        {
+          dieRoll: 6,
+          action: "reveal_random_grip_card_to_corp_and_play_or_install",
+        },
+      ],
       visibility: "hidden_info_barrier",
     },
   },

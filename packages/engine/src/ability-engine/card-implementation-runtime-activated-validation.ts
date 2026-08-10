@@ -21,7 +21,12 @@ import {
   trashOwnRezzedIceForCreditsEffect,
 } from "./card-implementation-runtime-activated-targets";
 import { assertActivatedCardImplementationAbilityCanResolve } from "./card-implementation-runtime-legality";
-import type { ActivatedCardAbilityImplementation } from "./definition-types";
+import { cardImplementationConditionMet } from "./card-implementation-runtime-shared";
+import {
+  activatedAbilityAtTiming,
+  additionalTimingCondition,
+  type ActivatedCardAbilityImplementation,
+} from "./definition-types";
 import {
   activatedAbilityBindingForLegalAction,
   assertAbilityRefMatchesActivatedBinding,
@@ -77,7 +82,20 @@ export function validateActivatedCardImplementationAbility(
   legalAction: LegalAction,
   match: ActivatedAbilityLegalActionMatch,
 ): void {
-  const { cardId, ability } = match;
+  const { cardId } = match;
+  const requestedTiming = legalAction.payload?.cardImplementationAbilityTiming;
+  if (typeof requestedTiming !== "string")
+    throw new Error("Der aktivierten Kartenfähigkeit fehlt ihr Timing.");
+  const ability = activatedAbilityAtTiming(
+    match.ability,
+    requestedTiming as ActivatedCardAbilityImplementation["timing"],
+  );
+  if (!ability)
+    throw new Error("Die aktivierte Kartenfähigkeit passt nicht zum Profil.");
+  const timingCondition = additionalTimingCondition(
+    match.ability,
+    requestedTiming as ActivatedCardAbilityImplementation["timing"],
+  );
   const validateChosenIceStrengthTarget = (): void => {
     const doubleIceStrengthEffect = doubleChosenIceStrengthEffect(ability);
     if (!doubleIceStrengthEffect) return;
@@ -97,6 +115,13 @@ export function validateActivatedCardImplementationAbility(
       "Diese aktivierte Kartenfaehigkeit gehoert der anderen Seite.",
     );
   validateActivatedAbilityCosts(ability, legalAction);
+  if (
+    timingCondition !== undefined &&
+    !cardImplementationConditionMet(deps, state, timingCondition, cardId)
+  )
+    throw new Error(
+      "Die zusätzliche Timing-Bedingung der Kartenfähigkeit ist nicht erfüllt.",
+    );
   const transferEffect = transferHostedCreditsEffect(ability);
   if (transferEffect) {
     const amount = Number(legalAction.payload?.xValue);
@@ -124,8 +149,6 @@ export function validateActivatedCardImplementationAbility(
     throw new Error(
       "Die aktivierte Kartenfaehigkeit kann nicht bezahlt werden.",
     );
-  if (legalAction.payload?.cardImplementationAbilityTiming !== ability.timing)
-    throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zum Profil.");
   if (ability.timing === "runner_main") {
     if (legalAction.side !== "runner")
       throw new Error(
@@ -167,9 +190,13 @@ export function validateActivatedCardImplementationAbility(
       state.activeSide !== "runner" ||
       (state.phase !== "runner_action_phase" && state.phase !== "run")
     )
-      throw new Error("Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.");
+      throw new Error(
+        "Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.",
+      );
     if (!deps.runnerInstalledCardIds(state).includes(cardId))
-      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+      throw new Error(
+        "Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,
@@ -331,7 +358,9 @@ export function validateActivatedCardImplementationAbility(
       state.phase !== "runner_action_phase" &&
       !state.run
     )
-      throw new Error("Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.");
+      throw new Error(
+        "Diese Paid-Faehigkeit ist in diesem Fenster nicht nutzbar.",
+      );
     if (
       !corpActivatedCardImplementationSourceIsAvailable(
         deps,
@@ -340,7 +369,9 @@ export function validateActivatedCardImplementationAbility(
         match.definition,
       )
     )
-      throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+      throw new Error(
+        "Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.",
+      );
     assertActivatedCardImplementationAbilityCanResolve(
       deps,
       state,

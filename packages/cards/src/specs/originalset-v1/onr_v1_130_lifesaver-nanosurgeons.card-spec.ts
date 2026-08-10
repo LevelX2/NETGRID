@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Draw two cards. Use this ability only if you were damaged during any of your last three actions.\n[T]: Prevent 1 brain damage.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_draw_cards",
+        ),
+        actionLabel: "Lifesaver™ Nanosurgeons: 2 Karten ziehen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

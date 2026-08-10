@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_draw_cards",
+        ),
+        actionLabel: "Employee Empowerment: 2 Karten ziehen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

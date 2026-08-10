@@ -11,6 +11,14 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "Hand size +2; A, [1]: Draw two cards.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_draw_cards",
+        ),
+        actionLabel: "Euromarket Consortium: 2 Karten ziehen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

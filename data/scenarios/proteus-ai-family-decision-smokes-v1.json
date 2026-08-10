@@ -27,7 +27,8 @@
         "onr_proteus_057_doppelganger-antibody",
         "onr_proteus_062_lesley-major",
         "onr_proteus_068_pattel-antibody",
-        "onr_proteus_075_stereogram-antibody"
+        "onr_proteus_075_stereogram-antibody",
+        "onr_proteus_119_promises-promises"
       ],
       "positiveDecisionAssertions": [
         "access_risk_projected",
@@ -108,9 +109,7 @@
         "onr_proteus_086_enterprise-inc-shields",
         "onr_proteus_095_skeleton-passkeys",
         "onr_proteus_100_wrecking-ball",
-        "onr_proteus_103_cruising-for-netwatch",
         "onr_proteus_114_on-the-fast-track",
-        "onr_proteus_119_promises-promises",
         "onr_proteus_135_cortical-stimulators"
       ],
       "positiveDecisionAssertions": [
@@ -138,6 +137,7 @@
         "onr_proteus_065_networked-center",
         "onr_proteus_072_research-bunker",
         "onr_proteus_077_weapons-depot",
+        "onr_proteus_103_cruising-for-netwatch",
         "onr_proteus_134_cortical-cybermodem",
         "onr_proteus_151_sunburst-cranial-interface"
       ],

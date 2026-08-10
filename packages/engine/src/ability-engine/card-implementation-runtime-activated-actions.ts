@@ -25,7 +25,12 @@ import {
   trashOwnRezzedIceForCreditsEffect,
 } from "./card-implementation-runtime-activated-targets";
 import { canResolveActivatedCardImplementationAbility } from "./card-implementation-runtime-legality";
-import type { ActivatedCardAbilityImplementation } from "./definition-types";
+import { cardImplementationConditionMet } from "./card-implementation-runtime-shared";
+import {
+  activatedAbilityAtTiming,
+  additionalTimingCondition,
+  type ActivatedCardAbilityImplementation,
+} from "./definition-types";
 import {
   abilityRefForActivatedBinding,
   activatedAbilityBindingsForDefinition,
@@ -37,7 +42,8 @@ export function activatedCardImplementationAbilitiesForTiming(
   timing: ActivatedCardAbilityImplementation["timing"],
 ): readonly ActivatedAbilityBinding[] {
   return activatedAbilityBindingsForDefinition(definition).filter(
-    (binding) => binding.ability.timing === timing,
+    (binding) =>
+      activatedAbilityAtTiming(binding.ability, timing) !== undefined,
   );
 }
 
@@ -91,7 +97,9 @@ export function pushActivatedCardImplementationActionsForTiming(
     definition,
     timing,
   )) {
-    const { ability } = binding;
+    const ability = activatedAbilityAtTiming(binding.ability, timing);
+    if (!ability)
+      throw new Error("Die aktivierte Fähigkeit besitzt dieses Timing nicht.");
     const createBoundAction = (
       label: string,
       payload: Record<string, string | number | boolean>,
@@ -121,6 +129,17 @@ export function pushActivatedCardImplementationActionsForTiming(
         deps,
         state,
         ability,
+        sourceCardId,
+      )
+    )
+      continue;
+    const timingCondition = additionalTimingCondition(binding.ability, timing);
+    if (
+      timingCondition !== undefined &&
+      !cardImplementationConditionMet(
+        deps,
+        state,
+        timingCondition,
         sourceCardId,
       )
     )

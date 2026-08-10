@@ -11,6 +11,14 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "A, 1: Expose an installed card.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_expose_installed_card",
+        ),
+        actionLabel: "SeeYa: installierte Korp-Karte exposen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

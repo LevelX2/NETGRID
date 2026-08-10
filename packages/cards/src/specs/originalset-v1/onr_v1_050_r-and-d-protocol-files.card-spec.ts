@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Make a run on R&D, but instead of accessing cards, look at the top five cards of R&D.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_make_run",
+        ),
+        actionLabel: "R&D-Protocol Files: Run auf R&D",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

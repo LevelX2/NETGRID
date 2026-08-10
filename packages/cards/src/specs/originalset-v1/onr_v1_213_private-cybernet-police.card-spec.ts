@@ -11,6 +11,12 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "[A]: Trace 5 - If trace is successful, give Runner a tag.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey("abilities_activated_corp_main_trace"),
+        actionLabel: "Private Cybernet Police: Trace 5 starten",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

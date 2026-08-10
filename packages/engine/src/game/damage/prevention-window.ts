@@ -40,6 +40,7 @@ import {
 } from "./prevention-sources";
 
 const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX = "damage_prevention_bypass_pay_";
+const SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR = "__prevent_amount_";
 
 export function openEventModificationWindow(
   state: GameState,
@@ -159,21 +160,48 @@ export function eventModificationChoice(
               : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
-    ...stageCandidates.map((stageCandidate) => ({
-      id: stageCandidate.candidateId,
-      label: corpDamagePreventionCancel
-        ? "Prevention wirken lassen"
-        : event.eventType === "add_tag"
-          ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
-          : event.eventType === "runner_installed_trash"
-            ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
-            : window.kind === "increase"
-              ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
-              : stageCandidate.sourceRef.kind === "card"
-                ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
-                : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
-      publicLabel: "Event Modification",
-    })),
+    ...stageCandidates.flatMap((stageCandidate) => {
+      if (
+        event.eventType === "damage" &&
+        stageCandidate.kind === "prevent" &&
+        stageCandidate.selectablePreventAmount === true
+      ) {
+        const maximum = Math.min(
+          amount,
+          Math.max(0, Math.floor(stageCandidate.preventAmount ?? 0)),
+        );
+        if (maximum <= 0)
+          throw new Error(
+            "Die wählbare Damage-Prevention hat kein positives Maximum.",
+          );
+        return Array.from({ length: maximum }, (_, index) => {
+          const preventedAmount = index + 1;
+          return {
+            id: `${stageCandidate.candidateId}${SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR}${preventedAmount}`,
+            label: `${stageCandidate.sourceRef.label}: ${preventedAmount} Schaden verhindern`,
+            publicLabel: "Event Modification",
+            value: preventedAmount,
+          };
+        });
+      }
+      return [
+        {
+          id: stageCandidate.candidateId,
+          label: corpDamagePreventionCancel
+            ? "Prevention wirken lassen"
+            : event.eventType === "add_tag"
+              ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
+              : event.eventType === "runner_installed_trash"
+                ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+                : window.kind === "increase"
+                  ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
+                  : stageCandidate.sourceRef.kind === "card"
+                    ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventAmount ?? amount} Schaden verhindern`
+                    : `${stageCandidate.preventAmount ?? amount} Schaden verhindern`,
+          publicLabel: "Event Modification",
+        },
+      ];
+    }),
   ];
   return {
     choiceId: `v120_choice_${window.windowId}`,
@@ -432,9 +460,14 @@ export function resolveEventModificationChoice(
     setDamagePayload(legalAction, summary);
     return;
   }
-  const candidate = window.candidates.find(
-    (item) => item.candidateId === selected,
+  const selectablePreventSelection = selectedPreventAmountSelection(
+    window,
+    selected,
+    event,
   );
+  const candidate = selectablePreventSelection
+    ? selectablePreventSelection.candidate
+    : window.candidates.find((item) => item.candidateId === selected);
   if (!candidate)
     throw new Error("Dieser Event-Modification-Kandidat ist nicht legal.");
   if (
@@ -611,9 +644,14 @@ export function resolveEventModificationChoice(
   revalidateDamagePreventionCandidateSource(state, candidate);
   const originalAmount = numberPayload(event, "amount");
   const preventedAmount = Math.min(
-    candidate.preventAmount ?? 0,
+    selectablePreventSelection?.amount ?? candidate.preventAmount ?? 0,
     originalAmount,
   );
+  if (
+    selectablePreventSelection &&
+    (preventedAmount <= 0 || preventedAmount > (candidate.preventAmount ?? 0))
+  )
+    throw new Error("Die gewählte Damage-Prevention-Menge ist nicht legal.");
   const finalAmount = Math.max(0, originalAmount - preventedAmount);
   registerDamagePreventionUsage(state, candidate, preventedAmount);
   if (
@@ -667,6 +705,33 @@ export function resolveEventModificationChoice(
   setDamagePayload(legalAction, summary);
 }
 
+function selectedPreventAmountSelection(
+  window: EventModificationWindow,
+  selected: string,
+  event: ImminentEvent,
+): { candidate: EventModificationCandidate; amount: number } | undefined {
+  if (event.eventType !== "damage") return undefined;
+  const separatorIndex = selected.lastIndexOf(
+    SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR,
+  );
+  if (separatorIndex <= 0) return undefined;
+  const candidateId = selected.slice(0, separatorIndex);
+  const amount = Number(
+    selected.slice(
+      separatorIndex + SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR.length,
+    ),
+  );
+  const candidate = window.candidates.find(
+    (entry) =>
+      entry.candidateId === candidateId &&
+      entry.kind === "prevent" &&
+      entry.selectablePreventAmount === true,
+  );
+  if (!candidate || !Number.isInteger(amount))
+    throw new Error("Die gewählte Damage-Prevention-Menge ist nicht legal.");
+  return { candidate, amount };
+}
+
 export function isCorpDamagePreventionCancelCandidate(
   state: GameState,
   candidate: EventModificationCandidate,
@@ -687,8 +752,7 @@ export function eventModificationStageCandidates(
     (candidate) =>
       candidate.kind === first.kind &&
       candidate.controller === first.controller &&
-      candidate.priority === first.priority &&
-      candidate.preventAmount === first.preventAmount,
+      candidate.priority === first.priority,
   );
 }
 

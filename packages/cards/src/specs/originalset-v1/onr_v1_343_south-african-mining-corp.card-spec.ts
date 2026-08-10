@@ -11,6 +11,14 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "A, A, A: Gain [6].",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_gain_credits",
+        ),
+        actionLabel: "6 Credits nehmen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

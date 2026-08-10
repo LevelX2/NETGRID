@@ -12,6 +12,20 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "0: Base link 1. 1: +1 link. Use only one base link card for each trace attempt made against you.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_trace_base_link_window_use_base_link",
+        ),
+        actionLabel: "Baedeker’s Net Map: Base Link 1 nutzen",
+      },
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+        ),
+        actionLabel: "Baedeker’s Net Map: +1 Link",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

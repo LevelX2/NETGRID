@@ -582,20 +582,43 @@ export function createTurnRunnerStartRuntimeResolvers(
       }
     | undefined {
     void sourceId;
-    void sourceDefinitionId;
-    if (dieRoll === 1) return { restriction: "draw_card" };
-    if (dieRoll === 2) return { restriction: "gain_credit" };
-    if (dieRoll === 3)
+    const longtail = cardImplementationForDefinitionId(
+      sourceDefinitionId,
+    )?.uniqueDirectLongtail;
+    if (longtail?.kind !== "runner_start_turn_forced_random_action")
+      throw new Error("Die erzwungene Zufallsaktion besitzt keinen Vertrag.");
+    if (longtail.mustTakeIfPossible !== true)
+      throw new Error("Die Zufallsaktion muss als verpflichtend deklariert sein.");
+    const outcomes = longtail.outcomes;
+    if (
+      outcomes.length !== 6 ||
+      new Set(outcomes.map((outcome) => outcome.dieRoll)).size !== 6 ||
+      outcomes.some(
+        (outcome) => !Number.isInteger(outcome.dieRoll) || outcome.dieRoll < 1 || outcome.dieRoll > 6,
+      )
+    )
+      throw new Error("Die Zufallsaktionstabelle ist nicht vollständig.");
+    const outcome = outcomes.find((entry) => entry.dieRoll === dieRoll);
+    if (!outcome)
+      throw new Error("Die Zufallsaktionstabelle besitzt dieses Würfelergebnis nicht.");
+    if (outcome.action === "draw_card") return { restriction: "draw_card" };
+    if (outcome.action === "gain_credit") return { restriction: "gain_credit" };
+    if (outcome.action === "make_run_rd")
       return { restriction: "start_run", targetServerId: "rd" };
-    if (dieRoll === 4)
+    if (outcome.action === "make_run_hq")
       return { restriction: "start_run", targetServerId: "hq" };
-    if (dieRoll === 5) {
+    if (outcome.action === "make_run_remote") {
       const hasRemote = state.corp.servers.some(
         (server) => server.kind === "remote",
       );
       if (!hasRemote) return undefined;
       return { restriction: "start_run_remote" };
     }
+    if (
+      outcome.action !==
+      "reveal_random_grip_card_to_corp_and_play_or_install"
+    )
+      throw new Error("Die Zufallsaktionstabelle enthält eine unbekannte Aktion.");
     const target = randomRunnerGripCardId(
       state,
       "runner_forced_action.random_grip",

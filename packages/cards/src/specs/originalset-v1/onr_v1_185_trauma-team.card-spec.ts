@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Put two Trauma counters on Trauma Team when it is installed.\nTrauma counter: Prevent 1 meat damage.\nA: Put one Trauma counter on Trauma Team.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_add_counters_to_source",
+        ),
+        actionLabel: "Trauma-Counter hinzufügen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

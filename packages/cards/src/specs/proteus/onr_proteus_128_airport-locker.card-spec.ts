@@ -14,11 +14,7 @@ export const cardSpec = {
       "[5], [T]: Search your stack for a program, and install that program, if you can. Shuffle your stack afterwards. You may use this ability during an encounter with a piece of ice. Hidden resources are installed face down, but are put into the trash face up.",
     capabilityText: [
       {
-        capabilityKey: capabilityKey("runner_main_search_install_program"),
-        actionLabel: "Airport Locker: Programm aus dem Stack installieren",
-      },
-      {
-        capabilityKey: capabilityKey("during_run_search_install_program"),
+        capabilityKey: capabilityKey("search_install_program"),
         actionLabel: "Airport Locker: Programm aus dem Stack installieren",
       },
     ],
@@ -52,10 +48,18 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey("runner_main_search_install_program"),
+        capabilityKey: capabilityKey("search_install_program"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
         timing: "runner_main",
+        additionalTimings: [
+          {
+            timing: "during_run",
+            condition: {
+              kind: "current_encounter_ice",
+            },
+          },
+        ],
         costs: [
           {
             kind: "credit",
@@ -66,34 +70,6 @@ export const cardSpec = {
             amount: 1,
           },
         ],
-        effects: [
-          {
-            kind: "search_stack_install",
-            filter: "program",
-            installCost: "normal",
-            shuffleAfterwards: true,
-            visibility: "hidden_info_barrier",
-          },
-        ],
-      },
-      {
-        capabilityKey: capabilityKey("during_run_search_install_program"),
-        addressability: ["plan", "action", "quote", "debug"],
-        kind: "activated",
-        timing: "during_run",
-        costs: [
-          {
-            kind: "credit",
-            amount: 5,
-          },
-          {
-            kind: "trash_source",
-            amount: 1,
-          },
-        ],
-        condition: {
-          kind: "current_encounter_ice",
-        },
         effects: [
           {
             kind: "search_stack_install",

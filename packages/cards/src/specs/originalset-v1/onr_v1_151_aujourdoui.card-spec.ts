@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Look at the top five cards of your stack. You may bring any program cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle your stack.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_look_top_stack_take_matching",
+        ),
+        actionLabel: "Aujourd’Oui: Top 5 nach Programmen prüfen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

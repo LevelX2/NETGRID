@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Put [15] from the bank on Rockerboy Promotion when you rez it. When all the bits have been removed, trash Rockerboy Promotion. A: Take [3] from Rockerboy Promotion.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_take_hosted_credits",
+        ),
+        actionLabel: "Rockerboy Promotion: bis zu 3 gehostete Credits nehmen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

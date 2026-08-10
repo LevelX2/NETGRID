@@ -11,6 +11,13 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "A: Trash a rezzed piece of ice. Gain [4].",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey("corp_main_trash_rezzed_ice_for_credits"),
+        actionLabel:
+          "Syd Meyer Superstores: gerezztes ICE trashen und 4 Credits erhalten",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -30,6 +30,7 @@ export function activatedAbilityPayload(
   ability: ActivatedCardAbilityImplementation,
   binding: ActivatedAbilityBinding,
   state?: GameState,
+  offeredTiming: ActivatedCardAbilityImplementation["timing"] = ability.timing,
 ): Record<string, string | number | boolean> {
   const advancementCounterCreditPayout =
     gainCreditsPerAdvancementCounterOnSourceEffect(ability);
@@ -104,7 +105,7 @@ export function activatedAbilityPayload(
     cardId,
     cardImplementationAbility: "activated",
     ...activatedAbilityBindingPayload(binding),
-    cardImplementationAbilityTiming: ability.timing,
+    cardImplementationAbilityTiming: offeredTiming,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
     ...(hostedCreditTakeAmount +
       directCreditGain +

@@ -12,6 +12,15 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Install Raymond Ellison only in a subsidiary data fort. [T]: Remove any number of advancement counters from cards installed in this data fort. Gain [3] for each advancement counter removed. Use this ability only during a run. At the end of the run, return to the bank any of the bits gained that you did not spend.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "during_run_tap_advancement_for_run_credits",
+        ),
+        actionLabel:
+          "Raymond Ellison: Advancement-Counter für Run-Credits entfernen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

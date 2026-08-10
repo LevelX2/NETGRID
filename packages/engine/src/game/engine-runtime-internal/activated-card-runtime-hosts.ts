@@ -575,6 +575,7 @@ import type {
   CardVirusCounterImplementation,
   MakeRunEffectImplementation,
 } from "../../ability-engine/definition-types";
+import { activatedAbilityAtTiming } from "../../ability-engine/definition-types";
 import type { RuntimeDeps } from "./runtime-shared";
 
 export function createActivatedCardRuntimeHosts(
@@ -603,7 +604,7 @@ export function createActivatedCardRuntimeHosts(
                 index: number;
               } =>
                 entry.ability.kind === "activated" &&
-                entry.ability.timing === timing,
+                activatedAbilityAtTiming(entry.ability, timing) !== undefined,
             ) ?? [],
         isTraceLinkForceJackOutSource: (cardId) =>
           isTraceLinkForceJackOutSource(state, cardId),

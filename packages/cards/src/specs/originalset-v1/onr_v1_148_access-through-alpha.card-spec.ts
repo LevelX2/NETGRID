@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "[1]: Base link 9. Use only one base link card for each trace attempt made against you.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_trace_base_link_window_use_base_link",
+        ),
+        actionLabel: "Access through Alpha: Base Link 9 nutzen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

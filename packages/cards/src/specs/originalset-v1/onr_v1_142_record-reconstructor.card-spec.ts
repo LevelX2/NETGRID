@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Make a run on the Archives. If run is successful, do not access cards from the Archives; instead, shuffle the face-up pile of the Archives and then put the top two cards from that pile on R&D.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_make_run",
+        ),
+        actionLabel: "Record Reconstructor: Run auf Archives",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -62,7 +62,17 @@ export const cardSpec = {
             amount: 1,
           },
         ],
-        effects: [],
+        effects: [
+          {
+            kind: "cancel_successful_trace_effect",
+            visibility: "hidden_info_barrier",
+          },
+          {
+            kind: "add_bad_publicity_if_cancelled_trace_has_non_tag_effect",
+            amount: 1,
+            visibility: "public",
+          },
+        ],
       },
     ],
   },
@@ -77,32 +87,8 @@ export const cardSpec = {
         kind: "plan_role",
         role: "safe_probe_run",
       },
-      {
-        kind: "tactic_interpretation",
-        signal: "punish.payoff",
-        use: "punish.payoff",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "tag.payoff",
-        use: "tag.payoff",
-      },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey("trace_success_cancel_window"),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "payoff_anchor",
-            roleDetail: "payoff_anchor_tag_payoff",
-            evidenceAnchor: "tag.payoff",
-            confidence: "medium",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

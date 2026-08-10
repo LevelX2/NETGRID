@@ -77,23 +77,7 @@ export const cardSpec = {
         exchange: "self_tag",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey(
-          "on_play_trash_last_run_fort_ice_add_tags",
-        ),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "medium",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

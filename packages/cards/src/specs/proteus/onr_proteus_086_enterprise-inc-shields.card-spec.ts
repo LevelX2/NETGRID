@@ -48,6 +48,7 @@ export const cardSpec = {
         kind: "damage_prevention",
         damageTypes: ["net"],
         amount: 2,
+        amountMode: "up_to",
         cost: {
           kind: "credit",
           amount: 1,

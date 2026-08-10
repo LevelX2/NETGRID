@@ -12,6 +12,15 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "You may advance Pacifica Regional AI before and after you rez it.\nRegional AI advancement counter: Gain an action.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_gain_actions",
+        ),
+        actionLabel:
+          "Pacifica Regional AI: Advancement-Counter für Aktion ausgeben",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -168,6 +168,9 @@ describe("CardSpec validation", () => {
 
   it("requires addressability only on the capability root, not nested mechanics", () => {
     const spec = untypedSpec();
+    (spec.text as Record<string, unknown>).capabilityText = [
+      { capabilityKey: "gain-credit", actionLabel: "2 Credits erhalten" },
+    ];
     engineOf(spec).abilities = [
       {
         kind: "activated",
@@ -186,6 +189,115 @@ describe("CardSpec validation", () => {
       },
     ];
     expect(() => validateUntyped(spec)).not.toThrow();
+  });
+
+  it("validates additional timing windows without splitting an ability identity", () => {
+    const withAdditionalTiming = () => {
+      const spec = untypedSpec();
+      engineOf(spec).abilities = [
+        {
+          kind: "activated",
+          timing: "runner_main",
+          additionalTimings: [
+            {
+              timing: "during_run",
+              condition: { kind: "current_encounter_ice" },
+            },
+          ],
+          costs: [],
+          effects: [],
+          capabilityKey: "single_ability_multiple_windows",
+          addressability: ["action"],
+        },
+      ];
+      (spec.text as Record<string, unknown>).capabilityText = [
+        {
+          capabilityKey: "single_ability_multiple_windows",
+          actionLabel: "Fähigkeit im erlaubten Fenster nutzen",
+        },
+      ];
+      return spec;
+    };
+    expect(() => validateUntyped(withAdditionalTiming())).not.toThrow();
+
+    const duplicateBase = withAdditionalTiming();
+    (
+      (engineOf(duplicateBase).abilities as Record<string, unknown>[])[0]!
+        .additionalTimings as Record<string, unknown>[]
+    )[0]!.timing = "runner_main";
+    expect(() => validateUntyped(duplicateBase)).toThrow(
+      /must not duplicate the ordinary timing/,
+    );
+
+    const duplicateAdditional = withAdditionalTiming();
+    (
+      (engineOf(duplicateAdditional).abilities as Record<string, unknown>[])[0]!
+        .additionalTimings as Record<string, unknown>[]
+    ).push({
+      timing: "during_run",
+    });
+    expect(() => validateUntyped(duplicateAdditional)).toThrow(
+      /must not duplicate an additional timing/,
+    );
+  });
+
+  it("requires a declarative trace cancel and a complete forced D6 table", () => {
+    const traceWithoutCancel = untypedSpec();
+    engineOf(traceWithoutCancel).abilities = [
+      {
+        kind: "activated",
+        timing: "trace_success_cancel_window",
+        costs: [],
+        effects: [
+          {
+            kind: "add_bad_publicity_if_cancelled_trace_has_non_tag_effect",
+            amount: 1,
+            visibility: "public",
+          },
+        ],
+        capabilityKey: "trace_cancel",
+        addressability: ["action"],
+      },
+    ];
+    (traceWithoutCancel.text as Record<string, unknown>).capabilityText = [
+      { capabilityKey: "trace_cancel", actionLabel: "Trace-Effekt aufheben" },
+    ];
+    expect(() => validateUntyped(traceWithoutCancel)).toThrow(
+      /require exactly one cancel effect/,
+    );
+
+    const forcedTable = untypedSpec();
+    engineOf(forcedTable).uniqueDirectLongtail = {
+      kind: "runner_start_turn_forced_random_action",
+      startsTurnAfterInstall: true,
+      mustTakeIfPossible: true,
+      outcomes: [
+        { dieRoll: 1, action: "draw_card" },
+        { dieRoll: 2, action: "gain_credit" },
+        { dieRoll: 3, action: "make_run_rd" },
+        { dieRoll: 4, action: "make_run_hq" },
+        { dieRoll: 5, action: "make_run_remote" },
+        {
+          dieRoll: 6,
+          action: "reveal_random_grip_card_to_corp_and_play_or_install",
+        },
+      ],
+      visibility: "hidden_info_barrier",
+      capabilityKey: "forced_random_action",
+      addressability: ["action"],
+    };
+    expect(() => validateUntyped(forcedTable)).not.toThrow();
+    const malformedTable = JSON.parse(JSON.stringify(forcedTable)) as Record<
+      string,
+      unknown
+    >;
+    const outcomes = (
+      engineOf(malformedTable).uniqueDirectLongtail as Record<string, unknown>
+    ).outcomes as Record<string, unknown>[];
+    outcomes[5] = { dieRoll: 5, action: "draw_card" };
+    expect(() => validateUntyped(malformedTable)).toThrow(
+      /must not be duplicated/,
+    );
   });
 
   it("requires keys for conditionally addressable capability variants", () => {
@@ -625,6 +737,31 @@ describe("CardSpec validation", () => {
     expect(() => validateUntyped(duplicate)).toThrowError(
       /duplicate capability text key/,
     );
+  });
+
+  it("requires canonical action text for every activated action capability", () => {
+    const missing = untypedSpec();
+    engineOf(missing).abilities = [
+      {
+        kind: "activated",
+        timing: "runner_main",
+        costs: [],
+        effects: [],
+        capabilityKey: "visible_action",
+        addressability: ["action"],
+      },
+    ];
+    expect(() => validateUntyped(missing)).toThrowError(
+      /missing_capability_text/,
+    );
+
+    (missing.text as Record<string, unknown>).capabilityText = [
+      {
+        capabilityKey: "visible_action",
+        actionLabel: "Sichtbare Fähigkeit nutzen",
+      },
+    ];
+    expect(() => validateUntyped(missing)).not.toThrow();
   });
 
   it("rejects non-string ability aliases and duplicate addressability", () => {

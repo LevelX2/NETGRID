@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "You may advance Information Laundering before and after you rez it. A, T: Gain [4] for each advancement counter on Information Laundering.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_gain_credits_per_advancement_counter_on_source",
+        ),
+        actionLabel: "Information Laundering: Credits nehmen und trashen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

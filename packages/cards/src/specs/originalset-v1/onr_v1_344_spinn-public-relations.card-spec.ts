@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Take [1] from Spinn(R) Public Relations, if it has any bits, at the start of each of your turns. A: Put [3] from the bank on Spinn(R) Public Relations.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_add_hosted_credits",
+        ),
+        actionLabel: "Spinn® Public Relations: 3 Credits auf die Karte legen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

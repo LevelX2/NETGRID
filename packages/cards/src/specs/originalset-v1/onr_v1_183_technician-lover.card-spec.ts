@@ -11,6 +11,14 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "[A]: Look at the top card of R&D.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_private_look",
+        ),
+        actionLabel: "Technician Lover: R&D-Spitze ansehen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

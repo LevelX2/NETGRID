@@ -12,6 +12,15 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "You may advance Government Contract before and after you rez it. Government Contract advancement counter: Gain [3]. Use these bits only to pay for installing or rezzing cards. When the turn ends, return to the bank any of the [3] you did not spend.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "corp_main_spend_advancement_for_install_rez_credits",
+        ),
+        actionLabel:
+          "Government Contract: 1 Advancement-Counter für 3 Installations-/Rez-Credits ausgeben",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "0: Show the top five cards of your stack to the Corp. If any of those cards are programs, trash Mystery Box and then install one of those programs, at no cost. Shuffle your stack afterwards. Use this ability only during a run and only once each run.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_during_run_look_top_stack_show_to_corp_then_install_matching",
+        ),
+        actionLabel: "Mystery Box: Stack-Spitze zeigen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

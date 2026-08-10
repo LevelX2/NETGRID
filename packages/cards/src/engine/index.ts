@@ -1,4 +1,8 @@
 export type * from "./definition-types";
+export {
+  activatedAbilityAtTiming,
+  additionalTimingCondition,
+} from "./definition-ability-contracts";
 export type * from "./card-mechanical-contracts";
 export {
   CapabilityIdentityError,
@@ -75,9 +79,7 @@ const expectedCardSpecRuntimeDefinitionIds = Object.freeze(
       : [];
   }),
 );
-function hasRuntimeCardSpecImplementation(
-  definitionId: string,
-): boolean {
+function hasRuntimeCardSpecImplementation(definitionId: string): boolean {
   const spec = cardSpecForDefinitionId(CARD_REGISTRY, definitionId);
   if (spec === undefined)
     throw new Error(`card_spec_runtime_missing_spec:${definitionId}`);

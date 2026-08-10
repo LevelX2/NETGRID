@@ -4664,7 +4664,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
         action.type === "activated_card_ability" &&
         action.payload?.cardId === vaporId &&
         action.payload?.cardImplementationAbilityLabel ===
-          "Vapor Ops: Advancement-Counter fuer 1 Credit ausgeben",
+          "Vapor Ops: Advancement-Counter für 1 Credit ausgeben",
     );
     expect(state.cardInstances[vaporId]?.advancementCounters).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({

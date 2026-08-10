@@ -331,6 +331,8 @@ export type CardDamagePreventionSourceImplementation = {
   kind: "damage_prevention";
   damageTypes: readonly Extract<DamageType, "net" | "meat" | "core">[];
   amount: number | "all";
+  /** A source that says "up to" offers every positive amount through amount. */
+  amountMode?: "exact" | "up_to";
   corpMayPayToBypass?: {
     costPerDamage: 1;
   };

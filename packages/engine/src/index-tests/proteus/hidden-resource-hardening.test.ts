@@ -411,13 +411,26 @@ describe("PRO011 hidden resource timing hardening", () => {
       accessCount: 1,
     };
 
+    const encounterAction = getLegalActions(encounter, "runner").find(
+      (candidate) =>
+        candidate.payload?.cardId === encounterLockerId &&
+        candidate.payload?.cardImplementationAbilityTiming === "during_run",
+    );
+    expect(encounterAction).toBeDefined();
+    expect(encounterAction?.abilityRef?.sourceAbilityId).toBe(
+      mainAction?.abilityRef?.sourceAbilityId,
+    );
+
+    const outsideEncounter = structuredClone(encounter);
+    outsideEncounter.run = {
+      ...outsideEncounter.run!,
+      phase: "movement",
+    };
     expect(
-      getLegalActions(encounter, "runner").some(
-        (candidate) =>
-          candidate.payload?.cardId === encounterLockerId &&
-          candidate.payload?.cardImplementationAbilityTiming === "during_run",
+      getLegalActions(outsideEncounter, "runner").some(
+        (candidate) => candidate.payload?.cardId === encounterLockerId,
       ),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("projects preparable Chiba and Swiss abilities only to the owning runner", () => {

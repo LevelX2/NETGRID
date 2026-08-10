@@ -12,6 +12,15 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Put [16] from the bank on BBS Whispering Campaign when you rez it.  When all the bits have been removed, trash BBS Whispering Campaign. A: Take [2] from BBS Whispering Campaign.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_take_hosted_credits",
+        ),
+        actionLabel:
+          "BBS Whispering Campaign: bis zu 2 gehostete Credits nehmen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

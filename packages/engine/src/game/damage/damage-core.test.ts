@@ -5,7 +5,9 @@ import type {
   CardDefinitionId,
   CardInstance,
   CardInstanceId,
+  EventModificationWindow,
   GameState,
+  ImminentEvent,
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
@@ -19,6 +21,10 @@ import {
   resolveReplacementChoice,
   type DamageCoreHost,
 } from "./damage-core";
+import {
+  eventModificationChoice,
+  eventModificationStageCandidates,
+} from "./prevention-window";
 
 describe("damage core", () => {
   afterEach(() => {
@@ -135,6 +141,120 @@ describe("damage core", () => {
       damageResolved: true,
       damageAmount: 0,
     });
+  });
+
+  it("offers every legal partial quantity from a run damage-prevention pool", () => {
+    const gripCardIds = ["grip_1", "grip_2", "grip_3"].map(
+      (id) => id as CardInstanceId,
+    );
+    const state = minimalState({
+      cardInstances: Object.fromEntries(
+        gripCardIds.map((cardId) => [
+          cardId,
+          instance(cardId, "grip_card", "runner", "grip"),
+        ]),
+      ),
+      runnerGrip: gripCardIds,
+    });
+    state.run = {
+      runId: "weefle_run",
+      attackedServerId: "rd",
+      damagePreventionPool: {
+        sourceDefinitionId: "onr_proteus_127_weefle-initiation",
+        remaining: 7,
+      },
+    } as NonNullable<GameState["run"]>;
+    configureDamageCoreHost(testHost());
+    const action = actionFor("corp", "play_operation");
+
+    resolveDamageOperation(state, action, "net", 3, "weefle_damage");
+
+    const preventionOptions = state.pendingChoice?.options.filter((option) =>
+      option.id.includes("run_damage_prevent_"),
+    );
+    expect(preventionOptions?.map((option) => option.value)).toEqual([1, 2, 3]);
+    const choiceAction = actionFor("runner", "resolve_choice");
+    resolveEventModificationChoice(
+      state,
+      choiceAction,
+      playerChoice(String(preventionOptions?.[1]?.id)),
+    );
+
+    expect(state.run?.damagePreventionPool?.remaining).toBe(5);
+    expect(state.runner.grip).toHaveLength(2);
+    expect(choiceAction.payload).toMatchObject({
+      eventModificationOutcome: "partially_prevented",
+      originalAmount: 3,
+      preventedAmount: 2,
+      finalAmount: 1,
+    });
+  });
+
+  it("keeps differently sized prevention sources in the same priority stage", () => {
+    const window: EventModificationWindow = {
+      windowId: "prevention_stage",
+      eventId: "damage_event",
+      eventType: "damage",
+      kind: "prevent",
+      side: "runner",
+      createdAtStateVersion: 1,
+      optional: true,
+      candidates: [
+        {
+          candidateId: "run_pool",
+          eventId: "damage_event",
+          kind: "prevent",
+          controller: "runner",
+          sourceRef: { kind: "game_rule", label: "Run pool" },
+          priority: 145,
+          visibility: "hidden_info_barrier",
+          optional: true,
+          preventAmount: 3,
+          selectablePreventAmount: true,
+        },
+        {
+          candidateId: "card_source",
+          eventId: "damage_event",
+          kind: "prevent",
+          controller: "runner",
+          sourceRef: { kind: "card", label: "Card source" },
+          priority: 145,
+          visibility: "hidden_info_barrier",
+          optional: true,
+          preventAmount: 1,
+        },
+      ],
+    };
+    const candidates = eventModificationStageCandidates(window);
+
+    expect(candidates.map((candidate) => candidate.candidateId)).toEqual([
+      "run_pool",
+      "card_source",
+    ]);
+
+    const event: ImminentEvent = {
+      eventId: "damage_event",
+      eventType: "damage",
+      source: { kind: "test_harness" },
+      controller: "system",
+      affectedSide: "runner",
+      payload: { amount: 3, damageType: "net" },
+      visibility: "hidden_info_barrier",
+      createdAtStateVersion: 1,
+    };
+    const choice = eventModificationChoice(
+      minimalState({ cardInstances: {}, runnerGrip: [] }),
+      window,
+      event,
+      1,
+    );
+    expect(choice.options.map((option) => option.id)).toEqual([
+      "pass",
+      "run_pool__prevent_amount_1",
+      "run_pool__prevent_amount_2",
+      "run_pool__prevent_amount_3",
+      "card_source",
+    ]);
   });
 
   it("chains public tag-avoidance sources until every incoming tag is handled", () => {

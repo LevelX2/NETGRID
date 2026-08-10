@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A, 1 credit: Remove a tag, at no cost.\n[T]: Avoid receiving a tag.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_remove_tags",
+        ),
+        actionLabel: "Nomad Allies: Tag entfernen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

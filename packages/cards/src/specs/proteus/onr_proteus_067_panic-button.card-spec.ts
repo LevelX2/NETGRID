@@ -12,6 +12,12 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Install Panic Button only in HQ. [1]: Draw a card. Use this ability only during a run on HQ.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey("hq_run_pay_one_draw_one"),
+        actionLabel: "Panic Button: 1 Credit zahlen und 1 Karte ziehen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -17,6 +17,28 @@ import type {
 } from "./definition-core-contracts";
 import type { CardEffectImplementation } from "./definition-effect-contracts";
 
+export type ActivatedCardAbilityTiming =
+  | "runner_main"
+  | "runner_paid"
+  | "during_run"
+  | "runner_cost_penalty_support"
+  | "access_start"
+  | "corp_main"
+  | "corp_paid"
+  | "corp_encounter"
+  | "corp_during_run"
+  | "corp_trace_window"
+  | "corp_start_run_window"
+  | "trace_base_link_window"
+  | "trace_post_bid_link_window"
+  | "trace_success_cancel_window";
+
+export type AdditionalActivatedCardAbilityTiming = {
+  timing: ActivatedCardAbilityTiming;
+  /** An extra window may be narrower than the ordinary ability window. */
+  condition?: CardConditionImplementation;
+};
+
 export type CardLifecycleTriggeredAbilityImplementation = {
   condition?: CardConditionImplementation;
   effects: readonly CardEffectImplementation[];
@@ -31,27 +53,48 @@ export type OnPlayCardAbilityImplementation = {
 
 export type ActivatedCardAbilityImplementation = {
   kind: "activated";
-  timing:
-    | "runner_main"
-    | "runner_paid"
-    | "during_run"
-    | "runner_cost_penalty_support"
-    | "access_start"
-    | "corp_main"
-    | "corp_paid"
-    | "corp_encounter"
-    | "corp_during_run"
-    | "corp_trace_window"
-    | "corp_start_run_window"
-    | "trace_base_link_window"
-    | "trace_post_bid_link_window"
-    | "trace_success_cancel_window";
+  /** The ability's ordinary timing window. */
+  timing: ActivatedCardAbilityTiming;
+  /**
+   * Additional explicitly granted windows for the same printed ability.
+   * They do not create another capability, limit, or planning identity.
+   */
+  additionalTimings?: readonly AdditionalActivatedCardAbilityTiming[];
   costs: readonly CardAbilityCostImplementation[];
   condition?: CardConditionImplementation;
   limit?: CardAbilityLimitImplementation;
   effects: readonly CardEffectImplementation[];
   label?: string;
 };
+
+/**
+ * Resolves an ability for one offered timing window without changing its
+ * capability identity. A caller must use the returned view for both action
+ * construction and revalidation.
+ */
+export function activatedAbilityAtTiming(
+  ability: ActivatedCardAbilityImplementation,
+  timing: ActivatedCardAbilityTiming,
+): ActivatedCardAbilityImplementation | undefined {
+  if (ability.timing === timing) return ability;
+  const additional = ability.additionalTimings?.find(
+    (entry) => entry.timing === timing,
+  );
+  return additional === undefined ? undefined : { ...ability, timing };
+}
+
+/**
+ * Returns only the extra condition of an additional timing. The ordinary
+ * ability condition remains independently required at every timing.
+ */
+export function additionalTimingCondition(
+  ability: ActivatedCardAbilityImplementation,
+  timing: ActivatedCardAbilityTiming,
+): CardConditionImplementation | undefined {
+  if (ability.timing === timing) return undefined;
+  return ability.additionalTimings?.find((entry) => entry.timing === timing)
+    ?.condition;
+}
 
 export type CardUniqueDirectLongtailImplementation =
   | {
@@ -74,6 +117,8 @@ export type CardUniqueDirectLongtailImplementation =
   | {
       kind: "runner_start_turn_forced_random_action";
       startsTurnAfterInstall: true;
+      mustTakeIfPossible: true;
+      outcomes: readonly RunnerStartTurnForcedRandomActionOutcome[];
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
@@ -102,6 +147,17 @@ export type CardUniqueDirectLongtailImplementation =
       trashSourceOnSuccess: true;
       visibility: Extract<EventVisibilityClass, "public">;
     };
+
+export type RunnerStartTurnForcedRandomActionOutcome = {
+  dieRoll: 1 | 2 | 3 | 4 | 5 | 6;
+  action:
+    | "draw_card"
+    | "gain_credit"
+    | "make_run_rd"
+    | "make_run_hq"
+    | "make_run_remote"
+    | "reveal_random_grip_card_to_corp_and_play_or_install";
+};
 
 export type CardRemainingReplacementLongtailImplementation =
   | {

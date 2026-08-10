@@ -11,6 +11,14 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "A, [1]: Bring the top card from your trash into your hand.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_move_top_trash_to_grip",
+        ),
+        actionLabel: "Junkyard BBS: oberste Trash-Karte in die Grip nehmen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

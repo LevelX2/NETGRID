@@ -12,6 +12,20 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Look at the top five cards of your stack. You may bring any hardware cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle the rest back into your stack.\tA, [2]: Expose any card.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_look_top_stack_take_matching",
+        ),
+        actionLabel: "Ronin Around: Stack-Spitze nach Hardware durchsuchen",
+      },
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_expose_installed_card",
+        ),
+        actionLabel: "Ronin Around: installierte Korp-Karte exposen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

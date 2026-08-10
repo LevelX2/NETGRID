@@ -11,6 +11,14 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "A: Expose a card installed inside a data fort.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_expose_installed_card",
+        ),
+        actionLabel: "Mouse: installierte Korp-Karte exposen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

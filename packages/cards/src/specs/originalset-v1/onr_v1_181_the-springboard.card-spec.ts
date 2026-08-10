@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "[1]: +1 link. Use this ability only once during each trace attempt, and only after you and the Corp have revealed how much each of you spent.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_trace_post_bid_link_window_increase_trace_link",
+        ),
+        actionLabel: "The Springboard: +1 Link",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

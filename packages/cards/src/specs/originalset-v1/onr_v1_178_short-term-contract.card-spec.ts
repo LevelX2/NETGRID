@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Put [12] from the bank on Short-Term Contract when it is installed. When all the bits have been removed, trash Short-Term Contract. A: Take [2] from Short-Term Contract.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_take_hosted_credits",
+        ),
+        actionLabel: "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

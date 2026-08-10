@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "T: Search your stack for a program and install that program, if you can. Shuffle your stack afterwards. Use this ability only during a run.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_during_run_trash_source",
+        ),
+        actionLabel: "Self-Modifying Code: Programm aus Stack installieren",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

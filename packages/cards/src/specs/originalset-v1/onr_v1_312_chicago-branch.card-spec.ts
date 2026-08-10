@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A, [3]: Add two advancement counters to an installed card that can be advanced.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_distribute_advancement_counters",
+        ),
+        actionLabel: "Chicago Branch: 2 Advancement-Counter legen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

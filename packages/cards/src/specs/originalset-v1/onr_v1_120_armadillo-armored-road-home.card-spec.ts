@@ -71,6 +71,7 @@ export const cardSpec = {
         kind: "damage_prevention",
         damageTypes: ["meat"],
         amount: 3,
+        amountMode: "up_to",
         cost: {
           kind: "trash_source",
         },

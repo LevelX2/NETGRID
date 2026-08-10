@@ -18,6 +18,8 @@ export type CardEffectImplementation =
   | GainCreditsForRunnerTrashHistoryEffectImplementation
   | AddBadPublicityEffectImplementation
   | AddBadPublicityFromFrameUpHistoryEffectImplementation
+  | CancelSuccessfulTraceEffectImplementation
+  | AddBadPublicityIfCancelledTraceHasNonTagEffectImplementation
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
@@ -114,6 +116,22 @@ export type AddBadPublicityFromFrameUpHistoryEffectImplementation = {
   kind: "add_bad_publicity_from_frame_up_history";
   baseAmount: 1;
   additionalAmount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+/** Cancels the current successful trace effect in its dedicated timing window. */
+export type CancelSuccessfulTraceEffectImplementation = {
+  kind: "cancel_successful_trace_effect";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+/**
+ * A consequence of cancelling the current trace, evaluated against that
+ * trace's declarative success effect rather than against a card identity.
+ */
+export type AddBadPublicityIfCancelledTraceHasNonTagEffectImplementation = {
+  kind: "add_bad_publicity_if_cancelled_trace_has_non_tag_effect";
+  amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };
 

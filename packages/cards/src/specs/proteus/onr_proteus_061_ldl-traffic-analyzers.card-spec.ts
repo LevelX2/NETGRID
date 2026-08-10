@@ -12,6 +12,15 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "You may advance LDL Traffic Analyzers before and after you rez it. You may rez LDL Traffic Analyzers during a trace attempt. LDL Traffic Analyzers advancement counter: Gain [5]. Use this ability only during a trace attempt. When the trace attempt ends, return to the bank any of the [5] you did not spend.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "trace_window_spend_advancement_for_trace_credits",
+        ),
+        actionLabel:
+          "LDL Traffic Analyzers: 1 Advancement-Counter für 5 Trace-Credits ausgeben",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

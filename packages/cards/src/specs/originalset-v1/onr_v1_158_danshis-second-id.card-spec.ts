@@ -11,6 +11,14 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "A, [T]: Remove up to three tags, at no cost.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_remove_tags",
+        ),
+        actionLabel: "Danshi’s Second ID: bis zu 3 Tags entfernen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -132,6 +132,7 @@ export function collectRuntimeDamagePreventionCandidates(
         visibility: "hidden_info_barrier",
         optional: true,
         preventAmount,
+        selectablePreventAmount: true,
       });
     }
   }
@@ -266,6 +267,9 @@ export function cardImplementationDamagePreventionCandidates(
       visibility: "hidden_info_barrier",
       optional: true,
       preventAmount,
+      ...(source.amountMode === "up_to"
+        ? { selectablePreventAmount: true }
+        : {}),
       preventionSourceIndex: sourceIndex,
       ...(source.corpMayPayToBypass
         ? {

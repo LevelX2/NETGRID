@@ -11,6 +11,15 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText: "A: Gain 1 credit and draw one card.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_gain_credits",
+        ),
+        actionLabel:
+          "Silicon Saloon Franchise: 1 Credit nehmen und 1 Karte ziehen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

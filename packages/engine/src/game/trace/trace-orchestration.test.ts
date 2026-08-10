@@ -916,7 +916,12 @@ function testHost(
                   { kind: "credit", amount: 3 },
                   { kind: "tap_source", amount: 1 },
                 ],
-                effects: [],
+                effects: [
+                  {
+                    kind: "cancel_successful_trace_effect",
+                    visibility: "hidden_info_barrier",
+                  },
+                ],
               } as ActivatedCardAbilityImplementation,
             },
           ];

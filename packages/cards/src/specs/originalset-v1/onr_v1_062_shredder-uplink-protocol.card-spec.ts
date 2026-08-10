@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Make a run on the Archives. If run is successful, do not access cards from the Archives; instead, treat run as a successful run on HQ.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_make_run",
+        ),
+        actionLabel: "Shredder Uplink Protocol: Run auf Archive",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

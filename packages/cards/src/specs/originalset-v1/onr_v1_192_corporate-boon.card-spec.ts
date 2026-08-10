@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Put four Boon counters on Corporate Boon when you score it.\nBoon counter: Gain an action. Use this ability only once per turn and only during your turn.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_corp_main_gain_actions",
+        ),
+        actionLabel: "Corporate Boon: Boon-Counter für Aktion ausgeben",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -21,6 +21,7 @@ export type CardSpecValidationErrorCode =
   | "duplicate_printing_id"
   | "duplicate_capability_key"
   | "missing_capability_key"
+  | "missing_capability_text"
   | "orphan_planning_capability"
   | "orphan_capability_text"
   | "forbidden_runtime_identity";
@@ -174,6 +175,22 @@ const SET_KEYS = new Set([
 ]);
 const SET_PUBLICATION_KEYS = new Set(["status", "blockReason"]);
 const ADDRESSABILITY = new Set(["plan", "action", "choice", "quote", "debug"]);
+const ACTIVATED_ABILITY_TIMINGS = new Set([
+  "runner_main",
+  "runner_paid",
+  "during_run",
+  "runner_cost_penalty_support",
+  "access_start",
+  "corp_main",
+  "corp_paid",
+  "corp_encounter",
+  "corp_during_run",
+  "corp_trace_window",
+  "corp_start_run_window",
+  "trace_base_link_window",
+  "trace_post_bid_link_window",
+  "trace_success_cancel_window",
+]);
 const FORBIDDEN_RUNTIME_IDENTITIES = new Set([
   "actionId",
   "cardImplementationAbilityIndex",
@@ -565,6 +582,9 @@ export function assertCardSpecContract(spec: CardSpec): void {
       "$cardSpec.engine.flatlineReplacementSources",
     );
   assertDynamicDamageSubroutineBinding(engine);
+  assertActivatedAbilityTimingExtensions(engine.abilities);
+  assertTraceSuccessCancelEffects(engine.abilities);
+  assertRunnerForcedRandomActionTable(engine.uniqueDirectLongtail);
 
   const capabilityKeys = assertCapabilityIdentities(engine, "$cardSpec.engine");
   for (const key of capabilityTextKeys)
@@ -574,6 +594,7 @@ export function assertCardSpecContract(spec: CardSpec): void {
         "$cardSpec.text.capabilityText",
         `capability text ${key} must bind an existing engine capability`,
       );
+  assertActivatedCapabilityTextCoverage(engine, capabilityTextKeys);
   if (root.planningAnnotations !== undefined) {
     assertPlanningAnnotations(root.planningAnnotations);
     assertPlanningCapabilityReferences(
@@ -609,6 +630,31 @@ export function assertCardSpecContract(spec: CardSpec): void {
     },
   );
   assertPublication(root.publication, "$cardSpec.publication");
+}
+
+function assertActivatedCapabilityTextCoverage(
+  engine: Record<string, unknown>,
+  capabilityTextKeys: ReadonlySet<CapabilityKey>,
+): void {
+  if (!Array.isArray(engine.abilities)) return;
+  engine.abilities.forEach((ability, index) => {
+    if (typeof ability !== "object" || ability === null) return;
+    const record = ability as Record<string, unknown>;
+    if (
+      record.kind !== "activated" ||
+      !Array.isArray(record.addressability) ||
+      !record.addressability.includes("action") ||
+      typeof record.capabilityKey !== "string"
+    )
+      return;
+    const key = capabilityKey(record.capabilityKey);
+    if (capabilityTextKeys.has(key)) return;
+    throw new CardSpecValidationError(
+      "missing_capability_text",
+      `$cardSpec.engine.abilities[${index}].capabilityKey`,
+      `activated action capability ${key} requires canonical capability text`,
+    );
+  });
 }
 
 function assertFlatlineReplacementSources(value: unknown, path: string): void {
@@ -993,6 +1039,143 @@ function assertEditorialPublication(
       publication.catalogBlockReason,
       `${path}.catalogBlockReason`,
     );
+  }
+}
+
+function assertActivatedAbilityTimingExtensions(value: unknown): void {
+  if (value === undefined) return;
+  for (const [index, ability] of denseArray(
+    value,
+    "$cardSpec.engine.abilities",
+  ).entries()) {
+    const path = `$cardSpec.engine.abilities[${index}]`;
+    const record = ability as Record<string, unknown>;
+    if (record.kind !== "activated" || record.additionalTimings === undefined)
+      continue;
+    const baseTiming = record.timing;
+    if (
+      typeof baseTiming !== "string" ||
+      !ACTIVATED_ABILITY_TIMINGS.has(baseTiming)
+    )
+      invalid(`${path}.timing`, "must be a known activated ability timing");
+    const seen = new Set<string>();
+    for (const [timingIndex, timingEntry] of denseArray(
+      record.additionalTimings,
+      `${path}.additionalTimings`,
+    ).entries()) {
+      const timingPath = `${path}.additionalTimings[${timingIndex}]`;
+      const timing = closedObject(
+        timingEntry,
+        new Set(["timing", "condition"]),
+        timingPath,
+      );
+      if (
+        typeof timing.timing !== "string" ||
+        !ACTIVATED_ABILITY_TIMINGS.has(timing.timing)
+      )
+        invalid(
+          `${timingPath}.timing`,
+          "must be a known activated ability timing",
+        );
+      if (timing.timing === baseTiming)
+        invalid(
+          `${timingPath}.timing`,
+          "must not duplicate the ordinary timing",
+        );
+      if (seen.has(timing.timing))
+        invalid(
+          `${timingPath}.timing`,
+          "must not duplicate an additional timing",
+        );
+      seen.add(timing.timing);
+    }
+  }
+}
+
+function assertTraceSuccessCancelEffects(value: unknown): void {
+  if (value === undefined) return;
+  for (const [index, ability] of denseArray(
+    value,
+    "$cardSpec.engine.abilities",
+  ).entries()) {
+    const path = `$cardSpec.engine.abilities[${index}]`;
+    const record = ability as Record<string, unknown>;
+    if (record.kind !== "activated") continue;
+    const effects = Array.isArray(record.effects) ? record.effects : [];
+    const cancelEffects = effects.filter(
+      (effect) =>
+        (effect as Record<string, unknown>).kind ===
+        "cancel_successful_trace_effect",
+    );
+    const badPublicityEffects = effects.filter(
+      (effect) =>
+        (effect as Record<string, unknown>).kind ===
+        "add_bad_publicity_if_cancelled_trace_has_non_tag_effect",
+    );
+    if (cancelEffects.length === 0 && badPublicityEffects.length === 0)
+      continue;
+    if (record.timing !== "trace_success_cancel_window")
+      invalid(
+        path,
+        "trace-cancel effects require the trace success cancel timing",
+      );
+    if (cancelEffects.length !== 1)
+      invalid(path, "trace-cancel abilities require exactly one cancel effect");
+    if (badPublicityEffects.length > 1)
+      invalid(
+        path,
+        "trace-cancel abilities permit at most one Bad Publicity consequence",
+      );
+    for (const effect of badPublicityEffects) {
+      const effectPath = `${path}.effects[${effects.indexOf(effect)}]`;
+      const amount = (effect as Record<string, unknown>).amount;
+      if (!Number.isInteger(amount) || (amount as number) <= 0)
+        invalid(`${effectPath}.amount`, "must be a positive integer");
+    }
+  }
+}
+
+function assertRunnerForcedRandomActionTable(value: unknown): void {
+  if (value === undefined) return;
+  const record = value as Record<string, unknown>;
+  if (record.kind !== "runner_start_turn_forced_random_action") return;
+  if (record.mustTakeIfPossible !== true)
+    invalid(
+      "$cardSpec.engine.uniqueDirectLongtail.mustTakeIfPossible",
+      "must be true for a forced random action",
+    );
+  const outcomes = denseArray(
+    record.outcomes,
+    "$cardSpec.engine.uniqueDirectLongtail.outcomes",
+  );
+  if (outcomes.length !== 6)
+    invalid(
+      "$cardSpec.engine.uniqueDirectLongtail.outcomes",
+      "must declare exactly six die outcomes",
+    );
+  const allowedActions = new Set([
+    "draw_card",
+    "gain_credit",
+    "make_run_rd",
+    "make_run_hq",
+    "make_run_remote",
+    "reveal_random_grip_card_to_corp_and_play_or_install",
+  ]);
+  const seen = new Set<number>();
+  for (const [index, outcome] of outcomes.entries()) {
+    const path = `$cardSpec.engine.uniqueDirectLongtail.outcomes[${index}]`;
+    const entry = closedObject(outcome, new Set(["dieRoll", "action"]), path);
+    if (
+      !Number.isInteger(entry.dieRoll) ||
+      (entry.dieRoll as number) < 1 ||
+      (entry.dieRoll as number) > 6
+    )
+      invalid(`${path}.dieRoll`, "must be a die result from 1 through 6");
+    const dieRoll = entry.dieRoll as number;
+    if (seen.has(dieRoll)) invalid(`${path}.dieRoll`, "must not be duplicated");
+    seen.add(dieRoll);
+    if (typeof entry.action !== "string" || !allowedActions.has(entry.action))
+      invalid(`${path}.action`, "must be a known forced-action outcome");
   }
 }
 

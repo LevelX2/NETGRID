@@ -87,6 +87,7 @@ export const cardSpec = {
         kind: "damage_prevention",
         damageTypes: ["net", "core"],
         amount: 1,
+        amountMode: "up_to",
         limit: {
           kind: "per_turn",
           amount: 1,

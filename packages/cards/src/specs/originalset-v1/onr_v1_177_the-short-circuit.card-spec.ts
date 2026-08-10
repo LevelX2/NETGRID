@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A, [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_search_stack_to_grip",
+        ),
+        actionLabel: "The Short Circuit: Stack nach Programm durchsuchen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",

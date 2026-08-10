@@ -12,6 +12,14 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "A: Look at the top four cards of your stack. You may bring any prep or resource cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle the rest back into your stack.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_look_top_stack_take_matching",
+        ),
+        actionLabel: "N.E.T.O.: Stack-Spitze nach Preps/Ressourcen durchsuchen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",
