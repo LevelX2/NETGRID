@@ -3529,6 +3529,7 @@ export type AiTurnPlanningDebug = {
       | "expected_progress"
       | "expected_phase_transition"
       | "expected_no_material_change"
+      | "plan_internal_continuation_boundary"
       | "scheduled_information_boundary"
       | "material_cost_or_target_drift"
       | "material_outcome_deviation"
@@ -3548,11 +3549,27 @@ export type AiTurnPlanningDebug = {
       | "material_choice_drift"
       | "material_outcome_deviation"
       | "scheduled_information_boundary"
+      | "route_completed"
+      | "route_unavailable"
       | "urgent_interrupt"
       | "phase_entry_invalid"
       | "hard_plan_commitment_invalid"
       | "campaign_requote_invalid"
       | "commitment_contract_invalid";
+    continuation?: {
+      status: "retained" | "preempted" | "released";
+      previousCommitmentId: string;
+      previousOwnerRootPlanInstanceId: string;
+      intendedNextMilestoneId: string;
+      boundaryKind:
+        | "plan_internal_continuation"
+        | "route_completed"
+        | "route_unavailable"
+        | "urgent_interrupt";
+      nextCommitmentId?: string;
+      takeoverRootPlanInstanceId?: string;
+      evidenceCodes: string[];
+    };
   };
   boundary?: {
     kind: string;

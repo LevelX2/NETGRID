@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-08-09-runner-turn-plan-sequence-commitment
-status: inbox
+status: in_progress
 kind: architecture
 area: ai
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-08-09
-startedAt:
+startedAt: 2026-08-11
 completedAt:
 branch:
 releaseTarget: post-card-semantics-restructuring
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/plans/turn-plan-commitment.ts
+  - packages/ai/src/plans/corp-turn-planner-cutover.ts
+  - packages/ai/src/plans/turn-remainder-search.ts
+  - packages/ai/src/semantic-ai-runtime-cutover-runner-plans.test.ts
+  - docs/architecture/ai/ai-turn-and-campaign-planner-concept-2026-07-29.md
+checks:
+  - "fokussierte Commitment-/Restzugsuche: 28 Tests grün"
+  - "fokussierte Runner-Cutover-Regressionsgruppe: 4 Tests grün"
+  - "@netgrid/shared typecheck: grün"
+  - "@netgrid/ai typecheck: derzeit durch fremde parallele Änderungen außerhalb dieses Pakets rot"
 ---
 
 # Runner-Züge bis zu echten Erkenntnisgrenzen verbindlich planen
@@ -177,5 +186,18 @@ Replanung auslösen können.
 
 ## Ergebnisnotiz
 
-Noch offen. Das Paket beschreibt den systemischen Befund hinter dem
-Planwechsel im ersten Runner-Zug.
+Zwischenstand: Die systemische Bindungslücke ist am TurnPlanner-Cutover
+behoben. `projected_plan_discovery_required` wird nach einem ausgeführten
+Einzelschritt als planinterne Fortsetzungsgrenze behandelt; der Folgevertrag
+rematerialisiert dieselbe Sequenz-Root-Instanz aus aktuellen `LegalActions`.
+Bereits bekannte gleichrangige Alternativen preempten nicht mehr still.
+Release, Abschluss, Unmöglichkeit und neue P1-/P2-/P3-Interrupts besitzen
+typisierte Gründe und strukturierte Diagnose.
+
+Noch offen bleibt die direkte Conference-Regression. Die CardSpec-Migration
+hat die mechanische No-Run-Semantik nach `planning.engine.lifecycle`
+verschoben, während der bestehende Recurring-Economy-Consumer noch das
+entfernte Legacy-`effects`-Feld liest. Dieser eigenständige Quellenfix darf
+nicht als Karten-ID-Fallback in den TurnPlanner gezogen werden. Das Paket
+bleibt daher `in_progress`; der generische Sequenzvertrag und die
+R&D-Interface-/Interrupt-/Draw-Regressionsgruppe sind bereits fokussiert grün.

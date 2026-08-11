@@ -201,6 +201,12 @@
   über `TurnPlanCommitment`, Execution Lease und aktuelle `LegalActions`
   autoritativ rematerialisiert. Informations-, Reaktions-, Engine- und
   Zufallsgrenzen lösen typisierte Neuplanung aus.
+- Ein Runner-Root behält eine deterministische eigene Folge über
+  `plan_internal_continuation_boundary` hinweg. Die nächste aktuelle
+  `LegalAction` wird für dieselbe `sequenceRootPlanInstanceId` neu gebunden;
+  bereits bekannte gleichrangige Alternativen dürfen nicht still übernehmen.
+  Release und Preemption benötigen positive Grenztypen und eine strukturierte
+  Continuation-Diagnose.
 - Agenda-, Defense-, Opening-Rush- und Runner-Kampagnen können über
   Zuggrenzen und öffentliche Gegneroutcomes resident bleiben. Ein
   Runtime-Neustart stellt das Portfolio wieder her, verwirft das alte

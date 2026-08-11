@@ -25,7 +25,7 @@ import {
 } from "./turn-planning-contracts";
 
 export const TURN_PLAN_COMMITMENT_SCHEMA_VERSION =
-  "turn-plan-commitment-v1" as const;
+  "turn-plan-commitment-v2" as const;
 export const CURRENT_TURN_COMPLETION_CERTIFICATE_SCHEMA_VERSION =
   "current-turn-completion-certificate-v1" as const;
 
@@ -33,6 +33,7 @@ export type TurnPlanObservationClass =
   | "expected_progress"
   | "expected_phase_transition"
   | "expected_no_material_change"
+  | "plan_internal_continuation_boundary"
   | "scheduled_information_boundary"
   | "material_cost_or_target_drift"
   | "material_outcome_deviation"
@@ -53,6 +54,8 @@ export type TurnPlanReplanReason =
   | "material_choice_drift"
   | "material_outcome_deviation"
   | "scheduled_information_boundary"
+  | "route_completed"
+  | "route_unavailable"
   | "urgent_interrupt"
   | "phase_entry_invalid"
   | "hard_plan_commitment_invalid"
@@ -101,6 +104,9 @@ export type TurnPlanCommitment = {
   commitmentId: string;
   sourcePlanId: string;
   sourceLineHash: string;
+  /** Required by v2; optional in the structural type so v1 checkpoint evidence can be rejected at runtime. */
+  sequenceRootPlanInstanceId?: string;
+  predecessorCommitmentId?: string;
   side: Side;
   turnKey: string;
   planningRulesFingerprint: string;
@@ -350,6 +356,7 @@ export function createTurnPlanCommitment(params: {
     commitmentId,
     sourcePlanId: params.plan.planId,
     sourceLineHash,
+    sequenceRootPlanInstanceId: phases[0]!.root.planInstanceId,
     side: params.plan.side,
     turnKey: params.plan.turnKey,
     planningRulesFingerprint: params.plan.planningRulesFingerprint,
@@ -677,12 +684,11 @@ export function advanceTurnPlanCommitment(
   }
 
   commitment.status = "awaiting_observation";
-  commitment.observationClass = "scheduled_information_boundary";
-  commitment.replanReason = "scheduled_information_boundary";
+  commitment.observationClass = "plan_internal_continuation_boundary";
+  delete commitment.replanReason;
   return {
     commitment,
     observationClass: commitment.observationClass,
-    replanReason: commitment.replanReason,
     phaseEntryRequired: false,
   };
 }
@@ -913,11 +919,21 @@ export function assertTurnPlanCommitment(commitment: TurnPlanCommitment): void {
     commitment.commitmentId,
     commitment.sourcePlanId,
     commitment.sourceLineHash,
+    commitment.sequenceRootPlanInstanceId,
     commitment.planningRulesFingerprint,
     commitment.runtimeInstanceId,
     commitment.turnKey,
   ]) {
-    if (value.trim().length === 0) issues.push("blank_identity");
+    if (typeof value !== "string" || value.trim().length === 0) {
+      issues.push("blank_identity");
+    }
+  }
+  if (
+    commitment.phases.length === 0 ||
+    commitment.phases[0]?.root.planInstanceId !==
+      commitment.sequenceRootPlanInstanceId
+  ) {
+    issues.push("sequence_root_mismatch");
   }
   if (
     !Number.isSafeInteger(commitment.cursor.phaseIndex) ||

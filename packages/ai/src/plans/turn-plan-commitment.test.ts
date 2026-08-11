@@ -482,6 +482,37 @@ describe("turn plan commitment", () => {
     });
   });
 
+  it("does not treat completion of one projected action as an information-driven replan", () => {
+    const setup = scenario({ samePhase: true });
+    setup.plan.phases[0]!.nodes = [setup.plan.phases[0]!.nodes[0]!];
+    setup.plan.phases[0]!.transition = {
+      kind: "projected_plan_discovery_required",
+    };
+    const commitment = createCommitment(setup);
+    const lease = executableLease(
+      commitment,
+      setup,
+      setup.firstAction,
+      identity(10, "safe:10"),
+    );
+    const advanced = advanceTurnPlanCommitment(commitment, {
+      lease: lease.lease,
+      runtimeInstanceId: "runtime:a",
+      turnKey: "corp:1",
+      stateIdentityAfter: identity(11, "safe:11"),
+      outcomeCodes: ["credits:+1", "clicks:-1"],
+    });
+
+    expect(advanced).toMatchObject({
+      observationClass: "plan_internal_continuation_boundary",
+      commitment: {
+        status: "awaiting_observation",
+        sequenceRootPlanInstanceId: "root:economy",
+      },
+    });
+    expect(advanced.replanReason).toBeUndefined();
+  });
+
   it("forces a new plan after runtime restart even when the visible fingerprint is unchanged", () => {
     const setup = scenario();
     const commitment = createCommitment(setup);

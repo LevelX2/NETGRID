@@ -1321,8 +1321,10 @@ Invocations null sein.
 
 ```ts
 type TurnPlanCommitment = {
-  schemaVersion: "turn-plan-commitment-v1";
+  schemaVersion: "turn-plan-commitment-v2";
   commitmentId: string;
+  sequenceRootPlanInstanceId: string;
+  predecessorCommitmentId?: string;
   rulesContext: PlanningRulesContext;
   side: Side;
   turnKey: string;
@@ -1372,6 +1374,26 @@ gespeichert. Es ist:
 - beim Zugwechsel geschlossen oder in eine Kampagnenwartelage überführt;
 - frei von zukünftigen Action-IDs, aber nicht von stabilen bekannten
   Karten-, Objekt-, Server- oder Ability-Referenzen.
+
+Ein vollständig projizierter Knoten ist nicht automatisch ein fachlicher
+Planabschluss. Endet eine aktuelle Linie nur mit
+`projected_plan_discovery_required`, wechselt das Commitment an die
+`plan_internal_continuation_boundary`. Der TurnPlanner rematerialisiert dort
+die nächste aktuelle `LegalAction` für dieselbe
+`sequenceRootPlanInstanceId`; ein Folgevertrag verweist über
+`predecessorCommitmentId` auf seinen Vorgänger. Dadurch bleiben Root,
+Planinstanz, Route Head und Leaf-Executor nachvollziehbar, ohne eine
+zukünftige Action-ID zur Regelautorität zu machen.
+
+Eine bereits bekannte gleichrangige Alternative darf diese Rematerialisierung
+nicht verdrängen. Die Bindung endet nur an einer positiven, typisierten
+Grenze: neu sichtbare side-sichere Information, nachgewiesener Routenabschluss
+oder Routenverlust, ein neu entstandener höherwertiger P1-/P2-/P3-Interrupt,
+relevanter Ressourcen- oder Zieldrift oder eine ausdrückliche planinterne
+Entscheidungsgrenze. „Eine Aktion wurde ausgeführt“ ist kein Replan-Grund.
+Retention, Preemption und Release tragen strukturierte Diagnose mit altem
+Owner, vorgesehenem nächsten Meilenstein, Grenztyp, Evidence und gegebenenfalls
+übernehmendem Owner.
 
 ### 7.12 Commitment-Hierarchie
 

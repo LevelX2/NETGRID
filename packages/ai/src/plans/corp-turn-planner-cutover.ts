@@ -44,7 +44,12 @@ export type TurnPlannerCutoverResult = {
   lease: TurnPlanExecutionLease;
   debug: AiTurnPlanningDebug;
   replanReason?: TurnPlanReplanReason;
+  continuationDiagnostic?: TurnPlanContinuationDiagnostic;
 };
+
+export type TurnPlanContinuationDiagnostic = NonNullable<
+  NonNullable<AiTurnPlanningDebug["commitment"]>["continuation"]
+>;
 
 export type CorpTurnPlannerCutoverResult = TurnPlannerCutoverResult;
 
@@ -92,9 +97,17 @@ export function resolveTurnPlannerCutover(params: {
         continuation.lease,
         continuation.head,
         continuation.replanReason,
+        continuation.continuationDiagnostic,
       ),
       ...(continuation.replanReason
         ? { replanReason: continuation.replanReason }
+        : {}),
+      ...(continuation.continuationDiagnostic
+        ? {
+            continuationDiagnostic: structuredClone(
+              continuation.continuationDiagnostic,
+            ),
+          }
         : {}),
     };
   }
@@ -115,8 +128,16 @@ export function resolveTurnPlannerCutover(params: {
       created.lease,
       created.head,
       continuation?.reason,
+      continuation?.continuationDiagnostic,
     ),
     ...(continuation?.reason ? { replanReason: continuation.reason } : {}),
+    ...(continuation?.continuationDiagnostic
+      ? {
+          continuationDiagnostic: structuredClone(
+            continuation.continuationDiagnostic,
+          ),
+        }
+      : {}),
   };
 }
 
@@ -136,8 +157,13 @@ function continueResidentCommitment(params: {
       lease: TurnPlanExecutionLease;
       head: TurnPlanningHeadCandidate;
       replanReason?: TurnPlanReplanReason;
+      continuationDiagnostic?: TurnPlanContinuationDiagnostic;
     }
-  | { kind: "replan"; reason: TurnPlanReplanReason }
+  | {
+      kind: "replan";
+      reason: TurnPlanReplanReason;
+      continuationDiagnostic?: TurnPlanContinuationDiagnostic;
+    }
   | undefined {
   const resident = params.portfolio.turnPlanCommitment;
   const pendingLease = params.portfolio.turnPlanExecutionLease;
@@ -201,6 +227,12 @@ function continueResidentCommitment(params: {
     }
   }
   if (commitment.status !== "active") {
+    if (
+      commitment.status === "awaiting_observation" &&
+      commitment.observationClass === "plan_internal_continuation_boundary"
+    ) {
+      return resumePlanInternalContinuation(params, commitment);
+    }
     return {
       kind: "replan",
       reason:
@@ -228,6 +260,194 @@ function continueResidentCommitment(params: {
     commitment: rematerialized.commitment,
     lease: rematerialized.lease,
     head: rematerialized.head,
+  };
+}
+
+function resumePlanInternalContinuation(
+  params: {
+    input: AiDecisionInput;
+    planner: TurnPlannerShadowResult;
+    portfolio: ResidentPlanPortfolio;
+    candidates: readonly ActionSemanticCandidate[];
+    rulesContext: PlanningRulesContext;
+    stateIdentity: PlanningStateIdentity;
+    runtimeInstanceId: string;
+    turnKey: string;
+  },
+  previous: TurnPlanCommitment,
+):
+  | {
+      kind: "executable";
+      commitment: TurnPlanCommitment;
+      lease: TurnPlanExecutionLease;
+      head: TurnPlanningHeadCandidate;
+      continuationDiagnostic: TurnPlanContinuationDiagnostic;
+    }
+  | {
+      kind: "replan";
+      reason: TurnPlanReplanReason;
+      continuationDiagnostic?: TurnPlanContinuationDiagnostic;
+    } {
+  const previousPhase = previous.phases[previous.cursor.phaseIndex]!;
+  const previousOwnerRootPlanInstanceId = previous.sequenceRootPlanInstanceId;
+  if (!previousOwnerRootPlanInstanceId) {
+    return {
+      kind: "replan",
+      reason: "commitment_contract_invalid",
+    };
+  }
+  const sequencedPrevious = previous as TurnPlanCommitment & {
+    sequenceRootPlanInstanceId: string;
+  };
+  const lines =
+    "lines" in params.planner
+      ? params.planner.lines
+      : params.planner.selectedLine
+        ? [params.planner.selectedLine]
+        : [];
+  const continuationLine = lines.find(
+    (line) => line.rootPlanInstanceId === previousOwnerRootPlanInstanceId,
+  );
+  const continuationHead = continuationLine?.steps[0]
+    ? params.planner.heads.find(
+        (head) => head.candidateId === continuationLine.steps[0]!.candidateId,
+      )
+    : undefined;
+  const takeoverHead = params.planner.selectedHead;
+  if (
+    takeoverHead &&
+    takeoverHead.rootPlanInstanceId !== previousOwnerRootPlanInstanceId &&
+    isNewUrgentInterrupt(takeoverHead, continuationHead)
+  ) {
+    return {
+      kind: "replan",
+      reason: "urgent_interrupt",
+      continuationDiagnostic: continuationDiagnostic({
+        previous: sequencedPrevious,
+        intendedNextMilestoneId: previousPhase.root.milestoneId,
+        status: "preempted",
+        boundaryKind: "urgent_interrupt",
+        takeoverRootPlanInstanceId: takeoverHead.rootPlanInstanceId,
+        evidenceCodes: [
+          `urgent_priority_class:${takeoverHead.priorityClass}`,
+          ...(continuationHead
+            ? [`retained_priority_class:${continuationHead.priorityClass}`]
+            : ["retained_route_currently_unmaterialized"]),
+        ],
+      }),
+    };
+  }
+  if (!continuationLine || !continuationHead) {
+    const completed = params.portfolio.completionHistory.some(
+      (record) => record.instanceId === previousOwnerRootPlanInstanceId,
+    );
+    const reason = completed ? "route_completed" : "route_unavailable";
+    return {
+      kind: "replan",
+      reason,
+      continuationDiagnostic: continuationDiagnostic({
+        previous: sequencedPrevious,
+        intendedNextMilestoneId: previousPhase.root.milestoneId,
+        status: "released",
+        boundaryKind: reason,
+        ...(takeoverHead
+          ? { takeoverRootPlanInstanceId: takeoverHead.rootPlanInstanceId }
+          : {}),
+        evidenceCodes: [
+          completed
+            ? "previous_owner_recorded_completed"
+            : "previous_owner_has_no_current_bound_line",
+        ],
+      }),
+    };
+  }
+  const binding = params.planner.headBindings.find(
+    (entry) => entry.candidateId === continuationHead.candidateId,
+  );
+  if (!binding) {
+    return {
+      kind: "replan",
+      reason: "commitment_contract_invalid",
+      continuationDiagnostic: continuationDiagnostic({
+        previous: sequencedPrevious,
+        intendedNextMilestoneId: previousPhase.root.milestoneId,
+        status: "released",
+        boundaryKind: "route_unavailable",
+        evidenceCodes: ["continuation_head_binding_missing"],
+      }),
+    };
+  }
+  const resumedPlanner = {
+    ...params.planner,
+    selectedLine: continuationLine,
+    selectedHead: continuationHead,
+    selectedPlanInstanceId: binding.planInstanceId,
+  } as TurnPlannerShadowResult;
+  const created = createCurrentCommitment({
+    ...params,
+    planner: resumedPlanner,
+  });
+  created.commitment.sequenceRootPlanInstanceId =
+    previousOwnerRootPlanInstanceId;
+  created.commitment.predecessorCommitmentId = previous.commitmentId;
+  const diagnostic = continuationDiagnostic({
+    previous: sequencedPrevious,
+    intendedNextMilestoneId: continuationHead.nextMilestoneId,
+    status: "retained",
+    boundaryKind: "plan_internal_continuation",
+    nextCommitmentId: created.commitment.commitmentId,
+    evidenceCodes: [
+      "same_root_continuation_line_rematerialized",
+      `continuation_action_id:${continuationHead.currentBinding.actionId}`,
+      ...(continuationHead.executorPlanInstanceId
+        ? [`continuation_executor:${continuationHead.executorPlanInstanceId}`]
+        : []),
+    ],
+  });
+  return {
+    kind: "executable",
+    commitment: created.commitment,
+    lease: created.lease,
+    head: created.head,
+    continuationDiagnostic: diagnostic,
+  };
+}
+
+function isNewUrgentInterrupt(
+  takeover: TurnPlanningHeadCandidate,
+  continuation: TurnPlanningHeadCandidate | undefined,
+): boolean {
+  const urgent = ["P1", "P2", "P3"];
+  const takeoverRank = urgent.indexOf(takeover.priorityClass);
+  if (takeoverRank < 0) return false;
+  if (!continuation) return true;
+  const continuationRank = urgent.indexOf(continuation.priorityClass);
+  return continuationRank < 0 || takeoverRank < continuationRank;
+}
+
+function continuationDiagnostic(params: {
+  previous: TurnPlanCommitment & { sequenceRootPlanInstanceId: string };
+  intendedNextMilestoneId: string;
+  status: TurnPlanContinuationDiagnostic["status"];
+  boundaryKind: TurnPlanContinuationDiagnostic["boundaryKind"];
+  nextCommitmentId?: string;
+  takeoverRootPlanInstanceId?: string;
+  evidenceCodes: string[];
+}): TurnPlanContinuationDiagnostic {
+  return {
+    status: params.status,
+    previousCommitmentId: params.previous.commitmentId,
+    previousOwnerRootPlanInstanceId:
+      params.previous.sequenceRootPlanInstanceId,
+    intendedNextMilestoneId: params.intendedNextMilestoneId,
+    boundaryKind: params.boundaryKind,
+    ...(params.nextCommitmentId
+      ? { nextCommitmentId: params.nextCommitmentId }
+      : {}),
+    ...(params.takeoverRootPlanInstanceId
+      ? { takeoverRootPlanInstanceId: params.takeoverRootPlanInstanceId }
+      : {}),
+    evidenceCodes: [...params.evidenceCodes].sort(),
   };
 }
 
@@ -641,9 +861,17 @@ function cutoverDebug(
   lease: TurnPlanExecutionLease,
   head: TurnPlanningHeadCandidate,
   replanReason?: TurnPlanReplanReason,
+  continuation?: TurnPlanContinuationDiagnostic,
 ): AiTurnPlanningDebug {
   const phase = commitment.phases[commitment.cursor.phaseIndex]!;
   const node = phase.nodes[commitment.cursor.nodeIndex]!;
+  const selectedBoundary =
+    source.shadowComparison?.shadowActionId === head.currentBinding.actionId
+      ? source.boundary
+      : node.boundaryAfter !== undefined &&
+          source.boundary?.kind === node.boundaryAfter
+      ? source.boundary
+      : undefined;
   return {
     ...structuredClone(source),
     mode: "cutover",
@@ -697,16 +925,21 @@ function cutoverDebug(
         leaseId: lease.leaseId,
         reasonCode: "committed_turn_step_rematerialized",
       },
-      observationClass: source.boundary
+      observationClass: selectedBoundary
         ? "scheduled_information_boundary"
         : commitment.observationClass,
       ...(replanReason
         ? { replanReason }
-        : source.boundary
+        : selectedBoundary
           ? { replanReason: "scheduled_information_boundary" }
           : {}),
+      ...(continuation
+        ? { continuation: structuredClone(continuation) }
+        : {}),
     },
-    ...(source.boundary ? { boundary: structuredClone(source.boundary) } : {}),
+    ...(selectedBoundary
+      ? { boundary: structuredClone(selectedBoundary) }
+      : {}),
     shadowComparison: {
       liveActionId: source.shadowComparison?.liveActionId ?? "unavailable",
       shadowActionId: head.currentBinding.actionId,
