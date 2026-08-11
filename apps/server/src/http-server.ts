@@ -2130,25 +2130,26 @@ async function routeHttp(
     }
 
     if (url.pathname.startsWith("/api/storage/maintenance/")) {
-      const authenticated = mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
-        request,
-        url.pathname,
-        deploymentConfig,
-      )
-        ? true
-        : request.method === "GET"
-          ? await ensureMaintenanceAuthenticated(
-              response,
-              request,
-              deploymentConfig,
-              maintenanceAuth,
-            )
-          : await ensureMaintenanceMutationAccess(
-              response,
-              request,
-              deploymentConfig,
-              maintenanceAuth,
-            );
+      const authenticated =
+        mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
+          request,
+          url.pathname,
+          deploymentConfig,
+        )
+          ? true
+          : request.method === "GET"
+            ? await ensureMaintenanceAuthenticated(
+                response,
+                request,
+                deploymentConfig,
+                maintenanceAuth,
+              )
+            : await ensureMaintenanceMutationAccess(
+                response,
+                request,
+                deploymentConfig,
+                maintenanceAuth,
+              );
       if (!authenticated) return;
       if (
         isSensitiveMaintenanceOperation(url.pathname, request.method) &&
@@ -2387,7 +2388,9 @@ async function routeHttp(
     const maintenanceDecisionAnalysisRoute =
       MAINTENANCE_DECISION_ANALYSIS_ROUTE.exec(url.pathname);
     if (maintenanceDecisionAnalysisRoute && request.method === "GET") {
-      const matchId = decodeURIComponent(maintenanceDecisionAnalysisRoute[1] ?? "");
+      const matchId = decodeURIComponent(
+        maintenanceDecisionAnalysisRoute[1] ?? "",
+      );
       const decisionIndex = Number(maintenanceDecisionAnalysisRoute[2]);
       if (
         !checkRateLimit(
@@ -2400,8 +2403,20 @@ async function routeHttp(
         )
       )
         return;
-      const context = await service.storageMaintenanceDecisionAnalysis(matchId, decisionIndex);
-      if (!context) { sendJson(response, 404, { error: { code: "not_found", message: "Diese Analyseansicht hat keine Entscheidung für diesen Match-Kontext." } }); return; }
+      const context = await service.storageMaintenanceDecisionAnalysis(
+        matchId,
+        decisionIndex,
+      );
+      if (!context) {
+        sendJson(response, 404, {
+          error: {
+            code: "not_found",
+            message:
+              "Diese Analyseansicht hat keine Entscheidung für diesen Match-Kontext.",
+          },
+        });
+        return;
+      }
       sendJson(response, 200, context);
       return;
     }
@@ -4381,15 +4396,14 @@ function maintenanceFiltersFromSearch(
   return filters;
 }
 
-function maintenanceAnalysisFiltersFromSearch(
-  searchParams: URLSearchParams,
-): {
+function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
   side?: "runner" | "corp";
   turn?: number;
   fromDecision?: number;
   toDecision?: number;
   includeEvents?: boolean;
   includeDecisionTraces?: boolean;
+  includeBeliefState?: boolean;
 } {
   const filters: {
     side?: "runner" | "corp";
@@ -4398,6 +4412,7 @@ function maintenanceAnalysisFiltersFromSearch(
     toDecision?: number;
     includeEvents?: boolean;
     includeDecisionTraces?: boolean;
+    includeBeliefState?: boolean;
   } = {};
   const side = searchParams.get("side");
   if (side === "runner" || side === "corp") filters.side = side;
@@ -4413,6 +4428,8 @@ function maintenanceAnalysisFiltersFromSearch(
     filters.includeEvents = false;
   if (searchParams.get("includeDecisionTraces") === "false")
     filters.includeDecisionTraces = false;
+  if (searchParams.get("includeBeliefState") === "true")
+    filters.includeBeliefState = true;
   return filters;
 }
 

@@ -1,15 +1,18 @@
 import { createHash, randomBytes } from "node:crypto";
 import {
   assertValidAiDeckSnapshotForRuntime,
+  beliefStateInvariantSignature,
   buildAiDecisionInput,
   chooseAiAction,
   isAiDeckSnapshotRuntimeError,
   residentPlanPortfolioSnapshot,
+  reconstructBeliefState,
   restoreResidentPlanPortfolioMemorySnapshot,
   selectAiDecisionSideForState,
   type AiDeckSnapshotRuntimeErrorCode,
   type AiDeckSnapshotRuntimeExpectation,
   type ResidentPlanPortfolio,
+  type RunnerOpponentModel,
 } from "@netgrid/ai";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import {
@@ -475,7 +478,15 @@ export type AiDecisionHistoricalAudit = {
       actionWasInHistoricalLegalActions: true;
       engineApplyActionValidated: true;
       bindingFields: Array<
-        "side" | "actionId" | "stateVersion" | "timingPoint" | "costs" | "targets" | "choices" | "lifecycle" | "parentOrContinuation"
+        | "side"
+        | "actionId"
+        | "stateVersion"
+        | "timingPoint"
+        | "costs"
+        | "targets"
+        | "choices"
+        | "lifecycle"
+        | "parentOrContinuation"
       >;
     };
   };
@@ -490,6 +501,7 @@ export type AiDecisionHistoricalAudit = {
     };
     actorState: Omit<PlayerView, "legalActions" | "publicEvents">;
   };
+  beliefState: AiDecisionBeliefCapture;
   runAndEncounterProjection:
     | {
         schemaVersion: "netgrid-run-encounter-projection-v1";
@@ -504,6 +516,21 @@ export type AiDecisionHistoricalAudit = {
         status: "unavailable";
         reason: "not_in_run_at_decision";
       };
+};
+
+export type AiDecisionBeliefCapture = {
+  schemaVersion: "netgrid-ai-belief-capture-v1";
+  provenance: "persisted";
+  actor: Side;
+  runtimeVersion: string;
+  invariantSignature: string;
+  stateVersion: number;
+  lastEventIndex: number;
+  hqHandMemory?: RunnerOpponentModel["hqHandMemory"];
+  rndTopFreshness?: RunnerOpponentModel["rndTopFreshness"];
+  knownPositionMemory?: RunnerOpponentModel["knownPositionMemory"];
+  hiddenRemoteCandidateMemory?: RunnerOpponentModel["hiddenRemoteCandidateMemory"];
+  invalidationLog: string[];
 };
 
 export type MultiplayerStorage = {
@@ -4442,6 +4469,7 @@ export class MultiplayerService {
       unavailableSections: [] as string[],
     };
     const unavailableAudit = unavailableHistoricalAudit();
+    const beliefState = audit?.beliefState;
     if (!audit) {
       diagnostics.unavailableSections.push(
         "historicalLegalActions",
@@ -4450,15 +4478,26 @@ export class MultiplayerService {
         "runAndEncounterProjection",
       );
     }
+    if (!beliefState) diagnostics.unavailableSections.push("beliefState");
     return {
       schemaVersion: "netgrid-decision-analysis-context-v2",
       decision: source.trace,
       aiTrace: source.trace,
       surroundingEvents: source.surroundingEvents,
       audit: audit ?? unavailableAudit,
+      beliefState: beliefState ?? {
+        schemaVersion: "netgrid-ai-belief-capture-v1",
+        provenance: "unavailable",
+        reason: "historical_belief_capture_not_persisted",
+      },
       provenance: {
         persisted: audit
-          ? ["decisionTrace", "historicalDecisionAudit", "surroundingEvents"]
+          ? [
+              "decisionTrace",
+              "historicalDecisionAudit",
+              ...(beliefState ? ["beliefState"] : []),
+              "surroundingEvents",
+            ]
           : ["decisionTrace", "surroundingEvents"],
         reconstructed: [],
       },
@@ -5610,7 +5649,8 @@ export class MultiplayerService {
       }
       try {
         decision = this.chooseAiAction(input, {
-          quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+          quoteCorpPunishRoute: (request) =>
+            quoteCorpPunishRoute(state, request),
           quoteRandomizedIceInstallSelection: (request) =>
             quoteRandomizedIceInstallSelection(state, request),
           quoteRandomizedTurnPlanSelection: (request) =>
@@ -5811,7 +5851,9 @@ export class MultiplayerService {
           stateVersion: state.stateVersion,
           matchVersion: record.match.matchVersion,
           eventAnchorId: anchorEvent.eventId,
-          legalActionTypes: [...new Set(legalActions.map((action) => action.type))].sort(),
+          legalActionTypes: [
+            ...new Set(legalActions.map((action) => action.type)),
+          ].sort(),
           ...failure,
         },
       },
@@ -6738,6 +6780,7 @@ function aiDecisionTraceFor(
   const traceJson = safeDebug
     ? aiDecisionTraceJson(safeDebug, side, legalAction, mode)
     : minimalAiDecisionTraceJson(side, legalAction, mode);
+  const beliefState = beliefCaptureFor(record, state, side);
   traceJson.historicalAudit = historicalAuditFor(
     state,
     snapshot,
@@ -6745,6 +6788,7 @@ function aiDecisionTraceFor(
     side,
     historicalLegalActions,
     legalAction,
+    beliefState,
   );
   const decisionIndex = nextAiDecisionIndex(record);
   const selectedActionType = legalAction.type;
@@ -6799,11 +6843,12 @@ function structuredAiDecisionFailure(error: unknown): Record<string, unknown> {
   const name =
     error instanceof Error
       ? error.name
-      : stringValue(details.name) ?? "UnknownAiDecisionError";
+      : (stringValue(details.name) ?? "UnknownAiDecisionError");
   const message =
     error instanceof Error
       ? error.message
-      : stringValue(details.message) ?? "KI-Entscheidung löste einen unbekannten Fehler aus.";
+      : (stringValue(details.message) ??
+        "KI-Entscheidung löste einen unbekannten Fehler aus.");
   const code = stringValue(details.code);
   const planKind = stringValue(details.planKind);
   const planId = stringValue(details.planId);
@@ -6815,7 +6860,7 @@ function structuredAiDecisionFailure(error: unknown): Record<string, unknown> {
       message: message.slice(0, 1_000),
       ...(code ? { code } : {}),
     },
-    ...((planKind || planId || step || route)
+    ...(planKind || planId || step || route
       ? {
           plan: {
             ...(planKind ? { kind: planKind } : {}),
@@ -6850,10 +6895,14 @@ function historicalAuditFor(
   side: Side,
   legalActions: readonly LegalAction[],
   selectedAction: LegalAction,
+  beliefState: AiDecisionBeliefCapture,
 ): AiDecisionHistoricalAudit {
   const actorView = getPlayerView(state, side);
-  const { legalActions: _legalActions, publicEvents: _publicEvents, ...actorState } =
-    actorView;
+  const {
+    legalActions: _legalActions,
+    publicEvents: _publicEvents,
+    ...actorState
+  } = actorView;
   const actions = legalActions.map((action) =>
     historicalLegalActionFor(state, action),
   );
@@ -6914,6 +6963,7 @@ function historicalAuditFor(
       },
       actorState,
     },
+    beliefState,
     runAndEncounterProjection: run
       ? {
           schemaVersion: "netgrid-run-encounter-projection-v1",
@@ -6921,15 +6971,54 @@ function historicalAuditFor(
           run,
           ...(attackedServer ? { attackedServer } : {}),
           ...(actorView.own.rig ? { ownRig: actorView.own.rig } : {}),
-          ...(selectedActionEffects
-            ? { selectedActionEffects }
-            : {}),
+          ...(selectedActionEffects ? { selectedActionEffects } : {}),
         }
       : {
           schemaVersion: "netgrid-run-encounter-projection-v1",
           status: "unavailable",
           reason: "not_in_run_at_decision",
         },
+  };
+}
+
+function beliefCaptureFor(
+  record: StoredMatch,
+  state: GameState,
+  side: Side,
+): AiDecisionBeliefCapture {
+  const controller = record.match.aiControllers?.[side];
+  const input = buildAiDecisionInput(state, side, {
+    difficulty: controller?.difficulty ?? "normal",
+    profileId:
+      controller?.profileId ??
+      `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+    decisionId: `${record.match.matchId}:${state.stateVersion}:${side}:belief-capture`,
+    actionNumber: state.stateVersion,
+    ownDeckSnapshot: assertRecordAiDeckSnapshotForRuntime(record, side),
+    expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
+  });
+  const belief = reconstructBeliefState(input);
+  const runnerModel =
+    side === "runner" ? belief.runnerOpponentModel : undefined;
+  return {
+    schemaVersion: "netgrid-ai-belief-capture-v1",
+    provenance: "persisted",
+    actor: side,
+    runtimeVersion: belief.version,
+    invariantSignature: beliefStateInvariantSignature(belief),
+    stateVersion: state.stateVersion,
+    lastEventIndex: Math.max(-1, record.eventLog.length - 1),
+    ...(runnerModel
+      ? {
+          hqHandMemory: structuredClone(runnerModel.hqHandMemory),
+          rndTopFreshness: structuredClone(runnerModel.rndTopFreshness),
+          knownPositionMemory: structuredClone(runnerModel.knownPositionMemory),
+          hiddenRemoteCandidateMemory: structuredClone(
+            runnerModel.hiddenRemoteCandidateMemory,
+          ),
+        }
+      : {}),
+    invalidationLog: belief.invalidationLog.slice(),
   };
 }
 
@@ -6955,11 +7044,15 @@ function historicalLegalActionFor(
         : {
             kind: "card",
             sourceCardInstanceId: action.source,
-            ...(sourceCard ? { sourceDefinitionId: sourceCard.definitionId } : {}),
+            ...(sourceCard
+              ? { sourceDefinitionId: sourceCard.definitionId }
+              : {}),
           },
     timingPoint: action.timingPoint,
     costs: action.costs.map((cost) => ({ ...cost })),
-    targetRequirements: action.targetRequirements.map((target) => ({ ...target })),
+    targetRequirements: action.targetRequirements.map((target) => ({
+      ...target,
+    })),
     ...(action.choiceRequirements
       ? {
           choiceRequirements: action.choiceRequirements.map((choice) => ({
@@ -6971,7 +7064,11 @@ function historicalLegalActionFor(
     ...(action.abilityRef ? { abilityRef: { ...action.abilityRef } } : {}),
     ...(action.effectRef ? { effectRef: action.effectRef } : {}),
     ...(action.resolvedEffects
-      ? { resolvedEffects: action.resolvedEffects.map((effect) => ({ ...effect })) }
+      ? {
+          resolvedEffects: action.resolvedEffects.map((effect) => ({
+            ...effect,
+          })),
+        }
       : {}),
     visibility: action.visibility,
     expiresAtStateVersion: action.expiresAtStateVersion,
@@ -6996,7 +7093,8 @@ export function historicalAuditFromTrace(
   traceJson: Record<string, unknown>,
 ): AiDecisionHistoricalAudit | undefined {
   const audit = traceJson.historicalAudit;
-  if (!audit || typeof audit !== "object" || Array.isArray(audit)) return undefined;
+  if (!audit || typeof audit !== "object" || Array.isArray(audit))
+    return undefined;
   const candidate = audit as Partial<AiDecisionHistoricalAudit>;
   return candidate.schemaVersion === "ai-decision-historical-audit-v1" &&
     candidate.capture === "persisted" &&

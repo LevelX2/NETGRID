@@ -86,6 +86,15 @@
   Encounter-Budget; unfinanzierbare oder sichtbar gefährliche Pfade behalten
   den Informationszweck. `runner.convert_run_window` führt danach nur die
   aktuelle gebundene Pump-/Break-/Fortsetzungsroute aus.
+- Verdeckte Corp-Installationen erhalten in PublicEvents einen opaken,
+  positionsstabilen Anker zusammen mit kanonischem `serverId` und Placement.
+  Runner-HQ-Kandidatengruppen, bekannte Positionen und spätere
+  Reveal-/Rez-/Abgangsereignisse reconciliieren damit dieselbe öffentliche
+  Position, ohne Karteninstanz oder verdeckte Definition offenzulegen. Der
+  actor-sichere Belief-Stand wird zusätzlich im bereits hash-gebundenen
+  Decision-Audit persistiert; Maintenance-Detail und opt-in Bundle-Timeline
+  lesen nur diesen historischen Capture und rekonstruieren keine vermeintliche
+  Vergangenheit aus aktuellem Full State.
 - Optionale Post-Pass-Fähigkeiten im `run.jack_out_window` transportieren
   Quellenkartendefinition, generische Fähigkeit, Ziel-ICE und Zahlung aus der
   Engine in den side-sicheren AI-Input. Der vorhandene Owner

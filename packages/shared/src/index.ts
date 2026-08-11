@@ -530,6 +530,11 @@ export type PublicEventPayload = Record<string, unknown> & {
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
   resolvedEffects?: ResolvedGameEffect[];
+  /** Actor-safe canonical location of an installed Corp card. */
+  serverId?: ServerId;
+  installPlacement?: "ice" | "root";
+  /** Opaque stable anchor; never a CardInstanceId or card definition. */
+  installedPositionKey?: string;
 };
 
 export type SpecialZoneKind = "set_aside" | "removed_from_game";
