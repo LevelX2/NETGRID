@@ -100,6 +100,8 @@ import {
   type RunnerRestrictedProgramInstallSequenceCommitment,
   type RunnerRestrictedProgramInstallSequenceStep,
   type RunnerRunAccessCommitmentSignal,
+  type RunnerInformationBoundaryReassessmentSignal,
+  type RunnerPressureSignal,
   type RunnerRunWindowActionAssessment,
 } from "../plans/runner-tactical-plan-modules";
 import {
@@ -363,6 +365,26 @@ type RunnerRemoteContestSignalDraft = Omit<
   "runActionAssessments"
 > & {
   preferredRunActionIds?: string[];
+};
+
+type RunnerRunOrigin = {
+  purpose?: "access" | "multiaccess" | "information" | "contest";
+  encounterCreditSpendLimit?: number;
+  accessCommitment?: RunnerRunAccessCommitmentSignal;
+  informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
+};
+
+type ActiveRunnerRunRoot = RunnerRunOrigin & {
+  instanceId: string;
+  parentBinding?:
+    | {
+        moduleId: "runner.pressure_central";
+        signal: RunnerPressureSignal;
+      }
+    | {
+        moduleId: "runner.contest_remote";
+        signal: RunnerRemoteContestSignal;
+      };
 };
 
 const CORP_DEFENSE_DOMAIN_SIGNAL_FACTS = {
@@ -1352,7 +1374,10 @@ function runnerContext(
     handDevelopmentEvaluations: handDevelopment,
   });
   assertRunnerRestrictedProgramInstallCommitment(input, candidates, previous);
-  const activeRunRoot = activeRunRootPlan(previous, input);
+  const activeRunRoot = reassessActiveInformationRunParent(
+    input,
+    activeRunRootPlan(previous, input),
+  );
   const runWindowActionAssessments = runnerRunWindowActionAssessments(
     input,
     candidates,
@@ -2743,14 +2768,7 @@ function buildRunnerDomain(
   runWindowActionAssessments: NonNullable<
     RunnerPlanDomain["runWindows"][number]["actionAssessments"]
   >,
-  activeRunRoot:
-    | {
-        instanceId: string;
-        purpose?: "access" | "multiaccess" | "information" | "contest";
-        encounterCreditSpendLimit?: number;
-        accessCommitment?: RunnerRunAccessCommitmentSignal;
-      }
-    | undefined,
+  activeRunRoot: ActiveRunnerRunRoot | undefined,
   previous: ResidentPlanPortfolio | undefined,
   discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
 ): RunnerPlanDomain {
@@ -3670,6 +3688,9 @@ function buildRunnerDomain(
         baseCentralPressure,
         runTargets,
       ),
+      ...(activeRunRoot?.parentBinding?.moduleId === "runner.pressure_central"
+        ? [activeRunRoot.parentBinding.signal]
+        : []),
     ],
     (signal) => signal.pressureId,
   );
@@ -3910,16 +3931,22 @@ function buildRunnerDomain(
     ),
   ];
   const remoteContests = uniqueBy(
-    remoteContestDrafts,
+    [
+      ...uniqueBy(remoteContestDrafts, (signal) => signal.contestId).map(
+        (signal) =>
+          bindRunnerRemoteRunActionAssessments(
+            input,
+            economy,
+            signal,
+            runTargets,
+            candidates,
+          ),
+      ),
+      ...(activeRunRoot?.parentBinding?.moduleId === "runner.contest_remote"
+        ? [activeRunRoot.parentBinding.signal]
+        : []),
+    ],
     (signal) => signal.contestId,
-  ).map((signal) =>
-    bindRunnerRemoteRunActionAssessments(
-      input,
-      economy,
-      signal,
-      runTargets,
-      candidates,
-    ),
   );
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds({
     fundingNeeds,
@@ -4319,7 +4346,11 @@ function buildRunnerDomain(
           candidates,
           runWindowActionAssessments,
           safetyAssessment !== undefined,
-          currentEncounterHasUnbrokenResolvableDeflector(input),
+          currentEncounterHasUnbrokenResolvableDeflector(input) ||
+            activeRunRoot?.informationBoundaryReassessment?.decision ===
+              "convert_to_access" ||
+            activeRunRoot?.informationBoundaryReassessment?.decision ===
+              "convert_to_contest",
         );
         const exactPhaseActionAssessments = runnerBindExactRunWindowPhaseRoute(
           runWindowActionAssessments,
@@ -6430,14 +6461,7 @@ function firstEvidenceNumber(
 function activeRunRootPlan(
   previous: ResidentPlanPortfolio | undefined,
   input: AiDecisionInput,
-):
-  | {
-      instanceId: string;
-      purpose?: "access" | "multiaccess" | "information" | "contest";
-      encounterCreditSpendLimit?: number;
-      accessCommitment?: RunnerRunAccessCommitmentSignal;
-    }
-  | undefined {
+): ActiveRunnerRunRoot | undefined {
   const serverId = input.playerView.run?.attackedServerId;
   if (!previous || !serverId) return undefined;
   const candidates = [
@@ -6459,17 +6483,39 @@ function activeRunRootPlan(
   if (!root) return undefined;
   const runOrigin = runOriginFromModuleState(root.moduleState);
   const accessCommitment = accessCommitmentFromModuleState(root.moduleState);
+  const moduleState = root.moduleState as {
+    kind?: unknown;
+    signal?: unknown;
+  };
+  const parentBinding =
+    root.moduleId === "runner.pressure_central" &&
+    moduleState.kind === "central_pressure" &&
+    moduleState.signal &&
+    typeof moduleState.signal === "object"
+      ? {
+          moduleId: "runner.pressure_central" as const,
+          signal: structuredClone(moduleState.signal) as RunnerPressureSignal,
+        }
+      : root.moduleId === "runner.contest_remote" &&
+          moduleState.kind === "remote_contest" &&
+          moduleState.signal &&
+          typeof moduleState.signal === "object"
+        ? {
+            moduleId: "runner.contest_remote" as const,
+            signal: structuredClone(
+              moduleState.signal,
+            ) as RunnerRemoteContestSignal,
+          }
+        : undefined;
   return {
     instanceId: root.instanceId,
     ...runOrigin,
     ...(accessCommitment ? { accessCommitment } : {}),
+    ...(parentBinding ? { parentBinding } : {}),
   };
 }
 
-function runOriginFromModuleState(moduleState: unknown): {
-  purpose?: "access" | "multiaccess" | "information" | "contest";
-  encounterCreditSpendLimit?: number;
-} {
+function runOriginFromModuleState(moduleState: unknown): RunnerRunOrigin {
   if (!moduleState || typeof moduleState !== "object") return {};
   const signal = (moduleState as { signal?: unknown }).signal;
   if (!signal || typeof signal !== "object") return {};
@@ -6477,6 +6523,9 @@ function runOriginFromModuleState(moduleState: unknown): {
   const encounterCreditSpendLimit = (
     signal as { encounterCreditSpendLimit?: unknown }
   ).encounterCreditSpendLimit;
+  const informationBoundaryReassessment = (
+    signal as { informationBoundaryReassessment?: unknown }
+  ).informationBoundaryReassessment;
   return {
     ...(purpose === "access" ||
     purpose === "multiaccess" ||
@@ -6489,7 +6538,181 @@ function runOriginFromModuleState(moduleState: unknown): {
     encounterCreditSpendLimit >= 0
       ? { encounterCreditSpendLimit }
       : {}),
+    ...(isRunnerInformationBoundaryReassessment(informationBoundaryReassessment)
+      ? {
+          informationBoundaryReassessment: structuredClone(
+            informationBoundaryReassessment,
+          ),
+        }
+      : {}),
   };
+}
+
+function reassessActiveInformationRunParent(
+  input: AiDecisionInput,
+  root: ActiveRunnerRunRoot | undefined,
+): ActiveRunnerRunRoot | undefined {
+  const run = input.playerView.run;
+  const encounteredIce = currentEncounteredIceCard(input);
+  if (
+    !root?.parentBinding ||
+    !run ||
+    run.phase !== "encounter_ice" ||
+    !encounteredIce ||
+    encounteredIce.known !== true ||
+    encounteredIce.rezzed !== true ||
+    !encounteredIce.effectiveRunQuote ||
+    (root.purpose !== "information" &&
+      root.informationBoundaryReassessment?.startedAsInformation !== true)
+  ) {
+    return root;
+  }
+
+  const remainingIce = uniqueBy(
+    [...currentRunRemainingIce(input), encounteredIce],
+    (ice) => ice.instanceId,
+  );
+  const knownPath = assessKnownRezzedIcePath(
+    remainingIce,
+    input.playerView.own.rig ?? [],
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits +
+        Math.max(0, input.playerView.run?.badPublicityCredits ?? 0),
+      input.playerView.own.rig ?? [],
+    ),
+    input.playerView.servers.find(
+      (server) => server.id === run.attackedServerId,
+    )?.root ?? [],
+    input.playerView.opponent.credits,
+  );
+  const unknownIceCount = remainingIce.filter(
+    (ice) =>
+      ice.known !== true ||
+      ice.rezzed !== true ||
+      ice.effectiveRunQuote === undefined,
+  ).length;
+  const knownPathCost = Math.max(0, knownPath.visibleBreakCost ?? 0);
+  const reservedCredits =
+    root.accessCommitment?.intendedAction === "trash"
+      ? Math.max(0, root.accessCommitment.trashBudget)
+      : 0;
+  const fundingGap = Math.max(0, reservedCredits - knownPath.creditsAfterPath);
+  const unavoidableHazardCount = Math.max(
+    0,
+    knownPath.unavoidableVisibleIceHazardCount ?? 0,
+  );
+  const parentSignal = root.parentBinding.signal;
+  const marginalValue = Number(parentSignal.marginalValue);
+  const payoff = root.accessCommitment?.payoff;
+  const hasMaterialPayoff =
+    (Number.isFinite(marginalValue) && marginalValue > 0) ||
+    payoff === "agenda" ||
+    payoff === "score_threat" ||
+    payoff === "trash_affordable" ||
+    payoff === "access_bonus";
+  const convert =
+    knownPath.canReachAccess &&
+    unknownIceCount === 0 &&
+    fundingGap === 0 &&
+    unavoidableHazardCount === 0 &&
+    hasMaterialPayoff;
+  const nextPurpose = convert
+    ? root.parentBinding.moduleId === "runner.contest_remote"
+      ? ("contest" as const)
+      : ("access" as const)
+    : ("information" as const);
+  const decision = convert
+    ? root.parentBinding.moduleId === "runner.contest_remote"
+      ? ("convert_to_contest" as const)
+      : ("convert_to_access" as const)
+    : ("retain_information" as const);
+  const encounterBudget = convert
+    ? knownPathCost
+    : Math.min(
+        Math.max(0, root.encounterCreditSpendLimit ?? 0),
+        Math.max(0, input.playerView.own.credits),
+      );
+  const evidenceCodes = [
+    "runner_information_boundary_reassessment",
+    `runner_information_boundary_previous_purpose:${root.purpose ?? "information"}`,
+    `runner_information_boundary_next_purpose:${nextPurpose}`,
+    `runner_information_boundary_decision:${decision}`,
+    `runner_information_boundary_known_path_cost:${knownPathCost}`,
+    `runner_information_boundary_known_path_reachable:${knownPath.canReachAccess}`,
+    `runner_information_boundary_unknown_ice:${unknownIceCount}`,
+    `runner_information_boundary_credits_after_path:${knownPath.creditsAfterPath}`,
+    `runner_information_boundary_reserved_credits:${reservedCredits}`,
+    `runner_information_boundary_funding_gap:${fundingGap}`,
+    `runner_information_boundary_unavoidable_hazards:${unavoidableHazardCount}`,
+    `runner_information_boundary_payoff:${payoff ?? "parent_marginal_value"}`,
+    `runner_information_boundary_encounter_budget:${encounterBudget}`,
+  ];
+  const reassessment: RunnerInformationBoundaryReassessmentSignal = {
+    startedAsInformation: true,
+    previousPurpose: root.purpose ?? "information",
+    nextPurpose,
+    decision,
+    boundaryKind: "visible_ice_path_changed",
+    observedAtStateVersion: input.playerView.stateVersion,
+    observedIceInstanceId: encounteredIce.instanceId,
+    knownPathCost,
+    knownPathReachable: knownPath.canReachAccess,
+    unknownIceCount,
+    runnerCreditsBeforeQuote: input.playerView.own.credits,
+    creditsAfterKnownPath: knownPath.creditsAfterPath,
+    reservedCredits,
+    fundingGap,
+    unavoidableHazardCount,
+    remainingClicks: input.playerView.own.clicks,
+    encounterBudget,
+    evidenceCodes,
+  };
+  const reboundSignal = {
+    ...parentSignal,
+    purpose: nextPurpose,
+    encounterCreditSpendLimit: encounterBudget,
+    informationBoundaryReassessment: reassessment,
+    evidenceCode: `runner_information_boundary_parent_requoted:${decision}`,
+  };
+
+  return {
+    ...root,
+    purpose: nextPurpose,
+    encounterCreditSpendLimit: encounterBudget,
+    informationBoundaryReassessment: reassessment,
+    parentBinding:
+      root.parentBinding.moduleId === "runner.pressure_central"
+        ? {
+            moduleId: "runner.pressure_central",
+            signal: reboundSignal as RunnerPressureSignal,
+          }
+        : {
+            moduleId: "runner.contest_remote",
+            signal: reboundSignal as RunnerRemoteContestSignal,
+          },
+  };
+}
+
+function isRunnerInformationBoundaryReassessment(
+  value: unknown,
+): value is RunnerInformationBoundaryReassessmentSignal {
+  if (!value || typeof value !== "object") return false;
+  const candidate =
+    value as Partial<RunnerInformationBoundaryReassessmentSignal>;
+  return (
+    candidate.startedAsInformation === true &&
+    candidate.boundaryKind === "visible_ice_path_changed" &&
+    typeof candidate.observedAtStateVersion === "number" &&
+    typeof candidate.observedIceInstanceId === "string" &&
+    typeof candidate.knownPathReachable === "boolean" &&
+    typeof candidate.knownPathCost === "number" &&
+    Number.isFinite(candidate.knownPathCost) &&
+    typeof candidate.fundingGap === "number" &&
+    Number.isFinite(candidate.fundingGap) &&
+    typeof candidate.unavoidableHazardCount === "number" &&
+    Number.isFinite(candidate.unavoidableHazardCount) &&
+    Array.isArray(candidate.evidenceCodes)
+  );
 }
 
 function accessCommitmentFromModuleState(
@@ -17380,12 +17603,7 @@ function runnerRunWindowActionAssessments(
   candidates: readonly ActionSemanticCandidate[],
   runTargets: readonly RunnerRunTargetEvaluation[],
   dependencies: PlanFirstLiveDependencies,
-  runOrigin:
-    | {
-        purpose?: "access" | "multiaccess" | "information" | "contest";
-        encounterCreditSpendLimit?: number;
-      }
-    | undefined,
+  runOrigin: RunnerRunOrigin | undefined,
 ): NonNullable<RunnerPlanDomain["runWindows"][number]["actionAssessments"]> {
   const assessments: NonNullable<
     RunnerPlanDomain["runWindows"][number]["actionAssessments"]
@@ -17423,13 +17641,7 @@ function runnerRunWindowActionAssessment(
   action: AiDecisionInput["legalActions"][number],
   runTargets: readonly RunnerRunTargetEvaluation[],
   dependencies: PlanFirstLiveDependencies,
-  runOrigin:
-    | {
-        purpose?: "access" | "multiaccess" | "information" | "contest";
-        encounterCreditSpendLimit?: number;
-        accessCommitment?: RunnerRunAccessCommitmentSignal;
-      }
-    | undefined,
+  runOrigin: RunnerRunOrigin | undefined,
 ): RunnerRunWindowActionAssessment {
   const additionalAccessAssessment =
     assessRunnerAdditionalAccessRunWindowAction({
@@ -17609,6 +17821,7 @@ function runnerRunWindowActionAssessment(
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
           `runner_run_window_action:${action.type}`,
+          ...(runOrigin?.informationBoundaryReassessment?.evidenceCodes ?? []),
         ],
       };
 }
@@ -17616,13 +17829,7 @@ function runnerRunWindowActionAssessment(
 function runnerPostPassDerezAndEndRunAssessment(
   input: AiDecisionInput,
   action: LegalAction,
-  runOrigin:
-    | {
-        purpose?: "access" | "multiaccess" | "information" | "contest";
-        encounterCreditSpendLimit?: number;
-        accessCommitment?: RunnerRunAccessCommitmentSignal;
-      }
-    | undefined,
+  runOrigin: RunnerRunOrigin | undefined,
 ): RunnerRunWindowActionAssessment {
   const run = input.playerView.run;
   const targetIceId = action.payload?.targetIceId;
@@ -17719,16 +17926,16 @@ function runnerExactRunWindowPhaseActionIds(
       .map((candidate) => candidate.actionId);
   }
   if (encounterRequiresTargetPreservingBreak) {
-    const directEncounterRoutes = admissibleRunWindowCandidates.filter(
-      (candidate) =>
-        candidate.actionType === "pump_breaker" ||
-        candidate.actionType === "break_subroutine" ||
-        candidate.semanticActionType === "breaker.boost_strength" ||
-        candidate.semanticActionType === "breaker.break_subroutine" ||
-        runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined,
-    );
-    if (directEncounterRoutes.length > 0) {
-      return directEncounterRoutes.map((candidate) => candidate.actionId);
+    const directEncounterActionIds = input.legalActions
+      .filter(
+        (action) =>
+          (action.type === "pump_breaker" ||
+            action.type === "break_subroutine") &&
+          assessments[action.actionId]?.admissible === true,
+      )
+      .map((action) => action.actionId);
+    if (directEncounterActionIds.length > 0) {
+      return directEncounterActionIds;
     }
   }
   const accessStartAvailable = input.legalActions.some(
@@ -17793,15 +18000,32 @@ function runnerRunWindowPlanStepExclusion(
   input: AiDecisionInput,
   action: AiDecisionInput["legalActions"][number],
   dependencies: PlanFirstLiveDependencies,
-  runOrigin:
-    | {
-        purpose?: "access" | "multiaccess" | "information" | "contest";
-        encounterCreditSpendLimit?: number;
-      }
-    | undefined,
+  runOrigin: RunnerRunOrigin | undefined,
 ): SemanticRuntimeExclusion | undefined {
   const run = input.playerView.run;
   if (!run) return undefined;
+
+  const informationReassessment = runOrigin?.informationBoundaryReassessment;
+  if (
+    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    informationReassessment?.decision === "retain_information" &&
+    (!informationReassessment.knownPathReachable ||
+      informationReassessment.fundingGap > 0 ||
+      informationReassessment.unavoidableHazardCount > 0)
+  ) {
+    return {
+      key: "run_plan_information_reassessment_not_convertible",
+      label: "Die neu quotierte Informationsroute tr„gt keine Fortsetzung",
+      reason: [
+        "run_plan_step:information_probe_reassessment",
+        `run_plan_target:${run.attackedServerId}`,
+        `run_plan_known_path_reachable:${informationReassessment.knownPathReachable}`,
+        `run_plan_known_path_cost:${informationReassessment.knownPathCost}`,
+        `run_plan_funding_gap:${informationReassessment.fundingGap}`,
+        `run_plan_unavoidable_hazards:${informationReassessment.unavoidableHazardCount}`,
+      ].join("|"),
+    };
+  }
 
   if (
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&

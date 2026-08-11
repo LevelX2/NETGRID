@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-08-09-runner-information-probe-reassessment
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-09
-startedAt:
-completedAt:
+startedAt: 2026-08-11
+completedAt: 2026-08-11
 branch:
 releaseTarget: ai-plan-layer-hardening
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/plans/runner-tactical-plan-modules.ts
+  - packages/ai/src/runtime/plan-first-live-runtime-information-probe-reassessment.test.ts
+  - docs/architecture/ai/README.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-08.md
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/plan-first-live-runtime-information-probe-reassessment.test.ts src/runtime/plan-first-live-runtime-central-information-route-contract.test.ts src/plans/runner-tactical-plan-modules.test.ts --maxWorkers=1
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
 ---
 
 # Informations-Runs nach Reveals neu bewerten und in echte Runs überführen
@@ -144,54 +152,54 @@ auswählt.
 
 ## Akzeptanzkriterien
 
-- [ ] Reveal oder Rez bislang unbekannter ICE erzeugt im Informations-Run
+- [x] Reveal oder Rez bislang unbekannter ICE erzeugt im Informations-Run
       eine echte `scheduled_information_boundary` mit anschließender
       fachlicher Neuquote des aktiven Runs.
-- [ ] Der Run-Purpose kann nach der Grenze typisiert von `information` zu
+- [x] Der Run-Purpose kann nach der Grenze typisiert von `information` zu
       `contest` oder `access` wechseln; das ursprüngliche Probe-Limit wird
       dann durch ein neu begründetes Encounter-Budget ersetzt.
-- [ ] Die Route-Quote erfasst die kumulierten Kosten bis zum vorgesehenen
+- [x] Die Route-Quote erfasst die kumulierten Kosten bis zum vorgesehenen
       Run-Meilenstein und entscheidet nicht nur anhand der Kosten der gerade
       nächsten Pump- oder Break-LegalAction.
-- [ ] Im Match-Checkpoint zu Entscheidung 22 erkennt die KI den mit Krash für
+- [x] Im Match-Checkpoint zu Entscheidung 22 erkennt die KI den mit Krash für
       4 Credits überwindbaren Data-Wall-Pfad bei 10 Credits, konvertiert den
       verdächtigen Remote-Probe-Run und beginnt die gebundene Pump-/Break-
       Route.
-- [ ] Ein zu teurer, nicht abgedeckter oder erkennbar unattraktiver Pfad kann
+- [x] Ein zu teurer, nicht abgedeckter oder erkennbar unattraktiver Pfad kann
       im Probe-Modus bleiben und den Run ohne unnötige Ausgabe beenden.
-- [ ] Ein bekannter hoher Schaden, Programmverlust oder notwendiger
+- [x] Ein bekannter hoher Schaden, Programmverlust oder notwendiger
       Reserveverbrauch kann trotz nominell ausreichender Credits gegen die
       Konvertierung sprechen und wird in der Evidence ausgewiesen.
-- [ ] Bei mehreren nacheinander aufgedeckten ICE wird an jeder material neuen
+- [x] Bei mehreren nacheinander aufgedeckten ICE wird an jeder material neuen
       Erkenntnis erneut quotiert; bereits ausgegebene Credits und verbleibende
       Ressourcen fließen in die nächste Entscheidung ein.
-- [ ] Remote- und Central-Probe verwenden denselben generischen
+- [x] Remote- und Central-Probe verwenden denselben generischen
       Übergangsvertrag, aber behalten ihren jeweils zuständigen strategischen
       Parent.
-- [ ] `runner.convert_run_window` führt nur die vom Parent gebundene
+- [x] `runner.convert_run_window` führt nur die vom Parent gebundene
       Runfensterroute aus und erzeugt weder Serverziel noch strategischen
       Purpose oder Budget als zweite Autorität.
-- [ ] Ein bedingtes Restzugziel kann die Grenze überleben und wird nach dem
+- [x] Ein bedingtes Restzugziel kann die Grenze überleben und wird nach dem
       Run ausgeführt, wenn seine Voraussetzungen noch erfüllt sind und es
       weiterhin gewinnt.
-- [ ] Der TurnPlanner darf einen Suffix schon vor dem Probe-Run als
+- [x] Der TurnPlanner darf einen Suffix schon vor dem Probe-Run als
       voraussichtlich sinnvoll ausweisen, kennzeichnet ihn aber ausdrücklich
       als konditional statt als zwingenden Teil der Ausführungsbindung.
-- [ ] Ein ressourcenabhängiges Restzugziel wird nach höheren tatsächlichen
+- [x] Ein ressourcenabhängiges Restzugziel wird nach höheren tatsächlichen
       Run-Ausgaben korrekt verworfen oder neu finanziert; seine alte konkrete
       Action wird nicht blind rematerialisiert.
-- [ ] Ein ressourcenunabhängiger, weiterhin sinnvoller Suffix kann nach dem
+- [x] Ein ressourcenunabhängiger, weiterhin sinnvoller Suffix kann nach dem
       Informations-Run erneut gewählt werden. Daraus entsteht keine starre
       Regel, Probe-Runs nur als letzte Aktion zuzulassen.
-- [ ] Diagnose-Evidence nennt mindestens vorherigen und neuen Purpose,
+- [x] Diagnose-Evidence nennt mindestens vorherigen und neuen Purpose,
       Reveal-/Grenzgrund, bekannte Gesamtroutenkosten, Funding Gap, Reserve,
       Payoff, Entscheidung und neues Ausgabenbudget.
-- [ ] Tests sichern Root-/Parent-Ownership, aktiven Run, Planphase,
+- [x] Tests sichern Root-/Parent-Ownership, aktiven Run, Planphase,
       `PlanExecutionOrigin`, exakte Action-ID und Executor. Resolver,
       Fallback und parallele Run-Autorität bleiben ausgeschlossen.
-- [ ] Hidden-Info-Schutz, LegalAction-Bindung, Determinismus, Replay und
+- [x] Hidden-Info-Schutz, LegalAction-Bindung, Determinismus, Replay und
       StateHash bleiben erhalten.
-- [ ] Fokussierter Match-Checkpoint, angrenzende Run-Plan-Tests,
+- [x] Fokussierter Match-Checkpoint, angrenzende Run-Plan-Tests,
       erforderlicher AI-Typecheck und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -215,5 +223,24 @@ auswählt.
 
 ## Ergebnisnotiz
 
-Noch offen. Das Paket trennt die verpflichtende Probe-Neubewertung von der
-nicht zwingenden Frage, ob und welche Aktionen nach dem Run folgen können.
+Der vorhandene `scheduled_information_boundary`-Replan aktualisiert jetzt den
+bereits residenten Run-Parent statt das alte Probe-Limit unverändert an den
+Runfenster-Leaf weiterzugeben. Die side-sichere Neuquote umfasst den gesamten
+verbleibenden bekannten ICE-Pfad, Reserve, Funding Gap, sichtbare Gefahren,
+Unknown-ICE-Anzahl, Payoff und Restklicks. Ein tragfähiger Remote- oder
+Central-Pfad wechselt auf derselben Parent-Instanz zu `contest` beziehungsweise
+`access` und bindet das neue Encounter-Budget; spätere neue Reveals quotieren
+erneut und können den Zweck wieder auf `information` zurückstellen.
+
+`runner.convert_run_window` bleibt alleiniger Leaf-Executor für die aktuelle
+LegalAction. Bei positiver Konvertierung bindet er die aktuelle
+Pump-/Break-Route; bei einer nicht tragfähigen Neuquote darf eine lokal billige
+Einzelaktion den unfinanzierbaren Gesamtpfad nicht mehr kaschieren. Der
+bestehende TurnPlanner-Vertrag für konditionale Suffixe und reguläre Neuplanung
+hinter Informationsgrenzen bleibt unverändert erhalten.
+
+Verifiziert wurden der matchnahe Data-Wall-2.0-/Krash-Pfad (4 Credits), eine
+zweite unfinanzierbare Keeper-Aufdeckung, ein unbezahlbarer Central-Gegenfall,
+die angrenzenden Central-/Planmodulverträge und der AI-Typecheck. Auf Wunsch des
+Nutzers wurden keine vollständigen AI-Shards, Baselines, Workspace-Tests oder
+Builds ausgeführt.

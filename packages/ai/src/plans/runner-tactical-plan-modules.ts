@@ -40,6 +40,7 @@ export type RunnerPressureSignal = {
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
+  informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
 };
 
 export type RunnerRemoteContestSignal = {
@@ -69,6 +70,28 @@ export type RunnerRemoteContestSignal = {
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
+  informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
+};
+
+export type RunnerInformationBoundaryReassessmentSignal = {
+  startedAsInformation: true;
+  previousPurpose: "access" | "multiaccess" | "information" | "contest";
+  nextPurpose: "access" | "information" | "contest";
+  decision: "convert_to_access" | "convert_to_contest" | "retain_information";
+  boundaryKind: "visible_ice_path_changed";
+  observedAtStateVersion: number;
+  observedIceInstanceId: string;
+  knownPathCost: number;
+  knownPathReachable: boolean;
+  unknownIceCount: number;
+  runnerCreditsBeforeQuote: number;
+  creditsAfterKnownPath: number;
+  reservedCredits: number;
+  fundingGap: number;
+  unavoidableHazardCount: number;
+  remainingClicks: number;
+  encounterBudget: number;
+  evidenceCodes: string[];
 };
 
 export type RunnerRunAccessCommitmentSignal = {

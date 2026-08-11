@@ -78,6 +78,14 @@
   Zentraldruck und Zielplan-Fit gelten für projizierte HQ-/R&D-Runs nur, wenn
   ihr eigener sichtbarer Pfad `run_now` trägt; Archives-, Remote- und
   Bezahlbarkeitsausschlüsse bleiben wirksam.
+- Informations-Runs werden an jeder neu sichtbaren ICE-Grenze vom bestehenden
+  `runner.pressure_central`- beziehungsweise `runner.contest_remote`-Parent
+  über den vollständigen verbleibenden bekannten Pfad neu quotiert. Ein
+  bezahlbarer, risikoarmer Pfad mit materiellem Payoff kann auf derselben
+  Planinstanz zu `access` oder `contest` wechseln und bindet ein neues
+  Encounter-Budget; unfinanzierbare oder sichtbar gefährliche Pfade behalten
+  den Informationszweck. `runner.convert_run_window` führt danach nur die
+  aktuelle gebundene Pump-/Break-/Fortsetzungsroute aus.
 - Optionale Post-Pass-Fähigkeiten im `run.jack_out_window` transportieren
   Quellenkartendefinition, generische Fähigkeit, Ziel-ICE und Zahlung aus der
   Engine in den side-sicheren AI-Input. Der vorhandene Owner
