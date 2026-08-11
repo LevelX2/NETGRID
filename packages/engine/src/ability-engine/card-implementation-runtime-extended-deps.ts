@@ -25,6 +25,12 @@ export type CardImplementationRuntimeExtendedDependencies = {
   installedIceTargetCount: (state: GameState) => number;
   rezzedBlackIceTargetCount: (state: GameState) => number;
   installedAdvanceableCorpCardTargetCount: (state: GameState) => number;
+  moveAdvancementCounterOptionCount: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    source: "chosen_card" | "source_card",
+    maxAmount: number | "all",
+  ) => number;
   corpHqCardCount: (state: GameState) => number;
   runnerValuPakInstallableProgramCount: (state: GameState) => number;
   startPayRezCostToTrashRezzedIceChoice: (

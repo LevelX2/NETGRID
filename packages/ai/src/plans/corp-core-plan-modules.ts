@@ -2373,11 +2373,21 @@ function defenseCandidates(
   }
   if (signal.phase === "install_ice") {
     const route = signal.installRoute;
+    const exactCandidates = exactGenericDefenseInstallCandidates(
+      context,
+      signal,
+    );
     const stagingAssessment = assessFundingOnlyIceStaging({
       input: context.input,
       signal,
-      productiveAlternativeExists: false,
-      fundingAlternativeExists: false,
+      productiveAlternativeExists: genericDefenseProductiveAlternativeExists(
+        context,
+        signal,
+      ),
+      fundingAlternativeExists: genericDefenseFundingAlternativeExists(
+        context,
+        signal,
+      ),
     });
     if (
       !route ||
@@ -2386,25 +2396,7 @@ function defenseCandidates(
     ) {
       return [];
     }
-    return context.actionCandidates
-      .filter(
-        (candidate) =>
-          candidate.actionId === route.projection.actionId &&
-          candidate.semanticActionType === "install.card" &&
-          candidate.sourceCardInstanceId ===
-            route.projection.sourceCardInstanceId &&
-          candidate.sourceDefinitionId ===
-            route.projection.sourceDefinitionId &&
-          candidateTargetIds(candidate).includes(
-            route.projection.targetServerId,
-          ) &&
-          scoreProtectionInstallActionMatches(
-            context,
-            candidate,
-            route.projection,
-          ),
-      )
-      .map((candidate) => ({ candidate, stepValue: 1 }));
+    return exactCandidates.map((candidate) => ({ candidate, stepValue: 1 }));
   }
   if (signal.phase === "rez_response" && signal.rezRoute) {
     if (!exactIceRezRouteIsCurrent(context, signal, signal.rezRoute)) {
@@ -2526,6 +2518,96 @@ function defenseCandidates(
       );
     })
     .map((candidate) => ({ candidate, stepValue: signal.value }));
+}
+
+function exactGenericDefenseInstallCandidates(
+  context: PlanSchedulerContext,
+  signal: CorpGenericDefenseSignal,
+): ActionSemanticCandidate[] {
+  const route = signal.installRoute;
+  if (
+    signal.phase !== "install_ice" ||
+    !route ||
+    !exactInstallProjectionMatchesSignal(context, signal, route.projection)
+  ) {
+    return [];
+  }
+  return context.actionCandidates.filter(
+    (candidate) =>
+      candidate.actionId === route.projection.actionId &&
+      candidate.semanticActionType === "install.card" &&
+      candidate.sourceCardInstanceId ===
+        route.projection.sourceCardInstanceId &&
+      candidate.sourceDefinitionId === route.projection.sourceDefinitionId &&
+      candidateTargetIds(candidate).includes(route.projection.targetServerId) &&
+      scoreProtectionInstallActionMatches(context, candidate, route.projection),
+  );
+}
+
+function genericDefenseProductiveAlternativeExists(
+  context: PlanSchedulerContext,
+  fundingOnlySignal: CorpGenericDefenseSignal,
+): boolean {
+  const currentDomain = corpDomainIfAvailable(context);
+  return (
+    currentDomain?.defenseNeeds.some(
+      (signal) =>
+        signal !== fundingOnlySignal &&
+        signal.kind === "generic" &&
+        signal.phase === "install_ice" &&
+        signal.installRoute?.disposition === "productive" &&
+        exactGenericDefenseInstallCandidates(context, signal).length > 0,
+    ) === true
+  );
+}
+
+function genericDefenseFundingAlternativeExists(
+  context: PlanSchedulerContext,
+  signal: CorpGenericDefenseSignal,
+): boolean {
+  const projection = signal.installRoute?.projection;
+  const gap = projection?.after.minimumAdditionalCreditsToSatisfy;
+  if (
+    signal.phase !== "install_ice" ||
+    signal.installRoute?.disposition !== "funding_only" ||
+    !projection ||
+    typeof gap !== "number" ||
+    !Number.isSafeInteger(gap) ||
+    gap <= 0
+  ) {
+    return false;
+  }
+  const expectedNeedId = `defense-reserve:${signal.serverId}:${projection.sourceCardInstanceId}`;
+  const need = corpDomainIfAvailable(context)?.economyNeeds.find(
+    (candidate) =>
+      candidate.kind === "parent_funding" &&
+      candidate.needId === expectedNeedId &&
+      candidate.parentNeedId === signal.defenseId &&
+      candidate.immediateDefenseConversion === true &&
+      candidate.gap === gap,
+  );
+  return (
+    need?.actionIds.some((actionId) =>
+      context.actionCandidates.some(
+        (candidate) =>
+          candidate.actionId === actionId &&
+          immediateCorpLiquidCreditGain(candidate) > 0 &&
+          corpEconomyCandidateHasExecutablePayload(context.input, candidate),
+      ),
+    ) === true
+  );
+}
+
+function corpDomainIfAvailable(
+  context: PlanSchedulerContext,
+): CorpCorePlanDomain | undefined {
+  const value = context.domain as CorpCorePlanDomain | undefined;
+  return value?.scoreProjects &&
+    value.remoteProjects &&
+    value.defenseNeeds &&
+    value.economyNeeds
+    ? value
+    : undefined;
 }
 
 function exactIceRezRouteIsCurrent(
@@ -3384,16 +3466,12 @@ function exactScoreProtectionParentNeedId(
 function defenseResourceGaps(
   selectedBand: SelectedDefensePortfolioBand,
 ): ResourceGap[] {
-  if (selectedBand.kind !== "generic") return [];
-  const selectedActionIds = new Set(
-    selectedBand.candidates.map(({ candidate }) => candidate.actionId),
-  );
+  if (selectedBand.kind !== "generic" || selectedBand.candidates.length > 0)
+    return [];
   return selectedBand.eligibleSignals.flatMap((signal) => {
     if (
       signal.phase !== "install_ice" ||
-      signal.installRoute?.disposition !== "funding_only" ||
-      (selectedActionIds.size > 0 &&
-        !signal.actionIds?.some((actionId) => selectedActionIds.has(actionId)))
+      signal.installRoute?.disposition !== "funding_only"
     ) {
       return [];
     }
@@ -3522,8 +3600,10 @@ function selectedGenericDefensePortfolioBand(
       prioritySignals,
       centralAllocation,
     );
-    const supportable =
-      genericDefenseBandHasExactFundingSupport(prioritySignals);
+    const supportable = genericDefenseBandHasExactFundingSupport(
+      context,
+      prioritySignals,
+    );
     if (candidates.length > 0 || supportable) {
       return {
         eligibleSignals: prioritySignals,
@@ -3545,19 +3625,12 @@ function selectedGenericDefensePortfolioBand(
 }
 
 function genericDefenseBandHasExactFundingSupport(
+  context: PlanSchedulerContext,
   signals: readonly CorpGenericDefenseSignal[],
 ): boolean {
-  return signals.some((signal) => {
-    if (
-      signal.phase !== "install_ice" ||
-      signal.installRoute?.disposition !== "funding_only"
-    ) {
-      return false;
-    }
-    const gap =
-      signal.installRoute.projection.after.minimumAdditionalCreditsToSatisfy;
-    return typeof gap === "number" && Number.isSafeInteger(gap) && gap > 0;
-  });
+  return signals.some((signal) =>
+    genericDefenseFundingAlternativeExists(context, signal),
+  );
 }
 
 function genericDefensePortfolioCandidates(
@@ -3771,9 +3844,15 @@ function selectedExactGenericDefenseRoutes(
       const fallbackServer = context.input.playerView.servers.find(
         (server) => server.id === fallbackServerId,
       );
+      const knownCorpHandOverflow =
+        Number.isSafeInteger(context.input.playerView.own.gripOrHq.length) &&
+        Number.isSafeInteger(context.input.playerView.own.maxHandSize) &&
+        context.input.playerView.own.gripOrHq.length >
+          context.input.playerView.own.maxHandSize;
       const fallbackHasIndependentValue =
         fallbackServer?.ice.length === 0 ||
-        allocation.evidence[fallbackServerId].threat !== "none";
+        allocation.evidence[fallbackServerId].threat !== "none" ||
+        knownCorpHandOverflow;
       const allocatedCentralRoutes =
         selectedCentralRoutes.length > 0
           ? selectedCentralRoutes
@@ -4126,6 +4205,19 @@ export type CorpDefenseActionDisposition = {
 
 export type CorpDefensePlacementDisposition = CorpDefenseActionDisposition;
 
+export function corpDefenseMaterializedActionIds(
+  context: PlanSchedulerContext,
+  signals: readonly CorpDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): ReadonlySet<string> {
+  const validSignals = validDefenseSignals(signals, context);
+  return new Set(
+    defensePortfolioCandidates(context, validSignals, centralAllocation).map(
+      (route) => route.candidate.actionId,
+    ),
+  );
+}
+
 export function corpDefenseActionDispositions(
   context: PlanSchedulerContext,
   signals: readonly CorpDefenseSignal[],
@@ -4244,10 +4336,14 @@ export function corpDefenseActionDispositions(
       continue;
     }
     const matchingPlacements = placementSignals
-      .filter((signal) =>
-        defenseCandidates(context, signal).some(
-          (route) => route.candidate.actionId === candidate.actionId,
-        ),
+      .filter(
+        (signal) =>
+          (signal.phase === "install_ice" &&
+            signal.installRoute?.projection.actionId === candidate.actionId) ||
+          (signal.phase !== "install_ice" &&
+            defenseCandidates(context, signal).some(
+              (route) => route.candidate.actionId === candidate.actionId,
+            )),
       )
       .sort(
         (left, right) =>
@@ -5533,14 +5629,8 @@ function candidateTargetIds(candidate: ActionSemanticCandidate): string[] {
 }
 
 function domain(context: PlanSchedulerContext): CorpCorePlanDomain {
-  const value = context.domain as CorpCorePlanDomain | undefined;
-  if (
-    value?.scoreProjects &&
-    value.remoteProjects &&
-    value.defenseNeeds &&
-    value.economyNeeds
-  )
-    return value;
+  const value = corpDomainIfAvailable(context);
+  if (value) return value;
   throw new PlanResolutionFailure("missing_plan_module_coverage", {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,

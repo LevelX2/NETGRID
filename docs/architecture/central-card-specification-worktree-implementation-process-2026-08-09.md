@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS11 abgeschlossen, CS12 ausstehend**
+- Status: **in Umsetzung; CS00 bis CS12 abgeschlossen, CS13 ausstehend**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -407,7 +407,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS09  | Proteus-Migration                                      | completed |
 | CS10  | Originalset-v1-Migration                               | completed |
 | CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | completed |
-| CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | pending   |
+| CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | completed |
 | CS13  | Gesamtevidence, aktuelle Dokumentation und Integration | pending   |
 
 ## 12. Paketdetails
@@ -454,6 +454,39 @@ Checks:
 - alle lokalen Dokumentlinks;
 - Prettier für geänderte Markdowndateien;
 - `git diff --check`.
+
+Umsetzungsstand 2026-08-12:
+
+- Die PlanningCardView projiziert Broker-Install, Build und Cash-out mit
+  stabiler Definition-, Instanz- und Capability-Identität. Eine zukünftige
+  Build-Invocation besitzt vor der Installation bewusst keine `actionId`;
+  nach der Installation wird ausschließlich die aktuelle Engine-LegalAction
+  derselben Instanz und Capability rematerialisiert.
+- `runner.credit_bank` bleibt alleiniger Owner für Build und Cash-out.
+  Install-plus-Build, spätere Build-Fortsetzung, Cash-out, zwei getrennte
+  Brokerinstanzen, gemeinsames Once-per-turn-Limit und höherprioritäre
+  Sicherheitsbedarfe sind fokussiert abgesichert. Synthetische Zeugen
+  verwenden wie produktive Engine-Actions die kanonischen
+  `store_credits`-/`withdraw_credits`-Bindings.
+- Die im Playtest sichtbaren Access-losen Wiederholungsruns wurden nicht über
+  einen Kostenfallback kaschiert. Random-Break-or-Damage-Routen werden nun bei
+  Runbeginn, Jack-out-Revalidierung und verbleibender Encounter-Pfadprüfung
+  mit demselben side-sicheren Risikovertrag bewertet. Nach einem Run ohne
+  Access bleibt derselbe Server gesperrt, bis sichtbare
+  Routenentwicklungs-Evidence vorliegt.
+- Corp-Punish-Quotes bilden öffentlich sichtbare, counterbezahlte
+  Damage-Prevention als begrenzte Antwortspanne ab. Dadurch bleibt eine
+  sichtbare Trace-Tag-/Damage-Folgeroute vollständig quotierbar, ohne
+  verdeckte Runnerkarten zu lesen.
+- Der finale CS12-Kandidat unter
+  `data/local/card-spec-registry-migration-cs12/ai-behavior-baseline-v1-cs12-candidate-r5.*`
+  umfasst 60 Spiele und 14.013 Entscheidungen. Er ist mit CS00 vergleichbar,
+  akzeptiert und meldet null IllegalActions, Replayfehler, Action-Limits,
+  Fallbacks, Timeouts, Runtimefehler, Hidden-Info-Marker und
+  No-Legal-Action-Fehler.
+- Fokussierte CS12-Zeugen, AI-, Engine- und Shared-Typecheck sowie
+  `git diff --check` sind grün. Der vollständige Integrationslauf bleibt
+  ausdrücklich Aufgabe von CS13.
 
 Done-Gate:
 

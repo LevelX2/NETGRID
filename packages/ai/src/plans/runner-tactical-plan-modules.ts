@@ -572,7 +572,8 @@ function centralPressureModule(): PlanModule {
                   }
                 : {}),
           },
-          ...(current.signal.routePreparation
+          ...(current.signal.routePreparation ||
+          (current.signal.runActionIds?.length ?? 0) > 0
             ? {}
             : {
                 target: {
@@ -685,7 +686,8 @@ function remoteContestModule(): PlanModule {
 }
 
 function remotePriority(signal: RunnerRemoteContestSignal): "P2" | "P4" | "P6" {
-  if (signal.knownAgendaThreat) return "P2";
+  if (signal.knownAgendaThreat && signal.routePreparation !== "targeted_bypass")
+    return "P2";
   return signal.constrainedActionCapacity ? "P6" : "P4";
 }
 

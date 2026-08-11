@@ -74,6 +74,150 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("projects a runner turn-start credit engine that ends on the first run", () => {
+    const conference = actualHint("onr_v1_184_top-runners-conference");
+
+    expect(conference.effects).toEqual(
+      expect.arrayContaining([
+        {
+          kind: "economy",
+          scope: "runner",
+          timing: "start_of_turn",
+          resource: "credits",
+          target: "economy.turn_start_credit",
+          amount: 2,
+          repeatable: true,
+        },
+        {
+          kind: "delayed_penalty",
+          scope: "runner",
+          timing: "start_of_run",
+          target: "risk.ends_on_run",
+          finite: true,
+        },
+      ]),
+    );
+    expect(conference.functionSignals).toEqual(
+      expect.arrayContaining([
+        "economy.generic",
+        "economy.turn_start_credit",
+      ]),
+    );
+
+    const entry = cardSpecPlanningCards().find(
+      (candidate) =>
+        candidate.definition.id === "onr_v1_184_top-runners-conference",
+    );
+    if (entry === undefined) throw new Error("missing_top_runners_conference");
+    const withoutRunStartTrash = deriveCardSpecAiHint({
+      ...entry,
+      planning: {
+        ...entry.planning,
+        planningAnnotations: undefined,
+        engine: {
+          ...entry.planning.engine,
+          lifecycle: {
+            ...entry.planning.engine.lifecycle,
+            on_runner_run_start: undefined,
+          },
+        },
+      },
+    } as never);
+    expect(withoutRunStartTrash.effects ?? []).not.toContainEqual(
+      expect.objectContaining({ target: "risk.ends_on_run" }),
+    );
+  });
+
+  it("projects an exact installed-program access ambush without text inference", () => {
+    const experimental = actualHint("onr_v1_323_experimental-ai");
+
+    expect(experimental.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "ambush",
+          scope: "accessed_card",
+          timing: "on_access",
+        }),
+        expect.objectContaining({
+          kind: "program_trash",
+          scope: "installed_program",
+          timing: "on_access",
+          amountKind: "dynamic",
+        }),
+      ]),
+    );
+
+    const entry = cardSpecPlanningCards().find(
+      (candidate) => candidate.definition.id === "onr_v1_323_experimental-ai",
+    );
+    if (entry === undefined) throw new Error("missing_experimental_ai");
+    const withoutAccessEffect = deriveCardSpecAiHint({
+      ...entry,
+      planning: {
+        ...entry.planning,
+        planningAnnotations: undefined,
+        engine: { ...entry.planning.engine, accessEffects: undefined },
+      },
+    } as never);
+    expect(withoutAccessEffect.effects ?? []).not.toContainEqual(
+      expect.objectContaining({ kind: "program_trash", timing: "on_access" }),
+    );
+  });
+
+  it("binds Blood Cat trace and tag semantics to its exact capability", () => {
+    const entry = cardSpecPlanningCards().find(
+      (candidate) => candidate.definition.id === "onr_v1_310_blood-cat",
+    );
+    if (entry === undefined) throw new Error("missing_blood_cat_test_card");
+
+    const hint = deriveCardSpecAiHint(entry);
+
+    expect(hint.actionCapabilitySemantics).toEqual([
+      expect.objectContaining({
+        capabilityKey: "abilities_activated_corp_main_trace",
+        effects: expect.arrayContaining([
+          expect.objectContaining({
+            kind: "trace",
+            scope: "trace",
+            timing: "action",
+          }),
+          expect.objectContaining({
+            kind: "tag_source",
+            scope: "runner",
+            timing: "action",
+            amount: 1,
+          }),
+        ]),
+        functionSignals: expect.arrayContaining(["tag.source", "trace.source"]),
+        strategySupportPairs: expect.arrayContaining([
+          expect.objectContaining({
+            strategyId: "corp.tag_trace_punish",
+            evidence: ["tactic_signal_anchor:tag.source"],
+          }),
+          expect.objectContaining({
+            strategyId: "corp.tag_trace_punish",
+            evidence: ["tactic_signal_anchor:trace.source"],
+          }),
+        ]),
+      }),
+    ]);
+
+    const traceWithoutOutcome = syntheticHint(
+      {
+        abilities: [
+          activated([{ kind: "trace", traceLimit: 5, onSuccess: [] }]),
+        ],
+      },
+      { side: "corp", type: "asset" },
+    );
+    expect(traceWithoutOutcome.actionCapabilitySemantics?.[0]?.effects).toEqual(
+      [expect.objectContaining({ kind: "trace" })],
+    );
+    expect(
+      traceWithoutOutcome.actionCapabilitySemantics?.[0]?.functionSignals,
+    ).not.toContain("tag.source");
+  });
+
   it("projects a typed delayed-install countdown without widening nearby cards", () => {
     const shell = actualHint("onr_v1_176_the-shell-traders");
     expect(shell.roles).toContain("delayed_install");

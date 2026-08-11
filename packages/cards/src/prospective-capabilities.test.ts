@@ -181,6 +181,16 @@ describe("compileProspectiveCapabilities", () => {
         ],
       },
     ];
+    broker.text.capabilityText = [
+      {
+        capabilityKey: capabilityKey("store_credits"),
+        actionLabel: "Store credits",
+      },
+      {
+        capabilityKey: capabilityKey("withdraw_credits"),
+        actionLabel: "Withdraw credits",
+      },
+    ];
 
     const store = byKey(broker, "store_credits");
     const withdraw = byKey(broker, "withdraw_credits");
@@ -906,6 +916,12 @@ describe("compileProspectiveCapabilities", () => {
         timing: "runner_main",
         costs: [],
         effects: [],
+      },
+    ];
+    annotated.text.capabilityText = [
+      {
+        capabilityKey: capabilityKey("gain"),
+        actionLabel: "Gain",
       },
     ];
     annotated.planningAnnotations = {

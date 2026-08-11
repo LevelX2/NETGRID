@@ -4783,4 +4783,37 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       /Simple Agenda|Genetics-Visionary Acquisition|privatePayload|cardInstances/,
     );
   });
+
+  it("does not offer Vapor Ops advancement movement without a distinct legal target", () => {
+    let state = apply(
+      MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-vapor-ops-no-move-target"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 50;
+    state.corp.clicks = 50;
+
+    const vaporId = putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    state.cardInstances[vaporId] = {
+      ...state.cardInstances[vaporId]!,
+      advancementCounters: 3,
+    };
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_card" &&
+        String(action.payload?.cardId) === vaporId,
+    );
+
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === vaporId &&
+          action.payload?.cardImplementationAbilityLabel ===
+            "Vapor Ops: Advancement-Counter bewegen",
+      ),
+    ).toBe(false);
+  });
 });

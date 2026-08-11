@@ -159,6 +159,30 @@ describe("corp economy domain signals", () => {
     });
   });
 
+  it("does not develop generic liquidity while HQ overflow requires cleanup", () => {
+    const input = decisionInput({
+      credits: 2,
+      clicks: 2,
+      handSize: 6,
+      maximumHandSize: 5,
+      extraLegalActions: [
+        {
+          actionId: "expensive-route",
+          costs: [{ clicks: 1, credits: 8 }],
+        },
+      ],
+    });
+
+    expect(
+      corpTurnLiquidityDevelopmentNeed(
+        input,
+        [basicCreditCandidate()],
+        undefined,
+        "corp:23",
+      ),
+    ).toBeUndefined();
+  });
+
   it("extends a completed resident target only across the finite remaining clicks", () => {
     const input = decisionInput({ credits: 8, clicks: 2 });
     const previous = {
@@ -235,6 +259,8 @@ describe("corp economy domain signals", () => {
 function decisionInput(params?: {
   credits?: number;
   clicks?: number;
+  handSize?: number;
+  maximumHandSize?: number;
   extraLegalActions?: unknown[];
 }): AiDecisionInput {
   return {
@@ -259,7 +285,10 @@ function decisionInput(params?: {
       own: {
         credits: params?.credits ?? 0,
         clicks: params?.clicks ?? 1,
-        gripOrHq: [],
+        gripOrHq: Array.from({ length: params?.handSize ?? 0 }, (_, index) => ({
+          instanceId: `corp-card-${index}`,
+        })),
+        maxHandSize: params?.maximumHandSize ?? 5,
       },
       servers: [],
     },

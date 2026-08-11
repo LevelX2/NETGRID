@@ -1,5 +1,14 @@
-import type { GameState, LegalAction } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardInstanceId,
+  GameState,
+  LegalAction,
+} from "@netgrid/shared";
 import { deterministicOnPlayResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
+import {
+  onPlayAbilityBindingForDefinition,
+  onPlayAbilityBindingPayload,
+} from "../../ability-engine/card-capability-binding";
 import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
 import {
   fixedPlayCostCredits,
@@ -108,6 +117,26 @@ export type CorpMainActionGenerationHost = {
     COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
   };
 };
+
+function corpOperationCapabilityBinding(
+  definition: CardDefinition,
+  sourceCardInstanceId: CardInstanceId,
+):
+  | {
+      abilityRef: NonNullable<LegalAction["abilityRef"]>;
+      payload: Record<string, string | number | boolean>;
+    }
+  | undefined {
+  const binding = onPlayAbilityBindingForDefinition(definition);
+  if (!binding) return undefined;
+  return {
+    abilityRef: {
+      sourceCardInstanceId,
+      sourceAbilityId: binding.sourceAbilityId,
+    },
+    payload: onPlayAbilityBindingPayload(binding),
+  };
+}
 
 export function buildCorpMainActions(
   host: CorpMainActionGenerationHost,
@@ -465,6 +494,10 @@ export function buildCorpMainActions(
         actions.push(...implementationActions);
         continue;
       }
+      const operationCapabilityBinding = corpOperationCapabilityBinding(
+        definition,
+        id,
+      );
       actions.push(
         action(
           state,
@@ -476,7 +509,11 @@ export function buildCorpMainActions(
           {
             cardId: id,
             ...deterministicOnPlayResourcePayload(definition, "corp"),
+            ...operationCapabilityBinding?.payload,
           },
+          operationCapabilityBinding
+            ? { abilityRef: operationCapabilityBinding.abilityRef }
+            : undefined,
         ),
       );
     }

@@ -456,7 +456,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     );
   });
 
-  it("still fails hard when a resident Ambush appears in a different active remote", () => {
+  it("retires a resident Ambush commitment when another owner installs it in a different remote", () => {
     resetResidentPlanPortfolioMemory();
     const trap = vacantSoulkiller();
     const installProtected = installAmbush(
@@ -481,6 +481,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
 
     input.playerView.stateVersion = 2;
     input.actionNumber = 2;
+    input.playerView.own.credits = 0;
     input.playerView.own.gripOrHq = [];
     input.playerView.servers = [
       server("hq"),
@@ -489,20 +490,22 @@ describe("plan-first Corp ambush preplanning contract", () => {
       server("remote_1", [], []),
       server("remote_2", [], [trap]),
     ];
-    input.legalActions = [{ ...gain, expiresAtStateVersion: 3 }];
+    input.legalActions = [
+      { ...gain, expiresAtStateVersion: 2 },
+      { ...endTurn(), expiresAtStateVersion: 2 },
+    ];
     input.playerView.legalActions = input.legalActions;
 
-    try {
-      liveContext().chooseSemanticRuntimeAction(input, {});
-      expect.unreachable("Expected invalid active Ambush movement to fail.");
-    } catch (error) {
-      expect(error).toBeInstanceOf(PlanResolutionFailure);
-      expect((error as PlanResolutionFailure).context).toMatchObject({
-        owner: "plan_module",
-        removalCondition:
-          "Resident ambush vacant-soulkiller moved away from its committed server remote_1.",
-      });
-    }
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: gain.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) => instance.moduleId === "corp.ambush_and_bluff",
+      ),
+    ).toBe(false);
   });
 
   it("resolves a sole mandatory draw before revalidating a stale resident Ambush plan", () => {

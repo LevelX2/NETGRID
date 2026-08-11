@@ -15,7 +15,6 @@ import {
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { buildRunnerHiddenStackProgramInstallAction } from "../turn/runner-special-zone-install-actions";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -130,7 +129,6 @@ export function buildRunnerEncounterActions(
   const encounteredIceStrength = host.ice.strengthForIce(encounteredIceId);
   const actions: LegalAction[] = [];
   actions.push(...host.run.runnerDuringRunCardImplementationLegalActions());
-  actions.push(...paidStackProgramInstallEncounterActions(host));
   for (const breakerId of host.state.runner.rig.programs) {
     const breaker = host.cards.definitionFor(breakerId);
     if (run.prohibitNoisyIcebreakers && breaker.subtypes.includes("noisy"))
@@ -283,11 +281,7 @@ export function buildRunnerEncounterActions(
               iceId: encounteredIceId,
               ...icebreakerAbilityBindingPayload(pump, breakerId),
             },
-            host.actions.abilityMetadata(
-              breakerId,
-              pump.id,
-              encounteredIceId,
-            ),
+            host.actions.abilityMetadata(breakerId, pump.id, encounteredIceId),
           ),
         );
       }
@@ -637,32 +631,6 @@ export function buildRunnerMovementActions(
     ),
   );
   return { handled: true, legalActions: actions };
-}
-
-function paidStackProgramInstallEncounterActions(
-  host: RunnerEncounterActionHost,
-): LegalAction[] {
-  const state = host.state;
-  if (
-    state.timingPoint !== "run.encounter_ice" ||
-    state.activeSide !== "runner" ||
-    !state.run?.encounteredIceId ||
-    !state.runner.stack.some(
-      (cardId) => host.cards.definitionFor(cardId).type === "program",
-    )
-  )
-    return [];
-  return state.runner.rig.programs
-    .slice()
-    .sort()
-    .filter((cardId) =>
-      cardImplementationForDefinitionId(
-        host.cards.definitionFor(cardId).id,
-      )?.abilities?.some((ability) =>
-        ability.effects?.some((effect) => effect.kind === "search_stack_install"),
-      ),
-    )
-    .map((cardId) => buildRunnerHiddenStackProgramInstallAction(state, cardId));
 }
 
 function multiBreakSubroutineActions(

@@ -131,6 +131,8 @@ export function createGameCardImplementationRuntimeDeps(
       state.corpTurnFlags?.scoredBlackOpsAgendaLastTurn === true,
     installedAdvanceableCorpCardTargetCount:
       host.callbacks.installedAdvanceableCorpCardTargetCount,
+    moveAdvancementCounterOptionCount:
+      host.callbacks.moveAdvancementCounterOptionCount,
     startCorpDiscardHqWithRetainPayment:
       host.hiddenZone.startCorpDiscardHqWithRetainPayment,
     shuffleSourceIntoCorpRd: host.callbacks.shuffleSourceIntoCorpRd,

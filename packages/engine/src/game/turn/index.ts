@@ -52,11 +52,8 @@ export {
   buildRunnerHostedProgramInstallAction,
   type RunnerInstallToHostActionInput,
 } from "./runner-hosted-install-actions";
+export { buildRunnerProgramTrashBeforeInstallAction } from "./runner-program-trash-install-actions";
 export {
-  buildRunnerProgramTrashBeforeInstallAction,
-} from "./runner-program-trash-install-actions";
-export {
-  buildRunnerHiddenStackProgramInstallAction,
   buildRunnerDelayedInstallRemoveCounterAction,
   buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,

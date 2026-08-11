@@ -251,6 +251,19 @@ export function pushActivatedCardImplementationActionsForTiming(
       deps.installedAdvanceableCorpCardTargetCount(state) === 0
     )
       continue;
+    const moveAdvancementEffect = ability.effects.find(
+      (effect) => effect.kind === "move_advancement_counters",
+    );
+    if (
+      moveAdvancementEffect?.kind === "move_advancement_counters" &&
+      deps.moveAdvancementCounterOptionCount(
+        state,
+        sourceCardId,
+        moveAdvancementEffect.source,
+        moveAdvancementEffect.maxAmount,
+      ) === 0
+    )
+      continue;
     const transferEffect = transferHostedCreditsEffect(ability);
     if (transferEffect) {
       const maximum = transferHostedCreditsMaximum(

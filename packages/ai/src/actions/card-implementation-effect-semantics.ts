@@ -7,6 +7,44 @@ export function applyCardImplementationEffectSemantics(
 ): ActionSemanticCandidate {
   if (
     action.side === "runner" &&
+    action.type === "play_event" &&
+    action.payload?.cardImplementationEffectKind ===
+      "secret_spend_guess_then_targeted_bypass_run"
+  ) {
+    const projectionIssues = new Set(candidate.projectionIssues);
+    projectionIssues.delete("ability_unresolved");
+    return {
+      ...candidate,
+      functionalEffects: [
+        ...new Map(
+          [
+            ...(candidate.functionalEffects ?? []),
+            {
+              kind: "future_run_effect" as const,
+              timing: "action" as const,
+              scope: "server" as const,
+              target: "make_run",
+            },
+            {
+              kind: "future_encounter_effect" as const,
+              timing: "during_run" as const,
+              scope: "ice" as const,
+              target: "bypass_chosen_ice",
+            },
+          ].map((effect) => [JSON.stringify(effect), effect]),
+        ).values(),
+      ],
+      primaryProjectionStatus: "projected",
+      confidence: "high",
+      projectionIssues: [...projectionIssues],
+      evidence: [
+        ...candidate.evidence,
+        "CardImplementation capability projects the targeted bypass run sequence",
+      ],
+    };
+  }
+  if (
+    action.side === "runner" &&
     action.type === "trigger_ability" &&
     action.payload?.runnerAbility === "decline_optional_bonus_run"
   ) {
@@ -58,10 +96,7 @@ export function applyCardImplementationEffectSemantics(
   }
   const effectKind = action.payload?.cardImplementationEffectKind;
   const searchFilter = action.payload?.cardImplementationSearchFilter;
-  if (
-    effectKind !== "search_stack_to_grip" ||
-    searchFilter !== "program"
-  ) {
+  if (effectKind !== "search_stack_to_grip" || searchFilter !== "program") {
     return candidate;
   }
   const projectionIssues = new Set(candidate.projectionIssues);
@@ -74,10 +109,7 @@ export function applyCardImplementationEffectSemantics(
       ...new Set([...candidate.actionTacticSignals, "setup.search"]),
     ],
     effectTargets: [
-      ...new Set([
-        ...(candidate.effectTargets ?? []),
-        "setup.program_search",
-      ]),
+      ...new Set([...(candidate.effectTargets ?? []), "setup.program_search"]),
     ],
     primaryProjectionStatus: "projected",
     confidence: "high",

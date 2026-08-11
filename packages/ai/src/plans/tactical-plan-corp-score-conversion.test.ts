@@ -56,6 +56,39 @@ describe("Corp same-turn score conversion", () => {
     ]);
   });
 
+  it("does not treat a visible agenda in Archives as an installed score target", () => {
+    const archivedAgenda = card("archived-agenda", "agenda", {
+      advancementRequirement: 3,
+      advancementCounters: 0,
+    });
+    const vapor = card("vapor", "asset", {
+      advancementCounters: 3,
+      rezzed: true,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 0,
+      hq: [],
+      root: [vapor],
+      actions: [
+        action("transfer", "activated_card_ability", vapor.instanceId, {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: "all",
+          scoreConversionSourceMode: "source_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+    const archives = input.playerView.servers.find(
+      (server) => server.id === "archives",
+    );
+    if (!archives) throw new Error("Archives server is missing from fixture.");
+    archives.root = [archivedAgenda];
+
+    expect(corpSameTurnScoreConversionPaths(input)).toEqual([]);
+  });
+
   it("rejects a same-root install that destroys its reserved counter source", () => {
     const agenda = card("agenda", "agenda", {
       advancementRequirement: 3,

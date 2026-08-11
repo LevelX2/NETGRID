@@ -5,8 +5,34 @@ import fundedRdLayerJson from "../../../../data/scenarios/ai-decision-checkpoint
 import type { AiDecisionCheckpointV1 } from "../evaluation/decision-checkpoints/checkpoint-types";
 import { runAiDecisionCheckpoint } from "../evaluation/decision-checkpoints/checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "./resident-plan-portfolio-memory";
+import { specializedPlanningLineMatchesRoute } from "./corp-turn-planner-shadow";
 
 describe("Corp TurnPlanner selected-head binding", () => {
+  it("does not let a sibling specialized line suppress an exact funding provider that shares its action", () => {
+    const shared = {
+      routeActionId: "play-accounts",
+      routeModuleId: "corp.economy" as const,
+      routePlanInstanceId: "plan:corp.economy:defense-reserve%3Ard%3Aice-1",
+      routeDedupeKey: "defense-reserve:rd:ice-1",
+      lineActionId: "play-accounts",
+      lineOwnerModuleId: "corp.economy" as const,
+    };
+
+    expect(
+      specializedPlanningLineMatchesRoute({
+        ...shared,
+        linePlanInstanceId:
+          "plan:corp.economy:defense-reserve%3Aremote_1%3Aice-1",
+      }),
+    ).toBe(false);
+    expect(
+      specializedPlanningLineMatchesRoute({
+        ...shared,
+        linePlanInstanceId: shared.routePlanInstanceId,
+      }),
+    ).toBe(true);
+  });
+
   it("keeps the defense module's selected current head bound through commitment and lease", () => {
     const checkpoint = structuredClone(
       fundedRdLayerJson,

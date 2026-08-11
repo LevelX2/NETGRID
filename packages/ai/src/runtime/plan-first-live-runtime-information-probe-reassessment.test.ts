@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { LegalActionPayload, VisibleCard } from "@netgrid/shared";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
@@ -48,12 +49,12 @@ describe("plan-first information-probe reassessment", () => {
     const startInput = aiInput("runner", [startRun]);
     startInput.playerView.own.credits = 10;
     startInput.playerView.own.clicks = 3;
-    const unknownRemoteRoot = {
-      ...visibleCard("remote-root", "corp", "asset"),
+    const unknownRemoteRoot: VisibleCard = {
+      instanceId: "remote-root",
+      owner: "corp",
+      controller: "corp",
       known: false,
-      definitionId: undefined,
       title: "Unknown remote card",
-      type: undefined,
     };
     startInput.playerView.servers = [
       server("hq"),
@@ -428,7 +429,7 @@ function encounterAction(
   actionId: string,
   type: "pump_breaker" | "break_subroutine" | "continue_run",
   credits: number,
-  payload: Record<string, unknown>,
+  payload: LegalActionPayload,
 ) {
   const action = legalAction(
     actionId,

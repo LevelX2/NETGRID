@@ -997,6 +997,205 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("continues a previously admitted probabilistic breaker route to the visible ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const continueRun = legalAction(
+      "continue-rd-random-break",
+      "runner",
+      "continue_run",
+      "Continue R&D run",
+      { credits: 0, clicks: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const jackOut = legalAction(
+      "jack-out-rd-random-break",
+      "runner",
+      "jack_out",
+      "Jack out",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [continueRun, jackOut]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.own.credits = 4;
+    input.playerView.own.rig = [
+      visibleCard("blink-installed", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+      }),
+    ];
+    input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
+      visibleCard(`random-break-buffer-${index}`, "runner", "event"),
+    );
+    input.playerView.run = {
+      runId: "random-break-rd",
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        quotedFixtureIce({
+          instanceId: "rd-visible-code-gate",
+          definitionId: "onr_v1_239_datapike",
+          title: "Datapike",
+          strength: 4,
+          subtypes: ["code_gate"],
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: continueRun.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).not.toContain(
+      "runner_current_run_remaining_path_unreachable:rd",
+    );
+  });
+
+  it("jacks out of a probabilistic breaker route when its damage buffer is no longer safe", () => {
+    resetResidentPlanPortfolioMemory();
+    const continueRun = legalAction(
+      "continue-rd-unsafe-random-break",
+      "runner",
+      "continue_run",
+      "Continue R&D run",
+      { credits: 0, clicks: 0 },
+      { payload: { serverId: "rd" } },
+    );
+    const jackOut = legalAction(
+      "jack-out-rd-unsafe-random-break",
+      "runner",
+      "jack_out",
+      "Jack out",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [continueRun, jackOut]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.own.credits = 4;
+    input.playerView.own.rig = [
+      visibleCard("blink-installed", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("insufficient-random-break-buffer", "runner", "event"),
+    ];
+    input.playerView.run = {
+      runId: "unsafe-random-break-rd",
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        quotedFixtureIce({
+          instanceId: "rd-visible-code-gate",
+          definitionId: "onr_v1_239_datapike",
+          title: "Datapike",
+          strength: 4,
+          subtypes: ["code_gate"],
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: jackOut.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+  });
+
+  it("uses the probabilistic breaker when its successful break preserves a conditional future path", () => {
+    resetResidentPlanPortfolioMemory();
+    const breakCurrentEtr = legalAction(
+      "blink-break-current-etr",
+      "runner",
+      "break_subroutine",
+      "Blink: break current end-the-run subroutine",
+      { credits: 0, clicks: 0 },
+      {
+        source: "blink-installed",
+        payload: {
+          iceId: "outer-code-gate",
+          subroutineIndex: 0,
+        },
+      },
+    );
+    const resolveCurrentIce = legalAction(
+      "resolve-current-etr",
+      "runner",
+      "continue_run",
+      "Resolve current ICE",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        },
+      },
+    );
+    const input = aiInput("runner", [resolveCurrentIce, breakCurrentEtr]);
+    breakCurrentEtr.timingPoint = "run.encounter_ice";
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 4;
+    input.playerView.own.rig = [
+      visibleCard("blink-installed", "runner", "program", {
+        definitionId: "onr_v1_007_blink",
+      }),
+    ];
+    input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, index) =>
+      visibleCard(`conditional-path-buffer-${index}`, "runner", "event"),
+    );
+    const innerIce = quotedFixtureIce({
+      instanceId: "inner-code-gate",
+      definitionId: "onr_v1_239_datapike",
+      title: "Datapike",
+      strength: 4,
+      subtypes: ["code_gate"],
+    });
+    const outerIce = quotedFixtureIce({
+      instanceId: "outer-code-gate",
+      definitionId: "onr_v1_270_sleeper",
+      title: "Sleeper",
+      strength: 4,
+      subtypes: ["code_gate"],
+    });
+    input.playerView.run = {
+      runId: "conditional-random-break-rd",
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 1 },
+      encounteredIce: outerIce,
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [innerIce, outerIce]),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: breakCurrentEtr.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect((decision.evidence ?? []).join(" ")).not.toContain(
+      "break_cannot_preserve_access_path",
+    );
+  });
+
   it("keeps Strategic Planning Group selection inside the exact Corp hand-plan route", () => {
     resetResidentPlanPortfolioMemory();
     const choiceId = "spg-draw-choice";
@@ -1920,6 +2119,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
+          sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "store_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -1935,6 +2139,12 @@ describe("authoritative plan-first live runtime", () => {
         source: "broker-card",
         payload: {
           cardId: "broker-card",
+          sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "withdraw_credits",
+          cardImplementationAbilityId:
+            "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           gainCreditsAmount: 3,
@@ -2023,6 +2233,10 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-2",
           sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "store_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -2113,6 +2327,10 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "store_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -2129,6 +2347,11 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "withdraw_credits",
+          cardImplementationAbilityId:
+            "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           gainCreditsAmount: 3,
@@ -2271,6 +2494,11 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "withdraw_credits",
+          cardImplementationAbilityId:
+            "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           hostedCreditTakeMode: "all",
@@ -2382,6 +2610,10 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "store_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
           hostedCreditAddAmount: 3,
         },
@@ -2398,6 +2630,11 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: "withdraw_credits",
+          cardImplementationAbilityId:
+            "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           hostedCreditTakeMode: "all",
@@ -10767,6 +11004,72 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
 
+    const noAccess = structuredClone(input);
+    noAccess.playerView.stateVersion = 22;
+    noAccess.eventTail = [
+      {
+        eventId: "hq-run-start-no-access",
+        type: "start_run",
+        stateVersionBefore: 20,
+        stateVersionAfter: 21,
+        turnSerial: 9,
+        stateHashAfter: "fnv1a:hq-run-start-no-access",
+        visibilityClass: "public",
+        publicPayload: {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "hq",
+        },
+      },
+      {
+        eventId: "hq-run-jack-out",
+        type: "jack_out",
+        stateVersionBefore: 21,
+        stateVersionAfter: 22,
+        turnSerial: 9,
+        stateHashAfter: "fnv1a:hq-run-jack-out",
+        visibilityClass: "public",
+        publicPayload: { actor: "runner", actionType: "jack_out" },
+      },
+    ];
+    resetResidentPlanPortfolioMemory();
+    const noAccessDecision = context.chooseSemanticRuntimeAction(noAccess, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
+    expect(noAccessDecision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(noAccessDecision.evidence).toContain(
+      "plan_portfolio_blocked_evidence:plan:runner.pressure_central:central%3Ahq:runner_same_server_no_access_attempt_requires_progress:hq:9",
+    );
+
+    const developedAfterNoAccess = structuredClone(noAccess);
+    developedAfterNoAccess.playerView.stateVersion = 23;
+    developedAfterNoAccess.playerView.own.clicks = 2;
+    developedAfterNoAccess.playerView.own.credits = 6;
+    developedAfterNoAccess.eventTail.push({
+      eventId: "hq-run-development-credit",
+      type: "gain_credit",
+      stateVersionBefore: 22,
+      stateVersionAfter: 23,
+      turnSerial: 9,
+      stateHashAfter: "fnv1a:hq-run-development-credit",
+      visibilityClass: "public",
+      publicPayload: { actor: "runner", actionType: "gain_credit" },
+    });
+    resetResidentPlanPortfolioMemory();
+    expect(
+      context.chooseSemanticRuntimeAction(developedAfterNoAccess, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: runHq.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
+
     const accessed = structuredClone(input);
     accessed.playerView.stateVersion = 22;
     accessed.eventTail = [
@@ -10876,7 +11179,7 @@ describe("authoritative plan-first live runtime", () => {
         fallbackUsed: false,
       });
       expect(decision.evidence, malformed.label).toContain(
-        "plan_portfolio_blocked_evidence:plan:runner.pressure_central:central%3Ahq:runner_central_pressure_cadence_event_turn_invalid:hq:hq-run-start",
+        "plan_portfolio_blocked_evidence:plan:runner.pressure_central:central%3Ahq:runner_run_attempt_cadence_event_turn_invalid:hq:hq-run-start",
       );
     }
 
@@ -11708,6 +12011,98 @@ describe("authoritative plan-first live runtime", () => {
       actionId: "credit",
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
+    });
+  });
+
+  it("does not repeat an unchanged no-access Remote run in the same turn", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-remote",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    input.playerView.stateVersion = 22;
+    input.playerView.turnSerial = 9;
+    run.expiresAtStateVersion = 22;
+    credit.expiresAtStateVersion = 22;
+    input.playerView.own.credits = 5;
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("remote-agenda", "corp", "agenda", {
+            definitionId: "onr_v1_203_hostile-takeover",
+            advancementCounters: 1,
+          }),
+        ],
+      ),
+    ];
+    input.eventTail = [
+      {
+        eventId: "remote-run-start-no-access",
+        type: "start_run",
+        stateVersionBefore: 20,
+        stateVersionAfter: 21,
+        turnSerial: 9,
+        stateHashAfter: "fnv1a:remote-run-start-no-access",
+        visibilityClass: "public",
+        publicPayload: {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        },
+      },
+      {
+        eventId: "remote-run-jack-out",
+        type: "jack_out",
+        stateVersionBefore: 21,
+        stateVersionAfter: 22,
+        turnSerial: 9,
+        stateHashAfter: "fnv1a:remote-run-jack-out",
+        visibilityClass: "public",
+        publicPayload: { actor: "runner", actionType: "jack_out" },
+      },
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      scoreThreat: true,
+      score: 400,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {
+      runnerTurnPlannerMode: "legacy_compare",
+    });
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          turnPlanning: {
+            coverage: {
+              status: "pass",
+              coveragePercent: 100,
+            },
+          },
+        },
+      },
     });
   });
 

@@ -427,11 +427,10 @@ function continuedAmbushSignals(params: {
       signal.serverId !== "new_remote" &&
       signal.serverId !== location.serverId
     ) {
-      throw ambushContractFailure(
-        params.input,
-        [],
-        `Resident ambush ${signal.sourceInstanceId} moved away from its committed server ${signal.serverId}.`,
-      );
+      // Another exact owner may legally install the same visible card on a
+      // different server. The old ambush commitment no longer owns that
+      // location and must retire; a fresh proposal may assess the new board.
+      return [];
     }
     // Rezzing a score decoy publicly ends its bluff purpose. In particular,
     // the score plan may have rezzed a counter bank for a one-time emergency
@@ -536,7 +535,7 @@ function ambushVisibleConditionsSatisfied(
     hint.effects?.some(
       (effect) =>
         effect.kind === "program_trash" &&
-        effect.scope === "runner" &&
+        effect.scope === "installed_program" &&
         effect.timing === "on_access",
     ) &&
     !(input.playerView.opponent.rig ?? []).some(

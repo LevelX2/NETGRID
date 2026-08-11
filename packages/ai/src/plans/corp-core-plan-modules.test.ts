@@ -1121,10 +1121,16 @@ describe("Corp core plan modules", () => {
       module.discover(corpContext)[0]!,
       10,
     );
+    const planAssessment = requireValidatedPlanAssessment(
+      module.assess(instance, corpContext, emptyPortfolio()),
+      CORP_PLAN_PRIORITY_POLICY,
+      10,
+    );
 
+    expect(planAssessment.readiness).toBe("executable_now");
     expect(
       module
-        .materialize(instance, {} as never, corpContext)
+        .materialize(instance, planAssessment, corpContext)
         .candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["install-staged-rd"]);
   });
@@ -1191,7 +1197,13 @@ describe("Corp core plan modules", () => {
       module
         .materialize(instance, planAssessment, corpContext)
         .candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual(["install-after-funding"]);
+    ).toEqual([]);
+    expect(
+      corpDefenseActionDispositions(corpContext, [defense]),
+    ).toContainEqual({
+      actionId: install.actionId,
+      evidenceCode: `corp_defense_exact_route_requires_parent_funding:rd:${defense.defenseId}`,
+    });
   });
 
   it("uses an executable productive defense install instead of a funding-only staging route", () => {

@@ -16,6 +16,7 @@ import type {
   AiHintStructuredEffect,
   KnownHintBreakerCoverage,
 } from "./hint-ontology";
+import type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts";
 import { runnerEffectsProvideMultiaccess } from "./runner-canonical-hint-semantics";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
@@ -200,6 +201,7 @@ type CardCapabilityRecord = {
   roles: string[];
   planRoles: string[];
   effects: AiHintStructuredEffect[];
+  actionPlanOwnerBindings: AiHintActionPlanOwnerBinding[];
   quantityKnownInDeck: number;
   locations: CapabilityCardStatus[];
   visibleCards: VisibleCard[];
@@ -431,6 +433,7 @@ function recordFromDefinition(
     roles: [...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
     effects: [...(hint?.effects ?? [])],
+    actionPlanOwnerBindings: [...(hint?.actionPlanOwnerBindings ?? [])],
     quantityKnownInDeck: Math.max(0, quantityKnownInDeck),
     locations: quantityKnownInDeck > 0 ? ["in_deck"] : [],
     visibleCards: [],
@@ -458,6 +461,7 @@ function recordFromVisibleCard(
     roles: [...(hint?.roles ?? [])],
     planRoles: [...(hint?.planRoles ?? [])],
     effects: [...(hint?.effects ?? [])],
+    actionPlanOwnerBindings: [...(hint?.actionPlanOwnerBindings ?? [])],
     quantityKnownInDeck: 0,
     locations: [],
     visibleCards: [card],
@@ -854,7 +858,12 @@ function economyBankToolsForRecord(
   const signals = [...record.roles, ...record.planRoles]
     .join(" ")
     .toLowerCase();
-  if (!deckCapabilityTextHasBankToolSignal(`${text} ${signals}`)) {
+  const canonicalRunnerBank = recordHasCanonicalRunnerCreditBank(record);
+  if (
+    record.side === "runner"
+      ? !canonicalRunnerBank
+      : !deckCapabilityTextHasBankToolSignal(`${text} ${signals}`)
+  ) {
     return [];
   }
   const visibleInstances = visibleCardRecords(
@@ -884,6 +893,7 @@ function economyBankToolForRecord(
   const signals = [...record.roles, ...record.planRoles]
     .join(" ")
     .toLowerCase();
+  const canonicalRunnerBank = recordHasCanonicalRunnerCreditBank(record);
   const buildActionIds = (params.legalActions ?? [])
     .filter((action) =>
       actionMatchesBankBuild(action, record, visibleInstance?.card),
@@ -908,6 +918,7 @@ function economyBankToolForRecord(
       ? currentBankAmounts.reduce((sum, amount) => sum + amount, 0)
       : undefined;
   const structuredBank =
+    canonicalRunnerBank ||
     deckCapabilityTextHasStructuredBankRoleSignal(signals) ||
     currentBankAmount !== undefined;
   return {
@@ -928,11 +939,11 @@ function economyBankToolForRecord(
     ...(cashOutActionLegal && currentBankAmount !== undefined
       ? { estimatedPayout: currentBankAmount }
       : {}),
-    confidence: deckCapabilityTextHasHighConfidenceBankSignal(
-      `${text} ${signals}`,
-    )
-      ? "high"
-      : "medium",
+    confidence:
+      canonicalRunnerBank ||
+      deckCapabilityTextHasHighConfidenceBankSignal(`${text} ${signals}`)
+        ? "high"
+        : "medium",
     evidence: [
       ...capabilitySourceEvidence({
         structured: structuredBank,
@@ -948,6 +959,22 @@ function economyBankToolForRecord(
         : "bank_cashout_legal:false",
     ],
   };
+}
+
+function recordHasCanonicalRunnerCreditBank(
+  record: CardCapabilityRecord,
+): boolean {
+  return (
+    record.side === "runner" &&
+    record.actionPlanOwnerBindings.some(
+      (binding) =>
+        binding.owner === "runner.credit_bank" && binding.route === "build",
+    ) &&
+    record.actionPlanOwnerBindings.some(
+      (binding) =>
+        binding.owner === "runner.credit_bank" && binding.route === "cash_out",
+    )
+  );
 }
 
 function recordHasRunOnlyEconomyPool(record: CardCapabilityRecord): boolean {
@@ -1014,7 +1041,7 @@ function buildRunnerAttackPlanProfile(
           ).target;
           return (
             effect.kind === "future_run_effect" &&
-            effect.scope === "server" &&
+            effect.scope === "runner" &&
             target === "make_run"
           );
         })),

@@ -7,6 +7,7 @@ import {
   type LegalAction,
   type MultiServerSuccessSequenceState,
 } from "@netgrid/shared";
+import { canonicalCapabilityId } from "@netgrid/cards/engine";
 import {
   deterministicOnPlayResourcePayload,
   isPrintedCostOnPlayAbility,
@@ -146,6 +147,38 @@ function runnerEventClickCost(
     .cardImplementationForDefinitionId(definition.id)
     ?.abilities?.find(isPrintedCostOnPlayAbility);
   return ability ? onPlayCardImplementationClickCost(ability) : 1;
+}
+
+function runnerEventCapabilityBinding(
+  host: RunnerMainActionGenerationHost,
+  definition: CardDefinition,
+  sourceCardInstanceId: CardInstanceId,
+):
+  | {
+      abilityRef: NonNullable<LegalAction["abilityRef"]>;
+      payload: Record<string, string>;
+    }
+  | undefined {
+  const implementation =
+    host.cardImplementation.cardImplementationForDefinitionId(definition.id);
+  const ability = implementation?.abilities?.find(isPrintedCostOnPlayAbility);
+  const capability = ability ?? implementation?.hiddenReplacementLongtail;
+  if (!capability) return undefined;
+  const sourceAbilityId = canonicalCapabilityId(
+    definition.id,
+    capability.capabilityKey,
+  );
+  return {
+    abilityRef: { sourceCardInstanceId, sourceAbilityId },
+    payload: {
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey: capability.capabilityKey,
+      cardImplementationAbilityId: sourceAbilityId,
+      ...(ability === undefined
+        ? { cardImplementationEffectKind: capability.kind }
+        : {}),
+    },
+  };
 }
 
 export function buildRunnerMainActions(
@@ -688,6 +721,14 @@ export function buildRunnerMainActions(
         definition,
         "runner",
       );
+      const eventCapabilityBinding = runnerEventCapabilityBinding(
+        host,
+        definition,
+        id,
+      );
+      const eventAbilityMetadata = eventCapabilityBinding
+        ? { abilityRef: eventCapabilityBinding.abilityRef }
+        : {};
       const playEventClickCost = canPlayCardImplementation
         ? runnerEventClickCost(host, definition)
         : 1;
@@ -708,7 +749,13 @@ export function buildRunnerMainActions(
               `${definition.title}: ${targetDefinition.title} verstärken`,
               id,
               [{ clicks: 1, credits: eventPlayCost }],
-              { cardId: id, targetCardId, ...deterministicResourcePayload },
+              {
+                cardId: id,
+                targetCardId,
+                ...deterministicResourcePayload,
+                ...eventCapabilityBinding?.payload,
+              },
+              eventAbilityMetadata,
             ),
           );
         }
@@ -763,7 +810,9 @@ export function buildRunnerMainActions(
                 serverId: server.id,
                 ...deterministicResourcePayload,
                 ...resolverActionPayload,
+                ...eventCapabilityBinding?.payload,
               },
+              eventAbilityMetadata,
             ),
           );
         }
@@ -783,7 +832,9 @@ export function buildRunnerMainActions(
                 serverId: server.id,
                 runnerEventRun: true,
                 ...deterministicResourcePayload,
+                ...eventCapabilityBinding?.payload,
               },
+              eventAbilityMetadata,
             ),
           );
           continue;
@@ -803,7 +854,9 @@ export function buildRunnerMainActions(
                   serverId: server.id,
                   runnerEventRun: true,
                   ...deterministicResourcePayload,
+                  ...eventCapabilityBinding?.payload,
                 },
+                eventAbilityMetadata,
               ),
             );
           }
@@ -821,7 +874,9 @@ export function buildRunnerMainActions(
               cardId: id,
               ...deterministicResourcePayload,
               ...resolverActionPayload,
+              ...eventCapabilityBinding?.payload,
             },
+            eventAbilityMetadata,
           ),
         );
       }

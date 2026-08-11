@@ -341,7 +341,7 @@ describe("DeckCapabilityProfile", () => {
     ]);
   });
 
-  it("bounds text-only bank tool signals to exact tokens", () => {
+  it("does not create Runner credit-bank tools from card text", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
       visibleCard(
@@ -370,12 +370,10 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    expect(profile.runner?.economyBankTools.map((tool) => tool.cardId)).toEqual(
-      ["local_stored_credits_tool"],
-    );
+    expect(profile.runner?.economyBankTools).toEqual([]);
   });
 
-  it("does not mistake a bank deposit amount for a capacity limit", () => {
+  it("does not infer a Runner credit-bank contract from a deposit phrase", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
       visibleCard("capacity-1", "local_capacity_tool", "runner", "resource", {
@@ -400,12 +398,7 @@ describe("DeckCapabilityProfile", () => {
       legalActions: [],
     });
 
-    const tools = profile.runner?.economyBankTools ?? [];
-    expect(tools.map((tool) => tool.cardId)).toEqual([
-      "local_capacity_noise",
-      "local_capacity_tool",
-    ]);
-    expect(tools.every((tool) => !("maxKnownCapacity" in tool))).toBe(true);
+    expect(profile.runner?.economyBankTools).toEqual([]);
   });
 
   it("requires source evidence before marking search tools legal now", () => {

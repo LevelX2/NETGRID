@@ -1,5 +1,5 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import { type AbilityDefinition, type CardDefinitionId } from "@netgrid/shared";
+import { canonicalCapabilityId } from "@netgrid/cards/planning";
+import { type CardDefinitionId } from "@netgrid/shared";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import type {
   ActionCardAbilitySemanticProfile,
@@ -12,6 +12,7 @@ import type {
 } from "../action-semantic-candidate";
 import type {
   AiHintCondition,
+  AiHintActionCapabilitySemantics,
   AiHintActionCapacityProfile,
   AiHintEffectTargetProfile,
   AiHintStructuredEffect,
@@ -60,9 +61,9 @@ function actionCardSemanticProfileFromHint(
   hint: AiCardHint,
 ): ActionCardSemanticProfile | undefined {
   const extendedHint = hint as ExtendedAiCardHint;
-  const abilitySemantics = (
-    CARD_DEFINITIONS_BY_ID[cardId]?.abilities ?? []
-  ).map(abilitySemanticProfile);
+  const abilitySemantics = (hint.actionCapabilitySemantics ?? []).map(
+    (semantics) => abilitySemanticProfile(cardId, semantics),
+  );
   const compatibilitySignals = uniqueStrings([
     ...(extendedHint.tacticSignals ?? []),
     ...hint.roles.map((role) => `role:${role}`),
@@ -109,8 +110,16 @@ function hintEffectTarget(effect: AiHintStructuredEffect): string | undefined {
 }
 
 function strategySupportFromHint(hint: AiCardHint): StrategySupportPair[] {
+  return strategySupportFromPairs(hint.actionStrategySupportPairs ?? []);
+}
+
+function strategySupportFromPairs(
+  pairs: readonly NonNullable<
+    AiCardHint["actionStrategySupportPairs"]
+  >[number][],
+): StrategySupportPair[] {
   return uniqueStrategySupportPairs(
-    (hint.actionStrategySupportPairs ?? []).map((pair) => ({
+    pairs.map((pair) => ({
       strategyId: pair.strategyId,
       role: pair.role,
       confidence: pair.confidence,
@@ -137,19 +146,46 @@ function riskTagsFromHint(hint: AiCardHint): SemanticRisk[] {
 }
 
 function abilitySemanticProfile(
-  ability: AbilityDefinition,
+  cardId: string,
+  semantics: AiHintActionCapabilitySemantics,
 ): ActionCardAbilitySemanticProfile {
+  const mechanicalSignals = (semantics.effects ?? []).flatMap((effect) => [
+    `effect:${effect.kind}`,
+    `effect_scope:${effect.scope}`,
+    `effect_timing:${effect.timing}`,
+  ]);
   return {
-    abilityId: ability.id,
+    abilityId: canonicalCapabilityId(
+      cardId as CardDefinitionId,
+      semantics.capabilityKey as Parameters<typeof canonicalCapabilityId>[1],
+    ),
     tacticSignals: uniqueStrings([
-      `ability.type:${ability.type}`,
-      ...(ability.publicActionType
-        ? [`ability.action_type:${ability.publicActionType}`]
-        : []),
-      ...(ability.iceSubtype
-        ? [`ability.ice_subtype:${ability.iceSubtype}`]
-        : []),
+      ...(semantics.functionSignals ?? []),
+      ...mechanicalSignals,
     ]),
+    ...(semantics.effects?.length
+      ? {
+          functionalEffects: semantics.effects.map((effect) => ({
+            ...effect,
+          })),
+        }
+      : {}),
+    ...(semantics.strategySupportPairs?.length
+      ? {
+          strategySupport: strategySupportFromPairs(
+            semantics.strategySupportPairs,
+          ),
+        }
+      : {}),
+    ...(semantics.conditions?.length
+      ? { conditions: semantics.conditions.map(conditionFromHint) }
+      : {}),
+    ...(semantics.targetProfiles?.length
+      ? {
+          targetProfileMatches:
+            semantics.targetProfiles.map(targetProfileMatch),
+        }
+      : {}),
   };
 }
 

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildDeckCapabilityProfileFromInput } from "../deck-capabilities";
+import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
@@ -16,6 +17,71 @@ const BROKER = "onr_v1_154_broker";
 
 describe("runner credit-bank source-bound cadence", () => {
   beforeEach(() => resetResidentPlanPortfolioMemory());
+
+  it("keeps one credit-bank plan across install and exact post-install build rematerialization", () => {
+    const source = bank("broker-1", 0);
+    const install = legalAction(
+      "install-broker-1",
+      "runner",
+      "install_card",
+      "Install Broker",
+      { credits: 3, clicks: 1 },
+      {
+        source: source.instanceId,
+        payload: {
+          cardId: source.instanceId,
+          sourceDefinitionId: BROKER,
+        },
+      },
+    );
+    const beforeInstall = aiInput("runner", [install, basicCredit()]);
+    beforeInstall.playerView.own.credits = 3;
+    beforeInstall.playerView.own.clicks = 2;
+    beforeInstall.playerView.own.gripOrHq = [source];
+
+    const installDecision = runtimeContext().chooseSemanticRuntimeAction(
+      beforeInstall,
+      {},
+    );
+    expect(installDecision).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+    });
+
+    const afterInstall = aiInput("runner", [
+      bankBuildAction(source.instanceId),
+      basicCredit(),
+    ]);
+    afterInstall.playerView.stateVersion = 2;
+    for (const action of afterInstall.legalActions) {
+      action.expiresAtStateVersion = 2;
+    }
+    afterInstall.playerView.own.credits = 0;
+    afterInstall.playerView.own.clicks = 1;
+    afterInstall.playerView.own.rig = [source];
+    Object.assign(afterInstall, {
+      planningStateIdentity: buildPlanningStateIdentity(afterInstall),
+    });
+    const buildDecision = runtimeContext().chooseSemanticRuntimeAction(
+      afterInstall,
+      {},
+    );
+    expect(buildDecision).toMatchObject({
+      actionId: buildActionId(source.instanceId),
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.credit_bank",
+        planFirstDecision: {
+          rootPlanInstanceId:
+            installDecision.decisionDebug?.planFirstDecision
+              ?.rootPlanInstanceId,
+          route: { actionId: buildActionId(source.instanceId) },
+        },
+      },
+    });
+  });
 
   it("lets a same-counter sibling keep its own exact build route", () => {
     const decision = decide({
@@ -104,13 +170,7 @@ function decide(params: {
   event: PublicGameEvent;
 }) {
   const build = bankBuildAction("broker-2");
-  const credit = legalAction(
-    "runner.gain_credit",
-    "runner",
-    "gain_credit",
-    "Gain 1 Credit",
-    { credits: 0, clicks: 1 },
-  );
+  const credit = basicCredit();
   const input = aiInput("runner", [build, credit]);
   input.playerView.turnSerial = 1;
   input.playerView.own.credits = 5;
@@ -120,6 +180,16 @@ function decide(params: {
   input.eventTail = input.playerView.publicEvents;
 
   return runtimeContext().chooseSemanticRuntimeAction(input, {});
+}
+
+function basicCredit() {
+  return legalAction(
+    "runner.gain_credit",
+    "runner",
+    "gain_credit",
+    "Gain 1 Credit",
+    { credits: 0, clicks: 1 },
+  );
 }
 
 function runtimeContext() {
@@ -176,6 +246,9 @@ function bankBuildAction(instanceId: string) {
       payload: {
         cardId: instanceId,
         sourceDefinitionId: BROKER,
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityId: `${BROKER}:store_credits`,
+        cardImplementationAbilityKey: "store_credits",
         cardImplementationAddsHostedCredits: true,
         hostedCreditAddAmount: 3,
       },
@@ -184,7 +257,7 @@ function bankBuildAction(instanceId: string) {
 }
 
 function buildActionId(instanceId: string): string {
-  return `runner.activated_card_ability.${instanceId}.${instanceId}.activated.0`;
+  return `runner.activated_card_ability.${instanceId}.${instanceId}.activated.${BROKER}:store_credits`;
 }
 
 function bankLoadEvent(

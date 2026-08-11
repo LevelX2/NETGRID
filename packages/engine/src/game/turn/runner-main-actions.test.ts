@@ -293,15 +293,15 @@ describe("runner main action generation", () => {
         type: "event",
       } as never;
     };
-    host.cardImplementation.cardImplementationForDefinitionId = (definitionId) =>
+    host.cardImplementation.cardImplementationForDefinitionId = (
+      definitionId,
+    ) =>
       definitionId === "all_nighter"
         ? {
             abilities: [
               {
                 kind: "on_play",
-                effects: [
-                  { kind: "make_run", followupRunOnEnd: "optional" },
-                ],
+                effects: [{ kind: "make_run", followupRunOnEnd: "optional" }],
               },
             ],
           }
@@ -312,7 +312,9 @@ describe("runner main action generation", () => {
     expect(actions.every((candidate) => candidate.type !== "gain_credit")).toBe(
       true,
     );
-    expect(actions.filter((candidate) => candidate.type === "start_run")).toEqual(
+    expect(
+      actions.filter((candidate) => candidate.type === "start_run"),
+    ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           payload: expect.objectContaining({
@@ -382,6 +384,10 @@ describe("runner main action generation", () => {
     );
 
     expect(action?.costs).toEqual([{ clicks: 2, credits: 0 }]);
+    expect(action?.abilityRef).toMatchObject({
+      sourceCardInstanceId: eventCardId,
+      sourceAbilityId: expect.stringContaining("onr_classic_041_networking:"),
+    });
   });
 
   it("offers only a deterministic sequence-failure action when the next data fort cannot be run", () => {

@@ -159,21 +159,13 @@ const STRONG_GUARANTEES = new Set<GuaranteeLevel>([
 export const RUNNER_PLAN_PRIORITY_POLICY: PlanPriorityPolicy = {
   side: "runner",
   allowedP1Reasons: ["terminal_win", "prevent_terminal_loss"],
-  allowedP2Reasons: [
-    "survival_threat",
-    "score_threat",
-    "irreversible_threat",
-  ],
+  allowedP2Reasons: ["survival_threat", "score_threat", "irreversible_threat"],
 };
 
 export const CORP_PLAN_PRIORITY_POLICY: PlanPriorityPolicy = {
   side: "corp",
   allowedP1Reasons: ["terminal_win", "prevent_terminal_loss"],
-  allowedP2Reasons: [
-    "survival_threat",
-    "score_threat",
-    "irreversible_threat",
-  ],
+  allowedP2Reasons: ["survival_threat", "score_threat", "irreversible_threat"],
 };
 
 export function validatePriorityClaim(
@@ -379,8 +371,8 @@ function hasReliablePriorityIntentOverrideEvidence(
   if (priorityClass === "P1" || priorityClass === "P2") {
     return Boolean(
       assessment.priorityClaim.witness &&
-        STRONG_GUARANTEES.has(assessment.priorityClaim.witness.guarantee) &&
-        assessment.priorityClaim.witness.evidenceCode.trim().length > 0,
+      STRONG_GUARANTEES.has(assessment.priorityClaim.witness.guarantee) &&
+      assessment.priorityClaim.witness.evidenceCode.trim().length > 0,
     );
   }
   if (priorityClass === "P3") {

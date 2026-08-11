@@ -28,6 +28,7 @@ import type {
   FundingRouteStatus,
 } from "./funding-route";
 import type { ProjectedHandDisposition } from "./turn-projection";
+import type { RunnerCreditBankProspectivePlan } from "./runner-credit-bank-prospective-planning";
 
 export type RunnerFundingRouteAssessment = {
   stateVersion: number;
@@ -181,6 +182,7 @@ export type RunnerCreditBankSignal = {
   currentStoredCredits: number;
   portfolioStoredCredits: number;
   estimatedPayout: number;
+  prospectivePlan?: RunnerCreditBankProspectivePlan;
   value: number;
   evidenceCodes: string[];
 };
@@ -863,6 +865,11 @@ function creditBankModule(): PlanModule {
     materialize: (instance, _assessment, context) => {
       const signal = state<CreditBankState>(instance).signal;
       const candidates = bankCandidates(context, signal);
+      const prospectiveBuild =
+        signal.phase === "install" &&
+        signal.prospectivePlan?.build.projection === "feasible_in_projection"
+          ? signal.prospectivePlan.build
+          : undefined;
       return {
         step: {
           stepId: `${instance.instanceId}:${signal.phase}`,
@@ -885,6 +892,25 @@ function creditBankModule(): PlanModule {
                   : "Keep the credit-bank plan resident until its next admissible phase.",
         },
         candidates,
+        ...(prospectiveBuild
+          ? {
+              continuation: {
+                continuationId: `${instance.instanceId}:prospective:${prospectiveBuild.capabilityKey}`,
+                trigger: "action_applied" as const,
+                nextCapability: {
+                  capabilityId: "credit_bank_build",
+                  semanticActionTypes: ["card_ability.trigger"],
+                  legalActionTypes: ["activated_card_ability"],
+                  requiredSourceDefinitionIds: [
+                    signal.prospectivePlan!.sourceDefinitionId,
+                  ],
+                },
+                target: { kind: "bank" as const, id: signal.bankId },
+                purpose:
+                  "Rematerialize the exact current build capability after the bank installation is applied.",
+              },
+            }
+          : {}),
       };
     },
   };

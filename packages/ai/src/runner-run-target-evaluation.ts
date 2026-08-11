@@ -34,6 +34,7 @@ import {
 import { buildRunnerEconomyPosture } from "./runner-economy-posture";
 import {
   assessRandomBreakOrDamageRiskForRunAction,
+  randomBreakOrDamageRiskCanCarryRunPath,
   randomBreakOrDamageRiskScorePenalty,
   randomBreakOrDamageRiskShouldAvoidRun,
 } from "./actions/risk-action-projection";
@@ -257,9 +258,9 @@ function evaluateRunnerRunTarget(
     projection.spendLimit !== undefined &&
     (path.visibleBreakCost ?? 0) > projection.spendLimit;
   const probabilisticUniversalPathReachable = Boolean(
-    randomBreakOrDamageRiskAssessment?.pathDependsOnRandomBreakOrDamage &&
-    !randomBreakOrDamageRiskAssessment.blockedByHandBuffer &&
-    !randomBreakOrDamageRiskAssessment.breakWouldBeExcludedInEncounter,
+    randomBreakOrDamageRiskCanCarryRunPath(
+      randomBreakOrDamageRiskAssessment,
+    ),
   );
   let pathPassability = randomBreakOrDamageRiskAssessment?.blockedByHandBuffer
     ? "blocked_by_random_break_damage_hand_buffer"

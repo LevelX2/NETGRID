@@ -162,17 +162,22 @@ export function buildCorpTurnPlannerShadow(params: {
     agendaSlices,
     defenseSlice,
   });
-  const rawHeadRecords = planningRoutes.flatMap((route) =>
-    headsForRoute({
-      input,
-      stateIdentity,
-      route,
-      portfolio: params.runtimeResult.portfolio,
-      agendaSlices,
-      defenseSlice,
-      selectedChoicesForDecision: params.selectedChoicesForDecision,
-    }).map((head) => ({ head, route })),
+  const dispositionActionIds = new Set(
+    (params.context.actionDispositions ?? []).map((entry) => entry.actionId),
   );
+  const rawHeadRecords = planningRoutes
+    .filter((route) => !dispositionActionIds.has(route.candidate.actionId))
+    .flatMap((route) =>
+      headsForRoute({
+        input,
+        stateIdentity,
+        route,
+        portfolio: params.runtimeResult.portfolio,
+        agendaSlices,
+        defenseSlice,
+        selectedChoicesForDecision: params.selectedChoicesForDecision,
+      }).map((head) => ({ head, route })),
+    );
   const deduplicatedHeadRecords = [
     ...rawHeadRecords
       .sort(
@@ -616,11 +621,6 @@ function headsForRoute(params: {
     params.agendaSlices,
     params.defenseSlice,
   );
-  const specializedActionOwned = specializedPlanningLineOwnsAction(
-    action.actionId,
-    params.agendaSlices,
-    params.defenseSlice,
-  );
   const variants =
     specialized.length > 0
       ? specialized.flatMap((variant) =>
@@ -637,25 +637,23 @@ function headsForRoute(params: {
               variantKey: `${variant.variantKey}:${invocation.invocationKey}`,
             })),
         )
-      : specializedActionOwned
-        ? []
-        : invocations.map(
-            (invocation): HeadVariant => ({
-              invocation,
-              nextMilestoneId: params.route.step.capability.capabilityId,
-              instanceHorizon: "current_turn",
-              evaluationValues: genericEvaluationValues(params.route),
-              valueClaims: [],
-              evidenceCodes: [
-                "current_plan_module_head",
-                "shadow_single_step_projection",
-                ...(params.route.continuation
-                  ? ["semantic_continuation_requires_real_state"]
-                  : ["future_projection_not_supported"]),
-              ],
-              variantKey: invocation.invocationKey,
-            }),
-          );
+      : invocations.map(
+          (invocation): HeadVariant => ({
+            invocation,
+            nextMilestoneId: params.route.step.capability.capabilityId,
+            instanceHorizon: "current_turn",
+            evaluationValues: genericEvaluationValues(params.route),
+            valueClaims: [],
+            evidenceCodes: [
+              "current_plan_module_head",
+              "shadow_single_step_projection",
+              ...(params.route.continuation
+                ? ["semantic_continuation_requires_real_state"]
+                : ["future_projection_not_supported"]),
+            ],
+            variantKey: invocation.invocationKey,
+          }),
+        );
   const rootPlanInstanceId = findRootPlanInstanceId(
     params.route.instance.instanceId,
     params.portfolio,
@@ -739,23 +737,6 @@ function headsForRoute(params: {
   });
 }
 
-function specializedPlanningLineOwnsAction(
-  actionId: string,
-  agendaSlices: Array<{
-    projectId: string;
-    slice: CorpAgendaTurnPlanningSlice;
-  }>,
-  defenseSlice: CorpDefenseTurnPlanningSlice | undefined,
-): boolean {
-  return (
-    agendaSlices.some(({ slice }) =>
-      slice.lines.some((line) => line.currentActionId === actionId),
-    ) ||
-    defenseSlice?.lines.some((line) => line.currentActionId === actionId) ===
-      true
-  );
-}
-
 function specializedVariants(
   route: PlanSchedulerPlanningRouteCandidate,
   agendaSlices: Array<{
@@ -772,8 +753,16 @@ function specializedVariants(
       slice?.lines
         .filter(
           (line) =>
-            line.currentActionId === route.candidate.actionId &&
-            line.nodes[0]?.ownerModuleId === route.instance.moduleId &&
+            specializedPlanningLineMatchesRoute({
+              routeActionId: route.candidate.actionId,
+              routeModuleId: route.instance.moduleId,
+              routePlanInstanceId: route.instance.instanceId,
+              routeDedupeKey: route.instance.dedupeKey,
+              lineActionId: line.currentActionId,
+              lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
+              linePlanInstanceId: undefined,
+              projectId: route.instance.dedupeKey,
+            }) &&
             (slice.selectedFamily === undefined ||
               line.family === slice.selectedFamily),
         )
@@ -786,16 +775,49 @@ function specializedVariants(
   ) {
     return (
       defenseSlice?.lines
-        .filter(
-          (line) =>
-            line.currentActionId === route.candidate.actionId &&
-            line.nodes[0]?.ownerModuleId === route.instance.moduleId &&
-            line.nodes[0]?.planInstanceId === route.instance.instanceId,
+        .filter((line) =>
+          specializedPlanningLineMatchesRoute({
+            routeActionId: route.candidate.actionId,
+            routeModuleId: route.instance.moduleId,
+            routePlanInstanceId: route.instance.instanceId,
+            routeDedupeKey: route.instance.dedupeKey,
+            lineActionId: line.currentActionId,
+            lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
+            linePlanInstanceId: line.nodes[0]?.planInstanceId,
+          }),
         )
         .map((line) => defenseVariant(line, route)) ?? []
     );
   }
   return [];
+}
+
+export function specializedPlanningLineMatchesRoute(params: {
+  routeActionId: string;
+  routeModuleId: PlanModuleId;
+  routePlanInstanceId: string;
+  routeDedupeKey: string;
+  lineActionId: string;
+  lineOwnerModuleId: PlanModuleId | undefined;
+  linePlanInstanceId: string | undefined;
+  projectId?: string;
+}): boolean {
+  if (
+    params.routeActionId !== params.lineActionId ||
+    params.routeModuleId !== params.lineOwnerModuleId
+  ) {
+    return false;
+  }
+  if (params.routeModuleId === "corp.score_agenda") {
+    return params.projectId === params.routeDedupeKey;
+  }
+  if (
+    params.routeModuleId === "corp.defend_servers" ||
+    params.routeModuleId === "corp.economy"
+  ) {
+    return params.linePlanInstanceId === params.routePlanInstanceId;
+  }
+  return false;
 }
 
 function agendaVariant(

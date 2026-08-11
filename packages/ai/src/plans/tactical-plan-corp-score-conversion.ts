@@ -344,11 +344,13 @@ function visitCapabilityCombinations(params: {
 }
 
 function scoreTargets(input: AiDecisionInput): ScoreTarget[] {
-  const installed = input.playerView.servers.flatMap((server) =>
-    server.root
-      .filter(isVisibleAgenda)
-      .map((card) => ({ card, serverId: server.id })),
-  );
+  const installed = input.playerView.servers
+    .filter((server) => server.id.startsWith("remote_"))
+    .flatMap((server) =>
+      server.root
+        .filter(isVisibleAgenda)
+        .map((card) => ({ card, serverId: server.id })),
+    );
   const hqById = new Map(
     input.playerView.own.gripOrHq
       .filter(isVisibleAgenda)

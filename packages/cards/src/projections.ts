@@ -10,6 +10,10 @@ import type {
   CardSectionFingerprints,
 } from "./fingerprints";
 import type { CardPlanningAnnotations } from "./planning-annotations";
+import {
+  compileProspectiveCapabilities,
+  type ProspectiveCapabilityView,
+} from "./prospective-capabilities";
 import { deepFreezeSerializable, type DeepReadonly } from "./serializable";
 
 export type PublicCardView = {
@@ -76,6 +80,7 @@ export type PlanningCardView = {
   side: Side;
   cardType: CardType;
   engine: DeepReadonly<CardMechanicalSpec>;
+  prospectiveCapabilities: DeepReadonly<ProspectiveCapabilityView>;
   planningAnnotations?: DeepReadonly<CardPlanningAnnotations>;
   cardRulesFingerprint: string;
   planningAnnotationsFingerprint: string;
@@ -218,6 +223,7 @@ export function projectPlanningCard(
     side: spec.identity.side,
     cardType: spec.identity.cardType,
     engine: spec.engine,
+    prospectiveCapabilities: compileProspectiveCapabilities(spec),
     ...(spec.planningAnnotations !== undefined
       ? { planningAnnotations: spec.planningAnnotations }
       : {}),

@@ -1176,6 +1176,18 @@ export function configureCardRuntimeBootstrap() {
         scoreSourceAsAgenda: scoreInstalledRunnerProgramAsAgenda,
         installedAdvanceableCorpCardTargetCount: (state) =>
           runtimePorts.advanceableInstalledCardTargets(state).length,
+        moveAdvancementCounterOptionCount: (
+          state,
+          sourceCardId,
+          source,
+          maxAmount,
+        ) =>
+          runtimePorts.moveAdvancementOptions(
+            state,
+            sourceCardId,
+            source,
+            maxAmount,
+          ).length,
         discardRandomCorpHqCards: (state, sourceDefinitionId, count) =>
           runtimePorts.discardRandomCorpHqCards(
             state,

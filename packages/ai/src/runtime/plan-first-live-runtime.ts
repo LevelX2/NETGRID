@@ -37,7 +37,11 @@ import type {
 } from "../runner-run-target-evaluation";
 import { runnerRunTargetHasOptionalBonusRunValue } from "../runner-run-target-guidance";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
-import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
+import {
+  assessRandomBreakOrDamageRiskForVisibleRunPath,
+  randomBreakOrDamageRiskCanCarryRunPath,
+  randomBreakOrDamageRiskProfileForDefinitionId,
+} from "../actions/risk-action-projection";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
 import { runnerDiscardChoicePlanBinding } from "./runner-discard-choice-plan";
@@ -172,6 +176,7 @@ import {
 import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
 import { buildRunnerTurnPlannerShadow } from "../plans/runner-turn-planner-shadow";
 import { runnerDelayedInstallReplanningBoundary } from "../plans/runner-delayed-install-replanning-boundary";
+import { runnerCreditBankProspectivePlan } from "../plans/runner-credit-bank-prospective-planning";
 import {
   buildCanonicalLegalActionInvocation,
   buildPlanningStateIdentity,
@@ -206,7 +211,10 @@ import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need
 import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 import { semanticRuntimeDecisionDebugTopLevelWhyNot } from "../diagnostics/semantic-runtime-decision-debug";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
-import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
+import {
+  buildBoundedCorpPunishRouteRequests,
+  withDecisionLocalCorpPunishRouteQuotes,
+} from "./corp-punish-route-quote-input";
 import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
@@ -403,9 +411,10 @@ const CORP_ACTION_DISPOSITION_CONTRIBUTOR_FACTS = {
   corpCandidateProjectsCardDraw,
   corpConditionalRezSupportWithoutCurrentRouteEvidence,
   corpDefenseSignalOwnsAction,
-  corpDefenseTurnPlanningSliceMayOwnAction,
   corpDefensiveUpgradePlacement,
   corpDefinitionSupportsPunishPlan,
+  corpConditionalPunishTagSourceHasNoVisiblePayoff,
+  corpPunishQuoteRequestExists,
   corpDrawCandidatePreservesHandCapacity,
   corpEmptyRdDrawOperationDispositionEvidence,
   corpExactExecutableNonEconomyPlanOwnsAction,
@@ -2536,6 +2545,18 @@ export function runnerActionDispositions(
     ) {
       continue;
     }
+    const runAttemptCadence = runnerSameServerNoAccessCadence(
+      input,
+      evaluation.targetServerId,
+    );
+    if (!runAttemptCadence.routeAvailable) {
+      add(
+        evaluation.actionId,
+        "runner.contest_remote",
+        runAttemptCadence.evidenceCode,
+      );
+      continue;
+    }
     if (
       visibleKnownAgendaOnServer(input, evaluation.targetServerId) &&
       !runnerKnownAgendaRunEvaluationIsCertified(
@@ -2595,6 +2616,7 @@ export function runnerActionDispositions(
       );
       const executableRoute = matchingSignals.some(
         (signal) =>
+          signal.routePreparation === undefined &&
           signal.reachable &&
           signal.marginalValue > 0 &&
           signal.runActionIds?.includes(evaluation.actionId) === true,
@@ -3769,15 +3791,20 @@ function buildRunnerDomain(
       .map((evaluation) => {
         const safetyBlocked =
           recentSafetyAbort?.serverId === evaluation.targetServerId;
-        const fundingSupport = safetyBlocked
-          ? undefined
-          : runnerRunFundingSupport(
-              input,
-              economy,
-              evaluation,
-              runTargets,
-              candidates,
-            );
+        const runAttemptCadence = runnerSameServerNoAccessCadence(
+          input,
+          evaluation.targetServerId,
+        );
+        const fundingSupport =
+          safetyBlocked || !runAttemptCadence.routeAvailable
+            ? undefined
+            : runnerRunFundingSupport(
+                input,
+                economy,
+                evaluation,
+                runTargets,
+                candidates,
+              );
         const purpose = runPurposeForEvaluation(evaluation);
         const directRunCanConvertNow = runnerRunTargetCanConvertNow(
           input,
@@ -3815,6 +3842,7 @@ function buildRunnerDomain(
           knownAgendaThreat: evaluation.scoreThreat,
           reachable:
             !safetyBlocked &&
+            runAttemptCadence.routeAvailable &&
             !forgoUnsafeRunCapacity &&
             (terminalRemoteContestIsDirectlyMandatory ||
               irrecoverableScoreThreatContest ||
@@ -3833,19 +3861,22 @@ function buildRunnerDomain(
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
             : safetyBlocked
               ? recentSafetyAbort.evidenceCode
-              : terminalRemoteContestIsDirectlyMandatory
-                ? `runner_terminal_remote_contest_mandatory:${evaluation.targetServerId}:${evaluation.actionId}`
-                : irrecoverableScoreThreatContest
-                  ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
-                  : fundingSupport
-                    ? fundingSupport.evidenceCode
-                    : directRunCanConvertNow
-                      ? `runner_direct_run_converts_now:${evaluation.targetServerId}`
-                      : evaluation.recommendation === "gain_credits_first"
-                        ? `runner_remote_contest_waits_for_credit_reserve:${evaluation.targetServerId}`
-                        : productiveProbeCanConvertNow
-                          ? `runner_productive_remote_probe_converts_now:${evaluation.targetServerId}`
-                          : (evaluation.evidence[0] ?? "runner_remote_target"),
+              : !runAttemptCadence.routeAvailable
+                ? runAttemptCadence.evidenceCode
+                : terminalRemoteContestIsDirectlyMandatory
+                  ? `runner_terminal_remote_contest_mandatory:${evaluation.targetServerId}:${evaluation.actionId}`
+                  : irrecoverableScoreThreatContest
+                    ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
+                    : fundingSupport
+                      ? fundingSupport.evidenceCode
+                      : directRunCanConvertNow
+                        ? `runner_direct_run_converts_now:${evaluation.targetServerId}`
+                        : evaluation.recommendation === "gain_credits_first"
+                          ? `runner_remote_contest_waits_for_credit_reserve:${evaluation.targetServerId}`
+                          : productiveProbeCanConvertNow
+                            ? `runner_productive_remote_probe_converts_now:${evaluation.targetServerId}`
+                            : (evaluation.evidence[0] ??
+                              "runner_remote_target"),
           ...(fundingSupport ? { supportNeedId: fundingSupport.needId } : {}),
           preferredRunActionIds: [evaluation.actionId],
           ...(purpose === "information"
@@ -3873,6 +3904,10 @@ function buildRunnerDomain(
       ) {
         return [];
       }
+      const runAttemptCadence = runnerSameServerNoAccessCadence(
+        input,
+        server.id,
+      );
       const preferredRunActionIds = knownAgendaRunEvaluations.map(
         (evaluation) => evaluation.actionId,
       );
@@ -3882,11 +3917,14 @@ function buildRunnerDomain(
           serverId: server.id,
           purpose: "contest" as const,
           knownAgendaThreat: true,
-          reachable: !forgoUnsafeRunCapacity,
+          reachable:
+            !forgoUnsafeRunCapacity && runAttemptCadence.routeAvailable,
           marginalValue: 1_000,
           evidenceCode: forgoUnsafeRunCapacity
             ? "runner_restricted_run_capacity_below_required_hand_buffer"
-            : "visible_known_agenda_remote",
+            : !runAttemptCadence.routeAvailable
+              ? runAttemptCadence.evidenceCode
+              : "visible_known_agenda_remote",
           preferredRunActionIds,
           accessCommitment: accessCommitmentForEvaluation(
             knownAgendaRunEvaluations[0]!,
@@ -5770,6 +5808,96 @@ type RunnerCentralPressureCadence = {
   evidenceCode: string;
 };
 
+const RUNNER_RUN_CADENCE_PROGRESS_ACTION_TYPES = new Set([
+  "draw_card",
+  "gain_credit",
+  "install_card",
+  "play_event",
+  "remove_tag",
+  "trash_card",
+  "trigger_ability",
+]);
+
+function runnerSameServerNoAccessCadence(
+  input: AiDecisionInput,
+  serverId: string,
+): RunnerCentralPressureCadence {
+  const available = (evidenceCode: string): RunnerCentralPressureCadence => ({
+    routeAvailable: true,
+    evidenceCode,
+  });
+  if (input.playerView.run !== undefined) {
+    return available(`runner_run_attempt_cadence_active_run:${serverId}`);
+  }
+  const turnSerial = input.playerView.turnSerial;
+  if (!Number.isSafeInteger(turnSerial) || (turnSerial ?? -1) < 0) {
+    return {
+      routeAvailable: false,
+      evidenceCode: `runner_run_attempt_cadence_turn_invalid:${serverId}`,
+    };
+  }
+  const currentTurnSerial = turnSerial as number;
+  let activeRunServerId: string | undefined;
+  let activeRunReachedAccess = false;
+  let blockedAfterNoAccess = false;
+  for (const event of mergedPublicHistory(input)) {
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (event.publicPayload.actor !== "runner") continue;
+    if (
+      !Number.isSafeInteger(event.turnSerial) ||
+      (event.turnSerial ?? -1) < 0
+    ) {
+      return {
+        routeAvailable: false,
+        evidenceCode: `runner_run_attempt_cadence_event_turn_invalid:${serverId}:${event.eventId}`,
+      };
+    }
+    if (event.turnSerial !== currentTurnSerial) continue;
+    if (actionType === "start_run" || event.type === "run_started") {
+      if (activeRunServerId === serverId && !activeRunReachedAccess) {
+        blockedAfterNoAccess = true;
+      }
+      activeRunServerId = serverIdFromEvent(event);
+      activeRunReachedAccess = false;
+      continue;
+    }
+    if (actionType === "access_card") {
+      if (activeRunServerId === serverId) activeRunReachedAccess = true;
+      continue;
+    }
+    if (actionType === "jack_out") {
+      if (activeRunServerId === serverId && !activeRunReachedAccess) {
+        blockedAfterNoAccess = true;
+      }
+      activeRunServerId = undefined;
+      activeRunReachedAccess = false;
+      continue;
+    }
+    if (RUNNER_RUN_CADENCE_PROGRESS_ACTION_TYPES.has(actionType)) {
+      if (activeRunServerId === serverId && !activeRunReachedAccess) {
+        blockedAfterNoAccess = true;
+      }
+      activeRunServerId = undefined;
+      activeRunReachedAccess = false;
+      blockedAfterNoAccess = false;
+    }
+  }
+  if (activeRunServerId === serverId && !activeRunReachedAccess) {
+    blockedAfterNoAccess = true;
+  }
+  return blockedAfterNoAccess
+    ? {
+        routeAvailable: false,
+        evidenceCode: `runner_same_server_no_access_attempt_requires_progress:${serverId}:${currentTurnSerial}`,
+      }
+    : available(
+        `runner_same_server_no_access_attempt_absent:${serverId}:${currentTurnSerial}`,
+      );
+}
+
 function runnerCentralPressureCadence(
   input: AiDecisionInput,
   serverId: "hq" | "rd" | "archives",
@@ -5791,6 +5919,8 @@ function runnerCentralPressureCadence(
   if (input.playerView.run !== undefined) {
     return available(`runner_central_pressure_cadence_active_run:${serverId}`);
   }
+  const noAccessCadence = runnerSameServerNoAccessCadence(input, serverId);
+  if (!noAccessCadence.routeAvailable) return noAccessCadence;
   const currentTurnSerial = turnSerial as number;
   const history = mergedPublicHistory(input);
   let activeRunServerId: string | undefined;
@@ -8218,9 +8348,6 @@ function corpExactExecutableNonEconomyPlanOwnsAction(
         signal.feasible &&
         signal.actionIds?.includes(candidate.actionId) === true,
     ) ||
-    domain.defenseNeeds.some((signal) =>
-      corpDefenseSignalOwnsAction(signal, candidate.actionId),
-    ) ||
     domain.handManagement.some(
       (signal) =>
         signal.routeAllowed !== false &&
@@ -8234,19 +8361,6 @@ function corpExactExecutableNonEconomyPlanOwnsAction(
         signal.feasible && corpPunishCampaignOwnsCandidate(signal, candidate),
     )
   );
-}
-
-function corpDefenseTurnPlanningSliceMayOwnAction(
-  domain: CorpPlanDomain,
-  actionId: string,
-): boolean {
-  return domain.defenseNeeds.some((signal) => {
-    if (signal.kind !== "generic") return signal.actionId === actionId;
-    return (
-      signal.phase === "install_ice" &&
-      signal.installRoute?.projection.actionId === actionId
-    );
-  });
 }
 
 function corpEmptyRdDrawOperationDispositionEvidence(
@@ -13732,6 +13846,24 @@ function corpDefinitionSupportsPunishPlan(
   );
 }
 
+function corpConditionalPunishTagSourceHasNoVisiblePayoff(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const exactTagSource = candidate.functionalEffects?.some(
+    (effect) => effect.kind === "tag_source" && effect.scope === "runner",
+  );
+  if (exactTagSource !== true) return false;
+  return ![...visibleOwnDefinitionIds(input)].some((definitionId) => {
+    const profile = getStructuredTagPunishProfileForCard(definitionId);
+    return profile?.payoff === true && profile.requiresRunnerTagged;
+  });
+}
+
+function corpPunishQuoteRequestExists(input: AiDecisionInput): boolean {
+  return buildBoundedCorpPunishRouteRequests(input).length > 0;
+}
+
 function corpStrategicFundingPhaseBlocksPreparation(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
@@ -15409,7 +15541,7 @@ function agendaSliceForRandomizedSelection(params: {
 }
 
 function runnerCreditBankSignals(
-  input: AiDecisionInput,
+  input: AiDecisionInputWithDeckCapabilities,
   candidates: readonly ActionSemanticCandidate[],
   deckCapabilities: DeckCapabilityProfile,
   economy: RunnerEconomyPosture,
@@ -15490,6 +15622,17 @@ function runnerCreditBankSignals(
       })
       .map((candidate) => candidate.actionId);
     if (tool.status === "in_hand" && installActionIds.length > 0) {
+      const prospectivePlan =
+        tool.sourceCardInstanceId !== undefined &&
+        input.planningStateIdentity !== undefined
+          ? runnerCreditBankProspectivePlan({
+              sourceDefinitionId: tool.cardId,
+              sourceCardInstanceId: tool.sourceCardInstanceId,
+              currentCredits: input.playerView.own.credits,
+              currentActions: input.playerView.own.clicks,
+              stateIdentity: input.planningStateIdentity,
+            })
+          : undefined;
       const handEvaluation = handDevelopment.find(
         (evaluation) =>
           evaluation.definitionId === tool.cardId &&
@@ -15507,6 +15650,8 @@ function runnerCreditBankSignals(
         !economy.fundingNeed &&
         input.playerView.own.credits >= economy.desiredCreditReserve;
       if (
+        prospectivePlan === undefined ||
+        prospectivePlan.install.projection !== "feasible_in_projection" ||
         unsatisfiedActivationPrerequisites.length > 0 ||
         delayedInstallWithoutFundingNeed
       )
@@ -15522,6 +15667,11 @@ function runnerCreditBankSignals(
             estimatedPayout,
             value: 0,
             evidenceCodes: [
+              ...(prospectivePlan === undefined
+                ? ["runner_credit_bank_prospective_projection_unknown"]
+                : prospectivePlan.install.projection === "blocked"
+                  ? ["runner_credit_bank_prospective_install_blocked"]
+                  : []),
               ...unsatisfiedActivationPrerequisites.map(
                 (prerequisite) =>
                   `runner_credit_bank_install_prerequisite_unsatisfied:${prerequisite.kind}`,
@@ -15538,16 +15688,17 @@ function runnerCreditBankSignals(
         return [
           {
             bankId: tool.sourceCardInstanceId ?? tool.cardId,
-            phase: "hold" as const,
-            actionIds: [],
-            rejectedActionIds: installActionIds,
+            phase: "install" as const,
+            actionIds: installActionIds,
             priorityClass: "P5" as const,
             currentStoredCredits,
             portfolioStoredCredits,
             estimatedPayout,
-            value: 0,
+            prospectivePlan,
+            value: 180,
             evidenceCodes: [
-              "runner_credit_bank_install_deferred_no_followup_window",
+              "runner_credit_bank_install_resident_without_same_turn_build",
+              ...prospectivePlan.evidenceCodes,
               ...tool.evidence,
             ],
           },
@@ -15561,8 +15712,13 @@ function runnerCreditBankSignals(
           currentStoredCredits,
           portfolioStoredCredits,
           estimatedPayout,
+          prospectivePlan,
           value: 350,
-          evidenceCodes: ["runner_credit_bank_install_ready", ...tool.evidence],
+          evidenceCodes: [
+            "runner_credit_bank_install_ready",
+            ...prospectivePlan.evidenceCodes,
+            ...tool.evidence,
+          ],
         },
       ];
     }
@@ -17454,6 +17610,9 @@ function isRunnerRunWindowCandidate(
 ): boolean {
   return (
     isRunWindowSemantic(candidate) ||
+    (input.playerView.run !== undefined &&
+      candidate.sourceKind === "card" &&
+      candidate.semanticActionType.startsWith("card_ability.")) ||
     runnerCandidateHasVisibleAdditionalAccessEffect(candidate) ||
     runnerRestrictedRunSequenceAction(input, candidate) !== undefined ||
     runnerOptionalBonusRunDeclineAction(input, candidate) !== undefined ||
@@ -17591,11 +17750,18 @@ function currentRunAbortAssessment(
     server.root,
     input.playerView.opponent.credits,
   );
-  return path.canReachAccess
-    ? undefined
-    : {
-        evidenceCode: `runner_current_run_remaining_path_unreachable:${run.attackedServerId}`,
-      };
+  if (path.canReachAccess) return undefined;
+  const conditionalRiskRoute =
+    assessRandomBreakOrDamageRiskForVisibleRunPath(input, {
+      targetServerId: run.attackedServerId,
+      visibleIce: remainingIce,
+    });
+  if (randomBreakOrDamageRiskCanCarryRunPath(conditionalRiskRoute)) {
+    return undefined;
+  }
+  return {
+    evidenceCode: `runner_current_run_remaining_path_unreachable:${run.attackedServerId}`,
+  };
 }
 
 function runnerRunWindowActionAssessments(
@@ -18015,7 +18181,7 @@ function runnerRunWindowPlanStepExclusion(
   ) {
     return {
       key: "run_plan_information_reassessment_not_convertible",
-      label: "Die neu quotierte Informationsroute tr„gt keine Fortsetzung",
+      label: "Die neu quotierte Informationsroute trÃ¤gt keine Fortsetzung",
       reason: [
         "run_plan_step:information_probe_reassessment",
         `run_plan_target:${run.attackedServerId}`,

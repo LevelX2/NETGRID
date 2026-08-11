@@ -42,6 +42,25 @@ function wallOfStatic(instanceId: string) {
   });
 }
 
+function brokerAbilityPayload(
+  route: "build" | "cash_out",
+  sourceCardInstanceId = "onr_v1_154_broker",
+) {
+  const capabilityKey =
+    route === "build" ? "store_credits" : "withdraw_credits";
+  return {
+    cardId: sourceCardInstanceId,
+    sourceDefinitionId: "onr_v1_154_broker",
+    cardImplementationCapabilityBindingKind:
+      "card_spec_capability_key" as const,
+    cardImplementationAbilityId: `onr_v1_154_broker:${capabilityKey}`,
+    cardImplementationAbilityKey: capabilityKey,
+    ...(route === "build"
+      ? { cardImplementationAddsHostedCredits: true }
+      : { cardImplementationTakesHostedCredits: true }),
+  };
+}
+
 function expectPlanDecision(
   decision: RunnerDecision,
   expected: {
@@ -112,7 +131,8 @@ function expectLastProductiveRunnerLiquidity(decision: RunnerDecision): void {
     planKind: "runner.economy",
     capability: "gain_general_liquid_credits",
     priorityClass: "P6",
-    assessmentEvidence: "runner_engine_certified_basic_liquidity_development",
+    assessmentEvidence:
+      "runner_engine_certified_immediate_liquidity_development",
   });
 }
 
@@ -171,9 +191,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server(
         "remote_1",
-        [
-          wallOfStatic("onr_v1_279_wall-of-static"),
-        ],
+        [wallOfStatic("onr_v1_279_wall-of-static")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -202,12 +220,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-load",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits auf Bank legen",
         { credits: 0 },
         {
           source: bankSource.instanceId,
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build", bankSource.instanceId),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -250,12 +268,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-take",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
         {
           source: payoutBankSource.instanceId,
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out", payoutBankSource.instanceId),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -294,12 +312,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-load",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits auf Bank legen",
         { credits: 0 },
         {
           source: bankSource.instanceId,
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build", bankSource.instanceId),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -316,12 +334,12 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction(
         "broker-take",
         "runner",
-        "trigger_ability",
+        "activated_card_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
         {
           source: bankSource.instanceId,
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out", bankSource.instanceId),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -357,7 +375,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -405,7 +423,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -617,7 +635,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -628,7 +646,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -687,7 +705,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -725,7 +743,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -771,7 +789,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationAddsHostedCredits: true },
+          payload: brokerAbilityPayload("build"),
         },
       ),
       legalAction(
@@ -782,7 +800,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: "onr_v1_154_broker",
-          payload: { cardImplementationTakesHostedCredits: true },
+          payload: brokerAbilityPayload("cash_out"),
         },
       ),
       legalAction(
@@ -1142,7 +1160,22 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "activated_card_ability",
         "The Short Circuit: Stack nach Programm durchsuchen",
         { credits: 1 },
-        { source: "short-circuit" },
+        {
+          source: "short-circuit",
+          payload: {
+            cardId: "short-circuit",
+            sourceDefinitionId: "onr_v1_177_the-short-circuit",
+            cardImplementationAbility: "activated",
+            cardImplementationCapabilityBindingKind:
+              "card_spec_capability_key",
+            cardImplementationAbilityKey:
+              "abilities_activated_runner_main_search_stack_to_grip",
+            cardImplementationAbilityId:
+              "onr_v1_177_the-short-circuit:abilities_activated_runner_main_search_stack_to_grip",
+            cardImplementationEffectKind: "search_stack_to_grip",
+            cardImplementationSearchFilter: "program",
+          },
+        },
       ),
       legalAction("gain", "runner", "gain_credit", "1 Credit nehmen", {
         credits: 0,
@@ -1339,7 +1372,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("devalues Broker install when a later bank load is not plausible", () => {
+  it("keeps a last-action Broker install resident without inventing the future build action", () => {
     const input = aiInput("runner", [
       legalAction(
         "install-broker",
@@ -1362,17 +1395,16 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const decision = chooseRunnerAction(input);
 
     expectPlanDecision(decision, {
-      actionId: "gain-credit",
-      planKind: "runner.economy",
-      capability: "gain_general_liquid_credits",
-      priorityClass: "P6",
-      assessmentEvidence: "runner_finite_portfolio_credit_reserve",
+      actionId: "install-broker",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_install",
+      priorityClass: "P5",
+      assessmentEvidence:
+        "runner_credit_bank_install_resident_without_same_turn_build",
     });
-    expect(actionAlternative(decision, "install-broker")?.whyNot).toEqual(
-      expect.arrayContaining([
-        "candidate_plan_evidence:runner_credit_bank_install_deferred_no_followup_window",
-        "candidate_plan_blocker:no_credit_bank_hold_route",
-      ]),
+    expect(decision.actionId).not.toContain("store_credits");
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      '"actionId":"onr_v1_154_broker:store_credits"',
     );
   });
 
@@ -1708,9 +1740,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("archives"),
       server(
         "remote_1",
-        [
-          wallOfStatic("onr_v1_279.wall-of-static.fixture"),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.fixture")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -1743,6 +1773,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     followupInput.playerView.stateVersion = 2;
+    for (const action of followupInput.legalActions)
+      action.expiresAtStateVersion = 2;
     followupInput.playerView.own.rig = [];
     followupInput.playerView.own.agendaPoints = 5;
     followupInput.playerView.servers = centralInput.playerView.servers;

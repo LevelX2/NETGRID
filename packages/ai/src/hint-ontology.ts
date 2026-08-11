@@ -151,6 +151,7 @@ export const KNOWN_HINT_EFFECT_RESOURCES = [
   "meat_damage",
   "brain_damage",
   "hand_size",
+  "agenda_points",
 ] as const;
 
 export const KNOWN_HINT_ECONOMY_MODES = [
@@ -766,6 +767,23 @@ export type AiHintStrategySupportPair = {
   rationale?: string;
 };
 
+/**
+ * Mechanical and planning semantics for one exact CardSpec capability.
+ *
+ * The capability key is the stable authoring identity. The canonical runtime
+ * ability id is reconstructed from cardDefinitionId + capabilityKey by the
+ * action-semantic read model; no action id or card-text inference belongs in
+ * this artifact.
+ */
+export type AiHintActionCapabilitySemantics = {
+  capabilityKey: string;
+  effects?: AiHintStructuredEffect[];
+  functionSignals?: string[];
+  conditions?: AiHintCondition[];
+  targetProfiles?: Array<AiHintEffectTargetProfile | AiHintTargetProfileV1>;
+  strategySupportPairs?: AiHintStrategySupportPair[];
+};
+
 import {
   type AiHintActionPlanOwnerBinding,
   validateAiHintActionPlanOwnerBindings,
@@ -790,6 +808,7 @@ export type AiHintOntologyExtension = {
   lineSupport?: KnownHintLineSupport[];
   strategySupportPairs?: AiHintStrategySupportPair[];
   actionStrategySupportPairs?: AiHintStrategySupportPair[];
+  actionCapabilitySemantics?: AiHintActionCapabilitySemantics[];
   actionPlanOwnerBindings?: AiHintActionPlanOwnerBinding[];
   opponentSignals?: AiHintOpponentSignal[];
   quality?: AiHintQuality;
@@ -865,6 +884,18 @@ export function validateAiHintOntologyFields(
   return validateAiHintOntologyExtension(hint);
 }
 
+export function validateAiHintActionCapabilitySemantics(
+  semantics: unknown,
+): AiHintOntologyValidationResult {
+  const issues: AiHintOntologyIssue[] = [];
+  validateActionCapabilitySemanticsValue(
+    semantics,
+    "$.actionCapabilitySemantics",
+    issues,
+  );
+  return resultFromIssues(issues);
+}
+
 function validateExtensionFields(
   input: Record<string, unknown>,
   path: string,
@@ -912,6 +943,11 @@ function validateExtensionFields(
   validateStrategySupportPairs(
     input.actionStrategySupportPairs,
     `${path}.actionStrategySupportPairs`,
+    issues,
+  );
+  validateActionCapabilitySemanticsValue(
+    input.actionCapabilitySemantics,
+    `${path}.actionCapabilitySemantics`,
     issues,
   );
   issues.push(
@@ -1719,6 +1755,87 @@ function validateStrategySupportPairs(
         "Expected string.",
       );
     }
+  });
+}
+
+function validateActionCapabilitySemanticsValue(
+  semantics: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (semantics === undefined) return;
+  if (!Array.isArray(semantics)) {
+    addIssue(issues, "error", "invalid_shape", path, "Expected array.");
+    return;
+  }
+  const seen = new Set<string>();
+  let previousCapabilityKey: string | undefined;
+  semantics.forEach((entry, index) => {
+    const entryPath = `${path}[${index}]`;
+    if (!isRecord(entry)) {
+      addIssue(issues, "error", "invalid_shape", entryPath, "Expected object.");
+      return;
+    }
+    if (
+      typeof entry.capabilityKey !== "string" ||
+      entry.capabilityKey.length === 0
+    ) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${entryPath}.capabilityKey`,
+        "Expected non-empty capability key.",
+      );
+    } else {
+      if (seen.has(entry.capabilityKey))
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${entryPath}.capabilityKey`,
+          "Capability semantics must be unique.",
+        );
+      if (
+        previousCapabilityKey !== undefined &&
+        previousCapabilityKey.localeCompare(entry.capabilityKey) >= 0
+      )
+        addIssue(
+          issues,
+          "error",
+          "invalid_shape",
+          `${entryPath}.capabilityKey`,
+          "Capability semantics must be sorted by capabilityKey.",
+        );
+      seen.add(entry.capabilityKey);
+      previousCapabilityKey = entry.capabilityKey;
+    }
+    validateEffects(entry.effects, `${entryPath}.effects`, issues);
+    validateConditions(entry.conditions, `${entryPath}.conditions`, issues);
+    validateTargetProfiles(
+      entry.targetProfiles,
+      `${entryPath}.targetProfiles`,
+      issues,
+    );
+    validateStrategySupportPairs(
+      entry.strategySupportPairs,
+      `${entryPath}.strategySupportPairs`,
+      issues,
+    );
+    if (
+      entry.functionSignals !== undefined &&
+      (!Array.isArray(entry.functionSignals) ||
+        entry.functionSignals.some(
+          (signal) => typeof signal !== "string" || signal.length === 0,
+        ))
+    )
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${entryPath}.functionSignals`,
+        "Expected non-empty strings.",
+      );
   });
 }
 

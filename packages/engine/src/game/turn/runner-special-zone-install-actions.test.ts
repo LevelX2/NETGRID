@@ -6,7 +6,6 @@ import type {
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import {
-  buildRunnerHiddenStackProgramInstallAction,
   buildRunnerDelayedInstallRemoveCounterAction,
   buildRunnerDelayedInstallSetAsideAction,
   buildRunnerValuPakInstallAction,
@@ -195,43 +194,6 @@ describe("runner special zone install action builders", () => {
         },
       ],
       visibility: "public",
-    });
-    expect(state).toEqual(before);
-  });
-
-  it("builds the Self-Modifying Code search-install trigger without mutating state", () => {
-    const state = createGame({
-      seed: "arch-12-self-modifying-code-action",
-      setupMode: "completed",
-    });
-    const before = structuredClone(state);
-    const sourceCardId = "self_modifying_code_source" as CardInstanceId;
-
-    const action = buildRunnerHiddenStackProgramInstallAction(
-      state,
-      sourceCardId,
-    );
-
-    expect(action).toMatchObject({
-      actionId:
-        "runner.trigger_ability.self_modifying_code_source.self_modifying_code_source.hidden_stack_program_install",
-      side: "runner",
-      type: "trigger_ability",
-      label: "Self-Modifying Code trashen: Programm aus Stack installieren",
-      source: sourceCardId,
-      costs: [],
-      payload: {
-        cardId: sourceCardId,
-        v1911HiddenZoneAbility: "hidden_stack_program_install",
-        hiddenZoneBarrier: true,
-      },
-      abilityRef: {
-        sourceCardInstanceId: sourceCardId,
-        abilityId: "hidden_stack_program_install",
-      },
-      effectRef: "effect.hidden_stack_program_install",
-      targetRequirements: [],
-      visibility: "private_to_actor",
     });
     expect(state).toEqual(before);
   });

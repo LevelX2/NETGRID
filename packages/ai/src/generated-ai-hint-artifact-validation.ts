@@ -4,6 +4,7 @@ import {
   type CardSpecAiHintArtifact,
   validateAiHintActionPlanOwnerBindings,
 } from "./ai-hint-contracts";
+import { validateAiHintActionCapabilitySemantics } from "./hint-ontology";
 
 export function validateGeneratedArtifact(
   value: unknown,
@@ -66,13 +67,20 @@ export function validateGeneratedArtifact(
   )
     throw new Error("invalid_card_spec_ai_hint_artifact_rows");
   for (const record of artifact.cards) {
-    const validation = validateAiHintActionPlanOwnerBindings(
+    const ownerValidation = validateAiHintActionPlanOwnerBindings(
       record.hint.actionPlanOwnerBindings,
       record.hint.side,
     );
-    if (!validation.valid)
+    if (!ownerValidation.valid)
       throw new Error(
-        `invalid_card_spec_ai_hint_artifact_hint:${record.cardId}:${validation.errors[0]?.path ?? "$"}`,
+        `invalid_card_spec_ai_hint_artifact_hint:${record.cardId}:${ownerValidation.errors[0]?.path ?? "$"}`,
+      );
+    const capabilityValidation = validateAiHintActionCapabilitySemantics(
+      record.hint.actionCapabilitySemantics,
+    );
+    if (!capabilityValidation.valid)
+      throw new Error(
+        `invalid_card_spec_ai_hint_artifact_hint:${record.cardId}:${capabilityValidation.errors[0]?.path ?? "$"}`,
       );
   }
   return artifact as CardSpecAiHintArtifact;

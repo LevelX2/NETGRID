@@ -38,7 +38,7 @@ describe("Corp punish-route quote request", () => {
       ok: true,
       quote: {
         complete: false,
-        incompleteReasons: ["source_capability_missing"],
+        incompleteReasons: ["source_capability_unsupported"],
       },
     });
   });
@@ -238,7 +238,7 @@ describe("Corp punish-route quote request", () => {
           runnerResponseCredits: { minimum: 0, maximum: 9 },
         },
         damageEnvelope: {
-          effectiveDamage: { minimum: 4, maximum: 4 },
+          effectiveDamage: { minimum: 0, maximum: 4 },
         },
         responseKnowledge: "public_exact",
       },
@@ -302,6 +302,161 @@ describe("Corp punish-route quote request", () => {
           paymentKnowledge: "unknown",
           corpResponseCredits: { maximum: 5 },
           totalCorpCredits: { maximum: 10 },
+        },
+      },
+    });
+  });
+
+  it("bounds a visible tag-prevention response instead of declaring the trace window unknown", () => {
+    const state = corpActionState("punish-route-visible-tag-prevention");
+    state.corp.credits = 12;
+    state.corp.clicks = 3;
+    state.runner.credits = 4;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const chance = addCorpCardToHqForTest(
+      state,
+      "onr_v1_284_chance-observation",
+      "chance-visible-prevention",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched-visible-prevention",
+    );
+    const fallGuy = addConcealedRunnerResource(
+      state,
+      "onr_v1_161_fall-guy",
+      "visible-fall-guy",
+    );
+    state.cardInstances[fallGuy]!.faceup = true;
+    const before = structuredClone(state);
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-tag-visible-prevention",
+            0,
+            "trace_tag",
+            chance,
+            "onr_v1_284_chance-observation",
+            "abilities_on_play_trace",
+          ),
+          canonicalStep(
+            "damage-visible-prevention",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        incompleteReasons: [],
+        guarantee: "conditional_on_runner_response",
+        responseKnowledge: "public_bounded",
+        responsePaymentEnvelope: {
+          paymentKnowledge: "bounded_public",
+          runnerResponseCredits: { minimum: 0, maximum: 4 },
+        },
+        damageEnvelope: {
+          rawDamage: { meat: 4, net: 0, core: 0, total: 4 },
+          effectiveDamage: { minimum: 0, maximum: 4 },
+        },
+      },
+    });
+    expect(state).toEqual(before);
+  });
+
+  it("bounds public counter-paid damage prevention instead of discarding the punish quote", () => {
+    const state = corpActionState("punish-route-visible-damage-prevention");
+    state.corp.credits = 12;
+    state.corp.clicks = 3;
+    state.runner.credits = 4;
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runAttemptsLastTurn: 1,
+    };
+    const chance = addCorpCardToHqForTest(
+      state,
+      "onr_v1_284_chance-observation",
+      "chance-visible-damage-prevention",
+    );
+    const scorched = addCorpCardToHqForTest(
+      state,
+      "onr_v1_302_scorched-earth",
+      "scorched-visible-damage-prevention",
+    );
+    const fridgeId =
+      "runner_visible_damage_prevention_armored_fridge" as CardInstanceId;
+    state.runner.rig.hardware.push(fridgeId);
+    state.cardInstances[fridgeId] = {
+      instanceId: fridgeId,
+      definitionId: "onr_v1_121_armored-fridge",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { ablative: 3 },
+    };
+
+    expect(
+      quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-tag-visible-damage-prevention",
+            0,
+            "trace_tag",
+            chance,
+            "onr_v1_284_chance-observation",
+            "abilities_on_play_trace",
+          ),
+          canonicalStep(
+            "damage-visible-damage-prevention",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      ),
+    ).toMatchObject({
+      ok: true,
+      quote: {
+        complete: true,
+        incompleteReasons: [],
+        responseKnowledge: "public_bounded",
+        responsePaymentEnvelope: {
+          responseKind: "mixed",
+          paymentKnowledge: "bounded_public",
+        },
+        damageEnvelope: {
+          rawDamage: { meat: 4, net: 0, core: 0, total: 4 },
+          effectiveDamage: { minimum: 1, maximum: 4 },
+          visiblePrevention: {
+            knowledge: "bounded_public",
+            maximumPreventableDamage: 3,
+            creditCost: { minimum: 0, maximum: 0 },
+          },
         },
       },
     });
@@ -407,7 +562,8 @@ describe("Corp punish-route quote request", () => {
           {
             kind: "other_punish",
             sourceCardDefinitionId: "onr_v1_285_closed-accounts",
-            sourceCapabilityId: "ability:on_play:0",
+            sourceCapabilityId:
+              "onr_v1_285_closed-accounts:abilities_on_play_lose_credits",
             clicks: 1,
             credits: 1,
             currentLegalAction: {

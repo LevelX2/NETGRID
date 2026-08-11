@@ -618,6 +618,44 @@ describe("AI hint ontology validation", () => {
     ).toEqual([]);
   });
 
+  it("validates exact, sorted action capability semantics", () => {
+    expect(
+      validateAiHintOntologyFields({
+        actionCapabilitySemantics: [
+          {
+            capabilityKey: "abilities_activated_trace",
+            effects: [
+              {
+                kind: "trace",
+                timing: "action",
+                scope: "trace",
+                target: "trace.source",
+                finite: true,
+              },
+            ],
+            functionSignals: ["trace.source"],
+            conditions: [{ kind: "requires_trace_attempt" }],
+          },
+        ],
+      }).errors,
+    ).toEqual([]);
+
+    for (const actionCapabilitySemantics of [
+      [{ capabilityKey: "same" }, { capabilityKey: "same" }],
+      [{ capabilityKey: "z-last" }, { capabilityKey: "a-first" }],
+      [{ capabilityKey: "", functionSignals: [""] }],
+      [
+        {
+          capabilityKey: "forged-effect",
+          effects: [{ kind: "unknown", timing: "action", scope: "runner" }],
+        },
+      ],
+    ])
+      expect(
+        validateAiHintOntologyFields({ actionCapabilitySemantics }).valid,
+      ).toBe(false);
+  });
+
   it.each([
     [
       [

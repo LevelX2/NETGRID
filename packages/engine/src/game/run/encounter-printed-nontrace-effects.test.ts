@@ -216,7 +216,20 @@ function makeHost(
     trash: {
       openRunnerInstalledTrashPreventionWindow: (_targetIds, source) => {
         expect(source).toBe("trash_program_subroutine");
-        return options.preventTrash ?? false;
+        if (!options.preventTrash) return false;
+        state.pendingChoice = {
+          choiceId: "trash_prevention",
+          side: "runner",
+          source: "test.trash_prevention",
+          prompt: "Trash verhindern",
+          kind: "select_option",
+          options: [{ id: "pass", label: "Nicht verhindern" }],
+          minSelections: 1,
+          maxSelections: 1,
+          stateVersion: state.stateVersion + 1,
+          visibility: "public",
+        };
+        return true;
       },
       trashRunnerInstalledProgram: (cardId) => {
         state.runner.rig.programs = state.runner.rig.programs.filter(
@@ -452,6 +465,11 @@ describe("encounter printed non-trace effects boundary", () => {
         cardsTrashed: 0,
       }),
     ]);
+    expect(state.pendingChoice).toMatchObject({
+      choiceId: "trash_prevention",
+      side: "runner",
+    });
+    expect(state.activeSide).toBe("runner");
   });
 
   it("revalidates the selected program when resolving the Corp choice", () => {

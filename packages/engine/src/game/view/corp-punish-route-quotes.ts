@@ -33,6 +33,10 @@ import {
   fixedPlayCostCredits,
   playCostForDefinition,
 } from "../payment/play-cost";
+import {
+  cardCounter,
+  damagePreventionUsedThisTurn,
+} from "../state/turn-flags-counters";
 import { eligibleInstalledRunnerHardwareIds } from "../state/installed-runner-hardware";
 import { isConcealedRunnerResource } from "./card-view";
 
@@ -48,8 +52,10 @@ type CertifiedTraceTagResponse = {
   traceLimit: number;
   corpResponseCredits: number;
   runnerResponseCredits: number;
-  tagAmount: number;
+  minimumTagAmount: number;
+  maximumTagAmount: number;
   concealedRunnerResponsesUnknown: boolean;
+  visibleTagPreventionResponse: boolean;
 };
 
 /**
@@ -150,10 +156,14 @@ export function quoteCorpPunishRoute(
     };
   }
 
-  let projectedRunnerTags = state.runner.tags;
-  let rawMeatDamage = 0;
-  let rawNetDamage = 0;
-  let rawCoreDamage = 0;
+  let projectedRunnerTagsMinimum = state.runner.tags;
+  let projectedRunnerTagsMaximum = state.runner.tags;
+  let minimumMeatDamage = 0;
+  let maximumMeatDamage = 0;
+  let minimumNetDamage = 0;
+  let maximumNetDamage = 0;
+  let minimumCoreDamage = 0;
+  let maximumCoreDamage = 0;
   let directTagStepId: string | undefined;
   let traceTagStepId: string | undefined;
   for (const certified of certifiedSteps) {
@@ -161,10 +171,11 @@ export function quoteCorpPunishRoute(
     if (condition) {
       const conditionStatus = conditionStatusAfterPriorSteps(
         condition,
-        projectedRunnerTags,
+        projectedRunnerTagsMinimum,
+        projectedRunnerTagsMaximum,
         certified.quote.order === 0,
       );
-      if (conditionStatus !== "met") {
+      if (conditionStatus === "unmet" || conditionStatus === "unknown") {
         return {
           ok: true,
           quote: incompleteQuote(
@@ -178,26 +189,58 @@ export function quoteCorpPunishRoute(
     }
     for (const effect of certified.effects) {
       if (effect.kind === "add_tags") {
-        projectedRunnerTags += effect.amount;
+        projectedRunnerTagsMinimum += effect.amount;
+        projectedRunnerTagsMaximum += effect.amount;
         directTagStepId ??= certified.quote.stepId;
       } else if (
         effect.kind === "trace" &&
         traceTagResponse?.sourceStepId === certified.quote.stepId
       ) {
-        projectedRunnerTags += traceTagResponse.tagAmount;
+        projectedRunnerTagsMinimum += traceTagResponse.minimumTagAmount;
+        projectedRunnerTagsMaximum += traceTagResponse.maximumTagAmount;
         traceTagStepId ??= certified.quote.stepId;
       } else if (effect.kind === "damage") {
-        if (effect.damageType === "meat") rawMeatDamage += effect.amount;
-        if (effect.damageType === "net") rawNetDamage += effect.amount;
-        if (effect.damageType === "core") rawCoreDamage += effect.amount;
+        const conditionStatus = certified.condition
+          ? conditionStatusAfterPriorSteps(
+              certified.condition,
+              projectedRunnerTagsMinimum,
+              projectedRunnerTagsMaximum,
+              certified.quote.order === 0,
+            )
+          : "met";
+        if (effect.damageType === "meat") {
+          maximumMeatDamage += effect.amount;
+          if (conditionStatus === "met") minimumMeatDamage += effect.amount;
+        }
+        if (effect.damageType === "net") {
+          maximumNetDamage += effect.amount;
+          if (conditionStatus === "met") minimumNetDamage += effect.amount;
+        }
+        if (effect.damageType === "core") {
+          maximumCoreDamage += effect.amount;
+          if (conditionStatus === "met") minimumCoreDamage += effect.amount;
+        }
       }
     }
   }
 
-  if (
-    rawMeatDamage + rawNetDamage + rawCoreDamage > 0 &&
-    hasVisibleDamageModifierOrPrevention(state)
-  ) {
+  const minimumDamage =
+    minimumMeatDamage + minimumNetDamage + minimumCoreDamage;
+  const maximumDamage =
+    maximumMeatDamage + maximumNetDamage + maximumCoreDamage;
+  const visibleDamagePrevention =
+    maximumDamage > 0
+      ? visibleDamagePreventionEnvelope(state, {
+          meat: maximumMeatDamage,
+          net: maximumNetDamage,
+          core: maximumCoreDamage,
+        })
+      : {
+          knowledge: "none_visible" as const,
+          maximumPreventableDamage: 0,
+          creditCost: { minimum: 0, maximum: 0 },
+        };
+  if (visibleDamagePrevention === undefined) {
     return {
       ok: true,
       quote: incompleteQuote(base, "damage_prevention_quote_incomplete"),
@@ -212,8 +255,7 @@ export function quoteCorpPunishRoute(
     (sum, step) => sum + step.quote.credits,
     0,
   );
-  const rawDamage = rawMeatDamage + rawNetDamage + rawCoreDamage;
-  const hasDamage = rawDamage > 0;
+  const hasDamage = maximumDamage > 0;
   const hasTraceTagResponse = traceTagResponse !== undefined;
   const corpResponseCredits = traceTagResponse?.corpResponseCredits ?? 0;
   const runnerResponseCredits =
@@ -248,11 +290,11 @@ export function quoteCorpPunishRoute(
             : traceTagStepId && traceTagResponse
               ? {
                   kind: "trace_tag_step",
-                  status: "response_required",
-                  currentRunnerTags: 0,
-                  requiredRunnerTags: traceTagResponse.tagAmount,
-                  sourceStepId: traceTagStepId,
-                  traceLimit: traceTagResponse.traceLimit,
+              status: "response_required",
+              currentRunnerTags: 0,
+              requiredRunnerTags: traceTagResponse.maximumTagAmount,
+              sourceStepId: traceTagStepId,
+              traceLimit: traceTagResponse.traceLimit,
                 }
               : {
                   kind: "none",
@@ -262,14 +304,20 @@ export function quoteCorpPunishRoute(
                 },
       responsePaymentEnvelope: {
         responseKind: hasTraceTagResponse
-          ? "trace_bid"
+          ? hasDamage &&
+            visibleDamagePrevention.maximumPreventableDamage > 0
+            ? "mixed"
+            : "trace_bid"
           : hasDamage
             ? "runner_optional"
             : "none",
         paymentKnowledge: hasTraceTagResponse
           ? traceTagResponse.concealedRunnerResponsesUnknown
             ? "unknown"
-            : "exact_public"
+            : traceTagResponse.visibleTagPreventionResponse ||
+                visibleDamagePrevention.maximumPreventableDamage > 0
+              ? "bounded_public"
+              : "exact_public"
           : hasDamage
             ? "unknown"
             : "exact_public",
@@ -291,20 +339,19 @@ export function quoteCorpPunishRoute(
       damageEnvelope: {
         runnerHandCount: state.runner.grip.length,
         rawDamage: {
-          meat: rawMeatDamage,
-          net: rawNetDamage,
-          core: rawCoreDamage,
-          total: rawDamage,
+          meat: maximumMeatDamage,
+          net: maximumNetDamage,
+          core: maximumCoreDamage,
+          total: maximumDamage,
         },
         effectiveDamage: {
-          minimum: rawDamage,
-          maximum: rawDamage,
+          minimum: Math.max(
+            0,
+            minimumDamage - visibleDamagePrevention.maximumPreventableDamage,
+          ),
+          maximum: maximumDamage,
         },
-        visiblePrevention: {
-          knowledge: "none_visible",
-          maximumPreventableDamage: 0,
-          creditCost: { minimum: 0, maximum: 0 },
-        },
+        visiblePrevention: visibleDamagePrevention,
         visiblePiercing: {
           knowledge: "none_visible",
           maximumBypassedDamage: 0,
@@ -313,13 +360,20 @@ export function quoteCorpPunishRoute(
       },
       guarantee: traceTagResponse?.concealedRunnerResponsesUnknown
         ? "not_guaranteed"
+        : traceTagResponse &&
+            traceTagResponse.minimumTagAmount <
+              traceTagResponse.maximumTagAmount
+          ? "conditional_on_runner_response"
         : hasDamage
           ? "conditional_on_runner_response"
           : "guaranteed",
       responseKnowledge: hasTraceTagResponse
         ? traceTagResponse.concealedRunnerResponsesUnknown
           ? "unknown"
-          : "public_exact"
+          : traceTagResponse.visibleTagPreventionResponse ||
+              visibleDamagePrevention.maximumPreventableDamage > 0
+            ? "public_bounded"
+            : "public_exact"
         : hasDamage
           ? "unknown"
           : "public_exact",
@@ -490,30 +544,46 @@ function certifyExactTraceTagResponse(
     "runner",
     zeroRunnerBid.id,
   );
-  if (
-    !successful ||
-    successful.trace !== undefined ||
-    successful.pendingChoice !== undefined ||
-    successful.runner.tags < simulationState.runner.tags + tagEffect.amount
-  ) {
-    return undefined;
-  }
+  if (!successful) return undefined;
+  const successfulOutcomes = exactTagApplicationOutcomes(successful);
+  if (!successfulOutcomes) return undefined;
   const maximumRunnerResponse = applyExactChoice(
     structuredClone(afterCorpBid),
     "runner",
     maximumRunnerBid.id,
   );
+  if (!maximumRunnerResponse) return undefined;
+  const maximumResponseOutcomes = exactTagApplicationOutcomes(
+    maximumRunnerResponse,
+  );
+  if (!maximumResponseOutcomes) return undefined;
+  const responseOutcomes = [
+    ...successfulOutcomes.states,
+    ...maximumResponseOutcomes.states,
+  ];
+  const tagAmounts = responseOutcomes.map(
+    (outcome) => outcome.runner.tags - simulationState.runner.tags,
+  );
+  const minimumTagAmount = concealedRunnerResponsesUnknown
+    ? 0
+    : Math.min(...tagAmounts);
+  const maximumTagAmount = Math.max(...tagAmounts);
   if (
-    !maximumRunnerResponse ||
-    maximumRunnerResponse.trace !== undefined ||
-    maximumRunnerResponse.pendingChoice !== undefined
+    tagAmounts.some(
+      (amount) =>
+        !Number.isSafeInteger(amount) || amount < 0 || amount > tagEffect.amount,
+    ) ||
+    maximumTagAmount !== tagEffect.amount
   ) {
     return undefined;
   }
   const corpResponseCredits =
     verifiedAfterHead.corp.credits - afterCorpBid.corp.credits;
-  const runnerResponseCredits =
-    afterCorpBid.runner.credits - maximumRunnerResponse.runner.credits;
+  const runnerResponseCredits = Math.max(
+    ...responseOutcomes.map(
+      (outcome) => afterCorpBid.runner.credits - outcome.runner.credits,
+    ),
+  );
   if (
     !Number.isSafeInteger(corpResponseCredits) ||
     corpResponseCredits < 0 ||
@@ -527,9 +597,52 @@ function certifyExactTraceTagResponse(
     traceLimit: traceEffect.traceLimit,
     corpResponseCredits,
     runnerResponseCredits,
-    tagAmount: tagEffect.amount,
+    minimumTagAmount,
+    maximumTagAmount,
     concealedRunnerResponsesUnknown,
+    visibleTagPreventionResponse:
+      successfulOutcomes.usedTagPreventionWindow ||
+      maximumResponseOutcomes.usedTagPreventionWindow,
   };
+}
+
+function exactTagApplicationOutcomes(
+  state: GameState,
+  depth = 0,
+):
+  | { states: GameState[]; usedTagPreventionWindow: boolean }
+  | undefined {
+  if (state.trace !== undefined || depth > 8) return undefined;
+  const choice = state.pendingChoice;
+  if (!choice) {
+    return { states: [state], usedTagPreventionWindow: depth > 0 };
+  }
+  if (
+    choice.side !== "runner" ||
+    choice.kind !== "select_option" ||
+    choice.source !== "v120.event_modification.avoid" ||
+    choice.minSelections !== 1 ||
+    choice.maxSelections !== 1 ||
+    choice.options.length < 2 ||
+    choice.options.length > 16 ||
+    new Set(choice.options.map((option) => option.id)).size !==
+      choice.options.length
+  ) {
+    return undefined;
+  }
+  const states: GameState[] = [];
+  for (const option of choice.options) {
+    const resolved = applyExactChoice(
+      structuredClone(state),
+      "runner",
+      option.id,
+    );
+    if (!resolved) return undefined;
+    const branch = exactTagApplicationOutcomes(resolved, depth + 1);
+    if (!branch) return undefined;
+    states.push(...branch.states);
+  }
+  return { states, usedTagPreventionWindow: true };
 }
 
 /**
@@ -1035,18 +1148,34 @@ function exactFundingOnlyHeadAvailable(
 
 function conditionStatusAfterPriorSteps(
   condition: CardConditionImplementation,
-  projectedRunnerTags: number,
+  projectedRunnerTagsMinimum: number,
+  projectedRunnerTagsMaximum: number,
   isCurrentHead: boolean,
-): "met" | "unmet" | "unknown" {
+): "met" | "unmet" | "conditional" | "unknown" {
   if (isCurrentHead) return "met";
-  if (condition.kind === "runner_is_tagged")
-    return projectedRunnerTags > 0 ? "met" : "unmet";
-  if (condition.kind === "runner_tags_at_least")
-    return projectedRunnerTags >= condition.amount ? "met" : "unmet";
+  if (condition.kind === "runner_is_tagged") {
+    if (projectedRunnerTagsMinimum > 0) return "met";
+    return projectedRunnerTagsMaximum > 0 ? "conditional" : "unmet";
+  }
+  if (condition.kind === "runner_tags_at_least") {
+    if (projectedRunnerTagsMinimum >= condition.amount) return "met";
+    return projectedRunnerTagsMaximum >= condition.amount
+      ? "conditional"
+      : "unmet";
+  }
   return "unknown";
 }
 
-function hasVisibleDamageModifierOrPrevention(state: GameState): boolean {
+function visibleDamagePreventionEnvelope(
+  state: GameState,
+  rawDamage: Readonly<Record<"meat" | "net" | "core", number>>,
+):
+  | CorpPunishRouteQuote["damageEnvelope"]["visiblePrevention"]
+  | undefined {
+  const supportedSources: {
+    matchingDamage: number;
+    maximumPrevention: number;
+  }[] = [];
   for (const instance of Object.values(state.cardInstances)) {
     if (!instance.faceup) continue;
     if (instance.zone.side !== "runner" || instance.zone.zone !== "rig") {
@@ -1057,20 +1186,67 @@ function hasVisibleDamageModifierOrPrevention(state: GameState): boolean {
         cardImplementationForDefinitionId(instance.definitionId)?.corpUtility
           ?.kind === "meat_damage_boost"
       ) {
-        return true;
+        return undefined;
       }
       continue;
     }
-    if (
-      (
-        cardImplementationForDefinitionId(instance.definitionId)
-          ?.damagePreventionSources ?? []
-      ).length > 0
-    ) {
-      return true;
+    for (const source of
+      cardImplementationForDefinitionId(instance.definitionId)
+        ?.damagePreventionSources ?? []) {
+      const matchingDamage = source.damageTypes.reduce(
+        (total, damageType) => total + rawDamage[damageType],
+        0,
+      );
+      if (matchingDamage <= 0) continue;
+      if (
+        source.visibility !== "public" ||
+        source.cost.kind !== "source_counter" ||
+        source.corpMayPayToBypass ||
+        source.corpMayCancelUntilEndOfTurn
+      ) {
+        return undefined;
+      }
+      const availableUses = Math.floor(
+        cardCounter(state, instance.instanceId, source.cost.counterType) /
+          source.cost.amount,
+      );
+      const sourceCapacity =
+        source.amount === "all"
+          ? availableUses > 0
+            ? matchingDamage
+            : 0
+          : source.amount * availableUses;
+      const remainingTurnLimit = source.limit
+        ? Math.max(
+            0,
+            source.limit.amount -
+              damagePreventionUsedThisTurn(state, instance.instanceId),
+          )
+        : sourceCapacity;
+      supportedSources.push({
+        matchingDamage,
+        maximumPrevention: Math.min(
+          matchingDamage,
+          sourceCapacity,
+          remainingTurnLimit,
+        ),
+      });
     }
   }
-  return false;
+  if (supportedSources.length === 0) {
+    return {
+      knowledge: "none_visible",
+      maximumPreventableDamage: 0,
+      creditCost: { minimum: 0, maximum: 0 },
+    };
+  }
+  if (supportedSources.length > 1) return undefined;
+  return {
+    knowledge: "bounded_public",
+    maximumPreventableDamage:
+      supportedSources[0]?.maximumPrevention ?? 0,
+    creditCost: { minimum: 0, maximum: 0 },
+  };
 }
 
 function quoteBase(

@@ -28,6 +28,7 @@ export type CardCapabilityBindingErrorCode =
   | "wrong_canonical_definition"
   | "unknown_activated_capability"
   | "ambiguous_activated_capability"
+  | "ambiguous_on_play_capability"
   | "wrong_activated_capability_kind"
   | "ability_binding_mode_mismatch"
   | "ability_ref_mismatch";
@@ -45,6 +46,13 @@ export class CardCapabilityBindingError extends Error {
 export type ActivatedAbilityBinding = {
   kind: "card_spec_capability_key";
   ability: ActivatedCardAbilityImplementation;
+  capabilityKey: CapabilityKey;
+  sourceAbilityId: CanonicalCapabilityId;
+};
+
+export type OnPlayAbilityBinding = {
+  kind: "card_spec_capability_key";
+  ability: OnPlayCardAbilityImplementation;
   capabilityKey: CapabilityKey;
   sourceAbilityId: CanonicalCapabilityId;
 };
@@ -105,6 +113,43 @@ export function onPlayAbilityForCapabilityIdentity(
   );
   if (matches.length !== 1 || matches[0]?.kind !== "on_play") return undefined;
   return matches[0] as unknown as OnPlayCardAbilityImplementation;
+}
+
+export function onPlayAbilityBindingForDefinition(
+  definition: CardDefinition,
+  sources: CardCapabilityAuthoritySources = DEFAULT_AUTHORITY_SOURCES,
+): OnPlayAbilityBinding | undefined {
+  const engineCard = authorityForDefinition(definition, sources);
+  if (!engineCard) return undefined;
+  const matches = (engineCard.engine.abilities ?? []).filter(
+    (ability) => ability.kind === "on_play",
+  );
+  if (matches.length > 1)
+    throw new CardCapabilityBindingError(
+      "ambiguous_on_play_capability",
+      "Die generische On-play-Aktion besitzt mehrere moegliche CardSpec-Capabilities.",
+    );
+  const ability = matches[0];
+  if (!ability) return undefined;
+  return {
+    kind: "card_spec_capability_key",
+    ability: ability as unknown as OnPlayCardAbilityImplementation,
+    capabilityKey: ability.capabilityKey,
+    sourceAbilityId: canonicalCapabilityId(
+      definition.id,
+      ability.capabilityKey,
+    ),
+  };
+}
+
+export function onPlayAbilityBindingPayload(
+  binding: OnPlayAbilityBinding,
+): Record<string, string | number | boolean> {
+  return {
+    cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+    cardImplementationAbilityKey: binding.capabilityKey,
+    cardImplementationAbilityId: binding.sourceAbilityId,
+  };
 }
 
 export function endOfRunnerTurnAbilityBindingsForDefinition(

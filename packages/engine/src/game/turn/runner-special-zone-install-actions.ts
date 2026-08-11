@@ -5,10 +5,6 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import {
-  canonicalCapabilityId,
-  engineCardByDefinitionId,
-} from "@netgrid/cards/engine";
 import { buildLegalAction } from "./action-builders";
 
 export type RunnerValuPakInstallActionInput = {
@@ -175,52 +171,6 @@ export function buildRunnerDelayedInstallRemoveCounterAction(
           visibility: "public",
         },
       ],
-    },
-  );
-}
-
-export function buildRunnerHiddenStackProgramInstallAction(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): LegalAction {
-  const definitionId = state.cardInstances[sourceCardId]?.definitionId;
-  const matches = definitionId
-    ? (engineCardByDefinitionId(definitionId)?.engine.abilities ?? []).filter(
-        (ability) =>
-          ability.kind === "activated" &&
-          ability.effects.some(
-            (effect) => effect.kind === "search_stack_install",
-          ),
-      )
-    : [];
-  if (!definitionId || matches.length !== 1)
-    throw new Error(
-      "Die Stack-Install-Faehigkeit ist nicht eindeutig an ihre CardSpec-Capability gebunden.",
-    );
-  const capabilityKey = matches[0]!.capabilityKey;
-  const sourceAbilityId = canonicalCapabilityId(definitionId, capabilityKey);
-  return buildLegalAction(
-    state,
-    "runner",
-    "trigger_ability",
-    "Self-Modifying Code trashen: Programm aus Stack installieren",
-    sourceCardId,
-    [],
-    {
-      cardId: sourceCardId,
-      cardImplementationAbility: "activated",
-      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-      cardImplementationAbilityKey: capabilityKey,
-      cardImplementationAbilityId: sourceAbilityId,
-      v1911HiddenZoneAbility: "hidden_stack_program_install",
-      hiddenZoneBarrier: true,
-    },
-    {
-      abilityRef: {
-        sourceCardInstanceId: sourceCardId,
-        sourceAbilityId,
-      },
-      effectRef: `effect.${sourceAbilityId}`,
     },
   );
 }

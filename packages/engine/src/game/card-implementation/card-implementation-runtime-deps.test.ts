@@ -284,6 +284,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
         publicPayload: { trashed: true },
       }),
       installedAdvanceableCorpCardTargetCount: () => 0,
+      moveAdvancementCounterOptionCount: () => 0,
       doubleChosenIceStrengthUntilEndOfTurn: () => ({
         publicPayload: { iceStrengthAfter: 1 },
       }),
@@ -412,6 +413,7 @@ describe("game card implementation runtime deps root", () => {
         "shuffleSourceIntoCorpRd",
         "trashCorpInstalledCardsInSourceServer",
         "installedAdvanceableCorpCardTargetCount",
+        "moveAdvancementCounterOptionCount",
         "gainRunnerEventAgendaPoint",
         "scoreSourceAsAgenda",
         "corpRandomDiscardFromHq",

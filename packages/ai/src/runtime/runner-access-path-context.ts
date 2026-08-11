@@ -5,6 +5,10 @@ import type {
 } from "@netgrid/shared";
 
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessRandomBreakOrDamageRiskForVisibleRunPath,
+  randomBreakOrDamageRiskCanCarryRunPath,
+} from "../actions/risk-action-projection";
 import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
 import {
   isEndRunSubroutine,
@@ -273,6 +277,34 @@ export function createRunnerAccessPathContext(
       return {
         canPreserveAccessPath: true,
         evidence: [
+          `break_credits_after:${creditsAfterBreak}`,
+          dependencies.knownIcePathReason(pathAssessment, server.id),
+        ],
+      };
+    }
+    const conditionalFuturePath =
+      assessRandomBreakOrDamageRiskForVisibleRunPath(input, {
+        targetServerId: server.id,
+        visibleIce: futureIce,
+      });
+    if (randomBreakOrDamageRiskCanCarryRunPath(conditionalFuturePath)) {
+      const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
+        input,
+        server,
+        targetSubroutines,
+        creditsAfterBreak,
+        remainingCurrentEndRunAfterBreak,
+      );
+      if (remotePayoff.blocksBreak) {
+        return {
+          canPreserveAccessPath: false,
+          evidence: remotePayoff.evidence,
+        };
+      }
+      return {
+        canPreserveAccessPath: true,
+        evidence: [
+          "break_preserves_conditional_random_break_path:true",
           `break_credits_after:${creditsAfterBreak}`,
           dependencies.knownIcePathReason(pathAssessment, server.id),
         ],

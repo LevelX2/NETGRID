@@ -62,6 +62,215 @@ describe("corp action disposition contributors", () => {
       },
     ]);
   });
+
+  it("disposes generic Basic Credit through hand management while HQ overflows", () => {
+    const current = input();
+    current.playerView.own.credits = 1;
+    current.playerView.own.gripOrHq = Array.from({ length: 6 }, (_, index) => ({
+      instanceId: `corp-card-${index}`,
+    })) as never;
+    current.playerView.own.maxHandSize = 5;
+    current.legalActions = [
+      {
+        actionId: "basic-credit",
+        side: "corp",
+        type: "gain_credit",
+        source: "basic_action",
+        expiresAtStateVersion: 12,
+        targetRequirements: [],
+        choiceRequirements: [],
+        costs: [{ clicks: 1 }],
+      },
+      {
+        actionId: "expensive-route",
+        side: "corp",
+        type: "install_card",
+        source: "corp-card-0",
+        expiresAtStateVersion: 12,
+        targetRequirements: [],
+        costs: [{ clicks: 1, credits: 8 }],
+      },
+    ] as never;
+    const candidate = {
+      actionId: "basic-credit",
+      sourceKind: "basic_action",
+      actionType: "gain_credit",
+      semanticActionType: "economy.gain_credit",
+      costProfile: {
+        clickCost: 1,
+        creditCost: 0,
+        additionalCosts: [],
+      },
+      economyProjection: {
+        kind: "immediate_liquid",
+        timing: "immediate",
+        creditRestriction: "general",
+        clickCost: 1,
+        creditCost: 0,
+        grossLiquidCreditGain: 1,
+        netLiquidCreditGain: 1,
+        cardsDrawn: 0,
+        cardsConsumed: 0,
+        netHandDelta: 0,
+        payoutMode: "fixed",
+        reliability: "guaranteed",
+        source: "basic_action_contract",
+        confidence: "medium",
+      },
+    } as unknown as ActionSemanticCandidate;
+
+    expect(
+      collectCorpActionDispositions(
+        current,
+        [candidate],
+        emptyDomain(),
+        contributorFacts(),
+      ),
+    ).toEqual([
+      {
+        actionId: "basic-credit",
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.hand_and_agenda_management",
+        evidenceCode: "corp_basic_credit_rejected_hq_overflow_requires_cleanup",
+      },
+    ]);
+  });
+
+  it("disposes an unbound punish-support install without requiring an execution quote", () => {
+    const candidate = {
+      actionId: "install-trace-support",
+      actionType: "install_card",
+      semanticActionType: "install.card",
+      sourceKind: "card",
+      sourceDefinitionId: "trace-support",
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpDefinitionSupportsPunishPlan: vi.fn(() => true),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([
+      {
+        actionId: "install-trace-support",
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.execute_punish_sequence",
+        evidenceCode: "corp_conditional_punish_setup_has_no_feasible_campaign",
+      },
+    ]);
+  });
+
+  it("does not dispose an action owned by an exact executable plan", () => {
+    const candidate = {
+      actionId: "install-exact-punish-plan",
+      actionType: "install_card",
+      semanticActionType: "install.card",
+      sourceKind: "card",
+      sourceDefinitionId: "trace-support",
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpExactExecutableNonEconomyPlanOwnsAction: vi.fn(() => true),
+      corpDefinitionSupportsPunishPlan: vi.fn(() => true),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([]);
+  });
+
+  it("disposes an exact tag-source action with no visible payoff without requiring a quote", () => {
+    const candidate = {
+      actionId: "trace-tag-source",
+      actionType: "activated_card_ability",
+      semanticActionType: "card_ability.activate",
+      sourceKind: "card",
+      sourceDefinitionId: "trace-tag-source",
+      functionalEffects: [
+        {
+          kind: "tag_source",
+          scope: "runner",
+          timing: "trace_success",
+          target: "runner",
+          amount: 1,
+          finite: false,
+        },
+      ],
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpDefinitionSupportsPunishPlan: vi.fn(() => true),
+      corpConditionalPunishTagSourceHasNoVisiblePayoff: vi.fn(() => true),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([
+      {
+        actionId: "trace-tag-source",
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.execute_punish_sequence",
+        evidenceCode:
+          "corp_conditional_punish_tag_source_has_no_visible_payoff",
+      },
+    ]);
+  });
+
+  it("keeps an exact tag-source action quote-bound when a visible payoff exists", () => {
+    const candidate = {
+      actionId: "trace-tag-source",
+      actionType: "activated_card_ability",
+      semanticActionType: "card_ability.activate",
+      sourceKind: "card",
+      sourceDefinitionId: "trace-tag-source",
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpDefinitionSupportsPunishPlan: vi.fn(() => true),
+      corpConditionalPunishTagSourceHasNoVisiblePayoff: vi.fn(() => false),
+      corpPunishQuoteRequestExists: vi.fn(() => true),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([
+      {
+        actionId: "trace-tag-source",
+        disposition: "assessment_unknown",
+        ownerModuleId: "corp.execute_punish_sequence",
+        evidenceCode: "corp_conditional_punish_action_quote_unknown",
+      },
+    ]);
+  });
+
+  it("disposes a punish action when no engine quote request can be formed", () => {
+    const candidate = {
+      actionId: "trace-tag-source",
+      actionType: "play_operation",
+      semanticActionType: "play.corp_operation",
+      sourceKind: "card",
+      sourceDefinitionId: "trace-tag-source",
+    } as unknown as ActionSemanticCandidate;
+    const facts = {
+      ...contributorFacts(),
+      corpDefinitionSupportsPunishPlan: vi.fn(() => true),
+      corpConditionalPunishTagSourceHasNoVisiblePayoff: vi.fn(() => false),
+      corpPunishQuoteRequestExists: vi.fn(() => false),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], emptyDomain(), facts),
+    ).toEqual([
+      {
+        actionId: "trace-tag-source",
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.execute_punish_sequence",
+        evidenceCode:
+          "corp_conditional_punish_action_has_no_engine_quote_request",
+      },
+    ]);
+  });
 });
 
 function input(): AiDecisionInput {
@@ -109,9 +318,10 @@ function contributorFacts(): CorpActionDispositionContributorFacts {
     corpCandidateProjectsCardDraw: no,
     corpConditionalRezSupportWithoutCurrentRouteEvidence: none,
     corpDefenseSignalOwnsAction: no,
-    corpDefenseTurnPlanningSliceMayOwnAction: no,
     corpDefensiveUpgradePlacement: none,
     corpDefinitionSupportsPunishPlan: no,
+    corpConditionalPunishTagSourceHasNoVisiblePayoff: no,
+    corpPunishQuoteRequestExists: no,
     corpDrawCandidatePreservesHandCapacity: no,
     corpEmptyRdDrawOperationDispositionEvidence: none,
     corpExactExecutableNonEconomyPlanOwnsAction: no,

@@ -896,9 +896,11 @@ export function resolveTrashProgramChoice(
           cardsTrashed: 1,
       },
   );
+  // The Corp has completed the target decision. Any resulting prevention
+  // window and the resumed encounter both belong to the Runner.
+  host.state.activeSide = "runner";
   if (host.state.pendingChoice === choice) {
     delete host.state.pendingChoice;
-    host.state.activeSide = "runner";
   }
 }
 

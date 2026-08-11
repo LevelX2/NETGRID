@@ -228,6 +228,15 @@ describe("Runner tactical plan modules", () => {
         .materialize(instance, {} as never, runnerContext)
         .candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["run-rd-protocol"]);
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "runner",
+        stateVersion: 10,
+        timingPoint: "runner.action",
+        planInstanceId: instance.instanceId,
+        ...module.materialize(instance, {} as never, runnerContext),
+      }).head.actionId,
+    ).toBe("run-rd-protocol");
   });
 
   it("does not impose one run producer's source on an exact mixed pressure route", () => {
@@ -565,6 +574,36 @@ describe("Runner tactical plan modules", () => {
       requestedClass: "P2",
       reasonCode: "score_threat",
       witness: { evidenceCode: "known_agenda_remote" },
+    });
+  });
+
+  it("keeps a belief-dependent targeted bypass below P2 even against a known agenda", () => {
+    const bypass = run("targeted-bypass", "remote_1");
+    const module = tacticalModule("runner.contest_remote");
+    const runnerContext = context([bypass], {
+      remoteContests: [
+        {
+          contestId: "remote-1",
+          serverId: "remote_1",
+          purpose: "contest",
+          knownAgendaThreat: true,
+          reachable: true,
+          marginalValue: 20,
+          evidenceCode: "targeted_bypass_preflight",
+          routePreparation: "targeted_bypass",
+          preparationActionIds: [bypass.actionId],
+          runActionAssessments: {},
+        },
+      ],
+    });
+    const proposal = module.discover(runnerContext)[0]!;
+    const instance = instantiatePlanProposal(proposal, 10);
+
+    expect(
+      module.assess(instance, runnerContext, emptyPortfolio()),
+    ).toMatchObject({
+      priorityClaim: { requestedClass: "P4" },
+      intentFit: "tactical_override",
     });
   });
 

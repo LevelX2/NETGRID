@@ -1,4 +1,6 @@
+import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "./action-card-semantic-profiles";
 
 describe("ActionCardSemanticProfiles", () => {
@@ -51,54 +53,30 @@ describe("ActionCardSemanticProfiles", () => {
     );
   });
 
-  it("creates qualified StrategySupportPairs from reviewed multiaccess payoff signals", () => {
+  it("retains static multiaccess without inventing capability-bound strategy pairs", () => {
     const profiles = buildActionCardSemanticProfilesByDefinitionId();
     const hqInterface = profiles["onr_v1_129_hq-interface"];
     const rndInterface = profiles["onr_v1_139_r-and-d-interface"];
 
     expect(hqInterface?.tacticSignals).toContain("access.hq_multiaccess");
-    expect(hqInterface?.strategySupport).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          strategyId: "runner.hq_pressure",
-          role: "payoff_anchor",
-          confidence: "high",
-          evidence: "tactic_signal_anchor:access.hq_multiaccess",
-        }),
-        expect.objectContaining({
-          strategyId: "runner.interface_closeout",
-          role: "payoff_anchor",
-          confidence: "high",
-          evidence: "tactic_signal_anchor:access.hq_multiaccess",
-        }),
-      ]),
+    expect(hqInterface?.functionalEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "multiaccess",
+        scope: "hq",
+        amount: 1,
+      }),
     );
+    expect(hqInterface?.strategySupport).toEqual([]);
 
     expect(rndInterface?.tacticSignals).toContain("access.rnd_multiaccess");
-    expect(rndInterface?.strategySupport).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          strategyId: "runner.rnd_pressure",
-          role: "payoff_anchor",
-          confidence: "high",
-          evidence: "tactic_signal_anchor:access.rnd_multiaccess",
-        }),
-        expect.objectContaining({
-          strategyId: "runner.interface_closeout",
-          role: "payoff_anchor",
-          confidence: "high",
-          evidence: "tactic_signal_anchor:access.rnd_multiaccess",
-        }),
-      ]),
+    expect(rndInterface?.functionalEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "multiaccess",
+        scope: "rnd",
+        amount: 1,
+      }),
     );
-    expect([
-      ...(hqInterface?.strategySupport ?? []),
-      ...(rndInterface?.strategySupport ?? []),
-    ]).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ evidence: "ai_hint_semantic_profile" }),
-      ]),
-    );
+    expect(rndInterface?.strategySupport).toEqual([]);
   });
 
   it("does not turn generic scored-agenda actions into score closeout signals", () => {
@@ -151,15 +129,80 @@ describe("ActionCardSemanticProfiles", () => {
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "finite_economy_pool",
-          timing: "action",
-          scope: "remote",
+          kind: "counter_economy",
+          timing: "on_rez",
+          scope: "corp",
           resource: "credits",
           amount: 16,
-          economyMode: "fixed_pool",
+          economyMode: "bank_load",
+          target: "economy.hosted_credit_bank",
+        }),
+        expect.objectContaining({
+          kind: "economy",
+          timing: "action",
+          scope: "corp",
+          resource: "credits",
+          economyMode: "bank_cashout",
+          target: "economy.hosted_credit_cashout",
         }),
       ]),
     );
+  });
+
+  it("joins Blood Cat trace semantics from its canonical capability", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+    const abilityId =
+      "onr_v1_310_blood-cat:abilities_activated_corp_main_trace";
+    const action = {
+      actionId: "blood-cat-trace",
+      side: "corp",
+      type: "activated_card_ability",
+      label: "Blood Cat: Trace 5 starten",
+      source: "blood-cat-instance",
+      timingPoint: "corp_action.main",
+      costs: [{ clicks: 1 }],
+      targetRequirements: [],
+      visibility: "public",
+      expiresAtStateVersion: 1,
+      abilityRef: {
+        sourceCardInstanceId: "blood-cat-instance",
+        sourceAbilityId: abilityId,
+      },
+      payload: {
+        cardId: "blood-cat-instance",
+        sourceDefinitionId: "onr_v1_310_blood-cat",
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityId: abilityId,
+        cardImplementationAbilityKey: "abilities_activated_corp_main_trace",
+      },
+    } satisfies LegalAction;
+
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [action],
+      observerSide: "corp",
+      stateVersion: 1,
+      cardSemanticProfilesByDefinitionId: profiles,
+    });
+
+    expect(candidate).toMatchObject({
+      abilityId,
+      abilityKey: "abilities_activated_corp_main_trace",
+      abilityBindingMethod: "canonical_capability_id",
+    });
+    expect(candidate?.functionalEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "trace", timing: "action" }),
+        expect.objectContaining({
+          kind: "tag_source",
+          timing: "action",
+          amount: 1,
+        }),
+      ]),
+    );
+    expect(candidate?.actionTacticSignals).toEqual(
+      expect.arrayContaining(["trace.source", "tag.source"]),
+    );
+    expect(candidate?.projectionIssues).not.toContain("ability_unresolved");
   });
 });
 

@@ -163,30 +163,9 @@ export function deriveCardSpecAiHint(
   const capabilityStrategySupportPairs = (
     entry.planning.planningAnnotations?.capabilities ?? []
   ).flatMap((capability) =>
-    capability.annotations.flatMap((annotation) =>
-      annotation.kind !== "strategy_support"
-        ? []
-        : [
-            {
-              strategyId: annotation.strategyKey,
-              role: strategySupportRole(annotation.role),
-              roleDetail: annotation.roleDetail,
-              evidence: derivedActionStrategyEvidence(
-                entry.planning.engine,
-                capability.capabilityKey,
-                annotation.strategyKey,
-                strategySupportRole(annotation.role),
-                annotation.roleDetail,
-                annotation.evidenceAnchor,
-              ),
-              confidence: annotation.confidence,
-              ...(annotation.rationale === undefined
-                ? {}
-                : { rationale: annotation.rationale }),
-            },
-          ],
-    ),
+    deriveCapabilityStrategySupportPairs(entry, capability.capabilityKey),
   );
+  const actionCapabilitySemantics = deriveActionCapabilitySemantics(entry);
   const actionPlanOwnerBindings = deriveActionPlanOwnerBindings(entry);
   const targetProfiles = deriveTargetProfiles(entry);
   const genericTypedHint = deriveGenericTypedHintOverlay(entry);
@@ -252,6 +231,9 @@ export function deriveCardSpecAiHint(
     ...(actionPlanOwnerBindings.length === 0
       ? {}
       : { actionPlanOwnerBindings }),
+    ...(actionCapabilitySemantics.length === 0
+      ? {}
+      : { actionCapabilitySemantics }),
     ...(targetProfiles.length === 0 &&
     genericTypedHint.targetProfiles.length === 0
       ? {}
@@ -291,6 +273,78 @@ export function deriveCardSpecAiHint(
     requiredMechanics: deriveRequiredMechanics(entry),
   } satisfies AiCardHint;
   return hint;
+}
+
+function deriveCapabilityStrategySupportPairs(
+  entry: PlanningEntry,
+  capabilityKey: string,
+): NonNullable<AiCardHint["actionStrategySupportPairs"]> {
+  const capability = (
+    entry.planning.planningAnnotations?.capabilities ?? []
+  ).find((candidate) => candidate.capabilityKey === capabilityKey);
+  if (capability === undefined) return [];
+  return capability.annotations.flatMap((annotation) =>
+    annotation.kind !== "strategy_support"
+      ? []
+      : [
+          {
+            strategyId: annotation.strategyKey,
+            role: strategySupportRole(annotation.role),
+            roleDetail: annotation.roleDetail,
+            evidence: derivedActionStrategyEvidence(
+              entry.planning.engine,
+              capabilityKey,
+              annotation.strategyKey,
+              strategySupportRole(annotation.role),
+              annotation.roleDetail,
+              annotation.evidenceAnchor,
+            ),
+            confidence: annotation.confidence,
+            ...(annotation.rationale === undefined
+              ? {}
+              : { rationale: annotation.rationale }),
+          },
+        ],
+  );
+}
+
+function deriveActionCapabilitySemantics(
+  entry: PlanningEntry,
+): NonNullable<AiCardHint["actionCapabilitySemantics"]> {
+  return (entry.planning.engine.abilities ?? [])
+    .map((ability) => {
+      const overlay: GenericTypedHintOverlay = {
+        effects: [],
+        conditions: [],
+        functionSignals: [],
+        targetProfiles: [],
+      };
+      appendTypedCondition(overlay.conditions, ability.condition);
+      for (const effect of ability.effects ?? []) {
+        appendGenericAbilityEffect(overlay, entry, ability, effect);
+        appendGenericTargetProfile(overlay.targetProfiles, ability, effect);
+      }
+      appendScoredAgendaActivatedAbilityMarker(overlay, entry, ability);
+      const strategySupportPairs = deriveCapabilityStrategySupportPairs(
+        entry,
+        ability.capabilityKey,
+      );
+      const effects = appendUniqueObjects([], overlay.effects);
+      const conditions = uniqueConditions(overlay.conditions);
+      const targetProfiles = appendUniqueObjects([], overlay.targetProfiles);
+      const functionSignals = [...new Set(overlay.functionSignals)].sort();
+      return {
+        capabilityKey: ability.capabilityKey,
+        ...(effects.length === 0 ? {} : { effects }),
+        ...(functionSignals.length === 0 ? {} : { functionSignals }),
+        ...(conditions.length === 0 ? {} : { conditions }),
+        ...(targetProfiles.length === 0 ? {} : { targetProfiles }),
+        ...(strategySupportPairs.length === 0 ? {} : { strategySupportPairs }),
+      };
+    })
+    .sort((left, right) =>
+      left.capabilityKey.localeCompare(right.capabilityKey),
+    );
 }
 
 function deriveActionPlanOwnerBindings(
@@ -397,6 +451,7 @@ function deriveGenericTypedHintOverlay(
       appendGenericAbilityEffect(overlay, entry, ability, effect);
       appendGenericTargetProfile(overlay.targetProfiles, ability, effect);
     }
+    appendScoredAgendaActivatedAbilityMarker(overlay, entry, ability);
   }
 
   for (const subroutine of engine.printedSubroutines ?? []) {
@@ -453,6 +508,21 @@ function deriveGenericTypedHintOverlay(
       });
       overlay.functionSignals.push("corp_ice.run_lock", "run.lock");
     }
+    if (subroutine.kind === "runner_forgoes_next_action") {
+      overlay.effects.push({
+        kind: "action_penalty",
+        scope: "runner",
+        timing: "encounter_resolution",
+        resource: "actions",
+        target: "corp_ice.runner_action_loss",
+        amount: 1,
+        finite: true,
+      });
+      overlay.functionSignals.push(
+        "corp_ice.runner_action_loss",
+        "risk.action_loss",
+      );
+    }
   }
 
   const virus = engine.virusCounter;
@@ -488,20 +558,75 @@ function deriveGenericTypedHintOverlay(
   }
 
   for (const modifier of engine.modifiers ?? []) {
-    if (modifier.kind !== "access_count") continue;
-    if (!Number.isInteger(modifier.amount) || modifier.amount <= 0)
-      throw new Error("card_spec_unknown_access_count_modifier_shape");
-    const server = modifier.server === "rd" ? "rnd" : modifier.server;
+    if (modifier.kind === "access_count") {
+      if (!Number.isInteger(modifier.amount) || modifier.amount <= 0)
+        throw new Error("card_spec_unknown_access_count_modifier_shape");
+      const server = modifier.server === "rd" ? "rnd" : modifier.server;
+      overlay.effects.push({
+        kind: "multiaccess",
+        scope: server,
+        timing: "persistent",
+        resource: "cards",
+        target: `access.${server}_multiaccess`,
+        amount: modifier.amount,
+        repeatable: true,
+      });
+      overlay.functionSignals.push(`access.${server}_multiaccess`);
+    }
+    if (modifier.kind === "agenda_difficulty") {
+      if (!Number.isInteger(modifier.amount) || modifier.amount <= 0)
+        throw new Error("card_spec_unknown_agenda_difficulty_modifier_shape");
+      const operation =
+        modifier.operation === "reduce" ? "discount" : "increase";
+      overlay.effects.push({
+        kind: "global_modifier",
+        scope: "remote",
+        timing: "persistent",
+        target: `score.${modifier.appliesTo.subtype}_difficulty_${operation}`,
+        amount: modifier.amount,
+        repeatable: true,
+      });
+      overlay.functionSignals.push(
+        `remote.agenda_difficulty_${operation}`,
+        `score.agenda_difficulty_${operation}`,
+        `score.${modifier.appliesTo.subtype}_difficulty_${operation}`,
+      );
+    }
+  }
+
+  for (const access of engine.accessEffects ?? []) {
+    appendTypedCondition(overlay.conditions, access.condition);
     overlay.effects.push({
-      kind: "multiaccess",
-      scope: server,
-      timing: "persistent",
-      resource: "cards",
-      target: `access.${server}_multiaccess`,
-      amount: modifier.amount,
-      repeatable: true,
+      kind: "ambush",
+      scope: "accessed_card",
+      timing: "on_access",
+      target: "remote.ambush",
+      finite: true,
     });
-    overlay.functionSignals.push(`access.${server}_multiaccess`);
+    overlay.functionSignals.push("access.punish", "remote.ambush");
+    for (const effect of access.effects) {
+      if (effect.kind !== "trash_installed_runner_cards") continue;
+      overlay.effects.push({
+        kind:
+          effect.target === "hardware" ? "hardware_trash" : "program_trash",
+        scope:
+          effect.target === "hardware" ? "hardware" : "installed_program",
+        timing: "on_access",
+        target:
+          effect.target === "hardware"
+            ? "access.corp_hardware_trash"
+            : "access.corp_program_trash",
+        ...(typeof effect.amount === "number"
+          ? { amount: effect.amount }
+          : { amountKind: "dynamic" as const }),
+        finite: true,
+      });
+      overlay.functionSignals.push(
+        effect.target === "hardware"
+          ? "access.hardware_trash"
+          : "access.program_trash",
+      );
+    }
   }
 
   const remaining = engine.remainingReplacementLongtail;
@@ -642,6 +767,13 @@ function deriveGenericTypedHintOverlay(
     overlay.functionSignals.push("defense.tag_prevention");
   }
 
+  for (const effect of engine.lifecycle?.on_install ?? [])
+    appendHostedCreditLifecycleEffect(
+      overlay,
+      entry.definition.side,
+      effect,
+      "install",
+    );
   for (const effect of engine.lifecycle?.on_score ?? [])
     appendHostedCreditLifecycleEffect(
       overlay,
@@ -666,9 +798,71 @@ function deriveGenericTypedHintOverlay(
         "start_of_turn",
       );
   }
+  for (const trigger of engine.lifecycle?.start_of_runner_turn ?? []) {
+    appendTypedCondition(overlay.conditions, trigger.condition);
+    for (const effect of trigger.effects) {
+      if (effect.kind !== "take_hosted_credits") continue;
+      const amount = effect.amount;
+      if (
+        effect.source !== "source" ||
+        effect.recipient !== "controller" ||
+        effect.mode !== "up_to_amount_if_available" ||
+        !Number.isInteger(amount) ||
+        amount === undefined ||
+        amount <= 0
+      )
+        throw new Error("card_spec_unknown_installment_credit_shape");
+      overlay.effects.push(
+        {
+          kind: "counter_economy",
+          scope: "runner",
+          timing: "start_of_turn",
+          resource: "credits",
+          target: "economy.installment_credit",
+          amount,
+          economyMode: "bank_cashout",
+          repeatable: true,
+        },
+        {
+          kind: "economy",
+          scope: "runner",
+          timing: "start_of_turn",
+          resource: "credits",
+          target: "economy.turn_start_credit",
+          amount,
+          repeatable: true,
+        },
+      );
+      overlay.functionSignals.push(
+        "economy.installment_credit",
+        "economy.turn_start_credit",
+      );
+    }
+  }
 
   appendScoredAgendaProjection(overlay, engine.scoredAgenda);
   return overlay;
+}
+
+function appendScoredAgendaActivatedAbilityMarker(
+  overlay: GenericTypedHintOverlay,
+  entry: PlanningEntry,
+  ability: PlanningAbility,
+): void {
+  if (
+    entry.definition.type !== "agenda" ||
+    ability.kind !== "activated" ||
+    (ability.effects?.length ?? 0) === 0
+  )
+    return;
+  overlay.effects.push({
+    kind: "scored_agenda_action",
+    scope: "score_area",
+    timing: "scored_activated",
+    target: "score.scored_agenda_ability",
+    finite: false,
+  });
+  overlay.functionSignals.push("score.scored_agenda_action");
 }
 
 function appendHostedCreditLifecycleEffect(
@@ -769,6 +963,18 @@ function appendGenericAbilityEffect(
       finite: true,
     });
     overlay.functionSignals.push("setup.draw");
+  }
+  if (effect.kind === "gain_runner_event_agenda_point") {
+    overlay.effects.push({
+      kind: "scored_agenda_action",
+      scope: "runner",
+      timing,
+      resource: "agenda_points",
+      target: "runner.agenda_point_conversion",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("runner.agenda_point_conversion");
   }
   if (effect.kind === "damage") {
     overlay.effects.push({
@@ -4856,6 +5062,27 @@ function deriveActionTacticSignals(
     signals.add(`effect:${effect.kind}`);
     signals.add(`effect_scope:${effect.scope}`);
     signals.add(`effect_timing:${effect.timing}`);
+    if (effect.kind === "multiaccess")
+      signals.add(
+        effect.scope === "hq"
+          ? "access.hq_multiaccess"
+          : "access.rnd_multiaccess",
+      );
+    if (
+      effect.kind === "scored_agenda_action" &&
+      effect.target === "runner.agenda_point_conversion"
+    )
+      signals.add("runner.agenda_point_conversion");
+    if (
+      effect.kind === "scored_agenda_action" &&
+      effect.scope === "score_area"
+    )
+      signals.add("corp.score_progress");
+    if (
+      effect.kind === "action_penalty" &&
+      effect.target === "corp_ice.runner_action_loss"
+    )
+      signals.add("corp_ice.runner_action_loss");
   }
   if (usesClosedExtendedMechanicalProfile(entry)) {
     for (const effect of effects) {
@@ -6292,7 +6519,17 @@ function deriveHintEffects(
       });
     }
   for (const entry of engine.lifecycle?.start_of_runner_turn ?? [])
-    for (const effect of entry.effects)
+    for (const effect of entry.effects) {
+      if (effect.kind === "gain_credits")
+        effects.push({
+          kind: "economy",
+          scope: "runner",
+          timing: "start_of_turn",
+          resource: "credits",
+          target: "economy.turn_start_credit",
+          amount: effect.amount,
+          repeatable: true,
+        });
       if (effect.kind === "lose_credits" && effect.amount !== undefined) {
         effects.push({
           kind: "economy",
@@ -6308,6 +6545,16 @@ function deriveHintEffects(
           amount: effect.amount,
         });
       }
+    }
+  for (const entry of engine.lifecycle?.on_runner_run_start ?? [])
+    if (entry.effects.some((effect) => effect.kind === "trash_source"))
+      effects.push({
+        kind: "delayed_penalty",
+        scope: "runner",
+        timing: "start_of_run",
+        target: "risk.ends_on_run",
+        finite: true,
+      });
   for (const effect of engine.lifecycle?.on_leave_play ?? [])
     if (effect.kind === "pay_credits_or_lose_game") {
       effects.push(
@@ -7431,6 +7678,15 @@ function appendClosedHardwareEffects(
           amount: effect.amount,
           repeatable: true,
         });
+  for (const trigger of engine.lifecycle?.on_runner_run_start ?? [])
+    if (trigger.effects.some((effect) => effect.kind === "trash_source"))
+      effects.push({
+        kind: "delayed_penalty",
+        scope: "runner",
+        timing: "start_of_run",
+        target: "risk.ends_on_run",
+        finite: true,
+      });
   for (const effect of engine.lifecycle?.on_leave_play ?? []) {
     if (effect.kind === "lose_credits")
       effects.push({
@@ -7651,10 +7907,11 @@ function derivedFunctionSignals(
       signals.add(signal);
   if (
     engine.lifecycle?.start_of_runner_turn?.some((entry) =>
-      entry.effects.some((effect) => effect.kind === "lose_credits"),
+      entry.effects.some((effect) => effect.kind === "gain_credits"),
     )
   )
-    signals.add("economy.turn_start_credit");
+    for (const signal of ["economy.generic", "economy.turn_start_credit"])
+      signals.add(signal);
   if (
     engine.lifecycle?.on_leave_play?.some(
       (effect) => effect.kind === "pay_credits_or_lose_game",
@@ -8162,6 +8419,15 @@ function derivedTacticSignals(
       signals.add(
         `access.${modifier.server === "rd" ? "rnd" : modifier.server}_multiaccess`,
       );
+    if (modifier.kind === "agenda_difficulty") {
+      const operation =
+        modifier.operation === "reduce" ? "discount" : "increase";
+      signals.add(`remote.agenda_difficulty_${operation}`);
+      signals.add(`score.agenda_difficulty_${operation}`);
+      signals.add(
+        `score.${modifier.appliesTo.subtype}_difficulty_${operation}`,
+      );
+    }
   }
   for (const access of engine.accessEffects ?? []) {
     if (access.ignoreIfAccessedFrom?.includes("archives"))

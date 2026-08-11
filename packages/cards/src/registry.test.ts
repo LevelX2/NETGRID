@@ -105,7 +105,15 @@ describe("CardRegistry", () => {
     );
     expect(
       planningCardViewForDefinitionId(registry, definitionId),
-    ).toMatchObject({ cardDefinitionId: definitionId });
+    ).toMatchObject({
+      cardDefinitionId: definitionId,
+      prospectiveCapabilities: {
+        schemaVersion: "prospective-capability-view-v1",
+        cardDefinitionId: definitionId,
+        currentLegality:
+          "not_evaluated_requires_current_legal_action_or_engine_quote",
+      },
+    });
     expect(engineCapabilityViewForId(registry, capabilityId)).toMatchObject({
       canonicalCapabilityId: capabilityId,
       capabilityKey: "gain",

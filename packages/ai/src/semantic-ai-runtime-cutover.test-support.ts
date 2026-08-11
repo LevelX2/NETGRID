@@ -198,17 +198,24 @@ export function legalAction(
     visibility?: LegalAction["visibility"];
   } = {},
 ): LegalAction {
+  const source =
+    options.source ?? (type === "end_turn" ? "game_rule" : "basic_action");
+  const canonicalAbilityId =
+    typeof options.payload?.cardImplementationAbilityId === "string"
+      ? options.payload.cardImplementationAbilityId
+      : undefined;
   const action: LegalAction = {
     actionId,
     side,
     type,
     label,
-    source:
-      options.source ?? (type === "end_turn" ? "game_rule" : "basic_action"),
+    source,
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
     costs: [
-      type === "gain_credit" &&
-      (options.source === undefined || options.source === "basic_action") &&
+      ((type === "gain_credit" &&
+        (options.source === undefined || options.source === "basic_action")) ||
+        (type === "activated_card_ability" &&
+          canonicalAbilityId !== undefined)) &&
       cost.clicks === undefined
         ? { ...cost, clicks: 1 }
         : cost,
@@ -216,6 +223,14 @@ export function legalAction(
     targetRequirements: [],
     visibility: options.visibility ?? "public",
     expiresAtStateVersion: 2,
+    ...(canonicalAbilityId !== undefined && typeof source === "string"
+      ? {
+          abilityRef: {
+            sourceCardInstanceId: source,
+            sourceAbilityId: canonicalAbilityId,
+          },
+        }
+      : {}),
   };
   if (options.payload) action.payload = options.payload;
   return action;

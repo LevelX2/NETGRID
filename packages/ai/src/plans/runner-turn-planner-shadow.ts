@@ -609,7 +609,9 @@ function offersForHeads(params: {
       const priorityCoverage = priorityCoverageForHead(
         params.urgentPriorityClass,
       );
-      const boundary = boundaryForRunnerCandidate(params.input, candidate);
+      const boundary =
+        boundaryForRunnerCandidate(params.input, candidate) ??
+        semanticContinuationReplanningBoundary(params.input, candidate, head);
       const commutativeKey = commutativeGroupKey(candidate);
       return {
         head,
@@ -638,6 +640,36 @@ function offersForHeads(params: {
         ...(boundary ? { boundaryAfter: boundary } : {}),
       };
     });
+  });
+}
+
+function semanticContinuationReplanningBoundary(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  head: TurnPlanningHeadCandidate,
+): BoundaryActionAssessment | undefined {
+  if (
+    !head.evidenceCodes.includes("semantic_continuation_requires_real_state")
+  ) {
+    return undefined;
+  }
+  const remainingActions = Math.max(
+    0,
+    input.playerView.own.clicks - (candidate.costProfile.clickCost ?? 0),
+  );
+  return assessTurnObservationBoundary({
+    boundaryKind: "projected_plan_discovery_required",
+    remainingActionCapacity: {
+      minimum: remainingActions,
+      maximum: remainingActions,
+    },
+    residualTurnValueBasis: "remaining_capacity",
+    immediateOutcomeCodes: [
+      "semantic_continuation_source_state_changed",
+      "current_legal_action_rematerialization_required",
+    ],
+    uncertainty: [{ code: "post_action_capability_revalidation_required" }],
+    assumptionIds: ["semantic_continuation_requires_current_engine_action"],
   });
 }
 
