@@ -63,6 +63,7 @@ import {
   type RunnerInstalledRunPayoff,
   type RunnerKnownAccessState,
   type RunnerPathPassability,
+  type RunnerPrerunReserveQuote,
   type RunnerRemoteScoreThreat,
   type RunnerRunActionSourceKind,
   type RunnerRunActionStructure,
@@ -277,6 +278,10 @@ function evaluateRunnerRunTarget(
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
   ).length;
+  const unknownUnrezzedIcePositions = projectedServerIce.flatMap(
+    (card, index) =>
+      card.rezzed !== true && card.known === false ? [index] : [],
+  );
   const visibleDuringRunRezSupport =
     server?.statuses?.some(
       (status) => status.kind === "during_run_ice_rez_support",
@@ -319,9 +324,6 @@ function evaluateRunnerRunTarget(
     unknownUnrezzedIceCount > 0 && params.input.playerView.opponent.credits > 0
       ? Math.max(1, Math.ceil(unrezzedIceRisk * 4))
       : 0;
-  const unrezzedIceRiskUnderfunded =
-    unknownUnrezzedIceCount > 0 &&
-    creditsAfterRun < unrezzedIceRiskCreditBuffer;
   if (
     pathPassability === "reachable" &&
     unknownUnrezzedIceCount > 0 &&
@@ -362,6 +364,22 @@ function evaluateRunnerRunTarget(
     payoff.knownAccessState !== "known_no_current_payoff" &&
     params.input.playerView.own.agendaPoints >=
       params.input.playerView.agendaPointsToWin - 2;
+  const prerunReserveQuote = quoteRunnerPrerunReserve({
+    input: params.input,
+    deckCapabilities: params.deckCapabilities,
+    projection,
+    accessPayoff,
+    scoreThreat,
+    multiaccessAvailable,
+    runnerMatchpointCentralAccess,
+    knownPathCost: routeQuote.guaranteedKnownCost,
+    creditsAfterKnownPath: creditsAfterRun,
+    unknownIceCount: unknownUnrezzedIceCount,
+    unknownIcePositions: unknownUnrezzedIcePositions,
+    unrezzedIceRiskCreditBuffer,
+    riskyUniversalCoverage,
+  });
+  const unrezzedIceRiskUnderfunded = prerunReserveQuote.creditGap > 0;
   const targetFundingNeed = runnerRunTargetFundingNeed({
     routeQuote,
     creditsAfterRun,
@@ -392,6 +410,7 @@ function evaluateRunnerRunTarget(
     routeQuote,
     targetFundingNeed,
     unrezzedIceRiskUnderfunded,
+    prerunReserveQuote,
     ...(accessOutcomeMemory ? { accessOutcomeMemory } : {}),
     ...(rankedAccessTarget ? { rankedAccessTarget } : {}),
     ...(randomBreakOrDamageRiskAssessment
@@ -441,6 +460,7 @@ function evaluateRunnerRunTarget(
     unrezzedIceRisk,
     unrezzedIceRiskCreditBuffer,
     unrezzedIceRiskUnderfunded,
+    prerunReserveQuote,
     ...(path.visibleIceRunHazards?.length
       ? { visibleIceRunHazards: path.visibleIceRunHazards }
       : {}),
@@ -521,6 +541,7 @@ function evaluateRunnerRunTarget(
       `unrezzed_ice_risk:${unrezzedIceRisk}`,
       `unrezzed_ice_risk_credit_buffer:${unrezzedIceRiskCreditBuffer}`,
       `unrezzed_ice_risk_underfunded:${unrezzedIceRiskUnderfunded}`,
+      ...prerunReserveQuote.evidence,
       `visible_during_run_rez_support:${visibleDuringRunRezSupport}`,
       `visible_ice_hazard_penalty:${visibleIceHazardPenalty}`,
       `visible_ice_hazard_avoidance_cost:${visibleIceHazardAvoidanceCost}`,
@@ -1144,6 +1165,138 @@ function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
   };
 }
 
+function quoteRunnerPrerunReserve(params: {
+  input: AiDecisionInput;
+  deckCapabilities: DeckCapabilityProfile | undefined;
+  projection: InternalRunActionProjection;
+  accessPayoff: RunnerAccessPayoff;
+  scoreThreat: boolean;
+  multiaccessAvailable: boolean;
+  runnerMatchpointCentralAccess: boolean;
+  knownPathCost: number;
+  creditsAfterKnownPath: number;
+  unknownIceCount: number;
+  unknownIcePositions: number[];
+  unrezzedIceRiskCreditBuffer: number;
+  riskyUniversalCoverage: boolean;
+}): RunnerPrerunReserveQuote {
+  const installedBreakers =
+    params.deckCapabilities?.runner?.breakerInventory.filter((breaker) =>
+      breaker.locations.includes("installed"),
+    ) ?? [];
+  const stableUniversal = installedBreakers.some(
+    (breaker) =>
+      breaker.coverage.includes("universal") &&
+      breaker.confidence === "high" &&
+      breaker.risks.length === 0,
+  );
+  const riskyUniversal =
+    !stableUniversal &&
+    (params.riskyUniversalCoverage ||
+      installedBreakers.some((breaker) =>
+        breaker.coverage.includes("universal"),
+      ));
+  const typedCoverage =
+    installedBreakers.some((breaker) => breaker.coverage.length > 0) ||
+    (params.input.playerView.own.rig ?? []).some((card) =>
+      (card.subtypes ?? []).some((subtype) =>
+        subtype.toLowerCase().includes("icebreaker"),
+      ),
+    );
+  const visibleCoverage = stableUniversal
+    ? ("stable_universal" as const)
+    : riskyUniversal
+      ? ("risky_universal" as const)
+      : typedCoverage
+        ? ("typed_only" as const)
+        : ("none" as const);
+  const purpose =
+    params.scoreThreat ||
+    params.accessPayoff === "agenda" ||
+    params.accessPayoff === "score_threat"
+      ? ("contest" as const)
+      : params.multiaccessAvailable
+        ? ("multiaccess" as const)
+        : params.projection.accessReplacement === "private_look_top_rd" ||
+            params.accessPayoff === "unknown" ||
+            params.accessPayoff === "fresh"
+          ? ("information" as const)
+          : ("access" as const);
+  const corpRezCredits = Math.max(0, params.input.playerView.opponent.credits);
+  const riskTolerance =
+    params.runnerMatchpointCentralAccess && stableUniversal
+      ? ("matchpoint_with_stable_universal_coverage" as const)
+      : ("standard" as const);
+  const baseRequiredCredits =
+    params.unknownIceCount > 0 && corpRezCredits > 0
+      ? params.unrezzedIceRiskCreditBuffer
+      : 0;
+  const requiredCredits =
+    riskTolerance === "matchpoint_with_stable_universal_coverage"
+      ? Math.max(1, baseRequiredCredits - 1)
+      : baseRequiredCredits;
+  const creditGap = Math.max(
+    0,
+    requiredCredits - params.creditsAfterKnownPath,
+  );
+  const requiredHandBuffer =
+    params.unknownIceCount === 0 || corpRezCredits === 0
+      ? 0
+      : riskTolerance === "matchpoint_with_stable_universal_coverage" ||
+          visibleCoverage === "stable_universal"
+        ? 2
+        : visibleCoverage === "risky_universal"
+          ? 4
+          : 3;
+  const handBufferGap = Math.max(
+    0,
+    requiredHandBuffer - params.input.playerView.own.gripOrHq.length,
+  );
+  const informationProbeAllowed =
+    purpose === "information" &&
+    !params.runnerMatchpointCentralAccess &&
+    params.knownPathCost <= 1 &&
+    params.creditsAfterKnownPath >= Math.min(1, requiredCredits);
+  const status =
+    params.unknownIceCount === 0 || corpRezCredits === 0
+      ? ("not_required" as const)
+      : creditGap === 0 && handBufferGap === 0
+        ? ("satisfied" as const)
+        : informationProbeAllowed
+          ? ("information_probe_only" as const)
+          : ("blocked" as const);
+  return {
+    purpose,
+    status,
+    riskTolerance,
+    knownPathCost: params.knownPathCost,
+    creditsAfterKnownPath: params.creditsAfterKnownPath,
+    unknownIceCount: params.unknownIceCount,
+    unknownIcePositions: params.unknownIcePositions,
+    corpRezCredits,
+    visibleCoverage,
+    requiredCredits,
+    creditGap,
+    requiredHandBuffer,
+    handBufferGap,
+    evidence: [
+      `prerun_reserve_purpose:${purpose}`,
+      `prerun_reserve_status:${status}`,
+      `prerun_reserve_risk_tolerance:${riskTolerance}`,
+      `prerun_reserve_known_path_cost:${params.knownPathCost}`,
+      `prerun_reserve_credits_after_known_path:${params.creditsAfterKnownPath}`,
+      `prerun_reserve_unknown_ice_count:${params.unknownIceCount}`,
+      `prerun_reserve_unknown_ice_positions:${params.unknownIcePositions.join("|") || "none"}`,
+      `prerun_reserve_corp_rez_credits:${corpRezCredits}`,
+      `prerun_reserve_visible_coverage:${visibleCoverage}`,
+      `prerun_reserve_required_credits:${requiredCredits}`,
+      `prerun_reserve_credit_gap:${creditGap}`,
+      `prerun_reserve_required_hand_buffer:${requiredHandBuffer}`,
+      `prerun_reserve_hand_buffer_gap:${handBufferGap}`,
+    ],
+  };
+}
+
 function recommendationForRunTarget(params: {
   targetKind: RunnerRunTargetKind;
   accessPayoff: RunnerAccessPayoff;
@@ -1166,6 +1319,7 @@ function recommendationForRunTarget(params: {
   routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
   targetFundingNeed: RunnerRunTargetFundingNeed;
   unrezzedIceRiskUnderfunded: boolean;
+  prerunReserveQuote: RunnerPrerunReserveQuote;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
   rankedAccessTarget?: RankedKnownRemoteAccessCandidate;
   randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
@@ -1235,6 +1389,9 @@ function recommendationForRunTarget(params: {
     return params.pathPassability === "blocked_unbreakable"
       ? "find_breaker_first"
       : "gain_credits_first";
+  }
+  if (params.prerunReserveQuote.status === "blocked") {
+    return "gain_credits_first";
   }
   if (
     params.targetKind === "remote" &&

@@ -78,6 +78,14 @@
   Zentraldruck und Zielplan-Fit gelten für projizierte HQ-/R&D-Runs nur, wenn
   ihr eigener sichtbarer Pfad `run_now` trägt; Archives-, Remote- und
   Bezahlbarkeitsausschlüsse bleiben wirksam.
+- Jede normale Runner-Run-Zulassung konsumiert zusätzlich eine side-sichere
+  Pre-run-Reservequote. Sie verbindet kumulierte bekannte Pfadkosten mit
+  Positionen unbekannten unrezzten ICE, sichtbaren Corp-Credits, installierter
+  Coverage, Handpuffer, Purpose und Funding Gap. Ein Urgency- oder
+  Matchpoint-Claim darf eine blockierte Quote nicht überspringen; zulässig
+  bleiben nur ein eng budgetierter Informations-Probevertrag oder ein
+  ausdrücklich erfüllter Matchpoint-Korridor mit stabiler universeller
+  Coverage.
 - Informations-Runs werden an jeder neu sichtbaren ICE-Grenze vom bestehenden
   `runner.pressure_central`- beziehungsweise `runner.contest_remote`-Parent
   über den vollständigen verbleibenden bekannten Pfad neu quotiert. Ein
@@ -86,6 +94,15 @@
   Encounter-Budget; unfinanzierbare oder sichtbar gefährliche Pfade behalten
   den Informationszweck. `runner.convert_run_window` führt danach nur die
   aktuelle gebundene Pump-/Break-/Fortsetzungsroute aus.
+- Verdeckte Corp-Installationen erhalten in PublicEvents einen opaken,
+  positionsstabilen Anker zusammen mit kanonischem `serverId` und Placement.
+  Runner-HQ-Kandidatengruppen, bekannte Positionen und spätere
+  Reveal-/Rez-/Abgangsereignisse reconciliieren damit dieselbe öffentliche
+  Position, ohne Karteninstanz oder verdeckte Definition offenzulegen. Der
+  actor-sichere Belief-Stand wird zusätzlich im bereits hash-gebundenen
+  Decision-Audit persistiert; Maintenance-Detail und opt-in Bundle-Timeline
+  lesen nur diesen historischen Capture und rekonstruieren keine vermeintliche
+  Vergangenheit aus aktuellem Full State.
 - Optionale Post-Pass-Fähigkeiten im `run.jack_out_window` transportieren
   Quellenkartendefinition, generische Fähigkeit, Ziel-ICE und Zahlung aus der
   Engine in den side-sicheren AI-Input. Der vorhandene Owner
@@ -192,6 +209,17 @@
   über `TurnPlanCommitment`, Execution Lease und aktuelle `LegalActions`
   autoritativ rematerialisiert. Informations-, Reaktions-, Engine- und
   Zufallsgrenzen lösen typisierte Neuplanung aus.
+- Ein Runner-Root behält eine deterministische eigene Folge über
+  `plan_internal_continuation_boundary` hinweg. Die nächste aktuelle
+  `LegalAction` wird für dieselbe `sequenceRootPlanInstanceId` neu gebunden;
+  bereits bekannte gleichrangige Alternativen dürfen nicht still übernehmen.
+  Release und Preemption benötigen positive Grenztypen und eine strukturierte
+  Continuation-Diagnose.
+- Runner-No-Run-Investments lesen ihren Recurring-Economy-Vertrag aus der
+  kanonischen `planning.engine.lifecycle`-Projektion. Nach einer Installation
+  im aktuellen Zug darf derselbe Root produktive Basic-Nicht-Run-Schritte
+  halten; Karten-IDs und veraltete zukünftige Action-IDs sind dafür keine
+  Entscheidungsquelle.
 - Agenda-, Defense-, Opening-Rush- und Runner-Kampagnen können über
   Zuggrenzen und öffentliche Gegneroutcomes resident bleiben. Ein
   Runtime-Neustart stellt das Portfolio wieder her, verwirft das alte

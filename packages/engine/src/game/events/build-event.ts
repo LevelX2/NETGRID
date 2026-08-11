@@ -13,6 +13,7 @@ import {
   type StateHash,
 } from "@netgrid/shared";
 import type { PublicContextForActionDependencies } from "../../public-context";
+import { publicInstalledPositionContext } from "../../public-context";
 import {
   buildPublicAbilitySchemaContext,
   abilityPayloadDiscriminatorEntries,
@@ -88,12 +89,18 @@ export function buildEventWithHost(
     legalAction,
     host.publicContext.deps,
   );
+  const installedPositionContext = publicInstalledPositionContext(
+    previousState,
+    state,
+    legalAction,
+  );
   const publicPayload: Record<string, unknown> = {
     actor,
     actionType: publicEventType,
     label: publicLabel(legalAction),
     ...actionUseContext,
     ...actionContext,
+    ...installedPositionContext,
     ...buildPublicAbilitySchemaContext(
       legalAction.type,
       legalAction.payload,

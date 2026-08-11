@@ -96,6 +96,48 @@ describe("deterministic remainder-turn search", () => {
     ).toBe(false);
   });
 
+  it("does not append a pre-known run to a selected Runner investment root", () => {
+    const setup = searchSetup();
+    const investment = offer(setup, "runner-investment", {
+      root: "root:investment",
+      milestone: "investment-installed",
+      economy: 8,
+      continuationScope: "same_root",
+    });
+    const ownFollowup = offer(setup, "runner-investment-followup", {
+      root: "root:investment",
+      milestone: "investment-held",
+      economy: 4,
+      continuationScope: "same_root",
+    });
+    const preKnownRun = offer(setup, "pre-known-run", {
+      root: "root:pressure",
+      milestone: "access-attempted",
+      agendaProgress: 20,
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [investment, ownFollowup, preKnownRun],
+    });
+    const investmentLines = result.lines.filter(
+      (line) => line.steps[0]?.candidateId === investment.head.candidateId,
+    );
+
+    expect(
+      investmentLines.some((line) =>
+        line.steps.some(
+          (step) => step.candidateId === preKnownRun.head.candidateId,
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      investmentLines.some(
+        (line) =>
+          line.steps[1]?.candidateId === ownFollowup.head.candidateId,
+      ),
+    ).toBe(true);
+  });
+
   it("changes the head only when the bounded second step materially beats the single-step baseline", () => {
     const setup = searchSetup();
     const safeDefense = offer(setup, "safe-defense-baseline", {
@@ -512,6 +554,7 @@ function offer(
     boundaryAfter?: TurnRemainderSearchOffer["boundaryAfter"];
     priorityCoverage?: PriorityCoverage;
     valueClaims?: CampaignValueClaim[];
+    continuationScope?: TurnRemainderSearchOffer["continuationScope"];
   },
 ): TurnRemainderSearchOffer {
   const candidateId = `head:${id}`;
@@ -636,6 +679,9 @@ function offer(
     candidate,
     obligationSignature: params.obligationSignature ?? "obligation:none",
     priorityCoverage: params.priorityCoverage ?? coverage(),
+    ...(params.continuationScope
+      ? { continuationScope: params.continuationScope }
+      : {}),
     ...(params.dependencyCandidateIds
       ? { dependencyCandidateIds: params.dependencyCandidateIds }
       : {}),

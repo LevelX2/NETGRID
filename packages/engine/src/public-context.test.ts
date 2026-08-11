@@ -1,7 +1,10 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { eventVisibilityForAction } from "./game/events/build-event";
-import { publicContextForAction } from "./public-context";
+import {
+  publicContextForAction,
+  publicInstalledPositionContext,
+} from "./public-context";
 
 describe("publicContextForAction", () => {
   it("publishes the aggregate Runner agenda total after a steal", () => {
@@ -136,9 +139,98 @@ describe("publicContextForAction", () => {
     expect(context).not.toHaveProperty("title");
   });
 
+  it("binds hidden installs and later rez events to opaque stable positions", () => {
+    const beforeInstall = {
+      corp: { servers: [{ id: "remote_1", ice: [], root: [] }] },
+      cardInstances: {
+        hidden_ice_a: { zone: { side: "corp", zone: "hand" } },
+        hidden_ice_b: { zone: { side: "corp", zone: "hand" } },
+      },
+    } as unknown as GameState;
+    const afterInstall = {
+      corp: {
+        servers: [
+          {
+            id: "remote_1",
+            ice: ["hidden_ice_a", "hidden_ice_b"],
+            root: [],
+          },
+        ],
+      },
+      cardInstances: {
+        hidden_ice_a: {
+          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        },
+        hidden_ice_b: {
+          zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+        },
+      },
+    } as unknown as GameState;
+    const installAction = {
+      side: "corp",
+      type: "install_card",
+      payload: { cardId: "hidden_ice_a" },
+    } as unknown as LegalAction;
+    const rezAction = {
+      side: "corp",
+      type: "rez_ice",
+      payload: { cardId: "hidden_ice_a" },
+    } as unknown as LegalAction;
+    const otherInstallAction = {
+      side: "corp",
+      type: "install_card",
+      payload: { cardId: "hidden_ice_b" },
+    } as unknown as LegalAction;
+    const afterTrash = {
+      ...afterInstall,
+      cardInstances: {
+        ...afterInstall.cardInstances,
+        hidden_ice_a: { zone: { side: "corp", zone: "discard" } },
+      },
+    } as unknown as GameState;
+    const trashAction = {
+      side: "runner",
+      type: "trash_accessed_card",
+      payload: { accessedCardId: "hidden_ice_a" },
+    } as unknown as LegalAction;
+
+    const installed = publicInstalledPositionContext(
+      beforeInstall,
+      afterInstall,
+      installAction,
+    );
+    const rezzed = publicInstalledPositionContext(
+      afterInstall,
+      afterInstall,
+      rezAction,
+    );
+    const other = publicInstalledPositionContext(
+      beforeInstall,
+      afterInstall,
+      otherInstallAction,
+    );
+    const trashed = publicInstalledPositionContext(
+      afterInstall,
+      afterTrash,
+      trashAction,
+    );
+
+    expect(installed).toMatchObject({
+      serverId: "remote_1",
+      installPlacement: "ice",
+      installedPositionKey: expect.stringMatching(/^installed-position-v1:/),
+    });
+    expect(rezzed.installedPositionKey).toBe(installed.installedPositionKey);
+    expect(trashed.installedPositionKey).toBe(installed.installedPositionKey);
+    expect(other.installedPositionKey).not.toBe(installed.installedPositionKey);
+    expect(JSON.stringify(installed)).not.toMatch(/hidden_ice|definition/i);
+  });
+
   it("publishes a rezzed public install target with server and ICE position", () => {
     const state = {
-      corp: { servers: [{ id: "hq", label: "HQ", ice: ["coyote", "mastermind"] }] },
+      corp: {
+        servers: [{ id: "hq", label: "HQ", ice: ["coyote", "mastermind"] }],
+      },
       cardInstances: {
         mastermind: {
           rezzed: true,

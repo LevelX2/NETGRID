@@ -1,19 +1,32 @@
 ---
 activityId: act-2026-08-09-runner-belief-memory-analysis-api-followup
-status: inbox
+status: done
 kind: architecture
 area: shared
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-08-09
-startedAt:
-completedAt:
+startedAt: 2026-08-11
+completedAt: 2026-08-11
 branch:
 releaseTarget: ai-observability-hardening
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/game/events/build-event.ts
+  - packages/ai/src/belief-state.ts
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/storage-sqlite.ts
+  - apps/server/src/http-server.ts
+  - docs/architecture/ai/README.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-08.md
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/public-context.test.ts --maxWorkers=1
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/belief-state.test.ts --maxWorkers=1
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "serves a read-only analysis bundle" --maxWorkers=1
+  - package typechecks for shared, engine, ai and server
+  - git diff --check
 ---
 
 # Runner-Belief-Memory positionsgenau fortschreiben und über die Analyse-API prüfen
@@ -167,46 +180,46 @@ die tatsächliche verdeckte Corp-Hand als vermeintliches Runner-Wissen.
 
 ## Akzeptanzkriterien
 
-- [ ] Verdeckte Remote- und Central-Installationen tragen in side-sicheren
+- [x] Verdeckte Remote- und Central-Installationen tragen in side-sicheren
       PublicEvents einen kanonischen Server- und stabilen Positionsanker, der
       bei späteren Reveal-/Rez-/Access-/Abgangsereignissen identisch gebunden
       werden kann.
-- [ ] Die Felder enthalten keine verdeckte Definition oder Instanzidentität
+- [x] Die Felder enthalten keine verdeckte Definition oder Instanzidentität
       und verändern keine LegalAction- oder Regelautorität.
-- [ ] Mehrere verdeckte Karten auf demselben Server werden positionsgenau und
+- [x] Mehrere verdeckte Karten auf demselben Server werden positionsgenau und
       count-sicher unterschieden.
-- [ ] Nach HQ-Access von Data Wall, verdecktem Remote-1-ICE-Install und
+- [x] Nach HQ-Access von Data Wall, verdecktem Remote-1-ICE-Install und
       späterem Data-Wall-Rez wird die richtige Kandidatengruppe geschlossen;
       kein Phantomkandidat bleibt bestehen.
-- [ ] Nach den HQ-Accesses von Cortical Scrub und Systematic Layoffs bleibt
+- [x] Nach den HQ-Accesses von Cortical Scrub und Systematic Layoffs bleibt
       Systematic Layoffs bei einem verdeckten ICE-Install sicher
       nicht-installierbar, während Cortical korrekt Kandidat wird und beim Rez
       abgeglichen wird.
-- [ ] Der wiederholte Systematic-Layoffs-Access bestätigt denselben
+- [x] Der wiederholte Systematic-Layoffs-Access bestätigt denselben
       side-sicheren Ledgerstand statt einen Widerspruch oder Total-Reset zu
       erzeugen.
-- [ ] Ein unbekannter Corp-Discard erzeugt eine logisch korrekte
+- [x] Ein unbekannter Corp-Discard erzeugt eine logisch korrekte
       Mehrdeutigkeit beziehungsweise begründete Invalidation; er erhält keine
       unbewiesene sichere Karte und löscht nicht mehr Information als nötig.
-- [ ] R&D-Access und anschließender Steal von Marine Arcology entfernen die
+- [x] R&D-Access und anschließender Steal von Marine Arcology entfernen die
       bekannte Spitze; die nächste unbekannte Karte wird nicht erfunden.
-- [ ] Decision-Detail liefert für eine capture-fähige historische Decision
+- [x] Decision-Detail liefert für eine capture-fähige historische Decision
       den actor-sicheren Belief-Snapshot mit Schema, Signatur, Event-Cutoff und
       eindeutiger Provenance.
-- [ ] Bundle-Analyse kann den Belief-Verlauf für einen gefilterten
+- [x] Bundle-Analyse kann den Belief-Verlauf für einen gefilterten
       Decision-Bereich kompakt als Signaturen, Summaries und Deltas liefern.
-- [ ] Bundle- und Detaildarstellung desselben historischen Checkpoints stimmen
+- [x] Bundle- und Detaildarstellung desselben historischen Checkpoints stimmen
       in Signatur, Counts, Quellen und Invalidation überein.
-- [ ] Bei fehlendem Capture und fehlender hash-verifizierter Rekonstruktion
+- [x] Bei fehlendem Capture und fehlender hash-verifizierter Rekonstruktion
       erscheint eine strukturierte `beliefState`-Lücke; es gibt keinen
       Fallback auf aktuelle Match-, Datenbank- oder FullState-Wahrheit.
-- [ ] Redaction-Tests verbieten gegnerische Handkarten, nicht gesehene
+- [x] Redaction-Tests verbieten gegnerische Handkarten, nicht gesehene
       Definitionen, `cardInstances`, `privatePayload`, Decklisten,
       Session-/Reconnect-Tokens und FullGameState-Felder.
-- [ ] Reconnect, Replay, Undo und StateHash bleiben deterministisch; ein
+- [x] Reconnect, Replay, Undo und StateHash bleiben deterministisch; ein
       zurückgerolltes Wissensereignis verschwindet auch aus Memory und
       Analyse-API.
-- [ ] Fokussierte Engine-PublicEvent-, AI-Belief-, Server-Analyse-API- und
+- [x] Fokussierte Engine-PublicEvent-, AI-Belief-, Server-Analyse-API- und
       Redaction-Tests, erforderliche Package-Typechecks sowie
       `git diff --check` sind grün.
 
@@ -232,6 +245,25 @@ die tatsächliche verdeckte Corp-Hand als vermeintliches Runner-Wissen.
 
 ## Ergebnisnotiz
 
-Noch offen. Das Paket verbindet den belegten Live-Positionsverlust mit der
-fehlenden historischen Diagnosefläche, damit Korrektur und Nachweis nicht
-erneut auseinanderfallen.
+Engine-PublicEvents leiten den kanonischen Server, das Placement und einen
+opaken stabilen Positionsanker aus derselben Kartenposition vor oder nach der
+Aktion ab. Der Anker bindet Install, Rez, Reveal, Access und Positionsabgänge,
+ohne Karteninstanz oder verdeckte Definition preiszugeben. Das Runner-Ledger
+reconciliiert Kandidatengruppen damit exakt; mehrere Installationen desselben
+Servers werden nicht mehr anhand von Server und Definition verwechselt.
+
+Unbekannte HQ-Discards bleiben als count-sichere Kandidatengruppe mit
+Reduktionsgrund erhalten. R&D-Freshness und die vorhandenen Access-/Steal-
+Verträge bleiben in derselben Eventfolge wirksam.
+
+Der bestehende `historicalAudit` jeder neuen KI-Decision persistiert jetzt den
+actor-sicheren Belief-Capture mit Schema, Runtime-Version, Invariant-Signatur,
+StateVersion, Event-Cutoff und den vier relevanten Memory-Sektionen. Das
+Decision-Detail liefert den vollständigen Capture; das Bundle bietet opt-in
+Signaturen, Summaries und Deltas. Fehlende ältere Captures werden ausdrücklich
+als `beliefState`-Lücke ausgewiesen und niemals aus Full State ersetzt.
+
+Verifiziert wurden ausschließlich die fokussierten Engine-, AI- und
+Maintenance-API-Regressionen sowie die Typechecks der vier berührten Pakete.
+Breite Workspace-Suiten, AI-Shards, E2E-Läufe und Builds wurden auf Wunsch des
+Nutzers nicht ausgeführt.

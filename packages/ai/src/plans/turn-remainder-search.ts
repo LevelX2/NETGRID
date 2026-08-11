@@ -41,6 +41,7 @@ export type TurnRemainderSearchOffer = {
   commutativeGroupKey?: string;
   commutativityCertified?: boolean;
   rootEligible?: boolean;
+  continuationScope?: "portfolio" | "same_root";
   boundaryAfter?: BoundaryActionAssessment;
 };
 
@@ -117,6 +118,7 @@ type SearchState = {
   usedCandidateIds: string[];
   consumedSourceCardInstanceIds: string[];
   incompatibleCandidateIds: string[];
+  continuationRootPlanInstanceId?: string;
 };
 
 type Partition = {
@@ -588,6 +590,14 @@ function applyOffer(params: {
         ...(params.prefix?.incompatibleCandidateIds ?? []),
         ...(params.offer.incompatibleCandidateIds ?? []),
       ]),
+      ...(params.prefix?.continuationRootPlanInstanceId !== undefined ||
+      params.offer.continuationScope === "same_root"
+        ? {
+            continuationRootPlanInstanceId:
+              params.prefix?.continuationRootPlanInstanceId ??
+              params.offer.head.rootPlanInstanceId,
+          }
+        : {}),
     },
   };
 }
@@ -727,6 +737,12 @@ function secondStepStaticPruneReason(
   prefix: SearchState,
   offer: TurnRemainderSearchOffer,
 ): TurnRemainderSearchPruneReason | undefined {
+  if (
+    prefix.continuationRootPlanInstanceId !== undefined &&
+    offer.head.rootPlanInstanceId !== prefix.continuationRootPlanInstanceId
+  ) {
+    return "incompatible_candidate";
+  }
   if (prefix.usedCandidateIds.includes(offer.head.candidateId)) {
     return "incompatible_candidate";
   }

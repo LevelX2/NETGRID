@@ -69,6 +69,7 @@ export type RunnerTurnPlannerShadowResult = {
   shadowActionId?: string;
   agreement: boolean;
   heads: TurnPlanningHeadCandidate[];
+  lines: TurnRemainderSearchLine[];
   selectedLine?: TurnRemainderSearchLine;
   selectedHead?: TurnPlanningHeadCandidate;
   selectedPlanInstanceId?: string;
@@ -148,6 +149,9 @@ export function buildRunnerTurnPlannerShadow(params: {
     candidates: params.context.actionCandidates,
     urgentPriorityClass,
     moduleSelectedActionId: params.runtimeResult.route.head.actionId,
+    protectedRootPlanInstanceId:
+      params.runtimeResult.portfolio.turnPlanCommitment
+        ?.sequenceRootPlanInstanceId,
   });
   const search = searchDeterministicRemainderTurnPlans({
     entryFrame,
@@ -190,6 +194,7 @@ export function buildRunnerTurnPlannerShadow(params: {
       : {}),
     agreement: selectedHead?.currentBinding.actionId === liveActionId,
     heads: structuredClone(heads),
+    lines: structuredClone(search.lines),
     ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
     ...(selectedHead ? { selectedHead: structuredClone(selectedHead) } : {}),
     ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
@@ -565,6 +570,7 @@ function offersForHeads(params: {
   candidates: readonly ActionSemanticCandidate[];
   urgentPriorityClass: string | undefined;
   moduleSelectedActionId: string;
+  protectedRootPlanInstanceId: string | undefined;
 }): TurnRemainderSearchOffer[] {
   const candidateIdsByActionId = new Map<string, string[]>();
   for (const head of params.heads) {
@@ -599,9 +605,11 @@ function offersForHeads(params: {
     const dependencyVariants =
       selectedHeadIds.length > 0 &&
       !selectedHeadHasCertifiedCleanupHarm &&
+      head.rootPlanInstanceId !== params.protectedRootPlanInstanceId &&
       head.currentBinding.actionId !== params.moduleSelectedActionId
         ? selectedHeadIds.map((candidateId) => [candidateId])
         : params.urgentPriorityClass &&
+            head.rootPlanInstanceId !== params.protectedRootPlanInstanceId &&
             head.priorityClass !== params.urgentPriorityClass
           ? urgentHeadIds.map((candidateId) => [candidateId])
           : [[]];
@@ -623,6 +631,7 @@ function offersForHeads(params: {
         obligationSignature:
           priorityCoverage.requiredObligationIds.join(",") || "no_urgent",
         priorityCoverage,
+        continuationScope: "same_root",
         ...(dependencyCandidateIds.length > 0
           ? { dependencyCandidateIds, rootEligible: false }
           : {}),

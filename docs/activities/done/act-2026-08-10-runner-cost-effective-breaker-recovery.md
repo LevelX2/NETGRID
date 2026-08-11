@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-08-10-runner-cost-effective-breaker-recovery
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-10
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-11
+completedAt: 2026-08-11
+branch: codex/runner-cost-effective-breaker-recovery
 releaseTarget: ai-plan-layer-hardening
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/plans/runner-core-plan-modules.ts
+  - packages/ai/src/runtime/runner-search-coverage-need.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.test.ts
+checks:
+  - 6 fokussierte Coverage-/Recovery-Tests grün
+  - 5 angrenzende Vorgänger-/Coverage-Regressionen grün
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
 ---
 
 # Unwirtschaftliche Breaker-Abdeckung als offenen Entwicklungsbedarf behandeln
@@ -96,32 +104,32 @@ Dieses Paket ist ein Follow-up zu der erledigten Activity
 
 ## Akzeptanzkriterien
 
-- [ ] Ein kompatibler, aber extrem teurer installierter Breaker schließt den
+- [x] Ein kompatibler, aber extrem teurer installierter Breaker schließt den
       Coverage-Bedarf nicht automatisch als vollständig gelöst.
-- [ ] Bei einem sichtbaren günstigeren Breaker in der Grip verfolgt die KI
+- [x] Bei einem sichtbaren günstigeren Breaker in der Grip verfolgt die KI
       dessen gebundene Finanzierung und Installation vor einer endlosen
       allgemeinen Credit-Schleife.
-- [ ] Bei einer legalen Tutor-/Search-Aktion bindet der zuständige Plan die
+- [x] Bei einer legalen Tutor-/Search-Aktion bindet der zuständige Plan die
       benötigte Breakerrolle; der Choice-Resolver ändert weder Zielserver noch
       Strategie oder Action-ID.
-- [ ] Ohne sichtbare Karte darf ein Draw-Bedarf nur aus eigener side-sicherer
+- [x] Ohne sichtbare Karte darf ein Draw-Bedarf nur aus eigener side-sicherer
       DeckDoctrine beziehungsweise eigener reihenfolgenneutraler
       Deckkomposition entstehen, niemals aus unbekannter Stack-Reihenfolge.
-- [ ] Wenn keine bessere Route begründet ist, darf die KI bewusst für den
+- [x] Wenn keine bessere Route begründet ist, darf die KI bewusst für den
       vorhandenen Breakerpfad sparen; Funding-Ziel und Abschlussgrenze sind
       quantifiziert.
-- [ ] Ein unwichtiger oder payoffloser Server löst keine umfangreiche
+- [x] Ein unwichtiger oder payoffloser Server löst keine umfangreiche
       Breaker-Suche aus.
-- [ ] Fixtures sichern: günstiger Breaker in Grip, Tutor verfügbar, nur
+- [x] Fixtures sichern: günstiger Breaker in Grip, Tutor verfügbar, nur
       Rollenwissen im Stack, keine bessere Alternative und irrelevant
       gewordener Zielserver.
-- [ ] Die Regression referenziert die erledigte Vorgänger-Activity und
+- [x] Die Regression referenziert die erledigte Vorgänger-Activity und
       sichert, dass deren einfache Fälle mit wirklich ausreichender Coverage
       nicht verschlechtert werden.
-- [ ] Ownership-Tests sichern Run-Parent, Coverage-Bedarf, Support-Plan,
+- [x] Ownership-Tests sichern Run-Parent, Coverage-Bedarf, Support-Plan,
       exakte LegalAction und Executor.
-- [ ] Hidden-Info-Schutz, Replay, StateHash und Determinismus bleiben erhalten.
-- [ ] Fokussierte AI-Tests, erforderlicher AI-Typecheck und
+- [x] Hidden-Info-Schutz, Replay, StateHash und Determinismus bleiben erhalten.
+- [x] Fokussierte AI-Tests, erforderlicher AI-Typecheck und
       `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -137,4 +145,15 @@ Dieses Paket ist ein Follow-up zu der erledigten Activity
 
 ## Ergebnisnotiz
 
-Noch offen. Follow-up zur bereits umgesetzten Breaker-Acquisition-Strategie.
+Der bestehende `runner.rig_and_coverage`-Plan unterscheidet jetzt zwischen
+fehlender und wirtschaftlich unzureichender Coverage. Für vollständig
+bekannte, aktuell unbezahlbare Pfade bindet er Zielserver und Run-Parent,
+quotiert den bekannten Ist-Pfad und wählt ausschließlich aus belegten
+günstigeren Routen: sichtbare Grip-Installation mit exakter Finanzierung,
+legaler Tutor oder side-sicheres Rollenwissen für Draw. Ohne belegte bessere
+Alternative bleibt der vorhandene, quantifizierte Run-Funding-Bedarf erhalten;
+payofflose Ziele öffnen keinen Recovery-Plan.
+
+Die Auswahl bleibt LegalAction- und rollenbasiert. Unbekannte Stack-Reihenfolge
+wird nicht verwendet, und bestehende Heap-Recovery bindet weiterhin Quelle,
+Zielkarte und Choice an denselben Coverage-Executor.

@@ -104,6 +104,7 @@ export type RunnerFundingNeedSignal =
 
 export type RunnerCoverageGapSignal = {
   gapId: string;
+  needKind?: "missing_coverage" | "cost_ineffective_coverage";
   requiredRole:
     | "breaker_wall"
     | "breaker_code_gate"
@@ -112,13 +113,23 @@ export type RunnerCoverageGapSignal = {
     | "breaker_trace"
     | "breaker_universal";
   targetServerId?: string;
+  requesterModuleId?: "runner.pressure_central" | "runner.contest_remote";
+  requesterPlanInstanceId?: string;
   priorityClass: "P2" | "P4" | "P5";
   evidenceCode: string;
   deckHasAnswer: boolean;
   answerInHand: boolean;
   answerInstallCost?: number;
+  installActionIds?: string[];
   installActionValues?: Record<string, number>;
   fundingGap?: number;
+  currentKnownPathCost?: number;
+  currentPathFundingGap?: number;
+  recoveryMode?:
+    | "install_visible_answer"
+    | "search_known_alternative"
+    | "draw_for_known_role";
+  recoveryEvidenceCodes?: string[];
   fundingActionIds: string[];
   directSearchActionIds: string[];
   directSearchChoiceBindings?: Array<{
@@ -1180,6 +1191,10 @@ function coverageModule(
           routeExists,
           blockerCode: "no_exact_coverage_route",
           evidenceCode: gap.evidenceCode,
+          evidenceCodes: [
+            gap.evidenceCode,
+            ...(gap.recoveryEvidenceCodes ?? []),
+          ],
         });
       }),
     assess: (instance, context, portfolio) => {
@@ -1880,6 +1895,12 @@ function coverageInstallCandidates(
 ): PlanMaterialization["candidates"] {
   return context.actionCandidates.flatMap((candidate) => {
     if (candidate.semanticActionType !== "install.card") return [];
+    if (
+      gap.installActionIds !== undefined &&
+      !gap.installActionIds.includes(candidate.actionId)
+    ) {
+      return [];
+    }
     if (
       context.actionDispositions?.some(
         (disposition) =>

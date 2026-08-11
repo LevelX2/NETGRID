@@ -45,6 +45,7 @@ export type BeliefEventClassification = {
   serverId?: string;
   runTargetServerId?: string;
   accessedCardPositionKey?: string;
+  installedPositionKey?: string;
   accessedArea?: string;
   installPlacement?: HqInstallPlacementMemory;
   sourceEventIds: string[];
@@ -113,6 +114,7 @@ export type HqHandCandidateGroupMemory = {
   reason: string;
   sourceEventId: string;
   serverId?: string;
+  installedPositionKey?: string;
   installPlacement?: HqInstallPlacementMemory;
   candidateDefinitions: KnownDefinitionCountMemory[];
   candidateCount: number;
@@ -133,6 +135,7 @@ export type HqHandLedgerMemory = {
 
 export type HiddenRemoteCandidateMemory = {
   serverId: string;
+  installedPositionKey?: string;
   candidateCount: number;
   unknownCandidateCount: number;
   agendaCandidateCount: number;
@@ -337,8 +340,23 @@ export function beliefStateInvariantSignature(
     )
     .join("|");
   const uncertaintySignature = beliefState.uncertainty.slice().sort().join("|");
+  const runnerMemorySignature = beliefState.runnerOpponentModel
+    ? JSON.stringify({
+        hqHandMemory: beliefState.runnerOpponentModel.hqHandMemory,
+        rndTopFreshness: beliefState.runnerOpponentModel.rndTopFreshness,
+        knownPositionMemory:
+          beliefState.runnerOpponentModel.knownPositionMemory,
+        hiddenRemoteCandidateMemory:
+          beliefState.runnerOpponentModel.hiddenRemoteCandidateMemory,
+      })
+    : "";
   return fnv1a(
-    [beliefState.side, entrySignature, uncertaintySignature].join("::"),
+    [
+      beliefState.side,
+      entrySignature,
+      uncertaintySignature,
+      runnerMemorySignature,
+    ].join("::"),
   );
 }
 
@@ -430,6 +448,9 @@ function classifyBeliefEvent(
   const accessedCardPositionKey = stringValue(
     event.publicPayload.accessedCardPositionKey,
   );
+  const installedPositionKey = stringValue(
+    event.publicPayload.installedPositionKey,
+  );
   const accessedArea = stringValue(event.publicPayload.accessedArea);
   return {
     eventId: event.eventId,
@@ -440,6 +461,7 @@ function classifyBeliefEvent(
     ...(serverId ? { serverId } : {}),
     ...(runTargetServerId ? { runTargetServerId } : {}),
     ...(accessedCardPositionKey ? { accessedCardPositionKey } : {}),
+    ...(installedPositionKey ? { installedPositionKey } : {}),
     ...(accessedArea ? { accessedArea } : {}),
     ...(installPlacement ? { installPlacement } : {}),
     sourceEventIds: [event.eventId],
@@ -817,6 +839,7 @@ function deriveKnownPositionMemory(
 
     const zone =
       accessEventZone(classification) ??
+      classification.serverId ??
       (event ? stringValue(event.publicPayload.privateLookZone) : undefined) ??
       (event ? stringValue(event.publicPayload.exposedServerId) : undefined) ??
       "unknown";
@@ -1034,10 +1057,7 @@ function deriveKnownHqHandMemory(
       if (removeIndex >= 0) knownCards.splice(removeIndex, 1);
       continue;
     }
-    if (
-      adjustment.kind === "unknown_departure" &&
-      classification.actionType === "install_card"
-    ) {
+    if (adjustment.kind === "unknown_departure") {
       const departure = hqHiddenInstallDepartureMemory(
         classification,
         knownCards,
@@ -1050,9 +1070,8 @@ function deriveKnownHqHandMemory(
       continue;
     }
     if (
-      adjustment.kind === "unknown_departure" ||
-      (adjustment.kind === "hidden_zone_reordered" &&
-        hiddenZoneReorderChangesHq(classification))
+      adjustment.kind === "hidden_zone_reordered" &&
+      hiddenZoneReorderChangesHq(classification)
     ) {
       knownCards.length = 0;
       candidateGroups.length = 0;
@@ -1082,7 +1101,9 @@ function deriveKnownHqHandMemory(
       handCount > 0 &&
       knownDefinitionIds.length === handCount &&
       ledger.unknownRestCount === 0 &&
-      ledger.candidateGroups.length === 0,
+      ledger.candidateGroups.every(
+        (group) => group.candidateCount - group.departureCount <= 0,
+      ),
     sourceEventIds: ledger.sourceEventIds,
     invalidationReasons,
     ledger,
@@ -1148,20 +1169,19 @@ function hqCandidateGroupsWithinAvailableSlots(
   candidateGroups: HqHandCandidateGroupMemory[],
   availableSlots: number,
 ): HqHandCandidateGroupMemory[] {
-  if (availableSlots <= 0) return [];
   let remainingSlots = availableSlots;
   const selected: HqHandCandidateGroupMemory[] = [];
   for (const group of candidateGroups.slice(-6).reverse()) {
+    if (group.candidateCount <= 0 && group.unknownCandidateCount <= 0) continue;
     const groupRemainder = Math.max(
       0,
       group.candidateCount - group.departureCount,
     );
-    const ambiguousUnknownInstallCandidate =
-      group.candidateCount > 0 && group.unknownCandidateCount > 0;
-    if (groupRemainder <= 0 && !ambiguousUnknownInstallCandidate) continue;
+    if (groupRemainder > 0) {
+      if (remainingSlots <= 0) continue;
+      remainingSlots -= groupRemainder;
+    }
     selected.push(group);
-    remainingSlots -= groupRemainder;
-    if (remainingSlots <= 0) break;
   }
   return selected.reverse();
 }
@@ -1174,6 +1194,8 @@ function hqHiddenInstallDepartureMemory(
   if (knownCards.length === 0) return { safeEntries: [] };
 
   const placement = event.installPlacement ?? "unknown";
+  const isInstall = event.actionType === "install_card";
+  const departureKind = isInstall ? "hidden_install" : "unknown_departure";
   const matchingCandidateEntries =
     placement === "unknown"
       ? knownCards.slice()
@@ -1194,10 +1216,15 @@ function hqHiddenInstallDepartureMemory(
     unknownCandidateCount > 0
   ) {
     const candidateGroup = {
-      groupId: `${event.eventId}:hidden_install:${placement}:${event.serverId ?? "unknown"}`,
-      reason: `hidden_${placement}_install_unknown_candidates`,
+      groupId: `${event.eventId}:${departureKind}:${placement}:${event.serverId ?? "hq"}`,
+      reason: isInstall
+        ? `hidden_${placement}_install_unknown_candidates`
+        : "unknown_hq_departure_candidates",
       sourceEventId: event.eventId,
       ...(event.serverId ? { serverId: event.serverId } : {}),
+      ...(event.installedPositionKey
+        ? { installedPositionKey: event.installedPositionKey }
+        : {}),
       installPlacement: placement,
       candidateDefinitions: [],
       candidateCount: 0,
@@ -1206,6 +1233,9 @@ function hqHiddenInstallDepartureMemory(
       basis: [
         `install_placement:${placement}`,
         ...(event.serverId ? [`server:${event.serverId}`] : []),
+        ...(event.installedPositionKey
+          ? [`installed_position:${event.installedPositionKey}`]
+          : []),
         "known_candidates:0",
         `unknown_candidates:${unknownCandidateCount}`,
         "known_cards_do_not_match_install_placement",
@@ -1235,20 +1265,29 @@ function hqHiddenInstallDepartureMemory(
   return {
     safeEntries,
     candidateGroup: {
-      groupId: `${event.eventId}:hidden_install:${placement}:${event.serverId ?? "unknown"}`,
-      reason: useAllKnownAsFallback
-        ? "hidden_install_no_matching_known_candidates"
-        : `hidden_${placement}_install_candidates`,
+      groupId: `${event.eventId}:${departureKind}:${placement}:${event.serverId ?? "hq"}`,
+      reason: isInstall
+        ? useAllKnownAsFallback
+          ? "hidden_install_no_matching_known_candidates"
+          : `hidden_${placement}_install_candidates`
+        : "unknown_hq_departure_candidates",
       sourceEventId: event.eventId,
       ...(event.serverId ? { serverId: event.serverId } : {}),
+      ...(event.installedPositionKey
+        ? { installedPositionKey: event.installedPositionKey }
+        : {}),
       installPlacement: placement,
       candidateDefinitions,
       candidateCount,
       unknownCandidateCount,
       departureCount: 1,
       basis: [
+        `departure_kind:${departureKind}`,
         `install_placement:${placement}`,
         ...(event.serverId ? [`server:${event.serverId}`] : []),
+        ...(event.installedPositionKey
+          ? [`installed_position:${event.installedPositionKey}`]
+          : []),
         `known_candidates:${candidateCount}`,
         `unknown_candidates:${unknownCandidateCount}`,
         ...(useAllKnownAsFallback
@@ -1269,9 +1308,18 @@ function reconcileHqCandidateGroups(
   if (!definitionId || !event.serverId || candidateGroups.length === 0) return;
   if (!hqCandidateReconciliationEvent(event)) return;
 
-  const groupIndex = candidateGroups.findIndex(
-    (group) => group.serverId === event.serverId,
-  );
+  const matchingServerGroups = candidateGroups
+    .map((group, index) => ({ group, index }))
+    .filter(({ group }) => group.serverId === event.serverId);
+  const exactPosition = event.installedPositionKey
+    ? matchingServerGroups.find(
+        ({ group }) =>
+          group.installedPositionKey === event.installedPositionKey,
+      )
+    : undefined;
+  const groupIndex =
+    exactPosition?.index ??
+    (matchingServerGroups.length === 1 ? matchingServerGroups[0]!.index : -1);
   if (groupIndex < 0) return;
   const group = candidateGroups[groupIndex]!;
   const matchedCandidate = group.candidateDefinitions.find(
@@ -1491,6 +1539,11 @@ function deriveHiddenRemoteCandidateMemory(
         );
         memories.push({
           serverId: classification.serverId,
+          ...(candidateGroup.installedPositionKey
+            ? {
+                installedPositionKey: candidateGroup.installedPositionKey,
+              }
+            : {}),
           candidateCount: totalCandidateCount,
           unknownCandidateCount: candidateGroup.unknownCandidateCount,
           agendaCandidateCount,
@@ -1533,14 +1586,25 @@ function reconcileHiddenRemoteCandidateMemories(
   if (!definitionId || !event.serverId || memories.length === 0) return;
   if (!hqCandidateReconciliationEvent(event)) return;
 
-  const memoryIndex = memories.findIndex(
-    (memory) =>
-      memory.serverId === event.serverId &&
-      (memory.unknownCandidateCount > 0 ||
-        memory.candidateDefinitions.some(
-          (candidate) => candidate.definitionId === definitionId,
-        )),
-  );
+  const matchingMemories = memories
+    .map((memory, index) => ({ memory, index }))
+    .filter(
+      ({ memory }) =>
+        memory.serverId === event.serverId &&
+        (memory.unknownCandidateCount > 0 ||
+          memory.candidateDefinitions.some(
+            (candidate) => candidate.definitionId === definitionId,
+          )),
+    );
+  const exactPosition = event.installedPositionKey
+    ? matchingMemories.find(
+        ({ memory }) =>
+          memory.installedPositionKey === event.installedPositionKey,
+      )
+    : undefined;
+  const memoryIndex =
+    exactPosition?.index ??
+    (matchingMemories.length === 1 ? matchingMemories[0]!.index : -1);
   if (memoryIndex >= 0) memories.splice(memoryIndex, 1);
 }
 
@@ -1554,8 +1618,7 @@ function positionInvalidatesKey(
     event.family === "swap"
   )
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
-  if (event.family === "install" && event.serverId)
-    return key.startsWith(`${event.serverId}:`);
+  if (event.family === "install") return false;
   if (rdTopRemovedByRunnerAccess(event) && key.startsWith("rd:")) return false;
   if (
     event.family === "move" ||
@@ -1563,6 +1626,9 @@ function positionInvalidatesKey(
     event.family === "steal" ||
     event.family === "discard"
   ) {
+    if (event.serverId && event.installedPositionKey) {
+      return key === `${event.serverId}:${event.installedPositionKey}`;
+    }
     if (event.family === "discard" && !event.serverId)
       return key.startsWith("hq:");
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
@@ -1810,6 +1876,14 @@ function knownDefinitionsFromEvent(
   );
   if (rndTopDefinition)
     return [{ definitionId: rndTopDefinition, positionKey: "top" }];
+  if (definitionId && classification.installedPositionKey) {
+    return [
+      {
+        definitionId,
+        positionKey: classification.installedPositionKey,
+      },
+    ];
+  }
   const exposedDefinition =
     stringValue(event.publicPayload.exposedCardDefinitionId) ??
     stringValue(event.publicPayload.publicRevealDefinitionId) ??

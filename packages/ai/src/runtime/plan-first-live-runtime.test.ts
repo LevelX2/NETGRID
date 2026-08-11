@@ -8,7 +8,11 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
-import { buildDeckCapabilityProfileFromInput } from "../deck-capabilities";
+import {
+  buildDeckCapabilityProfileFromInput,
+  type BreakerCapability,
+  type DeckCapabilityProfile,
+} from "../deck-capabilities";
 import {
   attachOwnDeckSnapshot,
   aiInput,
@@ -70,6 +74,198 @@ function quotedFixtureIce(params: {
       },
     ],
   });
+}
+
+function costIneffectiveWallRunAction() {
+  return legalAction(
+    "run-costly-hq-wall",
+    "runner",
+    "start_run",
+    "Run HQ",
+    { credits: 0, clicks: 1 },
+    { payload: { serverId: "hq" } },
+  );
+}
+
+function costIneffectiveCoverageCreditAction() {
+  return legalAction(
+    "credit-for-costly-hq-wall",
+    "runner",
+    "gain_credit",
+    "Gain 1 Credit",
+    { credits: 0, clicks: 1 },
+  );
+}
+
+function costEffectiveWallBreakerInHand() {
+  return visibleCard("ramming-piston", "runner", "program", {
+    definitionId: "onr_v1_053_ramming-piston",
+    title: "Ramming Piston",
+    installCost: 4,
+    strength: 5,
+    subtypes: ["icebreaker", "noisy"],
+  });
+}
+
+function costIneffectiveWallInput(
+  actions: ReturnType<typeof legalAction>[],
+) {
+  const input = aiInput("runner", actions);
+  input.playerView.own.credits = 4;
+  input.playerView.own.clicks = 3;
+  input.playerView.own.rig = [
+    visibleCard("installed-krash", "runner", "program", {
+      definitionId: "onr_v1_039_krash",
+      title: "Krash",
+      installCost: 0,
+      strength: 0,
+      subtypes: ["icebreaker"],
+    }),
+  ];
+  input.playerView.servers = [
+    server("hq", [
+      quotedFixtureIce({
+        instanceId: "costly-hq-wall",
+        definitionId: "onr_v1_279_wall-of-static",
+        title: "Wall of Static",
+        strength: 4,
+        subtypes: ["wall"],
+      }),
+    ]),
+    server("rd"),
+    server("archives"),
+  ];
+  return input;
+}
+
+function costIneffectiveWallTarget(actionId: string) {
+  const target = safeRuntimeRunTarget(actionId, "hq");
+  return {
+    ...target,
+    pathPassability: "blocked_unpayable" as const,
+    pathCost: 10,
+    routeQuote: {
+      ...target.routeQuote,
+      reachability: "no_access" as const,
+      knownCost: 10,
+      guaranteedKnownCost: 10,
+      availableCredits: 4,
+      fundingGap: 6,
+      noAccessReason: "insufficient_credits",
+      evidence: [
+        "route_reachability:no_access",
+        "route_funding_gap:6",
+        "route_unknown_ice_count:0",
+      ],
+    },
+    creditsAfterRun: -6,
+    recommendation: "gain_credits_first" as const,
+    score: 80,
+    evidence: [
+      "path_passability:blocked_unpayable",
+      "path_cost:10",
+      "visible_break_cost:10",
+    ],
+  };
+}
+
+function costIneffectiveCoverageCapabilities(
+  alternative: "in_hand" | "in_deck" | "none",
+): DeckCapabilityProfile {
+  const krash: BreakerCapability = {
+    cardId: "onr_v1_039_krash",
+    title: "Krash",
+    coverage: ["universal", "wall", "code_gate", "sentry"],
+    installCost: 0,
+    baseStrength: 0,
+    breakCost: 2,
+    pumpCost: 2,
+    risks: [],
+    restrictions: [],
+    quantityKnownInDeck: 2,
+    locations: ["installed", "in_deck"],
+    confidence: "high",
+    evidence: ["test_installed_expensive_coverage"],
+  };
+  const rammingPiston: BreakerCapability = {
+    cardId: "onr_v1_053_ramming-piston",
+    title: "Ramming Piston",
+    coverage: ["wall"],
+    installCost: 4,
+    baseStrength: 5,
+    breakCost: 2,
+    pumpCost: 1,
+    risks: [],
+    restrictions: [],
+    quantityKnownInDeck: 1,
+    locations:
+      alternative === "in_hand" ? ["in_hand", "in_deck"] : ["in_deck"],
+    confidence: "high",
+    evidence: ["test_known_efficient_wall_role"],
+  };
+  const breakerCoverageMatrix = Object.fromEntries(
+    (
+      [
+        "wall",
+        "code_gate",
+        "sentry",
+        "ap",
+        "trace",
+        "universal",
+        "subtype_limited",
+        "special",
+      ] as const
+    ).map((coverage) => [
+      coverage,
+      {
+        coverage,
+        inDeckKnown: true,
+        inHand: alternative === "in_hand" && coverage === "wall",
+        installed: ["wall", "code_gate", "sentry", "universal"].includes(
+          coverage,
+        ),
+        searchableNow: false,
+        drawOnly: alternative === "in_deck",
+        missing: false,
+        bestKnownCards: ["onr_v1_039_krash"],
+        blockers: [],
+      },
+    ]),
+  ) as unknown as NonNullable<
+    DeckCapabilityProfile["runner"]
+  >["breakerCoverageMatrix"];
+  return {
+    schemaVersion: "deck-capability-profile-v1",
+    side: "runner",
+    runner: {
+      breakerInventory: [
+        krash,
+        ...(alternative === "none" ? [] : [rammingPiston]),
+      ],
+      breakerCoverageMatrix,
+      searchAccess: {
+        tools: [],
+        canSearchProgramsNow: false,
+        canSearchBreakersNow: false,
+        evidence: [],
+      },
+      economyBankTools: [],
+      memoryProfile: {
+        memoryToolsKnown: 0,
+        missingMemoryPressure: false,
+        evidence: [],
+      },
+      attackPlanProfile: {
+        centralPressureToolsKnown: 1,
+        remoteContestToolsKnown: 0,
+        setupToolsKnown: 1,
+        evidence: [],
+      },
+    },
+    missingCapabilities: [],
+    confidence: "high",
+    evidence: ["test_side_safe_deck_snapshot"],
+  };
 }
 
 describe("authoritative plan-first live runtime", () => {
@@ -13020,6 +13216,294 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.rig_and_coverage",
       fallbackUsed: false,
     });
+  });
+
+  // Follow-up regression for act-2026-05-17-runner-ai-breaker-acquisition-strategy.
+  it("funds and installs a visible cheaper breaker for an exact known path", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-ramming-piston",
+      "runner",
+      "install_card",
+      "Install Ramming Piston",
+      { credits: 4, clicks: 1 },
+      { source: "ramming-piston" },
+    );
+    const run = costIneffectiveWallRunAction();
+    const credit = costIneffectiveCoverageCreditAction();
+    const input = costIneffectiveWallInput([run, credit]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.gripOrHq = [costEffectiveWallBreakerInHand()];
+    const context = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_hand"),
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    });
+
+    const fundingDecision = context.chooseSemanticRuntimeAction(input, {});
+
+    expect(fundingDecision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(fundingDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:fund_install_breaker_wall",
+        "plan_assessment_evidence:cost_ineffective_coverage:hq:10",
+      ]),
+    );
+    const fundingCoverage = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    expect(fundingCoverage?.moduleState).toMatchObject({
+      phase: "fund_answer",
+      gap: {
+        needKind: "cost_ineffective_coverage",
+        targetServerId: "hq",
+        requesterModuleId: "runner.pressure_central",
+        requesterPlanInstanceId:
+          "plan:runner.pressure_central:central%3Ahq",
+        currentKnownPathCost: 10,
+        currentPathFundingGap: 6,
+        recoveryMode: "install_visible_answer",
+        fundingGap: 1,
+      },
+    });
+
+    const funded = structuredClone(input);
+    funded.decisionId = "cost-effective-coverage-funded:2";
+    funded.playerView.stateVersion = 2;
+    funded.playerView.own.credits = 4;
+    funded.playerView.own.clicks = 2;
+    install.expiresAtStateVersion = 2;
+    run.expiresAtStateVersion = 2;
+    funded.legalActions = [install, run];
+    funded.playerView.legalActions = funded.legalActions;
+
+    const installDecision = context.chooseSemanticRuntimeAction(funded, {});
+
+    expect(installDecision).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(installDecision.evidence).toContain(
+      "plan_step_capability:install_breaker_wall",
+    );
+    const installCoverage = residentPlanPortfolioSnapshot(
+      funded,
+    )?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    expect(installCoverage?.moduleState).toMatchObject({
+      phase: "install_answer",
+      gap: { installActionIds: [install.actionId] },
+    });
+  });
+
+  it("uses a legal tutor for a cheaper known deck-coverage role", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple-for-efficient-wall-breaker",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const input = costIneffectiveWallInput([
+      temple,
+      run,
+      costIneffectiveCoverageCreditAction(),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+    ];
+    const baseCapabilities = costIneffectiveCoverageCapabilities("in_deck");
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        ...baseCapabilities,
+        runner: {
+          ...baseCapabilities.runner!,
+          searchAccess: {
+            tools: [
+              {
+                cardId: "onr_v1_114_temple-microcode-outlet",
+                title: "Temple Microcode Outlet",
+                status: "in_hand" as const,
+                canSearchPrograms: true,
+                canSearchBreakers: true,
+                legalNow: true,
+                confidence: "high" as const,
+                evidence: ["test_tutor_visible"],
+              },
+            ],
+            canSearchProgramsNow: true,
+            canSearchBreakersNow: true,
+            evidence: ["test_tutor_visible"],
+          },
+        },
+      }),
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: temple.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_capability:search_answer_breaker_wall",
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "search_answer",
+      gap: {
+        recoveryMode: "search_known_alternative",
+        directSearchActionIds: [temple.actionId],
+      },
+    });
+  });
+
+  it("draws only from side-safe deck-role knowledge when no tutor is legal", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = costIneffectiveWallRunAction();
+    const draw = legalAction(
+      "draw-for-efficient-wall-breaker",
+      "runner",
+      "draw_card",
+      "Draw 1",
+      { credits: 0, clicks: 1 },
+    );
+    const input = costIneffectiveWallInput([
+      draw,
+      run,
+      costIneffectiveCoverageCreditAction(),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("coverage-draw-buffer-1", "runner", "event"),
+      visibleCard("coverage-draw-buffer-2", "runner", "event"),
+      visibleCard("coverage-draw-buffer-3", "runner", "event"),
+    ];
+    const decision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_deck"),
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_capability:draw_for_answer_breaker_wall",
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "draw_for_answer",
+      gap: {
+        recoveryMode: "draw_for_known_role",
+        deckHasAnswer: true,
+        answerInHand: false,
+      },
+    });
+  });
+
+  it("retains quantified parent funding when no better breaker route is known", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = costIneffectiveWallRunAction();
+    const credit = costIneffectiveCoverageCreditAction();
+    const input = costIneffectiveWallInput([run, credit]);
+    input.playerView.own.credits = 9;
+    const target = costIneffectiveWallTarget(run.actionId);
+    target.creditsAfterRun = -1;
+    target.routeQuote = {
+      ...target.routeQuote,
+      availableCredits: 9,
+      fundingGap: 1,
+      evidence: [
+        "route_reachability:no_access",
+        "route_funding_gap:1",
+        "route_unknown_ice_count:0",
+      ],
+    };
+    const decision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("none"),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      ),
+    ).toBe(false);
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.dedupeKey === "run-support:central:hq",
+      )?.moduleState,
+    ).toMatchObject({
+      need: {
+        targetCredits: 13,
+        gap: 4,
+        parentPlanInstanceId:
+          "plan:runner.pressure_central:central%3Ahq",
+      },
+    });
+  });
+
+  it("does not open efficiency recovery for a known payoffless server", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = costIneffectiveWallRunAction();
+    const input = costIneffectiveWallInput([
+      run,
+      costIneffectiveCoverageCreditAction(),
+    ]);
+    const target = {
+      ...costIneffectiveWallTarget(run.actionId),
+      accessPayoff: "known_low_value" as const,
+      knownAccessState: "known_no_current_payoff" as const,
+      recommendation: "do_not_run_now" as const,
+      score: -100,
+    };
+    const decision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_deck"),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision.reasonCode).not.toBe(
+      "plan_first.runner.rig_and_coverage",
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      ),
+    ).toBe(false);
   });
 
   it("binds a heap search to the concrete breaker gap, server, source and recovery target", () => {
