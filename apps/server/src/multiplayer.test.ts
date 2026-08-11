@@ -1472,7 +1472,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     const maintenance = await authenticatedMaintenanceServer(service);
     try {
       const activeResponse = await maintenance.request(
-        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?turn=1&side=corp&fromDecision=1&toDecision=1&includeBeliefState=true`,
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?turn=1&side=corp&fromDecision=1&toDecision=1&includeBeliefState=true&includeOwnDeckSnapshot=true`,
       );
       const activeBundle = (await activeResponse.json()) as {
         schemaVersion?: string;
@@ -1489,6 +1489,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           decisionIndex?: string;
           historicalAudit?: string;
           beliefCapture?: string;
+          ownDeckSnapshot?: string;
         };
         beliefStates?: Array<{
           decisionIndex?: number;
@@ -1506,6 +1507,21 @@ describe("Backend 0.5 private storage maintenance", () => {
             analysisSnapshot?: { status?: string };
           };
         }>;
+        ownDeckSnapshot?: {
+          side?: string;
+          provenance?: string;
+          signature?: string;
+          deckSnapshotId?: string;
+          identityDefinitionId?: string;
+          definitionCounts?: Array<{
+            definitionId: string;
+            quantity: number;
+          }>;
+          totalCards?: number;
+          cardPoolSnapshotId?: string;
+          formatProfileId?: string;
+          deckHash?: string;
+        };
       };
       expect(activeResponse.status).toBe(200);
       expect(activeBundle).toMatchObject({
@@ -1514,6 +1530,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           decisionIndex: "netgrid-decision-audit-availability-v1",
           historicalAudit: "ai-decision-historical-audit-v1",
           beliefCapture: "netgrid-ai-belief-capture-v1",
+          ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
         },
         match: {
           matchId: active.matchId,
@@ -1545,8 +1562,51 @@ describe("Backend 0.5 private storage maintenance", () => {
           delta: expect.any(Object),
         }),
       ]);
+      expect(activeBundle.ownDeckSnapshot).toMatchObject({
+        side: "corp",
+        provenance: "persisted",
+        signature: expect.any(String),
+        deckSnapshotId: before.match.deckSetup.corpSnapshotId,
+        identityDefinitionId: before.match.deckSetup.corp.identityCardId,
+        cardPoolSnapshotId:
+          before.match.deckSetup.corp.cardPoolSnapshotId,
+        formatProfileId: before.match.deckSetup.corp.formatProfileId,
+        deckHash: before.match.deckSetup.corp.deckHash,
+      });
+      expect(activeBundle.ownDeckSnapshot?.definitionCounts?.length).toBeGreaterThan(
+        0,
+      );
+      expect(
+        activeBundle.ownDeckSnapshot?.definitionCounts?.reduce(
+          (total, entry) => total + entry.quantity,
+          0,
+        ),
+      ).toBe(activeBundle.ownDeckSnapshot?.totalCards);
+      const assignment = before.match.deckSetup.assignment;
+      if (!assignment) throw new Error("Missing analysis deck assignment");
+      const ownCorpSnapshot =
+        before.privateDeckSnapshots?.participants[assignment.corpPlayer].corp;
+      const opponentRunnerSnapshot =
+        before.privateDeckSnapshots?.participants[assignment.runnerPlayer]
+          .runner;
+      if (!ownCorpSnapshot || !opponentRunnerSnapshot)
+        throw new Error("Missing persisted analysis deck snapshots");
+      const ownCorpDefinitions = new Set(
+        ownCorpSnapshot.cards.map((entry) => entry.cardId),
+      );
+      const opponentOnlyDefinition = opponentRunnerSnapshot.cards.find(
+        (entry) => !ownCorpDefinitions.has(entry.cardId),
+      )?.cardId;
+      if (!opponentOnlyDefinition)
+        throw new Error("Missing opponent-only deck definition fixture");
+      expect(JSON.stringify(activeBundle)).not.toContain(
+        opponentOnlyDefinition,
+      );
       expect(JSON.stringify(activeBundle)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
+      );
+      expect(JSON.stringify(activeBundle.ownDeckSnapshot)).not.toMatch(
+        /instanceId|stackPosition|order|shuffle/i,
       );
 
       const defaultBundleResponse = await maintenance.request(
@@ -1555,6 +1615,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       const defaultBundle = await defaultBundleResponse.json();
       expect(defaultBundleResponse.status).toBe(200);
       expect(defaultBundle).not.toHaveProperty("beliefStates");
+      expect(defaultBundle).not.toHaveProperty("ownDeckSnapshot");
       expect(JSON.stringify(defaultBundle)).not.toContain('"beliefState"');
 
       const decisionResponse = await maintenance.request(
@@ -1587,6 +1648,28 @@ describe("Backend 0.5 private storage maintenance", () => {
           lastEventIndex?: number;
         };
         provenance?: { persisted?: string[]; reconstructed?: unknown[] };
+        ownDeckSnapshot?: {
+          side?: string;
+          provenance?: string;
+          signature?: string;
+          definitionCounts?: Array<{
+            definitionId: string;
+            quantity: number;
+          }>;
+          zoneBalance?: {
+            provenance?: string;
+            stateVersion?: number;
+            hiddenDeckCount?: number;
+            knownOutsideDeckDefinitionCounts?: Array<{
+              definitionId: string;
+              quantity: number;
+            }>;
+            remainingPossibleDefinitionCounts?: Array<{
+              definitionId: string;
+              quantity: number;
+            }>;
+          };
+        };
       };
       expect(decisionResponse.status).toBe(200);
       expect(decisionContext).toMatchObject({
@@ -1610,14 +1693,40 @@ describe("Backend 0.5 private storage maintenance", () => {
         stateVersion: decisionContext.decision?.stateVersion,
         lastEventIndex: expect.any(Number),
       });
+      expect(decisionContext.ownDeckSnapshot).toMatchObject({
+        side: "corp",
+        provenance: "persisted",
+        signature: activeBundle.ownDeckSnapshot?.signature,
+        zoneBalance: {
+          provenance: "reconstructed",
+          stateVersion: decisionContext.decision?.stateVersion,
+        },
+      });
+      expect(
+        decisionContext.ownDeckSnapshot?.zoneBalance
+          ?.remainingPossibleDefinitionCounts?.reduce(
+            (total, entry) => total + entry.quantity,
+            0,
+          ),
+      ).toBe(
+        decisionContext.ownDeckSnapshot?.zoneBalance?.hiddenDeckCount,
+      );
       expect(decisionContext.surroundingEvents?.length).toBeGreaterThan(0);
       expect(decisionContext.provenance?.persisted).toContain(
         "historicalDecisionAudit",
       );
       expect(decisionContext.provenance?.persisted).toContain("beliefState");
-      expect(decisionContext.provenance?.reconstructed).toHaveLength(0);
+      expect(decisionContext.provenance?.persisted).toContain(
+        "ownDeckSnapshot",
+      );
+      expect(decisionContext.provenance?.reconstructed).toContain(
+        "ownDeckZoneBalance",
+      );
       expect(JSON.stringify(decisionContext)).not.toMatch(
         /sessionToken|reconnectToken|joinToken|tokenHash|gameStateJson|cardInstances|privatePayload|privateDeckSnapshots|decklist|AIInput/i,
+      );
+      expect(JSON.stringify(decisionContext.ownDeckSnapshot)).not.toMatch(
+        /instanceId|stackPosition|order|shuffle/i,
       );
 
       const after = await service.loadForTest(active.matchId);
@@ -1625,6 +1734,69 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(after?.match.matchVersion).toBe(before.match.matchVersion);
       expect(after?.gameState.stateVersion).toBe(before.gameState.stateVersion);
       expect(hashState(after.gameState)).toBe(hashState(before.gameState));
+
+      const deckBindingDatabase = new DatabaseSync(
+        join(dir, "netgrid.sqlite"),
+      );
+      const persistedDeckRow = deckBindingDatabase
+        .prepare(
+          "SELECT private_deck_snapshots_json AS privateDeckSnapshotsJson FROM private_deck_snapshots WHERE match_id = ?",
+        )
+        .get(active.matchId) as
+        | { privateDeckSnapshotsJson?: string }
+        | undefined;
+      if (!persistedDeckRow?.privateDeckSnapshotsJson)
+        throw new Error("Missing persisted private deck snapshot row");
+      const mismatchedDeckSnapshots = JSON.parse(
+        persistedDeckRow.privateDeckSnapshotsJson,
+      ) as NonNullable<StoredMatch["privateDeckSnapshots"]>;
+      mismatchedDeckSnapshots.participants[assignment.corpPlayer].corp.deckHash =
+        "sha256:maintenance-binding-mismatch";
+      deckBindingDatabase
+        .prepare(
+          "UPDATE private_deck_snapshots SET private_deck_snapshots_json = ? WHERE match_id = ?",
+        )
+        .run(JSON.stringify(mismatchedDeckSnapshots), active.matchId);
+      const mismatchedBindingResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?side=corp&includeOwnDeckSnapshot=true&includeEvents=false&includeDecisionTraces=false`,
+      );
+      expect(mismatchedBindingResponse.status).toBe(200);
+      expect(await mismatchedBindingResponse.json()).toMatchObject({
+        ownDeckSnapshot: {
+          side: "corp",
+          provenance: "unavailable",
+          reason: "historical_deck_snapshot_binding_mismatch",
+        },
+        diagnostics: {
+          unavailableSections: expect.arrayContaining(["ownDeckSnapshot"]),
+        },
+      });
+
+      deckBindingDatabase
+        .prepare(
+          "DELETE FROM private_deck_snapshots WHERE match_id = ?",
+        )
+        .run(active.matchId);
+      const missingDeckResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?side=corp&includeOwnDeckSnapshot=true&includeEvents=false&includeDecisionTraces=false`,
+      );
+      expect(missingDeckResponse.status).toBe(200);
+      expect(await missingDeckResponse.json()).toMatchObject({
+        ownDeckSnapshot: {
+          side: "corp",
+          provenance: "unavailable",
+          reason: "historical_deck_snapshot_not_persisted",
+        },
+        diagnostics: {
+          unavailableSections: expect.arrayContaining(["ownDeckSnapshot"]),
+        },
+      });
+      deckBindingDatabase
+        .prepare(
+          "INSERT INTO private_deck_snapshots (match_id, private_deck_snapshots_json) VALUES (?, ?)",
+        )
+        .run(active.matchId, persistedDeckRow.privateDeckSnapshotsJson);
+      deckBindingDatabase.close();
 
       // A pre-audit trace must remain visibly unavailable; the API may not
       // substitute current-engine reconstruction for missing historical data.
@@ -1654,7 +1826,9 @@ describe("Backend 0.5 private storage maintenance", () => {
             },
           },
         },
-        provenance: { reconstructed: [] },
+        provenance: {
+          reconstructed: expect.arrayContaining(["ownDeckZoneBalance"]),
+        },
         diagnostics: {
           unavailableSections: expect.arrayContaining([
             "historicalLegalActions",

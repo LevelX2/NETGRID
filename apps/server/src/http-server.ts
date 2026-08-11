@@ -4404,6 +4404,7 @@ function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
   includeEvents?: boolean;
   includeDecisionTraces?: boolean;
   includeBeliefState?: boolean;
+  includeOwnDeckSnapshot?: boolean;
 } {
   const filters: {
     side?: "runner" | "corp";
@@ -4413,6 +4414,7 @@ function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
     includeEvents?: boolean;
     includeDecisionTraces?: boolean;
     includeBeliefState?: boolean;
+    includeOwnDeckSnapshot?: boolean;
   } = {};
   const side = searchParams.get("side");
   if (side === "runner" || side === "corp") filters.side = side;
@@ -4430,6 +4432,8 @@ function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
     filters.includeDecisionTraces = false;
   if (searchParams.get("includeBeliefState") === "true")
     filters.includeBeliefState = true;
+  if (searchParams.get("includeOwnDeckSnapshot") === "true")
+    filters.includeOwnDeckSnapshot = true;
   return filters;
 }
 

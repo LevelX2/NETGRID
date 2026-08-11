@@ -4470,6 +4470,7 @@ export class MultiplayerService {
     };
     const unavailableAudit = unavailableHistoricalAudit();
     const beliefState = audit?.beliefState;
+    const ownDeckSnapshot = source.ownDeckSnapshot;
     if (!audit) {
       diagnostics.unavailableSections.push(
         "historicalLegalActions",
@@ -4479,6 +4480,13 @@ export class MultiplayerService {
       );
     }
     if (!beliefState) diagnostics.unavailableSections.push("beliefState");
+    if (ownDeckSnapshot.provenance === "unavailable")
+      diagnostics.unavailableSections.push("ownDeckSnapshot");
+    if (
+      ownDeckSnapshot.provenance === "persisted" &&
+      ownDeckSnapshot.zoneBalance?.provenance === "unavailable"
+    )
+      diagnostics.unavailableSections.push("ownDeckZoneBalance");
     return {
       schemaVersion: "netgrid-decision-analysis-context-v2",
       decision: source.trace,
@@ -4490,16 +4498,30 @@ export class MultiplayerService {
         provenance: "unavailable",
         reason: "historical_belief_capture_not_persisted",
       },
+      ownDeckSnapshot,
       provenance: {
         persisted: audit
           ? [
               "decisionTrace",
               "historicalDecisionAudit",
               ...(beliefState ? ["beliefState"] : []),
+              ...(ownDeckSnapshot.provenance === "persisted"
+                ? ["ownDeckSnapshot"]
+                : []),
               "surroundingEvents",
             ]
-          : ["decisionTrace", "surroundingEvents"],
-        reconstructed: [],
+          : [
+              "decisionTrace",
+              ...(ownDeckSnapshot.provenance === "persisted"
+                ? ["ownDeckSnapshot"]
+                : []),
+              "surroundingEvents",
+            ],
+        reconstructed:
+          ownDeckSnapshot.provenance === "persisted" &&
+          ownDeckSnapshot.zoneBalance?.provenance === "reconstructed"
+            ? ["ownDeckZoneBalance"]
+            : [],
       },
       diagnostics,
     };
