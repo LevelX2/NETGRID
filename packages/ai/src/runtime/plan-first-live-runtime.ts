@@ -3440,6 +3440,7 @@ function buildRunnerDomain(
             fundingSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
             evaluation.routeQuote?.reachability !== "no_access" &&
+            evaluation.prerunReserveQuote?.status !== "blocked" &&
             (executionMode !== "information" ||
               runnerInformationProbeCanUseQuotedPath(
                 evaluation,
@@ -3557,6 +3558,7 @@ function buildRunnerDomain(
                   materialMarginalValue &&
                   !costlyInformationRunBelowHandBuffer &&
                   !safetyBlocked &&
+                  candidate.prerunReserveQuote?.status !== "blocked" &&
                   candidate.pathPassability === "reachable" &&
                   (candidate.recommendation === "run_now" ||
                     candidate.recommendation === "run_if_free") &&
@@ -3801,6 +3803,7 @@ function buildRunnerDomain(
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
         const directRunRouteReady =
+          evaluation.prerunReserveQuote?.status !== "blocked" &&
           (purpose !== "information" ||
             runnerInformationProbeCanUseQuotedPath(
               evaluation,
@@ -3818,6 +3821,7 @@ function buildRunnerDomain(
           reachable:
             !safetyBlocked &&
             !forgoUnsafeRunCapacity &&
+            evaluation.prerunReserveQuote?.status !== "blocked" &&
             (terminalRemoteContestIsDirectlyMandatory ||
               irrecoverableScoreThreatContest ||
               (fundingSupport === undefined && directRunRouteReady)),
@@ -6044,6 +6048,9 @@ function runnerRunTargetCanConvertNow(
   evaluation: RunnerRunTargetEvaluation,
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
+  if (evaluation.prerunReserveQuote?.status === "blocked") {
+    return false;
+  }
   const allowCreditFloorOverride = runnerRunCreditFloorOverrideAllowed(
     input,
     evaluation,
@@ -16029,6 +16036,7 @@ function planSafeRunExclusionEvidence(evidence: readonly string[]): string[] {
     "unavoidable_visible_ice_hazard_count:",
     "hq_run_suppressed_",
     "rd_run_suppressed_",
+    "prerun_reserve_",
     "semantic_excluded:",
   ];
   return evidence.filter((entry) =>

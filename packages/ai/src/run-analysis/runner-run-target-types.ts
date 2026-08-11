@@ -271,6 +271,31 @@ export type RunnerCreditBasePlan = {
   evidence: string[];
 };
 
+export type RunnerPrerunReserveQuote = {
+  purpose: "information" | "access" | "multiaccess" | "contest";
+  status:
+    | "not_required"
+    | "satisfied"
+    | "information_probe_only"
+    | "blocked";
+  riskTolerance: "standard" | "matchpoint_with_stable_universal_coverage";
+  knownPathCost: number;
+  creditsAfterKnownPath: number;
+  unknownIceCount: number;
+  unknownIcePositions: number[];
+  corpRezCredits: number;
+  visibleCoverage:
+    | "stable_universal"
+    | "risky_universal"
+    | "typed_only"
+    | "none";
+  requiredCredits: number;
+  creditGap: number;
+  requiredHandBuffer: number;
+  handBufferGap: number;
+  evidence: string[];
+};
+
 export type RunnerRunTargetEvaluation = {
   schemaVersion: typeof RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION;
   targetServerId: string;
@@ -292,6 +317,7 @@ export type RunnerRunTargetEvaluation = {
   unrezzedIceRisk?: number;
   unrezzedIceRiskCreditBuffer?: number;
   unrezzedIceRiskUnderfunded?: boolean;
+  prerunReserveQuote?: RunnerPrerunReserveQuote;
   visibleIceRunHazards?: VisibleIceRunHazard[];
   visibleIceHazardPenalty?: number;
   visibleIceHazardAvoidanceCost?: number;

@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-08-10-runner-prerun-path-reserve-quote
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-10
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-11
+completedAt: 2026-08-11
+branch: codex/runner-cost-effective-breaker-recovery
 releaseTarget: ai-plan-layer-hardening
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/run-analysis/runner-run-target-types.ts
+  - packages/ai/src/runner-run-target-evaluation.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runner-run-target-evaluation.test.ts
+  - packages/ai/src/runtime/plan-first-live-runtime-central-information-route-contract.test.ts
+  - docs/architecture/ai/README.md
+checks:
+  - 10 fokussierte Pfad-, Reserve- und Parent-Ownership-Tests grün
+  - AI-Typecheck grün
+  - git diff --check grün
 ---
 
 # Runner-Runs nur mit vollständiger Pfad- und Reservequote zulassen
@@ -93,30 +102,30 @@ Zulassung eingehen.
 
 ## Akzeptanzkriterien
 
-- [ ] Ein Run mit positivem Payoff, aber nicht bezahlbarem bekanntem Pfad
+- [x] Ein Run mit positivem Payoff, aber nicht bezahlbarem bekanntem Pfad
       wird nicht als `executable_now` zugelassen.
-- [ ] Die Quote summiert Pump-, Break-, Bypass-, Mitigation- und bekannte
+- [x] Die Quote summiert Pump-, Break-, Bypass-, Mitigation- und bekannte
       Folgekosten über alle bekannten ICE bis zum geplanten Meilenstein.
-- [ ] Unrezztes ICE wird ausschließlich als side-sichere Unsicherheit mit
+- [x] Unrezztes ICE wird ausschließlich als side-sichere Unsicherheit mit
       sichtbarer Corp-Rezfähigkeit und Runner-Coverage behandelt; keine
       verdeckte Definition fließt ein.
-- [ ] Entscheidung 112 startet den R&D-Run mit 10 Credits nicht als normalen
+- [x] Entscheidung 112 startet den R&D-Run mit 10 Credits nicht als normalen
       ausführbaren Access-/Informationspfad ohne begründete Reserve. Eine
       abweichende zulässige Probe muss Purpose, Budget und Abbruchvertrag
       ausdrücklich tragen.
-- [ ] Ein gleichwertiger Zustand ohne unrezztes ICE und mit exakt
+- [x] Ein gleichwertiger Zustand ohne unrezztes ICE und mit exakt
       bezahlbarem Keeper bleibt ausführbar.
-- [ ] Ein hochwertiger Agenda-/Matchpoint-Payoff kann einen höheren, aber
+- [x] Ein hochwertiger Agenda-/Matchpoint-Payoff kann einen höheren, aber
       weiterhin explizit begründeten Risikokorridor erhalten.
-- [ ] Nach einem Reveal bleibt die verwandte Reassessment-Logik zuständig;
+- [x] Nach einem Reveal bleibt die verwandte Reassessment-Logik zuständig;
       der Encounter-Executor erfindet keine neue Server- oder Purposewahl.
-- [ ] Tests sichern bekannte Einzel- und Mehrfach-ICE-Pfade, Unknown-ICE mit
+- [x] Tests sichern bekannte Einzel- und Mehrfach-ICE-Pfade, Unknown-ICE mit
       und ohne Reserve, universelle versus unvollständige Coverage sowie
       Informations- und Matchpoint-Purpose.
-- [ ] Ownership-Tests sichern Run-Parent, Step, Route,
+- [x] Ownership-Tests sichern Run-Parent, Step, Route,
       `PlanExecutionOrigin`, exakte Start-Run-Action und Executor.
-- [ ] Hidden-Info-Schutz, Replay, StateHash und Determinismus bleiben erhalten.
-- [ ] Fokussierte AI-Tests, erforderlicher AI-Typecheck, relevante
+- [x] Hidden-Info-Schutz, Replay, StateHash und Determinismus bleiben erhalten.
+- [x] Fokussierte AI-Tests, erforderlicher AI-Typecheck, relevante
       Runanalyse-/Architekturgates und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -133,5 +142,15 @@ Zulassung eingehen.
 
 ## Ergebnisnotiz
 
-Noch offen. Das Paket trennt die vorgelagerte Run-Zulassung von der späteren
-Encounter-Neubewertung.
+Die sichtbare Runanalyse liefert jetzt eine strukturierte, side-sichere
+Pre-Run-Reservequote mit Purpose, bekanntem Pfadbudget, Unknown-ICE-Korridor,
+Corp-Rezfähigkeit, Coverage sowie Credit- und Handpuffer. Die strategischen
+Run-Parents konsumieren diese Quote an ihrer Zulassungsgrenze; weder hoher
+Payoff noch Matchpoint-Urgency umgehen einen blockierten Korridor. Zulässig
+bleiben explizite, eng budgetierte Informations-Probes und ein begründeter
+Matchpoint-Korridor mit stabiler universeller Coverage.
+
+Die zehn fokussierten Regressionen und der AI-Typecheck sind grün. Sechs
+Fehler beim breiten Lauf von `runner-run-target-evaluation.test.ts` treten
+unverändert auch auf `main` auf und betreffen die laufende
+Kartenrestrukturierung; sie wurden nicht in dieses Paket gezogen.

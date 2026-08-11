@@ -141,6 +141,76 @@ describe("plan-first Central information-action ownership", () => {
       fallbackUsed: false,
     });
   });
+
+  it("keeps an underreserved private-look run blocked in its Central parent", () => {
+    resetResidentPlanPortfolioMemory();
+    const protocolRun = legalAction(
+      "underreserved-protocol-rd",
+      "runner",
+      "activated_card_ability",
+      "Run R&D with R&D Protocol Files",
+      { credits: 0, clicks: 1 },
+      {
+        source: "rd-protocol",
+        payload: {
+          cardId: "rd-protocol",
+          serverId: "rd",
+          runActionKind: "make_run",
+          successfulRunAccessReplacement: "private_look_top_rd",
+          successfulRunPrivateLookCount: 5,
+        },
+      },
+    );
+    const credit = legalAction(
+      "gain-reserve-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [protocolRun, credit]);
+    input.playerView.own.credits = 10;
+    const target = {
+      ...safeRuntimeRunTarget(protocolRun.actionId, "rd"),
+      accessPayoff: "access_bonus" as const,
+      knownAccessState: "known_payoff" as const,
+      pathCost: 10,
+      creditsAfterRun: 0,
+      recommendation: "run_now" as const,
+      score: 320,
+      prerunReserveQuote: {
+        purpose: "information" as const,
+        status: "blocked" as const,
+        riskTolerance: "standard" as const,
+        knownPathCost: 10,
+        creditsAfterKnownPath: 0,
+        unknownIceCount: 1,
+        unknownIcePositions: [0],
+        corpRezCredits: 12,
+        visibleCoverage: "typed_only" as const,
+        requiredCredits: 3,
+        creditGap: 3,
+        requiredHandBuffer: 3,
+        handBufferGap: 0,
+        evidence: ["prerun_reserve_status:blocked"],
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_portfolio_blocked:plan:runner.pressure_central:central%3Ard",
+      ]),
+    );
+  });
 });
 
 function liveContext(overrides: Record<string, unknown> = {}) {
