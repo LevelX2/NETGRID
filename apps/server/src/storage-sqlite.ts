@@ -25,6 +25,10 @@ import {
   type MultiplayerStorage,
   type StoredMatch,
 } from "./multiplayer";
+import {
+  projectMaintenanceOwnDeckSnapshot,
+  type StorageMaintenanceOwnDeckSnapshot,
+} from "./maintenance-own-deck-snapshot";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
@@ -394,6 +398,7 @@ export type StorageMaintenanceMatchAnalysisFilters = {
   includeEvents?: boolean;
   includeDecisionTraces?: boolean;
   includeBeliefState?: boolean;
+  includeOwnDeckSnapshot?: boolean;
 };
 
 export type StorageMaintenanceMatchAnalysisEvent = {
@@ -412,6 +417,7 @@ export type StorageMaintenanceMatchAnalysisBundle = {
     decisionIndex: "netgrid-decision-audit-availability-v1";
     historicalAudit: "ai-decision-historical-audit-v1";
     beliefCapture: "netgrid-ai-belief-capture-v1";
+    ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1";
   };
   match: {
     matchId: string;
@@ -433,6 +439,7 @@ export type StorageMaintenanceMatchAnalysisBundle = {
   decisions: StorageMaintenanceAiDecisionTraceIndexEntry[];
   traces?: StorageMaintenanceAiDecisionTraceDetail[];
   beliefStates?: Array<Record<string, unknown>>;
+  ownDeckSnapshot?: StorageMaintenanceOwnDeckSnapshot;
   diagnostics: {
     warnings: string[];
     unavailableSections: string[];
@@ -449,6 +456,7 @@ export type StorageMaintenanceDecisionAnalysisSource = {
     gameStateJson: string;
   };
   surroundingEvents: StorageMaintenanceMatchAnalysisEvent[];
+  ownDeckSnapshot: StorageMaintenanceOwnDeckSnapshot;
   snapshotIssue?: "snapshot_missing" | "snapshot_ambiguous";
 };
 
@@ -933,10 +941,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const materialized = runSqliteReadSnapshot(this.db, () => {
       const match = this.db
         .prepare(
-          `SELECT match_id AS matchId, status, mode, match_version AS matchVersion,
-             state_version AS stateVersion, state_hash AS stateHash,
-             created_at AS createdAt, updated_at AS updatedAt
-           FROM matches WHERE match_id = ?`,
+          `SELECT m.match_id AS matchId, m.status, m.mode,
+             m.match_version AS matchVersion, m.state_version AS stateVersion,
+             m.state_hash AS stateHash, m.created_at AS createdAt,
+             m.updated_at AS updatedAt, m.record_json AS recordJson,
+             p.private_deck_snapshots_json AS privateDeckSnapshotsJson
+           FROM matches m
+           LEFT JOIN private_deck_snapshots p ON p.match_id = m.match_id
+           WHERE m.match_id = ?`,
         )
         .get(matchId) as
         | {
@@ -948,6 +960,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             stateHash?: string;
             createdAt: string;
             updatedAt: string;
+            recordJson: string;
+            privateDeckSnapshotsJson?: string | null;
           }
         | undefined;
       if (!match) return undefined;
@@ -1019,6 +1033,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     if (!materialized) return undefined;
 
     const warnings: string[] = [];
+    const unavailableSections: string[] = [];
     const events = materialized.eventRows
       ?.slice(0, MATCH_ANALYSIS_EVENT_LIMIT)
       .map((row) => ({
@@ -1051,12 +1066,27 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       );
 
     const decisions = decisionRecords.map(aiDecisionTraceIndexEntry);
+    const ownDeckSnapshot = normalized.includeOwnDeckSnapshot
+      ? projectOwnDeckSnapshotFromStoredJson({
+          recordJson: materialized.match.recordJson,
+          ...(materialized.match.privateDeckSnapshotsJson === undefined
+            ? {}
+            : {
+                privateDeckSnapshotsJson:
+                  materialized.match.privateDeckSnapshotsJson,
+              }),
+          ...(normalized.side ? { side: normalized.side } : {}),
+        })
+      : undefined;
+    if (ownDeckSnapshot?.provenance === "unavailable")
+      unavailableSections.push("ownDeckSnapshot");
     return {
       schemaVersion: "netgrid-match-analysis-bundle-v2",
       schemaVersions: {
         decisionIndex: "netgrid-decision-audit-availability-v1",
         historicalAudit: "ai-decision-historical-audit-v1",
         beliefCapture: "netgrid-ai-belief-capture-v1",
+        ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
       },
       match: {
         matchId: materialized.match.matchId,
@@ -1089,7 +1119,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       ...(normalized.includeBeliefState
         ? { beliefStates: compactBeliefTimeline(decisionRecords) }
         : {}),
-      diagnostics: { warnings, unavailableSections: [] },
+      ...(ownDeckSnapshot ? { ownDeckSnapshot } : {}),
+      diagnostics: { warnings, unavailableSections },
     };
   }
 
@@ -1109,6 +1140,21 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         )
         .get(matchId, decisionIndex) as AiDecisionTraceRow | undefined;
       if (!traceRow) return undefined;
+      const ownDeckRow = this.db
+        .prepare(
+          `SELECT m.record_json AS recordJson,
+             p.private_deck_snapshots_json AS privateDeckSnapshotsJson
+           FROM matches m
+           LEFT JOIN private_deck_snapshots p ON p.match_id = m.match_id
+           WHERE m.match_id = ?`,
+        )
+        .get(matchId) as
+        | {
+            recordJson: string;
+            privateDeckSnapshotsJson?: string | null;
+          }
+        | undefined;
+      if (!ownDeckRow) return undefined;
       const snapshots = this.db
         .prepare(
           `SELECT snapshot_id AS snapshotId, state_version AS stateVersion,
@@ -1150,10 +1196,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         publicPayloadJson: string;
         hiddenInfoBarrier: number;
       }>;
-      return { traceRow, snapshots, events };
+      return { traceRow, snapshots, events, ownDeckRow };
     });
     if (!materialized) return undefined;
     const trace = aiDecisionTraceRecordFromRow(matchId, materialized.traceRow);
+    const exactState =
+      materialized.snapshots.length === 1
+        ? (JSON.parse(materialized.snapshots[0]!.gameStateJson) as GameState)
+        : undefined;
     return {
       trace: { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson },
       ...(materialized.snapshots.length === 1
@@ -1171,6 +1221,18 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         >,
         hiddenInfoBarrier: row.hiddenInfoBarrier === 1,
       })),
+      ownDeckSnapshot: projectOwnDeckSnapshotFromStoredJson({
+        recordJson: materialized.ownDeckRow.recordJson,
+        ...(materialized.ownDeckRow.privateDeckSnapshotsJson === undefined
+          ? {}
+          : {
+              privateDeckSnapshotsJson:
+                materialized.ownDeckRow.privateDeckSnapshotsJson,
+            }),
+        side: trace.side,
+        ...(exactState ? { state: exactState } : {}),
+        includeZoneBalance: true,
+      }),
       ...(materialized.snapshots.length === 0
         ? { snapshotIssue: "snapshot_missing" as const }
         : {}),
@@ -3614,6 +3676,7 @@ function normalizeMatchAnalysisFilters(
   includeEvents: boolean;
   includeDecisionTraces: boolean;
   includeBeliefState: boolean;
+  includeOwnDeckSnapshot: boolean;
 } {
   const normalizeOptionalInteger = (
     value: number | undefined,
@@ -3636,7 +3699,33 @@ function normalizeMatchAnalysisFilters(
     includeEvents: filters.includeEvents !== false,
     includeDecisionTraces: filters.includeDecisionTraces !== false,
     includeBeliefState: filters.includeBeliefState === true,
+    includeOwnDeckSnapshot: filters.includeOwnDeckSnapshot === true,
   };
+}
+
+function projectOwnDeckSnapshotFromStoredJson(params: {
+  recordJson: string;
+  privateDeckSnapshotsJson?: string | null;
+  side?: "runner" | "corp";
+  state?: GameState;
+  includeZoneBalance?: boolean;
+}): StorageMaintenanceOwnDeckSnapshot {
+  const persisted = JSON.parse(params.recordJson) as Pick<
+    StoredMatch,
+    "match"
+  >;
+  const privateDeckSnapshots = params.privateDeckSnapshotsJson
+    ? (JSON.parse(
+        params.privateDeckSnapshotsJson,
+      ) as StoredMatch["privateDeckSnapshots"])
+    : undefined;
+  return projectMaintenanceOwnDeckSnapshot({
+    match: persisted.match,
+    ...(privateDeckSnapshots ? { privateDeckSnapshots } : {}),
+    ...(params.side ? { side: params.side } : {}),
+    ...(params.state ? { state: params.state } : {}),
+    includeZoneBalance: params.includeZoneBalance === true,
+  });
 }
 
 function analysisScope(

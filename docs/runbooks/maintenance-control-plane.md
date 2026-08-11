@@ -169,6 +169,21 @@ betroffenen Abschnitt strukturiert `unavailable` mit
 `historical_audit_not_persisted`; der Server erstellt keinen
 Rückwärtskompatibilitätsadapter.
 
+Mit `side=runner|corp&includeOwnDeckSnapshot=true` liefert das Bundle außerdem
+den beim Matchstart serverprivat persistierten eigenen Decksnapshot als
+reihenfolgenneutrale Definition-Counts. Der Vertrag
+`netgrid-maintenance-own-deck-snapshot-v1` enthält Identity, Gesamtzahl,
+Kartenpool-/Formatbindung, Deck-Hash und eine eindeutige Signatur, aber keine
+Instanz-IDs, Shuffle-Daten oder Positionen. Der Decision-Detailendpunkt bindet
+denselben Snapshot automatisch an die Seite der historischen Entscheidung und
+ergänzt aus dem exakt zugehörigen State-Snapshot eine actor-sichere Zonenbilanz
+mit bekannten Karten außerhalb von Stack beziehungsweise R&D und den dort
+noch möglichen Definition-Counts. Fehlen Deckzuordnung, historischer Snapshot
+oder Hash-/Versionsbindung, bleibt der Abschnitt mit Provenance `unavailable`
+und `diagnostics.unavailableSections: ["ownDeckSnapshot"]` fail-closed. Eine
+aktuelle Deckdatei oder gegnerische Deckzusammensetzung wird nie als Ersatz
+gelesen.
+
 Im lokalen Profil dürfen dieselben read-only Analysis-Routen ohne
 Maintenance-Login über `127.0.0.1` oder `::1` aufgerufen werden. Das gilt
 ausschließlich für `GET /api/storage/maintenance/analysis/*` und prüft die

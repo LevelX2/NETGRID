@@ -78,6 +78,14 @@
   Zentraldruck und Zielplan-Fit gelten für projizierte HQ-/R&D-Runs nur, wenn
   ihr eigener sichtbarer Pfad `run_now` trägt; Archives-, Remote- und
   Bezahlbarkeitsausschlüsse bleiben wirksam.
+- Jede normale Runner-Run-Zulassung konsumiert zusätzlich eine side-sichere
+  Pre-run-Reservequote. Sie verbindet kumulierte bekannte Pfadkosten mit
+  Positionen unbekannten unrezzten ICE, sichtbaren Corp-Credits, installierter
+  Coverage, Handpuffer, Purpose und Funding Gap. Ein Urgency- oder
+  Matchpoint-Claim darf eine blockierte Quote nicht überspringen; zulässig
+  bleiben nur ein eng budgetierter Informations-Probevertrag oder ein
+  ausdrücklich erfüllter Matchpoint-Korridor mit stabiler universeller
+  Coverage.
 - Informations-Runs werden an jeder neu sichtbaren ICE-Grenze vom bestehenden
   `runner.pressure_central`- beziehungsweise `runner.contest_remote`-Parent
   über den vollständigen verbleibenden bekannten Pfad neu quotiert. Ein

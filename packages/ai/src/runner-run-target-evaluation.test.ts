@@ -20,6 +20,7 @@ import {
   type RunnerHandDevelopmentEvaluation,
 } from "./runner-hand-development";
 import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
+import { buildDeckCapabilityProfileFromInput } from "./deck-capabilities";
 
 const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 const ALL_HANDS_DEFINITION_ID = "onr_proteus_101_all-hands";
@@ -187,6 +188,112 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       unknownUnrezzedIceCount: 1,
       routeQuote: { reachability: "conditional_access" },
       accessPayoff: "access_bonus",
+    });
+  });
+
+  it("blocks a private-look run when the known path consumes the full budget before unknown ICE", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-underreserved-rd");
+    const input = aiInput({
+      credits: 10,
+      opponentCredits: 12,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-outer-rd-ice", {
+              known: false,
+              type: "ice",
+              rezzed: false,
+            }),
+            keeperIce("known-inner-keeper"),
+          ],
+        }),
+      ],
+      legalActions: [protocolRun, gainCreditAction("gain-credit")],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          type: "program",
+        }),
+        visibleCard("krash-installed", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      grip: Array.from({ length: 3 }, (_, index) =>
+        visibleCard(`reserve-grip-${index + 1}`, {
+          definitionId: "simple_run_event",
+        }),
+      ),
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: buildDeckCapabilityProfileFromInput(input),
+    });
+
+    expect(evaluation).toMatchObject({
+      actionId: protocolRun.actionId,
+      pathCost: 10,
+      creditsAfterRun: 0,
+      recommendation: "gain_credits_first",
+      prerunReserveQuote: {
+        purpose: "information",
+        status: "blocked",
+        knownPathCost: 10,
+        creditsAfterKnownPath: 0,
+        unknownIceCount: 1,
+        corpRezCredits: 12,
+        creditGap: 3,
+      },
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "prerun_reserve_status:blocked",
+        "prerun_reserve_known_path_cost:10",
+        "prerun_reserve_credits_after_known_path:0",
+        "prerun_reserve_unknown_ice_count:1",
+        "prerun_reserve_corp_rez_credits:12",
+      ]),
+    );
+  });
+
+  it("keeps the exactly affordable known Keeper path executable without unknown ICE", () => {
+    const protocolRun = activatedPrivateLookRun("protocol-known-keeper-rd");
+    const input = aiInput({
+      credits: 10,
+      opponentCredits: 12,
+      servers: [server("rd", { ice: [keeperIce("known-keeper")] })],
+      legalActions: [protocolRun],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          type: "program",
+        }),
+        visibleCard("krash-installed", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: buildDeckCapabilityProfileFromInput(input),
+    });
+
+    expect(evaluation).toMatchObject({
+      pathCost: 10,
+      creditsAfterRun: 0,
+      recommendation: "run_now",
+      prerunReserveQuote: {
+        status: "not_required",
+        unknownIceCount: 0,
+        requiredCredits: 0,
+      },
     });
   });
 
@@ -486,6 +593,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       unrezzedIceRisk: 0.51,
       unrezzedIceRiskCreditBuffer: 3,
       unrezzedIceRiskUnderfunded: true,
+      prerunReserveQuote: {
+        purpose: "information",
+        status: "blocked",
+        unknownIcePositions: [0],
+        requiredCredits: 3,
+        creditGap: 3,
+      },
     });
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
@@ -521,6 +635,12 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "run_now",
       unrezzedIceRiskCreditBuffer: 3,
       unrezzedIceRiskUnderfunded: false,
+      prerunReserveQuote: {
+        purpose: "information",
+        status: "information_probe_only",
+        requiredCredits: 3,
+        creditGap: 0,
+      },
     });
   });
 
@@ -549,6 +669,118 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "run_now",
       unrezzedIceRiskCreditBuffer: 0,
       unrezzedIceRiskUnderfunded: false,
+      prerunReserveQuote: {
+        status: "not_required",
+        corpRezCredits: 0,
+      },
+    });
+  });
+
+  it("allows the explicit matchpoint corridor only with stable universal unknown-ICE coverage", () => {
+    const protocolRun = activatedPrivateLookRun("matchpoint-protocol-rd");
+    const input = aiInput({
+      credits: 2,
+      opponentCredits: 4,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-matchpoint-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [protocolRun],
+      rig: [
+        visibleCard("protocol-installed", {
+          definitionId: "onr_v1_050_r-and-d-protocol-files",
+          type: "program",
+        }),
+        visibleCard("krash-installed", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      grip: [
+        visibleCard("matchpoint-buffer-1", {
+          definitionId: "simple_run_event",
+        }),
+        visibleCard("matchpoint-buffer-2", {
+          definitionId: "simple_run_event",
+        }),
+      ],
+    });
+    input.playerView.own.agendaPoints = 5;
+    const baseCapabilities = buildDeckCapabilityProfileFromInput(input);
+    const krash = baseCapabilities.runner?.breakerInventory.find(
+      (breaker) => breaker.cardId === KRASH_DEFINITION_ID,
+    );
+    if (!baseCapabilities.runner || !krash) {
+      throw new Error("Expected Krash deck capability");
+    }
+    const stableUniversalCapabilities = {
+      ...baseCapabilities,
+      runner: {
+        ...baseCapabilities.runner,
+        breakerInventory: [
+          {
+            ...krash,
+            coverage: ["universal" as const],
+            risks: [],
+            locations: ["installed" as const],
+            confidence: "high" as const,
+          },
+        ],
+      },
+    };
+    const typedOnlyCapabilities = {
+      ...stableUniversalCapabilities,
+      runner: {
+        ...stableUniversalCapabilities.runner,
+        breakerInventory: [
+          {
+            ...stableUniversalCapabilities.runner.breakerInventory[0]!,
+            coverage: ["code_gate" as const],
+          },
+        ],
+      },
+    };
+
+    const [stableUniversal] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: stableUniversalCapabilities,
+    });
+    const [typedOnly] = evaluateRunnerRunTargets({
+      input,
+      deckCapabilities: typedOnlyCapabilities,
+    });
+
+    expect(stableUniversal).toMatchObject({
+      recommendation: "run_now",
+      prerunReserveQuote: {
+        status: "satisfied",
+        riskTolerance: "matchpoint_with_stable_universal_coverage",
+        visibleCoverage: "stable_universal",
+        requiredCredits: 2,
+        creditGap: 0,
+        requiredHandBuffer: 2,
+      },
+    });
+    expect(typedOnly).toMatchObject({
+      recommendation: "gain_credits_first",
+      prerunReserveQuote: {
+        status: "blocked",
+        riskTolerance: "standard",
+        visibleCoverage: "typed_only",
+        requiredCredits: 3,
+        creditGap: 1,
+        requiredHandBuffer: 3,
+        handBufferGap: 1,
+      },
     });
   });
 
@@ -3414,6 +3646,29 @@ function wallOfStaticIce(instanceId: string): VisibleCard {
           sourceTitle: "Wall of Static",
         },
       ],
+  });
+}
+
+function keeperIce(instanceId: string): VisibleCard {
+  const ice = visibleCard(instanceId, {
+    definitionId: "onr_v1_252_keeper",
+    title: "Keeper",
+    type: "ice",
+    subtypes: ["code gate"],
+    known: true,
+    rezzed: true,
+    strength: 4,
+  });
+  return withEffectiveRunQuote(ice, {
+    effectiveStrength: 4,
+    subroutines: [
+      {
+        id: `${instanceId}_etr`,
+        type: "end_the_run",
+        sourceDefinitionId: "onr_v1_252_keeper",
+        sourceTitle: "Keeper",
+      },
+    ],
   });
 }
 
