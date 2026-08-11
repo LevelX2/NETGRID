@@ -11947,6 +11947,179 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
+  it("persists a failed AI choose attempt after successful steps for maintenance analysis", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
+    let runnerMainChoices = 0;
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ai-choose-failure-attempt",
+      chooseAiAction: (input, options): AiDecision => {
+        if (input.playerView.pendingChoice?.source === "setup.mulligan")
+          return chooseRuntimeAiAction(input, options);
+        runnerMainChoices += 1;
+        if (runnerMainChoices === 3) {
+          const failure = Object.assign(
+            new Error("private runner hand detail belongs only in maintenance"),
+            {
+              code: "test.choose_exception",
+              planKind: "runner.develop_board_and_hand",
+              step: "fund",
+              route: "basic_credit",
+            },
+          );
+          throw failure;
+        }
+        const action = input.legalActions.find(
+          (candidate) => candidate.type === "gain_credit",
+        );
+        if (!action)
+          throw new Error("Missing gain_credit LegalAction for choose failure test");
+        return {
+          actionId: action.actionId,
+          reasonCode: "test.choose_failure_setup",
+          explanation: "Take the current basic credit action.",
+          consideredActionIds: [action.actionId],
+          fallbackUsed: false,
+          evidence: ["test_choose_failure_setup"],
+          timeoutUsed: false,
+          profileId: input.profileId,
+          difficulty: input.difficulty,
+          confidence: 1,
+          reason: "test.choose_failure_setup",
+        };
+      },
+    });
+    try {
+      const created = await service.createMatch({
+        mode: "human_corp_vs_runner_ai",
+        hostSide: "corp",
+        seed: "ai-choose-failure-attempt",
+        runnerDifficulty: "normal",
+        aiTraceMode: "detailed",
+      });
+      const corp = {
+        side: "corp" as const,
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      };
+      await submitChoice(
+        service,
+        created.matchId,
+        corp,
+        "keep",
+        "ai-choose-failure-corp-setup",
+      );
+      await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "mandatory_draw",
+        "ai-choose-failure-corp-mandatory",
+      );
+      const endTurn = await submit(
+        service,
+        created.matchId,
+        corp,
+        (action) => action.type === "end_turn",
+        "ai-choose-failure-corp-end",
+      );
+      let payload = endTurn.actorPayload.playerView.pendingChoice
+        ? await submitFirstChoice(
+            service,
+            created.matchId,
+            corp,
+            "ai-choose-failure-corp-discard",
+          )
+        : endTurn.actorPayload;
+
+      for (let step = 0; step < 2; step += 1) {
+        const advanced = await service.advanceAi({
+          matchId: created.matchId,
+          side: "corp",
+          sessionToken: created.hostSessionToken,
+          knownStateVersion: payload.playerView.stateVersion,
+          knownMatchVersion: payload.matchVersion,
+          mode: "single_step",
+        });
+        expect(advanced.ok).toBe(true);
+        if (!advanced.ok) throw new Error(advanced.error.message);
+        payload = advanced.requesterPayload;
+      }
+
+      const beforeFailure = await service.loadForTest(created.matchId);
+      if (!beforeFailure?.gameState)
+        throw new Error("Missing match before failed AI choose attempt");
+      const eventAnchorId = beforeFailure.eventLog.at(-1)?.eventId;
+      if (!eventAnchorId) throw new Error("Missing failure event anchor");
+      const failureDecisionIndex =
+        (beforeFailure.aiDecisionTraces?.length ?? 0) + 1;
+      const failed = await service.advanceAi({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: payload.playerView.stateVersion,
+        knownMatchVersion: payload.matchVersion,
+        mode: "single_step",
+      });
+
+      expect(failed.ok).toBe(false);
+      if (failed.ok) throw new Error("Expected AI choose failure");
+      expect(failed.error).toMatchObject({
+        code: "ai_decision_failed",
+        diagnosticCode: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
+      });
+      expect(JSON.stringify(failed.error)).not.toContain(
+        "private runner hand detail",
+      );
+
+      const afterFailure = await service.loadForTest(created.matchId);
+      expect(afterFailure?.gameState?.stateVersion).toBe(
+        beforeFailure.gameState.stateVersion,
+      );
+      expect(afterFailure?.eventLog).toHaveLength(beforeFailure.eventLog.length);
+
+      const bundle = await service.storageMaintenanceMatchAnalysis(
+        created.matchId,
+        { includeEvents: false, includeDecisionTraces: true },
+      );
+      expect(bundle?.decisions).toHaveLength(failureDecisionIndex);
+      expect(bundle?.decisions.at(-1)).toMatchObject({
+        traceId: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
+        eventId: eventAnchorId,
+        stateVersion: beforeFailure.gameState.stateVersion,
+        decisionIndex: failureDecisionIndex,
+        schemaVersion: "ai-decision-failure-attempt-v1",
+        meta: {
+          attempt: {
+            outcome: "failed",
+            phase: "choose",
+            code: "ai_decision_exception",
+            plan: {
+              kind: "runner.develop_board_and_hand",
+              step: "fund",
+              route: "basic_credit",
+            },
+            error: {
+              code: "test.choose_exception",
+              message: "private runner hand detail belongs only in maintenance",
+            },
+          },
+        },
+      });
+      expect(bundle?.traces?.at(-1)?.detail).toMatchObject({
+        attempt: {
+          diagnosticCode: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
+          eventAnchorId,
+        },
+      });
+    } finally {
+      storage.close?.();
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it("reports an engine rejection of an AI LegalAction without exposing its private message", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ai-engine-action-rejected",

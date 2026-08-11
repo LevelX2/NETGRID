@@ -420,6 +420,8 @@ export type AiDecisionTraceRecord = {
   traceJson: Record<string, unknown>;
 };
 
+type AiDecisionFailurePhase = "choose";
+
 export type HistoricalAuditAvailability = {
   status: "persisted" | "reconstructed" | "unavailable";
   schemaVersion?: string;
@@ -689,6 +691,7 @@ export type GamebookExportArtifact = {
 export type SafeErrorPayload = {
   code: string;
   message: string;
+  diagnosticCode?: string;
   currentStateVersion?: number;
   playerView?: PlayerView;
 };
@@ -881,6 +884,7 @@ type EngineRandomizedTurnPlanSelectionApplier =
   typeof applyRandomizedTurnPlanSelection;
 type AiStepFailureCode =
   | "ai_no_action"
+  | "ai_decision_failed"
   | "ai_decision_action_not_legal"
   | "ai_engine_action_rejected"
   | AiDeckSnapshotRuntimeErrorCode;
@@ -890,6 +894,7 @@ type AiStepResult =
       ok: false;
       code: AiStepFailureCode;
       engineErrorCode?: EngineError["code"];
+      diagnosticCode?: string;
     };
 
 type PreparedAiDecision = {
@@ -3199,6 +3204,24 @@ export class MultiplayerService {
           : this.runAiStep(record);
       this.syncPlayerClock(record);
 
+      if (!aiStepResult.ok && aiStepResult.code === "ai_decision_failed") {
+        await this.persistAction(record);
+        return {
+          ok: false,
+          error: {
+            ...safeError(
+              "ai_decision_failed",
+              "Die KI-Entscheidung ist fehlgeschlagen.",
+              record.gameState,
+              input.side,
+            ),
+            ...(aiStepResult.diagnosticCode
+              ? { diagnosticCode: aiStepResult.diagnosticCode }
+              : {}),
+          },
+          payload: this.payloadFor(record, input.side),
+        };
+      }
       if (
         !aiStepResult.ok &&
         aiStepResult.code === "ai_decision_action_not_legal"
@@ -5585,13 +5608,29 @@ export class MultiplayerService {
           return { ok: false, code: error.code };
         throw error;
       }
-      decision = this.chooseAiAction(input, {
-        quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
-        quoteRandomizedIceInstallSelection: (request) =>
-          quoteRandomizedIceInstallSelection(state, request),
-        quoteRandomizedTurnPlanSelection: (request) =>
-          quoteRandomizedTurnPlanSelection(state, request),
-      });
+      try {
+        decision = this.chooseAiAction(input, {
+          quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
+          quoteRandomizedIceInstallSelection: (request) =>
+            quoteRandomizedIceInstallSelection(state, request),
+          quoteRandomizedTurnPlanSelection: (request) =>
+            quoteRandomizedTurnPlanSelection(state, request),
+        });
+      } catch (error) {
+        const diagnosticCode = this.captureAiDecisionFailureAttempt(
+          record,
+          state,
+          side,
+          legalActions,
+          "choose",
+          error,
+        );
+        return {
+          ok: false,
+          code: "ai_decision_failed",
+          ...(diagnosticCode ? { diagnosticCode } : {}),
+        };
+      }
       this.captureResidentPlanPortfolioFor(record, input);
     }
     const directLegalAction =
@@ -5729,6 +5768,67 @@ export class MultiplayerService {
     record.match.updatedAt = occurredAt;
     if (result.state.winner) this.finalizeFinishedMatch(record);
     return { ok: true };
+  }
+
+  private captureAiDecisionFailureAttempt(
+    record: StoredMatch,
+    state: GameState,
+    side: Side,
+    legalActions: readonly LegalAction[],
+    phase: AiDecisionFailurePhase,
+    error: unknown,
+  ): string | undefined {
+    const anchorEvent = record.eventLog.at(-1);
+    if (!anchorEvent) return undefined;
+    const decisionIndex = nextAiDecisionIndex(record);
+    const diagnosticCode = `ai_attempt_${record.match.matchId}_${decisionIndex}`;
+    const createdAt = this.now();
+    const failure = structuredAiDecisionFailure(error);
+    const turn =
+      chronicleTurnNumberForEvent(
+        record.eventLog.map((entry) => entry.publicPayload),
+        anchorEvent.eventId,
+      ) ?? 1;
+    const trace: AiDecisionTraceRecord = {
+      traceId: diagnosticCode,
+      matchId: record.match.matchId,
+      eventId: anchorEvent.eventId,
+      stateVersion: state.stateVersion,
+      matchVersion: record.match.matchVersion,
+      side,
+      turn,
+      decisionIndex,
+      createdAt,
+      schemaVersion: "ai-decision-failure-attempt-v1",
+      traceJson: {
+        schemaVersion: "ai-decision-failure-attempt-v1",
+        attempt: {
+          outcome: "failed",
+          phase,
+          code: "ai_decision_exception",
+          diagnosticCode,
+          actorSide: side,
+          stateVersion: state.stateVersion,
+          matchVersion: record.match.matchVersion,
+          eventAnchorId: anchorEvent.eventId,
+          legalActionTypes: [...new Set(legalActions.map((action) => action.type))].sort(),
+          ...failure,
+        },
+      },
+    };
+    const traces = record.aiDecisionTraces ?? [];
+    traces.push(trace);
+    record.aiDecisionTraces = traces;
+    record.stateSnapshots.push(
+      this.snapshotFor(
+        record.match.matchId,
+        state,
+        record.match.matchVersion,
+        `snap_ai_attempt_${decisionIndex}`,
+        false,
+      ),
+    );
+    return diagnosticCode;
   }
 
   private aiTurnPresentationFor(
@@ -6646,18 +6746,7 @@ function aiDecisionTraceFor(
     historicalLegalActions,
     legalAction,
   );
-  const baseline = record.actionPersistenceBaseline;
-  const newTraceCount = baseline
-    ? Math.max(
-        0,
-        (record.aiDecisionTraces?.length ?? 0) -
-          baseline.loadedAiDecisionTraceCount,
-      )
-    : 0;
-  const decisionIndex =
-    (baseline?.aiDecisionTraceCount ?? record.aiDecisionTraces?.length ?? 0) +
-    newTraceCount +
-    1;
+  const decisionIndex = nextAiDecisionIndex(record);
   const selectedActionType = legalAction.type;
   const planKind =
     typeof traceJson.planKind === "string" ? traceJson.planKind : undefined;
@@ -6688,6 +6777,54 @@ function aiDecisionTraceFor(
     createdAt,
     schemaVersion: "ai-decision-trace-v2",
     traceJson,
+  };
+}
+
+function nextAiDecisionIndex(record: StoredMatch): number {
+  const baseline = record.actionPersistenceBaseline;
+  const traceCount = record.aiDecisionTraces?.length ?? 0;
+  if (!baseline) return traceCount + 1;
+  return (
+    baseline.aiDecisionTraceCount +
+    Math.max(0, traceCount - baseline.loadedAiDecisionTraceCount) +
+    1
+  );
+}
+
+function structuredAiDecisionFailure(error: unknown): Record<string, unknown> {
+  const details =
+    error && typeof error === "object"
+      ? (error as Record<string, unknown>)
+      : {};
+  const name =
+    error instanceof Error
+      ? error.name
+      : stringValue(details.name) ?? "UnknownAiDecisionError";
+  const message =
+    error instanceof Error
+      ? error.message
+      : stringValue(details.message) ?? "KI-Entscheidung löste einen unbekannten Fehler aus.";
+  const code = stringValue(details.code);
+  const planKind = stringValue(details.planKind);
+  const planId = stringValue(details.planId);
+  const step = stringValue(details.step) ?? stringValue(details.stepId);
+  const route = stringValue(details.route);
+  return {
+    error: {
+      name,
+      message: message.slice(0, 1_000),
+      ...(code ? { code } : {}),
+    },
+    ...((planKind || planId || step || route)
+      ? {
+          plan: {
+            ...(planKind ? { kind: planKind } : {}),
+            ...(planId ? { id: planId } : {}),
+            ...(step ? { step } : {}),
+            ...(route ? { route } : {}),
+          },
+        }
+      : {}),
   };
 }
 
