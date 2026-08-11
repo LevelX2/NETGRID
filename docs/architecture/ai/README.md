@@ -207,6 +207,11 @@
   bereits bekannte gleichrangige Alternativen dürfen nicht still übernehmen.
   Release und Preemption benötigen positive Grenztypen und eine strukturierte
   Continuation-Diagnose.
+- Runner-No-Run-Investments lesen ihren Recurring-Economy-Vertrag aus der
+  kanonischen `planning.engine.lifecycle`-Projektion. Nach einer Installation
+  im aktuellen Zug darf derselbe Root produktive Basic-Nicht-Run-Schritte
+  halten; Karten-IDs und veraltete zukünftige Action-IDs sind dafür keine
+  Entscheidungsquelle.
 - Agenda-, Defense-, Opening-Rush- und Runner-Kampagnen können über
   Zuggrenzen und öffentliche Gegneroutcomes resident bleiben. Ein
   Runtime-Neustart stellt das Portfolio wieder her, verwirft das alte

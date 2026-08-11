@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-08-09-runner-turn-plan-sequence-commitment
-status: in_progress
+status: done
 kind: architecture
 area: ai
 priority: high
@@ -8,7 +8,7 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-08-09
 startedAt: 2026-08-11
-completedAt:
+completedAt: 2026-08-11
 branch:
 releaseTarget: post-card-semantics-restructuring
 blockedBy: []
@@ -16,13 +16,18 @@ resultArtifacts:
   - packages/ai/src/plans/turn-plan-commitment.ts
   - packages/ai/src/plans/corp-turn-planner-cutover.ts
   - packages/ai/src/plans/turn-remainder-search.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runtime/runner-canonical-card-facts.ts
+  - packages/ai/src/runtime/runner-canonical-card-facts.test.ts
+  - packages/ai/src/runtime/plan-first-live-runtime-information-probe-reassessment.test.ts
   - packages/ai/src/semantic-ai-runtime-cutover-runner-plans.test.ts
   - docs/architecture/ai/ai-turn-and-campaign-planner-concept-2026-07-29.md
 checks:
   - "fokussierte Commitment-/Restzugsuche: 28 Tests grün"
-  - "fokussierte Runner-Cutover-Regressionsgruppe: 4 Tests grün"
-  - "@netgrid/shared typecheck: grün"
-  - "@netgrid/ai typecheck: derzeit durch fremde parallele Änderungen außerhalb dieses Pakets rot"
+  - "fokussierte Runner-Cutover-/Recurring-Economy-Regressionsgruppe: 10 Tests grün"
+  - "Informations-Run-Regressionsdatei: 2 Tests grün"
+  - "@netgrid/ai typecheck: grün"
+  - "git diff --check: grün"
 ---
 
 # Runner-Züge bis zu echten Erkenntnisgrenzen verbindlich planen
@@ -138,37 +143,37 @@ Replanung auslösen können.
 
 ## Akzeptanzkriterien
 
-- [ ] Das Review benennt die aktuelle Schicht, die nach einer ausgeführten
+- [x] Das Review benennt die aktuelle Schicht, die nach einer ausgeführten
       Aktion die bestehende Restzugbindung verliert, und belegt die Ursache
       anhand der Entscheidungen 6 und 7.
-- [ ] Der Zielvertrag definiert positive Replan-Grenzen und behandelt
+- [x] Der Zielvertrag definiert positive Replan-Grenzen und behandelt
       „eine Aktion wurde ausgeführt“ nicht als hinreichenden Replan-Grund.
-- [ ] Eine deterministische Folge eigener Aktionen ohne neue Evidence behält
+- [x] Eine deterministische Folge eigener Aktionen ohne neue Evidence behält
       Root-Plan, Planinstanz, Route und `PlanExecutionOrigin`.
-- [ ] Ein bereits bekannter gleichrangiger Plan kann die Folgeaktion nicht
+- [x] Ein bereits bekannter gleichrangiger Plan kann die Folgeaktion nicht
       ohne typisierte Preemption und strukturierte Begründung übernehmen.
-- [ ] Draw, Access, Search, Reveal, Zufall und gegnerische Reaktionen können
+- [x] Draw, Access, Search, Reveal, Zufall und gegnerische Reaktionen können
       an der passenden Stelle weiterhin regulär replannen.
-- [ ] Planabschluss, nachgewiesene Unmöglichkeit sowie neu entstandene echte
+- [x] Planabschluss, nachgewiesene Unmöglichkeit sowie neu entstandene echte
       Matchpoint-, Pflicht- oder Notfallsituationen können eine Bindung
       sichtbar und deterministisch beenden.
-- [ ] Die Regression verhindert im beobachteten unveränderten Zustand die
+- [x] Die Regression verhindert im beobachteten unveränderten Zustand die
       widersprüchliche Folge `Conference installieren -> sofort Run starten`;
       die Karte wird dabei nicht im TurnPlanner namentlich erkannt.
-- [ ] Die Regression zu Entscheidungen 124 bis 126 belegt, dass eine
+- [x] Die Regression zu Entscheidungen 124 bis 126 belegt, dass eine
       gebundene Funding-Sequenz nach Erreichen ihres Kostenmeilensteins nicht
       ohne neue Evidence still an einen allgemeinen Economy-Plan fällt. Ein
       fachlich begründeter Abbruch nennt Grenztyp, bisherigen Owner,
       vorgesehenen nächsten Schritt und übernehmenden Owner.
-- [ ] Ein positiver Test belegt, dass ein neu entstandener höherwertiger
+- [x] Ein positiver Test belegt, dass ein neu entstandener höherwertiger
       Interrupt einen bestehenden Plan regelkonform übernehmen darf.
-- [ ] Ein Grenztest belegt, dass nach einem Draw oder Access mit neuer
+- [x] Ein Grenztest belegt, dass nach einem Draw oder Access mit neuer
       side-sicherer Information neu geplant wird.
-- [ ] Ownership-Tests sichern Plan, Step, Route, Action-ID und Executor;
+- [x] Ownership-Tests sichern Plan, Step, Route, Action-ID und Executor;
       Resolver und Auswahl-Fallback werden nicht zur zweiten Autorität.
-- [ ] Determinismus, Replay, StateHash, LegalAction-Bindung und Hidden-Info-
+- [x] Determinismus, Replay, StateHash, LegalAction-Bindung und Hidden-Info-
       Schutz bleiben erhalten.
-- [ ] Fokussierte AI-Tests, erforderlicher AI-Typecheck, relevante
+- [x] Fokussierte AI-Tests, erforderlicher AI-Typecheck, relevante
       Architekturgates und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -186,7 +191,7 @@ Replanung auslösen können.
 
 ## Ergebnisnotiz
 
-Zwischenstand: Die systemische Bindungslücke ist am TurnPlanner-Cutover
+Abgeschlossen: Die systemische Bindungslücke ist am TurnPlanner-Cutover
 behoben. `projected_plan_discovery_required` wird nach einem ausgeführten
 Einzelschritt als planinterne Fortsetzungsgrenze behandelt; der Folgevertrag
 rematerialisiert dieselbe Sequenz-Root-Instanz aus aktuellen `LegalActions`.
@@ -194,10 +199,10 @@ Bereits bekannte gleichrangige Alternativen preempten nicht mehr still.
 Release, Abschluss, Unmöglichkeit und neue P1-/P2-/P3-Interrupts besitzen
 typisierte Gründe und strukturierte Diagnose.
 
-Noch offen bleibt die direkte Conference-Regression. Die CardSpec-Migration
-hat die mechanische No-Run-Semantik nach `planning.engine.lifecycle`
-verschoben, während der bestehende Recurring-Economy-Consumer noch das
-entfernte Legacy-`effects`-Feld liest. Dieser eigenständige Quellenfix darf
-nicht als Karten-ID-Fallback in den TurnPlanner gezogen werden. Das Paket
-bleibt daher `in_progress`; der generische Sequenzvertrag und die
-R&D-Interface-/Interrupt-/Draw-Regressionsgruppe sind bereits fokussiert grün.
+Die direkte Conference-Regression liest die No-Run-Recurring-Economy-
+Eigenschaft generisch aus `planning.engine.lifecycle`. Nach der Installation
+bleibt der Recurring-Economy-Root an eine aktuelle produktive Basic-
+Nicht-Run-Aktion gebunden; der bereits bekannte R&D-Run übernimmt nicht.
+Die Karte wird weder im TurnPlanner noch im Consumer namentlich erkannt.
+R&D-Interface-Funding, höherwertiger Interrupt und Draw-Grenze sind ebenfalls
+fokussiert abgesichert. Die Pakettests und der AI-Typecheck sind grün.

@@ -37,6 +37,7 @@ import type {
 } from "../runner-run-target-evaluation";
 import { runnerRunTargetHasOptionalBonusRunValue } from "../runner-run-target-guidance";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
+import { runnerNoRunRecurringEconomyProfile } from "./runner-canonical-card-facts";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../actions/risk-action-projection";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
@@ -16048,24 +16049,21 @@ function runnerRecurringEconomySignals(
       recurringEconomyValueAlreadyResolved(input, definitionId)
     )
       return [];
-    const holdActionIds = candidates
-      .filter(
-        (candidate) =>
-          candidate.sourceCardInstanceId === card.instanceId &&
-          candidate.sourceDefinitionId === definitionId &&
-          !candidate.effectTargets?.some((target) =>
-            [
-              "economy.bank_cashout_all",
-              "economy.bank_load",
-              "economy.temporary_resource_bank",
-            ].includes(target),
-          ) &&
-          ((candidate.semanticActionType === "draw.card" &&
-            input.playerView.own.gripOrHq.length <
-              input.playerView.own.maxHandSize) ||
-            candidate.semanticActionType === "economy.gain_credit"),
-      )
-      .map((candidate) => candidate.actionId);
+    const installedThisTurn = runnerRecurringEconomyInstalledInCurrentTurn(
+      input,
+      definitionId,
+    );
+    const holdActionIds = installedThisTurn
+      ? candidates
+          .filter(
+            (candidate) =>
+              (candidate.semanticActionType === "draw.card" &&
+                input.playerView.own.gripOrHq.length <
+                  input.playerView.own.maxHandSize) ||
+              candidate.semanticActionType === "economy.gain_credit",
+          )
+          .map((candidate) => candidate.actionId)
+      : [];
     return [
       {
         commitmentId: card.instanceId,
@@ -16077,7 +16075,7 @@ function runnerRecurringEconomySignals(
         evidenceCodes: [
           "runner_recurring_economy_waiting_for_turn_start_value",
           holdActionIds.length > 0
-            ? `runner_recurring_economy_own_hold_action_count:${holdActionIds.length}`
+            ? `runner_recurring_economy_same_turn_hold_action_count:${holdActionIds.length}`
             : "runner_recurring_economy_waiting_without_own_action",
         ],
       },
@@ -16128,14 +16126,12 @@ function runnerRecurringEconomySignals(
 }
 
 function recurringEconomyCommitmentValue(definitionId: string): number {
-  const amounts = (AI_HINTS_BY_CARD.get(definitionId)?.effects ?? [])
-    .filter((effect) => effect.kind === "economy")
-    .map((effect) => effect.amount)
-    .filter(
-      (amount): amount is number =>
-        typeof amount === "number" && Number.isFinite(amount) && amount > 0,
+  const profile = runnerNoRunRecurringEconomyProfile(definitionId);
+  if (!profile)
+    throw new Error(
+      `runner_no_run_recurring_economy_profile_missing:${definitionId}`,
     );
-  return amounts.length > 0 ? Math.max(...amounts) : 1;
+  return profile.turnStartCredits;
 }
 
 function runnerResourceLifecycleSignals(
@@ -16349,14 +16345,25 @@ function runnerLifecycleLeavePlayPaymentQuote(
 function hasNoRunRecurringEconomyCommitment(
   definitionId: string | undefined,
 ): boolean {
-  if (!definitionId) return false;
-  const targets = new Set(
-    (AI_HINTS_BY_CARD.get(definitionId)?.effects ?? [])
-      .map((effect) => effect.target)
-      .filter((target): target is string => typeof target === "string"),
+  return runnerNoRunRecurringEconomyProfile(definitionId) !== undefined;
+}
+
+function runnerRecurringEconomyInstalledInCurrentTurn(
+  input: AiDecisionInput,
+  definitionId: string,
+): boolean {
+  const turnSerial = input.playerView.turnSerial;
+  if (turnSerial === undefined) return false;
+  const events = uniqueBy(
+    [...input.playerView.publicEvents, ...input.eventTail],
+    (event) => event.eventId,
   );
-  return (
-    targets.has("economy.turn_start_credit") && targets.has("risk.ends_on_run")
+  return events.some(
+    (event) =>
+      event.turnSerial === turnSerial &&
+      event.publicPayload?.actor === "runner" &&
+      event.publicPayload.actionType === "install_card" &&
+      event.publicPayload.cardDefinitionId === definitionId,
   );
 }
 
@@ -18015,7 +18022,7 @@ function runnerRunWindowPlanStepExclusion(
   ) {
     return {
       key: "run_plan_information_reassessment_not_convertible",
-      label: "Die neu quotierte Informationsroute tr„gt keine Fortsetzung",
+      label: "Die neu quotierte Informationsroute trÃ¤gt keine Fortsetzung",
       reason: [
         "run_plan_step:information_probe_reassessment",
         `run_plan_target:${run.attackedServerId}`,

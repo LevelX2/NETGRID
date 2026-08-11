@@ -49,11 +49,9 @@ describe("plan-first information-probe reassessment", () => {
     startInput.playerView.own.credits = 10;
     startInput.playerView.own.clicks = 3;
     const unknownRemoteRoot = {
-      ...visibleCard("remote-root", "corp", "asset"),
+      instanceId: visibleCard("remote-root", "corp", "asset").instanceId,
       known: false,
-      definitionId: undefined,
       title: "Unknown remote card",
-      type: undefined,
     };
     startInput.playerView.servers = [
       server("hq"),
@@ -428,7 +426,7 @@ function encounterAction(
   actionId: string,
   type: "pump_breaker" | "break_subroutine" | "continue_run",
   credits: number,
-  payload: Record<string, unknown>,
+  payload: Record<string, string | number | boolean>,
 ) {
   const action = legalAction(
     actionId,

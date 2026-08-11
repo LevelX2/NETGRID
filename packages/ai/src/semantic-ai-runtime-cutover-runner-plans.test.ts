@@ -1436,6 +1436,110 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
+  it("does not follow a just-installed no-run recurring investment with a pre-known run", () => {
+    const conference = visibleCard(
+      "conference-card",
+      "runner",
+      "resource",
+      {
+        definitionId: "onr_v1_184_top-runners-conference",
+        title: "Top Runners' Conference",
+      },
+    );
+    const firstInput = versionedRunnerTurnInput(1, [
+      legalAction(
+        "install-conference",
+        "runner",
+        "install_card",
+        "Install Conference",
+        { credits: 0 },
+        { source: conference.instanceId },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    firstInput.playerView.own.gripOrHq = [conference];
+    firstInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+
+    const first = chooseRunnerAction(firstInput);
+    const firstPlanning =
+      first.decisionDebug?.planFirstDecision?.turnPlanning;
+    expectPlanDecision(first, {
+      actionId: "install-conference",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_install",
+      priorityClass: "P4",
+    });
+
+    const secondInput = versionedRunnerTurnInput(2, [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    secondInput.playerView.own.rig = [conference];
+    secondInput.playerView.servers = firstInput.playerView.servers;
+    const secondTurnSerial = secondInput.playerView.turnSerial;
+    if (secondTurnSerial === undefined) {
+      throw new Error("Expected a concrete Runner turn serial.");
+    }
+    secondInput.eventTail = [
+      {
+        ...publicEvent("conference-installed", "install_card", 0, {
+          actor: "runner",
+          actionType: "install_card",
+          cardDefinitionId: conference.definitionId,
+        }),
+        turnSerial: secondTurnSerial,
+      },
+    ];
+
+    const second = chooseRunnerAction(secondInput);
+    const secondPlanning =
+      second.decisionDebug?.planFirstDecision?.turnPlanning;
+    expectPlanDecision(second, {
+      actionId: "gain-credit",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_hold",
+      priorityClass: "P4",
+    });
+    expect(second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
+      first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    );
+    expect(secondPlanning?.selectedLine.phases[0]?.rootPlanInstanceId).toBe(
+      firstPlanning?.selectedLine.phases[0]?.rootPlanInstanceId,
+    );
+    expect(secondPlanning?.commitment?.continuation).toMatchObject({
+      status: "retained",
+      previousCommitmentId: firstPlanning?.commitment?.commitmentId,
+      boundaryKind: "plan_internal_continuation",
+      evidenceCodes: expect.arrayContaining([
+        "continuation_action_id:gain-credit",
+        "same_root_continuation_line_rematerialized",
+      ]),
+    });
+  });
+
   it("retains a Runner root across an internal continuation instead of silently handing it to a pre-known alternative", () => {
     const firstInput = versionedRunnerTurnInput(1, [
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
