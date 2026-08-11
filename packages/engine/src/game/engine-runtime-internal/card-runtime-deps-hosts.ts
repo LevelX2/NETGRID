@@ -824,7 +824,9 @@ export function createCardRuntimeDepsHosts(
       deps.icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-      cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
+      (cardCounter(state, breakerId, "breaker_strength_penalty") +
+        cardCounter(state, breakerId, "pattel")) *
+        -1 +
       selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       deps.runRemainderStrengthBonusForBreaker(run, breakerId);
@@ -1009,7 +1011,9 @@ export function createCardRuntimeDepsHosts(
       ) +
       cardCounter(state, breakerId, "militech") +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-      cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
+      (cardCounter(state, breakerId, "breaker_strength_penalty") +
+        cardCounter(state, breakerId, "pattel")) *
+        -1 +
       selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       deps.runRemainderStrengthBonusForBreaker(run, breakerId);

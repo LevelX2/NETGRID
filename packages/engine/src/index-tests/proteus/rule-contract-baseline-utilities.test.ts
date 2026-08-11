@@ -404,10 +404,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     expect(twoCreditActions.map((action) => action.costs[0]?.credits)).toEqual([
       1, 2,
     ]);
-    const twoCreditApplyState = setup(
-      "pro019-emergency-two-credits-apply",
-      2,
-    );
+    const twoCreditApplyState = setup("pro019-emergency-two-credits-apply", 2);
     const payableX2 = emergencyActions(twoCreditApplyState).find(
       (action) => action.payload?.xValue === 2,
     );
@@ -891,9 +888,16 @@ describe("PRO019 rule-contract baseline utilities", () => {
       "remote_1",
       false,
     );
-    const newIce = addCorpHq(state, WALL, "pavit_new_ice");
+    const oldRoot = addCorpRoot(
+      state,
+      SIMPLE_ASSET,
+      "pavit_old_root",
+      "remote_1",
+      false,
+    );
     const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_new_root");
-    addCorpHq(state, CHIHUAHUA, "pavit_extra_ice");
+    const newAsset = addCorpHq(state, SIMPLE_ASSET, "pavit_new_asset");
+    addCorpHq(state, SIMPLE_UPGRADE, "pavit_extra_root");
     forceRunAtServer(state, "remote_1");
 
     const rezAction = mustAction(
@@ -913,7 +917,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
     const runnerViewWithPavitChoice = JSON.stringify(
       getPlayerView(state, "runner"),
     );
-    expect(runnerViewWithPavitChoice).not.toContain(String(newIce));
+    expect(runnerViewWithPavitChoice).not.toContain(String(newAsset));
     expect(runnerViewWithPavitChoice).not.toContain(String(newRoot));
     expect(runnerViewWithPavitChoice).not.toContain("fortReplacementHqCardIds");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -924,7 +928,7 @@ describe("PRO019 rule-contract baseline utilities", () => {
       "fortReplacementHqCardIds",
     );
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      String(newIce),
+      String(newAsset),
     );
     const invalid = applyAction(state, {
       matchId: state.matchId,
@@ -937,36 +941,43 @@ describe("PRO019 rule-contract baseline utilities", () => {
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${newIce}`, `card_${newIce}`],
+        selectedOptionIds: [`card_${newAsset}`, `card_${newAsset}`],
       },
       idempotencyKey: "pavit-invalid-duplicate",
     });
     expect(invalid.ok).toBe(false);
     expect(hashState(invalid.state)).toBe(hashState(state));
     expect(remoteServer(invalid.state, "remote_1").ice).toEqual([oldIce]);
-    expect(remoteServer(invalid.state, "remote_1").root).toEqual([pavitId]);
+    expect(remoteServer(invalid.state, "remote_1").root).toEqual([
+      pavitId,
+      oldRoot,
+    ]);
 
-    state = applyChoices(state, "corp", [`card_${newIce}`, `card_${newRoot}`]);
+    state = applyChoices(state, "corp", [
+      `card_${newAsset}`,
+      `card_${newRoot}`,
+    ]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "ordered_fort_rebuild_sequence",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      String(newIce),
+      String(newAsset),
     );
     const server = remoteServer(state, "remote_1");
-    expect(server.ice).toEqual([newIce]);
-    expect(server.root).toEqual([newRoot]);
-    expect(state.corp.hq).toEqual(expect.arrayContaining([oldIce, pavitId]));
-    expect(state.cardInstances[newIce]?.zone).toMatchObject({
-      zone: "serverIce",
+    expect(server.ice).toEqual([oldIce]);
+    expect(server.root).toEqual(expect.arrayContaining([newAsset, newRoot]));
+    expect(state.corp.hq).toEqual(expect.arrayContaining([oldRoot, pavitId]));
+    expect(state.corp.hq).not.toContain(oldIce);
+    expect(state.cardInstances[newAsset]?.zone).toMatchObject({
+      zone: "serverRoot",
       serverId: "remote_1",
     });
     expect(state.cardInstances[newRoot]?.zone).toMatchObject({
       zone: "serverRoot",
       serverId: "remote_1",
     });
-    expect(state.cardInstances[newIce]?.rezzed).toBe(false);
+    expect(state.cardInstances[newAsset]?.rezzed).toBe(false);
     expect(state.cardInstances[newRoot]?.rezzed).toBe(false);
   });
 
@@ -987,9 +998,16 @@ describe("PRO019 rule-contract baseline utilities", () => {
       "remote_1",
       false,
     );
-    const newIce = addCorpHq(state, WALL, "pavit_stale_new_ice");
+    const oldRoot = addCorpRoot(
+      state,
+      SIMPLE_ASSET,
+      "pavit_stale_old_root",
+      "remote_1",
+      false,
+    );
     const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_stale_new_root");
-    addCorpHq(state, CHIHUAHUA, "pavit_stale_extra_ice");
+    const newAsset = addCorpHq(state, SIMPLE_ASSET, "pavit_stale_new_asset");
+    addCorpHq(state, SIMPLE_UPGRADE, "pavit_stale_extra_root");
     forceRunAtServer(state, "remote_1");
 
     state = apply(
@@ -1017,21 +1035,24 @@ describe("PRO019 rule-contract baseline utilities", () => {
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${newIce}`, `card_${newRoot}`],
+        selectedOptionIds: [`card_${newAsset}`, `card_${newRoot}`],
       },
       idempotencyKey: "pavit-stale-choice",
     });
 
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale Pavit choice rejection.");
-    expect(stale.error.message).not.toContain(String(newIce));
+    expect(stale.error.message).not.toContain(String(newAsset));
     expect(stale.error.message).not.toContain(String(newRoot));
     expect(hashState(stale.state)).toBe(beforeStaleHash);
     expect(stale.state.eventLog).toHaveLength(beforeStaleEventCount);
     expect(remoteServer(stale.state, "remote_1").ice).toEqual([oldIce]);
-    expect(remoteServer(stale.state, "remote_1").root).toEqual([pavitId]);
+    expect(remoteServer(stale.state, "remote_1").root).toEqual([
+      pavitId,
+      oldRoot,
+    ]);
     expect(stale.state.corp.hq).toEqual(
-      expect.arrayContaining([newIce, newRoot]),
+      expect.arrayContaining([newAsset, newRoot]),
     );
   });
 
@@ -1052,9 +1073,16 @@ describe("PRO019 rule-contract baseline utilities", () => {
       "remote_1",
       false,
     );
-    const newIce = addCorpHq(state, WALL, "pavit_timing_new_ice");
+    const oldRoot = addCorpRoot(
+      state,
+      SIMPLE_ASSET,
+      "pavit_timing_old_root",
+      "remote_1",
+      false,
+    );
     const newRoot = addCorpHq(state, SIMPLE_UPGRADE, "pavit_timing_new_root");
-    addCorpHq(state, CHIHUAHUA, "pavit_timing_extra_ice");
+    const newAsset = addCorpHq(state, SIMPLE_ASSET, "pavit_timing_new_asset");
+    addCorpHq(state, SIMPLE_UPGRADE, "pavit_timing_extra_root");
     forceRunAtServer(state, "remote_1");
 
     state = apply(
@@ -1078,21 +1106,24 @@ describe("PRO019 rule-contract baseline utilities", () => {
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${newIce}`, `card_${newRoot}`],
+        selectedOptionIds: [`card_${newAsset}`, `card_${newRoot}`],
       },
       idempotencyKey: "pavit-stale-timing-choice",
     });
 
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale Pavit timing rejection.");
-    expect(stale.error.message).not.toContain(String(newIce));
+    expect(stale.error.message).not.toContain(String(newAsset));
     expect(stale.error.message).not.toContain(String(newRoot));
     expect(hashState(stale.state)).toBe(beforeStaleHash);
     expect(stale.state.eventLog).toHaveLength(beforeStaleEventCount);
     expect(remoteServer(stale.state, "remote_1").ice).toEqual([oldIce]);
-    expect(remoteServer(stale.state, "remote_1").root).toEqual([pavitId]);
+    expect(remoteServer(stale.state, "remote_1").root).toEqual([
+      pavitId,
+      oldRoot,
+    ]);
     expect(stale.state.corp.hq).toEqual(
-      expect.arrayContaining([newIce, newRoot]),
+      expect.arrayContaining([newAsset, newRoot]),
     );
   });
 
@@ -1104,6 +1135,13 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       PAVIT,
       "pavit_blocked_source",
+      "remote_1",
+      false,
+    );
+    addCorpRoot(
+      state,
+      SIMPLE_UPGRADE,
+      "pavit_blocked_old_root",
       "remote_1",
       false,
     );
@@ -1119,8 +1157,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     ).toBe(false);
   });
 
-  it("allows Pavit to replace a fort with a jointly legal ICE and upgrade mix", () => {
-    let state = corpActionState("pro019-pavit-joint-ice-upgrade");
+  it("preserves fort ICE while Pavit replaces only cards installed inside the fort", () => {
+    let state = corpActionState("pro019-pavit-root-only");
     clearCorpHq(state);
     const oldIce = addCorpIce(
       state,
@@ -1136,7 +1174,6 @@ describe("PRO019 rule-contract baseline utilities", () => {
       "remote_1",
       false,
     );
-    const newIce = addCorpHq(state, WALL, "pavit_mix_new_ice");
     const newUpgrade = addCorpHq(
       state,
       SIMPLE_UPGRADE,
@@ -1154,9 +1191,10 @@ describe("PRO019 rule-contract baseline utilities", () => {
     );
 
     const server = remoteServer(state, "remote_1");
-    expect(server.ice).toEqual([newIce]);
+    expect(server.ice).toEqual([oldIce]);
     expect(server.root).toEqual([newUpgrade]);
-    expect(state.corp.hq).toEqual(expect.arrayContaining([oldIce, pavitId]));
+    expect(state.corp.hq).toContain(pavitId);
+    expect(state.corp.hq).not.toContain(oldIce);
     expect(hashState(state)).toMatch(/^fnv1a:/);
     expect(
       replayEvents(replayStart, state.eventLog.slice(replayStartIndex)).ok,
@@ -1171,6 +1209,13 @@ describe("PRO019 rule-contract baseline utilities", () => {
       state,
       PAVIT,
       "pavit_invalid_source",
+      "remote_1",
+      false,
+    );
+    addCorpRoot(
+      state,
+      SIMPLE_UPGRADE,
+      "pavit_invalid_old_root",
       "remote_1",
       false,
     );

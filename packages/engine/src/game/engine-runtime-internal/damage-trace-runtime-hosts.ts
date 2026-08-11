@@ -593,7 +593,7 @@ export function createDamageTraceRuntimeHosts(
     if (counterType === "baskerville") return "Baskerville-Counter";
     if (counterType === "cerberus") return "Cerberus-Counter";
     if (counterType === "mastiff") return "Mastiff-Counter";
-    if (counterType === "link_reduction_counter") return "Doppelganger-Counter";
+    if (counterType === "doppelganger") return "Doppelganger-Counter";
     return "Counter";
   }
 

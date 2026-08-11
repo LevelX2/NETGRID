@@ -13280,7 +13280,7 @@
     },
     {
       "cardId": "onr_proteus_057_doppelganger-antibody",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:934e6984c9cea3c8",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5d11508ca7b154e0",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:efded230c2c2479c",
       "hint": {
         "cardId": "onr_proteus_057_doppelganger-antibody",
@@ -14271,7 +14271,7 @@
     },
     {
       "cardId": "onr_proteus_068_pattel-antibody",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9e6cb4b982e0a91d",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:204878a9e9556cdd",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b3f19215060122a1",
       "hint": {
         "cardId": "onr_proteus_068_pattel-antibody",
@@ -14375,7 +14375,7 @@
     },
     {
       "cardId": "onr_proteus_069_pavit-bharat",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:89b6e7247a26c620",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e36b9552103514ae",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:46cbdba07d6a4d8c",
       "hint": {
         "cardId": "onr_proteus_069_pavit-bharat",
@@ -14538,7 +14538,7 @@
     },
     {
       "cardId": "onr_proteus_071_raymond-ellison",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:119cdb13a3704ccf",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e3673bd35ac0df0f",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c004c6b8d20ac044",
       "hint": {
         "cardId": "onr_proteus_071_raymond-ellison",
@@ -14580,7 +14580,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "during_run_tap_advancement_for_run_credits"
+            "capabilityKey": "during_run_trash_advancement_for_run_credits"
           }
         ],
         "targetProfiles": [
@@ -14625,9 +14625,9 @@
           "install_remote",
           "remove_same_fort_advancement_counters_for_run_credits",
           "rez_card",
-          "tap_source",
           "trash_cost",
-          "trash_on_access"
+          "trash_on_access",
+          "trash_source"
         ]
       }
     },
@@ -17197,8 +17197,8 @@
     },
     {
       "cardId": "onr_proteus_101_all-hands",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:09711cba085e36a6",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:74582375a61b4551",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:94c02a8702d1ba7b",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b99b4dde8db754a2",
       "hint": {
         "cardId": "onr_proteus_101_all-hands",
         "side": "runner",
@@ -17246,7 +17246,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "on_play_run_with_success_credit_gain",
+            "capabilityKey": "on_play_hq_run_access_four_prohibit_noisy_icebreakers",
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -17344,7 +17344,7 @@
     },
     {
       "cardId": "onr_proteus_102_blackmail",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a8a71dc8ed17df44",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:362412bd74080709",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:414166db10b69947",
       "hint": {
         "cardId": "onr_proteus_102_blackmail",
@@ -17373,7 +17373,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "on_play_run_with_rez_prohibition",
+            "capabilityKey": "on_play_hq_run_replace_access_gain_agenda_point",
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -17600,7 +17600,7 @@
     },
     {
       "cardId": "onr_proteus_104_decoy-signal",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:001b9493ac241717",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9436604f2fff55bb",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:cdc8a7a5a2ac2129",
       "hint": {
         "cardId": "onr_proteus_104_decoy-signal",
@@ -17620,7 +17620,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "on_play_run_with_rez_credit_gain",
+            "capabilityKey": "on_play_run_expose_approached_ice_before_rez",
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -17640,7 +17640,7 @@
                 "kind": "use_target",
                 "timing": "on_play",
                 "targetType": "server",
-                "purpose": "make_run:on_play_run_with_rez_credit_gain",
+                "purpose": "make_run:on_play_run_expose_approached_ice_before_rez",
                 "hiddenInfoPolicy": "legal_targets_only"
               }
             ]
@@ -17667,7 +17667,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:on_play_run_with_rez_credit_gain",
+            "purpose": "make_run:on_play_run_expose_approached_ice_before_rez",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
@@ -17712,8 +17712,8 @@
     },
     {
       "cardId": "onr_proteus_105_demolition-run",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c52189dc40cea108",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1e609cf3634597b7",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:aee407c41f6b9b20",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9d9fa95d5907f171",
       "hint": {
         "cardId": "onr_proteus_105_demolition-run",
         "side": "runner",
@@ -17735,20 +17735,9 @@
         "strategicExchangeKinds": [
           "self_tag"
         ],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": [
-              "tactic_signal_anchor:tag.source"
-            ],
-            "confidence": "medium"
-          }
-        ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "on_play_run_with_free_access_trash",
+            "capabilityKey": "on_play_run_replace_access_trash_rezzed_fort_ice_add_tags",
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -17778,19 +17767,8 @@
                 "kind": "use_target",
                 "timing": "on_play",
                 "targetType": "server",
-                "purpose": "make_run:on_play_run_with_free_access_trash",
+                "purpose": "make_run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags",
                 "hiddenInfoPolicy": "legal_targets_only"
-              }
-            ],
-            "strategySupportPairs": [
-              {
-                "strategyId": "corp.tag_trace_punish",
-                "role": "anchor_evidence",
-                "roleDetail": "anchor_evidence_tag_source",
-                "evidence": [
-                  "tactic_signal_anchor:tag.source"
-                ],
-                "confidence": "medium"
               }
             ]
           }
@@ -17801,7 +17779,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:on_play_run_with_free_access_trash",
+            "purpose": "make_run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
@@ -17903,7 +17881,7 @@
     },
     {
       "cardId": "onr_proteus_106_disgruntled-ice-technician",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a192a50aa5373bd6",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:06d77cb9e048ece5",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:bd829236c86928b2",
       "hint": {
         "cardId": "onr_proteus_106_disgruntled-ice-technician",
@@ -17925,7 +17903,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "on_play_run_with_success_credit_gain",
+            "capabilityKey": "on_play_run_with_post_pass_derez_fully_broken_ice",
             "effects": [
               {
                 "kind": "future_run_effect",
@@ -17945,7 +17923,7 @@
                 "kind": "use_target",
                 "timing": "on_play",
                 "targetType": "server",
-                "purpose": "make_run:on_play_run_with_success_credit_gain",
+                "purpose": "make_run:on_play_run_with_post_pass_derez_fully_broken_ice",
                 "hiddenInfoPolicy": "legal_targets_only"
               }
             ]
@@ -17976,7 +17954,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:on_play_run_with_success_credit_gain",
+            "purpose": "make_run:on_play_run_with_post_pass_derez_fully_broken_ice",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
@@ -20507,7 +20485,7 @@
     },
     {
       "cardId": "onr_proteus_137_death-from-above",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b0af169bc2dc80ef",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c251b12d32bf1029",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a18db3b0804b7e2c",
       "hint": {
         "cardId": "onr_proteus_137_death-from-above",

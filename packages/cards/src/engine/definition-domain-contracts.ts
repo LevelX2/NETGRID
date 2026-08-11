@@ -428,7 +428,10 @@ export type CardAccessEffectStepImplementation =
   | CardEffectImplementation
   | {
       kind: "add_runner_counter";
-      counterType: Extract<CounterType, "crying" | "link_reduction_counter">;
+      counterType: Extract<
+        CounterType,
+        "crying" | "doppelganger" | "link_reduction_counter"
+      >;
       amount: number;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -530,7 +533,7 @@ export type CardSuccessfulRunFollowupImplementation =
       server: "remote";
       source: "installed_hidden_runner_resource";
       cost: { kind: "reveal_and_trash_source" };
-      effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
+      effect: { kind: "trash_remote_fort"; include: "root" };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {

@@ -57,7 +57,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       tagPreventionCosts:
         "credit_and_forgo_next_action_is_action_debt_credit_and_trash_source_is_not_an_action_penalty",
       capabilityStrategyEvidence:
-        "exact27_pairs_on_17_cards_bound_to_reviewed_capability_keys_with_closed_non_tautological_detail_and_evidence",
+        "exact24_pairs_on_14_cards_after_removing_three_opponent_strategy_misclassifications",
       passiveHuntingPackPair:
         "discarded_non_action_addressable_relative_ice_trace_classification",
       disintegratorTargetProfile:
@@ -154,7 +154,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:b3768bb340c651ed79f50c574924228476ed9bbc81f7449b842e620517362335",
+      "sha256:6649132c76a709d4cce625e5d9f0d216e4a7c44e3ada7226ce33058271f8ed18",
     );
   });
 
@@ -174,8 +174,8 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
 
     expect(actionCapacity).toHaveLength(16);
     expect(new Set(actionCapacity.map(({ cardId }) => cardId)).size).toBe(15);
-    expect(actionPairs).toHaveLength(27);
-    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(17);
+    expect(actionPairs).toHaveLength(24);
+    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(14);
     expect(
       actionPairs.every(
         ({ pair }) =>

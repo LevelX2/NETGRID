@@ -762,6 +762,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     );
     expect(state.cardInstances[sameFortIce]?.advancementCounters).toBe(0);
     expect(state.cardInstances[otherFortIce]?.advancementCounters).toBe(1);
+    expect(state.corp.archives).toContain(raymondId);
     expect(state.run?.corpRunTemporaryCredits?.remaining).toBe(6);
     expect(state.corp.credits).toBe(26);
   });
@@ -810,6 +811,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
         temporaryRunCreditsRemaining: 6,
       },
     });
+    expect(state.corp.archives).toContain(raymondId);
 
     const panic = mustAction(
       state,
@@ -864,6 +866,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
         action.type === "activated_card_ability" && action.source === raymondId,
     );
     expect(state.corp.credits).toBe(26);
+    expect(state.corp.archives).toContain(raymondId);
 
     state = apply(state, "runner", (action) => action.type === "jack_out");
     expect(state.run).toBeUndefined();

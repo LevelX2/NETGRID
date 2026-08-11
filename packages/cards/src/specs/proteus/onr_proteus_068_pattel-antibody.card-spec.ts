@@ -42,9 +42,7 @@ export const cardSpec = {
     },
     accessEffects: [
       {
-        capabilityKey: capabilityKey(
-          "access_add_breaker_strength_penalty_counters",
-        ),
+        capabilityKey: capabilityKey("access_add_pattel_counters"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_access",
         sourceZones: ["installed", "hq", "rd", "archives"],
@@ -58,7 +56,7 @@ export const cardSpec = {
         effects: [
           {
             kind: "add_counter_to_all_installed_runner_icebreakers",
-            counterType: "breaker_strength_penalty",
+            counterType: "pattel",
             amount: 1,
             visibility: "public",
           },

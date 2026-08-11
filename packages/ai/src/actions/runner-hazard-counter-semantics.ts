@@ -7,7 +7,7 @@ const REMOVABLE_RUNNER_HAZARD_COUNTERS = new Set([
   "baskerville",
   "cerberus",
   "mastiff",
-  "link_reduction_counter",
+  "doppelganger",
 ]);
 
 export function applyRunnerHazardCounterSemantics(
@@ -28,10 +28,7 @@ export function applyRunnerHazardCounterSemantics(
       "counter.remove_runner_hazard",
       "survival.persistent_runner_hazard_counter",
       ...(traceTagCounter
-        ? [
-            "counter.remove_trace_tag",
-            "survival.persistent_trace_counter",
-          ]
+        ? ["counter.remove_trace_tag", "survival.persistent_trace_counter"]
         : []),
     ]),
     evidence: [

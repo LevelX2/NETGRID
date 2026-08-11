@@ -45,7 +45,9 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey("on_play_run_with_free_access_trash"),
+        capabilityKey: capabilityKey(
+          "on_play_run_replace_access_trash_rezzed_fort_ice_add_tags",
+        ),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",
@@ -80,21 +82,7 @@ export const cardSpec = {
         exchange: "self_tag",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey("on_play_run_with_free_access_trash"),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "medium",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

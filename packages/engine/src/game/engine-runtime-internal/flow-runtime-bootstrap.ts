@@ -1074,15 +1074,14 @@ export function configureFlowRuntimeBootstrap({
     serverId: Exclude<ServerId, "new_remote">,
   ): boolean {
     const server = mustServer(state, serverId);
-    const removedCount = server.ice.length + server.root.length;
+    const removedCount = server.root.length;
     if (removedCount === 0) return true;
     const candidates = state.corp.hq
       .filter((cardId) => {
         const definition = definitionFor(state, cardId);
         return (
           definition.side === "corp" &&
-          (definition.type === "ice" ||
-            definition.type === "asset" ||
+          (definition.type === "asset" ||
             definition.type === "agenda" ||
             definition.type === "upgrade")
         );
@@ -1091,19 +1090,10 @@ export function configureFlowRuntimeBootstrap({
     const orderIsLegal = (order: CardInstanceId[]): boolean => {
       const testState = cloneState(state);
       const testServer = mustServer(testState, server.id);
-      testServer.ice = [];
       testServer.root = [];
       for (const cardId of order) {
         const definition = definitionFor(testState, cardId);
         removeFromAllZones(testState, cardId);
-        if (definition.type === "ice") {
-          testServer.ice.push(cardId);
-          testState.cardInstances[cardId] = {
-            ...mustInstance(testState.cardInstances, cardId),
-            zone: { side: "corp", zone: "serverIce", serverId: testServer.id },
-          };
-          continue;
-        }
         if (
           !runtimePorts.canInstallCorpRootCardInServer(
             testState,

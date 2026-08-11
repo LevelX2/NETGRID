@@ -190,6 +190,8 @@ export type CounterType =
   | "socket_rd"
   | "pipe"
   | "spy"
+  | "doppelganger"
+  | "pattel"
   | "link_reduction_counter"
   | "breaker_strength_penalty"
   | "baskerville"

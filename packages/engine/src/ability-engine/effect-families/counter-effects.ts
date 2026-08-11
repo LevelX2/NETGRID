@@ -1,19 +1,19 @@
 import type { CardEffectFamilyInput } from "./family-runtime";
 
 export function executeCounterEffect(input: CardEffectFamilyInput): boolean {
-  const {
-    context,
-    effect,
-    index,
-    publicPayload,
-    resolvedEffects,
-    runtime,
-  } = input;
+  const { context, effect, index, publicPayload, resolvedEffects, runtime } =
+    input;
 
   switch (effect.kind) {
     case "add_counters_to_source": {
-      runtime.assertPositiveIntegerAmount("add_counters_to_source", effect.amount);
-      runtime.assertPublicVisibility("add_counters_to_source", effect.visibility);
+      runtime.assertPositiveIntegerAmount(
+        "add_counters_to_source",
+        effect.amount,
+      );
+      runtime.assertPublicVisibility(
+        "add_counters_to_source",
+        effect.visibility,
+      );
       if (
         effect.counterType !== "ablative" &&
         effect.counterType !== "trauma" &&
@@ -33,7 +33,11 @@ export function executeCounterEffect(input: CardEffectFamilyInput): boolean {
       );
       runtime.mergePublicPayload(publicPayload, addResult.publicPayload);
       resolvedEffects.push({
-        effectId: runtime.publicEffectId(context, index, "add_counters_to_source"),
+        effectId: runtime.publicEffectId(
+          context,
+          index,
+          "add_counters_to_source",
+        ),
         kind: "counter_change",
         visibility: effect.visibility,
         side: context.controller,
@@ -60,6 +64,7 @@ export function executeCounterEffect(input: CardEffectFamilyInput): boolean {
       );
       if (
         effect.counterType !== "militech" &&
+        effect.counterType !== "pattel" &&
         effect.counterType !== "breaker_strength_penalty"
       )
         throw new Error(

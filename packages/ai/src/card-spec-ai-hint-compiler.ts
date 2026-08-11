@@ -607,10 +607,8 @@ function deriveGenericTypedHintOverlay(
     for (const effect of access.effects) {
       if (effect.kind !== "trash_installed_runner_cards") continue;
       overlay.effects.push({
-        kind:
-          effect.target === "hardware" ? "hardware_trash" : "program_trash",
-        scope:
-          effect.target === "hardware" ? "hardware" : "installed_program",
+        kind: effect.target === "hardware" ? "hardware_trash" : "program_trash",
+        scope: effect.target === "hardware" ? "hardware" : "installed_program",
         timing: "on_access",
         target:
           effect.target === "hardware"
@@ -5073,10 +5071,7 @@ function deriveActionTacticSignals(
       effect.target === "runner.agenda_point_conversion"
     )
       signals.add("runner.agenda_point_conversion");
-    if (
-      effect.kind === "scored_agenda_action" &&
-      effect.scope === "score_area"
-    )
+    if (effect.kind === "scored_agenda_action" && effect.scope === "score_area")
       signals.add("corp.score_progress");
     if (
       effect.kind === "action_penalty" &&
@@ -9533,7 +9528,7 @@ function derivedCardStrategyEvidence(
           access.effects.some(
             (effect) =>
               effect.kind === "add_runner_counter" &&
-              effect.counterType === "link_reduction_counter",
+              effect.counterType === "doppelganger",
           ),
         ) &&
           engine.runnerCounterEffects?.some(

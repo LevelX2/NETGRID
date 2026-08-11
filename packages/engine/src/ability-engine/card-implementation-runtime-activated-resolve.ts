@@ -43,6 +43,16 @@ export function resolveActivatedCardImplementationAbility(
   const effectPayload = continuation
     ? continuation.originalActionPayload
     : { ...(legalAction.payload ?? {}) };
+  const sourceBeforeCosts = deps.mustInstance(
+    state.cardInstances,
+    match.cardId,
+  );
+  const sourceServerId =
+    sourceBeforeCosts.zone.side === "corp" &&
+    (sourceBeforeCosts.zone.zone === "serverRoot" ||
+      sourceBeforeCosts.zone.zone === "serverIce")
+      ? sourceBeforeCosts.zone.serverId
+      : undefined;
   const costPublicPayload: Record<string, string | number | boolean> = {};
   if (!continuation) {
     validateActivatedCardImplementationAbility(deps, state, legalAction, match);
@@ -65,6 +75,7 @@ export function resolveActivatedCardImplementationAbility(
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
       sourceTitle: match.definition.title,
+      ...(sourceServerId ? { sourceServerId } : {}),
       ...(typeof effectPayload.targetCardId === "string"
         ? { targetCardId: effectPayload.targetCardId as CardInstanceId }
         : {}),

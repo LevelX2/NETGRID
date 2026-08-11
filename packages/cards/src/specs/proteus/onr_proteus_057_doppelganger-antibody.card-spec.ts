@@ -42,7 +42,7 @@ export const cardSpec = {
     },
     accessEffects: [
       {
-        capabilityKey: capabilityKey("access_add_link_reduction_counter"),
+        capabilityKey: capabilityKey("access_add_doppelganger_counter"),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_access",
         sourceZones: ["installed", "hq", "rd", "archives"],
@@ -56,7 +56,7 @@ export const cardSpec = {
         effects: [
           {
             kind: "add_runner_counter",
-            counterType: "link_reduction_counter",
+            counterType: "doppelganger",
             amount: 1,
             visibility: "hidden_info_barrier",
           },
@@ -66,10 +66,10 @@ export const cardSpec = {
     runnerCounterEffects: [
       {
         capabilityKey: capabilityKey(
-          "link_reduction_counter_start_turn_credit_loss",
+          "doppelganger_counter_start_turn_credit_loss",
         ),
         addressability: ["plan", "action", "quote", "debug"],
-        counterType: "link_reduction_counter",
+        counterType: "doppelganger",
         removeCost: 4,
         startOfRunnerTurn: {
           kind: "lose_credits",

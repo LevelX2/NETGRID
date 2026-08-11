@@ -81,7 +81,7 @@ export function remoteTrashFortBeforeAccessEffect(
       followup.kind === "successful_run_before_access_effect" &&
       followup.server === "remote" &&
       followup.effect.kind === "trash_remote_fort" &&
-      followup.effect.include === "root_and_ice" &&
+      followup.effect.include === "root" &&
       followup.source === "installed_hidden_runner_resource" &&
       followup.cost.kind === "reveal_and_trash_source",
   );
@@ -165,8 +165,7 @@ export function buildSuccessfulRunFollowupActions(
   ].sort()) {
     if (used.has(sourceCardId)) continue;
     const definition = host.cards.definitionFor(sourceCardId);
-    const forceRezFollowup =
-      hasSuccessfulRunForceRezFollowup(definition.id);
+    const forceRezFollowup = hasSuccessfulRunForceRezFollowup(definition.id);
     if (forceRezFollowup) {
       const server = host.servers.mustServer(run.attackedServerId);
       const unrezzedCount = server.ice.filter(
@@ -555,7 +554,7 @@ export function resolveHiddenSuccessfulRunTrashRemoteFortEffect(
 ): SuccessfulRunFollowupExecutionResult {
   const run = mustRun(host);
   const server = host.servers.mustServer(serverId);
-  const targets = [...server.root, ...server.ice].sort();
+  const targets = server.root.slice().sort();
   if (targets.length === 0)
     throw new Error("Death from Above braucht ein nicht-leeres Remote-Fort.");
   const trashedDefinitionIds: CardDefinitionId[] = [];

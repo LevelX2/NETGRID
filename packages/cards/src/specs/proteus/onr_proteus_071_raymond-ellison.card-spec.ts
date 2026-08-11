@@ -15,7 +15,7 @@ export const cardSpec = {
     capabilityText: [
       {
         capabilityKey: capabilityKey(
-          "during_run_tap_advancement_for_run_credits",
+          "during_run_trash_advancement_for_run_credits",
         ),
         actionLabel:
           "Raymond Ellison: Advancement-Counter für Run-Credits entfernen",
@@ -58,14 +58,14 @@ export const cardSpec = {
     abilities: [
       {
         capabilityKey: capabilityKey(
-          "during_run_tap_advancement_for_run_credits",
+          "during_run_trash_advancement_for_run_credits",
         ),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
         timing: "corp_during_run",
         costs: [
           {
-            kind: "tap_source",
+            kind: "trash_source",
             amount: 1,
           },
         ],

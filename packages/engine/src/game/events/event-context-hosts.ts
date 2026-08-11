@@ -67,7 +67,8 @@ export function createEventContextHostComposition(
     cardStrengthModifier: (state, cardId) =>
       mustInstance(state.cardInstances, cardId).strengthModifier +
       cards.hostedProgramStrengthModifier(state, cardId) -
-      cards.cardCounter(state, cardId, "breaker_strength_penalty"),
+      cards.cardCounter(state, cardId, "breaker_strength_penalty") +
+      cards.cardCounter(state, cardId, "pattel"),
     creditCostForAction: context.creditCostForAction,
     definitionFor,
     pumpAmountForLegalAction: context.pumpAmountForLegalAction,
@@ -103,6 +104,8 @@ export function configureEventContextHostComposition(
 
 function requiredGroup<T>(value: T | undefined, name: string): T {
   if (!value)
-    throw new Error(`EventContextHostCompositionHost.${name} ist erforderlich.`);
+    throw new Error(
+      `EventContextHostCompositionHost.${name} ist erforderlich.`,
+    );
   return value;
 }

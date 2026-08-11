@@ -110,7 +110,11 @@ export function executeEncounterTraceMovementEffect(
         throw new Error(
           "replace_source_fort_cards_from_hq visibility is invalid.",
         );
-      if (effect.include !== "root_and_ice" || effect.installCost !== "free")
+      if (
+        effect.include !== "root" ||
+        effect.installCost !== "free" ||
+        effect.rezTiming !== "after_runner_passed_last_ice_on_source_fort"
+      )
         throw new Error(
           "replace_source_fort_cards_from_hq profile is invalid.",
         );

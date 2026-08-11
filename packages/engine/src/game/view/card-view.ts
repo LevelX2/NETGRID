@@ -880,12 +880,20 @@ function specialCounterDisplays(
       counterType: "power",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.link_reduction_counter, {
-      id: "link_reduction_counter",
+    ...singleCounterDisplay(counters.doppelganger, {
+      id: "doppelganger",
       displayKind: "generic_counter",
       label: "Doppelganger-Counter",
       ariaLabelName: "Doppelganger-Counter",
-      counterType: "link_reduction_counter",
+      counterType: "doppelganger",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.pattel, {
+      id: "pattel",
+      displayKind: "generic_counter",
+      label: "Pattel-Counter",
+      ariaLabelName: "Pattel-Counter",
+      counterType: "pattel",
       usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.breaker_strength_penalty, {
@@ -1184,7 +1192,8 @@ function singleCounterDisplay(
 function breakerStrengthPenaltyCounterAmount(instance: CardInstance): number {
   return Math.max(
     0,
-    Math.floor(instance.counters?.breaker_strength_penalty ?? 0),
+    Math.floor(instance.counters?.breaker_strength_penalty ?? 0) +
+      Math.floor(instance.counters?.pattel ?? 0),
   );
 }
 

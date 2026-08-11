@@ -186,7 +186,9 @@ export function buildRunnerEncounterActions(
       ) ?? 0) +
       host.cards.cardCounter(breakerId, "militech") +
       (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
-      host.cards.cardCounter(breakerId, "breaker_strength_penalty") * -1 +
+      (host.cards.cardCounter(breakerId, "breaker_strength_penalty") +
+        host.cards.cardCounter(breakerId, "pattel")) *
+        -1 +
       host.breaker.selectedServerIcebreakerStrengthCounterBonus(breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(host.state, breakerId) +
       host.run.runRemainderStrengthBonusForBreaker(breakerId);

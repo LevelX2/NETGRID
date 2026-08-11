@@ -14,6 +14,8 @@ export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
+  /** Captured before a trash-source cost moves the source out of its fort. */
+  sourceServerId?: Exclude<ServerId, "new_remote">;
   targetCardId?: CardInstanceId;
   xValue?: number;
   targetRezCost?: number;
@@ -243,7 +245,12 @@ export type CardEffectCounterResult = {
   amount: number;
   counterType: Extract<
     CounterType,
-    "ablative" | "trauma" | "boon" | "militech" | "breaker_strength_penalty"
+    | "ablative"
+    | "trauma"
+    | "boon"
+    | "militech"
+    | "pattel"
+    | "breaker_strength_penalty"
   >;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;

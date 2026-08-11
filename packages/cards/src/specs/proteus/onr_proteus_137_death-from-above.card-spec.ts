@@ -55,7 +55,7 @@ export const cardSpec = {
         },
         effect: {
           kind: "trash_remote_fort",
-          include: "root_and_ice",
+          include: "root",
         },
         visibility: "hidden_info_barrier",
       },

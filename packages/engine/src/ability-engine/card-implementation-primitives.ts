@@ -172,7 +172,7 @@ export function hiddenSuccessfulRunBeforeAccessEffect(
       }
     | {
         server: "remote";
-        effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
+        effect: { kind: "trash_remote_fort"; include: "root" };
         abilityKey?: string;
       },
 ): SuccessfulRunBeforeAccessEffect {

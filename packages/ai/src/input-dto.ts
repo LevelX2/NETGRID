@@ -2185,6 +2185,8 @@ const TRACE_COUNTER_TYPES = {
   socket_rd: true,
   pipe: true,
   spy: true,
+  doppelganger: true,
+  pattel: true,
   link_reduction_counter: true,
   breaker_strength_penalty: true,
   baskerville: true,

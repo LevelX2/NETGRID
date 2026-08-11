@@ -38,9 +38,10 @@ export function executeResourceCostLinkEffect(
         throw new Error("Run-Credits brauchen einen laufenden Run.");
       const source = state.cardInstances[context.sourceCardId];
       const serverId =
-        source?.zone.side === "corp" && source.zone.zone === "serverRoot"
+        context.sourceServerId ??
+        (source?.zone.side === "corp" && source.zone.zone === "serverRoot"
           ? source.zone.serverId
-          : undefined;
+          : undefined);
       if (!serverId)
         throw new Error("Die Quelle ist nicht in einem Fort installiert.");
       const server = state.corp.servers.find(

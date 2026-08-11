@@ -45,7 +45,9 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey("on_play_run_with_success_credit_gain"),
+        capabilityKey: capabilityKey(
+          "on_play_hq_run_access_four_prohibit_noisy_icebreakers",
+        ),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",
@@ -100,7 +102,9 @@ export const cardSpec = {
     ],
     capabilities: [
       {
-        capabilityKey: capabilityKey("on_play_run_with_success_credit_gain"),
+        capabilityKey: capabilityKey(
+          "on_play_hq_run_access_four_prohibit_noisy_icebreakers",
+        ),
         annotations: [
           {
             kind: "strategy_support",

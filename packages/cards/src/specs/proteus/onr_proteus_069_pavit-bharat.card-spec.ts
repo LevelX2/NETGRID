@@ -50,8 +50,9 @@ export const cardSpec = {
       on_rez: [
         {
           kind: "replace_source_fort_cards_from_hq",
-          include: "root_and_ice",
+          include: "root",
           installCost: "free",
+          rezTiming: "after_runner_passed_last_ice_on_source_fort",
           visibility: "hidden_info_barrier",
         },
       ],

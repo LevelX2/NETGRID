@@ -643,6 +643,7 @@ export type RunnerTraceCounterEffectImplementation = {
     | "cerberus"
     | "mastiff"
     | "crying"
+    | "doppelganger"
     | "link_reduction_counter"
   >;
   removeCost: number;

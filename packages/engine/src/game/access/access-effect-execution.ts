@@ -143,10 +143,10 @@ export function accessEffectHiddenZoneAction(
     effect.effects.some(
       (step) =>
         step.kind === "add_runner_counter" &&
-        step.counterType === "link_reduction_counter",
+        step.counterType === "doppelganger",
     )
   )
-    return "proteus_link_reduction_counter_access_counter";
+    return "proteus_doppelganger_counter_access";
   if (
     effect.effects.some(
       (step) => step.kind === "add_counter_to_all_installed_runner_icebreakers",
@@ -343,7 +343,9 @@ export function resolveCardImplementationAccessEffects(
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         accessEffectSourceTrashed: true,
-        ...(sourceServerId ? { accessEffectSourceServerId: sourceServerId } : {}),
+        ...(sourceServerId
+          ? { accessEffectSourceServerId: sourceServerId }
+          : {}),
       };
     }
     if (
@@ -370,7 +372,10 @@ export function startCardImplementationAccessPaymentChoice(
   const legalAction = requireLegalAction(host);
   const cost = effect.cost;
   if (!cost) return;
-  if (cost.kind === "corp_may_pay_credits" && host.state.corp.credits < cost.amount) {
+  if (
+    cost.kind === "corp_may_pay_credits" &&
+    host.state.corp.credits < cost.amount
+  ) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       ambushPaymentAvailable: false,
@@ -701,7 +706,7 @@ export function executeCardImplementationAccessEffectStep(
               linkModifierAmount: -2 * remainingCounters,
             }
           : {}),
-        ...(step.counterType === "link_reduction_counter"
+        ...(step.counterType === "doppelganger"
           ? {
               doppelgangerCountersAfter: remainingCounters,
             }

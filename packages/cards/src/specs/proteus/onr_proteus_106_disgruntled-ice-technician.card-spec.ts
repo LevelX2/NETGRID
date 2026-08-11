@@ -47,7 +47,9 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey("on_play_run_with_success_credit_gain"),
+        capabilityKey: capabilityKey(
+          "on_play_run_with_post_pass_derez_fully_broken_ice",
+        ),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",

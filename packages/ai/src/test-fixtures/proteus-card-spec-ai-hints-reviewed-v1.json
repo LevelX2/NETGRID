@@ -1,7 +1,7 @@
 {
   "schemaVersion": "proteus-card-spec-ai-hint-reviewed-golden-v1",
-  "migrationReportFingerprint": "sha256:9738f8b04827b572b03a5a8b5730b81f588a94205b6b5d1ff53566fd58ed2621",
-  "migrationReportSha256": "sha256:3e1639182b3928bc950bda5d0a909b26eb456c55d34d822ff616086932d2009f",
+  "migrationReportFingerprint": "sha256:c5f61e6fbaf70d44526d43c820e4682de3e8e5dc900b2f5dae2f922c237f5bff",
+  "migrationReportSha256": "sha256:4531ade35b53f97065682f451138097184874f680eb3594f1f209df4013f4e65",
   "dispositions": {
     "mechanicalFacts": "derived_only_from_closed_typed_proteus_card_spec_engine_nodes",
     "sharedSubroutineFacts": "exact13_previously_shared_runtime_subroutines_on_10_cards_are_canonical_typed_engine_nodes_including_homing_trace_run_lock",
@@ -14,7 +14,7 @@
     "scenarioAndQuality": "regenerated_from_current_ai_supported_scenario_evidence",
     "actionCapacity": "exact16_profiles_on_15_cards_derived_from_typed_mechanical_owners",
     "tagPreventionCosts": "credit_and_forgo_next_action_is_action_debt_credit_and_trash_source_is_not_an_action_penalty",
-    "capabilityStrategyEvidence": "exact27_pairs_on_17_cards_bound_to_reviewed_capability_keys_with_closed_non_tautological_detail_and_evidence",
+    "capabilityStrategyEvidence": "exact24_pairs_on_14_cards_after_removing_three_opponent_strategy_misclassifications",
     "passiveHuntingPackPair": "discarded_non_action_addressable_relative_ice_trace_classification",
     "disintegratorTargetProfile": "canonical_breaker_effect_owner_replaces_stale_legacy_timing_and_visibility_claim",
     "canonicalDamageValues": "fixed_damage_values_derive_from_typed_mechanics_instead_of_legacy_empty_value_hints",
@@ -67,8 +67,12 @@
         ],
         "functionSignals": ["economy.action", "risk.random_outcome"],
         "conditions": [
-          { "kind": "requires_score_window" },
-          { "kind": "requires_scored_agenda" }
+          {
+            "kind": "requires_score_window"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
         ],
         "quality": {
           "hintReviewed": true,
@@ -203,9 +207,15 @@
           "effect_timing:scored_activated"
         ],
         "conditions": [
-          { "kind": "requires_score_window" },
-          { "kind": "requires_scored_agenda" },
-          { "kind": "requires_runner_tagged" }
+          {
+            "kind": "requires_score_window"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          },
+          {
+            "kind": "requires_runner_tagged"
+          }
         ],
         "quality": {
           "hintReviewed": true,
@@ -243,7 +253,9 @@
           "upgrade"
         ],
         "planRoles": ["corp_score_agenda", "score_next_turn"],
-        "valueHints": { "damage": 2 },
+        "valueHints": {
+          "damage": 2
+        },
         "strategicRole": ["punish_payoff"],
         "lineSupport": ["corp.ambush_bluff", "corp.damage_kill"],
         "strategySupportPairs": [
@@ -283,7 +295,9 @@
         ],
         "functionSignals": [
           "access.corp_net_damage_ambush",
-          "access.rnd_reveal_requirement"
+          "access.rnd_reveal_requirement",
+          "access.punish",
+          "remote.ambush"
         ],
         "tacticSignals": [
           "access.corp_net_damage_ambush",
@@ -299,8 +313,12 @@
           "effect_timing:on_access"
         ],
         "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
         ],
         "riskTags": [
           "hidden_until_score_or_access",
@@ -380,11 +398,33 @@
             "confidence": "high"
           }
         ],
-        "functionSignals": ["access.rnd_reveal_requirement"],
+        "effects": [
+          {
+            "kind": "ambush",
+            "scope": "accessed_card",
+            "timing": "on_access",
+            "target": "remote.ambush",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "access.rnd_reveal_requirement",
+          "access.punish",
+          "remote.ambush"
+        ],
         "tacticSignals": ["access.rnd_reveal_requirement"],
+        "actionTacticSignals": [
+          "effect:ambush",
+          "effect_scope:accessed_card",
+          "effect_timing:on_access"
+        ],
         "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
         ],
         "riskTags": [
           "hidden_until_score_or_access",
@@ -460,8 +500,12 @@
           "score.action_counter_bank"
         ],
         "conditions": [
-          { "kind": "requires_score_window" },
-          { "kind": "requires_scored_agenda" }
+          {
+            "kind": "requires_score_window"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
         ],
         "quality": {
           "hintReviewed": true,
@@ -532,8 +576,12 @@
         ],
         "functionSignals": ["economy.action", "score.overadvance_action"],
         "conditions": [
-          { "kind": "requires_score_window" },
-          { "kind": "requires_scored_agenda" }
+          {
+            "kind": "requires_score_window"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
         ],
         "quality": {
           "hintReviewed": true,
@@ -600,8 +648,12 @@
           "effect_timing:start_of_turn"
         ],
         "conditions": [
-          { "kind": "requires_score_window" },
-          { "kind": "requires_scored_agenda" }
+          {
+            "kind": "requires_score_window"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
         ],
         "quality": {
           "hintReviewed": true,
@@ -670,11 +722,33 @@
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
-        "functionSignals": ["access.rnd_reveal_requirement"],
+        "effects": [
+          {
+            "kind": "ambush",
+            "scope": "accessed_card",
+            "timing": "on_access",
+            "target": "remote.ambush",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "access.rnd_reveal_requirement",
+          "access.punish",
+          "remote.ambush"
+        ],
         "tacticSignals": ["access.rnd_reveal_requirement"],
+        "actionTacticSignals": [
+          "effect:ambush",
+          "effect_scope:accessed_card",
+          "effect_timing:on_access"
+        ],
         "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
         ],
         "riskTags": [
           "hidden_until_score_or_access",
@@ -746,8 +820,12 @@
           "effect_timing:when_scored"
         ],
         "conditions": [
-          { "kind": "requires_score_window" },
-          { "kind": "requires_scored_agenda" }
+          {
+            "kind": "requires_score_window"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
         ],
         "quality": {
           "hintReviewed": true,
@@ -817,10 +895,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 3 },
+        "costProfile": {
+          "credits": 3
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -931,10 +1015,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 6 },
+        "costProfile": {
+          "credits": 6
+        },
         "riskTags": ["hidden_ice", "ap_damage"],
         "quality": {
           "hintReviewed": true,
@@ -1009,10 +1099,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 7 },
+        "costProfile": {
+          "credits": 7
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1108,12 +1204,22 @@
           "trace.source"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" },
-          { "kind": "requires_trace_success" },
-          { "kind": "requires_trace_attempt" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          },
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_trace_attempt"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_ice", "trace"],
         "quality": {
           "hintReviewed": true,
@@ -1214,11 +1320,19 @@
           "target.runner_program_trash"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" },
-          { "kind": "requires_installed_program" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          },
+          {
+            "kind": "requires_installed_program"
+          }
         ],
-        "costProfile": { "credits": 17 },
+        "costProfile": {
+          "credits": 17
+        },
         "riskTags": ["hidden_ice", "program_trash"],
         "quality": {
           "hintReviewed": true,
@@ -1282,10 +1396,16 @@
           "effect_timing:on_rez"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -1359,10 +1479,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 6 },
+        "costProfile": {
+          "credits": 6
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1417,11 +1543,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 4 },
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -1511,11 +1645,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 7 },
+        "costProfile": {
+          "credits": 7
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -1641,10 +1783,16 @@
           "effect_timing:persistent"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 5 },
+        "costProfile": {
+          "credits": 5
+        },
         "riskTags": ["hidden_ice", "ap_damage"],
         "quality": {
           "hintReviewed": true,
@@ -1694,7 +1842,9 @@
           "corp_ice.rez_paid_scaling",
           "ice.strength_modifier"
         ],
-        "costProfile": { "credits": 4 },
+        "costProfile": {
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1764,10 +1914,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 6 },
+        "costProfile": {
+          "credits": 6
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1814,7 +1970,9 @@
           "corp_ice.rez_paid_scaling",
           "ice.strength_modifier"
         ],
-        "costProfile": { "credits": 3 },
+        "costProfile": {
+          "credits": 3
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1955,12 +2113,22 @@
           "trace.source"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" },
-          { "kind": "requires_trace_success" },
-          { "kind": "requires_trace_attempt" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          },
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_trace_attempt"
+          }
         ],
-        "costProfile": { "credits": 4 },
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": ["trace"],
         "quality": {
           "hintReviewed": true,
@@ -2021,7 +2189,9 @@
             "rationale": "v2: Mehrere Trace-5-Tag-Subroutinen sind deutlich stärker als ein einfacher Hunter/Fetch-Trace und tragen die Tag/Trace-Linie als Enabler."
           }
         ],
-        "costProfile": { "credits": 1 },
+        "costProfile": {
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2063,6 +2233,11 @@
             "rationale": "ICE Semantic Review v1: Iceberg bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "encounter_add_end_run_subroutine"
+          }
+        ],
         "effects": [
           {
             "kind": "damage",
@@ -2089,10 +2264,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 4 },
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2167,10 +2348,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 7 },
+        "costProfile": {
+          "credits": 7
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2244,13 +2431,25 @@
           "target.runner_program_trash"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" },
-          { "kind": "requires_installed_program" },
-          { "kind": "requires_installed_ice" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          },
+          {
+            "kind": "requires_installed_program"
+          },
+          {
+            "kind": "requires_installed_ice"
+          }
         ],
-        "costProfile": { "credits": 3 },
+        "costProfile": {
+          "credits": 3
+        },
         "riskTags": ["hidden_ice", "program_trash", "start_run_reposition"],
         "quality": {
           "hintReviewed": true,
@@ -2371,10 +2570,16 @@
           "effect_timing:persistent"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 7 },
+        "costProfile": {
+          "credits": 7
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2428,8 +2633,14 @@
         ],
         "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "credits": 6 },
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "credits": 6
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2518,10 +2729,16 @@
           "effect_timing:on_rez"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2612,11 +2829,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 6 },
+        "costProfile": {
+          "credits": 6
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2662,7 +2887,14 @@
             "rationale": "ICE Semantic Review v1: Riddler bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
           }
         ],
-        "costProfile": { "credits": 2 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "encounter_add_end_run_subroutine"
+          }
+        ],
+        "costProfile": {
+          "credits": 2
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2718,10 +2950,16 @@
           "effect_timing:encounter"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 2 },
+        "costProfile": {
+          "credits": 2
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2768,7 +3006,9 @@
           "corp_ice.rez_paid_scaling",
           "ice.strength_modifier"
         ],
-        "costProfile": { "credits": 4 },
+        "costProfile": {
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2821,11 +3061,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 2 },
+        "costProfile": {
+          "credits": 2
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2914,10 +3162,16 @@
           "effect_timing:on_rez"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2990,10 +3244,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 6 },
+        "costProfile": {
+          "credits": 6
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3064,10 +3324,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 8 },
+        "costProfile": {
+          "credits": 8
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3138,10 +3404,16 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 13 },
+        "costProfile": {
+          "credits": 13
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -3194,11 +3466,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 5 },
+        "costProfile": {
+          "credits": 5
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -3253,11 +3533,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 3 },
+        "costProfile": {
+          "credits": 3
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -3328,11 +3616,19 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_remote_server" },
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_remote_server"
+          },
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 5 },
+        "costProfile": {
+          "credits": 5
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -3384,10 +3680,16 @@
           "effect_timing:on_rez"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_unbroken_subroutine" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -3418,7 +3720,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["operation"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
         "actionCapacityProfiles": [
           {
             "class": "future_recurring_gain",
@@ -3434,7 +3738,10 @@
             "repeatable": false
           }
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3455,7 +3762,26 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "operation", "economy_operation"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_gain_fifteen_credits",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 15,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -3486,7 +3812,10 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 10 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 10
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3530,6 +3859,37 @@
             "confidence": "high"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_tag_after_runner_trashed_node",
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "tag.source",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["tag.source"],
+            "conditions": [
+              {
+                "kind": "requires_runner_trashed_node_last_turn"
+              }
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_tag_source",
+                "evidence": ["tactic_signal_anchor:tag.source"],
+                "confidence": "high"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "tag_source",
@@ -3547,8 +3907,15 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "conditions": [{ "kind": "requires_runner_trashed_node_last_turn" }],
-        "costProfile": { "clicks": 1, "credits": 4 },
+        "conditions": [
+          {
+            "kind": "requires_runner_trashed_node_last_turn"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3587,6 +3954,11 @@
             "evidence": ["ice.corp_free_rez", "ice.corp_temporary_rez"],
             "confidence": "medium",
             "rationale": "Operations Semantic Review v2: ice_rez / temporary_rez."
+          }
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_free_rez_ice_with_kludge_counters"
           }
         ],
         "targetProfiles": [
@@ -3637,7 +4009,9 @@
           "effect_timing:action",
           "effect_timing:corp_turn"
         ],
-        "costProfile": { "clicks": 1 },
+        "costProfile": {
+          "clicks": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3699,6 +4073,57 @@
             "confidence": "high"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_trace_six_tags_by_margin",
+            "effects": [
+              {
+                "kind": "trace",
+                "scope": "trace",
+                "timing": "action",
+                "target": "trace.source",
+                "finite": true
+              },
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "trace.trace_tag",
+                "amountKind": "dynamic",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["tag.source", "trace.source"],
+            "conditions": [
+              {
+                "kind": "requires_runner_attempted_run_last_turn"
+              },
+              {
+                "kind": "requires_trace_attempt"
+              },
+              {
+                "kind": "requires_trace_success"
+              }
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_tag_source",
+                "evidence": ["tactic_signal_anchor:tag.source"],
+                "confidence": "high"
+              },
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_trace_source",
+                "evidence": ["tactic_signal_anchor:trace.source"],
+                "confidence": "high"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "trace",
@@ -3726,11 +4151,20 @@
           "effect_timing:action"
         ],
         "conditions": [
-          { "kind": "requires_runner_attempted_run_last_turn" },
-          { "kind": "requires_trace_attempt" },
-          { "kind": "requires_trace_success" }
+          {
+            "kind": "requires_runner_attempted_run_last_turn"
+          },
+          {
+            "kind": "requires_trace_attempt"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 4 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3770,6 +4204,11 @@
             "evidence": ["ice.corp_free_rez", "ice.corp_installment_rez"],
             "confidence": "medium",
             "rationale": "Operations Semantic Review v2: ice_rez / installment_liability."
+          }
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_free_rez_ice_with_term_counters"
           }
         ],
         "targetProfiles": [
@@ -3822,7 +4261,10 @@
           "effect_timing:action",
           "effect_timing:corp_turn"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3880,6 +4322,57 @@
             "confidence": "high"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_variable_trace_add_tag",
+            "effects": [
+              {
+                "kind": "trace",
+                "scope": "trace",
+                "timing": "action",
+                "target": "trace.source",
+                "finite": true
+              },
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "trace.trace_tag",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["tag.source", "trace.source"],
+            "conditions": [
+              {
+                "kind": "requires_runner_attempted_run_this_game"
+              },
+              {
+                "kind": "requires_trace_attempt"
+              },
+              {
+                "kind": "requires_trace_success"
+              }
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_tag_source",
+                "evidence": ["tactic_signal_anchor:tag.source"],
+                "confidence": "high"
+              },
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_trace_source",
+                "evidence": ["tactic_signal_anchor:trace.source"],
+                "confidence": "high"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "trace",
@@ -3907,11 +4400,20 @@
           "effect_timing:action"
         ],
         "conditions": [
-          { "kind": "requires_runner_attempted_run_this_game" },
-          { "kind": "requires_trace_attempt" },
-          { "kind": "requires_trace_success" }
+          {
+            "kind": "requires_runner_attempted_run_this_game"
+          },
+          {
+            "kind": "requires_trace_attempt"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 6 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 6
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3988,6 +4490,48 @@
             "confidence": "high"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_trace_trash_recent_resource_add_tag",
+            "effects": [
+              {
+                "kind": "trace",
+                "scope": "trace",
+                "timing": "action",
+                "target": "trace.source",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["trace.source"],
+            "conditions": [
+              {
+                "kind": "requires_runner_installed_resource_last_turn"
+              },
+              {
+                "kind": "requires_trace_attempt"
+              },
+              {
+                "kind": "requires_trace_success"
+              }
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_tag_source",
+                "evidence": ["tactic_signal_anchor:tag.source"],
+                "confidence": "high"
+              },
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_trace_source",
+                "evidence": ["tactic_signal_anchor:trace.source"],
+                "confidence": "high"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "trace",
@@ -4004,11 +4548,20 @@
           "effect_timing:action"
         ],
         "conditions": [
-          { "kind": "requires_runner_installed_resource_last_turn" },
-          { "kind": "requires_trace_attempt" },
-          { "kind": "requires_trace_success" }
+          {
+            "kind": "requires_runner_installed_resource_last_turn"
+          },
+          {
+            "kind": "requires_trace_attempt"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 6 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 6
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4037,7 +4590,10 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["ambush", "net_damage", "hidden_zone"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1, "damage": 1 },
+        "valueHints": {
+          "remoteRootValue": 1,
+          "damage": 1
+        },
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff"],
@@ -4059,11 +4615,20 @@
             "resource": "net_damage",
             "amount": 1,
             "target": "access.corp_net_damage_ambush"
+          },
+          {
+            "kind": "ambush",
+            "scope": "accessed_card",
+            "timing": "on_access",
+            "target": "remote.ambush",
+            "finite": true
           }
         ],
         "functionSignals": [
           "access.corp_net_damage_ambush",
-          "access.rnd_reveal_requirement"
+          "access.rnd_reveal_requirement",
+          "access.punish",
+          "remote.ambush"
         ],
         "tacticSignals": [
           "access.corp_net_damage_ambush",
@@ -4074,15 +4639,23 @@
         "actionTacticSignals": [
           "access.punish",
           "damage.payoff.runner",
+          "effect:ambush",
           "effect:damage",
+          "effect_scope:accessed_card",
           "effect_scope:runner",
           "effect_timing:on_access"
         ],
         "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",
@@ -4119,7 +4692,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["asset"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["enabler"],
         "lineSupport": ["corp.damage_kill"],
         "strategySupportPairs": [
@@ -4133,7 +4708,11 @@
           }
         ],
         "effects": [
-          { "kind": "global_modifier", "scope": "damage", "timing": "action" }
+          {
+            "kind": "global_modifier",
+            "scope": "damage",
+            "timing": "action"
+          }
         ],
         "functionSignals": ["advance.corp_counter_bank"],
         "tacticSignals": [
@@ -4145,8 +4724,14 @@
           "effect_scope:damage",
           "effect_timing:action"
         ],
-        "conditions": [{ "kind": "requires_advancement_counter" }],
-        "costProfile": { "credits": 1 },
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ],
+        "costProfile": {
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4174,7 +4759,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["asset"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "effects": [
           {
             "kind": "prevention_replacement",
@@ -4189,7 +4776,9 @@
           "effect_scope:installed_card",
           "effect_timing:prevention_window"
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4216,7 +4805,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["hidden_zone", "asset", "ambush", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff"],
@@ -4249,7 +4840,9 @@
           "access.archives_safe_exception",
           "access.rnd_reveal_requirement",
           "damage.corp_persistent_damage_counter",
-          "defense.corp_run_end_counter"
+          "defense.corp_run_end_counter",
+          "access.punish",
+          "remote.ambush"
         ],
         "tacticSignals": [
           "access.archives_safe_exception",
@@ -4274,10 +4867,16 @@
           "punish.payoff"
         ],
         "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",
@@ -4317,7 +4916,10 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 2, "remoteRootValue": 2 },
+        "valueHints": {
+          "economy": 2,
+          "remoteRootValue": 2
+        },
         "strategicRole": ["engine_anchor"],
         "lineSupport": ["corp.economy_rez_reserve"],
         "strategySupportPairs": [
@@ -4330,9 +4932,16 @@
             "rationale": "Temporary run-only credits support rez/trace reserve with explicit random discard and temporary-credit drawbacks. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "during_run_discard_for_two_run_credits"
+          }
+        ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4362,7 +4971,10 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 2, "remoteRootValue": 2 },
+        "valueHints": {
+          "economy": 2,
+          "remoteRootValue": 2
+        },
         "strategicRole": ["engine_anchor"],
         "lineSupport": ["corp.economy_rez_reserve"],
         "strategySupportPairs": [
@@ -4378,10 +4990,26 @@
             "rationale": "Advanceable counters convert to temporary install/rez credits; side condition is not limited to during-run use."
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "corp_main_spend_advancement_for_install_rez_credits",
+            "conditions": [
+              {
+                "kind": "requires_advancement_counter"
+              }
+            ]
+          }
+        ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "conditions": [{ "kind": "requires_advancement_counter" }],
-        "costProfile": { "credits": 2 },
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ],
+        "costProfile": {
+          "credits": 2
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4413,7 +5041,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["tax_tool"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
@@ -4438,7 +5068,9 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "credits": 1 },
+        "costProfile": {
+          "credits": 1
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -4461,7 +5093,10 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 2, "remoteRootValue": 2 },
+        "valueHints": {
+          "economy": 2,
+          "remoteRootValue": 2
+        },
         "strategicRole": ["enabler"],
         "lineSupport": ["corp.tag_trace_punish"],
         "strategySupportPairs": [
@@ -4474,8 +5109,24 @@
             "rationale": "Advancement counters convert to trace-only temporary credits; not a tag source."
           }
         ],
-        "conditions": [{ "kind": "requires_advancement_counter" }],
-        "costProfile": { "credits": 0 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "trace_window_spend_advancement_for_trace_credits",
+            "conditions": [
+              {
+                "kind": "requires_advancement_counter"
+              }
+            ]
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ],
+        "costProfile": {
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4507,7 +5158,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["enabler"],
         "strategyAnchors": ["corp.fast_advance", "corp.remote_scoring"],
         "lineSupport": ["corp.ambush_bluff"],
@@ -4541,8 +5194,14 @@
           "run.corp_server_lock",
           "tax.remote"
         ],
-        "conditions": [{ "kind": "requires_remote_server" }],
-        "costProfile": { "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_remote_server"
+          }
+        ],
+        "costProfile": {
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -4573,7 +5232,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["tax_tool"],
         "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
@@ -4585,6 +5246,11 @@
             "evidence": ["ice.corp_subroutine_repeat"],
             "confidence": "high",
             "rationale": "Repeats an ICE subroutine and increases tax/ETR/damage depending on the ICE."
+          }
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "during_run_discard_and_copy_subroutine"
           }
         ],
         "targetProfiles": [
@@ -4599,7 +5265,9 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -4631,7 +5299,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["tax_tool"],
         "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
@@ -4643,6 +5313,11 @@
             "evidence": ["ice.corp_subroutine_repeat"],
             "confidence": "high",
             "rationale": "Repeats an ICE subroutine; R&D trash is the cost risk."
+          }
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "during_run_trash_rd_and_copy_subroutine"
           }
         ],
         "targetProfiles": [
@@ -4657,7 +5332,9 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -4689,7 +5366,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["scoring_tool"],
         "strategyAnchors": ["corp.remote_scoring"],
         "lineSupport": ["corp.remote_scoring"],
@@ -4706,10 +5385,41 @@
             "rationale": "Gray Ops agenda difficulty discount supports remote scoring."
           }
         ],
-        "tacticSignals": ["corp.remote_protection"],
-        "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "credits": 4 },
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "scope": "remote",
+            "timing": "persistent",
+            "target": "score.gray_ops_difficulty_discount",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "remote.agenda_difficulty_discount",
+          "score.agenda_difficulty_discount",
+          "score.gray_ops_difficulty_discount"
+        ],
+        "tacticSignals": [
+          "corp.remote_protection",
+          "remote.agenda_difficulty_discount",
+          "score.agenda_difficulty_discount",
+          "score.gray_ops_difficulty_discount"
+        ],
+        "actionTacticSignals": [
+          "corp.remote_protection",
+          "effect:global_modifier",
+          "effect_scope:remote",
+          "effect_timing:persistent"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -4739,7 +5449,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["tax_tool"],
         "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
@@ -4773,8 +5485,14 @@
           "effect_scope:fort",
           "effect_timing:during_run"
         ],
-        "conditions": [{ "kind": "requires_during_run" }],
-        "costProfile": { "credits": 4 },
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -4802,7 +5520,31 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade", "draw"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "hq_run_pay_one_draw_one",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "corp",
+                "timing": "during_run",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["setup.draw"],
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "draw",
@@ -4831,8 +5573,14 @@
           "effect_timing:action",
           "effect_timing:during_run"
         ],
-        "conditions": [{ "kind": "requires_during_run" }],
-        "costProfile": { "credits": 1 },
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "costProfile": {
+          "credits": 1
+        },
         "riskTags": ["hidden_zone_change", "hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -4864,7 +5612,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["hidden_zone"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff"],
@@ -4881,9 +5631,20 @@
             "rationale": "Counter-Punish konkret als Icebreaker-Strength-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
         ],
+        "effects": [
+          {
+            "kind": "ambush",
+            "scope": "accessed_card",
+            "timing": "on_access",
+            "target": "remote.ambush",
+            "finite": true
+          }
+        ],
         "functionSignals": [
           "access.archives_safe_exception",
-          "access.rnd_reveal_requirement"
+          "access.rnd_reveal_requirement",
+          "access.punish",
+          "remote.ambush"
         ],
         "tacticSignals": [
           "access.archives_safe_exception",
@@ -4891,12 +5652,24 @@
           "access.rnd_reveal_requirement",
           "punish.payoff"
         ],
-        "actionTacticSignals": ["access.punish", "punish.payoff"],
-        "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+        "actionTacticSignals": [
+          "access.punish",
+          "effect:ambush",
+          "effect_scope:accessed_card",
+          "effect_timing:on_access",
+          "punish.payoff"
         ],
-        "costProfile": { "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
+        ],
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",
@@ -4931,7 +5704,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["defensive_tool"],
         "lineSupport": ["corp.remote_scoring"],
         "strategySupportPairs": [
@@ -4960,7 +5735,9 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "credits": 2 },
+        "costProfile": {
+          "credits": 2
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -4992,7 +5769,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["tax_tool", "defensive_tool"],
         "strategyAnchors": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
@@ -5022,8 +5801,14 @@
           "run.corp_server_lock",
           "tax.remote"
         ],
-        "conditions": [{ "kind": "requires_remote_server" }],
-        "costProfile": { "credits": 4 },
+        "conditions": [
+          {
+            "kind": "requires_remote_server"
+          }
+        ],
+        "costProfile": {
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -5051,7 +5836,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["support_tool"],
         "strategyAnchors": ["corp.economy_rez_reserve"],
         "lineSupport": ["corp.economy_rez_reserve"],
@@ -5069,6 +5856,11 @@
             "rationale": "Converts advancement counters into temporary run credits; support only."
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "during_run_trash_advancement_for_run_credits"
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -5083,7 +5875,9 @@
         ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -5101,9 +5895,9 @@
           "install_remote",
           "remove_same_fort_advancement_counters_for_run_credits",
           "rez_card",
-          "tap_source",
           "trash_cost",
-          "trash_on_access"
+          "trash_on_access",
+          "trash_source"
         ]
       }
     },
@@ -5116,7 +5910,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["scoring_tool"],
         "strategyAnchors": ["corp.remote_scoring"],
         "lineSupport": ["corp.remote_scoring"],
@@ -5133,10 +5929,41 @@
             "rationale": "Research agenda difficulty discount supports remote scoring."
           }
         ],
-        "tacticSignals": ["corp.remote_protection"],
-        "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "credits": 4 },
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "scope": "remote",
+            "timing": "persistent",
+            "target": "score.research_difficulty_discount",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "remote.agenda_difficulty_discount",
+          "score.agenda_difficulty_discount",
+          "score.research_difficulty_discount"
+        ],
+        "tacticSignals": [
+          "corp.remote_protection",
+          "remote.agenda_difficulty_discount",
+          "score.agenda_difficulty_discount",
+          "score.research_difficulty_discount"
+        ],
+        "actionTacticSignals": [
+          "corp.remote_protection",
+          "effect:global_modifier",
+          "effect_scope:remote",
+          "effect_timing:persistent"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -5166,7 +5993,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade", "hidden_zone"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["defensive_tool"],
         "strategyAnchors": ["corp.central_stabilize"],
         "lineSupport": ["corp.central_stabilize"],
@@ -5180,11 +6009,32 @@
             "rationale": "Reduces central multiaccess from HQ/R&D and stabilizes central defense."
           }
         ],
-        "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+        "effects": [
+          {
+            "kind": "ambush",
+            "scope": "accessed_card",
+            "timing": "on_access",
+            "target": "remote.ambush",
+            "finite": true
+          }
         ],
-        "costProfile": { "credits": 3 },
+        "functionSignals": ["access.punish", "remote.ambush"],
+        "actionTacticSignals": [
+          "effect:ambush",
+          "effect_scope:accessed_card",
+          "effect_timing:on_access"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
+        ],
+        "costProfile": {
+          "credits": 3
+        },
         "riskTags": [
           "hidden_root",
           "hidden_info_barrier",
@@ -5222,7 +6072,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["asset"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["defensive_tool"],
         "lineSupport": ["corp.remote_scoring"],
         "strategySupportPairs": [
@@ -5235,7 +6087,9 @@
             "rationale": "Run redirect/control supports remote defense but adds no planner or legality behavior. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
         ],
-        "costProfile": { "credits": 3 },
+        "costProfile": {
+          "credits": 3
+        },
         "riskTags": ["install_restriction"],
         "quality": {
           "hintReviewed": true,
@@ -5264,7 +6118,10 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["ambush", "net_damage", "hidden_zone"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1, "damage": 1 },
+        "valueHints": {
+          "remoteRootValue": 1,
+          "damage": 1
+        },
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff"],
@@ -5289,9 +6146,20 @@
             "resource": "net_damage",
             "amount": 1,
             "target": "access.corp_net_damage_ambush"
+          },
+          {
+            "kind": "ambush",
+            "scope": "accessed_card",
+            "timing": "on_access",
+            "target": "remote.ambush",
+            "finite": true
           }
         ],
-        "functionSignals": ["access.corp_net_damage_ambush"],
+        "functionSignals": [
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "remote.ambush"
+        ],
         "tacticSignals": [
           "access.corp_net_damage_ambush",
           "access.punish",
@@ -5300,12 +6168,20 @@
         "actionTacticSignals": [
           "access.punish",
           "damage.payoff.runner",
+          "effect:ambush",
           "effect:damage",
+          "effect_scope:accessed_card",
           "effect_scope:runner",
           "effect_timing:on_access"
         ],
-        "conditions": [{ "kind": "requires_accessed_card" }],
-        "costProfile": { "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ],
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",
@@ -5341,11 +6217,22 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 2, "remoteRootValue": 2 },
+        "valueHints": {
+          "economy": 2,
+          "remoteRootValue": 2
+        },
         "strategyAnchors": ["corp.asset_economy", "corp.economy_rez_reserve"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "corp_main_trash_rezzed_ice_for_credits"
+          }
+        ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -5375,7 +6262,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["scoring_tool"],
         "strategyAnchors": ["corp.remote_scoring"],
         "lineSupport": ["corp.remote_scoring"],
@@ -5392,10 +6281,41 @@
             "rationale": "Black Ops agenda difficulty discount supports remote scoring."
           }
         ],
-        "tacticSignals": ["corp.remote_protection"],
-        "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "credits": 4 },
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "scope": "remote",
+            "timing": "persistent",
+            "target": "score.black_ops_difficulty_discount",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "remote.agenda_difficulty_discount",
+          "score.agenda_difficulty_discount",
+          "score.black_ops_difficulty_discount"
+        ],
+        "tacticSignals": [
+          "corp.remote_protection",
+          "remote.agenda_difficulty_discount",
+          "score.agenda_difficulty_discount",
+          "score.black_ops_difficulty_discount"
+        ],
+        "actionTacticSignals": [
+          "corp.remote_protection",
+          "effect:global_modifier",
+          "effect_scope:remote",
+          "effect_timing:persistent"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -5444,8 +6364,16 @@
         ],
         "functionSignals": ["run.successful_run_grip_reset"],
         "tacticSignals": ["run.successful_run_grip_reset"],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1,
+          "memory": 1
+        },
         "riskTags": ["hidden_zone", "successful_run"],
         "quality": {
           "hintReviewed": true,
@@ -5502,7 +6430,11 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.sentry"],
         "tacticSignals": ["coverage.breaker"],
@@ -5512,7 +6444,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 2, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -5552,7 +6488,11 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.wall"],
         "tacticSignals": ["coverage.breaker"],
@@ -5562,7 +6502,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 6, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 6,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -5603,7 +6547,11 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.wall"],
         "tacticSignals": ["coverage.breaker"],
@@ -5614,10 +6562,18 @@
           "effect_timing:persistent"
         ],
         "conditions": [
-          { "kind": "requires_during_run" },
-          { "kind": "requires_encounter" }
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_encounter"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 7, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 7,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -5662,7 +6618,11 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.wall"],
         "tacticSignals": ["coverage.breaker"],
@@ -5672,7 +6632,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -5759,8 +6723,16 @@
           "effect_scope:runner",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -5821,10 +6793,18 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_rezzed_ice" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_rezzed_ice"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 6, "memory": 2 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 6,
+          "memory": 2
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -5883,8 +6863,16 @@
           "effect_scope:runner",
           "effect_timing:prevention_window"
         ],
-        "conditions": [{ "kind": "requires_damage" }],
-        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_damage"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0,
+          "memory": 1
+        },
         "riskTags": ["damage_window"],
         "quality": {
           "hintReviewed": true,
@@ -5913,7 +6901,11 @@
           "sideEffects": ["random_failure"]
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.sentry"],
         "tacticSignals": ["coverage.breaker"],
@@ -5924,10 +6916,18 @@
           "effect_timing:persistent"
         ],
         "conditions": [
-          { "kind": "requires_during_run" },
-          { "kind": "requires_encounter" }
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_encounter"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 9, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 9,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -5985,7 +6985,11 @@
           "sideEffects": ["stealth_loss"]
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
@@ -5998,7 +7002,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 10, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 10,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6087,8 +7095,16 @@
           "effect_scope:runner",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6179,8 +7195,16 @@
           "effect_timing:persistent",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6218,7 +7242,11 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6267,7 +7295,11 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.sentry"],
         "tacticSignals": ["coverage.breaker"],
@@ -6277,7 +7309,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 9, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 9,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -6342,8 +7378,16 @@
           "effect_scope:runner",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6381,7 +7425,11 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.code_gate"],
         "tacticSignals": ["coverage.breaker"],
@@ -6391,7 +7439,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -6439,8 +7491,16 @@
           "effect_scope:runner",
           "effect_timing:prevention_window"
         ],
-        "conditions": [{ "kind": "requires_damage" }],
-        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_damage"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0,
+          "memory": 1
+        },
         "riskTags": ["damage_window"],
         "quality": {
           "hintReviewed": true,
@@ -6501,8 +7561,16 @@
           "effect_scope:runner",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6593,8 +7661,16 @@
           "effect_timing:persistent",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6665,8 +7741,16 @@
           "effect_scope:runner",
           "effect_timing:successful_run"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6700,7 +7784,11 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          {
+            "kind": "breaker",
+            "scope": "runner",
+            "timing": "persistent"
+          }
         ],
         "functionSignals": ["breaker.wall"],
         "tacticSignals": ["coverage.breaker"],
@@ -6710,7 +7798,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4,
+          "memory": 1
+        },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -6762,6 +7854,46 @@
             "confidence": "medium"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_hq_run_access_four_prohibit_noisy_icebreakers",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "hq",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              },
+              {
+                "kind": "multiaccess",
+                "scope": "hq",
+                "timing": "successful_run",
+                "resource": "cards",
+                "target": "run.additional_access",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.hq", "run.make_run"],
+            "strategySupportPairs": [
+              {
+                "strategyId": "runner.hq_pressure",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_hq_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.hq_multiaccess"],
+                "confidence": "medium"
+              },
+              {
+                "strategyId": "runner.interface_closeout",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_hq_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.hq_multiaccess"],
+                "confidence": "medium"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "future_run_effect",
@@ -6782,13 +7914,17 @@
         ],
         "functionSignals": ["run.make_run", "run.hq"],
         "actionTacticSignals": [
+          "access.hq_multiaccess",
           "effect:future_run_effect",
           "effect:multiaccess",
           "effect_scope:hq",
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "costProfile": { "clicks": 1, "credits": 3 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3
+        },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -6819,6 +7955,21 @@
         "strategicRole": ["payoff_anchor"],
         "strategyAnchors": ["runner.interface_closeout"],
         "lineSupport": ["runner.hq_pressure", "runner.interface_closeout"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_hq_run_replace_access_gain_agenda_point",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "hq",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.hq", "run.make_run"]
+          }
+        ],
         "effects": [
           {
             "kind": "future_run_effect",
@@ -6867,10 +8018,17 @@
           "effect_timing:successful_run"
         ],
         "conditions": [
-          { "kind": "requires_rnd_pressure" },
-          { "kind": "requires_successful_run" }
+          {
+            "kind": "requires_rnd_pressure"
+          },
+          {
+            "kind": "requires_successful_run"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 12 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 12
+        },
         "riskTags": [
           "run",
           "run_success_dependency",
@@ -6904,7 +8062,39 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "event", "draw"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_gain_one_credit_draw_two",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 1,
+                "finite": true
+              },
+              {
+                "kind": "draw",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic",
+              "setup.draw"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -6961,7 +8151,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["hidden_zone_change"],
         "quality": {
           "hintReviewed": true,
@@ -6985,6 +8178,31 @@
         "planRoles": ["pressure_rnd"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_run_expose_approached_ice_before_rez",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.any_server", "run.make_run"],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:on_play_run_expose_approached_ice_before_rez",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -7001,7 +8219,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:on_play_run_with_rez_credit_gain",
+            "purpose": "make_run:on_play_run_expose_approached_ice_before_rez",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
@@ -7020,7 +8238,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -7050,13 +8271,42 @@
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
         "strategicExchangeKinds": ["self_tag"],
-        "actionStrategySupportPairs": [
+        "actionCapabilitySemantics": [
           {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
-            "confidence": "medium"
+            "capabilityKey": "on_play_run_replace_access_trash_rezzed_fort_ice_add_tags",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              },
+              {
+                "kind": "tag",
+                "scope": "runner",
+                "timing": "successful_run",
+                "resource": "tags",
+                "target": "run.successful_run_self_tag",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "risk.self_tag",
+              "run.any_server",
+              "run.make_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
           }
         ],
         "targetProfiles": [
@@ -7065,7 +8315,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:on_play_run_with_free_access_trash",
+            "purpose": "make_run:on_play_run_replace_access_trash_rezzed_fort_ice_add_tags",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
@@ -7129,10 +8379,17 @@
           "tag.source"
         ],
         "conditions": [
-          { "kind": "requires_rnd_pressure" },
-          { "kind": "requires_successful_run" }
+          {
+            "kind": "requires_rnd_pressure"
+          },
+          {
+            "kind": "requires_successful_run"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 4 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4
+        },
         "riskTags": [
           "run",
           "run_success_dependency",
@@ -7169,6 +8426,31 @@
         "planRoles": ["safe_probe_run"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_run_with_post_pass_derez_fully_broken_ice",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.any_server", "run.make_run"],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:on_play_run_with_post_pass_derez_fully_broken_ice",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -7194,7 +8476,7 @@
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "purpose": "make_run:on_play_run_with_success_credit_gain",
+            "purpose": "make_run:on_play_run_with_post_pass_derez_fully_broken_ice",
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
@@ -7252,10 +8534,17 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          { "kind": "requires_encounter" },
-          { "kind": "requires_rezzed_ice" }
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_rezzed_ice"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 2 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "riskTags": ["run", "run_success_dependency"],
         "quality": {
           "hintReviewed": true,
@@ -7286,7 +8575,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "event"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
         "strategicExchangeKinds": ["self_tag"],
         "actionStrategySupportPairs": [
           {
@@ -7295,6 +8586,45 @@
             "roleDetail": "anchor_evidence_tag_source",
             "evidence": ["tactic_signal_anchor:tag.source"],
             "confidence": "medium"
+          }
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_gain_nine_credits_add_tag",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 9,
+                "finite": true
+              },
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "tag.source",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic",
+              "tag.source"
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_tag_source",
+                "evidence": ["tactic_signal_anchor:tag.source"],
+                "confidence": "medium"
+              }
+            ]
           }
         ],
         "effects": [
@@ -7338,7 +8668,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 4 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7361,6 +8694,23 @@
         "planRoles": ["build_rig"],
         "valueHints": {},
         "strategicExchangeKinds": ["self_damage"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_add_bad_publicity_and_core_damage",
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "brain_damage",
+                "target": "damage.core",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["damage.payoff"]
+          }
+        ],
         "effects": [
           {
             "kind": "damage",
@@ -7380,7 +8730,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 5 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 5
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7409,8 +8762,25 @@
         "planRoles": ["pressure_rnd"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 2 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_bad_publicity_from_run_history",
+            "conditions": [
+              {
+                "kind": "requires_successful_run"
+              }
+            ]
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7437,7 +8807,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["event"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -7455,7 +8827,10 @@
         ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7477,6 +8852,11 @@
         "roles": [],
         "planRoles": ["build_rig"],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_expose_up_to_five_same_fort_cards"
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -7489,7 +8869,10 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "clicks": 1, "credits": 3 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7558,10 +8941,17 @@
           "effect_timing:prevention_window"
         ],
         "conditions": [
-          { "kind": "requires_meat_damage" },
-          { "kind": "requires_prevention_window" }
+          {
+            "kind": "requires_meat_damage"
+          },
+          {
+            "kind": "requires_prevention_window"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7592,6 +8982,40 @@
             "confidence": "medium"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_run_with_bad_publicity_aftermath",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.any_server", "run.make_run"],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:on_play_run_with_bad_publicity_aftermath",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "corp.tag_trace_punish",
+                "role": "anchor_evidence",
+                "roleDetail": "anchor_evidence_tag_source",
+                "evidence": ["tactic_signal_anchor:tag.source"],
+                "confidence": "medium"
+              }
+            ]
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -7617,7 +9041,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -7643,10 +9070,20 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_gain_credits_from_runner_trash_history"
+          }
+        ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7715,8 +9152,15 @@
           "effect_scope:installed_program",
           "effect_timing:action"
         ],
-        "conditions": [{ "kind": "requires_installed_program" }],
-        "costProfile": { "clicks": 1, "credits": 4 },
+        "conditions": [
+          {
+            "kind": "requires_installed_program"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7739,7 +9183,15 @@
         "planRoles": ["pressure_rnd"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_run_each_fort_sequence"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7780,7 +9232,10 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 4 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7801,7 +9256,14 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "event"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_mark_next_agenda_access_credit_gain"
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -7829,7 +9291,10 @@
           "effect_scope:runner",
           "effect_timing:on_access"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7859,6 +9324,11 @@
         "strategicRole": ["payoff_anchor"],
         "strategyAnchors": ["runner.interface_closeout"],
         "lineSupport": ["runner.interface_closeout"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_mark_next_agenda_access_point_gain"
+          }
+        ],
         "effects": [
           {
             "kind": "scored_agenda_action",
@@ -7887,7 +9357,10 @@
           "effect_scope:runner",
           "effect_timing:on_access"
         ],
-        "costProfile": { "clicks": 1, "credits": 2 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7913,8 +9386,35 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["event", "run_pressure"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
         "strategyAnchors": ["runner.run_event_tempo"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_run_with_corp_rez_credit_gain",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.any_server", "run.make_run"],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:on_play_run_with_corp_rez_credit_gain",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -7952,7 +9452,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -7976,17 +9479,25 @@
         "planRoles": ["pressure_rnd"],
         "valueHints": {},
         "strategicExchangeKinds": ["self_tag"],
-        "actionStrategySupportPairs": [
+        "actionCapabilitySemantics": [
           {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
-            "confidence": "medium"
+            "capabilityKey": "on_play_trash_last_run_fort_ice_add_tags",
+            "conditions": [
+              {
+                "kind": "requires_successful_run"
+              }
+            ]
           }
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 7 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 7
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8037,6 +9548,46 @@
             "confidence": "medium"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_rd_run_access_four_without_noisy_breakers",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "rnd",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              },
+              {
+                "kind": "multiaccess",
+                "scope": "rnd",
+                "timing": "successful_run",
+                "resource": "cards",
+                "target": "run.additional_access",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.make_run", "run.rnd"],
+            "strategySupportPairs": [
+              {
+                "strategyId": "runner.interface_closeout",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_rnd_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.rnd_multiaccess"],
+                "confidence": "medium"
+              },
+              {
+                "strategyId": "runner.rnd_pressure",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_rnd_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.rnd_multiaccess"],
+                "confidence": "medium"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "future_run_effect",
@@ -8057,13 +9608,17 @@
         ],
         "functionSignals": ["run.make_run", "run.rnd"],
         "actionTacticSignals": [
+          "access.rnd_multiaccess",
           "effect:future_run_effect",
           "effect:multiaccess",
           "effect_scope:rnd",
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "costProfile": { "clicks": 1, "credits": 3 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3
+        },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -8086,6 +9641,11 @@
         "roles": [],
         "planRoles": ["build_rig"],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_derez_last_black_ice_or_bad_publicity"
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -8098,7 +9658,10 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8125,7 +9688,39 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "event", "draw"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_gain_two_credits_draw_one",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 2,
+                "finite": true
+              },
+              {
+                "kind": "draw",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic",
+              "setup.draw"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -8182,7 +9777,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["hidden_zone_change"],
         "quality": {
           "hintReviewed": true,
@@ -8205,6 +9803,31 @@
         "roles": ["event", "run_pressure"],
         "planRoles": ["pressure_rnd"],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_run_with_advertisement_bad_publicity",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.any_server", "run.make_run"],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:on_play_run_with_advertisement_bad_publicity",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -8230,7 +9853,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 2 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -8278,7 +9904,10 @@
         ],
         "tacticSignals": ["damage.payoff"],
         "actionTacticSignals": ["damage.payoff.runner"],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8305,6 +9934,31 @@
         "planRoles": ["pressure_rnd"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "on_play_run_with_damage_prevention_pool",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["run.any_server", "run.make_run"],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:on_play_run_with_damage_prevention_pool",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -8330,7 +9984,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -8356,6 +10013,21 @@
         "strategicRole": ["engine_anchor"],
         "strategyAnchors": ["runner.search.breaker"],
         "lineSupport": ["runner.search.breaker"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "search_install_program",
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "search_install_target",
+                "timing": "activated_ability",
+                "targetType": "program",
+                "purpose": "search_stack_install:search_install_program",
+                "hiddenInfoPolicy": "public_or_controller_known_only"
+              }
+            ]
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -8380,20 +10052,14 @@
             "kind": "search_install_target",
             "timing": "activated_ability",
             "targetType": "program",
-            "purpose": "search_stack_install:runner_main_search_install_program",
-            "hiddenInfoPolicy": "public_or_controller_known_only"
-          },
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "search_install_target",
-            "timing": "activated_ability",
-            "targetType": "program",
-            "purpose": "search_stack_install:during_run_search_install_program",
+            "purpose": "search_stack_install:search_install_program",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "conditions": [{ "kind": "requires_encounter" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8423,18 +10089,15 @@
         "roles": [],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
-        "actionStrategySupportPairs": [
+        "actionCapabilitySemantics": [
           {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "payoff_anchor",
-            "roleDetail": "payoff_anchor_tag_payoff",
-            "evidence": ["tactic_signal_anchor:tag.payoff"],
-            "confidence": "medium"
+            "capabilityKey": "trace_success_cancel_window"
           }
         ],
-        "tacticSignals": ["punish.payoff", "tag.payoff"],
-        "actionTacticSignals": ["punish.payoff", "tag.payoff"],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8446,6 +10109,8 @@
         "requiredMechanics": [
           "abilities",
           "activated",
+          "add_bad_publicity_if_cancelled_trace_has_non_tag_effect",
+          "cancel_successful_trace_effect",
           "credit",
           "install_resource",
           "trash_source"
@@ -8461,7 +10126,41 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "trace_base_link_two",
+            "effects": [
+              {
+                "kind": "base_link",
+                "scope": "runner",
+                "timing": "trace_window",
+                "resource": "link",
+                "target": "trace.base_link",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["defense.trace_defense", "trace.base_link"]
+          },
+          {
+            "capabilityKey": "trace_post_bid_link_plus_one",
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "runner",
+                "timing": "trace_window",
+                "resource": "link",
+                "target": "trace.link_boost",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["defense.trace_defense", "trace.link_boost"]
+          }
+        ],
         "effects": [
           {
             "kind": "base_link",
@@ -8495,7 +10194,10 @@
           "effect_scope:runner",
           "effect_timing:trace_window"
         ],
-        "costProfile": { "clicks": 1, "credits": 2 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8524,7 +10226,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
         "strategyAnchors": ["runner.run_event_tempo"],
         "actionCapacityProfiles": [
           {
@@ -8543,7 +10247,10 @@
         ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "costProfile": { "clicks": 1, "credits": 3 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8585,8 +10292,15 @@
           "effect_scope:runner",
           "effect_timing:prevention_window"
         ],
-        "conditions": [{ "kind": "requires_damage" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_damage"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["damage_window"],
         "quality": {
           "hintReviewed": true,
@@ -8612,7 +10326,26 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "resource"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "pay_and_trash_source_gain_four_credits",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "during_ice_encounter",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 4,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -8644,7 +10377,10 @@
           "effect_timing:action",
           "effect_timing:during_ice_encounter"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8678,7 +10414,9 @@
           "recurring_credit"
         ],
         "planRoles": ["build_rig", "safe_probe_run", "runner_install_hardware"],
-        "valueHints": { "economy": 2 },
+        "valueHints": {
+          "economy": 2
+        },
         "effects": [
           {
             "kind": "hardware_trait",
@@ -8709,6 +10447,15 @@
             "amount": 2,
             "economyMode": "restricted_credit",
             "repeatable": true
+          },
+          {
+            "kind": "counter_economy",
+            "scope": "runner",
+            "timing": "install",
+            "resource": "credits",
+            "target": "economy.hosted_credit_bank",
+            "amount": 2,
+            "economyMode": "bank_load"
           }
         ],
         "functionSignals": [
@@ -8716,21 +10463,31 @@
           "economy.recurring_breaker_credit",
           "setup.deck_exclusive",
           "setup.hand_size",
-          "setup.memory"
+          "setup.memory",
+          "economy.hosted_credit_bank"
         ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
           "economy.card",
+          "effect:counter_economy",
           "effect:global_modifier",
           "effect:hand_size_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
           "effect_scope:hardware",
           "effect_scope:runner",
+          "effect_timing:install",
           "effect_timing:persistent"
         ],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "clicks": 1, "credits": 11 },
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 11
+        },
         "riskTags": ["install_runner", "deck_unique", "restricted_credits"],
         "quality": {
           "hintReviewed": true,
@@ -8783,8 +10540,15 @@
           "effect_scope:runner",
           "effect_timing:prevention_window"
         ],
-        "conditions": [{ "kind": "requires_damage" }],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "conditions": [
+          {
+            "kind": "requires_damage"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "riskTags": ["install_runner", "damage_window"],
         "quality": {
           "hintReviewed": true,
@@ -8817,8 +10581,15 @@
         "functionSignals": ["run.successful_run_grip_reset"],
         "tacticSignals": ["economy.card", "run.successful_run_grip_reset"],
         "actionTacticSignals": ["economy.card"],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["hidden_zone", "successful_run"],
         "quality": {
           "hintReviewed": true,
@@ -8869,8 +10640,15 @@
           "run.successful_run_grip_reset"
         ],
         "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["hidden_zone", "successful_run"],
         "quality": {
           "hintReviewed": true,
@@ -8900,6 +10678,38 @@
         "roles": ["hardware", "deck", "memory"],
         "planRoles": ["build_rig", "safe_probe_run", "runner_install_hardware"],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "trace_base_link_five",
+            "effects": [
+              {
+                "kind": "base_link",
+                "scope": "runner",
+                "timing": "trace_window",
+                "resource": "link",
+                "target": "trace.base_link",
+                "amount": 5,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["defense.trace_defense", "trace.base_link"]
+          },
+          {
+            "capabilityKey": "trace_post_bid_link_plus_one",
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "runner",
+                "timing": "trace_window",
+                "resource": "link",
+                "target": "trace.link_boost",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["defense.trace_defense", "trace.link_boost"]
+          }
+        ],
         "effects": [
           {
             "kind": "hardware_trait",
@@ -8950,8 +10760,15 @@
           "effect_timing:persistent",
           "effect_timing:trace_window"
         ],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "clicks": 1, "credits": 11 },
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 11
+        },
         "riskTags": ["install_runner", "credit_cost", "deck_unique"],
         "quality": {
           "hintReviewed": true,
@@ -9007,20 +10824,35 @@
             "amount": 2,
             "economyMode": "restricted_credit",
             "repeatable": true
+          },
+          {
+            "kind": "counter_economy",
+            "scope": "runner",
+            "timing": "install",
+            "resource": "credits",
+            "target": "economy.hosted_credit_bank",
+            "amount": 2,
+            "economyMode": "bank_load"
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.recurring_breaker_credit"
+          "economy.recurring_breaker_credit",
+          "economy.hosted_credit_bank"
         ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
           "economy.card",
+          "effect:counter_economy",
           "effect:recurring_economy",
           "effect_scope:runner",
+          "effect_timing:install",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 6 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 6
+        },
         "riskTags": ["install_runner", "restricted_credits"],
         "quality": {
           "hintReviewed": true,
@@ -9066,8 +10898,15 @@
           "effect_timing:prevention_window",
           "survival.defense"
         ],
-        "conditions": [{ "kind": "requires_prevention_window" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_prevention_window"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["tag_prevention", "credit_cost", "trash_source"],
         "quality": {
           "hintReviewed": true,
@@ -9179,7 +11018,10 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["resource_trash_if_tagged"],
         "quality": {
           "hintReviewed": true,
@@ -9225,6 +11067,32 @@
             "confidence": "medium"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "hq_access_start_add_two_accesses",
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "runner.hq_pressure",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_hq_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.hq_multiaccess"],
+                "confidence": "medium"
+              },
+              {
+                "strategyId": "runner.interface_closeout",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_hq_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.hq_multiaccess"],
+                "confidence": "medium"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "multiaccess",
@@ -9247,8 +11115,15 @@
           "effect_scope:hq",
           "effect_timing:persistent"
         ],
-        "conditions": [{ "kind": "requires_during_run" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["credit_cost", "tap_source"],
         "quality": {
           "hintReviewed": true,
@@ -9276,7 +11151,26 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "resource"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "pay_and_trash_source_gain_eleven_credits",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "during_ice_encounter",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 11,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -9308,7 +11202,10 @@
           "effect_timing:action",
           "effect_timing:during_ice_encounter"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9355,7 +11252,10 @@
         ],
         "tacticSignals": ["damage.payoff", "economy.card"],
         "actionTacticSignals": ["damage.payoff.runner", "economy.card"],
-        "costProfile": { "clicks": 1, "credits": 8 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 8
+        },
         "riskTags": ["install_runner"],
         "quality": {
           "hintReviewed": true,
@@ -9390,7 +11290,10 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9436,8 +11339,15 @@
         ],
         "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9482,6 +11392,32 @@
             "confidence": "medium"
           }
         ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "rd_access_start_add_two_accesses",
+            "conditions": [
+              {
+                "kind": "requires_during_run"
+              }
+            ],
+            "strategySupportPairs": [
+              {
+                "strategyId": "runner.interface_closeout",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_rnd_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.rnd_multiaccess"],
+                "confidence": "medium"
+              },
+              {
+                "strategyId": "runner.rnd_pressure",
+                "role": "payoff_anchor",
+                "roleDetail": "payoff_anchor_access_rnd_multiaccess",
+                "evidence": ["tactic_signal_anchor:access.rnd_multiaccess"],
+                "confidence": "medium"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "multiaccess",
@@ -9504,8 +11440,15 @@
           "effect_scope:rnd",
           "effect_timing:persistent"
         ],
-        "conditions": [{ "kind": "requires_during_run" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["credit_cost", "tap_source"],
         "quality": {
           "hintReviewed": true,
@@ -9533,7 +11476,41 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "trace_base_link_four",
+            "effects": [
+              {
+                "kind": "base_link",
+                "scope": "runner",
+                "timing": "trace_window",
+                "resource": "link",
+                "target": "trace.base_link",
+                "amount": 4,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["defense.trace_defense", "trace.base_link"]
+          },
+          {
+            "capabilityKey": "trace_post_bid_link_plus_one",
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "runner",
+                "timing": "trace_window",
+                "resource": "link",
+                "target": "trace.link_boost",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["defense.trace_defense", "trace.link_boost"]
+          }
+        ],
         "effects": [
           {
             "kind": "base_link",
@@ -9567,7 +11544,10 @@
           "effect_scope:runner",
           "effect_timing:trace_window"
         ],
-        "costProfile": { "clicks": 1, "credits": 4 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9598,6 +11578,16 @@
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "during_run_trash_source_pass_ap_ice",
+            "conditions": [
+              {
+                "kind": "requires_encounter"
+              }
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "global_modifier",
@@ -9612,8 +11602,15 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "conditions": [{ "kind": "requires_encounter" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["resource_trash_if_tagged"],
         "quality": {
           "hintReviewed": true,
@@ -9643,7 +11640,26 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "resource"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 3 },
+        "valueHints": {
+          "economy": 3
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "runner_main_add_three_hosted_credits",
+            "effects": [
+              {
+                "kind": "counter_economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.hosted_credit_bank",
+                "amount": 3,
+                "economyMode": "bank_load"
+              }
+            ],
+            "functionSignals": ["economy.hosted_credit_bank"]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -9674,6 +11690,25 @@
             "target": "economy.hosted_credit_bank",
             "amount": 3,
             "economyMode": "bank_load"
+          },
+          {
+            "kind": "counter_economy",
+            "scope": "runner",
+            "timing": "start_of_turn",
+            "resource": "credits",
+            "target": "economy.installment_credit",
+            "amount": 1,
+            "economyMode": "bank_cashout",
+            "repeatable": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "start_of_turn",
+            "resource": "credits",
+            "target": "economy.turn_start_credit",
+            "amount": 1,
+            "repeatable": true
           }
         ],
         "functionSignals": [
@@ -9682,7 +11717,9 @@
           "economy.counter",
           "economy.generic",
           "economy.temporary_resource_bank",
-          "economy.hosted_credit_bank"
+          "economy.hosted_credit_bank",
+          "economy.installment_credit",
+          "economy.turn_start_credit"
         ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
@@ -9691,10 +11728,21 @@
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action",
-          "effect_timing:persistent"
+          "effect_timing:persistent",
+          "effect_timing:start_of_turn"
         ],
-        "conditions": [{ "kind": "requires_start_of_turn" }],
-        "costProfile": { "clicks": 1, "credits": 1 },
+        "conditions": [
+          {
+            "kind": "requires_start_of_turn"
+          },
+          {
+            "kind": "requires_credit_pool"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9758,27 +11806,46 @@
             "amount": 1,
             "economyMode": "restricted_credit",
             "repeatable": true
+          },
+          {
+            "kind": "counter_economy",
+            "scope": "runner",
+            "timing": "install",
+            "resource": "credits",
+            "target": "economy.hosted_credit_bank",
+            "amount": 1,
+            "economyMode": "bank_load"
           }
         ],
         "functionSignals": [
           "economy.recurring",
           "setup.deck_exclusive",
           "setup.hand_size",
-          "setup.memory"
+          "setup.memory",
+          "economy.hosted_credit_bank"
         ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
           "economy.card",
+          "effect:counter_economy",
           "effect:global_modifier",
           "effect:hand_size_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
           "effect_scope:hardware",
           "effect_scope:runner",
+          "effect_timing:install",
           "effect_timing:persistent"
         ],
-        "conditions": [{ "kind": "requires_installed_ice" }],
-        "costProfile": { "clicks": 1, "credits": 5 },
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 5
+        },
         "riskTags": ["install_runner", "deck_unique", "restricted_credits"],
         "quality": {
           "hintReviewed": true,
@@ -9810,7 +11877,41 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "resource"],
         "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "valueHints": {
+          "economy": 1
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "pay_three_trash_source_gain_six",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "during_ice_encounter",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 6,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          },
+          {
+            "capabilityKey": "trash_source_gain_two_credits",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "during_ice_encounter",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["economy.burst_credit", "economy.generic"]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -9858,7 +11959,10 @@
           "effect_timing:action",
           "effect_timing:during_ice_encounter"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9958,8 +12062,15 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "conditions": [{ "kind": "requires_prevention_window" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_prevention_window"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9981,6 +12092,23 @@
         "roles": [],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "trace_post_bid_trash_source_link_plus_three",
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "runner",
+                "timing": "trace_window",
+                "resource": "link",
+                "target": "trace.link_boost",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": ["defense.trace_defense", "trace.link_boost"]
+          }
+        ],
         "effects": [
           {
             "kind": "link",
@@ -9998,7 +12126,10 @@
           "effect_scope:runner",
           "effect_timing:trace_window"
         ],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,

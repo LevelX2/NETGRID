@@ -45,7 +45,9 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey("on_play_run_with_rez_prohibition"),
+        capabilityKey: capabilityKey(
+          "on_play_hq_run_replace_access_gain_agenda_point",
+        ),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",

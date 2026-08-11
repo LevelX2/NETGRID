@@ -387,12 +387,16 @@ export function createCorpZoneRuntimeHosts(
     amount: number,
   ): {
     amount: number;
-    counterType: Extract<CounterType, "militech" | "breaker_strength_penalty">;
+    counterType: Extract<
+      CounterType,
+      "militech" | "pattel" | "breaker_strength_penalty"
+    >;
     countersAfter: number;
     publicPayload: Record<string, string | number | boolean>;
   } {
     if (
       counterType !== "militech" &&
+      counterType !== "pattel" &&
       counterType !== "breaker_strength_penalty"
     )
       throw new Error("Dieser Icebreaker-Counter-Typ wird nicht unterstuetzt.");

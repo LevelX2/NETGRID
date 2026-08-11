@@ -144,7 +144,10 @@ export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
 
 export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
   kind: "add_counter_to_all_installed_runner_icebreakers";
-  counterType: Extract<CounterType, "militech" | "breaker_strength_penalty">;
+  counterType: Extract<
+    CounterType,
+    "militech" | "pattel" | "breaker_strength_penalty"
+  >;
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };
@@ -307,8 +310,9 @@ export type FreeRezInstalledIceWithCountersEffectImplementation = {
 
 export type ReplaceFortCardsFromHqEffectImplementation = {
   kind: "replace_source_fort_cards_from_hq";
-  include: "root_and_ice";
+  include: "root";
   installCost: "free";
+  rezTiming: "after_runner_passed_last_ice_on_source_fort";
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 

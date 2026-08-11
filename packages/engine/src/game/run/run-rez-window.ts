@@ -208,9 +208,12 @@ function rootRezLifecycleIsSolvable(
   const lifecycle = cardImplementationForDefinitionId(definition.id)?.lifecycle
     ?.on_rez;
   if (
-    !lifecycle?.some(
-      (effect) => effect.kind === "replace_source_fort_cards_from_hq",
-    )
+    !lifecycle?.some((effect) => {
+      if (effect.kind !== "replace_source_fort_cards_from_hq") return false;
+      if (effect.rezTiming !== "after_runner_passed_last_ice_on_source_fort")
+        throw new Error("Die Fort-Ersatzkarte hat kein gültiges Rez-Timing.");
+      return true;
+    })
   )
     return true;
   const run = host.state.run;

@@ -1792,13 +1792,20 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       "onr_proteus_137_death-from-above",
     );
     expect(deathState.corp.archives).toEqual(
-      expect.arrayContaining([assetId, upgradeId, iceId]),
+      expect.arrayContaining([assetId, upgradeId]),
     );
+    expect(deathState.corp.archives).not.toContain(iceId);
+    expect(
+      deathState.corp.servers.find((server) => server.id === "remote_1")?.ice,
+    ).toContain(iceId);
     expect(deathState.cardInstances[assetId]?.faceup).toBe(true);
     expect(deathState.cardInstances[upgradeId]?.faceup).toBe(true);
-    expect(deathState.cardInstances[iceId]?.faceup).toBe(true);
+    expect(deathState.cardInstances[iceId]?.zone).toMatchObject({
+      zone: "serverIce",
+      serverId: "remote_1",
+    });
     expect(deathState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      trashedCount: 3,
+      trashedCount: 2,
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_137_death-from-above",
       sourceTrashed: true,
