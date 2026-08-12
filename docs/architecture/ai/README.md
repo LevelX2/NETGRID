@@ -4,22 +4,26 @@ Stand: 2026-08-12
 
 Dieser Ordner enthält ausschließlich aktuell benötigte Architektur- und Referenzverträge der NETGRID-KI. Abgeschlossene Implementierungs-, Replay-, Remediation-, Audit-, Cutover- und Match-Prozessdokumente gehören nicht in den aktiven Architekturbestand. Git bleibt die Historie.
 
+## Benennung
+
+Lebende Current-State-Dokumente verwenden kurze, versionslose Dateinamen nach dem Muster `<fachlicher-gegenstand>-<dokumenttyp>.md`. Der Ordner `docs/architecture/ai/` liefert den AI-Kontext; ein zusätzliches `ai-`-Präfix ist deshalb redundant. Datum, Version und Reifegrad stehen im Dokument selbst und in der Git-Historie, nicht im Dateinamen.
+
 ## Führende Architektur
 
-1. `ai-program-logic-change-compass.md` – verbindliches Agenten-Konzentrat vor Änderungen an produktiver KI-Programmlogik.
-2. `ki-zielbild-metaebene-2026-08-02-v6.md` – führendes allgemeines KI-Zielbild und Current-State-Modell.
-3. `ai-plan-layer-target-state-wip.md` – detaillierter produktiver Plan-first-, Scheduler-, Ownership- und Ausführungsvertrag.
+1. `change-compass.md` – verbindliches Agenten-Konzentrat vor Änderungen an produktiver KI-Programmlogik.
+2. `target-architecture.md` – führendes allgemeines KI-Zielbild und Current-State-Modell.
+3. `planning-architecture.md` – detaillierter produktiver Plan-first-, Scheduler-, Ownership- und Ausführungsvertrag.
 
 Diese drei Dokumente bilden den führenden Architekturverbund. Bei Widersprüchen oder Änderungen am gemeinsamen Rahmen sind sie gemeinsam zu prüfen.
 
 ## Aktuelle Detail- und Referenzverträge
 
-- `ai-turn-and-campaign-planner-concept-2026-07-29.md` – umgesetzter Detailvertrag des Zug- und Kampagnenplaners.
-- `ai-controller-spec.md` – Controller-, LegalAction- und Engine-Autoritätsgrenze.
-- `ai-decision-trace-contract-2026-05-22.md` – lokaler Trace-, Redaction- und Debugvertrag.
-- `ai-simulation-test-matrix.md` – aktuelle Evidenz- und Simulationsmatrix.
-- `taktiksignale-strategieanker-guide-2026-06-02-v3.md` – Fachreferenz für Taktiksignale, Strategieanker, TargetProfiles, Conditions und Constraints.
-- `ai-hints-structure-decision-2026-05-15.md` – weiterhin gültige Strukturentscheidung für AI-Hints.
+- `turn-campaign-planner.md` – umgesetzter Detailvertrag des Zug- und Kampagnenplaners.
+- `controller-contract.md` – Controller-, LegalAction- und Engine-Autoritätsgrenze.
+- `decision-trace-contract.md` – lokaler Trace-, Redaction- und Debugvertrag.
+- `simulation-test-matrix.md` – aktuelle Evidenz- und Simulationsmatrix.
+- `strategy-signals-guide.md` – Fachreferenz für Taktiksignale, Strategieanker, TargetProfiles, Conditions und Constraints.
+- `hint-architecture.md` – weiterhin gültige Strukturentscheidung für AI-Hints.
 
 ## Retention-Regel
 

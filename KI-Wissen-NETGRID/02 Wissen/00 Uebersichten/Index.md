@@ -1,139 +1,72 @@
 # Index
 
+Stand: 2026-08-12
+
 ## Einstieg
 
 - [[Projektueberblick]]: Zielbild, Scope und Architekturgrundsätze.
-- [[Aktueller Projektstatus]]: verdichteter Ist-Stand, aktive Strukturarbeit
-  und offene Risiken.
-- [[Quellenlage und Aktualitaet]]: vorhandene und fehlende Quellen.
-- [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]:
-  wiki-first Workflow und Rückführung belastbarer Erkenntnisse.
-- `docs/codex/CODEX_STATUS.md`: detaillierter Release-, Gate- und
-  Implementierungsstand.
+- [[Aktueller Projektstatus]]: verdichteter aktueller Produkt- und Implementierungsstand.
+- `docs/codex/CODEX_STATUS.md`: kompakter technischer Current-State-Einstieg.
+- `docs/README.md`: Struktur und Retention der Projektdokumentation.
 
-## Führende Planung
+## Planung und Arbeit
 
-- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`:
-  konsolidierte Release- und Produktroadmap.
-- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`:
-  langfristige private, Internet-, Public- und Endprodukt-Gates.
-- `docs/activities/`: operatives Board für kleine Findings, Fixes und
-  Nacharbeiten (`inbox`, `in-progress`, `done`).
-- `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`:
-  verbindliche Current-State-Retention für die Version-0-Phase.
+- `docs/activities/inbox/`: offene kleine Findings und Nacharbeiten.
+- `docs/activities/in-progress/`: aktuell beanspruchte Pakete.
+- `docs/decisions/product-version-and-build-identification-2026-07-17.md`: Produktreife `V0.9` und Git-basierte Buildkennung.
+- `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`: verbindliches Current-State-Prinzip.
+
+Es gibt derzeit keine dauerhaft führende monolithische Release-Roadmap. Größere neue Vorhaben erhalten bei Bedarf einen explizit aktuellen Scope-/Releaseplan; nach Abschluss wird historische Release-Evidence entfernt.
 
 ## Architektur
 
-- Engine-Grundsätze: `packages/engine/AGENTS.md` und
-  `docs/architecture/ability-engine/README.md`.
+- Engine-Grundsätze: `packages/engine/AGENTS.md`.
+- Engine-Current-State: `docs/architecture/engine/README.md`.
+- Kanonische CardSpec- und Registry-Architektur:
+  `docs/architecture/central-card-specification-and-registry-target-state-2026-08-09.md`.
 - AI-Current-State: `docs/architecture/ai/README.md`.
+- KI-Änderungs-Preflight: [[../Architektur/KI-Aenderungen Architektur-Preflight]].
 - Card-Rule-Text und Symbole:
   `docs/architecture/card-rules/card-rule-text-formatting-spec.md`.
 - Lokale Deckbibliothek:
   `docs/architecture/deck-library/local-file-deck-library-2026-05-07.md`.
-- Passwort-Accounts, persönliche Server-Decks und Standard-Deck-Kuration:
-  `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`.
-- Private Account-Matchstatistik mit sicherer Teilnehmerbindung,
-  Ergebnisledger und Retention-Vertrag:
-  `docs/releases/v2/account-match-statistics-final-review-2026-07-19.md`
-  (Quellplan: `docs/releases/v2/account-match-statistics-plan-2026-07-19.md`).
-- Öffentliche Matches, Hidden-Info-sichere Live-Zuschauer und terminale
-  Full-Information-Lern-Replays:
-  `docs/reviews/public-match-spectator-replay-final-review-2026-07-20.md`
-  (Prozess:
-  `docs/architecture/public-match-spectator-replay-process-2026-07-20.md`).
-- Globale öffentliche Spieleübersicht, accountgebundene persönliche
-  Spielhistorie und persistierte terminale Ergebnis-Snapshots:
-  `docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`
-  (Prozess:
-  `docs/architecture/public-game-directory-and-personal-history-process-2026-07-20.md`).
 - Wiederverwendbare Funktionsnamen:
   [[../Architektur/Abstrakte Funktionsnamen und Wiederverwendung]].
-- Projektweiter Cleanup:
-  `docs/architecture/current-state-project-cleanup-process-2026-07-10.md`.
 
 ## Karten und Mechaniken
 
-- Aktive Kartendaten: `data/cards/`.
-- Aktive Supportmanifeste: `data/manifests/`.
-- Aktive Szenarien: `data/scenarios/`.
-- Classic-Endstand:
-  `docs/releases/classic/classic-silent-impact-v22b-extension-review-2026-07-11.md`
-  – 54/54 Karten
-  engine-/human-playable und technisch AI-supported.
-- Proteus-Endstand: 154/154 Karten engine-/human-playable. Die
-  AI-Reconciliation qualifiziert alle 114 Karten der vier Pilotdecks über elf
-  Familien-Szenarien; vier Snapshots sind im AI-Deckpool 1.1.0 für Fixed- und
-  Seeded-Random-Auswahl freigegeben. Führend sind
-  `data/ai/card-set-ai-readiness-v1.json` und
-  `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`.
-- Originalset-/Releasehistorie liegt unter `docs/releases/v1/`; sie ist keine
-  zweite aktuelle Runtimequelle.
-- Node-Zugriffseffekte und Rez-Default:
-  `docs/reviews/engine/node-access-rez-contract-final-review-2026-07-15.md`.
+- Kanonische kartenspezifische Autoren- und Projektionsschicht: `@netgrid/cards`.
+- Versionierte Kartendaten und Projektartefakte: `data/cards/`, `data/manifests/`, `data/scenarios/`.
+- Engine-Registry und Coverage konsumieren die mechanischen CardSpec-Projektionen über `@netgrid/cards/engine`.
+- Originalset, Classic und Proteus sind technisch spielbar; technische Unterstützung ist von qualitativer KI-Spielstärke zu trennen.
 
 ## KI
 
-- Die Semantic Runtime ist der einzige Live-Entscheidungsweg.
-- Das führende allgemeine KI-Zielbild liegt in
-  `docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md`. Es verbindet
-  Kartensemantik, kompositionsabhängige DeckDoctrine, Strategic Intent,
-  Planportfolio, Zugplanung und Engine-Ausführung; die Metaebene v5 ist nur
-  noch historische Evidence.
-- [[../Architektur/KI-Aenderungen Architektur-Preflight]]:
-  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch. Das
-  vollständig zu lesende Agenten-Konzentrat liegt in
-  `docs/architecture/ai/ai-program-logic-change-compass.md`.
-- Das führende WIP-Zielbild für eine autoritative modulare
-  Plan-first-Auswahl mit gemeinsamem Planrahmen, getrennten
-  Runner-/Corp-Schedulern und verfeinerbaren Planmodulen liegt in
-  `docs/architecture/ai/ai-plan-layer-target-state-wip.md`. Der gemeinsame
-  TurnPlanner-, Commitment- und Kampagnenvertrag ist für beide Seiten
-  produktiv umgesetzt. Version 1.2 enthält den Current-State-Abgleich aus den
-  jüngsten Spielaudits und generischen Fähigkeitsmigrationen; führende
-  Abnahme-Evidence ist
-  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
+- Die produktive KI ist Plan-first; die Engine bleibt alleinige Regelautorität.
+- Führendes allgemeines Zielbild: `docs/architecture/ai/target-architecture.md`.
+- Detaillierter Planvertrag: `docs/architecture/ai/planning-architecture.md`.
+- Zug- und Kampagnenplaner: `docs/architecture/ai/turn-campaign-planner.md`.
+- Verbindlicher Änderungskompass: `docs/architecture/ai/change-compass.md`.
 - Live-API: `@netgrid/ai`; Simulation: `@netgrid/ai/simulation`.
-- Current-State-Cleanup:
-  - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
-  - `docs/reviews/ai/ai-current-state-cleanup-final-review-2026-07-09.md`
-- Historischer AI020-bis-AI212-Erkenntniswert:
-  `docs/reviews/ai/ai-historical-process-rollup-2026-07-10.md`.
-- Proteus-Reconciliation:
-  - `docs/architecture/ai/proteus-ai-release-reconciliation-plan-2026-07-09.md`
-  - `docs/architecture/ai/proteus-ai-release-automation-process-2026-07-09.md`
-  - `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`
-- Aktive Gates:
-  - `corepack pnpm check:ai`
-  - `corepack pnpm check:ai-deck-doctrine-strategy`
-  - `corepack pnpm check:proteus-ai-readiness`
+
+Aktive Gates umfassen je nach Scope insbesondere:
+
+- `corepack pnpm check:ai`
+- `corepack pnpm check:ai-deck-doctrine-strategy`
+- `corepack pnpm check:proteus-ai-readiness`
+- `corepack pnpm check:engine-source-structure`
 
 ## Betrieb und Qualität
 
 - Lokaler Start: `scripts/start-netgrid.ps1`.
-- Lokaler Transfer: `docs/runbooks/netgrid-local-transfer.md` sowie
-  `scripts/export-local-transfer.ps1` und `scripts/import-local-transfer.ps1`.
-- SQLite-Wartung: authentifizierte Maintenance-Control-Plane unter
-  `/maintenance`, `docs/runbooks/maintenance-control-plane.md` sowie
-  `storage:inspect`, `storage:backup`, `storage:restore` und
-  `storage:optimize`. Speicher- und Performance-Endstand:
-  `docs/reviews/architecture/delta-action-persistence-final-review-2026-07-19.md`
-  sowie der vorgelagerte Bestands-/Optimize-Stand
-  `docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
-- Geschlossene Account-Alpha: `docs/runbooks/account-alpha-operations.md` für
-  Admin-Bootstrap, Invite/Reset, Backup/Restore und Deckquote.
+- Lokaler Transfer: `docs/runbooks/netgrid-local-transfer.md`.
+- SQLite-Wartung und laufende Matchanalyse: `docs/runbooks/maintenance-control-plane.md`.
+- Account-Alpha-Betrieb: `docs/runbooks/account-alpha-operations.md`.
 - Browser-E2E: `scripts/run-e2e.mjs` und `tests/e2e/`.
-- Aktueller Playtest-Fund mit Chronicle-, Access-, Window- und Auto-End-
-  Härtung:
-  `docs/reviews/current-game-findings-remediation-final-review-2026-07-11.md`.
 - Monatslogs: [[../../../03 Betrieb/Log]].
 
 ## Dokumentationsregel
 
-- Aktueller Status, aktuelle Architektur und aktuelle Gates stehen in den oben
-  genannten führenden Artefakten.
-- Abgeschlossene Prozessketten werden verdichtet; Git-Historie ersetzt
-  versionierte Rohreport-Sammlungen.
-- Umfangreiche Benchmarks, Traces und lokale Daten gehören nach `data/local/`.
-- Historische Release-Reviews belegen einen damaligen Abschluss, dürfen aber
-  aktuelle Runtime-, Kartenpool- oder KI-Freigaben nicht überschreiben.
+- Current State steht in aktuellen Architektur-, Status-, Entscheidungs-, Runbook- und laufenden Activity-Artefakten.
+- Abgeschlossene Releaseketten, Prozesse, Einzelreviews und Rohreports werden nach Referenzprüfung entfernt; Git-Historie ersetzt ein Dokumentationsarchiv.
+- Umfangreiche Benchmarks, Traces und lokale Analyseausgaben gehören nicht dauerhaft nach `docs/`.
