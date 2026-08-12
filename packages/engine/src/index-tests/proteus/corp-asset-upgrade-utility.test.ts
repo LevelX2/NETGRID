@@ -622,9 +622,8 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       "remote_1",
       true,
     );
-    paidWindowState.cardInstances[
-      paidWindowGovernment
-    ]!.advancementCounters = 1;
+    paidWindowState.cardInstances[paidWindowGovernment]!.advancementCounters =
+      1;
     paidWindowState.activeSide = "runner";
     paidWindowState.phase = "runner_action_phase";
     paidWindowState.timingPoint = "runner_action.main";

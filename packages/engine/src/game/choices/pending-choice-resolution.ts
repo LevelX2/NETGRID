@@ -601,11 +601,7 @@ export function resolvePendingChoice(
       "card_implementation.current_access_free_trash:",
     )
   ) {
-    resolveMercenaryCurrentAccessTrashChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
+    resolveMercenaryCurrentAccessTrashChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -722,7 +718,9 @@ export function resolvePendingChoice(
   }
   if (
     state.pendingChoice.source.startsWith("p3_54.delayed_success") ||
-    state.pendingChoice.source.startsWith("classic.indiscriminate_response_team:")
+    state.pendingChoice.source.startsWith(
+      "classic.indiscriminate_response_team:",
+    )
   ) {
     resolveSuccessfulRunInterventionChoiceInRunModule(
       successfulRunInterventionHost(state),

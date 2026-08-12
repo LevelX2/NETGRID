@@ -158,10 +158,7 @@ export function validateAiHintActionCapabilitySemanticsContract(
           (signal) => typeof signal !== "string" || signal.length === 0,
         ))
     )
-      addError(
-        `${entryPath}.functionSignals`,
-        "Expected non-empty strings.",
-      );
+      addError(`${entryPath}.functionSignals`, "Expected non-empty strings.");
   });
 
   return {

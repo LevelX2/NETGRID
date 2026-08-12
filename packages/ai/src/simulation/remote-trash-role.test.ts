@@ -46,7 +46,6 @@ describe("remoteTrashRoleForVisibleCard", () => {
         counters: { bit: 1 },
       }),
     ).toBe("economy");
-
   });
 
   it("matches remote trash roles by bounded role terms", () => {

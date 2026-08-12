@@ -75,9 +75,10 @@ export function validateGeneratedArtifact(
       throw new Error(
         `invalid_card_spec_ai_hint_artifact_hint:${record.cardId}:${ownerValidation.errors[0]?.path ?? "$"}`,
       );
-    const capabilityValidation = validateAiHintActionCapabilitySemanticsContract(
-      record.hint.actionCapabilitySemantics,
-    );
+    const capabilityValidation =
+      validateAiHintActionCapabilitySemanticsContract(
+        record.hint.actionCapabilitySemantics,
+      );
     if (!capabilityValidation.valid)
       throw new Error(
         `invalid_card_spec_ai_hint_artifact_hint:${record.cardId}:${capabilityValidation.errors[0]?.path ?? "$"}`,

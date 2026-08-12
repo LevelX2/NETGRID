@@ -95,8 +95,9 @@ describe("generic CardSpec AI-hint repair block", () => {
     const ordinaryRun = structuredClone(
       planningEntry("onr_v1_096_kilroy-was-here"),
     );
-    (ordinaryRun.planning.engine.abilities![0]!.effects[0] as any).freeTrashAccessZones =
-      [];
+    (
+      ordinaryRun.planning.engine.abilities![0]!.effects[0] as any
+    ).freeTrashAccessZones = [];
     const ordinaryRunHint = deriveCardSpecAiHint(ordinaryRun as never);
     expect(ordinaryRunHint.effects).not.toContainEqual(
       expect.objectContaining({ target: "access.free_trash" }),

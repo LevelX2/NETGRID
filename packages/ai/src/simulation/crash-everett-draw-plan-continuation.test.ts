@@ -44,8 +44,7 @@ describe("Crash Everett draw-plan continuation", () => {
       "runner",
       getLegalActions(state, "runner").find(
         (action) =>
-          action.type === "install_card" &&
-          action.payload?.cardId === crashId,
+          action.type === "install_card" && action.payload?.cardId === crashId,
       ),
     );
 

@@ -490,17 +490,17 @@ function hunterTraceTagIce(instanceId: string): VisibleCard {
     strength: 5,
   };
   return withEffectiveRunQuote(ice, {
-      effectiveStrength: 5,
-      subroutines: [
-        {
-          id: `${instanceId}_trace`,
-          type: "initiate_trace",
-          sourceDefinitionId: "onr_v1_249_hunter",
-          sourceTitle: "Hunter",
-          traceLimit: 5,
-          traceSuccessEffect: { type: "add_tag", amount: 1 },
-        },
-      ],
+    effectiveStrength: 5,
+    subroutines: [
+      {
+        id: `${instanceId}_trace`,
+        type: "initiate_trace",
+        sourceDefinitionId: "onr_v1_249_hunter",
+        sourceTitle: "Hunter",
+        traceLimit: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
+      },
+    ],
   });
 }
 
@@ -519,25 +519,25 @@ function traceEffectIce(
     strength: 5,
   };
   return withEffectiveRunQuote(ice, {
-      effectiveStrength: 5,
-      subroutines: [
-        {
-          id: `${instanceId}_trace`,
-          type: "initiate_trace",
-          sourceDefinitionId: "test_visible_trace_effect_ice",
-          sourceTitle: "Trace Risk ICE",
-          traceLimit: 5,
-          traceSuccessEffect: effect,
-          ...(effect.type === "end_run_and_run_lock" ||
-          effect.type === "end_run_trash_program_and_run_lock"
-            ? {
-                unbrokenRunEffect: {
-                  createsRunLockOrActionTax: Math.max(1, effect.amount),
-                },
-              }
-            : {}),
-        },
-      ],
+    effectiveStrength: 5,
+    subroutines: [
+      {
+        id: `${instanceId}_trace`,
+        type: "initiate_trace",
+        sourceDefinitionId: "test_visible_trace_effect_ice",
+        sourceTitle: "Trace Risk ICE",
+        traceLimit: 5,
+        traceSuccessEffect: effect,
+        ...(effect.type === "end_run_and_run_lock" ||
+        effect.type === "end_run_trash_program_and_run_lock"
+          ? {
+              unbrokenRunEffect: {
+                createsRunLockOrActionTax: Math.max(1, effect.amount),
+              },
+            }
+          : {}),
+      },
+    ],
   });
 }
 

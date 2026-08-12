@@ -580,15 +580,17 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         .servers.find((server) => server.id === "remote_1")
         ?.ice.find((ice) => ice.instanceId === tagIce)?.effectiveRunQuote
         ?.subroutines ?? [];
-    expect(effectiveSubroutines.slice(0, 3).map((subroutine) => subroutine.type))
-      .toEqual(["give_runner_tag", "give_runner_tag", "end_the_run"]);
+    expect(
+      effectiveSubroutines.slice(0, 3).map((subroutine) => subroutine.type),
+    ).toEqual(["give_runner_tag", "give_runner_tag", "end_the_run"]);
     const continueAction = mustAction(
       state,
       "runner",
       (candidate) => candidate.type === "continue_run",
     );
-    expect(String(continueAction.payload?.encounterSubroutineIds).split(","))
-      .toEqual(effectiveSubroutines.map((subroutine) => subroutine.id));
+    expect(
+      String(continueAction.payload?.encounterSubroutineIds).split(","),
+    ).toEqual(effectiveSubroutines.map((subroutine) => subroutine.id));
   });
 
   it("keeps Lisa Blight subroutine copies run-scoped and rejects stale duplicate targets", () => {

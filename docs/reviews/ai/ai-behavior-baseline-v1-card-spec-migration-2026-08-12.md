@@ -18,65 +18,65 @@ Generated: 2026-08-12T08:46:03.765Z
 Accepted: yes
 Hard failures: none
 
-| Metric | Value |
-| --- | ---: |
-| illegalActions | 0 |
-| replayFailures | 0 |
-| actionLimitGames | 0 |
-| fallbackActions | 0 |
-| timeoutActions | 0 |
-| runtimeErrors | 0 |
-| classifiedRuntimeFailures | 0 |
-| unclassifiedRuntimeFailures | 0 |
-| classifiedActionLimitGames | 0 |
-| unclassifiedActionLimitGames | 0 |
-| hiddenInfoFindings | 0 |
-| noLegalActionFailures | 0 |
-| redactionSafe | yes |
+| Metric                       | Value |
+| ---------------------------- | ----: |
+| illegalActions               |     0 |
+| replayFailures               |     0 |
+| actionLimitGames             |     0 |
+| fallbackActions              |     0 |
+| timeoutActions               |     0 |
+| runtimeErrors                |     0 |
+| classifiedRuntimeFailures    |     0 |
+| unclassifiedRuntimeFailures  |     0 |
+| classifiedActionLimitGames   |     0 |
+| unclassifiedActionLimitGames |     0 |
+| hiddenInfoFindings           |     0 |
+| noLegalActionFailures        |     0 |
+| redactionSafe                |   yes |
 
 ### Runtime failure classifications
 
 | Code | Count |
-| --- | ---: |
-| none | 0 |
+| ---- | ----: |
+| none |     0 |
 
 | Owner | Count |
-| --- | ---: |
-| none | 0 |
+| ----- | ----: |
+| none  |     0 |
 
 ### Action-limit classifications
 
 | Slot | Seed | Classified | Last owner | Last plan | Last step | No-progress cluster | No-progress subcluster |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| none | none | yes | none | none | none | none | none |
+| ---- | ---- | ---------- | ---------- | --------- | --------- | ------------------- | ---------------------- |
+| none | none | yes        | none       | none      | none      | none                | none                   |
 
 ## Behavioural metrics
 
-| Metric | Value |
-| --- | ---: |
-| Missed score window rate | 0.030 |
-| Advanced remote contest skip rate | 0.802 |
-| Plan conversion rate | 0.680 |
-| Strategic no-progress repeats / 100 decisions | 3.429 |
-| Clearly dominated plan choices / 100 decisions | 0 |
-| Trace findings / 100 decisions | 0.981 |
-| Action-capacity use rate | n/a |
-| Action-capacity plan conversion rate | n/a |
-| Action-capacity expiration rate | n/a |
-| Action-capacity misconversion rate | n/a |
-| Premature Runner end turns / 100 decisions | 0 |
-| Redundant low-value Runner persistent install rate | n/a |
+| Metric                                             | Value |
+| -------------------------------------------------- | ----: |
+| Missed score window rate                           | 0.030 |
+| Advanced remote contest skip rate                  | 0.802 |
+| Plan conversion rate                               | 0.680 |
+| Strategic no-progress repeats / 100 decisions      | 3.429 |
+| Clearly dominated plan choices / 100 decisions     |     0 |
+| Trace findings / 100 decisions                     | 0.981 |
+| Action-capacity use rate                           |   n/a |
+| Action-capacity plan conversion rate               |   n/a |
+| Action-capacity expiration rate                    |   n/a |
+| Action-capacity misconversion rate                 |   n/a |
+| Premature Runner end turns / 100 decisions         |     0 |
+| Redundant low-value Runner persistent install rate |   n/a |
 
 ## Deck slots
 
-| Slot | Runner | Corp | Games | Decisions | Missed score rate | Remote contest skip rate | Plan conversion rate | No-progress / 100 | Dominated / 100 | Limits |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| progression_tuning_origin_rig_vs_tax | rig_economy_pressure | remote_scoring | 10 | 1642 | 0.111 | 0.940 | 0.742 | 2.862 | 0 | 0 |
-| progression_tuning_origin_pressure_vs_tax | event_pressure | remote_scoring | 10 | 1637 | 0.000 | 0.818 | 0.770 | 2.627 | 0 | 0 |
-| snapshot_holdout_origin_pressure_vs_tag_ops | event_pressure | tag_punish | 10 | 1889 | 0.000 | 0.571 | 0.747 | 2.276 | 0 | 0 |
-| strategy_panel_fast_advance_chrome_rush | rig_economy_pressure | fast_advance | 10 | 3100 | 0.025 | 0.716 | 0.619 | 4.387 | 0 | 0 |
-| strategy_panel_net_damage_black_ice | central_multiaccess | net_damage | 10 | 2759 | 0.000 | 0.932 | 0.691 | 3.371 | 0 | 0 |
-| strategy_panel_hybrid_score_punish_cheap_bag | rig_economy_pressure | hybrid_score_punish | 10 | 2942 | 0.000 | 0.782 | 0.624 | 3.977 | 0 | 0 |
+| Slot                                         | Runner               | Corp                | Games | Decisions | Missed score rate | Remote contest skip rate | Plan conversion rate | No-progress / 100 | Dominated / 100 | Limits |
+| -------------------------------------------- | -------------------- | ------------------- | ----: | --------: | ----------------: | -----------------------: | -------------------: | ----------------: | --------------: | -----: |
+| progression_tuning_origin_rig_vs_tax         | rig_economy_pressure | remote_scoring      |    10 |      1642 |             0.111 |                    0.940 |                0.742 |             2.862 |               0 |      0 |
+| progression_tuning_origin_pressure_vs_tax    | event_pressure       | remote_scoring      |    10 |      1637 |             0.000 |                    0.818 |                0.770 |             2.627 |               0 |      0 |
+| snapshot_holdout_origin_pressure_vs_tag_ops  | event_pressure       | tag_punish          |    10 |      1889 |             0.000 |                    0.571 |                0.747 |             2.276 |               0 |      0 |
+| strategy_panel_fast_advance_chrome_rush      | rig_economy_pressure | fast_advance        |    10 |      3100 |             0.025 |                    0.716 |                0.619 |             4.387 |               0 |      0 |
+| strategy_panel_net_damage_black_ice          | central_multiaccess  | net_damage          |    10 |      2759 |             0.000 |                    0.932 |                0.691 |             3.371 |               0 |      0 |
+| strategy_panel_hybrid_score_punish_cheap_bag | rig_economy_pressure | hybrid_score_punish |    10 |      2942 |             0.000 |                    0.782 |                0.624 |             3.977 |               0 |      0 |
 
 ## Outcome context
 

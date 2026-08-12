@@ -7,7 +7,10 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
   ["uses the bound trash-recovery search for current setup", noNeedSearchJson],
-  ["scores instead of installing unrezzable matchpoint ice", unrezzableMatchpointIceJson],
+  [
+    "scores instead of installing unrezzable matchpoint ice",
+    unrezzableMatchpointIceJson,
+  ],
 ] as const;
 
 describe("Rent-I-Con versus CODE ROT cycle-seven remediation checkpoints", () => {

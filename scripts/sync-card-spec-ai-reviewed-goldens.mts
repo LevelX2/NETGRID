@@ -1,5 +1,7 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { format } from "prettier";
 
 type HintRecord = {
   cardId: string;
@@ -43,9 +45,9 @@ for (const goldenPath of goldenPaths) {
   if (cards.length !== reviewed.cards.length) {
     throw new Error(`${goldenPath}: reviewed partition size changed`);
   }
-  writeFileSync(
+  await writeFile(
     resolve(root, goldenPath),
-    `${JSON.stringify({ ...reviewed, cards }, null, 2)}\n`,
+    await format(JSON.stringify({ ...reviewed, cards }), { parser: "json" }),
     "utf8",
   );
   process.stdout.write(`${goldenPath}: ${cards.length} cards synced\n`);

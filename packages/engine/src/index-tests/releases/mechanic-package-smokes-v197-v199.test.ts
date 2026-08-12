@@ -236,7 +236,9 @@ describe("V1.9.8 Mechanikpaket Q", () => {
       );
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/break/);
       expect(
-        cardImplementationForDefinitionId(definitionId)?.icebreakerAbilities?.some(
+        cardImplementationForDefinitionId(
+          definitionId,
+        )?.icebreakerAbilities?.some(
           (ability) => ability.kind === "increase_strength",
         ),
         definitionId,
@@ -312,9 +314,8 @@ describe("V1.9.9 Mechanikpaket R", () => {
       CARD_DEFINITIONS_BY_ID["onr_v1_349_aardvark"]?.mechanics.join(" "),
     ).toMatch(/worm/);
     expect(
-      cardImplementationForDefinitionId(
-        "onr_v1_351_bizarre-encryption-scheme",
-      )?.hiddenReplacementLongtail?.kind,
+      cardImplementationForDefinitionId("onr_v1_351_bizarre-encryption-scheme")
+        ?.hiddenReplacementLongtail?.kind,
     ).toBe("delayed_agenda_access_replacement");
     expect(
       cardImplementationForDefinitionId("onr_v1_352_chester-mix")?.modifiers,

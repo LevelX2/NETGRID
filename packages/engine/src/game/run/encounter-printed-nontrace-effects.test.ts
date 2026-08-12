@@ -417,9 +417,13 @@ describe("encounter printed non-trace effects boundary", () => {
         expect.objectContaining({ id: "card_expensive_program" }),
       ]),
     });
-    resolveTrashProgramChoice(host, { payload: {} } as LegalAction, {
-      selectedChoices: { optionIds: ["card_cheap_program"] },
-    } as unknown as PlayerAction);
+    resolveTrashProgramChoice(
+      host,
+      { payload: {} } as LegalAction,
+      {
+        selectedChoices: { optionIds: ["card_cheap_program"] },
+      } as unknown as PlayerAction,
+    );
     expect(state.runner.rig.programs).toEqual(["expensive_program"]);
     expect(state.runner.heap).toEqual(["cheap_program"]);
     expect(legalAction.payload).toMatchObject({
@@ -491,9 +495,13 @@ describe("encounter printed non-trace effects boundary", () => {
     state.runner.rig.programs = ["cheap_program"] as CardInstanceId[];
 
     expect(() =>
-      resolveTrashProgramChoice(host, { payload: {} } as LegalAction, {
-        selectedChoices: { optionIds: ["card_expensive_program"] },
-      } as unknown as PlayerAction),
+      resolveTrashProgramChoice(
+        host,
+        { payload: {} } as LegalAction,
+        {
+          selectedChoices: { optionIds: ["card_expensive_program"] },
+        } as unknown as PlayerAction,
+      ),
     ).toThrow("nicht mehr installiert");
   });
 

@@ -18,8 +18,7 @@ const SHATTERED_REMAINS_INSTANCE_ID =
   "corp_onr_v1_315_corprunners-shattered-remains_1";
 const VISIBLE_TAG_PUNISH_INSTANCE_ID =
   "corp_onr_classic_026_street-enforcer_fixture_1";
-const VISIBLE_TAG_PUNISH_DEFINITION_ID =
-  "onr_classic_026_street-enforcer";
+const VISIBLE_TAG_PUNISH_DEFINITION_ID = "onr_classic_026_street-enforcer";
 
 describe("match 5F6D runner decision checkpoints", () => {
   it.each([

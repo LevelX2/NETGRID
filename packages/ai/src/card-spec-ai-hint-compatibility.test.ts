@@ -468,10 +468,7 @@ const signalCases: Record<
       "effect_scope:remote",
       "effect_timing:when_scored",
     ],
-    conditions: [
-      "requires_score_window",
-      "requires_scored_agenda",
-    ],
+    conditions: ["requires_score_window", "requires_scored_agenda"],
     requiredMechanics: [
       "advance",
       "install_remote",

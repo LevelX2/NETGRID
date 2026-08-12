@@ -592,7 +592,9 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     const input = runnerInput({
       credits: 4,
       hand: [textOnlyExpose],
-      legalActions: [installAction("install-text-only-expose", textOnlyExpose, 0)],
+      legalActions: [
+        installAction("install-text-only-expose", textOnlyExpose, 0),
+      ],
     });
 
     expect(

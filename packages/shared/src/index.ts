@@ -1759,9 +1759,7 @@ export type HqInstallRezSequenceState = {
 
 export type RunnerDelayedEffectInstance = {
   effectInstanceId: string;
-  kind:
-    | "next_agenda_access_credit_gain"
-    | "next_agenda_access_agenda_point";
+  kind: "next_agenda_access_credit_gain" | "next_agenda_access_agenda_point";
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   sourceTitle: string;

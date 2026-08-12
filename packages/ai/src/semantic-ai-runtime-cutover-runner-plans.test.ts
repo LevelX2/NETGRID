@@ -289,7 +289,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         { credits: 0 },
         {
           source: payoutBankSource.instanceId,
-          payload: brokerAbilityPayload("cash_out", payoutBankSource.instanceId),
+          payload: brokerAbilityPayload(
+            "cash_out",
+            payoutBankSource.instanceId,
+          ),
         },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -1246,8 +1249,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
             cardId: "short-circuit",
             sourceDefinitionId: "onr_v1_177_the-short-circuit",
             cardImplementationAbility: "activated",
-            cardImplementationCapabilityBindingKind:
-              "card_spec_capability_key",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
             cardImplementationAbilityKey:
               "abilities_activated_runner_main_search_stack_to_grip",
             cardImplementationAbilityId:
@@ -1533,15 +1535,10 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
   });
 
   it("does not follow a just-installed no-run recurring investment with a pre-known run", () => {
-    const conference = visibleCard(
-      "conference-card",
-      "runner",
-      "resource",
-      {
-        definitionId: "onr_v1_184_top-runners-conference",
-        title: "Top Runners' Conference",
-      },
-    );
+    const conference = visibleCard("conference-card", "runner", "resource", {
+      definitionId: "onr_v1_184_top-runners-conference",
+      title: "Top Runners' Conference",
+    });
     const firstInput = versionedRunnerTurnInput(1, [
       legalAction(
         "install-conference",
@@ -1571,8 +1568,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     ];
 
     const first = chooseRunnerAction(firstInput);
-    const firstPlanning =
-      first.decisionDebug?.planFirstDecision?.turnPlanning;
+    const firstPlanning = first.decisionDebug?.planFirstDecision?.turnPlanning;
     expectPlanDecision(first, {
       actionId: "install-conference",
       planKind: "runner.recurring_economy",
@@ -1619,9 +1615,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       capability: "recurring_economy_hold",
       priorityClass: "P4",
     });
-    expect(second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
-      first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-    );
+    expect(
+      second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toBe(first.decisionDebug?.planFirstDecision?.leafExecutorInstanceId);
     expect(secondPlanning?.selectedLine.phases[0]?.rootPlanInstanceId).toBe(
       firstPlanning?.selectedLine.phases[0]?.rootPlanInstanceId,
     );
@@ -1677,9 +1673,9 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(first.actionId).toBe("gain-credit");
     expect(second.actionId).toBe("gain-credit");
     expect(second.decisionDebug?.planKind).toBe("runner.economy");
-    expect(second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
-      firstLeaf,
-    );
+    expect(
+      second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toBe(firstLeaf);
     expect(planning?.commitment?.continuation).toMatchObject({
       status: "retained",
       previousCommitmentId: firstCommitment?.commitmentId,
@@ -1753,9 +1749,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const planFirst = second.decisionDebug?.planFirstDecision;
 
     expect(first.actionId).toBe("gain-credit");
-    expect(first.decisionDebug?.planKind).toBe(
-      "runner.develop_board_and_hand",
-    );
+    expect(first.decisionDebug?.planKind).toBe("runner.develop_board_and_hand");
     expect(second.actionId).toBe("install-interface");
     expect(second.decisionDebug?.planKind).toBe(
       "runner.develop_board_and_hand",
@@ -1807,11 +1801,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       server("hq"),
       server("rd"),
       server("archives"),
-      server(
-        "remote_1",
-        [],
-        [visibleCard("simple_agenda", "corp", "agenda")],
-      ),
+      server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
     const second = chooseRunnerAction(secondInput);
     const planning = second.decisionDebug?.planFirstDecision?.turnPlanning;
@@ -1822,9 +1812,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(planning?.commitment?.continuation).toMatchObject({
       status: "preempted",
       boundaryKind: "urgent_interrupt",
-      evidenceCodes: expect.arrayContaining([
-        "urgent_priority_class:P2",
-      ]),
+      evidenceCodes: expect.arrayContaining(["urgent_priority_class:P2"]),
     });
   });
 

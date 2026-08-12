@@ -1391,7 +1391,9 @@ describe("V1.9.6 Mechanikpaket O", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
     const corpBid = state.pendingChoice?.options
       .filter((option) => /^bid_\d+$/.test(option.id))
-      .sort((left, right) => Number(right.id.slice(4)) - Number(left.id.slice(4)))[0];
+      .sort(
+        (left, right) => Number(right.id.slice(4)) - Number(left.id.slice(4)),
+      )[0];
     expect(corpBid).toBeDefined();
     state = applyChoice(state, "corp", String(corpBid?.id));
     const runnerBid =

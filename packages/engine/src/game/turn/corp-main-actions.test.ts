@@ -79,7 +79,9 @@ describe("corp main action generation", () => {
       "purge_runner_virus_counters",
     );
     expect(
-      actions.find((candidate) => candidate.type === "purge_runner_virus_counters"),
+      actions.find(
+        (candidate) => candidate.type === "purge_runner_virus_counters",
+      ),
     ).toMatchObject({
       label: "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
       costs: [],
@@ -94,8 +96,7 @@ describe("corp main action generation", () => {
   it("binds a generic Corp operation to its exact CardSpec on-play capability", () => {
     const state = minimalCorpMainState("cs12-corp-operation-capability");
     const cardId = "chance-observation-instance";
-    const definition =
-      CARD_DEFINITIONS_BY_ID["onr_v1_284_chance-observation"]!;
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_284_chance-observation"]!;
     state.corp.hq = [cardId as never];
     state.corp.credits = 5;
     state.cardInstances[cardId] = {
@@ -170,8 +171,7 @@ function testCorpMainHost(
       [{ clicks: 1 }],
       {
         actionDebtPaid: 1,
-        corpActionDebtTotalBefore:
-          overrides.corpActionDebtPending?.() ?? 0,
+        corpActionDebtTotalBefore: overrides.corpActionDebtPending?.() ?? 0,
       },
       { targetRequirements: [] },
     );
@@ -222,7 +222,9 @@ function testCorpMainHost(
     agenda: {
       effectiveAgendaDifficulty: unexpected("effectiveAgendaDifficulty"),
       effectiveAgendaDifficultyDeps: {},
-      scoredAgendaKindForDefinition: unexpected("scoredAgendaKindForDefinition"),
+      scoredAgendaKindForDefinition: unexpected(
+        "scoredAgendaKindForDefinition",
+      ),
       serverChoiceDisplayLabel: unexpected("serverChoiceDisplayLabel"),
       scoredAgendaAbilityHost: () => ({}),
       buildScoredAgendaAbilityActionsForCard: () => ({

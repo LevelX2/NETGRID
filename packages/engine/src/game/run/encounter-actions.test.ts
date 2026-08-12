@@ -170,11 +170,7 @@ function hostFor(
           payload,
           metadata,
         ),
-      abilityMetadata: (
-        sourceCardInstanceId,
-        abilityId,
-        encounteredIceId,
-      ) => ({
+      abilityMetadata: (sourceCardInstanceId, abilityId, encounteredIceId) => ({
         abilityRef: { sourceCardInstanceId, sourceAbilityId: abilityId },
         effectRef: `effect.${abilityId}`,
         targetRequirements: [

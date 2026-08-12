@@ -233,10 +233,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state.corp.clicks = 30;
     state.corp.maxHandSize = 100;
 
-    const agendaId = putCorpRootInRemote(
-      state,
-      "onr_v1_214_project-babylon",
-    );
+    const agendaId = putCorpRootInRemote(state, "onr_v1_214_project-babylon");
     const initial = structuredClone(state);
     for (let index = 0; index < 7; index += 1) {
       state = apply(

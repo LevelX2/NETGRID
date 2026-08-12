@@ -2466,11 +2466,9 @@ export function runnerActionDispositions(
       .filter(
         (candidate) =>
           evaluatedCandidate !== undefined &&
-          runnerHandDevelopmentRejectionForCandidate(
-            input,
-            candidate,
-            [evaluation],
-          ) === evaluation &&
+          runnerHandDevelopmentRejectionForCandidate(input, candidate, [
+            evaluation,
+          ]) === evaluation &&
           candidate.actionType === evaluatedCandidate.actionType &&
           candidate.semanticActionType ===
             evaluatedCandidate.semanticActionType,
@@ -6697,8 +6695,7 @@ function reassessActiveInformationRunParent(
     Number.isFinite(marginalValue) &&
     marginalValue > 0 &&
     knownPath.creditsAfterPath > 0;
-  const hasMaterialPayoff =
-    hasConcretePayoff || hasSpeculativeInformationValue;
+  const hasMaterialPayoff = hasConcretePayoff || hasSpeculativeInformationValue;
   const convert =
     knownPath.canReachAccess &&
     unknownIceCount === 0 &&
@@ -15848,13 +15845,13 @@ function runnerCreditBankSignals(
               ? `runner_credit_bank_cashout_delegation_missing_exact_route:${developmentCashOutAdmission.route?.targetCardInstanceId ?? "unknown"}`
               : repeatedCycleShouldYield
                 ? "runner_credit_bank_hold_completed_cycle_for_development"
-              : alreadyBuiltThisTurn
-                ? "runner_credit_bank_hold_instance_built_this_turn"
-                : combinedCreditAccess >= 20 || currentStoredCredits >= 12
-                  ? "runner_credit_bank_hold_comfortable_value"
-                  : convertibleDevelopmentFundingNeed
-                    ? "runner_credit_bank_cashout_delegated_to_development_plan"
-                    : "runner_credit_bank_hold_no_current_conversion_need",
+                : alreadyBuiltThisTurn
+                  ? "runner_credit_bank_hold_instance_built_this_turn"
+                  : combinedCreditAccess >= 20 || currentStoredCredits >= 12
+                    ? "runner_credit_bank_hold_comfortable_value"
+                    : convertibleDevelopmentFundingNeed
+                      ? "runner_credit_bank_cashout_delegated_to_development_plan"
+                      : "runner_credit_bank_hold_no_current_conversion_need",
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
             ...(developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
@@ -15896,7 +15893,9 @@ function runnerCreditBankSignals(
 
 function creditBankCompletedPriorCycle(
   input: AiDecisionInput,
-  tool: NonNullable<DeckCapabilityProfile["runner"]>["economyBankTools"][number],
+  tool: NonNullable<
+    DeckCapabilityProfile["runner"]
+  >["economyBankTools"][number],
 ): boolean {
   const history = mergedPublicHistory(input);
   let observedLoad = false;
@@ -18327,7 +18326,9 @@ function runnerRunWindowActionAssessment(
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((legalAction) => legalAction.type),
+      legalActionTypes: input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
       unresolvedActionIds: [action.actionId],
       owner: "action_semantics",
       removalCondition:
@@ -18346,7 +18347,9 @@ function runnerRunWindowActionAssessment(
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((legalAction) => legalAction.type),
+      legalActionTypes: input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
       unresolvedActionIds: [action.actionId],
       owner: "action_semantics",
       removalCondition:

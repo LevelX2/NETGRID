@@ -567,11 +567,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
-    withProgram = applyChoice(
-      withProgram,
-      "corp",
-      `card_${codecrackerId}`,
-    );
+    withProgram = applyChoice(withProgram, "corp", `card_${codecrackerId}`);
     withProgram = apply(
       withProgram,
       "runner",
@@ -808,11 +804,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
-    dataNaga = applyChoice(
-      dataNaga,
-      "corp",
-      `card_${dataNagaKillerId}`,
-    );
+    dataNaga = applyChoice(dataNaga, "corp", `card_${dataNagaKillerId}`);
     expect(dataNaga.runner.heap).toContain(dataNagaKillerId);
     expect(dataNaga.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
@@ -1167,9 +1159,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
       state = applyChoices(state, "corp", selectedIds);
 
       const randomRecords = state.randomDrawRecords.filter((record) =>
-        record.purpose.startsWith(
-          "v191.random.runner_virus_hq_discard_phase",
-        ),
+        record.purpose.startsWith("v191.random.runner_virus_hq_discard_phase"),
       );
       expect(randomRecords).toHaveLength(1);
       const discardEvent = [...state.eventLog]

@@ -42,8 +42,7 @@ export function projectRemoteRootValue(
   const valueScore = Math.max(0, input.valueHints?.remoteRootValue ?? 0);
   const hasFiniteEconomyEffect = effects.some(
     (effect) =>
-      (effect.kind === "economy" ||
-        effect.kind === "finite_economy_pool") &&
+      (effect.kind === "economy" || effect.kind === "finite_economy_pool") &&
       effect.scope === "corp" &&
       effect.finite === true,
   );
@@ -144,6 +143,8 @@ function tokensIncludePhrase(
   phrase: readonly string[],
 ): boolean {
   return tokens.some((token, index) =>
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+    phrase.every(
+      (phraseToken, offset) => tokens[index + offset] === phraseToken,
+    ),
   );
 }

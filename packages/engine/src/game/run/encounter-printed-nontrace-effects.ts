@@ -818,7 +818,9 @@ export function resolveDirectTrashProgramSubroutine(
     options.subroutineIndex === undefined ||
     !options.legalAction
   )
-    throw new Error("Programmtrash-Subroutine benötigt gebundene Source-Context.");
+    throw new Error(
+      "Programmtrash-Subroutine benötigt gebundene Source-Context.",
+    );
   startTrashProgramChoice(host, {
     definition: options.definition,
     subroutine: options.subroutine,
@@ -884,7 +886,10 @@ export function resolveTrashProgramChoice(
     throw new Error("Programmtrash-Choice ist nicht offen.");
   const context = parseTrashProgramChoiceSource(choice.source);
   const run = mustRun(host.state);
-  if (run.runId !== context.runId || run.encounteredIceId !== context.sourceIceId)
+  if (
+    run.runId !== context.runId ||
+    run.encounteredIceId !== context.sourceIceId
+  )
     throw new Error("Die Programmtrash-Choice passt nicht mehr zum Encounter.");
   const sourceInstance = host.state.cardInstances[context.sourceIceId];
   if (
@@ -892,7 +897,9 @@ export function resolveTrashProgramChoice(
     sourceInstance.zone.side !== "corp" ||
     sourceInstance.zone.zone !== "serverIce"
   )
-    throw new Error("Die Programmtrash-Choice-Quelle ist nicht mehr rezzed ICE.");
+    throw new Error(
+      "Die Programmtrash-Choice-Quelle ist nicht mehr rezzed ICE.",
+    );
   const sourceDefinition = host.cards.definitionFor(context.sourceIceId);
   if (sourceDefinition.id !== context.sourceDefinitionId)
     throw new Error("Die Programmtrash-Choice-Quelle passt nicht mehr.");
@@ -915,7 +922,10 @@ export function resolveTrashProgramChoice(
   const targetProgramId = choice.options.find(
     (option) => option.id === selectedOptionId,
   )?.value as CardInstanceId | undefined;
-  if (!targetProgramId || !host.state.runner.rig.programs.includes(targetProgramId))
+  if (
+    !targetProgramId ||
+    !host.state.runner.rig.programs.includes(targetProgramId)
+  )
     throw new Error("Das gewählte Programm ist nicht mehr installiert.");
   const targetDefinition = host.cards.definitionFor(targetProgramId);
   const prevented = host.trash.openRunnerInstalledTrashPreventionWindow(
@@ -944,7 +954,7 @@ export function resolveTrashProgramChoice(
           cardDefinitionId: targetDefinition.id,
           cardTitle: targetDefinition.title,
           cardsTrashed: 1,
-      },
+        },
   );
   // The Corp has completed the target decision. Any resulting prevention
   // window and the resumed encounter both belong to the Runner.
@@ -972,7 +982,9 @@ function startTrashProgramChoice(
     input.subroutine.type !== "trash_installed_program" &&
     input.subroutine.type !== "trash_installed_program_unless_runner_pays"
   )
-    throw new Error("Programmtrash-Choice benötigt eine Programmtrash-Subroutine.");
+    throw new Error(
+      "Programmtrash-Choice benötigt eine Programmtrash-Subroutine.",
+    );
   if (
     input.continuation === "trace_success" &&
     (input.subroutine.type !== "initiate_trace" ||
@@ -1041,7 +1053,9 @@ function trashProgramChoiceSource(context: TrashProgramChoiceContext): string {
   ].join(":");
 }
 
-function parseTrashProgramChoiceSource(source: string): TrashProgramChoiceContext {
+function parseTrashProgramChoiceSource(
+  source: string,
+): TrashProgramChoiceContext {
   const [
     prefix,
     runId,
@@ -1051,8 +1065,7 @@ function parseTrashProgramChoiceSource(source: string): TrashProgramChoiceContex
     subroutineId,
     subroutineType,
     continuation,
-  ] =
-    source.split(":");
+  ] = source.split(":");
   if (prefix !== TRASH_PROGRAM_CHOICE_SOURCE_PREFIX)
     throw new Error("Programmtrash-Choice-Quelle ist ungültig.");
   const subroutineIndex = Number(index);

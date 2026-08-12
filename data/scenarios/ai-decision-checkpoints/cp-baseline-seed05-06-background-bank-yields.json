@@ -23239,9 +23239,9 @@
   },
   "expectation": {
     "contractKind": "correctness",
-  "acceptableActions": [
-    {
-      "type": "draw_card"
+    "acceptableActions": [
+      {
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -23253,9 +23253,7 @@
     "planExecution": {
       "acceptablePlanKinds": ["runner.defense_and_recovery"],
       "acceptableCapabilities": ["build_required_hand_buffer"],
-      "requiredAssessmentEvidence": [
-        "runner_volatile_breaker_hand_buffer:4"
-      ]
+      "requiredAssessmentEvidence": ["runner_volatile_breaker_hand_buffer:4"]
     }
   }
 }

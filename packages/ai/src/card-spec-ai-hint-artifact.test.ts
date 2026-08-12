@@ -22,7 +22,7 @@ import {
 import { validateGeneratedArtifact } from "./generated-ai-hint-artifact-validation";
 
 describe("CardSpec generated AI hint artifact", () => {
-  it("is the canonical exact-618 active output of the current compiler inputs", () => {
+  it("is the canonical exact-618 active output of the current compiler inputs", async () => {
     const compiled = buildCardSpecAiHintArtifact();
 
     expect(compiled).toEqual(generatedArtifact);
@@ -36,8 +36,16 @@ describe("CardSpec generated AI hint artifact", () => {
     expect(compiled.cards.map((entry) => entry.cardId)).toEqual(
       compiled.cardIds,
     );
-    expect(serializeCardSpecAiHintArtifact(compiled)).toBe(
-      `${JSON.stringify(generatedArtifact, null, 2)}\n`,
+    expect(await serializeCardSpecAiHintArtifact(compiled)).toBe(
+      readFileSync(
+        fileURLToPath(
+          new URL(
+            "../../../data/ai/card-spec-ai-hints-generated.json",
+            import.meta.url,
+          ),
+        ),
+        "utf8",
+      ),
     );
   });
 

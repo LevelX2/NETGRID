@@ -965,8 +965,7 @@ describe("run end cleanup", () => {
       proteusRunnerVirusFreeTrashCounterType: "garbage",
       garbageCountersSpent: 2,
       garbageCountersAfter: 1,
-      garbageCounterRemovalSourceDefinitionId:
-        "onr_proteus_089_garbage-in",
+      garbageCounterRemovalSourceDefinitionId: "onr_proteus_089_garbage-in",
     });
   });
 

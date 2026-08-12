@@ -947,13 +947,13 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           ),
         ).toEqual(
           expect.arrayContaining([
-          expect.objectContaining({
-            kind: "resolve_subroutine",
-            subroutineType: "trash_installed_program",
-            cardDefinitionId: "simple_decoder",
-            cardTitle: "Simple Decoder",
-            cardsTrashed: 1,
-          }),
+            expect.objectContaining({
+              kind: "resolve_subroutine",
+              subroutineType: "trash_installed_program",
+              cardDefinitionId: "simple_decoder",
+              cardTitle: "Simple Decoder",
+              cardsTrashed: 1,
+            }),
           ]),
         );
       }

@@ -1,9 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import {
-  installCard,
-  type InstallCardHost,
-} from "./install-card";
+import { installCard, type InstallCardHost } from "./install-card";
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -25,14 +22,22 @@ describe("install card execution", () => {
     });
     const state = minimalState({
       cardInstances: {
-        [programId]: instance(programId, programDefinition.id, "runner", "grip"),
+        [programId]: instance(
+          programId,
+          programDefinition.id,
+          "runner",
+          "grip",
+        ),
       },
       runnerGrip: [programId],
     });
     const calls = testCalls();
     const action = installAction("runner", programId);
 
-    installCard(testHost(state, { [programDefinition.id]: programDefinition }, calls), action);
+    installCard(
+      testHost(state, { [programDefinition.id]: programDefinition }, calls),
+      action,
+    );
 
     expect(state.runner.grip).toEqual([]);
     expect(state.runner.rig.programs).toEqual([programId]);
@@ -129,7 +134,10 @@ describe("install card execution", () => {
     });
 
     expect(() =>
-      installCard(testHost(state, { [iceDefinition.id]: iceDefinition }), action),
+      installCard(
+        testHost(state, { [iceDefinition.id]: iceDefinition }),
+        action,
+      ),
     ).toThrow("Dieses ICE darf nicht auf diesem Fort installiert werden.");
     expect(state.corp.clicks).toBe(3);
     expect(state.corp.hq).toEqual([iceId]);
@@ -253,7 +261,10 @@ describe("install card execution", () => {
       serverId: "remote_1",
     });
 
-    installCard(testHost(state, { [assetDefinition.id]: assetDefinition }, calls), action);
+    installCard(
+      testHost(state, { [assetDefinition.id]: assetDefinition }, calls),
+      action,
+    );
 
     expect(state.corp.archives).toEqual([assetId]);
     expect(action.payload).toMatchObject({
@@ -356,7 +367,13 @@ function minimalState(input: {
       badPublicity: 0,
       servers: [
         { id: "hq", kind: "hq", label: "HQ", ice: [], root: [] },
-        { id: "remote_1", kind: "remote", label: "Remote 1", ice: [], root: [] },
+        {
+          id: "remote_1",
+          kind: "remote",
+          label: "Remote 1",
+          ice: [],
+          root: [],
+        },
       ],
     },
     cardInstances: input.cardInstances,
@@ -409,9 +426,15 @@ function testHost(
   const removeFromAllZones = (cardId: CardInstanceId) => {
     state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
     state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
-    state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
-    state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
-    state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
+    state.runner.rig.programs = state.runner.rig.programs.filter(
+      (id) => id !== cardId,
+    );
+    state.runner.rig.hardware = state.runner.rig.hardware.filter(
+      (id) => id !== cardId,
+    );
+    state.runner.rig.resources = state.runner.rig.resources.filter(
+      (id) => id !== cardId,
+    );
     state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
     state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
     for (const server of state.corp.servers) {
@@ -426,7 +449,8 @@ function testHost(
       mustInstance: (cardId) => state.cardInstances[cardId]!,
       isUniqueCard: (definition) => definition.subtypes.includes("unique"),
       hasInstalledUniqueCardDefinition: () => false,
-      cardHasSubtype: (definition, subtype) => definition.subtypes.includes(subtype),
+      cardHasSubtype: (definition, subtype) =>
+        definition.subtypes.includes(subtype),
       isRunnerHardwareDeckDefinition: (definition) =>
         definition.mechanics.includes("hardware_deck"),
       hasCardImplementationMemoryUnitModifier: () => false,

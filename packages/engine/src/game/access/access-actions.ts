@@ -158,8 +158,10 @@ export function buildRunnerAccessActions(
     };
   }
   const definition = host.cards.definitionFor(run.accessedCardId);
-  const currentAccessTrashActions =
-    hiddenResourceCurrentAccessTrashActions(host, run);
+  const currentAccessTrashActions = hiddenResourceCurrentAccessTrashActions(
+    host,
+    run,
+  );
   const freeTrashSource = freeTrashAccessSourceForCurrentAccessCard(
     host,
     run,
@@ -172,24 +174,24 @@ export function buildRunnerAccessActions(
       freeTrashSource.enabled &&
       freeTrashSource.counterType &&
       freeTrashSource.sourceDefinitionId
-      ? [
-          host.actions.buildLegalAction(
-            "runner",
-            "trash_accessed_card",
-            `${definition.title} kostenlos trashen`,
-            run.accessedCardId,
-            [],
-            {
-              accessTrashCostOverride: 0,
-              freeAccessTrash: true,
-              proteusRunnerVirusFreeTrashCounterType:
-                freeTrashSource.counterType,
-              proteusRunnerVirusFreeTrashSourceDefinitionId:
-                freeTrashSource.sourceDefinitionId,
-            },
-          ),
-        ]
-      : [];
+        ? [
+            host.actions.buildLegalAction(
+              "runner",
+              "trash_accessed_card",
+              `${definition.title} kostenlos trashen`,
+              run.accessedCardId,
+              [],
+              {
+                accessTrashCostOverride: 0,
+                freeAccessTrash: true,
+                proteusRunnerVirusFreeTrashCounterType:
+                  freeTrashSource.counterType,
+                proteusRunnerVirusFreeTrashSourceDefinitionId:
+                  freeTrashSource.sourceDefinitionId,
+              },
+            ),
+          ]
+        : [];
     const accessReplacement = agendaAccessReplacementForDefinition(definition);
     if (accessReplacement?.kind === "install_as_runner_program") {
       const legalActions: LegalAction[] = [
@@ -569,7 +571,9 @@ export function freeTrashAccessSourceForCurrentAccessCard(
   const virusCounter = owner.virusCounter!;
   const accessTrash = virusCounter.accessTrash!;
   if (accessTrash.includeNormallyUntrashable !== true)
-    throw new Error("Virus access-trash must explicitly include untrashable cards.");
+    throw new Error(
+      "Virus access-trash must explicitly include untrashable cards.",
+    );
   const counterType = virusCounter.counterKind as AccessTrashCounterType;
   if (
     Math.max(0, Math.floor(corpCounters?.[counterType] ?? 0)) >=

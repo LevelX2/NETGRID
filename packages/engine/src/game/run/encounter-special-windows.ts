@@ -458,8 +458,7 @@ export function fullyBrokenPassedIcePostPassActions(
         {
           cardId: sourceCardId,
           sourceDefinitionId: sourceDefinition.id,
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: implementation.capabilityKey,
           cardImplementationAbilityId: sourceAbilityId,
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
@@ -484,8 +483,10 @@ export function fullyBrokenPassedIcePostPassActions(
     .sort()
     .map((sourceCardId) => {
       const sourceDefinition = definitionFor(state, sourceCardId);
-      const implementation =
-        fullyBrokenPassedIceDerezOnlyImplementationForCard(state, sourceCardId);
+      const implementation = fullyBrokenPassedIceDerezOnlyImplementationForCard(
+        state,
+        sourceCardId,
+      );
       if (!implementation)
         throw new Error("Die Post-Pass-Fähigkeit ist nicht mehr verfügbar.");
       const sourceAbilityId = canonicalCapabilityId(
@@ -502,8 +503,7 @@ export function fullyBrokenPassedIcePostPassActions(
         {
           cardId: sourceCardId,
           sourceDefinitionId: sourceDefinition.id,
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: implementation.capabilityKey,
           cardImplementationAbilityId: sourceAbilityId,
           targetIceId,

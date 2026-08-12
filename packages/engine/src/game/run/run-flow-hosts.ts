@@ -220,8 +220,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         icebreakerSpecialSourceDefinitionId: (breakerId, special) => {
           const definition = host.cards.definitionFor(state, breakerId);
           const hasSpecial = (
-            cardImplementationForDefinitionId(definition.id)?.icebreakerAbilities ??
-            []
+            cardImplementationForDefinitionId(definition.id)
+              ?.icebreakerAbilities ?? []
           ).some(
             (ability) =>
               ability.kind === "break_subroutine" &&

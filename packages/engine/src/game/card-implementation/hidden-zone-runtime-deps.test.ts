@@ -27,12 +27,14 @@ function card(
   } as CardDefinition;
 }
 
-function state(input: {
-  stack?: CardInstanceId[];
-  heap?: CardInstanceId[];
-  grip?: CardInstanceId[];
-  credits?: number;
-} = {}): GameState {
+function state(
+  input: {
+    stack?: CardInstanceId[];
+    heap?: CardInstanceId[];
+    grip?: CardInstanceId[];
+    credits?: number;
+  } = {},
+): GameState {
   return {
     stateVersion: 10,
     pendingChoice: undefined,
@@ -79,12 +81,14 @@ function action(payload: LegalAction["payload"] = {}): LegalAction {
   } as unknown as LegalAction;
 }
 
-function host(input: {
-  definitions?: Record<string, CardDefinition>;
-  canInstallIds?: CardInstanceId[];
-  privateLookCalls?: unknown[][];
-  exposeTargetIds?: CardInstanceId[];
-} = {}): HiddenZoneRuntimeDepsHost {
+function host(
+  input: {
+    definitions?: Record<string, CardDefinition>;
+    canInstallIds?: CardInstanceId[];
+    privateLookCalls?: unknown[][];
+    exposeTargetIds?: CardInstanceId[];
+  } = {},
+): HiddenZoneRuntimeDepsHost {
   const definitions = input.definitions ?? {};
   const canInstallIds = new Set(input.canInstallIds ?? []);
   const exposeTargetIds = input.exposeTargetIds ?? [];
@@ -109,7 +113,10 @@ function host(input: {
     runnerMemoryLimit: () => 4,
     shuffleRunnerStack: () => undefined,
   });
-  const searchHandlerHost = (gameState: GameState, legalAction: LegalAction) => ({
+  const searchHandlerHost = (
+    gameState: GameState,
+    legalAction: LegalAction,
+  ) => ({
     ...searchTargetHost(gameState),
     legalAction,
   });
@@ -123,9 +130,9 @@ function host(input: {
       searchActivationTargetHost: (gameState) => searchTargetHost(gameState),
       searchActivationHandlerHost: (gameState, legalAction) =>
         searchHandlerHost(gameState, legalAction),
-      arrangeChoiceHandlerHost: () => ({} as never),
-      nonSearchChoiceHandlerHost: () => ({} as never),
-      corpZoneChoiceHandlerHost: () => ({} as never),
+      arrangeChoiceHandlerHost: () => ({}) as never,
+      nonSearchChoiceHandlerHost: () => ({}) as never,
+      corpZoneChoiceHandlerHost: () => ({}) as never,
     },
     callbacks: {
       startRunnerPrivateLookChoice: (...args) => {
@@ -233,9 +240,9 @@ describe("hidden-zone card implementation runtime deps", () => {
       2,
     ]);
 
-    expect(deps.exposeInstalledCorpCardTargets(gameState, "any_installed")).toEqual([
-      "target",
-    ]);
+    expect(
+      deps.exposeInstalledCorpCardTargets(gameState, "any_installed"),
+    ).toEqual(["target"]);
     expect(
       deps.exposeInstalledCorpCard(
         gameState,
@@ -309,9 +316,9 @@ describe("hidden-zone card implementation runtime deps", () => {
       }),
     );
 
-    expect(deps.searchStackInstallTargetCount(gameState, "program", "free")).toBe(
-      1,
-    );
+    expect(
+      deps.searchStackInstallTargetCount(gameState, "program", "free"),
+    ).toBe(1);
 
     const result = deps.startSearchStackInstallChoice(
       gameState,

@@ -144,7 +144,10 @@ describe("encounter special windows boundary", () => {
     });
 
     const start = resolveEncounterSpecialWindowSubroutine(host, {
-      definition: { id: "onr_v1_272_too-many-doors", title: "Secret Spend Compare" } as never,
+      definition: {
+        id: "onr_v1_272_too-many-doors",
+        title: "Secret Spend Compare",
+      } as never,
       subroutine,
       subroutineIndex: 2,
       legalAction,

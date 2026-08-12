@@ -117,9 +117,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          wallOfStatic("onr_v1_279.wall-of-static.coverage"),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.coverage")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -184,9 +182,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          wallOfStatic("onr_v1_279.wall-of-static.trace-safety"),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.trace-safety")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];
@@ -809,10 +805,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          dataWall("remote-data-wall"),
-          hiddenIce,
-        ],
+        [dataWall("remote-data-wall"), hiddenIce],
         [hiddenAdvancedRoot],
       ),
     ];
@@ -873,10 +866,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          dataWall("remote-data-wall"),
-          hiddenIce,
-        ],
+        [dataWall("remote-data-wall"), hiddenIce],
         [hiddenAdvancedRoot],
       ),
     ];
@@ -909,9 +899,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       server("archives"),
       server(
         "remote_1",
-        [
-          wallOfStatic("onr_v1_279.wall-of-static.preview"),
-        ],
+        [wallOfStatic("onr_v1_279.wall-of-static.preview")],
         [visibleCard("simple_agenda", "corp", "agenda")],
       ),
     ];

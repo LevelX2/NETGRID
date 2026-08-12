@@ -425,11 +425,7 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (context.duplicateInstalled && !looksRepeatUseful(text)) {
     return "duplicate_or_low_value";
   }
-  if (
-    runnerEffectsProvideBreakerCredits(
-      context.signals.structuredEffects,
-    )
-  ) {
+  if (runnerEffectsProvideBreakerCredits(context.signals.structuredEffects)) {
     return "economy_engine";
   }
   if (looksLikeMemorySupport(context.card, text)) return "memory_support";
@@ -447,7 +443,8 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
   if (
     runnerEffectsProvideProgramTrashPrevention(
       context.signals.structuredEffects,
-    ) || looksLikeDefense(text)
+    ) ||
+    looksLikeDefense(text)
   )
     return "defense_support";
   if (

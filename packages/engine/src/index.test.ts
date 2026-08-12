@@ -677,8 +677,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state,
       "runner",
       (action) =>
-        action.type === "play_event" &&
-        action.payload?.cardId === secondDropId,
+        action.type === "play_event" && action.payload?.cardId === secondDropId,
     );
     expect(state.runnerDelayedEffectInstances).toHaveLength(2);
     expect(

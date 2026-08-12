@@ -11807,8 +11807,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "post_pass_derez_fully_broken_ice_end_run",
           cardImplementationAbilityId:
@@ -11927,8 +11926,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "post_pass_derez_fully_broken_ice_end_run",
           cardImplementationAbilityId:
@@ -12056,8 +12054,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "post_pass_derez_fully_broken_ice_end_run",
           cardImplementationAbilityId:
@@ -13935,8 +13932,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "junkyard-bbs",
           sourceDefinitionId: "onr_v1_165_junkyard-bbs",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationAbilityId:
@@ -14044,8 +14040,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "junkyard-bbs",
           sourceDefinitionId: "onr_v1_165_junkyard-bbs",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey:
             "abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationAbilityId:

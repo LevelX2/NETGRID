@@ -90,7 +90,9 @@ export function resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice(
     throw new Error("Es ist keine Indiscriminate-Response-Team-Choice offen.");
   const [, sourceCardId = "", choiceRunId = ""] = choice.source.split(":");
   if (!sourceCardId || choiceRunId !== run.runId)
-    throw new Error("Die Indiscriminate-Response-Team-Choice passt nicht zum Run.");
+    throw new Error(
+      "Die Indiscriminate-Response-Team-Choice passt nicht zum Run.",
+    );
   const sourceId = sourceCardId as CardInstanceId;
   const instance = host.state.cardInstances[sourceId];
   if (
@@ -99,19 +101,31 @@ export function resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice(
     instance.rezzed !== true ||
     instance.zone.side !== "corp" ||
     instance.zone.zone !== "serverRoot" ||
-    !cardImplementationForDefinitionId(instance.definitionId)?.successfulRunFollowups?.some(
+    !cardImplementationForDefinitionId(
+      instance.definitionId,
+    )?.successfulRunFollowups?.some(
       (followup) =>
         followup.kind ===
         "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
     )
   )
-    throw new Error("Die Indiscriminate-Response-Team-Quelle ist nicht mehr legal.");
+    throw new Error(
+      "Die Indiscriminate-Response-Team-Quelle ist nicht mehr legal.",
+    );
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceId))
-    throw new Error("Diese Indiscriminate-Response-Team-Quelle wurde bereits behandelt.");
-  const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find((candidate) => candidate.id === selectedId);
-  if (!option || (option.value !== "decline" && option.value !== "shuffle_grip"))
+    throw new Error(
+      "Diese Indiscriminate-Response-Team-Quelle wurde bereits behandelt.",
+    );
+  const selectedId =
+    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find(
+    (candidate) => candidate.id === selectedId,
+  );
+  if (
+    !option ||
+    (option.value !== "decline" && option.value !== "shuffle_grip")
+  )
     throw new Error("Die Indiscriminate-Response-Team-Auswahl ist ungueltig.");
   delete host.state.pendingChoice;
   run.successfulRunAbilityUsedSourceIds = [...used, sourceId].sort();

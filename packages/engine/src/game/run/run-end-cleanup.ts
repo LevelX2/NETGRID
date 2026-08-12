@@ -127,7 +127,9 @@ export function handleRunEndCleanup(
   host.credits.gainCorp(corpBonus.amount);
   if (run && corpBonus.amount > 0 && legalAction) {
     if (!corpBonus.sourceCardId)
-      throw new Error("Unsuccessful-run credit bonus requires its source card.");
+      throw new Error(
+        "Unsuccessful-run credit bonus requires its source card.",
+      );
     const sourceDefinition = host.cards.definitionFor(corpBonus.sourceCardId);
     const sourceDefinitionId = sourceDefinition.id;
     const serverLabel = host.servers.publicServerLabel(run.attackedServerId);

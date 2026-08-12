@@ -122,9 +122,7 @@ function mercenaryCurrentAccessEligibleCardIds(
       : [];
   return [...new Set(candidates)].filter((cardId) => {
     const instance = host.state.cardInstances[cardId];
-    return (
-      instance?.zone.side === "corp" && instance.zone.zone !== "archives"
-    );
+    return instance?.zone.side === "corp" && instance.zone.zone !== "archives";
   });
 }
 
@@ -144,8 +142,9 @@ function openMercenaryCurrentAccessTrashChoice(
   )
     throw new Error("Die Mercenary-Subcontract-Quelle ist nicht installiert.");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
-  const utility = cardImplementationForDefinitionId(sourceDefinition.id)
-    ?.runnerUtilityLongtail;
+  const utility = cardImplementationForDefinitionId(
+    sourceDefinition.id,
+  )?.runnerUtilityLongtail;
   if (utility?.kind !== "hidden_resource_current_access_free_trash")
     throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Quelle.");
   if (utility.cost.kind !== "credit_and_trash_source")
@@ -162,7 +161,9 @@ function openMercenaryCurrentAccessTrashChoice(
     );
   const eligibleCardIds = mercenaryCurrentAccessEligibleCardIds(host);
   if (eligibleCardIds.length === 0)
-    throw new Error("Es gibt keine aktuell zugreifbare Karte fuer diese Faehigkeit.");
+    throw new Error(
+      "Es gibt keine aktuell zugreifbare Karte fuer diese Faehigkeit.",
+    );
   if (
     expectedCost > 0 &&
     openRunnerCostPenaltySupportWindow(host.state, legalAction, {
@@ -235,8 +236,11 @@ export function resolveMercenaryCurrentAccessTrashChoice(
   const [, runId, sourceCardId, sourceDefinitionId] = choice.source.split(":");
   const run = mustRun(host);
   if (run.runId !== runId)
-    throw new Error("Die Current-Access-Trash-Choice gehoert zu einem anderen Run.");
-  const sourceInstance = host.state.cardInstances[sourceCardId as CardInstanceId];
+    throw new Error(
+      "Die Current-Access-Trash-Choice gehoert zu einem anderen Run.",
+    );
+  const sourceInstance =
+    host.state.cardInstances[sourceCardId as CardInstanceId];
   if (
     !sourceInstance ||
     sourceInstance.definitionId !== sourceDefinitionId ||
@@ -797,11 +801,7 @@ export function trashAccessedCard(
     cardId as CardInstanceId,
     legalAction,
   );
-  recordAccessTrashConsequences(
-    host,
-    cardId as CardInstanceId,
-    definition,
-  );
+  recordAccessTrashConsequences(host, cardId as CardInstanceId, definition);
   consumeAccessTrashCounters(host, definition, legalAction);
   if (host.state.run?.breach) {
     return {
@@ -913,7 +913,8 @@ export function declineCurrentAccess(
       definition.id,
     )?.agendaAccessReplacement;
     const instance = host.cards.cardInstanceFor(cardId);
-    const serverId = run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
+    const serverId =
+      run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
     if (
       replacement?.onDecline?.kind ===
         "score_if_still_installed_in_same_fort_at_runner_start" &&

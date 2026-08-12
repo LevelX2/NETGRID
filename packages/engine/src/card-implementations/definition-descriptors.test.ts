@@ -1342,9 +1342,9 @@ describe("CardImplementation definition descriptors", () => {
           kind: "add_current_encounter_additional_subroutine",
           target: "encountered_ice_self",
           append: "after_existing",
-        subroutine: {
-          kind: "end_the_run",
-          visibility: "public",
+          subroutine: {
+            kind: "end_the_run",
+            visibility: "public",
           },
           visibility: "public",
         },

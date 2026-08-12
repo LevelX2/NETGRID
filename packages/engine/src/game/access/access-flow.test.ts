@@ -821,8 +821,7 @@ describe("access flow execution", () => {
         matchId: "match",
         side: "runner",
         actionId: "runner.resolve_choice",
-        clientKnownStateVersion:
-          agendaState.state.pendingChoice!.stateVersion,
+        clientKnownStateVersion: agendaState.state.pendingChoice!.stateVersion,
         selectedChoices: {
           choiceId: agendaState.state.pendingChoice!.choiceId,
           selectedOptionIds: ["agenda"],

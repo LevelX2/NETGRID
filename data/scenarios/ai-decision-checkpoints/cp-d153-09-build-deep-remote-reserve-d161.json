@@ -12040,9 +12040,7 @@
       "acceptableCapabilities": [
         "complete_turn_after_productive_routes_exhausted"
       ],
-      "requiredAssessmentEvidence": [
-        "productive_legal_routes_exhausted"
-      ]
+      "requiredAssessmentEvidence": ["productive_legal_routes_exhausted"]
     }
   }
 }

@@ -209,9 +209,7 @@ export function applyPromisesPromisesAgendaAccess(
   host.state.run = {
     ...mustRun(host),
     nextAgendaAccessAgendaPointBonus: {
-      sourceEffectInstanceIds: effects.map(
-        (effect) => effect.effectInstanceId,
-      ),
+      sourceEffectInstanceIds: effects.map((effect) => effect.effectInstanceId),
       sourceDefinitionIds: effects.map((effect) => effect.sourceDefinitionId),
       sourceTitles: effects.map((effect) => effect.sourceTitle),
       amount,
@@ -231,9 +229,7 @@ export function applyPromisesPromisesAgendaAccess(
 function consumeRunnerDelayedAgendaAccessEffects(
   state: GameState,
   cardId: CardInstanceId,
-  kind:
-    | "next_agenda_access_credit_gain"
-    | "next_agenda_access_agenda_point",
+  kind: "next_agenda_access_credit_gain" | "next_agenda_access_agenda_point",
 ): NonNullable<GameState["runnerDelayedEffectInstances"]> {
   const effects = state.runnerDelayedEffectInstances ?? [];
   const matches = effects.filter(

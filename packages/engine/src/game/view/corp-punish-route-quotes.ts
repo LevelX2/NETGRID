@@ -290,11 +290,11 @@ export function quoteCorpPunishRoute(
             : traceTagStepId && traceTagResponse
               ? {
                   kind: "trace_tag_step",
-              status: "response_required",
-              currentRunnerTags: 0,
-              requiredRunnerTags: traceTagResponse.maximumTagAmount,
-              sourceStepId: traceTagStepId,
-              traceLimit: traceTagResponse.traceLimit,
+                  status: "response_required",
+                  currentRunnerTags: 0,
+                  requiredRunnerTags: traceTagResponse.maximumTagAmount,
+                  sourceStepId: traceTagStepId,
+                  traceLimit: traceTagResponse.traceLimit,
                 }
               : {
                   kind: "none",
@@ -304,8 +304,7 @@ export function quoteCorpPunishRoute(
                 },
       responsePaymentEnvelope: {
         responseKind: hasTraceTagResponse
-          ? hasDamage &&
-            visibleDamagePrevention.maximumPreventableDamage > 0
+          ? hasDamage && visibleDamagePrevention.maximumPreventableDamage > 0
             ? "mixed"
             : "trace_bid"
           : hasDamage
@@ -364,9 +363,9 @@ export function quoteCorpPunishRoute(
             traceTagResponse.minimumTagAmount <
               traceTagResponse.maximumTagAmount
           ? "conditional_on_runner_response"
-        : hasDamage
-          ? "conditional_on_runner_response"
-          : "guaranteed",
+          : hasDamage
+            ? "conditional_on_runner_response"
+            : "guaranteed",
       responseKnowledge: hasTraceTagResponse
         ? traceTagResponse.concealedRunnerResponsesUnknown
           ? "unknown"
@@ -581,7 +580,9 @@ function certifyExactTraceTagResponse(
   if (
     tagAmounts.some(
       (amount) =>
-        !Number.isSafeInteger(amount) || amount < 0 || amount > tagEffect.amount,
+        !Number.isSafeInteger(amount) ||
+        amount < 0 ||
+        amount > tagEffect.amount,
     ) ||
     maximumTagAmount !== tagEffect.amount
   ) {
@@ -619,9 +620,7 @@ function certifyExactTraceTagResponse(
 function exactTagApplicationOutcomes(
   state: GameState,
   depth = 0,
-):
-  | { states: GameState[]; usedTagPreventionWindow: boolean }
-  | undefined {
+): { states: GameState[]; usedTagPreventionWindow: boolean } | undefined {
   if (state.trace !== undefined || depth > 8) return undefined;
   const choice = state.pendingChoice;
   if (!choice) {
@@ -1179,9 +1178,7 @@ function conditionStatusAfterPriorSteps(
 function visibleDamagePreventionEnvelope(
   state: GameState,
   rawDamage: Readonly<Record<"meat" | "net" | "core", number>>,
-):
-  | CorpPunishRouteQuote["damageEnvelope"]["visiblePrevention"]
-  | undefined {
+): CorpPunishRouteQuote["damageEnvelope"]["visiblePrevention"] | undefined {
   const supportedSources: {
     matchingDamage: number;
     maximumPrevention: number;
@@ -1200,9 +1197,9 @@ function visibleDamagePreventionEnvelope(
       }
       continue;
     }
-    for (const source of
-      cardImplementationForDefinitionId(instance.definitionId)
-        ?.damagePreventionSources ?? []) {
+    for (const source of cardImplementationForDefinitionId(
+      instance.definitionId,
+    )?.damagePreventionSources ?? []) {
       const matchingDamage = source.damageTypes.reduce(
         (total, damageType) => total + rawDamage[damageType],
         0,
@@ -1253,8 +1250,7 @@ function visibleDamagePreventionEnvelope(
   if (supportedSources.length > 1) return undefined;
   return {
     knowledge: "bounded_public",
-    maximumPreventableDamage:
-      supportedSources[0]?.maximumPrevention ?? 0,
+    maximumPreventableDamage: supportedSources[0]?.maximumPrevention ?? 0,
     creditCost: { minimum: 0, maximum: 0 },
   };
 }

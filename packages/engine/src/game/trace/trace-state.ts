@@ -51,10 +51,7 @@ export function requireCurrentTrace(state: GameState): CurrentTrace {
   return trace;
 }
 
-export function traceIsInPhase(
-  state: GameState,
-  phase: TracePhase,
-): boolean {
+export function traceIsInPhase(state: GameState, phase: TracePhase): boolean {
   return currentTrace(state)?.status === phase;
 }
 
@@ -63,7 +60,8 @@ export function requireTracePhase(
   phase: TracePhase,
 ): CurrentTrace {
   const trace = currentTrace(state);
-  if (!trace || trace.status !== phase) throw new Error(TRACE_PHASE_MESSAGES[phase]);
+  if (!trace || trace.status !== phase)
+    throw new Error(TRACE_PHASE_MESSAGES[phase]);
   return trace;
 }
 
@@ -115,9 +113,7 @@ export function describeCurrentTraceWindow(
     hasCorpBid: trace.corpBid !== undefined,
     hasRunnerBid: trace.runnerBid !== undefined,
     ...(trace.corpBid !== undefined ? { corpBid: trace.corpBid } : {}),
-    ...(trace.traceValue !== undefined
-      ? { traceValue: trace.traceValue }
-      : {}),
+    ...(trace.traceValue !== undefined ? { traceValue: trace.traceValue } : {}),
     ...(trace.runnerLink !== undefined ? { runnerLink: trace.runnerLink } : {}),
     ...(trace.baseLinkSourceId !== undefined
       ? { baseLinkSourceId: trace.baseLinkSourceId }

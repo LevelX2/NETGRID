@@ -53,9 +53,7 @@ describe("match 9D15 runner contest decision checkpoints", () => {
             targetServerId: "remote_1",
             pathPassability: "blocked_missing_coverage",
             recommendation: "find_breaker_first",
-            requiredEvidence: [
-              "run_action_projection_bypass_first_ice:true",
-            ],
+            requiredEvidence: ["run_action_projection_bypass_first_ice:true"],
           },
         ],
       };
@@ -109,17 +107,14 @@ describe("match 9D15 runner contest decision checkpoints", () => {
   });
 
   it("does not release the run lock when its credit cost is unaffordable", () => {
-    const unaffordable = mutateFixture(
-      multiPointRunLockJson,
-      (checkpoint) => {
-        checkpoint.engine.testOnlyGameState.runner.credits = 1;
-        checkpoint.source.kind = "synthetic_companion";
-        checkpoint.source.findingId = "9D15-C04-RUN-LOCK-UNAFFORDABLE";
-        checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.trigger_ability" }],
-        };
-      },
-    );
+    const unaffordable = mutateFixture(multiPointRunLockJson, (checkpoint) => {
+      checkpoint.engine.testOnlyGameState.runner.credits = 1;
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "9D15-C04-RUN-LOCK-UNAFFORDABLE";
+      checkpoint.expectation = {
+        forbiddenActions: [{ actionId: "runner.trigger_ability" }],
+      };
+    });
 
     expectCheckpointToPass(unaffordable);
   });

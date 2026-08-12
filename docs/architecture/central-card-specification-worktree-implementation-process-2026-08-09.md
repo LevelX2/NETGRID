@@ -1,7 +1,7 @@
 # Zentrale CardSpec: Worktree-Umsetzungsprozess
 
 - Datum: 09.08.2026
-- Status: **in Umsetzung; CS00 bis CS12 abgeschlossen, CS13 ausstehend**
+- Status: **abgeschlossen; CS00 bis CS13 umgesetzt, verifiziert und lokal integriert**
 - Zielbranch: `codex/card-spec-registry-migration`
 - Ziel-Worktree: `C:\Projekte\NETGRID_CARD_SPEC_REGISTRY_MIGRATION`
 - Integrationsbranch: lokaler `main`
@@ -408,7 +408,7 @@ in diesem Dokument aktualisiert und mit dem jeweiligen Paket committed.
 | CS10  | Originalset-v1-Migration                               | completed |
 | CS11  | Consumer-, Altquellen-, Printing- und Asset-Cleanup    | completed |
 | CS12  | Side-sichere AI-Projektion und Broker-Zugplanung       | completed |
-| CS13  | Gesamtevidence, aktuelle Dokumentation und Integration | pending   |
+| CS13  | Gesamtevidence, aktuelle Dokumentation und Integration | completed |
 
 ## 12. Paketdetails
 
@@ -1632,6 +1632,33 @@ Done-Gate:
   Dateisystem;
 - der gemergte Arbeitsbranch wurde mit `git branch -d` entfernt;
 - kein Push oder PR wurde ausgeführt.
+
+Umsetzungsstand 2026-08-12:
+
+- Die paketweise Commitkette ist vollständig und strikt sequenziell belegt:
+  CS00 `1c57fb009`, CS01 `6906aaa05`, CS02 `e7bf86a10`, CS03 `1413a4fa3`,
+  CS04 `dbb62cd68`, CS05 `0d03aa8f1`, CS06 `a77112672`, CS07
+  `a7f140987`, CS08 `e6d901e68`, CS09 `28ffff193`, CS10 `6ce0ab533`,
+  CS11 `4fa459bb0` und CS12 `fd1dbcca0`. CS13 wurde über die dokumentierten
+  Reconciliation- und Abschlusscommits `8ff5b4352` und `f6fe70091` sowie den
+  nachfolgenden Dokumentationscommit geschlossen.
+- Die finale Registry enthält 620/620 Karten aus kanonischen CardSpecs. Das
+  erzeugte aktive KI-Artefakt enthält 618 Karten und ist zusammen mit
+  Importindex und Proteus-Readiness deterministisch und aktuell.
+- Workspace-Typecheck, Contracts, Shared-, Cards- und Engine-Tests,
+  Package-Boundaries, AI-Source-Structure, Card-Asset-Retention,
+  Proteus-Readiness und Build sind grün. Der abschließende AI-Lauf umfasst
+  494 Testdateien mit 4.138 grünen Tests. Das Generator-/Prettier-Gate ist für
+  alle geänderten formatierbaren Dateien grün; generatorautorisierte
+  JSON-Artefakte werden nun bereits kanonisch formatiert erzeugt.
+- Der finale kompatible Behavior-Baseline-Lauf umfasst 60 Spiele und 13.969
+  Entscheidungen. Er ist akzeptiert; Illegal Actions, Replay-, Action-Limit-,
+  Fallback-, Timeout-, Runtime-, Hidden-Info- und No-Legal-Action-Fehler sind
+  jeweils null.
+- Der Arbeitsbranch wurde per Fast-Forward lokal nach `main` integriert. Der
+  Hauptworkspace ist sauber; Ziel-Worktree und gemergter Arbeitsbranch wurden
+  anschließend entfernt und jeweils doppelt auf Abwesenheit geprüft. Es gab
+  keinen Push und keinen Pull Request.
 
 Commit:
 

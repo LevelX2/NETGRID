@@ -41,9 +41,7 @@ describe("Corp trace-bid play-cost projection", () => {
   });
 });
 
-function payoffCard(
-  playCost?: VisibleCard["playCost"],
-): VisibleCard {
+function payoffCard(playCost?: VisibleCard["playCost"]): VisibleCard {
   return {
     instanceId: "power-grid",
     definitionId: "onr_v1_299_power-grid-overload",

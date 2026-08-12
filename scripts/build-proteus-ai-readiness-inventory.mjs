@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { format } from "prettier";
 import {
   AI_HINTS_BY_CARD,
   RUNTIME_CARDS,
@@ -122,7 +123,7 @@ const inventory = {
   cards,
 };
 
-const serialized = `${JSON.stringify(inventory, null, 2)}\n`;
+const serialized = await format(JSON.stringify(inventory), { parser: "json" });
 if (shouldWrite) {
   await writeFile(outputPath, serialized, "utf8");
   console.log(`Wrote ${path.relative(root, outputPath)}.`);

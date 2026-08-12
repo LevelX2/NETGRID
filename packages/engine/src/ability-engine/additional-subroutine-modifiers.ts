@@ -56,7 +56,10 @@ function additionalSubroutineModifierAppliesToIce(
       modifier.sourceZone !== "corp_installed")
   )
     return false;
-  if (modifier.sourceZone === "corp_root" && !isPublicRezzedCorpRootModifier(modifier))
+  if (
+    modifier.sourceZone === "corp_root" &&
+    !isPublicRezzedCorpRootModifier(modifier)
+  )
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
   if (modifier.appliesTo.sourceCardOnly && sourceCardInstanceId !== iceId)
@@ -111,7 +114,9 @@ function subroutineDefinitionForImplementation(
       dynamicSubroutine,
     };
   }
-  throw new Error(`Unsupported additional subroutine: ${JSON.stringify(subroutine)}`);
+  throw new Error(
+    `Unsupported additional subroutine: ${JSON.stringify(subroutine)}`,
+  );
 }
 
 function rezzedInstalledIceRepeatCount(
@@ -135,7 +140,9 @@ function rezzedInstalledIceRepeatCount(
     source.zone.side !== "corp" ||
     source.zone.zone !== "serverIce"
   )
-    throw new Error("Additional subroutine repeat source is not installed ICE.");
+    throw new Error(
+      "Additional subroutine repeat source is not installed ICE.",
+    );
   const sourceZone = source.zone;
   const server = state.corp.servers.find(
     (candidate) => candidate.id === sourceZone.serverId,
@@ -144,7 +151,9 @@ function rezzedInstalledIceRepeatCount(
     throw new Error("Additional subroutine repeat source server is missing.");
   const sourceIndex = server.ice.indexOf(sourceCardInstanceId);
   if (sourceIndex < 0)
-    throw new Error("Additional subroutine repeat source is absent from its server.");
+    throw new Error(
+      "Additional subroutine repeat source is absent from its server.",
+    );
   return server.ice.slice(sourceIndex + 1).reduce((count, cardId) => {
     if (cardId === sourceCardInstanceId) return count;
     const instance = state.cardInstances[cardId];

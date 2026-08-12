@@ -4517,7 +4517,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(legal.payload).toMatchObject({
       cardId: legal.source,
       cardImplementationAbility: "activated",
-      cardImplementationAbilityKey: "abilities_activated_runner_main_gain_credits",
+      cardImplementationAbilityKey:
+        "abilities_activated_runner_main_gain_credits",
       cardImplementationAbilityTiming: "runner_main",
     });
     const wrongSide = applyAction(state, {

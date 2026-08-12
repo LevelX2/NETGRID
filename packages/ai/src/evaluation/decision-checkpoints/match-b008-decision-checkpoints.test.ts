@@ -48,9 +48,7 @@ describe("match B008 older decision checkpoints", () => {
         ],
         planExecution: {
           acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: [
-            "develop_onr_proteus_119_promises-promises",
-          ],
+          acceptableCapabilities: ["develop_onr_proteus_119_promises-promises"],
           requiredAssessmentEvidence: [
             "runner_same_turn_access_preparation:rd:onr_proteus_119_promises-promises",
           ],

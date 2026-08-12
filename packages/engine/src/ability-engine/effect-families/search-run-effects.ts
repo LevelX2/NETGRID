@@ -1,8 +1,6 @@
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeSearchRunEffect(
-  input: CardEffectFamilyInput,
-): boolean {
+export function executeSearchRunEffect(input: CardEffectFamilyInput): boolean {
   const { context, effect, publicPayload, runtime } = input;
   const { mergePublicPayload } = runtime;
 

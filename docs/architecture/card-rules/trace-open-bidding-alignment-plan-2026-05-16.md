@@ -162,30 +162,30 @@ Abnahmekriterien:
 
 ## Kartenmatrix
 
-| Karte | Aktueller Befund | Planbedarf | Priorität |
-| --- | --- | --- | --- |
-| Data Raven | Trace 5 nutzt den offenen Trace-Kern. | Kein Logikwechsel. UI soll klarer zeigen, dass 5 die Basis ist und Korp-Gebot addiert wird. | P2 |
-| Signpost | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`. | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +2 Link für diesen Trace`, einmal pro Trace. | abgeschlossen |
-| The Springboard | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`; statischer Base-Link wurde entfernt. | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +1 Link für diesen Trace`, einmal pro Trace. | abgeschlossen |
-| Rabbit | Original reduziert Trace Limit bei ICE. Engine berücksichtigt eine Korp-Bid-Obergrenzenreduktion für ICE-Traces. | Text auf moderne Begriffe bringen: reduziert die Korp-Bid-Obergrenze bei ICE-Traces, nicht die Basis-Trace-Stärke. | P1 |
-| Hacker Tracker Central | Original: Counter nach jedem Trace; Counter können Trace-Stärke und Trace Limit erhöhen. Engine nutzt Counter als Korp-Bid-Quelle. | Text und Tests auf moderne Gebotsquelle abstimmen. Quelle in Payload/Chronik nachvollziehbar machen. | P1 |
-| Krumz | Engine unterstützt Krumz-Bits als Korp-Trace-Bid-Quelle. | Quellenanzeige, Tests und Katalogtext prüfen. | P1 |
-| Hell's Run | Engine kennt diese Quelle für Runner-Trace-Link-Credits. | Behalten und gegen weitere Quellen abgleichen. | P1 |
-| Pandora's Deck | Original und lokale Definition deuten wiederkehrende Link-Credits an. Engine nutzt sie noch nicht als Runner-Bid-Quelle. | In Link-Credit-Inventar aufnehmen und Implementierungsbedarf prüfen. | P1 |
-| Bodyweight Data Creche | Lokale Definition enthält Link-Credit-Mechanik. Engine nutzt sie noch nicht als Runner-Bid-Quelle. | In Link-Credit-Inventar aufnehmen und Text/Mechanik angleichen. | P1 |
-| PK-6089a | Lokale Fakten deuten wiederkehrende Link-Credits an, aktuelle Definition wirkt generischer. | Originalwert, Release-Gate und gewünschte NETGRID-Fassung prüfen. | P1 |
-| Techtronica Utility Suit | Originaltext enthält Link-Credit-Bezug, aktuelle Definition fokussiert Schadenprävention. | Prüfen, ob Link-Credits im aktuellen Release überhaupt freigeschaltet werden sollen. | P1 |
-| Baedeker's Net Map | Base-Link-Karte. | Wert und Kosten gegen Zielmodell prüfen. | P1 |
-| Bakdoor | Originalwert wirkt höher als aktuelle lokale Definition. | Base-Link-Wert und Kostenmodell klären. | P1 |
-| Access through Alpha | Aktueller Workspace deutet bereits auf hohen Base-Link-Wert hin. | Gegen Original, Gate und gewünschte Vereinfachung prüfen. | P1 |
-| Access to Arasaka | Original enthält Base-Link und Link-Erhöhung. Aktuelle Definition wirkt vereinfacht. | Wert, Zusatzfähigkeit und Kostenmodell klären. | P1 |
-| Access to Kiribati | Base-Link-Karte. | Wert und Kosten gegen Zielmodell prüfen. | P1 |
-| Back Door to Hilliard | Original enthält Base-Link und Link-Erhöhung. | Wert, Zusatzfähigkeit und Kostenmodell klären. | P1 |
-| Back Door to Orbital Air | Original enthält Base-Link und Link-Erhöhung. | Wert, Zusatzfähigkeit und Kostenmodell klären. | P1 |
-| Submarine Uplink | Original enthält Base-Link, Link-Erhöhung und Jack-out-Folge. | Prüfen, ob Zusatzfolge im aktuellen Release gebraucht wird oder bewusst verschoben bleibt. | P1 |
-| Microtech 'Trode Set | Aktuell als +1 Link vereinfacht. | Gegen Base-Link-Zielmodell prüfen. | P1 |
-| Crybaby | Engine berücksichtigt Counter-Reduktion auf Runner-Link. | Tests und Anzeige beibehalten beziehungsweise ergänzen. | P2 |
-| Paris City Grid | Trace-Quelle im Corp-Upgrade-/City-Grid-Umfeld. | Nur Terminologie prüfen, kein offenes Bietmodell ändern. | P2 |
+| Karte                    | Aktueller Befund                                                                                                                   | Planbedarf                                                                                                         | Priorität     |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------- |
+| Data Raven               | Trace 5 nutzt den offenen Trace-Kern.                                                                                              | Kein Logikwechsel. UI soll klarer zeigen, dass 5 die Basis ist und Korp-Gebot addiert wird.                        | P2            |
+| Signpost                 | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`.                                                        | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +2 Link für diesen Trace`, einmal pro Trace.            | abgeschlossen |
+| The Springboard          | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`; statischer Base-Link wurde entfernt.                   | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +1 Link für diesen Trace`, einmal pro Trace.            | abgeschlossen |
+| Rabbit                   | Original reduziert Trace Limit bei ICE. Engine berücksichtigt eine Korp-Bid-Obergrenzenreduktion für ICE-Traces.                   | Text auf moderne Begriffe bringen: reduziert die Korp-Bid-Obergrenze bei ICE-Traces, nicht die Basis-Trace-Stärke. | P1            |
+| Hacker Tracker Central   | Original: Counter nach jedem Trace; Counter können Trace-Stärke und Trace Limit erhöhen. Engine nutzt Counter als Korp-Bid-Quelle. | Text und Tests auf moderne Gebotsquelle abstimmen. Quelle in Payload/Chronik nachvollziehbar machen.               | P1            |
+| Krumz                    | Engine unterstützt Krumz-Bits als Korp-Trace-Bid-Quelle.                                                                           | Quellenanzeige, Tests und Katalogtext prüfen.                                                                      | P1            |
+| Hell's Run               | Engine kennt diese Quelle für Runner-Trace-Link-Credits.                                                                           | Behalten und gegen weitere Quellen abgleichen.                                                                     | P1            |
+| Pandora's Deck           | Original und lokale Definition deuten wiederkehrende Link-Credits an. Engine nutzt sie noch nicht als Runner-Bid-Quelle.           | In Link-Credit-Inventar aufnehmen und Implementierungsbedarf prüfen.                                               | P1            |
+| Bodyweight Data Creche   | Lokale Definition enthält Link-Credit-Mechanik. Engine nutzt sie noch nicht als Runner-Bid-Quelle.                                 | In Link-Credit-Inventar aufnehmen und Text/Mechanik angleichen.                                                    | P1            |
+| PK-6089a                 | Lokale Fakten deuten wiederkehrende Link-Credits an, aktuelle Definition wirkt generischer.                                        | Originalwert, Release-Gate und gewünschte NETGRID-Fassung prüfen.                                                  | P1            |
+| Techtronica Utility Suit | Originaltext enthält Link-Credit-Bezug, aktuelle Definition fokussiert Schadenprävention.                                          | Prüfen, ob Link-Credits im aktuellen Release überhaupt freigeschaltet werden sollen.                               | P1            |
+| Baedeker's Net Map       | Base-Link-Karte.                                                                                                                   | Wert und Kosten gegen Zielmodell prüfen.                                                                           | P1            |
+| Bakdoor                  | Originalwert wirkt höher als aktuelle lokale Definition.                                                                           | Base-Link-Wert und Kostenmodell klären.                                                                            | P1            |
+| Access through Alpha     | Aktueller Workspace deutet bereits auf hohen Base-Link-Wert hin.                                                                   | Gegen Original, Gate und gewünschte Vereinfachung prüfen.                                                          | P1            |
+| Access to Arasaka        | Original enthält Base-Link und Link-Erhöhung. Aktuelle Definition wirkt vereinfacht.                                               | Wert, Zusatzfähigkeit und Kostenmodell klären.                                                                     | P1            |
+| Access to Kiribati       | Base-Link-Karte.                                                                                                                   | Wert und Kosten gegen Zielmodell prüfen.                                                                           | P1            |
+| Back Door to Hilliard    | Original enthält Base-Link und Link-Erhöhung.                                                                                      | Wert, Zusatzfähigkeit und Kostenmodell klären.                                                                     | P1            |
+| Back Door to Orbital Air | Original enthält Base-Link und Link-Erhöhung.                                                                                      | Wert, Zusatzfähigkeit und Kostenmodell klären.                                                                     | P1            |
+| Submarine Uplink         | Original enthält Base-Link, Link-Erhöhung und Jack-out-Folge.                                                                      | Prüfen, ob Zusatzfolge im aktuellen Release gebraucht wird oder bewusst verschoben bleibt.                         | P1            |
+| Microtech 'Trode Set     | Aktuell als +1 Link vereinfacht.                                                                                                   | Gegen Base-Link-Zielmodell prüfen.                                                                                 | P1            |
+| Crybaby                  | Engine berücksichtigt Counter-Reduktion auf Runner-Link.                                                                           | Tests und Anzeige beibehalten beziehungsweise ergänzen.                                                            | P2            |
+| Paris City Grid          | Trace-Quelle im Corp-Upgrade-/City-Grid-Umfeld.                                                                                    | Nur Terminologie prüfen, kein offenes Bietmodell ändern.                                                           | P2            |
 
 ## Regelmodell für offene Link-Booster
 

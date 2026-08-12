@@ -953,56 +953,56 @@ describe("shared plan scheduler", () => {
   ] as const)(
     "accepts early %s EndTurn only when the completion plan proves the exact remaining action set nonproductive",
     (side, policy) => {
-    const credit = candidate("credit", side);
-    const endTurn = standardEndTurnCandidate(side);
-    const schedulerContext = context(side, [credit, endTurn]);
-    schedulerContext.input.playerView.own.clicks = 1;
-    schedulerContext.actionDispositions = [
-      {
-        actionId: credit.actionId,
-        disposition: "explicitly_nonproductive",
-        ownerModuleId: `${side}.economy`,
-        evidenceCode:
-          `${side}_basic_credit_rejected_visible_liquidity_demand_satisfied`,
-      },
-    ];
-    const economy = module(side, `${side}.economy`, "P6", credit);
-    economy.discover = () => [];
-    const completion = module(
-      side,
-      `${side}.complete_turn`,
-      "P6",
-      endTurn,
-      -10_000,
-      "turn_flow.end_turn",
-    );
-    const baseMaterialize = completion.materialize;
-    completion.materialize = (
-      instance,
-      planAssessment,
-      materializationContext,
-    ) => ({
-      ...baseMaterialize(instance, planAssessment, materializationContext),
-      earlyEndTurnJustification: {
-        kind: "forgo_exhausted_voluntary_capacity",
-        capacityKind: "all_current_voluntary_actions_explicitly_nonproductive",
-        explicitlyNonproductiveActionIds: [credit.actionId],
-      },
-    });
-
-    const result = runPlanScheduler({
-      context: schedulerContext,
-      registry: createSidePlanRegistry({
+      const credit = candidate("credit", side);
+      const endTurn = standardEndTurnCandidate(side);
+      const schedulerContext = context(side, [credit, endTurn]);
+      schedulerContext.input.playerView.own.clicks = 1;
+      schedulerContext.actionDispositions = [
+        {
+          actionId: credit.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: `${side}.economy`,
+          evidenceCode: `${side}_basic_credit_rejected_visible_liquidity_demand_satisfied`,
+        },
+      ];
+      const economy = module(side, `${side}.economy`, "P6", credit);
+      economy.discover = () => [];
+      const completion = module(
         side,
-        priorityPolicy: policy,
-        modules: [economy, completion],
-      }),
-      resolveEngineWindow: () => undefined,
-    });
+        `${side}.complete_turn`,
+        "P6",
+        endTurn,
+        -10_000,
+        "turn_flow.end_turn",
+      );
+      const baseMaterialize = completion.materialize;
+      completion.materialize = (
+        instance,
+        planAssessment,
+        materializationContext,
+      ) => ({
+        ...baseMaterialize(instance, planAssessment, materializationContext),
+        earlyEndTurnJustification: {
+          kind: "forgo_exhausted_voluntary_capacity",
+          capacityKind:
+            "all_current_voluntary_actions_explicitly_nonproductive",
+          explicitlyNonproductiveActionIds: [credit.actionId],
+        },
+      });
 
-    expect(result.lane === "plan" && result.route.head.actionId).toBe(
-      endTurn.actionId,
-    );
+      const result = runPlanScheduler({
+        context: schedulerContext,
+        registry: createSidePlanRegistry({
+          side,
+          priorityPolicy: policy,
+          modules: [economy, completion],
+        }),
+        resolveEngineWindow: () => undefined,
+      });
+
+      expect(result.lane === "plan" && result.route.head.actionId).toBe(
+        endTurn.actionId,
+      );
     },
   );
 

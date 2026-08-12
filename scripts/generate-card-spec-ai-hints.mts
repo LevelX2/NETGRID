@@ -9,7 +9,9 @@ import {
 const artifactPath = fileURLToPath(
   new URL("../data/ai/card-spec-ai-hints-generated.json", import.meta.url),
 );
-const expected = serializeCardSpecAiHintArtifact(buildCardSpecAiHintArtifact());
+const expected = await serializeCardSpecAiHintArtifact(
+  buildCardSpecAiHintArtifact(),
+);
 
 if (process.argv.includes("--write")) {
   await writeFile(artifactPath, expected, "utf8");

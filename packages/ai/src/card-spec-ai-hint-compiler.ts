@@ -346,9 +346,7 @@ function deriveActionCapabilitySemantics(
       left.capabilityKey.localeCompare(right.capabilityKey),
     );
   const runnerUtility = entry.planning.engine.runnerUtilityLongtail;
-  if (
-    runnerUtility?.kind === "derez_fully_broken_passed_ice_and_end_run"
-  ) {
+  if (runnerUtility?.kind === "derez_fully_broken_passed_ice_and_end_run") {
     abilitySemantics.push({
       capabilityKey: runnerUtility.capabilityKey,
       effects: [
@@ -564,9 +562,9 @@ function deriveGenericTypedHintOverlay(
         ? "rnd"
         : virus.addOnSuccessfulRun.server === "any"
           ? "server"
-        : virus.addOnSuccessfulRun.server === "subsidiary_data_fort"
-          ? "remote"
-          : virus.addOnSuccessfulRun.server;
+          : virus.addOnSuccessfulRun.server === "subsidiary_data_fort"
+            ? "remote"
+            : virus.addOnSuccessfulRun.server;
     overlay.effects.push({
       kind: "persistent_counter_effect",
       scope: successfulRunScope,
@@ -605,7 +603,9 @@ function deriveGenericTypedHintOverlay(
     });
     overlay.functionSignals.push("access.free_trash", "virus.access_trash");
   }
-  if (virus?.startOfRunnerTurn?.kind === "random_reveal_hq_cards_per_two_counters") {
+  if (
+    virus?.startOfRunnerTurn?.kind === "random_reveal_hq_cards_per_two_counters"
+  ) {
     overlay.effects.push({
       kind: "hq_info",
       scope: "hq",
@@ -648,8 +648,7 @@ function deriveGenericTypedHintOverlay(
         throw new Error("card_spec_unknown_install_cost_modifier_shape");
       const sameFort = modifier.appliesTo.sameServerAsSource === true;
       overlay.effects.push({
-        kind:
-          modifier.operation === "reduce" ? "install_discount" : "run_tax",
+        kind: modifier.operation === "reduce" ? "install_discount" : "run_tax",
         scope: sameFort ? "fort" : "corp",
         timing: "persistent",
         resource: "credits",
@@ -786,10 +785,7 @@ function deriveGenericTypedHintOverlay(
     }
   }
   for (const window of engine.fortRunWindows ?? []) {
-    if (
-      window.kind ===
-      "block_stealth_bits_during_runs_on_this_fort"
-    ) {
+    if (window.kind === "block_stealth_bits_during_runs_on_this_fort") {
       overlay.effects.push({
         kind: "run_tax",
         scope: "fort",
@@ -818,9 +814,7 @@ function deriveGenericTypedHintOverlay(
         "remote.scoring_protection",
       );
     }
-    if (
-      window.kind === "temporary_hq_ice_encounter_after_successful_run"
-    ) {
+    if (window.kind === "temporary_hq_ice_encounter_after_successful_run") {
       overlay.effects.push({
         kind: "future_encounter_effect",
         scope: "run_path",
@@ -831,8 +825,7 @@ function deriveGenericTypedHintOverlay(
       overlay.functionSignals.push("ice.corp_fort_defense", "tax.ice");
     }
     if (
-      window.kind ===
-      "runner_pay_or_end_run_after_passing_ice_on_this_fort"
+      window.kind === "runner_pay_or_end_run_after_passing_ice_on_this_fort"
     ) {
       overlay.effects.push(
         {
@@ -892,9 +885,7 @@ function deriveGenericTypedHintOverlay(
           amount: effect.amount,
           repeatable: true,
         });
-        overlay.functionSignals.push(
-          "access.corp_central_access_reduction",
-        );
+        overlay.functionSignals.push("access.corp_central_access_reduction");
       }
       if (effect.kind !== "trash_installed_runner_cards") continue;
       overlay.effects.push({
@@ -990,8 +981,7 @@ function deriveGenericTypedHintOverlay(
     );
   }
   if (
-    hiddenReplacement?.kind ===
-    "secret_spend_guess_then_targeted_bypass_run"
+    hiddenReplacement?.kind === "secret_spend_guess_then_targeted_bypass_run"
   ) {
     if (hiddenReplacement.visibility !== "hidden_info_barrier")
       throw new Error("card_spec_unknown_targeted_bypass_run_shape");
@@ -1011,10 +1001,7 @@ function deriveGenericTypedHintOverlay(
         finite: true,
       },
     );
-    overlay.functionSignals.push(
-      "run.make_run",
-      "run.bypass_chosen_ice",
-    );
+    overlay.functionSignals.push("run.make_run", "run.bypass_chosen_ice");
   }
 
   const uniqueDirect = engine.uniqueDirectLongtail;
@@ -2611,10 +2598,7 @@ function deriveClosedMechanicalHintOverlay(
       { kind: "requires_runner_tagged" },
       { kind: "requires_installed_hardware" },
     );
-    overlay.functionSignals.push(
-      "access.corp_hardware_trash",
-      "tag.payoff",
-    );
+    overlay.functionSignals.push("access.corp_hardware_trash", "tag.payoff");
     overlay.tacticSignals.push("punish.payoff", "tag.payoff");
   }
 
@@ -5752,10 +5736,7 @@ function deriveTargetProfiles(
         modifier.appliesTo.cardType === "ice" &&
         modifier.appliesTo.sameServerAsSource === true,
     ) === true;
-  if (
-    preference?.kind === "target_preference" &&
-    sameFortAdditionalSubroutine
-  )
+  if (preference?.kind === "target_preference" && sameFortAdditionalSubroutine)
     return [
       {
         schemaVersion: "target-profile-v1",
@@ -6920,10 +6901,7 @@ function deriveHintEffects(
         amount: modifier.amount,
         resource: "credits",
       });
-    if (
-      modifier.kind === "ice_strength" &&
-      entry.definition.side === "corp"
-    )
+    if (modifier.kind === "ice_strength" && entry.definition.side === "corp")
       effects.push({
         kind: "remote_protection",
         scope: "ice",
@@ -8644,15 +8622,12 @@ function derivedFunctionSignals(
     if (window.kind === "move_self_to_outermost_position_on_other_fort")
       signals.add("corp_ice.mobile_position_change");
     if (
-      window.kind ===
-      "runner_pay_or_end_run_after_passing_ice_on_this_fort"
+      window.kind === "runner_pay_or_end_run_after_passing_ice_on_this_fort"
     ) {
       signals.add("run.corp_pay_or_end_run");
       signals.add("tax.runner_credit");
     }
-    if (
-      window.kind === "temporary_hq_ice_encounter_after_successful_run"
-    ) {
+    if (window.kind === "temporary_hq_ice_encounter_after_successful_run") {
       signals.add("ice.corp_fort_defense");
       signals.add("tax.ice");
     }
@@ -9020,10 +8995,7 @@ function derivedTacticSignals(
     signals.add("economy.corp_credit_burst");
   for (const modifier of engine.modifiers ?? []) {
     if (modifier.kind === "rez_cost") signals.add("ice.corp_rez_discount");
-    if (
-      modifier.kind === "ice_strength" &&
-      entry.definition.side === "corp"
-    )
+    if (modifier.kind === "ice_strength" && entry.definition.side === "corp")
       signals.add("ice.corp_strength_support");
     if (
       modifier.kind === "rez_cost" ||

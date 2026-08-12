@@ -11,10 +11,7 @@
     "futureRandomOutcomeAccess": false,
     "cardTextParsingAllowed": false
   },
-  "summary": {
-    "familyCount": 11,
-    "coveredPilotCardCount": 114
-  },
+  "summary": { "familyCount": 11, "coveredPilotCardCount": 114 },
   "scenarios": [
     {
       "id": "proteus_access_ambush",
@@ -124,9 +121,7 @@
       "engineEvidence": [
         "packages/engine/src/card-implementations/coverage.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/action-semantic-candidate.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/action-semantic-candidate.test.ts"]
     },
     {
       "id": "proteus_complex_multi_ability",
@@ -151,9 +146,7 @@
       "engineEvidence": [
         "packages/engine/src/index-tests/proteus/rule-contract-baseline-utilities.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/action-semantic-candidate.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/action-semantic-candidate.test.ts"]
     },
     {
       "id": "proteus_hidden_resource",
@@ -266,9 +259,7 @@
       "engineEvidence": [
         "packages/engine/src/game/choices/choice-validation.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/decision/target-choice-shadow.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/decision/target-choice-shadow.test.ts"]
     },
     {
       "id": "proteus_temporary_action",
@@ -300,9 +291,7 @@
       "engineEvidence": [
         "packages/engine/src/index-tests/proteus/action-economy-debt-suite.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/actions/action-cost-timing.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/actions/action-cost-timing.test.ts"]
     },
     {
       "id": "proteus_virus_counter",
@@ -358,9 +347,7 @@
       "engineEvidence": [
         "packages/engine/src/index-tests/proteus/variable-ice.test.ts"
       ],
-      "aiEvidence": [
-        "packages/ai/src/actions/action-cost-timing.test.ts"
-      ]
+      "aiEvidence": ["packages/ai/src/actions/action-cost-timing.test.ts"]
     }
   ]
 }

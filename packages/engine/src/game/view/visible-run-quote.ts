@@ -10,9 +10,7 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
-import {
-  dynamicSubroutineAttributionFor,
-} from "../../ability-engine/additional-subroutine-modifiers";
+import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { effectiveIceRunSubroutines } from "../run/effective-ice-run-subroutines";
@@ -28,15 +26,12 @@ export function visibleEffectiveIceRunQuote(
     return undefined;
   const definition = CARD_DEFINITIONS_BY_ID[definitionId];
   if (!definition || definition.type !== "ice") return undefined;
-  const subroutines = effectiveIceRunSubroutines(
-    state,
-    iceId,
-    definition,
-  ).map((subroutine) =>
-    visibleEffectiveSubroutine(subroutine, {
-      definitionId,
-      title: definition.title,
-    }),
+  const subroutines = effectiveIceRunSubroutines(state, iceId, definition).map(
+    (subroutine) =>
+      visibleEffectiveSubroutine(subroutine, {
+        definitionId,
+        title: definition.title,
+      }),
   );
   const breakCostQuote = quoteBreakSubroutineCostModifiers(state, iceId, 1);
   const runBreakCost = iceIsOnCurrentRunServer(state, iceId)

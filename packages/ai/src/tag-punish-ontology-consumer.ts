@@ -178,9 +178,7 @@ function tagPunishProfileFromHint(
   const effects = hint.effects ?? [];
   const conditions = hint.conditions ?? [];
   const effectKinds = sortedUnique(
-    effects
-      .filter(isTagPunishRelevantEffect)
-      .map((effect) => effect.kind),
+    effects.filter(isTagPunishRelevantEffect).map((effect) => effect.kind),
   );
   const conditionKinds = sortedUnique(
     conditions
@@ -254,9 +252,7 @@ function isTagPunishPayoffEffect(effect: AiHintStructuredEffect): boolean {
   );
 }
 
-function isTagPunishRelevantEffect(
-  effect: AiHintStructuredEffect,
-): boolean {
+function isTagPunishRelevantEffect(effect: AiHintStructuredEffect): boolean {
   return (
     isTagSourceEffect(effect) ||
     isTagPunishPayoffEffect(effect) ||

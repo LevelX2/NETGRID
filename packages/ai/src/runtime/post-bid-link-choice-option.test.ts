@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 describe("post-bid link choice option", () => {
   it("uses structured option metadata to select the minimal outcome-changing link", () => {

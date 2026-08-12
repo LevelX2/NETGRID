@@ -15,15 +15,10 @@ import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runt
 describe("plan-first Central information-action ownership", () => {
   it("routes an exact productive R&D Protocol run through Central pressure instead of disposing it as preparation", () => {
     resetResidentPlanPortfolioMemory();
-    const protocol = visibleCard(
-      "rd-protocol",
-      "runner",
-      "hardware",
-      {
-        definitionId: "onr_v1_050_r-and-d-protocol-files",
-        title: "R&D Protocol Files",
-      },
-    );
+    const protocol = visibleCard("rd-protocol", "runner", "hardware", {
+      definitionId: "onr_v1_050_r-and-d-protocol-files",
+      title: "R&D Protocol Files",
+    });
     const protocolRun = legalAction(
       "run-rd-with-protocol",
       "runner",
@@ -48,11 +43,7 @@ describe("plan-first Central information-action ownership", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.rig = [protocol];
     input.playerView.opponent.deckCount = 20;
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     const target = {
       ...safeRuntimeRunTarget(protocolRun.actionId, "rd"),
       score: 320,
@@ -72,15 +63,10 @@ describe("plan-first Central information-action ownership", () => {
 
   it("does not materialize a known-no-payoff R&D Protocol variant beside an executable direct R&D run", () => {
     resetResidentPlanPortfolioMemory();
-    const protocol = visibleCard(
-      "rd-protocol",
-      "runner",
-      "hardware",
-      {
-        definitionId: "onr_v1_050_r-and-d-protocol-files",
-        title: "R&D Protocol Files",
-      },
-    );
+    const protocol = visibleCard("rd-protocol", "runner", "hardware", {
+      definitionId: "onr_v1_050_r-and-d-protocol-files",
+      title: "R&D Protocol Files",
+    });
     const protocolRun = legalAction(
       "aaa-protocol-rd",
       "runner",
@@ -111,11 +97,7 @@ describe("plan-first Central information-action ownership", () => {
     input.playerView.own.credits = 5;
     input.playerView.own.rig = [protocol];
     input.playerView.opponent.deckCount = 20;
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     const productiveDirect = safeRuntimeRunTarget(directRun.actionId, "rd");
     const exhaustedProtocol = {
       ...safeRuntimeRunTarget(protocolRun.actionId, "rd"),
@@ -144,15 +126,10 @@ describe("plan-first Central information-action ownership", () => {
 
   it("keeps an underreserved private-look run blocked in its Central parent", () => {
     resetResidentPlanPortfolioMemory();
-    const protocol = visibleCard(
-      "rd-protocol",
-      "runner",
-      "hardware",
-      {
-        definitionId: "onr_v1_050_r-and-d-protocol-files",
-        title: "R&D Protocol Files",
-      },
-    );
+    const protocol = visibleCard("rd-protocol", "runner", "hardware", {
+      definitionId: "onr_v1_050_r-and-d-protocol-files",
+      title: "R&D Protocol Files",
+    });
     const protocolRun = legalAction(
       "underreserved-protocol-rd",
       "runner",
@@ -182,11 +159,7 @@ describe("plan-first Central information-action ownership", () => {
     input.playerView.own.clicks = 2;
     input.playerView.own.rig = [protocol];
     input.playerView.opponent.deckCount = 20;
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     const target = {
       ...safeRuntimeRunTarget(protocolRun.actionId, "rd"),
       accessPayoff: "access_bonus" as const,

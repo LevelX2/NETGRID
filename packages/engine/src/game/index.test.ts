@@ -54,7 +54,9 @@ describe("game facade", () => {
     );
 
     expect(state).toEqual(legacyState);
-    expect(legalActionsFor(state, "corp")).toEqual(getLegalActions(state, "corp"));
+    expect(legalActionsFor(state, "corp")).toEqual(
+      getLegalActions(state, "corp"),
+    );
     expect(playerViewFor(state, "corp")).toEqual(getPlayerView(state, "corp"));
     expect(hashState(state)).toBe(legacyHashState(state));
     expect(hashGameState(state)).toBe(legacyHashState(state));
@@ -220,18 +222,18 @@ describe("game facade", () => {
       runnerBid: 1,
     } as NonNullable<ReturnType<typeof createGame>["trace"]>;
 
-    expect(describeTraceResultFromTrace(trace, { runnerLinkFallback: 0 })).toEqual(
-      {
-        traceLimit: 5,
-        corpBid: 1,
-        traceValue: 1,
-        baseLinkValue: 0,
-        runnerLink: 0,
-        runnerBid: 1,
-        postBidLinkValue: 0,
-        runnerStrength: 1,
-        successful: true,
-      },
-    );
+    expect(
+      describeTraceResultFromTrace(trace, { runnerLinkFallback: 0 }),
+    ).toEqual({
+      traceLimit: 5,
+      corpBid: 1,
+      traceValue: 1,
+      baseLinkValue: 0,
+      runnerLink: 0,
+      runnerBid: 1,
+      postBidLinkValue: 0,
+      runnerStrength: 1,
+      successful: true,
+    });
   });
 });

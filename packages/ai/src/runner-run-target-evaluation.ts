@@ -259,9 +259,7 @@ function evaluateRunnerRunTarget(
     projection.spendLimit !== undefined &&
     (path.visibleBreakCost ?? 0) > projection.spendLimit;
   const probabilisticUniversalPathReachable = Boolean(
-    randomBreakOrDamageRiskCanCarryRunPath(
-      randomBreakOrDamageRiskAssessment,
-    ),
+    randomBreakOrDamageRiskCanCarryRunPath(randomBreakOrDamageRiskAssessment),
   );
   let pathPassability = randomBreakOrDamageRiskAssessment?.blockedByHandBuffer
     ? "blocked_by_random_break_damage_hand_buffer"
@@ -1235,10 +1233,7 @@ function quoteRunnerPrerunReserve(params: {
     riskTolerance === "matchpoint_with_stable_universal_coverage"
       ? Math.max(1, baseRequiredCredits - 1)
       : baseRequiredCredits;
-  const creditGap = Math.max(
-    0,
-    requiredCredits - params.creditsAfterKnownPath,
-  );
+  const creditGap = Math.max(0, requiredCredits - params.creditsAfterKnownPath);
   const requiredHandBuffer =
     params.unknownIceCount === 0 || corpRezCredits === 0
       ? 0

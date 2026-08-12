@@ -148,9 +148,7 @@ export function validateGameState(state: GameState): ValidationResult {
     if (transaction.continuation?.kind === "card_effect_activated") {
       const continuation = transaction.continuation;
       try {
-        const parsed = parseCanonicalCapabilityId(
-          continuation.sourceAbilityId,
-        );
+        const parsed = parseCanonicalCapabilityId(continuation.sourceAbilityId);
         if (parsed.cardDefinitionId !== continuation.sourceDefinitionId)
           errors.push(
             "Pending Corp draw activated continuation capability belongs to another definition.",
@@ -403,10 +401,7 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.trace) {
     if (!state.cardInstances[state.trace.sourceCardInstanceId])
       errors.push("Trace references missing source card.");
-    if (
-      !Number.isInteger(state.trace.traceLimit) ||
-      state.trace.traceLimit < 0
-    )
+    if (!Number.isInteger(state.trace.traceLimit) || state.trace.traceLimit < 0)
       errors.push("Trace limit is invalid.");
     if (
       state.trace.effectiveTraceLimit !== undefined &&

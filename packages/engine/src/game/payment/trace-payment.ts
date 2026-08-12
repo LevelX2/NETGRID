@@ -469,7 +469,8 @@ export function quoteCorpTraceBidPayment(
   );
   const normalCorpCreditsAvailable = Math.max(
     0,
-    deps.corpCreditsAvailable(state) - implementationTemporaryTraceCreditsAvailable,
+    deps.corpCreditsAvailable(state) -
+      implementationTemporaryTraceCreditsAvailable,
   );
   const fortTraceBitPoolAvailable =
     trace.fortTraceBitPoolSourceCardInstanceId && trace.fortTraceBitPoolServerId

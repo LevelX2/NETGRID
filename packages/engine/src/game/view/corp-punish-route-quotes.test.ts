@@ -675,9 +675,7 @@ describe("Corp punish-route quote request", () => {
 
     const missingProbe = quoteCorpPunishRoute(
       left,
-      routeRequest(left, [
-        step(left, "probe", 0, "tag", "nonexistent-source"),
-      ]),
+      routeRequest(left, [step(left, "probe", 0, "tag", "nonexistent-source")]),
     );
     const hiddenProbe = quoteCorpPunishRoute(
       left,
@@ -798,9 +796,7 @@ describe("Corp punish-route quote request", () => {
     expect(
       quoteCorpPunishRoute(
         state,
-        routeRequest(state, [
-          step(state, "damage", 0, "meat_damage", damage),
-        ]),
+        routeRequest(state, [step(state, "damage", 0, "meat_damage", damage)]),
       ),
     ).toMatchObject({
       ok: true,
@@ -829,9 +825,7 @@ describe("Corp punish-route quote request", () => {
     expect(
       quoteCorpPunishRoute(
         state,
-        routeRequest(state, [
-          step(state, "trace", 0, "trace_tag", trace),
-        ]),
+        routeRequest(state, [step(state, "trace", 0, "trace_tag", trace)]),
       ),
     ).toMatchObject({
       ok: true,

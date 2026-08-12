@@ -65,23 +65,26 @@ if (options.list) {
   for (const file of files) console.log(`- ${file}`);
 }
 
-const result = spawnSync(
-  prettier.command,
-  [...prettier.args, "--check", "--", ...files],
-  {
-    cwd: repoRoot,
-    stdio: "inherit",
-    shell: false,
-  },
-);
-
-if (result.error) {
-  console.error(
-    `FORMAT_CHANGED failed to start prettier: ${result.error.message}`,
+for (const batch of batchesOf(files, 25)) {
+  const result = spawnSync(
+    prettier.command,
+    [...prettier.args, "--check", "--", ...batch],
+    {
+      cwd: repoRoot,
+      stdio: "inherit",
+      shell: false,
+    },
   );
-  process.exit(1);
+
+  if (result.error) {
+    console.error(
+      `FORMAT_CHANGED failed to start prettier: ${result.error.message}`,
+    );
+    process.exit(1);
+  }
+  if (result.status !== 0) process.exit(result.status ?? 1);
 }
-process.exit(result.status ?? 1);
+process.exit(0);
 
 function parseArgs(rawArgs) {
   const parsed = {
@@ -175,6 +178,14 @@ function prettierBinary() {
 
 function unique(values) {
   return [...new Set(values)].sort();
+}
+
+function batchesOf(values, size) {
+  const batches = [];
+  for (let index = 0; index < values.length; index += size) {
+    batches.push(values.slice(index, index + size));
+  }
+  return batches;
 }
 
 function runSelfTest() {

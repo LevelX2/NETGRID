@@ -194,9 +194,9 @@ export function endOfRunnerTurnAbilityBindingForLegalAction(
     );
   assertCanonicalBindingMode(legalAction, "Lifecycle");
   const canonical = assertCanonicalPayloadBinding(definition, legalAction);
-  const matches = (engineCard.engine.lifecycle?.end_of_runner_turn ?? []).filter(
-    (ability) => ability.capabilityKey === canonical.capabilityKey,
-  );
+  const matches = (
+    engineCard.engine.lifecycle?.end_of_runner_turn ?? []
+  ).filter((ability) => ability.capabilityKey === canonical.capabilityKey);
   if (matches.length === 0)
     throw new CardCapabilityBindingError(
       "unknown_activated_capability",

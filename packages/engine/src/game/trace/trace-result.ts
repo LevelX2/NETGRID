@@ -46,7 +46,7 @@ export function isTraceSuccessful(
 ): boolean {
   return (
     trace.successful ??
-    (traceCorpValue(trace) >= traceRunnerStrength(trace, options))
+    traceCorpValue(trace) >= traceRunnerStrength(trace, options)
   );
 }
 
@@ -66,8 +66,7 @@ export function describeTraceResultFromTrace(
     runnerBid: trace.runnerBid ?? 0,
     postBidLinkValue: trace.postBidLinkBonus ?? 0,
     runnerStrength,
-    successful:
-      trace.successful ?? (traceValue >= runnerStrength),
+    successful: trace.successful ?? traceValue >= runnerStrength,
   };
 }
 

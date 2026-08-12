@@ -820,11 +820,11 @@ function installedCardIsInsideServer(
   const instance = host.state.cardInstances[cardId];
   return Boolean(
     instance &&
-      instance.controller === "corp" &&
-        instance.zone.side === "corp" &&
-        instance.zone.zone === "serverRoot" &&
-        instance.zone.serverId === serverId &&
-        host.servers.mustServer(serverId).root.includes(cardId),
+    instance.controller === "corp" &&
+    instance.zone.side === "corp" &&
+    instance.zone.zone === "serverRoot" &&
+    instance.zone.serverId === serverId &&
+    host.servers.mustServer(serverId).root.includes(cardId),
   );
 }
 

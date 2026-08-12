@@ -62,9 +62,7 @@ describe("tag punish ontology conflict detection", () => {
 
   it("does not classify a typed source-trash economy cashout as tag punishment", () => {
     expect(
-      getStructuredTagPunishProfileForCard(
-        "onr_v1_328_information-laundering",
-      ),
+      getStructuredTagPunishProfileForCard("onr_v1_328_information-laundering"),
     ).toBeUndefined();
   });
 });

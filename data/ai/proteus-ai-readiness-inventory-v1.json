@@ -52,12 +52,8 @@
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -70,21 +66,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_002_charity-takeover",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -107,12 +97,8 @@
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -125,21 +111,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_004_fetal-ai",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -152,21 +132,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_005_marked-accounts",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -177,23 +151,17 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_006_please-dont-choke-anyone",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -206,21 +174,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_007_project-venice",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -233,21 +195,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_008_project-zurich",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -260,21 +216,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_009_viral-breeding-ground",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -285,23 +235,17 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
         ],
         "targetProfileCount": 1,
-        "effectCount": 1
+        "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_010_world-domination",
       "side": "corp",
       "cardType": "agenda",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -314,21 +258,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_011_brain-wash",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -341,21 +279,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_012_bug-zapper",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -368,21 +300,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_013_caryatid",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -405,12 +331,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -433,12 +355,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -451,21 +369,15 @@
         "targetProfileCount": 0,
         "effectCount": 3
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_016_coyote",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -478,21 +390,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_017_credit-blocks",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -515,12 +421,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -543,9 +445,7 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -558,21 +458,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "baseline_decision_smoke_green"
-      ]
+      "removalConditions": ["baseline_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_020_digiconda",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -585,21 +479,15 @@
         "targetProfileCount": 0,
         "effectCount": 3
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_021_dog-pile",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -612,21 +500,15 @@
         "targetProfileCount": 0,
         "effectCount": 3
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_022_food-fight",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -639,21 +521,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_023_galatea",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -676,12 +552,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -694,21 +566,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_025_homing-missile",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -721,21 +587,15 @@
         "targetProfileCount": 0,
         "effectCount": 7
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_026_hunting-pack",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -748,21 +608,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_027_iceberg",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -775,21 +629,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_028_lesser-arcana",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -812,12 +660,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -840,12 +684,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -858,21 +698,15 @@
         "targetProfileCount": 0,
         "effectCount": 3
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_031_minotaur",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -885,21 +719,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_032_misleading-access-menus",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -912,21 +740,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_033_mobile-barricade",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -949,12 +771,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -967,21 +785,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_035_roadblock",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "random_outcome",
-      "classificationReasons": [
-        "random_outcome_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["random_outcome_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1004,12 +816,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1022,21 +830,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_037_scaffolding",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1059,9 +861,7 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1074,21 +874,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "baseline_decision_smoke_green"
-      ]
+      "removalConditions": ["baseline_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_039_sphinx-2006",
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1111,12 +905,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1139,12 +929,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1167,12 +953,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1195,9 +977,7 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1220,12 +1000,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1248,12 +1024,8 @@
       "side": "corp",
       "cardType": "ice",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1276,9 +1048,7 @@
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "x_cost",
-      "classificationReasons": [
-        "variable_x_semantics"
-      ],
+      "classificationReasons": ["variable_x_semantics"],
       "pilotDeckIds": [
         "proteus_corp_antibody_tax_2026_05_25",
         "proteus_corp_region_fast_score_2026_05_25"
@@ -1305,12 +1075,8 @@
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1333,12 +1099,8 @@
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1351,21 +1113,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_049_emergency-rig",
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1378,21 +1134,15 @@
         "targetProfileCount": 1,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_050_manhunt",
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1405,21 +1155,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_051_rent-to-own-contract",
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1432,21 +1176,15 @@
         "targetProfileCount": 1,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_052_schlaghund-pointers",
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1459,21 +1197,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_053_underworld-mole",
       "side": "corp",
       "cardType": "operation",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1486,21 +1218,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_054_bel-digmo-antibody",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1513,21 +1239,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_055_cybertech-think-tank",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1540,21 +1260,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_056_department-of-misinformation",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1577,12 +1291,8 @@
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1595,21 +1305,15 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_058_executive-boot-camp",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "random_outcome",
-      "classificationReasons": [
-        "random_outcome_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["random_outcome_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1622,21 +1326,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_059_government-contract",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1649,21 +1347,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_060_herman-revista",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1676,21 +1368,15 @@
         "targetProfileCount": 1,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_061_ldl-traffic-analyzers",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1703,21 +1389,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_062_lesley-major",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1730,18 +1410,14 @@
         "targetProfileCount": 1,
         "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_063_lisa-blight",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "random_outcome",
-      "classificationReasons": [
-        "random_outcome_semantics"
-      ],
+      "classificationReasons": ["random_outcome_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1754,18 +1430,14 @@
         "targetProfileCount": 1,
         "effectCount": 0
       },
-      "removalConditions": [
-        "random_outcome_decision_smoke_green"
-      ]
+      "removalConditions": ["random_outcome_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_064_marcel-desoleil",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1778,21 +1450,15 @@
         "targetProfileCount": 1,
         "effectCount": 0
       },
-      "removalConditions": [
-        "target_choice_decision_smoke_green"
-      ]
+      "removalConditions": ["target_choice_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_065_networked-center",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1805,18 +1471,14 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_066_obfuscated-fortress",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1829,21 +1491,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "baseline_decision_smoke_green"
-      ]
+      "removalConditions": ["baseline_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_067_panic-button",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -1866,12 +1522,8 @@
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1882,20 +1534,16 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 0
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_069_pavit-bharat",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1908,21 +1556,15 @@
         "targetProfileCount": 1,
         "effectCount": 0
       },
-      "removalConditions": [
-        "target_choice_decision_smoke_green"
-      ]
+      "removalConditions": ["target_choice_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_070_rasmin-bridger",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1933,20 +1575,16 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_baseline"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_071_raymond-ellison",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1959,21 +1597,15 @@
         "targetProfileCount": 1,
         "effectCount": 0
       },
-      "removalConditions": [
-        "temporary_action_decision_smoke_green"
-      ]
+      "removalConditions": ["temporary_action_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_072_research-bunker",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -1986,18 +1618,14 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_073_simon-francisco",
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2010,18 +1638,14 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "access_ambush_decision_smoke_green"
-      ]
+      "removalConditions": ["access_ambush_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_074_siren",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2034,21 +1658,15 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": [
-        "run_modification_decision_smoke_green"
-      ]
+      "removalConditions": ["run_modification_decision_smoke_green"]
     },
     {
       "cardId": "onr_proteus_075_stereogram-antibody",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_antibody_tax_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -2061,18 +1679,14 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_076_syd-meyer-superstores",
       "side": "corp",
       "cardType": "asset",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2095,12 +1709,8 @@
       "side": "corp",
       "cardType": "upgrade",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
-      "pilotDeckIds": [
-        "proteus_corp_region_fast_score_2026_05_25"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
+      "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": true,
@@ -2113,21 +1723,15 @@
         "targetProfileCount": 0,
         "effectCount": 1
       },
-      "removalConditions": [
-        "pilot_benchmark_coverage"
-      ]
+      "removalConditions": ["pilot_benchmark_coverage"]
     },
     {
       "cardId": "onr_proteus_078_armageddon",
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
-      "classificationReasons": [
-        "virus_or_antibody_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["virus_or_antibody_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2138,7 +1742,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 1
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2150,9 +1754,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2179,12 +1781,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2207,12 +1805,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2235,12 +1829,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2263,9 +1853,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2292,9 +1880,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
-      "classificationReasons": [
-        "virus_or_antibody_semantics"
-      ],
+      "classificationReasons": ["virus_or_antibody_semantics"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2309,7 +1895,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
         ],
         "targetProfileCount": 1,
-        "effectCount": 1
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2321,9 +1907,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2350,12 +1934,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2378,9 +1958,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2403,12 +1981,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2431,9 +2005,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
-      "classificationReasons": [
-        "virus_or_antibody_semantics"
-      ],
+      "classificationReasons": ["virus_or_antibody_semantics"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2448,7 +2020,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
         ],
         "targetProfileCount": 1,
-        "effectCount": 1
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2460,9 +2032,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
-      "classificationReasons": [
-        "virus_or_antibody_semantics"
-      ],
+      "classificationReasons": ["virus_or_antibody_semantics"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2477,7 +2047,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
         ],
         "targetProfileCount": 0,
-        "effectCount": 2
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2489,12 +2059,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2517,12 +2083,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2545,9 +2107,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2570,12 +2130,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
-      "classificationReasons": [
-        "virus_or_antibody_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["virus_or_antibody_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2586,7 +2142,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2598,9 +2154,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2627,9 +2181,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2652,38 +2204,7 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "virus_counter",
-      "classificationReasons": [
-        "virus_or_antibody_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25",
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
-      "evidence": {
-        "hintReviewed": true,
-        "strategyCovered": false,
-        "benchmarkCovered": false,
-        "confidence": "unknown",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
-        ],
-        "targetProfileCount": 0,
-        "effectCount": 1
-      },
-      "removalConditions": [
-        "strategy_coverage_or_explicit_non_strategy_decision",
-        "pilot_benchmark_coverage"
-      ]
-    },
-    {
-      "cardId": "onr_proteus_098_vienna-22",
-      "side": "runner",
-      "cardType": "program",
-      "primaryFamily": "virus_counter",
-      "classificationReasons": [
-        "virus_or_antibody_semantics"
-      ],
+      "classificationReasons": ["virus_or_antibody_semantics"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2706,13 +2227,38 @@
       ]
     },
     {
+      "cardId": "onr_proteus_098_vienna-22",
+      "side": "runner",
+      "cardType": "program",
+      "primaryFamily": "virus_counter",
+      "classificationReasons": ["virus_or_antibody_semantics"],
+      "pilotDeckIds": [
+        "proteus_runner_hq_virus_derez_2026_05_25",
+        "proteus_runner_rd_bad_publicity_2026_05_25"
+      ],
+      "evidence": {
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "benchmarkCovered": false,
+        "confidence": "unknown",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
+        ],
+        "targetProfileCount": 0,
+        "effectCount": 3
+      },
+      "removalConditions": [
+        "strategy_coverage_or_explicit_non_strategy_decision",
+        "pilot_benchmark_coverage"
+      ]
+    },
+    {
       "cardId": "onr_proteus_099_viral-pipeline",
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -2727,7 +2273,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2739,12 +2285,8 @@
       "side": "runner",
       "cardType": "program",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2767,9 +2309,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2792,9 +2332,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2817,12 +2355,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2845,9 +2379,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2870,12 +2402,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2898,12 +2426,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2926,9 +2450,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -2951,12 +2473,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -2979,12 +2497,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3007,12 +2521,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3035,9 +2545,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3060,9 +2568,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3085,12 +2591,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3113,12 +2615,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3141,9 +2639,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3166,12 +2662,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3194,12 +2686,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3222,9 +2710,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3247,12 +2733,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "access_ambush",
-      "classificationReasons": [
-        "access_or_ambush_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3275,12 +2757,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3303,12 +2781,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3331,12 +2805,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3359,12 +2829,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3387,9 +2853,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3412,12 +2876,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "bad_publicity",
-      "classificationReasons": [
-        "bad_publicity_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["bad_publicity_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3440,12 +2900,8 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3468,9 +2924,7 @@
       "side": "runner",
       "cardType": "event",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3493,9 +2947,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3518,12 +2970,8 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3546,9 +2994,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3571,9 +3017,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "random_outcome",
-      "classificationReasons": [
-        "random_outcome_semantics"
-      ],
+      "classificationReasons": ["random_outcome_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3596,9 +3040,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3621,12 +3063,8 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3649,12 +3087,8 @@
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3677,12 +3111,8 @@
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "baseline",
-      "classificationReasons": [
-        "no_specialized_readiness_model_required"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3705,9 +3135,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3730,9 +3158,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3755,9 +3181,7 @@
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "complex_multi_ability",
-      "classificationReasons": [
-        "multiple_semantic_surfaces"
-      ],
+      "classificationReasons": ["multiple_semantic_surfaces"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3780,9 +3204,7 @@
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3805,9 +3227,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3830,9 +3250,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3855,12 +3273,8 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3883,12 +3297,8 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3911,9 +3321,7 @@
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3936,9 +3344,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -3961,12 +3367,8 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "target_choice",
-      "classificationReasons": [
-        "target_profile_present"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["target_profile_present"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3989,12 +3391,8 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_rd_bad_publicity_2026_05_25"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -4017,9 +3415,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "run_modification",
-      "classificationReasons": [
-        "run_modification_semantics"
-      ],
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -4042,9 +3438,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -4067,9 +3461,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -4096,12 +3488,8 @@
       "side": "runner",
       "cardType": "hardware",
       "primaryFamily": "temporary_action",
-      "classificationReasons": [
-        "temporary_or_delayed_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["temporary_or_delayed_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -4124,12 +3512,8 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
-      "pilotDeckIds": [
-        "proteus_runner_hq_virus_derez_2026_05_25"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -4152,9 +3536,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -4177,9 +3559,7 @@
       "side": "runner",
       "cardType": "resource",
       "primaryFamily": "hidden_resource",
-      "classificationReasons": [
-        "hidden_resource_semantics"
-      ],
+      "classificationReasons": ["hidden_resource_semantics"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,

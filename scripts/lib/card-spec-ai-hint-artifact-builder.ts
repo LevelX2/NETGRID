@@ -5,6 +5,7 @@ import {
   CS06_CARD_DEFINITION_IDS,
 } from "../../packages/cards/src/engine/index";
 import { cardSpecPlanningCards } from "../../packages/cards/src/planning/index";
+import { format } from "prettier";
 
 import aiSupportScenarioData from "../../data/scenarios/card-support-ai-supported-current.json";
 import {
@@ -142,10 +143,10 @@ export function buildCardSpecAiHintArtifact(options?: {
   };
 }
 
-export function serializeCardSpecAiHintArtifact(
+export async function serializeCardSpecAiHintArtifact(
   artifact = buildCardSpecAiHintArtifact(),
-): string {
-  return `${JSON.stringify(artifact, null, 2)}\n`;
+): Promise<string> {
+  return format(JSON.stringify(artifact), { parser: "json" });
 }
 
 function assertExactIds(

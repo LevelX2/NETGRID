@@ -146,9 +146,7 @@ describe("runner during-run CardImplementation actions", () => {
           cardDefinition,
           timing,
         ) => {
-          calls.push(
-            `${side}:${sourceCardId}:${cardDefinition.id}:${timing}`,
-          );
+          calls.push(`${side}:${sourceCardId}:${cardDefinition.id}:${timing}`);
           if (timing !== "during_run") return;
           legalActions.push(
             action(sourceCardId, {
@@ -168,10 +166,9 @@ describe("runner during-run CardImplementation actions", () => {
       "runner:program_b:program_b_definition:during_run",
       "runner:program_b:program_b_definition:runner_paid",
     ]);
-    expect(result.legalActions.map((legalAction) => legalAction.source)).toEqual([
-      "program_a",
-      "program_b",
-    ]);
+    expect(
+      result.legalActions.map((legalAction) => legalAction.source),
+    ).toEqual(["program_a", "program_b"]);
     expect(result.legalActions[0]?.payload).toEqual({
       sourceDefinitionId: "program_a_definition",
       cardImplementationAbilityTiming: "during_run",
@@ -332,9 +329,8 @@ describe("corp during-run CardImplementation actions", () => {
       "corp:agenda_a:agenda_a_definition:corp_during_run",
       "corp:agenda_b:agenda_b_definition:corp_during_run",
     ]);
-    expect(result.legalActions.map((legalAction) => legalAction.source)).toEqual([
-      "agenda_a",
-      "agenda_b",
-    ]);
+    expect(
+      result.legalActions.map((legalAction) => legalAction.source),
+    ).toEqual(["agenda_a", "agenda_b"]);
   });
 });

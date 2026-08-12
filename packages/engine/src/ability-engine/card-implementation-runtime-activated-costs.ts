@@ -107,8 +107,7 @@ function purgeableCounterAmount(
   return Math.max(
     0,
     Math.floor(
-      state.purgeableRunnerVirusCounters?.servers?.[server]?.[counterType] ??
-        0,
+      state.purgeableRunnerVirusCounters?.servers?.[server]?.[counterType] ?? 0,
     ),
   );
 }
@@ -352,8 +351,7 @@ export function payActivatedCardImplementationCosts(
     corpPurgeableRunnerVirusCounterCostsForActivatedAbility(ability);
   if (virusCounterCosts.length > 0) {
     for (const cost of virusCounterCosts) {
-      const bucket =
-        state.purgeableRunnerVirusCounters?.servers?.[cost.server];
+      const bucket = state.purgeableRunnerVirusCounters?.servers?.[cost.server];
       const before = purgeableCounterAmount(
         state,
         cost.server,

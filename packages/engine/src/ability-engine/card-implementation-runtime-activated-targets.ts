@@ -594,11 +594,7 @@ export function sameFortSubroutineTargets(
     const instance = state.cardInstances[iceId];
     if (!instance || instance.controller !== "corp") continue;
     const definition = deps.definitionFor(state, iceId);
-    const subroutines = effectiveIceRunSubroutines(
-      state,
-      iceId,
-      definition,
-    );
+    const subroutines = effectiveIceRunSubroutines(state, iceId, definition);
     subroutines.forEach((subroutine, subroutineIndex) => {
       if (
         state.run?.encounterAdditionalSubroutines?.some(

@@ -328,7 +328,8 @@ export function nonAdditiveUtilityFamiliesForPersistentCard(
     (effect) => effect.kind === "search",
   );
   const programSearch =
-    searchEffects?.some((effect) => effect.target?.includes("program")) ?? false;
+    searchEffects?.some((effect) => effect.target?.includes("program")) ??
+    false;
   const stackSearch =
     searchEffects?.some((effect) => effect.scope === "stack") ?? false;
   const hiddenZoneSearch = runnerHandTextHasHiddenZoneSearchSignal(text);
@@ -412,10 +413,9 @@ export function nonAdditiveUtilityProfilesOverlap(
   installed: PersistentFunctionalProfile,
 ): boolean {
   const genericFamily = "non_additive_utility:action_gated_search";
-  const candidateSpecificFamilies =
-    candidate.nonAdditiveUtilityFamilies.filter(
-      (family) => family !== genericFamily,
-    );
+  const candidateSpecificFamilies = candidate.nonAdditiveUtilityFamilies.filter(
+    (family) => family !== genericFamily,
+  );
   const installedSpecificFamilies = new Set(
     installed.nonAdditiveUtilityFamilies.filter(
       (family) => family !== genericFamily,
@@ -1214,10 +1214,7 @@ export function candidateMatchesCard(
         ? candidate.sourceDefinitionId === card.definitionId
         : candidate.sourceCardId === card.instanceId ||
           candidate.sourceCardId === card.definitionId;
-  return (
-    candidate.actorSide === "runner" &&
-    sourceMatches
-  );
+  return candidate.actorSide === "runner" && sourceMatches;
 }
 
 export function actionCreditCost(action: LegalAction): number | undefined {

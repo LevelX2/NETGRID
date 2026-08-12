@@ -2210,11 +2210,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         candidate.sourceRef.definitionId === "onr_v1_135_nasuko-cycle",
     );
     expect(nasukoCandidate).toBeDefined();
-    state = applyChoice(
-      state,
-      "runner",
-      String(nasukoCandidate?.candidateId),
-    );
+    state = applyChoice(state, "runner", String(nasukoCandidate?.candidateId));
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationDecision: "apply",
       sourceDefinitionId: "onr_v1_135_nasuko-cycle",
