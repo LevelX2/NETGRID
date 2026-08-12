@@ -789,6 +789,15 @@ export type CardRunnerEventLongtailImplementation =
       kind: "random_dice_loop";
       dieFaces: 6;
       choiceOn: readonly [1, 2, 3];
+      choice: {
+        kind: "split_roll_between_credits_and_set_aside_dice";
+        mode: "any_nonnegative_integer_split";
+        creditRecipient: "runner";
+      };
+      setAsideDiceResolution: {
+        kind: "roll_each";
+        recursive: true;
+      };
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

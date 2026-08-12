@@ -57,6 +57,7 @@ export const cardSpec = {
               server: "hq",
             },
             accessServerOverride: "rd",
+            successfulRunServerOverride: "rd",
             visibility: "public",
           },
         ],

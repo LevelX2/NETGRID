@@ -69,10 +69,6 @@ export const cardSpec = {
         role: "build_rig",
       },
       {
-        kind: "plan_role",
-        role: "draw_for_answers",
-      },
-      {
         kind: "strategic_role",
         role: "enabler",
       },
@@ -80,11 +76,6 @@ export const cardSpec = {
         kind: "line_support",
         lineKey: "runner.search.breaker",
         support: "supports",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "draw.card",
-        use: "draw.card",
       },
       {
         kind: "target_preference",

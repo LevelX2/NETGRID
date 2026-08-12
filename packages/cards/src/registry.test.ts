@@ -314,6 +314,80 @@ describe("CardRegistry", () => {
     );
   });
 
+  it("preserves Original Set 101-120 random, run and AI semantics", () => {
+    const playfulAi = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_104_playful-ai" as CardDefinitionId,
+    )!;
+    const privateLdl = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_106_private-ldl-access" as CardDefinitionId,
+    )!;
+    const synchronizedAttack = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_113_synchronized-attack-on-hq" as CardDefinitionId,
+    )!;
+    const temple = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_114_temple-microcode-outlet" as CardDefinitionId,
+    )!;
+    const reprisal = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_115_terrorist-reprisal" as CardDefinitionId,
+    )!;
+    const totalRetrofit = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_116_total-genetic-retrofit" as CardDefinitionId,
+    )!;
+    const weatherPipe = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_118_weather-to-finance-pipe" as CardDefinitionId,
+    )!;
+
+    expect(playfulAi.engine.runnerEventLongtail).toMatchObject({
+      kind: "random_dice_loop",
+      choiceOn: [1, 2, 3],
+      choice: {
+        kind: "split_roll_between_credits_and_set_aside_dice",
+        mode: "any_nonnegative_integer_split",
+        creditRecipient: "runner",
+      },
+      setAsideDiceResolution: { kind: "roll_each", recursive: true },
+    });
+    expect(privateLdl.engine.abilities).toMatchObject([
+      {
+        effects: [
+          {
+            kind: "make_run",
+            target: { kind: "central_server", server: "hq" },
+            accessServerOverride: "rd",
+            successfulRunServerOverride: "rd",
+          },
+        ],
+      },
+    ]);
+    expect(totalRetrofit.engine.abilities?.[0]).not.toHaveProperty("condition");
+    expect(synchronizedAttack.planningAnnotations!.card).toEqual([
+      { kind: "plan_role", role: "pressure_hq" },
+      { kind: "strategic_role", role: "payoff_anchor" },
+    ]);
+    expect(temple.planningAnnotations!.card).not.toContainEqual(
+      expect.objectContaining({ kind: "plan_role", role: "draw_for_answers" }),
+    );
+    expect(temple.planningAnnotations!.card).not.toContainEqual(
+      expect.objectContaining({
+        kind: "tactic_interpretation",
+        use: "draw.card",
+      }),
+    );
+    expect(reprisal.planningAnnotations!.card).toEqual([
+      { kind: "plan_role", role: "pressure_hq" },
+    ]);
+    expect(weatherPipe.planningAnnotations!.card).toEqual([
+      { kind: "plan_role", role: "pressure_hq" },
+    ]);
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

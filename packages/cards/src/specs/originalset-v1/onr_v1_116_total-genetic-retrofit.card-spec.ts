@@ -49,9 +49,6 @@ export const cardSpec = {
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",
-        condition: {
-          kind: "runner_is_tagged",
-        },
         effects: [
           {
             kind: "remove_tags",

@@ -71,15 +71,6 @@ export const cardSpec = {
         kind: "plan_role",
         role: "pressure_hq",
       },
-      {
-        kind: "plan_role",
-        role: "recover_economy",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "medium",
-      },
     ],
     capabilities: [],
   },

@@ -1110,6 +1110,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
         sourceDefinition(state, action) === "onr_v1_106_private-ldl-access" &&
         action.payload?.serverId === "hq",
     );
+    expect(state.run).toMatchObject({
+      attackedServerId: "hq",
+      accessServerOverride: "rd",
+      successfulRunServerOverride: "rd",
+    });
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1121,6 +1126,11 @@ describe("V1.7.1 Mechanikpaket E", () => {
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.run).toBeUndefined();
     expect(state.corp.hq).toContain(hqOperationId);
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRdRunThisTurn: true,
+      lastSuccessfulRunServerId: "rd",
+    });
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).not.toBe(true);
   });
 
   it("runs P3.32 CardImplementation multiaccess events on their printed central servers", () => {
