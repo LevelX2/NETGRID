@@ -165,15 +165,6 @@ function revealedEventCardId(event: PublicGameEvent): string | null {
   return typeof cardId === "string" ? cardId : null;
 }
 
-function revealedEventCardIds(event: PublicGameEvent): string[] {
-  const ids = [
-    revealedEventCardId(event),
-    ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds"),
-    ...payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds"),
-  ].filter((value): value is string => Boolean(value));
-  return Array.from(new Set(ids));
-}
-
 function eventCardDetail(
   event: PublicGameEvent,
   detailsById: Record<string, CatalogCardDetail>,

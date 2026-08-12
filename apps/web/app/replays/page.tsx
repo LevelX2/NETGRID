@@ -12,7 +12,7 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   CardImagePreferenceContext,
@@ -33,7 +33,12 @@ import {
 import { readLocalStorage } from "../../lib/local-storage";
 import { CARD_DISPLAY_MODE_STORAGE_KEY } from "../../lib/storage-keys";
 import type { CardDisplayMode } from "../../features/settings/settings-model";
-import type { CatalogListResponse } from "../../features/catalog/catalog-types";
+import type {
+  CatalogCardDetail,
+  CatalogListResponse,
+} from "../../features/catalog/catalog-types";
+import { CatalogDetailRequestCoordinator } from "../../features/catalog/catalog-detail-loader";
+import { publicChronicleCardDefinitionIds } from "../../features/chronicle/chronicle-public-card-ids";
 import type { PublicCardPresentationsById } from "../public-card-presentation";
 import {
   CatalogCardPresentationsProvider,
@@ -92,6 +97,13 @@ export default function ReplayPage() {
   const [loading, setLoading] = useState(false);
   const [cardPresentationsById, setCardPresentationsById] =
     useState<PublicCardPresentationsById>({});
+  const [cardDetailsById, setCardDetailsById] = useState<
+    Record<string, CatalogCardDetail>
+  >({});
+  const cardDetailsByIdRef = useRef(cardDetailsById);
+  const cardDetailRequestCoordinatorRef = useRef(
+    new CatalogDetailRequestCoordinator(),
+  );
   const [boardSettings, setBoardSettings] = useState(
     DEFAULT_REPLAY_BOARD_SETTINGS,
   );
@@ -188,6 +200,36 @@ export default function ReplayPage() {
       ),
     [currentFrame?.stateVersion, replay?.publicEvents],
   );
+
+  useEffect(() => {
+    const cardIds = Array.from(
+      new Set(
+        (replay?.publicEvents ?? []).flatMap(publicChronicleCardDefinitionIds),
+      ),
+    );
+    if (cardIds.length === 0) return;
+    void cardDetailRequestCoordinatorRef.current.ensure(
+      cardIds,
+      (cardId) => Boolean(cardDetailsByIdRef.current[cardId]),
+      async (cardId) => {
+        const response = await fetch(
+          `/api/cards/catalog/${encodeURIComponent(cardId)}`,
+          { cache: "no-store" },
+        );
+        if (!response.ok) return null;
+        const data = (await response.json()) as { card?: CatalogCardDetail };
+        return data.card ?? null;
+      },
+      (detail) => {
+        setCardDetailsById((current) => {
+          if (current[detail.catalogCardId]) return current;
+          const next = { ...current, [detail.catalogCardId]: detail };
+          cardDetailsByIdRef.current = next;
+          return next;
+        });
+      },
+    );
+  }, [replay?.publicEvents]);
 
   useEffect(() => {
     if (!playing || frames.length === 0) return;
@@ -381,6 +423,7 @@ export default function ReplayPage() {
                   displayNames={replay?.metadata.participantNames ?? {}}
                   publicEvents={currentPublicEvents}
                   cardPresentationsById={cardPresentationsById}
+                  cardDetailsById={cardDetailsById}
                   cardDisplayMode={boardSettings.cardDisplayMode}
                   chronicleDetailMode={boardSettings.chronicleDetailMode}
                   onCardDisplayMode={updateCardDisplayMode}
