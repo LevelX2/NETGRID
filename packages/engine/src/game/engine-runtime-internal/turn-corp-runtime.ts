@@ -332,6 +332,9 @@ export function createTurnCorpRuntime(
         0,
       ),
       targetCount: placements.length,
+      advancementCounterTargetCardIds: placements
+        .map(([targetId]) => targetId)
+        .join(","),
       targetCardDefinitionIds: placements
         .map(([targetId]) => deps.definitionFor(state, targetId).id)
         .join(","),
@@ -548,6 +551,7 @@ export function createTurnCorpRuntime(
       v1919OperationAbility: "add_advancement_counters",
       addedAdvancementCounters: 3,
       targetCount,
+      advancementCounterTargetCardIds: Object.keys(placements).join(","),
       advancementCounterDistribution: Object.entries(placements)
         .map(([targetId, amount]) => `${deps.sanitizeId(targetId)}:${amount}`)
         .join(","),

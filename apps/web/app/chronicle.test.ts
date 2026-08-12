@@ -60,6 +60,18 @@ const TEST_CARD_PRESENTATIONS = {
     title: "Highlighter",
     type: "program",
   },
+  "onr_v1_196_corporate-war": {
+    title: "Corporate War",
+    type: "agenda",
+  },
+  "onr_v1_292_management-shake-up": {
+    title: "Management Shake-Up",
+    type: "operation",
+  },
+  "onr_v1_304_systematic-layoffs": {
+    title: "Systematic Layoffs",
+    type: "operation",
+  },
   "onr_proteus_111_ice-and-data-special-report": {
     title: "Ice and Data Special Report",
     type: "event",
@@ -2359,7 +2371,7 @@ describe("formatChronicleEvent", () => {
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
-  it("shows Systematic Layoffs advancement choices with target context", () => {
+  it("shows Systematic Layoffs advancement choices with public target context", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
@@ -2385,6 +2397,57 @@ describe("formatChronicleEvent", () => {
       ]),
     );
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("redacts hidden advancement targets while preserving the public source", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+        v1919OperationAbility: "add_advancement_counters",
+        addedAdvancementCounters: 2,
+        targetCount: 1,
+        publicTargetCount: 0,
+        hiddenTargetCount: 1,
+        targetVisibility: "hidden_installed_card",
+      }),
+      "runner",
+    );
+
+    expect(resolved.title).toBe(
+      "Die Korp hat 2 Advancement-Counter durch Systematic Layoffs auf eine verdeckte Karte gelegt.",
+    );
+    expect(resolved.title).not.toContain("Project Babylon");
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "Systematic Layoffs",
+        "+2 Advancement",
+        "1 Ziel",
+        "Verdecktes Ziel",
+      ]),
+    );
+  });
+
+  it("names only the public cards in a mixed advancement distribution", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_292_management-shake-up",
+        v1919OperationAbility: "add_advancement_counters",
+        targetCardDefinitionIds: "onr_v1_196_corporate-war",
+        addedAdvancementCounters: 3,
+        targetCount: 2,
+        publicTargetCount: 1,
+        hiddenTargetCount: 1,
+        targetVisibility: "mixed_public_and_hidden_installed_cards",
+      }),
+      "runner",
+    );
+
+    expect(resolved.title).toBe(
+      "Die Korp hat 3 Advancement-Counter durch Management Shake-Up auf Corporate War und eine verdeckte Karte gelegt.",
+    );
+    expect(resolved.title).not.toContain("Systematic Layoffs");
   });
 
   it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
