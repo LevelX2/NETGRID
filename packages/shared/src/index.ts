@@ -1474,9 +1474,10 @@ export type RunState = {
     spentDuringRun: number;
   };
   nextAgendaAccessAgendaPointBonus?: {
-    sourceDefinitionId: CardDefinitionId;
-    sourceTitle: string;
-    amount: 1;
+    sourceEffectInstanceIds: string[];
+    sourceDefinitionIds: CardDefinitionId[];
+    sourceTitles: string[];
+    amount: number;
     cardId?: CardInstanceId;
   };
   activeSequence?: MultiServerSuccessSequenceState;
@@ -1748,6 +1749,23 @@ export type HqInstallRezSequenceState = {
   temporaryCreditsRemaining: number;
 };
 
+export type RunnerDelayedEffectInstance = {
+  effectInstanceId: string;
+  kind:
+    | "next_agenda_access_credit_gain"
+    | "next_agenda_access_agenda_point";
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  sourceTitle: string;
+  sourceCapabilityKey: string;
+  amount: number;
+  trigger: "next_agenda_access";
+  expires: "runner_turn_end";
+  createdAtTurnSerial: number;
+  consumed: boolean;
+  consumedByCardId?: CardInstanceId;
+};
+
 export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
@@ -1854,6 +1872,7 @@ export type GameState = {
     sourceDefinitionId: CardDefinitionId;
     resolveAt: "runner_start_turn";
   }>;
+  runnerDelayedEffectInstances?: RunnerDelayedEffectInstance[];
   activeObligationDebtCount?: number;
   corpTemporaryInstallRezCredits?: {
     sourceCardInstanceId: CardInstanceId;
@@ -1893,10 +1912,6 @@ export type GameState = {
     trashedNodeLastTurn?: boolean;
     trashedAdvertisementThisTurn?: boolean;
     trashedTransactionsThisTurn?: boolean;
-    nextAgendaAccessCreditGainPending?: boolean;
-    nextAgendaAccessAgendaPointPending?: boolean;
-    nextAgendaAccessAgendaPointSourceDefinitionId?: CardDefinitionId;
-    nextAgendaAccessAgendaPointSourceTitle?: string;
     pendingSequences?: MultiServerSuccessSequenceState[];
     installedResourceIdsThisTurn?: CardInstanceId[];
     installedResourceIdsLastTurn?: CardInstanceId[];

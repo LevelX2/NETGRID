@@ -237,7 +237,7 @@ export function createTurnEndRuntimeResolvers(
       flags.trashedNodeThisTurn = false;
       flags.trashedAdvertisementThisTurn = false;
       flags.trashedTransactionsThisTurn = false;
-      flags.nextAgendaAccessCreditGainPending = false;
+      delete state.runnerDelayedEffectInstances;
       flags.installedResourceIdsLastTurn = (
         flags.installedResourceIdsThisTurn ?? []
       ).slice();

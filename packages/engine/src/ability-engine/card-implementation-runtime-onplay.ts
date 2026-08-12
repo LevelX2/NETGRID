@@ -10,6 +10,7 @@ import { executeCardImplementationEffects } from "./effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import { assertOnPlayCardImplementationAbilityCanResolve } from "./card-implementation-runtime-legality";
 import { printedCostOnPlayImplementation } from "./card-implementation-runtime-shared";
+import { onPlayAbilityBindingForDefinition } from "./card-capability-binding";
 
 /**
  * Resolves a printed-cost on-play CardImplementation ability after the host has
@@ -28,8 +29,9 @@ export function executeOnPlayCardImplementationAbility(
     skipLegalityCheck: true;
   },
 ): void {
+  const binding = onPlayAbilityBindingForDefinition(definition);
   const ability = printedCostOnPlayImplementation(definition);
-  if (!ability)
+  if (!ability || !binding)
     throw new Error(
       `Kein On-Play-Implementation-Resolver fuer ${definition.id}.`,
     );
@@ -44,6 +46,7 @@ export function executeOnPlayCardImplementationAbility(
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
       sourceTitle: definition.title,
+      sourceCapabilityKey: binding.capabilityKey,
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       effectIndexOffset: startEffectIndex,
       creditGainOrdinalOffset: continuation?.creditGainOrdinal ?? 0,

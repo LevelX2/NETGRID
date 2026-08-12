@@ -14,6 +14,7 @@ export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
+  sourceCapabilityKey?: string;
   /** Captured before a trash-source cost moves the source out of its fort. */
   sourceServerId?: Exclude<ServerId, "new_remote">;
   targetCardId?: CardInstanceId;

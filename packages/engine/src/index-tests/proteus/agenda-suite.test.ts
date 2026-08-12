@@ -955,6 +955,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       PROMISES_PROMISES,
       "pro013_promises",
     );
+    const secondPromisesId = addRunnerGripCard(
+      state,
+      PROMISES_PROMISES,
+      "pro013_promises_second",
+    );
     const assetId = addCorpCard(
       state,
       NON_AGENDA_ASSET,
@@ -974,34 +979,52 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       (action) =>
         action.type === "play_event" && action.payload?.cardId === promisesId,
     );
-    expectReplayStable(before, state);
-    expect(state.runner.credits).toBe(28);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      true,
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === secondPromisesId,
     );
+    expectReplayStable(before, state);
+    expect(state.runner.credits).toBe(26);
+    expect(state.runnerDelayedEffectInstances).toHaveLength(2);
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) =>
+          effect.kind === "next_agenda_access_agenda_point" &&
+          effect.amount === 1 &&
+          effect.consumed === false,
+      ),
+    ).toBe(true);
 
     state = accessTopCard(state, "remote_1");
     expect(state.run?.accessedCardId).toBe(assetId);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      true,
-    );
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) => effect.consumed === false,
+      ),
+    ).toBe(true);
     state = apply(state, "runner", (action) => action.type === "decline_trash");
 
     state = accessTopCard(state, "rd");
     expect(state.run?.accessedCardId).toBe(agendaId);
-    expect(state.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      false,
-    );
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) =>
+          effect.consumed === true && effect.consumedByCardId === agendaId,
+      ),
+    ).toBe(true);
     expect(state.run?.nextAgendaAccessAgendaPointBonus).toMatchObject({
-      amount: 1,
+      amount: 2,
       cardId: agendaId,
     });
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.runner.scoreArea).toContain(agendaId);
-    expect(state.cardInstances[agendaId]?.counters?.agenda).toBe(1);
+    expect(state.cardInstances[agendaId]?.counters?.agenda).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      agendaPointBonus: 1,
-      totalAgendaPoints: 3,
+      agendaPointBonus: 2,
+      totalAgendaPoints: 4,
     });
 
     let expires = baseState("pro013-promises-expires");
@@ -1019,8 +1042,6 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     );
     expires = apply(expires, "runner", (action) => action.type === "end_turn");
     expires = toRunnerTurn(expires);
-    expect(expires.runnerTurnFlags?.nextAgendaAccessAgendaPointPending).toBe(
-      false,
-    );
+    expect(expires.runnerDelayedEffectInstances).toBeUndefined();
   });
 });

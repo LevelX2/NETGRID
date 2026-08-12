@@ -201,7 +201,6 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       runAttemptsLastTurn: 0,
       trashedAdvertisementThisTurn: false,
       trashedTransactionsThisTurn: false,
-      nextAgendaAccessCreditGainPending: false,
       successfulHqRunThisTurn: false,
       successfulRunThisTurn: false,
       damagePreventionUsage: {},

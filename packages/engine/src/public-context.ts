@@ -813,6 +813,9 @@ export function publicContextForAction(
       "specialZone",
       "specialZoneVisibility",
       "sourceDefinitionId",
+      "delayedEffectInstanceId",
+      "nextAgendaAccessCreditGainAmount",
+      "agendaPointBonus",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -1706,6 +1709,9 @@ export function publicContextForAction(
       "hostedCreditsAfter",
       "sourceTrashed",
       "trashedCardDefinitionId",
+      "delayedEffectInstanceId",
+      "nextAgendaAccessCreditGainAmount",
+      "agendaPointBonus",
     ]) {
       const value = legalAction.payload[key];
       if (value !== undefined) context[key] = value;
@@ -2312,6 +2318,25 @@ export function publicContextForAction(
     context.runEnded = legalAction.payload.runEnded;
   if (typeof legalAction.payload?.runSuccessful === "boolean")
     context.runSuccessful = legalAction.payload.runSuccessful;
+  for (const key of [
+    "delayedEffectInstanceIds",
+    "sourceDefinitionIds",
+    "sourceTitles",
+  ]) {
+    const value = legalAction.payload?.[key];
+    if (typeof value === "string") context[key] = value;
+  }
+  for (const key of [
+    "agendaPointBonusPending",
+    "nextAgendaAccessAgendaPointBonusAmount",
+  ]) {
+    const value = legalAction.payload?.[key];
+    if (typeof value === "number") context[key] = value;
+  }
+  if (legalAction.payload?.nextAgendaAccessCreditGainResolved === true)
+    context.nextAgendaAccessCreditGainResolved = true;
+  if (legalAction.payload?.nextAgendaAccessAgendaPointConsumed === true)
+    context.nextAgendaAccessAgendaPointConsumed = true;
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;

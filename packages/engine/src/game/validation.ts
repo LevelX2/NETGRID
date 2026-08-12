@@ -647,6 +647,33 @@ export function validateGameState(state: GameState): ValidationResult {
         "runnerTurnFlags.runnerRunLockCreditCost must be a non-negative integer.",
       );
   }
+  if (state.runnerDelayedEffectInstances) {
+    const ids = new Set<string>();
+    for (const effect of state.runnerDelayedEffectInstances) {
+      if (ids.has(effect.effectInstanceId))
+        errors.push("Runner delayed effect instance ids must be unique.");
+      ids.add(effect.effectInstanceId);
+      const source = state.cardInstances[effect.sourceCardInstanceId];
+      if (!source || source.definitionId !== effect.sourceDefinitionId)
+        errors.push("Runner delayed effect source binding is invalid.");
+      if (!effect.sourceCapabilityKey || !effect.sourceTitle)
+        errors.push("Runner delayed effect capability binding is invalid.");
+      if (!Number.isInteger(effect.amount) || effect.amount <= 0)
+        errors.push("Runner delayed effect amount must be positive.");
+      if (
+        effect.trigger !== "next_agenda_access" ||
+        effect.expires !== "runner_turn_end"
+      )
+        errors.push("Runner delayed effect trigger or expiry is invalid.");
+      if (
+        !Number.isInteger(effect.createdAtTurnSerial) ||
+        effect.createdAtTurnSerial < 0
+      )
+        errors.push("Runner delayed effect turn serial is invalid.");
+      if (effect.consumed !== Boolean(effect.consumedByCardId))
+        errors.push("Runner delayed effect consumed binding is invalid.");
+    }
+  }
   if (state.runnerAgendaPointsToForfeit !== undefined) {
     const pending = state.runnerAgendaPointsToForfeit;
     if (!Number.isInteger(pending) || pending < 0)

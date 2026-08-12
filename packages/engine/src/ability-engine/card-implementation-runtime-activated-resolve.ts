@@ -76,6 +76,7 @@ export function resolveActivatedCardImplementationAbility(
       sourceCardId: match.cardId,
       sourceDefinitionId: match.definition.id,
       sourceTitle: match.definition.title,
+      sourceCapabilityKey: match.binding.capabilityKey,
       ...(sourceServerId ? { sourceServerId } : {}),
       ...(typeof effectPayload.targetCardId === "string"
         ? { targetCardId: effectPayload.targetCardId as CardInstanceId }

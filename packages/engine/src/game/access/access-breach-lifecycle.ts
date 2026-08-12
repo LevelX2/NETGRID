@@ -1,6 +1,7 @@
 import type {
   CardDefinition,
   CardInstanceId,
+  GameState,
   LegalAction,
   ServerId,
 } from "@netgrid/shared";
@@ -164,17 +165,27 @@ export function applyPrearrangedDropAgendaAccess(
   definition: CardDefinition,
   legalAction: LegalAction,
 ): void {
-  const flags = host.state.runnerTurnFlags;
-  if (!flags?.nextAgendaAccessCreditGainPending || definition.type !== "agenda")
-    return;
-  flags.nextAgendaAccessCreditGainPending = false;
-  const gain = credits(host.state, "runner", 6, {
+  if (definition.type !== "agenda") return;
+  const effects = consumeRunnerDelayedAgendaAccessEffects(
+    host.state,
+    cardIdForAccess(host),
+    "next_agenda_access_credit_gain",
+  );
+  if (effects.length === 0) return;
+  const amount = effects.reduce((sum, effect) => sum + effect.amount, 0);
+  const gain = credits(host.state, "runner", amount, {
     kind: "access_effect",
     reason: "next_agenda_access_credit_gain",
   });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     nextAgendaAccessCreditGainResolved: true,
+    delayedEffectInstanceIds: effects
+      .map((effect) => effect.effectInstanceId)
+      .join(","),
+    sourceDefinitionIds: effects
+      .map((effect) => effect.sourceDefinitionId)
+      .join(","),
     gainedCredits:
       Number(legalAction.payload?.gainedCredits ?? 0) + gain.creditedAmount,
     runnerCreditsAfter: gain.creditsAfter,
@@ -187,30 +198,65 @@ export function applyPromisesPromisesAgendaAccess(
   definition: CardDefinition,
   legalAction: LegalAction,
 ): void {
-  const flags = host.state.runnerTurnFlags;
-  if (
-    !flags?.nextAgendaAccessAgendaPointPending ||
-    definition.type !== "agenda"
-  )
-    return;
-  flags.nextAgendaAccessAgendaPointPending = false;
+  if (definition.type !== "agenda") return;
+  const effects = consumeRunnerDelayedAgendaAccessEffects(
+    host.state,
+    cardId,
+    "next_agenda_access_agenda_point",
+  );
+  if (effects.length === 0) return;
+  const amount = effects.reduce((sum, effect) => sum + effect.amount, 0);
   host.state.run = {
     ...mustRun(host),
     nextAgendaAccessAgendaPointBonus: {
-      sourceDefinitionId:
-        flags.nextAgendaAccessAgendaPointSourceDefinitionId ??
-        ("card_implementation" as CardDefinition["id"]),
-      sourceTitle:
-        flags.nextAgendaAccessAgendaPointSourceTitle ?? "Promises, Promises",
-      amount: 1,
+      sourceEffectInstanceIds: effects.map(
+        (effect) => effect.effectInstanceId,
+      ),
+      sourceDefinitionIds: effects.map((effect) => effect.sourceDefinitionId),
+      sourceTitles: effects.map((effect) => effect.sourceTitle),
+      amount,
       cardId,
     },
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     nextAgendaAccessAgendaPointConsumed: true,
-    agendaPointBonusPending: 1,
+    delayedEffectInstanceIds: effects
+      .map((effect) => effect.effectInstanceId)
+      .join(","),
+    agendaPointBonusPending: amount,
   };
+}
+
+function consumeRunnerDelayedAgendaAccessEffects(
+  state: GameState,
+  cardId: CardInstanceId,
+  kind:
+    | "next_agenda_access_credit_gain"
+    | "next_agenda_access_agenda_point",
+): NonNullable<GameState["runnerDelayedEffectInstances"]> {
+  const effects = state.runnerDelayedEffectInstances ?? [];
+  const matches = effects.filter(
+    (effect) =>
+      !effect.consumed &&
+      effect.kind === kind &&
+      effect.trigger === "next_agenda_access" &&
+      effect.expires === "runner_turn_end",
+  );
+  if (matches.length === 0) return [];
+  const matchIds = new Set(matches.map((effect) => effect.effectInstanceId));
+  state.runnerDelayedEffectInstances = effects.map((effect) =>
+    matchIds.has(effect.effectInstanceId)
+      ? { ...effect, consumed: true, consumedByCardId: cardId }
+      : effect,
+  );
+  return matches;
+}
+
+function cardIdForAccess(host: AccessFlowHost): CardInstanceId {
+  const cardId = host.state.run?.accessedCardId;
+  if (!cardId) throw new Error("agenda_access_card_id_missing");
+  return cardId;
 }
 
 export function applyHqAccessExposeInstalledCorpCards(

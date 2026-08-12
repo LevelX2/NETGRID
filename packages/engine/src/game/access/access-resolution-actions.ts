@@ -413,8 +413,9 @@ export function applyPendingAgendaPointBonusToStolenAgenda(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       nextAgendaAccessAgendaPointBonusAmount: bonus.amount,
-      sourceDefinitionId: bonus.sourceDefinitionId,
-      sourceTitle: bonus.sourceTitle,
+      sourceDefinitionIds: bonus.sourceDefinitionIds.join(","),
+      sourceTitles: bonus.sourceTitles.join(","),
+      delayedEffectInstanceIds: bonus.sourceEffectInstanceIds.join(","),
     };
   }
 }

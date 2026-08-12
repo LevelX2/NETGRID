@@ -117,10 +117,7 @@ export function createTurnRunnerStartRuntimeResolvers(
     flags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = false;
     flags.trashedAdvertisementThisTurn = false;
     flags.trashedTransactionsThisTurn = false;
-    flags.nextAgendaAccessCreditGainPending = false;
-    flags.nextAgendaAccessAgendaPointPending = false;
-    delete flags.nextAgendaAccessAgendaPointSourceDefinitionId;
-    delete flags.nextAgendaAccessAgendaPointSourceTitle;
+    delete state.runnerDelayedEffectInstances;
     flags.damagePreventionUsage = {};
     flags.abilityUsedSourceIdsByLimitKey = {};
     flags.startOfTurnFloatingCreditsApplied = false;

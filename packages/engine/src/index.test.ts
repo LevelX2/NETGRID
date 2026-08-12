@@ -660,11 +660,35 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     });
 
     state = runnerMain("proteus-pro008-prearranged-drop");
-    addCorpCardToRdForTest(state, "simple_agenda", "prearranged_agenda");
+    const accessedAgendaId = addCorpCardToRdForTest(
+      state,
+      "simple_agenda",
+      "prearranged_agenda",
+    );
     const dropBefore = state.runner.credits;
     const drop = playEventAction(state, "onr_proteus_118_prearranged-drop");
     state = drop.state;
-    expect(state.runnerTurnFlags?.nextAgendaAccessCreditGainPending).toBe(true);
+    const secondDropId = addRunnerCardToGripForTest(
+      state,
+      "onr_proteus_118_prearranged-drop",
+      "prearranged_second",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === secondDropId,
+    );
+    expect(state.runnerDelayedEffectInstances).toHaveLength(2);
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) =>
+          effect.kind === "next_agenda_access_credit_gain" &&
+          effect.amount === 6 &&
+          effect.consumed === false,
+      ),
+    ).toBe(true);
     state = apply(
       state,
       "runner",
@@ -678,10 +702,16 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     )
       state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.runner.credits).toBe(dropBefore - drop.creditCost + 6);
-    expect(state.runnerTurnFlags?.nextAgendaAccessCreditGainPending).toBe(
-      false,
-    );
+    expect(state.runner.credits).toBe(dropBefore - drop.creditCost + 12);
+    expect(
+      state.runnerDelayedEffectInstances?.every(
+        (effect) =>
+          effect.kind === "next_agenda_access_credit_gain" &&
+          effect.amount === 6 &&
+          effect.consumed === true &&
+          effect.consumedByCardId === accessedAgendaId,
+      ),
+    ).toBe(true);
   });
 
   it("starts All-Hands and Rush Hour central runs with +3 access and noisy breaker lock", () => {
