@@ -97,10 +97,10 @@ Codepatch zu lesen:
 
 1. `packages/ai/AGENTS.md`
 2. vollständig
-   `docs/architecture/ai/ai-program-logic-change-compass.md`
+   `docs/architecture/ai/change-compass.md`
 3. `docs/architecture/ai/README.md`
 4. die für den betroffenen Owner relevanten Abschnitte aus
-   `docs/architecture/ai/ai-plan-layer-target-state-wip.md`
+   `docs/architecture/ai/planning-architecture.md`
 
 Der Änderungskompass ist das verbindliche Agenten-Konzentrat aus dem
 allgemeinen KI-Zielbild und dem detaillierten Planebenen-Konzept. Bei

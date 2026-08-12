@@ -1,19 +1,20 @@
 # Abgeleitete Artefakte
 
-`docs/derived/` ist seit der Strukturmigration vom 2026-05-18 nur noch ein Übergangshinweis. Dauerhafte Artefakte liegen jetzt in fachlichen Zielbereichen wie `docs/releases/`, `docs/architecture/`, `docs/reviews/`, `docs/decisions/` oder `docs/archive/`.
+Stand: 2026-08-12
+
+`docs/derived/` ist nur noch ein Übergangsbereich aus einer älteren Dokumentstruktur. Neue Dokumente sollen hier nicht mehr abgelegt werden.
+
+Dauerhafte Artefakte gehören direkt in ihren fachlichen Bereich:
+
+- `docs/releases/` für aktuell relevante Release-, Requirement-, Gate- und Planungsartefakte;
+- `docs/architecture/` für aktuelle technische Zielbilder und Verträge;
+- `docs/reviews/` für aktuell benötigte Audit- und Review-Evidence;
+- `docs/decisions/` für dauerhafte Entscheidungen;
+- `docs/runbooks/` für wiederholbare Betriebs- und Diagnoseabläufe;
+- `docs/activities/` für offene und laufende Arbeitspakete.
+
+Historische Artefakte werden nicht in einen separaten Archivbereich verschoben. Wenn sie keine aktuelle Funktion mehr besitzen, werden sie nach Referenzprüfung aus dem Arbeitsbaum entfernt und bleiben über Git nachvollziehbar.
 
 Die Strukturentscheidung liegt unter `docs/decisions/docs-structure-target-decision-2026-05-18.md`.
 
-## Regel
-
-Neue Dokumente sollen nicht mehr hier abgelegt werden. Verwende:
-
-- `docs/releases/` für Releasefamilien, Requirements, Specs, Testmatrizen und Reviews.
-- `docs/architecture/` für technische Zielbilder und Schichtgrenzen.
-- `docs/reviews/` für Audits, Inventare und strukturierte Nachprüfungen.
-- `docs/decisions/` für dauerhafte kleine Entscheidungen.
-- `docs/activities/` für offene, laufende und erledigte Arbeitspakete.
-
-## Migrationsstand
-
-Die früheren `docs/derived/`-Artefakte wurden schrittweise nach Zielbereichen migriert. Dieser Ordner bleibt vorerst bestehen, damit alte mentale Modelle und Suchen nicht ins Leere laufen; fachlich führend sind aber die neuen Pfade.
+Der Ordner kann vollständig entfallen, sobald keine verbliebenen Dateien oder aktuellen Verweise mehr auf ihn angewiesen sind.

@@ -1,668 +1,87 @@
 # Aktueller Projektstatus
 
-Stand: 2026-08-02
+Stand: 2026-08-12
 
-## Führender Produktstand
+## Produktstand
 
-- NETGRID ist eine private Version-0-Webanwendung mit deterministischer Rules
-  Engine, lokalem/private-LAN-Multiplayer, SQLite-Storage, Deckbibliothek,
-  Kartenkatalog, Replay-/Undo-Grundlage, Human-vs-Human, Human-vs-KI und einem
-  beobachtbaren KI-vs-KI-Matchmodus.
-- Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur
-  vorhandene `LegalActions` ein; `applyAction` revalidiert den vollständigen
-  Vertrag.
-- Hidden-Info-Schutz, Replay, StateHash und seedbasierte Zufallsnachweise sind
-  verbindliche Gates.
-- Der detaillierte Release-/Phasenstand liegt in `docs/codex/CODEX_STATUS.md`;
-  die konsolidierte Folgeplanung liegt unter
-  `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`.
-- Matches sind standardmäßig öffentlich und besitzen dafür genau den
-  unveränderlichen Erstellungsflag `isPublic`. Öffentliche offene Matches sind
-  beitretbar, aktive Matches über eine Hidden-Info-sichere read-only
-  Projektion zuschaubar und beendete Matches als Full-Information-Lern-Replay
-  in derselben Oberfläche wie die laufende Partie abspielbar. Oben wird
-  zwischen Runner und Korp gewechselt; die jeweilige eigene Hand erscheint
-  normal im Board. Eine künstliche Analysefläche oder ein separates
-  Gegnerhandfenster gibt es nicht. Alle vorhandenen Matches werden einmalig
-  rückwirkend öffentlich normalisiert; der Auditstand beträgt 21/21
-  öffentliche und 19/19 replayfähige terminale Matches.
-- Der globale Bereich `Spiele` ordnet diese öffentlichen Matches als offen,
-  laufend und abgeschlossen, filtert nach diesen Zuständen und führt direkt
-  zu Beitritt, Zuschaueransicht oder Replay. Die öffentliche Liste kann
-  zwischen der ausführlichen Kartendarstellung und einer responsiven kompakten
-  Zeilenansicht wechseln. Abgeschlossene Einträge zeigen vorhandene
-  Matchpunkte als primäre Wertung getrennt von den Agenda-Punkten und
-  unterscheiden reguläres Ende, Aufgabe sowie Zeitablauf. Aufgabe und
-  Zeitablauf benennen den verantwortlichen Teilnehmer über die autoritative
-  Verliererseite. `Meine Spiele` ist davon getrennt und liefert nur
-  serverseitig gebundene Matches des angemeldeten Accounts, einschließlich
-  eigener privater Partien.
-  Abgeschlossene Ergebnisse liegen als immutable Snapshots in der kompakten
-  Matchzeile; warme Listenabrufe hydrieren keine vollständigen Historien mehr.
-  Führend sind
-  `docs/reviews/public-game-directory-and-personal-history-final-review-2026-07-20.md`
-  und
-  `docs/reviews/public-game-list-view-modes-final-review-2026-07-29.md`.
+NETGRID ist eine private Version-0-Webanwendung für Netrunner mit deterministischer Rules Engine, lokalem/private-LAN-Multiplayer, SQLite-Storage, Deckbibliothek, Kartenkatalog, Replay-/Undo-Grundlage, Human-vs-Human, Human-vs-KI und KI-vs-KI-Analysepfaden.
+
+Die sichtbare Produktversion ist `V0.9`. Daneben wird eine aus Git ermittelte Buildkennung angezeigt. Führend ist `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
+
+Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebotene `LegalActions` ein; die Engine revalidiert Zustand, Kosten, Ziel, Choice und Legalität vor der Ausführung. Hidden-Info-Schutz, Replay, StateHash und seedbasierter Zufall bleiben verbindliche Systemgrenzen.
+
+Innerhalb der privaten Anwendung sind öffentliche Matchlisten, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays umgesetzt.
 
 ## Engine und Karten
 
-- Originalset, Classic und Proteus besitzen versionierte Kartendaten,
-  Supportmanifeste und Engine-Implementierungen.
-- Classic ist mit 54/54 Karten technisch abgeschlossen und als optionales
-  Zusatzset verfügbar.
-- Proteus ist mit 154/154 Karten engine-/human-playable. Technisches
-  `ai_supported` ist von Play-Strength-Readiness und Default-/Random-Pool-
-  Promotion getrennt.
-- Die einmalige Proteus-Spoiler-Importpipeline und ihre blockierte
-  Planungskopie sind entfernt. Aktuell führend sind die unveränderte
-  Spoilerquelle, `data/cards/proteus-cards.json`, das Supportmanifest und die
-  Runtime-Implementierungen.
-- Kartenimplementierungen, PlayerViews, PublicEvents, Replay und StateHash
-  werden durch paketnahe Engine- und Visibilitytests abgesichert.
-- Normale Creditgewinne von Runner und Korp verwenden eine zentrale,
-  typisierte Gain-Pipeline. Sie unterscheidet Grundbetrag, zusätzliche
-  Regelcredits, abgefangene Credits und tatsächliche Gutschrift; deklarative
-  Effekte, Resolver, Access, Run, Trace, Subroutinen, Turneffekte,
-  gehostete Entnahme und temporäre Pool-Gutschriften sind angebunden. Setup,
-  Setzen, Bezahlen und Verlust bleiben getrennte Semantiken. Elena Laskova
-  modifiziert dadurch auch Resolver wie Finders Keepers korrekt innerhalb
-  derselben Gain-Auflösung. Führend ist
-  `docs/reviews/engine/central-credit-gain-pipeline-final-review-2026-07-19.md`.
-- Allgemeine Asset-/Upgrade-Rezfenster während Runs gelten über alle
-  Corp-Server. ICE-Rez und fortgebundene Sonderfenster bleiben am Runziel;
-  Encounter und laufende Trace-Versuche öffnen kein zusätzliches normales
-  Rezfenster. Im Movement entscheidet der Runner zuerst über das normale
-  Jack-out; erst nach „Weiter“ öffnet die Engine das blockierende
-  Nicht-ICE-Rezfenster. Danach gibt es vor Approach beziehungsweise Access
-  kein zweites normales Jack-out. Kartenspezifische Rez-Interrupts bleiben
-  davon getrennt. Der konkrete Hacker-Tracker-Fall rezzt die Karte in Remote 2
-  während eines Runs auf Remote 1 und führt sie anschließend regelkonform in
-  den Trace. Führend sind die abgeschlossene Activity
-  `act-2026-07-19-post-jack-out-root-rez-window` und
-  `docs/reviews/engine/global-run-rez-windows-final-review-2026-07-16.md`.
-- Installierte Corp-Assets mit semantischem Zugriffseffekt wirken
-  standardmäßig nur gerezzt. Der aktive Pool umfasst zehn Access-Nodes unter
-  56 Corp-Assets: sieben folgen dem Rez-Default, `Virus Test Site` ist die
-  einzige belegte installierte Unrezzed-Ausnahme und macht dann genau 1 Net
-  Damage; Bel-Digmo und Stereogram wirken nur aus R&D beziehungsweise
-  Archives. Führend ist
-  `docs/reviews/engine/node-access-rez-contract-final-review-2026-07-15.md`.
-- City Surveillance löst Runner-Mehrfachziehen als fortsetzbare Sequenz auf:
-  Vor jeder tatsächlich gezogenen Karte kann die Korp eine installierte,
-  bezahlbare Draw-Tax-Quelle rezzen; danach wählt der Runner pro gerezzter
-  Quelle einzeln 1 Credit oder 1 Tag. `Jack 'n' Joe`, Fünf-Karten-Draws,
-  mehrere Quellen und Crash Everetts Zusatzdraw sind abgedeckt. Effekte ohne
-  das Wort „draw“, insbesondere `Arasaka Owns You` mit „refresh your hand“,
-  verwenden keinen Draw-Tax-Pfad. Führend ist
-  `docs/reviews/engine/city-surveillance-draw-sequence-final-review-2026-07-14.md`.
+Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur geführt.
+
+Der CardSpec-Migrationsprozess CS00 bis CS13 ist abgeschlossen und integriert:
+
+- `@netgrid/cards` ist die zentrale kartenspezifische Autoren- und Projektionsschicht.
+- `@netgrid/cards/engine` liefert die mechanischen CardImplementation-, Runtime- und Source-Ref-Projektionen.
+- `packages/engine/src/card-implementations/registry.ts` besitzt keine zweite manuelle Autorenregistry.
+- Coverage bezieht Implementierungs-, Runtime- und Source-Informationen aus CardSpec.
+- Die Rules Engine bleibt alleinige Autorität für Legalität und Ausführung.
+
+Führend sind:
+
+- `docs/architecture/central-card-specification-and-registry-target-state-2026-08-09.md`
+- `docs/architecture/engine/README.md`
+- `packages/engine/AGENTS.md`
 
 ## KI
 
-- Die drei Runner-Befunde aus `match_b0b0bffec6715028` sind spielgleich
-  geschlossen. Draw-Tax zählt nur echte strukturierte Ziehsteuern;
-  `during_run`-Credits werden ausschließlich in konkreten RunAction-Quotes
-  verbraucht; Runner-Discards sind exakt unter
-  `runner.defense_and_recovery` gebunden und schützen Flatline-Prävention nur
-  bei bestätigter oder kritischer Gefahr. Die drei Checkpoints, beide
-  Deck-Hint-Audits und alle 4575 AI-Shard-Tests sind grün. Führend ist
-  `docs/reviews/ai/match-b0b0bffec6715028-runner-remediation-final-review-2026-08-02.md`.
+Die produktive KI arbeitet Plan-first. Der aktuelle Entscheidungsweg verbindet Engine-/Kartensemantik und ActionSemanticCandidates mit DeckDoctrine, Strategic Intent, residenten Planinstanzen, side-spezifischen Schedulern, TurnPlanner, Commitment/Execution Lease und eng gebundener Choice-Auflösung. Doctrine, Hints, Sensoren und Quotes liefern Information; sie besitzen keine parallele Action-Autorität.
 
-- Disgruntled Ice Technician ist im `run.jack_out_window` vollständig an den
-  bestehenden Planowner `runner.convert_run_window` gebunden. Die Engine
-  projiziert generische Quellen-, Fähigkeits-, Ziel- und Zahlungsfakten; die
-  AI übernimmt dieselbe Action-ID und dasselbe Ziel auch in der
-  Serverposition. Unvollständige Bindung bleibt fail-closed, ein
-  höherwertiger Access-Payoff darf den Trigger bewusst verwerfen. Die beiden
-  ursprünglichen Rent-I-Con-Seeds enden vollständig und replay-stabil ohne
-  Runtimefehler, Illegal Action, Fallback oder Timeout. Führend ist
-  `docs/reviews/ai/disgruntled-run-window-plan-coverage-final-review-2026-08-02.md`.
+Führend sind:
 
-- Das allgemeine Zielbild ist in
-  `docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md` auf den
-  produktiven Plan-first-Stand aktualisiert. Die durchgehende Kette reicht
-  von Engine-/Kartensemantik und ActionSemanticCandidates über
-  kompositionsabhängige DeckDoctrine, Strategic Intent und residente
-  Planinstanzen bis zum Restzugvergleich, Commitment, Lease und der erneuten
-  Enginevalidierung. Die frühere Metaebene v5 bleibt nur historische
-  Entwicklungsevidence. Für jeden KI-Codepatch ist diese Haltung im kurzen
-  `docs/architecture/ai/ai-program-logic-change-compass.md` als verbindlicher
-  erster Agentenvertrag zusammengefasst und in Root- sowie Package-`AGENTS.md`
-  verankert.
-- Das WIP-Zielkonzept
-  `docs/architecture/ai/ai-plan-layer-target-state-wip.md` führt die
-  verteilten Verträge für Deckstrategie, Strategic Intent, kurzlebige
-  Goal-/Threat-Signale, Planinstanzen, Portfolio, Ressourcen und
-  Folgeaktionen zu einer Plan-first-Zielarchitektur zusammen. PF15 ist mit
-  Commit `4b0c459f6` abgeschlossen: Getrennte Runner-/Corp-Scheduler wählen
-  zuerst eine autoritative residente `PlanInstance` und deren Step; erst
-  innerhalb dieses Steps wird eine vorhandene LegalAction ausgewählt.
-  Aktuelle und angestrebte Planmodule, orthogonale Zustandsachsen,
-  Parent-/Need-/Supportpläne, geschützte Fortsetzungen,
-  Highlighter-R&D- und
-  Manhunt-Flatline-Akzeptanzszenarien sowie spätere Implementierungsgates sind
-  dokumentiert. Version 0.7 legt fest: Tactical Goals sind nicht persistent,
-  sondern ausschließlich `stateVersion`-gebundene, nicht autoritative
-  Goal-/Threat-Signale für Discovery und Priorisierung. Planinstanzen bleiben
-  alleinige persistente Handlungsautorität. Strategic Intent ist ein stabiler
-  Strategieanker: P1- bis P3-Pläne dürfen ihn mit Evidence übergehen,
-  P4-/P5-Kampagnen benötigen Intent-Fit oder explizite taktische Evidence;
-  normale Action-Schwankungen wechseln ihn nicht. `TransientPlanSignal`
-  typisiert diesen Vertrag fail-closed. Produktive Signalquellen bestehen
-  für Runner-Remote-Contest, Survival, Terminal Wins und Corp-Scoreprojekte;
-  gebunden wird ausschließlich die exakte Planmodul-/`dedupeKey`-/
-  Zielkombination. Der öffentliche Setup-/Mulliganabschluss erzeugt für
-  beide Seiten einen aktuellen `phase_change`; weitere typisierte
-  Intent-Revalidierungsgründe benötigen eigene side-sichere
-  Live-Evidence-Produzenten. Der öffentliche transitive Livegraph
-  ist von alten TacticalGoal-, SemanticChoice-, PracticalMicro-,
-  TacticalPlan-Memory- und TacticalPlan-Override-Abhängigkeiten bereinigt;
-  historische Altverträge bleiben ausschließlich isolierte
-  Test-/Evaluationsdiagnostik.
-- Version 1.2 des Planebenen-Zielkonzepts konsolidiert zusätzlich die
-  Erkenntnisse aus generischer Fähigkeitsmigration, Serie 82b2 und Match
-  978d: Doctrine verlangt ausführbare Komponentenkomposition; Known und
-  Unknown werden pfadweise getrennt; Draw braucht einen materialisierbaren
-  Folgeaktionshorizont; ICE-Staffelung wird als globale Opportunitätsfrage im
-  Defense-Plan bewertet; Score- und Defense-Ownership bleiben über
-  Parent-/Need-Bindung getrennt. Resolver erhalten keine eigene
-  Domainentscheidung.
-- Für Corp-Verteidigung existiert keine Legacy-Zentralreserve und kein
-  eigenständiger zentraler Reserveplan. Finanzierung entsteht nur als
-  Economy-Bedarf des exakten Defense-Parents; Schutzwirkung und Reserve
-  werden getrennt und ausschließlich über Engine-zertifizierte Quotes
-  bewertet. Unknown bleibt fail-closed.
-- `Loan from Chiba` gehört bei Erwerb und Entwicklung zum Economy-Modul.
-  Nach der Installation gehören Halten, Verlassen und das zugehörige
-  Zahlungs-/Verlustrisiko in einen `runner.resource_lifecycle`-Child der
-  exakten Karteninstanz. Unbekannte Engine-Zahlungsquotes bleiben blockiert
-  und werden nicht geschätzt.
-- PF16-Final-Review und vollständige Pre-Commit-Gates einschließlich der
-  60-Spiele-Baseline sind grün. PF16 ist als `ec18fcb8f` abgeschlossen und
-  über den geprüften Integrationsstand `94051e77e` lokal in `main` enthalten;
-  Worktree und gemergter Arbeitsbranch
-  `codex/ai-plan-first-runtime-cutover` sind verifiziert entfernt.
-- Die verifizierte PF15-Code-Freeze-Baseline umfasst 60 Spiele und 11.012
-  Entscheidungen. Sie wurde im vollständigen dirty PF15-Arbeitsbaum auf
-  Parent `527833085` gemessen; dieser Arbeitsstand wurde anschließend mit
-  `4b0c459f6` committed. Illegal Action, Replay-, Runtime-, Hidden-Info-,
-  Fallback-, Timeout-, Action-Limit-, No-Legal-Action- und
-  Redaktionsfehler stehen bei null. Die Plan-Conversion beträgt `0,670`;
-  klar dominierte Planwahlen stehen bei null. Typechecks, alle drei
-  AI-Vitest-Shards, der vollständige Engine-Lauf mit 207 Dateien und 1.795
-  Tests sowie Scenario-, Checkpoint-, Hidden-Info-, Authority-, Structure-
-  und Diff-Gates sind grün. 175 qualitative Trace-Befunde, darunter drei hohe
-  `corp_never_scores_long_game`-Fälle, und zwei
-  `gameEndReason=unknown`-Anomalien bleiben offene Play-Strength-Evidence.
-  Führend ist
-  `docs/reviews/ai/ai-behavior-baseline-v1-plan-first-pf15-code-freeze-verified-2026-07-25.md`.
-- Historische Runner-Fehlentscheidungen aus dem damals aktiven Match
-  `match_fd22cad3cc454a9e` sind ohne produktive Laufzeitänderung als exakte
-  Decision-Checkpoints gesichert. Die zweite redundante
-  `Psychic Friend`-Installation und drei sofortige Zugenden mit vier
-  Restklicks bleiben rote `behavior_regression`-Evidence. Erste sinnvolle
-  `Matador`-/`Psychic Friend`-Installationen, null-Klick-Zugenden und ein
-  sicherer sofortiger Zugabschluss für den deterministischen Corp-Deckout
-  schützen die zulässigen Nachbarfälle.
-- Die damals aufgezeichneten Diagnosemetriken zählten 22 vorzeitige
-  Runner-Zugenden und 16 redundante negativ bewertete Installationen; 29
-  sichere Deckout-Zugenden wurden separat erkannt. Der historische Lauf
-  besaß keine Illegal-Action-, Replay-, Runtime-, Hidden-Info- oder
-  Redaktionsverletzung, erreichte aber in einem davon unabhängigen
-  reproduzierbaren Slot das 480-Aktionen-Limit. Diese Werte sind nicht die
-  aktuelle PF15-Code-Freeze-Baseline. Führend sind
-  `docs/reviews/ai/runner-action-valuation-regression-evidence-2026-07-23.md`
-  und
-  `docs/reviews/ai/runner-action-valuation-regression-final-review-2026-07-23.md`.
+- `docs/architecture/ai/README.md`
+- `docs/architecture/ai/target-architecture.md`
+- `docs/architecture/ai/planning-architecture.md`
+- `docs/architecture/ai/turn-campaign-planner.md`
+- `docs/architecture/ai/change-compass.md`
+- `packages/ai/AGENTS.md`
 
-- Die Economy-KI besitzt einen gemeinsamen side-sicheren Vertrag von der
-  LegalAction-Ressourcenprojektion bis zur Planebene. Kleine monotone
-  Grundwerte ordnen vergleichbare liquide Sofortgewinne; typisierte
-  `CreditDemand`s geben akuten Breaker-/Run-/Score-/Rezblockern Vorrang vor
-  Vordergrund-, Next-turn- und Reservebedarf. Der höchste kompatible
-  Bedarfsbonus gilt für alle Economy-Action-Typen genau einmal.
-  `FundingRoute`s planen begrenzt über Same-turn, nächsten eigenen Zug und
-  höchstens drei eigene Züge. Kontingente Routen dürfen gewählt werden, lösen
-  harte Blocker aber nicht ohne garantierte Route. Planportfolio-
-  Reservierungen verhindern Doppelverwendung derselben Credits.
-- Corporate Coup und BBS sind finite Auszahlungspools ohne strategisches
-  Halten; Broker bleibt eine eigenständige Aufbau-/Cashout-Bank. Die Corp-KI
-  führt solche Pools generisch von Installation über Rez bis Auszahlung und
-  aktiviert aktionsgebundene Pools nur im eigenen Aktionsfenster. Gemischte
-  Actions verrechnen Kartenverbrauch und Draw als Netto-Handdelta,
-  verzögerte Economy braucht einen passenden Reserveplan. Der vergleichbare
-  Abschlusslauf über 60 Spiele und 10.957 Entscheidungen hat keine Hard
-  Failures, Action-Limits oder klar dominierte Planwahl. Führend sind
-  `docs/architecture/ai/ai-economy-funding-routes-implementation-process-2026-07-21.md`
-  und
-  `docs/reviews/ai/ai-behavior-baseline-v1-economy-funding-routes-2026-07-21.md`.
+Weitere KI-Arbeit ist überwiegend Play-Strength- und Modulerweiterung. Konkrete Spielbeobachtungen werden als kleine Activities und Regressionstests geführt. Abgeschlossene Matchanalysen, Replay-Evidence und Reviewchroniken sind keine zweite aktuelle Spezifikation.
 
-- Die Corp-KI verwertet bekannte, exakt projizierte HQ-Karten jetzt vor
-  einem vermeidbaren gleichklassigen Draw. Garantierte sofortige
-  Economy-Operationen gehören `corp.economy`; ein autoritätsloses
-  Handinventar weist Domainclaims oder explizite Dispositionen aus.
-  Draw-Admission bindet Parent-Zweck, Versuchsbudget, Net-Handdelta und
-  Endturn-Overflow und wird nach jeder Konversion vollständig revalidiert.
-  BBS Whispering Campaign und Red Herrings besitzen enge Domainrouten.
-  Frühe unsichere P4-Rushes bleiben `corp.score_agenda` und können innerhalb
-  eines vollständig qualifizierten Fensters seed-deterministisch variieren;
-  öffentliche vorbereitete Breaker und sichere Gegenbeweise blockieren.
-  40 kontrollierte Seeds ergeben 18 Annahmen und 22 Ablehnungen. Der finale
-  AI-Volltest besitzt keine neuen Fehler gegenüber `main` und 22 zusätzliche
-  grüne Tests. Führend sind
-  `docs/architecture/ai/corp-hand-utilization-opening-rush-worktree-process-2026-07-28.md`
-  und
-  `docs/reviews/ai/corp-hand-utilization-opening-rush-final-review-2026-07-28.md`.
+## Betrieb und Analyse
 
-- Die Aktionsökonomie besitzt nun denselben durchgängigen Vertrag:
-  `PlayerView.own.clicks` liefert den aktuellen Bestand, LegalActions und
-  normalisierte Kartenhints projizieren unmittelbare, eingeschränkte,
-  gespeicherte, wiederkehrende, zufällige und geschuldete Kapazität.
-  Typisierte `ActionDemand`s und begrenzte `ActionCapacityRoute`s bewerten
-  Quellen nach ihrer garantierten kompatiblen Folge statt nach einem hohen
-  pauschalen Aktionswert. Planportfolio-Reservierungen verhindern
-  Doppelverwendung; wiederkehrende Quellen werden nur über einen nutzbaren
-  Horizont amortisiert.
-- Overtime kann garantierte Same-turn-Scorefolgen schließen, Corporate Boon
-  darf für eine gebundene spätere Linie gehalten werden, und eingeschränkte
-  Bursts ohne kompatiblen Demand oder Planbeitrag werden nicht von einem
-  allgemeinen Handkartenplan erzwungen. Selbstfinanzierende Runs gelten
-  bereits in ihrer Quellaktion als konvertiert. Der vergleichbare
-  P7-Abschluss über 60 Spiele und 11.040 Entscheidungen hat keine Hard
-  Failures, keine
-  verpassten Scorefenster, keine dominierte Planwahl und bei 45 Nutzungen
-  null Fehlkonversionen. Der finale Integrationslauf nach Einbindung des
-  aktuellen Main-Stands umfasst 10.974 Entscheidungen und 43 Nutzungen mit
-  43 Folgekonversionen sowie weiterhin null Fehlkonversionen. Führend sind
-  `docs/architecture/ai/ai-action-capacity-routes-implementation-process-2026-07-22.md`
-  und
-  `docs/reviews/ai/ai-behavior-baseline-v1-action-capacity-routes-2026-07-22.md`.
+Aktuelle wiederholbare Betriebspfade liegen unter `docs/runbooks/`:
 
-- Die Deckstrategie-Ableitung ist für 44 aktive Standarddecks und alle
-  produktiven Strategy-IDs vollständig gegatet. 43 aktive Decks besitzen eine
-  produktive Primärstrategie; Ghost Circuit bleibt wegen zwei
-  realer Breaker-Coverage-Lücken bewusst neutral. Runtime-, Target-/Reserve-,
-  Goal-, Action-Fit- und Metadaten-Consumerverträge sind geschlossen; ein
-  Deckstrategie-Run kann eine ausdrücklich höher bewertete begonnene
-  Broker-Bankaufladung nicht mehr blockieren. Führend ist das Abschlussreview
-  vom 18.07.2026 unter `docs/reviews/ai/`.
-- Die Vollbestandsremediation aller 618 aktiven Kartenhints ist umgesetzt und
-  verifiziert. 17 konkrete Kartenfehler und 28 rohe Signaltransporte wurden
-  korrigiert, alle coverage-pflichtigen Taktiksignale besitzen Consumer oder
-  explizite Policy, und Value-, Pair-, Mechanik- sowie Szenariometadaten sind
-  runtimewirksam oder ausdrücklich Evidence-only. Alle Hints sind geprüft;
-  Hint-Quality und Target-Profile-Gates stehen bei null offenen Fällen.
-  Führend sind der Vollbestandsaudit, der Remediationprozess und das
-  Abschlussreview vom 18.07.2026.
-- Der Zug- und Kampagnenplaner ist für Corp und Runner produktiv. Fachmodule
-  melden aktuelle Planning Heads; der TurnPlanner wählt daraus eine
-  deterministisch begrenzte Restzuglinie. Der aktuelle Head wird als
-  `TurnPlanCommitment` mit Execution Lease gegen die aktuellen
-  `LegalActions` rematerialisiert. Mehrphasige Zuglinien, typisierte
-  Informations-/Reaktionsgrenzen, gegnerzugübergreifende Kampagnen,
-  Runtime-Restart und vollständige getrennte Side-Coverage sind abgenommen.
-  Produktiv gilt `cutover`; `legacy_compare` bleibt ein expliziter
-  Diagnosemodus ohne Fallbackautorität.
-- Die privilegierte private Betreiber-Buganzeige zeigt bestimmungsgemäß die
-  vollständige Hand der jeweils aktiven KI sowie die vollständige Zugplanung,
-  nicht jedoch die Hand des menschlichen Spielers. Für die KI-Daten dieser
-  Ansicht gilt keine seitensichere Reduktion. Normale PlayerViews,
-  PublicEvents, Zuschauerpayloads, öffentliche Replays und Logs bleiben
-  getrennt. Führend ist
-  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
-- Das KI-Entscheidungsfenster hält den ersten vollständigen
-  Zugplan-Snapshot pro KI-Zug fest. Der ausgewählte Plan und alle betrachteten
-  Alternativen sind in einer kompakten, standardmäßig eingeklappten
-  Vergleichsliste mit Wert, Schrittzahl und Pflichtenbefund sichtbar; beim
-  Aufklappen erscheinen die tatsächliche semantische Schrittfolge,
-  Bewertungskomponenten und planspezifische Evidence. Fenster-, Bereichs- und
-  Planstatus bleiben über nachfolgende Aktionen erhalten.
-- Corp-Score- und Defense-Plan können eine exakte Same-Turn-Linie aus
-  Remote-ICE und gebundener Agenda ausführen. Eine eng gegatete zentrale
-  Steuer-/Disruptions-ICE-Zuweisung verhindert auf der letzten Aktion einen
-  inkonsistenten Draw, ohne allgemeine ICE- oder ungeschützte
-  Agenda-Installationen freizugeben. Cleanup berücksichtigt abnehmenden
-  Dublettenwert; Marked Accounts nutzt den korrekten `on_access`-Vertrag.
-  Führend ist
-  `docs/reviews/ai/match-5f7924-agenda-defense-discard-final-review-2026-07-30.md`.
-- Die Plan-first-Live-Runtime ist der einzige produktive Entscheidungsweg;
-  historisch benannte Semantic-Runtime-Fassaden rufen ausschließlich diesen
-  Einstieg auf.
-- Die Corp-Planprovider sind auch source-seitig klar getrennt:
-  Defense-Domain-Signale, Economy-/Liquiditätssignale,
-  Score-/Defense-Execution-Continuity und ownerbezogene
-  Action-Disposition-Contributors liegen in eigenen `plans/`-Modulen.
-  `plan-first-live-runtime.ts` bindet nur gemeinsam genutzte Fakten über
-  typisierte read-only Adapter an. Ein vollständiger Vorher-/Nachher-Lauf mit
-  60 Spielen und 12.527 Entscheidungen war einschließlich aller
-  ActionSequences, StateHashes, Debug-Evidence und bekannten roten
-  Coverage-Befunde exakt identisch. Führend ist
-  `docs/reviews/ai/corp-plan-architecture-source-cleanup-final-review-2026-07-30.md`.
-- `@netgrid/ai` exportiert nur Live-Verträge; Simulation, Selfplay und
-  Benchmarks liegen unter `@netgrid/ai/simulation`.
-- Alte Corp-/Runner-Planer, Baseline-Selectoren, Shadow-/META-/Readiness-
-  Runtime, Kill-Switches und der frühere AI-Monolithtest sind entfernt.
-- Ein Repository-Gesamtcheck hat zusätzlich elf verwaiste Helfermodule der
-  früheren KI-Baseline-/Legacy-Bewertung entfernt; der anschließende
-  Importscan enthält keine ungenutzten App-/Package-Module mehr.
-- Der Coverage-Restpfad ist fail-closed und darf nur ausdrücklich sichere
-  Engine-Fortsetzungen auswählen.
-- Der produktive Auswahlweg ist über den strukturierten side-sicheren Vertrag
-  `AiDecisionDebug.planFirstDecision` verhaltensneutral erklärbar:
-  autoritative Planinstanz, Root-/Leaf-/Executor-Bezug, P1 bis P6, aktueller
-  Step und exakter Route Head, Parent-/Need-Bindung, Engine-Quote-Evidence,
-  diagnostischer Strategic Intent und Goal-/Threat-Signale sowie
-  `whyNot`-/Dispositionen werden getrennt ausgewiesen. Das sichtbare
-  KI-Entscheidungsfenster verwendet nur diesen Vertrag und bleibt bei
-  fehlenden oder unvollständigen Daten fail-closed.
-- `AiDecisionDebug.decisionChain` bleibt eine tiefere Trace-Ebene für
-  bestehende Checkpoint- und Evaluationsdiagnostik, ist aber keine sichtbare
-  Auswahlautorität. Der bestehende SQLite-KI-Trace bleibt die einzige
-  dauerhafte Diagnoseablage: `summary` und `detailed` speichern den
-  redigierten Plan-first-Vertrag im gleichen
-  `ai_decision_traces.trace_json`; Replayperspektiven werden aus demselben
-  Pfad side-sicher hydriert.
-- Der bestehende Plan `corp.create_score_window` erkennt vollständige
-  Same-Turn-Konversionspfade aus Aktionsgewinn, Advancement-Platzierung,
-  Countertransfer und Basic Advances. Vapor Ops und andere Werkzeuge werden
-  funktionsbasiert erkannt; ungeschützte Agenda-Installationen bleiben ohne
-  garantierten Abschluss gesperrt.
-- Die spielgleiche Runner-Endgame-Remediation aus Match 424A trennt vorhandene
-  Breaker-Coverage von fehlender Gesamtbezahlbarkeit, bewertet Run-Events über
-  ihren wirklichen Zielpfad, schützt finanzierte neue Entwicklung und lässt
-  negative Backup- oder Hintergrund-Bankpläne bei akut besserer sichtbarer
-  Konvertierung weichen. Fall Guy wird im konkreten legalen
-  Tag-Vermeidungsfenster statt `pass` genutzt. Führend ist
-  `docs/reviews/ai/ai-match-424a-runner-endgame-remediation-final-2026-07-15.md`.
-- Die Corp-Entscheidungsfenster aus Match e2f2 sind mit zehn spielgleichen
-  Checkpoints geschlossen. Rez-Ertrag, Mehrkarten-Draw und Credit-Überschuss
-  werden getrennt bewertet; erfolgreicher R&D-Druck bleibt über Runner-Züge
-  bestehen. Matchpoint-HQ-Schutz verlangt sichtbare Agendaexposition und geht
-  einem garantiert vollständigen Same-Turn-Scorepfad nicht vor. Der
-  45-Karten-Audit von `Universal Fast Advance` meldet null Blocker und null
-  Warnungen; 444 AI-Testdateien mit 3.109 Tests sind grün. Führend ist
-  `docs/reviews/ai/match-e2f2-corp-decision-windows-remediation-final-review-2026-07-22.md`.
-- Die ECFE3CE-Remediation führt sichtbare Trace-Vermeidung und spätere
-  ICE-Kosten durch einen gemeinsamen Credit-Pool und revalidiert Run-Sperren
-  quellenunabhängig im tiefsten `startRun`-Pfad. Fang, All-Nighter, Private LDL
-  Access, Bodyweight Synthetic Blood und TKO 2.0 sind von der Hintquelle bis
-  zu ihren produktiven Consumern korrigiert. Die getrennte Broker-Analyse
-  bestätigte Optimierungsbedarf bei letztem Lade-Klick, Mehrkopien-
-  Amortisation, Quellenwahl und einem frühen Cashout. Die nachfolgende
-  Serie-82b2-Remediation schließt den reifen Cashout jetzt im bestehenden
-  `runner.credit_bank`-Owner: Ein bei 12 Credits liegender Broker ersetzt eine
-  konkret gebundene Mehrklick-Finanzierung, bleibt ohne solchen Bedarf aber
-  unangetastet. Führend sind
-  `docs/reviews/ai/match-ecfe3ce-engine-hints-remediation-final-2026-07-16.md`
-  und
-  `docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md`.
-- Die vollständige Hin-/Rückspielanalyse der Serie 82b2 umfasst 267/267
-  KI-Entscheidungen. All-Nighter rankt gebundene Bonusziele, gestaffelte
-  Zentral-ICE werden über ihren gemeinsamen Engine-Tax bewertet, und eine
-  rezzte Vapor-Ops-Score-Decoy-Instanz beendet ihren alten Bluffzweck. Beide
-  Deck-Consumer-Audits melden null Findings und null Warnungen; 4.506 AI-Tests
-  in drei Shards sind grün. Führend ist
-  `docs/reviews/ai/series-82b2-remediation-final-review-2026-08-01.md`.
-- Die zwei zuletzt abgeschlossenen Corp-KI-Spiele vom 17.07.2026 sind mit
-  192/192 Decisions analysiert und behoben. Geschützte Scorelines können
-  spekulative Punish-Pläne konvertieren, Score-Remote-Roots bleiben für
-  Agenden frei, contestable Agenda-Risiken berücksichtigen den Punktwert und
-  ausreichend geschützte Matchpoint-Linien werden nicht pauschal blockiert.
-  Nicht-ICE-Rezzes verwenden durchgängig `rez_card`; beide Match-Deck-Audits
-  melden null Hint-Blocker und null Warnungen. Führend ist
-  `docs/reviews/ai/latest-two-corp-match-remediation-final-review-2026-07-17.md`.
-- Das vollständig analysierte Corp-KI-Spiel
-  `match_e653f50ac25eed22` ist mit 128/128 Decisions behoben. Verteiltes
-  Advancement projiziert pro Ziel statt als Gesamtmenge, riskante
-  Agenda-Installationen können eine fälschlich garantierte Same-Turn-Bindung
-  nicht mehr absolut durchsetzen, und Synchronized Attack bezahlt
-  HQ-Retain-Choices wertbasiert oberhalb einer Fünf-Credit-Reserve. Leere
-  Scoring-Remotes bleiben erlaubte Hintergrundprojekte, stehen ohne
-  unmittelbaren Scorepfad aber hinter R&D-Grundschutz; kritischer direkter
-  Scoreline-Schutz bleibt erhalten. Der 55-Karten-Deckaudit meldet null
-  Hint-/Runtime-Lücken und null Strategiewarnungen. Führend ist
-  `docs/reviews/ai/match-e653f50a-corp-remediation-final-review-2026-07-19.md`.
-- Das jüngste nicht abgeschlossene Corp-KI-Spiel
-  `match_f8096c690c233533` ist mit 46/46 Entscheidungen geprüft. Finanzierte
-  variable ICE-Routen akzeptieren die tatsächlich von der Engine projizierte
-  Rez-Konfiguration; unter akutem Zentraldruck darf der Defense-Plan eine
-  höchstens drei Credits entfernte ICE-Installation am letzten Klick dosiert
-  stagen. Installation, Bluffwert und revalidierte Rez-Hilfe bleiben
-  ausschließlich in `corp.defend_servers`; Economy finanziert nur den
-  gebundenen Parent, Handmanagement bewahrt höchstens ein bereits bewertetes
-  Defense-Paket. Die vollständige AI-Suite ist mit 4.248/4.248 Tests grün,
-  der 30/45-Deck-Audit meldet null Blocker und Warnungen. D29
-  (verdeckte Choice-Policy) und D37 (riskante Remote-Agenda) bleiben mangels
-  eindeutiger side-sicherer Ursache bewusst offen. Führend ist
-  `docs/reviews/ai/match-f809-corp-defense-remediation-final-review-2026-07-29.md`.
-- Die Planebene besitzt zusätzlich ein begrenztes Planportfolio: kurzfristige
-  Score- und Gefahrenpläne bleiben Vordergrund beziehungsweise Interrupt,
-  während Broker-/Bank-Zyklen und langfristige Corp-Scoring-Remotes mit
-  höchstens einer Hintergrundaktion pro Zug fortgesetzt werden können.
-  `RemoteDoctrineProfile` leitet den Remote-Bedarf aus der eigenen Deckstrategie
-  ab; Fast Advance erzeugt keinen pauschalen Glacier-Ausbau. Zielremotes werden
-  über Züge gebunden und anhand sichtbarer Pfadkosten sowie Runner-Erholung
-  statt nur ICE-Anzahl bewertet.
-- Aktuelle Benchmarks vergleichen `random_legal_bot` mit
-  `current_candidate`; historische Profilnamen sind keine Runtimeoption mehr.
-- AI Behavior Baseline v1 ergänzt diese Profilvergleiche um einen festen
-  deckübergreifenden `current_candidate`-Selfplay-Lauf mit sechs Slots, zehn
-  Seeds je Slot, 480 Aktionen und normalisierten Verhaltensraten. Der erste
-  Lauf umfasst 60 Spiele und 11.144 Entscheidungen; alle Safety-Gates außer
-  zwei Aktionslimits im Hybrid-Score/Punish-Slot sind grün. Führend sind
-  `docs/architecture/ai/ai-behavior-baseline-v1-process-2026-07-12.md` und
-  `docs/reviews/ai/ai-behavior-baseline-v1-initial-run-review-2026-07-12.md`.
-- Run-produzierende Kartenfähigkeiten werden inzwischen vor der Auswahl über
-  dieselbe Ziel-, Route-, Release- und Commitment-Prüfung wie normale Runs
-  geführt. Privates Topdeck-Wissen bleibt als geordnete Sequenz erhalten,
-  wandert bei einem bekannten Draw positionsgenau nach HQ und wird bei
-  Shuffle oder Reorder invalidiert. Effekt-Consumer prüfen zusätzlich den
-  tatsächlichen Zonen-/Aktivzustand; Strategic Runtime, Board-Triage und
-  Plan-Memory teilen eine Punkte- und Deadline-Feasibility. Der feste
-  Vergleich über 60 Spiele und 11.836 Entscheidungen ist ohne Hard Failure
-  akzeptiert. Führend sind
-  `docs/architecture/ai/ai-seed01-seed09-seed02-behavior-hardening-process-2026-07-20.md`
-  und
-  `docs/reviews/ai/ai-behavior-baseline-v1-seed01-seed09-seed02-hardening-candidate-2026-07-20.md`.
-- Selfplay- und Testspiel-Laufzeiten sind ohne fachliche Abstriche gehärtet:
-  semantische Ableitungen werden nur innerhalb einer Entscheidung
-  wiederverwendet, Vollhistorie und echter 80-Ereignis-Tail teilen bereinigte
-  Eventobjekte, und Side-Safety arbeitet strukturell ohne Vollstringkopie. Der
-  feste 240-Aktionen-Fall sank bei bitgleicher Summary, ActionSequence und
-  StateHash um 21,8 Prozent. Baseline-Slots laufen ab vier Slots konservativ in
-  isolierten Prozessen; vollständige Raw-Evidence wird atomar gestreamt und
-  optional verlustfrei als `.gz` geschrieben. Führend sind
-  `docs/architecture/ai/ai-selfplay-performance-optimization-process-2026-07-20.md`
-  und
-  `docs/reviews/ai/ai-selfplay-performance-optimization-final-review-2026-07-20.md`.
-- Das anschließende Profil der eigentlichen KI-Kernlaufzeit hat identische
-  Runner-Run-Target-, Handentwicklungs- und Install-Fit-Ableitungen innerhalb
-  einer Entscheidung sowie allokationsintensive Markerprüfungen als weitere
-  Schwerpunkte bestätigt und optimiert. Der bereits optimierte feste
-  240-Aktionen-Lauf sank bei bitgleichen kompakten und vollständigen
-  Raw-Artefakten nochmals von 22,854 auf 18,512 Sekunden; die profiliert
-  gemessene KI-Entscheidungszeit sank von 11,664 auf 5,051 Sekunden. Der
-  Standard-Benchmark profitiert automatisch über seinen öffentlichen
-  `chooseAiAction`-Pfad. Führend sind
-  `docs/architecture/ai/ai-core-runtime-performance-followup-process-2026-07-20.md`
-  und
-  `docs/reviews/ai/ai-core-runtime-performance-followup-final-review-2026-07-20.md`.
-- Der Runner-Survival-Progress-Vertrag bindet Basic Credits jetzt an eine
-  sichtbare konkrete Reaktions- oder Prevention-Lücke. Ohne Handgewinn,
-  Risikoreduktion oder verringerte Reservelücke verliert der Plan seine TTL
-  und seine absolute Arbitration. Im 60-Spiele-Panel sinken die bestätigten
-  nichtprogressiven Survival-Credit-Folgen in Net-Damage-08/-09 und
-  Hybrid-04/-07 vollständig auf null; C-09 nutzt nur einen konkret
-  finanzierenden Credit von 3 auf das sichtbare Ziel 4 und endet nach 416
-  statt 480 Aktionen regulär. Drei unabhängige Action-Limits in Net-Damage-07,
-  Hybrid-01 und Hybrid-05 bleiben offen. Führend ist
-  `docs/reviews/ai/ai-behavior-baseline-v1-runner-survival-progress-2026-07-18.md`.
-- Der Planportfolio-Rollout wurde zusätzlich gegen einen isolierten
-  Hybrid-Control am exakten Ausgangs-Commit geprüft. Control und Kandidat
-  besitzen jeweils vier bereits vorhandene Aktionslimit-Partien; alle übrigen
-  Safety-Gates sind grün. Plan-Konversion und No-Progress verbesserten sich
-  leicht, gestiegene Bank-/Plan-Mismatch-Findings und eine Seed-Verschiebung
-  bleiben offenes Review-Risiko. Führend:
-  `docs/reviews/ai/ai-planportfolio-remote-doctrine-final-review-2026-07-12.md`.
-- Aktive AI-Gates: 618 geprüfte Hints, 599 Karten mit statisch gepflegten
-  Action-Signalen, 0 zurückgestellt und 0 Target-Profile-Gaps. Der
-  Taktiksignalvertrag umfasst 671 Signale und 294 coverage-pflichtige
-  Einträge ohne offene Pflichtlücke; das Hint-Quality-Gate meldet 0 Fehler und
-  0 Warnungen. `data/ai/ai-card-hints-active.json` ist die einzige statische
-  Karten-Hint-Quelle für Runtime, Deckstrategie und Inspector. Die frühere
-  Compile-/Derived-Facts-/Manual-Overlay-Pipeline ist entfernt; der Inspector
-  baut seine Darstellung direkt aus dieser Quelle auf und besitzt keinen
-  zweiten Semantikindex.
-- Die neun am 19.07.2026 identifizierten AI-Komplexitätsschwerpunkte wurden
-  durch fachliche Owner- und Testsuite-Schnitte aufgeteilt. Der produktive
-  Importgraph bleibt frei von Laufzeit- und Typzyklen. Die damalige
-  Größen-Gate-Remediation ist als historische Umsetzungsevidence dokumentiert;
-  aktuelle Gates verwenden keine Datei-, Zeilen-, Testgrößen- oder
-  Runtime-Root-Caps. Führend sind
-  `docs/architecture/legacy-simplification-process-2026-07-19.md` und
-  `docs/reviews/ai/ai-source-structure-gate-remediation-final-review-2026-07-19.md`.
-- Führende Artefakte:
-  - `docs/architecture/ai/README.md`
-  - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
-  - `docs/reviews/ai/ai-current-state-cleanup-final-review-2026-07-09.md`
-  - `docs/architecture/ai/corp-score-conversion-capability-contract.md`
-  - `docs/architecture/ai/corp-score-conversion-plan-process-2026-07-10.md`
-- Der Proteus-AI-Rollout ist lokal in `main` integriert: 154/154 Karten sind
-  technisch `ai_supported`, alle 114 Pilotdeck-Karten sind an elf
-  Familien-Szenarien gebunden und vier qualifizierte Snapshots liegen im
-  AI-Deckpool 1.1.0. Play-Strength bleibt ein getrenntes Gate.
+- `account-alpha-operations.md`
+- `maintenance-control-plane.md`
+- `netgrid-local-transfer.md`
 
-## Server, Web und lokaler Betrieb
+Für die Analyse laufender Matches dient die read-only Maintenance-Analysis-API. Direkter SQLite-Zugriff bleibt ein bewusstes Wartungs-/Sonderwerkzeug. Der aktuelle Vertrag steht in `docs/runbooks/maintenance-control-plane.md`.
 
-- Der Spielstart `Simulation` erstellt ein persistiertes `ai_vs_ai`-Regelmatch
-  und öffnet das normale side-sichere Spielbrett. Pause, Einzelschritt,
-  getaktetes Weiter, schneller Einzelschritt-Takt und aktiver Abbruch sind
-  verfügbar; der frühere interaktive Batchlauf mit 120-Aktionen-Limit ist aus
-  diesem Startpfad entfernt. Ein deterministischer Regressionslauf endete nach
-  183 Aktionen regulär und blieb nach Reconnect, Replay und StateHash grün.
-  Führend sind
-  `docs/architecture/ai/ai-vs-ai-observer-process-2026-07-13.md` und
-  `docs/reviews/ai/ai-vs-ai-observer-implementation-review-2026-07-13.md`.
-- SQLite ist der einzige konfigurierbare Laufzeitstorage. Backup, Restore,
-  Inspect, Maintenance, Retention-Schutz und Cleanup arbeiten auf der
-  aktuellen SQLite-Datenbank. JSON-Storage und Alt-Schema-Migrationen sind
-  entfernt; private Matchdecks werden ausschließlich je Teilnehmer
-  gespeichert.
-- Wachsende Matchtabellen werden append-or-truncate persistiert; ausführlicher
-  KI-Debug liegt dauerhaft nur im Trace-Ledger. Backups sind über
-  `VACUUM INTO` konsistent und kompakt, und `storage:optimize` sichert,
-  normalisiert, vakuumiert und prüft die Datenbank kontrolliert. Private
-  Accountstatistiken verwenden SQL-Aggregate und indexgestützte
-  Keyset-Pagination. Führend ist
-  `docs/reviews/architecture/sqlite-matchstorage-optimization-final-review-2026-07-19.md`.
-- Normale Spieler- und KI-Aktionen verwenden auf SQLite einen bounded
-  Aktionsload und einen atomaren Delta-Save. Der PublicEvent-Tail bleibt mit
-  Chronicle-Kontext identisch, Receipts und KI-Traces werden gezielt geladen,
-  und Versions- oder Historydrift verhindert jeden Teilcommit. Vollständige
-  Undo-, Replay-, Maintenance- und Lifecycle-Pfade bleiben unverändert.
-  Die lokale 1-/10-/25-Match-Probe blieb mit 36 exakt einmal persistierten
-  Receipts grün. Führend ist
-  `docs/reviews/architecture/delta-action-persistence-final-review-2026-07-19.md`.
-- Die geschlossene V2.0-Passwort-Account-Alpha ist umgesetzt. Accounts werden
-  nur durch lokalen Admin-Bootstrap oder einmalige Einladung angelegt;
-  widerrufbare Account-Sessions laufen über ein `HttpOnly`-Cookie und bleiben
-  von Maintenance- und Match-Capabilities getrennt. E-Mail, Passkeys, MFA und
-  öffentliche Registrierung sind noch nicht enthalten. Der CSRF-Nachweis ist
-  stabil an die einzelne Session gebunden; Session-Restore, Reload und mehrere
-  Tabs invalidieren einander nicht.
-- Ein Account kann bis zu 50 ownergebundene persönliche Server-Decks halten.
-  44 kuratierte Standard-Decks sind direkt spielbar oder kopierbar; interne
-  KI-, Test- und ausgemusterte Decks sind in der normalen UI unsichtbar.
-  Matchstarts erzeugen weiterhin ausschließlich neu validierte immutable
-  Snapshots. Führend sind
-  `docs/releases/v2/v2-0-auth-privacy-cloud-decks/password-accounts-cloud-decks-final-review-2026-07-18.md`
-  und `docs/runbooks/account-alpha-operations.md`.
-- Alle 44 aktiven Standard-Decks besitzen eine versionierte deutsche
-  Deck-Anleitung mit Deckidee, Spielphasen, Schlüsselkarten, Tipps und Risiken.
-  Feste Standarddeck-Auswahlen und der Kopierdialog öffnen dieselbe Anleitung;
-  Zufallsauswahlen und persönliche Decks erhalten keine. Neue oder geänderte
-  Standards bleiben auch ohne aktuellen Text vollständig spielbar und zeigen
-  stattdessen „Anleitung fehlt noch“ oder „Anleitung muss aktualisiert werden“.
-  Der eigenständige Pflegecheck ist bewusst kein Build- oder Start-Gate.
-  Führend ist
-  `docs/reviews/deck-library/standard-deck-guides-final-review-2026-08-02.md`.
-- Der einmalige JSON-/Alt-SQLite-Import wurde am 2026-05-06 abgeschlossen und
-  ist seit dem Current-State-Projekt-Cleanup kein Start-/CLI-/Health-Vertrag
-  mehr.
-- Der normale lokale Startpfad ist `scripts/start-netgrid.ps1`.
-- Der Webclient zeigt die bewusst gesetzte Produktversion `V0.9` getrennt von
-  einer fortlaufenden Git-Buildkennung. Die Optionen nennen zusätzlich Commit,
-  Quellstand und lokalen Entwicklungsstatus; ein nicht sauberer Arbeitsbaum
-  wird als `-dev` gekennzeichnet. Führend ist
-  `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
-- Storage-, Cleanup-, Recovery- und KI-Trace-Maintenance bilden nach ARC-001
-  eine eigenständige Control Plane. Private LAN-Adressen sind kein
-  Adminnachweis mehr. Passwort, kurzlebige serverseitige Sitzung, CSRF und
-  frische Reauthentifizierung schützen die Wartungsfunktionen; aktiver und
-  anderer nicht-terminaler Matchzustand ist vom Cleanup ausgeschlossen.
-- Lokales HTTP ist nur auf Loopback erlaubt. Remote-/Tablet-Maintenance ist im
-  `private_internet`-Profil standardmäßig aus und verlangt eine eigene
-  HTTPS-Origin sowie explizit benannte Proxy-Adressen. Führend sind
-  `docs/architecture/maintenance/maintenance-control-plane-security-process-2026-07-11.md`,
-  `docs/runbooks/maintenance-control-plane.md` und das ARC-001-Final-Review.
-- Die verwaiste Next-Demo-Route `/api/game` mit globalem V0.8-GameState ist
-  entfernt. Produktive Matches laufen über den Multiplayer-Server; das lokale
-  Tutorial bleibt ein ausdrücklich isolierter Modus.
-- Der Playtest-Fund vom 11. Juli 2026 ist als sequenzieller Paketprozess
-  geschlossen: Window- und Access-Darstellung, öffentliche Chronicle-
-  Choice-Texte sowie Auto-End bei offenen Runs und Bestätigungen sind
-  gehärtet. `Lockjaw`-Tap und das nicht bezahlbare HQ-ICE wurden als
-  regelkonforme Nichtfehler belegt. Führend:
-  `docs/reviews/current-game-findings-remediation-final-review-2026-07-11.md`.
+## Planung und laufende Arbeit
 
-## Current-State-Struktur
+Es gibt derzeit keine dauerhaft führende monolithische Release-Roadmap. Historische V0-/V1-/V2-Releasepakete und ihre Audit-/Final-Review-Evidence sind kein Current State.
 
-- `docs/architecture/current-state-project-cleanup-process-2026-07-10.md`
-  dokumentiert die projektweite Bereinigung und ihre Einzelcommits.
-- Historische nummerierte AI-Prozessscripts und ihre Rohreports werden durch
-  `docs/reviews/ai/ai-historical-process-rollup-2026-07-10.md` ersetzt.
-- Die Kartenregistrierung liegt in `packages/shared/src/card-definitions.ts`;
-  produktive Consumer verwenden nur `CARD_DEFINITIONS` und
-  `CARD_DEFINITIONS_BY_ID`.
-- Teststufen, drei feste AI-Shards und Package-Boundaries sind unter
-  `docs/architecture/test-tiers-and-package-boundaries-2026-07-10.md`
-  ausführbar festgeschrieben.
-- Für lokalisierte Kartenassets werden nur Art-Quellen und Full-PNGs
-  versioniert. Die Retention-Regel steht in
-  `docs/architecture/card-asset-retention-2026-07-10.md`.
+Aktuelle Arbeit wird über folgende Ebenen gesteuert:
 
-## Aktuelle Risiken und offene Gates
+- `docs/activities/inbox/`: offene kleine Findings und Nacharbeiten.
+- `docs/activities/in-progress/`: aktuell beanspruchte Pakete.
+- `docs/codex/CODEX_STATUS.md`: kompakter technischer Gesamtstand.
+- aktuelle Architektur-, Entscheidungs- und Runbook-Verträge.
+- bei einem neuen größeren Vorhaben ein ausdrücklich aktueller Scope-/Releaseplan für dessen Laufzeit.
 
-- `apps/web/app/page.tsx`, `apps/web/app/chronicle.ts`,
-  `apps/server/src/multiplayer.test.ts` und mehrere Corp-AI-Scoringdateien sind
-  verbleibende Komplexitätsschwerpunkte.
-- Das AI-Source-Structure-Gate ist grün und schützt den zyklenfreien Laufzeit-
-  und Typimportgraph sowie qualitative Modulgrenzen. Historische Datei-,
-  Zeilen-, Testgrößen- und Fanout-Ratchets sind keine Architektur-Gates mehr.
-- Das Engine-Architektur-Zielgate ist grün. Mark-Counter-Anzeigen werden über
-  generische Kartendefinitionsmetadaten statt direkter Karten-ID-Verzweigungen
-  projiziert.
-- Der Engine Architecture Refresh vom 18.07.2026 ist vollständig umgesetzt:
-  Runtime-Port-Verträge sind statisch typisiert, der produktive relative
-  Importgraph ist zyklenfrei und Turn-, Damage-, Access- sowie Run-Domänen sind
-  fachlich geteilt. CardImplementations werden deterministisch nach Set, Seite
-  und Typ registriert.
-- Interne Ability-Payload-Discriminatorfelder sind normalisiert und werden
-  nicht in PublicEvents weitergereicht. Einzelne historisch benannte
-  Präsentations-/Mechanikfelder bleiben nur dort bestehen, wo aktuelle
-  Producer und Consumer sie noch verwenden; führend ist das Final Review
-  `docs/reviews/engine/engine-architecture-refresh-final-review-2026-07-18.md`.
-- `public-context.ts` und der große Per-Card-Longtail-Test bleiben als
-  begrenzte nächste Architekturpunkte
-  dokumentiert; sie sind keine roten Korrektheits- oder Release-Gates.
-- Umfangreiche Benchmark-Rohdaten gehören nach `data/local/`; versioniert
-  werden nur kleine aktuelle Summaries und reproduzierbare Fixtures.
-- Offizielle Artworks, Frames, Logos und externe Kartendatenbankabhängigkeiten
-  bleiben ohne eigenes Rechts-/Asset-Gate ausgeschlossen.
+Nach Abschluss wird das dauerhafte Ergebnis in Code, Tests, Architektur, Entscheidung, Status oder Runbook zurückgeführt; historische Prozess-, Release- und Review-Evidence wird anschließend entfernt.
 
-## Arbeits- und Abschlussregel
+## Zentrale Qualitätsgrenzen
 
-- Neue Arbeit wird gegen diesen Current State und `docs/codex/CODEX_STATUS.md`
-  geprüft.
-- Historische Aussagen sind keine aktuelle Runtimefreigabe.
-- Parallele Worktrees werden vor Main-Integration defensiv abgeglichen.
-- Push, Pull Request und Remote-Integration erfolgen nur auf Nutzerwunsch.
+Je nach Änderungsscope sind insbesondere relevant:
+
+- paketnahe Typechecks und Tests;
+- `corepack pnpm check:engine-source-structure`;
+- `corepack pnpm check:engine-source-structure:selftest` bei Strukturguard-Arbeit;
+- `corepack pnpm check:ai` und einschlägige AI-Struktur-/Hint-Gates bei KI-Änderungen;
+- Replay-, StateHash-, Hidden-Info- und deterministische Zufallstests bei betroffenen Enginepfaden;
+- `git diff --check` vor Abschluss eines Änderungsschnitts.
+
+## Dokumentationsprinzip
+
+Der Arbeitsbaum beschreibt den heutigen Stand. Abgeschlossene Prozesse, Releasepakete, Reviews, Benchmarks, Replay-/Trace-Rohdaten und alte Statuschroniken werden nicht vorsorglich konserviert. Git-Historie übernimmt die historische Nachvollziehbarkeit.
+
+Führend: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`.

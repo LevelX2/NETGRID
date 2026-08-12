@@ -1,54 +1,54 @@
 # Engine Source Structure Guard
 
-Status: current
+Status: current  
+Stand: 2026-08-12
 
 ## Zweck
 
-`corepack pnpm check:engine-source-structure` schützt die Schichtgrenzen und
-Kompositionsstruktur der Rules Engine gegen erneutes unkontrolliertes Wachstum.
-Der Guard analysiert ausschließlich produktive TypeScript-Dateien unter
-`packages/engine/src` und verwendet dafür den TypeScript-Parser statt
-Textheuristiken.
+`corepack pnpm check:engine-source-structure` schützt die produktive Rules Engine gegen neue Importzyklen, untypisierte Runtime-Komposition, rückwärts gerichtete Schichtabhängigkeiten und die Wiedereinführung bereits entfernter Legacy-Strukturen.
 
-## Geprüfte Verträge
+Der Guard analysiert produktive TypeScript-Dateien unter `packages/engine/src` mit dem TypeScript-Parser.
 
-- Relative Imports dürfen nur den im Schuldenledger benannten Run-Window-
-  Altzyklus bilden. Neue Zyklen und veraltete Ledger-Einträge sind Fehler.
-- Die fünf Runtime-Delegate-Dateien, der Delegate-Store und der frühere
-  Delegate-Barrel dürfen nicht wieder eingeführt werden.
-- `runtime-port-bindings.ts` muss genau 430 statisch typisierte Bindings ohne
-  `any` exportieren und unter dem Größenlimit bleiben.
-- Runtime-Factories dürfen das stabile `deps`-Objekt nicht destrukturieren,
-  weil eine solche Momentaufnahme die spätere Vervollständigung der
-  Komposition umgehen würde.
-- Die deklarativen Runtime-Portmodule dürfen kein `any`, keine ausführbaren
-  Statements und jeweils höchstens 260 Zeilen enthalten.
-- Import-Fan-out über 100 interne Module ist ausschließlich für die explizit
-  aufgeführten Runtime-Kompositionsdateien zulässig und muss dort exakt dem
-  Ledger entsprechen.
-- Ability Engine und CardImplementations dürfen keine neuen Rückwärtsimporte in
-  die Game-Ausführung erhalten. Die drei vorhandenen Ability-Engine-Kanten sind
-  als zu entfernende Altlasten benannt.
-- Nur `game/engine-runtime.ts` darf die private Runtime-Kompositionsschicht von
-  außen importieren.
+## Aktuell geschützte Verträge
 
-## Schuldenabbau
+### Importgraph und Schichten
 
-Die Ledger sind keine dauerhaften Ausnahmen. E03 bis E08 reduzieren sie mit
-jedem migrierten Vertrags- und Runtime-Cluster. E05 senkte den Ausgangswert von
-430 auf 363, E06 auf 186 und E07 auf null. Sobald eine Altlast entfällt, muss
-ihr Eintrag im selben Paket entfernt oder abgesenkt werden. E08 entfernte den
-technischen Delegate-Store, alle fünf Wrapperdateien und die zugehörige
-4-Modul-Zyklusfreigabe. Der verbleibende Run-Window-Zyklus wird in E13
-bereinigt.
-Import-Fan-out über 100 bleibt ebenfalls abzubauen.
+- Relative Imports im produktiven Engine-Graph müssen azyklisch bleiben.
+- `game/engine-runtime-internal/` darf von außen nur über `game/engine-runtime.ts` betreten werden.
+- `ability-engine/` und `card-implementations/` dürfen nicht zurück in `game/` importieren.
+- Zwei aktuell ausdrücklich inventarisierte Ability-Engine-Kanten sind noch als abzubauende Layer-Schuld erlaubt:
+  - `ability-engine/active-modifiers.ts -> game/state/temporary-breaker-strength.ts`
+  - `ability-engine/card-implementation-runtime-activated-costs.ts -> game/payment/runner-payment-support.ts`
+- Neue unerlaubte Kanten und inzwischen verschwundene, aber noch eingetragene Schuld sind beide Fehler.
 
-E09 reduzierte `turn-runtime-resolvers.ts` von einem dreistelligen Fan-out auf
-einen kleinen Composition Root. Der zugehörige Schuldeneintrag ist entfernt;
-vier fachliche Turn-Teilmodule werden zusätzlich durch explizite Größenlimits
-geschützt.
+### Runtime-Komposition
 
-Der Selftest `corepack pnpm check:engine-source-structure:selftest` erzeugt
-isolierte Gegenbeispiele für unsichere Funktionssignaturen, Zyklen, Fan-out und
-verbotene Schichtkanten. Er beweist damit, dass jede Fehlerklasse tatsächlich
-vom Guard erkannt wird.
+Die früheren Runtime-Delegate-Dateien, der dynamische Delegate-Store und der Delegate-Barrel dürfen nicht wieder eingeführt werden.
+
+`runtime-port-contracts.ts`, `runtime-port-bindings.ts` und die fachlichen Runtime-Portmodule müssen ohne `any` bleiben. Die deklarativen Portmodule dürfen keine ausführbaren Runtime-Statements enthalten.
+
+Innerhalb von `game/engine-runtime-internal/` darf das stabile `deps`-Objekt nicht per Object-Destructuring als Momentaufnahme eingefroren werden. Factories müssen spätere Vervollständigung der Komposition weiterhin über das gemeinsame Dependency-Objekt sehen.
+
+### Ability-Verträge
+
+Alle `definition-*-contracts.ts` unter `ability-engine/` sind reine deklarative Typverträge. Ausführbare Statements in diesen Dateien sind ein Strukturfehler.
+
+### CardSpec-, Registry- und Coverage-Grenze
+
+- Nummerierte `card-implementation-group-NNN.ts`-Subregistries sind verboten.
+- `card-implementations/coverage-source-locations.ts` muss entfernt bleiben; CardSpec-Source-Refs sind die Quellautorität.
+- `card-implementations/coverage.ts` muss aus `@netgrid/cards/engine` mindestens
+  `cardSpecImplementationDefinitionIds`, `cardSpecRuntimeDefinitionIds` und
+  `cardSpecSourceRefByDefinitionId` konsumieren.
+
+### Öffentliche Effektverträge
+
+Produktive Engine-Dateien dürfen `ResolvedGameEffect` nicht durch Type Assertions umgehen. Ein Effekt muss seinen gemeinsamen Vertrag beim Producer erfüllen.
+
+## Fail-closed-Ratchet
+
+Die ausdrücklich inventarisierten Ausnahmen sind kein Dauerbestand. Der Guard behandelt sowohl neue Schulden als auch veraltete Allowlist-Einträge als Fehler. Wird eine der zwei verbleibenden Layer-Kanten entfernt, muss ihr Allowlist-Eintrag im selben Änderungsschnitt verschwinden.
+
+## Selftest
+
+`corepack pnpm check:engine-source-structure:selftest` erzeugt isolierte Gegenbeispiele für die geschützten Fehlerklassen und beweist, dass der Guard nicht nur einen grünen Ist-Zustand beschreibt, sondern Verstöße tatsächlich erkennt.

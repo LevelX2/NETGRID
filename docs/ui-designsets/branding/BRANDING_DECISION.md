@@ -1,34 +1,30 @@
 # Vorläufige Branding-Entscheidung: NETGRID
 
-Stand: 2026-05-03
+Stand: 2026-08-12
 
 ## Entscheidung
 
-Der bevorzugte Programmname ist vorläufig:
+Der bevorzugte Programmname bleibt vorläufig:
 
 `NETGRID`
 
-Als bevorzugter Schriftzug gilt der rechte obere `NETGRID`-Lockup aus der historischen Ideentafel [wordmark-lockups.png](../archive/exploration/logo-ideas/wordmark-lockups.png).
-
-Aus diesem Lockup dürfen die zugehörigen Symbole links und rechts vom Schriftzug vorläufig als textlose Tool-Icons verwendet werden.
-
-## Abgelegte Referenzen
+Als führende visuelle Referenz gilt der im Repository erhaltene ausgewählte NETGRID-Lockup:
 
 - [Ausgewählter NETGRID-Lockup](selected-netgrid/netgrid-lockup-selected.png)
-- [Icon links vom Schriftzug, sauberer Ausschnitt](selected-netgrid/netgrid-icon-left-mark-clean.png)
-- [Icon rechts vom Schriftzug, sauberer Ausschnitt](selected-netgrid/netgrid-icon-right-tile-clean.png)
-- [Neu gezeichnetes rechtes NETGRID-Kachel-Icon, SVG](selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg)
+- [Icon links](selected-netgrid/netgrid-icon-left-mark-clean.png)
+- [Icon rechts](selected-netgrid/netgrid-icon-right-tile-clean.png)
+- [Neu gezeichnetes rechtes Kachel-Icon](selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg)
 
-Für neue Verweise sollten die `*-clean.png`-Dateien verwendet werden.
+Die früheren Ideentafeln, aus denen diese Auswahl hervorging, sind keine aktive Referenz mehr und werden nur über Git-Historie erhalten.
 
 Für Client- und Desktop-Icons wird aktuell die Cyber-Fassung `apps/web/public/brand/netgrid-icon-cyber-v1.png` verwendet. Das Windows-Icon `apps/web/public/brand/netgrid.ico` wird daraus abgeleitet.
 
 ## Nutzungsstatus
 
-- Status: vorläufige visuelle Richtung.
-- Für UI-Mockups, Dokumentation und App-Platzhalter geeignet.
-- Noch kein finales Markenasset.
-- Vor produktiver Nutzung als einfache SVG-/Icon-Dateien neu zeichnen.
+- vorläufige visuelle Richtung;
+- für UI, Dokumentation und private App-Nutzung geeignet;
+- noch kein finales Markenasset;
+- bevorzugte technische Basis ist das neu gezeichnete SVG-Icon.
 
 ## Grenzen
 

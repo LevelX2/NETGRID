@@ -81,11 +81,10 @@ assert(
 );
 
 const currentStatusFiles = [
+  "data/ai/card-set-ai-readiness-v1.json",
+  "data/ai/ai-deck-pool-1.1.0.json",
   "data/decks/proteus-playtest-decks-2026-05-25.json",
   "data/decks/deck-format-profiles-1.3.0.json",
-  "docs/reviews/ai/ai-proteus-play-strength-readiness-classes-2026-06-13.md",
-  "docs/reviews/ai/ai-proteus-random-bad-publicity-readiness-2026-06-13.md",
-  "docs/reviews/ai/ai-proteus-hidden-resource-ambush-readiness-2026-06-13.md",
 ];
 const stalePatterns = [
   "proteus_ai_supported: false",
