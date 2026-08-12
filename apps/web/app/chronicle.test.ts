@@ -6450,6 +6450,42 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("describes a Bizarre Encryption Scheme replacement without claiming a steal or agenda points", () => {
+    const item = formatChronicleEvent(
+      makeEvent("steal_agenda", {
+        actor: "runner",
+        title: "Hostile Takeover",
+        serverLabel: "Remote 1",
+        accessOrigin: "server_root",
+        agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+        delayedAgendaAccessScoreScheduled: true,
+        delayedAgendaAccessSourceDefinitionId:
+          "onr_v1_351_bizarre-encryption-scheme",
+      }),
+      "runner",
+      {
+        cardTitle: "Hostile Takeover",
+      },
+    );
+
+    expect(item.title).toBe(
+      "Du hast Hostile Takeover aus Remote 1 wegen Bizarre Encryption Scheme noch nicht gestohlen.",
+    );
+    expect(item.description).toBe(
+      "Die Agenda bleibt im Fort; ihre Wertung ist bis zum Beginn des nächsten Runner-Zugs verzögert.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Agenda",
+        "Verzögert",
+        "Remote 1",
+        "Bizarre Encryption Scheme",
+      ]),
+    );
+    expect(item.chips).not.toContain("+2 Agenda");
+    expect(item.title).not.toContain("Agenda-Punkte erhalten");
+  });
+
   it("names accessed cards when the access event reveals one", () => {
     const item = formatChronicleEvent(
       makeEvent("access_card", {

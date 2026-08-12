@@ -615,6 +615,16 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.runner.scoreArea).not.toContain(agendaId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "steal_agenda",
+      agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+      delayedAgendaAccessScoreScheduled: true,
+      delayedAgendaAccessSourceDefinitionId:
+        "onr_v1_351_bizarre-encryption-scheme",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "agendaPoints",
+    );
     expect(state.delayedAccessEffects).toEqual([
       {
         kind: "delayed_agenda_access_replacement",
@@ -655,88 +665,42 @@ describe("V1.9.9 Mechanikpaket R", () => {
     );
   });
 
-  it("delays an HQ-hand agenda after trashing an accessed Bizarre Encryption Scheme in the HQ root", () => {
-    let state = toRunnerTurn(v199CardReleaseGame("v199-bizarre-encryption-hq"));
-    state.runner.credits = 20;
+  it("allows Bizarre Encryption Scheme installs only in subsidiary data forts", () => {
+    let state = v199CardReleaseGame("v199-bizarre-encryption-install");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
-    const agendaId = moveCorpCardToHq(
-      state,
-      "onr_v1_203_hostile-takeover",
-    );
-    keepOnlyCorpHqCard(state, agendaId);
-    const bizarreId = addRezzedCorpRootForTest(
+    const bizarreId = moveCorpCardToHq(
       state,
       "onr_v1_351_bizarre-encryption-scheme",
-      "hq",
-      "bizarre_hq_root",
     );
-    state.cardInstances[bizarreId] = {
-      ...state.cardInstances[bizarreId]!,
-      faceup: false,
-      rezzed: false,
-    };
+
+    const installActions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "install_card" && action.source === bizarreId,
+    );
+    expect(installActions.length).toBeGreaterThan(0);
+    expect(
+      installActions.map((action) => action.payload?.serverId),
+    ).not.toEqual(expect.arrayContaining(["hq", "rd", "archives"]));
+    expect(
+      installActions.every((action) => {
+        const serverId = String(action.payload?.serverId ?? "");
+        return serverId === "new_remote" || serverId.startsWith("remote_");
+      }),
+    ).toBe(true);
 
     state = apply(
       state,
-      "runner",
+      "corp",
       (action) =>
-        action.type === "start_run" && action.payload?.serverId === "hq",
+        action.type === "install_card" &&
+        action.source === bizarreId &&
+        action.payload?.serverId === "new_remote",
     );
-    state = passRootRezWindowBeforeAccessIfOpen(state);
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.run?.accessedCardId).toBe(bizarreId);
-    state = apply(
-      state,
-      "runner",
-      (action) => action.type === "trash_accessed_card",
-    );
-    expect(state.corp.archives).toContain(bizarreId);
-    expect(state.run?.runDurationEffects).toEqual([
-      expect.objectContaining({
-        kind: "delayed_agenda_access_replacement",
-        sourceCardInstanceId: bizarreId,
-        sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
-        serverId: "hq",
-      }),
-    ]);
-
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.run?.accessedCardId).toBe(agendaId);
-    const delayedSteal = mustAction(
-      state,
-      "runner",
-      (action) => action.type === "steal_agenda",
-    );
-    const result = applyAction(state, {
-      matchId: state.matchId,
-      side: "runner",
-      actionId: delayedSteal.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      idempotencyKey: "v199-bizarre-hq-delayed-steal",
-    });
-
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    state = result.state;
-    expect(state.runner.scoreArea).not.toContain(agendaId);
-    expect(state.delayedAccessEffects).toEqual([
-      expect.objectContaining({
-        kind: "delayed_agenda_access_replacement",
-        agendaId,
-        serverId: "hq",
-        sourceCardInstanceId: bizarreId,
-        sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
-        resolveAt: "runner_start_turn",
-      }),
-    ]);
-    expect(validateGameState(state).ok).toBe(true);
-
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-    expect(state.runner.scoreArea).toContain(agendaId);
-    expect(state.corp.hq).not.toContain(agendaId);
-    expect(state.delayedAccessEffects).toBeUndefined();
+    expect(
+      state.corp.servers.some(
+        (server) => server.kind === "remote" && server.root.includes(bizarreId),
+      ),
+    ).toBe(true);
   });
 
   it("reduces ICE install costs on Chester Mix forts only", () => {

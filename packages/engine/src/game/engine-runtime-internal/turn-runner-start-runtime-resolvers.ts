@@ -200,10 +200,15 @@ export function createTurnRunnerStartRuntimeResolvers(
         continue;
       }
       const instance = state.cardInstances[entry.agendaId];
+      const server = state.corp.servers.find(
+        (candidate) => candidate.id === entry.serverId,
+      );
       if (
         !instance ||
         instance.zone.side !== "corp" ||
-        !corpFortContainsCard(state, entry.serverId, entry.agendaId)
+        instance.zone.zone !== "serverRoot" ||
+        instance.zone.serverId !== entry.serverId ||
+        !server?.root.includes(entry.agendaId)
       ) {
         continue;
       }
@@ -231,21 +236,6 @@ export function createTurnRunnerStartRuntimeResolvers(
     }
     if (remaining.length > 0) state.delayedAccessEffects = remaining;
     else delete state.delayedAccessEffects;
-  }
-
-  function corpFortContainsCard(
-    state: GameState,
-    serverId: Exclude<ServerId, "new_remote">,
-    cardId: CardInstanceId,
-  ): boolean {
-    if (serverId === "hq") return state.corp.hq.includes(cardId);
-    if (serverId === "rd") return state.corp.rd.includes(cardId);
-    if (serverId === "archives") return state.corp.archives.includes(cardId);
-    return (
-      state.corp.servers.find((server) => server.id === serverId)?.root.includes(
-        cardId,
-      ) === true
-    );
   }
 
   function applyRunnerStartOfTurnEffects(

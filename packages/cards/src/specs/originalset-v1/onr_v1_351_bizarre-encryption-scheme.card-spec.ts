@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Runner does not score any agenda or agendas on a run during which Bizarre Encryption Scheme is accessed; return that agenda to the fort instead. Runner scores the agenda at the start of his or her next turn, if neither you nor Runner has scored it by then. This does not affect any further runs.",
+      "Bizarre Encryption Scheme may only be installed in a subsidiary data fort. Runner does not score any agenda (or agendas) that he or she accesses from this fort; return the agenda to the fort instead. Runner scores the agenda at the start of his or her next turn if it is still in the fort.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -40,6 +40,12 @@ export const cardSpec = {
         kind: "not_applicable",
       },
     },
+    installCapabilities: [
+      {
+        kind: "install_only_inside_subsidiary_data_fort",
+        visibility: "public",
+      },
+    ],
     hiddenReplacementLongtail: {
       capabilityKey: capabilityKey(
         "hidden_replacement_longtail_delayed_agenda_access_replacement",

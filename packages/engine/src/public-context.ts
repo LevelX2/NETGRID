@@ -2340,18 +2340,36 @@ export function publicContextForAction(
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
+  if (legalAction.type === "steal_agenda") {
+    const agendaAccessReplacement =
+      legalAction.payload?.agendaAccessReplacement;
+    if (typeof agendaAccessReplacement === "string")
+      context.agendaAccessReplacement = agendaAccessReplacement;
+    if (legalAction.payload?.delayedAgendaAccessScoreScheduled === true)
+      context.delayedAgendaAccessScoreScheduled = true;
+    if (
+      typeof legalAction.payload?.delayedAgendaAccessSourceDefinitionId ===
+      "string"
+    )
+      context.delayedAgendaAccessSourceDefinitionId =
+        legalAction.payload.delayedAgendaAccessSourceDefinitionId;
+  }
+  const scoredSide =
+    legalAction.type === "score_agenda"
+      ? "corp"
+      : legalAction.type === "steal_agenda"
+        ? "runner"
+        : undefined;
   if (
-    (legalAction.type === "score_agenda" ||
-      legalAction.type === "steal_agenda") &&
-    agendaId
+    scoredSide &&
+    agendaId &&
+    state[scoredSide].scoreArea.includes(agendaId)
   ) {
     const definition = deps.definitionFor(state, agendaId);
     if (definition.type === "agenda") {
       context.agendaPoints = definition.agendaPoints ?? 0;
       const bonusAgendaPoints = deps.cardCounter(state, agendaId, "agenda");
       if (bonusAgendaPoints > 0) context.agendaPointBonus = bonusAgendaPoints;
-      const scoredSide =
-        legalAction.type === "score_agenda" ? "corp" : "runner";
       context.totalAgendaPoints = state[scoredSide].scoreArea.reduce(
         (sum, scoredAgendaId) =>
           sum + deps.agendaPointsForScoredCard(state, scoredAgendaId),

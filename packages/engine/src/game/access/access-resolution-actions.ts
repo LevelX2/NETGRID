@@ -661,21 +661,17 @@ export function delayAgendaAccessReplacementScore(
     throw new Error(
       "Der verzögerte Access-Effekt kann nur Agenda-Scoring verzögern.",
     );
-  const breach = run.breach;
-  const serverId = breach?.serverId ?? run.attackedServerId;
+  const serverId = run.breach?.serverId ?? run.attackedServerId;
+  const zone = host.cards.cardInstanceFor(cardId).zone;
+  if (
+    zone.side !== "corp" ||
+    zone.zone !== "serverRoot" ||
+    zone.serverId !== serverId
+  ) {
+    throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Remote.");
+  }
   if (replacementEffect.serverId !== serverId)
     throw new Error("Der verzögerte Access-Effekt passt nicht zu diesem Fort.");
-  const currentEntry = breach?.queue[breach.currentIndex];
-  if (
-    !currentEntry ||
-    currentEntry.serverId !== serverId ||
-    currentEntry.cardInstanceId !== cardId ||
-    currentEntry.status !== "accessed"
-  ) {
-    throw new Error(
-      "Die verzögerte Agenda ist nicht als aktueller Access dieses Forts gebunden.",
-    );
-  }
   const existing = host.state.delayedAccessEffects ?? [];
   if (!existing.some((entry) => entry.agendaId === cardId)) {
     host.state.delayedAccessEffects = [
@@ -689,6 +685,15 @@ export function delayAgendaAccessReplacementScore(
         resolveAt: "runner_start_turn",
       },
     ];
+  }
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+      delayedAgendaAccessScoreScheduled: true,
+      delayedAgendaAccessSourceDefinitionId:
+        replacementEffect.sourceDefinitionId,
+    };
   }
   if (host.state.run?.breach) {
     return completeCurrentBreachAccess(host, "declined", legalAction);

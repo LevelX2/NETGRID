@@ -3671,6 +3671,41 @@ export function formatChronicleEvent(
     case "steal_agenda": {
       category = "agenda";
       importance = "critical";
+      if (
+        stringValue(payload.agendaAccessReplacement) ===
+          "delay_score_until_runner_next_turn_start" &&
+        payload.delayedAgendaAccessScoreScheduled === true
+      ) {
+        const delayedSourceDefinitionId = stringValue(
+          payload.delayedAgendaAccessSourceDefinitionId,
+        );
+        const delayedSourceTitle =
+          titleForDefinitionId(delayedSourceDefinitionId) ??
+          "Bizarre Encryption Scheme";
+        title = phrase(
+          subject,
+          `${cardTitle ?? "die Agenda"}${accessServerSourceSuffix(serverLabel, stringValue(payload.accessOrigin))} wegen ${delayedSourceTitle} noch nicht gestohlen`,
+        );
+        description =
+          "Die Agenda bleibt im Fort; ihre Wertung ist bis zum Beginn des nächsten Runner-Zugs verzögert.";
+        chips.push(
+          "Agenda",
+          "Verzögert",
+          ...(accessChronicleLocationLabel(
+            serverLabel,
+            stringValue(payload.accessOrigin),
+          )
+            ? [
+                accessChronicleLocationLabel(
+                  serverLabel,
+                  stringValue(payload.accessOrigin),
+                )!,
+              ]
+            : []),
+          delayedSourceTitle,
+        );
+        break;
+      }
       const points = agendaPointSuffix(agendaPoints);
       const payment = stealCostPaymentSuffix(payload);
       title = phrase(
