@@ -13540,6 +13540,7 @@ describe("authoritative plan-first live runtime", () => {
       counters: { bit: 1 },
     });
     accessInput.playerView.stateVersion = 2;
+    accessInput.playerView.own.credits = 10;
     accessInput.playerView.timingPoint = "access.resolve_card";
     accessInput.playerView.run = {
       attackedServerId: "hq",
@@ -13559,6 +13560,71 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
     });
+  });
+
+  it("keeps the exact access action under runner.convert_run_window and explains a high-impact stored-economy trash", () => {
+    resetResidentPlanPortfolioMemory();
+    const trash = legalAction(
+      "trash-visible-campaign",
+      "runner",
+      "trash_accessed_card",
+      "Trash visible campaign",
+      { credits: 4, clicks: 0 },
+      {
+        source: "visible-campaign",
+        payload: { accessTrashTotalCost: 4 },
+      },
+    );
+    const decline = legalAction(
+      "decline-visible-campaign",
+      "runner",
+      "decline_trash",
+      "Decline trash",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [decline, trash]);
+    const campaign = visibleCard("visible-campaign", "corp", "asset", {
+      definitionId: "onr_v1_309_bbs-whispering-campaign",
+      counters: { bit: 14 },
+    });
+    input.playerView.own.credits = 5;
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      attackedServerId: "remote_1",
+      phase: "access",
+      position: { kind: "server", serverId: "remote_1" },
+      accessedCard: campaign,
+      successful: true,
+    };
+    input.playerView.servers = [server("remote_1", [], [campaign])];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: trash.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          route: { actionId: trash.actionId },
+          leafExecutorInstanceId: expect.stringContaining(
+            "runner.convert_run_window",
+          ),
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_action_assessment_evidence:runner_access_trash_cost:4",
+        "plan_action_assessment_evidence:runner_access_trash_credits_after:1",
+        "plan_action_assessment_evidence:runner_access_trash_visible_stored_credits:14",
+        "plan_action_assessment_evidence:runner_access_trash_impact_classes:stored_economy",
+        "plan_action_assessment_evidence:runner_access_trash_uncertainty:conservative",
+        "plan_action_assessment_evidence:runner_access_trash_opportunity_cost:720",
+        "plan_action_assessment_evidence:runner_access_trash_recommendation:trash",
+      ]),
+    );
   });
 
   it("admits a visibly known agenda remote directly as a witnessed contest plan", () => {

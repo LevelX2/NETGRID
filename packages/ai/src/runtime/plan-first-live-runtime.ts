@@ -210,7 +210,7 @@ import {
   runnerHandBreakerForCoverage,
 } from "../plans/tactical-plan-breaker-coverage";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
-import { buildRunnerRemoteTrashAccessContext } from "../simulation/remote-trash-access-context";
+import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { rolesMatch } from "./role-match";
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
@@ -1401,6 +1401,7 @@ function runnerContext(
     input,
     candidates,
     runTargets,
+    economy,
     dependencies,
     activeRunRoot,
   );
@@ -7010,47 +7011,40 @@ function currentAccessWindowCommitment(
   );
   if (!trashAction) return parentCommitment;
   const accessedDefinitionId = input.playerView.run?.accessedCard?.definitionId;
-  const trashCost = trashAction.costs.reduce(
-    (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
-    0,
-  );
-  if (
-    parentCommitment?.intendedAction === "trash" &&
-    accessedDefinitionId &&
-    parentCommitment.knownTargetDefinitionIds.includes(accessedDefinitionId) &&
-    trashCost <= parentCommitment.trashBudget
-  ) {
-    return parentCommitment;
-  }
-  const accessContext = buildRunnerRemoteTrashAccessContext(
+  if (!accessedDefinitionId) return parentCommitment;
+  const exactParentTarget =
+    parentCommitment?.knownTargetDefinitionIds.includes(accessedDefinitionId) ===
+    true;
+  const impact = assessRunnerAccessTrashImpact({
     input,
     trashAction,
-    economy.desiredCreditReserve,
-  );
-  if (!accessContext.trashable || !accessedDefinitionId)
-    return parentCommitment;
-  if (accessContext.affordableRelevant) {
+    economyReserve: economy.desiredCreditReserve,
+    parentReservedCredits: exactParentTarget
+      ? 0
+      : (parentCommitment?.trashBudget ?? 0),
+  });
+  if (!impact) return parentCommitment;
+  if (impact.recommendation === "trash") {
     return {
       payoff: "trash_affordable",
       intendedAction: "trash",
       knownTargetDefinitionIds: [accessedDefinitionId],
-      trashBudget: Math.max(0, accessContext.generalCreditCost),
-      evidenceCode:
-        accessContext.evidence.find((entry) =>
-          entry.startsWith("remote_trash_role:"),
-        ) ?? "access_window_relevant_trash",
+      trashBudget: impact.trashCost,
+      evidenceCode: "access_window_canonical_impact_trash",
     };
   }
   return {
-    payoff: accessContext.deferredByBudget
-      ? "trash_unaffordable"
-      : "known_low_value",
+    payoff:
+      impact.creditsAfterTrash < impact.requiredReserve
+        ? "trash_unaffordable"
+        : "known_low_value",
     intendedAction: "decline",
     knownTargetDefinitionIds: [accessedDefinitionId],
     trashBudget: 0,
-    evidenceCode: accessContext.deferredByBudget
-      ? "access_window_trash_deferred_by_budget"
-      : "access_window_low_value_trash",
+    evidenceCode:
+      impact.creditsAfterTrash < impact.requiredReserve
+        ? "access_window_trash_deferred_by_bound_reserve"
+        : "access_window_visible_impact_below_cost",
   };
 }
 
@@ -18719,6 +18713,7 @@ function runnerRunWindowActionAssessments(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   runTargets: readonly RunnerRunTargetEvaluation[],
+  economy: RunnerEconomyPosture,
   dependencies: PlanFirstLiveDependencies,
   runOrigin: RunnerRunOrigin | undefined,
 ): NonNullable<RunnerPlanDomain["runWindows"][number]["actionAssessments"]> {
@@ -18745,6 +18740,7 @@ function runnerRunWindowActionAssessments(
       candidate,
       action,
       runTargets,
+      economy,
       dependencies,
       runOrigin,
     );
@@ -18757,6 +18753,7 @@ function runnerRunWindowActionAssessment(
   candidate: ActionSemanticCandidate,
   action: AiDecisionInput["legalActions"][number],
   runTargets: readonly RunnerRunTargetEvaluation[],
+  economy: RunnerEconomyPosture,
   dependencies: PlanFirstLiveDependencies,
   runOrigin: RunnerRunOrigin | undefined,
 ): RunnerRunWindowActionAssessment {
@@ -18950,6 +18947,29 @@ function runnerRunWindowActionAssessment(
     input,
     action,
   );
+  const accessedDefinitionId = input.playerView.run.accessedCard?.definitionId;
+  const exactParentTrashTarget =
+    accessedDefinitionId !== undefined &&
+    runOrigin?.accessCommitment?.knownTargetDefinitionIds.includes(
+      accessedDefinitionId,
+    ) === true;
+  const accessTrashImpact =
+    action.type === "trash_accessed_card" || action.type === "decline_trash"
+      ? assessRunnerAccessTrashImpact({
+          input,
+          trashAction:
+            action.type === "trash_accessed_card"
+              ? action
+              : (input.legalActions.find(
+                  (candidateAction) =>
+                    candidateAction.type === "trash_accessed_card",
+                ) ?? action),
+          economyReserve: economy.desiredCreditReserve,
+          parentReservedCredits: exactParentTrashTarget
+            ? 0
+            : (runOrigin?.accessCommitment?.trashBudget ?? 0),
+        })
+      : undefined;
   return exclusion
     ? {
         admissible: false,
@@ -18965,7 +18985,14 @@ function runnerRunWindowActionAssessment(
         admissible: true,
         ...(programPreservationPayment !== undefined
           ? { value: programPreservationPayment }
-          : {}),
+          : accessTrashImpact
+            ? {
+                value:
+                  action.type === "trash_accessed_card"
+                    ? accessTrashImpact.margin
+                    : -accessTrashImpact.margin,
+              }
+            : {}),
         evidenceCodes: [
           accessAction
             ? "runner_access_window_action_plan_admissible"
@@ -18973,7 +19000,8 @@ function runnerRunWindowActionAssessment(
                 action.type === "break_subroutine"
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
-          `runner_run_window_action:${action.type}`,
+           `runner_run_window_action:${action.type}`,
+          ...(accessTrashImpact?.evidenceCodes ?? []),
           ...(runOrigin?.informationBoundaryReassessment?.evidenceCodes ?? []),
         ],
       };
