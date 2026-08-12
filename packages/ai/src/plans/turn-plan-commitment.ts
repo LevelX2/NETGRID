@@ -264,7 +264,7 @@ export function executionExpectationFromLegalAction(params: {
     ),
     payloadFingerprint: legalActionPartFingerprint(
       "turn-step-payload",
-      params.legalAction.payload ?? {},
+      materialExecutionPayload(params.legalAction.payload ?? {}),
     ),
     expectedStateDeltaCodes: sortedUnique(params.expectedStateDeltaCodes),
     ...(params.expectedNextPlanningFingerprint
@@ -1130,11 +1130,24 @@ function legalActionExpectationDrift(
         legalAction.choiceRequirements ?? [],
       ) ||
     expectation.payloadFingerprint !==
-      legalActionPartFingerprint("turn-step-payload", legalAction.payload ?? {})
+      legalActionPartFingerprint(
+        "turn-step-payload",
+        materialExecutionPayload(legalAction.payload ?? {}),
+      )
   ) {
     return "material_choice_drift";
   }
   return undefined;
+}
+
+function materialExecutionPayload(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(materialExecutionPayload);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => !key.endsWith("QuoteExpiresAtStateVersion"))
+      .map(([key, entry]) => [key, materialExecutionPayload(entry)]),
+  );
 }
 
 function committedInvocationRoute(

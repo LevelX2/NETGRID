@@ -1165,6 +1165,7 @@ function offersForHeads(params: {
       const boundaryMustBeImmediate =
         boundary !== undefined &&
         head.moduleId === "corp.hand_and_agenda_management";
+      const continuationScope = corpPlanningHeadContinuationScope(head);
       return {
         head,
         candidate,
@@ -1183,6 +1184,7 @@ function offersForHeads(params: {
         ...(dependencyCandidateIds.length > 0
           ? { dependencyCandidateIds, rootEligible: false }
           : {}),
+        ...(continuationScope ? { continuationScope } : {}),
         incompatibleCandidateIds: [
           ...new Set([
             ...(
@@ -1205,6 +1207,23 @@ function offersForHeads(params: {
       } satisfies TurnRemainderSearchOffer;
     });
   });
+}
+
+export function corpPlanningHeadContinuationScope(
+  head: Pick<
+    TurnPlanningHeadCandidate,
+    | "rootPlanInstanceId"
+    | "executorPlanInstanceId"
+    | "executorParentPlanInstanceId"
+    | "executorParentNeedId"
+  >,
+): "same_root" | undefined {
+  return head.executorPlanInstanceId !== undefined &&
+    head.executorPlanInstanceId !== head.rootPlanInstanceId &&
+    head.executorParentPlanInstanceId === head.rootPlanInstanceId &&
+    head.executorParentNeedId !== undefined
+    ? "same_root"
+    : undefined;
 }
 
 function selectedAgendaHeadCandidateIds(
