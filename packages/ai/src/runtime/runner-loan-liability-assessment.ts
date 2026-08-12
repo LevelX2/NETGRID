@@ -81,8 +81,7 @@ export type RunnerLoanLiabilityAssessmentDependencies = {
   valueHint: (
     definitionId: string | undefined,
     key: "installCreditGain" | "startOfTurnCreditLoss" | "leavePlayPayCost",
-    fallback: number,
-  ) => number;
+  ) => number | undefined;
   projectedCreditGainForAction: (action: LegalAction) => number;
   actionCreditCost: (action: LegalAction) => number;
   runtimeContext: (
@@ -178,19 +177,26 @@ export function runnerLoanLiabilityAssessment(
 
   const loanSourceDefinitionId =
     loanDefinitionId ?? installedLoan?.definitionId;
-  const installCreditGain = loanInstallAction
-    ? dependencies.valueHint(loanSourceDefinitionId, "installCreditGain", 12)
-    : 0;
+  const canonicalInstallCreditGain = dependencies.valueHint(
+    loanSourceDefinitionId,
+    "installCreditGain",
+  );
+  const installCreditGain = loanInstallAction ? canonicalInstallCreditGain : 0;
   const startTurnCreditLoss = dependencies.valueHint(
     loanSourceDefinitionId,
     "startOfTurnCreditLoss",
-    1,
   );
   const leavePlayPayCost = dependencies.valueHint(
     loanSourceDefinitionId,
     "leavePlayPayCost",
-    10,
   );
+  if (
+    installCreditGain === undefined ||
+    startTurnCreditLoss === undefined ||
+    leavePlayPayCost === undefined
+  ) {
+    return undefined;
+  }
   const currentCredits = input.playerView.own.credits;
   const actionCreditGain = dependencies.projectedCreditGainForAction(action);
   const actionCreditSpend = dependencies.actionCreditCost(action);

@@ -1,21 +1,26 @@
 ---
 activityId: act-2026-08-09-top-runners-conference-investment-horizon
-status: inbox
+status: done
 kind: fix
 area: ai-data
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-09
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-13T00:05:55+02:00
+completedAt: 2026-08-13T00:18:28+02:00
+branch: codex/activities-ai-20260812
 releaseTarget: post-card-semantics-restructuring
-blockedBy:
-  - act-2026-08-09-runner-turn-plan-sequence-commitment
-  - laufende Kartenrestrukturierung und Konsolidierung der kanonischen Kartensemantik
-resultArtifacts: []
-checks: []
+blockedBy: []
+resultArtifacts:
+  - packages/ai/src/runtime/runner-recurring-economy-investment.ts
+  - packages/ai/src/runtime/runner-canonical-card-facts.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+checks:
+  - focused generic investment-horizon unit tests
+  - focused recurring-economy runtime and ownership regressions
+  - AI typecheck checked with unrelated worktree/report baseline errors separated
+  - git diff --check
 ---
 
 # Verzögerte Investments gegen selbstentwertende Folgeaktionen planen
@@ -108,39 +113,39 @@ aufgebaut werden.
 
 ## Akzeptanzkriterien
 
-- [ ] Die strategische Zusatzsemantik ist generisch formuliert; Regelwerte,
+- [x] Die strategische Zusatzsemantik ist generisch formuliert; Regelwerte,
       Trigger und Effekte kommen ausschließlich aus dem kanonischen
       Kartenmodell.
-- [ ] Der produktive Pfad enthält weder Conference-Karten-ID noch
+- [x] Der produktive Pfad enthält weder Conference-Karten-ID noch
       Kartennamensvergleich.
-- [ ] Im beobachteten ersten Runner-Zug wird nicht die deterministische Folge
+- [x] Im beobachteten ersten Runner-Zug wird nicht die deterministische Folge
       `Conference installieren -> als nächste Aktion Run starten` gewählt.
-- [ ] Ist im Restzug bereits ein attraktiver Run gebunden, wird die
+- [x] Ist im Restzug bereits ein attraktiver Run gebunden, wird die
       unamortisierte Installation abgelehnt oder auf eine spätere
       Wiederaufbauphase verschoben.
-- [ ] Sind Runs derzeit nicht aussichtsreich und ist Economy-Aufbau sinnvoll,
+- [x] Sind Runs derzeit nicht aussichtsreich und ist Economy-Aufbau sinnvoll,
       kann die Installation als gebundener `runner.recurring_economy`-Plan
       gewählt werden.
-- [ ] Nach wenigstens einer Auszahlung darf ein konkret wertvoller Run die
+- [x] Nach wenigstens einer Auszahlung darf ein konkret wertvoller Run die
       Karte bewusst aufgeben, wenn sein erwarteter Payoff den entgangenen
       zukünftigen Nutzen übersteigt.
-- [ ] Bei einem schwachen Run und hohem Wert eines weiteren
+- [x] Bei einem schwachen Run und hohem Wert eines weiteren
       Auszahlungszyklus kann die KI bewusst warten und weiter aufbauen.
-- [ ] Ein Agenda-, Matchpoint- oder Notfall-Run kann mit strukturierter
+- [x] Ein Agenda-, Matchpoint- oder Notfall-Run kann mit strukturierter
       Evidence regulär preempten; das System schützt die Karte nicht um ihrer
       selbst willen.
-- [ ] Diagnose-Evidence nennt Investitionskosten, früheste Auszahlung,
+- [x] Diagnose-Evidence nennt Investitionskosten, früheste Auszahlung,
       prognostizierte Haltedauer, invalidierende Aktion, entgangenen
       Zukunftswert und Run-Payoff.
-- [ ] Eine zweite generische Fixture belegt, dass Planung und Bewertung nicht
+- [x] Eine zweite generische Fixture belegt, dass Planung und Bewertung nicht
       kartenspezifisch sind.
-- [ ] Der positive Ausführungspfad behält Root-Plan, Step, Route,
+- [x] Der positive Ausführungspfad behält Root-Plan, Step, Route,
       `PlanExecutionOrigin`, exakte Action-ID und Executor. Keine zweite
       Entscheidungsautorität oder Fallback-Auswahl entsteht.
-- [ ] Fokussierte Tests decken Installation in Wiederaufbauphase,
+- [x] Fokussierte Tests decken Installation in Wiederaufbauphase,
       Same-Turn-Konflikt, Warten nach erster Auszahlung, wertvollen Run nach
       Auszahlung und echten Preemption-Fall ab.
-- [ ] Fokussierte AI-Tests, kanonische Semantik-/Hint-Gates, erforderlicher
+- [x] Fokussierte AI-Tests, kanonische Semantik-/Hint-Gates, erforderlicher
       AI-Typecheck und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -158,5 +163,23 @@ aufgebaut werden.
 
 ## Ergebnisnotiz
 
-Noch offen. Die Umsetzung ist bewusst von TurnPlanner-Bindung und kanonischem
-Kartenmodell abhängig.
+`runner.recurring_economy` führt verzögerte Economy nun als residenten
+Investmenthorizont weiter. Installationskosten, Startzeitpunkt, Auszahlung und
+die invalidierende Run-Aktion werden aus der kanonischen CardSpec-Semantik
+gelesen; der produktive Entscheidungsweg enthält weder Karten-ID noch
+Namensvergleich. Eine zweite, anders benannte Fixture sichert diesen
+generischen Vertrag ab.
+
+Vor der ersten Auszahlung verdrängt ein schwacher Run die gebundene
+Wiederaufbauphase nicht. Nach einer Auszahlung wird der konkret sichtbare
+Run-Payoff gegen den gefährdeten Zukunftswert abgewogen. Wertvolle Runs dürfen
+regulär übernehmen, Agenda-, Matchpoint- und Notfallfenster preempten auch vor
+der Amortisation. Der bestehende TurnPlanner und die jeweiligen Planmodule
+behalten dabei Root-Plan, Route, Action-ID und Executor; es ist kein zweiter
+Resolver oder Fallback entstanden.
+
+Die fokussierten Unit-, Runtime- und Ownership-Regressionen sind grün (zuletzt
+7/7; der vorangehende gemeinsame Lauf 18/18). Der AI-Typecheck wurde nach
+Behebung aller neuen Typfehler erneut ausgeführt und meldet ausschließlich die
+bereits getrennt reproduzierten Worktree-Doppeltypen sowie vier fehlende
+CardSpec-Migrationsreports. `git diff --check` ist grün.

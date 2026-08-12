@@ -726,6 +726,381 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
+  it("binds a legal access-payoff install to a viable multi-turn central campaign before the run is funded", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-payoff",
+      "runner",
+      "install_card",
+      "Install access payoff",
+      { credits: 4, clicks: 1 },
+      {
+        source: "payoff-card",
+        payload: {
+          cardId: "payoff-card",
+          sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+        },
+      },
+    );
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [install, run, credit]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("payoff-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "rd"),
+      pathCost: 6,
+      creditsAfterRun: -1,
+      recommendation: "gain_credits_first" as const,
+      score: 180,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "payoff-card",
+          definitionId: "onr_v1_139_r-and-d-interface",
+          legalActionId: install.actionId,
+          priority: 900,
+          cardType: "hardware",
+          installCost: 4,
+          developmentRole: "access_payoff",
+          strategicFit: "strong",
+        }),
+      ],
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 8,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:runner.pressure_central:central%3Ard",
+      ]),
+    );
+    const campaign = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) =>
+        instance.instanceId === "plan:runner.pressure_central:central%3Ard",
+    );
+    expect(campaign).toMatchObject({
+      moduleId: "runner.pressure_central",
+      phase: "develop_payoff",
+    });
+    expect(JSON.stringify(campaign?.moduleState)).toContain(
+      '"horizon":"same_turn"',
+    );
+    expect(JSON.stringify(campaign?.moduleState)).toContain(
+      '"runFundingTargetCredits":9',
+    );
+  });
+
+  it("selects exactly one of three equal access-payoff copies and records diminishing copy ownership", () => {
+    resetResidentPlanPortfolioMemory();
+    const installs = [1, 2, 3].map((index) =>
+      legalAction(
+        `install-payoff-${index}`,
+        "runner",
+        "install_card",
+        `Install access payoff ${index}`,
+        { credits: 4, clicks: 1 },
+        {
+          source: `payoff-card-${index}`,
+          payload: {
+            cardId: `payoff-card-${index}`,
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          },
+        },
+      ),
+    );
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [...installs, run]);
+    input.playerView.own.credits = 12;
+    input.playerView.own.gripOrHq = installs.map((_, index) =>
+      visibleCard(`payoff-card-${index + 1}`, "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+    );
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "rd"),
+      recommendation: "setup_first" as const,
+      score: 180,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () =>
+        installs.map((action, index) =>
+          handEvaluation({
+            cardInstanceId: `payoff-card-${index + 1}`,
+            definitionId: "onr_v1_139_r-and-d-interface",
+            legalActionId: action.actionId,
+            priority: 900,
+            cardType: "hardware",
+            installCost: 4,
+            developmentRole: "access_payoff",
+            strategicFit: "strong",
+          }),
+        ),
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 6,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "install-payoff-1",
+      reasonCode: "plan_first.runner.pressure_central",
+    });
+    const campaignState = JSON.stringify(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.pressure_central",
+      )?.moduleState,
+    );
+    expect(campaignState).toContain('"desiredCopyCount":1');
+    expect(campaignState).toContain(
+      '"rejectedPreparationActionIds":["install-payoff-2","install-payoff-3"]',
+    );
+  });
+
+  it("keeps multi-turn install funding bound to the central parent and economy leaf", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [credit, run]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("payoff-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "rd"),
+      recommendation: "setup_first" as const,
+      score: 180,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "payoff-card",
+          definitionId: "onr_v1_139_r-and-d-interface",
+          legalActionId: "install-payoff-not-yet-legal",
+          priority: 900,
+          availability: "missing_credits",
+          deferReason: "missing_credits",
+          missingCredits: 3,
+          installCost: 4,
+          cardType: "hardware",
+          developmentRole: "access_payoff",
+          strategicFit: "strong",
+        }),
+      ],
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 6,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ard",
+      executorInstanceId:
+        "plan:runner.economy:access-payoff-support%3Acentral%3Ard%3Apayoff-card",
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ard",
+        "plan_priority_need:access-payoff-support:central:rd:payoff-card",
+      ]),
+    );
+  });
+
+  it("abandons access-payoff setup when new visible path evidence makes the central permanently unreachable", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-payoff",
+      "runner",
+      "install_card",
+      "Install access payoff",
+      { credits: 4, clicks: 1 },
+      {
+        source: "payoff-card",
+        payload: {
+          cardId: "payoff-card",
+          sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [install, credit, run]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("payoff-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "payoff-card",
+          definitionId: "onr_v1_139_r-and-d-interface",
+          legalActionId: install.actionId,
+          priority: 900,
+          cardType: "hardware",
+          installCost: 4,
+          developmentRole: "access_payoff",
+          strategicFit: "strong",
+        }),
+      ],
+      evaluateRunnerRunTargets: () => [
+        {
+          ...safeRuntimeRunTarget(run.actionId, "rd"),
+          pathPassability: "blocked_unbreakable" as const,
+          recommendation: "find_breaker_first" as const,
+          score: 180,
+        },
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 6,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "runner.pressure_central" &&
+          JSON.stringify(instance.moduleState).includes("payoff-card"),
+      ),
+    ).toBe(false);
+  });
+
+  it("runs the bound central normally after the access payoff is installed", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [run]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("installed-payoff", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [],
+      evaluateRunnerRunTargets: () => [
+        {
+          ...safeRuntimeRunTarget(run.actionId, "rd"),
+          accessPayoff: "access_bonus" as const,
+          knownAccessState: "fresh" as const,
+          recommendation: "run_now" as const,
+          score: 220,
+        },
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 6,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:runner.pressure_central:central%3Ard",
+      ]),
+    );
+  });
+
   it.each([
     {
       label: "missing credits",
@@ -8908,7 +9283,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("does not alias Basic Credit into a recurring-economy P4 hold step", () => {
+  it("binds productive non-run development to an unrealized recurring-economy horizon", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
       "end",
@@ -8945,10 +9320,92 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: credit.actionId,
-      reasonCode: "plan_first.runner.economy",
+      reasonCode: "plan_first.runner.recurring_economy",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.economy",
+        planKind: "runner.recurring_economy",
+      },
+    });
+  });
+
+  it("lets a valuable visible run preempt the resident investment after its first payout", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-rd-after-payout",
+      "runner",
+      "start_run",
+      "Run R&D after payout",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const credit = legalAction(
+      "credit-after-payout",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    const conference = visibleCard("conference", "runner", "resource", {
+      definitionId: "onr_v1_184_top-runners-conference",
+      title: "Top Runners' Conference",
+    });
+    input.playerView.own.rig = [conference];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.eventTail = [
+      {
+        eventId: "conference-first-payout",
+        type: "automatic_effects_resolved",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:conference-first-payout",
+        visibilityClass: "public",
+        publicPayload: {
+          resolvedEffects: [
+            {
+              effectId: "conference-first-payout-effect",
+              kind: "gain_credits",
+              visibility: "public",
+              amount: 2,
+              reason: "start_of_turn",
+              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+            },
+          ],
+        },
+      },
+    ];
+    const valuableRun = {
+      ...safeRuntimeRunTarget(run.actionId, "rd"),
+      recommendation: "run_now" as const,
+      pathPassability: "reachable" as const,
+      score: 450,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [valuableRun],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.pressure_central" },
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.recurring_economy",
+      ),
+    ).toMatchObject({
+      viability: "blocked",
+      moduleState: {
+        signal: {
+          investmentHorizon: {
+            realizedPayoutCount: 1,
+            futureValueAtRisk: 2,
+            bestVisibleRunPayoff: 450,
+            decision: "allow_run",
+          },
+        },
       },
     });
   });
@@ -9536,6 +9993,262 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).not.toContain(
       "plan_assessment_evidence:runner_run_support_build_strategic_reserve:rd",
     );
+  });
+
+  it("rejects debt financing as standalone board development without a bound parent", () => {
+    resetResidentPlanPortfolioMemory();
+    const loan = legalAction(
+      "install-debt",
+      "runner",
+      "install_card",
+      "Install credit exchange",
+      { credits: 0, clicks: 1 },
+      {
+        source: "debt-card",
+        payload: {
+          cardId: "debt-card",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          gainCreditsAmount: 12,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [loan, credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("debt-card", "runner", "resource", {
+        definitionId: "onr_v1_168_loan-from-chiba",
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "debt-card",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          legalActionId: loan.actionId,
+          priority: 9_000,
+          currentNeed: "acute",
+          strategicFit: "strong",
+        }),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "strategic_exchange_requires_bound_parent",
+    );
+  });
+
+  it.each([
+    {
+      label: "low payoff",
+      accessPayoff: "fresh" as const,
+      scoreThreat: false,
+      unknownIce: 0,
+      riskyCoverage: false,
+    },
+    {
+      label: "uncovered unknown ICE",
+      accessPayoff: "score_threat" as const,
+      scoreThreat: true,
+      unknownIce: 1,
+      riskyCoverage: false,
+    },
+  ])(
+    "does not bind debt financing to a $label run",
+    ({ accessPayoff, scoreThreat, unknownIce, riskyCoverage }) => {
+      resetResidentPlanPortfolioMemory();
+      const run = legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "remote_1" } },
+      );
+      const loan = legalAction(
+        "install-debt",
+        "runner",
+        "install_card",
+        "Install credit exchange",
+        { credits: 0, clicks: 1 },
+        {
+          source: "debt-card",
+          payload: {
+            cardId: "debt-card",
+            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            gainCreditsAmount: 12,
+          },
+        },
+      );
+      const credit = legalAction(
+        "credit",
+        "runner",
+        "gain_credit",
+        "Gain 1 Credit",
+        { credits: 0, clicks: 1 },
+      );
+      const input = aiInput("runner", [run, loan, credit]);
+      input.playerView.own.credits = 0;
+      input.playerView.own.clicks = 2;
+      input.playerView.own.gripOrHq = [
+        visibleCard("debt-card", "runner", "resource", {
+          definitionId: "onr_v1_168_loan-from-chiba",
+        }),
+      ];
+      const target = {
+        ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+        targetKind: "remote" as const,
+        accessTargetKind: "remote" as const,
+        accessPayoff,
+        knownAccessState: "unknown" as const,
+        pathCost: 2,
+        creditsAfterRun: -2,
+        runCommitment: "probe_only" as const,
+        unknownUnrezzedIceCount: unknownIce,
+        riskyUniversalCoverage: riskyCoverage,
+        scoreThreat,
+        recommendation: "gain_credits_first" as const,
+        score: 500,
+      };
+      const completeEconomy = buildRunnerEconomyPosture({
+        input,
+        handDevelopmentEvaluations: [],
+      });
+
+      const decision = liveContext({
+        evaluateRunnerHandDevelopment: () => [],
+        evaluateRunnerRunTargets: () => [target],
+        buildRunnerEconomyPosture: () => ({
+          ...completeEconomy,
+          minimumCreditFloor: 0,
+          desiredCreditReserve: 2,
+          fundingNeed: true,
+          buildEconomyBeforePressure: true,
+          creditReservePolicy: {
+            ...completeEconomy.creditReservePolicy,
+            contestReserve: 2,
+          },
+          evidence: ["test_debt_parent_rejected"],
+        }),
+      }).chooseSemanticRuntimeAction(input, {});
+
+      expect(decision.actionId).not.toBe(loan.actionId);
+      expect(JSON.stringify(decision.decisionDebug)).toContain(
+        "strategic_exchange_requires_bound_parent",
+      );
+    },
+  );
+
+  it("binds canonical debt financing to the exact profitable run parent and its safe exit reserve", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-remote",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const loan = legalAction(
+      "install-debt",
+      "runner",
+      "install_card",
+      "Install credit exchange",
+      { credits: 0, clicks: 1 },
+      {
+        source: "debt-card",
+        payload: {
+          cardId: "debt-card",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          gainCreditsAmount: 12,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, loan, credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("debt-card", "runner", "resource", {
+        definitionId: "onr_v1_168_loan-from-chiba",
+      }),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      pathCost: 2,
+      creditsAfterRun: -2,
+      runCommitment: "full_path" as const,
+      unknownUnrezzedIceCount: 1,
+      riskyUniversalCoverage: true,
+      scoreThreat: true,
+      recommendation: "gain_credits_first" as const,
+      score: 500,
+    };
+    const completeEconomy = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations: [],
+    });
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [],
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        ...completeEconomy,
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 2,
+        fundingNeed: true,
+        buildEconomyBeforePressure: true,
+        creditReservePolicy: {
+          ...completeEconomy.creditReservePolicy,
+          contestReserve: 2,
+        },
+        evidence: ["test_profitable_debt_parent"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: loan.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          openNeedIds: ["run-support:remote:remote_1"],
+        }),
+        expect.objectContaining({
+          instanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          parentNeedId: "run-support:remote:remote_1",
+        }),
+      ]),
+    });
   });
 
   it("rejects Do the 'Drine as standalone economy without a bound parent need", () => {
@@ -12904,6 +13617,7 @@ describe("authoritative plan-first live runtime", () => {
       counters: { bit: 1 },
     });
     accessInput.playerView.stateVersion = 2;
+    accessInput.playerView.own.credits = 10;
     accessInput.playerView.timingPoint = "access.resolve_card";
     accessInput.playerView.run = {
       attackedServerId: "hq",
@@ -12923,6 +13637,71 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
     });
+  });
+
+  it("keeps the exact access action under runner.convert_run_window and explains a high-impact stored-economy trash", () => {
+    resetResidentPlanPortfolioMemory();
+    const trash = legalAction(
+      "trash-visible-campaign",
+      "runner",
+      "trash_accessed_card",
+      "Trash visible campaign",
+      { credits: 4, clicks: 0 },
+      {
+        source: "visible-campaign",
+        payload: { accessTrashTotalCost: 4 },
+      },
+    );
+    const decline = legalAction(
+      "decline-visible-campaign",
+      "runner",
+      "decline_trash",
+      "Decline trash",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [decline, trash]);
+    const campaign = visibleCard("visible-campaign", "corp", "asset", {
+      definitionId: "onr_v1_309_bbs-whispering-campaign",
+      counters: { bit: 14 },
+    });
+    input.playerView.own.credits = 5;
+    input.playerView.timingPoint = "access.resolve_card";
+    input.playerView.run = {
+      attackedServerId: "remote_1",
+      phase: "access",
+      position: { kind: "server", serverId: "remote_1" },
+      accessedCard: campaign,
+      successful: true,
+    };
+    input.playerView.servers = [server("remote_1", [], [campaign])];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: trash.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          route: { actionId: trash.actionId },
+          leafExecutorInstanceId: expect.stringContaining(
+            "runner.convert_run_window",
+          ),
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_action_assessment_evidence:runner_access_trash_cost:4",
+        "plan_action_assessment_evidence:runner_access_trash_credits_after:1",
+        "plan_action_assessment_evidence:runner_access_trash_visible_stored_credits:14",
+        "plan_action_assessment_evidence:runner_access_trash_impact_classes:stored_economy",
+        "plan_action_assessment_evidence:runner_access_trash_uncertainty:conservative",
+        "plan_action_assessment_evidence:runner_access_trash_opportunity_cost:720",
+        "plan_action_assessment_evidence:runner_access_trash_recommendation:trash",
+      ]),
+    );
   });
 
   it("admits a visibly known agenda remote directly as a witnessed contest plan", () => {

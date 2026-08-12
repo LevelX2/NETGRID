@@ -98,29 +98,22 @@ export function createRunnerLoanContext<
     action: LegalAction,
   ): string | undefined {
     return runnerLoanDefinitionIdForAction(input, action, {
-      hintForDefinitionId: dependencies.hintForDefinitionId,
       sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     });
   }
 
   function definitionIsHighRiskLoan(definitionId: string | undefined): boolean {
-    return runnerDefinitionIsHighRiskLoan(definitionId, {
-      hintForDefinitionId: dependencies.hintForDefinitionId,
-    });
+    return runnerDefinitionIsHighRiskLoan(definitionId);
   }
 
   function installedLoanCards(input: AiDecisionInput): VisibleCard[] {
-    return runnerInstalledLoanCards(input, {
-      hintForDefinitionId: dependencies.hintForDefinitionId,
-    });
+    return runnerInstalledLoanCards(input);
   }
 
   function loanSemanticEvidence(
     definitionId: string | undefined,
   ): string[] | undefined {
-    return runnerLoanSemanticEvidence(definitionId, {
-      hintForDefinitionId: dependencies.hintForDefinitionId,
-    });
+    return runnerLoanSemanticEvidence(definitionId);
   }
 
   return {
@@ -128,14 +121,7 @@ export function createRunnerLoanContext<
       runnerLoanLiabilityAssessment(input, action, {
         loanDefinitionIdForAction,
         installedLoanCards,
-        valueHint: (definitionId, key, fallback) =>
-          runnerLoanValueHint(
-            definitionId
-              ? dependencies.hintForDefinitionId(definitionId)
-              : undefined,
-            key,
-            fallback,
-          ),
+        valueHint: runnerLoanValueHint,
         projectedCreditGainForAction: dependencies.projectedCreditGainForAction,
         actionCreditCost: dependencies.actionCreditCost,
         runtimeContext: (input, creditsAfterLoan) =>

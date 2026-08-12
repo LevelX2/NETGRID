@@ -1491,7 +1491,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("keeps recurring economy blocked instead of aliasing Basic Draw or Credit into its P4 hold", () => {
+  it("keeps a weak run waiting behind the resident recurring-economy horizon", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -1514,20 +1514,19 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
 
     const decision = chooseRunnerAction(input);
     expectPlanDecision(decision, {
-      actionId: "run-rd",
-      planKind: "runner.pressure_central",
-      capability: "pressure_rd_access",
-      priorityClass: "P4",
-      assessmentEvidence: "target:rd",
+      actionId: "draw",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_hold",
+      priorityClass: "P3",
+      assessmentEvidence: "runner_recurring_economy_investment_decision:wait",
     });
-    expect(actionAlternative(decision, "draw")?.selected).toBe(false);
+    expect(actionAlternative(decision, "draw")?.selected).toBe(true);
     expect(actionAlternative(decision, "gain-credit")?.selected).toBe(false);
     expect(planPortfolioItems(decision)).toEqual(
       expect.arrayContaining([
         expect.stringContaining(
-          "module:runner.recurring_economy|phase:hold|viability:blocked",
+          "module:runner.recurring_economy|phase:hold|viability:ready",
         ),
-        expect.stringContaining("blocker:recurring_economy_waiting_for_value"),
       ]),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
@@ -1614,7 +1613,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "gain-credit",
       planKind: "runner.recurring_economy",
       capability: "recurring_economy_hold",
-      priorityClass: "P4",
+      priorityClass: "P3",
     });
     expect(
       second.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
@@ -2017,7 +2016,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("reduces Top Runners' Conference run penalty after start-of-turn value is realized", () => {
+  it("keeps the investment resident and waits on a weak run after the first payout", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -2064,17 +2063,17 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const decision = chooseRunnerAction(input);
 
     expectPlanDecision(decision, {
-      actionId: "run-rd",
-      planKind: "runner.pressure_central",
-      capability: "pressure_rd_access",
-      priorityClass: "P4",
-      assessmentEvidence: "target:rd",
+      actionId: "gain-credit",
+      planKind: "runner.recurring_economy",
+      capability: "recurring_economy_hold",
+      priorityClass: "P3",
+      assessmentEvidence: "runner_recurring_economy_investment_decision:wait",
     });
-    expect(
-      planPortfolioItems(decision).some((item) =>
-        item.includes("runner.recurring_economy"),
-      ),
-    ).toBe(false);
+    expect(planPortfolioItems(decision)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("runner.recurring_economy"),
+      ]),
+    );
   });
 
   it("does not treat turn-start economy without run drawback as no-run commitment", () => {

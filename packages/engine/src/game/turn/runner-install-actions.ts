@@ -5,6 +5,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import { buildLegalAction } from "./action-builders";
+import { deterministicOnInstallResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
 
 export function buildRunnerProgramInstallAction(
   state: GameState,
@@ -50,7 +51,10 @@ export function buildRunnerResourceInstallAction(
     `${definition.title} installieren`,
     cardId,
     [{ clicks: 1, credits: definition.installCost ?? 0 }],
-    { cardId },
+    {
+      cardId,
+      ...deterministicOnInstallResourcePayload(definition, "runner"),
+    },
     {
       targetRequirements: [
         {

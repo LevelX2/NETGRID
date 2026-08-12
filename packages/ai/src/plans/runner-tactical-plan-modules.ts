@@ -35,12 +35,28 @@ export type RunnerPressureSignal = {
   runActionEvidence?: Record<string, string[]>;
   runActionExclusions?: Record<string, string[]>;
   preparationActionIds?: string[];
+  rejectedPreparationActionIds?: string[];
   supportNeedId?: string;
   routePreparation?: "release_run_lock" | "develop_payoff" | "targeted_bypass";
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
   informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
+  accessPayoffCampaign?: {
+    payoffCardInstanceId: string;
+    payoffDefinitionId: string;
+    desiredCopyCount: number;
+    installedCopyCount: number;
+    selectedCopyOrdinal: number;
+    installCost: number;
+    runFundingTargetCredits: number;
+    totalFundingEnvelope: number;
+    fundingGap: number;
+    horizon: "same_turn" | "bounded_multi_turn";
+    milestone: "fund_install" | "install_payoff";
+    blocker?: string;
+    evidenceCodes: string[];
+  };
 };
 
 export type RunnerRemoteContestSignal = {

@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-08-10-runner-access-payoff-campaign-binding
-status: inbox
+status: done
 kind: architecture
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-10
-startedAt:
-completedAt:
-branch:
-releaseTarget: post-card-semantics-restructuring
-blockedBy:
-  - laufende Kartenrestrukturierung und Konsolidierung der kanonischen Kartensemantik
-resultArtifacts: []
-checks: []
+startedAt: 2026-08-12
+completedAt: 2026-08-12
+branch: codex/activities-ai-20260812
+releaseTarget: current
+blockedBy: []
+resultArtifacts:
+  - packages/ai/src/plans/runner-tactical-plan-modules.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.test.ts
+checks:
+  - focused access-payoff runtime regressions (5 passed)
+  - full plan-first-live-runtime test file (204 passed, 1 pre-existing Corp baseline failure reproduced on main)
+  - AI typecheck changed-file audit (no changed-file errors; full gate blocked by four pre-existing missing migration-report imports reproduced on main)
+  - git diff --check
 ---
 
 # Access-Payoff-Karten an eine ausführbare Runner-Kampagne binden
@@ -112,35 +118,35 @@ Access-Payoff-Karten und darf nicht über Kartenname oder Karten-ID erfolgen.
 
 ## Akzeptanzkriterien
 
-- [ ] Der Vertrag ist generisch und enthält weder Karten-ID noch Namenscheck
+- [x] Der Vertrag ist generisch und enthält weder Karten-ID noch Namenscheck
       für `R&D Interface`.
-- [ ] Ohne begründeten Access-Parent entsteht keine isolierte
+- [x] Ohne begründeten Access-Parent entsteht keine isolierte
       Payoff-Installation allein aufgrund verfügbarer Credits.
-- [ ] Mit realistischem Parent bleiben Zielserver, Root-Plan,
+- [x] Mit realistischem Parent bleiben Zielserver, Root-Plan,
       Planinstanz, Meilensteine und `PlanExecutionOrigin` über Funding,
       Installation und Run-Finanzierung nachvollziehbar gebunden.
-- [ ] Der Match-Checkpoint zu Entscheidungen 124 bis 126 verliert den
+- [x] Der Match-Checkpoint zu Entscheidungen 124 bis 126 verliert den
       Interface-Plan nicht nach Erreichen der Installationskosten. Entweder
       wird die legal gebundene Installation ausgeführt oder die Kampagne
       nennt einen neuen materiellen Blocker; ein konkurrierender pauschaler
       Access-Veto-Grund genügt nicht.
-- [ ] Eine vorbereitende Installation kann bei realistischem mehrzügigem
+- [x] Eine vorbereitende Installation kann bei realistischem mehrzügigem
       Horizont zulässig sein, obwohl der vollständige Run noch nicht im selben
       Zug bezahlt werden kann.
-- [ ] Ein unprofitabler oder dauerhaft unerreichbarer Server erzeugt keine
+- [x] Ein unprofitabler oder dauerhaft unerreichbarer Server erzeugt keine
       endlose Funding-Schleife; die Kampagne wird sichtbar blockiert,
       zurückgestellt oder beendet.
-- [ ] Bei drei gleichen Kopien wird mindestens eine fachlich gewählte
+- [x] Bei drei gleichen Kopien wird mindestens eine fachlich gewählte
       Instanz korrekt bewertet; es werden nicht alle drei ohne installierte
       Kopie als Duplikat ausgeschlossen.
-- [ ] Tests sichern mindestens: kein Payoff, realistischer Ein-Kopien-Plan,
+- [x] Tests sichern mindestens: kein Payoff, realistischer Ein-Kopien-Plan,
       mehrere Kopien mit abnehmendem Grenznutzen, Funding über mehrere Züge,
       Abbruch bei neuer ICE-Evidence und erfolgreicher normaler R&D-Zugriff.
-- [ ] Ownership-Tests sichern Parent, Step, Support-Bindung, exakte
+- [x] Ownership-Tests sichern Parent, Step, Support-Bindung, exakte
       LegalAction und Executor; Resolver und Fallback treffen keine eigene
       Strategieentscheidung.
-- [ ] Hidden-Info-Schutz, Replay, StateHash und Determinismus bleiben erhalten.
-- [ ] Fokussierte AI-Tests, erforderlicher AI-Typecheck, relevante
+- [x] Hidden-Info-Schutz, Replay, StateHash und Determinismus bleiben erhalten.
+- [x] Fokussierte AI-Tests, erforderlicher AI-Typecheck, relevante
       Semantik-/Architekturgates und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -158,5 +164,24 @@ Access-Payoff-Karten und darf nicht über Kartenname oder Karten-ID erfolgen.
 
 ## Ergebnisnotiz
 
-Noch offen. Umsetzung bewusst auf den kanonischen Kartenstrukturstand
-ausgerichtet.
+`runner.pressure_central` erzeugt nun aus der kanonischen generischen
+Access-Payoff-Semantik eine server- und karteninstanzgebundene Kampagne. Sie
+führt Kopienziel, Installationskosten, Run-Finanzierungsziel, Gesamthülle,
+Funding Gap, Horizont und Meilenstein. Eine legal gewählte Kopie wird direkt
+vom Parent materialisiert; weitere gleichwertige Kopien erhalten eine
+explizite Grenznutzen-Disposition. Fehlende Installationscredits werden über
+einen exakt parentgebundenen `runner.economy`-Need finanziert.
+
+Der frühere pauschale Sofort-Run-Veto greift nicht mehr gegen diese residente
+Kampagne. Bekannter Null-Payoff, dauerhaft unpassierbare Pfade und nicht
+realistisch finanzierbare Pfade erzeugen dagegen weiterhin keinen Aufbau.
+Die Lösung enthält im Produktivcode weder Karten-ID noch Kartennamen und
+öffnet keinen Resolver- oder Fallback-Chooser.
+
+Die fünf fokussierten Regressionen sind grün. Der vollständige Test der
+betroffenen Runtime-Datei hat 204 grüne Tests und einen bereits auf `main`
+identisch reproduzierbaren Corp-Score-Funding-Baselinefehler. Der
+Paket-Typecheck meldet in den geänderten Dateien keinen Fehler; sein voller
+Lauf scheitert auf `main` bereits an vier Imports inzwischen entfernter
+CardSpec-Migrationsreports. Diese beiden unabhängigen Baselinepunkte wurden
+nicht in den Activity-Scope gezogen.

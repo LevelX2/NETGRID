@@ -53,6 +53,28 @@ describe("runner install main actions", () => {
     });
   });
 
+  it("quotes a canonical on-install credit gain on the resource LegalAction", () => {
+    const game = createGame({
+      seed: "arch-6-runner-resource-install-credit-quote",
+      setupMode: "completed",
+    });
+    expect(
+      buildRunnerResourceInstallAction(
+        game,
+        "loan-instance" as never,
+        runnerCardDefinition(
+          "onr_v1_168_loan-from-chiba",
+          "resource",
+          "Credit Exchange",
+          0,
+        ),
+      ).payload,
+    ).toMatchObject({
+      cardId: "loan-instance",
+      gainCreditsAmount: 12,
+    });
+  });
+
   it("builds a simple Runner hardware install action with stable ID and payload", () => {
     const state = createGame({
       seed: "arch-6-runner-hardware-install",
