@@ -29,6 +29,7 @@ import {
   clampReplayFrame,
   nextReplayFrame,
   playbackDelayMs,
+  publicEventsThroughReplayFrame,
 } from "../../features/replay/replay-player-model";
 import { readLocalStorage } from "../../lib/local-storage";
 import { CARD_DISPLAY_MODE_STORAGE_KEY } from "../../lib/storage-keys";
@@ -195,8 +196,9 @@ export default function ReplayPage() {
   }, [currentFrame, replay?.timeline]);
   const currentPublicEvents = useMemo(
     () =>
-      (replay?.publicEvents ?? []).filter(
-        (event) => event.stateVersionAfter <= (currentFrame?.stateVersion ?? 0),
+      publicEventsThroughReplayFrame(
+        replay?.publicEvents ?? [],
+        currentFrame?.stateVersion ?? 0,
       ),
     [currentFrame?.stateVersion, replay?.publicEvents],
   );
