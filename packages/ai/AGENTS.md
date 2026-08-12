@@ -9,7 +9,7 @@ Vor dem ersten Patch an produktivem KI-Verhalten vollständig lesen:
 3. die einschlägigen Abschnitte in
    `docs/architecture/ai/ai-plan-layer-target-state-wip.md`
 4. bei Plan-first-, Choice- oder Ownership-Arbeit zusätzlich
-   `docs/architecture/ai/ai-plan-first-runtime-cutover-process-2026-07-23.md`
+   `docs/architecture/ai/ai-turn-and-campaign-planner-concept-2026-07-29.md`
 
 Der Änderungskompass verdichtet das allgemeine KI-Zielbild und das
 Planebenen-Konzept zu Haltung, Autoritätskette, Schichtzuordnung und

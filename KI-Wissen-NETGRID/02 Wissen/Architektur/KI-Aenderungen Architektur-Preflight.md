@@ -15,7 +15,7 @@ Führende Detailquellen:
 - `docs/architecture/ai/README.md`
 - `docs/architecture/ai/ai-plan-layer-target-state-wip.md`
 - bei Plan-first-, Choice- und Ownership-Arbeit:
-  `docs/architecture/ai/ai-plan-first-runtime-cutover-process-2026-07-23.md`
+  `docs/architecture/ai/ai-turn-and-campaign-planner-concept-2026-07-29.md`
 - package-lokale Pflichtregeln: `packages/ai/AGENTS.md`
 
 Der Änderungskompass wird vor jedem KI-Codepatch vollständig gelesen. Die
