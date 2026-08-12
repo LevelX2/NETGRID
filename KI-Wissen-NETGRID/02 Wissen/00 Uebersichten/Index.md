@@ -74,35 +74,24 @@
 
 ## KI
 
-- Die Semantic Runtime ist der einzige Live-Entscheidungsweg.
-- Das führende allgemeine KI-Zielbild liegt in
-  `docs/architecture/ai/ki-zielbild-metaebene-2026-08-02-v6.md`. Es verbindet
-  Kartensemantik, kompositionsabhängige DeckDoctrine, Strategic Intent,
-  Planportfolio, Zugplanung und Engine-Ausführung; die Metaebene v5 ist nur
-  noch historische Evidence.
+- Die produktive KI ist Plan-first; die Engine bleibt alleinige Regelautorität.
+- Der aktuelle Einstieg und die vollständige Dokumenthierarchie liegen in
+  `docs/architecture/ai/README.md`.
+- Führendes allgemeines KI-Zielbild:
+  `docs/architecture/ai/target-architecture.md`.
+- Verbindliches Agenten-Konzentrat vor jedem KI-Codepatch:
+  `docs/architecture/ai/change-compass.md`.
+- Detaillierter Plan-first-, Scheduler-, Ownership- und Ausführungsvertrag:
+  `docs/architecture/ai/planning-architecture.md`.
+- Umgesetzter Detailvertrag des Zug- und Kampagnenplaners:
+  `docs/architecture/ai/turn-campaign-planner.md`.
 - [[../Architektur/KI-Aenderungen Architektur-Preflight]]:
-  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch. Das
-  vollständig zu lesende Agenten-Konzentrat liegt in
-  `docs/architecture/ai/ai-program-logic-change-compass.md`.
-- Das führende WIP-Zielbild für eine autoritative modulare
-  Plan-first-Auswahl mit gemeinsamem Planrahmen, getrennten
-  Runner-/Corp-Schedulern und verfeinerbaren Planmodulen liegt in
-  `docs/architecture/ai/ai-plan-layer-target-state-wip.md`. Der gemeinsame
-  TurnPlanner-, Commitment- und Kampagnenvertrag ist für beide Seiten
-  produktiv umgesetzt. Version 1.2 enthält den Current-State-Abgleich aus den
-  jüngsten Spielaudits und generischen Fähigkeitsmigrationen; führende
-  Abnahme-Evidence ist
-  `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
+  verbindliche Ownership- und Plan-first-Prüfung vor jedem KI-Codepatch.
 - Live-API: `@netgrid/ai`; Simulation: `@netgrid/ai/simulation`.
-- Current-State-Cleanup:
-  - `docs/architecture/ai/ai-current-state-cleanup-process-2026-07-09.md`
-  - `docs/reviews/ai/ai-current-state-cleanup-final-review-2026-07-09.md`
 - Historischer AI020-bis-AI212-Erkenntniswert:
   `docs/reviews/ai/ai-historical-process-rollup-2026-07-10.md`.
 - Proteus-Reconciliation:
-  - `docs/architecture/ai/proteus-ai-release-reconciliation-plan-2026-07-09.md`
-  - `docs/architecture/ai/proteus-ai-release-automation-process-2026-07-09.md`
-  - `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`
+  `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`.
 - Aktive Gates:
   - `corepack pnpm check:ai`
   - `corepack pnpm check:ai-deck-doctrine-strategy`

@@ -10,9 +10,9 @@ KI-Programmlogik vollständig zu lesen. Es verdichtet Haltung, Autoritätskette
 und Pflichtentscheidungen aus zwei führenden Gesamtkonzepten:
 
 1. Allgemeines KI-Zielbild:
-   `ki-zielbild-metaebene-2026-08-02-v6.md`
+   `target-architecture.md`
 2. Detailliertes Planebenen-Zielkonzept:
-   `ai-plan-layer-target-state-wip.md`
+   `planning-architecture.md`
 
 Bei Unklarheit oder einer Änderung am gemeinsamen Rahmen sind die betroffenen
 Abschnitte beider Gesamtdokumente selbst zu lesen. Dieses Konzentrat ersetzt
@@ -23,8 +23,8 @@ sie nicht.
 Dieses Dokument bildet mit folgenden beiden Gesamtdokumenten einen
 verbindlichen Dreierverbund:
 
-- `ki-zielbild-metaebene-2026-08-02-v6.md`;
-- `ai-plan-layer-target-state-wip.md`.
+- `target-architecture.md`;
+- `planning-architecture.md`.
 
 Bei jeder inhaltlichen Änderung an einem der drei Dokumente muss geprüft
 werden, ob Begriffe, Haltung, Autoritätskette, Ownership, Planvertrag,

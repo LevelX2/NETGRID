@@ -8,16 +8,16 @@ Stand: 2026-08-02
 Dieses Dokument beschreibt die allgemeine Entscheidungsarchitektur der
 NETGRID-KI. Es ersetzt die vor dem Plan-first-Cutover entstandene Metaebene
 v5. Die detaillierte Planarchitektur bleibt in
-`ai-plan-layer-target-state-wip.md` führend; der implementierte Zug- und
+`planning-architecture.md` führend; der implementierte Zug- und
 Kampagnenvertrag ist zusätzlich in
-`ai-turn-and-campaign-planner-concept-2026-07-29.md` und dessen Final Review
+`turn-campaign-planner.md` und dessen Final Review
 belegt.
 
 Dieses allgemeine Zielbild bildet einen verbindlichen Dreierverbund mit:
 
-- `ai-plan-layer-target-state-wip.md` als detailliertem Plan- und
+- `planning-architecture.md` als detailliertem Plan- und
   Ausführungsvertrag;
-- `ai-program-logic-change-compass.md` als vollständig zu lesender
+- `change-compass.md` als vollständig zu lesender
   Agenten-Handlungsanweisung.
 
 Bei jeder inhaltlichen Änderung an einem der drei Dokumente werden mögliche
