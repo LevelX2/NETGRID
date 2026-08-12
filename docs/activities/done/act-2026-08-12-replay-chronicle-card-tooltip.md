@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-08-12-replay-chronicle-card-tooltip
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-12
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-12
+completedAt: 2026-08-12
+branch: codex/activities-worktree-20260812
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/replays/page.tsx
+  - apps/web/features/replay/ReplayBoard.tsx
+  - apps/web/features/chronicle/chronicle-public-card-ids.ts
+  - apps/web/features/replay/replay-chronicle-card-tooltip.test.ts
+checks:
+  - corepack pnpm exec vitest run features/replay/replay-chronicle-card-tooltip.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Karten-Tooltip der Spielchronik im Replay vollständig anzeigen
@@ -60,16 +67,16 @@ statt lediglich Chronik- oder Regeltext erneut auszugeben.
 
 ## Akzeptanzkriterien
 
-- [ ] Eine im Replay sichtbare Kartenreferenz der Spielchronik öffnet bei
+- [x] Eine im Replay sichtbare Kartenreferenz der Spielchronik öffnet bei
   Hover und Tastaturfokus einen Tooltip.
-- [ ] Im Bildmodus enthält der Tooltip die zur Kartenreferenz gehörende
+- [x] Im Bildmodus enthält der Tooltip die zur Kartenreferenz gehörende
   Kartenansicht, wenn für die Karte eine zulässige Präsentation verfügbar ist;
   er degradiert nicht unbegründet zu erneutem Chroniktext.
-- [ ] Im einfachen und erweiterten Modus bleibt die jeweilige Textansicht
+- [x] Im einfachen und erweiterten Modus bleibt die jeweilige Textansicht
   vollständig und konsistent zum aktiven Spiel nutzbar.
-- [ ] Nicht sichtbare oder im Replay redigierte Karteninformationen werden
+- [x] Nicht sichtbare oder im Replay redigierte Karteninformationen werden
   weiterhin nicht über den Tooltip offengelegt.
-- [ ] Ein fokussierter Regressionstest deckt den realen Replay-Pfad ab.
+- [x] Ein fokussierter Regressionstest deckt den realen Replay-Pfad ab.
 
 ## Umsetzungshinweise
 
@@ -83,4 +90,10 @@ statt lediglich Chronik- oder Regeltext erneut auszugeben.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Replay-Seite ermittelt Kartendefinitionen ausschließlich aus bereits
+öffentlichen Event-Payloads, lädt dafür die vollständigen Katalogdetails und
+reicht sie über `ReplayBoard` an die gemeinsame Spielchronik weiter. Damit ist
+der bestehende Karten-Trigger nicht länger wegen eines leeren Detailkatalogs
+deaktiviert. Die gemeinsame Tooltip-Auswahl hält Bild-, einfachen und
+erweiterten Textmodus unverändert auseinander; redigierte Payloads erzeugen
+keine Detailanfrage. Fokussierter Regressionstest und Web-Typecheck sind grün.

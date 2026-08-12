@@ -3009,15 +3009,30 @@ export function formatChronicleEvent(
         );
         const breakerStrengthAfter = numberValue(payload.breakerStrengthAfter);
         description = `${pumpBreakerCreditCost !== undefined ? `${creditText(pumpBreakerCreditCost)}: ` : ""}+${pumpStrengthAmount} Stärke für diese Begegnung${breakerStrengthAfter !== undefined ? `; Stärke danach ${breakerStrengthAfter}` : ""}.`;
+        const pumpSummary = [
+          `+${pumpStrengthAmount} Stärke`,
+          ...(breakerStrengthAfter !== undefined
+            ? [`Stärke ${breakerStrengthAfter}`]
+            : []),
+          ...(pumpBreakerCreditCost !== undefined
+            ? [`Kosten ${creditText(pumpBreakerCreditCost)}`]
+            : []),
+        ].join(", ");
         chips.push(
           "Breaker",
           `+${pumpStrengthAmount} Stärke`,
+          ...(breakerStrengthAfter !== undefined
+            ? [`Stärke ${breakerStrengthAfter}`]
+            : []),
           ...(pumpBreakerCreditCost !== undefined
             ? [`${pumpBreakerCreditCost} ${creditLabel(pumpBreakerCreditCost)}`]
             : []),
         );
+        title = phrase(
+          subject,
+          `${cardTitle ?? "einen Icebreaker"} gepumpt (${pumpSummary})`,
+        );
       }
-      title = phrase(subject, `${cardTitle ?? "einen Icebreaker"} gepumpt`);
       break;
     case "break_subroutine":
       category = "run";
