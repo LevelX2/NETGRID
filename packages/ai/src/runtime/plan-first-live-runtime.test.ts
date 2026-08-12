@@ -14168,6 +14168,66 @@ describe("authoritative plan-first live runtime", () => {
       priorityClass: "P5",
       evidenceCode: "missing_coverage:breaker_wall",
     });
+
+    resetResidentPlanPortfolioMemory();
+    const repeatedScoringRemote = structuredClone(unadvanced);
+    repeatedScoringRemote.playerView.publicEvents = [
+      {
+        eventId: "corp-score-remote-1",
+        type: "score_agenda",
+        stateVersionBefore: 8,
+        stateVersionAfter: 9,
+        turnSerial: 3,
+        stateHashAfter: "fnv1a:corp-score-remote-1",
+        publicPayload: {
+          actor: "corp",
+          actionType: "score_agenda",
+          targets: { scoredFromServerId: "remote_1" },
+        },
+      },
+    ];
+    repeatedScoringRemote.eventTail =
+      repeatedScoringRemote.playerView.publicEvents;
+    const focusedDecision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(repeatedScoringRemote, {});
+
+    expect(focusedDecision).toMatchObject({
+      actionId: junkyard.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(focusedDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        "plan_assessment_evidence:terminal_remote_coverage:remote_1",
+        "plan_step_capability:search_answer_breaker_wall",
+        "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
+      ]),
+    );
+    expect(residentPlanPortfolioSnapshot(repeatedScoringRemote)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId:
+        "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          openNeedIds: ["coverage:breaker_wall"],
+        }),
+        expect.objectContaining({
+          instanceId: "plan:runner.rig_and_coverage:coverage%3Abreaker_wall",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          parentNeedId: "coverage:breaker_wall",
+        }),
+      ]),
+    });
   });
 
   it("does not recycle a rejected coverage search as generic draw support", () => {

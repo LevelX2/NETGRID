@@ -48,6 +48,7 @@ export type RunnerRemoteContestSignal = {
   serverId: string;
   purpose: "contest" | "information";
   knownAgendaThreat: boolean;
+  terminalPatternThreat?: boolean;
   reachable: boolean;
   marginalValue: number;
   constrainedActionCapacity?: boolean;
@@ -498,7 +499,7 @@ function centralPressureModule(): PlanModule {
         current.signal.reachable &&
         current.signal.marginalValue > 0 &&
         candidates.length > 0;
-      const resourceGaps = exactRunnerParentFundingResourceGaps(
+      const resourceGaps = exactRunnerParentSupportResourceGaps(
         context,
         instance,
         current.signal.supportNeedId,
@@ -621,7 +622,7 @@ function remoteContestModule(): PlanModule {
         current.signal.reachable &&
         current.signal.marginalValue > 0 &&
         remoteCandidates(context, current.signal).length > 0;
-      const resourceGaps = exactRunnerParentFundingResourceGaps(
+      const resourceGaps = exactRunnerParentSupportResourceGaps(
         context,
         instance,
         current.signal.supportNeedId,
@@ -632,10 +633,14 @@ function remoteContestModule(): PlanModule {
         routeExists,
         current.signal.marginalValue,
         portfolio.executorInstanceId,
-        current.signal.knownAgendaThreat ? "score_threat" : undefined,
+        current.signal.knownAgendaThreat || current.signal.terminalPatternThreat
+          ? "score_threat"
+          : undefined,
         current.signal.routePreparation === "targeted_bypass"
           ? "belief_supported"
-          : "visible_state_forced",
+          : current.signal.terminalPatternThreat
+            ? "robust_but_reactive"
+            : "visible_state_forced",
         resourceGaps,
       );
       if (priorityClass === "P4") {
@@ -686,7 +691,10 @@ function remoteContestModule(): PlanModule {
 }
 
 function remotePriority(signal: RunnerRemoteContestSignal): "P2" | "P4" | "P6" {
-  if (signal.knownAgendaThreat && signal.routePreparation !== "targeted_bypass")
+  if (
+    (signal.knownAgendaThreat || signal.terminalPatternThreat) &&
+    signal.routePreparation !== "targeted_bypass"
+  )
     return "P2";
   return signal.constrainedActionCapacity ? "P6" : "P4";
 }
@@ -1063,7 +1071,7 @@ function assessment(
   };
 }
 
-function exactRunnerParentFundingResourceGaps(
+function exactRunnerParentSupportResourceGaps(
   context: PlanSchedulerContext,
   parent: PlanInstance,
   supportNeedId: string | undefined,
@@ -1076,14 +1084,31 @@ function exactRunnerParentFundingResourceGaps(
       need.parentPlanInstanceId === parent.instanceId &&
       need.gap > 0,
   );
-  if (exactNeeds.length !== 1) return [];
-  const [need] = exactNeeds;
-  if (!need) return [];
+  if (exactNeeds.length === 1) {
+    const [need] = exactNeeds;
+    if (!need) return [];
+    return [
+      {
+        needId: need.needId,
+        capability: "credits",
+        minimum: need.gap,
+        available: 0,
+        deadline: "current_turn",
+      },
+    ];
+  }
+  const coverageGaps = domain(context).coverageGaps.filter(
+    (gap) =>
+      gap.gapId === supportNeedId &&
+      gap.requesterPlanInstanceId === parent.instanceId &&
+      gap.requesterNeedId === supportNeedId,
+  );
+  if (coverageGaps.length !== 1) return [];
   return [
     {
-      needId: need.needId,
-      capability: "credits",
-      minimum: need.gap,
+      needId: supportNeedId,
+      capability: coverageGaps[0]!.requiredRole,
+      minimum: 1,
       available: 0,
       deadline: "current_turn",
     },

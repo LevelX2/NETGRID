@@ -1446,6 +1446,7 @@ function runnerTransientPlanSignals(
     (signal) =>
       signal.marginalValue > 0 &&
       (signal.knownAgendaThreat ||
+        signal.terminalPatternThreat ||
         signal.reachable ||
         signal.supportNeedId !== undefined)
         ? [
@@ -1454,7 +1455,10 @@ function runnerTransientPlanSignals(
               signalId: `runner-remote:${signal.contestId}`,
               planModuleId: "runner.contest_remote",
               planDedupeKey: signal.contestId,
-              kind: signal.knownAgendaThreat ? "threat" : "goal",
+              kind:
+                signal.knownAgendaThreat || signal.terminalPatternThreat
+                  ? "threat"
+                  : "goal",
               scope: "tactical",
               evidenceCode: signal.evidenceCode,
               guarantee: signal.knownAgendaThreat
@@ -3921,6 +3925,7 @@ function buildRunnerDomain(
           accessCommitment: accessCommitmentForEvaluation(evaluation),
         };
       }),
+    ...runnerMatchpointRemoteFocusSignals(input, runTargets),
     ...input.playerView.servers.flatMap((server) => {
       const knownAgenda = server.root.some(
         (card) => card.known !== false && card.type === "agenda",
@@ -4899,7 +4904,7 @@ function runnerTargetedBypassRemotePreparationSignals(
     .flatMap((candidate) => {
       const planTargets = eligiblePlans.flatMap((signal) => {
         const payoffValue = Math.max(
-          signal.knownAgendaThreat ? 1_000 : 0,
+          signal.knownAgendaThreat || signal.terminalPatternThreat ? 1_000 : 0,
           runnerTargetedBypassPayoffValue(signal.serverId, runTargets),
         );
         if (payoffValue <= 0) return [];
@@ -16561,6 +16566,7 @@ function uniqueCoverageGaps(
         .searchEngineSetupActionIds.length > 0
     );
   });
+  const terminalContestThreat = runnerTerminalContestThreat(input);
   for (const evaluation of runTargets) {
     const outsideMissingCoverageScope =
       evaluation.recommendation !== "find_breaker_first" &&
@@ -16583,6 +16589,9 @@ function uniqueCoverageGaps(
     }
     const terminalRemoteCoverageThreat =
       runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
+    const terminalRemotePatternThreat =
+      terminalContestThreat?.kind === "opponent_matchpoint" &&
+      terminalContestThreat.remoteServerIds.includes(evaluation.targetServerId);
     if (installedRoles.has(role) && !costRecovery) continue;
     const visibleAnswer =
       costRecovery?.visibleAnswer ??
@@ -16636,10 +16645,15 @@ function uniqueCoverageGaps(
       requiredRole: role,
       targetServerId: evaluation.targetServerId,
       requesterModuleId,
-      requesterPlanInstanceId: planInstanceIdForProposal({
-        moduleId: requesterModuleId,
-        dedupeKey: requesterDedupeKey,
-      }),
+      ...(terminalRemotePatternThreat
+        ? {
+            requesterPlanInstanceId: planInstanceIdForProposal({
+              moduleId: requesterModuleId,
+              dedupeKey: requesterDedupeKey,
+            }),
+            requesterNeedId: gapId,
+          }
+        : {}),
       priorityClass:
         evaluation.scoreThreat || terminalRemoteCoverageThreat
           ? "P2"
@@ -17074,19 +17088,62 @@ function runnerCoverageGapIsTerminalRemoteThreat(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === evaluation.targetServerId,
   );
-  if (
-    !server?.root.some(
+  const visiblyAdvancedRoot =
+    server?.root.some(
       (card) =>
         (card.known === false || card.type === "agenda") &&
         (card.advancementCounters ?? 0) > 0,
-    )
-  ) {
+    ) === true;
+  const repeatedMatchpointRemote = terminalThreat.remoteServerIds.includes(
+    evaluation.targetServerId,
+  );
+  if (!visiblyAdvancedRoot && !repeatedMatchpointRemote) {
     return false;
   }
   return (
-    terminalThreat.kind === "opponent_matchpoint" ||
-    terminalThreat.remoteServerIds.includes(evaluation.targetServerId)
+    terminalThreat.kind === "opponent_matchpoint" || repeatedMatchpointRemote
   );
+}
+
+function runnerMatchpointRemoteFocusSignals(
+  input: AiDecisionInput,
+  runTargets: readonly RunnerRunTargetEvaluation[],
+): RunnerRemoteContestSignalDraft[] {
+  const threat = runnerTerminalContestThreat(input);
+  if (threat?.kind !== "opponent_matchpoint") return [];
+  return threat.remoteServerIds.map((serverId) => {
+    const evaluations = runTargets.filter(
+      (evaluation) =>
+        evaluation.targetKind === "remote" &&
+        evaluation.targetServerId === serverId,
+    );
+    const missingCoverage = evaluations.find(
+      (evaluation) => evaluation.pathPassability === "blocked_missing_coverage",
+    );
+    const supportNeedId = missingCoverage
+      ? `coverage:${planFirstCoverageRole(
+          missingBreakerCoverageKind(
+            input.playerView,
+            missingCoverage.targetServerId,
+          ),
+          missingCoverage.evidence,
+        )}`
+      : undefined;
+    return {
+      contestId: `remote:${serverId}`,
+      serverId,
+      purpose: "contest" as const,
+      knownAgendaThreat: false,
+      terminalPatternThreat: true,
+      reachable: false,
+      marginalValue: 1_400,
+      evidenceCode: `runner_matchpoint_remote_pattern_focus:${serverId}`,
+      ...(supportNeedId ? { supportNeedId } : {}),
+      preferredRunActionIds: evaluations.map(
+        (evaluation) => evaluation.actionId,
+      ),
+    };
+  });
 }
 
 function runnerTerminalRemoteContestIsDirectlyMandatory(

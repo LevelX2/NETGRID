@@ -115,6 +115,7 @@ export type RunnerCoverageGapSignal = {
   targetServerId?: string;
   requesterModuleId?: "runner.pressure_central" | "runner.contest_remote";
   requesterPlanInstanceId?: string;
+  requesterNeedId?: string;
   priorityClass: "P2" | "P4" | "P5";
   evidenceCode: string;
   deckHasAnswer: boolean;
@@ -1197,6 +1198,12 @@ function coverageModule(
             gap.evidenceCode,
             ...(gap.recoveryEvidenceCodes ?? []),
           ],
+          ...(gap.requesterPlanInstanceId && gap.requesterNeedId
+            ? {
+                parentInstanceId: gap.requesterPlanInstanceId,
+                parentNeedId: gap.requesterNeedId,
+              }
+            : {}),
         });
       }),
     assess: (instance, context, portfolio) => {
