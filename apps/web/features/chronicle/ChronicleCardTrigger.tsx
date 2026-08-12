@@ -27,6 +27,7 @@ import {
   useCardTooltipSettings,
   usePreferredCardImageSource,
 } from "../cards/card-display-settings";
+import { chronicleCardTooltipContentMode } from "./chronicle-card-tooltip-model";
 
 type ChronicleTriggerCard = {
   catalogCardId: string;
@@ -74,10 +75,15 @@ export function ChronicleCardTrigger({
 
   const imageSource = usePreferredCardImageSource(card?.catalogCardId);
   const imageUrl = imageSource.src;
-  const showImageTooltip = tooltipMode === "image" && Boolean(imageUrl);
   const rulesLines = card ? rulesTextLines(card.text) : [];
   const hasTooltipTextContent = Boolean(card && (card.title || item.cardDetailLines.length > 0 || rulesLines.length > 0));
-  const tooltipEnabled = Boolean(card) && !disabled && (showImageTooltip || hasTooltipTextContent);
+  const tooltipContentMode = chronicleCardTooltipContentMode(
+    tooltipMode,
+    Boolean(imageUrl),
+    hasTooltipTextContent,
+  );
+  const showImageTooltip = tooltipContentMode === "image";
+  const tooltipEnabled = Boolean(card) && !disabled && tooltipContentMode !== null;
   const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
   const cardType = card?.type ?? "";
   const tooltipId =

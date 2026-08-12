@@ -4672,12 +4672,19 @@ describe("formatChronicleEvent", () => {
       "corp",
     );
 
-    expect(pump.title).toBe("Die Runner-KI hat Krash gepumpt.");
+    expect(pump.title).toBe(
+      "Die Runner-KI hat Krash gepumpt (+1 Stärke, Stärke 1, Kosten 2 Credits).",
+    );
     expect(pump.description).toBe(
       "2 Credits: +1 Stärke für diese Begegnung; Stärke danach 1.",
     );
     expect(pump.chips).toEqual(
-      expect.arrayContaining(["Breaker", "+1 Stärke", "2 Credits"]),
+      expect.arrayContaining([
+        "Breaker",
+        "+1 Stärke",
+        "Stärke 1",
+        "2 Credits",
+      ]),
     );
     expect(breakAction.title).toBe(
       "Die Runner-KI hat mit Krash Subroutine 1 auf Filter gebrochen.",

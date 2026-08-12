@@ -45,8 +45,8 @@ import {
 } from "../settings/settings-model";
 import type { OverlayPositionPreference } from "../../lib/overlay-position";
 import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
+import type { CatalogCardDetail } from "../catalog/catalog-types";
 
-const EMPTY_CARD_DETAILS = {};
 const EMPTY_ACTIONS: LegalAction[] = [];
 const EMPTY_IDS = new Set<string>();
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
@@ -57,6 +57,7 @@ export function ReplayBoard({
   displayNames,
   publicEvents,
   cardPresentationsById,
+  cardDetailsById,
   cardDisplayMode,
   chronicleDetailMode,
   onCardDisplayMode,
@@ -66,6 +67,7 @@ export function ReplayBoard({
   displayNames: Partial<Record<Side, string>>;
   publicEvents: PublicGameEvent[];
   cardPresentationsById: PublicCardPresentationsById;
+  cardDetailsById: Record<string, CatalogCardDetail>;
   cardDisplayMode: CardDisplayMode;
   chronicleDetailMode: ChronicleDetailMode;
   onCardDisplayMode(value: CardDisplayMode): void;
@@ -135,7 +137,7 @@ export function ReplayBoard({
   );
 
   const enrichCard = (card: VisibleCard): DisplayVisibleCard =>
-    enrichVisibleCard(card, EMPTY_CARD_DETAILS);
+    enrichVisibleCard(card, cardDetailsById);
   const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) =>
     setFocusedCard({ card, ...(hiddenSide ? { hiddenSide } : {}) });
   const scoreAreaCardsBySide = (side: Side): VisibleCard[] =>
@@ -211,7 +213,7 @@ export function ReplayBoard({
           view={view}
           legalActions={EMPTY_ACTIONS}
           runActions={EMPTY_ACTIONS}
-          cardDetailsById={EMPTY_CARD_DETAILS}
+          cardDetailsById={cardDetailsById}
           actionDisabled
           corpRunAutoPassActive={false}
           onAction={noAction}
@@ -270,7 +272,7 @@ export function ReplayBoard({
           />
           <SpecialZonesStrip
             view={view}
-            cardDetailsById={EMPTY_CARD_DETAILS}
+            cardDetailsById={cardDetailsById}
             displayMode={cardDisplayMode}
             compact
             onFocus={focusCard}
@@ -285,7 +287,7 @@ export function ReplayBoard({
             >
               <RunnerOpponentZonesStrip
                 view={view}
-                cardDetailsById={EMPTY_CARD_DETAILS}
+                cardDetailsById={cardDetailsById}
                 displayMode={cardDisplayMode}
                 selectedContext={null}
                 contextualActions={EMPTY_ACTIONS}
@@ -297,7 +299,7 @@ export function ReplayBoard({
               />
               <RunnerRigStrip
                 view={view}
-                cardDetailsById={EMPTY_CARD_DETAILS}
+                cardDetailsById={cardDetailsById}
                 displayMode={cardDisplayMode}
                 selectedContext={null}
                 contextualActions={EMPTY_ACTIONS}
@@ -311,7 +313,7 @@ export function ReplayBoard({
           ) : (
             <RunnerRigStrip
               view={view}
-              cardDetailsById={EMPTY_CARD_DETAILS}
+              cardDetailsById={cardDetailsById}
               displayMode={cardDisplayMode}
               selectedContext={null}
               contextualActions={EMPTY_ACTIONS}
@@ -419,7 +421,7 @@ export function ReplayBoard({
             events={publicEvents}
             turnContextEvents={publicEvents}
             side={view.side}
-            cardDetailsById={EMPTY_CARD_DETAILS}
+            cardDetailsById={cardDetailsById}
             cardPresentationsById={cardPresentationsById}
             displayMode={cardDisplayMode}
             detailMode={chronicleDetailMode}
