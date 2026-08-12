@@ -69,7 +69,7 @@ export type EncounterResolutionResult = {
 
 export type PostEncounterResult = {
   handled: boolean;
-  forcedJackOutAfterEncounter?: boolean;
+  forcedRunEndAfterEncounter?: boolean;
   runShouldEnd?: boolean;
   stateChanged?: boolean;
 };
@@ -555,15 +555,15 @@ export function consumeForcedJackOutAfterEncounter(
   const run = mustRun(host.state);
   if (!run.forceJackOutAfterEncounterSourceId) return { handled: false };
   legalActionPayload(legalAction, {
-    forcedJackOutAfterEncounter: true,
-    forceJackOutAfterEncounterSourceDefinitionId: definitionFor(
+    forcedRunEndAfterEncounter: true,
+    forceRunEndAfterEncounterSourceDefinitionId: definitionFor(
       host.state,
       run.forceJackOutAfterEncounterSourceId,
     ).id,
   });
   return {
     handled: true,
-    forcedJackOutAfterEncounter: true,
+    forcedRunEndAfterEncounter: true,
     runShouldEnd: true,
   };
 }

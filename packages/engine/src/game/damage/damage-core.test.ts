@@ -27,6 +27,8 @@ import {
   eventModificationChoice,
   eventModificationStageCandidates,
 } from "./prevention-window";
+import { collectRuntimeTrashPreventionCandidates } from "./prevention-sources";
+import { createRunnerInstalledTrashImminentEvent } from "./damage-event-resolution";
 
 describe("damage core", () => {
   afterEach(() => {
@@ -248,6 +250,95 @@ describe("damage core", () => {
     });
   });
 
+  it("sums meat-damage bonuses from every scored Bioweapons Engineering", () => {
+    const firstId = "bioweapons_1" as CardInstanceId;
+    const secondId = "bioweapons_2" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [firstId]: instance(
+          firstId,
+          "onr_v1_190_bioweapons-engineering",
+          "corp",
+          "identity",
+        ),
+        [secondId]: instance(
+          secondId,
+          "onr_v1_190_bioweapons-engineering",
+          "corp",
+          "identity",
+        ),
+      },
+      runnerGrip: [],
+    });
+    state.corp.scoreArea = [firstId, secondId];
+    const host = testHost();
+    host.cards.scoredAgendaKindForDefinition = (definition) =>
+      definition.id === "onr_v1_190_bioweapons-engineering"
+        ? "meat_damage_bonus"
+        : undefined;
+    configureDamageCoreHost(host);
+
+    expect(
+      createDamageImminentEvent(state, {
+        damageId: "stacked_bioweapons",
+        damageType: "meat",
+        amount: 1,
+        source: "test",
+      }).payload,
+    ).toMatchObject({
+      baseDamageAmount: 1,
+      damageAmountModifier: 2,
+      amount: 3,
+    });
+  });
+
+  it("offers every simultaneous Umbrella Policy target but allows one", () => {
+    const umbrellaId = "umbrella" as CardInstanceId;
+    const firstTargetId = "program_a" as CardInstanceId;
+    const secondTargetId = "program_b" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [umbrellaId]: instance(
+          umbrellaId,
+          "onr_v1_186_umbrella-policy",
+          "runner",
+          "identity",
+        ),
+        [firstTargetId]: instance(
+          firstTargetId,
+          "program_a_def",
+          "runner",
+          "identity",
+        ),
+        [secondTargetId]: instance(
+          secondTargetId,
+          "program_b_def",
+          "runner",
+          "identity",
+        ),
+      },
+      runnerGrip: [],
+    });
+    state.runner.rig.resources = [umbrellaId];
+    state.runner.rig.programs = [firstTargetId, secondTargetId];
+    configureDamageCoreHost(testHost());
+    const event = createRunnerInstalledTrashImminentEvent(
+      state,
+      [firstTargetId, secondTargetId],
+      "test",
+    );
+
+    const umbrella = collectRuntimeTrashPreventionCandidates(state, event).find(
+      (candidate) => candidate.sourceRef.instanceId === umbrellaId,
+    );
+
+    expect(umbrella).toMatchObject({
+      selectablePreventTrashTargets: true,
+      maxPreventedTrashTargets: 1,
+      preventedTrashTargetIds: [firstTargetId, secondTargetId],
+    });
+  });
+
   it("offers every legal partial quantity from a run damage-prevention pool", () => {
     const gripCardIds = ["grip_1", "grip_2", "grip_3"].map(
       (id) => id as CardInstanceId,
@@ -286,13 +377,21 @@ describe("damage core", () => {
     );
 
     expect(state.run?.damagePreventionPool?.remaining).toBe(5);
-    expect(state.runner.grip).toHaveLength(2);
     expect(choiceAction.payload).toMatchObject({
       eventModificationOutcome: "partially_prevented",
       originalAmount: 3,
       preventedAmount: 2,
       finalAmount: 1,
     });
+    expect(
+      state.pendingChoice?.options.some((option) => option.id !== "pass"),
+    ).toBe(true);
+    resolveEventModificationChoice(
+      state,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("pass"),
+    );
+    expect(state.runner.grip).toHaveLength(2);
   });
 
   it("keeps differently sized prevention sources in the same priority stage", () => {

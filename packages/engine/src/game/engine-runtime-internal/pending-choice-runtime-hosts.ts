@@ -34,6 +34,7 @@ import {
 } from "../../ability-engine/card-implementation-runtime";
 import { startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { resumeSuccessfulRunAccessReplacementAfterTagPrevention } from "../run/run-access-transition";
+import { resumePreventableTrashCostContinuation } from "../abilities/trigger-ability-execution";
 import { resumeRunEndCleanupAfterTagPrevention } from "../run/run-end-cleanup";
 import {
   appendResolvedEffectsToPayload,
@@ -862,6 +863,7 @@ export function createPendingChoiceRuntimeHosts(
           deps.resolveRevealRdUntilAgendaStoreInHqChoice,
       },
       cardImplementation: {
+        resumePreventableTrashCostContinuation,
         resolveCardImplementationAccessPaymentChoice,
         resolveCardImplementationAdvancementDistributionChoice:
           deps.resolveCardImplementationAdvancementDistributionChoice,
@@ -869,6 +871,9 @@ export function createPendingChoiceRuntimeHosts(
           deps.resolveCardImplementationMoveAdvancementChoice,
       },
       turn: {
+        resolveCorpStartOfTurnOrderChoice:
+          deps.resolveCorpStartOfTurnOrderChoice,
+        resumeCorpStartOfTurnOrdering: deps.resumeCorpStartOfTurnOrdering,
         resolveRunnerStartOfTurnOrderChoice:
           deps.resolveRunnerStartOfTurnOrderChoice,
         resumeRunnerStartOfTurnOrdering: (_state, legalAction) => {

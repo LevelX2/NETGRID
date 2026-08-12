@@ -107,10 +107,6 @@ export const cardSpec = {
         role: "defensive_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
-      },
-      {
         kind: "line_support",
         lineKey: "runner.survival_defense",
         support: "supports",

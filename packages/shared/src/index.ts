@@ -666,6 +666,8 @@ export type EventModificationCandidate = {
   preventedTrashTargetIds?: CardInstanceId[];
   /** The controller chooses a non-empty subset of the protected targets. */
   selectablePreventTrashTargets?: boolean;
+  /** Upper bound for a selectable protected-target subset. */
+  maxPreventedTrashTargets?: number;
   trashPreventionSourceIndex?: number;
   /** Targets eligible for the Microtech Backup Drive trash replacement. */
   microtechBackupTargetIds?: CardInstanceId[];
@@ -1833,6 +1835,14 @@ export type GameState = {
     traceStep: "runner_bid" | "post_bid_link";
     additionalTagAmount?: number;
   };
+  pendingPreventableTrashCostContinuation?: {
+    kind: "runner_run_strength_boost";
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    targetCardId: CardInstanceId;
+    runId: string;
+    amount: number;
+  };
   pendingCorpDraw?: CorpDrawTransaction;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;
@@ -2010,6 +2020,7 @@ export type GameState = {
     counterPreventionUsedSourceIdsThisTurn?: CardInstanceId[];
     scoredAgendaStartDrawChoiceResolvedSourceIds?: CardInstanceId[];
     scoredAgendaStartDrawChoiceSelectedSourceIds?: CardInstanceId[];
+    corpStartOfTurnResolvedSourceIds?: CardInstanceId[];
     pdcaUsedSourceIdsThisTurn?: CardInstanceId[];
     fortActivityServerIdsSinceCorpTurnStart?: Array<
       Exclude<ServerId, "new_remote">
@@ -2862,7 +2873,7 @@ export type VisibleRunnerTraceSupportQuote = {
     safeForAccess: boolean;
     sourceDefinitionId?: CardDefinitionId;
     sourceTitle?: string;
-    sideEffect?: "forces_jack_out_after_encounter";
+    sideEffect?: "ends_run_after_encounter";
   }>;
   postBidLinkOptions: ReadonlyArray<{
     sourceCardInstanceId: CardInstanceId;

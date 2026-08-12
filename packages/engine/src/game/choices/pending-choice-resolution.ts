@@ -108,11 +108,14 @@ export type PendingChoiceResolutionHost = {
     resolveRevealRdUntilAgendaStoreInHqChoice?: HostFn<void>;
   };
   cardImplementation: {
+    resumePreventableTrashCostContinuation: HostFn<void>;
     resolveCardImplementationAccessPaymentChoice: HostFn<void>;
     resolveCardImplementationAdvancementDistributionChoice: HostFn<void>;
     resolveCardImplementationMoveAdvancementChoice: HostFn<void>;
   };
   turn: {
+    resolveCorpStartOfTurnOrderChoice: HostFn<void>;
+    resumeCorpStartOfTurnOrdering: HostFn<void>;
     resolveSatelliteMonitorsStartChoice: HostFn<void>;
     resolveRunnerStartOfTurnOrderChoice: HostFn<void>;
     resumeRunnerStartOfTurnOrdering: HostFn<void>;
@@ -258,6 +261,8 @@ export function resolvePendingChoice(
   const resolveTrashProgramChoice = host.run.resolveTrashProgramChoice;
   const resumeTraceProgramTrashContinuation =
     host.run.resumeTraceProgramTrashContinuation;
+  const resumePreventableTrashCostContinuation =
+    host.cardImplementation.resumePreventableTrashCostContinuation;
   const resolveSuccessfulRunCreditLossSpendChoice =
     host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const resolveAccessProgramInstallMemoryChoice =
@@ -280,6 +285,9 @@ export function resolvePendingChoice(
     host.turn.resolveSatelliteMonitorsStartChoice;
   const resolveRunnerStartOfTurnOrderChoice =
     host.turn.resolveRunnerStartOfTurnOrderChoice;
+  const resolveCorpStartOfTurnOrderChoice =
+    host.turn.resolveCorpStartOfTurnOrderChoice;
+  const resumeCorpStartOfTurnOrdering = host.turn.resumeCorpStartOfTurnOrdering;
   const resumeRunnerStartOfTurnOrdering =
     host.turn.resumeRunnerStartOfTurnOrdering;
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
@@ -301,6 +309,10 @@ export function resolvePendingChoice(
     resolveReplacementChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("corp_start.order:")) {
+    resolveCorpStartOfTurnOrderChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v120.event_modification")) {
     resolveEventModificationChoice(state, legalAction, playerAction);
     if (
@@ -315,6 +327,12 @@ export function resolvePendingChoice(
       state.pendingTraceProgramTrashContinuation
     )
       resumeTraceProgramTrashContinuation(state, legalAction);
+    if (
+      !state.pendingChoice &&
+      !state.eventModificationWindow &&
+      state.pendingPreventableTrashCostContinuation
+    )
+      resumePreventableTrashCostContinuation(state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("damage_replacement:")) {
@@ -380,10 +398,17 @@ export function resolvePendingChoice(
     corpInstallRezSequenceHandlerHost(state, legalAction, playerAction),
   );
   if (corpInstallRezSequenceChoice.handled) return;
+  const resumesCorpStartOrdering = state.pendingChoice.source.startsWith(
+    "scored_agenda.start_draw_choice",
+  );
   const scoredAgendaFlowChoice = handleScoredAgendaFlowChoice(
     scoredAgendaFlowHost(state, legalAction, playerAction),
   );
-  if (scoredAgendaFlowChoice.handled) return;
+  if (scoredAgendaFlowChoice.handled) {
+    if (resumesCorpStartOrdering && !state.pendingChoice)
+      resumeCorpStartOfTurnOrdering(state, undefined, legalAction);
+    return;
+  }
   if (
     isP358HiddenReplacementCompatibilityChoiceSource(state.pendingChoice.source)
   ) {

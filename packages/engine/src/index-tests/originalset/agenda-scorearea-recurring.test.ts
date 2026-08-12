@@ -3248,6 +3248,25 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
     );
+    expect(state.pendingChoice?.side).toBe("runner");
+    const repeatOptionId = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
+    expect(repeatOptionId).toBeDefined();
+    if (!repeatOptionId)
+      throw new Error("Missing repeated Trauma Team prevention option");
+    state = applyChoice(state, "runner", repeatOptionId);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(
+      cardCounterAmount(
+        state,
+        state.runner.rig.resources.find(
+          (cardId) =>
+            state.cardInstances[cardId]?.definitionId === definitionId,
+        )!,
+        "trauma",
+      ),
+    ).toBe(0);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -3689,5 +3708,51 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       expect(replay.ok, definitionId).toBe(true);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
+  });
+
+  it("lets the Corp order simultaneous scored start-of-turn sources", () => {
+    let state = apply(
+      MECHANIC_SMOKE_GAMES.counterRecurring("corp-start-source-order"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.maxHandSize = 100;
+    const employeeId = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_199_employee-empowerment",
+    );
+    const detroitId = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_198_detroit-police-contract",
+    );
+    setCardCounterForTest(state, detroitId, "bit", 2);
+    const creditsBefore = state.corp.credits;
+
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("corp_start.order:"),
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.value)).toEqual(
+      expect.arrayContaining([employeeId, detroitId]),
+    );
+    const employeeOrderOption = state.pendingChoice?.options.find(
+      (option) => option.value === employeeId,
+    )?.id;
+    if (!employeeOrderOption)
+      throw new Error("Missing Employee Empowerment order option");
+    state = applyChoice(state, "corp", employeeOrderOption);
+    expect(state.pendingChoice?.source).toContain(
+      "scored_agenda.start_draw_choice",
+    );
+    state = applyChoice(state, "corp", "skip");
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.corp.credits).toBe(creditsBefore + 2);
+    expect(cardCounterAmount(state, detroitId, "bit")).toBe(0);
   });
 });

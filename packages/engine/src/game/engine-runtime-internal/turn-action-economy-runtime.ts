@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   type CardDefinitionId,
   type CardInstanceId,
@@ -8,7 +9,10 @@ import {
   type Side,
 } from "@netgrid/shared";
 import { buildLegalAction as action } from "../turn/action-builders";
-import { definitionFor } from "../state/card-server-lookup";
+import {
+  definitionFor,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
 import { ensureRunnerTurnFlags } from "../state/turn-flags-counters";
 import type {
   AutomaticEffectCollector,
@@ -42,13 +46,34 @@ export function consumeRunnerFutureActionDebt(state: GameState): number {
   let pending = Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0));
   if (flags.forgoNextActionPending === true) pending += 1;
   flags.forgoNextActionPending = false;
-  if (pending <= 0 || state.runner.clicks <= 0) {
+  if (pending <= 0) {
     flags.forgoNextActionsPending = pending;
     return 0;
   }
-  const consumed = Math.min(state.runner.clicks, pending);
-  state.runner.clicks -= consumed;
-  flags.forgoNextActionsPending = pending - consumed;
+  const usedRunOnlySources = new Set(
+    flags.runOnlyActionUsedSourceIdsThisTurn ?? [],
+  );
+  let consumed = 0;
+  for (const sourceCardId of runnerInstalledCardIds(state).sort()) {
+    if (pending <= 0 || usedRunOnlySources.has(sourceCardId)) continue;
+    const implementation = cardImplementationForDefinitionId(
+      definitionFor(state, sourceCardId).id,
+    )?.remainingReplacementLongtail;
+    if (implementation?.kind !== "run_action_spending_cap") continue;
+    const sourceActions = Math.max(0, Math.floor(implementation.actionGain));
+    if (sourceActions <= 0) continue;
+    const sourceConsumed = Math.min(sourceActions, pending);
+    if (sourceConsumed <= 0) continue;
+    pending -= sourceConsumed;
+    consumed += sourceConsumed;
+    usedRunOnlySources.add(sourceCardId);
+  }
+  flags.runOnlyActionUsedSourceIdsThisTurn = [...usedRunOnlySources].sort();
+  const clicksConsumed = Math.min(state.runner.clicks, pending);
+  state.runner.clicks -= clicksConsumed;
+  pending -= clicksConsumed;
+  consumed += clicksConsumed;
+  flags.forgoNextActionsPending = pending;
   return consumed;
 }
 

@@ -37,7 +37,11 @@ import {
   fortTraceBitPoolCapacityForCard,
 } from "../run/fort-run-side-families";
 import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
-import { executeCardImplementationStartOfCorpTurnEffects } from "../../ability-engine/card-implementation-runtime";
+import {
+  executeCardImplementationStartOfCorpTurnEffects,
+  hasDueCardImplementationStartOfCorpTurnAbility,
+} from "../../ability-engine/card-implementation-runtime";
+import { selectedChoiceIds } from "../choices/choice-validation";
 import type { AutomaticEffectCollector, RuntimeDeps } from "./runtime-shared";
 import {
   applyFutureExtraActionGrantsAtTurnStart,
@@ -56,6 +60,8 @@ type TurnCorpStartRuntimeResolvers = Pick<
   | "startCorpTurn"
   | "applyInstalledIceCounterLifecycle"
   | "applyCorpStartOfTurnEffects"
+  | "resolveCorpStartOfTurnOrderChoice"
+  | "resumeCorpStartOfTurnOrdering"
   | "applyPurgeableRunnerVirusCorpStartEffects"
   | "openCorpStartTurnRestrictedActionOffers"
   | "virusCounterDrawsAtCorpStart"
@@ -405,6 +411,7 @@ export function createTurnCorpStartRuntimeResolvers(
       [];
     ensureCorpTurnFlags(state).scoredAgendaStartDrawChoiceSelectedSourceIds =
       [];
+    ensureCorpTurnFlags(state).corpStartOfTurnResolvedSourceIds = [];
     ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn =
       clearAbilityUsageSourceIds();
     applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
@@ -474,11 +481,8 @@ export function createTurnCorpStartRuntimeResolvers(
           });
         }
       }
-      executeCardImplementationStartOfCorpTurnEffects(
-        deps.cardImplementationRuntimeDeps,
-        state,
-        effects,
-      );
+      resumeCorpStartOfTurnOrdering(state, effects, legalAction);
+      return true;
     }
     const rootCardIds = deps.rezzedCorpRootCardIds(state);
     for (
@@ -674,9 +678,140 @@ export function createTurnCorpStartRuntimeResolvers(
           payload: {},
         } as LegalAction),
       );
+    return state.pendingChoice !== undefined;
+  }
+
+  function corpStartOfTurnSourceIds(state: GameState): CardInstanceId[] {
+    return [...deps.rezzedCorpRootCardIds(state), ...state.corp.scoreArea]
+      .filter((sourceId) => {
+        if (
+          hasDueCardImplementationStartOfCorpTurnAbility(
+            deps.cardImplementationRuntimeDeps,
+            state,
+            sourceId,
+          )
+        )
+          return true;
+        const definition = definitionFor(state, sourceId);
+        return (
+          deps.scoredAgendaImplementationForDefinition(definition)?.kind ===
+          "corp_start_turn_optional_draw"
+        );
+      })
+      .filter((sourceId, index, all) => all.indexOf(sourceId) === index)
+      .sort();
+  }
+
+  function startCorpStartOfTurnOrderChoice(
+    state: GameState,
+    sourceIds: CardInstanceId[],
+  ): void {
+    const nextStateVersion = state.stateVersion + 1;
+    state.pendingChoice = {
+      choiceId: `corp_start_order_${nextStateVersion}`,
+      side: "corp",
+      source: `corp_start.order:${nextStateVersion}`,
+      prompt: "Wähle den nächsten Effekt am Beginn deines Zuges.",
+      kind: "select_cards",
+      options: sourceIds.map((sourceId) => ({
+        id: `source_${sourceId}`,
+        label: definitionFor(state, sourceId).title,
+        value: sourceId,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: nextStateVersion,
+      visibility: "hidden_info_barrier",
+    };
+  }
+
+  function resolveCorpStartOfTurnSource(
+    state: GameState,
+    sourceId: CardInstanceId,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    executeCardImplementationStartOfCorpTurnEffects(
+      deps.cardImplementationRuntimeDeps,
+      state,
+      effects,
+      sourceId,
+    );
+    if (state.pendingChoice) return;
+    const definition = definitionFor(state, sourceId);
+    if (
+      state.corp.scoreArea.includes(sourceId) &&
+      deps.scoredAgendaImplementationForDefinition(definition)?.kind ===
+        "corp_start_turn_optional_draw"
+    )
+      startScoredAgendaStartDrawChoice(
+        deps.scoredAgendaFlowHost(state),
+        sourceId,
+      );
+  }
+
+  function resumeCorpStartOfTurnOrdering(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    legalAction?: LegalAction,
+  ): void {
+    if (state.pendingChoice) return;
+    const flags = ensureCorpTurnFlags(state);
+    const resolved = new Set(flags.corpStartOfTurnResolvedSourceIds ?? []);
+    const remaining = corpStartOfTurnSourceIds(state).filter(
+      (sourceId) => !resolved.has(sourceId),
+    );
+    if (remaining.length > 1) {
+      startCorpStartOfTurnOrderChoice(state, remaining);
+      return;
+    }
+    if (remaining.length === 1) {
+      const sourceId = remaining[0]!;
+      flags.corpStartOfTurnResolvedSourceIds = [...resolved, sourceId].sort();
+      resolveCorpStartOfTurnSource(state, sourceId, effects);
+      if (!state.pendingChoice)
+        resumeCorpStartOfTurnOrdering(state, effects, legalAction);
+      return;
+    }
+    applyCorpStartOfTurnEffects(state, effects, legalAction, 0, true);
     if (!state.pendingChoice)
-      startScoredAgendaStartDrawChoice(deps.scoredAgendaFlowHost(state));
-    return false;
+      openCorpStartTurnRestrictedActionOffers(state, effects);
+  }
+
+  function resolveCorpStartOfTurnOrderChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: import("@netgrid/shared").PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    if (!choice?.source.startsWith("corp_start.order:"))
+      throw new Error("Es ist keine Korp-Startzugreihenfolge offen.");
+    if (legalAction.side !== "corp" || playerAction.side !== "corp")
+      throw new Error("Nur die Korp bestimmt ihre Startzugreihenfolge.");
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const option = choice.options.find(
+      (candidate) => candidate.id === selectedId,
+    );
+    const sourceId =
+      typeof option?.value === "string"
+        ? (option.value as CardInstanceId)
+        : undefined;
+    const flags = ensureCorpTurnFlags(state);
+    const resolved = new Set(flags.corpStartOfTurnResolvedSourceIds ?? []);
+    if (
+      !sourceId ||
+      resolved.has(sourceId) ||
+      !corpStartOfTurnSourceIds(state).includes(sourceId)
+    )
+      throw new Error(
+        "Der gewählte Korp-Startzugeffekt ist nicht mehr fällig.",
+      );
+    delete state.pendingChoice;
+    flags.corpStartOfTurnResolvedSourceIds = [...resolved, sourceId].sort();
+    const effects: ResolvedGameEffect[] = [];
+    resolveCorpStartOfTurnSource(state, sourceId, effects);
+    if (!state.pendingChoice)
+      resumeCorpStartOfTurnOrdering(state, effects, legalAction);
+    links.appendResolvedEffectsToPayload(legalAction, effects);
   }
 
   function applyPurgeableRunnerVirusCorpStartEffects(
@@ -717,9 +852,7 @@ export function createTurnCorpStartRuntimeResolvers(
           effects?.push({
             effectId: `corp.start.virus.${sourceDefinitionId}.${index}`,
             kind:
-              badPublicityAdded > 0
-                ? "add_bad_publicity"
-                : "counter_change",
+              badPublicityAdded > 0 ? "add_bad_publicity" : "counter_change",
             visibility: start.visibility,
             side: "corp",
             amount: badPublicityAdded,
@@ -881,8 +1014,7 @@ export function createTurnCorpStartRuntimeResolvers(
     if (
       !virusCounter ||
       start?.kind !== "trash_top_rd_cards_faceup_per_two_counters" ||
-      virusCounter.addOnSuccessfulRun?.counterScope.kind !==
-        "shared_corp_pool"
+      virusCounter.addOnSuccessfulRun?.counterScope.kind !== "shared_corp_pool"
     )
       throw new Error("Der gemeinsame R&D-Trash-Counter-Vertrag fehlt.");
     const counterAmount = purgeableRunnerVirusCounterAmount(
@@ -902,16 +1034,14 @@ export function createTurnCorpStartRuntimeResolvers(
       | "draw_extra_cards_per_counter"
       | "trash_top_rd_cards_faceup_per_two_counters",
   ): CardDefinitionId {
-    const ownerDefinitionIds = CARD_IMPLEMENTATIONS.filter(
-      (implementation) => {
-        const virusCounter = implementation.virusCounter;
-        return (
-          virusCounter?.startOfCorpTurn?.kind === startKind &&
-          virusCounter.addOnSuccessfulRun?.counterScope.kind ===
-            "shared_corp_pool"
-        );
-      },
-    ).map((implementation) => implementation.cardDefinitionId);
+    const ownerDefinitionIds = CARD_IMPLEMENTATIONS.filter((implementation) => {
+      const virusCounter = implementation.virusCounter;
+      return (
+        virusCounter?.startOfCorpTurn?.kind === startKind &&
+        virusCounter.addOnSuccessfulRun?.counterScope.kind ===
+          "shared_corp_pool"
+      );
+    }).map((implementation) => implementation.cardDefinitionId);
     if (ownerDefinitionIds.length !== 1)
       throw new Error(
         `Expected exactly one virus-counter owner for ${startKind}; received ${ownerDefinitionIds.length}.`,
@@ -944,6 +1074,8 @@ export function createTurnCorpStartRuntimeResolvers(
     startCorpTurn,
     applyInstalledIceCounterLifecycle,
     applyCorpStartOfTurnEffects,
+    resolveCorpStartOfTurnOrderChoice,
+    resumeCorpStartOfTurnOrdering,
     applyPurgeableRunnerVirusCorpStartEffects,
     openCorpStartTurnRestrictedActionOffers,
     virusCounterDrawsAtCorpStart,

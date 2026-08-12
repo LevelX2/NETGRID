@@ -238,12 +238,12 @@ describe("encounter resolution boundary", () => {
 
     expect(result).toMatchObject({
       handled: true,
-      forcedJackOutAfterEncounter: true,
+      forcedRunEndAfterEncounter: true,
       runShouldEnd: true,
     });
     expect(legalAction.payload).toMatchObject({
-      forcedJackOutAfterEncounter: true,
-      forceJackOutAfterEncounterSourceDefinitionId: "onr_v1_276_viral-15",
+      forcedRunEndAfterEncounter: true,
+      forceRunEndAfterEncounterSourceDefinitionId: "onr_v1_276_viral-15",
     });
   });
 

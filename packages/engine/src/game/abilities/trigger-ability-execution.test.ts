@@ -12,10 +12,57 @@ import { createGame } from "../create-game";
 import { buildLegalAction } from "../turn/action-builders";
 import {
   handleTriggerAbilityExecution,
+  resumePreventableTrashCostContinuation,
   type TriggerAbilityExecutionHost,
 } from "./trigger-ability-execution";
 
 describe("trigger ability execution", () => {
+  it("does not resolve a run boost when its trash cost was prevented", () => {
+    const state = createGame({
+      seed: "prevented-trash-cost-continuation",
+      setupMode: "completed",
+    });
+    const sourceCardId = "lockjaw" as CardInstanceId;
+    const targetCardId = "breaker" as CardInstanceId;
+    state.runner.rig.programs = [sourceCardId, targetCardId];
+    state.cardInstances[sourceCardId] = instance(
+      sourceCardId,
+      "onr_proteus_091_lockjaw",
+      "runner",
+    );
+    state.cardInstances[targetCardId] = instance(
+      targetCardId,
+      "simple_code_gate_breaker",
+      "runner",
+    );
+    state.run = {
+      runId: "run_lockjaw",
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      remainderStrengthBonusByBreaker: {},
+    } as NonNullable<GameState["run"]>;
+    state.pendingPreventableTrashCostContinuation = {
+      kind: "runner_run_strength_boost",
+      sourceCardId,
+      sourceDefinitionId: "onr_proteus_091_lockjaw",
+      targetCardId,
+      runId: "run_lockjaw",
+      amount: 2,
+    };
+    const action = triggerAction(state, "runner", {});
+
+    resumePreventableTrashCostContinuation(state, action);
+
+    expect(
+      state.run.remainderStrengthBonusByBreaker?.[targetCardId],
+    ).toBeUndefined();
+    expect(state.run.runStrengthBoostUsedSourceIds).toBeUndefined();
+    expect(action.payload).toMatchObject({
+      trashCostPrevented: true,
+      effectResolved: false,
+    });
+  });
+
   it("returns unhandled for actions outside the trigger ability boundary", () => {
     const state = createGame({
       seed: "arch-70-trigger-ability-unhandled",
@@ -322,6 +369,7 @@ function testHost(
       },
     },
     runner: {
+      openInstalledTrashPreventionWindow: () => false,
       trashInstalledCardToHeap: (_stateToMutate, cardId) =>
         options.trashRunnerInstalledCardToHeap?.(cardId),
       ensureTurnFlags: (stateToMutate) =>

@@ -454,12 +454,10 @@ const signalCases: Record<
       "score.remote_install_budget",
     ],
     tacticSignals: [
-      "economy.card",
       "score.remote_fort_creation",
       "score.remote_install_budget",
     ],
     actionTacticSignals: [
-      "economy.card",
       "effect:economy",
       "effect:install",
       "effect:remote_build",

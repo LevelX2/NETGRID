@@ -176,6 +176,16 @@ export type TurnRuntimePort = {
     rootCardStartIndex?: number,
     skipPreamble?: boolean,
   ) => boolean;
+  resolveCorpStartOfTurnOrderChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resumeCorpStartOfTurnOrdering: (
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    legalAction?: LegalAction,
+  ) => void;
   applyPurgeableRunnerVirusCorpStartEffects: (
     state: GameState,
     effects?: AutomaticEffectCollector,

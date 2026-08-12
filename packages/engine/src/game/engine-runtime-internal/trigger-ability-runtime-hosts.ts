@@ -782,6 +782,8 @@ export function createTriggerAbilityRuntimeHosts(
         spend: spendCredits,
       },
       runner: {
+        openInstalledTrashPreventionWindow:
+          openRunnerInstalledTrashPreventionWindow,
         trashInstalledCardToHeap: deps.trashRunnerInstalledCardToHeap,
         ensureTurnFlags: ensureRunnerTurnFlags,
       },

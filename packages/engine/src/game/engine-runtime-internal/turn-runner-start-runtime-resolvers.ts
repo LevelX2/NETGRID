@@ -139,6 +139,7 @@ export function createTurnRunnerStartRuntimeResolvers(
     flags.valuPakTemporaryProgramInstallCredits = 0;
     flags.delayedInstallStartTurnResolvedSourceIds = [];
     flags.runnerStartOfTurnResolvedSourceIds = [];
+    flags.runOnlyActionUsedSourceIdsThisTurn = [];
     flags.successfulRunExtraRunPending = false;
     flags.successfulRunExtraRunUsedThisTurn = false;
     flags.delayedEndTurnEffects = [];

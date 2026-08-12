@@ -584,7 +584,7 @@ describe("generic typed CardSpec AI translators", () => {
           ).length ?? 0),
         0,
       ),
-    ).toBe(78);
+    ).toBe(75);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
@@ -684,7 +684,7 @@ describe("generic typed CardSpec AI translators", () => {
     expect(
       forged("onr_v1_032_i-spy", {
         runnerUtilityLongtail: {
-          kind: "trace_link_force_jack_out",
+          kind: "trace_link_end_run_after_encounter",
           visibility: "public",
         },
       }),

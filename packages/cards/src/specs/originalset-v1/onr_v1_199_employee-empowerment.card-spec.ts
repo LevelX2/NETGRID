@@ -108,11 +108,6 @@ export const cardSpec = {
         signal: "draw.card",
         use: "draw.card",
       },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
-      },
     ],
     capabilities: [],
   },

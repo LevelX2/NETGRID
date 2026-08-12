@@ -89,11 +89,11 @@ export function visibleRunnerTraceSupportQuote(
       baseLinkOptions.push({
         baseLink: coreLink + quote.baseLinkValue,
         activationCost: quote.creditCost,
-        safeForAccess: !quote.forcesJackOutAfterEncounter,
+        safeForAccess: !quote.endsRunAfterEncounter,
         sourceDefinitionId: quote.sourceDefinitionId,
         sourceTitle: quote.label,
-        ...(quote.forcesJackOutAfterEncounter
-          ? { sideEffect: "forces_jack_out_after_encounter" as const }
+        ...(quote.endsRunAfterEncounter
+          ? { sideEffect: "ends_run_after_encounter" as const }
           : {}),
       });
     }
@@ -152,7 +152,7 @@ function visibleTraceWindowOptions(
     const implementation = cardImplementationForDefinitionId(definition.id);
     const safeForAccess =
       implementation?.runnerUtilityLongtail?.kind !==
-      "trace_link_force_jack_out";
+      "trace_link_end_run_after_encounter";
     for (const ability of implementation?.abilities ?? []) {
       if (ability.kind !== "activated") continue;
       if (ability.timing === "trace_post_bid_link_window") {

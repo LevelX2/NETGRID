@@ -381,10 +381,7 @@ export function collectRuntimeTrashPreventionCandidates(
           targetId,
         ),
       );
-      const preventedTrashTargetIds =
-        source.mode === "one_card"
-          ? protectedTargets.slice(0, 1)
-          : protectedTargets;
+      const preventedTrashTargetIds = protectedTargets;
       if (preventedTrashTargetIds.length === 0) return;
       candidates.push({
         candidateId: `card_implementation_prevent_trash_${sanitizeId(cardId)}_${sourceIndex}_${preventedTrashTargetIds.length}`,
@@ -402,7 +399,9 @@ export function collectRuntimeTrashPreventionCandidates(
         optional: true,
         preventedTrashTargetIds,
         selectablePreventTrashTargets:
+          source.mode === "one_card" ||
           source.mode === "one_or_more_simultaneous",
+        ...(source.mode === "one_card" ? { maxPreventedTrashTargets: 1 } : {}),
         trashPreventionSourceIndex: sourceIndex,
       });
     });

@@ -93,8 +93,8 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
+        signal: "corp.ice_tax",
+        use: "corp.ice_tax",
       },
       {
         kind: "tactic_interpretation",
@@ -107,7 +107,24 @@ export const cardSpec = {
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "scored_agenda_reveal_installed_ice_subtype_for_credits",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_code_gates_to_reveal_for_credits",
+            preferences: [
+              "prefer_reveal_when_credit_value_exceeds_information_cost",
+              "prefer_already_public_or_low_information_value_code_gates",
+            ],
+            avoid: ["avoid_revealing_high_value_hidden_ice_without_need"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

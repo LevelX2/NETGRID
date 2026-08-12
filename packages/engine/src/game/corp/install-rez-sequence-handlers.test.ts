@@ -35,7 +35,7 @@ const DATA_FORT_SEQUENCE = {
   maxCards: 4,
   temporaryCredits: {
     amount: 10,
-    usableFor: "rez_installed_cards_from_sequence",
+    usableFor: "install_and_rez_cards_from_sequence",
     returnUnused: true,
   },
   optionalRez: true,
@@ -122,6 +122,7 @@ type MakeHostInput = {
   scoredKinds?: Record<string, string>;
   scoredAgendas?: Record<string, unknown>;
   rezRootCalls?: CardInstanceId[];
+  successfulCorpInstallCounter?: { count: number };
 };
 
 function makeHost(
@@ -316,6 +317,28 @@ function makeHost(
       },
     },
     callbacks: {
+      payHqInstallCost: (cardId, server, temporaryCreditsAvailable) => {
+        const installCost =
+          definitions[cardId]?.type === "ice" ? server.ice.length : 0;
+        const temporaryCreditsSpent = Math.min(
+          installCost,
+          temporaryCreditsAvailable,
+        );
+        const corpCreditsSpent = installCost - temporaryCreditsSpent;
+        if (state.corp.credits < corpCreditsSpent)
+          throw new Error("test install is unpayable");
+        state.corp.credits -= corpCreditsSpent;
+        return {
+          temporaryCreditsSpent,
+          temporaryCreditsRemaining:
+            temporaryCreditsAvailable - temporaryCreditsSpent,
+          corpCreditsSpent,
+        };
+      },
+      recordSuccessfulCorpInstall: () => {
+        if (input.successfulCorpInstallCounter)
+          input.successfulCorpInstallCounter.count += 1;
+      },
       resolveCorpRootRez: (cardId) => {
         rezRootCalls.push(cardId);
       },
@@ -580,6 +603,37 @@ describe("corp install rez sequence handlers", () => {
     expect(host.state.pendingChoice?.source).toBe(
       "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:asset_1:2:8",
     );
+  });
+
+  it("pays increasing ICE install costs and records each successful install", () => {
+    const successfulCorpInstallCounter = { count: 0 };
+    const host = makeHost({
+      hq: ["ice_1", "ice_2"] as CardInstanceId[],
+      scoreArea: ["data_fort_agenda"] as CardInstanceId[],
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
+      pendingChoice: selectCardsChoice(
+        "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:8",
+        ["ice_1", "ice_2"] as CardInstanceId[],
+        4,
+      ),
+      playerAction: playerAction(["card_ice_1", "card_ice_2"]),
+      successfulCorpInstallCounter,
+    });
+
+    handleCorpInstallRezSequenceChoice(host);
+    host.playerAction = playerAction([]);
+    handleCorpInstallRezSequenceChoice(host);
+
+    expect(host.state.corp.servers[0]?.ice).toEqual(["ice_1", "ice_2"]);
+    expect(host.state.hqInstallRezSequence).toMatchObject({
+      nextCardIndex: 2,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsRemaining: 9,
+    });
+    expect(host.state.pendingChoice?.options[0]?.value).toBe("ice_2");
+    expect(successfulCorpInstallCounter.count).toBe(2);
   });
 
   it("resolves empty Data Fort Reclamation selection without creating a remote", () => {

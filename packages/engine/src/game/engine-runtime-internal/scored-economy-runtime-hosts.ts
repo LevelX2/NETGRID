@@ -733,6 +733,32 @@ export function createScoredEconomyRuntimeHosts(
         spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
       },
       callbacks: {
+        payHqInstallCost: (cardId, server, temporaryCreditsAvailable) => {
+          const definition = definitionFor(state, cardId);
+          const installCost =
+            definition.type === "ice"
+              ? deps.corpIceInstallTotalCost(state, cardId, server).totalCost
+              : 0;
+          const temporaryCreditsSpent = Math.min(
+            installCost,
+            temporaryCreditsAvailable,
+          );
+          const corpCreditsSpent = installCost - temporaryCreditsSpent;
+          if (state.corp.credits < corpCreditsSpent)
+            throw new Error(
+              "Die Data-Fort-Reclamation-Installkosten sind nicht bezahlbar.",
+            );
+          if (corpCreditsSpent > 0)
+            spendCredits(state, "corp", corpCreditsSpent);
+          return {
+            temporaryCreditsSpent,
+            temporaryCreditsRemaining:
+              temporaryCreditsAvailable - temporaryCreditsSpent,
+            corpCreditsSpent,
+          };
+        },
+        recordSuccessfulCorpInstall: () =>
+          deps.expireScoredAgendaInstallRezCreditAbilities(state),
         resolveCorpRootRez: (cardId) => {
           resolveCorpRootRezEffect(
             deps.runRezWindowHostForState(state),
@@ -753,6 +779,13 @@ export function createScoredEconomyRuntimeHosts(
           let temporaryCreditsRemaining = temporaryCreditsAvailable;
           for (const cardId of selectedCardIds) {
             const definition = definitionFor(previewState, cardId);
+            const installPayment = previewHost.callbacks.payHqInstallCost(
+              cardId,
+              previewServer,
+              temporaryCreditsRemaining,
+            );
+            temporaryCreditsRemaining =
+              installPayment.temporaryCreditsRemaining;
             removeFromAllZones(previewState, cardId);
             if (definition.type === "ice") {
               previewServer.ice.push(cardId);
@@ -766,6 +799,7 @@ export function createScoredEconomyRuntimeHosts(
                   serverId: previewServer.id,
                 },
               };
+              previewHost.callbacks.recordSuccessfulCorpInstall();
               continue;
             }
             previewServer.root.push(cardId);
@@ -779,6 +813,7 @@ export function createScoredEconomyRuntimeHosts(
                 serverId: previewServer.id,
               },
             };
+            previewHost.callbacks.recordSuccessfulCorpInstall();
             if (
               !deps.isRegionUpgrade(definition) &&
               !deps.rootInstallRezzesOnInstall(definition)

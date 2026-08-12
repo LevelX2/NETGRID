@@ -90,7 +90,7 @@ function requireHqToNewRemoteInstallRezSequence(
     sequence.maxCards < 0 ||
     sequence.temporaryCredits.amount < 0 ||
     sequence.temporaryCredits.usableFor !==
-      "rez_installed_cards_from_sequence" ||
+      "install_and_rez_cards_from_sequence" ||
     sequence.temporaryCredits.returnUnused !== true ||
     sequence.optionalRez !== true
   )
@@ -306,6 +306,14 @@ function advanceHqInstallRezSequence(
       cardId,
       server,
     );
+    const installPayment = host.callbacks.payHqInstallCost(
+      cardId,
+      server,
+      sequenceState.temporaryCreditsRemaining,
+    );
+    sequenceState.temporaryCreditsRemaining =
+      installPayment.temporaryCreditsRemaining;
+    corpCreditsSpent += installPayment.corpCreditsSpent;
     host.zones.removeFromAllZones(cardId);
     const rootRezOnInstall =
       destination === "root" &&
@@ -345,6 +353,7 @@ function advanceHqInstallRezSequence(
           );
       }
     }
+    host.callbacks.recordSuccessfulCorpInstall();
     installedIds.push(cardId);
     sequenceState.nextCardIndex += 1;
 

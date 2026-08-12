@@ -84,8 +84,8 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
+        signal: "corp.ice_tax",
+        use: "corp.ice_tax",
       },
     ],
     capabilities: [],
