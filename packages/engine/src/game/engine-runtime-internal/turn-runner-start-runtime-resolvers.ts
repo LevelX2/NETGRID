@@ -226,7 +226,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         zone: { side: "runner", zone: "scoreArea" },
       };
       effects?.push(
-        links.automaticStealAgendaEffect(
+        links.automaticScoreAgendaEffect(
           `runner.start.delayed_agenda_access.${entry.agendaId}`,
           definition.id,
           entry.sourceDefinitionId,

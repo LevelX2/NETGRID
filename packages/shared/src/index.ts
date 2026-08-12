@@ -456,6 +456,7 @@ export type ResolvedGameEffectKind =
   | "draw_cards"
   | "lose_credits"
   | "rez_card"
+  | "score_agenda"
   | "steal_agenda"
   | "trash_card"
   | "purge_counters"

@@ -8521,14 +8521,14 @@ describe("formatChronicleEvent", () => {
     }
   });
 
-  it("shows delayed agenda steals from automatic start-of-turn effects", () => {
+  it("shows delayed agenda scoring from automatic start-of-turn effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {
         actor: "corp",
         resolvedEffects: [
           {
             effectId: "runner.start.bizarre_encryption.card_789",
-            kind: "steal_agenda",
+            kind: "score_agenda",
             visibility: "public",
             side: "runner",
             amount: 2,
@@ -8544,7 +8544,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items[0]?.title).toBe(
-      "Du hast Hostile Takeover durch Bizarre Encryption Scheme gestohlen.",
+      "Du hast Hostile Takeover durch Bizarre Encryption Scheme gewertet.",
     );
     expect(items[0]?.category).toBe("agenda");
     expect(items[0]?.chips).toEqual(

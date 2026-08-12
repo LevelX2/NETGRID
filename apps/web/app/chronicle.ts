@@ -5171,6 +5171,19 @@ function formatChronicleEffect(
       } gerezzt`;
       chips.push("Rez", "Automatisch");
       break;
+    case "score_agenda":
+      category = "agenda";
+      importance = "critical";
+      title = phrase(
+        subject,
+        `${cardTitle ?? "eine Agenda"}${through} gewertet`,
+      );
+      chips.push(
+        "Agenda",
+        ...(amount > 0 ? [`+${amount} Agenda`] : []),
+        "Automatisch",
+      );
+      break;
     case "steal_agenda":
       category = "agenda";
       importance = "critical";

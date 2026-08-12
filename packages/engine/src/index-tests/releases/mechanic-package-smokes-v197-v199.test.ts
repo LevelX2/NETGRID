@@ -654,7 +654,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "steal_agenda",
+          kind: "score_agenda",
           side: "runner",
           cardDefinitionId: "onr_v1_203_hostile-takeover",
           sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",

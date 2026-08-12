@@ -113,7 +113,7 @@ export type TurnRuntimePort = {
     remainingCounters: number,
     addedCounterAmount: number,
   ) => ResolvedGameEffect;
-  automaticStealAgendaEffect: (
+  automaticScoreAgendaEffect: (
     effectId: string,
     cardDefinitionId: CardDefinitionId,
     sourceDefinitionId: CardDefinitionId,

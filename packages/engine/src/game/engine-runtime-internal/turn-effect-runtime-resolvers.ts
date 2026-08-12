@@ -18,7 +18,7 @@ type TurnEffectRuntimeResolvers = Pick<
   | "automaticTagEffect"
   | "automaticTrashCardEffect"
   | "automaticCounterChangeEffect"
-  | "automaticStealAgendaEffect"
+  | "automaticScoreAgendaEffect"
   | "publicCardTitle"
 >;
 
@@ -155,7 +155,7 @@ export function createTurnEffectRuntimeResolvers(
     };
   }
 
-  function automaticStealAgendaEffect(
+  function automaticScoreAgendaEffect(
     effectId: string,
     cardDefinitionId: CardDefinitionId,
     sourceDefinitionId: CardDefinitionId,
@@ -163,7 +163,7 @@ export function createTurnEffectRuntimeResolvers(
   ): ResolvedGameEffect {
     return {
       effectId,
-      kind: "steal_agenda",
+      kind: "score_agenda",
       visibility: "public",
       side: "runner",
       amount,
@@ -187,7 +187,7 @@ export function createTurnEffectRuntimeResolvers(
     automaticTagEffect,
     automaticTrashCardEffect,
     automaticCounterChangeEffect,
-    automaticStealAgendaEffect,
+    automaticScoreAgendaEffect,
     publicCardTitle,
   };
 }
