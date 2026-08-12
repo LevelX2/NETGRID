@@ -2512,13 +2512,28 @@ export function runnerActionDispositions(
     ...unboundOneShotSearchActionIds,
     ...optionalProgramTrashInstallDispositionActionIds,
   ]);
+  for (const signal of domain.centralPressure) {
+    for (const actionId of signal.rejectedPreparationActionIds ?? []) {
+      add(
+        actionId,
+        "runner.pressure_central",
+        `runner_access_payoff_campaign_copy_not_selected:${signal.serverId}`,
+      );
+    }
+  }
   for (const evaluation of handDevelopment) {
     if (!evaluation.legalActionId) continue;
     const accessPayoffCandidate = candidates.find(
       (candidate) => candidate.actionId === evaluation.legalActionId,
     );
     if (
+      dispositions.some((entry) => entry.actionId === evaluation.legalActionId)
+    ) {
+      continue;
+    }
+    if (
       accessPayoffCandidate !== undefined &&
+      !centralPreparationActionIds.has(accessPayoffCandidate.actionId) &&
       runnerAccessPayoffInstallLacksBoundAccessRoute(
         evaluation,
         accessPayoffCandidate,
@@ -2533,6 +2548,7 @@ export function runnerActionDispositions(
       );
       continue;
     }
+    if (centralPreparationActionIds.has(evaluation.legalActionId)) continue;
     if (!runnerHandDevelopmentExplicitlyRejected(evaluation)) continue;
     if (
       evaluation.deferReason === "preserve_credit_floor" &&
@@ -3005,6 +3021,15 @@ function buildRunnerDomain(
     _deckCapabilities,
     strategicIntent,
   );
+  const accessPayoffCampaignSignals = runnerCentralPressureDevelopmentSignals(
+    input,
+    candidates,
+    handDevelopment,
+    runTargets,
+    coverageGaps,
+    strategicIntent,
+    economy,
+  );
   const shellTradersPipelines = buildRunnerShellTradersPipelineSignals({
     input,
     candidates,
@@ -3401,11 +3426,57 @@ function buildRunnerDomain(
         },
       ];
     });
+  const accessPayoffFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
+    accessPayoffCampaignSignals.flatMap((signal) => {
+      const campaign = signal.accessPayoffCampaign;
+      if (!campaign || !signal.supportNeedId || campaign.fundingGap <= 0) {
+        return [];
+      }
+      const parentPlanInstanceId = planInstanceIdForProposal({
+        moduleId: "runner.pressure_central",
+        dedupeKey: signal.pressureId,
+      });
+      return [
+        {
+          kind: "parent_plan_support" as const,
+          needId: signal.supportNeedId,
+          parentPlanInstanceId,
+          driver: {
+            kind: "run" as const,
+            targetId: signal.serverId,
+            reasonCode: "fund_bound_access_payoff_install",
+          },
+          targetCredits: campaign.installCost,
+          currentCreditsAtRevalidation: currentCredits,
+          gap: campaign.fundingGap,
+          priorityClass: "P4" as const,
+          revalidation: {
+            stateVersion: input.playerView.stateVersion,
+            status: "material_parent_open" as const,
+          },
+          ...runnerExactFundingRouteContract(input, candidates, {
+            demandId: signal.supportNeedId,
+            sourcePlanId: parentPlanInstanceId,
+            purpose: "foreground_plan",
+            priority: "next_own_turn",
+            hardness: "soft",
+            deadline: "within_three_own_turns",
+            targetCredits: campaign.installCost,
+            remainingClicks,
+            allowIncrementalProgress: true,
+            allowStrategicExchange: false,
+            evidence: campaign.evidenceCodes,
+          }),
+          evidenceCode: `runner_access_payoff_campaign_funding:${signal.serverId}`,
+        },
+      ];
+    });
   const fundingNeeds = uniqueBy(
     [
       ...runFundingNeeds,
       ...runLockFundingNeeds,
       ...resourceLifecycleFundingNeeds,
+      ...accessPayoffFundingNeeds,
       ...portfolioReserveFundingNeeds,
       ...turnLiquidityFundingNeeds,
     ],
@@ -3451,7 +3522,7 @@ function buildRunnerDomain(
               : [];
           })
       : [];
-  const baseCentralPressure = uniqueBy(
+  const baseCentralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
     [
       ...runLockReleaseRoutes.flatMap((route) => {
         if (
@@ -3495,12 +3566,6 @@ function buildRunnerDomain(
           },
         ];
       }),
-      ...runnerCentralPressureDevelopmentSignals(
-        candidates,
-        handDevelopment,
-        runTargets,
-        strategicIntent,
-      ),
       ...bestRunTargetsByServer(input, economy, runTargets, candidates)
         .filter(
           (evaluation) =>
@@ -3815,6 +3880,7 @@ function buildRunnerDomain(
           ];
         },
       ),
+      ...accessPayoffCampaignSignals,
       // A legal same-turn payoff changes the current phase of the already
       // discovered server-pressure plan. Keep it after the direct route
       // signals because uniqueBy intentionally retains the last phase for a
@@ -3829,7 +3895,7 @@ function buildRunnerDomain(
     ],
     (signal) => signal.pressureId,
   );
-  const centralPressure = uniqueBy(
+  const centralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
     [
       ...baseCentralPressure,
       ...runnerTargetedBypassCentralPreparationSignals(
@@ -4152,6 +4218,15 @@ function buildRunnerDomain(
         return [];
       }
       if (
+        accessPayoffCampaignSignals.some(
+          (signal) =>
+            signal.accessPayoffCampaign?.payoffCardInstanceId ===
+            evaluation.cardInstanceId,
+        )
+      ) {
+        return [];
+      }
+      if (
         recurringEconomy.some(
           (signal) => signal.definitionId === evaluation.definitionId,
         )
@@ -4191,6 +4266,14 @@ function buildRunnerDomain(
       ) {
         // Irreversible financing is support for an already selected parent
         // plan, never a standalone board-development objective.
+        return [];
+      }
+      if (
+        candidate !== undefined &&
+        centralPressure.some((signal) =>
+          signal.preparationActionIds?.includes(candidate.actionId),
+        )
+      ) {
         return [];
       }
       if (
@@ -5327,61 +5410,215 @@ function runnerInstalledAgendaScoreSignals(
 }
 
 function runnerCentralPressureDevelopmentSignals(
+  input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
   runTargets: readonly RunnerRunTargetEvaluation[],
+  coverageGaps: RunnerPlanDomain["coverageGaps"],
   strategicIntent: RunnerStrategicIntentProfile,
+  economy: RunnerEconomyPosture,
 ): RunnerPlanDomain["centralPressure"] {
-  return handDevelopment.flatMap((evaluation) => {
+  const eligible = handDevelopment.flatMap((evaluation) => {
     if (
       evaluation.developmentRole !== "access_payoff" ||
       evaluation.strategicFit !== "strong" ||
-      evaluation.availability !== "legal_now" ||
-      evaluation.deferReason !== "none" ||
       !evaluation.definitionId ||
-      !evaluation.legalActionId
-    ) {
-      return [];
-    }
-    const candidate = candidates.find(
-      (entry) =>
-        entry.actionId === evaluation.legalActionId &&
-        entry.sourceDefinitionId === evaluation.definitionId,
-    );
-    if (
-      !candidate ||
       runnerDefinitionRequiresTargetedBypassPlan(evaluation.definitionId)
     ) {
       return [];
     }
-    const serverId = runnerCentralPayoffServer(candidate);
+    const candidate = evaluation.legalActionId
+      ? candidates.find(
+          (entry) =>
+            entry.actionId === evaluation.legalActionId &&
+            entry.sourceDefinitionId === evaluation.definitionId,
+        )
+      : undefined;
+    const serverId = candidate
+      ? runnerCentralPayoffServer(candidate)
+      : runnerCentralPayoffServerForDefinition(evaluation.definitionId);
+    if (!serverId) return [];
+    const target = [...runTargets]
+      .filter(
+        (entry) =>
+          entry.targetServerId === serverId || entry.accessServerId === serverId,
+      )
+      .sort(
+        (left, right) =>
+          right.score - left.score || left.actionId.localeCompare(right.actionId),
+      )[0];
     if (
-      !serverId ||
-      runTargets.some((target) => target.targetServerId === serverId)
+      !target ||
+      !runnerAccessPayoffCampaignTargetIsViable(input, target, coverageGaps)
     ) {
       return [];
     }
+    const installedCopyCount =
+      evaluation.persistentInstallEvaluation?.installedSameDefinitionCount ??
+      (input.playerView.own.rig ?? []).filter(
+        (card) => card.definitionId === evaluation.definitionId,
+      ).length;
+    const legalInstall =
+      evaluation.availability === "legal_now" &&
+      (evaluation.deferReason === "none" ||
+        (evaluation.deferReason === "duplicate" && installedCopyCount === 0)) &&
+      candidate?.semanticActionType === "install.card";
+    const waitingForInstallFunding =
+      evaluation.availability === "missing_credits" &&
+      evaluation.deferReason === "missing_credits" &&
+      evaluation.fundingNeed !== undefined;
+    if (!legalInstall && !waitingForInstallFunding) return [];
+    const installCost =
+      evaluation.fundingNeed?.installOrPlayCost ??
+      evaluation.persistentInstallEvaluation?.installCost ??
+      candidate?.costProfile.creditCost;
+    if (!Number.isSafeInteger(installCost) || installCost! < 0) return [];
+    const marginalValue =
+      Math.min(300, Math.max(1, evaluation.priority)) -
+      installedCopyCount * 140;
+    if (marginalValue <= 0) return [];
+    return [
+      {
+        evaluation,
+        candidate,
+        serverId,
+        target,
+        installedCopyCount,
+        installCost: installCost!,
+        marginalValue,
+      },
+    ];
+  });
+  const byServer = new Map<string, typeof eligible>();
+  for (const entry of eligible) {
+    const current = byServer.get(entry.serverId) ?? [];
+    current.push(entry);
+    byServer.set(entry.serverId, current);
+  }
+  return [...byServer.entries()].flatMap(([serverId, entries]) => {
+    const ordered = entries.sort(
+      (left, right) =>
+        right.marginalValue - left.marginalValue ||
+        right.target.score - left.target.score ||
+        left.evaluation.cardInstanceId.localeCompare(
+          right.evaluation.cardInstanceId,
+        ),
+    );
+    const selected = ordered[0];
+    if (!selected) return [];
+    const fundingGap = Math.max(
+      0,
+      selected.installCost - input.playerView.own.credits,
+    );
+    const runFundingTargetCredits = Math.max(
+      0,
+      selected.target.pathCost + economy.minimumCreditFloor,
+    );
+    const supportNeedId =
+      fundingGap > 0
+        ? `access-payoff-support:central:${serverId}:${selected.evaluation.cardInstanceId}`
+        : undefined;
+    const evidenceCodes = [
+      "runner_access_payoff_campaign_parent:runner.pressure_central",
+      `runner_access_payoff_campaign_server:${serverId}`,
+      `runner_access_payoff_campaign_card:${selected.evaluation.cardInstanceId}`,
+      `runner_access_payoff_campaign_desired_copies:${selected.installedCopyCount + 1}`,
+      `runner_access_payoff_campaign_install_cost:${selected.installCost}`,
+      `runner_access_payoff_campaign_run_target_credits:${runFundingTargetCredits}`,
+      `runner_access_payoff_campaign_funding_gap:${fundingGap}`,
+      `runner_access_payoff_campaign_milestone:${fundingGap > 0 ? "fund_install" : "install_payoff"}`,
+    ];
     return [
       {
         pressureId: `central:${serverId}`,
-        serverId,
+        serverId: serverId as "hq" | "rd" | "archives",
         purpose: "multiaccess" as const,
         strategyLineIds: [
           ...new Set([
             strategicIntent.primaryWinIntent,
-            ...candidate.strategySupport.map((support) => support.strategyId),
+            ...(selected.candidate?.strategySupport.map(
+              (support) => support.strategyId,
+            ) ?? []),
           ]),
         ],
         priorityClass: "P4" as const,
-        reachable: true,
-        marginalValue: Math.min(300, Math.max(1, evaluation.priority)),
-        evidenceCode: `runner_central_pressure_develop_payoff:${serverId}:${evaluation.definitionId}`,
-        sourceDefinitionIds: [evaluation.definitionId],
-        preparationActionIds: [candidate.actionId],
+        reachable: selected.candidate !== undefined,
+        marginalValue: selected.marginalValue,
+        evidenceCode: `runner_access_payoff_campaign:${serverId}:${selected.evaluation.cardInstanceId}`,
+        sourceDefinitionIds: [selected.evaluation.definitionId!],
+        preparationActionIds: selected.candidate
+          ? [selected.candidate.actionId]
+          : [],
+        rejectedPreparationActionIds: ordered
+          .slice(1)
+          .flatMap((entry) =>
+            entry.candidate ? [entry.candidate.actionId] : [],
+          ),
+        ...(supportNeedId ? { supportNeedId } : {}),
         routePreparation: "develop_payoff" as const,
+        accessPayoffCampaign: {
+          payoffCardInstanceId: selected.evaluation.cardInstanceId,
+          payoffDefinitionId: selected.evaluation.definitionId!,
+          desiredCopyCount: selected.installedCopyCount + 1,
+          installedCopyCount: selected.installedCopyCount,
+          selectedCopyOrdinal: selected.installedCopyCount + 1,
+          installCost: selected.installCost,
+          runFundingTargetCredits,
+          totalFundingEnvelope: selected.installCost + runFundingTargetCredits,
+          fundingGap,
+          horizon: fundingGap > 0 ? "bounded_multi_turn" : "same_turn",
+          milestone: fundingGap > 0 ? "fund_install" : "install_payoff",
+          evidenceCodes,
+        },
       },
     ];
   });
+}
+
+function runnerCentralPayoffServerForDefinition(
+  definitionId: string,
+): "hq" | "rd" | "archives" | undefined {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  const signals = new Set([
+    ...(hint?.functionSignals ?? []),
+    ...(hint?.tacticSignals ?? []),
+    ...(hint?.actionTacticSignals ?? []),
+  ]);
+  if (signals.has("access.rnd_multiaccess")) return "rd";
+  if (signals.has("access.hq_multiaccess")) return "hq";
+  return undefined;
+}
+
+function runnerAccessPayoffCampaignTargetIsViable(
+  input: AiDecisionInput,
+  target: RunnerRunTargetEvaluation,
+  coverageGaps: RunnerPlanDomain["coverageGaps"],
+): boolean {
+  if (
+    target.score <= 0 ||
+    target.knownAccessState === "known_no_current_payoff" ||
+    target.accessPayoff === "known_low_value" ||
+    target.accessPayoffContestable === false ||
+    target.pathPassability === "blocked_unbreakable" ||
+    target.pathPassability === "blocked_by_random_break_damage_hand_buffer"
+  ) {
+    return false;
+  }
+  if (target.pathPassability === "reachable") return true;
+  if (target.pathPassability === "blocked_missing_coverage") {
+    return coverageGaps.some(
+      (gap) =>
+        (gap.targetServerId === undefined ||
+          gap.targetServerId === target.targetServerId) &&
+        (gap.answerInHand || (gap.directSearchActionIds?.length ?? 0) > 0),
+    );
+  }
+  return (
+    target.pathPassability === "blocked_unpayable" &&
+    Number.isSafeInteger(target.pathCost) &&
+    target.pathCost <= input.playerView.own.credits + 12 &&
+    target.recommendation === "gain_credits_first"
+  );
 }
 
 function runnerSameTurnAccessCentralPreparationSignals(
