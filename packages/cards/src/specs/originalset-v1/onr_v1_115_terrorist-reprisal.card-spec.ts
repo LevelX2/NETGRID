@@ -70,15 +70,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "contest_remote",
-      },
-      {
-        kind: "plan_role",
         role: "pressure_hq",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
       },
     ],
     capabilities: [],

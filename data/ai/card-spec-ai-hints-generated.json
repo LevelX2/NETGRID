@@ -24980,7 +24980,7 @@
     },
     {
       "cardId": "onr_v1_104_playful-ai",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:97d4a3079b1281fb",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:7b3ad6162902e302",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e8f64a28f57f4c6c",
       "hint": {
         "cardId": "onr_v1_104_playful-ai",
@@ -25117,7 +25117,7 @@
     },
     {
       "cardId": "onr_v1_106_private-ldl-access",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4c3f48a8eb8a8a1c",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:68d3b01c3f1e11b0",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:bb03beb4d7434858",
       "hint": {
         "cardId": "onr_v1_106_private-ldl-access",
@@ -25666,16 +25666,16 @@
     {
       "cardId": "onr_v1_113_synchronized-attack-on-hq",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:38487b555dcd3191",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:091768256361e3a1",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:31b90a6b04acf1c7",
       "hint": {
         "cardId": "onr_v1_113_synchronized-attack-on-hq",
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["pressure_hq"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
+        "strategicRole": ["payoff_anchor"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_corp_discard_hq_with_retain_payment",
@@ -25704,14 +25704,14 @@
     {
       "cardId": "onr_v1_114_temple-microcode-outlet",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a0961ae8c21e3944",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f3bd59039ed4d117",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f241625bcc12fb2f",
       "hint": {
         "cardId": "onr_v1_114_temple-microcode-outlet",
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "draw_for_answers"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "strategicRole": ["enabler"],
         "lineSupport": ["runner.search.breaker"],
@@ -25742,9 +25742,7 @@
           }
         ],
         "functionSignals": ["setup.search"],
-        "tacticSignals": ["draw.card"],
         "actionTacticSignals": [
-          "draw.card",
           "effect:search",
           "effect_scope:stack",
           "effect_timing:action"
@@ -25769,16 +25767,15 @@
     {
       "cardId": "onr_v1_115_terrorist-reprisal",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d1b8f4549b803a00",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:31999bddc2d3d0e9",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:29a7eb31aff65d55",
       "hint": {
         "cardId": "onr_v1_115_terrorist-reprisal",
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["contest_remote", "pressure_hq"],
+        "planRoles": ["pressure_hq"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
         "actionCapabilitySemantics": [
           { "capabilityKey": "abilities_on_play_corp_random_discard_from_hq" }
         ],
@@ -25802,7 +25799,7 @@
     },
     {
       "cardId": "onr_v1_116_total-genetic-retrofit",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:00aa4b5f6fb558fb",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:46ba370a45f9a71e",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:30c12475c5d013c9",
       "hint": {
         "cardId": "onr_v1_116_total-genetic-retrofit",
@@ -25813,10 +25810,7 @@
         "planRoles": ["recover_from_tags"],
         "valueHints": {},
         "actionCapabilitySemantics": [
-          {
-            "capabilityKey": "abilities_on_play_remove_tags",
-            "conditions": [{ "kind": "requires_runner_tagged" }]
-          }
+          { "capabilityKey": "abilities_on_play_remove_tags" }
         ],
         "effects": [
           {
@@ -25835,9 +25829,8 @@
           "effect_timing:action",
           "survival.defense"
         ],
-        "conditions": [{ "kind": "requires_runner_tagged" }],
         "costProfile": { "clicks": 1, "credits": 3 },
-        "riskTags": ["tag", "tag_clear_timing"],
+        "riskTags": ["tag_clear_timing"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -25904,7 +25897,7 @@
     {
       "cardId": "onr_v1_118_weather-to-finance-pipe",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0ac424320662db66",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ad0c79913b2673ad",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:29a7eb31aff65d55",
       "hint": {
         "cardId": "onr_v1_118_weather-to-finance-pipe",
         "side": "runner",
@@ -25916,8 +25909,8 @@
           "rd_access_replacement",
           "agenda_pressure"
         ],
-        "planRoles": ["pressure_hq", "recover_economy"],
-        "valueHints": { "economy": 2 },
+        "planRoles": ["pressure_hq"],
+        "valueHints": {},
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_make_run",

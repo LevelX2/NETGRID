@@ -340,6 +340,25 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     expect(
       replayEvents(totalInitial, total.eventLog.slice(totalReplayStart)).ok,
     ).toBe(true);
+
+    let untaggedTotal = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags(
+        "spotcheck-total-genetic-retrofit-untagged",
+      ),
+    );
+    untaggedTotal.runner.credits = 20;
+    untaggedTotal.runner.tags = 0;
+    moveRunnerCardToGrip(untaggedTotal, "onr_v1_116_total-genetic-retrofit");
+    untaggedTotal = apply(
+      untaggedTotal,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(untaggedTotal, action) ===
+          "onr_v1_116_total-genetic-retrofit",
+    );
+    expect(untaggedTotal.runner.tags).toBe(0);
+    expect(untaggedTotal.runnerTagAvoidanceCredits).toBe(1);
   });
 
   it("keeps run, stack-search and reprisal events side-safe and replayable", () => {

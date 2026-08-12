@@ -307,8 +307,8 @@ describe("V1.9.2 Mechanikpaket K", () => {
     expect(state.runner.scoreArea).not.toContain(kilroyAgendaId);
 
     moveRunnerCardToGrip(state, "onr_v1_107_romp-through-hq");
-    const hqCard = moveCorpCardToHq(state, "simple_economy_operation");
-    keepOnlyCorpHqCard(state, hqCard);
+    const rompAgendaId = moveCorpCardToHq(state, "simple_agenda");
+    keepOnlyCorpHqCard(state, rompAgendaId);
     state = apply(
       state,
       "runner",
@@ -318,6 +318,9 @@ describe("V1.9.2 Mechanikpaket K", () => {
     );
     const creditsBeforeRompTrash = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(expect.arrayContaining(["steal_agenda", "trash_accessed_card"]));
     const freeTrashAction = mustAction(
       state,
       "runner",
@@ -330,6 +333,8 @@ describe("V1.9.2 Mechanikpaket K", () => {
       (action) => action.actionId === freeTrashAction.actionId,
     );
     expect(state.runner.credits).toBe(creditsBeforeRompTrash);
+    expect(state.corp.archives).toContain(rompAgendaId);
+    expect(state.runner.scoreArea).not.toContain(rompAgendaId);
   });
 
   it("applies Top Runners' Conference credits at start of turn and trashes it when a run starts", () => {

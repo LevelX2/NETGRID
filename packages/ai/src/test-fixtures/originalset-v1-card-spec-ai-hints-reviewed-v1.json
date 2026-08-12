@@ -7541,9 +7541,9 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["pressure_hq"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
+        "strategicRole": ["payoff_anchor"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_corp_discard_hq_with_retain_payment",
@@ -7588,7 +7588,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "draw_for_answers"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "strategicRole": ["enabler"],
         "lineSupport": ["runner.search.breaker"],
@@ -7619,9 +7619,7 @@
           }
         ],
         "functionSignals": ["setup.search"],
-        "tacticSignals": ["draw.card"],
         "actionTacticSignals": [
-          "draw.card",
           "effect:search",
           "effect_scope:stack",
           "effect_timing:action"
@@ -7654,9 +7652,8 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["contest_remote", "pressure_hq"],
+        "planRoles": ["pressure_hq"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_corp_random_discard_from_hq"
@@ -7695,12 +7692,7 @@
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "abilities_on_play_remove_tags",
-            "conditions": [
-              {
-                "kind": "requires_runner_tagged"
-              }
-            ]
+            "capabilityKey": "abilities_on_play_remove_tags"
           }
         ],
         "effects": [
@@ -7720,16 +7712,11 @@
           "effect_timing:action",
           "survival.defense"
         ],
-        "conditions": [
-          {
-            "kind": "requires_runner_tagged"
-          }
-        ],
         "costProfile": {
           "clicks": 1,
           "credits": 3
         },
-        "riskTags": ["tag", "tag_clear_timing"],
+        "riskTags": ["tag_clear_timing"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7807,10 +7794,8 @@
           "rd_access_replacement",
           "agenda_pressure"
         ],
-        "planRoles": ["pressure_hq", "recover_economy"],
-        "valueHints": {
-          "economy": 2
-        },
+        "planRoles": ["pressure_hq"],
+        "valueHints": {},
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_make_run",

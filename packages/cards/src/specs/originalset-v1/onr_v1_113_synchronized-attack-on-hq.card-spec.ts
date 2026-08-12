@@ -69,8 +69,12 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "plan_role",
+        role: "pressure_hq",
+      },
+      {
+        kind: "strategic_role",
+        role: "payoff_anchor",
       },
     ],
     capabilities: [],

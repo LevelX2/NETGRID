@@ -514,10 +514,92 @@ Lucidrine Booster Drug, Mantis, Fixer-at-Large und misc.for-sale ergab der
 Nutzerblock keinen weiteren mechanischen Korrekturbefund. Die genannten
 AI-Bereinigungen ändern daran nichts.
 
+## Block 006 – Karten 101 bis 120 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 006` eingeführt.
+
+### ONR V1 104 – Playful AI
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:448-450`
+  beschreibt für Würfe 1 bis 3 eine beliebige ganzzahlige Aufteilung des
+  Wurfwerts zwischen Runner-Credits und neu beiseitegelegten Würfeln; alle
+  beiseitegelegten Würfel werden nach derselben Regel weitergewürfelt.
+- Korrektur: `random_dice_loop` deklariert jetzt neben Würfelgröße und
+  Choice-Würfen ausdrücklich den Splitvertrag, den Credit-Empfänger und die
+  rekursive Auflösung jedes beiseitegelegten Würfels. Der bestehende
+  deterministische Runtime-Pfad validiert und verwendet diesen Vertrag,
+  statt die CardSpec nur auf den groben Longtail-Kindwert zu reduzieren.
+- Generischer Befund: Planungsrelevante Zufalls-Outcomes, Choices und
+  Fortsetzungen gehören in die kanonische CardSpec. Ein mechanisch korrekter
+  Spezialinterpreter allein ist keine vollständige Spezifikation.
+- Regression: CardSpec-Vertrag und bestehende Würfel-Integrationszeugen
+  sichern alle Splits von 0 bis X Credits, die rekursive Fortsetzung,
+  öffentliche Choices und deterministische RandomDrawRecords.
+
+### ONR V1 106 – Private LDL Access
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:457-460`
+  lässt den physischen HQ-Run bei Erfolg als erfolgreichen R&D-Run gelten.
+- Korrektur: Der Run behält HQ als angegriffenen Server und R&D als
+  Access-Override, trägt nun aber zusätzlich R&D als semantischen
+  Successful-Run-Server. Run-End-Trigger, Viren, Turn-Flags und
+  `lastSuccessfulRunServerId` verwenden damit die gedruckte Identität.
+- Regression: Der reale Lauf greift weiterhin HQ an, greift auf R&D zu und
+  setzt nach Abschluss ausschließlich den R&D-Erfolgsstatus.
+
+### ONR V1 107 – Romp through HQ
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:462-464`
+  erlaubt kostenlosen Trash auch für normalerweise nicht trashbare Karten.
+- Korrekturstand: Der generische Agenda-Pfad wurde bereits durch Block 005
+  ursachenorientiert korrigiert. Es entstand kein zusätzlicher
+  kartenspezifischer Runtime-Zweig.
+- Regression: Ein echter Romp-HQ-Zugriff auf eine Agenda bietet Steal und
+  kostenlosen Trash getrennt an; Trash kostet keine Credits, legt die Agenda
+  in Archives und punktet sie nicht für den Runner.
+
+### ONR V1 116 – Total Genetic Retrofit
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:502-504`
+  enthält keine Voraussetzung, dass der Runner bereits getaggt sein muss.
+- Korrektur: Die künstliche `runner_is_tagged`-Bedingung ist entfernt.
+  `remove_tags` mit Modus `all` bleibt bei null Tags wirkungslos, während
+  `avoid_next_tag` trotzdem erzeugt wird.
+- Regression: Neben dem bestehenden Tag-Entfernungs- und
+  Tag-Vermeidungszeugen sichert ein eigener Null-Tag-Fall die Legalität und
+  den erzeugten Vermeidungscredit.
+
+### AI-Semantikbereinigung
+
+- Synchronized Attack on HQ ist nun HQ-Pressure-Payoff statt Anker von
+  `runner.run_event_tempo`; die Karte erzeugt selbst keinen Run.
+- Temple Microcode Outlet bleibt Programmsuche und Support der bestehenden
+  Breaker-Suchlinie, trägt aber weder `draw_for_answers` noch `draw.card`.
+- Terrorist Reprisal bleibt konditionale HQ-Pressure und trägt weder
+  `contest_remote` noch `runner.run_event_tempo`.
+- Weather-to-Finance Pipe bleibt HQ-Pressure/Credit-Denial und trägt weder
+  `recover_economy` noch einen positiven Runner-Economy-Wert.
+- Ownership: Die Bereinigung ändert nur deklarative Hints bestehender
+  Kartenpfade. Plan, Step, Route, Action-ID, Executor und Choice-Owner bleiben
+  unverändert; es entsteht keine zweite Entscheidungsautorität.
+
+### Unveränderte Karten dieses Blocks
+
+Für MIT West Tier, Open-Ended Mileage Program, Organ Donor, Priority Wreck,
+Score!, Security Code WORM Chip, Sneak Preview, Social Engineering, Stumble
+through Wilderspace, Synchronized Attack on HQ, Temple Microcode Outlet,
+Terrorist Reprisal, Valu-Pak Software Bundle, Weather-to-Finance Pipe,
+Arasaka Portable Prototype und “Armadillo” Armored Road Home ergab der
+Nutzerblock keinen weiteren mechanischen Korrekturbefund. Die bei vier dieser
+Karten genannten AI-Bereinigungen ändern daran nichts. Die Zuordnung 119/120
+folgt der Repo-Collector-Nummerierung.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 101 bis 120.
+- Als nächster regulärer Nutzerblock folgen die Karten 121 bis 140.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -569,3 +651,11 @@ Artefaktvertrag grün. Das generierte AI-Hint-Artefakt ändert ausschließlich
 die erwarteten Regel-/Planungsfingerprints und Semantiken von Pattel Antibody,
 Deal with Militech, Edited Shipping Manifests, Forgotten Backup Chip,
 Lucidrine Booster Drug und Mantis, Fixer-at-Large.
+
+Für Block 006 sind Cards-, Engine- und AI-Typecheck, Generator-Check,
+CardSpec-Vertrag, 129 direkt angrenzende Engine-Integrationszeugen sowie
+Originalset-AI-Golden und Artefaktvertrag grün. Das generierte
+AI-Hint-Artefakt ändert ausschließlich die erwarteten Regel- oder
+Planungsfingerprints und Semantiken von Playful AI, Private LDL Access,
+Synchronized Attack on HQ, Temple Microcode Outlet, Terrorist Reprisal,
+Total Genetic Retrofit und Weather-to-Finance Pipe.

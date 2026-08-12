@@ -15,9 +15,9 @@ type HiddenZoneNonSearchDiceLoopRuntimeDeps = RuntimeDeps & {
   credits: typeof import("../state/economy-mutation").credits;
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   rollDeterministicDie: (state: GameState, purpose: string) => number;
-  runnerEventLongtailKindForDefinition: (
+  runnerEventLongtailForDefinition: (
     definition: CardDefinition,
-  ) => CardRunnerEventLongtailImplementation["kind"] | undefined;
+  ) => CardRunnerEventLongtailImplementation | undefined;
   selectedChoiceIds: (
     selectedChoices: PlayerAction["selectedChoices"],
   ) => string[];
@@ -28,24 +28,53 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
 ): import("./hidden-zone-dice-loop-runtime-port").HiddenZoneDiceLoopRuntimePort {
   const typedDeps = deps as HiddenZoneNonSearchDiceLoopRuntimeDeps;
 
+  type RandomDiceLoopImplementation = Extract<
+    CardRunnerEventLongtailImplementation,
+    { kind: "random_dice_loop" }
+  >;
+
+  function requireRandomDiceLoopImplementation(
+    implementation: CardRunnerEventLongtailImplementation | undefined,
+  ): RandomDiceLoopImplementation {
+    if (
+      implementation?.kind !== "random_dice_loop" ||
+      implementation.dieFaces !== 6 ||
+      implementation.visibility !== "public" ||
+      implementation.choice.kind !==
+        "split_roll_between_credits_and_set_aside_dice" ||
+      implementation.choice.mode !== "any_nonnegative_integer_split" ||
+      implementation.choice.creditRecipient !== "runner" ||
+      implementation.setAsideDiceResolution.kind !== "roll_each" ||
+      implementation.setAsideDiceResolution.recursive !== true
+    )
+      throw new Error("Playful-AI-Implementation ist ungueltig.");
+    return implementation;
+  }
+
+  function randomDiceLoopImplementationForSource(
+    state: GameState,
+    sourceCardId: CardInstanceId,
+  ): RandomDiceLoopImplementation {
+    return requireRandomDiceLoopImplementation(
+      typedDeps.runnerEventLongtailForDefinition(
+        typedDeps.definitionFor(state, sourceCardId),
+      ),
+    );
+  }
+
   function resolveRandomDiceLoopEvent(
     state: GameState,
     legalAction: LegalAction,
     sourceDefinitionId: CardDefinitionId,
     implementation: CardRunnerEventLongtailImplementation,
   ): void {
-    if (
-      implementation.kind !== "random_dice_loop" ||
-      implementation.dieFaces !== 6 ||
-      implementation.visibility !== "public"
-    )
-      throw new Error("Playful-AI-Implementation ist ungueltig.");
+    const randomDiceLoop = requireRandomDiceLoopImplementation(implementation);
     const dieRoll = typedDeps.rollDeterministicDie(
       state,
       `v1921.die.${sourceDefinitionId}.dice_loop.initial`,
     );
-    const choiceOpened = implementation.choiceOn.includes(
-      dieRoll as (typeof implementation.choiceOn)[number],
+    const choiceOpened = randomDiceLoop.choiceOn.includes(
+      dieRoll as (typeof randomDiceLoop.choiceOn)[number],
     );
     if (choiceOpened) {
       startRandomDiceSplitChoice(
@@ -83,7 +112,16 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       throw new Error("Es ist bereits eine Choice offen.");
     if (!sourceCardId || !state.cardInstances[sourceCardId])
       throw new Error("Playful AI hat keine gültige Quelle.");
-    if (!Number.isInteger(dieRoll) || dieRoll < 1 || dieRoll > 3)
+    const implementation = randomDiceLoopImplementationForSource(
+      state,
+      sourceCardId,
+    );
+    if (
+      !Number.isInteger(dieRoll) ||
+      !implementation.choiceOn.includes(
+        dieRoll as (typeof implementation.choiceOn)[number],
+      )
+    )
       throw new Error(
         "Playful AI darf nur bei Wurf 1, 2 oder 3 eine Choice öffnen.",
       );
@@ -234,6 +272,10 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       throw new Error("Die offenen Playful-AI-Würfel sind ungültig.");
     if (!Number.isInteger(rollIndex) || rollIndex < 1)
       throw new Error("Der Playful-AI-Wurfindex ist ungültig.");
+    const implementation = randomDiceLoopImplementationForSource(
+      state,
+      sourceCardId,
+    );
     let remainingDice = queuedDice;
     let nextRollIndex = rollIndex;
     const rolledDice: number[] = [];
@@ -245,7 +287,11 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       );
       nextRollIndex += 1;
       rolledDice.push(nextRoll);
-      if (nextRoll <= 3) {
+      if (
+        implementation.choiceOn.includes(
+          nextRoll as (typeof implementation.choiceOn)[number],
+        )
+      ) {
         startRandomDiceSplitChoice(
           state,
           sourceCardId,
@@ -296,13 +342,17 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
     if (
       !sourceCardId ||
       !state.runner.heap.includes(sourceCardId) ||
-      typedDeps.runnerEventLongtailKindForDefinition(
+      typedDeps.runnerEventLongtailForDefinition(
         typedDeps.definitionFor(state, sourceCardId),
-      ) !== "random_dice_loop"
+      )?.kind !== "random_dice_loop"
     )
       throw new Error(
         "Die Playful-AI-Choice gehoert nicht zur gespielten Karte.",
       );
+    const implementation = randomDiceLoopImplementationForSource(
+      state,
+      sourceCardId,
+    );
     const sourceDefinitionId = typedDeps.definitionFor(state, sourceCardId).id;
     const selectedOptionId = typedDeps.selectedChoiceIds(
       playerAction.selectedChoices,
@@ -328,13 +378,18 @@ export function createHiddenZoneNonSearchDiceLoopRuntime(
       setAsideDice = split.setAsideDice;
       if (gainedCredits > 0) {
         nextCreditGainOrdinal += 1;
-        const gain = typedDeps.credits(state, "runner", gainedCredits, {
-          kind: "card_effect",
-          sourceDefinitionId,
-          sourceCardId,
-          gainOrdinal: nextCreditGainOrdinal,
-          reason: "random_dice_loop_split",
-        });
+        const gain = typedDeps.credits(
+          state,
+          implementation.choice.creditRecipient,
+          gainedCredits,
+          {
+            kind: "card_effect",
+            sourceDefinitionId,
+            sourceCardId,
+            gainOrdinal: nextCreditGainOrdinal,
+            reason: "random_dice_loop_split",
+          },
+        );
         gainPayload = creditGainPublicPayload(gain);
       }
       queuedDiceBeforeRolls = remainingDice + setAsideDice;
