@@ -22379,7 +22379,7 @@
     },
     {
       "cardId": "onr_v1_062_shredder-uplink-protocol",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c435c1e0a4e17a54",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:93ade5af9d5b639b",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:3d7589c1535bae5d",
       "hint": {
         "cardId": "onr_v1_062_shredder-uplink-protocol",
@@ -22727,7 +22727,7 @@
     },
     {
       "cardId": "onr_v1_068_startup-immolator",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:346d97552a9595e9",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9c9f8d5f1ea2ba63",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:72d52e01db73c8dd",
       "hint": {
         "cardId": "onr_v1_068_startup-immolator",

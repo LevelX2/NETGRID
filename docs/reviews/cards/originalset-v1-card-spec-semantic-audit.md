@@ -377,10 +377,69 @@ Raptor, Replicator, Scatter Shot, SeeYa und Shaka ergab der Nutzerblock keinen
 neuen Korrekturbefund. Rabbit bleibt insbesondere auf der Senkung des Trace
 Limits und nicht einer Basis-Trace-Stärke modelliert.
 
+## Block 004 – Karten 061 bis 080 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 004` eingeführt.
+
+### ONR V1 061 – Shield
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:266-268`
+  verlangt mit „up to 2“ eine wählbare Präventionsmenge.
+- Ergebnis: Der Befund war beim Eingang von Block 004 bereits durch den
+  generischen Folgefund aus Block 002 erledigt. Shield trägt
+  `amountMode: "up_to"`; der vorhandene Prevention-Resolver bietet die
+  Teilmengen an und wahrt das gemeinsame Per-Turn-Limit. Es wurde kein
+  zweiter Fixpfad angelegt.
+
+### ONR V1 062 – Shredder Uplink Protocol
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:270-272`
+  trennt den physischen Run auf Archives vom HQ-Zugriff und von der Wertung
+  als erfolgreicher HQ-Run.
+- Korrektur: `successfulRunServerOverride` ist neben angegriffenem Server und
+  `accessServerOverride` ein eigener CardSpec-, Engine- und Run-State-Vertrag.
+  Der physische Laufweg und das ICE bleiben Archives, der Breach erfolgt auf
+  HQ, und Successful-Run-Trigger, Viren, Turn-Flags sowie
+  `lastSuccessfulRunServerId` verwenden HQ.
+- Ownership: `runner.pressure_central` bleibt Plan-Owner; die Änderung
+  projiziert nur eine weitere Engine-Tatsache der bereits gebundenen
+  Run-Action. Es entsteht weder ein neuer Resolver noch eine zweite
+  Serverwahl.
+- Regression: Ein realer Shredder-Run sichert Archives-Laufweg, HQ-Breach,
+  HQ-Erfolgsflags, Replay und die Freischaltung von Core Command: Jettison
+  Ice. Ein Run-End-Zeuge sichert zusätzlich den HQ-Virusscope.
+
+### ONR V1 068 – Startup Immolator
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:294-296`
+  kennzeichnet `[T]` als Aktivierungskosten und enthält kein
+  Once-per-Turn-Limit.
+- Korrektur: Der CardSpec-Vertrag führt Quell-Trash und die dynamischen
+  Rez-Kosten des gerade vollständig gebrochenen ICE gemeinsam als Kosten.
+  Der Runtimepfad revalidiert beide Kosten, bezahlt Credits und trasht die
+  Quelle vor dem Ziel-Effekt. `trashSourceOnResolve`, das künstliche
+  Turn-Limit und dessen Nutzungszustand sind entfernt; der kanonische Text
+  bewahrt `[T]:`.
+- Regression: Vertrags-, Unit- und realer Integrationszeuge sichern die
+  kombinierte Kostenform, die fortbestehende LegalAction trotz eines alten
+  Limit-Flags, Quell- und Ziel-Trash sowie Replay und StateHash.
+
+### Unveränderte Karten dieses Blocks
+
+Für Signpost, Skivviss, Smarteye, Snowball, Speed Trap, Succubus, Tinweasel,
+Vewy Vewy Quiet, Wild Card, Wizard's Book, Worm, Zetatech Software Installer,
+All-Nighter, Anonymous Tip, Arasaka Owns You, Bodyweight Synthetic Blood und
+Core Command: Jettison Ice ergab der Nutzerblock keinen eigenen
+Korrekturbefund. Core Command war nur von Shredders bisher falscher
+Successful-Run-Identität betroffen. Signposts offene Post-Bid-Trace-Logik
+bleibt die dokumentierte NETGRID-Entscheidung.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 061 bis 080.
+- Als nächster regulärer Nutzerblock folgen die Karten 081 bis 100.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -418,3 +477,9 @@ Purge-Replacement-Zeuge grün. Ein versehentlich breit gestarteter Engine-Lauf
 bestätigte 1.884 von 1.885 Tests; sein einziger Draw-Aggregationsfehler ist
 derselbe unveränderte Classic-Corp-Baseline-Drift wie in Block 002. Der Lauf
 wurde nicht als Block-Gate gewertet und nicht in den Scope gezogen.
+
+Für Block 004 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+und Import-Index-Check sowie die fokussierten CardSpec-, Post-Pass-,
+Run-End-, Successful-Run-, Shredder- und Startup-Regressionsläufe grün. Das
+generierte AI-Hint-Artefakt änderte ausschließlich die erwarteten
+CardRules-Fingerprints von Shredder Uplink Protocol und Startup Immolator.

@@ -15,6 +15,7 @@ import {
   type BreachStateHost,
 } from "../access/breach-state";
 import { credits } from "../state/economy-mutation";
+import { successfulRunServerId } from "./run-server-identities";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type SuccessfulRunTagContinuation = Extract<
@@ -134,7 +135,9 @@ export function enterAccessFromSuccessfulRun(
       stateChanged: true,
       ...resolvedPayloadFor(legalAction),
     };
-  if (startCorpShuffleRunnerGripAfterSuccessfulRunChoice(host, run, legalAction))
+  if (
+    startCorpShuffleRunnerGripAfterSuccessfulRunChoice(host, run, legalAction)
+  )
     return {
       handled: true,
       stateChanged: true,
@@ -464,7 +467,7 @@ export function successfulRunInterventionSourceIds(
 ): CardInstanceId[] {
   if (run.successfulRunInterventionWindowClosed || run.delayedSuccessfulRun)
     return [];
-  const server = host.breach.servers.mustServer(run.attackedServerId);
+  const server = host.breach.servers.mustServer(successfulRunServerId(run));
   const used = new Set(run.successfulRunInterventionUsedSourceIds ?? []);
   const hqIceIds = host.state.corp.hq
     .filter((cardId) => host.cards.definitionFor(cardId).type === "ice")
@@ -495,7 +498,7 @@ export function startSuccessfulRunInterventionChoice(
   if (!sourceCardId) return false;
   const kind = host.run.successfulRunInterventionKindForSource(sourceCardId);
   if (!kind) return false;
-  const server = host.breach.servers.mustServer(run.attackedServerId);
+  const server = host.breach.servers.mustServer(successfulRunServerId(run));
   const hqIceOptions = host.state.corp.hq
     .filter((cardId) => host.cards.definitionFor(cardId).type === "ice")
     .sort()
@@ -509,7 +512,7 @@ export function startSuccessfulRunInterventionChoice(
   host.state.pendingChoice = {
     choiceId: `p3_54_delayed_success_${host.state.stateVersion + 1}`,
     side: "corp",
-    source: `p3_54.delayed_success:${sourceCardId}:${kind}:${run.attackedServerId}:${host.state.stateVersion + 1}`,
+    source: `p3_54.delayed_success:${sourceCardId}:${kind}:${server.id}:${host.state.stateVersion + 1}`,
     prompt: `${definition.title}: Successful Run verzögern?`,
     kind: "select_option",
     options: [
@@ -544,7 +547,7 @@ export function startSuccessfulRunInterventionChoice(
       hqIceSelectedCount: hqIceOptions.length,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_54_delayed_success_intervention_choice",
-      serverId: run.attackedServerId,
+      serverId: server.id,
     };
   }
   return true;
@@ -574,7 +577,9 @@ export function startCorpShuffleRunnerGripAfterSuccessfulRunChoice(
       )
         return false;
       return (
-        cardImplementationForDefinitionId(instance.definitionId)?.successfulRunFollowups?.some(
+        cardImplementationForDefinitionId(
+          instance.definitionId,
+        )?.successfulRunFollowups?.some(
           (followup) =>
             followup.kind ===
             "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
@@ -626,8 +631,10 @@ function markSuccessfulRunForTurn(
   host: RunAccessTransitionHost,
   run: ActiveRun,
 ): void {
-  if (run.attackedServerId === "hq")
-    host.runner.ensureTurnFlags().successfulHqRunThisTurn = true;
+  const serverId = successfulRunServerId(run);
+  const flags = host.runner.ensureTurnFlags();
+  if (serverId === "hq") flags.successfulHqRunThisTurn = true;
+  if (serverId === "rd") flags.successfulRdRunThisTurn = true;
 }
 
 function applySuccessfulRunAccessReplacement(

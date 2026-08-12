@@ -30,6 +30,7 @@ export type CardImplementationStartRunOptions = Pick<
   | "freeTrashAccessZones"
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
+  | "successfulRunServerOverride"
   | "successfulRunAccessReplacement"
   | "conditionalAccessBonus"
   | "corpRezCostSurcharge"

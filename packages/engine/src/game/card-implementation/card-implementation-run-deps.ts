@@ -73,6 +73,11 @@ export function startRunForCardImplementation(
       ...(options.accessServerOverride
         ? { accessServerOverride: options.accessServerOverride }
         : {}),
+      ...(options.successfulRunServerOverride
+        ? {
+            successfulRunServerOverride: options.successfulRunServerOverride,
+          }
+        : {}),
       ...(options.successfulRunAccessReplacement
         ? {
             successfulRunAccessReplacement:

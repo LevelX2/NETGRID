@@ -21,6 +21,7 @@ import {
   type RunEndCleanupHost,
   type RunnerTurnFlags,
 } from "./run-end-cleanup-contracts";
+import { successfulRunServerId } from "./run-server-identities";
 
 export type RunnerVirusCounterPreventionSummary = {
   added: number;
@@ -166,6 +167,7 @@ export function applyV181SuccessfulRunCounterTriggers(
   run: ActiveRun,
   legalAction?: LegalAction,
 ): void {
+  const serverId = successfulRunServerId(run);
   const sourceIds = host.virus.installedRunnerVirusSourceIds(
     (implementation) =>
       implementation.addOnSuccessfulRun !== undefined &&
@@ -230,14 +232,12 @@ export function applyV181SuccessfulRunCounterTriggers(
       );
       const added = counterSummary.added;
       if (legalAction) {
-        const serverLabel = host.servers.publicServerLabel(
-          run.attackedServerId,
-        );
+        const serverLabel = host.servers.publicServerLabel(serverId);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           proteusRunnerVirusCounter: true,
           runId: run.runId,
-          serverId: run.attackedServerId,
+          serverId,
           counterType,
           counterDelta: added,
           counterTotalAfter: purgeableRunnerVirusCounterAmount(
@@ -266,13 +266,11 @@ export function applyV181SuccessfulRunCounterTriggers(
       continue;
     }
     if (trigger.counterScope.kind === "attacked_central_server_pool") {
-      const socketCounterType = socketCounterTypeForServer(
-        run.attackedServerId,
-      );
+      const socketCounterType = socketCounterTypeForServer(serverId);
       if (!socketCounterType) continue;
       const counterSummary = addPurgeableRunnerVirusCounterWithPrevention(
         host,
-        { kind: "server", serverId: run.attackedServerId },
+        { kind: "server", serverId },
         socketCounterType,
         trigger.amount,
         legalAction,
@@ -283,13 +281,11 @@ export function applyV181SuccessfulRunCounterTriggers(
           ...(legalAction.payload ?? {}),
           proteusRunnerVirusCounter: true,
           runId: run.runId,
-          serverId: run.attackedServerId,
+          serverId,
           counterType: socketCounterType,
           counterDelta: added,
           counterTotalAfter: purgeableRunnerVirusCounterAmount(
-            host.state.purgeableRunnerVirusCounters?.servers?.[
-              run.attackedServerId
-            ],
+            host.state.purgeableRunnerVirusCounters?.servers?.[serverId],
             socketCounterType,
           ),
           sourceCardDefinitionId: definition.id,
@@ -305,16 +301,12 @@ export function applyV181SuccessfulRunCounterTriggers(
           counterType: socketCounterType,
           added,
           remainingCounters: purgeableRunnerVirusCounterAmount(
-            host.state.purgeableRunnerVirusCounters?.servers?.[
-              run.attackedServerId
-            ],
+            host.state.purgeableRunnerVirusCounters?.servers?.[serverId],
             socketCounterType,
           ),
-          serverId: run.attackedServerId,
+          serverId,
         };
-        const socketServerLabel = host.servers.publicServerLabel(
-          run.attackedServerId,
-        );
+        const socketServerLabel = host.servers.publicServerLabel(serverId);
         if (socketServerLabel)
           socketEffectInput.serverLabel = socketServerLabel;
         if (added > 0)
@@ -346,7 +338,6 @@ export function applyV181SuccessfulRunCounterTriggers(
     }
     if (trigger.counterScope.kind !== "attacked_server")
       throw new Error("Unbekannter Virus-Counter-Scope.");
-    const serverId = run.attackedServerId;
     if (implementation.counterKind === "pox") {
       const current = host.counters.poxCountersForServer(serverId);
       const counterSummary = applyRunnerVirusCounterPrevention(
@@ -454,21 +445,18 @@ export function successfulRunMatchesVirusTrigger(
 ): boolean {
   const trigger = implementation.addOnSuccessfulRun;
   if (!trigger) return false;
+  const serverId = successfulRunServerId(run);
   if (trigger.server === "any") return true;
   if (
     trigger.server === "hq" ||
     trigger.server === "rd" ||
     trigger.server === "archives"
   )
-    return run.attackedServerId === trigger.server;
+    return serverId === trigger.server;
   if (trigger.server === "central")
-    return (
-      run.attackedServerId === "archives" ||
-      run.attackedServerId === "hq" ||
-      run.attackedServerId === "rd"
-    );
+    return serverId === "archives" || serverId === "hq" || serverId === "rd";
   if (trigger.server === "subsidiary_data_fort") {
-    return host.servers.mustServer(run.attackedServerId).kind === "remote";
+    return host.servers.mustServer(serverId).kind === "remote";
   }
   return false;
 }

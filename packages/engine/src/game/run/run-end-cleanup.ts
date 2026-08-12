@@ -35,6 +35,7 @@ import type {
   RunnerTurnFlags,
   RunTemporaryCreditCleanupResult,
 } from "./run-end-cleanup-contracts";
+import { successfulRunServerId } from "./run-server-identities";
 
 export function clearEncounterTemporaryTraceCredits(
   run: ActiveRun,
@@ -80,13 +81,14 @@ export function handleRunEndCleanup(
   if (!resumeAfterTag && run)
     applyRunEndVirusAccessTrashCounterRemoval(host, run, legalAction);
   if (!resumeAfterTag && run && successful) {
+    const serverId = successfulRunServerId(run);
     const flags = host.runner.ensureTurnFlags();
     flags.successfulRunThisTurn = true;
-    flags.lastSuccessfulRunServerId = run.attackedServerId;
-    if (run.attackedServerId === "hq") flags.successfulHqRunThisTurn = true;
-    if (run.attackedServerId === "rd") flags.successfulRdRunThisTurn = true;
+    flags.lastSuccessfulRunServerId = serverId;
+    if (serverId === "hq") flags.successfulHqRunThisTurn = true;
+    if (serverId === "rd") flags.successfulRdRunThisTurn = true;
     if (
-      (run.attackedServerId === "hq" || run.attackedServerId === "rd") &&
+      (serverId === "hq" || serverId === "rd") &&
       (Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0)) > 0 ||
         Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) > 0)
     ) {

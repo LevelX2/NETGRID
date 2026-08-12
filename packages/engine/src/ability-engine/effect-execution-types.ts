@@ -297,6 +297,7 @@ export type CardEffectMakeRunOptions = {
   accessCount?: number;
   freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
   accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
+  successfulRunServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
   successfulRunAccessReplacement?:
     | "corp_lose_credits"
     | "runner_spend_corp_lose_credits"

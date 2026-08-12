@@ -279,9 +279,10 @@ export type CardRunnerUtilityLongtailImplementation =
       kind: "trash_fully_broken_passed_ice";
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
-      cost: "target_rez_cost";
-      trashSourceOnResolve: true;
-      limit: "once_per_turn_per_source";
+      costs: readonly [
+        { kind: "trash_source"; amount: 1 },
+        { kind: "target_rez_cost"; target: "that_ice" },
+      ];
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

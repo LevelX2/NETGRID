@@ -206,6 +206,55 @@ describe("CardRegistry", () => {
     ]);
   });
 
+  it("preserves Original Set 061-080 prevention, run identity and costs", () => {
+    const shield = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_061_shield" as CardDefinitionId,
+    )!;
+    const shredder = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_062_shredder-uplink-protocol" as CardDefinitionId,
+    )!;
+    const startupImmolator = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_068_startup-immolator" as CardDefinitionId,
+    )!;
+
+    expect(shield.engine.damagePreventionSources).toMatchObject([
+      {
+        amount: 2,
+        amountMode: "up_to",
+        limit: { kind: "per_turn", amount: 2 },
+      },
+    ]);
+    expect(shredder.engine.abilities).toMatchObject([
+      {
+        effects: [
+          {
+            kind: "make_run",
+            target: { kind: "central_server", server: "archives" },
+            accessServerOverride: "hq",
+            successfulRunServerOverride: "hq",
+          },
+        ],
+      },
+    ]);
+    expect(startupImmolator.text.rulesText).toMatch(/^\[T\]:/);
+    expect(startupImmolator.engine.runnerUtilityLongtail).toMatchObject({
+      kind: "trash_fully_broken_passed_ice",
+      costs: [
+        { kind: "trash_source", amount: 1 },
+        { kind: "target_rez_cost", target: "that_ice" },
+      ],
+    });
+    expect(startupImmolator.engine.runnerUtilityLongtail).not.toHaveProperty(
+      "limit",
+    );
+    expect(startupImmolator.engine.runnerUtilityLongtail).not.toHaveProperty(
+      "trashSourceOnResolve",
+    );
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

@@ -1231,6 +1231,7 @@ export type RunState = {
   runId: string;
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
+  successfulRunServerOverride?: Exclude<ServerId, "new_remote">;
   freeTrashAccessZones?: Array<"rd" | "hq">;
   virusAccessTrashCounterUses?: Array<{
     counterType: Extract<PurgeableRunnerVirusCounterType, "garbage">;

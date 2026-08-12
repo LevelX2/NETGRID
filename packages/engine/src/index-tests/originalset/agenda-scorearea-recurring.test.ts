@@ -956,11 +956,40 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     ).toBe(true);
 
     let shredderState = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-shredder-uplink-activated-run"),
+      createGameAfterSetup({
+        seed: "spotcheck-shredder-uplink-activated-run",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "spotcheck_shredder_uplink_runner",
+          name: "Spotcheck Shredder Uplink Runner",
+          cards: [
+            { id: "onr_v1_062_shredder-uplink-protocol", quantity: 1 },
+            { id: "onr_v1_080_core-command-jettison-ice", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (entry) =>
+                entry.id !== "onr_v1_062_shredder-uplink-protocol" &&
+                entry.id !== "onr_v1_080_core-command-jettison-ice",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "spotcheck_shredder_uplink_corp",
+          name: "Spotcheck Shredder Uplink Corp",
+          cards: [
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (entry) => entry.id !== "simple_barrier_ice",
+            ),
+          ],
+        },
+      }),
     );
     shredderState.runner.credits = 20;
     shredderState.runner.memoryLimit = 8;
     moveRunnerCardToGrip(shredderState, "onr_v1_062_shredder-uplink-protocol");
+    moveRunnerCardToGrip(shredderState, "onr_v1_080_core-command-jettison-ice");
     shredderState = apply(
       shredderState,
       "runner",
@@ -974,6 +1003,16 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "simple_economy_operation",
     );
     keepOnlyCorpHqCard(shredderState, hqCardId);
+    const targetIceId = putCorpIceOnServer(
+      shredderState,
+      "rd",
+      "simple_barrier_ice",
+    );
+    shredderState.cardInstances[targetIceId] = {
+      ...shredderState.cardInstances[targetIceId]!,
+      faceup: true,
+      rezzed: true,
+    };
     const shredderInitial = structuredClone(shredderState);
     const shredderReplayStart = shredderState.eventLog.length;
     shredderState = apply(
@@ -985,7 +1024,10 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
           "onr_v1_062_shredder-uplink-protocol",
     );
     expect(shredderState.run?.attackedServerId).toBe("archives");
+    expect(shredderState.run?.accessServerOverride).toBe("hq");
+    expect(shredderState.run?.successfulRunServerOverride).toBe("hq");
     expect(shredderState.run?.breach?.serverId).toBe("hq");
+    expect(shredderState.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
     shredderState = apply(
       shredderState,
       "runner",
@@ -996,6 +1038,22 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       cardDefinitionId: "simple_economy_operation",
       serverLabel: "HQ",
     });
+    expect(shredderState.runnerTurnFlags).toMatchObject({
+      successfulRunThisTurn: true,
+      successfulHqRunThisTurn: true,
+      lastSuccessfulRunServerId: "hq",
+    });
+    expect(shredderState.runnerTurnFlags?.successfulRdRunThisTurn).not.toBe(
+      true,
+    );
+    expect(
+      getLegalActions(shredderState, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(shredderState, action) ===
+            "onr_v1_080_core-command-jettison-ice",
+      ),
+    ).toBe(true);
     expect(
       replayEvents(
         shredderInitial,

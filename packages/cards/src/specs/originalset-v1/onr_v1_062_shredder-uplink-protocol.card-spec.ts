@@ -70,6 +70,7 @@ export const cardSpec = {
               server: "archives",
             },
             accessServerOverride: "hq",
+            successfulRunServerOverride: "hq",
             visibility: "public",
           },
         ],

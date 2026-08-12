@@ -4285,6 +4285,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(startupAction.payload?.targetIceId).toBe(iceId);
     expect(startupAction.costs[0]?.credits).toBe(3);
+    expect(startupAction.payload).toMatchObject({
+      cardImplementationTrashSourceCost: true,
+      targetRezCost: true,
+    });
 
     state = apply(
       state,
@@ -4313,7 +4317,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       rezCostPaid: 3,
       trashedCardDefinitionId: "simple_barrier_ice",
       trashedCount: 1,
-      sourceAbilityExhausted: true,
+      sourceTrashed: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,

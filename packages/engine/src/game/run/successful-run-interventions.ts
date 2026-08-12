@@ -38,6 +38,7 @@ import type {
   SuccessfulRunInterventionExecutionResult,
   SuccessfulRunInterventionHost,
 } from "./successful-run-contracts";
+import { successfulRunServerId } from "./run-server-identities";
 
 export function hqCorpLoseCreditsBeforeAccessEffect(
   followups: readonly CardSuccessfulRunFollowupImplementation[] | undefined,
@@ -156,6 +157,7 @@ export function buildSuccessfulRunFollowupActions(
   run: ActiveRun,
 ): LegalAction[] {
   if (!run.successful || run.phase !== "access") return [];
+  const successfulServerId = successfulRunServerId(run);
   const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
   const actions: LegalAction[] = [];
   for (const sourceCardId of [
@@ -166,7 +168,7 @@ export function buildSuccessfulRunFollowupActions(
     const definition = host.cards.definitionFor(sourceCardId);
     const forceRezFollowup = hasSuccessfulRunForceRezFollowup(definition.id);
     if (forceRezFollowup) {
-      const server = host.servers.mustServer(run.attackedServerId);
+      const server = host.servers.mustServer(successfulServerId);
       const unrezzedCount = server.ice.filter(
         (iceId) => !host.cards.cardInstanceFor(iceId).rezzed,
       ).length;
@@ -198,7 +200,7 @@ export function buildSuccessfulRunFollowupActions(
         (followup) =>
           followup.kind === "skip_rd_access_add_purgeable_runner_virus_counter",
       ) &&
-      run.attackedServerId === "rd" &&
+      successfulServerId === "rd" &&
       !run.accessedCardId
     ) {
       actions.push(
@@ -208,7 +210,7 @@ export function buildSuccessfulRunFollowupActions(
           [],
           {
             cardId: sourceCardId,
-            serverId: run.attackedServerId,
+            serverId: successfulServerId,
             successfulRunAccessReplacement:
               "skip_access_add_purgeable_runner_virus_counter",
             counterSide: "corp",
@@ -223,7 +225,7 @@ export function buildSuccessfulRunFollowupActions(
     );
     if (
       hqCreditLossFollowup &&
-      run.attackedServerId === "hq" &&
+      successfulServerId === "hq" &&
       host.state.runner.rig.resources.includes(sourceCardId)
     ) {
       actions.push(
@@ -240,7 +242,7 @@ export function buildSuccessfulRunFollowupActions(
               ...successfulRunFollowupBinding(hqCreditLossFollowup),
             }),
             cardId: sourceCardId,
-            serverId: run.attackedServerId,
+            serverId: successfulServerId,
             proteusHiddenSuccessfulRunFollowup: "corp_lose_credits",
             creditLoss: hqCreditLossFollowup.effect.amount,
           },
@@ -252,10 +254,10 @@ export function buildSuccessfulRunFollowupActions(
     );
     if (
       remoteTrashFortFollowup &&
-      host.servers.mustServer(run.attackedServerId).kind === "remote" &&
+      host.servers.mustServer(successfulServerId).kind === "remote" &&
       host.state.runner.rig.resources.includes(sourceCardId)
     ) {
-      const server = host.servers.mustServer(run.attackedServerId);
+      const server = host.servers.mustServer(successfulServerId);
       const targetCount = server.root.length + server.ice.length;
       if (targetCount > 0) {
         actions.push(
@@ -272,7 +274,7 @@ export function buildSuccessfulRunFollowupActions(
                 ...successfulRunFollowupBinding(remoteTrashFortFollowup),
               }),
               cardId: sourceCardId,
-              serverId: run.attackedServerId,
+              serverId: successfulServerId,
               proteusHiddenSuccessfulRunFollowup: "trash_remote_fort",
               targetCount,
             },
@@ -285,7 +287,7 @@ export function buildSuccessfulRunFollowupActions(
         (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
       )
     ) {
-      const server = host.servers.mustServer(run.attackedServerId);
+      const server = host.servers.mustServer(successfulServerId);
       if (server.kind !== "archives" && server.ice.length > 1) {
         actions.push(
           host.actions.createRunnerTriggerAction(
@@ -306,7 +308,7 @@ export function buildSuccessfulRunFollowupActions(
       runnerUtilityLongtailKindForDefinition(definition.id) ===
       "successful_run_fort_counter_expose"
     ) {
-      const server = host.servers.mustServer(run.attackedServerId);
+      const server = host.servers.mustServer(successfulServerId);
       if (server.kind !== "archives") {
         actions.push(
           host.actions.createRunnerTriggerAction(
@@ -424,7 +426,7 @@ export function resolveHiddenSuccessfulRunBeforeAccessEffect(
     legalAction.payload?.sourceCardId ?? legalAction.payload?.cardId ?? "",
   ) as CardInstanceId;
   const serverId = String(
-    legalAction.payload?.serverId ?? run.attackedServerId,
+    legalAction.payload?.serverId ?? successfulRunServerId(run),
   ) as Exclude<ServerId, "new_remote">;
   if (!run.successful || run.phase !== "access")
     throw new Error(
@@ -442,12 +444,12 @@ export function resolveHiddenSuccessfulRunBeforeAccessEffect(
   if (!followup)
     throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
   if (followup.server === "hq") {
-    if (run.attackedServerId !== "hq")
+    if (successfulRunServerId(run) !== "hq")
       throw new Error(
         "Credit Subversion ist nur vor HQ-Access nach erfolgreichem Run legal.",
       );
   } else {
-    if (serverId !== run.attackedServerId)
+    if (serverId !== successfulRunServerId(run))
       throw new Error(
         "Death from Above muss das gerade erfolgreiche Remote treffen.",
       );
@@ -572,7 +574,7 @@ export function resolveArmageddonDoomCounterInsteadOfAccess(
   if (
     !run.successful ||
     run.phase !== "access" ||
-    run.attackedServerId !== "rd"
+    successfulRunServerId(run) !== "rd"
   )
     throw new Error(
       "Armageddon ist nur statt Zugriff nach erfolgreichem R&D-Run legal.",
@@ -644,12 +646,12 @@ export function resolveSuccessfulRunInterventionChoice(
   if (
     !sourceCardId ||
     !host.state.cardInstances[sourceCardId] ||
-    run.attackedServerId !== serverId ||
+    successfulRunServerId(run) !== serverId ||
     run.position.kind !== "server" ||
     run.delayedSuccessfulRun
   )
     throw new Error("Der Delayed-Success-Kontext ist nicht mehr gueltig.");
-  const server = host.servers.mustServer(run.attackedServerId);
+  const server = host.servers.mustServer(successfulRunServerId(run));
   if (
     !server.root.includes(sourceCardId as CardInstanceId) ||
     !host.cards.cardInstanceFor(sourceCardId as CardInstanceId).rezzed
@@ -682,7 +684,7 @@ export function resolveSuccessfulRunInterventionChoice(
       fortWindowSourceTitle: definition.title,
       sourceDefinitionId: definition.id,
       sourceCardId,
-      serverId: run.attackedServerId,
+      serverId: successfulRunServerId(run),
       hiddenZoneAction: "successful_run_intervention_declined",
       interventionDecision: "decline",
     };
@@ -691,7 +693,7 @@ export function resolveSuccessfulRunInterventionChoice(
       handled: true,
       sourceCardId: sourceCardId as CardInstanceId,
       sourceDefinitionId: definition.id,
-      serverId: run.attackedServerId,
+      serverId: successfulRunServerId(run),
       accessShouldStart: true,
       stateChanged: true,
       ...resolvedPayloadFor(legalAction),

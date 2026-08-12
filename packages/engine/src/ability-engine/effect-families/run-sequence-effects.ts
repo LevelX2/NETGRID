@@ -75,6 +75,11 @@ export function executeRunSequenceEffect(
         ...(effect.accessServerOverride
           ? { accessServerOverride: effect.accessServerOverride }
           : {}),
+        ...(effect.successfulRunServerOverride
+          ? {
+              successfulRunServerOverride: effect.successfulRunServerOverride,
+            }
+          : {}),
         ...(effect.successfulRunAccessReplacement
           ? {
               successfulRunAccessReplacement:

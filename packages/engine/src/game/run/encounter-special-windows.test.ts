@@ -283,6 +283,14 @@ describe("encounter special windows boundary", () => {
     state.phase = "run";
     state.timingPoint = "run.jack_out_window";
     state.run!.phase = "movement";
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {}),
+      abilityUsedSourceIdsByLimitKey: {
+        "trash_fully_broken_passed_ice:once_per_turn_per_source": [
+          "startup_1" as CardInstanceId,
+        ],
+      },
+    } as NonNullable<GameState["runnerTurnFlags"]>;
     const trashed: CardInstanceId[] = [];
     const runnerTrashed: CardInstanceId[] = [];
     const host = encounterSpecialWindowHost(state, {
@@ -317,6 +325,8 @@ describe("encounter special windows boundary", () => {
         targetIceDefinitionId: "onr_v1_272_too-many-doors",
         runnerUtilityAbility: "trash_fully_broken_passed_ice",
         abilityKind: "trash_fully_broken_passed_ice",
+        cardImplementationTrashSourceCost: true,
+        targetRezCost: true,
         rezCostPaid: 3,
       },
     });
@@ -337,17 +347,14 @@ describe("encounter special windows boundary", () => {
     expect(state.runner.rig.programs).not.toContain("startup_1");
     expect(state.runner.heap).toContain("startup_1");
     expect(state.run?.fullyBrokenPassedIceTrashPendingId).toBeUndefined();
-    expect(
-      state.runnerTurnFlags?.abilityUsedSourceIdsByLimitKey?.[
-        "trash_fully_broken_passed_ice:once_per_turn_per_source"
-      ],
-    ).toEqual(["startup_1"]);
     expect(actions[0]!.payload).toMatchObject({
       sourceDefinitionId: "onr_v1_068_startup-immolator",
       trashedCount: 1,
       trashedCardDefinitionId: "onr_v1_272_too-many-doors",
       runnerCreditsAfter: 3,
-      sourceAbilityExhausted: true,
+      sourceTrashed: true,
+      cardImplementationTrashSourceCost: true,
+      targetRezCost: true,
     });
   });
 

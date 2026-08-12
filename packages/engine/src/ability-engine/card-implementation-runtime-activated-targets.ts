@@ -273,6 +273,9 @@ function makeRunLegalActionProjectionPayload(
     ...(effect.accessServerOverride
       ? { accessServerId: effect.accessServerOverride }
       : {}),
+    ...(effect.successfulRunServerOverride
+      ? { successfulRunServerId: effect.successfulRunServerOverride }
+      : {}),
     ...(effect.successfulRunAccessReplacement
       ? {
           successfulRunAccessReplacement: effect.successfulRunAccessReplacement,

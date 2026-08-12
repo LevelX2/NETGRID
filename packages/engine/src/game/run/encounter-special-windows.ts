@@ -374,11 +374,6 @@ export function fullyBrokenPassedIceTrashPostPassActions(
   if (!run || !targetIceId || !state.cardInstances[targetIceId]) return [];
   if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
   if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
-  const used = new Set(
-    ensureRunnerTurnFlags(state).abilityUsedSourceIdsByLimitKey?.[
-      fullyBrokenPassedIceTrashLimitKey()
-    ] ?? [],
-  );
   const rezCost = quoteIceRezCost(host, targetIceId);
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
@@ -386,7 +381,6 @@ export function fullyBrokenPassedIceTrashPostPassActions(
     .filter((cardId) =>
       fullyBrokenPassedIceTrashImplementationForCard(state, cardId),
     )
-    .filter((cardId) => !used.has(cardId))
     .sort()
     .map((sourceCardId) =>
       buildLegalAction(
@@ -402,6 +396,8 @@ export function fullyBrokenPassedIceTrashPostPassActions(
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "trash_fully_broken_passed_ice",
           abilityKind: "trash_fully_broken_passed_ice",
+          cardImplementationTrashSourceCost: true,
+          targetRezCost: true,
           rezCostPaid: rezCost,
         },
       ),
@@ -687,13 +683,6 @@ export function resolveFullyBrokenPassedIceTrash(
     )
   )
     throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
-  const flags = ensureRunnerTurnFlags(state);
-  const limitKey = fullyBrokenPassedIceTrashLimitKey();
-  const used = flags.abilityUsedSourceIdsByLimitKey?.[limitKey] ?? [];
-  if (used.includes(sourceCardId as CardInstanceId))
-    throw new Error(
-      "Die Post-Pass-Faehigkeit wurde in diesem Zug bereits genutzt.",
-    );
   if (
     !targetIceId ||
     run.fullyBrokenPassedIceTrashPendingId !== targetIceId ||
@@ -707,24 +696,20 @@ export function resolveFullyBrokenPassedIceTrash(
     throw new Error(
       "Die Post-Pass-Faehigkeit muss exakt die Rez-Kosten zahlen.",
     );
+  if (!host.callbacks?.trashRunnerInstalledCardToHeap)
+    throw new Error("Runner-Trash-Callback fehlt.");
+  if (!host.callbacks?.trashCorpInstalledCard)
+    throw new Error("Corp-Trash-Callback fehlt.");
   spendCredits(host, "runner", rezCost);
   const targetDefinitionId = definitionFor(
     state,
     targetIceId as CardInstanceId,
   ).id;
-  if (!host.callbacks?.trashCorpInstalledCard)
-    throw new Error("Corp-Trash-Callback fehlt.");
-  host.callbacks.trashCorpInstalledCard(targetIceId as CardInstanceId);
-  if (!host.callbacks?.trashRunnerInstalledCardToHeap)
-    throw new Error("Runner-Trash-Callback fehlt.");
   host.callbacks.trashRunnerInstalledCardToHeap(
     sourceCardId as CardInstanceId,
     legalAction,
   );
-  flags.abilityUsedSourceIdsByLimitKey = {
-    ...(flags.abilityUsedSourceIdsByLimitKey ?? {}),
-    [limitKey]: [...used, sourceCardId as CardInstanceId].sort(),
-  };
+  host.callbacks.trashCorpInstalledCard(targetIceId as CardInstanceId);
   const {
     fullyBrokenPassedIceTrashPendingId: _fullyBrokenPassedIceTrashPending,
     ...runWithoutFullyBrokenPassedIceTrashPending
@@ -741,7 +726,9 @@ export function resolveFullyBrokenPassedIceTrash(
     trashedCount: 1,
     trashedCardDefinitionId: targetDefinitionId,
     runnerCreditsAfter: state.runner.credits,
-    sourceAbilityExhausted: true,
+    sourceTrashed: true,
+    cardImplementationTrashSourceCost: true,
+    targetRezCost: true,
   };
   return {
     handled: true,
@@ -851,9 +838,10 @@ function fullyBrokenPassedIceTrashImplementationForCard(
       kind: "trash_fully_broken_passed_ice";
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
-      cost: "target_rez_cost";
-      trashSourceOnResolve: true;
-      limit: "once_per_turn_per_source";
+      costs: readonly [
+        { kind: "trash_source"; amount: 1 },
+        { kind: "target_rez_cost"; target: "that_ice" },
+      ];
       visibility: "public";
     }
   | undefined {
@@ -863,10 +851,6 @@ function fullyBrokenPassedIceTrashImplementationForCard(
   return implementation?.kind === "trash_fully_broken_passed_ice"
     ? implementation
     : undefined;
-}
-
-function fullyBrokenPassedIceTrashLimitKey(): string {
-  return "trash_fully_broken_passed_ice:once_per_turn_per_source";
 }
 
 function fullyBrokenPassedIceDerezImplementationForCard(

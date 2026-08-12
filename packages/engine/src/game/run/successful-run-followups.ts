@@ -30,6 +30,7 @@ import type {
   SuccessfulRunInterventionExecutionResult,
   SuccessfulRunInterventionHost,
 } from "./successful-run-contracts";
+import { successfulRunServerId } from "./run-server-identities";
 
 export function applyDirectSuccessfulRunTriggers(
   host: SuccessfulRunInterventionHost,
@@ -231,7 +232,7 @@ export function resolveSuccessfulRunForceRez(
   if (
     !run.successful ||
     run.phase !== "access" ||
-    serverId !== run.attackedServerId
+    serverId !== successfulRunServerId(run)
   )
     throw new Error("False Echo ist nur direkt nach erfolgreichem Run legal.");
   if (!host.state.runner.rig.programs.includes(sourceCardId))
@@ -306,7 +307,7 @@ export function resolveSuccessfulRunReverseIce(
   if (
     !run.successful ||
     run.phase !== "access" ||
-    serverId !== run.attackedServerId
+    serverId !== successfulRunServerId(run)
   )
     throw new Error(
       "Netspace Inverter ist nur direkt nach erfolgreichem Run legal.",
@@ -370,7 +371,7 @@ export function resolveSuccessfulRunFortCounterExpose(
   if (!implementation)
     throw new Error("Die I-Spy-Faehigkeit passt nicht zur Karte.");
   assertFortCounterExposeImplementation(implementation);
-  if (serverId !== run.attackedServerId)
+  if (serverId !== successfulRunServerId(run))
     throw new Error("I Spy kann nur den gerade erfolgreichen Fort markieren.");
   const server = host.servers.mustServer(serverId);
   if (server.kind === "archives")

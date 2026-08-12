@@ -940,6 +940,63 @@ describe("run end cleanup", () => {
     );
   });
 
+  it("uses the semantic successful-run server for flags and virus triggers", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_shredder_pipeline",
+        attackedServerId: "archives",
+        successfulRunServerOverride: "hq",
+        phase: "movement",
+        position: { kind: "server", serverId: "archives" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["viral_pipeline"],
+      instances: {
+        viral_pipeline: instance(
+          "viral_pipeline",
+          "onr_proteus_099_viral-pipeline",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+      },
+      definitions: {
+        "onr_proteus_099_viral-pipeline": definition(
+          "onr_proteus_099_viral-pipeline",
+          "program",
+        ),
+      },
+      virusImplementations: {
+        viral_pipeline: {
+          counterKind: "pipe",
+          addOnSuccessfulRun: {
+            server: "central",
+            counterScope: { kind: "attacked_central_server_pool" },
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      },
+    });
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.runnerTurnFlags).toMatchObject({
+      successfulRunThisTurn: true,
+      successfulHqRunThisTurn: true,
+      lastSuccessfulRunServerId: "hq",
+    });
+    expect(fixture.state.purgeableRunnerVirusCounters?.servers).toMatchObject({
+      hq: { socket_hq: 1 },
+    });
+    expect(
+      fixture.state.purgeableRunnerVirusCounters?.servers?.archives,
+    ).toBeUndefined();
+    expect(fixture.legalAction.payload).toMatchObject({
+      serverId: "hq",
+      counterType: "socket_hq",
+      counterDelta: 1,
+    });
+  });
+
   it("removes Garbage counters once at run end after one or more free trashes", () => {
     const fixture = makeHost({
       run: {

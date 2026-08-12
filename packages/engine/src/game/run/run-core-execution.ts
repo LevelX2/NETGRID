@@ -23,6 +23,7 @@ export type StartRunOptions = Pick<
   | "freeTrashAccessZones"
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
+  | "successfulRunServerOverride"
   | "successfulRunAccessReplacement"
   | "conditionalAccessBonus"
   | "corpRezCostSurcharge"
@@ -147,6 +148,9 @@ export function startRun(
     ...(options?.grantBonusRunOnFinish ? { grantBonusRunOnFinish: true } : {}),
     ...(options?.accessServerOverride
       ? { accessServerOverride: options.accessServerOverride }
+      : {}),
+    ...(options?.successfulRunServerOverride
+      ? { successfulRunServerOverride: options.successfulRunServerOverride }
       : {}),
     ...(options?.successfulRunAccessReplacement
       ? {
