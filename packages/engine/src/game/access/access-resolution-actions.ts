@@ -661,17 +661,21 @@ export function delayAgendaAccessReplacementScore(
     throw new Error(
       "Der verzögerte Access-Effekt kann nur Agenda-Scoring verzögern.",
     );
-  const serverId = run.breach?.serverId ?? run.attackedServerId;
-  const zone = host.cards.cardInstanceFor(cardId).zone;
-  if (
-    zone.side !== "corp" ||
-    zone.zone !== "serverRoot" ||
-    zone.serverId !== serverId
-  ) {
-    throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Remote.");
-  }
+  const breach = run.breach;
+  const serverId = breach?.serverId ?? run.attackedServerId;
   if (replacementEffect.serverId !== serverId)
     throw new Error("Der verzögerte Access-Effekt passt nicht zu diesem Fort.");
+  const currentEntry = breach?.queue[breach.currentIndex];
+  if (
+    !currentEntry ||
+    currentEntry.serverId !== serverId ||
+    currentEntry.cardInstanceId !== cardId ||
+    currentEntry.status !== "accessed"
+  ) {
+    throw new Error(
+      "Die verzögerte Agenda ist nicht als aktueller Access dieses Forts gebunden.",
+    );
+  }
   const existing = host.state.delayedAccessEffects ?? [];
   if (!existing.some((entry) => entry.agendaId === cardId)) {
     host.state.delayedAccessEffects = [
