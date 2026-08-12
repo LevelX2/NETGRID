@@ -46,7 +46,7 @@ export const cardSpec = {
       counterKind: "fait",
       addOnSuccessfulRun: {
         server: "subsidiary_data_fort",
-        target: "successful_run_server",
+        counterScope: { kind: "attacked_server" },
         amount: 1,
         visibility: "public",
       },

@@ -1082,6 +1082,9 @@ describe("V1.9.1 Mechanikpaket J", () => {
       expect(cockroachId).toBeDefined();
       expect(
         cockroachId ? cardCounterAmount(state, cockroachId, "virus") : 0,
+      ).toBe(0);
+      expect(
+        state.purgeableRunnerVirusCounters?.corp?.cockroach,
       ).toBeGreaterThanOrEqual(2);
       const lastCockroachCounterEvent = [...state.eventLog]
         .reverse()
@@ -1092,7 +1095,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
             effects.some(
               (effect) =>
                 effect.kind === "counter_change" &&
-                effect.reason === "cockroach_successful_hq_run",
+                effect.reason === "runner_virus_successful_run",
             )
           );
         });
@@ -1105,7 +1108,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
           counterType: "cockroach",
           addedCounterAmount: 1,
           remainingCounters: 2,
-          reason: "cockroach_successful_hq_run",
+          reason: "runner_virus_successful_run",
           sourceDefinitionId: "onr_v1_013_cockroach",
           sourceTitle: "Cockroach",
         }),
@@ -1123,16 +1126,16 @@ describe("V1.9.1 Mechanikpaket J", () => {
       ).not.toBe(true);
       expect(runnerView.opponent.identity.counterDisplays).toContainEqual(
         expect.objectContaining({
-          id: "cockroach",
+          id: "runner_virus_corp_cockroach",
           amount: 2,
           label: "Cockroach-Counter",
-          ariaLabel: "2 Cockroach-Counter auf der Korp",
+          ariaLabel: "2 Cockroach-Counter",
           counterType: "cockroach",
         }),
       );
       expect(corpView.own.identity.counterDisplays).toContainEqual(
         expect.objectContaining({
-          id: "cockroach",
+          id: "runner_virus_corp_cockroach",
           amount: 2,
           label: "Cockroach-Counter",
           counterType: "cockroach",
@@ -1259,6 +1262,12 @@ describe("V1.9.1 Mechanikpaket J", () => {
         GameState["poxCountersByServer"]
       >;
       beforeCount = state.poxCountersByServer?.[serverId] ?? 0;
+    } else if (selectedValue.startsWith("corp_pool:")) {
+      const counterType = selectedValue.slice("corp_pool:".length) as
+        | "incubate"
+        | "cockroach";
+      beforeCount =
+        state.purgeableRunnerVirusCounters?.corp?.[counterType] ?? 0;
     }
 
     const initial = structuredClone(state);
@@ -1273,6 +1282,13 @@ describe("V1.9.1 Mechanikpaket J", () => {
         GameState["poxCountersByServer"]
       >;
       expect(state.poxCountersByServer?.[serverId] ?? 0).toBe(beforeCount + 1);
+    } else if (selectedValue.startsWith("corp_pool:")) {
+      const counterType = selectedValue.slice("corp_pool:".length) as
+        | "incubate"
+        | "cockroach";
+      expect(state.purgeableRunnerVirusCounters?.corp?.[counterType] ?? 0).toBe(
+        beforeCount + 1,
+      );
     }
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1439,30 +1455,40 @@ describe("V1.9.1 Mechanikpaket J", () => {
     expect(cockroachId).toBeDefined();
     expect(incubatorId).toBeDefined();
     if (!cockroachId || !incubatorId) return;
-    expect(
-      cardCounterAmount(state, cockroachId, "virus"),
-    ).toBeGreaterThanOrEqual(2);
-    expect(
-      cardCounterAmount(state, incubatorId, "virus"),
-    ).toBeGreaterThanOrEqual(2);
+    expect(cardCounterAmount(state, cockroachId, "virus")).toBe(0);
+    expect(cardCounterAmount(state, incubatorId, "virus")).toBe(0);
+    expect(state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      cockroach: 2,
+      incubate: 2,
+    });
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    expect(state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      cockroach: 2,
+      incubate: 2,
+    });
+    expect(state.phase).toBe("corp_action_phase");
+    expect(state.corp.clicks).toBe(3);
     expect(
       getLegalActions(state, "corp").some(
-        (action) => action.type === "purge_virus_counters",
+        (action) => action.type === "purge_runner_virus_counters",
       ),
     ).toBe(true);
     state = apply(
       state,
       "corp",
-      (action) => action.type === "purge_virus_counters",
+      (action) => action.type === "purge_runner_virus_counters",
     );
 
     expect(cardCounterAmount(state, cockroachId, "virus")).toBe(0);
     expect(cardCounterAmount(state, incubatorId, "virus")).toBe(0);
+    expect(state.purgeableRunnerVirusCounters?.corp?.cockroach ?? 0).toBe(0);
+    expect(state.purgeableRunnerVirusCounters?.corp?.incubate ?? 0).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      purgedCounterType: "virus",
+      purgedCounterType: "runner_virus",
+      purgeModel: "future_action_debt",
+      actionDebtAdded: 3,
     });
   });
 });

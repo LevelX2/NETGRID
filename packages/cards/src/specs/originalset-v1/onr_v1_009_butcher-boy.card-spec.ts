@@ -44,9 +44,10 @@ export const cardSpec = {
       capabilityKey: capabilityKey("virus_counter"),
       addressability: ["plan", "action", "quote", "debug"],
       counterKind: "successful_hq_run_pair_credit",
+      publicLabel: "Butcher-Boy-Counter",
       addOnSuccessfulRun: {
         server: "hq",
-        target: "source",
+        counterScope: { kind: "shared_corp_pool" },
         amount: 1,
         visibility: "public",
       },

@@ -12750,7 +12750,7 @@
     },
     {
       "cardId": "onr_proteus_084_crumble",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:cfad8aa0d51c0a9c",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:bcba2ed24976a666",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:904a286d89525b89",
       "hint": {
         "cardId": "onr_proteus_084_crumble",
@@ -13141,7 +13141,7 @@
     },
     {
       "cardId": "onr_proteus_089_garbage-in",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:36aba7ac3b32f1f8",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:689a7458b889586c",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:28f779ac14aedbf0",
       "hint": {
         "cardId": "onr_proteus_089_garbage-in",
@@ -13250,7 +13250,7 @@
     },
     {
       "cardId": "onr_proteus_090_highlighter",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9810d0b38fc86407",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9101d8f386e4c72f",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c357bd2ec7085ab2",
       "hint": {
         "cardId": "onr_proteus_090_highlighter",
@@ -13563,7 +13563,7 @@
     },
     {
       "cardId": "onr_proteus_094_scaldan",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d45df1ec2d9a6358",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b23ae11e828aa502",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_094_scaldan",
@@ -13739,7 +13739,7 @@
     },
     {
       "cardId": "onr_proteus_097_taxman",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:28098978d74d280c",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:85a3edd6320f44e2",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:dbe734a51d79a629",
       "hint": {
         "cardId": "onr_proteus_097_taxman",
@@ -13815,7 +13815,7 @@
     },
     {
       "cardId": "onr_proteus_098_vienna-22",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:891fc0816795bde5",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b93ef0a7bd0bfd53",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fde0bee66f9b0d8a",
       "hint": {
         "cardId": "onr_proteus_098_vienna-22",
@@ -13921,7 +13921,7 @@
     },
     {
       "cardId": "onr_proteus_099_viral-pipeline",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d8e0b1e79fb0264b",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1c750817229c3bfb",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_099_viral-pipeline",
@@ -18277,7 +18277,7 @@
     },
     {
       "cardId": "onr_v1_002_ai-boon",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1b19f068cebb856c",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a188e40a6d49e756",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:17b6d6c8acf5533c",
       "hint": {
         "cardId": "onr_v1_002_ai-boon",
@@ -18428,7 +18428,7 @@
     },
     {
       "cardId": "onr_v1_004_bakdoor",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:85e9d532739fc0de",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:45ae4e004197cf14",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
       "hint": {
         "cardId": "onr_v1_004_bakdoor",
@@ -18701,7 +18701,7 @@
     },
     {
       "cardId": "onr_v1_008_boardwalk",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4006c6ca35661946",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0911c69b4e04456f",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:78e7bf667dad30c2",
       "hint": {
         "cardId": "onr_v1_008_boardwalk",
@@ -18736,7 +18736,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -18791,7 +18791,7 @@
     },
     {
       "cardId": "onr_v1_009_butcher-boy",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a5fbd94db79d57c1",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5480cdacde9f3e28",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f8c226c7bab6d123",
       "hint": {
         "cardId": "onr_v1_009_butcher-boy",
@@ -18823,7 +18823,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -18867,7 +18867,7 @@
     },
     {
       "cardId": "onr_v1_010_cascade",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a5f49d3e3094c342",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d002d306e3fdc30a",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e44aec053c120421",
       "hint": {
         "cardId": "onr_v1_010_cascade",
@@ -19051,7 +19051,7 @@
     },
     {
       "cardId": "onr_v1_013_cockroach",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f87445033df3aec7",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b2479cfeb780b142",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b2b660b0e64c4a7c",
       "hint": {
         "cardId": "onr_v1_013_cockroach",
@@ -19083,7 +19083,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -19280,7 +19280,7 @@
     },
     {
       "cardId": "onr_v1_017_deep-thought",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2a77a0c4de58ff90",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3ad1e68d8743d749",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:194d080fb828fae3",
       "hint": {
         "cardId": "onr_v1_017_deep-thought",
@@ -19315,7 +19315,7 @@
             "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -19507,7 +19507,7 @@
     },
     {
       "cardId": "onr_v1_020_dupre",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a60b02fc330fc978",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e86037419dd89f6d",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:cb21363e94bf2a22",
       "hint": {
         "cardId": "onr_v1_020_dupre",
@@ -19769,7 +19769,7 @@
     },
     {
       "cardId": "onr_v1_025_fait-accompli",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:7453f5b408145788",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4a1e13e61e2b9062",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8bffe794ae620eb8",
       "hint": {
         "cardId": "onr_v1_025_fait-accompli",
@@ -19985,7 +19985,7 @@
     },
     {
       "cardId": "onr_v1_029_gremlins",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:df33c4f1454abf35",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:446aaafe4c6928a2",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1104cbb1bc8a5a55",
       "hint": {
         "cardId": "onr_v1_029_gremlins",
@@ -20017,7 +20017,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -20241,7 +20241,7 @@
     },
     {
       "cardId": "onr_v1_034_incubator",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9305f94143545865",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:fa9878d66a74033a",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_v1_034_incubator",
@@ -20273,7 +20273,7 @@
             "scope": "server",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -21034,7 +21034,7 @@
     },
     {
       "cardId": "onr_v1_046_pattels-virus",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c1f93fe87314f59c",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:80fc593f30736bcb",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ceb896ecfb8b1770",
       "hint": {
         "cardId": "onr_v1_046_pattels-virus",
@@ -21272,7 +21272,7 @@
     },
     {
       "cardId": "onr_v1_049_pox",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5ffcd2b8c30fdeec",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9b4b4c261befd762",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:61403c1590d58629",
       "hint": {
         "cardId": "onr_v1_049_pox",
@@ -22285,7 +22285,7 @@
     },
     {
       "cardId": "onr_v1_064_skivviss",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9ea26b3cb207b2e8",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6979e6db3c37f267",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8c2927556748ab69",
       "hint": {
         "cardId": "onr_v1_064_skivviss",
@@ -22317,7 +22317,7 @@
             "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },

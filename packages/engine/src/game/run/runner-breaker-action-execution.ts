@@ -10,9 +10,7 @@ import {
   icebreakerAbilityHasSpecialEffect,
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
-import {
-  addTemporaryBreakerStrengthModifierUntilEndOfTurn,
-} from "../state/temporary-breaker-strength";
+import { addTemporaryBreakerStrengthModifierUntilEndOfTurn } from "../state/temporary-breaker-strength";
 import type { RunnerRunCreditSpendResult } from "./run-duration-payment";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -102,7 +100,10 @@ export type RunnerBreakerActionExecutionHost = {
   };
   tracking: {
     recordBartmossEncounterUsage: (breakerId: CardInstanceId) => void;
-    recordDupreBreakUsage: (breakerId: CardInstanceId) => void;
+    recordFortBoundBreakerUsage: (
+      breakerId: CardInstanceId,
+      awardsRunEndCounter: boolean,
+    ) => void;
     recordSnowballBreakUsage: (breakerId: CardInstanceId) => void;
     recordRunEndTrashBreakerUsage?: (breakerId: CardInstanceId) => void;
   };
@@ -144,7 +145,9 @@ function executePumpBreakerAction(
   if (isVariablePump) {
     const expectedCost = pumpAmount;
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
-      throw new Error("Variable Icebreaker-Pump-Kosten sind nicht mehr gueltig.");
+      throw new Error(
+        "Variable Icebreaker-Pump-Kosten sind nicht mehr gueltig.",
+      );
   }
   const payment = host.payment.spendRunnerRunCredits(
     legalAction.costs[0]?.credits ?? 1,
@@ -152,6 +155,7 @@ function executePumpBreakerAction(
     legalAction,
   );
   if (payment.handled && payment.paid === false) return;
+  if (breakerId) recordFortBoundBreakerUse(host, breakerId, pumpAbility, false);
   if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
@@ -172,13 +176,17 @@ function executePumpBreakerAction(
       brokenSubroutineCountByBreakerInstanceId: {},
       pendingFreeBreaks: [],
     };
-    const previous = host.run.runRemainderStrengthBonusForBreaker(run, breakerId);
+    const previous = host.run.runRemainderStrengthBonusForBreaker(
+      run,
+      breakerId,
+    );
     run.breakerState = {
       ...breakerState,
       strengthModifiersByBreakerInstanceId: {
         ...breakerState.strengthModifiersByBreakerInstanceId,
         [breakerId]: [
-          ...(breakerState.strengthModifiersByBreakerInstanceId[breakerId] ?? []),
+          ...(breakerState.strengthModifiersByBreakerInstanceId[breakerId] ??
+            []),
           { amount: pumpAmount, duration: "current_run", source: "paid_pump" },
         ],
       },
@@ -216,7 +224,9 @@ function executePumpBreakerAction(
     host.effects.addRunnerFutureActionDebt(pumpAmount);
     const pendingDebt = Math.max(
       0,
-      Math.floor(host.turn.ensureRunnerTurnFlags().forgoNextActionsPending ?? 0),
+      Math.floor(
+        host.turn.ensureRunnerTurnFlags().forgoNextActionsPending ?? 0,
+      ),
     );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -264,6 +274,7 @@ function executeBreakSubroutineAction(
       recordBrokenSubroutineBreaker(host, breakerId, subroutineIndex);
     }
     recordNoisyIcebreakerUse(host, breakerId, legalAction);
+    recordFortBoundBreakerUse(host, breakerId, breakAbility, true);
     recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
@@ -272,8 +283,12 @@ function executeBreakSubroutineAction(
   if (!host.state.run?.encounteredIceId)
     throw new Error("Subroutine kann nur im ICE-Encounter gebrochen werden.");
   if (host.state.run.noBreakSubroutinesActive)
-    throw new Error("Subroutinen koennen in diesem Encounter nicht gebrochen werden.");
-  const iceDefinition = host.cards.definitionFor(host.state.run.encounteredIceId);
+    throw new Error(
+      "Subroutinen koennen in diesem Encounter nicht gebrochen werden.",
+    );
+  const iceDefinition = host.cards.definitionFor(
+    host.state.run.encounteredIceId,
+  );
   const currentSubroutine =
     host.breaker.assertCurrentSubroutineMatchesLegalAction(
       iceDefinition,
@@ -289,6 +304,8 @@ function executeBreakSubroutineAction(
       legalAction,
     );
     if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
+    if (breakerId)
+      recordFortBoundBreakerUse(host, breakerId, breakAbility, true);
     return;
   }
   host.breaker.assertBreakSubroutineCostQuoteValid(
@@ -302,6 +319,8 @@ function executeBreakSubroutineAction(
     legalAction,
   );
   if (payment.handled && payment.paid === false) return;
+  if (breakerId)
+    recordFortBoundBreakerUse(host, breakerId, breakAbility, false);
   if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
@@ -312,7 +331,9 @@ function executeBreakSubroutineAction(
     return;
   }
   if (breakerId) {
-    if (icebreakerAbilityHasSpecialEffect(breakAbility, "random_break_or_damage")) {
+    if (
+      icebreakerAbilityHasSpecialEffect(breakAbility, "random_break_or_damage")
+    ) {
       host.breaker.resolveBlinkBreakSubroutineAction(
         breakerId,
         Number(legalAction.payload?.subroutineIndex),
@@ -334,6 +355,7 @@ function executeBreakSubroutineAction(
       breakerId,
       Number(legalAction.payload?.subroutineIndex),
     );
+    recordFortBoundBreakerUse(host, breakerId, breakAbility, true);
     host.fort.applyPostBreakStealthLoss(breakerId, legalAction);
     recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
@@ -374,9 +396,6 @@ function recordBreakerSpecialEffects(
       case "post_encounter_self_trash_check":
         host.tracking.recordBartmossEncounterUsage(breakerId);
         break;
-      case "run_end_add_counter_if_used_on_last_fort":
-        host.tracking.recordDupreBreakUsage(breakerId);
-        break;
       case "strength_bonus_per_successful_break_this_run":
         host.tracking.recordSnowballBreakUsage(breakerId);
         break;
@@ -393,6 +412,27 @@ function recordBreakerSpecialEffects(
         break;
     }
   }
+}
+
+function recordFortBoundBreakerUse(
+  host: RunnerBreakerActionExecutionHost,
+  breakerId: CardInstanceId,
+  ability: RuntimeIcebreakerAbility | undefined,
+  successfulBreak: boolean,
+): void {
+  const resetsOnFortChange = ability?.onUseEffects?.some(
+    (effect) => effect.kind === "reset_source_counter_on_fort_change",
+  );
+  const awardsRunEndCounter =
+    successfulBreak &&
+    ability?.onSuccessfulBreakEffects?.some(
+      (effect) => effect.kind === "mark_run_end_source_counter_award",
+    );
+  if (resetsOnFortChange || awardsRunEndCounter)
+    host.tracking.recordFortBoundBreakerUsage(
+      breakerId,
+      awardsRunEndCounter === true,
+    );
 }
 
 function recordNoisyIcebreakerUse(
@@ -453,7 +493,9 @@ function resolveNextSentryFreeBreakAction(
     throw new Error("Diese Subroutine ist bereits erledigt.");
   if ((legalAction.costs[0]?.credits ?? 0) !== 0)
     throw new Error("Free-Break-Kosten sind nicht mehr gueltig.");
-  host.effects.executeEffectCommands([{ type: "break_subroutine", subroutineIndex }]);
+  host.effects.executeEffectCommands([
+    { type: "break_subroutine", subroutineIndex },
+  ]);
   recordBrokenSubroutineBreaker(host, breakerId, subroutineIndex);
   run.breakerState = {
     ...(run.breakerState ?? {
@@ -500,7 +542,8 @@ function recordNextSentryFreeBreakIfEarned(
       .includes("wall")
   )
     return;
-  const subroutineCount = host.run.currentEncounterSubroutines(iceDefinition).length;
+  const subroutineCount =
+    host.run.currentEncounterSubroutines(iceDefinition).length;
   if (subroutineCount === 0) return;
   for (let index = 0; index < subroutineCount; index += 1) {
     if (run.breakerState?.brokenSubroutineBreakerByIndex?.[index] !== breakerId)

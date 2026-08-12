@@ -345,7 +345,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -605,41 +605,47 @@ export function createCounterTurnRuntimeServices(
   }
 
   function cockroachCounterTotal(state: GameState): number {
-    const implementationTotal = Object.keys(state.cardInstances).reduce(
-      (sum, cardId) => {
-        const implementation = runtime.virusCounterImplementationForCard(
-          state,
-          cardId,
-        );
-        if (
-          implementation?.continuousEffect?.kind !==
-          "randomize_corp_hq_discards_at_threshold"
-        )
-          return sum;
-        return sum + cardCounter(state, cardId, "virus");
-      },
+    const owners = CARD_IMPLEMENTATIONS.filter((implementation) => {
+      const virusCounter = implementation.virusCounter;
+      return (
+        virusCounter?.continuousEffect?.kind ===
+          "randomize_corp_hq_discards_at_threshold" &&
+        virusCounter.addOnSuccessfulRun?.counterScope.kind ===
+          "shared_corp_pool"
+      );
+    });
+    if (owners.length !== 1)
+      throw new Error(
+        `Expected exactly one shared Corp-pool Cockroach effect owner; received ${owners.length}.`,
+      );
+    const counterKind = owners[0]!.virusCounter!
+      .counterKind as PurgeableRunnerVirusCounterType;
+    return Math.max(
       0,
+      Math.floor(state.purgeableRunnerVirusCounters?.corp?.[counterKind] ?? 0),
     );
-    return implementationTotal;
   }
 
   function incubatorCounterTotal(state: GameState): number {
-    const implementationTotal = Object.keys(state.cardInstances).reduce(
-      (sum, cardId) => {
-        const implementation = runtime.virusCounterImplementationForCard(
-          state,
-          cardId,
-        );
-        if (
-          implementation?.startOfRunnerTurn?.kind !==
-          "incubator_duplicate_virus_counter"
-        )
-          return sum;
-        return sum + cardCounter(state, cardId, "virus");
-      },
+    const owners = CARD_IMPLEMENTATIONS.filter((implementation) => {
+      const virusCounter = implementation.virusCounter;
+      return (
+        virusCounter?.startOfRunnerTurn?.kind ===
+          "incubator_duplicate_virus_counter" &&
+        virusCounter.addOnSuccessfulRun?.counterScope.kind ===
+          "shared_corp_pool"
+      );
+    });
+    if (owners.length !== 1)
+      throw new Error(
+        `Expected exactly one shared Corp-pool Incubator effect owner; received ${owners.length}.`,
+      );
+    const counterKind = owners[0]!.virusCounter!
+      .counterKind as PurgeableRunnerVirusCounterType;
+    return Math.max(
       0,
+      Math.floor(state.purgeableRunnerVirusCounters?.corp?.[counterKind] ?? 0),
     );
-    return implementationTotal;
   }
 
   function cockroachRandomHqDiscardActive(state: GameState): boolean {

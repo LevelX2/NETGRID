@@ -40,7 +40,6 @@ export const cardSpec = {
         kind: "random_die",
         dieSides: 6,
       },
-      recurringCredits: 1,
     },
     icebreakerAbilities: [
       {

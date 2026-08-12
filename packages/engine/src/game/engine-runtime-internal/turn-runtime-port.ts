@@ -189,7 +189,7 @@ export type TurnRuntimePort = {
     amount: number;
     sourceDefinitionId?: CardDefinitionId;
   };
-  trashFaceupRdCardsForCascade: (
+  trashTopRdCardsFaceupForCascade: (
     state: GameState,
     maxCount: number,
   ) => CardInstanceId[];

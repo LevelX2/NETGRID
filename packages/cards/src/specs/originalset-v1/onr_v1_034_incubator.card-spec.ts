@@ -46,7 +46,7 @@ export const cardSpec = {
       counterKind: "incubate",
       addOnSuccessfulRun: {
         server: "any",
-        target: "source",
+        counterScope: { kind: "shared_corp_pool" },
         amount: 1,
         visibility: "public",
       },

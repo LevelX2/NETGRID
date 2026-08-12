@@ -131,6 +131,62 @@ describe("CardSpec validation", () => {
     expect(Object.isFrozen(frozen.engine.characteristics.numeric)).toBe(true);
   });
 
+  it("requires an explicit closed virus-counter scope", () => {
+    const valid = untypedSpec();
+    engineOf(valid).virusCounter = {
+      capabilityKey: "virus_counter",
+      addressability: ["plan", "action", "quote", "debug"],
+      counterKind: "boardwalk",
+      addOnSuccessfulRun: {
+        server: "hq",
+        counterScope: { kind: "shared_corp_pool" },
+        amount: 1,
+        visibility: "public",
+      },
+    };
+    expect(() => validateUntyped(valid)).not.toThrow();
+
+    const legacyTarget = JSON.parse(JSON.stringify(valid)) as Record<
+      string,
+      unknown
+    >;
+    const legacyTrigger = (
+      engineOf(legacyTarget).virusCounter as Record<string, unknown>
+    ).addOnSuccessfulRun as Record<string, unknown>;
+    delete legacyTrigger.counterScope;
+    legacyTrigger.target = "source";
+    expect(() => validateUntyped(legacyTarget)).toThrowError(
+      /unknown_contract_field|invalid_contract_shape/,
+    );
+
+    const unknownScope = JSON.parse(JSON.stringify(valid)) as Record<
+      string,
+      unknown
+    >;
+    const unknownTrigger = (
+      engineOf(unknownScope).virusCounter as Record<string, unknown>
+    ).addOnSuccessfulRun as Record<string, unknown>;
+    unknownTrigger.counterScope = { kind: "shared_card_guess" };
+    expect(() => validateUntyped(unknownScope)).toThrowError(
+      /invalid_contract_shape/,
+    );
+
+    const openScope = JSON.parse(JSON.stringify(valid)) as Record<
+      string,
+      unknown
+    >;
+    const openTrigger = (
+      engineOf(openScope).virusCounter as Record<string, unknown>
+    ).addOnSuccessfulRun as Record<string, unknown>;
+    openTrigger.counterScope = {
+      kind: "shared_corp_pool",
+      fallback: "source_card",
+    };
+    expect(() => validateUntyped(openScope)).toThrowError(
+      /unknown_contract_field/,
+    );
+  });
+
   it.each([
     (spec: Record<string, unknown>) => delete spec.identity,
     (spec: Record<string, unknown>) =>

@@ -25,17 +25,6 @@ export type RunEndTagContinuation = Extract<
 
 export type RunnerTurnFlags = NonNullable<GameState["runnerTurnFlags"]>;
 
-export const CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS =
-  new Set<PurgeableRunnerVirusCounterType>([
-    "cascade",
-    "crumble",
-    "garbage",
-    "highlighter",
-    "scaldan",
-    "tax",
-    "vienna",
-  ]);
-
 export type RunEndDamageSummary = {
   damageType: DamageType;
   amount: number;
@@ -164,9 +153,7 @@ export type RunEndCleanupHost = {
   ice: {
     icebreakerHasSpecial: (
       breakerId: CardInstanceId,
-      special:
-        | "dupre_strength_counter_and_last_fort"
-        | "run_end_trash_source_if_used",
+      special: "run_end_trash_source_if_used",
     ) => boolean;
   };
   virus: {

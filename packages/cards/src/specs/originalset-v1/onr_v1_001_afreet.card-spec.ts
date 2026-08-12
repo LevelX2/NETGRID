@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Afreet can host up to 3 MU of programs. Hosted programs use Afreet's hosting capacity instead of Runner MU.",
+      "Afreet can host up to 3 MU of programs. Hosted programs use Afreet's hosting capacity instead of Runner MU. All icebreakers hosted on Afreet have their strength reduced by 1. If Afreet leaves play, trash all programs hosted on it.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

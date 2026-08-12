@@ -46,12 +46,12 @@ export const cardSpec = {
       counterKind: "cascade",
       addOnSuccessfulRun: {
         server: "rd",
-        target: "corp_purgeable_runner_virus_counter",
+        counterScope: { kind: "shared_corp_pool" },
         amount: 1,
         visibility: "public",
       },
       startOfCorpTurn: {
-        kind: "trash_faceup_rd_cards_per_two_counters",
+        kind: "trash_top_rd_cards_faceup_per_two_counters",
         perCounters: 2,
         countPerGroup: 1,
         visibility: "hidden_info_barrier",

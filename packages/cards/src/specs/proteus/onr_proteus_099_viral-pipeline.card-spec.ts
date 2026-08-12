@@ -52,7 +52,7 @@ export const cardSpec = {
       counterKind: "pipe",
       addOnSuccessfulRun: {
         server: "central",
-        target: "central_server_socket_counters",
+        counterScope: { kind: "attacked_central_server_pool" },
         amount: 1,
         visibility: "public",
       },

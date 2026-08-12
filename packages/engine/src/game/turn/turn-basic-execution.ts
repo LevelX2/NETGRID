@@ -8,6 +8,7 @@ import type {
   PurgeableRunnerVirusCounterType,
   Side,
 } from "@netgrid/shared";
+import { PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES } from "@netgrid/shared";
 
 export type DrawTaxDecision = "auto" | "pay" | "tag";
 
@@ -280,22 +281,6 @@ export function consumeCorpActionDebt(
     delete state.corpActionDebt;
   return consumed;
 }
-
-const PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES: readonly PurgeableRunnerVirusCounterType[] =
-  [
-    "cascade",
-    "doom",
-    "crumble",
-    "garbage",
-    "highlighter",
-    "scaldan",
-    "tax",
-    "vienna",
-    "socket_archives",
-    "socket_hq",
-    "socket_rd",
-    "pipe",
-  ];
 
 export function purgeableRunnerVirusCounterAmount(
   bucket: PurgeableRunnerVirusCounterBucket | undefined,

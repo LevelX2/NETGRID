@@ -46,7 +46,7 @@ export const cardSpec = {
       counterKind: "garbage",
       addOnSuccessfulRun: {
         server: "rd",
-        target: "corp_purgeable_runner_virus_counter",
+        counterScope: { kind: "shared_corp_pool" },
         amount: 1,
         visibility: "public",
       },

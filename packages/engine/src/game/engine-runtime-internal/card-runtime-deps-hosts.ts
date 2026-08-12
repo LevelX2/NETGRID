@@ -348,7 +348,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -509,6 +509,7 @@ import { traceSuccessEffectForCardImplementation } from "../../ability-engine/tr
 import {
   icebreakerAbilityForLegalAction,
   icebreakerAbilitiesForDefinition,
+  icebreakerHasRunEndCounterAward,
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
@@ -603,10 +604,8 @@ export function createCardRuntimeDepsHosts(
     breakerId: CardInstanceId,
   ): number {
     if (
-      !deps.icebreakerHasSpecial(
-        state,
-        breakerId,
-        "dupre_strength_counter_and_last_fort",
+      !icebreakerHasRunEndCounterAward(
+        definitionFor(state, breakerId),
       )
     )
       return 0;
@@ -644,10 +643,8 @@ export function createCardRuntimeDepsHosts(
     breakerId: CardInstanceId,
   ): number {
     if (
-      deps.icebreakerHasSpecial(
-        state,
-        breakerId,
-        "dupre_strength_counter_and_last_fort",
+      icebreakerHasRunEndCounterAward(
+        definitionFor(state, breakerId),
       )
     )
       return 0;

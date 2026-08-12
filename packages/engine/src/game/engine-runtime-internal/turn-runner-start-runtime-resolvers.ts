@@ -4,6 +4,7 @@ import {
   type CardInstanceId,
   type GameState,
   type LegalAction,
+  type PurgeableRunnerVirusCounterType,
   type ResolvedGameEffect,
   type ServerId,
 } from "@netgrid/shared";
@@ -29,7 +30,10 @@ import {
 } from "../damage/damage-core";
 import { startInstalledCardTrashForCreditsChoice } from "../hidden-zone/nonsearch-choice-handlers";
 import { publicServerLabel } from "../../public-context";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../../card-implementations/registry";
 import { executeCardImplementationStartOfRunnerTurnEffects } from "../../ability-engine/card-implementation-runtime";
 import type { CardRunnerUtilityLongtailImplementation } from "../../ability-engine/definition-types";
 import type {
@@ -641,21 +645,32 @@ export function createTurnRunnerStartRuntimeResolvers(
     amount: number;
     sourceDefinitionId?: CardDefinitionId;
   } {
-    return Object.keys(state.cardInstances).reduce(
-      (result, cardId) => {
-        const implementation = deps.virusCounterImplementationForCard(
-          state,
-          cardId,
+    return CARD_IMPLEMENTATIONS.reduce(
+      (result, cardImplementation) => {
+        const virusCounter = cardImplementation.virusCounter;
+        const start = virusCounter?.startOfRunnerTurn;
+        if (
+          !virusCounter ||
+          start?.kind !== "gain_credits_per_two_counters" ||
+          virusCounter.addOnSuccessfulRun?.counterScope.kind !==
+            "shared_corp_pool"
+        )
+          return result;
+        const counterAmount = Math.max(
+          0,
+          Math.floor(
+            state.purgeableRunnerVirusCounters?.corp?.[
+              virusCounter.counterKind as PurgeableRunnerVirusCounterType
+            ] ?? 0,
+          ),
         );
-        const start = implementation?.startOfRunnerTurn;
-        if (start?.kind !== "gain_credits_per_two_counters") return result;
         const amount =
-          Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+          Math.floor(counterAmount / start.perCounters) *
           start.amountPerGroup;
         return {
           amount: result.amount + amount,
           sourceDefinitionId:
-            result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+            result.sourceDefinitionId ?? cardImplementation.cardDefinitionId,
         };
       },
       { amount: 0 } as {
@@ -668,22 +683,32 @@ export function createTurnRunnerStartRuntimeResolvers(
   function startVirusCounterRunnerPrivateLookAtStart(
     state: GameState,
   ): boolean {
-    const boardwalk = Object.keys(state.cardInstances).reduce(
-      (result, cardId) => {
-        const implementation = deps.virusCounterImplementationForCard(
-          state,
-          cardId,
-        );
-        const start = implementation?.startOfRunnerTurn;
-        if (start?.kind !== "random_reveal_hq_cards_per_two_counters")
+    const boardwalk = CARD_IMPLEMENTATIONS.reduce(
+      (result, cardImplementation) => {
+        const virusCounter = cardImplementation.virusCounter;
+        const start = virusCounter?.startOfRunnerTurn;
+        if (
+          !virusCounter ||
+          start?.kind !== "random_reveal_hq_cards_per_two_counters" ||
+          virusCounter.addOnSuccessfulRun?.counterScope.kind !==
+            "shared_corp_pool"
+        )
           return result;
+        const counterAmount = Math.max(
+          0,
+          Math.floor(
+            state.purgeableRunnerVirusCounters?.corp?.[
+              virusCounter.counterKind as PurgeableRunnerVirusCounterType
+            ] ?? 0,
+          ),
+        );
         const amount =
-          Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+          Math.floor(counterAmount / start.perCounters) *
           start.countPerGroup;
         return {
           amount: result.amount + amount,
           sourceDefinitionId:
-            result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+            result.sourceDefinitionId ?? cardImplementation.cardDefinitionId,
         };
       },
       { amount: 0 } as {
@@ -707,27 +732,32 @@ export function createTurnRunnerStartRuntimeResolvers(
       );
     }
 
-    const privateRdLookSourceCardId = Object.keys(state.cardInstances).find(
-      (cardId) => {
-        const implementation = deps.virusCounterImplementationForCard(
-          state,
-          cardId,
-        );
-        const start = implementation?.startOfRunnerTurn;
+    const privateRdLookSource = CARD_IMPLEMENTATIONS.find(
+      (implementation) => {
+        const virusCounter = implementation.virusCounter;
+        const start = virusCounter?.startOfRunnerTurn;
         return (
           start?.kind === "private_look_top_rd_at_threshold" &&
-          cardCounter(state, cardId, "virus") >= start.threshold
+          virusCounter?.addOnSuccessfulRun?.counterScope.kind ===
+            "shared_corp_pool" &&
+          Math.max(
+            0,
+            Math.floor(
+              state.purgeableRunnerVirusCounters?.corp?.[
+                virusCounter.counterKind as PurgeableRunnerVirusCounterType
+              ] ?? 0,
+            ),
+          ) >= start.threshold
         );
       },
     );
-    if (!privateRdLookSourceCardId || state.corp.rd.length === 0) return false;
-    return deps.startRunnerPrivateLookChoice(
+    if (!privateRdLookSource || state.corp.rd.length === 0) return false;
+    return startRunnerPrivateLookAtSpecificCorpCards(
       state,
-      privateRdLookSourceCardId,
-      definitionFor(state, privateRdLookSourceCardId).id,
+      privateRdLookSource.cardDefinitionId,
       "rd",
-      1,
-      "ability",
+      state.corp.rd.slice(0, 1),
+      "Deep Thought: oberste R&D-Karte ansehen.",
     );
   }
 
@@ -794,8 +824,7 @@ export function createTurnRunnerStartRuntimeResolvers(
         flags.incubatorPendingTransforms = 0;
         return false;
       }
-      const sourceDefinitionId = uniqueInstalledVirusCounterOwnerDefinitionId(
-        state,
+      const sourceDefinitionId = uniqueVirusCounterOwnerDefinitionId(
         "incubator_duplicate_virus_counter",
       );
       let pending = 0;
@@ -812,27 +841,19 @@ export function createTurnRunnerStartRuntimeResolvers(
     return startIncubatorTransformChoice(state);
   }
 
-  function uniqueInstalledVirusCounterOwnerDefinitionId(
-    state: GameState,
+  function uniqueVirusCounterOwnerDefinitionId(
     startKind: "incubator_duplicate_virus_counter",
   ): CardDefinitionId {
-    const ownerDefinitionIds = [
-      ...new Set(
-        runnerInstalledCardIds(state)
-          .filter((cardId) => {
-            if (cardCounter(state, cardId, "virus") <= 0) return false;
-            const virusCounter = cardImplementationForDefinitionId(
-              definitionFor(state, cardId).id,
-            )?.virusCounter;
-            return (
-              virusCounter?.startOfRunnerTurn?.kind === startKind &&
-              virusCounter.startOfRunnerTurn.rollPerCounter === true &&
-              virusCounter.startOfRunnerTurn.successDieValue === 6
-            );
-          })
-          .map((cardId) => definitionFor(state, cardId).id),
-      ),
-    ];
+    const ownerDefinitionIds = CARD_IMPLEMENTATIONS.filter((implementation) => {
+      const virusCounter = implementation.virusCounter;
+      return (
+        virusCounter?.startOfRunnerTurn?.kind === startKind &&
+        virusCounter.startOfRunnerTurn.rollPerCounter === true &&
+        virusCounter.startOfRunnerTurn.successDieValue === 6 &&
+        virusCounter.addOnSuccessfulRun?.counterScope.kind ===
+          "shared_corp_pool"
+      );
+    }).map((implementation) => implementation.cardDefinitionId);
     if (ownerDefinitionIds.length !== 1)
       throw new Error(
         `Expected exactly one installed virus-counter owner for ${startKind}; received ${ownerDefinitionIds.length}.`,
@@ -894,7 +915,31 @@ export function createTurnRunnerStartRuntimeResolvers(
         value: `fait:${entry.serverId}`,
       }));
 
-    const options = [...cardTargets, ...poxTargets, ...faitTargets];
+    const sharedCorpPoolTargets = Object.entries(
+      state.purgeableRunnerVirusCounters?.corp ?? {},
+    )
+      .filter((entry): entry is [PurgeableRunnerVirusCounterType, number] =>
+        Number.isFinite(entry[1]),
+      )
+      .map(([counterType, rawAmount]) => ({
+        counterType,
+        amount: Math.max(0, Math.floor(rawAmount)),
+      }))
+      .filter((entry) => entry.amount > 0)
+      .sort((left, right) => left.counterType.localeCompare(right.counterType))
+      .map((entry) => ({
+        id: `corp_pool_${entry.counterType}`,
+        label: `${entry.counterType} (${entry.amount})`,
+        publicLabel: "Virus-Counter",
+        value: `corp_pool:${entry.counterType}`,
+      }));
+
+    const options = [
+      ...cardTargets,
+      ...poxTargets,
+      ...faitTargets,
+      ...sharedCorpPoolTargets,
+    ];
     if (options.length === 0) {
       flags.incubatorPendingTransforms = 0;
       return false;

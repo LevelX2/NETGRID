@@ -684,7 +684,7 @@ describe("generic typed CardSpec AI translators", () => {
             .virusCounter,
           addOnSuccessfulRun: {
             server: "any",
-            target: "source",
+            counterScope: { kind: "source_card" },
             amount: 1,
             visibility: "public",
           },
@@ -896,7 +896,7 @@ describe("generic typed CardSpec AI translators", () => {
         counterKind: "boardwalk",
         addOnSuccessfulRun: {
           server: "any",
-          target: "source",
+          counterScope: { kind: "source_card" },
           amount: 1,
           visibility: "public",
         },

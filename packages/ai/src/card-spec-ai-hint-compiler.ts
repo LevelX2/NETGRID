@@ -460,6 +460,31 @@ type GenericTypedHintOverlay = Pick<
   targetProfiles: NonNullable<AiCardHint["targetProfiles"]>;
 };
 
+type PlanningVirusCounterScope = NonNullable<
+  NonNullable<
+    PlanningEntry["planning"]["engine"]["virusCounter"]
+  >["addOnSuccessfulRun"]
+>["counterScope"];
+
+function virusCounterHintTarget(scope: PlanningVirusCounterScope): string {
+  switch (scope.kind) {
+    case "source_card":
+      return "source";
+    case "shared_corp_pool":
+      return "corp_purgeable_runner_virus_counter";
+    case "attacked_server":
+      return "successful_run_server";
+    case "chosen_fully_broken_ice":
+      return "chosen_fully_broken_ice";
+    case "attacked_central_server_pool":
+      return "central_server_socket_counters";
+    default: {
+      const exhaustive: never = scope;
+      return exhaustive;
+    }
+  }
+}
+
 /**
  * Projects only closed CardSpec unions. This deliberately does not consult
  * card ids, rules text, labels, or legacy hint payloads.
@@ -570,7 +595,9 @@ function deriveGenericTypedHintOverlay(
       scope: successfulRunScope,
       timing: "successful_run",
       resource: "counters",
-      target: `virus.${virus.addOnSuccessfulRun.target}`,
+      target: `virus.${virusCounterHintTarget(
+        virus.addOnSuccessfulRun.counterScope,
+      )}`,
       amount: virus.addOnSuccessfulRun.amount,
       repeatable: true,
     });
@@ -3300,8 +3327,8 @@ function deriveActionCapacityProfiles(
       actionTypes: ["purge_virus_counters"],
     });
   if (
-    engine.virusCounter?.addOnSuccessfulRun?.target ===
-    "central_server_socket_counters"
+    engine.virusCounter?.addOnSuccessfulRun?.counterScope.kind ===
+    "attacked_central_server_pool"
   )
     profiles.push({
       class: "action_loss",
@@ -5517,7 +5544,16 @@ function deriveConditions(
     const breaker = engine.icebreakerAbilities?.find(
       (ability) => ability.kind === "break_subroutine",
     );
-    if (breaker?.kind === "break_subroutine" && breaker.special !== undefined)
+    if (
+      breaker?.kind === "break_subroutine" &&
+      (breaker.special !== undefined ||
+        breaker.onUse?.some(
+          (effect) => effect.kind === "reset_source_counter_on_fort_change",
+        ) ||
+        breaker.onSuccessfulBreak?.some(
+          (effect) => effect.kind === "mark_run_end_source_counter_award",
+        ))
+    )
       conditions.push(
         { kind: "requires_during_run" },
         { kind: "requires_encounter" },
@@ -6514,7 +6550,7 @@ function deriveClosedExtendedTargetProfile(
     const addOnSuccessfulRun = engine.virusCounter.addOnSuccessfulRun;
     if (
       addOnSuccessfulRun.server === "any" &&
-      addOnSuccessfulRun.target === "chosen_fully_broken_ice"
+      addOnSuccessfulRun.counterScope.kind === "chosen_fully_broken_ice"
     )
       return {
         ...planningFields,

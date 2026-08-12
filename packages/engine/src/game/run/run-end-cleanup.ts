@@ -14,6 +14,7 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
+import { icebreakerHasRunEndCounterAward } from "../../ability-engine/icebreaker-abilities";
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
   applyV181SuccessfulRunCounterTriggers,
@@ -64,9 +65,9 @@ export function handleRunEndCleanup(
   const run = host.state.run;
   if (!resumeAfterTag && run)
     clearEncounterTemporaryTraceCredits(run, legalAction);
-  const dupre =
+  const fortBoundBreakerCounterAward =
     !resumeAfterTag && run
-      ? applyDupreRunEndCounters(host, run)
+      ? applyFortBoundBreakerRunEndCounters(host, run)
       : { handled: false };
   const temporaryDiscountedDerez =
     !resumeAfterTag && run
@@ -214,8 +215,8 @@ export function handleRunEndCleanup(
     ...(temporaryDiscountedDerez.derezCardIds
       ? { derezCardIds: temporaryDiscountedDerez.derezCardIds }
       : {}),
-    ...(dupre.placedCounters !== undefined
-      ? { placedCounters: dupre.placedCounters }
+    ...(fortBoundBreakerCounterAward.placedCounters !== undefined
+      ? { placedCounters: fortBoundBreakerCounterAward.placedCounters }
       : {}),
     ...(runEndTrash.handled ? { stateChanged: true } : {}),
     ...(corpBonus.amount > 0 ? { gainedCredits: corpBonus.amount } : {}),
@@ -601,19 +602,13 @@ export function samePendingSequenceSource(
   );
 }
 
-export function recordDupreBreakUsage(
+export function recordFortBoundBreakerUsage(
   host: RunEndCleanupHost,
   breakerId: CardInstanceId,
+  awardsRunEndCounter: boolean,
 ): void {
   const run = host.state.run;
-  if (
-    !run ||
-    !host.ice.icebreakerHasSpecial(
-      breakerId,
-      "dupre_strength_counter_and_last_fort",
-    )
-  )
-    return;
+  if (!run) return;
   const instance = host.cards.cardInstanceFor(breakerId);
   if (
     instance.selectedServerId &&
@@ -621,9 +616,14 @@ export function recordDupreBreakUsage(
   ) {
     host.counters.setCardCounter(breakerId, "power", 0);
   }
-  const usedBreakerIds = run.dupreUsedBreakerIdsThisRun ?? [];
+  host.state.cardInstances[breakerId] = {
+    ...host.cards.cardInstanceFor(breakerId),
+    selectedServerId: run.attackedServerId,
+  };
+  if (!awardsRunEndCounter) return;
+  const usedBreakerIds = run.runEndCounterAwardBreakerIds ?? [];
   if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
-  run.dupreUsedBreakerIdsThisRun = usedBreakerIds;
+  run.runEndCounterAwardBreakerIds = usedBreakerIds;
 }
 
 export function resolveBrokenIceVirusCounterChoice(
@@ -794,29 +794,18 @@ export function derezTemporaryDiscountedRunIce(
   };
 }
 
-export function applyDupreRunEndCounters(
+export function applyFortBoundBreakerRunEndCounters(
   host: RunEndCleanupHost,
   run: ActiveRun,
 ): RunDurationCleanupResult {
-  const usedBreakerIds = run.dupreUsedBreakerIdsThisRun?.slice().sort() ?? [];
+  const usedBreakerIds = run.runEndCounterAwardBreakerIds?.slice().sort() ?? [];
   let placedCounters = 0;
   for (const breakerId of usedBreakerIds) {
     const instance = host.state.cardInstances[breakerId];
     if (!instance || !host.state.runner.rig.programs.includes(breakerId))
       continue;
-    if (
-      !host.ice.icebreakerHasSpecial(
-        breakerId,
-        "dupre_strength_counter_and_last_fort",
-      )
-    )
+    if (!icebreakerHasRunEndCounterAward(host.cards.definitionFor(breakerId)))
       continue;
-    if (
-      instance.selectedServerId &&
-      instance.selectedServerId !== run.attackedServerId
-    ) {
-      host.counters.setCardCounter(breakerId, "power", 0);
-    }
     host.state.cardInstances[breakerId] = {
       ...host.cards.cardInstanceFor(breakerId),
       selectedServerId: run.attackedServerId,

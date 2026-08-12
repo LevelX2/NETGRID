@@ -47,7 +47,7 @@ export let applyPurgeableRunnerVirusCorpStartEffects: RuntimePortGroups["turnRun
 export let virusCounterDrawsAtCorpStart: RuntimePortGroups["turnRuntimeResolvers"]["virusCounterDrawsAtCorpStart"];
 export let skivvissCounterTotal: RuntimePortGroups["turnRuntimeResolvers"]["skivvissCounterTotal"];
 export let virusCounterCascadeTrashAtCorpStart: RuntimePortGroups["turnRuntimeResolvers"]["virusCounterCascadeTrashAtCorpStart"];
-export let trashFaceupRdCardsForCascade: RuntimePortGroups["turnRuntimeResolvers"]["trashFaceupRdCardsForCascade"];
+export let trashTopRdCardsFaceupForCascade: RuntimePortGroups["turnRuntimeResolvers"]["trashTopRdCardsFaceupForCascade"];
 export let applyRunnerStartOfTurnEffects: RuntimePortGroups["turnRuntimeResolvers"]["applyRunnerStartOfTurnEffects"];
 export let applyStartTurnRandomEffectTables: RuntimePortGroups["turnRuntimeResolvers"]["applyStartTurnRandomEffectTables"];
 export let virusCounterCreditsAtRunnerStart: RuntimePortGroups["turnRuntimeResolvers"]["virusCounterCreditsAtRunnerStart"];
@@ -507,8 +507,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   skivvissCounterTotal = ports.turnRuntimeResolvers.skivvissCounterTotal;
   virusCounterCascadeTrashAtCorpStart =
     ports.turnRuntimeResolvers.virusCounterCascadeTrashAtCorpStart;
-  trashFaceupRdCardsForCascade =
-    ports.turnRuntimeResolvers.trashFaceupRdCardsForCascade;
+  trashTopRdCardsFaceupForCascade =
+    ports.turnRuntimeResolvers.trashTopRdCardsFaceupForCascade;
   applyRunnerStartOfTurnEffects =
     ports.turnRuntimeResolvers.applyRunnerStartOfTurnEffects;
   applyStartTurnRandomEffectTables =

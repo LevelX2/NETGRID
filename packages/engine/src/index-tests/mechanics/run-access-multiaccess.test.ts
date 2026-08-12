@@ -492,6 +492,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
           action.type === "pump_breaker" &&
           String(action.payload?.breakerId) === dupreId,
       );
+    expect(cardCounterAmount(state, dupreId, "power")).toBe(0);
+    expect(state.cardInstances[dupreId]?.selectedServerId).toBe("hq");
     state = apply(
       state,
       "runner",

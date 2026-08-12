@@ -100,8 +100,8 @@ export function quoteCentralAccessCounterModifiers(
     if (!virusCounter || !modifier || modifier.server !== serverId) continue;
     if (
       modifier.visibility !== "public" ||
-      virusCounter.addOnSuccessfulRun?.target !==
-        "corp_purgeable_runner_virus_counter" ||
+      virusCounter.addOnSuccessfulRun?.counterScope.kind !==
+        "shared_corp_pool" ||
       virusCounter.addOnSuccessfulRun.server !== serverId
     )
       return undefined;

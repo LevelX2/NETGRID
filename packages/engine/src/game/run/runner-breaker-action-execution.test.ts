@@ -145,7 +145,8 @@ function hostFor(
     cards: {
       definitionFor: (cardId) =>
         definition(cardId === ICE_ID ? "ice_definition" : "breaker_definition"),
-      cardInstanceFor: (cardId) => targetState.cardInstances[cardId] as CardInstance,
+      cardInstanceFor: (cardId) =>
+        targetState.cardInstances[cardId] as CardInstance,
       effectiveSubtypesForCard: () => [],
     },
     run: {
@@ -203,7 +204,8 @@ function hostFor(
     },
     tracking: {
       recordBartmossEncounterUsage: () => calls.push("bartmoss"),
-      recordDupreBreakUsage: () => calls.push("dupre"),
+      recordFortBoundBreakerUsage: (_breakerId, awardsRunEndCounter) =>
+        calls.push(`fortBound:${awardsRunEndCounter}`),
       recordSnowballBreakUsage: () => calls.push("snowball"),
       recordRunEndTrashBreakerUsage: () => calls.push("rentICon"),
     },
@@ -303,7 +305,10 @@ describe("runner-breaker-action-execution", () => {
       hostFor(targetState, calls, {
         breaker: {
           pumpAbilityForLegalAction: () =>
-            ({ type: "pump_strength", onUseEndRun: true }) as RuntimeIcebreakerAbility,
+            ({
+              type: "pump_strength",
+              onUseEndRun: true,
+            }) as RuntimeIcebreakerAbility,
           pumpAmountForLegalAction: () => 3,
           pumpDurationForLegalAction: () => "current_run",
         },
@@ -344,18 +349,18 @@ describe("runner-breaker-action-execution", () => {
     delete targetState.run;
     handleRunnerBreakerActionExecution(host, secondAction);
 
-    expect(
-      targetState.temporaryBreakerStrengthModifiersUntilEndOfTurn,
-    ).toEqual([
-      {
-        sourceCardInstanceId: BREAKER_ID,
-        sourceDefinitionId: "breaker_definition",
-        targetBreakerId: BREAKER_ID,
-        amount: 2,
-        turnSerial: 7,
-        expires: "turn_end",
-      },
-    ]);
+    expect(targetState.temporaryBreakerStrengthModifiersUntilEndOfTurn).toEqual(
+      [
+        {
+          sourceCardInstanceId: BREAKER_ID,
+          sourceDefinitionId: "breaker_definition",
+          targetBreakerId: BREAKER_ID,
+          amount: 2,
+          turnSerial: 7,
+          expires: "turn_end",
+        },
+      ],
+    );
     expect(firstAction.payload).toMatchObject({
       turnStrengthBonusApplied: true,
       turnStrengthBonusAfter: 1,
@@ -364,10 +369,7 @@ describe("runner-breaker-action-execution", () => {
       turnStrengthBonusApplied: true,
       turnStrengthBonusAfter: 2,
     });
-    expect(calls).toEqual([
-      `spend:1:${BREAKER_ID}`,
-      `spend:1:${BREAKER_ID}`,
-    ]);
+    expect(calls).toEqual([`spend:1:${BREAKER_ID}`, `spend:1:${BREAKER_ID}`]);
   });
 
   it("opens Aardvark interception and stops pump execution", () => {
@@ -435,8 +437,9 @@ describe("runner-breaker-action-execution", () => {
           breakAbilityForLegalAction: () =>
             ({
               type: "break_subroutine",
-              specialEffects: [
-                { kind: "run_end_add_counter_if_used_on_last_fort" },
+              onUseEffects: [{ kind: "reset_source_counter_on_fort_change" }],
+              onSuccessfulBreakEffects: [
+                { kind: "mark_run_end_source_counter_award" },
               ],
             }) as unknown as RuntimeIcebreakerAbility,
         },
@@ -450,9 +453,10 @@ describe("runner-breaker-action-execution", () => {
     expect(dupreCalls).toEqual([
       "assertCost",
       `spend:1:${BREAKER_ID}`,
+      "fortBound:false",
       "effect:break_subroutine:0",
+      "fortBound:true",
       "stealthLoss",
-      "dupre",
     ]);
 
     const msTodonCalls: string[] = [];
@@ -556,6 +560,10 @@ describe("runner-breaker-action-execution", () => {
       }),
     );
 
-    expect(blinkCalls).toEqual(["assertCost", `spend:1:${BREAKER_ID}`, "blink"]);
+    expect(blinkCalls).toEqual([
+      "assertCost",
+      `spend:1:${BREAKER_ID}`,
+      "blink",
+    ]);
   });
 });

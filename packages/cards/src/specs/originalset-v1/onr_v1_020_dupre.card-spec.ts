@@ -54,9 +54,19 @@ export const cardSpec = {
           kind: "ice_subtype",
           subtype: "code_gate",
         },
-        special: {
-          kind: "dupre_strength_counter_and_last_fort",
-        },
+        onUse: [
+          {
+            kind: "reset_source_counter_on_fort_change",
+            counterType: "power",
+          },
+        ],
+        onSuccessfulBreak: [
+          {
+            kind: "mark_run_end_source_counter_award",
+            counterType: "power",
+            amount: 1,
+          },
+        ],
         visibility: "public",
       },
       {
@@ -69,6 +79,12 @@ export const cardSpec = {
         },
         amount: 1,
         duration: "current_encounter",
+        onUse: [
+          {
+            kind: "reset_source_counter_on_fort_change",
+            counterType: "power",
+          },
+        ],
         visibility: "public",
       },
     ],

@@ -176,12 +176,18 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "boardwalk"
+  | "successful_hq_run_pair_credit"
   | "cockroach"
   | "cascade"
   | "doom"
   | "crumble"
   | "garbage"
   | "highlighter"
+  | "thought"
+  | "gremlin"
+  | "incubate"
+  | "skivviss"
   | "scaldan"
   | "tax"
   | "vienna"
@@ -301,19 +307,30 @@ export type EventVisibilityClass =
   | "hidden_info_barrier"
   | "replay_only";
 
+export const PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES = [
+  "boardwalk",
+  "successful_hq_run_pair_credit",
+  "cockroach",
+  "cascade",
+  "doom",
+  "crumble",
+  "garbage",
+  "highlighter",
+  "thought",
+  "gremlin",
+  "incubate",
+  "skivviss",
+  "scaldan",
+  "tax",
+  "vienna",
+  "socket_archives",
+  "socket_hq",
+  "socket_rd",
+  "pipe",
+] as const;
+
 export type PurgeableRunnerVirusCounterType =
-  | "cascade"
-  | "doom"
-  | "crumble"
-  | "garbage"
-  | "highlighter"
-  | "scaldan"
-  | "tax"
-  | "vienna"
-  | "socket_archives"
-  | "socket_hq"
-  | "socket_rd"
-  | "pipe";
+  (typeof PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES)[number];
 
 export type PurgeableRunnerVirusCounterBucket = Partial<
   Record<PurgeableRunnerVirusCounterType, number>
@@ -1398,7 +1415,7 @@ export type RunState = {
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
-  dupreUsedBreakerIdsThisRun?: CardInstanceId[];
+  runEndCounterAwardBreakerIds?: CardInstanceId[];
   runOnceBreakTagAndStealthLossUsedBreakerIds?: CardInstanceId[];
   runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
   hiddenStackInstallUsedSourceIdsThisRun?: CardInstanceId[];

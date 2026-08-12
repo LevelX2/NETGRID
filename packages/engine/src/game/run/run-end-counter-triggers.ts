@@ -16,7 +16,6 @@ import type {
 import type { CardVirusCounterImplementation } from "../../ability-engine/definition-types";
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
-  CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS,
   type ActiveRun,
   type RunEndAftermathResult,
   type RunEndCleanupHost,
@@ -175,7 +174,7 @@ export function applyV181SuccessfulRunCounterTriggers(
   const pattelSources = sourceIds.filter(
     (cardId) =>
       host.virus.virusCounterImplementationForCard(cardId)?.addOnSuccessfulRun
-        ?.target === "chosen_fully_broken_ice",
+        ?.counterScope.kind === "chosen_fully_broken_ice",
   );
   if (pattelSources.length > 0) {
     const targetIceIds = (run.fullyBrokenIceIds ?? []).filter(
@@ -213,16 +212,11 @@ export function applyV181SuccessfulRunCounterTriggers(
     if (
       !implementation ||
       !trigger ||
-      trigger.target === "chosen_fully_broken_ice"
+      trigger.counterScope.kind === "chosen_fully_broken_ice"
     )
       continue;
     const definition = host.cards.definitionFor(cardId);
-    if (
-      trigger.target === "corp_purgeable_runner_virus_counter" &&
-      CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS.has(
-        implementation.counterKind as PurgeableRunnerVirusCounterType,
-      )
-    ) {
+    if (trigger.counterScope.kind === "shared_corp_pool") {
       const counterType =
         implementation.counterKind as PurgeableRunnerVirusCounterType;
       const counterSummary = addPurgeableRunnerVirusCounterWithPrevention(
@@ -269,7 +263,7 @@ export function applyV181SuccessfulRunCounterTriggers(
       }
       continue;
     }
-    if (trigger.target === "central_server_socket_counters") {
+    if (trigger.counterScope.kind === "attacked_central_server_pool") {
       const socketCounterType = socketCounterTypeForServer(
         run.attackedServerId,
       );
@@ -326,26 +320,13 @@ export function applyV181SuccessfulRunCounterTriggers(
       }
       continue;
     }
-    if (trigger.target === "source") {
+    if (trigger.counterScope.kind === "source_card") {
       const added = host.counters.addVirusCounterWithCounterPrevention(
         cardId,
         trigger.amount,
         legalAction,
       );
       if (legalAction) {
-        if (implementation.counterKind === "cockroach" && added > 0) {
-          appendRunnerVirusCounterEffect(legalAction, {
-            run,
-            sourceCardId: cardId,
-            sourceDefinitionId: definition.id,
-            sourceTitle: definition.title,
-            side: "corp",
-            counterType: "cockroach",
-            added,
-            remainingCounters: host.counters.cardCounter(cardId, "virus"),
-            reason: "cockroach_successful_hq_run",
-          });
-        }
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           virusCounterAdded: added,
@@ -357,6 +338,8 @@ export function applyV181SuccessfulRunCounterTriggers(
       }
       continue;
     }
+    if (trigger.counterScope.kind !== "attacked_server")
+      throw new Error("Unbekannter Virus-Counter-Scope.");
     const serverId = run.attackedServerId;
     if (implementation.counterKind === "pox") {
       const current = host.counters.poxCountersForServer(serverId);
@@ -431,9 +414,7 @@ export function appendRunnerVirusCounterEffect(
     counterType: CounterType;
     added: number;
     remainingCounters: number;
-    reason?:
-      | "proteus_runner_virus_successful_run"
-      | "cockroach_successful_hq_run";
+    reason?: "runner_virus_successful_run";
     serverId?: Exclude<ServerId, "new_remote">;
     serverLabel?: string;
   },
@@ -448,7 +429,7 @@ export function appendRunnerVirusCounterEffect(
     counterType: input.counterType,
     addedCounterAmount: input.added,
     remainingCounters: input.remainingCounters,
-    reason: input.reason ?? "proteus_runner_virus_successful_run",
+    reason: input.reason ?? "runner_virus_successful_run",
     sourceDefinitionId: input.sourceDefinitionId,
     sourceTitle: input.sourceTitle,
     ...(input.serverId ? { serverId: input.serverId } : {}),

@@ -546,7 +546,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -641,7 +641,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -925,7 +925,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -1183,7 +1183,7 @@
             "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -1957,7 +1957,7 @@
             "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -2235,7 +2235,7 @@
             "scope": "server",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },
@@ -4411,7 +4411,7 @@
             "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
-            "target": "virus.source",
+            "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
           },

@@ -46,7 +46,7 @@ export const cardSpec = {
       counterKind: "pattel",
       addOnSuccessfulRun: {
         server: "any",
-        target: "chosen_fully_broken_ice",
+        counterScope: { kind: "chosen_fully_broken_ice" },
         amount: 1,
         visibility: "public",
       },

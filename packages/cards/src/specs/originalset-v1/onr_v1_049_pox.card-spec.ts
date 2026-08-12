@@ -46,7 +46,7 @@ export const cardSpec = {
       counterKind: "pox",
       addOnSuccessfulRun: {
         server: "any",
-        target: "successful_run_server",
+        counterScope: { kind: "attacked_server" },
         amount: 1,
         visibility: "public",
       },

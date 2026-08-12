@@ -1070,8 +1070,8 @@ function visibleBreakerStrengthForTargetServer(
   const hasLastServerBoundCounters = icebreakerAbilitiesForDefinition(
     definition,
   ).some((ability) =>
-    ability.specialEffects?.some(
-      (effect) => effect.kind === "run_end_add_counter_if_used_on_last_fort",
+    ability.onSuccessfulBreakEffects?.some(
+      (effect) => effect.kind === "mark_run_end_source_counter_award",
     ),
   );
   if (!hasLastServerBoundCounters) return strength;

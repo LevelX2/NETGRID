@@ -399,6 +399,7 @@ export function assertCardSpecContract(spec: CardSpec): void {
     characteristics.strength,
     "$cardSpec.engine.characteristics.strength",
   );
+  assertVirusCounterScope(engine.virusCounter);
   assertCharacteristicOwnership(identity.cardType, characteristics, numeric);
   if (engine.variableRez !== undefined) {
     const variableRez = closedObject(
@@ -1177,6 +1178,33 @@ function assertRunnerForcedRandomActionTable(value: unknown): void {
     if (typeof entry.action !== "string" || !allowedActions.has(entry.action))
       invalid(`${path}.action`, "must be a known forced-action outcome");
   }
+}
+
+function assertVirusCounterScope(value: unknown): void {
+  if (value === undefined) return;
+  const virusCounter = value as Record<string, unknown>;
+  if (virusCounter.addOnSuccessfulRun === undefined) return;
+  const trigger = closedObject(
+    virusCounter.addOnSuccessfulRun,
+    new Set(["server", "counterScope", "amount", "visibility"]),
+    "$cardSpec.engine.virusCounter.addOnSuccessfulRun",
+  );
+  const scope = closedObject(
+    trigger.counterScope,
+    new Set(["kind"]),
+    "$cardSpec.engine.virusCounter.addOnSuccessfulRun.counterScope",
+  );
+  enumValue(
+    scope.kind,
+    [
+      "source_card",
+      "shared_corp_pool",
+      "attacked_server",
+      "chosen_fully_broken_ice",
+      "attacked_central_server_pool",
+    ],
+    "$cardSpec.engine.virusCounter.addOnSuccessfulRun.counterScope.kind",
+  );
 }
 
 function assertCapabilityIdentities(

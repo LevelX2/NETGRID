@@ -7,10 +7,7 @@ import {
 import type { CardDefinitionId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import {
-  CARD_DEFINITIONS,
-  CARD_DEFINITIONS_BY_ID,
-} from "./card-definitions";
+import { CARD_DEFINITIONS, CARD_DEFINITIONS_BY_ID } from "./card-definitions";
 import {
   CARD_IMPLEMENTATIONS,
   CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
@@ -29,9 +26,7 @@ describe("canonical CardSpec authority", () => {
         (implementation) => implementation.cardDefinitionId,
       ),
     ).toEqual(cardSpecImplementationDefinitionIds());
-    expect(CARD_IMPLEMENTATIONS).toHaveLength(
-      cardSpecImplementations().length,
-    );
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(cardSpecImplementations().length);
     expect(Object.isFrozen(CARD_DEFINITIONS)).toBe(true);
     expect(Object.isFrozen(CARD_DEFINITIONS_BY_ID)).toBe(true);
     expect(Object.isFrozen(CARD_IMPLEMENTATIONS)).toBe(true);
@@ -68,7 +63,7 @@ describe("canonical CardSpec authority", () => {
           counterKind,
           addOnSuccessfulRun: {
             server: "hq",
-            target: "corp_purgeable_runner_virus_counter",
+            counterScope: { kind: "shared_corp_pool" },
             amount: 1,
             visibility: "public",
           },

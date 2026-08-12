@@ -61,7 +61,7 @@ type TurnCorpStartRuntimeResolvers = Pick<
   | "virusCounterDrawsAtCorpStart"
   | "skivvissCounterTotal"
   | "virusCounterCascadeTrashAtCorpStart"
-  | "trashFaceupRdCardsForCascade"
+  | "trashTopRdCardsFaceupForCascade"
 >;
 
 type CorpMandatoryDrawSummary = {
@@ -453,13 +453,13 @@ export function createTurnCorpStartRuntimeResolvers(
       if (cascadeTrash.amount > 0) {
         if (!cascadeTrash.sourceDefinitionId)
           throw new Error("Cascade-Virus-Quelle fehlt.");
-        const trashed = trashFaceupRdCardsForCascade(
+        const trashed = trashTopRdCardsFaceupForCascade(
           state,
           cascadeTrash.amount,
         );
         if (trashed.length > 0) {
           effects?.push({
-            effectId: "corp.start.cascade.trash_faceup_rd",
+            effectId: "corp.start.cascade.trash_top_rd_faceup",
             kind: "trash_card",
             visibility: "hidden_info_barrier",
             side: "corp",
@@ -825,25 +825,44 @@ export function createTurnCorpStartRuntimeResolvers(
   }
 
   function virusCounterDrawsAtCorpStart(state: GameState): number {
-    return Object.keys(state.cardInstances).reduce((sum, cardId) => {
-      const implementation = deps.virusCounterImplementationForCard(
-        state,
-        cardId,
+    return CARD_IMPLEMENTATIONS.reduce((sum, implementation) => {
+      const virusCounter = implementation.virusCounter;
+      const start = virusCounter?.startOfCorpTurn;
+      if (
+        !virusCounter ||
+        start?.kind !== "draw_extra_cards_per_counter" ||
+        virusCounter.addOnSuccessfulRun?.counterScope.kind !==
+          "shared_corp_pool"
+      )
+        return sum;
+      return (
+        sum +
+        purgeableRunnerVirusCounterAmount(
+          state.purgeableRunnerVirusCounters?.corp,
+          virusCounter.counterKind as PurgeableRunnerVirusCounterType,
+        ) *
+          start.amountPerCounter
       );
-      const start = implementation?.startOfCorpTurn;
-      if (start?.kind !== "draw_extra_cards_per_counter") return sum;
-      return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
     }, 0);
   }
 
   function skivvissCounterTotal(state: GameState): number {
-    return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    return CARD_IMPLEMENTATIONS.reduce((sum, implementation) => {
+      const virusCounter = implementation.virusCounter;
       if (
-        deps.virusCounterImplementationForCard(state, cardId)?.startOfCorpTurn
-          ?.kind !== "draw_extra_cards_per_counter"
+        virusCounter?.startOfCorpTurn?.kind !==
+          "draw_extra_cards_per_counter" ||
+        virusCounter.addOnSuccessfulRun?.counterScope.kind !==
+          "shared_corp_pool"
       )
         return sum;
-      return sum + cardCounter(state, cardId, "virus");
+      return (
+        sum +
+        purgeableRunnerVirusCounterAmount(
+          state.purgeableRunnerVirusCounters?.corp,
+          virusCounter.counterKind as PurgeableRunnerVirusCounterType,
+        )
+      );
     }, 0);
   }
 
@@ -851,49 +870,47 @@ export function createTurnCorpStartRuntimeResolvers(
     amount: number;
     sourceDefinitionId?: CardDefinitionId;
   } {
-    const corpCascadeCounters = purgeableRunnerVirusCounterAmount(
+    const sourceDefinitionId = uniqueVirusCounterOwnerDefinitionId(
+      "trash_top_rd_cards_faceup_per_two_counters",
+    );
+    const implementation = CARD_IMPLEMENTATIONS.find(
+      (candidate) => candidate.cardDefinitionId === sourceDefinitionId,
+    );
+    const virusCounter = implementation?.virusCounter;
+    const start = virusCounter?.startOfCorpTurn;
+    if (
+      !virusCounter ||
+      start?.kind !== "trash_top_rd_cards_faceup_per_two_counters" ||
+      virusCounter.addOnSuccessfulRun?.counterScope.kind !==
+        "shared_corp_pool"
+    )
+      throw new Error("Der gemeinsame R&D-Trash-Counter-Vertrag fehlt.");
+    const counterAmount = purgeableRunnerVirusCounterAmount(
       state.purgeableRunnerVirusCounters?.corp,
-      "cascade",
+      virusCounter.counterKind as PurgeableRunnerVirusCounterType,
     );
-    const corpCascadeTrash = Math.floor(corpCascadeCounters / 2);
-    return Object.keys(state.cardInstances).reduce(
-      (result, cardId) => {
-        const implementation = deps.virusCounterImplementationForCard(
-          state,
-          cardId,
-        );
-        const start = implementation?.startOfCorpTurn;
-        if (start?.kind !== "trash_faceup_rd_cards_per_two_counters")
-          return result;
-        const amount =
-          Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
-          start.countPerGroup;
-        return {
-          amount: result.amount + amount,
-          sourceDefinitionId:
-            result.sourceDefinitionId ?? definitionFor(state, cardId).id,
-        };
-      },
-      {
-        amount: corpCascadeTrash,
-        sourceDefinitionId:
-          corpCascadeCounters > 0
-            ? uniqueVirusCounterOwnerDefinitionId(
-                "trash_faceup_rd_cards_per_two_counters",
-              )
-            : undefined,
-      } as { amount: number; sourceDefinitionId?: CardDefinitionId },
-    );
+    const trashAmount =
+      Math.floor(counterAmount / start.perCounters) * start.countPerGroup;
+    return {
+      amount: trashAmount,
+      ...(counterAmount > 0 ? { sourceDefinitionId } : {}),
+    };
   }
 
   function uniqueVirusCounterOwnerDefinitionId(
     startKind:
       | "draw_extra_cards_per_counter"
-      | "trash_faceup_rd_cards_per_two_counters",
+      | "trash_top_rd_cards_faceup_per_two_counters",
   ): CardDefinitionId {
     const ownerDefinitionIds = CARD_IMPLEMENTATIONS.filter(
-      (implementation) =>
-        implementation.virusCounter?.startOfCorpTurn?.kind === startKind,
+      (implementation) => {
+        const virusCounter = implementation.virusCounter;
+        return (
+          virusCounter?.startOfCorpTurn?.kind === startKind &&
+          virusCounter.addOnSuccessfulRun?.counterScope.kind ===
+            "shared_corp_pool"
+        );
+      },
     ).map((implementation) => implementation.cardDefinitionId);
     if (ownerDefinitionIds.length !== 1)
       throw new Error(
@@ -902,20 +919,18 @@ export function createTurnCorpStartRuntimeResolvers(
     return ownerDefinitionIds[0]!;
   }
 
-  function trashFaceupRdCardsForCascade(
+  function trashTopRdCardsFaceupForCascade(
     state: GameState,
     maxCount: number,
   ): CardInstanceId[] {
-    const selected = state.corp.rd
-      .filter((cardId) => state.cardInstances[cardId]?.faceup === true)
-      .slice(0, Math.max(0, Math.floor(maxCount)));
+    const selected = state.corp.rd.slice(0, Math.max(0, Math.floor(maxCount)));
     for (const cardId of selected) {
       removeFromAllZones(state, cardId);
       state.corp.archives.push(cardId);
       state.cardInstances[cardId] = {
         ...mustInstance(state.cardInstances, cardId),
         faceup: true,
-        rezzed: true,
+        rezzed: false,
         zone: { side: "corp", zone: "archives" },
       };
     }
@@ -934,6 +949,6 @@ export function createTurnCorpStartRuntimeResolvers(
     virusCounterDrawsAtCorpStart,
     skivvissCounterTotal,
     virusCounterCascadeTrashAtCorpStart,
-    trashFaceupRdCardsForCascade,
+    trashTopRdCardsFaceupForCascade,
   };
 }

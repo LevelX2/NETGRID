@@ -850,6 +850,7 @@ export type CardVirusCounterKindImplementation =
 
 export type CardVirusCounterImplementation = {
   counterKind: CardVirusCounterKindImplementation;
+  publicLabel?: string;
   onCorpInstall?: {
     kind: "roll_per_counter_trash_installed_card_and_remove_counter_on_success";
     counterSource: "corp_purgeable_runner_virus_counter";
@@ -877,12 +878,12 @@ export type CardVirusCounterImplementation = {
       | "central"
       | "any"
       | "subsidiary_data_fort";
-    target:
-      | "source"
-      | "successful_run_server"
-      | "chosen_fully_broken_ice"
-      | "corp_purgeable_runner_virus_counter"
-      | "central_server_socket_counters";
+    counterScope:
+      | { kind: "source_card" }
+      | { kind: "shared_corp_pool" }
+      | { kind: "attacked_server" }
+      | { kind: "chosen_fully_broken_ice" }
+      | { kind: "attacked_central_server_pool" };
     amount: 1;
     visibility: Extract<EventVisibilityClass, "public">;
   };
@@ -921,7 +922,7 @@ export type CardVirusCounterImplementation = {
       };
   startOfCorpTurn?:
     | {
-        kind: "trash_faceup_rd_cards_per_two_counters";
+        kind: "trash_top_rd_cards_faceup_per_two_counters";
         perCounters: 2;
         countPerGroup: 1;
         visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;

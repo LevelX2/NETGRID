@@ -345,7 +345,7 @@ import {
 } from "../run/successful-run-interventions";
 import {
   handleRunEndCleanup,
-  recordDupreBreakUsage,
+  recordFortBoundBreakerUsage,
   recordRunEndTrashBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
@@ -906,8 +906,12 @@ export function createEncounterMovementRuntimeHosts(
       tracking: {
         recordBartmossEncounterUsage: (breakerId) =>
           recordBartmossEncounterUsage(state, breakerId),
-        recordDupreBreakUsage: (breakerId) =>
-          recordDupreBreakUsage(runEndCleanupHost(state), breakerId),
+        recordFortBoundBreakerUsage: (breakerId, awardsRunEndCounter) =>
+          recordFortBoundBreakerUsage(
+            runEndCleanupHost(state),
+            breakerId,
+            awardsRunEndCounter,
+          ),
         recordSnowballBreakUsage: (breakerId) =>
           recordSnowballBreakUsage(state, breakerId),
         recordRunEndTrashBreakerUsage: (breakerId) =>

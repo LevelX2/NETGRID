@@ -39,7 +39,6 @@ export type RuntimeIcebreakerSpecialEffect =
     }
   | { kind: "run_start_random_strength_bonus" }
   | { kind: "strength_bonus_per_successful_break_this_run" }
-  | { kind: "run_end_add_counter_if_used_on_last_fort" }
   | { kind: "once_per_run_break_tag_and_all_stealth_loss" }
   | { kind: "run_end_trash_source_if_used" }
   | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
@@ -58,13 +57,21 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
   postBreakStealthLossOptionalIfUnavailable?: boolean;
   postBreakStealthLossTrigger?: "per_subroutine" | "per_ability_use";
   onUseEndRun?: boolean;
+  onUseEffects?: readonly {
+    kind: "reset_source_counter_on_fort_change";
+    counterType: "power";
+  }[];
+  onSuccessfulBreakEffects?: readonly {
+    kind: "mark_run_end_source_counter_award";
+    counterType: "power";
+    amount: 1;
+  }[];
   breakAllMatchingSubroutines?: boolean;
   special?:
     | "run_start_random_strength_bonus"
     | "blink_random_break_or_net_damage"
     | "bartmoss_post_encounter_self_trash_check"
     | "snowball_run_strength_per_successful_break"
-    | "dupre_strength_counter_and_last_fort"
     | "once_per_run_break_tag_and_all_stealth_loss"
     | "run_end_trash_source_if_used"
     | "set_next_sentry_free_break_after_fully_breaking_wall";
@@ -204,8 +211,6 @@ function specialEffectsForImplementation(
       ];
     case "snowball_run_strength_per_successful_break":
       return [{ kind: "strength_bonus_per_successful_break_this_run" }];
-    case "dupre_strength_counter_and_last_fort":
-      return [{ kind: "run_end_add_counter_if_used_on_last_fort" }];
     case "once_per_run_break_tag_and_all_stealth_loss":
       return [{ kind: "once_per_run_break_tag_and_all_stealth_loss" }];
     case "run_end_trash_source_if_used":
@@ -255,6 +260,18 @@ function abilityForImplementation(
       ...(ability.onUse?.some((effect) => effect.kind === "end_run")
         ? { onUseEndRun: true }
         : {}),
+      ...(ability.onUse?.some(
+        (effect) => effect.kind === "reset_source_counter_on_fort_change",
+      )
+        ? {
+            onUseEffects: [
+              {
+                kind: "reset_source_counter_on_fort_change" as const,
+                counterType: "power" as const,
+              },
+            ],
+          }
+        : {}),
       source,
     };
   }
@@ -286,6 +303,31 @@ function abilityForImplementation(
     ...(ability.onUse?.some((effect) => effect.kind === "end_run")
       ? { onUseEndRun: true }
       : {}),
+    ...(ability.onUse?.some(
+      (effect) => effect.kind === "reset_source_counter_on_fort_change",
+    )
+      ? {
+          onUseEffects: [
+            {
+              kind: "reset_source_counter_on_fort_change" as const,
+              counterType: "power" as const,
+            },
+          ],
+        }
+      : {}),
+    ...(ability.onSuccessfulBreak?.some(
+      (effect) => effect.kind === "mark_run_end_source_counter_award",
+    )
+      ? {
+          onSuccessfulBreakEffects: [
+            {
+              kind: "mark_run_end_source_counter_award" as const,
+              counterType: "power" as const,
+              amount: 1 as const,
+            },
+          ],
+        }
+      : {}),
     ...(ability.special ? { special: ability.special.kind } : {}),
     ...(specialEffects ? { specialEffects } : {}),
     ...breakMatcherFields(ability.matches),
@@ -310,5 +352,15 @@ export function icebreakerAbilitiesForDefinition(
   )?.icebreakerAbilities;
   return (implementation ?? []).map((ability, index) =>
     abilityForImplementation(definition, ability, index),
+  );
+}
+
+export function icebreakerHasRunEndCounterAward(
+  definition: Pick<CardDefinition, "id" | "abilities">,
+): boolean {
+  return icebreakerAbilitiesForDefinition(definition).some((ability) =>
+    ability.onSuccessfulBreakEffects?.some(
+      (effect) => effect.kind === "mark_run_end_source_counter_award",
+    ),
   );
 }

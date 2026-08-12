@@ -19,6 +19,7 @@ import type {
   ServerId,
   Side,
 } from "./runtime-shared";
+import type { PurgeableRunnerVirusCounterType } from "@netgrid/shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import {
   completeRunnerProgramRigInstall,
@@ -693,6 +694,33 @@ export function createHiddenZoneNonSearchRuntime(
         hiddenZoneBarrier: true,
         hiddenZoneAction: "incubator_transform",
         incubatorTargetKind: "card",
+      };
+    } else if (value.startsWith("corp_pool:")) {
+      const counterType = value.slice(
+        "corp_pool:".length,
+      ) as PurgeableRunnerVirusCounterType;
+      const available = Math.max(
+        0,
+        Math.floor(
+          state.purgeableRunnerVirusCounters?.corp?.[counterType] ?? 0,
+        ),
+      );
+      if (available <= 0)
+        throw new Error(
+          "Der gewählte gemeinsame Corp-Virus-Counter ist nicht mehr verfügbar.",
+        );
+      state.purgeableRunnerVirusCounters = {
+        ...(state.purgeableRunnerVirusCounters ?? {}),
+        corp: {
+          ...(state.purgeableRunnerVirusCounters?.corp ?? {}),
+          [counterType]: available + 1,
+        },
+      };
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "incubator_transform",
+        incubatorTargetKind: "shared_corp_pool",
       };
     } else if (value.startsWith("pox:")) {
       const serverId = value.slice("pox:".length) as Exclude<

@@ -46,7 +46,7 @@ export const cardSpec = {
       counterKind: "thought",
       addOnSuccessfulRun: {
         server: "rd",
-        target: "source",
+        counterScope: { kind: "shared_corp_pool" },
         amount: 1,
         visibility: "public",
       },

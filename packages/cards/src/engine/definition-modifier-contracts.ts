@@ -277,24 +277,32 @@ export type CardIcebreakerBreakMatcherImplementation =
   | { kind: "subroutine_tag"; tag: string }
   | { kind: "subroutine_traces" };
 
-export type CardIcebreakerBreakSideEffectImplementation = {
-  kind: "lose_bits_from_stealth_sources";
-  amount: number;
-  sourceMode: "single_stealth_card" | "any_stealth_cards";
-  optionalIfUnavailable: boolean;
-  trigger: "per_subroutine" | "per_ability_use";
-};
+export type CardIcebreakerBreakSideEffectImplementation =
+  | {
+      kind: "lose_bits_from_stealth_sources";
+      amount: number;
+      sourceMode: "single_stealth_card" | "any_stealth_cards";
+      optionalIfUnavailable: boolean;
+      trigger: "per_subroutine" | "per_ability_use";
+    }
+  | {
+      kind: "mark_run_end_source_counter_award";
+      counterType: Extract<CounterType, "power">;
+      amount: 1;
+    };
 
-export type CardIcebreakerUseSideEffectImplementation = {
-  kind: "end_run";
-};
+export type CardIcebreakerUseSideEffectImplementation =
+  | { kind: "end_run" }
+  | {
+      kind: "reset_source_counter_on_fort_change";
+      counterType: Extract<CounterType, "power">;
+    };
 
 export type CardIcebreakerBreakSpecialImplementation =
   | { kind: "run_start_random_strength_bonus" }
   | { kind: "blink_random_break_or_net_damage" }
   | { kind: "bartmoss_post_encounter_self_trash_check" }
   | { kind: "snowball_run_strength_per_successful_break" }
-  | { kind: "dupre_strength_counter_and_last_fort" }
   | { kind: "once_per_run_break_tag_and_all_stealth_loss" }
   | { kind: "run_end_trash_source_if_used" }
   | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };

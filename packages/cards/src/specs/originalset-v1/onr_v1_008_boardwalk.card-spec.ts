@@ -39,7 +39,6 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
-      recurringCredits: 1,
     },
     virusCounter: {
       capabilityKey: capabilityKey("virus_counter"),
@@ -47,7 +46,7 @@ export const cardSpec = {
       counterKind: "boardwalk",
       addOnSuccessfulRun: {
         server: "hq",
-        target: "source",
+        counterScope: { kind: "shared_corp_pool" },
         amount: 1,
         visibility: "public",
       },

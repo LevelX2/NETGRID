@@ -1351,7 +1351,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
 });
 
 describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => {
-  it("keeps Cockroach random HQ discard source-bound across multi-copy counters and state drift", () => {
+  it("keeps Cockroach random HQ discard bound to the shared Corp pool across multiple sources and state drift", () => {
     let state = toRunnerTurn(v191CardReleaseGame("spotcheck-cockroach-multi"));
     state.runner.credits = 20;
     const first = installRunnerProgramForTest(state, "onr_v1_013_cockroach");
@@ -1367,12 +1367,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     };
     const installed = [first, second];
     expect(installed).toHaveLength(2);
-    for (const id of installed) {
-      state.cardInstances[id] = {
-        ...state.cardInstances[id]!,
-        counters: { ...state.cardInstances[id]!.counters, virus: 1 },
-      };
-    }
+    for (const id of installed)
+      expect(cardCounterAmount(state, id, "virus")).toBe(0);
+    state.purgeableRunnerVirusCounters = { corp: { cockroach: 2 } };
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -1550,6 +1547,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
           action.type === "install_card" &&
           sourceDefinition(state, action) === definitionId,
       );
+      if (definitionId === "onr_v1_004_bakdoor") {
+        const bakdoorView = getPlayerView(state, "runner").own.rig?.find(
+          (card) => card.definitionId === definitionId,
+        );
+        expect(bakdoorView?.baseLink).toBeUndefined();
+      }
       putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
       state = apply(
         state,
@@ -2334,6 +2337,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     setCardCounterForTest(state, restrictedId, "bit", 1);
     setCardCounterForTest(state, state.runner.identity, "trauma", 2);
     setCardCounterForTest(state, virusId, "virus", 3);
+    state.purgeableRunnerVirusCounters = { corp: { boardwalk: 3 } };
     setCardCounterForTest(state, fridgeId, "ablative", 2);
     setCardCounterForTest(state, state.runner.identity, "trace_tag_counter", 1);
     setCardCounterForTest(state, state.runner.identity, "cerberus", 2);
@@ -2415,18 +2419,22 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         }),
       ]),
     );
-    expect(virusCard?.counterDisplays?.map((display) => display.id)).toEqual([
-      "virus",
-    ]);
-    expect(virusCard?.counterDisplays).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: "virus",
-          amount: 3,
-          displayKind: "virus",
-          counterType: "virus",
-        }),
-      ]),
+    expect(virusCard?.counterDisplays).toBeUndefined();
+    expect(runnerView.opponent.identity.counterDisplays).toContainEqual(
+      expect.objectContaining({
+        id: "runner_virus_corp_boardwalk",
+        amount: 3,
+        displayKind: "virus",
+        counterType: "boardwalk",
+      }),
+    );
+    expect(corpView.own.identity.counterDisplays).toContainEqual(
+      expect.objectContaining({
+        id: "runner_virus_corp_boardwalk",
+        amount: 3,
+        displayKind: "virus",
+        counterType: "boardwalk",
+      }),
     );
     expect(fridgeCard?.counterDisplays?.map((display) => display.id)).toEqual([
       "ablative",
