@@ -851,15 +851,21 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(projectOption).toBeDefined();
     state = applyChoices(state, "corp", [projectOption?.id ?? ""]);
     expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(5);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const projectPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(projectPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_300_project-consultants",
-      targetCardId: secondAgendaId,
-      targetCardDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
       addedAdvancementCounters: 4,
+      targetCount: 1,
+      publicTargetCount: 0,
+      hiddenTargetCount: 1,
+      targetVisibility: "hidden_installed_card",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"hq"|"rd"|"cardInstances"|"privatePayload"/,
+    expect(projectPayload).not.toHaveProperty("targetCardId");
+    expect(projectPayload).not.toHaveProperty("targetCardDefinitionId");
+    expect(JSON.stringify(projectPayload)).not.toMatch(
+      /onr_v1_202_genetics-visionary-acquisition|"hq"|"rd"|"cardInstances"|"privatePayload"/,
     );
+    expect(JSON.stringify(projectPayload)).not.toContain(secondAgendaId);
 
     const creditsBefore = state.corp.credits;
     state = apply(
@@ -895,6 +901,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       sourceDefinitionId: "onr_v1_305_team-restructuring",
       addedAdvancementCounters: 2,
       targetCount: 2,
+      publicTargetCount: 0,
+      hiddenTargetCount: 2,
+      targetVisibility: "hidden_installed_card",
     });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));

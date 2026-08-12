@@ -4745,11 +4745,15 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(chicagoOption).toBeDefined();
     state = applyChoices(state, "corp", [chicagoOption?.id ?? ""]);
     expect(state.cardInstances[agendaId]?.advancementCounters).toBe(2);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const chicagoPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(chicagoPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_312_chicago-branch",
       addedAdvancementCounters: 2,
-      targetCardDefinitionId: "simple_agenda",
+      publicTargetCount: 0,
+      hiddenTargetCount: 1,
+      targetVisibility: "hidden_installed_card",
     });
+    expect(chicagoPayload).not.toHaveProperty("targetCardDefinitionId");
 
     state.cardInstances[vaporId] = {
       ...state.cardInstances[vaporId]!,
@@ -4884,9 +4888,20 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(state.cardInstances[geneticsVisionaryId]?.advancementCounters).toBe(
       3,
     );
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+    const vaporMovePayload = state.eventLog.at(-1)?.publicPayload;
+    expect(vaporMovePayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_347_vapor-ops",
+      advancementCounterSourceDefinitionId: "onr_v1_347_vapor-ops",
+      advancementCounterSourceVisibility: "public",
+      advancementCounterTargetVisibility: "hidden_installed_card",
+    });
+    expect(vaporMovePayload).not.toHaveProperty(
+      "advancementCounterTargetDefinitionId",
+    );
+    expect(JSON.stringify(vaporMovePayload)).not.toMatch(
       /Simple Agenda|Genetics-Visionary Acquisition|privatePayload|cardInstances/,
     );
+    expect(JSON.stringify(vaporMovePayload)).not.toContain(geneticsVisionaryId);
   });
 
   it("does not offer Vapor Ops advancement movement without a distinct legal target", () => {

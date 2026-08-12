@@ -400,13 +400,33 @@ export function formatChronicleEvent(
       if (v1919OperationAbility === "add_advancement_counters") {
         const added = numberValue(payload.addedAdvancementCounters) ?? 2;
         const targetCount = numberValue(payload.targetCount) ?? 1;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
         const targetTitles = titlesForDefinitionIds(
           stringValue(payload.targetCardDefinitionIds),
         );
         const targetTitle = targetCardTitleFromPayload(payload);
+        const hiddenTargetCount = Math.max(
+          0,
+          numberValue(payload.hiddenTargetCount) ??
+            targetCount - targetTitles.length,
+        );
+        const hiddenTargetText =
+          hiddenTargetCount === 1
+            ? "eine verdeckte Karte"
+            : hiddenTargetCount > 1
+              ? `${hiddenTargetCount} verdeckte Karten`
+              : undefined;
+        const projectedTargets = [
+          ...targetTitles,
+          ...(hiddenTargetText ? [hiddenTargetText] : []),
+        ];
         const targetText =
-          targetTitles.length > 0
-            ? targetTitles.join(", ")
+          projectedTargets.length > 0
+            ? (joinChronicleParts(projectedTargets) ?? "eine Karte")
             : (targetTitle ??
               (targetCount === 1 ? "eine Karte" : `${targetCount} Karten`));
         category = "agenda";
@@ -415,12 +435,13 @@ export function formatChronicleEvent(
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         title = phrase(
           subject,
-          `${added} Advancement-Counter durch Systematic Layoffs auf ${targetText} gelegt`,
+          `${added} Advancement-Counter durch ${source} auf ${targetText} gelegt`,
         );
         chips.push(
-          "Systematic Layoffs",
+          source,
           `+${added} Advancement`,
           targetCount === 1 ? "1 Ziel" : `${targetCount} Ziele`,
+          ...(hiddenTargetCount > 0 ? ["Verdecktes Ziel"] : []),
         );
         break;
       }

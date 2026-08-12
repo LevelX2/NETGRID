@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-08-12-advancement-hidden-card-public-event-redaction
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-08-12
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-12
+completedAt: 2026-08-12
+branch: codex/act-2026-08-12-advancement-hidden-card-redaction
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/mechanics/public-payload-schema.ts
+  - packages/engine/src/game/events/build-event.ts
+  - apps/web/app/chronicle.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - focused engine regression tests (8 tests)
+  - focused agenda-scorearea regression test (1 test)
+  - focused Lesley Major regression test (1 test)
+  - focused chronicle regression tests (3 tests)
 ---
 
 # Advancement-Effekte dürfen verdeckte Corp-Karten nicht offenlegen
@@ -86,32 +96,32 @@ eine zulässige öffentliche Positionsangabe bleiben weiterhin nachvollziehbar.
 
 ## Akzeptanzkriterien
 
-- [ ] Legt **Systematic Layoffs** Counter auf eine verdeckte Corp-Karte,
+- [x] Legt **Systematic Layoffs** Counter auf eine verdeckte Corp-Karte,
   enthalten PublicEvent und öffentliche Folgeflächen weder deren
   `CardDefinitionId` beziehungsweise Titel noch eine interne oder
   rückverfolgbare Karteninstanz-ID.
-- [ ] Die Chronik beschreibt ein verdecktes Einzel- oder Mehrfachziel
+- [x] Die Chronik beschreibt ein verdecktes Einzel- oder Mehrfachziel
   verständlich, ohne seine Identität zu verraten; Counterzahl und Zielanzahl
   stimmen weiterhin.
-- [ ] Bei vollständig öffentlich bekannten beziehungsweise aufgedeckten
+- [x] Bei vollständig öffentlich bekannten beziehungsweise aufgedeckten
   Zielkarten dürfen deren Titel weiterhin erscheinen.
-- [ ] Gemischte Mehrfachziele werden pro Ziel sichtbarkeitskonform projiziert:
+- [x] Gemischte Mehrfachziele werden pro Ziel sichtbarkeitskonform projiziert:
   öffentliche Ziele dürfen benannt, verdeckte Ziele nur neutral oder über
   eine bereits öffentliche Position beschrieben werden.
-- [ ] Die gemeinsamen Verteilungs- und Verschiebepfade sind mit fokussierten
+- [x] Die gemeinsamen Verteilungs- und Verschiebepfade sind mit fokussierten
   Regressionstests abgedeckt; die oben aufgeführten Karten sind entweder
   direkt getestet oder nachweislich über denselben abgesicherten Pfad
   erfasst.
-- [ ] **Lesley Major** besitzt einen eigenen Regressionstest mit verdecktem
+- [x] **Lesley Major** besitzt einen eigenen Regressionstest mit verdecktem
   Ziel; ihr öffentliches Event nennt die rezzte Quelle, aber nicht die
   verdeckte Zielkarte.
-- [ ] Runner-PlayerView, PublicEvent, WebSocket-/Reconnect-Payload und
+- [x] Runner-PlayerView, PublicEvent, WebSocket-/Reconnect-Payload und
   öffentliches Replay enthalten für verdeckte Ziele keine Kartendefinition,
   keinen Titel und keine unzulässige Instanzreferenz.
-- [ ] Der Corp-private Aktions- und Choice-Pfad behält die zur legalen
+- [x] Der Corp-private Aktions- und Choice-Pfad behält die zur legalen
   Auflösung nötige Zielbindung; die öffentliche Redaktion verändert weder
   Legalität noch Replay-Determinismus oder StateHash.
-- [ ] Der Basiszug `advance_card` bleibt redigiert und ein öffentliches Ziel
+- [x] Der Basiszug `advance_card` bleibt redigiert und ein öffentliches Ziel
   bleibt in der Chronik weiterhin namentlich darstellbar.
 
 ## Umsetzungshinweise
@@ -141,4 +151,12 @@ eine zulässige öffentliche Positionsangabe bleiben weiterhin nachvollziehbar.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die öffentliche Advancement-Projektion prüft installierte Corp-Ziele nun mit
+der bestehenden Runner-Sichtbarkeit. Verdeckte Einzel-, Mehrfach-, Quell- und
+Zielkarten werden vor PublicEvent, PlayerView und den daraus gespeisten
+Reconnect-/Replay-/Chronikflächen entfernt; öffentlich bekannte Ziele bleiben
+namentlich verfügbar. Die private Zielbindung bleibt für Auflösung und
+deterministisches Replay erhalten. Zusätzlich verwendet Lesley Major ein
+neutrales öffentliches Event-Label, sodass auch dort kein Kartentitel über den
+Freitext entweicht. Die Chronik beschreibt verdeckte und gemischte Ziele mit
+korrekter Ziel- und Counterzahl.

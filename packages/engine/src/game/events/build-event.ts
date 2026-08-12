@@ -320,6 +320,11 @@ function publicLabel(legalAction: LegalAction): string {
     return "Korp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card")
     return "Korp advanced eine Karte.";
+  if (
+    legalAction.payload?.fortRunWindowAbility ===
+    "add_advancement_counters_after_passing_last_ice_on_this_fort"
+  )
+    return "Korp legt Advancement-Counter auf eine Karte in diesem Fort.";
   return legalAction.label;
 }
 

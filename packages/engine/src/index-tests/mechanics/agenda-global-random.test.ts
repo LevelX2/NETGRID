@@ -512,16 +512,37 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state = applyChoices(state, "corp", [singleTargetOption?.id ?? ""]);
     expect(state.cardInstances[agendaId]?.advancementCounters).toBe(3);
     expect(state.corp.credits).toBe(creditsBeforeLayoffs - 5);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const layoffsPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(layoffsPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_304_systematic-layoffs",
-      targetCardId: agendaId,
-      targetCardDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
-      targetCardDefinitionIds: "onr_v1_202_genetics-visionary-acquisition",
       addedAdvancementCounters: 2,
       targetCount: 1,
+      publicTargetCount: 0,
+      hiddenTargetCount: 1,
+      targetVisibility: "hidden_installed_card",
       advancementCountersAfter: 3,
     });
+    expect(layoffsPayload).not.toHaveProperty("targetCardId");
+    expect(layoffsPayload).not.toHaveProperty("targetCardDefinitionId");
+    expect(layoffsPayload).not.toHaveProperty("targetCardDefinitionIds");
+    expect(JSON.stringify(layoffsPayload)).not.toContain(agendaId);
+    expect(JSON.stringify(layoffsPayload)).not.toContain(
+      "onr_v1_202_genetics-visionary-acquisition",
+    );
+    const runnerPublicPayload = getPlayerView(
+      state,
+      "runner",
+    ).publicEvents.at(-1)?.publicPayload;
+    expect(runnerPublicPayload).toMatchObject({
+      publicTargetCount: 0,
+      hiddenTargetCount: 1,
+      targetVisibility: "hidden_installed_card",
+    });
+    expect(JSON.stringify(runnerPublicPayload)).not.toContain(agendaId);
+    expect(JSON.stringify(runnerPublicPayload)).not.toContain(
+      "onr_v1_202_genetics-visionary-acquisition",
+    );
 
     moveCorpCardToHq(state, "onr_v1_292_management-shake-up");
     state = apply(
@@ -541,7 +562,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_292_management-shake-up",
       addedAdvancementCounters: 3,
-      targetCardDefinitionId: "simple_agenda",
+      publicTargetCount: 0,
+      hiddenTargetCount: 1,
+      targetVisibility: "hidden_installed_card",
     });
   });
 
@@ -622,12 +645,13 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       sourceDefinitionId: "onr_v1_304_systematic-layoffs",
       addedAdvancementCounters: 2,
       targetCount: 2,
+      publicTargetCount: 0,
+      hiddenTargetCount: 2,
+      targetVisibility: "hidden_installed_card",
     });
-    expect(
-      String(state.eventLog.at(-1)?.publicPayload.targetCardDefinitionIds)
-        .split(",")
-        .sort(),
-    ).toEqual(["onr_v1_202_genetics-visionary-acquisition", "simple_agenda"]);
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "targetCardDefinitionIds",
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -680,8 +704,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       sourceDefinitionId: "onr_v1_304_systematic-layoffs",
       addedAdvancementCounters: 2,
       targetCount: 1,
-      targetCardDefinitionId: "onr_v1_196_corporate-war",
-      targetCardDefinitionIds: "onr_v1_196_corporate-war",
+      publicTargetCount: 0,
+      hiddenTargetCount: 1,
+      targetVisibility: "hidden_installed_card",
     });
   });
 

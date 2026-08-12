@@ -3451,6 +3451,10 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       "onr_v1_202_genetics-visionary-acquisition",
     );
     const virusId = putCorpRootInRemote(state, "onr_v1_348_virus-test-site");
+    state.cardInstances[virusId] = {
+      ...state.cardInstances[virusId]!,
+      faceup: true,
+    };
     moveCorpCardToHq(state, "onr_v1_292_management-shake-up");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -3470,14 +3474,21 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       (state.cardInstances[agendaId]?.advancementCounters ?? 0) +
         (state.cardInstances[virusId]?.advancementCounters ?? 0),
     ).toBe(3);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const advancementPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(advancementPayload).toMatchObject({
       abilityId: "add_advancement_counters",
       addedAdvancementCounters: 3,
       targetCount: 2,
+      publicTargetCount: 1,
+      hiddenTargetCount: 1,
+      targetVisibility: "mixed_public_and_hidden_installed_cards",
+      targetCardDefinitionIds: "onr_v1_348_virus-test-site",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /cardInstances|privatePayload/,
+    expect(advancementPayload).not.toHaveProperty("targetCardDefinitionId");
+    expect(JSON.stringify(advancementPayload)).not.toMatch(
+      /onr_v1_202_genetics-visionary-acquisition|cardInstances|privatePayload/,
     );
+    expect(JSON.stringify(advancementPayload)).not.toContain(agendaId);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
