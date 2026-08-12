@@ -199,9 +199,14 @@ import {
 } from "../abilities/runner-special-trigger-execution";
 import {
   installCard as executeInstallCard,
+  finalizeCorpIceInstallAfterExternalPayment,
+  finalizeCorpRootInstallAfterExternalPayment,
   type InstallCardHost,
 } from "../install/install-card";
+import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
 import {
+  effectDrivenCorpIceRezAgendaPointCost,
+  effectDrivenCorpIceRezVariants,
   finalizeCorpRezAfterExternalPayment,
   rezCard as executeRezCard,
   type RezCardHost,
@@ -678,6 +683,127 @@ export function createScoredEconomyRuntimeHosts(
         corpCreditsSpent: quote.regularCreditsRequired,
       };
     };
+    const availableEffectDrivenRezVariants = (cardId: CardInstanceId) => {
+      const definition = definitionFor(state, cardId);
+      const agendaPointCost = effectDrivenCorpIceRezAgendaPointCost(definition);
+      if (deps.corpAgendaPointTotal(state) < agendaPointCost) return [];
+      return effectDrivenCorpIceRezVariants(definition, state.corp.credits);
+    };
+    const effectDrivenInstallCredits = (
+      cardId: CardInstanceId,
+      server: CorpServer,
+    ) => {
+      const installQuote = deps.corpIceInstallTotalCost(state, cardId, server);
+      const increaseCredits = Math.max(
+        0,
+        installQuote.totalCost -
+          installQuote.baseCost -
+          installQuote.additionalCost +
+          installQuote.reduction,
+      );
+      return {
+        installQuote,
+        installCreditsPaid: installQuote.additionalCost + increaseCredits,
+      };
+    };
+    const rezInstalledIceWaivingBaseCost = (
+      cardId: CardInstanceId,
+      variantId: string,
+    ) => {
+      const definition = definitionFor(state, cardId);
+      const variant = availableEffectDrivenRezVariants(cardId).find(
+        (candidate) => candidate.variantId === variantId,
+      );
+      if (!variant)
+        throw new Error(
+          "Die effect-driven Rez-Variante ist nicht mehr bezahlbar.",
+        );
+      const instance = state.cardInstances[cardId];
+      if (
+        definition.type !== "ice" ||
+        !instance ||
+        instance.zone.side !== "corp" ||
+        instance.zone.zone !== "serverIce" ||
+        instance.rezzed
+      )
+        throw new Error("Das effect-driven Rez-Ziel ist nicht mehr gueltig.");
+      const agendaPointCost = effectDrivenCorpIceRezAgendaPointCost(definition);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...variant.payload,
+        cardId,
+        effectDrivenInstallRez: true,
+        effectDrivenBaseRezCreditsWaived: true,
+        ...(agendaPointCost > 0 ? { agendaPointCost } : {}),
+      };
+      executeRezCard(deps.rezCardHost(state), cardId, false, legalAction, {
+        runContinuation: "none",
+        waiveBaseCreditCost: true,
+      });
+      deps.expireScoredAgendaInstallRezCreditAbilities(state);
+      return {
+        installCreditsPaid: 0,
+        rezAdditionalCreditsPaid: variant.additionalCreditCost,
+        rezAgendaPointsPaid: agendaPointCost,
+        installed: true,
+        rezzed: true,
+      };
+    };
+    const installAndRezIceWaivingBaseCosts = (
+      cardId: CardInstanceId,
+      server: CorpServer,
+      variantId: string,
+    ) => {
+      const definition = definitionFor(state, cardId);
+      if (definition.type !== "ice")
+        throw new Error("Der effect-driven Install-/Rez-Pfad braucht ICE.");
+      const { installQuote, installCreditsPaid } = effectDrivenInstallCredits(
+        cardId,
+        server,
+      );
+      if (state.corp.credits < installCreditsPaid)
+        throw new Error(
+          "Die zusaetzlichen effect-driven ICE-Installkosten sind nicht bezahlbar.",
+        );
+      if (installCreditsPaid > 0)
+        spendCredits(state, "corp", installCreditsPaid);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        cardId,
+        serverId: server.id,
+        effectDrivenInstallRez: true,
+        effectDrivenBaseInstallCreditsWaived: installQuote.baseCost,
+        effectDrivenAdditionalInstallCreditsPaid: installCreditsPaid,
+        ...(installQuote.increaseSourceDefinitionIds
+          ? {
+              iceInstallCostIncreaseSourceDefinitionIds:
+                installQuote.increaseSourceDefinitionIds,
+            }
+          : {}),
+      };
+      finalizeCorpIceInstallAfterExternalPayment(
+        deps.installCardHost(state),
+        cardId,
+        server,
+        legalAction,
+      );
+      const installedInstance = state.cardInstances[cardId];
+      if (
+        installedInstance?.zone.side !== "corp" ||
+        installedInstance.zone.zone !== "serverIce" ||
+        installedInstance.zone.serverId !== server.id
+      ) {
+        return {
+          installCreditsPaid,
+          rezAdditionalCreditsPaid: 0,
+          rezAgendaPointsPaid: 0,
+          installed: false,
+          rezzed: false,
+        };
+      }
+      const rezReceipt = rezInstalledIceWaivingBaseCost(cardId, variantId);
+      return { ...rezReceipt, installCreditsPaid };
+    };
     return {
       state,
       legalAction,
@@ -759,6 +885,24 @@ export function createScoredEconomyRuntimeHosts(
         },
         recordSuccessfulCorpInstall: () =>
           deps.expireScoredAgendaInstallRezCreditAbilities(state),
+        finalizeCorpInstallAfterExternalPayment: (cardId, server) => {
+          const definition = definitionFor(state, cardId);
+          if (definition.type === "ice") {
+            finalizeCorpIceInstallAfterExternalPayment(
+              deps.installCardHost(state),
+              cardId,
+              server,
+              legalAction,
+            );
+            return;
+          }
+          finalizeCorpRootInstallAfterExternalPayment(
+            deps.installCardHost(state),
+            cardId,
+            server,
+            legalAction,
+          );
+        },
         resolveCorpRootRez: (cardId) => {
           resolveCorpRootRezEffect(
             deps.runRezWindowHostForState(state),
@@ -786,34 +930,19 @@ export function createScoredEconomyRuntimeHosts(
             );
             temporaryCreditsRemaining =
               installPayment.temporaryCreditsRemaining;
-            removeFromAllZones(previewState, cardId);
-            if (definition.type === "ice") {
-              previewServer.ice.push(cardId);
-              previewState.cardInstances[cardId] = {
-                ...mustInstance(previewState.cardInstances, cardId),
-                faceup: false,
-                rezzed: false,
-                zone: {
-                  side: "corp",
-                  zone: "serverIce",
-                  serverId: previewServer.id,
-                },
-              };
-              previewHost.callbacks.recordSuccessfulCorpInstall();
-              continue;
-            }
-            previewServer.root.push(cardId);
-            previewState.cardInstances[cardId] = {
-              ...mustInstance(previewState.cardInstances, cardId),
-              faceup: false,
-              rezzed: false,
-              zone: {
-                side: "corp",
-                zone: "serverRoot",
-                serverId: previewServer.id,
-              },
-            };
+            previewHost.callbacks.finalizeCorpInstallAfterExternalPayment(
+              cardId,
+              previewServer,
+            );
             previewHost.callbacks.recordSuccessfulCorpInstall();
+            const previewInstance = previewState.cardInstances[cardId];
+            if (
+              previewInstance?.zone.side !== "corp" ||
+              (previewInstance.zone.zone !== "serverIce" &&
+                previewInstance.zone.zone !== "serverRoot")
+            )
+              continue;
+            if (definition.type === "ice") continue;
             if (
               !deps.isRegionUpgrade(definition) &&
               !deps.rootInstallRezzesOnInstall(definition)
@@ -860,6 +989,69 @@ export function createScoredEconomyRuntimeHosts(
               "Die verpflichtende Data-Fort-Reclamation-Rez-Quote ist unvollstaendig oder unbezahlbar.",
             );
           return payAndFinalizeSequenceRez(cardId, quote);
+        },
+        effectDrivenRezVariants: availableEffectDrivenRezVariants,
+        rezInstalledIceWaivingBaseCost,
+        installAndRezIceWaivingBaseCosts,
+        preflightInstallAndRezIceWaivingBaseCosts: (entries) => {
+          const previewState = structuredClone(state);
+          const previewAction = structuredClone(legalAction);
+          const previewHost = corpInstallRezSequenceHandlerHost(
+            previewState,
+            previewAction,
+          );
+          for (const entry of entries) {
+            const server =
+              entry.serverId === "new_remote"
+                ? createRemote(previewState)
+                : mustServer(previewState, entry.serverId);
+            previewHost.callbacks.installAndRezIceWaivingBaseCosts(
+              entry.cardId,
+              server,
+              entry.variantId,
+            );
+          }
+        },
+        canInstallAndRezIceWaivingBaseCosts: (cardId, serverId, variantId) => {
+          if (serverId === "new_remote" && corpNewDataFortCreationLocked(state))
+            return false;
+          const definition = definitionFor(state, cardId);
+          const server =
+            serverId === "new_remote"
+              ? ({
+                  id: "remote_0",
+                  label: "Neues Remote",
+                  kind: "remote",
+                  ice: [],
+                  root: [],
+                } as CorpServer)
+              : state.corp.servers.find(
+                  (candidate) => candidate.id === serverId,
+                );
+          if (
+            definition.type !== "ice" ||
+            !server ||
+            !canInstallCorpIceInServer(definition, server) ||
+            (deps.isUniqueCard(definition) &&
+              deps.hasInstalledUniqueCardDefinition(
+                state,
+                "corp",
+                definition.id,
+              ))
+          )
+            return false;
+          const variant = availableEffectDrivenRezVariants(cardId).find(
+            (candidate) => candidate.variantId === variantId,
+          );
+          if (!variant) return false;
+          const { installCreditsPaid } = effectDrivenInstallCredits(
+            cardId,
+            server,
+          );
+          return (
+            state.corp.credits >=
+            installCreditsPaid + variant.additionalCreditCost
+          );
         },
       },
     };

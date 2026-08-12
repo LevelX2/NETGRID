@@ -62,10 +62,6 @@ export const cardSpec = {
         role: "build_scoring_remote",
       },
       {
-        kind: "plan_role",
-        role: "protect_rnd",
-      },
-      {
         kind: "strategic_role",
         role: "tax_tool",
       },

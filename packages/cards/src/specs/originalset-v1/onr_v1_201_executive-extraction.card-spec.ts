@@ -92,15 +92,6 @@ export const cardSpec = {
         rationale:
           "Agenda Semantic Review v1 maps Executive Extraction to corp.fast_advance as enabler/gray_ops_difficulty_enabler.",
       },
-      {
-        kind: "target_preference",
-        purpose: "advance_high_value_corp_card",
-        preferences: [
-          "prefer_option_that_protects_agenda_or_remote_pressure",
-          "central_or_remote_plan_enabler",
-        ],
-        avoid: ["hidden_info_dependent_choice"],
-      },
     ],
     capabilities: [],
   },

@@ -530,10 +530,9 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(JSON.stringify(layoffsPayload)).not.toContain(
       "onr_v1_202_genetics-visionary-acquisition",
     );
-    const runnerPublicPayload = getPlayerView(
-      state,
-      "runner",
-    ).publicEvents.at(-1)?.publicPayload;
+    const runnerPublicPayload = getPlayerView(state, "runner").publicEvents.at(
+      -1,
+    )?.publicPayload;
     expect(runnerPublicPayload).toMatchObject({
       publicTargetCount: 0,
       hiddenTargetCount: 1,
@@ -1702,7 +1701,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       abilityId: "scored_rezzed_ice_mark_modifier",
       targetIceDefinitionId: "onr_v1_232_crystal-wall",
       strengthBonus: 1,
-      duplicatedSubroutineCount: 1,
+      cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter: true,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

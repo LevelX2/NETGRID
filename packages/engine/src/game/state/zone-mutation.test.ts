@@ -120,6 +120,7 @@ describe("zone-mutation", () => {
   it("ensures special zones and uninstalls corp cards to HQ", () => {
     const current = state();
     delete current.specialZones;
+    setCardCounter(current, CORP_ASSET, "mark", 1);
 
     expect(ensureSpecialZones(current)).toEqual({
       setAside: [],
@@ -134,6 +135,7 @@ describe("zone-mutation", () => {
       rezzed: false,
       zone: { side: "corp", zone: "hq" },
     });
+    expect(current.cardInstances[CORP_ASSET]?.counters).toBeUndefined();
   });
 
   it("manages hosted card links and rejects cycles with existing errors", () => {

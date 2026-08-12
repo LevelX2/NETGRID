@@ -58,10 +58,6 @@ export const cardSpec = {
         role: "enabler",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -75,17 +71,27 @@ export const cardSpec = {
         rationale:
           "Review v1 removes the previous remote-scoring pair; free install/rez from R&D is an ICE-tax/glacier setup payoff.",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "install_best_legal_target",
-        preferences: [
-          "high_install_cost_or_memory",
-          "central_or_remote_plan_enabler",
+        capabilityKey: capabilityKey(
+          "scored_agenda_reveal_top_rd_install_and_rez_ice_trash_rest",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_server_for_revealed_ice_install",
+            preferences: [
+              "blocks_relevant_run_path",
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "central_or_remote_plan_enabler",
+            ],
+            avoid: ["unaffordable_after_install"],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

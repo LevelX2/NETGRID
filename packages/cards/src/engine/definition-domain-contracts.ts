@@ -1120,7 +1120,7 @@ export type CardScoredAgendaImplementation =
       counterType: Extract<CounterType, "mark">;
       counterAmount: 1;
       strengthBonusPerCounter: 1;
-      duplicateEachPrintedSubroutinePerCounter: true;
+      duplicateEachSelfProvidedSubroutinePerCounter: true;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

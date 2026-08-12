@@ -9,6 +9,7 @@ import {
   additionalSubroutinesForIce,
   copiedRunSubroutinesForIceAfterOriginal,
   currentEncounterAdditionalSubroutinesForIce,
+  dynamicSubroutineAttributionFor,
 } from "../../ability-engine/additional-subroutine-modifiers";
 import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { cardCounter } from "../state/turn-flags-counters";
@@ -36,29 +37,47 @@ export function effectiveIceRunSubroutines(
   );
   const transmutationCopies = cardCounter(state, iceId, "mark");
   const effectiveBase = [
-    ...publicDerivation.printedSubroutines.flatMap((subroutine) => {
-      const copies = [subroutine];
-      for (let index = 0; index < transmutationCopies; index += 1) {
-        copies.push({
-          ...subroutine,
-          id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
-        });
-      }
-      return copies;
-    }),
+    ...publicDerivation.printedSubroutines.flatMap((subroutine) =>
+      repeatSelfProvidedSubroutine(subroutine, transmutationCopies),
+    ),
     ...runDurationAdditionalSubroutinesForIce(state, iceId),
-    ...publicDerivation.appendedSubroutines.filter(
-      (subroutine) => subroutine.type === "end_the_run",
+    ...publicDerivation.appendedSubroutines
+      .filter((subroutine) => subroutine.type === "end_the_run")
+      .flatMap((subroutine) =>
+        repeatSelfProvidedSubroutine(subroutine, transmutationCopies),
+      ),
+    ...currentEncounterAdditionalSubroutinesForIce(state, iceId).flatMap(
+      (subroutine) =>
+        repeatSelfProvidedSubroutine(subroutine, transmutationCopies),
     ),
-    ...currentEncounterAdditionalSubroutinesForIce(state, iceId),
-    ...publicDerivation.appendedSubroutines.filter(
-      (subroutine) => subroutine.type === "initiate_trace",
+    ...publicDerivation.appendedSubroutines
+      .filter((subroutine) => subroutine.type === "initiate_trace")
+      .flatMap((subroutine) =>
+        repeatSelfProvidedSubroutine(subroutine, transmutationCopies),
+      ),
+    ...additionalSubroutinesForIce(state, iceId).flatMap((subroutine) =>
+      dynamicSubroutineAttributionFor(subroutine)?.sourceCardInstanceId ===
+      iceId
+        ? repeatSelfProvidedSubroutine(subroutine, transmutationCopies)
+        : [subroutine],
     ),
-    ...additionalSubroutinesForIce(state, iceId),
   ];
   return effectiveBase.flatMap((subroutine) =>
     subroutineWithRunScopedCopies(state, iceId, subroutine, new Set()),
   );
+}
+
+function repeatSelfProvidedSubroutine(
+  subroutine: SubroutineDefinition,
+  copies: number,
+): SubroutineDefinition[] {
+  return [
+    subroutine,
+    ...Array.from({ length: copies }, (_, index) => ({
+      ...subroutine,
+      id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
+    })),
+  ];
 }
 
 function subroutineWithRunScopedCopies(

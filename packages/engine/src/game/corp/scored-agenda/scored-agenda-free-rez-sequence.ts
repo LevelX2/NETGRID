@@ -4,11 +4,7 @@ import type {
   PlayerAction,
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../../choices/choice-validation";
-import {
-  hiddenCardChoiceOption,
-  hiddenZoneChoicePayload,
-  selectedHiddenCardChoiceIds,
-} from "../../choices/hidden-zone-choice";
+import { hiddenZoneChoicePayload } from "../../choices/hidden-zone-choice";
 import type {
   CorpInstallRezSequenceHandlerHost,
   CorpInstallRezSequenceHandlerResult,
@@ -47,14 +43,15 @@ export function startScoredAgendaFreeRezChoice(
     side: "corp",
     source: `card_implementation.scored_agenda_free_rez:${agendaId}:${host.state.stateVersion + 1}`,
     prompt: "Priority Requisition: ICE kostenlos rezzen",
-    kind: "select_cards",
+    kind: "select_option",
     options: [
-      ...candidates.map((cardId) =>
-        hiddenCardChoiceOption({
-          cardId,
-          label: host.cards.definitionFor(cardId).title,
+      ...candidates.flatMap((cardId) =>
+        host.callbacks.effectDrivenRezVariants(cardId).map((variant) => ({
+          id: `rez_${cardId}_${variant.variantId}`,
+          label: variant.label,
           publicLabel: "Installiertes ICE",
-        }),
+          value: `${cardId}|${variant.variantId}`,
+        })),
       ),
       {
         id: "skip",
@@ -111,37 +108,28 @@ export function resolveScoredAgendaFreeRezChoice(
       },
     });
   }
-  const selectedIds = selectedChoiceCardIds(host, choice);
-  if (selectedIds.length > 1)
-    throw new Error("Priority Requisition darf hoechstens ein ICE rezzen.");
-  const targetId = selectedIds[0];
-  if (!targetId) {
-    delete host.state.pendingChoice;
-    return applySequenceResolution(host.legalAction, {
-      result: { handled: true, deletePendingChoice: true },
-      stateChanged: true,
-      payloadPatch: {
-        scoredAgendaFreeRezFreeRez: false,
-        scoredAgendaFreeRezDeclined: true,
-      },
-    });
-  }
-  const optionValues = new Set(
-    choice.options
-      .map((option) => option.value)
-      .filter((value): value is string => typeof value === "string"),
+  if (selectedOptionIds.length !== 1)
+    throw new Error("Priority Requisition braucht genau eine Auswahl.");
+  const selectedOption = choice.options.find(
+    (option) => option.id === selectedOptionIds[0],
   );
+  if (typeof selectedOption?.value !== "string")
+    throw new Error("Die Priority-Requisition-Auswahl ist ungueltig.");
+  const [targetText, variantId] = selectedOption.value.split("|");
+  const targetId = targetText as CardInstanceId | undefined;
   if (
-    !optionValues.has(targetId) ||
-    !host.cards.isScoredAgendaFreeRezCandidate(targetId)
+    !targetId ||
+    !variantId ||
+    !host.cards.isScoredAgendaFreeRezCandidate(targetId) ||
+    !host.callbacks
+      .effectDrivenRezVariants(targetId)
+      .some((variant) => variant.variantId === variantId)
   )
     throw new Error("Das Priority-Requisition-Ziel ist nicht mehr gueltig.");
-  const instance = host.cards.mustInstance(targetId);
-  host.state.cardInstances[targetId] = {
-    ...instance,
-    faceup: true,
-    rezzed: true,
-  };
+  const receipt = host.callbacks.rezInstalledIceWaivingBaseCost(
+    targetId,
+    variantId,
+  );
   delete host.state.pendingChoice;
   return applySequenceResolution(host.legalAction, {
     result: {
@@ -156,7 +144,9 @@ export function resolveScoredAgendaFreeRezChoice(
       scoredAgendaFreeRezTarget: targetId,
       scoredAgendaFreeRezTargetDefinitionId:
         host.cards.definitionFor(targetId).id,
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: host.cards.definitionFor(targetId).rezCost ?? 0,
+      rezAdditionalCreditsPaid: receipt.rezAdditionalCreditsPaid,
+      rezAgendaPointsPaid: receipt.rezAgendaPointsPaid,
     },
   });
 }
@@ -165,8 +155,11 @@ function scoredAgendaFreeRezCandidates(
   host: CorpInstallRezSequenceHandlerHost,
 ): CardInstanceId[] {
   return Object.keys(host.state.cardInstances)
-    .filter((cardId): cardId is CardInstanceId =>
-      host.cards.isScoredAgendaFreeRezCandidate(cardId as CardInstanceId),
+    .filter(
+      (cardId): cardId is CardInstanceId =>
+        host.cards.isScoredAgendaFreeRezCandidate(cardId as CardInstanceId) &&
+        host.callbacks.effectDrivenRezVariants(cardId as CardInstanceId)
+          .length > 0,
     )
     .sort((left, right) => {
       const leftCost = host.cards.definitionFor(left).rezCost ?? 0;
@@ -189,14 +182,4 @@ function requirePlayerAction(
 ): PlayerAction {
   if (!host.playerAction) throw new Error("Diese Choice hat keine Auswahl.");
   return host.playerAction;
-}
-
-function selectedChoiceCardIds(
-  host: CorpInstallRezSequenceHandlerHost,
-  choice: ChoiceRequest,
-): CardInstanceId[] {
-  return selectedHiddenCardChoiceIds(
-    requirePlayerAction(host).selectedChoices,
-    choice,
-  );
 }

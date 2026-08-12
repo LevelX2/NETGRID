@@ -87,10 +87,6 @@ export const cardSpec = {
         role: "score_next_turn",
       },
       {
-        kind: "plan_role",
-        role: "protect_rnd",
-      },
-      {
         kind: "strategic_role",
         role: "enabler",
       },

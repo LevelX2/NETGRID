@@ -5429,6 +5429,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 20;
     state.corp.maxHandSize = 100;
+    state.poxCountersByServer = { rd: 2 };
 
     moveCorpCardToHq(state, "onr_v1_216_security-purge");
     state = apply(
@@ -5647,13 +5648,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(staleResolve.error.code).toBe("ERR_STALE_STATE");
 
     const rdOption = state.pendingChoice?.options.find(
-      (option) => option.value === `${installedBarrierId}|rd`,
+      (option) => option.value === `${installedBarrierId}|rd|fixed`,
     );
     const newRemoteOption = state.pendingChoice?.options.find(
-      (option) => option.value === `${installedCodeGateId}|new_remote`,
+      (option) => option.value === `${installedCodeGateId}|new_remote|fixed`,
     );
     expect(rdOption).toBeDefined();
     expect(newRemoteOption).toBeDefined();
+    const creditsBeforePurgeResolution = state.corp.credits;
     state = applyChoices(state, "corp", [rdOption!.id, newRemoteOption!.id]);
 
     expect(
@@ -5688,6 +5690,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         serverId: createdRemote?.id,
       },
     });
+    expect(state.corp.credits).toBe(creditsBeforePurgeResolution - 1);
     expect(state.corp.archives).toContain(trashedOperationId);
     expect(state.cardInstances[trashedOperationId]).toMatchObject({
       faceup: true,
@@ -5697,6 +5700,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       actionType: "resolve_choice",
       abilityId: "agenda_purge",
       hiddenZoneAction: "agenda_purge_install_targets",
+      effectDrivenAdditionalInstallCreditsPaid: 1,
+      effectDrivenAdditionalRezCreditsPaid: 0,
       revealedCount: 3,
       revealedIceCount: 2,
       installedIceCount: 2,

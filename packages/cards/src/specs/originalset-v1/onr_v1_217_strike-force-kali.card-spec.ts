@@ -86,10 +86,6 @@ export const cardSpec = {
         role: "score_next_turn",
       },
       {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
         kind: "strategic_role",
         role: "punish_payoff",
       },

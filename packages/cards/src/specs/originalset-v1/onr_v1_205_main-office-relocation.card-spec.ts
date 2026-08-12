@@ -53,13 +53,7 @@ export const cardSpec = {
   },
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
-    card: [
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-    ],
+    card: [],
     capabilities: [],
   },
   printings: [

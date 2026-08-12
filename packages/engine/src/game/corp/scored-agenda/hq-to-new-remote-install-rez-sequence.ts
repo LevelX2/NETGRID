@@ -314,26 +314,26 @@ function advanceHqInstallRezSequence(
     sequenceState.temporaryCreditsRemaining =
       installPayment.temporaryCreditsRemaining;
     corpCreditsSpent += installPayment.corpCreditsSpent;
-    host.zones.removeFromAllZones(cardId);
     const rootRezOnInstall =
       destination === "root" &&
       requiresOrderedRootInstallRezSequence(host, definition);
-    if (destination === "ice") {
-      server.ice.push(cardId);
-      host.state.cardInstances[cardId] = {
-        ...host.cards.mustInstance(cardId),
-        faceup: false,
-        rezzed: false,
-        zone: { side: "corp", zone: "serverIce", serverId: server.id },
-      };
-    } else {
-      server.root.push(cardId);
-      host.state.cardInstances[cardId] = {
-        ...host.cards.mustInstance(cardId),
-        faceup: false,
-        rezzed: false,
-        zone: { side: "corp", zone: "serverRoot", serverId: server.id },
-      };
+    host.callbacks.finalizeCorpInstallAfterExternalPayment(cardId, server);
+    host.callbacks.recordSuccessfulCorpInstall();
+    const installedInstance = host.state.cardInstances[cardId];
+    const installedZone = installedInstance?.zone;
+    const remainsInstalled =
+      installedZone?.side === "corp" &&
+      ((destination === "ice" &&
+        installedZone.zone === "serverIce" &&
+        installedZone.serverId === server.id) ||
+        (destination === "root" &&
+          installedZone.zone === "serverRoot" &&
+          installedZone.serverId === server.id));
+    if (!remainsInstalled) {
+      sequenceState.nextCardIndex += 1;
+      continue;
+    }
+    if (destination === "root") {
       if (rootRezOnInstall) {
         const payment = host.callbacks.payAndFinalizeMandatoryHqInstallRez(
           cardId,
@@ -345,15 +345,8 @@ function advanceHqInstallRezSequence(
       }
       if (rootRezOnInstall) {
         immediatelyRezzedIds.push(cardId);
-        if (host.cards.isRegionUpgrade(definition))
-          host.servers.trashOlderRegionUpgradesInServer(
-            server,
-            cardId,
-            host.legalAction,
-          );
       }
     }
-    host.callbacks.recordSuccessfulCorpInstall();
     installedIds.push(cardId);
     sequenceState.nextCardIndex += 1;
 

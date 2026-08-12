@@ -1502,6 +1502,12 @@ export function publicContextForAction(
     "successfulRunForceRezCreditCost",
     "rezzedIceCount",
     "rezCostPaid",
+    "rezBaseCreditCostWaived",
+    "rezAdditionalCreditsPaid",
+    "rezAgendaPointsPaid",
+    "effectDrivenAdditionalInstallCreditsPaid",
+    "effectDrivenAdditionalRezCreditsPaid",
+    "effectDrivenRezAgendaPointsPaid",
     "priorityRequisitionChoiceOpened",
     "priorityRequisitionCandidateCount",
     "priorityRequisitionFreeRez",
@@ -1620,7 +1626,7 @@ export function publicContextForAction(
   for (const key of [
     "targetIceDefinitionId",
     "strengthBonus",
-    "duplicatedSubroutineCount",
+    "cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter",
   ]) {
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
@@ -2439,14 +2445,18 @@ function applyPublicAdvancementCardProjection(
   const targetIds = advancementTargetCardIds(payload);
   const targetCount = Math.max(
     targetIds.length,
-    integerValue(payload.targetCount) ?? (stringValue(payload.targetCardId) ? 1 : 0),
+    integerValue(payload.targetCount) ??
+      (stringValue(payload.targetCardId) ? 1 : 0),
   );
   const publicDefinitionIds = targetIds
     .map((targetId) =>
       publicInstalledCorpCardDefinitionId(state, targetId, deps),
     )
     .filter((definitionId): definitionId is string => Boolean(definitionId));
-  const hiddenTargetCount = Math.max(0, targetCount - publicDefinitionIds.length);
+  const hiddenTargetCount = Math.max(
+    0,
+    targetCount - publicDefinitionIds.length,
+  );
 
   context.publicTargetCount = publicDefinitionIds.length;
   context.hiddenTargetCount = hiddenTargetCount;

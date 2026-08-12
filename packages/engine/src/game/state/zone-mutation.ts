@@ -16,7 +16,11 @@ export function ensureSpecialZones(state: GameState): SpecialZoneState {
 }
 
 export function removeFromAllZones(state: GameState, cardId: string): void {
-  const wasRunnerRigCard = runnerInstalledCardIds(state).includes(cardId);
+  const wasInstalledCard =
+    runnerInstalledCardIds(state).includes(cardId) ||
+    state.corp.servers.some(
+      (server) => server.ice.includes(cardId) || server.root.includes(cardId),
+    );
   state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
   state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
   state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
@@ -43,7 +47,7 @@ export function removeFromAllZones(state: GameState, cardId: string): void {
   specialZones.removedFromGame = specialZones.removedFromGame.filter(
     (id) => id !== cardId,
   );
-  if (wasRunnerRigCard) clearCardCounters(state, cardId);
+  if (wasInstalledCard) clearCardCounters(state, cardId);
 }
 
 export function hostedCardsOn(
@@ -94,8 +98,9 @@ export function uninstallCorpInstalledCardToHq(
   state: GameState,
   cardId: CardInstanceId,
 ): void {
-  const instance = mustInstance(state.cardInstances, cardId);
+  mustInstance(state.cardInstances, cardId);
   removeFromAllZones(state, cardId);
+  const instance = mustInstance(state.cardInstances, cardId);
   state.corp.hq.unshift(cardId);
   state.cardInstances[cardId] = {
     ...instance,

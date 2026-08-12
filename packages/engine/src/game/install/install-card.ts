@@ -237,8 +237,6 @@ export function installCard(
     );
   }
   host.payment.spendClick(legalAction.side);
-  if (legalAction.side === "corp")
-    host.corp.expireScoredAgendaInstallRezCreditAbilities();
   if (legalAction.side === "runner") {
     installRunnerCard(host, legalAction, cardId, definition);
     return;
@@ -563,7 +561,6 @@ function installCorpCard(
       definition,
       server ?? { id: "new_remote", kind: "remote" },
     );
-    host.zones.removeFromAllZones(cardId);
     const installServer = server ?? host.servers.createRemote();
     if (corpIceInstallQuote) {
       legalAction.payload = {
@@ -575,16 +572,12 @@ function installCorpCard(
       "corp",
       corpIceInstallQuote?.finalCredits ?? legalAction.costs[0]?.credits ?? 0,
     );
-    installServer.ice.push(cardId);
-    state.cardInstances[cardId] = {
-      ...host.cards.mustInstance(cardId),
-      faceup: false,
-      rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: installServer.id },
-    };
-    host.servers.markFortActivityForRunGate(installServer.id, legalAction);
-    host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
-    applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
+    finalizeCorpIceInstallAfterExternalPayment(
+      host,
+      cardId,
+      installServer,
+      legalAction,
+    );
     return;
   }
 
@@ -634,6 +627,7 @@ function installCorpCard(
     rezzed: rootRezOnInstall,
     zone: { side: "corp", zone: "serverRoot", serverId: server.id },
   };
+  host.corp.expireScoredAgendaInstallRezCreditAbilities();
   if (rootRezOnInstall) {
     appendRootRezOnInstallEffect(host, server, cardId, definition, legalAction);
   }
@@ -652,6 +646,113 @@ function installCorpCard(
   if (host.corp.isRegionUpgrade(definition)) {
     host.servers.trashOlderRegionUpgradesInServer(server, cardId, legalAction);
   }
+  host.servers.markFortActivityForRunGate(server.id, legalAction);
+  host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
+  applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
+}
+
+/**
+ * Completes the canonical Corp ICE install lifecycle after an owning Engine
+ * effect has validated and paid its exact install contract. Action and base
+ * install costs stay with that owning effect; board legality, fort activity,
+ * install-triggered replacements and install/rez-credit invalidation do not.
+ */
+export function finalizeCorpIceInstallAfterExternalPayment(
+  host: InstallCardHost,
+  cardId: CardInstanceId,
+  server: CorpServer,
+  legalAction: LegalAction,
+): void {
+  const definition = host.cards.definitionFor(cardId);
+  if (definition.type !== "ice")
+    throw new Error("Der externe Corp-ICE-Installpfad braucht ICE.");
+  if (
+    host.cards.isUniqueCard(definition) &&
+    host.cards.hasInstalledUniqueCardDefinition("corp", definition.id)
+  )
+    throw new Error(
+      "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
+    );
+  assertCorpIceInstallAllowed(definition, server);
+  host.zones.removeFromAllZones(cardId);
+  server.ice.push(cardId);
+  host.state.cardInstances[cardId] = {
+    ...host.cards.mustInstance(cardId),
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "serverIce", serverId: server.id },
+  };
+  host.corp.expireScoredAgendaInstallRezCreditAbilities();
+  host.lifecycle.executeOnInstall(legalAction, definition, cardId);
+  host.servers.markFortActivityForRunGate(server.id, legalAction);
+  host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
+  applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
+}
+
+/**
+ * Completes an already-paid Corp root install for an Engine-owned effect.
+ * Mandatory rez-on-install payment stays with the owning sequence, while the
+ * canonical install legality, replacement, lifecycle and fort hooks stay here.
+ */
+export function finalizeCorpRootInstallAfterExternalPayment(
+  host: InstallCardHost,
+  cardId: CardInstanceId,
+  server: CorpServer,
+  legalAction: LegalAction,
+): void {
+  const definition = host.cards.definitionFor(cardId);
+  if (
+    definition.type !== "asset" &&
+    definition.type !== "agenda" &&
+    definition.type !== "upgrade"
+  )
+    throw new Error(
+      "Der externe Corp-Root-Installpfad braucht eine Root-Karte.",
+    );
+  if (
+    host.cards.isUniqueCard(definition) &&
+    host.cards.hasInstalledUniqueCardDefinition("corp", definition.id)
+  )
+    throw new Error(
+      "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
+    );
+  if (!host.servers.canInstallCorpRootCardInServer(definition, server))
+    throw new Error(
+      "In diesem Server darf diese Karte nicht im Root installiert sein.",
+    );
+  const rootCapacity =
+    host.servers.corpRootAgendaOrNodeCapacityInServer(server);
+  const replacedRootAssetIds =
+    definition.type === "agenda" &&
+    host.servers.corpRootMainCardIdsInServer(server).length >= rootCapacity
+      ? host.servers.corpRootAssetIdsInServer(server)
+      : [];
+  const replacedRootDefinitionIds = replacedRootAssetIds.map(
+    (replacedId) => host.cards.definitionFor(replacedId).id,
+  );
+  for (const replacedId of replacedRootAssetIds)
+    host.zones.trashCorpInstalledCardToArchives(replacedId, legalAction);
+  if (replacedRootAssetIds.length > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      rootReplacement: "asset_to_agenda",
+      replacedRootCardIds: replacedRootAssetIds.join(","),
+      replacedRootDefinitionIds: replacedRootDefinitionIds.join(","),
+      replacedRootCardType: "asset",
+    };
+  }
+  host.zones.removeFromAllZones(cardId);
+  server.root.push(cardId);
+  host.state.cardInstances[cardId] = {
+    ...host.cards.mustInstance(cardId),
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "serverRoot", serverId: server.id },
+  };
+  host.corp.expireScoredAgendaInstallRezCreditAbilities();
+  host.lifecycle.executeOnInstall(legalAction, definition, cardId);
+  if (host.corp.isRegionUpgrade(definition))
+    host.servers.trashOlderRegionUpgradesInServer(server, cardId, legalAction);
   host.servers.markFortActivityForRunGate(server.id, legalAction);
   host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
   applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);

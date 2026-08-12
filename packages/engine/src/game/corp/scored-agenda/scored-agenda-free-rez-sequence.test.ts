@@ -38,7 +38,7 @@ describe("priority requisition sequence routing", () => {
       {
         label: "Archer",
         publicLabel: "Installiertes ICE",
-        value: "ice_1",
+        value: "ice_1|fixed",
       },
       { label: "Überspringen", publicLabel: "Überspringen" },
     ]);
@@ -68,7 +68,9 @@ describe("priority requisition sequence routing", () => {
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTarget: "ice_1",
       scoredAgendaFreeRezTargetDefinitionId: "ice_1_def",
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: 7,
+      rezAdditionalCreditsPaid: 0,
+      rezAgendaPointsPaid: 0,
     });
   });
 });
@@ -166,6 +168,28 @@ function makeScoredAgendaFreeRezHost(
     },
     callbacks: {
       resolveCorpRootRez: () => undefined,
+      effectDrivenRezVariants: () => [
+        {
+          variantId: "fixed",
+          label: "Archer",
+          additionalCreditCost: 0,
+          payload: { cardId: "ice_1" },
+        },
+      ],
+      rezInstalledIceWaivingBaseCost: (_cardId: CardInstanceId) => {
+        state.cardInstances.ice_1 = {
+          ...state.cardInstances.ice_1,
+          faceup: true,
+          rezzed: true,
+        };
+        return {
+          installCreditsPaid: 0,
+          rezAdditionalCreditsPaid: 0,
+          rezAgendaPointsPaid: 0,
+          installed: true,
+          rezzed: true,
+        };
+      },
     },
   } as unknown as CorpInstallRezSequenceHandlerHost;
 }
@@ -176,12 +200,12 @@ function selectChoice(cardIds: CardInstanceId[]): ChoiceRequest {
     side: "corp",
     source: "card_implementation.scored_agenda_free_rez:priority_agenda:8",
     prompt: "Priority Requisition",
-    kind: "select_cards",
+    kind: "select_option",
     options: cardIds.map((cardId) => ({
       id: `card_${cardId}`,
       label: "Archer",
       publicLabel: "Installiertes ICE",
-      value: cardId,
+      value: `${cardId}|fixed`,
     })),
     minSelections: 1,
     maxSelections: 1,
