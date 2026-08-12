@@ -805,8 +805,8 @@ describe("authoritative plan-first live runtime", () => {
       ]),
     );
     const campaign = residentPlanPortfolioSnapshot(input)?.instances.find(
-      (instance) => instance.instanceId ===
-        "plan:runner.pressure_central:central%3Ard",
+      (instance) =>
+        instance.instanceId === "plan:runner.pressure_central:central%3Ard",
     );
     expect(campaign).toMatchObject({
       moduleId: "runner.pressure_central",
@@ -959,8 +959,7 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId:
-        "plan:runner.pressure_central:central%3Ard",
+      rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ard",
       executorInstanceId:
         "plan:runner.economy:access-payoff-support%3Acentral%3Ard%3Apayoff-card",
     });
@@ -9284,7 +9283,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("does not alias Basic Credit into a recurring-economy P4 hold step", () => {
+  it("binds productive non-run development to an unrealized recurring-economy horizon", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
       "end",
@@ -9321,10 +9320,92 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: credit.actionId,
-      reasonCode: "plan_first.runner.economy",
+      reasonCode: "plan_first.runner.recurring_economy",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.economy",
+        planKind: "runner.recurring_economy",
+      },
+    });
+  });
+
+  it("lets a valuable visible run preempt the resident investment after its first payout", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-rd-after-payout",
+      "runner",
+      "start_run",
+      "Run R&D after payout",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const credit = legalAction(
+      "credit-after-payout",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    const conference = visibleCard("conference", "runner", "resource", {
+      definitionId: "onr_v1_184_top-runners-conference",
+      title: "Top Runners' Conference",
+    });
+    input.playerView.own.rig = [conference];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.eventTail = [
+      {
+        eventId: "conference-first-payout",
+        type: "automatic_effects_resolved",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:conference-first-payout",
+        visibilityClass: "public",
+        publicPayload: {
+          resolvedEffects: [
+            {
+              effectId: "conference-first-payout-effect",
+              kind: "gain_credits",
+              visibility: "public",
+              amount: 2,
+              reason: "start_of_turn",
+              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+            },
+          ],
+        },
+      },
+    ];
+    const valuableRun = {
+      ...safeRuntimeRunTarget(run.actionId, "rd"),
+      recommendation: "run_now" as const,
+      pathPassability: "reachable" as const,
+      score: 450,
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [valuableRun],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.pressure_central" },
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.recurring_economy",
+      ),
+    ).toMatchObject({
+      viability: "blocked",
+      moduleState: {
+        signal: {
+          investmentHorizon: {
+            realizedPayoutCount: 1,
+            futureValueAtRisk: 2,
+            bestVisibleRunPayoff: 450,
+            decision: "allow_run",
+          },
+        },
       },
     });
   });
@@ -10154,20 +10235,16 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId:
-        "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId:
-        "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
       instances: expect.arrayContaining([
         expect.objectContaining({
           instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
           openNeedIds: ["run-support:remote:remote_1"],
         }),
         expect.objectContaining({
-          instanceId:
-            "plan:runner.economy:run-support%3Aremote%3Aremote_1",
-          parentInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_1",
+          instanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
           parentNeedId: "run-support:remote:remote_1",
         }),
       ]),

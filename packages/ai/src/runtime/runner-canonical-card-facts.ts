@@ -5,7 +5,10 @@ type RunnerPlanningCard = NonNullable<
 >;
 
 export type RunnerNoRunRecurringEconomyProfile = Readonly<{
+  installCost: number;
   turnStartCredits: number;
+  earliestPayout: "start_of_runner_turn";
+  invalidatingActionType: "start_run";
 }>;
 
 export type RunnerDebtFinancingProfile = Readonly<{
@@ -87,14 +90,12 @@ export function runnerDebtFinancingProfileFromPlanningCard(
         : [],
   );
   const leavePlayPayCost =
-    leavePlayPayments.length === 1 &&
-    positiveSafeInteger(leavePlayPayments[0])
+    leavePlayPayments.length === 1 && positiveSafeInteger(leavePlayPayments[0])
       ? leavePlayPayments[0]
       : undefined;
-  const canTrashAtEndOfRunnerTurn = (
-    lifecycle?.end_of_runner_turn ?? []
-  ).some((ability) =>
-    ability.effects.some((effect) => effect.kind === "trash_source"),
+  const canTrashAtEndOfRunnerTurn = (lifecycle?.end_of_runner_turn ?? []).some(
+    (ability) =>
+      ability.effects.some((effect) => effect.kind === "trash_source"),
   );
   const installCost = planning.engine.characteristics.numeric.installCost;
   if (
@@ -119,8 +120,22 @@ export function runnerNoRunRecurringEconomyProfile(
   definitionId: string | undefined,
 ): RunnerNoRunRecurringEconomyProfile | undefined {
   if (!definitionId) return undefined;
-  const planning = cardSpecPlanningCardByDefinitionId(definitionId);
+  return runnerNoRunRecurringEconomyProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerNoRunRecurringEconomyProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerNoRunRecurringEconomyProfile | undefined {
+  const planning = card;
   if (planning?.planning.side !== "runner") return undefined;
+
+  const recoveryInvestment = planning.planning.planningAnnotations?.card?.some(
+    (annotation) =>
+      annotation.kind === "plan_role" && annotation.role === "recover_economy",
+  );
+  if (!recoveryInvestment) return undefined;
 
   const lifecycle = planning.planning.engine.lifecycle;
   const turnStartCredits = (lifecycle?.start_of_runner_turn ?? []).reduce(
@@ -139,10 +154,20 @@ export function runnerNoRunRecurringEconomyProfile(
     0,
   );
   const trashesOnRunStart = (lifecycle?.on_runner_run_start ?? []).some(
-    (ability) => ability.effects.some((effect) => effect.kind === "trash_source"),
+    (ability) =>
+      ability.effects.some((effect) => effect.kind === "trash_source"),
   );
-  return turnStartCredits > 0 && trashesOnRunStart
-    ? { turnStartCredits }
+  const installCost =
+    planning.planning.engine.characteristics.numeric.installCost;
+  return turnStartCredits > 0 &&
+    trashesOnRunStart &&
+    nonNegativeSafeInteger(installCost)
+    ? {
+        installCost,
+        turnStartCredits,
+        earliestPayout: "start_of_runner_turn",
+        invalidatingActionType: "start_run",
+      }
     : undefined;
 }
 
@@ -175,8 +200,7 @@ function sumExactPositiveAmounts(
     return undefined;
   }
   return matched.reduce(
-    (sum, effect) =>
-      sum + Number((effect as Record<string, unknown>).amount),
+    (sum, effect) => sum + Number((effect as Record<string, unknown>).amount),
     0,
   );
 }

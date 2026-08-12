@@ -101,6 +101,7 @@ import {
   type RunnerDiscardChoiceBinding,
   type RunnerFundingNeedSignal,
   type RunnerFundingRouteAssessment,
+  type RunnerRecurringEconomySignal,
 } from "../plans/runner-core-plan-modules";
 import {
   createRunnerTacticalPlanModules,
@@ -211,6 +212,7 @@ import {
 } from "../plans/tactical-plan-breaker-coverage";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
+import { assessRunnerRecurringEconomyRunHorizon } from "./runner-recurring-economy-investment";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { rolesMatch } from "./role-match";
 import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
@@ -2824,9 +2826,7 @@ function runnerBoundStrategicExchangeFundingActionIds(
   return new Set(
     domain.fundingNeeds.flatMap((need) =>
       need.kind === "parent_plan_support" &&
-      (need.parentPlanInstanceId.startsWith(
-        "plan:runner.pressure_central:",
-      ) ||
+      (need.parentPlanInstanceId.startsWith("plan:runner.pressure_central:") ||
         need.parentPlanInstanceId.startsWith("plan:runner.contest_remote:"))
         ? need.routeActionIds
         : [],
@@ -3072,7 +3072,12 @@ function buildRunnerDomain(
     handDevelopment,
     strategicIntent,
   });
-  const recurringEconomy = runnerRecurringEconomySignals(input, candidates);
+  const recurringEconomy = runnerRecurringEconomySignals(
+    input,
+    candidates,
+    runTargets,
+    economy,
+  );
   const resourceLifecycle = runnerResourceLifecycleSignals(input, candidates);
   const installedAgendaScores = runnerInstalledAgendaScoreSignals(
     input,
@@ -5476,11 +5481,13 @@ function runnerCentralPressureDevelopmentSignals(
     const target = [...runTargets]
       .filter(
         (entry) =>
-          entry.targetServerId === serverId || entry.accessServerId === serverId,
+          entry.targetServerId === serverId ||
+          entry.accessServerId === serverId,
       )
       .sort(
         (left, right) =>
-          right.score - left.score || left.actionId.localeCompare(right.actionId),
+          right.score - left.score ||
+          left.actionId.localeCompare(right.actionId),
       )[0];
     if (
       !target ||
@@ -6107,10 +6114,7 @@ function runnerExactFundingRouteCandidates(
       return (
         kinds.includes("self_damage") ||
         (kinds.includes("debt_financing") &&
-          runnerDebtFinancingCandidateHasSafeBoundRunExit(
-            candidate,
-            request,
-          ))
+          runnerDebtFinancingCandidateHasSafeBoundRunExit(candidate, request))
       );
     })
     .sort(
@@ -6152,8 +6156,7 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     (!parent.scoreThreat &&
       parent.accessPayoff !== "agenda" &&
       parent.accessPayoff !== "score_threat") ||
-    (parent.unknownUnrezzedIceCount > 0 &&
-      !parent.riskyUniversalCoverage) ||
+    (parent.unknownUnrezzedIceCount > 0 && !parent.riskyUniversalCoverage) ||
     parent.remainingClicksAfterRun < 0
   ) {
     return false;
@@ -7013,8 +7016,9 @@ function currentAccessWindowCommitment(
   const accessedDefinitionId = input.playerView.run?.accessedCard?.definitionId;
   if (!accessedDefinitionId) return parentCommitment;
   const exactParentTarget =
-    parentCommitment?.knownTargetDefinitionIds.includes(accessedDefinitionId) ===
-    true;
+    parentCommitment?.knownTargetDefinitionIds.includes(
+      accessedDefinitionId,
+    ) === true;
   const impact = assessRunnerAccessTrashImpact({
     input,
     trashAction,
@@ -16696,91 +16700,188 @@ function planSafeRunExclusionEvidence(evidence: readonly string[]): string[] {
 function runnerRecurringEconomySignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  runTargets: readonly RunnerRunTargetEvaluation[],
+  economy: RunnerEconomyPosture,
 ): NonNullable<RunnerCorePlanDomain["recurringEconomy"]> {
   const installedSources = (input.playerView.own.rig ?? []).filter((card) =>
     hasNoRunRecurringEconomyCommitment(card.definitionId),
   );
-  const installedSignals = installedSources.flatMap((card) => {
-    const definitionId = card.definitionId;
-    if (
-      !definitionId ||
-      recurringEconomyValueAlreadyResolved(input, definitionId)
-    )
-      return [];
-    const installedThisTurn = runnerRecurringEconomyInstalledInCurrentTurn(
-      input,
-      definitionId,
-    );
-    const holdActionIds = installedThisTurn
-      ? candidates
-          .filter(
-            (candidate) =>
-              (candidate.semanticActionType === "draw.card" &&
-                input.playerView.own.gripOrHq.length <
-                  input.playerView.own.maxHandSize) ||
-              candidate.semanticActionType === "economy.gain_credit",
-          )
-          .map((candidate) => candidate.actionId)
-      : [];
-    return [
-      {
-        commitmentId: card.instanceId,
+  const installedSignals =
+    installedSources.flatMap<RunnerRecurringEconomySignal>((card) => {
+      const definitionId = card.definitionId;
+      if (!definitionId) return [];
+      const profile = runnerNoRunRecurringEconomyProfile(definitionId);
+      if (!profile) return [];
+      const installedThisTurn = runnerRecurringEconomyInstalledInCurrentTurn(
+        input,
         definitionId,
-        phase: "hold" as const,
-        actionIds: holdActionIds,
-        priorityClass: "P4" as const,
-        value: recurringEconomyCommitmentValue(definitionId) * 100,
-        evidenceCodes: [
-          "runner_recurring_economy_waiting_for_turn_start_value",
-          holdActionIds.length > 0
-            ? `runner_recurring_economy_same_turn_hold_action_count:${holdActionIds.length}`
-            : "runner_recurring_economy_waiting_without_own_action",
-        ],
-      },
-    ];
-  });
-  const installSignals = candidates.flatMap((candidate) => {
-    if (
-      candidate.semanticActionType !== "install.card" ||
-      !candidate.sourceDefinitionId ||
-      !hasNoRunRecurringEconomyCommitment(candidate.sourceDefinitionId)
-    )
-      return [];
-    const lowValueRunExists = input.legalActions.some(
-      (action) => action.type === "start_run",
-    );
-    const productiveSetupAlternative = input.legalActions.some(
-      (action) =>
-        action.actionId !== candidate.actionId &&
-        action.type !== "start_run" &&
-        action.type !== "end_turn",
-    );
-    const setupWindow =
-      input.playerView.own.clicks >= 2 &&
-      (productiveSetupAlternative || !lowValueRunExists);
-    return [
-      {
-        commitmentId:
-          candidate.sourceCardInstanceId ??
-          candidate.sourceCardId ??
-          candidate.sourceDefinitionId,
-        definitionId: candidate.sourceDefinitionId,
-        phase: setupWindow ? ("install" as const) : ("hold" as const),
-        actionIds: setupWindow ? [candidate.actionId] : [],
-        priorityClass: setupWindow ? ("P4" as const) : ("P5" as const),
-        value: setupWindow ? 300 : 0,
-        evidenceCodes: [
-          setupWindow
-            ? "runner_recurring_economy_install_ready"
-            : "runner_recurring_economy_install_deferred_no_setup_window",
-        ],
-      },
-    ];
-  });
+      );
+      const realization = recurringEconomyRealization(input, definitionId);
+      const runDecision = runnerRecurringEconomyRunDecision(
+        input,
+        runTargets,
+        profile.turnStartCredits,
+        installedThisTurn || realization.payoutCount === 0,
+      );
+      const holdActionIds =
+        runDecision.decision === "wait"
+          ? candidates
+              .filter(
+                (candidate) =>
+                  (candidate.semanticActionType === "draw.card" &&
+                    input.playerView.own.gripOrHq.length <
+                      input.playerView.own.maxHandSize) ||
+                  candidate.semanticActionType === "economy.gain_credit" ||
+                  candidate.semanticActionType === "turn_flow.end_turn",
+              )
+              .map((candidate) => candidate.actionId)
+          : [];
+      const futureValueAtRisk = profile.turnStartCredits;
+      return [
+        {
+          commitmentId: card.instanceId,
+          definitionId,
+          phase: "hold" as const,
+          actionIds: holdActionIds,
+          priorityClass:
+            runDecision.decision === "wait" ? ("P3" as const) : ("P4" as const),
+          value: futureValueAtRisk * 350,
+          investmentHorizon: {
+            installCost: profile.installCost,
+            earliestPayout: profile.earliestPayout,
+            projectedHoldTurns: runDecision.decision === "wait" ? 1 : 0,
+            invalidatingActionType: profile.invalidatingActionType,
+            realizedPayoutCount: realization.payoutCount,
+            realizedValue: realization.value,
+            futureValueAtRisk,
+            bestVisibleRunPayoff: runDecision.bestVisibleRunPayoff,
+            decision: runDecision.decision,
+          },
+          evidenceCodes: [
+            `runner_recurring_economy_investment_decision:${runDecision.decision}`,
+            `runner_recurring_economy_install_cost:${profile.installCost}`,
+            `runner_recurring_economy_earliest_payout:${profile.earliestPayout}`,
+            `runner_recurring_economy_projected_hold_turns:${runDecision.decision === "wait" ? 1 : 0}`,
+            `runner_recurring_economy_invalidating_action:${profile.invalidatingActionType}`,
+            `runner_recurring_economy_realized_payout_count:${realization.payoutCount}`,
+            `runner_recurring_economy_realized_value:${realization.value}`,
+            `runner_recurring_economy_future_value_at_risk:${futureValueAtRisk}`,
+            `runner_recurring_economy_best_visible_run_payoff:${runDecision.bestVisibleRunPayoff}`,
+            ...runDecision.evidenceCodes,
+            holdActionIds.length > 0
+              ? `runner_recurring_economy_same_turn_hold_action_count:${holdActionIds.length}`
+              : "runner_recurring_economy_run_preemption_has_no_hold_route",
+          ],
+        },
+      ];
+    });
+  const installSignals = candidates.flatMap<RunnerRecurringEconomySignal>(
+    (candidate) => {
+      if (
+        candidate.semanticActionType !== "install.card" ||
+        !candidate.sourceDefinitionId ||
+        !hasNoRunRecurringEconomyCommitment(candidate.sourceDefinitionId)
+      )
+        return [];
+      const profile = runnerNoRunRecurringEconomyProfile(
+        candidate.sourceDefinitionId,
+      );
+      if (!profile) return [];
+      const action = input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      if (!action) return [];
+      const runDecision = runnerRecurringEconomyRunDecision(
+        input,
+        runTargets,
+        profile.turnStartCredits,
+        true,
+      );
+      const productiveSetupAlternative = input.legalActions.some(
+        (action) =>
+          action.actionId !== candidate.actionId &&
+          action.type !== "start_run" &&
+          action.type !== "end_turn",
+      );
+      const investmentCost = legalActionCreditCost(action);
+      const firstPayoutJustifiesInvestment =
+        profile.turnStartCredits > investmentCost;
+      const rebuildWindow =
+        economy.buildEconomyBeforePressure ||
+        economy.recommendation === "build_economy" ||
+        runDecision.bestVisibleRunPayoff <= 0;
+      const setupWindow =
+        input.playerView.own.clicks >= 2 &&
+        firstPayoutJustifiesInvestment &&
+        runDecision.decision === "wait" &&
+        (productiveSetupAlternative || rebuildWindow);
+      return [
+        {
+          commitmentId:
+            candidate.sourceCardInstanceId ??
+            candidate.sourceCardId ??
+            candidate.sourceDefinitionId,
+          definitionId: candidate.sourceDefinitionId,
+          phase: setupWindow ? ("install" as const) : ("hold" as const),
+          actionIds: setupWindow ? [candidate.actionId] : [],
+          priorityClass: setupWindow ? ("P4" as const) : ("P5" as const),
+          value: setupWindow ? profile.turnStartCredits * 150 : 0,
+          investmentHorizon: {
+            installCost: investmentCost,
+            earliestPayout: profile.earliestPayout,
+            projectedHoldTurns: setupWindow ? 1 : 0,
+            invalidatingActionType: profile.invalidatingActionType,
+            realizedPayoutCount: 0,
+            realizedValue: 0,
+            futureValueAtRisk: profile.turnStartCredits,
+            bestVisibleRunPayoff: runDecision.bestVisibleRunPayoff,
+            decision: setupWindow ? "install" : runDecision.decision,
+          },
+          evidenceCodes: [
+            setupWindow
+              ? "runner_recurring_economy_install_ready"
+              : "runner_recurring_economy_install_deferred_no_setup_window",
+            `runner_recurring_economy_investment_decision:${setupWindow ? "install" : runDecision.decision}`,
+            `runner_recurring_economy_install_cost:${investmentCost}`,
+            `runner_recurring_economy_earliest_payout:${profile.earliestPayout}`,
+            `runner_recurring_economy_projected_hold_turns:${setupWindow ? 1 : 0}`,
+            `runner_recurring_economy_invalidating_action:${profile.invalidatingActionType}`,
+            `runner_recurring_economy_future_value_at_risk:${profile.turnStartCredits}`,
+            `runner_recurring_economy_best_visible_run_payoff:${runDecision.bestVisibleRunPayoff}`,
+            ...runDecision.evidenceCodes,
+          ],
+        },
+      ];
+    },
+  );
   return uniqueBy(
     [...installedSignals, ...installSignals],
     (signal) => signal.commitmentId,
   );
+}
+
+function runnerRecurringEconomyRunDecision(
+  input: AiDecisionInput,
+  runTargets: readonly RunnerRunTargetEvaluation[],
+  futureValueAtRisk: number,
+  payoutStillUnrealized: boolean,
+): {
+  decision: "wait" | "allow_run" | "preempt_for_urgent_run";
+  bestVisibleRunPayoff: number;
+  evidenceCodes: string[];
+} {
+  return assessRunnerRecurringEconomyRunHorizon({
+    runTargets,
+    legalRunActionIds: new Set(
+      input.legalActions
+        .filter((action) => action.type === "start_run")
+        .map((action) => action.actionId),
+    ),
+    runnerAgendaPoints: input.playerView.own.agendaPoints,
+    agendaPointsToWin: input.playerView.agendaPointsToWin,
+    futureValueAtRisk,
+    payoutStillUnrealized,
+  });
 }
 
 function recurringEconomyCommitmentValue(definitionId: string): number {
@@ -17025,28 +17126,34 @@ function runnerRecurringEconomyInstalledInCurrentTurn(
   );
 }
 
-function recurringEconomyValueAlreadyResolved(
+function recurringEconomyRealization(
   input: AiDecisionInput,
   definitionId: string,
-): boolean {
+): { payoutCount: number; value: number } {
   const events = uniqueBy(
     [...input.playerView.publicEvents, ...input.eventTail],
     (event) => event.eventId,
   );
-  return events.some((event) => {
+  let payoutCount = 0;
+  let value = 0;
+  for (const event of events) {
     const effects = event.publicPayload?.resolvedEffects;
-    if (!Array.isArray(effects)) return false;
-    return effects.some((effect) => {
-      const value = effect as Record<string, unknown>;
-      return (
-        value.sourceDefinitionId === definitionId &&
-        value.kind === "gain_credits" &&
-        value.reason === "start_of_turn" &&
-        typeof value.amount === "number" &&
-        value.amount > 0
-      );
-    });
-  });
+    if (!Array.isArray(effects)) continue;
+    for (const effect of effects) {
+      const resolved = effect as Record<string, unknown>;
+      if (
+        resolved.sourceDefinitionId === definitionId &&
+        resolved.kind === "gain_credits" &&
+        resolved.reason === "start_of_turn" &&
+        typeof resolved.amount === "number" &&
+        resolved.amount > 0
+      ) {
+        payoutCount += 1;
+        value += resolved.amount;
+      }
+    }
+  }
+  return { payoutCount, value: Math.max(0, Math.floor(value)) };
 }
 
 function uniqueCoverageGaps(
@@ -19000,7 +19107,7 @@ function runnerRunWindowActionAssessment(
                 action.type === "break_subroutine"
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
-           `runner_run_window_action:${action.type}`,
+          `runner_run_window_action:${action.type}`,
           ...(accessTrashImpact?.evidenceCodes ?? []),
           ...(runOrigin?.informationBoundaryReassessment?.evidenceCodes ?? []),
         ],

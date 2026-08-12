@@ -5,15 +5,19 @@ import {
   runnerDebtFinancingProfileFromPlanningCard,
   runnerInstalledDebtFinancingLiability,
   runnerNoRunRecurringEconomyProfile,
+  runnerNoRunRecurringEconomyProfileFromPlanningCard,
 } from "./runner-canonical-card-facts";
 
 describe("Runner canonical card facts", () => {
   it("projects no-run recurring economy from the canonical lifecycle", () => {
     expect(
-      runnerNoRunRecurringEconomyProfile(
-        "onr_v1_184_top-runners-conference",
-      ),
-    ).toEqual({ turnStartCredits: 2 });
+      runnerNoRunRecurringEconomyProfile("onr_v1_184_top-runners-conference"),
+    ).toEqual({
+      installCost: 0,
+      turnStartCredits: 2,
+      earliestPayout: "start_of_runner_turn",
+      invalidatingActionType: "start_run",
+    });
   });
 
   it("does not infer the profile for unrelated Runner resources", () => {
@@ -22,10 +26,43 @@ describe("Runner canonical card facts", () => {
     ).toBeUndefined();
   });
 
-  it("derives the full debt consequence from Loan's canonical lifecycle", () => {
+  it("recognizes a differently named delayed investment from the generic canonical contract", () => {
     expect(
-      runnerDebtFinancingProfile("onr_v1_168_loan-from-chiba"),
+      runnerNoRunRecurringEconomyProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          planningAnnotations: {
+            card: [{ kind: "plan_role", role: "recover_economy" }],
+          },
+          engine: {
+            characteristics: { numeric: { installCost: 1 } },
+            lifecycle: {
+              start_of_runner_turn: [
+                {
+                  effects: [
+                    {
+                      kind: "gain_credits",
+                      recipient: "controller",
+                      amount: 3,
+                    },
+                  ],
+                },
+              ],
+              on_runner_run_start: [{ effects: [{ kind: "trash_source" }] }],
+            },
+          },
+        },
+      } as never),
     ).toEqual({
+      installCost: 1,
+      turnStartCredits: 3,
+      earliestPayout: "start_of_runner_turn",
+      invalidatingActionType: "start_run",
+    });
+  });
+
+  it("derives the full debt consequence from Loan's canonical lifecycle", () => {
+    expect(runnerDebtFinancingProfile("onr_v1_168_loan-from-chiba")).toEqual({
       installCost: 0,
       installCreditGain: 12,
       startOfTurnCreditLoss: 1,
@@ -40,9 +77,7 @@ describe("Runner canonical card facts", () => {
         planning: {
           side: "runner",
           planningAnnotations: {
-            card: [
-              { kind: "strategic_exchange", exchange: "debt_financing" },
-            ],
+            card: [{ kind: "strategic_exchange", exchange: "debt_financing" }],
           },
           engine: {
             characteristics: { numeric: { installCost: 2 } },
@@ -69,9 +104,7 @@ describe("Runner canonical card facts", () => {
                   loseSide: "controller",
                 },
               ],
-              end_of_runner_turn: [
-                { effects: [{ kind: "trash_source" }] },
-              ],
+              end_of_runner_turn: [{ effects: [{ kind: "trash_source" }] }],
             },
           },
         },
@@ -91,9 +124,7 @@ describe("Runner canonical card facts", () => {
         planning: {
           side: "runner",
           planningAnnotations: {
-            card: [
-              { kind: "strategic_exchange", exchange: "debt_financing" },
-            ],
+            card: [{ kind: "strategic_exchange", exchange: "debt_financing" }],
           },
           engine: {
             characteristics: { numeric: { installCost: 0 } },

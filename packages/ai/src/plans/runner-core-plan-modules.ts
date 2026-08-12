@@ -204,9 +204,20 @@ export type RunnerRecurringEconomySignal = {
   definitionId: string;
   phase: "install" | "hold";
   actionIds: string[];
-  priorityClass: "P4" | "P5";
+  priorityClass: "P3" | "P4" | "P5";
   value: number;
   evidenceCodes: string[];
+  investmentHorizon: Readonly<{
+    installCost: number;
+    earliestPayout: "start_of_runner_turn";
+    projectedHoldTurns: number;
+    invalidatingActionType: "start_run";
+    realizedPayoutCount: number;
+    realizedValue: number;
+    futureValueAtRisk: number;
+    bestVisibleRunPayoff: number;
+    decision: "install" | "wait" | "allow_run" | "preempt_for_urgent_run";
+  }>;
 };
 
 export type RunnerInstalledCardLiquidationChoiceSignal = {
