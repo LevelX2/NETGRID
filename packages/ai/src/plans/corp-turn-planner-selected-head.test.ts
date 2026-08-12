@@ -5,9 +5,45 @@ import fundedRdLayerJson from "../../../../data/scenarios/ai-decision-checkpoint
 import type { AiDecisionCheckpointV1 } from "../evaluation/decision-checkpoints/checkpoint-types";
 import { runAiDecisionCheckpoint } from "../evaluation/decision-checkpoints/checkpoint-runner";
 import { residentPlanPortfolioSnapshot } from "./resident-plan-portfolio-memory";
-import { specializedPlanningLineMatchesRoute } from "./corp-turn-planner-shadow";
+import {
+  corpPlanningHeadContinuationScope,
+  specializedPlanningLineMatchesRoute,
+} from "./corp-turn-planner-shadow";
+import { planningHeadMatchesCommittedPhaseRoot } from "./corp-turn-planner-cutover";
 
 describe("Corp TurnPlanner selected-head binding", () => {
+  it("returns from an exact defense support leaf to its score root", () => {
+    const scoreRoot = "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_2";
+    const supportHead = {
+      rootPlanInstanceId: scoreRoot,
+      rootPlanModuleId: "corp.score_agenda" as const,
+      moduleId: "corp.defend_servers" as const,
+      executorPlanInstanceId:
+        "plan:corp.defend_servers:score-protection%3Aagenda-1%3Aremote_2",
+      executorParentPlanInstanceId: scoreRoot,
+      executorParentNeedId: "score-protection:agenda-1:remote_2",
+      nextMilestoneId: "score_server_protected",
+    };
+
+    expect(corpPlanningHeadContinuationScope(supportHead)).toBe("same_root");
+    expect(
+      planningHeadMatchesCommittedPhaseRoot(supportHead, {
+        planInstanceId: scoreRoot,
+        moduleId: "corp.score_agenda",
+        milestoneId: "score_server_protected",
+        provenance: "admitted_support",
+      }),
+    ).toBe(true);
+    expect(
+      planningHeadMatchesCommittedPhaseRoot(supportHead, {
+        planInstanceId: scoreRoot,
+        moduleId: "corp.defend_servers",
+        milestoneId: "score_server_protected",
+        provenance: "admitted_support",
+      }),
+    ).toBe(false);
+  });
+
   it("does not let a sibling specialized line suppress an exact funding provider that shares its action", () => {
     const shared = {
       routeActionId: "play-accounts",

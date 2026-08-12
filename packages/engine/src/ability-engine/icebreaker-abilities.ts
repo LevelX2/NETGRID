@@ -89,13 +89,26 @@ export class IcebreakerAbilityBindingError extends Error {
 export function icebreakerAbilityBindingPayload(
   ability: RuntimeIcebreakerAbility,
   breakerId: CardInstanceId,
-): Record<string, string> {
+): Record<string, string | number> {
   const parsed = parseCanonicalCapabilityId(ability.id);
+  if (
+    ability.type === "pump_strength" &&
+    (typeof ability.amount !== "number" ||
+      !Number.isFinite(ability.amount) ||
+      ability.amount <= 0)
+  ) {
+    throw new IcebreakerAbilityBindingError(
+      "Die Pump-Staerke der gebundenen Breaker-Faehigkeit fehlt oder ist ungueltig.",
+    );
+  }
   return {
     cardId: breakerId,
     cardImplementationCapabilityBindingKind: "card_spec_capability_key",
     cardImplementationAbilityKey: parsed.capabilityKey,
     cardImplementationAbilityId: ability.id,
+    ...(ability.type === "pump_strength"
+      ? { pumpStrengthAmount: ability.amount }
+      : {}),
   };
 }
 

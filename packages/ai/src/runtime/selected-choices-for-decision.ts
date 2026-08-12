@@ -812,6 +812,12 @@ export function selectedChoicesForDecision(
                       coverageBinding.targetCardInstanceId,
                   }
                 : {}),
+              ...(coverageBinding.targetDefinitionId
+                ? {
+                    preferredCardDefinitionId:
+                      coverageBinding.targetDefinitionId,
+                  }
+                : {}),
             }
           : {}),
         ...(preferredServerId ? { preferredServerId } : {}),
@@ -1844,6 +1850,7 @@ function runnerCoverageSearchChoiceBinding(
       requiredCoverage: RequiredCapabilityKind;
       serverId?: string;
       targetCardInstanceId?: string;
+      targetDefinitionId?: string;
     }
   | undefined {
   if (input.side !== "runner") return undefined;
@@ -1903,7 +1910,12 @@ function runnerCoverageSearchChoiceBinding(
                 option.card?.instanceId === candidate.targetCardInstanceId &&
                 (candidate.targetDefinitionId === undefined ||
                   option.card?.definitionId === candidate.targetDefinitionId),
-            ))),
+            ))) &&
+        (candidate.targetDefinitionId === undefined ||
+          choice.options.some(
+            (option) =>
+              option.card?.definitionId === candidate.targetDefinitionId,
+          )),
     ) ?? [];
   if (bindings.length !== 1) {
     throw coverageSearchChoiceBindingFailure(
@@ -1929,6 +1941,9 @@ function runnerCoverageSearchChoiceBinding(
       : {}),
     ...(typeof binding.targetCardInstanceId === "string"
       ? { targetCardInstanceId: binding.targetCardInstanceId }
+      : {}),
+    ...(typeof binding.targetDefinitionId === "string"
+      ? { targetDefinitionId: binding.targetDefinitionId }
       : {}),
   };
 }

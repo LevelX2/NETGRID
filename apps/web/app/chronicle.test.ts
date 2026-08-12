@@ -60,6 +60,18 @@ const TEST_CARD_PRESENTATIONS = {
     title: "Highlighter",
     type: "program",
   },
+  "onr_v1_196_corporate-war": {
+    title: "Corporate War",
+    type: "agenda",
+  },
+  "onr_v1_292_management-shake-up": {
+    title: "Management Shake-Up",
+    type: "operation",
+  },
+  "onr_v1_304_systematic-layoffs": {
+    title: "Systematic Layoffs",
+    type: "operation",
+  },
   "onr_proteus_111_ice-and-data-special-report": {
     title: "Ice and Data Special Report",
     type: "event",
@@ -2359,7 +2371,7 @@ describe("formatChronicleEvent", () => {
     expect(item.title).not.toContain("Entscheidung beantwortet");
   });
 
-  it("shows Systematic Layoffs advancement choices with target context", () => {
+  it("shows Systematic Layoffs advancement choices with public target context", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "corp",
@@ -2385,6 +2397,57 @@ describe("formatChronicleEvent", () => {
       ]),
     );
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("redacts hidden advancement targets while preserving the public source", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+        v1919OperationAbility: "add_advancement_counters",
+        addedAdvancementCounters: 2,
+        targetCount: 1,
+        publicTargetCount: 0,
+        hiddenTargetCount: 1,
+        targetVisibility: "hidden_installed_card",
+      }),
+      "runner",
+    );
+
+    expect(resolved.title).toBe(
+      "Die Korp hat 2 Advancement-Counter durch Systematic Layoffs auf eine verdeckte Karte gelegt.",
+    );
+    expect(resolved.title).not.toContain("Project Babylon");
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "Systematic Layoffs",
+        "+2 Advancement",
+        "1 Ziel",
+        "Verdecktes Ziel",
+      ]),
+    );
+  });
+
+  it("names only the public cards in a mixed advancement distribution", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_292_management-shake-up",
+        v1919OperationAbility: "add_advancement_counters",
+        targetCardDefinitionIds: "onr_v1_196_corporate-war",
+        addedAdvancementCounters: 3,
+        targetCount: 2,
+        publicTargetCount: 1,
+        hiddenTargetCount: 1,
+        targetVisibility: "mixed_public_and_hidden_installed_cards",
+      }),
+      "runner",
+    );
+
+    expect(resolved.title).toBe(
+      "Die Korp hat 3 Advancement-Counter durch Management Shake-Up auf Corporate War und eine verdeckte Karte gelegt.",
+    );
+    expect(resolved.title).not.toContain("Systematic Layoffs");
   });
 
   it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
@@ -6450,6 +6513,42 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("describes a Bizarre Encryption Scheme replacement without claiming a steal or agenda points", () => {
+    const item = formatChronicleEvent(
+      makeEvent("steal_agenda", {
+        actor: "runner",
+        title: "Hostile Takeover",
+        serverLabel: "Remote 1",
+        accessOrigin: "server_root",
+        agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+        delayedAgendaAccessScoreScheduled: true,
+        delayedAgendaAccessSourceDefinitionId:
+          "onr_v1_351_bizarre-encryption-scheme",
+      }),
+      "runner",
+      {
+        cardTitle: "Hostile Takeover",
+      },
+    );
+
+    expect(item.title).toBe(
+      "Du hast Hostile Takeover aus Remote 1 wegen Bizarre Encryption Scheme noch nicht gestohlen.",
+    );
+    expect(item.description).toBe(
+      "Die Agenda bleibt im Fort; ihre Wertung ist bis zum Beginn des nächsten Runner-Zugs verzögert.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Agenda",
+        "Verzögert",
+        "Remote 1",
+        "Bizarre Encryption Scheme",
+      ]),
+    );
+    expect(item.chips).not.toContain("+2 Agenda");
+    expect(item.title).not.toContain("Agenda-Punkte erhalten");
+  });
+
   it("names accessed cards when the access event reveals one", () => {
     const item = formatChronicleEvent(
       makeEvent("access_card", {
@@ -8485,14 +8584,14 @@ describe("formatChronicleEvent", () => {
     }
   });
 
-  it("shows delayed agenda steals from automatic start-of-turn effects", () => {
+  it("shows delayed agenda scoring from automatic start-of-turn effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {
         actor: "corp",
         resolvedEffects: [
           {
             effectId: "runner.start.bizarre_encryption.card_789",
-            kind: "steal_agenda",
+            kind: "score_agenda",
             visibility: "public",
             side: "runner",
             amount: 2,
@@ -8508,7 +8607,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items[0]?.title).toBe(
-      "Du hast Hostile Takeover durch Bizarre Encryption Scheme gestohlen.",
+      "Du hast Hostile Takeover durch Bizarre Encryption Scheme gewertet.",
     );
     expect(items[0]?.category).toBe("agenda");
     expect(items[0]?.chips).toEqual(

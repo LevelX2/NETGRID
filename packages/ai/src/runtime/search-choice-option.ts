@@ -31,6 +31,7 @@ export type SearchChoiceScoringContext = {
   readonly requiredCoverage?: RequiredCapabilityKind;
   readonly preferredServerId?: string;
   readonly preferredCardInstanceId?: string;
+  readonly preferredCardDefinitionId?: string;
 };
 
 export function selectedSearchChoiceOptionIds(
@@ -68,10 +69,17 @@ export function selectedSearchChoiceOptionIds(
         (option) => option.card?.instanceId === context.preferredCardInstanceId,
       )
     : undefined;
-  if (preferredOption) {
+  const preferredDefinitionOption = context.preferredCardDefinitionId
+    ? selectableOptions.find(
+        (option) =>
+          option.card?.definitionId === context.preferredCardDefinitionId,
+      )
+    : undefined;
+  const exactPreferredOption = preferredOption ?? preferredDefinitionOption;
+  if (exactPreferredOption) {
     return [
-      preferredOption,
-      ...ranked.filter((option) => option.id !== preferredOption.id),
+      exactPreferredOption,
+      ...ranked.filter((option) => option.id !== exactPreferredOption.id),
     ]
       .slice(0, count)
       .map((option) => option.id);

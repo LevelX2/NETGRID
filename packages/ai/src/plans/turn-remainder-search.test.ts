@@ -132,10 +132,50 @@ describe("deterministic remainder-turn search", () => {
     ).toBe(false);
     expect(
       investmentLines.some(
-        (line) =>
-          line.steps[1]?.candidateId === ownFollowup.head.candidateId,
+        (line) => line.steps[1]?.candidateId === ownFollowup.head.candidateId,
       ),
     ).toBe(true);
+  });
+
+  it("keeps an exact Corp support step bound to its parent root", () => {
+    const setup = searchSetup();
+    const support = offer(setup, "score-defense-support", {
+      root: "root:score",
+      milestone: "score-server-protected",
+      defense: 8,
+      continuationScope: "same_root",
+    });
+    const scoreConversion = offer(setup, "score-agenda-install", {
+      root: "root:score",
+      milestone: "agenda-installed",
+      agendaProgress: 10,
+    });
+    const unrelatedEconomy = offer(setup, "unrelated-economy-install", {
+      root: "root:economy",
+      milestone: "campaign-installed",
+      economy: 20,
+    });
+
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [support, scoreConversion, unrelatedEconomy],
+    });
+    const supportLines = result.lines.filter(
+      (line) => line.steps[0]?.candidateId === support.head.candidateId,
+    );
+
+    expect(
+      supportLines.some(
+        (line) =>
+          line.steps[1]?.candidateId === scoreConversion.head.candidateId,
+      ),
+    ).toBe(true);
+    expect(
+      supportLines.some(
+        (line) =>
+          line.steps[1]?.candidateId === unrelatedEconomy.head.candidateId,
+      ),
+    ).toBe(false);
   });
 
   it("changes the head only when the bounded second step materially beats the single-step baseline", () => {

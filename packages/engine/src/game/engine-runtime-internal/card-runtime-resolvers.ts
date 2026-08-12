@@ -1125,6 +1125,9 @@ export function createCardRuntimeResolvers(
                     {
                       cardId,
                       xValue: amount,
+                      gainCreditsAmount:
+                        amount *
+                        Math.max(0, Math.floor(longtail.creditsPerDamage)),
                       damageCannotBePrevented: true,
                       damageType: "core",
                       damageAmount: amount,

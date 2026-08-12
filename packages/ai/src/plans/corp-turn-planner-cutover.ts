@@ -195,11 +195,8 @@ function continueResidentCommitment(params: {
     if (advanced.phaseEntryRequired) {
       const phase = commitment.phases[commitment.cursor.phaseIndex];
       const phaseHead = phase
-        ? params.planner.heads.find(
-            (head) =>
-              head.rootPlanInstanceId === phase.root.planInstanceId &&
-              head.moduleId === phase.root.moduleId &&
-              head.nextMilestoneId === phase.root.milestoneId,
+        ? params.planner.heads.find((head) =>
+            planningHeadMatchesCommittedPhaseRoot(head, phase.root),
           )
         : undefined;
       if (!phase || !phaseHead) {
@@ -261,6 +258,23 @@ function continueResidentCommitment(params: {
     lease: rematerialized.lease,
     head: rematerialized.head,
   };
+}
+
+export function planningHeadMatchesCommittedPhaseRoot(
+  head: Pick<
+    TurnPlanningHeadCandidate,
+    | "rootPlanInstanceId"
+    | "rootPlanModuleId"
+    | "moduleId"
+    | "nextMilestoneId"
+  >,
+  phaseRoot: TurnPlan["phases"][number]["root"],
+): boolean {
+  return (
+    head.rootPlanInstanceId === phaseRoot.planInstanceId &&
+    (head.rootPlanModuleId ?? head.moduleId) === phaseRoot.moduleId &&
+    head.nextMilestoneId === phaseRoot.milestoneId
+  );
 }
 
 function resumePlanInternalContinuation(

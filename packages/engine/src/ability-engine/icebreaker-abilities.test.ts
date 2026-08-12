@@ -6,6 +6,8 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import {
+  IcebreakerAbilityBindingError,
+  icebreakerAbilityBindingPayload,
   resolveIcebreakerAbilityBinding,
   type RuntimeIcebreakerAbility,
 } from "./icebreaker-abilities";
@@ -56,6 +58,27 @@ function actionFor(
 }
 
 describe("icebreaker ability identity binding", () => {
+  it("projects the exact bound pump strength into the LegalAction payload", () => {
+    expect(
+      icebreakerAbilityBindingPayload(
+        canonicalPump("matador_pump", 5),
+        breakerId,
+      ),
+    ).toMatchObject({
+      cardId: breakerId,
+      pumpStrengthAmount: 5,
+    });
+  });
+
+  it("rejects a pump binding without a valid strength amount", () => {
+    expect(() =>
+      icebreakerAbilityBindingPayload(
+        { ...canonicalPump("invalid_pump", 1), amount: 0 },
+        breakerId,
+      ),
+    ).toThrow(IcebreakerAbilityBindingError);
+  });
+
   it("selects the exact canonical capability independent of same-kind ordering", () => {
     const low = canonicalPump("pump_low", 1);
     const high = canonicalPump("pump_high", 3);

@@ -388,6 +388,59 @@ describe("turn plan commitment", () => {
     }
   });
 
+  it("rematerializes a future action when only its quote expiry advances", () => {
+    const setup = scenario({ samePhase: true });
+    setup.firstAction.payload = {
+      ...setup.firstAction.payload,
+      postInstallRezQuoteExpiresAtStateVersion: 10,
+      postInstallRezQuoteFinalCredits: 8,
+    };
+    const commitment = createCommitment(setup);
+    const refreshedAction: LegalAction = {
+      ...setup.firstAction,
+      payload: {
+        ...setup.firstAction.payload,
+        postInstallRezQuoteExpiresAtStateVersion: 11,
+      },
+    };
+
+    expect(
+      rematerializeCommittedTurnStep({
+        commitment,
+        rulesContext: setup.rules,
+        runtimeInstanceId: "runtime:a",
+        turnKey: "corp:1",
+        stateIdentity: identity(10, "safe:10"),
+        heads: [head(setup.plan, refreshedAction, identity(10, "safe:10"))],
+        legalActions: [refreshedAction],
+        continuationEvidence: validContinuationEvidence(),
+      }),
+    ).toMatchObject({ kind: "executable" });
+
+    const changedQuote: LegalAction = {
+      ...refreshedAction,
+      payload: {
+        ...refreshedAction.payload,
+        postInstallRezQuoteFinalCredits: 9,
+      },
+    };
+    expect(
+      rematerializeCommittedTurnStep({
+        commitment,
+        rulesContext: setup.rules,
+        runtimeInstanceId: "runtime:a",
+        turnKey: "corp:1",
+        stateIdentity: identity(10, "safe:10"),
+        heads: [head(setup.plan, changedQuote, identity(10, "safe:10"))],
+        legalActions: [changedQuote],
+        continuationEvidence: validContinuationEvidence(),
+      }),
+    ).toMatchObject({
+      kind: "replan_required",
+      reason: "material_choice_drift",
+    });
+  });
+
   it("detects target and choice route changes before issuing a lease", () => {
     const setup = scenario();
     const commitment = createCommitment(setup);

@@ -1196,6 +1196,9 @@ export function createCorpRuntimeResolvers(
       v1919OperationAbility: "add_advancement_counters",
       targetCardId: firstTargetId,
       targetCardDefinitionId: definitionFor(state, firstTargetId).id,
+      advancementCounterTargetCardIds: placementEntries
+        .map(([targetId]) => targetId)
+        .join(","),
       targetCardDefinitionIds: placementEntries
         .map(([targetId]) => definitionFor(state, targetId).id)
         .join(","),

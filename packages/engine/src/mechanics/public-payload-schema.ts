@@ -140,6 +140,10 @@ const TARGET_KEYS = [
   "cardDefinitionId",
   "targetCardDefinitionId",
   "targetCardDefinitionIds",
+  "publicTargetCount",
+  "hiddenTargetCount",
+  "advancementCounterSourceVisibility",
+  "advancementCounterTargetVisibility",
   "targetIceDefinitionId",
   "runStartBypassPassedIceDefinitionId",
   "trashedCardDefinitionId",
@@ -236,6 +240,20 @@ export function buildPublicAbilitySchemaContext(
   visibilityClass: EventVisibilityClass,
 ): PublicAbilitySchemaContext {
   const combined = { ...(payload ?? {}), ...context };
+  if (isAdvancementCardTargetProjection(payload)) {
+    delete combined.targetCardDefinitionId;
+    delete combined.targetCardDefinitionIds;
+    const publicTargetDefinitionId = stringValue(
+      context.targetCardDefinitionId,
+    );
+    const publicTargetDefinitionIds = stringValue(
+      context.targetCardDefinitionIds,
+    );
+    if (publicTargetDefinitionId)
+      combined.targetCardDefinitionId = publicTargetDefinitionId;
+    if (publicTargetDefinitionIds)
+      combined.targetCardDefinitionIds = publicTargetDefinitionIds;
+  }
   const metadata = publicAbilityMetadata(actionType, payload, context);
   const sourceDefinitionId = stringValue(combined.sourceDefinitionId);
   const amounts = publicAmounts(combined);
@@ -256,6 +274,17 @@ export function buildPublicAbilitySchemaContext(
     ...(redactedKind ? { redactedKind } : {}),
   };
   return result;
+}
+
+function isAdvancementCardTargetProjection(
+  payload: Record<string, unknown> | undefined,
+): boolean {
+  return (
+    payload?.v1919OperationAbility === "add_advancement_counters" ||
+    payload?.v1919OperationAbility === "move_advancement_counters" ||
+    payload?.fortRunWindowAbility ===
+      "add_advancement_counters_after_passing_last_ice_on_this_fort"
+  );
 }
 
 function inferAbilityFamily(

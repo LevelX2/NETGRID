@@ -327,7 +327,7 @@ describe("Classic Agenda Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "steal_agenda",
+          kind: "score_agenda",
           side: "runner",
           sourceDefinitionId: THEOREM_PROOF,
         }),

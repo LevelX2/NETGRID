@@ -686,6 +686,15 @@ export function delayAgendaAccessReplacementScore(
       },
     ];
   }
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+      delayedAgendaAccessScoreScheduled: true,
+      delayedAgendaAccessSourceDefinitionId:
+        replacementEffect.sourceDefinitionId,
+    };
+  }
   if (host.state.run?.breach) {
     return completeCurrentBreachAccess(host, "declined", legalAction);
   }

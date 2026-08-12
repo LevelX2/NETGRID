@@ -1284,17 +1284,26 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
     expect(
       counterState.cardInstances[targetAgendaId]?.advancementCounters,
     ).toBe(2);
-    expect(counterState.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const movePayload = counterState.eventLog.at(-1)?.publicPayload;
+    expect(movePayload).toMatchObject({
       sourceDefinitionId: "onr_v1_291_falsified-transactions-expert",
       abilityId: "move_advancement_counters",
       advancementCountersMoved: 2,
-      advancementCounterSourceDefinitionId: "simple_agenda",
-      advancementCounterTargetDefinitionId:
-        "onr_v1_202_genetics-visionary-acquisition",
+      advancementCounterSourceVisibility: "hidden_installed_card",
+      advancementCounterTargetVisibility: "hidden_installed_card",
     });
-    expect(
-      JSON.stringify(counterState.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(privatePayloadMarkers);
+    expect(movePayload).not.toHaveProperty(
+      "advancementCounterSourceDefinitionId",
+    );
+    expect(movePayload).not.toHaveProperty(
+      "advancementCounterTargetDefinitionId",
+    );
+    expect(JSON.stringify(movePayload)).not.toMatch(privatePayloadMarkers);
+    expect(JSON.stringify(movePayload)).not.toMatch(
+      /simple_agenda|onr_v1_202_genetics-visionary-acquisition/,
+    );
+    expect(JSON.stringify(movePayload)).not.toContain(agendaId);
+    expect(JSON.stringify(movePayload)).not.toContain(targetAgendaId);
     const counterReplay = replayEvents(
       counterInitial,
       counterState.eventLog.slice(counterReplayStart),

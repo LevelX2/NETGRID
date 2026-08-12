@@ -26,7 +26,7 @@ export let automaticDrawCardsEffect: RuntimePortGroups["turnRuntimeResolvers"]["
 export let automaticTagEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticTagEffect"];
 export let automaticTrashCardEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticTrashCardEffect"];
 export let automaticCounterChangeEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticCounterChangeEffect"];
-export let automaticStealAgendaEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticStealAgendaEffect"];
+export let automaticScoreAgendaEffect: RuntimePortGroups["turnRuntimeResolvers"]["automaticScoreAgendaEffect"];
 export let publicCardTitle: RuntimePortGroups["turnRuntimeResolvers"]["publicCardTitle"];
 export let applyRunnerForgoNextAction: RuntimePortGroups["turnRuntimeResolvers"]["applyRunnerForgoNextAction"];
 export let addRunnerFutureActionDebt: RuntimePortGroups["turnRuntimeResolvers"]["addRunnerFutureActionDebt"];
@@ -470,8 +470,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.turnRuntimeResolvers.automaticTrashCardEffect;
   automaticCounterChangeEffect =
     ports.turnRuntimeResolvers.automaticCounterChangeEffect;
-  automaticStealAgendaEffect =
-    ports.turnRuntimeResolvers.automaticStealAgendaEffect;
+  automaticScoreAgendaEffect =
+    ports.turnRuntimeResolvers.automaticScoreAgendaEffect;
   publicCardTitle = ports.turnRuntimeResolvers.publicCardTitle;
   applyRunnerForgoNextAction =
     ports.turnRuntimeResolvers.applyRunnerForgoNextAction;

@@ -400,13 +400,33 @@ export function formatChronicleEvent(
       if (v1919OperationAbility === "add_advancement_counters") {
         const added = numberValue(payload.addedAdvancementCounters) ?? 2;
         const targetCount = numberValue(payload.targetCount) ?? 1;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
         const targetTitles = titlesForDefinitionIds(
           stringValue(payload.targetCardDefinitionIds),
         );
         const targetTitle = targetCardTitleFromPayload(payload);
+        const hiddenTargetCount = Math.max(
+          0,
+          numberValue(payload.hiddenTargetCount) ??
+            targetCount - targetTitles.length,
+        );
+        const hiddenTargetText =
+          hiddenTargetCount === 1
+            ? "eine verdeckte Karte"
+            : hiddenTargetCount > 1
+              ? `${hiddenTargetCount} verdeckte Karten`
+              : undefined;
+        const projectedTargets = [
+          ...targetTitles,
+          ...(hiddenTargetText ? [hiddenTargetText] : []),
+        ];
         const targetText =
-          targetTitles.length > 0
-            ? targetTitles.join(", ")
+          projectedTargets.length > 0
+            ? (joinChronicleParts(projectedTargets) ?? "eine Karte")
             : (targetTitle ??
               (targetCount === 1 ? "eine Karte" : `${targetCount} Karten`));
         category = "agenda";
@@ -415,12 +435,13 @@ export function formatChronicleEvent(
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         title = phrase(
           subject,
-          `${added} Advancement-Counter durch Systematic Layoffs auf ${targetText} gelegt`,
+          `${added} Advancement-Counter durch ${source} auf ${targetText} gelegt`,
         );
         chips.push(
-          "Systematic Layoffs",
+          source,
           `+${added} Advancement`,
           targetCount === 1 ? "1 Ziel" : `${targetCount} Ziele`,
+          ...(hiddenTargetCount > 0 ? ["Verdecktes Ziel"] : []),
         );
         break;
       }
@@ -3671,6 +3692,41 @@ export function formatChronicleEvent(
     case "steal_agenda": {
       category = "agenda";
       importance = "critical";
+      if (
+        stringValue(payload.agendaAccessReplacement) ===
+          "delay_score_until_runner_next_turn_start" &&
+        payload.delayedAgendaAccessScoreScheduled === true
+      ) {
+        const delayedSourceDefinitionId = stringValue(
+          payload.delayedAgendaAccessSourceDefinitionId,
+        );
+        const delayedSourceTitle =
+          titleForDefinitionId(delayedSourceDefinitionId) ??
+          "Bizarre Encryption Scheme";
+        title = phrase(
+          subject,
+          `${cardTitle ?? "die Agenda"}${accessServerSourceSuffix(serverLabel, stringValue(payload.accessOrigin))} wegen ${delayedSourceTitle} noch nicht gestohlen`,
+        );
+        description =
+          "Die Agenda bleibt im Fort; ihre Wertung ist bis zum Beginn des nächsten Runner-Zugs verzögert.";
+        chips.push(
+          "Agenda",
+          "Verzögert",
+          ...(accessChronicleLocationLabel(
+            serverLabel,
+            stringValue(payload.accessOrigin),
+          )
+            ? [
+                accessChronicleLocationLabel(
+                  serverLabel,
+                  stringValue(payload.accessOrigin),
+                )!,
+              ]
+            : []),
+          delayedSourceTitle,
+        );
+        break;
+      }
       const points = agendaPointSuffix(agendaPoints);
       const payment = stealCostPaymentSuffix(payload);
       title = phrase(
@@ -5135,6 +5191,19 @@ function formatChronicleEffect(
           : ""
       } gerezzt`;
       chips.push("Rez", "Automatisch");
+      break;
+    case "score_agenda":
+      category = "agenda";
+      importance = "critical";
+      title = phrase(
+        subject,
+        `${cardTitle ?? "eine Agenda"}${through} gewertet`,
+      );
+      chips.push(
+        "Agenda",
+        ...(amount > 0 ? [`+${amount} Agenda`] : []),
+        "Automatisch",
+      );
       break;
     case "steal_agenda":
       category = "agenda";

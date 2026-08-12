@@ -615,6 +615,16 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
     expect(state.runner.scoreArea).not.toContain(agendaId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "steal_agenda",
+      agendaAccessReplacement: "delay_score_until_runner_next_turn_start",
+      delayedAgendaAccessScoreScheduled: true,
+      delayedAgendaAccessSourceDefinitionId:
+        "onr_v1_351_bizarre-encryption-scheme",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "agendaPoints",
+    );
     expect(state.delayedAccessEffects).toEqual([
       {
         kind: "delayed_agenda_access_replacement",
@@ -644,7 +654,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "steal_agenda",
+          kind: "score_agenda",
           side: "runner",
           cardDefinitionId: "onr_v1_203_hostile-takeover",
           sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
@@ -653,6 +663,44 @@ describe("V1.9.9 Mechanikpaket R", () => {
         }),
       ]),
     );
+  });
+
+  it("allows Bizarre Encryption Scheme installs only in subsidiary data forts", () => {
+    let state = v199CardReleaseGame("v199-bizarre-encryption-install");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    const bizarreId = moveCorpCardToHq(
+      state,
+      "onr_v1_351_bizarre-encryption-scheme",
+    );
+
+    const installActions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "install_card" && action.source === bizarreId,
+    );
+    expect(installActions.length).toBeGreaterThan(0);
+    expect(
+      installActions.map((action) => action.payload?.serverId),
+    ).not.toEqual(expect.arrayContaining(["hq", "rd", "archives"]));
+    expect(
+      installActions.every((action) => {
+        const serverId = String(action.payload?.serverId ?? "");
+        return serverId === "new_remote" || serverId.startsWith("remote_");
+      }),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === bizarreId &&
+        action.payload?.serverId === "new_remote",
+    );
+    expect(
+      state.corp.servers.some(
+        (server) => server.kind === "remote" && server.root.includes(bizarreId),
+      ),
+    ).toBe(true);
   });
 
   it("reduces ICE install costs on Chester Mix forts only", () => {
