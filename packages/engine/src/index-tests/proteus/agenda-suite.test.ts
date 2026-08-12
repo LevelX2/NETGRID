@@ -924,10 +924,11 @@ describe("Proteus PRO013 agenda suite behavior", () => {
         sourceTitle: "Pirate Broadcast",
         pendingServerIds: ["remote_99"],
         successfulServerIds: ["hq"],
+        anyUnsuccessful: false,
         onAllSuccessful: "gain_runner_event_agenda_point",
         onAnyUnsuccessful: "forgo_next_action",
-        advanceOnSuccessfulRun: true,
-        failOnUnsuccessfulRun: true,
+        advanceAfterEachRun: true,
+        resolveAfterAllRuns: true,
       },
     ];
     failed.runnerTurnFlags.forgoNextActionsPending = 0;

@@ -300,10 +300,11 @@ describe("start-run-action-execution", () => {
         sourceTitle: "Pirate Broadcast",
         pendingServerIds: ["rd", "archives"],
         successfulServerIds: ["hq"],
+        anyUnsuccessful: false,
         onAllSuccessful: "gain_runner_event_agenda_point",
         onAnyUnsuccessful: "forgo_next_action",
-        advanceOnSuccessfulRun: true,
-        failOnUnsuccessfulRun: true,
+        advanceAfterEachRun: true,
+        resolveAfterAllRuns: true,
       },
     ];
 

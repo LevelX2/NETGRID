@@ -336,7 +336,7 @@ function makeHost(
 }
 
 describe("multi-server success sequence run-end cleanup", () => {
-  it("adds one future action debt on an unsuccessful sequence run without consuming it in the same cleanup", () => {
+  it("continues the sequence after an unsuccessful run and remembers the failure", () => {
     const { host, state, legalAction } = makeHost({
       run: {
         runId: "run_pirate",
@@ -352,10 +352,11 @@ describe("multi-server success sequence run-end cleanup", () => {
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
+          anyUnsuccessful: false,
           onAllSuccessful: "gain_runner_event_agenda_point",
           onAnyUnsuccessful: "forgo_next_action",
-          advanceOnSuccessfulRun: true,
-          failOnUnsuccessfulRun: true,
+          advanceAfterEachRun: true,
+          resolveAfterAllRuns: true,
         },
       } as unknown as NonNullable<GameState["run"]>,
     });
@@ -372,11 +373,57 @@ describe("multi-server success sequence run-end cleanup", () => {
 
     handleRunEndCleanup(host, false, legalAction);
 
-    expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
+    expect(state.runnerTurnFlags?.forgoNextActionsPending ?? 0).toBe(0);
     expect(consumed).toBe(0);
     expect(state.runner.clicks).toBe(3);
-    expect(state.runnerTurnFlags?.pendingSequences).toBeUndefined();
+    expect(state.runnerTurnFlags?.pendingSequences?.[0]).toMatchObject({
+      pendingServerIds: ["archives"],
+      successfulServerIds: ["hq"],
+      anyUnsuccessful: true,
+    });
     expect(legalAction.payload).toMatchObject({
+      multiServerSuccessSequenceRunSuccessful: false,
+      multiServerSuccessSequenceAnyUnsuccessful: true,
+      multiServerSuccessSequencePendingServerCount: 1,
+    });
+  });
+
+  it("adds exactly one future action debt only after the final run when any sequence run failed", () => {
+    const { host, state, legalAction } = makeHost({
+      run: {
+        runId: "run_pirate_final",
+        attackedServerId: "archives",
+        phase: "movement",
+        position: { kind: "server", serverId: "archives" },
+        activeSequence: {
+          kind: "multi_server_success_sequence",
+          sequence: "run_each_data_fort",
+          sourceCardId: "pirate_1" as CardInstanceId,
+          sourceDefinitionId:
+            "onr_proteus_116_pirate-broadcast" as CardDefinitionId,
+          sourceTitle: "Pirate Broadcast",
+          pendingServerIds: [],
+          successfulServerIds: ["hq"],
+          anyUnsuccessful: true,
+          onAllSuccessful: "gain_runner_event_agenda_point",
+          onAnyUnsuccessful: "forgo_next_action",
+          advanceAfterEachRun: true,
+          resolveAfterAllRuns: true,
+        },
+      } as unknown as NonNullable<GameState["run"]>,
+    });
+    let awardedAgendaPoints = 0;
+    host.runner.awardEventAgendaPoint = () => {
+      awardedAgendaPoints += 1;
+    };
+
+    handleRunEndCleanup(host, true, legalAction);
+
+    expect(state.runnerTurnFlags?.pendingSequences).toBeUndefined();
+    expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
+    expect(awardedAgendaPoints).toBe(0);
+    expect(legalAction.payload).toMatchObject({
+      multiServerSuccessSequenceComplete: true,
       multiServerSuccessSequenceFailed: true,
       actionDebtAdded: 1,
     });
@@ -398,10 +445,11 @@ describe("multi-server success sequence run-end cleanup", () => {
           sourceTitle: "Pirate Broadcast",
           pendingServerIds: ["archives"],
           successfulServerIds: ["hq"],
+          anyUnsuccessful: false,
           onAllSuccessful: "gain_runner_event_agenda_point",
           onAnyUnsuccessful: "forgo_next_action",
-          advanceOnSuccessfulRun: true,
-          failOnUnsuccessfulRun: true,
+          advanceAfterEachRun: true,
+          resolveAfterAllRuns: true,
         },
       } as unknown as NonNullable<GameState["run"]>,
     });

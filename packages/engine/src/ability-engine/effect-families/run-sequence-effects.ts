@@ -236,10 +236,11 @@ export function executeRunSequenceEffect(
         sourceTitle: context.sourceTitle ?? "Sequenzquelle",
         pendingServerIds,
         successfulServerIds: [],
+        anyUnsuccessful: false,
         onAllSuccessful: effect.onAllSuccessful,
         onAnyUnsuccessful: effect.onAnyUnsuccessful,
-        advanceOnSuccessfulRun: true,
-        failOnUnsuccessfulRun: true,
+        advanceAfterEachRun: true,
+        resolveAfterAllRuns: true,
       };
       flags.pendingSequences = [
         ...(flags.pendingSequences ?? []).filter(

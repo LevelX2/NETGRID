@@ -458,29 +458,10 @@ export function applyMultiServerSuccessSequenceRunResult(
 ): { handled: boolean; deferActionDebtConsumption?: boolean } {
   const sequence = run.activeSequence;
   if (!sequence) return { handled: false };
-  if (!successful) {
-    if (host.runner.addFutureActionDebt) {
-      host.runner.addFutureActionDebt(1);
-    } else {
-      const flags = host.runner.ensureTurnFlags();
-      flags.forgoNextActionsPending =
-        Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
-    }
-    removePendingSequence(host.runner.ensureTurnFlags(), sequence);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        multiServerSuccessSequenceFailed: true,
-        actionDebtAdded: 1,
-        sourceDefinitionId: sequence.sourceDefinitionId,
-      };
-    }
-    return { handled: true, deferActionDebtConsumption: true };
-  }
-  const successfulServerIds = [
-    ...sequence.successfulServerIds,
-    run.attackedServerId,
-  ];
+  const successfulServerIds = successful
+    ? [...sequence.successfulServerIds, run.attackedServerId]
+    : sequence.successfulServerIds;
+  const anyUnsuccessful = sequence.anyUnsuccessful || !successful;
   const remainingPendingServerIds =
     sequence.pendingServerIds[0] === run.attackedServerId
       ? sequence.pendingServerIds.slice(1)
@@ -492,11 +473,13 @@ export function applyMultiServerSuccessSequenceRunResult(
       ...sequence,
       pendingServerIds: remainingPendingServerIds,
       successfulServerIds,
+      anyUnsuccessful,
     });
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        multiServerSuccessSequenceRunSuccessful: true,
+        multiServerSuccessSequenceRunSuccessful: successful,
+        multiServerSuccessSequenceAnyUnsuccessful: anyUnsuccessful,
         multiServerSuccessSequencePendingServerCount:
           remainingPendingServerIds.length,
         sourceDefinitionId: sequence.sourceDefinitionId,
@@ -505,6 +488,26 @@ export function applyMultiServerSuccessSequenceRunResult(
     return { handled: true, deferActionDebtConsumption: true };
   }
   removePendingSequence(host.runner.ensureTurnFlags(), sequence);
+  if (anyUnsuccessful) {
+    if (host.runner.addFutureActionDebt) {
+      host.runner.addFutureActionDebt(1);
+    } else {
+      const flags = host.runner.ensureTurnFlags();
+      flags.forgoNextActionsPending =
+        Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + 1;
+    }
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        multiServerSuccessSequenceComplete: true,
+        multiServerSuccessSequenceFailed: true,
+        multiServerSuccessSequenceAnyUnsuccessful: true,
+        actionDebtAdded: 1,
+        sourceDefinitionId: sequence.sourceDefinitionId,
+      };
+    }
+    return { handled: true, deferActionDebtConsumption: true };
+  }
   if (!host.runner.awardEventAgendaPoint)
     throw new Error("Runner-Agenda-Punkt-Callback fehlt.");
   host.runner.awardEventAgendaPoint(
