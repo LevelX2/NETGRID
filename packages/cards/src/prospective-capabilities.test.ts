@@ -686,7 +686,7 @@ describe("compileProspectiveCapabilities", () => {
       maxCards: 4,
       temporaryCredits: {
         amount: 10,
-        usableFor: "rez_installed_cards_from_sequence",
+        usableFor: "install_and_rez_cards_from_sequence",
         returnUnused: true,
       },
       optionalRez: true,
@@ -699,7 +699,7 @@ describe("compileProspectiveCapabilities", () => {
     expect(descriptorValue(score, ".temporaryCredits")).toEqual({
       amount: 10,
       returnUnused: true,
-      usableFor: "rez_installed_cards_from_sequence",
+      usableFor: "install_and_rez_cards_from_sequence",
     });
     expect(score.liabilities).toEqual([
       expect.objectContaining({ phase: "end_of_turn_cleanup" }),

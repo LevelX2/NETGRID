@@ -1037,10 +1037,18 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       "runner",
       (action) => action.type === "end_turn",
     );
+    expect(polymerState.pendingChoice?.source).toContain("corp_start.order:");
+    polymerState = applyChoice(
+      polymerState,
+      "corp",
+      String(polymerState.pendingChoice?.options[0]?.id),
+    );
     expect(polymerState.corp.credits).toBe(7);
-    expect(polymerState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "end_turn",
-    });
+    expect(
+      polymerState.eventLog
+        .slice(polymerReplayStart)
+        .some((event) => event.publicPayload.actionType === "end_turn"),
+    ).toBe(true);
     const polymerReplay = replayEvents(
       polymerInitial,
       polymerState.eventLog.slice(polymerReplayStart),
@@ -2618,12 +2626,22 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "runner",
       (action) => action.type === "end_turn",
     );
+    while (corpState.pendingChoice?.source.startsWith("corp_start.order:")) {
+      corpState = applyChoice(
+        corpState,
+        "corp",
+        String(corpState.pendingChoice.options[0]?.id),
+      );
+    }
 
     expect(corpState.corp.credits).toBe(6);
     expect(corpState.corp.clicks).toBe(5);
-    const effects = corpState.eventLog.at(-1)?.publicPayload.resolvedEffects;
-    expect(Array.isArray(effects)).toBe(true);
-    const resolvedEffects = Array.isArray(effects) ? effects : [];
+    const resolvedEffects = corpState.eventLog
+      .slice(replayStart)
+      .flatMap((event) => {
+        const effects = event.publicPayload.resolvedEffects;
+        return Array.isArray(effects) ? effects : [];
+      });
     expect(resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

@@ -14,6 +14,7 @@ export { canPlayPrintedCostOnPlayImplementation } from "./card-implementation-ru
 export { executeCardImplementationLifecycleEffects } from "./card-implementation-runtime-lifecycle-immediate";
 export {
   cardImplementationStartOfRunnerTurnAbilities,
+  hasDueCardImplementationStartOfCorpTurnAbility,
   hasDueCardImplementationStartOfRunnerTurnAbility,
   executeCardImplementationRunnerRunStartEffects,
   executeCardImplementationStartOfCorpTurnEffects,

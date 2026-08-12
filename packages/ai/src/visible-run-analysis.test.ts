@@ -1694,7 +1694,7 @@ describe("visible run analysis trace hazards", () => {
           0,
           false,
           "Submarine Uplink",
-          "forces_jack_out_after_encounter",
+          "ends_run_after_encounter",
         ),
       },
     );
@@ -1712,11 +1712,11 @@ describe("visible run analysis trace hazards", () => {
       baseLinkValue: 4,
       baseLinkActivationCost: 0,
       baseLinkSourceTitle: "Submarine Uplink",
-      baseLinkSideEffect: "forces_jack_out_after_encounter",
+      baseLinkSideEffect: "ends_run_after_encounter",
       unavoidable: true,
     });
     expect(assessment.visibleIceRunHazards?.[0]?.evidence).toContain(
-      "visible_trace_base_link_side_effect:forces_jack_out_after_encounter",
+      "visible_trace_base_link_side_effect:ends_run_after_encounter",
     );
   });
 
@@ -2580,7 +2580,7 @@ function traceSupportQuote(
   activationCost: number,
   safeForAccess: boolean,
   sourceTitle: string,
-  sideEffect?: "forces_jack_out_after_encounter",
+  sideEffect?: "ends_run_after_encounter",
 ) {
   return {
     traceCreditPool: 0,

@@ -309,7 +309,7 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "trace_link_force_jack_out";
+      kind: "trace_link_end_run_after_encounter";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -1143,7 +1143,7 @@ export type CardScoredAgendaImplementation =
       maxCards: number;
       temporaryCredits: {
         amount: number;
-        usableFor: "rez_installed_cards_from_sequence";
+        usableFor: "install_and_rez_cards_from_sequence";
         returnUnused: true;
       };
       optionalRez: true;

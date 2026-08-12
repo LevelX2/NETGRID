@@ -5,6 +5,7 @@ import {
   handleStartRunActionExecution,
   type StartRunActionExecutionHost,
 } from "./start-run-action-execution";
+import { consumeRunnerFutureActionDebt } from "../engine-runtime-internal/turn-action-economy-runtime";
 
 function state(): GameState {
   return {
@@ -112,6 +113,29 @@ function hostFor(
 }
 
 describe("start-run-action-execution", () => {
+  it("pays action debt with Wilson's run-only action before normal clicks", () => {
+    const gameState = state();
+    const wilsonId = "wilson" as CardInstanceId;
+    gameState.runner.rig.resources = [wilsonId];
+    gameState.cardInstances[wilsonId] = {
+      id: wilsonId,
+      definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      owner: "runner",
+      controller: "runner",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "rig" },
+    } as never;
+    gameState.runnerTurnFlags!.forgoNextActionsPending = 1;
+
+    expect(consumeRunnerFutureActionDebt(gameState)).toBe(1);
+    expect(gameState.runner.clicks).toBe(3);
+    expect(gameState.runnerTurnFlags?.forgoNextActionsPending).toBe(0);
+    expect(
+      gameState.runnerTurnFlags?.runOnlyActionUsedSourceIdsThisTurn,
+    ).toEqual([wilsonId]);
+  });
+
   it("does not import from index or contain public event wiring", () => {
     const source = readFileSync(
       new URL("./start-run-action-execution.ts", import.meta.url),

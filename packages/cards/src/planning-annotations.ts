@@ -3,6 +3,7 @@ import { assertStrictlySerializable } from "./serializable";
 
 export const KNOWN_PLANNING_TACTIC_SIGNALS = [
   "access.punish",
+  "corp.ice_tax",
   "corp.remote_protection",
   "coverage.breaker",
   "damage.payoff",
@@ -15,6 +16,7 @@ export const KNOWN_PLANNING_TACTIC_SIGNALS = [
 
 export const KNOWN_PLANNING_TACTIC_USES = [
   "access.punish",
+  "corp.ice_tax",
   "corp.remote_protection",
   "coverage.breaker",
   "damage.payoff.runner",

@@ -30563,8 +30563,8 @@
     },
     {
       "cardId": "onr_v1_182_submarine-uplink",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:fc3ab46279f61efe",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:40da8f75f25f9309",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:537461da39d2f78e",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9787b5029b0a0ace",
       "hint": {
         "cardId": "onr_v1_182_submarine-uplink",
         "side": "runner",
@@ -30573,7 +30573,6 @@
         "roles": ["resource"],
         "planRoles": ["build_rig", "trace_bid_support"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_trace_base_link_window_use_base_link",
@@ -30712,14 +30711,14 @@
     {
       "cardId": "onr_v1_184_top-runners-conference",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:cabc3627180e6bcb",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:659bd3f1f799eefd",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c9776aba290f02f6",
       "hint": {
         "cardId": "onr_v1_184_top-runners-conference",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["recover_economy", "contest_remote"],
+        "planRoles": ["recover_economy"],
         "valueHints": { "economy": 2 },
         "effects": [
           {
@@ -30876,7 +30875,7 @@
     {
       "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4c334e102c7fab34",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ac75a4b3ac92f41f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c074ec32f681b996",
       "hint": {
         "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
         "side": "runner",
@@ -30891,7 +30890,6 @@
         ],
         "valueHints": {},
         "strategicRole": ["defensive_tool"],
-        "strategyAnchors": ["runner.run_event_tempo"],
         "lineSupport": ["runner.survival_defense"],
         "actionCapacityProfiles": [
           {
@@ -30971,14 +30969,14 @@
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a5cd25cd91e96819",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c5d5b645c5ba9001",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:97fbea26f358dde2",
       "hint": {
         "cardId": "onr_v1_188_ai-chief-financial-officer",
         "side": "corp",
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["score_now", "score_next_turn", "recover_economy"],
+        "planRoles": ["score_now", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["engine_anchor"],
         "lineSupport": ["corp.deck_recycle_engine"],
@@ -31051,7 +31049,7 @@
     {
       "cardId": "onr_v1_189_artificial-security-directors",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5f49534518d87d29",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:956023c1bcb28f2d",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ecccf3ba25c967ee",
       "hint": {
         "cardId": "onr_v1_189_artificial-security-directors",
         "side": "corp",
@@ -31186,7 +31184,7 @@
     {
       "cardId": "onr_v1_191_black-ice-quality-assurance",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f5a86d499e7ed13d",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d0a29b17421e3453",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4e75155534c67e11",
       "hint": {
         "cardId": "onr_v1_191_black-ice-quality-assurance",
         "side": "corp",
@@ -31239,12 +31237,12 @@
           "ice.corp_strength_support"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
+          "corp.ice_tax",
           "ice.corp_strength_support",
           "tax.ice"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
+          "corp.ice_tax",
           "effect:remote_protection",
           "effect_scope:ice",
           "effect_timing:persistent"
@@ -31725,8 +31723,8 @@
     },
     {
       "cardId": "onr_v1_197_data-fort-reclamation",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0eb774286742d38c",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fe6601261de07a72",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4d1271b10849306d",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ccedaf7c1a391e98",
       "hint": {
         "cardId": "onr_v1_197_data-fort-reclamation",
         "side": "corp",
@@ -31793,12 +31791,10 @@
           "score.remote_install_budget"
         ],
         "tacticSignals": [
-          "economy.card",
           "score.remote_fort_creation",
           "score.remote_install_budget"
         ],
         "actionTacticSignals": [
-          "economy.card",
           "effect:economy",
           "effect:install",
           "effect:remote_build",
@@ -31906,7 +31902,7 @@
     {
       "cardId": "onr_v1_199_employee-empowerment",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:36aed6bbfc918a67",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:737a1c1cbd61d478",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:42e79fba70d81576",
       "hint": {
         "cardId": "onr_v1_199_employee-empowerment",
         "side": "corp",
@@ -31914,7 +31910,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["draw", "agenda"],
         "planRoles": [],
-        "valueHints": { "economy": 1 },
+        "valueHints": {},
         "strategicRole": ["engine_anchor"],
         "lineSupport": ["corp.draw_engine"],
         "strategySupportPairs": [
@@ -32036,7 +32032,7 @@
     {
       "cardId": "onr_v1_200_encryption-breakthrough",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4cc5dbad41f77009",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:76847ede08b33c5a",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:46b1d8495d2f67b5",
       "hint": {
         "cardId": "onr_v1_200_encryption-breakthrough",
         "side": "corp",
@@ -32056,6 +32052,21 @@
             "evidence": ["ice.corp_strength_support", "tax.ice"],
             "confidence": "high",
             "rationale": "Agenda Semantic Review v1 maps Encryption Breakthrough to corp.ice_tax_glacier as tax_tool/code_gate_tax_anchor."
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "install_target",
+            "timing": "on_score",
+            "targetType": "card",
+            "purpose": "choose_code_gates_to_reveal_for_credits",
+            "preferences": [
+              "prefer_reveal_when_credit_value_exceeds_information_cost",
+              "prefer_already_public_or_low_information_value_code_gates"
+            ],
+            "avoid": ["avoid_revealing_high_value_hidden_ice_without_need"],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -32083,13 +32094,13 @@
           "info.expose_installed_card"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
+          "corp.ice_tax",
           "economy.card",
           "ice.corp_strength_support",
           "tax.ice"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
+          "corp.ice_tax",
           "economy.card",
           "effect:remote_protection",
           "effect_scope:ice",

@@ -34,6 +34,7 @@ import {
   applyRuntimeTagPreventionCost,
   applyRuntimeTrashPreventionCost,
   collectEventModificationCandidates,
+  collectRuntimeDamagePreventionCandidates,
   damagePreventionSourceForEventCandidate,
   registerDamagePreventionUsage,
   revalidateDamagePreventionCandidateSource,
@@ -602,7 +603,7 @@ export function resolveEventModificationChoice(
       choiceId: `v120_trash_targets_${window.windowId}_${candidate.candidateId}`,
       side: candidate.controller,
       source: `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:${window.windowId}:${candidate.candidateId}`,
-      prompt: "Eine oder mehrere Resources vor dem Trashen schützen",
+      prompt: "Installierte Karten vor dem Trashen schützen",
       kind: "select_cards",
       options: targetIds.map((cardId) => ({
         id: cardId,
@@ -610,7 +611,10 @@ export function resolveEventModificationChoice(
         label: definitionFor(state, cardId).title,
       })),
       minSelections: 1,
-      maxSelections: targetIds.length,
+      maxSelections: Math.min(
+        targetIds.length,
+        candidate.maxPreventedTrashTargets ?? targetIds.length,
+      ),
       stateVersion: state.stateVersion + 1,
       visibility: candidate.visibility,
     };
@@ -840,7 +844,7 @@ export function resolveEventModificationChoice(
       state,
       finalEvent,
       window,
-      remainingEventModificationCandidatesAfterStage(state, window, finalEvent),
+      collectFreshDamagePreventionCandidates(state, window, finalEvent),
       legalAction,
       legalAction.payload,
     )
@@ -850,6 +854,18 @@ export function resolveEventModificationChoice(
   if (openPdcaDamageReplacementChoice(state, finalEvent, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, finalEvent);
   setDamagePayload(legalAction, summary);
+}
+
+function collectFreshDamagePreventionCandidates(
+  state: GameState,
+  window: EventModificationWindow,
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  if (event.payload.cannotBePrevented === true) return [];
+  return [
+    ...collectRuntimeDamagePreventionCandidates(state, event),
+    ...remainingEventModificationCandidatesAfterStage(state, window, event),
+  ];
 }
 
 function selectedPreventAmountSelection(

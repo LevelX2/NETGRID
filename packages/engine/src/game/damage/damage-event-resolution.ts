@@ -12,6 +12,7 @@ import type {
 } from "@netgrid/shared";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import { maxHandSize } from "../../ability-engine/effective-values";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   addRunnerFutureActionDebt,
   assertPositiveIntegerAmount,
@@ -338,9 +339,7 @@ export function createDamageImminentEvent(
   },
 ): ImminentEvent {
   const damageAmountModifier =
-    request.damageType === "meat" && corpHasScoredMeatDamageBonusAgenda(state)
-      ? 1
-      : 0;
+    request.damageType === "meat" ? corpScoredMeatDamageBonus(state) : 0;
   const amount = request.amount + damageAmountModifier;
   return {
     eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
@@ -374,11 +373,21 @@ export function createDamageImminentEvent(
 }
 
 export function corpHasScoredMeatDamageBonusAgenda(state: GameState): boolean {
-  return scoredCorpAgendaIds(state).some(
-    (cardId) =>
-      scoredAgendaKindForDefinition(definitionFor(state, cardId)) ===
-      "meat_damage_bonus",
-  );
+  return corpScoredMeatDamageBonus(state) > 0;
+}
+
+export function corpScoredMeatDamageBonus(state: GameState): number {
+  return scoredCorpAgendaIds(state).reduce((total, cardId) => {
+    const definition = definitionFor(state, cardId);
+    if (scoredAgendaKindForDefinition(definition) !== "meat_damage_bonus")
+      return total;
+    const scoredAgenda = cardImplementationForDefinitionId(
+      definition.id,
+    )?.scoredAgenda;
+    return scoredAgenda?.kind === "meat_damage_bonus"
+      ? total + Math.max(0, Math.floor(scoredAgenda.amount))
+      : total;
+  }, 0);
 }
 
 export function createAddTagImminentEvent(

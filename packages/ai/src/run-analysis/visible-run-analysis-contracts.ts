@@ -145,7 +145,7 @@ export type PumpStrengthAbilityLike = {
   amount?: number;
 };
 
-export type VisibleTraceSupportSideEffect = "forces_jack_out_after_encounter";
+export type VisibleTraceSupportSideEffect = "ends_run_after_encounter";
 
 export type VisibleIceRunHazardKind =
   | "trace_tag"

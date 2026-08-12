@@ -71,6 +71,12 @@ export type CorpInstallRezSequenceHandlerHost = {
     spendCorpCredits: (amount: number) => void;
   };
   callbacks: {
+    payHqInstallCost: (
+      cardId: CardInstanceId,
+      server: CorpServer,
+      temporaryCreditsAvailable: number,
+    ) => CorpSequenceRezPaymentReceipt;
+    recordSuccessfulCorpInstall: () => void;
     resolveCorpRootRez: (cardId: CardInstanceId) => void;
     preflightMandatoryHqInstallRez: (
       selectedCardIds: readonly CardInstanceId[],

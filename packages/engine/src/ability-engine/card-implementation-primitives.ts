@@ -219,7 +219,7 @@ export function hqToNewRemoteInstallRezSequence(input: {
     maxCards: input.maxCards,
     temporaryCredits: {
       amount: input.temporaryCredits,
-      usableFor: "rez_installed_cards_from_sequence",
+      usableFor: "install_and_rez_cards_from_sequence",
       returnUnused: true,
     },
     optionalRez: true,

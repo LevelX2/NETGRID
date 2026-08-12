@@ -73,10 +73,6 @@ export const cardSpec = {
         role: "recover_economy",
       },
       {
-        kind: "plan_role",
-        role: "contest_remote",
-      },
-      {
         kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",

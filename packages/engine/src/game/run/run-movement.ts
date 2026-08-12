@@ -443,7 +443,6 @@ export function movePastCurrentIce(
     return {
       handled: true,
       runEnded: true,
-      runnerJackedOut: true,
       movedPastIceId: passedIceId,
       stateChanged: true,
     };

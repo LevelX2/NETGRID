@@ -16,9 +16,12 @@ export function isScoredAgendaStartDrawChoiceSource(source: string): boolean {
 
 export function startScoredAgendaStartDrawChoice(
   host: ScoredAgendaFlowHost,
+  onlySourceCardId?: CardInstanceId,
 ): ScoredAgendaFlowResult {
   if (host.state.pendingChoice) return { handled: false };
-  const sourceCardId = scoredAgendaStartDrawSourceIds(host)[0];
+  const sourceCardId = scoredAgendaStartDrawSourceIds(host).find(
+    (cardId) => !onlySourceCardId || cardId === onlySourceCardId,
+  );
   if (!sourceCardId) return { handled: false };
   host.state.pendingChoice = {
     choiceId: `scored_agenda_start_draw_choice_${sourceCardId}_${host.state.stateVersion + 1}`,
@@ -106,7 +109,6 @@ export function resolveScoredAgendaStartDrawChoice(
     scoredAgendaStartDrawDecision: useDraw ? "draw" : "skip",
     selectedAdditionalDrawCount: useDraw ? scoredAgenda.drawCount : 0,
   });
-  startScoredAgendaStartDrawChoice(host);
 }
 
 function scoredAgendaStartDrawSourceIds(

@@ -513,15 +513,20 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       ),
     );
     expect(cardCounterAmount(state, armoredFridgeId, "ablative")).toBe(6);
-    expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationDecision: "apply",
       preventedAmount: 1,
-      damageAmount: 1,
       counterType: "ablative",
       removedCounterAmount: 1,
       remainingCounters: 6,
       sourceTrashed: false,
+    });
+    expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    state = applyChoice(state, "runner", "pass");
+    expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "pass",
+      damageAmount: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /Simple|Armored Fridge"/,

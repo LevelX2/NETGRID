@@ -460,6 +460,8 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "central_or_remote_plan_enabler",
   "reduces_current_run_payoff",
   "adds_relevant_encounter_tax",
+  "prefer_reveal_when_credit_value_exceeds_information_cost",
+  "prefer_already_public_or_low_information_value_code_gates",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -480,6 +482,7 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "low_impact_ice",
   "no_rezzed_ice_target",
   "no_subsidiary_fort_target",
+  "avoid_revealing_high_value_hidden_ice_without_need",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [

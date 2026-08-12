@@ -42,7 +42,7 @@ export type TraceBaseLinkCardImplementationQuote = {
   label: string;
   baseLinkValue: number;
   creditCost: number;
-  forcesJackOutAfterEncounter: boolean;
+  endsRunAfterEncounter: boolean;
   rewardCreditsOnAvoidTrace?: number;
 };
 
@@ -126,7 +126,7 @@ function isTraceLinkForceJackOutDefinition(
 ): boolean {
   return (
     cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
-      ?.kind === "trace_link_force_jack_out"
+      ?.kind === "trace_link_end_run_after_encounter"
   );
 }
 
@@ -174,9 +174,7 @@ function cardImplementationQuoteForAbility(
     label: definition.title,
     baseLinkValue: effect.baseLink,
     creditCost,
-    forcesJackOutAfterEncounter: isTraceLinkForceJackOutDefinition(
-      definition.id,
-    ),
+    endsRunAfterEncounter: isTraceLinkForceJackOutDefinition(definition.id),
     ...(effect.rewardCreditsOnAvoidTrace
       ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
       : {}),

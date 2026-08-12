@@ -447,11 +447,11 @@ describe("encounter special windows boundary", () => {
       handled: true,
       sourceCardId: "submarine_1",
       sourceDefinitionId: "onr_v1_182_submarine-uplink",
-      forcedJackOutAfterEncounter: true,
+      forcedRunEndAfterEncounter: true,
     });
     expect(state.run?.forceJackOutAfterEncounterSourceId).toBe("submarine_1");
     expect(legalAction.payload).toMatchObject({
-      forceJackOutAfterEncounter: true,
+      forceRunEndAfterEncounter: true,
       sourceDefinitionId: "onr_v1_182_submarine-uplink",
     });
 

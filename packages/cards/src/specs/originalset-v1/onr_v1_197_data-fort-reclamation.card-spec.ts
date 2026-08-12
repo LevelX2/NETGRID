@@ -56,7 +56,7 @@ export const cardSpec = {
       maxCards: 4,
       temporaryCredits: {
         amount: 10,
-        usableFor: "rez_installed_cards_from_sequence",
+        usableFor: "install_and_rez_cards_from_sequence",
         returnUnused: true,
       },
       optionalRez: true,
@@ -74,11 +74,6 @@ export const cardSpec = {
       { kind: "strategic_role", role: "engine_anchor" },
       { kind: "plan_role", role: "corp_score_agenda" },
       { kind: "plan_role", role: "corp_agenda_ability" },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
       {
         kind: "strategy_support",
         strategyKey: "corp.remote_scoring",

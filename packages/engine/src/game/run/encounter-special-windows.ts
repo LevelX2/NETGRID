@@ -74,7 +74,7 @@ export type FullyBrokenPassedIceWindowResult = EncounterSpecialWindowResult & {
 export type SubmarinePostBidMarkerResult = EncounterSpecialWindowResult & {
   sourceCardId?: CardInstanceId;
   sourceDefinitionId?: string;
-  forcedJackOutAfterEncounter?: boolean;
+  forcedRunEndAfterEncounter?: boolean;
 };
 
 export type PostPassIceWindowResult = EncounterSpecialWindowResult & {
@@ -747,7 +747,7 @@ export function isTraceLinkForceJackOutSource(
 ): boolean {
   return (
     cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-      ?.runnerUtilityLongtail?.kind === "trace_link_force_jack_out"
+      ?.runnerUtilityLongtail?.kind === "trace_link_end_run_after_encounter"
   );
 }
 
@@ -763,14 +763,14 @@ export function markTraceLinkForceJackOutAfterEncounter(
   const sourceDefinitionId = definitionFor(state, cardId).id;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    forceJackOutAfterEncounter: true,
+    forceRunEndAfterEncounter: true,
     sourceDefinitionId,
   };
   return {
     handled: true,
     sourceCardId: cardId,
     sourceDefinitionId,
-    forcedJackOutAfterEncounter: true,
+    forcedRunEndAfterEncounter: true,
     stateChanged: true,
   };
 }

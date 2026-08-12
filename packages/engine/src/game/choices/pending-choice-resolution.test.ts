@@ -417,6 +417,9 @@ function pendingChoiceHost(
       ),
     },
     cardImplementation: {
+      resumePreventableTrashCostContinuation: unexpected(
+        "resumePreventableTrashCostContinuation",
+      ),
       resolveCardImplementationAccessPaymentChoice: unexpected(
         "resolveCardImplementationAccessPaymentChoice",
       ),
@@ -428,6 +431,12 @@ function pendingChoiceHost(
       ),
     },
     turn: {
+      resolveCorpStartOfTurnOrderChoice: unexpected(
+        "resolveCorpStartOfTurnOrderChoice",
+      ),
+      resumeCorpStartOfTurnOrdering: unexpected(
+        "resumeCorpStartOfTurnOrdering",
+      ),
       resolveRunnerStartOfTurnOrderChoice: unexpected(
         "resolveRunnerStartOfTurnOrderChoice",
       ),

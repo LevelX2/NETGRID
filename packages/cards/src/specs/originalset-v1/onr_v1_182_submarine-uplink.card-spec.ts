@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[0]: Base link 4. [1]: +1 link. You may use Submarine Uplink only \tduring a run. Using Submarine Uplink forces you to jack out after the current encounter ends. Use only one base link card for each trace attempt made against you.",
+      "[0]: Base link 4. [1]: +1 link. You may use Submarine Uplink only during a run. Using Submarine Uplink ends the run after the current encounter ends. Use only one base link card for each trace attempt made against you.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(
@@ -53,7 +53,6 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
-      baseLink: 1,
     },
     abilities: [
       {
@@ -105,10 +104,10 @@ export const cardSpec = {
     ],
     runnerUtilityLongtail: {
       capabilityKey: capabilityKey(
-        "runner_utility_longtail_trace_link_force_jack_out",
+        "runner_utility_longtail_trace_link_end_run_after_encounter",
       ),
       addressability: ["plan", "action", "quote", "debug"],
-      kind: "trace_link_force_jack_out",
+      kind: "trace_link_end_run_after_encounter",
       visibility: "public",
     },
   },
@@ -122,10 +121,6 @@ export const cardSpec = {
       {
         kind: "plan_role",
         role: "trace_bid_support",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
       },
     ],
     capabilities: [],

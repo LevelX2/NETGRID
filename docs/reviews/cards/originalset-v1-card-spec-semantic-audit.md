@@ -809,10 +809,75 @@ Für Fall Guy, Floating Runner BBS, Leland, Corporate Bodyguard, N.E.T.O.,
 Nomad Allies, The Short Circuit und Short-Term Contract ergab der Nutzerblock
 keinen weiteren Korrekturbedarf.
 
+## Block 010 – Karten 181 bis 200 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 010` eingeführt.
+
+### Prävention, Trash-Kosten und Damage
+
+- Bezahlte oder Counter-basierte Damage-Prävention kann dieselbe Quelle nach
+  einer erfolgreichen Teilprävention erneut anbieten, solange Damage
+  verbleibt und die Quelle ihre Kosten noch bezahlen kann. Trauma Team kann
+  dadurch beide Counter in demselben Damage-Ereignis verwenden. Synthetische
+  Testkandidaten werden nicht künstlich wiederholt.
+- Umbrella bietet bei `one_card` alle gleichzeitig bedrohten legalen Karten
+  zur Auswahl an, begrenzt die Auswahl aber auf genau eine. Der getrennte
+  Vertrag `one_or_more` bleibt eine Mehrfachauswahl.
+- Lockjaw bezahlt seinen Quell-Trash als verhinderbare Aktivierungskosten.
+  Wird der Trash verhindert, bleibt Lockjaw installiert und der
+  Stärkeeffekt löst nicht auf; erst ein tatsächlich bezahlter Trash setzt die
+  gebundene Fortsetzung frei.
+- Bioweapons Engineering addiert den auf jeder gewerteten Kopie deklarierten
+  Meat-Damage-Bonus. Mehrere Kopien werden weder auf einen pauschalen Punkt
+  reduziert noch verlieren sie ihre jeweilige Betragsemantik.
+
+### Zugstart, Run-Ende und Agenda-Credits
+
+- Gleichzeitig fällige Corp-Startquellen werden vom Corp-Spieler in stabil
+  gebundener Reihenfolge aufgelöst und vor ihrer Auflösung erneut validiert.
+  Das umfasst insbesondere Detroit Police Contract und Employee
+  Empowerment; eine zuerst abgewickelte Quelle erzwingt keine versteckte
+  automatische Reihenfolge für die übrigen Quellen.
+- Wilson, Weeflerunner Apprentice stellt eine Run-only-Action bereit. Eine
+  fällige Action-Schuld verbraucht diese zweckgebundene Action vor den
+  normalen Clicks, statt Wilsons Kapazität zu ignorieren.
+- Submarine Uplink beendet den Run nach dem aktuellen Encounter. Der
+  sichtbare Vertrag und die AI-Projektion klassifizieren dieses Ende nicht
+  mehr als Jack-out; der nicht gedruckte statische Base Link ist entfernt.
+- Data Fort Reclamation bezahlt bei jeder Sequenzinstallation die normalen,
+  serverabhängigen ICE-Installkosten. Seine temporären Credits dürfen
+  Installation und Rez bezahlen und werden durch normale Corp-Credits
+  ergänzt. Jede erfolgreiche Installation invalidiert Corporate Retreat
+  sofort über denselben zentralen Vertrag wie reguläre Installationen.
+
+### Planning-Semantik
+
+- Black ICE Quality Assurance und Encryption Breakthrough verwenden die
+  gezielte Taktik `corp.ice_tax` statt Remote-Schutz. Encryption Breakthrough
+  beschreibt zusätzlich den Informationspreis des Reveals und bevorzugt
+  bereits öffentliche oder weniger wertvolle Code Gates, ohne dafür einen
+  neuen Plan oder Choice-Resolver einzuführen.
+- Top Runners' Conference, Wilson und AI Chief Financial Officer verlieren
+  fachfremde Run- beziehungsweise Economy-Anker. Artificial Security
+  Directors besitzt keine erfundene Zielpräferenz, Employee Empowerment
+  keine Economy-Wertinterpretation und Data Fort Reclamation nur den
+  tatsächlich gültigen Install-and-rez-Creditvertrag.
+- Die Hint-Korrekturen bleiben deklarativ. Plan-, Step-, Route-, Action-,
+  Choice- und Executor-Ownership ändern sich nicht.
+
+### Unveränderte Karten dieses Blocks
+
+Für The Springboard, Technician Lover, Corporate Boon, Corporate Coup,
+Corporate Downsizing und Corporate War ergab der Nutzerblock keinen weiteren
+Korrekturbedarf. Detroit Police Contract benötigt keinen eigenen CardSpec-Fix,
+ist aber durch den generischen Corp-Startvertrag abgedeckt.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 181 bis 200.
+- Als nächster regulärer Nutzerblock folgen die Karten 201 bis 220.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -912,3 +977,12 @@ ohne Initializer nicht ausführbar; `check:card-function-abstraction` findet
 weiterhin sein bereits fehlendes historisches Baseline-JSON nicht. Der
 Originalset-AI-Golden-Test bleibt aus demselben bekannten statischen Import
 des entfernten Migration-Reports nicht startfähig.
+
+Für Block 010 sind Cards- und Engine-Typecheck, CardSpec-AI-Hint-Generator
+und -Check sowie 150 fokussierte Engine-Tests für Prävention, Trash-Kosten,
+Corp-Startreihenfolge, Wilson, Data Fort und den Run-End-Vertrag grün. Die
+fokussierten AI-Vertragstests prüfen die neuen Hint-Typen und die sichtbare
+Submarine-Uplink-Semantik. Der breite AI-Typecheck bleibt unabhängig vom
+Block wegen seiner statischen Imports der bereits entfernten historischen
+Migration-Report-JSONs nicht startfähig; diese fehlenden lokalen Artefakte
+wurden nicht als Kompatibilitätsfallback wieder eingeführt.
