@@ -12,6 +12,7 @@ import {
 import {
   assertTurnPlanCommitment,
   executionExpectationFromLegalAction,
+  TURN_PLAN_COMMITMENT_SCHEMA_VERSION,
 } from "../packages/ai/src/plans/turn-plan-commitment";
 
 const CHECKPOINT_DIRECTORY = path.resolve(
@@ -149,6 +150,7 @@ for (const file of files) {
   const original = JSON.parse(sourceText) as any;
   assertExpectedCs09Reconciliation(file, original);
   const current = structuredClone(original);
+  rematerializeTurnPlanCommitmentContract(current);
   if (file === RENT_I_CON_CHECKPOINT) rematerializeRentIConBinding(current);
   current.engine.stateHash = hashGameState(current.engine.testOnlyGameState);
   const changedPaths = leafDiffPaths(original, current);
@@ -156,10 +158,21 @@ for (const file of files) {
   assertAllowedLeafChanges(file, changedPaths);
   changed.push({ file, paths: changedPaths });
   if (mode === "write") {
-    const rendered =
+    let rendered =
       file === RENT_I_CON_CHECKPOINT
         ? `${JSON.stringify(current, null, 2)}\n`
         : replaceSingleStateHash(sourceText, current.engine.stateHash);
+    if (
+      changedPaths.some(
+        (changedPath) =>
+          changedPath ===
+            "runtime.residentPlanPortfolio.turnPlanCommitment.schemaVersion" ||
+          changedPath ===
+            "runtime.residentPlanPortfolio.turnPlanCommitment.sequenceRootPlanInstanceId",
+      )
+    ) {
+      rendered = replaceTurnPlanCommitmentContract(rendered, current);
+    }
     writeFileSync(filePath, rendered, "utf8");
   }
 }
@@ -182,6 +195,16 @@ const baselineChangedCount = baselineChanges.filter(
 const baselineCanonicalBindingCount = baselineChanges.filter(
   ({ file, paths }) => file === RENT_I_CON_CHECKPOINT && paths.length > 1,
 ).length;
+const baselineCommitmentContractUpgradeCount = baselineChanges.filter(
+  ({ paths }) =>
+    paths.some(
+      (changedPath) =>
+        changedPath ===
+          "runtime.residentPlanPortfolio.turnPlanCommitment.schemaVersion" ||
+        changedPath ===
+          "runtime.residentPlanPortfolio.turnPlanCommitment.sequenceRootPlanInstanceId",
+    ),
+).length;
 const baselineExpectationReconciliationCount = baselineChanges.filter(
   ({ file, paths }) =>
     file in CS10_EXPECTED_EXPECTATION_FINGERPRINTS && paths.length > 1,
@@ -190,12 +213,13 @@ if (
   mode === "check" &&
   changed.length === 0 &&
   (baselineChangedCount !== 352 ||
-    baselineHashOnlyCount !== 324 ||
+    baselineHashOnlyCount !== 271 ||
     baselineCanonicalBindingCount !== 1 ||
+    baselineCommitmentContractUpgradeCount !== 59 ||
     baselineExpectationReconciliationCount !== 27)
 )
   throw new Error(
-    `card_spec_checkpoint_baseline_audit_mismatch:${baselineChanges.length}:${baselineHashOnlyCount}:${baselineCanonicalBindingCount}:${baselineExpectationReconciliationCount}`,
+    `card_spec_checkpoint_baseline_audit_mismatch:${baselineChanges.length}:${baselineHashOnlyCount}:${baselineCanonicalBindingCount}:${baselineCommitmentContractUpgradeCount}:${baselineExpectationReconciliationCount}`,
   );
 
 const report = {
@@ -209,10 +233,21 @@ const report = {
   canonicalBindingCheckpointCount: changed.filter(
     ({ file }) => file === RENT_I_CON_CHECKPOINT,
   ).length,
+  commitmentContractUpgradeCheckpointCount: changed.filter(({ paths }) =>
+    paths.some(
+      (changedPath) =>
+        changedPath ===
+          "runtime.residentPlanPortfolio.turnPlanCommitment.schemaVersion" ||
+        changedPath ===
+          "runtime.residentPlanPortfolio.turnPlanCommitment.sequenceRootPlanInstanceId",
+    ),
+  ).length,
   pinnedBaselineCommit: PINNED_CS08_BASE_COMMIT,
   baselineChangedCheckpointCount: baselineChangedCount,
   baselineHashOnlyCheckpointCount: baselineHashOnlyCount,
   baselineCanonicalBindingCheckpointCount: baselineCanonicalBindingCount,
+  baselineCommitmentContractUpgradeCheckpointCount:
+    baselineCommitmentContractUpgradeCount,
   baselineExpectationReconciliationCheckpointCount:
     baselineExpectationReconciliationCount,
   changed,
@@ -240,6 +275,33 @@ function replaceSingleStateHash(source: string, stateHash: string): string {
   return source.replace(
     pattern,
     (_match, prefix: string) => `${prefix}${JSON.stringify(stateHash)}`,
+  );
+}
+
+function replaceTurnPlanCommitmentContract(
+  sourceText: string,
+  checkpoint: any,
+): string {
+  const commitment =
+    checkpoint.runtime?.residentPlanPortfolio?.turnPlanCommitment;
+  const sequenceRootPlanInstanceId = commitment?.sequenceRootPlanInstanceId;
+  if (
+    !commitment ||
+    commitment.schemaVersion !== TURN_PLAN_COMMITMENT_SCHEMA_VERSION ||
+    typeof sequenceRootPlanInstanceId !== "string" ||
+    sequenceRootPlanInstanceId.trim().length === 0
+  )
+    throw new Error("checkpoint_turn_plan_commitment_contract_missing");
+  const pattern = /^(\s*)"schemaVersion": "turn-plan-commitment-v1",$/gm;
+  const matches = [...sourceText.matchAll(pattern)];
+  if (matches.length !== 1)
+    throw new Error(
+      `checkpoint_turn_plan_commitment_schema_occurrence_mismatch:${matches.length}`,
+    );
+  const indentation = matches[0]?.[1] ?? "";
+  return sourceText.replace(
+    pattern,
+    `${indentation}"schemaVersion": ${JSON.stringify(TURN_PLAN_COMMITMENT_SCHEMA_VERSION)},\n${indentation}"sequenceRootPlanInstanceId": ${JSON.stringify(sequenceRootPlanInstanceId)},`,
   );
 }
 
@@ -373,6 +435,22 @@ function rematerializeRentIConBinding(checkpoint: any): void {
   });
 }
 
+function rematerializeTurnPlanCommitmentContract(checkpoint: any): void {
+  const commitment =
+    checkpoint.runtime?.residentPlanPortfolio?.turnPlanCommitment;
+  if (!commitment) return;
+  const sequenceRootPlanInstanceId =
+    commitment.phases?.[0]?.root?.planInstanceId;
+  if (
+    typeof sequenceRootPlanInstanceId !== "string" ||
+    sequenceRootPlanInstanceId.trim().length === 0
+  )
+    throw new Error("checkpoint_turn_plan_commitment_sequence_root_missing");
+  commitment.schemaVersion = TURN_PLAN_COMMITMENT_SCHEMA_VERSION;
+  commitment.sequenceRootPlanInstanceId = sequenceRootPlanInstanceId;
+  assertTurnPlanCommitment(commitment);
+}
+
 function leafDiffPaths(left: unknown, right: unknown, prefix = ""): string[] {
   if (Object.is(left, right)) return [];
   if (
@@ -403,6 +481,8 @@ function assertAllowedLeafChanges(
 ): void {
   const allowed = [
     "engine.stateHash",
+    "runtime.residentPlanPortfolio.turnPlanCommitment.schemaVersion",
+    "runtime.residentPlanPortfolio.turnPlanCommitment.sequenceRootPlanInstanceId",
     ...Object.keys(CS09_EXPECTED_RECONCILIATIONS[file] ?? {}),
     ...(CS10_EXPECTED_EXPECTATION_FINGERPRINTS[file] ? ["expectation"] : []),
     ...(file === RENT_I_CON_CHECKPOINT

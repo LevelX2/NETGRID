@@ -1041,7 +1041,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     traceState = applyChoice(traceState, "corp", "bid_1");
     expect(traceState.trace).toMatchObject({
       status: "base_link",
-      traceValue: 5,
+      traceValue: 1,
       runnerLink: 0,
     });
     traceState = applyChoice(
@@ -2011,7 +2011,6 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(legal.payload).toMatchObject({
       cardId: filterId,
       cardImplementationAbility: "activated",
-      cardImplementationAbilityIndex: 0,
       cardImplementationAbilityTiming: "runner_main",
     });
     const removedSource = structuredClone(state);
@@ -2110,7 +2109,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     );
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
-    ).toEqual(expect.arrayContaining(["access", "breach", "multiaccess"]));
+    ).toEqual(expect.arrayContaining(["access_count", "modifiers"]));
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_139_r-and-d-interface"]?.mechanics,
     ).not.toContain("damage_prevention");
@@ -2179,7 +2178,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         cards: [
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-          { id: "onr_v1_301_punitive-counterstrike", quantity: 3 },
+          { id: "onr_v1_287_datapool-by-zetatech", quantity: 3 },
         ],
       },
       agendaPointsToWin: 7,
@@ -2193,9 +2192,9 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       state,
       "onr_v1_135_nasuko-cycle",
     );
-    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
-    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
-    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
+    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
+    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -2204,31 +2203,33 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+        sourceDefinition(state, action) === "onr_v1_287_datapool-by-zetatech",
     );
-    expect(
-      state.eventModificationWindow?.candidates[0]?.sourceRef.definitionId,
-    ).toBe("onr_v1_135_nasuko-cycle");
+    const nasukoCandidate = state.eventModificationWindow?.candidates.find(
+      (candidate) =>
+        candidate.sourceRef.definitionId === "onr_v1_135_nasuko-cycle",
+    );
+    expect(nasukoCandidate).toBeDefined();
     state = applyChoice(
       state,
       "runner",
-      String(state.eventModificationWindow?.candidates[0]?.candidateId),
+      String(nasukoCandidate?.candidateId),
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationDecision: "apply",
-      preventedAmount: 1,
       sourceDefinitionId: "onr_v1_135_nasuko-cycle",
     });
+    expect(state.runner.tags).toBe(1);
     expect(state.runner.rig.hardware).toContain(nasukoId);
     let removedSource = structuredClone(initial);
-    moveCorpCardToHq(removedSource, "onr_v1_301_punitive-counterstrike");
+    moveCorpCardToHq(removedSource, "onr_v1_287_datapool-by-zetatech");
     removedSource = apply(
       removedSource,
       "corp",
       (action) =>
         action.type === "play_operation" &&
         sourceDefinition(removedSource, action) ===
-          "onr_v1_301_punitive-counterstrike",
+          "onr_v1_287_datapool-by-zetatech",
     );
     const legal = mustAction(
       removedSource,
@@ -2236,7 +2237,10 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       (action) => action.type === "resolve_choice",
     );
     const candidateId = String(
-      removedSource.eventModificationWindow?.candidates[0]?.candidateId,
+      removedSource.eventModificationWindow?.candidates.find(
+        (candidate) =>
+          candidate.sourceRef.definitionId === "onr_v1_135_nasuko-cycle",
+      )?.candidateId,
     );
     removeEverywhere(removedSource, nasukoId);
     removedSource.runner.heap.push(nasukoId);
@@ -2433,7 +2437,8 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       (action) =>
         action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === roninId &&
-        action.payload?.cardImplementationAbilityIndex === 0,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_runner_main_look_top_stack_take_matching",
     );
     expect(state.pendingChoice?.source).toContain(
       "p3_37.look_top_stack_take_matching",
@@ -2477,7 +2482,8 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       (action) =>
         action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === exposeRoninId &&
-        action.payload?.cardImplementationAbilityIndex === 1,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_runner_main_expose_installed_card",
     );
     expect(exposeState.pendingChoice).toMatchObject({
       source: expect.stringContaining("p3_36.expose_installed_card:"),

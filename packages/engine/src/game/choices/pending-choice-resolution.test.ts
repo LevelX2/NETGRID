@@ -397,6 +397,9 @@ function pendingChoiceHost(
         "resolveClassicDeflectorChoice",
       ),
       resolveTrashProgramChoice: unexpected("resolveTrashProgramChoice"),
+      resumeTraceProgramTrashContinuation: unexpected(
+        "resumeTraceProgramTrashContinuation",
+      ),
     },
     access: {
       resolveAccessProgramInstallMemoryChoice: unexpected(

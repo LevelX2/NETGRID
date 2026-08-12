@@ -191,9 +191,10 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/,
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(

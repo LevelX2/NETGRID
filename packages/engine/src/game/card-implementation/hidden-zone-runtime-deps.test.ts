@@ -174,6 +174,7 @@ describe("hidden-zone card implementation runtime deps", () => {
       "exposeOutermostIceEachDataFort",
       "lookTopStackShowToCorpThenInstallMatchingTargetCount",
       "lookTopStackTakeMatchingTargetCount",
+      "moveTopHostedProgramToGrip",
       "moveTopTrashToGrip",
       "outermostIceEachDataFortExposeCount",
       "searchStackInstallTargetCount",

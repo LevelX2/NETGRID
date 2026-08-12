@@ -107,7 +107,7 @@
   },
   "engine": {
     "stateVersion": 429,
-    "stateHash": "fnv1a:8e18fd56",
+    "stateHash": "fnv1a:c878ef88",
     "testOnlyGameState": {
       "matchId": "ai-sim_manhunt-coup-post-fix-2026-07-13-005_local_runner_mit_ansage_der_perfekte_coup_2026_07_09_local_corp_manhunt_pressure_bureau",
       "baseline": {

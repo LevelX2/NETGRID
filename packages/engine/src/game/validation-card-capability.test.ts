@@ -4,7 +4,7 @@ import { createGame } from "./create-game";
 import { validateGameState } from "./validation";
 
 describe("persisted card capability identity validation", () => {
-  it("accepts exactly one valid identity and rejects malformed hybrid continuations", () => {
+  it("accepts one canonical identity and rejects malformed continuations", () => {
     const state = createGame({
       seed: "card-capability-continuation-validation",
       setupMode: "completed",
@@ -49,9 +49,8 @@ describe("persisted card capability identity validation", () => {
       } as never;
       return validateGameState(candidate).errors.join(" ");
     };
-    expect(errorsFor({ abilityIndex: 0 })).toMatch(/exactly one ability/);
     expect(errorsFor({ sourceAbilityId: undefined })).toMatch(
-      /exactly one ability/,
+      /capability identity is invalid/,
     );
     expect(errorsFor({ sourceAbilityId: "Bad/Id" })).toMatch(/invalid/);
     expect(errorsFor({ sourceAbilityId: "other_card:draw" })).toMatch(

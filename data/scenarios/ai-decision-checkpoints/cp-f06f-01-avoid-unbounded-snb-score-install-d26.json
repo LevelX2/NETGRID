@@ -164,7 +164,7 @@
   },
   "engine": {
     "stateVersion": 47,
-    "stateHash": "fnv1a:627737b3",
+    "stateHash": "fnv1a:78f98662",
     "testOnlyGameState": {
       "matchId": "match_f06f0fe345a11e0f",
       "baseline": {
@@ -6257,7 +6257,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_219_superior-net-barriers_1%3Aremote_1",
         "commitmentId": "fnv1a:72222123",
         "sourcePlanId": "fnv1a:1a8dde6c",
         "sourceLineHash": "fnv1a:e020042d",

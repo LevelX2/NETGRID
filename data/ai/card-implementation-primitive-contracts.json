@@ -43,7 +43,7 @@
   },
   {
     "cardDefinitionId": "onr_v1_204_ice-transmutation",
-    "abilityKey": "scored_ice_mark:0",
+      "abilityKey": "scored_agenda_select_rezzed_ice_mark_modifier_mark",
     "primitiveKind": "select_rezzed_ice_mark_modifier",
     "effectKind": "mark_modifier",
     "timing": "score_window",

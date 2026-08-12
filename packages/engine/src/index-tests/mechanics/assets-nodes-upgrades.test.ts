@@ -195,9 +195,10 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone|hq_agenda_reveal|hq_shuffle_into_rd/,
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
@@ -1510,9 +1511,10 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/,
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
@@ -1848,7 +1850,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       traceLimit: 10,
     });
 
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_1");
     state = applyChoice(state, "runner", "bid_0");
 
     expect(state.runner.tags).toBe(1);

@@ -202,6 +202,13 @@ export function resolveActivatedCardImplementationAbility(
           match.cardId,
           match.definition.id,
         ),
+      moveTopHostedProgramToGrip: () =>
+        deps.moveTopHostedProgramToGrip(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+        ),
       startSearchStackInstall: (filter, installCost, shuffleAfterwards) =>
         deps.startSearchStackInstallChoice(
           state,

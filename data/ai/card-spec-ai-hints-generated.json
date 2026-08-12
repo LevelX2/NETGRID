@@ -32494,7 +32494,7 @@
     },
     {
       "cardId": "onr_v1_131_microtech-backup-drive",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2ad559cfde607bfb",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5e49014d83b8d6d9",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:cdf976dcac7ba6e0",
       "hint": {
         "cardId": "onr_v1_131_microtech-backup-drive",
@@ -32506,6 +32506,11 @@
         ],
         "planRoles": [],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "abilities_activated_runner_main_move_top_hosted_program_to_grip"
+          }
+        ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -32539,6 +32544,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
+          "activated_ability",
           "install_hardware"
         ]
       }

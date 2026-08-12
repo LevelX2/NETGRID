@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -198,7 +194,7 @@ describe("Proteus Visible Baseline", () => {
   const SUNBURST_CRANIAL_INTERFACE =
     "onr_proteus_151_sunburst-cranial-interface";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   it("rezzes Toughonium Wall through public ICE paths with revalidation and replay coverage", () => {
     let state = toRunnerTurn(
@@ -228,13 +224,15 @@ describe("Proteus Visible Baseline", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const rezAction = mustAction(
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" && sourceDefinition(state, action) === TOUGHONIUM,
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === TOUGHONIUM,
     );
     expect(rezAction.costs).toEqual([{ credits: 13 }]);
 
@@ -275,15 +273,17 @@ describe("Proteus Visible Baseline", () => {
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "corp", (action) => action.actionId === rezAction.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === rezAction.actionId,
+    );
 
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
     expect(state.corp.credits).toBe(7);
     expect(state.run?.encounteredIceId).toBe(iceId);
     expect(cardImplementationForDefinitionId(TOUGHONIUM)).toBeUndefined();
-    expect(
-      CARD_DEFINITIONS_BY_ID[TOUGHONIUM]?.subroutines,
-    ).toHaveLength(4);
+    expect(CARD_DEFINITIONS_BY_ID[TOUGHONIUM]?.subroutines).toHaveLength(4);
     expect(
       CARD_DEFINITIONS_BY_ID[TOUGHONIUM]?.subroutines?.every(
         (subroutine) => subroutine.type === "end_the_run",
@@ -342,7 +342,11 @@ describe("Proteus Visible Baseline", () => {
         },
         agendaPointsToWin: 7,
       });
-      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
       state.corp.credits = 20;
       state.corp.clicks = 10;
       const regionInstanceId = putCorpRootInRemote(state, regionId);
@@ -542,13 +546,11 @@ describe("Proteus Visible Baseline", () => {
     );
     state.runner.credits = 30;
     state.corp.credits = 8;
-    const oldDeckId = moveRunnerCardToGrip(
-      state,
-      "onr_v1_137_parraline-5750",
-    );
+    const oldDeckId = moveRunnerCardToGrip(state, "onr_v1_137_parraline-5750");
     const deckId = moveRunnerCardToGrip(state, DECK_THE);
     const memoryBefore =
-      getPlayerView(state, "runner").own.memoryLimit ?? state.runner.memoryLimit;
+      getPlayerView(state, "runner").own.memoryLimit ??
+      state.runner.memoryLimit;
 
     state = apply(
       state,
@@ -633,7 +635,8 @@ describe("Proteus Visible Baseline", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -721,7 +724,8 @@ describe("Proteus Visible Baseline", () => {
       moveRunnerCardToGrip(state, "simple_decoder");
       const iceId = putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
       const memoryBefore =
-        getPlayerView(state, "runner").own.memoryLimit ?? state.runner.memoryLimit;
+        getPlayerView(state, "runner").own.memoryLimit ??
+        state.runner.memoryLimit;
       const handSizeBefore = getPlayerView(state, "runner").own.maxHandSize;
       const installDeck = mustAction(
         state,
@@ -730,9 +734,7 @@ describe("Proteus Visible Baseline", () => {
           action.type === "install_card" &&
           String(action.payload?.cardId) === deckId,
       );
-      expect(installDeck.costs).toEqual([
-        { clicks: 1, credits: expectedCost },
-      ]);
+      expect(installDeck.costs).toEqual([{ clicks: 1, credits: expectedCost }]);
 
       const wrongSide = applyAction(state, {
         matchId: state.matchId,
@@ -875,7 +877,8 @@ describe("Proteus Visible Baseline", () => {
     noisyState = apply(
       noisyState,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     noisyState = apply(
       noisyState,

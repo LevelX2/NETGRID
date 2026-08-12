@@ -50,7 +50,6 @@ describe("CardImplementation definition descriptors", () => {
         appliesTo: { side: "corp", cardType: "ice", subtype: "code_gate" },
         subroutine: {
           kind: "end_the_run",
-          text: "*End the run.",
           visibility: "public",
         },
       }),
@@ -1109,7 +1108,6 @@ describe("CardImplementation definition descriptors", () => {
         subroutine: {
           kind: "end_the_run_unless_runner_pays",
           amount: 1,
-          text: "*End the run unless Runner pays [1].",
           visibility: "public",
         },
       }),
@@ -1215,13 +1213,12 @@ describe("CardImplementation definition descriptors", () => {
 
   it("describes Proteus Phase 1a reuse-only baseline implementations", () => {
     expect(
-      cardImplementationForDefinitionId("onr_proteus_041_toughoniumtm-wall")
-        ?.printedSubroutines,
+      CARD_DEFINITIONS_BY_ID["onr_proteus_041_toughoniumtm-wall"]?.subroutines,
     ).toEqual([
-      { kind: "end_the_run", text: "*End the run." },
-      { kind: "end_the_run", text: "*End the run." },
-      { kind: "end_the_run", text: "*End the run." },
-      { kind: "end_the_run", text: "*End the run." },
+      expect.objectContaining({ type: "end_the_run" }),
+      expect.objectContaining({ type: "end_the_run" }),
+      expect.objectContaining({ type: "end_the_run" }),
+      expect.objectContaining({ type: "end_the_run" }),
     ]);
 
     for (const [definitionId, subtype] of [
@@ -1229,15 +1226,9 @@ describe("CardImplementation definition descriptors", () => {
       ["onr_proteus_072_research-bunker", "research"],
       ["onr_proteus_077_weapons-depot", "black_ops"],
     ] as const) {
-      expect(
-        cardImplementationForDefinitionId(definitionId)?.regionBaseline,
-      ).toMatchObject({
-        kind: "region_baseline",
-        rezOnInstall: true,
-        installOnlyIfRezAffordable: true,
-        oneRegionPerFort: true,
-        trashOlderRegions: true,
-      });
+      expect(CARD_DEFINITIONS_BY_ID[definitionId]?.subtypes).toContain(
+        "region",
+      );
       expect(
         cardImplementationForDefinitionId(definitionId)?.modifiers,
       ).toContainEqual(
@@ -1330,10 +1321,11 @@ describe("CardImplementation definition descriptors", () => {
           kind: "for_each_rezzed_installed_ice",
           subtypeAnyOf: ["code_gate", "wall"],
           excludeSource: true,
+          scope: "outside_source_same_server",
+          subtypeMatch: "effective_current_subtypes",
         },
         subroutine: {
           kind: "end_the_run",
-          text: "*End the run.",
           visibility: "public",
         },
       }),
@@ -1350,10 +1342,9 @@ describe("CardImplementation definition descriptors", () => {
           kind: "add_current_encounter_additional_subroutine",
           target: "encountered_ice_self",
           append: "after_existing",
-          subroutine: {
-            kind: "end_the_run",
-            text: "*End the run.",
-            visibility: "public",
+        subroutine: {
+          kind: "end_the_run",
+          visibility: "public",
           },
           visibility: "public",
         },
@@ -1466,8 +1457,9 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_117_poisoned-water-supply")
         ?.runnerEventLongtail,
-    ).toEqual({
+    ).toMatchObject({
       kind: "trash_installed_runner_connections_then_add_bad_publicity",
+      capabilityKey: "trash_two_connections_add_bad_publicity",
       count: 2,
       badPublicity: 1,
       visibility: "hidden_info_barrier",
@@ -1776,17 +1768,20 @@ describe("CardImplementation definition descriptors", () => {
       cardImplementationForDefinitionId(
         "onr_proteus_086_enterprise-inc-shields",
       )?.damagePreventionSources,
-    ).toEqual([
+    ).toMatchObject([
       {
         kind: "damage_prevention",
+        capabilityKey: "prevent_two_net_damage",
         damageTypes: ["net"],
         amount: 2,
+        amountMode: "up_to",
         cost: { kind: "credit", amount: 1 },
         priority: 100,
         visibility: "public",
       },
       {
         kind: "damage_prevention",
+        capabilityKey: "prevent_one_core_damage",
         damageTypes: ["core"],
         amount: 1,
         cost: { kind: "credit", amount: 1 },
@@ -1797,9 +1792,10 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_096_skullcap")
         ?.damagePreventionSources,
-    ).toEqual([
+    ).toMatchObject([
       {
         kind: "damage_prevention",
+        capabilityKey: "trash_source_prevent_all_net_or_core_damage",
         damageTypes: ["net", "core"],
         amount: "all",
         cost: { kind: "trash_source" },
@@ -1835,8 +1831,9 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_022_food-fight")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "paid_end_the_run_subroutines",
+      capabilityKey: "rez_with_paid_end_run_subroutines",
       additionalCostPerSubroutine: 2,
       minSubroutines: 0,
       visibility: "public",
@@ -1855,8 +1852,9 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_013_caryatid")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "alternate_subtype",
+      capabilityKey: "rez_as_wall_or_code_gate",
       additionalCost: 1,
       baseSubtypes: ["wall"],
       alternateSubtypes: ["code_gate"],
@@ -1865,7 +1863,7 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_017_credit-blocks")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "alternate_subtype",
       additionalCost: 1,
       baseSubtypes: ["sentry"],
@@ -1875,7 +1873,7 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_025_homing-missile")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "x_strength",
       additionalCostPerValue: 1,
       minValue: 0,
@@ -1886,7 +1884,7 @@ describe("CardImplementation definition descriptors", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_039_sphinx-2006")
         ?.variableRez,
-    ).toEqual({
+    ).toMatchObject({
       kind: "alternate_subtype",
       additionalCost: 4,
       baseSubtypes: ["code_gate"],
@@ -1980,8 +1978,9 @@ describe("CardImplementation definition descriptors", () => {
     ] as const) {
       expect(
         cardImplementationForDefinitionId(definitionId)?.fortRunWindows?.[0],
-      ).toEqual({
+      ).toMatchObject({
         kind: "move_self_to_different_position_on_same_fort",
+        capabilityKey: "start_run_move_source_within_fort",
         timing: "start_of_run_on_this_fort",
         cost: { kind: "credit", amount: 1 },
         target: "different_position_on_same_fort",

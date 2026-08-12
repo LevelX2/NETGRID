@@ -48,6 +48,7 @@ export type CardEffectImplementation =
   | SearchTrashToGripEffectImplementation
   | SearchStackToGripEffectImplementation
   | MoveTopTrashToGripEffectImplementation
+  | MoveTopHostedProgramToGripEffectImplementation
   | SearchStackInstallEffectImplementation
   | ChooseStackOrTrashProgramInstallEffectImplementation
   | LookTopStackShowToCorpThenInstallMatchingEffectImplementation
@@ -374,6 +375,13 @@ export type SearchStackToGripEffectImplementation = {
 export type MoveTopTrashToGripEffectImplementation = {
   kind: "move_top_trash_to_grip";
   recipient: "runner";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type MoveTopHostedProgramToGripEffectImplementation = {
+  kind: "move_top_hosted_program_to_grip";
+  recipient: "runner";
+  host: "source";
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 

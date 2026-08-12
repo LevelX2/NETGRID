@@ -132,6 +132,15 @@ export function canResolveActivatedCardImplementationAbility(
       return deps.searchStackToGripTargetCount(state, effect.filter) > 0;
     if (effect.kind === "move_top_trash_to_grip")
       return deps.topTrashToGripTargetCount(state) > 0;
+    if (effect.kind === "move_top_hosted_program_to_grip")
+      return (
+        sourceCardId !== undefined &&
+        Object.entries(state.cardInstances).some(
+          ([cardId, instance]) =>
+            instance.hostedOn === sourceCardId &&
+            deps.definitionFor(state, cardId).type === "program",
+        )
+      );
     if (effect.kind === "search_stack_install")
       return (
         deps.searchStackInstallTargetCount(

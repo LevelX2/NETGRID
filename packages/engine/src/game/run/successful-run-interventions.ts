@@ -27,7 +27,6 @@ import {
   resolveSuccessfulRunForceRez,
   resolveSuccessfulRunFortCounterExpose,
   resolveCorpShuffleRunnerGripAfterSuccessfulRunChoice,
-  resolveSuccessfulRunRemoteCounter,
   resolveSuccessfulRunReverseIce,
   runnerUtilityLongtailKindForDefinition,
   successfulRunForceRezFollowupCreditCost,
@@ -304,28 +303,6 @@ export function buildSuccessfulRunFollowupActions(
       }
     }
     if (
-      cardImplementationForDefinitionId(definition.id)?.virusCounter
-        ?.addOnSuccessfulRun?.server === "subsidiary_data_fort"
-    ) {
-      const server = host.servers.mustServer(run.attackedServerId);
-      if (server.kind === "remote") {
-        actions.push(
-          host.actions.createRunnerTriggerAction(
-            `${definition.title}: Remote mit Power-Counter markieren`,
-            sourceCardId,
-            [],
-            {
-              cardId: sourceCardId,
-              serverId: server.id,
-              v1919RunnerProgramAbility: "successful_run_remote_counter",
-              counterType: "power",
-              addCounterAmount: 1,
-            },
-          ),
-        );
-      }
-    }
-    if (
       runnerUtilityLongtailKindForDefinition(definition.id) ===
       "successful_run_fort_counter_expose"
     ) {
@@ -364,11 +341,6 @@ export function resolveSuccessfulRunFollowupAbility(
     "successful_run_reverse_ice"
   )
     return resolveSuccessfulRunReverseIce(host, legalAction);
-  if (
-    legalAction.payload?.v1919RunnerProgramAbility ===
-    "successful_run_remote_counter"
-  )
-    return resolveSuccessfulRunRemoteCounter(host, legalAction);
   if (
     legalAction.payload?.runnerUtilityAbility ===
     "successful_run_fort_counter_expose"

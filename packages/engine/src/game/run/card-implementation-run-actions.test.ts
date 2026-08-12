@@ -149,6 +149,7 @@ describe("runner during-run CardImplementation actions", () => {
           calls.push(
             `${side}:${sourceCardId}:${cardDefinition.id}:${timing}`,
           );
+          if (timing !== "during_run") return;
           legalActions.push(
             action(sourceCardId, {
               sourceDefinitionId: cardDefinition.id,
@@ -163,7 +164,9 @@ describe("runner during-run CardImplementation actions", () => {
 
     expect(calls).toEqual([
       "runner:program_a:program_a_definition:during_run",
+      "runner:program_a:program_a_definition:runner_paid",
       "runner:program_b:program_b_definition:during_run",
+      "runner:program_b:program_b_definition:runner_paid",
     ]);
     expect(result.legalActions.map((legalAction) => legalAction.source)).toEqual([
       "program_a",
@@ -190,7 +193,10 @@ describe("runner during-run CardImplementation actions", () => {
           legalActions,
           _side,
           sourceCardId,
+          _definition,
+          timing,
         ) => {
+          if (timing !== "during_run") return;
           legalActions.push(
             action(sourceCardId, {
               sourceDefinitionId: "program_a_definition",

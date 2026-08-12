@@ -211,9 +211,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "playable_mvp",
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
-      expect(definition?.mechanics.join(" "), definitionId).toContain(
-        "per_card_longtail",
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
     }
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
@@ -515,9 +516,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         "playable_mvp",
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
-      expect(definition?.mechanics.join(" "), definitionId).toContain(
-        "per_card_longtail",
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
     }
   });
 
@@ -4417,6 +4419,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", `card_${succubusId}`);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.runner.heap).toContain(succubusId);
     for (const hostedId of hostedIds) {
       expect(state.runner.rig.programs).toContain(hostedId);
@@ -4429,11 +4433,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.v1922RunnerHardwareAbility ===
-          "return_top_hosted_program",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_131_microtech-backup-drive" &&
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_runner_main_move_top_hosted_program_to_grip",
     );
-    const returnedId = String(returnAction.payload?.targetProgramId ?? "");
+    expect(returnAction.label).toBe(
+      "Microtech Backup Drive: oberstes gesichertes Programm auf die Hand nehmen",
+    );
+    const returnedId = hostedIds.slice().sort().at(-1)!;
     state = apply(
       state,
       "runner",
@@ -4443,8 +4452,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.cardInstances[returnedId]?.hostedOn).toBeUndefined();
     expect(state.runner.rig.programs).not.toContain(returnedId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "trigger_ability",
-      abilityId: "return_top_hosted_program",
+      actionType: "activated_card_ability",
+      sourceDefinitionId: "onr_v1_131_microtech-backup-drive",
       returnedToGrip: true,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -4508,7 +4517,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(legal.payload).toMatchObject({
       cardId: legal.source,
       cardImplementationAbility: "activated",
-      cardImplementationAbilityIndex: 0,
+      cardImplementationAbilityKey: "abilities_activated_runner_main_gain_credits",
       cardImplementationAbilityTiming: "runner_main",
     });
     const wrongSide = applyAction(state, {
@@ -4727,11 +4736,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         visibleCard.definitionId === "onr_v1_195_corporate-retreat",
     );
     expect(retreatView?.counterDisplays).toContainEqual({
-      id: "corporate_retreat_active",
+      id: "mark",
       amount: 1,
       displayKind: "generic_counter",
-      label: "Noch aktiv",
-      ariaLabel: "1 Corporate Retreat noch aktiv",
+      label: "Mark-Counter",
+      ariaLabel: "1 Mark-Counter",
       counterType: "mark",
       usageHint: "status_marker",
     });

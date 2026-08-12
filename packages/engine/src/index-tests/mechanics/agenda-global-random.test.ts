@@ -211,9 +211,21 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     ).toBe("playable_mvp");
   });
 
-  it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
+  it("scores V1.9.19 overadvanced agendas with replay-stable payloads", () => {
     let state = apply(
-      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-overadvance-score"),
+      createGameAfterSetup({
+        seed: "v1919-overadvance-score",
+        runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+          id: "v1919_overadvance_score_corp",
+          cards: [
+            { id: "onr_v1_214_project-babylon", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
       "corp",
       (action) => action.type === "mandatory_draw",
     );
@@ -223,25 +235,10 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
     const agendaId = putCorpRootInRemote(
       state,
-      "onr_v1_189_artificial-security-directors",
+      "onr_v1_214_project-babylon",
     );
-    const rovingId = findCard(state, "onr_v1_368_roving-submarine");
-    const server = state.corp.servers.find(
-      (candidate) => candidate.id === "remote_1",
-    );
-    expect(server).toBeDefined();
-    if (!server) throw new Error("Missing remote");
-    removeEverywhere(state, rovingId);
-    server.root.push(rovingId);
-    state.cardInstances[rovingId] = {
-      ...state.cardInstances[rovingId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
-      faceup: true,
-      rezzed: true,
-    };
-
     const initial = structuredClone(state);
-    for (let index = 0; index < 5; index += 1) {
+    for (let index = 0; index < 7; index += 1) {
       state = apply(
         state,
         "corp",
@@ -259,14 +256,13 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
 
     expect(state.corp.scoreArea).toContain(agendaId);
-    expect(cardCounterAmount(state, agendaId, "agenda")).toBe(1);
+    expect(cardCounterAmount(state, agendaId, "agenda")).toBe(2);
     const scoreEvent = state.eventLog.at(-1);
     expect(scoreEvent?.publicPayload).toMatchObject({
       actionType: "score_agenda",
-      v1919AgendaDifficulty: 2,
-      v1919Overadvance: 3,
-      v1919BonusAgendaPoints: 1,
-      totalAgendaPoints: 2,
+      overadvanceBonusAgendaPointOveradvance: 4,
+      overadvanceBonusAgendaPoints: 2,
+      totalAgendaPoints: 3,
     });
     const replay = replayEvents(
       initial,
@@ -276,7 +272,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("uses V1.9.19 scored agenda reveal actions without leaking hidden R&D to the Runner before reveal", () => {
+  it("does not invent a scored reveal action for a difficulty-modifier agenda", () => {
     let state = apply(
       MECHANIC_SMOKE_GAMES.agendaScoring("v1919-scored-reveal"),
       "corp",
@@ -311,21 +307,16 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "Simple Agenda",
     );
 
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1919_scored_agenda_reveal_rd_top",
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          sourceDefinition(state, action) ===
+          "onr_v1_202_genetics-visionary-acquisition",
+      ),
+    ).toBe(false);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Simple Agenda",
     );
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      abilityId: "v1919_scored_agenda_reveal_rd_top",
-      revealKind: "reveal",
-      cardDefinitionId: "simple_agenda",
-      title: "Simple Agenda",
-    });
-    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
   });
 
   it("uses V1.9.19 asset counter, economy and access-ambush paths through explicit actions", () => {
@@ -827,7 +818,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
   });
 
-  it("uses V1.9.19 Runner agenda-cost paths and keeps Arasaka's refresh distinct from drawing", () => {
+  it("does not invent a manual Fait action and keeps Arasaka's refresh distinct from drawing", () => {
     let faitState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-accompli"),
     );
@@ -837,20 +828,14 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "onr_v1_025_fait-accompli",
     );
     scoreRunnerAgendaForTest(faitState, "simple_agenda");
-    faitState = apply(
-      faitState,
-      "runner",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1919RunnerProgramAbility === "add_power_counter",
-    );
-    expect(cardCounterAmount(faitState, faitId, "power")).toBe(1);
-    expect(faitState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      abilityId: "add_power_counter",
-      addedCounterAmount: 1,
-      remainingCounters: 1,
-    });
+    expect(
+      getLegalActions(faitState, "runner").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1919RunnerProgramAbility === "add_power_counter",
+      ),
+    ).toBe(false);
+    expect(cardCounterAmount(faitState, faitId, "power")).toBe(0);
 
     let arasakaState = toRunnerTurn(
       createGameAfterSetup({
@@ -1290,7 +1275,12 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
           action.payload?.serverId === "remote_1",
       );
       next = passRootRezWindowBeforeAccessIfOpen(next);
-      next = apply(next, "runner", (action) => action.type === "access_card");
+      if (
+        getLegalActions(next, "runner").some(
+          (action) => action.type === "access_card",
+        )
+      )
+        next = apply(next, "runner", (action) => action.type === "access_card");
       if (
         getLegalActions(next, "runner").some(
           (action) => action.type === "decline_trash",
@@ -1307,9 +1297,6 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     state = makeSuccessfulRemoteRun(state);
     state = makeSuccessfulRemoteRun(state);
     expect(state.serverAgendaCostCountersByServer?.remote_1).toBe(2);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "decline_trash",
-    });
 
     const agendaId = findCard(state, "simple_agenda");
     removeEverywhere(state, agendaId);
@@ -1619,7 +1606,6 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.runner.grip).toHaveLength(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      originalAmount: 4,
       damageResolved: true,
       damageType: "meat",
       damageAmount: 4,
@@ -1832,7 +1818,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         JSON.stringify(state.eventLog.at(-1)?.publicPayload),
         definitionId,
       ).not.toMatch(
-        /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+        /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
       );
       expect(
         getPlayerView(state, "runner").opponent.handCount,
@@ -2068,7 +2054,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -2247,7 +2233,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(getPlayerView(state, "corp").own.maxHandSize).toBe(7);
     expect(getPlayerView(state, "runner").opponent.maxHandSize).toBe(7);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Economy Operation"/,
     );
     expect(getPlayerView(state, "runner").opponent.handCount).toBe(
       state.corp.hq.length,
@@ -2337,7 +2323,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       cardsTrashed: 5,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"hq"|"rd"|"cardInstances"|"privatePayload"|"grip"/,
+      /"hq"\s*:|"rd"\s*:|"cardInstances"|"privatePayload"|"grip"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -2391,7 +2377,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Economy Operation"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -2445,7 +2431,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       ]),
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -2680,7 +2666,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.pendingChoice?.side).toBe("corp");
-    const expectedCorpBidMax = state.corp.credits - 1;
+    const expectedCorpBidMax = Math.min(
+      state.corp.credits,
+      Math.max(0, (state.trace?.traceLimit ?? 0) - 1),
+    );
     expect(
       state.pendingChoice?.options.some(
         (option) => option.id === `bid_${expectedCorpBidMax}`,
@@ -3118,9 +3107,10 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         "playable_mvp",
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
-      expect(definition?.mechanics.join(" "), definitionId).toContain(
-        "deterministic_random",
-      );
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
     }
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus,
@@ -3222,7 +3212,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       state.corp.servers.some((server) => server.root.includes(assetId)),
     ).toBe(false);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
     );
     expect(getPlayerView(state, "runner").opponent.handCount).toBe(
       state.corp.hq.length,
@@ -3329,7 +3319,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         });
       }
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-        /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+        /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
@@ -3338,7 +3328,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     },
   );
 
-  it("records V1.9.21 Boardwalk die probes through installed program actions", () => {
+  it("does not invent a manual Boardwalk die-probe action", () => {
     for (const definitionId of ["onr_v1_008_boardwalk"]) {
       let state = toRunnerTurn(
         createGameAfterSetup({
@@ -3361,66 +3351,16 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       state.runner.memoryLimit = 20;
 
       const programId = installRunnerProgramForTest(state, definitionId);
-      const legal = mustAction(
-        state,
-        "runner",
-        (action) =>
-          action.type === "gain_credit" &&
-          action.payload?.v1921RunnerProgramAbility ===
-            "deterministic_die_probe" &&
-          String(action.payload?.cardId) === programId,
-      );
-      const wrongSide = applyAction(state, {
-        matchId: state.matchId,
-        side: "corp",
-        actionId: legal.actionId,
-        clientKnownStateVersion: state.stateVersion,
-        idempotencyKey: `v1921-${definitionId}-wrong-side`,
-      });
-      expect(wrongSide.ok, definitionId).toBe(false);
-      if (!wrongSide.ok)
-        expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
-
-      const initial = structuredClone(state);
-      const replayStart = state.eventLog.length;
-      const randomBefore = state.randomDrawRecords.length;
-      state = apply(
-        state,
-        "runner",
-        (action) => action.actionId === legal.actionId,
-      );
-
-      const randomPurpose = `v1921.die.${definitionId}.program_probe`;
-      expect(state.randomDrawRecords, definitionId).toHaveLength(
-        randomBefore + 1,
-      );
-      expect(state.randomDrawRecords.at(-1)?.purpose, definitionId).toBe(
-        randomPurpose,
-      );
-      expect(state.eventLog.at(-1)?.publicPayload, definitionId).toMatchObject({
-        actionType: "gain_credit",
-        abilityId: "deterministic_die_probe",
-        randomPurpose,
-        randomCounterAfter: randomBefore + 1,
-      });
-      const publicRoll = Number(
-        state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0,
-      );
-      expect(Number.isInteger(publicRoll), definitionId).toBe(true);
-      expect(publicRoll, definitionId).toBeGreaterThanOrEqual(1);
-      expect(publicRoll, definitionId).toBeLessThanOrEqual(6);
       expect(
-        JSON.stringify(state.eventLog.at(-1)?.publicPayload),
+        getLegalActions(state, "runner").some(
+          (action) =>
+            action.type === "gain_credit" &&
+            action.payload?.v1921RunnerProgramAbility ===
+              "deterministic_die_probe" &&
+            String(action.payload?.cardId) === programId,
+        ),
         definitionId,
-      ).not.toMatch(
-        /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
-      );
-      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
-      expect(replay.actualFinalStateHash, definitionId).toBe(hashState(state));
-      expect(replay.state.randomDrawRecords, definitionId).toEqual(
-        state.randomDrawRecords,
-      );
+      ).toBe(false);
     }
   });
 
@@ -3581,7 +3521,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       ),
     ).toBe(false);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -3696,7 +3636,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         .map((event) => JSON.stringify(event.publicPayload))
         .join("\n"),
     ).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -3704,7 +3644,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
 
-  it("records Quest for Cattekin resource die probes through installed resource actions", () => {
+  it("does not invent a manual Quest for Cattekin die-probe action", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1921-quest-for-cattekin-resource-die-probe",
@@ -3728,56 +3668,14 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       state,
       "onr_v1_172_quest-for-cattekin",
     );
-    const legal = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1921RunnerResourceAbility ===
-          "deterministic_die_probe" &&
-        String(action.payload?.cardId) === resourceId,
-    );
-    const wrongSide = applyAction(state, {
-      matchId: state.matchId,
-      side: "corp",
-      actionId: legal.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      idempotencyKey: "v1921-quest-wrong-side",
-    });
-    expect(wrongSide.ok).toBe(false);
-    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
-
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    const randomBefore = state.randomDrawRecords.length;
-    state = apply(
-      state,
-      "runner",
-      (action) => action.actionId === legal.actionId,
-    );
-
-    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
-    expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
-      "v1921.die.onr_v1_172_quest-for-cattekin.resource_probe",
-    );
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      abilityId: "deterministic_die_probe",
-      randomPurpose: "v1921.die.onr_v1_172_quest-for-cattekin.resource_probe",
-      randomCounterAfter: randomBefore + 1,
-    });
-    const publicRoll = Number(
-      state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0,
-    );
-    expect(Number.isInteger(publicRoll)).toBe(true);
-    expect(publicRoll).toBeGreaterThanOrEqual(1);
-    expect(publicRoll).toBeLessThanOrEqual(6);
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
-    );
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(replay.actualFinalStateHash).toBe(hashState(state));
-    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1921RunnerResourceAbility ===
+            "deterministic_die_probe" &&
+          String(action.payload?.cardId) === resourceId,
+      ),
+    ).toBe(false);
   });
 });

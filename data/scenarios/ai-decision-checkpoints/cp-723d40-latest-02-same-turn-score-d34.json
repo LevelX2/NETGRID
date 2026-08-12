@@ -5887,7 +5887,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
         "commitmentId": "fnv1a:34544f4d",
         "sourcePlanId": "fnv1a:1e761a64",
         "sourceLineHash": "fnv1a:49bf656d",

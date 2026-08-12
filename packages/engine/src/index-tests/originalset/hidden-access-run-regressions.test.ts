@@ -576,8 +576,9 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
         sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_1");
     state = applyChoice(state, "runner", "bid_0");
+    state = applyChoice(state, "corp", `card_${pileDriverId}`);
 
     expect(pileDriverId && state.runner.heap.includes(pileDriverId)).toBe(true);
     expect(state.run).toBeUndefined();
@@ -1082,7 +1083,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       (action) => action.actionId === policeAction.actionId,
     );
     expect(policeState.trace).toMatchObject({ traceLimit: 5 });
-    policeState = applyChoice(policeState, "corp", "bid_0");
+    policeState = applyChoice(policeState, "corp", "bid_1");
     policeState = applyChoice(policeState, "runner", "bid_0");
     expect(policeState.runner.tags).toBe(1);
     const policeReplay = replayEvents(
@@ -1141,11 +1142,18 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       "runner",
       (action) => action.actionId === continueAction.actionId,
     );
+    nagaState = applyChoice(nagaState, "corp", `card_${dwarfId}`);
+    const nagaTrashEvent = nagaState.eventLog.at(-1);
+    nagaState = apply(
+      nagaState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(nagaState.runner.heap).toContain(dwarfId);
     expect(nagaState.runner.heap).not.toContain(codecrackerId);
     expect(nagaState.run).toBeUndefined();
-    expect(nagaState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "continue_run",
+    expect(nagaTrashEvent?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
       trashedCardDefinitionId: "onr_v1_021_dwarf",
       trashedCardType: "program",
       trashedCount: 1,
@@ -1463,12 +1471,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     expect(state.trace).toMatchObject({
       status: "base_link",
-      traceValue: 5,
+      traceValue: 1,
       runnerLink: 0,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerLink: 0,
-      traceValue: 5,
+      traceValue: 1,
     });
     state = applyChoice(
       state,
@@ -2855,7 +2863,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(dataDartsContinue.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "card_implementation.onr_v1_234_data-darts.printed_subroutine.1.net_damage,card_implementation.onr_v1_234_data-darts.printed_subroutine.2.prohibit_break_next_ice",
+        "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice",
     });
     expect(dataDartsContinue.payload?.encounterWillEndRun).toBe(false);
     state = apply(
@@ -3218,7 +3226,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 3,
       encounterSubroutineIds:
-        "card_implementation.onr_v1_224_bolter-cluster.printed_subroutine.1.net_damage,card_implementation.onr_v1_224_bolter-cluster.printed_subroutine.2.prohibit_break_next_ice,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+        "printed_subroutines_damage_net,printed_subroutines_prohibit_break_next_ice,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
     });
     const breakActions = getLegalActions(state, "runner").filter(
       (action) =>
@@ -3301,7 +3309,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       traceLimit: 4,
       sourceDefinitionId: "onr_v1_240_fang",
     });
-    state = applyChoice(state, "corp", "bid_5");
+    state = applyChoice(state, "corp", "bid_4");
     state = applyChoice(state, "runner", "bid_0");
     expect(state.run).toBeUndefined();
     expect(state.runner.tags).toBe(0);
@@ -3429,9 +3437,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     const preventionOptionId = getPlayerView(
       state,
       "runner",
-    ).pendingChoice?.options.find((option) =>
-      option.label.includes("Lifesaver Nanosurgeons"),
-    )?.id;
+    ).pendingChoice?.options.find((option) => option.id !== "pass")?.id;
     expect(preventionOptionId).toBeDefined();
     state = applyChoice(state, "runner", String(preventionOptionId));
     expect(state.runner.coreDamage).toBe(1);
@@ -3776,7 +3782,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       actionType: "continue_run",
       sourceDefinitionId: "onr_v1_251_jack-attack",
     });
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_1");
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -4192,14 +4198,14 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     });
   });
 
-  it("reveals only I Spy's top stack card and keeps source and empty-stack gates closed", () => {
+  it("does not invent I Spy's removed stack-reveal action", () => {
     let state = toRunnerTurn(
       originalsetReorderCounterRunlockGame("spotcheck-i-spy"),
     );
     state.runner.credits = 20;
     const iSpyId = moveRunnerCardToGrip(state, "onr_v1_032_i-spy");
-    const hiddenBelowId = putRunnerCardOnTopOfStack(state, "simple_fracter");
-    const topId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putRunnerCardOnTopOfStack(state, "simple_fracter");
+    putRunnerCardOnTopOfStack(state, "simple_decoder");
 
     expect(
       getLegalActions(state, "runner").some(
@@ -4214,39 +4220,6 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
         String(action.payload?.cardId) === iSpyId,
     );
 
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1912CounterAbility === "reveal_stack_top",
-    );
-    expect(state.runner.stack.slice(0, 2)).toEqual([topId, hiddenBelowId]);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      revealKind: "reveal",
-      cardDefinitionId: "simple_decoder",
-    });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "simple_fracter",
-    );
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
-      hiddenBelowId,
-    );
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
-
-    for (const cardId of state.runner.stack.slice()) {
-      removeEverywhere(state, cardId);
-      state.runner.heap.push(cardId);
-      state.cardInstances[cardId] = {
-        ...state.cardInstances[cardId]!,
-        zone: { side: "runner", zone: "heap" },
-        faceup: true,
-      };
-    }
     expect(
       getLegalActions(state, "runner").some(
         (action) => action.payload?.v1912CounterAbility === "reveal_stack_top",
@@ -4522,7 +4495,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "card_implementation.onr_v1_253_laser-wire.printed_subroutine.1.net_damage,card_implementation.onr_v1_253_laser-wire.printed_subroutine.2.end_the_run",
+        "printed_subroutines_damage_net,printed_subroutines_end_the_run",
       encounterWillEndRun: true,
     });
     state = apply(

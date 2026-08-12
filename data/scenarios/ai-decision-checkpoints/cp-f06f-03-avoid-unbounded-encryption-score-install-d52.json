@@ -164,7 +164,7 @@
   },
   "engine": {
     "stateVersion": 118,
-    "stateHash": "fnv1a:e404f42f",
+    "stateHash": "fnv1a:2f3ce118",
     "testOnlyGameState": {
       "matchId": "match_f06f0fe345a11e0f",
       "baseline": {
@@ -10504,7 +10504,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:24d7d365",
         "sourcePlanId": "fnv1a:199ccf5d",
         "sourceLineHash": "fnv1a:2a5c597e",

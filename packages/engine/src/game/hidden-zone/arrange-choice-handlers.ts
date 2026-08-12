@@ -228,6 +228,64 @@ export function moveTopTrashToGripForCardImplementation(
   return { publicPayload: payload };
 }
 
+export function moveTopHostedProgramToGripForCardImplementation(
+  host: HiddenZoneArrangeChoiceHandlerHost,
+  input: {
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+  },
+): { publicPayload: HiddenZonePayload } {
+  const source = host.cards.mustInstance(input.sourceCardId);
+  if (
+    source.zone.side !== "runner" ||
+    source.zone.zone !== "rig" ||
+    !host.state.runner.rig.hardware.includes(input.sourceCardId)
+  )
+    throw new Error("Die Programm-Hostquelle ist nicht installiert.");
+  const targetCardId = Object.entries(host.state.cardInstances)
+    .filter(
+      ([cardId, instance]) =>
+        instance.hostedOn === input.sourceCardId &&
+        host.cards.definitionFor(cardId).type === "program",
+    )
+    .map(([cardId]) => cardId as CardInstanceId)
+    .sort()
+    .at(-1);
+  if (!targetCardId)
+    throw new Error("Auf der Quelle liegt kein Programm.");
+  const targetDefinition = host.cards.definitionFor(targetCardId);
+  host.zones.removeFromAllZones(targetCardId);
+  host.state.runner.grip.unshift(targetCardId);
+  const target = host.cards.mustInstance(targetCardId);
+  const { hostedOn: _hostedOn, ...withoutHost } = target;
+  void _hostedOn;
+  host.state.cardInstances[targetCardId] = {
+    ...withoutHost,
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
+  const hostedProgramCountAfter = Object.entries(host.state.cardInstances).filter(
+    ([cardId, instance]) =>
+      instance.hostedOn === input.sourceCardId &&
+      host.cards.definitionFor(cardId).type === "program",
+  ).length;
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "move_top_hosted_program_to_grip",
+    sourceDefinitionId: input.sourceDefinitionId,
+    returnedCardDefinitionId: targetDefinition.id,
+    returnedCount: 1,
+    movedCardCount: 1,
+    sourceZone: "hosted_on_source",
+    destinationZone: "grip",
+    returnedToGrip: true,
+    hostedProgramCountAfter,
+  };
+  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
 export function startCorpRdArrangeChoice(
   host: HiddenZoneArrangeChoiceHandlerHost,
   input: {

@@ -322,8 +322,14 @@ function playRunnerEventByDefinition(
   );
 }
 
-function resolveTraceWithZeroBids(state: GameState): GameState {
-  let resolved = applyChoice(state, "corp", "bid_0");
+function resolveTraceWithMaximumCorpBid(state: GameState): GameState {
+  const maximumCorpBid = Math.max(
+    ...(state.pendingChoice?.options ?? [])
+      .map((option) => /^bid_(\d+)$/.exec(option.id)?.[1])
+      .filter((value): value is string => value !== undefined)
+      .map(Number),
+  );
+  let resolved = applyChoice(state, "corp", `bid_${maximumCorpBid}`);
   if (resolved.pendingChoice?.source.startsWith("trace_base_link:"))
     resolved = applyChoice(resolved, "runner", "pass");
   resolved = applyChoice(resolved, "runner", "bid_0");
@@ -397,7 +403,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       traceLimit: 6,
       successEffect: { type: "add_tags_by_trace_margin_over_runner_link" },
     });
-    state = resolveTraceWithZeroBids(state);
+    state = resolveTraceWithMaximumCorpBid(state);
     expect(state.runner.tags).toBe(6);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
@@ -432,7 +438,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       (candidate) => candidate.actionId === action?.actionId,
     );
     expect(state.corp.credits).toBe(11);
-    state = resolveTraceWithZeroBids(state);
+    state = resolveTraceWithMaximumCorpBid(state);
     expect(state.runner.tags).toBe(1);
   });
 
@@ -478,7 +484,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
         targetCardInstanceId: resourceId,
       },
     });
-    state = resolveTraceWithZeroBids(state);
+    state = resolveTraceWithMaximumCorpBid(state);
     expect(state.runner.tags).toBe(1);
     expect(state.runner.heap).toContain(resourceId);
     expect(state.runner.rig.resources).not.toContain(resourceId);
@@ -557,7 +563,7 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       "onr_proteus_128_airport-locker",
     );
 
-    state = resolveTraceWithZeroBids(state);
+    state = resolveTraceWithMaximumCorpBid(state);
     expect(state.runner.tags).toBe(1);
     expect(state.runner.heap).toContain(hiddenResourceId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1436,6 +1442,8 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     expect(state.run?.breakerState?.pendingFreeBreaks).toEqual([
       {
         sourceBreakerInstanceId: bulldozerId,
+        sourceAbilityId:
+          "onr_proteus_082_bulldozer:break_wall_with_stealth_tradeoff_and_sentry_reward",
         iceSubtype: "sentry",
         remainingUses: 1,
         mustBeNextEncounteredIce: true,

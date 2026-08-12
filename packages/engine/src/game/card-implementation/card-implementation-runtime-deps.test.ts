@@ -386,6 +386,7 @@ describe("game card implementation runtime deps root", () => {
         "lookTopStackTakeMatchingTargetCount",
         "startSearchTrashToGripChoice",
         "startSearchStackToGripChoice",
+        "moveTopHostedProgramToGrip",
         "moveTopTrashToGrip",
         "startSearchStackInstallChoice",
         "startStackOrTrashProgramInstallChoice",

@@ -97,6 +97,7 @@ export type PendingChoiceResolutionHost = {
     resolveStartOfRunFortUtilityChoice: HostFn<void>;
     resolveClassicDeflectorChoice: HostFn<void>;
     resolveTrashProgramChoice: HostFn<void>;
+    resumeTraceProgramTrashContinuation: HostFn<void>;
   };
   access: {
     resolveAccessProgramInstallMemoryChoice: HostFn<void>;
@@ -252,6 +253,8 @@ export function resolvePendingChoice(
     host.run.resolveStartOfRunFortUtilityChoice;
   const resolveClassicDeflectorChoice = host.run.resolveClassicDeflectorChoice;
   const resolveTrashProgramChoice = host.run.resolveTrashProgramChoice;
+  const resumeTraceProgramTrashContinuation =
+    host.run.resumeTraceProgramTrashContinuation;
   const resolveSuccessfulRunCreditLossSpendChoice =
     host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const resolveAccessProgramInstallMemoryChoice =
@@ -297,14 +300,16 @@ export function resolvePendingChoice(
       state.pendingAddTagContinuation
     )
       resumeAddTagContinuation(state, legalAction);
+    if (
+      !state.pendingChoice &&
+      !state.eventModificationWindow &&
+      state.pendingTraceProgramTrashContinuation
+    )
+      resumeTraceProgramTrashContinuation(state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("damage_replacement:")) {
     resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.trace) {
-    resolveTraceChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -331,6 +336,16 @@ export function resolvePendingChoice(
     )
   ) {
     resolveTrashProgramChoice(state, legalAction, playerAction);
+    if (
+      !state.pendingChoice &&
+      !state.eventModificationWindow &&
+      state.pendingTraceProgramTrashContinuation
+    )
+      resumeTraceProgramTrashContinuation(state, legalAction);
+    return;
+  }
+  if (state.trace) {
+    resolveTraceChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(

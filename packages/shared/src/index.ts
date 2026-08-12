@@ -1536,7 +1536,8 @@ export type TraceState = {
     | "base_link"
     | "runner_bid"
     | "post_bid_link"
-    | "trace_success_cancel";
+    | "trace_success_cancel"
+    | "trace_success_program_trash";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
   returnTimingPoint?: TimingPointId;
@@ -1769,6 +1770,11 @@ export type GameState = {
   pendingChoice?: PendingChoice;
   hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
+  pendingTraceProgramTrashContinuation?: {
+    traceId: string;
+    traceStep: "runner_bid" | "post_bid_link";
+    additionalTagAmount?: number;
+  };
   pendingCorpDraw?: CorpDrawTransaction;
   runnerDrawSequence?: RunnerDrawSequence;
   imminentEvent?: ImminentEvent;

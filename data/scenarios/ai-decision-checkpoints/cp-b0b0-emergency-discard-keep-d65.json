@@ -8199,7 +8199,8 @@
       "rootForegroundInstanceId": "plan:runner.complete_turn:standard-turn-completion",
       "executorInstanceId": "plan:runner.complete_turn:standard-turn-completion",
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:runner.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:770be3bc",
         "sourcePlanId": "fnv1a:92cc5f61",
         "sourceLineHash": "fnv1a:2aa364c7",

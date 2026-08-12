@@ -132,7 +132,7 @@
   },
   "engine": {
     "stateVersion": 44,
-    "stateHash": "fnv1a:cd8e03aa",
+    "stateHash": "fnv1a:a68cf25e",
     "testOnlyGameState": {
       "matchId": "match_5f7924e4893ba855",
       "baseline": {
@@ -6193,7 +6193,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_1",
         "commitmentId": "fnv1a:5c6c13c1",
         "sourcePlanId": "fnv1a:5f505658",
         "sourceLineHash": "fnv1a:b8aadc0a",

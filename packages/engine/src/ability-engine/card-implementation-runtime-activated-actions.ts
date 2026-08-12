@@ -17,6 +17,7 @@ import {
   distributeAdvancementCountersEffect,
   exposeInstalledCardEffect,
   moveTopTrashToGripEffect,
+  moveTopHostedProgramToGripEffect,
   ownRezzedIceTargetIds,
   rezzedInstalledIceTargetIds,
   sameFortSubroutineTargets,
@@ -183,6 +184,18 @@ export function pushActivatedCardImplementationActionsForTiming(
             targetCardId,
             targetDefinitionId: targetDefinition.id,
           },
+        ),
+      );
+      continue;
+    }
+    const moveTopHostedProgramEffect =
+      moveTopHostedProgramToGripEffect(ability);
+    if (moveTopHostedProgramEffect) {
+      actions.push(
+        createBoundAction(
+          ability.label ??
+            `${definition.title}: oberstes gesichertes Programm auf die Hand nehmen`,
+          activatedAbilityPayload(sourceCardId, ability, binding),
         ),
       );
       continue;

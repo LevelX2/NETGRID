@@ -331,7 +331,8 @@ describe("V1.6.2 Mechanikpaket B", () => {
         action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
           "onr_v1_318_department-of-truth-enhancement" &&
-        action.label.includes("Credits von der Karte"),
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_take_hosted_credits",
     );
     const emptiedCard = getPlayerView(state, "corp")
       .servers.find((server) => server.id === "remote_1")
@@ -1627,9 +1628,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(pumpedWithEncoder, action) === "simple_decoder",
     );
     expect(breakActions.map((action) => action.payload?.subroutineId)).toEqual([
-      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.1.end_the_run",
-      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.2.end_the_run",
-      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.3.end_the_run",
+      "printed_subroutines_end_the_run",
+      "printed_subroutines_end_the_run_a",
+      "printed_subroutines_end_the_run_b",
       "card_implementation.onr_v1_320_encoder-inc.additional_subroutine.1.end_the_run",
     ]);
     expect(breakActions[3]?.payload).toMatchObject({

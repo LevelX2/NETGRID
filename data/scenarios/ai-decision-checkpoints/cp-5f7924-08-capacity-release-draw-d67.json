@@ -132,7 +132,7 @@
   },
   "engine": {
     "stateVersion": 138,
-    "stateHash": "fnv1a:228e71cd",
+    "stateHash": "fnv1a:76351a11",
     "testOnlyGameState": {
       "matchId": "match_5f7924e4893ba855",
       "baseline": {
@@ -7606,7 +7606,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.defend_servers:server-defense-portfolio",
         "commitmentId": "fnv1a:e0d8c48a",
         "sourcePlanId": "fnv1a:e1fb252e",
         "sourceLineHash": "fnv1a:a525cf9f",

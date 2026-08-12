@@ -20876,7 +20876,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_v1_209_political-coup_2%3Aremote_1",
         "commitmentId": "fnv1a:488bca46",
         "sourcePlanId": "fnv1a:725f1b39",
         "sourceLineHash": "fnv1a:72017a07",

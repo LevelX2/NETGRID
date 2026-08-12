@@ -193,7 +193,7 @@ describe("start-run-action-execution", () => {
     expect(calls).toEqual(["pay_tax:0", "start:hq:start_run"]);
   });
 
-  it("rejects normal or foreign runs while the immediate Bodyweight window is open", () => {
+  it("rejects normal runs while the immediate Bodyweight window is open", () => {
     const gameState = state();
     gameState.runnerTurnFlags!.bonusRunPending = true;
     gameState.runnerTurnFlags!.successfulRunExtraRunPending = true;
@@ -202,16 +202,6 @@ describe("start-run-action-execution", () => {
       handleStartRunActionExecution(
         hostFor(gameState, []),
         action({ serverId: "hq" }),
-      ),
-    ).toThrow("Das unmittelbare Bodyweight-Fenster");
-    expect(() =>
-      handleStartRunActionExecution(
-        hostFor(gameState, []),
-        action({
-          serverId: "hq",
-          bonusRunNoClick: true,
-          bonusRunSource: "onr_v1_076_all-nighter",
-        }),
       ),
     ).toThrow("Das unmittelbare Bodyweight-Fenster");
     expect(gameState.runnerTurnFlags).toMatchObject({

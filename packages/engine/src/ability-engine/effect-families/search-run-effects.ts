@@ -43,6 +43,23 @@ export function executeSearchRunEffect(
       mergePublicPayload(publicPayload, moveResult.publicPayload);
       return true;
     }
+    case "move_top_hosted_program_to_grip": {
+      if (effect.visibility !== "hidden_info_barrier")
+        throw new Error(
+          "move_top_hosted_program_to_grip visibility must be hidden_info_barrier.",
+        );
+      if (effect.recipient !== "runner" || effect.host !== "source")
+        throw new Error(
+          "move_top_hosted_program_to_grip requires the Runner and source host.",
+        );
+      if (!context.moveTopHostedProgramToGrip)
+        throw new Error(
+          "move_top_hosted_program_to_grip requires a moveTopHostedProgramToGrip execution context.",
+        );
+      const moveResult = context.moveTopHostedProgramToGrip();
+      mergePublicPayload(publicPayload, moveResult.publicPayload);
+      return true;
+    }
     case "search_stack_install": {
       if (effect.visibility !== "hidden_info_barrier")
         throw new Error(

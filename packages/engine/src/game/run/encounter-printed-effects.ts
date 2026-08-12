@@ -77,9 +77,10 @@ export type EncounterPrintedEffectHost = {
       traceId: string,
       targetCardId: CardInstanceId,
     ) => Record<string, unknown>;
-    resolveTrashInstalledProgramSubroutine: (
-      legalAction?: LegalAction,
-    ) => { definitionId: string; title: string } | undefined;
+    resolveTraceSuccessTrashProgramSubroutine: (
+      trace: CurrentTrace,
+      legalAction: LegalAction,
+    ) => { suspended: boolean };
     rollDie?: (purpose: string) => number;
     setDamagePayload: (summary: DamageSummary) => void;
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
@@ -525,6 +526,7 @@ export function applyPrintedTraceSuccessFollowups(
     extraPayload?: Record<string, unknown> | undefined;
     additionalTagAmount?: number | undefined;
     deletePendingChoice?: boolean | undefined;
+    programTrashChoiceResolved?: boolean | undefined;
   },
 ): TraceSuccessFollowupResult {
   const { state } = host;
@@ -538,6 +540,39 @@ export function applyPrintedTraceSuccessFollowups(
   const runnerBid = result.runnerBid;
   const runnerStrength = result.runnerStrength;
   const successful = result.successful;
+  if (
+    successful &&
+    trace.successEffect.type === "end_run_trash_program_and_run_lock" &&
+    !options.programTrashChoiceResolved
+  ) {
+    state.trace = { ...trace, status: "trace_success_program_trash" };
+    if (options.deletePendingChoice) delete state.pendingChoice;
+    const trashChoice =
+      host.callbacks.resolveTraceSuccessTrashProgramSubroutine(
+        trace,
+        legalAction,
+      );
+    if (trashChoice.suspended) {
+      state.pendingTraceProgramTrashContinuation = {
+        traceId: trace.traceId,
+        traceStep,
+        ...(options.additionalTagAmount !== undefined
+          ? { additionalTagAmount: options.additionalTagAmount }
+          : {}),
+      };
+      return {
+        handled: true,
+        suspended: true,
+        traceSuccessful: true,
+        tagsAdded: 0,
+        hackerTrackerCountersAdded: 0,
+        runnerRunEnded: false,
+        runnerRunLockCreditCost: 0,
+        payload: legalAction.payload ?? {},
+        stateChanged: true,
+      };
+    }
+  }
   const tagAmount =
     traceSuccessTagAmount(trace.successEffect, successful, result) +
     (successful ? Math.max(0, options.additionalTagAmount ?? 0) : 0);
@@ -575,8 +610,6 @@ export function applyPrintedTraceSuccessFollowups(
     host.callbacks.ensureRunnerTurnFlags().runnerRunLockCreditCost =
       runnerRunLockCreditCost;
     runnerRunEnded = true;
-    if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
-      host.callbacks.resolveTrashInstalledProgramSubroutine(legalAction);
   }
   if (successful && trace.successEffect.type === "net_damage") {
     const damageAmount = Math.max(0, Math.floor(trace.successEffect.amount));

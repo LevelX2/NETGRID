@@ -25,6 +25,7 @@ import {
   resolveClassicDeflectorChoice as resolveClassicDeflectorChoiceInRunModule,
   resolveTrashProgramChoice as resolveTrashProgramChoiceInRunModule,
 } from "../run/encounter-printed-nontrace-effects";
+import { applyPrintedTraceSuccessFollowups } from "../run/encounter-printed-effects";
 import { resumeAccessEffectAfterTagPrevention } from "../access/access-effect-handlers";
 import {
   resumeActivatedCardImplementationAfterCorpDraw,
@@ -533,6 +534,37 @@ export function createPendingChoiceRuntimeHosts(
     );
   }
 
+  function resumeTraceProgramTrashContinuation(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingTraceProgramTrashContinuation;
+    if (!continuation)
+      throw new Error(
+        "Es ist keine Trace-Programmtrash-Fortsetzung geöffnet.",
+      );
+    if (state.pendingChoice || state.eventModificationWindow)
+      throw new Error(
+        "Trace-Programmtrash kann erst nach der Ziel-/Präventionswahl fortgesetzt werden.",
+      );
+    const trace = state.trace;
+    if (!trace || trace.traceId !== continuation.traceId)
+      throw new Error("Trace-Programmtrash-Fortsetzung passt nicht zum Trace.");
+    delete state.pendingTraceProgramTrashContinuation;
+    applyPrintedTraceSuccessFollowups(
+      deps.encounterPrintedEffectHostForState(state, legalAction),
+      {
+        trace,
+        traceStep: continuation.traceStep,
+        legalAction,
+        ...(continuation.additionalTagAmount !== undefined
+          ? { additionalTagAmount: continuation.additionalTagAmount }
+          : {}),
+        programTrashChoiceResolved: true,
+      },
+    );
+  }
+
   function resumeAddTagContinuation(
     state: GameState,
     legalAction: LegalAction,
@@ -795,6 +827,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveStartOfRunFortUtilityChoice,
         resolveClassicDeflectorChoice,
         resolveTrashProgramChoice,
+        resumeTraceProgramTrashContinuation,
       },
       access: {
         resolveAccessProgramInstallMemoryChoice: (

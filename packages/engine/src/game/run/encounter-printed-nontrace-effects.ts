@@ -41,8 +41,10 @@ type TrashProgramChoiceContext = {
   sourceDefinitionId: string;
   subroutineId: string;
   subroutineType:
+    | "initiate_trace"
     | "trash_installed_program"
     | "trash_installed_program_unless_runner_pays";
+  continuation: "encounter" | "trace_success";
 };
 
 export const CLASSIC_DEFLECTOR_CHOICE_SOURCE_PREFIX =
@@ -822,6 +824,7 @@ export function resolveDirectTrashProgramSubroutine(
     subroutine: options.subroutine,
     subroutineIndex: options.subroutineIndex,
     legalAction: options.legalAction,
+    continuation: "encounter",
   });
   return {
     ...base,
@@ -831,11 +834,51 @@ export function resolveDirectTrashProgramSubroutine(
   };
 }
 
+export function resolveTraceSuccessTrashProgramSubroutine(
+  host: EncounterPrintedNonTraceHost,
+  options: {
+    definition: CardDefinition;
+    subroutine: SubroutineDefinition;
+    subroutineIndex: number;
+    legalAction: LegalAction;
+  },
+): DirectTrashProgramSubroutineResult {
+  if (
+    options.subroutine.type !== "initiate_trace" ||
+    options.subroutine.traceSuccessEffect?.type !==
+      "end_run_trash_program_and_run_lock"
+  )
+    throw new Error(
+      "Trace-Programmtrash benötigt eine passende Trace-Erfolgs-Subroutine.",
+    );
+  const base: EncounterPrintedNonTraceEffectResult = {
+    handled: true,
+    sourceDefinitionId: options.definition.id,
+    subroutineId: options.subroutine.id,
+  };
+  if (host.state.runner.rig.programs.length === 0)
+    return { ...base, trashedCardIds: [], stateChanged: false };
+  startTrashProgramChoice(host, {
+    ...options,
+    continuation: "trace_success",
+  });
+  return {
+    ...base,
+    trashedCardIds: [],
+    suspended: true,
+    stateChanged: true,
+  };
+}
+
+export type TrashProgramChoiceResolution = {
+  traceSuccessContinuation: boolean;
+};
+
 export function resolveTrashProgramChoice(
   host: EncounterPrintedNonTraceHost,
   legalAction: LegalAction,
   playerAction: PlayerAction,
-): void {
+): TrashProgramChoiceResolution {
   const choice = host.state.pendingChoice;
   if (!choice?.source.startsWith(TRASH_PROGRAM_CHOICE_SOURCE_PREFIX))
     throw new Error("Programmtrash-Choice ist nicht offen.");
@@ -860,6 +903,13 @@ export function resolveTrashProgramChoice(
   );
   if (!subroutine)
     throw new Error("Die Programmtrash-Subroutine passt nicht mehr.");
+  if (
+    context.continuation === "trace_success" &&
+    (subroutine.type !== "initiate_trace" ||
+      subroutine.traceSuccessEffect?.type !==
+        "end_run_trash_program_and_run_lock")
+  )
+    throw new Error("Die Trace-Programmtrash-Fortsetzung passt nicht mehr.");
   const selectedOptionId =
     host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const targetProgramId = choice.options.find(
@@ -902,6 +952,9 @@ export function resolveTrashProgramChoice(
   if (host.state.pendingChoice === choice) {
     delete host.state.pendingChoice;
   }
+  return {
+    traceSuccessContinuation: context.continuation === "trace_success",
+  };
 }
 
 function startTrashProgramChoice(
@@ -911,15 +964,30 @@ function startTrashProgramChoice(
     subroutine: SubroutineDefinition;
     subroutineIndex: number;
     legalAction: LegalAction;
+    continuation: "encounter" | "trace_success";
   },
 ): void {
   if (
+    input.continuation === "encounter" &&
     input.subroutine.type !== "trash_installed_program" &&
     input.subroutine.type !== "trash_installed_program_unless_runner_pays"
   )
     throw new Error("Programmtrash-Choice benötigt eine Programmtrash-Subroutine.");
+  if (
+    input.continuation === "trace_success" &&
+    (input.subroutine.type !== "initiate_trace" ||
+      input.subroutine.traceSuccessEffect?.type !==
+        "end_run_trash_program_and_run_lock")
+  )
+    throw new Error(
+      "Trace-Programmtrash-Choice benötigt eine passende Trace-Erfolgs-Subroutine.",
+    );
   if (host.state.pendingChoice)
     throw new Error("Es ist bereits eine Choice offen.");
+  const subroutineType = input.subroutine.type as
+    | "initiate_trace"
+    | "trash_installed_program"
+    | "trash_installed_program_unless_runner_pays";
   const run = mustRun(host.state);
   const sourceIceId = run.encounteredIceId;
   if (!sourceIceId)
@@ -934,7 +1002,8 @@ function startTrashProgramChoice(
       subroutineIndex: input.subroutineIndex,
       sourceDefinitionId: input.definition.id,
       subroutineId: input.subroutine.id,
-      subroutineType: input.subroutine.type,
+      subroutineType,
+      continuation: input.continuation,
     }),
     prompt: `${input.definition.title}: installiertes Programm zum Trashing wählen.`,
     kind: "select_cards",
@@ -968,11 +1037,21 @@ function trashProgramChoiceSource(context: TrashProgramChoiceContext): string {
     encodeURIComponent(context.sourceDefinitionId),
     encodeURIComponent(context.subroutineId),
     context.subroutineType,
+    context.continuation,
   ].join(":");
 }
 
 function parseTrashProgramChoiceSource(source: string): TrashProgramChoiceContext {
-  const [prefix, runId, sourceIceId, index, sourceDefinitionId, subroutineId, subroutineType] =
+  const [
+    prefix,
+    runId,
+    sourceIceId,
+    index,
+    sourceDefinitionId,
+    subroutineId,
+    subroutineType,
+    continuation,
+  ] =
     source.split(":");
   if (prefix !== TRASH_PROGRAM_CHOICE_SOURCE_PREFIX)
     throw new Error("Programmtrash-Choice-Quelle ist ungültig.");
@@ -980,17 +1059,30 @@ function parseTrashProgramChoiceSource(source: string): TrashProgramChoiceContex
   if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
     throw new Error("Programmtrash-Subroutine-Index ist ungültig.");
   if (
+    subroutineType !== "initiate_trace" &&
     subroutineType !== "trash_installed_program" &&
     subroutineType !== "trash_installed_program_unless_runner_pays"
   )
     throw new Error("Programmtrash-Subroutinen-Typ ist ungültig.");
+  if (continuation !== "encounter" && continuation !== "trace_success")
+    throw new Error("Programmtrash-Fortsetzung ist ungültig.");
+  if (
+    (continuation === "encounter" && subroutineType === "initiate_trace") ||
+    (continuation === "trace_success" && subroutineType !== "initiate_trace")
+  )
+    throw new Error("Programmtrash-Fortsetzung passt nicht zur Subroutine.");
+  const parsedSubroutineType = subroutineType as
+    | "initiate_trace"
+    | "trash_installed_program"
+    | "trash_installed_program_unless_runner_pays";
   return {
     runId: decodeURIComponent(runId ?? ""),
     sourceIceId: decodeURIComponent(sourceIceId ?? "") as CardInstanceId,
     subroutineIndex,
     sourceDefinitionId: decodeURIComponent(sourceDefinitionId ?? ""),
     subroutineId: decodeURIComponent(subroutineId ?? ""),
-    subroutineType,
+    subroutineType: parsedSubroutineType,
+    continuation,
   };
 }
 

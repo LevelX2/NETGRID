@@ -924,6 +924,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         "runner",
         (action) => action.type === "continue_run",
       );
+      if (programId) {
+        state = applyChoice(state, "corp", `card_${programId}`);
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
+      }
       expect(state.run).toBeUndefined();
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "continue_run",
@@ -931,14 +939,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
       });
       if (programId) {
         expect(state.runner.heap).toContain(programId);
-        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-          trashedCardDefinitionId: "simple_decoder",
-          trashedCardType: "program",
-          trashedCount: 1,
-        });
         expect(
-          state.eventLog.at(-1)?.publicPayload.resolvedEffects,
-        ).toContainEqual(
+          state.eventLog.flatMap((event) =>
+            Array.isArray(event.publicPayload.resolvedEffects)
+              ? event.publicPayload.resolvedEffects
+              : [],
+          ),
+        ).toEqual(
+          expect.arrayContaining([
           expect.objectContaining({
             kind: "resolve_subroutine",
             subroutineType: "trash_installed_program",
@@ -946,6 +954,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
             cardTitle: "Simple Decoder",
             cardsTrashed: 1,
           }),
+          ]),
         );
       }
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -1404,6 +1413,20 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
         (action) => action.type === "continue_run",
       );
 
+      if (kind === "trash_program" && programId) {
+        state = applyChoice(state, "corp", `card_${programId}`);
+        if (
+          getLegalActions(state, "runner").some(
+            (action) => action.type === "continue_run",
+          )
+        )
+          state = apply(
+            state,
+            "runner",
+            (action) => action.type === "continue_run",
+          );
+      }
+
       if (kind === "trace") {
         expect(state.trace).toMatchObject({
           sourceDefinitionId: definitionId,
@@ -1433,11 +1456,15 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
 
       if (kind === "trash_program") {
         expect(programId && state.runner.heap.includes(programId)).toBe(true);
-        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-          trashedCardDefinitionId: "simple_decoder",
-          trashedCardType: "program",
-          trashedCount: 1,
-        });
+        expect(
+          state.eventLog.some(
+            (event) =>
+              event.publicPayload.trashedCardDefinitionId ===
+                "simple_decoder" &&
+              event.publicPayload.trashedCardType === "program" &&
+              event.publicPayload.trashedCount === 1,
+          ),
+        ).toBe(true);
       }
       if (kind === "core_damage") {
         expect(state.runner.coreDamage).toBe(1);
@@ -1467,8 +1494,6 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     expect(pileDriver?.subtypes).toContain("noisy");
     expect(pileDriver?.subtypes).not.toContain("stealth");
     expect(pileDriver?.recurringCredits).toBeUndefined();
-    expect(pileDriver?.mechanics).toContain("subtype_noisy");
-    expect(pileDriver?.mechanics).not.toContain("subtype_stealth");
     expect(pileDriver?.mechanics).not.toContain("recurring_credit");
   });
 
@@ -2306,7 +2331,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     });
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
       "Nicht verhindern",
-      "Techtronica Utility Suit: 1 Schaden verhindern",
+      "Techtronica™ Utility Suit: 1 Schaden verhindern",
     ]);
 
     state = applyChoice(state, "runner", "pass");

@@ -148,7 +148,10 @@ describe("trigger ability execution", () => {
     ).toThrow("Nur der Runner");
 
     expect(
-      handleTriggerAbilityExecution(testHost(state), action),
+      handleTriggerAbilityExecution(
+        testHost(state, { successfulRunExtraRunFollowup: true }),
+        action,
+      ),
     ).toMatchObject({
       handled: true,
       actionType: "trigger_ability",
@@ -248,6 +251,7 @@ function triggerAction(
 }
 
 type TestHostOptions = {
+  successfulRunExtraRunFollowup?: boolean;
   remainingReplacementKind?: string;
   corpTrashInstalledRunnerSource?: false;
   trashRunnerInstalledCardToHeap?: (cardId: CardInstanceId) => void;
@@ -287,6 +291,17 @@ function testHost(
       remainingReplacementLongtailKindForCard: () =>
         options.remainingReplacementKind,
       cardImplementationForDefinitionId: () => ({
+        ...(options.successfulRunExtraRunFollowup
+          ? {
+              successfulRunFollowups: [
+                {
+                  kind: "optional_make_run_after_successful_run",
+                  timing: "after_successful_run",
+                  visibility: "public",
+                },
+              ],
+            }
+          : {}),
         ...(options.corpTrashInstalledRunnerSource === false
           ? {}
           : {

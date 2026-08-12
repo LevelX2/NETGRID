@@ -468,7 +468,6 @@ describe("PublicContext golden payload gate", () => {
     expectGoldenPayload(context, {
       agendaAbility: "v1919_scored_agenda_reveal_rd_top",
       cardImplementationAbility: "golden_card_implementation",
-      cardImplementationAbilityIndex: 1,
       cardImplementationAbilityTiming: "paid_ability",
       corpCreditsAfter: 7,
       gainedCredits: 3,

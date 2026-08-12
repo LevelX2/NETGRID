@@ -106,6 +106,12 @@ export type CardImplementationRuntimeHiddenDependencies = {
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
   ) => CardEffectHiddenInfoResult;
+  moveTopHostedProgramToGrip: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
   startSearchStackInstallChoice: (
     state: GameState,
     legalAction: LegalAction,

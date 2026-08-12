@@ -228,8 +228,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       cardImplementationForDefinitionId("onr_v1_353_chimera")?.accessEffects,
     ).toEqual([
       expect.objectContaining({
-        capabilityKey:
-          "access_effects_on_access_trash_installed_runner_cards",
+        capabilityKey: "access_effects_on_access_trash_installed_runner_cards",
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_access",
         sourceZones: ["installed"],
@@ -1645,7 +1644,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       CARD_IMPLEMENTATIONS.length,
     );
     expect(coverageByStatus.get("no_engine_behavior_required")).toBe(24);
-    expect(coverageByStatus.get("outside_current_release_scope")).toBe(
+    expect(coverageByStatus.get("outside_current_release_scope") ?? 0).toBe(
       expectedOutsideScopeCoverageCount,
     );
     expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);

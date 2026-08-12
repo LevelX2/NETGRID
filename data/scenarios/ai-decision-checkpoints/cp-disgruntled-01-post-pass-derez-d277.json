@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 277,
-    "stateHash": "fnv1a:528fced6",
+    "stateHash": "fnv1a:c2efa7e7",
     "testOnlyGameState": {
       "matchId": "selfplay:neon-escrow-counterbank-rent-02",
       "baseline": {
@@ -29563,7 +29563,7 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
         "commitmentId": "fnv1a:830dc6b3",
         "sourcePlanId": "fnv1a:c51cc578",
         "sourceLineHash": "fnv1a:a96a603c",
@@ -29688,7 +29688,8 @@
           "boundaryAfter": "engine_continuation"
         },
         "status": "active",
-        "observationClass": "expected_no_material_change"
+        "observationClass": "expected_no_material_change",
+        "sequenceRootPlanInstanceId": "plan:runner.convert_run_window:run%3A275"
       },
       "turnPlanExecutionLease": {
         "leaseId": "fnv1a:9f371af3",

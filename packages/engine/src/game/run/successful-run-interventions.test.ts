@@ -738,8 +738,9 @@ describe("successful run interventions", () => {
     );
     expect(action?.payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_proteus_136_credit-subversion:successful_run_before_access:0",
-      cardImplementationAbilityKey: "successful_run_before_access:0",
+        "onr_proteus_136_credit-subversion:hq_success_reveal_trash_source_corp_lose_three",
+      cardImplementationAbilityKey:
+        "hq_success_reveal_trash_source_corp_lose_three",
       cardImplementationPrimitiveKind: "successful_run_before_access_effect",
       cardImplementationEffectKind: "corp_lose_credits",
     });

@@ -43,7 +43,13 @@ export function startScoredRezzedIceMarkModifierChoice(
     sourceDefinitionId: agendaDefinition.id,
     primitiveKind: scoredAgenda.kind,
     effectKind: "mark_modifier",
-    abilityKey: scoredAgenda.abilityKey,
+    abilityKey:
+      "capabilityKey" in scoredAgenda ? undefined : scoredAgenda.abilityKey,
+    capabilityKey:
+      "capabilityKey" in scoredAgenda &&
+      typeof scoredAgenda.capabilityKey === "string"
+        ? scoredAgenda.capabilityKey
+        : undefined,
   });
   if (targets.length === 0) {
     applySequencePayloadPatch(legalAction, {
@@ -148,7 +154,13 @@ export function resolveScoredRezzedIceMarkModifierChoice(
         .id,
       primitiveKind: scoredAgenda.kind,
       effectKind: "mark_modifier",
-      abilityKey: scoredAgenda.abilityKey,
+      abilityKey:
+        "capabilityKey" in scoredAgenda ? undefined : scoredAgenda.abilityKey,
+      capabilityKey:
+        "capabilityKey" in scoredAgenda &&
+        typeof scoredAgenda.capabilityKey === "string"
+          ? scoredAgenda.capabilityKey
+          : undefined,
     }),
     agendaAbility: "scored_rezzed_ice_mark_modifier",
     sourceAgendaId: agendaId,

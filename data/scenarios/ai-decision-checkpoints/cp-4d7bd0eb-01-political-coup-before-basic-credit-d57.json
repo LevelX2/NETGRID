@@ -164,7 +164,7 @@
   },
   "engine": {
     "stateVersion": 123,
-    "stateHash": "fnv1a:81286ba5",
+    "stateHash": "fnv1a:964661c5",
     "testOnlyGameState": {
       "matchId": "match_4d7bd0eba9138d83",
       "baseline": {
@@ -11767,7 +11767,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.hand_and_agenda_management:resolve-hq-overflow%3Acorp%3A18",
         "commitmentId": "fnv1a:8166ee30",
         "sourcePlanId": "fnv1a:dd5c6249",
         "sourceLineHash": "fnv1a:a9abad18",

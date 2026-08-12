@@ -12,6 +12,15 @@ export const cardSpec = {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
       "Whenever one or more installed programs are being sent to the trash at the same time, you may instead choose to put any or all of the programs on top of Microtech Backup Drive in any order you choose. If Backup Drive is removed from play, trash any cards on it.\nA: Bring the top card on Backup Drive into your hand.",
+    capabilityText: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_move_top_hosted_program_to_grip",
+        ),
+        actionLabel:
+          "Microtech Backup Drive: oberstes gesichertes Programm auf die Hand nehmen",
+      },
+    ],
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -48,6 +57,30 @@ export const cardSpec = {
       kind: "replace_installed_program_trash_with_host_on_source",
       visibility: "hidden_info_barrier",
     },
+    abilities: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_move_top_hosted_program_to_grip",
+        ),
+        addressability: ["plan", "action", "quote", "debug"],
+        kind: "activated",
+        timing: "runner_main",
+        costs: [
+          {
+            kind: "action",
+            amount: 1,
+          },
+        ],
+        effects: [
+          {
+            kind: "move_top_hosted_program_to_grip",
+            recipient: "runner",
+            host: "source",
+            visibility: "hidden_info_barrier",
+          },
+        ],
+      },
+    ],
   },
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",

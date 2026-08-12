@@ -101,13 +101,13 @@ describe("card implementation primitive ability keys", () => {
   it("preserves legacy primitive payload identity without claiming an index binding", () => {
     const payload = cardImplementationPrimitivePayload({
       sourceCardId: "legacy_primitive_instance" as CardInstanceId,
-      sourceDefinitionId: "onr_v1_204_ice-transmutation" as CardDefinitionId,
+      sourceDefinitionId: "legacy_primitive_definition" as CardDefinitionId,
       primitiveKind: "select_rezzed_ice_mark_modifier",
       effectKind: "mark_modifier",
     });
     expect(payload).toMatchObject({
       cardImplementationAbilityId:
-        "onr_v1_204_ice-transmutation:scored_ice_mark:0",
+        "legacy_primitive_definition:scored_ice_mark:0",
       cardImplementationAbilityKey: "scored_ice_mark:0",
     });
     expect(payload).not.toHaveProperty(

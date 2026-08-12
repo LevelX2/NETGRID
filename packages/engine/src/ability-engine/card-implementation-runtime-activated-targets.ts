@@ -466,6 +466,20 @@ export function moveTopTrashToGripEffect(
     : undefined;
 }
 
+export function moveTopHostedProgramToGripEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "move_top_hosted_program_to_grip" }
+    >
+  | undefined {
+  const effect = ability.effects[0];
+  return effect?.kind === "move_top_hosted_program_to_grip"
+    ? effect
+    : undefined;
+}
+
 export function trashOwnRezzedIceForCreditsEffect(
   ability: ActivatedCardAbilityImplementation,
 ):

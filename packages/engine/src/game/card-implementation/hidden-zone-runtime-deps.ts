@@ -1,5 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import {
+  moveTopHostedProgramToGripForCardImplementation,
   moveTopTrashToGripForCardImplementation,
   startCardImplementationLookTopStackTakeOneArrangeRestChoice,
 } from "../hidden-zone/arrange-choice-handlers";
@@ -203,6 +204,16 @@ export function createHiddenZoneCardImplementationRuntimeDeps(
       moveTopTrashToGripForCardImplementation(
         host.hiddenZone.arrangeChoiceHandlerHost(state, legalAction),
         { sourceDefinitionId },
+      ),
+    moveTopHostedProgramToGrip: (
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+    ) =>
+      moveTopHostedProgramToGripForCardImplementation(
+        host.hiddenZone.arrangeChoiceHandlerHost(state, legalAction),
+        { sourceCardId, sourceDefinitionId },
       ),
     startSearchStackInstallChoice: (
       state,

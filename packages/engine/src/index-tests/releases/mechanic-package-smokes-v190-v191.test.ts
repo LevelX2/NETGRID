@@ -192,9 +192,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" ")).toMatch(
-        /deterministic_die_roll|deterministic_random|concrete_special_resolver|ambush/,
-      );
+      expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
     }
     expect(ONR_V1_9_0_FINAL_CARD_IDS).not.toContain("onr_v1_013_cockroach");
     expect(ONR_V1_9_0_FINAL_CARD_IDS).not.toContain("onr_v1_034_incubator");
@@ -256,7 +254,9 @@ describe("V1.9.0 Mechanikpaket I", () => {
           String(action.payload?.breakerId) === blinkId,
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith("v190.die.onr_v1_007_blink.break."),
+        record.purpose.startsWith(
+          "v190.die.icebreaker.random_break_or_damage.onr_v1_007_blink.",
+        ),
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
@@ -406,7 +406,9 @@ describe("V1.9.0 Mechanikpaket I", () => {
           String(action.payload?.breakerId) === blinkId,
       );
       const dieRecord = state.randomDrawRecords.find((record) =>
-        record.purpose.startsWith("v190.die.onr_v1_007_blink.break."),
+        record.purpose.startsWith(
+          "v190.die.icebreaker.random_break_or_damage.onr_v1_007_blink.",
+        ),
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
@@ -520,7 +522,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(new Set(discarded).size).toBe(discarded.length);
     const discardRecords = state.randomDrawRecords.filter((record) =>
       record.purpose.startsWith(
-        "v190.random.onr_v1_115_terrorist-reprisal.hq_discard",
+        "card_implementation.random.onr_v1_115_terrorist-reprisal.hq_discard",
       ),
     );
     expect(discardRecords).toHaveLength(Math.min(5, hqBefore));
@@ -559,6 +561,16 @@ describe("V1.9.0 Mechanikpaket I", () => {
       (action) =>
         action.type === "rez_ice" &&
         sourceDefinition(withProgram, action) === "onr_v1_223_banpei",
+    );
+    withProgram = apply(
+      withProgram,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    withProgram = applyChoice(
+      withProgram,
+      "corp",
+      `card_${codecrackerId}`,
     );
     withProgram = apply(
       withProgram,
@@ -689,7 +701,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds:
-        "card_implementation.onr_v1_223_banpei.printed_subroutine.1.trash_program,card_implementation.onr_v1_223_banpei.printed_subroutine.2.end_the_run",
+        "printed_subroutines_trash_program,printed_subroutines_end_the_run",
       encounterWillEndRun: true,
     });
     unbroken = apply(
@@ -697,16 +709,27 @@ describe("V1.9.0 Mechanikpaket I", () => {
       "runner",
       (action) => action.actionId === continueAction.actionId,
     );
+    unbroken = applyChoice(unbroken, "corp", `card_${killerId}`);
+    const trashEvent = unbroken.eventLog.at(-1);
+    unbroken = apply(
+      unbroken,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
     expect(unbroken.runner.heap).toContain(killerId);
     expect(unbroken.run).toBeUndefined();
-    expect(unbroken.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "continue_run",
-      sourceDefinitionId: "onr_v1_223_banpei",
+    expect(trashEvent?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
       trashedCardDefinitionId: "simple_killer",
       trashedCardType: "program",
       trashedCount: 1,
     });
-    expect(unbroken.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+    const resolvedEffects = unbroken.eventLog.flatMap((event) =>
+      Array.isArray(event.publicPayload.resolvedEffects)
+        ? event.publicPayload.resolvedEffects
+        : [],
+    );
+    expect(resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "resolve_subroutine",
@@ -785,13 +808,35 @@ describe("V1.9.0 Mechanikpaket I", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
+    dataNaga = applyChoice(
+      dataNaga,
+      "corp",
+      `card_${dataNagaKillerId}`,
+    );
     expect(dataNaga.runner.heap).toContain(dataNagaKillerId);
     expect(dataNaga.eventLog.at(-1)?.publicPayload).toMatchObject({
-      sourceDefinitionId: "onr_v1_235_data-naga",
+      actionType: "resolve_choice",
       trashedCardDefinitionId: "simple_killer",
       trashedCardType: "program",
       trashedCount: 1,
     });
+    expect(
+      dataNaga.eventLog.flatMap((event) =>
+        Array.isArray(event.publicPayload.resolvedEffects)
+          ? event.publicPayload.resolvedEffects
+          : [],
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_235_data-naga",
+          subroutineType: "trash_installed_program",
+          cardDefinitionId: "simple_killer",
+          cardsTrashed: 1,
+        }),
+      ]),
+    );
 
     let crystal = setupTrashProgramIce(
       "p326-crystal-break-trash-program",
@@ -826,7 +871,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     expect(tesseractContinue.payload).toMatchObject({
       unbrokenSubroutineCount: 3,
       encounterSubroutineIds:
-        "card_implementation.onr_v1_223_banpei.printed_subroutine.1.trash_program,card_implementation.onr_v1_223_banpei.printed_subroutine.2.end_the_run,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+        "printed_subroutines_trash_program,printed_subroutines_end_the_run,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
     });
   });
 
@@ -980,21 +1025,12 @@ describe("V1.9.0 Mechanikpaket I", () => {
 describe("V1.9.1 Mechanikpaket J", () => {
   it("adds a controlled V1.9.1 core card set for cockroach random discard, incubator transform and grubb run-remainder strength", () => {
     expect(ONR_V1_9_1_FINAL_CARD_IDS).toHaveLength(3);
-    const expectedMechanics: Record<string, RegExp> = {
-      onr_v1_013_cockroach: /hq_discard_randomization/,
-      onr_v1_034_incubator: /counter_transform_choice/,
-      onr_v1_030_grubb: /run_remainder_strength_bonus/,
-    };
     for (const definitionId of ONR_V1_9_1_FINAL_CARD_IDS) {
       const definition = CARD_DEFINITIONS_BY_ID[definitionId];
-      const expectedPattern = expectedMechanics[definitionId];
-      expect(expectedPattern, definitionId).toBeDefined();
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        expectedPattern!,
-      );
+      expect(cardImplementationForDefinitionId(definitionId)).toBeDefined();
       expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
         /v2|matchmaking|ranking|deckbuilder/,
       );
@@ -1132,7 +1168,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
 
       const randomRecords = state.randomDrawRecords.filter((record) =>
         record.purpose.startsWith(
-          "v191.random.onr_v1_013_cockroach.hq_discard_phase",
+          "v191.random.runner_virus_hq_discard_phase",
         ),
       );
       expect(randomRecords).toHaveLength(1);

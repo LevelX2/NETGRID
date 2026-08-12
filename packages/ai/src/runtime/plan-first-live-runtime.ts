@@ -2761,8 +2761,11 @@ function runnerDrawActionHasCurrentPlanPurpose(
     (domain.defense.handSize < domain.defense.minimumHandBuffer &&
       domain.defense.handBufferActionIds?.includes(candidate.actionId) ===
         true) ||
-    domain.coverageGaps.some((gap) =>
-      gap.drawForAnswerActionIds.includes(candidate.actionId),
+    domain.coverageGaps.some(
+      (gap) =>
+        !gap.answerInHand &&
+        gap.deckHasAnswer &&
+        gap.drawForAnswerActionIds.includes(candidate.actionId),
     ) ||
     domain.developments.some((signal) =>
       signal.actionIds.includes(candidate.actionId),

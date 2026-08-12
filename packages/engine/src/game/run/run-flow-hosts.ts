@@ -72,7 +72,7 @@ import {
 } from "./run-duration-payment";
 import {
   encounterPrintedNonTraceHost,
-  resolveDirectTrashProgramSubroutine,
+  resolveTraceSuccessTrashProgramSubroutine,
   type EncounterPrintedNonTraceHost,
 } from "./encounter-printed-nontrace-effects";
 import {
@@ -770,23 +770,34 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           traceId,
           targetCardId,
         ),
-      resolveTrashInstalledProgramSubroutine: (
-        actionToResolve = legalAction,
-      ) => {
-        const trashResult = resolveDirectTrashProgramSubroutine(
-          encounterPrintedNonTraceHostForState(state, actionToResolve),
-          { legalAction: actionToResolve },
-        );
-        const trashedCardId = trashResult.trashedCardIds[0];
-        if (!trashedCardId) return undefined;
-        const trashedDefinition = host.cards.definitionFor(
+      resolveTraceSuccessTrashProgramSubroutine: (trace, actionToResolve) => {
+        if (trace.subroutineIndex === undefined)
+          throw new Error(
+            "Trace-Programmtrash benötigt einen gebundenen Subroutine-Index.",
+          );
+        const definition = host.cards.definitionFor(
           state,
-          trashedCardId,
+          trace.sourceCardInstanceId,
         );
-        return {
-          definitionId: trashedDefinition.id,
-          title: trashedDefinition.title,
-        };
+        if (definition.id !== trace.sourceDefinitionId)
+          throw new Error(
+            "Trace-Programmtrash-Quelle passt nicht zur Trace-Definition.",
+          );
+        const subroutine = definition.subroutines?.[trace.subroutineIndex];
+        if (!subroutine)
+          throw new Error(
+            "Trace-Programmtrash-Subroutine ist nicht mehr vorhanden.",
+          );
+        const trashResult = resolveTraceSuccessTrashProgramSubroutine(
+          encounterPrintedNonTraceHostForState(state, actionToResolve),
+          {
+            definition,
+            subroutine,
+            subroutineIndex: trace.subroutineIndex,
+            legalAction: actionToResolve,
+          },
+        );
+        return { suspended: trashResult.suspended === true };
       },
       rollDie: (purpose) => host.rng.rollDie(state, purpose),
       setDamagePayload: (summary) => {

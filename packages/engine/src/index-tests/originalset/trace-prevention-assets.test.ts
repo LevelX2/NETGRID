@@ -489,7 +489,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         String(action.payload?.cardId) === fallGuyId,
     );
     state.runner.credits = 0;
-    state.corp.credits = 0;
+    state.corp.credits = 1;
     putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -508,7 +508,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         sourceDefinition(state, action) === "onr_v1_243_fetch-4-0-1",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_1");
     state = applyChoice(state, "runner", "bid_0");
 
     expect(state.runner.credits).toBe(0);
@@ -730,12 +730,12 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       expect(state.trace).toMatchObject({
         status: "base_link",
         runnerLink: 0,
-        traceValue: 3,
+        traceValue: 0,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "corp_bid",
         runnerLink: 0,
-        traceValue: 3,
+        traceValue: 0,
       });
       state = applyChoice(
         state,
@@ -751,7 +751,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         status: "runner_bid",
         runnerLink: 4,
         baseLinkValue: 4,
-        traceValue: 3,
+        traceValue: 0,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "base_link",
@@ -1262,12 +1262,16 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     expect(
       departmentActions.some(
-        (action) => action.payload?.cardImplementationAbilityIndex === 0,
+        (action) =>
+          action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_add_hosted_credits",
       ),
     ).toBe(true);
     expect(
       departmentActions.some(
-        (action) => action.payload?.cardImplementationAbilityIndex === 1,
+        (action) =>
+          action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_take_hosted_credits",
       ),
     ).toBe(false);
 
@@ -1277,7 +1281,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (action) =>
         action.type === "activated_card_ability" &&
         action.payload?.cardId === departmentId &&
-        action.payload?.cardImplementationAbilityIndex === 0,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_add_hosted_credits",
     );
     expect(cardCounterAmount(state, departmentId, "bit")).toBe(3);
     state = apply(
@@ -1286,7 +1291,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (action) =>
         action.type === "activated_card_ability" &&
         action.payload?.cardId === departmentId &&
-        action.payload?.cardImplementationAbilityIndex === 0,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_add_hosted_credits",
     );
     expect(cardCounterAmount(state, departmentId, "bit")).toBe(6);
 
@@ -1301,7 +1307,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (action) =>
         action.type === "activated_card_ability" &&
         action.payload?.cardId === departmentId &&
-        action.payload?.cardImplementationAbilityIndex === 1,
+        action.payload?.cardImplementationAbilityKey ===
+          "abilities_activated_corp_main_take_hosted_credits",
     );
     expect(departmentActions).toHaveLength(2);
     const stale = structuredClone(state);
@@ -1965,7 +1972,7 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
     state = applyChoice(state, "corp", "bid_0");
     expect(state.trace).toMatchObject({
       status: "runner_bid",
-      traceValue: 3,
+      traceValue: 0,
       runnerLink: 0,
     });
     state = applyChoice(state, "runner", "bid_0");

@@ -563,7 +563,9 @@ export function startActiveIceProgramTrashChoice(
   if (!sourceIceId) return { handled: false };
   const sourceDefinition = definitionFor(state, sourceIceId);
   if (
-    !cardImplementationForDefinitionId(sourceDefinition.id)?.printedSubroutines?.some(
+    !cardImplementationForDefinitionId(
+      sourceDefinition.id,
+    )?.printedSubroutines?.some(
       (subroutine) =>
         subroutine.kind ===
         "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out",

@@ -277,6 +277,12 @@ describe("V1.6.3 Mechanikpaket C", () => {
         "runner",
         (action) => action.type === "continue_run",
       );
+      state = applyChoice(state, "corp", `card_${installedProgramId}`);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
 
       expect(state.run).toBeUndefined();
       if (installedProgramId) {
@@ -728,6 +734,8 @@ describe("V1.7.0 Mechanikpaket D", () => {
         action.type === "rez_ice" &&
         sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
     );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", `card_${succubusId}`);
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.run).toBeUndefined();

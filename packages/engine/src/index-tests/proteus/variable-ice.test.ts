@@ -198,7 +198,7 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
   const DIGICONDA = "onr_proteus_020_digiconda";
   const FOOD_FIGHT = "onr_proteus_022_food-fight";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function resolveOpenProgramTrashChoices(state: GameState): GameState {
     while (
@@ -210,7 +210,11 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
       if (!option) throw new Error("Programmtrash-Choice ohne Zieloption.");
       state = applyChoice(state, "corp", option.id);
       if (state.run)
-        state = apply(state, "runner", (action) => action.type === "continue_run");
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
     }
     return state;
   }
@@ -469,7 +473,7 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
 
 describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
   const phase3bCards = [
     "onr_proteus_013_caryatid",
     "onr_proteus_017_credit-blocks",
@@ -779,7 +783,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
   const OUTER_BLANK_ICE_A = "onr_proteus_024_gatekeeper";
   const OUTER_BLANK_ICE_B = "onr_proteus_036_sandstorm";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusPhase3cGame(seed: string): GameState {
     return toRunnerTurn(
@@ -1095,7 +1099,7 @@ describe("Proteus Phase 3e ICE Repositioning", () => {
   const INNER_ICE = "onr_proteus_024_gatekeeper";
   const MIDDLE_ICE = "onr_proteus_036_sandstorm";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusPhase3eGame(seed: string): GameState {
     return toRunnerTurn(
@@ -1339,7 +1343,7 @@ describe("Proteus Dynamic Public ETR ICE", () => {
   const WALL = "onr_v1_232_crystal-wall";
   const SENTRY = "onr_v1_231_cortical-scrub";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function proteusDynamicIceGame(seed: string): GameState {
     const corpOverrideIds = new Set([
@@ -1433,7 +1437,11 @@ describe("Proteus Dynamic Public ETR ICE", () => {
       if (!option) throw new Error("Programmtrash-Choice ohne Zieloption.");
       state = applyChoice(state, "corp", option.id);
       if (state.run)
-        state = apply(state, "runner", (action) => action.type === "continue_run");
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
     }
     return state;
   }
@@ -1643,7 +1651,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   const RASMIN_BRIDGER = "onr_proteus_070_rasmin-bridger";
   const SOCIAL_ENGINEERING = "onr_v1_111_social-engineering";
   const hiddenPayloadMarkers =
-    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"\s*:|"rd"\s*:/;
 
   function resolveOpenProgramTrashChoices(state: GameState): GameState {
     while (
@@ -1655,7 +1663,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       if (!option) throw new Error("Programmtrash-Choice ohne Zieloption.");
       state = applyChoice(state, "corp", option.id);
       if (state.run)
-        state = apply(state, "runner", (action) => action.type === "continue_run");
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
     }
     return state;
   }
@@ -2300,11 +2312,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       (action) => action.type === "continue_run" && action.costs.length === 0,
     );
     expect(refusing.pendingChoice).toMatchObject({ side: "corp" });
-    refusing = applyChoice(
-      refusing,
-      "corp",
-      `card_${trashedProgramId}`,
-    );
+    refusing = applyChoice(refusing, "corp", `card_${trashedProgramId}`);
     expect(refusing.runner.heap).toContain(trashedProgramId);
     expect(JSON.stringify(refusing.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,

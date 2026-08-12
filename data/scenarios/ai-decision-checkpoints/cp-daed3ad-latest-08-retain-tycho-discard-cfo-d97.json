@@ -10938,7 +10938,8 @@
       "executorInstanceId": "plan:corp.complete_turn:standard-turn-completion",
       "campaigns": [],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.complete_turn:standard-turn-completion",
         "commitmentId": "fnv1a:2725ab18",
         "sourcePlanId": "fnv1a:172ae81c",
         "sourceLineHash": "fnv1a:419e0868",

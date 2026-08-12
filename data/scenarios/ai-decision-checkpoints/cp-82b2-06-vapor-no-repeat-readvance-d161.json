@@ -19777,7 +19777,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.economy:economy-campaign%3Acorp_onr_v1_309_bbs-whispering-campaign_1",
         "commitmentId": "fnv1a:c9c22f93",
         "sourcePlanId": "fnv1a:d858f81d",
         "sourceLineHash": "fnv1a:6a49ae67",

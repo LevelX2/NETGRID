@@ -140,7 +140,7 @@
   },
   "engine": {
     "stateVersion": 196,
-    "stateHash": "fnv1a:b450d008",
+    "stateHash": "fnv1a:4f3f248a",
     "testOnlyGameState": {
       "matchId": "match_e6aca07c69fdd5df",
       "baseline": {
@@ -10269,7 +10269,8 @@
         }
       ],
       "turnPlanCommitment": {
-        "schemaVersion": "turn-plan-commitment-v1",
+        "schemaVersion": "turn-plan-commitment-v2",
+        "sequenceRootPlanInstanceId": "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_008_project-zurich_1%3Aremote_1",
         "commitmentId": "fnv1a:5680476d",
         "sourcePlanId": "fnv1a:31549509",
         "sourceLineHash": "fnv1a:dcc432ba",

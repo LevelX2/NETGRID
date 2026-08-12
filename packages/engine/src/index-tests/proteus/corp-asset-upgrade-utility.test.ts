@@ -628,9 +628,12 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     expect(state.cardInstances[ldlId]?.advancementCounters).toBe(0);
     expect(state.trace?.corpTemporaryTraceCredits?.remaining).toBe(5);
 
-    state = applyChoice(state, "corp", "bid_5");
-    expect(state.trace?.corpBid).toBe(5);
-    expect(state.trace?.corpTemporaryTraceCredits?.remaining).toBe(0);
+    const traceLimit = state.trace?.traceLimit ?? 0;
+    state = applyChoice(state, "corp", `bid_${traceLimit}`);
+    expect(state.trace?.corpBid).toBe(traceLimit);
+    expect(state.trace?.corpTemporaryTraceCredits?.remaining).toBe(
+      5 - traceLimit,
+    );
     expect(state.corp.credits).toBe(0);
 
     const noTrace = baseState("pro014-ldl-no-trace");

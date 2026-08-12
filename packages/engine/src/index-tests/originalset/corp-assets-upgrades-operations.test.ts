@@ -725,7 +725,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       sourceDefinitionId: "onr_v1_310_blood-cat",
       traceLimit: 5,
     });
-    trace = applyChoice(trace, "corp", "bid_0");
+    trace = applyChoice(trace, "corp", "bid_1");
     trace = applyChoice(trace, "runner", "bid_0");
     expect(trace.runner.tags).toBe(1);
     expect(replayEvents(traceInitial, trace.eventLog.slice(traceReplayStart)).ok).toBe(true);

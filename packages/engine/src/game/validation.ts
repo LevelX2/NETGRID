@@ -430,6 +430,12 @@ export function validateGameState(state: GameState): ValidationResult {
     )
       errors.push("Corp trace bid requires Corp choice.");
     if (
+      state.trace.status === "trace_success_program_trash" &&
+      state.pendingChoice?.side !== "corp" &&
+      !state.eventModificationWindow
+    )
+      errors.push("Trace program trash requires Corp choice.");
+    if (
       state.trace.status === "base_link" ||
       state.trace.status === "runner_bid" ||
       state.trace.status === "post_bid_link"

@@ -235,7 +235,12 @@ describe("V1.9.8 Mechanikpaket Q", () => {
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/break/);
-      expect(definition?.mechanics.join(" "), definitionId).toMatch(/pump/);
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.icebreakerAbilities?.some(
+          (ability) => ability.kind === "increase_strength",
+        ),
+        definitionId,
+      ).toBe(true);
       expect(definition?.mechanics.join(" "), definitionId).not.toMatch(
         /v2|matchmaking|ranking/,
       );
@@ -307,19 +312,31 @@ describe("V1.9.9 Mechanikpaket R", () => {
       CARD_DEFINITIONS_BY_ID["onr_v1_349_aardvark"]?.mechanics.join(" "),
     ).toMatch(/worm/);
     expect(
-      CARD_DEFINITIONS_BY_ID[
-        "onr_v1_351_bizarre-encryption-scheme"
-      ]?.mechanics.join(" "),
-    ).toMatch(/delayed_agenda_score/);
+      cardImplementationForDefinitionId(
+        "onr_v1_351_bizarre-encryption-scheme",
+      )?.hiddenReplacementLongtail?.kind,
+    ).toBe("delayed_agenda_access_replacement");
     expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.mechanics.join(" "),
-    ).toMatch(/ice_install_cost_mod_server/);
+      cardImplementationForDefinitionId("onr_v1_352_chester-mix")?.modifiers,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "install_cost",
+          operation: "reduce",
+          amount: 2,
+          appliesTo: expect.objectContaining({
+            cardType: "ice",
+            sameServerAsSource: true,
+          }),
+        }),
+      ]),
+    );
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.rulesText,
     ).toContain("reduced by 2");
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" "),
-    ).toMatch(/daemon_trash_choice/);
+    ).toMatch(/trash_installed_runner_cards/);
     expect(
       validateDeckDefinition(ONR_V1_9_9_RUNNER_DECK, { expectedSide: "runner" })
         .ok,

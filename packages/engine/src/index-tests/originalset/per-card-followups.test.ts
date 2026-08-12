@@ -1420,7 +1420,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           amount: 3,
           reason: "card_resolver",
           sourceDefinitionId: "onr_v1_097_livewires-contacts",
-          sourceTitle: "Livewire's Contacts",
+          sourceTitle: "Livewire’s Contacts",
         }),
       ],
     });
@@ -1653,7 +1653,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
                 reason: "card_resolver",
                 runnerTagsAfter: 3,
                 sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
-                sourceTitle: "Datapool® by Zetatech",
+                sourceTitle: "Datapool by Zetatech",
               }),
             ],
           });
@@ -3032,7 +3032,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         (action) => action.type === "continue_run",
       );
       expect(state.trace).toMatchObject({ traceLimit: traceValue });
-      state = applyChoice(state, "corp", "bid_10");
+      state = applyChoice(state, "corp", `bid_${traceValue}`);
       state = applyChoice(state, "runner", "bid_0");
       expect(state.runner.tags).toBe(0);
       expect(state.pendingChoice).toBeUndefined();
@@ -3147,7 +3147,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       traceSuccessful: false,
       corpBid: 0,
       runnerBid: 6,
-      traceValue: 6,
+      traceValue: 0,
       runnerStrength: 6,
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toMatchObject({

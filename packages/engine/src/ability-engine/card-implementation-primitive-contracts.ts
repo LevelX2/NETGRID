@@ -54,9 +54,21 @@ export function primitiveContractRecords(
 
     const scoredAgenda = implementation.scoredAgenda;
     if (scoredAgenda?.kind === "select_rezzed_ice_mark_modifier") {
+      const identity = resolveCardImplementationPrimitiveIdentity({
+        sourceDefinitionId: implementation.cardDefinitionId,
+        primitiveKind: scoredAgenda.kind,
+        effectKind: "mark_modifier",
+        abilityKey:
+          "capabilityKey" in scoredAgenda ? undefined : scoredAgenda.abilityKey,
+        capabilityKey:
+          "capabilityKey" in scoredAgenda &&
+          typeof scoredAgenda.capabilityKey === "string"
+            ? scoredAgenda.capabilityKey
+            : undefined,
+      });
       records.push({
         cardDefinitionId: implementation.cardDefinitionId,
-        abilityKey: scoredAgenda.abilityKey ?? "scored_ice_mark:0",
+        abilityKey: identity.abilityKey,
         primitiveKind: scoredAgenda.kind,
         effectKind: "mark_modifier",
         timing: "score_window",

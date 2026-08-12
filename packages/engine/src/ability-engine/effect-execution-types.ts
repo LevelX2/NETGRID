@@ -127,6 +127,7 @@ export type CardEffectExecutionContext = {
     shuffleAfterwards: true,
   ) => CardEffectHiddenInfoResult;
   moveTopTrashToGrip?: () => CardEffectHiddenInfoResult;
+  moveTopHostedProgramToGrip?: () => CardEffectHiddenInfoResult;
   startSearchStackInstall?: (
     filter: "program",
     installCost: "normal" | "free",
