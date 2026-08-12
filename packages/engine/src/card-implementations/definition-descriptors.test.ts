@@ -1367,7 +1367,7 @@ describe("CardImplementation definition descriptors", () => {
           kind: "add_advancement_counters_after_passing_last_ice_on_this_fort",
           timing: "pass_last_ice_on_this_fort",
           cost: { kind: "credit", amount: 5 },
-          target: "advanceable_installed_card_in_this_fort",
+          target: "installed_card_in_this_fort",
           amount: 2,
           limit: "once_per_run_per_source",
           visibility: "public",

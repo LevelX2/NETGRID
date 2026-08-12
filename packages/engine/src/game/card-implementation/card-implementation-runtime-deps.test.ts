@@ -354,6 +354,7 @@ describe("game card implementation runtime deps root", () => {
     expect(Object.keys(deps).sort()).toEqual(
       [
         "definitionFor",
+        "addCorpPurgeableRunnerVirusCounter",
         "mustInstance",
         "cardCounter",
         "rezzedCorpRootCardIds",
