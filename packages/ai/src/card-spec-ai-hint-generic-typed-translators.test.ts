@@ -74,6 +74,23 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("binds Reconnaissance rez-credit planning to the chosen run server", () => {
+    const reconnaissance = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_proteus_120_reconnaissance"),
+    );
+
+    expect(reconnaissance.targetProfiles).toContainEqual({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "server",
+      purpose: "choose_server_for_corp_rez_credit_gain",
+      preferences: ["high_expected_corp_rez_count"],
+      avoid: ["hidden_info_dependent_choice"],
+      hiddenInfoPolicy: "legal_targets_only",
+    });
+  });
+
   it("projects a runner turn-start credit engine that ends on the first run", () => {
     const conference = actualHint("onr_v1_184_top-runners-conference");
 

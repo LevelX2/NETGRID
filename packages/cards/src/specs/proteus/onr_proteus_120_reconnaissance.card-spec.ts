@@ -80,16 +80,14 @@ export const cardSpec = {
       },
       {
         kind: "target_preference",
-        purpose: "expose_ice_on_relevant_run_path",
-        preferences: ["relevant_server_ice", "blocks_relevant_run_path"],
+        purpose: "choose_server_for_corp_rez_credit_gain",
+        preferences: ["high_expected_corp_rez_count"],
         avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_120_reconnaissance.",
       },
     ],
     capabilities: [],

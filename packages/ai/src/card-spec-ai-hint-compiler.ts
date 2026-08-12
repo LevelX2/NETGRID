@@ -5575,7 +5575,7 @@ function deriveClosedExtendedTargetProfile(
       ...planningFields,
       kind: "use_target",
       timing: "on_play",
-      targetType: "installed_ice",
+      targetType: "server",
       hiddenInfoPolicy: "legal_targets_only",
     };
   if (
