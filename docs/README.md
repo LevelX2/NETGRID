@@ -1,28 +1,34 @@
 # NETGRID-Dokumentation
 
-Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefakte. Die Zielstruktur für die laufende Aufräumung ist in `docs/decisions/docs-structure-target-decision-2026-05-18.md` festgelegt.
+Stand: 2026-08-12
 
-## Ordner
+`docs/` enthält den aktuell relevanten Dokumentationsstand des Projekts. Historische Arbeitsstände werden nicht zusätzlich im Arbeitsbaum archiviert; dafür reicht die Git-Historie.
 
-- `source/`: unveränderte oder quellennahe Ausgangsdokumente.
-- `activities/`: aktive Arbeits-Pipeline für offene Konzepte, kleine Pakete, Fixes, Nacharbeiten und Cleanup-Aufgaben.
-- `releases/`: gebündelte Releasefamilien mit Requirements, Specs, Testmatrizen, Reviews, Final Reviews und historischen Plänen.
-- `architecture/`: releaseübergreifende Architekturentscheidungen, technische Zielbilder und Engine-/Schichtgrenzen.
-- `reviews/`: Querschnittsreviews, Audits, Inventare und strukturierte Nachprüfungen ohne eigene Releasefamilie.
-- `runbooks/`: wiederholbare lokale Betriebs-, Diagnose-, Wartungs- und Arbeitsabläufe.
-- `archive/`: historische, nicht mehr führende Artefakte, die bewusst im Arbeitsbaum bleiben.
-- `derived/`: bestehender Übergangs- und Bestandsbereich für abgeleitete Artefakte wie Releasepläne, Requirements, Specs, Testmatrizen, Implementation Reviews, Final Reviews und größere Analyseberichte.
-- `codex/`: aktueller Codex-Status, Runbooks und Arbeitsnotizen mit Projektsteuerungsbezug.
-- `ui-designsets/`: kuratierte UI-/Branding-Referenzen mit aktiven Designrichtungen, Branding und archivierten Explorationen.
+## Bereiche
 
-## Zielstruktur
+- `source/`: unveränderte oder quellennahe Primärquellen, Regelreferenzen und Spoiler.
+- `activities/`: operatives Arbeitsboard für offene und laufende kleine Pakete. `done/` ist nur ein kurzlebiger Abschluss-Slot, kein Archiv.
+- `architecture/`: aktuelle releaseübergreifende Architektur-, Vertrags- und Schichtdokumente.
+- `releases/`: aktuell noch relevante Release-, Gate- und Planungsartefakte. Historische Familien werden schrittweise nach dem Current-State-Prinzip ausgedünnt.
+- `reviews/`: aktuell benötigte Querschnittsreviews, Audits und Gate-Evidence.
+- `decisions/`: dauerhafte Projekt-, Produkt-, Git- und Dokumentationsentscheidungen.
+- `runbooks/`: wiederholbare lokale Betriebs-, Diagnose- und Wartungsabläufe.
+- `codex/`: aktueller Codex-Status und noch nicht konsolidierte Steuerungsartefakte.
+- `ui-designsets/`: aktive UI-/Branding-Referenzen.
+- `derived/`: reiner Übergangsbereich; hier sollen keine neuen Dokumente entstehen.
 
-Weitere Strukturpakete führen diese Zielbereiche schrittweise ein, sobald ein kleiner Linkaudit- und Move-Schnitt sie braucht:
+## Current-State-Regel
 
-- `decisions/`: kleine Projekt-, Produkt-, Asset-, Git- und Dokumentationsentscheidungen.
-- `operations/`: ops-nahe Dauerartefakte zu Deployment, Maintenance, Observability und Incidents.
-- `design/`: spätere echte Designsystem-Struktur, falls aus Mockups später Komponentenmodelle, Tokens und Designentscheidungen entstehen.
+Ein Dokument bleibt im Arbeitsbaum, wenn es heute mindestens eine konkrete Funktion besitzt:
 
-## Grundregel
+- aktueller Architektur- oder Schnittstellenvertrag;
+- aktive Requirement, Roadmap, Gate- oder Releasegrundlage;
+- aktuelle Entscheidungs- oder Removal-Condition-Evidence;
+- aktive Quelle oder Runbook;
+- offenes oder laufendes Arbeitspaket.
 
-Neue lose Arbeitspakete starten in `activities/inbox/`. Erst wenn daraus ein formaler Plan, eine Spezifikation, ein Review oder ein dauerhaftes Nachweisdokument entsteht, wird ein passendes Artefakt angelegt. Migrierte Dauerartefakte sollen nach der Zielstruktur einsortiert werden; `derived/` bleibt nur noch als Übergangshinweis bestehen.
+Abgeschlossene Prozess-, Implementierungs-, Audit-, Benchmark-, Replay-, Trace-, Zwischenstands- und Migrationsartefakte werden nach Referenzprüfung entfernt, sobald ihr aktueller Erkenntniswert in führenden Dokumenten, Code, Tests oder Gates steckt. Sie werden nicht vorsorglich nach `archive/` verschoben.
+
+Große generierte Rohreports und lokale Analyseausgaben gehören nicht dauerhaft nach `docs/`. Wenn sie für laufende Arbeit benötigt werden, liegen sie in dafür vorgesehenen Daten-/Local-Bereichen oder werden reproduzierbar neu erzeugt.
+
+Führende Retention-Entscheidung: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`.

@@ -1,34 +1,27 @@
 # Branding
 
-Vorläufige Branding-Referenzen für das private NETGRID-Tool. Diese Dateien sind Bildkonzepte und Auswahlstände, noch keine finalen Markenassets.
+Vorläufige Branding-Referenzen für das private NETGRID-Tool. Diese Dateien sind Auswahlstände, noch keine finalen Markenassets.
 
 Aktuelle Auswahl: [Vorläufige Branding-Entscheidung: NETGRID](BRANDING_DECISION.md).
 
 ## Aktive Referenzen
 
-- [Ausgewählter NETGRID-Lockup](selected-netgrid/netgrid-lockup-selected.png): bevorzugter rechter oberer NETGRID-Schriftzug.
-- [NETGRID Icon links](selected-netgrid/netgrid-icon-left-mark-clean.png): textloser Icon-Kandidat aus dem linken Symbol des Lockups.
-- [NETGRID Icon rechts](selected-netgrid/netgrid-icon-right-tile-clean.png): textloser Icon-Kandidat aus dem rechten Symbol des Lockups.
-- [NETGRID Icon rechts, neu gezeichnet](selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg): aktuelles Client- und Desktop-Icon mit transparentem Außenbereich.
+- [Ausgewählter NETGRID-Lockup](selected-netgrid/netgrid-lockup-selected.png)
+- [NETGRID Icon links](selected-netgrid/netgrid-icon-left-mark-clean.png)
+- [NETGRID Icon rechts](selected-netgrid/netgrid-icon-right-tile-clean.png)
+- [NETGRID Icon rechts, neu gezeichnet](selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg)
 
-## Historische Ideentafeln
+Historische Logo-Ideentafeln und verworfene Explorationsstände werden nicht mehr im Arbeitsbaum gehalten; sie bleiben in der Git-Historie verfügbar.
 
-- [Logo-Marken](../archive/exploration/logo-ideas/logo-mark-exploration.png): zwölf reine Symbolideen.
-- [Wordmark-Lockups](../archive/exploration/logo-ideas/wordmark-lockups.png): acht Kombinationen aus Icon und Platzhalter-Produktnamen.
-- [App-Icons](../archive/exploration/logo-ideas/app-icon-exploration.png): sechzehn quadratische Icon-Ideen für PWA, Favicon oder Toolbar.
+## Aktuelle Richtung
 
-## Bewertung
-
-Stärkste Richtungen:
-
-- `A1` / Icon `13`: Netzwerk-Hex und Kernwürfel; gut für Engine, StateHash und private Grid-Struktur.
-- `A3` / Icon `15`: Shield mit Check; stark für Hidden-Info-Sicherheit und LegalAction-Vertrag.
-- `B1`: geteilte Runner/Corp-Anmutung ohne offizielle Symbole; gut als Projektmarke.
-- `C2` / Icon `11`: Access-Door/Run-Lane; gut für Spielgefühl und Runs.
-- `NETGRID`: bislang stärkster Platzhaltername, weil er privat, technisch und toolartig wirkt.
+- `NETGRID` bleibt der bevorzugte Projektname.
+- Der ausgewählte Lockup ist die führende visuelle Referenz.
+- Das neu gezeichnete rechte Kachel-Icon ist die bevorzugte technische Icon-Basis.
+- Für Client- und Desktop-Icons wird aktuell die Cyber-Fassung unter `apps/web/public/brand/` verwendet.
 
 ## Grenzen
 
 - Keine offiziellen Logos, Faction-Symbole, Cardbacks, Cardframes oder offiziellen Artworks verwenden.
-- Final sollten die besten Konzepte als einfache SVGs neu gezeichnet werden.
-- Die Wortmarken sind explorativ; Produktname und Typografie sind noch nicht verbindlich.
+- Die Marke bleibt eigenständig und projektintern.
+- Typografie und Feinschliff sind noch nicht final.

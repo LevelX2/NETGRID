@@ -1,18 +1,27 @@
 # Reviews
 
-`docs/reviews/` enthält Querschnittsreviews, Audits, Inventare und strukturierte Nachprüfungen, die nicht klar zu einer einzelnen Releasefamilie gehören.
+Stand: 2026-08-12
 
-## Enthaltene Bereiche
+`docs/reviews/` enthält nur Reviews, Audits und strukturierte Evidence, die heute noch eine konkrete Projektfunktion besitzen. Der Ordner ist kein historisches Review-Archiv.
 
-- `originalset-spotchecks/`: Register, Rollup und Detailberichte der Originalset-Karten-Spotchecks. Abgeschlossene Arbeitsjobfiles dazu liegen unter `docs/archive/originalset-spotcheck-jobs/2026-05/`.
-- `ai/`: KI-Audits, Benchmarks, Gap-Reports, Regression-Reviews und historische Runner-KI-Beobachtungen.
-- `docs-cleanup/`: Inventare, Linkaudits und Review-Artefakte zur Docs-Struktur.
-- `onr-v1/`: Quellen-, Spoiler-, Karten- und Supportdatenreviews zur lokalen O:NR-v1-Basis.
+## Aktueller Zweck
 
-## Regel
+Review-Artefakte bleiben versioniert, wenn sie beispielsweise:
 
-Review-Artefakte bleiben nur dann dauerhaft versioniert, wenn sie aktuell als Audit-, Gate-, Test-, Entscheidungs-, Architektur- oder Removal-Condition-Nachweis dienen. Historische Update-, Prozess-, Benchmark-, Trace- und Zwischenstandsartefakte sind nach dem Current-State-Prinzip nicht automatisch aufzubewahren.
+- aktuelles Gate- oder Release-Evidence sind;
+- eine noch relevante Architektur-, Safety- oder Removal-Condition belegen;
+- von aktuellem Status, Tests, Scripts, Package-Commands oder führenden Verträgen referenziert werden;
+- einen noch nicht anderweitig verdichteten Befund enthalten.
+
+Historische Spotcheck-Serien, frühere Docs-Cleanup-Inventare, Chronicle-Berichte, Zwischenstände, Benchmark-/Trace-Serien und andere abgeschlossene Ausführungsevidence werden nicht im Arbeitsbaum konserviert. Ihre Historie liegt in Git.
+
+## Retention
+
+Vor einer Löschwelle werden aktive Verweise geprüft und bei Bedarf auf den aktuellen führenden Vertrag, Review oder Status umgestellt. Danach gilt:
+
+- current and referenced → behalten;
+- abgeschlossen und fachlich verdichtet → löschen;
+- generierte Roh-Evidence ohne aktuelle Consumer → löschen;
+- unklare aktuelle Gate-/Contract-Funktion → gesondert prüfen.
 
 Führende Retention-Regel: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`.
-
-Verdichtung oder Entfernung erfolgt weiter nur über ein eigenes Cleanup-Paket mit Inventar und Linkprüfung.

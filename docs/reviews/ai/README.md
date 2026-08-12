@@ -1,44 +1,29 @@
 # AI-Reviews und Benchmarks
 
-`docs/reviews/ai/` enthält historische und aktuelle KI-bezogene Audits, Diagnoseberichte, Benchmark-Nachweise und Beobachtungen. Der Ordner ist nicht mehr als vollständiger Lesepfad zu verwenden. Führend sind aktuelle Status-, Rollup-, Architektur-, Release- und Data-Artefakte.
+Stand: 2026-08-12
+
+`docs/reviews/ai/` enthält ausschließlich KI-bezogene Review- und Gate-Evidence, die aktuell noch benötigt wird. Historische Serien sind kein eigener Lesepfad.
 
 ## Aktueller Einstieg
 
-- Aktueller Projektstatus: `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- Current-State-Cleanup-Rollup: `docs/reviews/docs-cleanup/current-state-docs-rollup-2026-07-08.md`
-- Retention-Entscheidung: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`
+- Projektstatus: `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- AI-Architektur und Dokumenthierarchie: `docs/architecture/ai/README.md`
+- Retention: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`
 - Konsolidierte Roadmap: `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 
-## Aktive Root-Kommandos
+## Retention
 
-- `corepack pnpm check:ai`: Hint-Metadatenverträge und qualitative
-  AI-Source-Struktur.
-- Direkte Spezialskripte unter `scripts/check-ai-*.mjs` bleiben nur dann relevant, wenn ein aktueller Review, Test oder Gate sie ausdrücklich nutzt.
+Behalten werden nur Review-Artefakte mit einer heutigen Funktion, insbesondere:
 
-## Führender aktueller AI-Stand
+- aktuelle Final Reviews, Gate-, Readiness-, Contract- oder Removal-Condition-Evidence;
+- Dateien, die von aktuellen Architekturverträgen, Statusseiten, Tests, Scripts oder Gates benötigt werden;
+- kleine Reviews mit noch nicht anderweitig verdichtetem aktuellem Erkenntniswert.
 
-- AI Runtime Zero Legacy ist abgeschlossen; der normale AI-Livepfad läuft über die Semantic Runtime und bleibt LegalActions-only.
-- Planbasierte Corp- und Runner-KI sind als AI-Level-2-Modelle umgesetzt und final geprüft.
-- Aktuelle Runner-/Corp-Plan-Nacharbeiten werden über kleine gezielte Artefakte, Tests und aktuelle Data-Reports geführt.
-- Alte Shadow-, Generated-Facts-, Selfplay-, Candidate-, Seed- und Benchmark-Serien sind historische Arbeitsprodukte. Sie sind nur noch führend, wenn sie aktuell referenziert oder als konkrete Regression, Gate-Evidence oder Removal Condition gebraucht werden.
+Nach Referenzprüfung werden entfernt:
 
-## Retention-Regel für diesen Ordner
+- historische Update-, Remediation- und Zwischenstandsserien ohne aktuellen Gate-Wert;
+- alte Selfplay-, Candidate-, Seed-, Snapshot-, Optimizer-, Replay- und Benchmark-Dumps;
+- generierte JSON/CSV/Markdown-Reports ohne aktuellen Consumer;
+- Prozess- und Diagnoseketten, deren Ergebnis bereits in Code, Tests, Architektur oder aktuellem Status enthalten ist.
 
-Behalten:
-
-- aktuelle Final Reviews, Gate-Evidence, Readiness-/Cutover-/Policy-/Contract-Dokumente;
-- Dateien, die von Statusseiten, Architekturverträgen, Tests, Scripts, Package-Commands oder aktuellen Releaseartefakten referenziert werden;
-- kleine verdichtete Reviews, deren Inhalt noch nicht in aktuelle Rollups oder Statusseiten übernommen wurde.
-
-Verdichten und danach entfernen:
-
-- historische Update-Serien;
-- abgeschlossene Prozessberichte ohne aktuellen Gate-Wert;
-- alte Diagnoseketten, deren Ergebnis bereits in Tests, Status oder Rollups übernommen wurde.
-
-Nach Referenzprüfung entfernen:
-
-- unreferenzierte große JSON-Traces, Benchmarks, Candidate-/Seed-/Snapshot-/Optimizer-/Selfplay-Dumps;
-- generierte Reports, die keine aktuelle Script-, Test-, Gate- oder Statusfunktion mehr haben.
-
-Bei Unsicherheit wird eine Datei als `needs-review` inventarisiert und bleibt stehen.
+Git-Historie ersetzt die vorsorgliche Aufbewahrung alter Review-Evidence im Arbeitsbaum. Bei unklarer aktueller Gate-/Contract-Funktion wird die Datei vor Löschung einzeln geprüft.

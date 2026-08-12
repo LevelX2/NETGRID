@@ -1,21 +1,32 @@
 # Release-Dokumentation
 
-`docs/releases/` ist der Zielbereich für gebündelte Releasefamilien. Jede Familie bekommt einen eigenen Ordner mit einem knappen `README.md` und den zugehörigen Requirements, Spezifikationen, Testmatrizen, Implementation Reviews, Final Reviews und historischen Plänen.
+Stand: 2026-08-12
 
-## Regeln
+`docs/releases/` enthält Release-, Requirement-, Gate- und Planungsartefakte nur solange sie für aktuellen oder absehbar relevanten Projektstand benötigt werden.
 
-- Moves nach `docs/releases/` erfolgen nur familienweise.
-- Vor jedem Move wird ein Linkaudit durchgeführt.
-- Final Reviews, Implementation Reviews, Requirements und Testmatrizen bleiben als Audit-Trail erhalten.
-- Historische Detailpläne werden nicht gelöscht, solange kein Rollup und keine Linkprüfung vorliegen.
+## Grundregel
 
-## Aktive Pilotstruktur
+Git-Historie ist der Audit-Trail für abgeschlossene Version-0-Releasearbeit. Requirements, Testmatrizen, Implementation Reviews, Final Reviews und Detailpläne werden nicht allein wegen ihres Dokumenttyps dauerhaft konserviert.
 
-- `backend-ops/backend-0-5/`: privater Backend-/Ops-Schnitt für Storage-Maintenance.
-- `ai/`: abgeschlossene KI-Doctrine- und Deck-Legal-Approval-Spuren.
-- `mvp/`: historische MVP-0.x-Releasekette von MVP 0.1 bis MVP 0.99.
-- `proteus/`: planning-only Proteus-Import-, Coverage-, Slicing- und Mechanikvertragsartefakte ohne Kartenpromotion.
-- `roadmaps/`: releaseübergreifende Roadmaps, Bestandsaufnahmen und Produktvisionen.
-- `special/s01/`: abgeschlossene Sonderphase für Spielende, Ergebnisfenster, private Matchserie und opt-in Audio.
-- `v1/`: migrierte V1-Releasefamilien von V1.0 bis V1.9.22.
-- `v2/`: aktive V2-Plattform-, Datenschutz-, Public-Lobby-, Moderations- und Replay-Verträge.
+Behalten werden insbesondere:
+
+- aktuelle oder zukünftige Roadmaps und Produktvisionen;
+- aktive Release-/Plattformverträge;
+- aktuelle Requirements, Specs und Gates, die noch Produktverhalten oder Folgearbeit steuern;
+- Final Reviews oder andere Evidence, wenn sie heute noch die einzige relevante Freigabe-, Safety- oder Removal-Condition-Quelle sind.
+
+Entfernt werden nach Referenzprüfung insbesondere:
+
+- abgeschlossene historische Releasefamilien ohne aktuellen Steuerungsnutzen;
+- überholte Detailpläne und Zwischenreviews;
+- paketweise Implementierungsnachweise, deren Ergebnis bereits in aktuellem Code, Tests, Status oder Verträgen steckt.
+
+## Aktueller Strukturhinweis
+
+- `roadmaps/`: releaseübergreifende Roadmaps und Produktvisionen; auch hier werden alte Bestandsaufnahmen schrittweise entfernt.
+- `v2/`: enthält aktuell relevante Plattform-/Account-/Public-Lobby-/Safety-Verträge, ist aber ebenfalls nach Current-State-Nutzen zu prüfen.
+- `mvp/`, `v1/`, `ai/`, `classic/`, `proteus/`, `special/` und `backend-ops/`: enthalten überwiegend abgeschlossene oder gemischte historische Familien und sind Kandidaten für separate Cleanup-Wellen.
+
+Die bloße Existenz eines Releaseordners bedeutet keine aktuelle Release- oder Gate-Autorität. Führend sind Wissensbasis, konsolidierte Roadmap, aktuelle Statusdokumente, Code und aktive Verträge.
+
+Retention: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`.
