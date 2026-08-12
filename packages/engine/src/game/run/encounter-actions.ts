@@ -15,6 +15,7 @@ import {
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { icebreakerStrengthModifierFromDeclarativeCounters } from "../../ability-engine/effective-values";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -184,11 +185,9 @@ export function buildRunnerEncounterActions(
         breakerId,
         encounteredIceId,
       ) ?? 0) +
-      host.cards.cardCounter(breakerId, "militech") +
+      icebreakerStrengthModifierFromDeclarativeCounters(host.state, breakerId) +
       (host.cards.permanentIcebreakerStrengthCounterBonus?.(breakerId) ?? 0) +
-      (host.cards.cardCounter(breakerId, "breaker_strength_penalty") +
-        host.cards.cardCounter(breakerId, "pattel")) *
-        -1 +
+      host.cards.cardCounter(breakerId, "breaker_strength_penalty") * -1 +
       host.breaker.selectedServerIcebreakerStrengthCounterBonus(breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(host.state, breakerId) +
       host.run.runRemainderStrengthBonusForBreaker(breakerId);

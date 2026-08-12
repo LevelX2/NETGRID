@@ -11721,7 +11721,7 @@
     },
     {
       "cardId": "onr_proteus_068_pattel-antibody",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:204878a9e9556cdd",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:069aa5cf55f193e3",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:6f2ab8905cb7bbf4",
       "hint": {
         "cardId": "onr_proteus_068_pattel-antibody",
@@ -11781,6 +11781,7 @@
           "accessEffects",
           "add_counter_to_all_installed_runner_icebreakers",
           "corp_may_pay_credits",
+          "icebreaker_strength_modifier_per_counter",
           "install_remote",
           "on_access",
           "rez_card",
@@ -23589,7 +23590,7 @@
     },
     {
       "cardId": "onr_v1_082_deal-with-militech",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:8762dcece6fc1400",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:49fe7419ae034f3d",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:020e242a323d0e66",
       "hint": {
         "cardId": "onr_v1_082_deal-with-militech",
@@ -23621,6 +23622,7 @@
         "requiredMechanics": [
           "abilities",
           "add_counter_to_all_installed_runner_icebreakers",
+          "icebreaker_strength_modifier_per_counter",
           "on_play",
           "play_event",
           "runner_liberated_agenda_subtype_this_turn"
@@ -23697,7 +23699,7 @@
     {
       "cardId": "onr_v1_084_edited-shipping-manifests",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:77b1c7b533579861",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ba99404a91b36486",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d9ca7bfacc382d26",
       "hint": {
         "cardId": "onr_v1_084_edited-shipping-manifests",
         "side": "runner",
@@ -23716,15 +23718,6 @@
         "strategyAnchors": ["runner.hq_pressure"],
         "lineSupport": ["runner.hq_pressure"],
         "strategicExchangeKinds": ["self_tag"],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
-            "confidence": "medium"
-          }
-        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_make_run",
@@ -23760,15 +23753,6 @@
               "risk.self_tag",
               "run.hq",
               "run.make_run"
-            ],
-            "strategySupportPairs": [
-              {
-                "strategyId": "corp.tag_trace_punish",
-                "role": "anchor_evidence",
-                "roleDetail": "anchor_evidence_tag_source",
-                "evidence": ["tactic_signal_anchor:tag.source"],
-                "confidence": "medium"
-              }
             ]
           }
         ],
@@ -24087,7 +24071,7 @@
     {
       "cardId": "onr_v1_087_forgotten-backup-chip",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:91c3ec1e605a967a",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:3e32f7977f147203",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:41bb9e80496ff8f4",
       "hint": {
         "cardId": "onr_v1_087_forgotten-backup-chip",
         "side": "runner",
@@ -24097,7 +24081,6 @@
         "planRoles": ["build_rig", "recover_rig"],
         "valueHints": {},
         "strategicRole": ["enabler"],
-        "strategyAnchors": ["runner.search.breaker"],
         "lineSupport": ["runner.search.breaker"],
         "actionCapabilitySemantics": [
           { "capabilityKey": "abilities_on_play_search_trash_to_grip" }
@@ -24651,7 +24634,7 @@
     {
       "cardId": "onr_v1_098_lucidrine-booster-drug",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a318be080e20736c",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:5e867175fe28a141",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2846985b930afb67",
       "hint": {
         "cardId": "onr_v1_098_lucidrine-booster-drug",
         "side": "runner",
@@ -24753,9 +24736,8 @@
           "economy.run_credits",
           "risk.self_damage"
         ],
-        "tacticSignals": ["damage.payoff", "economy.card"],
+        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "damage.payoff.runner",
           "economy.card",
           "effect:damage",
           "effect:finite_economy_pool",
@@ -24780,7 +24762,7 @@
     {
       "cardId": "onr_v1_099_mantis-fixer-at-large",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f610f513c35c784f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1066ceeda0ede981",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fa9ae81bc9b3c0e7",
       "hint": {
         "cardId": "onr_v1_099_mantis-fixer-at-large",
         "side": "runner",

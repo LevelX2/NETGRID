@@ -1229,7 +1229,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(targetChoice).toBeDefined();
     if (!targetChoice)
       throw new Error("Missing Forged Activation Orders target choice");
-    expect(targetChoice.options.map((option) => option.value)).not.toContain(
+    expect(targetChoice.options.map((option) => option.value)).toContain(
       rezzedReinforcedWallId,
     );
     const targetOption = targetChoice.options.find(
@@ -1243,10 +1243,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.visibility).toBe("public");
     expect(state.pendingChoice?.prompt).toBe(
-      "Rez-oder-Trash-Entscheidung: ICE 1 in R&D rezzen oder trashen",
+      "Rez-oder-Trash-Entscheidung für ICE 1 in R&D",
     );
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
-      "ICE 1 in R&D rezzen",
+      "Simple Barrier ICE rezzen",
       "ICE 1 in R&D trashen",
     ]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1267,6 +1267,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.cardInstances[targetIceId]?.rezzed).toBe(true);
     expect(state.cardInstances[targetIceId]?.faceup).toBe(true);
     expect(state.corp.credits).toBeLessThan(corpCreditsBefore);
+    expect(state.runnerTurnFlags?.corpRezzedIceThisTurn).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_option",
@@ -1322,14 +1323,26 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       noUnrezzedTargetState,
       "onr_v1_086_forged-activation-orders",
     );
+    noUnrezzedTargetState = apply(
+      noUnrezzedTargetState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(noUnrezzedTargetState, action) ===
+          "onr_v1_086_forged-activation-orders",
+    );
+    const onlyRezzedTargetOption =
+      noUnrezzedTargetState.pendingChoice?.options.find(
+        (option) => option.value === onlyRezzedTargetId,
+      );
+    noUnrezzedTargetState = applyChoice(
+      noUnrezzedTargetState,
+      "runner",
+      onlyRezzedTargetOption?.id ?? "",
+    );
     expect(
-      getLegalActions(noUnrezzedTargetState, "runner").some(
-        (action) =>
-          action.type === "play_event" &&
-          sourceDefinition(noUnrezzedTargetState, action) ===
-            "onr_v1_086_forged-activation-orders",
-      ),
-    ).toBe(false);
+      noUnrezzedTargetState.pendingChoice?.options.map((option) => option.id),
+    ).toEqual(["trash_ice"]);
 
     let trashState = toRunnerTurn(
       createGameAfterSetup({
@@ -1379,7 +1392,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     trashState = applyChoice(trashState, "runner", trashTargetOption?.id ?? "");
     expect(trashState.pendingChoice?.prompt).toBe(
-      "Rez-oder-Trash-Entscheidung: ICE 1 in HQ rezzen oder trashen",
+      "Rez-oder-Trash-Entscheidung für ICE 1 in HQ",
     );
     expect(
       trashState.pendingChoice?.options.map((option) => option.label),

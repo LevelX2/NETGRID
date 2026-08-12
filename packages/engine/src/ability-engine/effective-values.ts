@@ -8,6 +8,7 @@
 import type {
   CardDefinition,
   CardInstanceId,
+  CounterType,
   GameState,
   PurgeableRunnerVirusCounterType,
   Side,
@@ -27,6 +28,40 @@ import {
   cardImplementationForDefinitionId,
 } from "../card-implementations/registry";
 import type { CardAgendaDifficultyModifierImplementation } from "./definition-types";
+
+export function icebreakerStrengthModifierFromDeclarativeCounters(
+  state: GameState,
+  breakerId: CardInstanceId,
+): number {
+  const instance = state.cardInstances[breakerId];
+  if (!instance) return 0;
+  const modifiersByCounterType = new Map<CounterType, number>();
+  for (const implementation of CARD_IMPLEMENTATIONS) {
+    for (const capability of [
+      ...(implementation.abilities ?? []),
+      ...(implementation.accessEffects ?? []),
+    ]) {
+      for (const effect of capability.effects ?? []) {
+        if (effect.kind !== "add_counter_to_all_installed_runner_icebreakers")
+          continue;
+        const amountPerCounter = effect.counterEffect.amountPerCounter;
+        const existing = modifiersByCounterType.get(effect.counterType);
+        if (existing !== undefined && existing !== amountPerCounter)
+          throw new Error(
+            `Widerspruechliche Icebreaker-Counterwirkung fuer ${effect.counterType}.`,
+          );
+        modifiersByCounterType.set(effect.counterType, amountPerCounter);
+      }
+    }
+  }
+  return [...modifiersByCounterType].reduce(
+    (sum, [counterType, amountPerCounter]) =>
+      sum +
+      Math.max(0, Math.floor(instance.counters?.[counterType] ?? 0)) *
+        amountPerCounter,
+    0,
+  );
+}
 
 export type EffectiveAgendaDifficultyDependencies = {
   // Remaining agenda-difficulty rules still live in the host. Injecting them keeps

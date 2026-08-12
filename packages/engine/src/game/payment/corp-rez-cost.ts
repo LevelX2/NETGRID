@@ -1745,17 +1745,20 @@ export function assertCorpRezCostQuoteValid(
   const definition = definitionFor(state, iceId);
   if (definition.type !== "ice")
     throw new Error("Corp-Rez-Kostenquote ist nur fuer ICE gueltig.");
-  const run = mustRun(state);
+  const forcedRezOrTrashEffect =
+    legalAction.payload?.forcedRezOrTrashEffect === true;
+  const run = forcedRezOrTrashEffect ? state.run : mustRun(state);
   const successfulRunForceRezQuote =
     legalAction.payload?.successfulRunForceRezQuote === true &&
-    run.successful === true &&
+    run?.successful === true &&
     run.phase === "access" &&
     legalAction.payload?.serverId === run.attackedServerId &&
     corpServerIdForInstalledCard(state, iceId) === run.attackedServerId;
   if (
+    !forcedRezOrTrashEffect &&
     !successfulRunForceRezQuote &&
     (state.timingPoint !== "run.approach_ice" ||
-      run.phase !== "approach_ice" ||
+      run?.phase !== "approach_ice" ||
       run.approachedIceId !== iceId)
   )
     throw new Error("ICE ist nicht mehr im passenden Rez-Fenster.");
@@ -1764,6 +1767,8 @@ export function assertCorpRezCostQuoteValid(
       ? (legalAction.payload.discountedRezSourceCardId as CardInstanceId)
       : undefined;
   if (discountedRezSourceCardId) {
+    if (!run)
+      throw new Error("Discounted-Rez-Quelle braucht einen laufenden Run.");
     if (!state.cardInstances[discountedRezSourceCardId])
       throw new Error("Discounted-Rez-Quelle fehlt.");
     const availableSources = discountedRezSourceIdsForRunIce(state, iceId);

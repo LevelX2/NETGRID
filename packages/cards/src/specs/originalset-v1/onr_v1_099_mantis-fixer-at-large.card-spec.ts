@@ -74,7 +74,7 @@ export const cardSpec = {
       },
       {
         kind: "target_preference",
-        purpose: "program_search",
+        purpose: "generic_stack_search",
         preferences: [],
         avoid: [],
       },

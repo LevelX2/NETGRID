@@ -255,6 +255,65 @@ describe("CardRegistry", () => {
     );
   });
 
+  it("preserves Original Set 081-100 counter effects and AI semantics", () => {
+    const dealWithMilitech = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_082_deal-with-militech" as CardDefinitionId,
+    )!;
+    const editedShippingManifests = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_084_edited-shipping-manifests" as CardDefinitionId,
+    )!;
+    const forgottenBackupChip = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_087_forgotten-backup-chip" as CardDefinitionId,
+    )!;
+    const lucidrine = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_098_lucidrine-booster-drug" as CardDefinitionId,
+    )!;
+    const mantis = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_099_mantis-fixer-at-large" as CardDefinitionId,
+    )!;
+
+    expect(dealWithMilitech.engine.abilities).toMatchObject([
+      {
+        effects: [
+          {
+            kind: "add_counter_to_all_installed_runner_icebreakers",
+            counterType: "militech",
+            counterEffect: {
+              kind: "icebreaker_strength_modifier_per_counter",
+              amountPerCounter: 1,
+            },
+          },
+        ],
+      },
+    ]);
+    expect(editedShippingManifests.planningAnnotations!.capabilities).toEqual(
+      [],
+    );
+    expect(forgottenBackupChip.planningAnnotations!.card).not.toContainEqual(
+      expect.objectContaining({
+        kind: "strategy_anchor",
+        strategyKey: "runner.search.breaker",
+      }),
+    );
+    expect(lucidrine.planningAnnotations!.card).not.toContainEqual(
+      expect.objectContaining({
+        kind: "tactic_interpretation",
+        use: "damage.payoff.runner",
+      }),
+    );
+    expect(mantis.planningAnnotations!.card).toContainEqual(
+      expect.objectContaining({
+        kind: "target_preference",
+        purpose: "generic_stack_search",
+      }),
+    );
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

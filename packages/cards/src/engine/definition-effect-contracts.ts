@@ -152,6 +152,10 @@ export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
     "militech" | "pattel" | "breaker_strength_penalty"
   >;
   amount: number;
+  counterEffect: {
+    kind: "icebreaker_strength_modifier_per_counter";
+    amountPerCounter: number;
+  };
   visibility: Extract<EventVisibilityClass, "public">;
 };
 

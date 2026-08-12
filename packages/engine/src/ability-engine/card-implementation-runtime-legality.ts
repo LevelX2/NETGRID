@@ -81,7 +81,7 @@ export function canResolveOnPlayCardImplementationAbility(
     if (effect.kind === "trash_unrezzed_ice")
       return deps.unrezzedIceTargetCount(state) > 0;
     if (effect.kind === "corp_choice_rez_or_trash_ice")
-      return deps.unrezzedIceTargetCount(state) > 0;
+      return deps.installedIceTargetCount(state) > 0;
     if (effect.kind === "derez_rezzed_black_ice")
       return deps.rezzedBlackIceTargetCount(state) > 0;
     if (effect.kind === "start_runner_program_install_action_bundle")

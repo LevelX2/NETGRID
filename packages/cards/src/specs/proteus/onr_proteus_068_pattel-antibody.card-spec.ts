@@ -58,6 +58,10 @@ export const cardSpec = {
             kind: "add_counter_to_all_installed_runner_icebreakers",
             counterType: "pattel",
             amount: 1,
+            counterEffect: {
+              kind: "icebreaker_strength_modifier_per_counter",
+              amountPerCounter: -1,
+            },
             visibility: "public",
           },
         ],

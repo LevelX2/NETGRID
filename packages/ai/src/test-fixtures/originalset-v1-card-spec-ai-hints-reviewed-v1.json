@@ -5548,6 +5548,7 @@
         "requiredMechanics": [
           "abilities",
           "add_counter_to_all_installed_runner_icebreakers",
+          "icebreaker_strength_modifier_per_counter",
           "on_play",
           "play_event",
           "runner_liberated_agenda_subtype_this_turn"
@@ -5650,15 +5651,6 @@
         "strategyAnchors": ["runner.hq_pressure"],
         "lineSupport": ["runner.hq_pressure"],
         "strategicExchangeKinds": ["self_tag"],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
-            "confidence": "medium"
-          }
-        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_make_run",
@@ -5694,15 +5686,6 @@
               "risk.self_tag",
               "run.hq",
               "run.make_run"
-            ],
-            "strategySupportPairs": [
-              {
-                "strategyId": "corp.tag_trace_punish",
-                "role": "anchor_evidence",
-                "roleDetail": "anchor_evidence_tag_source",
-                "evidence": ["tactic_signal_anchor:tag.source"],
-                "confidence": "medium"
-              }
             ]
           }
         ],
@@ -6038,7 +6021,6 @@
         "planRoles": ["build_rig", "recover_rig"],
         "valueHints": {},
         "strategicRole": ["enabler"],
-        "strategyAnchors": ["runner.search.breaker"],
         "lineSupport": ["runner.search.breaker"],
         "actionCapabilitySemantics": [
           {
@@ -6713,9 +6695,8 @@
           "economy.run_credits",
           "risk.self_damage"
         ],
-        "tacticSignals": ["damage.payoff", "economy.card"],
+        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "damage.payoff.runner",
           "economy.card",
           "effect:damage",
           "effect:finite_economy_pool",

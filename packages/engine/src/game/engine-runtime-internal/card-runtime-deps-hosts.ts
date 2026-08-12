@@ -496,6 +496,7 @@ import { validateGameState } from "../validation";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
 import {
   effectiveAgendaDifficulty,
+  icebreakerStrengthModifierFromDeclarativeCounters,
   maxHandSize,
   runnerMemoryLimit,
   type EffectiveAgendaDifficultyDependencies,
@@ -603,11 +604,7 @@ export function createCardRuntimeDepsHosts(
     state: GameState,
     breakerId: CardInstanceId,
   ): number {
-    if (
-      !icebreakerHasRunEndCounterAward(
-        definitionFor(state, breakerId),
-      )
-    )
+    if (!icebreakerHasRunEndCounterAward(definitionFor(state, breakerId)))
       return 0;
     const selectedServerId = mustInstance(
       state.cardInstances,
@@ -642,11 +639,7 @@ export function createCardRuntimeDepsHosts(
     state: GameState,
     breakerId: CardInstanceId,
   ): number {
-    if (
-      icebreakerHasRunEndCounterAward(
-        definitionFor(state, breakerId),
-      )
-    )
+    if (icebreakerHasRunEndCounterAward(definitionFor(state, breakerId)))
       return 0;
     return cardCounter(state, breakerId, "power");
   }
@@ -815,11 +808,9 @@ export function createCardRuntimeDepsHosts(
       mustInstance(state.cardInstances, breakerId).strengthModifier +
       deps.hostedProgramStrengthModifier(state, breakerId) +
       deps.icebreakerEncounterStrengthBonus(state, breakerId, iceId) +
-      cardCounter(state, breakerId, "militech") +
+      icebreakerStrengthModifierFromDeclarativeCounters(state, breakerId) +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-      (cardCounter(state, breakerId, "breaker_strength_penalty") +
-        cardCounter(state, breakerId, "pattel")) *
-        -1 +
+      cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       deps.runRemainderStrengthBonusForBreaker(run, breakerId);
@@ -1002,11 +993,9 @@ export function createCardRuntimeDepsHosts(
         breakerId,
         run.encounteredIceId,
       ) +
-      cardCounter(state, breakerId, "militech") +
+      icebreakerStrengthModifierFromDeclarativeCounters(state, breakerId) +
       permanentIcebreakerStrengthCounterBonus(state, breakerId) +
-      (cardCounter(state, breakerId, "breaker_strength_penalty") +
-        cardCounter(state, breakerId, "pattel")) *
-        -1 +
+      cardCounter(state, breakerId, "breaker_strength_penalty") * -1 +
       selectedServerIcebreakerStrengthCounterBonus(state, breakerId) +
       temporaryBreakerStrengthBonusUntilEndOfTurn(state, breakerId) +
       deps.runRemainderStrengthBonusForBreaker(run, breakerId);
@@ -1028,11 +1017,7 @@ export function createCardRuntimeDepsHosts(
   ): NonNullable<CardDefinition["subroutines"]> {
     const run = state.run;
     return run?.encounteredIceId
-      ? effectiveIceRunSubroutines(
-          state,
-          run.encounteredIceId,
-          iceDefinition,
-        )
+      ? effectiveIceRunSubroutines(state, run.encounteredIceId, iceDefinition)
       : [];
   }
 

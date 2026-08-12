@@ -170,33 +170,38 @@ export function buildRunnerAccessActions(
   const freeTrashEnabled = freeTrashSource.enabled;
   const accessedFromArchives = isCurrentAccessFromArchives(host, run);
   if (definition.type === "agenda") {
-    const virusFreeTrashAction =
-      freeTrashSource.enabled &&
-      freeTrashSource.counterType &&
-      freeTrashSource.sourceDefinitionId
-        ? [
-            host.actions.buildLegalAction(
-              "runner",
-              "trash_accessed_card",
-              `${definition.title} kostenlos trashen`,
-              run.accessedCardId,
-              [],
-              {
-                accessTrashCostOverride: 0,
-                freeAccessTrash: true,
-                proteusRunnerVirusFreeTrashCounterType:
-                  freeTrashSource.counterType,
-                proteusRunnerVirusFreeTrashSourceDefinitionId:
-                  freeTrashSource.sourceDefinitionId,
-              },
-            ),
-          ]
-        : [];
+    const freeTrashAction = freeTrashSource.enabled
+      ? [
+          host.actions.buildLegalAction(
+            "runner",
+            "trash_accessed_card",
+            `${definition.title} kostenlos trashen`,
+            run.accessedCardId,
+            [],
+            {
+              accessTrashCostOverride: 0,
+              freeAccessTrash: true,
+              ...(freeTrashSource.counterType
+                ? {
+                    proteusRunnerVirusFreeTrashCounterType:
+                      freeTrashSource.counterType,
+                  }
+                : {}),
+              ...(freeTrashSource.sourceDefinitionId
+                ? {
+                    proteusRunnerVirusFreeTrashSourceDefinitionId:
+                      freeTrashSource.sourceDefinitionId,
+                  }
+                : {}),
+            },
+          ),
+        ]
+      : [];
     const accessReplacement = agendaAccessReplacementForDefinition(definition);
     if (accessReplacement?.kind === "install_as_runner_program") {
       const legalActions: LegalAction[] = [
         ...currentAccessTrashActions,
-        ...virusFreeTrashAction,
+        ...freeTrashAction,
       ];
       if (
         runnerAgendaProgramInstallMemoryReachable(
@@ -267,7 +272,7 @@ export function buildRunnerAccessActions(
           handled: true,
           legalActions: [
             ...currentAccessTrashActions,
-            ...virusFreeTrashAction,
+            ...freeTrashAction,
             declineStealAction,
           ],
         };
@@ -276,7 +281,7 @@ export function buildRunnerAccessActions(
         handled: true,
         legalActions: [
           ...currentAccessTrashActions,
-          ...virusFreeTrashAction,
+          ...freeTrashAction,
           host.actions.buildLegalAction(
             "runner",
             "steal_agenda",
@@ -296,7 +301,7 @@ export function buildRunnerAccessActions(
       handled: true,
       legalActions: [
         ...currentAccessTrashActions,
-        ...virusFreeTrashAction,
+        ...freeTrashAction,
         host.actions.buildLegalAction(
           "runner",
           "steal_agenda",

@@ -284,7 +284,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
     state.runner.credits = 20;
 
     moveRunnerCardToGrip(state, "onr_v1_096_kilroy-was-here");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const kilroyAgendaId = putCorpCardOnTopOfRd(state, "simple_agenda");
     const creditsBeforeKilroy = state.runner.credits;
     state = apply(
       state,
@@ -294,12 +294,17 @@ describe("V1.9.2 Mechanikpaket K", () => {
         sourceDefinition(state, action) === "onr_v1_096_kilroy-was-here",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(expect.arrayContaining(["steal_agenda", "trash_accessed_card"]));
     state = apply(
       state,
       "runner",
       (action) => action.type === "trash_accessed_card",
     );
     expect(state.runner.credits).toBe(creditsBeforeKilroy);
+    expect(state.corp.archives).toContain(kilroyAgendaId);
+    expect(state.runner.scoreArea).not.toContain(kilroyAgendaId);
 
     moveRunnerCardToGrip(state, "onr_v1_107_romp-through-hq");
     const hqCard = moveCorpCardToHq(state, "simple_economy_operation");

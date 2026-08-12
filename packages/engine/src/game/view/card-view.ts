@@ -21,6 +21,7 @@ import {
 import { corpServerIdForInstalledCard } from "../payment";
 import {
   effectiveAgendaDifficulty,
+  icebreakerStrengthModifierFromDeclarativeCounters,
   type EffectiveAgendaDifficultyDependencies,
 } from "../../ability-engine/effective-values";
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
@@ -144,6 +145,7 @@ function visibleKnownCardWithReferenceViewer(
         : visibleBaseStrength +
           instance.strengthModifier +
           hostedProgramStrengthModifier(state, id) +
+          icebreakerStrengthModifierFromDeclarativeCounters(state, id) +
           temporaryBreakerStrengthBonusUntilEndOfTurn(state, id) +
           runRemainderStrengthBonus -
           breakerStrengthPenaltyCounterAmount(instance)
@@ -1077,8 +1079,7 @@ function singleCounterDisplay(
 function breakerStrengthPenaltyCounterAmount(instance: CardInstance): number {
   return Math.max(
     0,
-    Math.floor(instance.counters?.breaker_strength_penalty ?? 0) +
-      Math.floor(instance.counters?.pattel ?? 0),
+    Math.floor(instance.counters?.breaker_strength_penalty ?? 0),
   );
 }
 

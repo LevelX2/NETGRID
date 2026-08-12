@@ -850,7 +850,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     }
   });
 
-  it("keeps Forged Activation Orders choices redacted and rejects target drift", () => {
+  it("keeps Forged Activation Orders redacted, accepts rez-state changes and rejects location drift", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-forged-activation-orders-multi-ice",
@@ -931,14 +931,14 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     state = applyChoice(state, "runner", rdOption?.id ?? "");
     expect(state.pendingChoice?.prompt).toBe(
-      "Rez-oder-Trash-Entscheidung: ICE 1 in Research and Development rezzen oder trashen",
+      "Rez-oder-Trash-Entscheidung für ICE 1 in Research and Development",
     );
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "rez_ice",
       "trash_ice",
     ]);
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
-      "ICE 1 in Research and Development rezzen",
+      "Simple Barrier ICE rezzen",
       "ICE 1 in Research and Development trashen",
     ]);
     const rezzedDrift = structuredClone(state);
@@ -962,7 +962,9 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         selectedOptionIds: ["trash_ice"],
       },
     });
-    expect(rezzedDriftResult.ok).toBe(false);
+    expect(rezzedDriftResult.ok).toBe(true);
+    if (!rezzedDriftResult.ok) throw new Error(rezzedDriftResult.error.message);
+    expect(rezzedDriftResult.state.corp.archives).toContain(rdIce);
     const drifted = structuredClone(state);
     removeEverywhere(drifted, rdIce);
     const driftResult = applyAction(drifted, {

@@ -436,10 +436,88 @@ Korrekturbefund. Core Command war nur von Shredders bisher falscher
 Successful-Run-Identität betroffen. Signposts offene Post-Bid-Trace-Logik
 bleibt die dokumentierte NETGRID-Entscheidung.
 
+## Block 005 – Karten 081 bis 100 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 005` eingeführt.
+
+### ONR V1 082 – Deal with Militech
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:356-359`
+  bestimmt neben der Counterverteilung ausdrücklich Stärke plus 1 je
+  Militech-Counter auf dem jeweiligen Icebreaker.
+- Ursache und Korrektur: Die Countererzeugung war deklarativ, ihre Wirkung
+  wurde aber über den Namen `militech` in mehreren Stärkepfaden geschaltet.
+  Der erzeugende CardSpec-Effekt trägt jetzt einen typisierten
+  `icebreaker_strength_modifier_per_counter` mit Wert +1. Alle Break-, View-
+  und Eventkontexte lesen diese deklarative Wirkung.
+- Generischer Folgefund: Pattel Antibody verwendet denselben Erzeugervertrag
+  mit Wert -1. Dadurch ist auch dort der Name `pattel` kein verdeckter
+  Icebreaker-Stärkeschalter mehr. Der unabhängige ältere
+  `breaker_strength_penalty`-Basiscounter bleibt unverändert.
+- Regression: CardSpec-Vertrag und direkter effektiver Stärkewert sichern die
+  Kombination aus drei Militech- und zwei Pattel-Countern als netto +1.
+
+### ONR V1 086 – Forged Activation Orders
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:374-376`
+  erlaubt jedes installierte ICE als Ziel und überlässt der Corp Rez oder
+  Trash, ohne das Ziel auf unrezztes ICE zu beschränken.
+- Korrektur: Legalität und Ziel-Choice verwenden jedes installierte ICE.
+  Bereits gerezztes oder aktuell nicht bezahlbares ICE bietet nur Trash;
+  andernfalls entstehen Rez-Optionen aus dem bestehenden kanonischen
+  Rez-Action-Builder. Der Rez-Zweig nutzt anschließend den normalen
+  Zahlungs-, Status-, Turn-Flag- und On-Rez-Lifecycle ohne Run-Fortsetzung.
+- Regression: Rezzte und unrezzte Ziele, unbezahlbarer Nur-Trash-Fall,
+  Positionsredaktion, Rez-Lifecycle-Flag, Revalidierung, Replay und StateHash
+  sind durch die fokussierten Integrationszeugen abgedeckt.
+
+### ONR V1 096 – Kilroy Was Here
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:414-416`
+  erlaubt während des R&D-Runs das kostenlose Trashing jeder accesseten
+  Karte, ausdrücklich auch normalerweise nicht trashbarer Karten.
+- Korrektur: Der generische Free-Access-Trash-Pfad erzeugt jetzt auch für
+  Agendas eine Trash-Action, ohne fälschlich einen Virus-Counter-Vertrag zu
+  verlangen. Virusquellen behalten ihre zusätzlichen Counter-Payloads.
+- Generischer Folgefund: Romp through HQ verwendet denselben
+  `freeTrashAccessZones`-Vertrag und ist damit für den Agenda-Fall desselben
+  Pfades mitkorrigiert; es entstand kein kartenspezifischer Kilroy-Zweig.
+- Regression: Ein realer Kilroy-R&D-Zugriff bietet bei einer Agenda sowohl
+  Steal als auch kostenlosen Trash, bezahlt keine Credits, legt die Agenda in
+  Archives und nimmt sie nicht in die Runner-Score-Area auf.
+
+### AI-Semantikbereinigung
+
+- Edited Shipping Manifests behält `strategic_exchange: self_tag`, liefert
+  aber keine rückwärts gerichtete Unterstützung für
+  `corp.tag_trace_punish` mehr.
+- Forgotten Backup Chip bleibt Support der bestehenden
+  `runner.search.breaker`-Linie, ist als generische Program-Recovery jedoch
+  kein eigener Strategieanker.
+- Lucidrine Booster Drug behält `strategic_exchange: self_damage`, erzeugt
+  aber kein Runner-Damage-Payoff-Signal mehr.
+- Mantis, Fixer-at-Large verwendet für `any_card` die generische
+  `generic_stack_search`-Zielpräferenz statt `program_search`.
+- Ownership: Die Änderungen betreffen nur deklarative Hints der bestehenden
+  Pläne. Action-ID, Plan, Step, Route, Executor und Choice-Owner bleiben
+  unverändert; es entsteht keine zweite Entscheidungsautorität.
+
+### Unveränderte Karten dieses Blocks
+
+Für Custodial Position, Desperate Competitor, Edited Shipping Manifests,
+Executive Wiretaps, Forgotten Backup Chip, Fortress Respecification, Gideon's
+Pawnshop, Hot Tip for WNS, Hunt Club BBS, Ice and Data's Guide to the Net, If
+You Want It Done Right..., Inside Job, Jack 'n' Joe, Livewire's Contacts,
+Lucidrine Booster Drug, Mantis, Fixer-at-Large und misc.for-sale ergab der
+Nutzerblock keinen weiteren mechanischen Korrekturbefund. Die genannten
+AI-Bereinigungen ändern daran nichts.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 081 bis 100.
+- Als nächster regulärer Nutzerblock folgen die Karten 101 bis 120.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -483,3 +561,11 @@ und Import-Index-Check sowie die fokussierten CardSpec-, Post-Pass-,
 Run-End-, Successful-Run-, Shredder- und Startup-Regressionsläufe grün. Das
 generierte AI-Hint-Artefakt änderte ausschließlich die erwarteten
 CardRules-Fingerprints von Shredder Uplink Protocol und Startup Immolator.
+
+Für Block 005 sind Cards-, Engine- und AI-Typecheck, Generator-Check,
+CardSpec-Vertrag, 93 direkt angrenzende Engine-Integrationszeugen, der neue
+deklarative Counter-Stärkewert sowie Originalset-AI-Golden und
+Artefaktvertrag grün. Das generierte AI-Hint-Artefakt ändert ausschließlich
+die erwarteten Regel-/Planungsfingerprints und Semantiken von Pattel Antibody,
+Deal with Militech, Edited Shipping Manifests, Forgotten Backup Chip,
+Lucidrine Booster Drug und Mantis, Fixer-at-Large.

@@ -27,6 +27,8 @@ import {
 } from "../install/runner-rig-install-finalization";
 import * as nonSearchMemory from "../install/nonsearch-program-install-memory";
 import { parseTemporaryInstallChoiceSource } from "./hidden-zone-nonsearch-choice-source";
+import { buildCanonicalPaidIceRezActions } from "../run/run-rez-window";
+import { rezCard as executeRezCard } from "../rez/rez-card";
 
 export function createHiddenZoneNonSearchRuntime(
   deps: RuntimeDeps,
@@ -320,8 +322,9 @@ export function createHiddenZoneNonSearchRuntime(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const targets = deps.unrezzedInstalledIceIds(state);
-    if (targets.length === 0) throw new Error("Keine unrezzte ICE als Ziel.");
+    const targets = installedIceIds(state);
+    if (targets.length === 0)
+      throw new Error("Keine installierte ICE als Ziel.");
     state.pendingChoice = {
       choiceId: `card_implementation_corp_choice_rez_or_trash_ice_target_${state.stateVersion + 1}`,
       side: "runner",
@@ -344,6 +347,32 @@ export function createHiddenZoneNonSearchRuntime(
     };
   }
 
+  function installedIceIds(state: GameState): CardInstanceId[] {
+    return deps
+      .corpInstalledCardIds(state)
+      .filter(
+        (cardId) =>
+          deps.mustInstance(state.cardInstances, cardId).zone.zone ===
+          "serverIce",
+      );
+  }
+
+  function forcedRezActions(
+    state: GameState,
+    iceId: CardInstanceId,
+  ): LegalAction[] {
+    return buildCanonicalPaidIceRezActions(
+      deps.runRezWindowHostForState(state),
+      iceId,
+    ).map((action) => ({
+      ...action,
+      payload: {
+        ...(action.payload ?? {}),
+        forcedRezOrTrashEffect: true,
+      },
+    }));
+  }
+
   function resolveCorpChoiceRezOrTrashIceTargetChoice(
     state: GameState,
     legalAction: LegalAction,
@@ -358,34 +387,31 @@ export function createHiddenZoneNonSearchRuntime(
     )
       throw new Error("Es ist keine Rez-oder-Trash-Ziel-Choice offen.");
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-    if (
-      !selectedId ||
-      !deps.unrezzedInstalledIceIds(state).includes(selectedId)
-    )
-      throw new Error("Das Ziel ist keine installierte unrezzte ICE.");
+    if (!selectedId || !installedIceIds(state).includes(selectedId))
+      throw new Error("Das Ziel ist keine installierte ICE.");
     const serverLabel =
       deps.publicServerLabelForCard(state, selectedId) ?? "Server";
     const icePositionLabel =
       publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
     const choiceTargetLabel = icePositionLabel || "ICE";
+    const rezActions = forcedRezActions(state, selectedId);
     state.pendingChoice = {
       choiceId: `card_implementation_corp_choice_rez_or_trash_ice_decision_${state.stateVersion + 1}`,
       side: "corp",
       source: `card_implementation.corp_choice_rez_or_trash_ice_decision:${selectedId}:${state.stateVersion + 1}`,
-      prompt: `Rez-oder-Trash-Entscheidung: ${choiceTargetLabel} rezzen oder trashen`,
+      prompt: `Rez-oder-Trash-Entscheidung für ${choiceTargetLabel}`,
       kind: "select_option",
       options: [
-        ...(!deps.mustInstance(state.cardInstances, selectedId).rezzed &&
-        state.corp.credits >= deps.rezCostForCard(state, selectedId)
-          ? [
-              {
-                id: "rez_ice",
-                label: `${choiceTargetLabel} rezzen`,
-                publicLabel: `${choiceTargetLabel} gerezzt`,
-                value: "rez_ice",
-              },
-            ]
-          : []),
+        ...rezActions.map((action, index) => {
+          const optionId =
+            rezActions.length === 1 ? "rez_ice" : `rez_ice_${index + 1}`;
+          return {
+            id: optionId,
+            label: action.label,
+            publicLabel: `${choiceTargetLabel} gerezzt`,
+            value: optionId,
+          };
+        }),
         {
           id: "trash_ice",
           label: `${choiceTargetLabel} trashen`,
@@ -428,8 +454,6 @@ export function createHiddenZoneNonSearchRuntime(
         "serverIce"
     )
       throw new Error("Das Ziel ist nicht mehr installierte ICE.");
-    if (deps.mustInstance(state.cardInstances, targetIceId).rezzed)
-      throw new Error("Das Ziel ist nicht mehr unrezzte ICE.");
     const selected =
       deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     const definition = deps.definitionFor(state, targetIceId);
@@ -437,21 +461,27 @@ export function createHiddenZoneNonSearchRuntime(
       deps.publicServerLabelForCard(state, targetIceId) ?? "Server";
     const icePositionLabel =
       publicIcePositionLabelForCard(state, targetIceId) ?? serverLabel;
-    if (selected === "rez_ice") {
+    if (selected === "rez_ice" || selected.startsWith("rez_ice_")) {
       if (deps.mustInstance(state.cardInstances, targetIceId).rezzed)
         throw new Error("Die ICE ist bereits gerezzt.");
-      const rezCost = deps.rezCostForCard(state, targetIceId);
-      if (state.corp.credits < rezCost)
-        throw new Error("Die Korp kann die ICE nicht rezzen.");
-      deps.spendCredits(state, "corp", rezCost);
-      state.cardInstances[targetIceId] = {
-        ...deps.mustInstance(state.cardInstances, targetIceId),
-        rezzed: true,
-        faceup: true,
-      };
+      const rezActions = forcedRezActions(state, targetIceId);
+      const selectedIndex =
+        selected === "rez_ice"
+          ? 0
+          : Number.parseInt(selected.slice("rez_ice_".length), 10) - 1;
+      const rezAction = rezActions[selectedIndex];
+      if (!rezAction)
+        throw new Error("Die gewählte Rez-Option ist nicht mehr legal.");
+      const rezCost = rezAction.costs[0]?.credits ?? 0;
       delete state.pendingChoice;
+      executeRezCard(deps.rezCardHost(state), targetIceId, false, rezAction, {
+        runContinuation: "none",
+      });
+      const rezPayload = { ...(rezAction.payload ?? {}) };
+      delete rezPayload.forcedRezOrTrashEffect;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
+        ...rezPayload,
         v1922RunnerEventAbility: "force_rez_or_trash_ice",
         corpDecision: "rez_ice",
         rezCostPaid: rezCost,
@@ -459,6 +489,10 @@ export function createHiddenZoneNonSearchRuntime(
         targetServerLabel: serverLabel,
         targetIcePositionLabel: icePositionLabel,
       };
+      legalAction.resolvedEffects = [
+        ...(legalAction.resolvedEffects ?? []),
+        ...(rezAction.resolvedEffects ?? []),
+      ];
       return;
     }
     if (selected !== "trash_ice")

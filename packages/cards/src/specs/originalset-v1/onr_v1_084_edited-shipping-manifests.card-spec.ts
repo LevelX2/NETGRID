@@ -97,21 +97,7 @@ export const cardSpec = {
         use: "economy.card",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey("abilities_on_play_make_run"),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "medium",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

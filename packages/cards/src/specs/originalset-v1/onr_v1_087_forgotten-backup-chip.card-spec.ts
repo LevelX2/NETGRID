@@ -74,10 +74,6 @@ export const cardSpec = {
         role: "enabler",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.search.breaker",
-      },
-      {
         kind: "line_support",
         lineKey: "runner.search.breaker",
         support: "supports",
