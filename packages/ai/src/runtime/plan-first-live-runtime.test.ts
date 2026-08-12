@@ -470,6 +470,92 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
+  it("preserves matchpoint liquidity instead of installing overlapping breaker coverage", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-ms-todon",
+      "runner",
+      "install_card",
+      "Install MS-todon",
+      { credits: 4, clicks: 1 },
+      {
+        source: "ms-todon-card",
+        payload: {
+          cardId: "ms-todon-card",
+          sourceDefinitionId: "onr_classic_029_ms-todon",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [install, credit]);
+    input.playerView.own.credits = 10;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.own.rig = [
+      visibleCard("installed-matador", "runner", "program", {
+        definitionId: "onr_classic_028_matador",
+        title: "Matador",
+        strength: 0,
+        subtypes: ["icebreaker", "killer"],
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("ms-todon-card", "runner", "program", {
+        definitionId: "onr_classic_029_ms-todon",
+        title: "MS-todon",
+        installCost: 4,
+        strength: 2,
+        subtypes: ["icebreaker", "killer", "noisy"],
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "ms-todon-card",
+          definitionId: "onr_classic_029_ms-todon",
+          legalActionId: install.actionId,
+          priority: 1_000,
+          developmentRole: "breaker_or_rig_piece",
+          strategicFit: "strong",
+          currentNeed: "useful_now",
+          cardType: "program",
+          installCost: 4,
+          creditsAfterInstall: 6,
+          duplicateRole: "useful_backup",
+          finalInstallFit: 500,
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 7,
+        desiredCreditReserve: 12,
+        fundingNeed: true,
+        evidence: ["test_matchpoint_remote_reserve"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "runner_matchpoint_remote_reserve_blocks_overlapping_breaker_install",
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "runner.develop_board_and_hand" &&
+          JSON.stringify(instance.moduleState).includes("ms-todon-card"),
+      ),
+    ).toBe(false);
+  });
+
   it("keeps Social Engineering exclusively targeted-bypass-owned even if future semantics resemble central payoff development", () => {
     resetResidentPlanPortfolioMemory();
     const social = legalAction(
@@ -9624,10 +9710,8 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId:
-        "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId:
-        "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
     });
   });
 
@@ -13543,7 +13627,6 @@ describe("authoritative plan-first live runtime", () => {
         needKind: "cost_ineffective_coverage",
         targetServerId: "hq",
         requesterModuleId: "runner.pressure_central",
-        requesterPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
         currentKnownPathCost: 10,
         currentPathFundingGap: 6,
         recoveryMode: "install_visible_answer",
@@ -13656,6 +13739,132 @@ describe("authoritative plan-first live runtime", () => {
       gap: {
         recoveryMode: "search_known_alternative",
         directSearchActionIds: [temple.actionId],
+      },
+    });
+  });
+
+  it("quotes a searched breaker across the complete known multi-ICE path", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple-for-rent-i-con",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const input = costIneffectiveWallInput([
+      temple,
+      run,
+      costIneffectiveCoverageCreditAction(),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+    ];
+    input.playerView.servers[0] = server("hq", [
+      quotedFixtureIce({
+        instanceId: "hq-keeper",
+        definitionId: "onr_v1_252_keeper",
+        title: "Keeper",
+        strength: 4,
+        subtypes: ["code gate"],
+      }),
+      quotedFixtureIce({
+        instanceId: "hq-wall-of-static",
+        definitionId: "onr_v1_279_wall-of-static",
+        title: "Wall of Static",
+        strength: 2,
+        subtypes: ["wall"],
+      }),
+    ]);
+    const target = costIneffectiveWallTarget(run.actionId);
+    target.pathCost = 12;
+    target.routeQuote = {
+      ...target.routeQuote,
+      knownCost: 12,
+      guaranteedKnownCost: 12,
+      fundingGap: 8,
+    };
+    target.evidence = [
+      "path_passability:blocked_unpayable",
+      "path_cost:12",
+      "visible_break_cost:12",
+    ];
+    const capabilities = costIneffectiveCoverageCapabilities("in_deck");
+    capabilities.runner!.breakerInventory = [
+      capabilities.runner!.breakerInventory[0]!,
+      {
+        cardId: "onr_classic_031_rent-i-con",
+        title: "Rent-I-Con",
+        coverage: ["universal"],
+        installCost: 3,
+        baseStrength: 2,
+        breakCost: 1,
+        pumpCost: 1,
+        risks: ["temporary_resource"],
+        restrictions: [],
+        quantityKnownInDeck: 2,
+        locations: ["in_deck"],
+        confidence: "high",
+        evidence: ["test_known_rent_i_con"],
+      },
+    ];
+    capabilities.runner!.searchAccess = {
+      tools: [
+        {
+          cardId: "onr_v1_114_temple-microcode-outlet",
+          title: "Temple Microcode Outlet",
+          status: "in_hand",
+          canSearchPrograms: true,
+          canSearchBreakers: true,
+          legalNow: true,
+          confidence: "high",
+          evidence: ["test_tutor_visible"],
+        },
+      ],
+      canSearchProgramsNow: true,
+      canSearchBreakersNow: true,
+      evidence: ["test_tutor_visible"],
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => capabilities,
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: temple.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    const coverage = residentPlanPortfolioSnapshot(input)?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    expect(coverage?.moduleState).toMatchObject({
+      phase: "search_answer",
+      gap: {
+        recoveryEvidenceCodes: expect.arrayContaining([
+          "coverage_efficiency_deck_alternative:onr_classic_031_rent-i-con",
+          "coverage_efficiency_deck_alternative_operating_cost:4",
+          "coverage_efficiency_deck_alternative_total_known_cost:7",
+        ]),
+        directSearchChoiceBindings: [
+          {
+            actionId: temple.actionId,
+            targetDefinitionId: "onr_classic_031_rent-i-con",
+          },
+        ],
       },
     });
   });

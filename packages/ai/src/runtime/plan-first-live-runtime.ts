@@ -1600,6 +1600,60 @@ function runnerCoverageOwnedActionIds(
   );
 }
 
+const RUNNER_BREAKER_COVERAGE_ROLES = [
+  "breaker_wall",
+  "breaker_code_gate",
+  "breaker_sentry",
+  "breaker_ap",
+  "breaker_trace",
+  "breaker_universal",
+] as const satisfies readonly RunnerCoverageGapSignal["requiredRole"][];
+
+function runnerMatchpointReserveBlocksOverlappingBreakerInstall(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  coverageOwnedActionIds: ReadonlySet<string>,
+  coverageGaps: readonly RunnerCoverageGapSignal[],
+): boolean {
+  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+    input,
+    candidate,
+  );
+  const sourceRoles = sourceDefinitionId
+    ? rolesForDeckDoctrineCard(sourceDefinitionId)
+    : [];
+  const ownsTargetedCoverageNeed = coverageGaps.some(
+    (gap) =>
+      gap.targetServerId !== undefined &&
+      ((gap.installActionIds ?? []).includes(candidate.actionId) ||
+        (gap.answerInHand &&
+          runnerRolesCoverCoverageGap(sourceRoles, gap.requiredRole))),
+  );
+  if (
+    candidate.semanticActionType !== "install.card" ||
+    (coverageOwnedActionIds.has(candidate.actionId) &&
+      ownsTargetedCoverageNeed) ||
+    runnerTerminalContestThreat(input)?.kind !== "opponent_matchpoint" ||
+    candidate.costProfile.costKnownStatus !== "known" ||
+    (candidate.costProfile.creditCost ?? 0) <= 0
+  ) {
+    return false;
+  }
+  if (!sourceDefinitionId) return false;
+  const candidateCoverage = RUNNER_BREAKER_COVERAGE_ROLES.filter((role) =>
+    runnerRolesCoverCoverageGap(sourceRoles, role),
+  );
+  if (candidateCoverage.length === 0) return false;
+
+  return (input.playerView.own.rig ?? []).some((installedCard) => {
+    if (!installedCard.known || !installedCard.definitionId) return false;
+    const installedRoles = rolesForDeckDoctrineCard(installedCard.definitionId);
+    return candidateCoverage.some((role) =>
+      runnerRolesCoverCoverageGap(installedRoles, role),
+    );
+  });
+}
+
 function runnerProgramSearchRecentlyResolved(input: AiDecisionInput): boolean {
   return uniqueBy(
     [...input.playerView.publicEvents, ...input.eventTail],
@@ -1896,6 +1950,21 @@ export function runnerActionDispositions(
         candidate.actionId,
         "runner.economy",
         "runner_self_damage_economy_requires_bound_parent_funding",
+      );
+      continue;
+    }
+    if (
+      runnerMatchpointReserveBlocksOverlappingBreakerInstall(
+        input,
+        candidate,
+        coverageOwnedActionIds,
+        domain.coverageGaps,
+      )
+    ) {
+      add(
+        candidate.actionId,
+        "runner.develop_board_and_hand",
+        "runner_matchpoint_remote_reserve_blocks_overlapping_breaker_install",
       );
       continue;
     }
@@ -4055,6 +4124,11 @@ function buildRunnerDomain(
   const rejectedCreditBankActionIds = new Set(
     creditBanks.flatMap((signal) => signal.rejectedActionIds ?? []),
   );
+  const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
+    input,
+    candidates,
+    coverageGaps,
+  );
   const cardDevelopments: RunnerPlanDomain["developments"] =
     handDevelopment.flatMap((evaluation): RunnerPlanDomain["developments"] => {
       const executableNow =
@@ -4100,6 +4174,17 @@ function buildRunnerDomain(
           )
         : undefined;
       if (executableNow && !candidate) return [];
+      if (
+        candidate !== undefined &&
+        runnerMatchpointReserveBlocksOverlappingBreakerInstall(
+          input,
+          candidate,
+          coverageOwnedActionIds,
+          coverageGaps,
+        )
+      ) {
+        return [];
+      }
       if (
         candidate !== undefined &&
         runnerStrategicExchangeKinds(candidate).includes("self_damage")
@@ -4177,11 +4262,6 @@ function buildRunnerDomain(
       ) {
         return [];
       }
-      const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
-        input,
-        candidates,
-        coverageGaps,
-      );
       if (
         candidate !== undefined &&
         coverageOwnedActionIds.has(candidate.actionId)
@@ -5670,11 +5750,7 @@ function runnerExactFundingRouteContract(
   });
   const result = searchFundingRoutes({
     demand,
-    candidates: runnerExactFundingRouteCandidates(
-      candidates,
-      request,
-      demand,
-    ),
+    candidates: runnerExactFundingRouteCandidates(candidates, request, demand),
     remainingClicks: request.remainingClicks,
     maxSteps: Math.max(1, request.remainingClicks),
     maxRoutes: 8,
@@ -5753,8 +5829,8 @@ function runnerExactFundingRouteCandidates(
           (right.economyProjection?.netLiquidCreditGain ?? 0) ||
         left.actionId.localeCompare(right.actionId),
     );
-  const smallestSufficientSelfDamage = selfDamageCandidates.find(
-    (candidate) => routeCoversDemand([...ordinary, candidate]),
+  const smallestSufficientSelfDamage = selfDamageCandidates.find((candidate) =>
+    routeCoversDemand([...ordinary, candidate]),
   );
   return smallestSufficientSelfDamage === undefined
     ? ordinary
@@ -16702,6 +16778,7 @@ function uniqueCoverageGaps(
       deckCapabilities,
       role,
       costRecovery?.deckHasAlternative,
+      costRecovery?.targetDefinitionId,
     );
     const deckHasAnswer =
       visibleAnswer !== undefined ||
@@ -16885,6 +16962,7 @@ function uniqueCoverageGaps(
 type RunnerCostEffectiveCoverageRecovery = Readonly<{
   visibleAnswer?: VisibleCard;
   deckHasAlternative: boolean;
+  targetDefinitionId?: string;
   recoveryMode:
     | "install_visible_answer"
     | "search_known_alternative"
@@ -16970,6 +17048,8 @@ function runnerCostEffectiveCoverageRecovery(
     );
   const visibleAnswer = visibleOptions[0];
   const deckAlternative = runnerCostEffectiveDeckCoverageAlternative(
+    input,
+    server,
     deckCapabilities,
     role,
     installedDefinitionIds,
@@ -17003,12 +17083,13 @@ function runnerCostEffectiveCoverageRecovery(
     : searchRouteAvailable
       ? "search_known_alternative"
       : "draw_for_known_role";
-  const deckAlternativeOperatingCost = deckAlternative
-    ? runnerBreakerOperatingCost(deckAlternative)
-    : undefined;
+  const deckAlternativeOperatingCost = deckAlternative?.breakCost;
   return {
     ...(visibleAnswer ? { visibleAnswer: visibleAnswer.card } : {}),
     deckHasAlternative: deckAlternative !== undefined,
+    ...(deckAlternative
+      ? { targetDefinitionId: deckAlternative.breaker.cardId }
+      : {}),
     recoveryMode,
     evidenceCodes: [
       `coverage_efficiency_target:${evaluation.targetServerId}`,
@@ -17025,9 +17106,9 @@ function runnerCostEffectiveCoverageRecovery(
         : []),
       ...(deckAlternative && deckAlternativeOperatingCost !== undefined
         ? [
-            `coverage_efficiency_deck_alternative:${deckAlternative.cardId}`,
+            `coverage_efficiency_deck_alternative:${deckAlternative.breaker.cardId}`,
             `coverage_efficiency_deck_alternative_operating_cost:${deckAlternativeOperatingCost}`,
-            `coverage_efficiency_deck_alternative_total_known_cost:${(deckAlternative.installCost ?? 0) + deckAlternativeOperatingCost}`,
+            `coverage_efficiency_deck_alternative_total_known_cost:${deckAlternative.totalCost}`,
           ]
         : []),
       `coverage_efficiency_recovery_mode:${recoveryMode}`,
@@ -17036,29 +17117,29 @@ function runnerCostEffectiveCoverageRecovery(
 }
 
 function runnerCostEffectiveDeckCoverageAlternative(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
   deckCapabilities: DeckCapabilityProfile,
   role: RunnerCoverageGapSignal["requiredRole"],
   installedDefinitionIds: ReadonlySet<string>,
   currentKnownPathCost: number,
-): BreakerCapability | undefined {
+):
+  | { breaker: BreakerCapability; breakCost: number; totalCost: number }
+  | undefined {
   const inventory = deckCapabilities.runner?.breakerInventory ?? [];
-  const installedOperatingCosts = inventory
-    .filter(
-      (breaker) =>
-        installedDefinitionIds.has(breaker.cardId) &&
-        breaker.locations.includes("installed") &&
-        runnerBreakerCapabilityCoversRole(breaker, role),
-    )
-    .flatMap((breaker) => {
-      const cost = runnerBreakerOperatingCost(breaker);
-      return cost === undefined ? [] : [cost];
-    });
-  if (installedOperatingCosts.length === 0) return undefined;
-  const currentOperatingCost = Math.min(...installedOperatingCosts);
   return inventory
-    .filter((breaker) => {
-      const operatingCost = runnerBreakerOperatingCost(breaker);
-      return (
+    .flatMap((breaker) => {
+      const projectedBreaker = runnerVisibleDeckBreaker(breaker);
+      if (!projectedBreaker) return [];
+      const path = assessKnownRezzedIcePath(
+        server.ice,
+        [...(input.playerView.own.rig ?? []), projectedBreaker],
+        Math.max(currentKnownPathCost, input.playerView.own.credits),
+        server.root,
+        input.playerView.opponent.credits,
+      );
+      const breakCost = path.visibleBreakCost;
+      const eligible =
         breaker.confidence === "high" &&
         breaker.quantityKnownInDeck > 0 &&
         breaker.locations.includes("in_deck") &&
@@ -17066,19 +17147,57 @@ function runnerCostEffectiveDeckCoverageAlternative(
         runnerBreakerCapabilityCoversRole(breaker, role) &&
         Number.isSafeInteger(breaker.installCost) &&
         (breaker.installCost ?? -1) >= 0 &&
-        operatingCost !== undefined &&
-        operatingCost < currentOperatingCost &&
-        (breaker.installCost ?? 0) + operatingCost < currentKnownPathCost
-      );
+        breakCost !== undefined &&
+        path.canReachAccess &&
+        (breaker.installCost ?? 0) + breakCost < currentKnownPathCost;
+      return eligible
+        ? [
+            {
+              breaker,
+              breakCost,
+              totalCost: (breaker.installCost ?? 0) + breakCost,
+            },
+          ]
+        : [];
     })
     .sort(
       (left, right) =>
-        (left.installCost ?? Number.POSITIVE_INFINITY) +
-          (runnerBreakerOperatingCost(left) ?? Number.POSITIVE_INFINITY) -
-          ((right.installCost ?? Number.POSITIVE_INFINITY) +
-            (runnerBreakerOperatingCost(right) ?? Number.POSITIVE_INFINITY)) ||
-        left.cardId.localeCompare(right.cardId),
+        left.totalCost - right.totalCost ||
+        left.breaker.cardId.localeCompare(right.breaker.cardId),
     )[0];
+}
+
+function runnerVisibleDeckBreaker(
+  breaker: BreakerCapability,
+): VisibleCard | undefined {
+  const definition = CARD_DEFINITIONS_BY_ID[breaker.cardId];
+  if (
+    !definition ||
+    definition.side !== "runner" ||
+    definition.type !== "program"
+  ) {
+    return undefined;
+  }
+  return {
+    instanceId: `deck-coverage:${breaker.cardId}`,
+    definitionId: breaker.cardId,
+    title: definition.title,
+    owner: "runner",
+    controller: "runner",
+    type: "program",
+    subtypes: [...(definition.subtypes ?? [])],
+    known: true,
+    rezzed: true,
+    ...(typeof definition.strength === "number"
+      ? { strength: definition.strength }
+      : {}),
+    ...(typeof breaker.installCost === "number"
+      ? { installCost: breaker.installCost }
+      : {}),
+    ...(typeof definition.memoryCost === "number"
+      ? { memoryCost: definition.memoryCost }
+      : {}),
+  };
 }
 
 function runnerBreakerCapabilityCoversRole(
@@ -17090,20 +17209,6 @@ function runnerBreakerCapabilityCoversRole(
     breaker.coverage.includes(coverage) ||
     breaker.coverage.includes("universal")
   );
-}
-
-function runnerBreakerOperatingCost(
-  breaker: BreakerCapability,
-): number | undefined {
-  if (
-    !Number.isSafeInteger(breaker.breakCost) ||
-    (breaker.breakCost ?? -1) < 0 ||
-    !Number.isSafeInteger(breaker.pumpCost) ||
-    (breaker.pumpCost ?? -1) < 0
-  ) {
-    return undefined;
-  }
-  return (breaker.breakCost ?? 0) + (breaker.pumpCost ?? 0);
 }
 
 function runnerCoverageInstallActionValues(
@@ -17325,6 +17430,7 @@ function coverageSupportActionIds(
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
   deckHasStackAnswerOverride?: boolean,
+  targetDefinitionIdOverride?: string,
 ): Pick<
   RunnerCorePlanDomain["coverageGaps"][number],
   | "directSearchActionIds"
@@ -17336,6 +17442,9 @@ function coverageSupportActionIds(
   const deckHasStackAnswer =
     deckHasStackAnswerOverride ??
     runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole);
+  const targetDefinitionId =
+    targetDefinitionIdOverride ??
+    runnerPreferredCoverageSearchDefinitionId(deckCapabilities, requiredRole);
   const recoveryBindings = candidates.flatMap((candidate) => {
     const target = runnerCoverageRecoveryTarget(input, candidate, requiredRole);
     return target ? [{ candidate, target }] : [];
@@ -17478,7 +17587,9 @@ function coverageSupportActionIds(
                         }
                       : {}),
                   }
-                : {}),
+                : targetDefinitionId
+                  ? { targetDefinitionId }
+                  : {}),
             },
           ]
         : [];
@@ -17495,6 +17606,26 @@ function coverageSupportActionIds(
       ...sideSafeRoleBasicDraws,
     ].map((candidate) => candidate.actionId),
   };
+}
+
+function runnerPreferredCoverageSearchDefinitionId(
+  deckCapabilities: DeckCapabilityProfile,
+  requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
+): string | undefined {
+  return (deckCapabilities.runner?.breakerInventory ?? [])
+    .filter(
+      (breaker) =>
+        breaker.confidence === "high" &&
+        breaker.quantityKnownInDeck > 0 &&
+        breaker.locations.includes("in_deck") &&
+        runnerBreakerCapabilityCoversRole(breaker, requiredRole),
+    )
+    .sort(
+      (left, right) =>
+        (left.installCost ?? Number.POSITIVE_INFINITY) -
+          (right.installCost ?? Number.POSITIVE_INFINITY) ||
+        left.cardId.localeCompare(right.cardId),
+    )[0]?.cardId;
 }
 
 function runnerCoverageRecoveryTarget(
