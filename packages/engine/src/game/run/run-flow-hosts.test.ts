@@ -257,6 +257,7 @@ function hostFor(calls: string[]): RunFlowHost {
       installedRunnerVirusSourceIds: () => [],
       virusCounterImplementationForCard: () => undefined,
       resolveTestSpinRunEnd: () => ({ handled: false }),
+      rezIceWithoutRunContinuation: () => undefined,
     },
   };
 }

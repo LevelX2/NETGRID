@@ -437,6 +437,11 @@ export type RunFlowHost = {
       run: NonNullable<GameState["run"]>,
       legalAction?: LegalAction,
     ) => { handled: boolean; stateChanged?: boolean };
+    rezIceWithoutRunContinuation: (
+      state: GameState,
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
   };
 };
 

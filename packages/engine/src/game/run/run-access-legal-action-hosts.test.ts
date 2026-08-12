@@ -306,6 +306,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         snapshotPersistentStealCostModifiersForSource: () =>
           calls.push("snapshotStealCost"),
         archivesAccessRequiresDecisionOrEffect: () => false,
+        rezIceWithoutRunContinuation: () => undefined,
         installedRevealHelperCount: () => 0,
       },
     },

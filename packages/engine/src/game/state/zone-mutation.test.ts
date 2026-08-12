@@ -183,6 +183,7 @@ describe("zone-mutation", () => {
     );
 
     delete current.run;
+    current.spyCountersByServer = { remote_2: 1 };
     cleanupEmptyRemotes(current);
     expect(current.corp.servers.map((server) => server.id)).not.toContain(
       "remote_2",
@@ -190,5 +191,6 @@ describe("zone-mutation", () => {
     expect(current.corp.servers.map((server) => server.id)).toContain(
       "remote_1",
     );
+    expect(current.spyCountersByServer?.remote_2).toBeUndefined();
   });
 });

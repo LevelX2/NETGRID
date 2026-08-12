@@ -19620,14 +19620,14 @@
     {
       "cardId": "onr_v1_022_emergency-self-construct",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c969784f4eceb443",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c224e8a978622705",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a7fbb7122ccb908e",
       "hint": {
         "cardId": "onr_v1_022_emergency-self-construct",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_upgrade_modifier"],
+        "planRoles": [],
         "valueHints": {},
         "strategicRole": ["emergency_tool"],
         "strategyAnchors": ["runner.survival_defense"],
@@ -19661,7 +19661,7 @@
     },
     {
       "cardId": "onr_v1_023_evil-twin",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c245c6fe2a4ee542",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:67f2e024ddca61e0",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:81ffcd8f914b5d23",
       "hint": {
         "cardId": "onr_v1_023_evil-twin",
@@ -19938,7 +19938,7 @@
     },
     {
       "cardId": "onr_v1_028_force-shield",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2ecc3ecf5b5adda3",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f8f942a72e5d2023",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
       "hint": {
         "cardId": "onr_v1_028_force-shield",
@@ -19986,14 +19986,14 @@
     {
       "cardId": "onr_v1_029_gremlins",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:446aaafe4c6928a2",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1104cbb1bc8a5a55",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:29a7eb31aff65d55",
       "hint": {
         "cardId": "onr_v1_029_gremlins",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_upgrade_modifier"],
+        "planRoles": ["pressure_hq"],
         "valueHints": {},
         "actionCapacityProfiles": [
           {
@@ -20169,7 +20169,7 @@
     },
     {
       "cardId": "onr_v1_032_i-spy",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:64f4ccd50a4239d9",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d5601ff34a347037",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:11e6a92f0e3e903b",
       "hint": {
         "cardId": "onr_v1_032_i-spy",
@@ -22082,7 +22082,7 @@
     },
     {
       "cardId": "onr_v1_061_shield",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1ac0f903125c267f",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5d439287db2a738b",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:30c12475c5d013c9",
       "hint": {
         "cardId": "onr_v1_061_shield",

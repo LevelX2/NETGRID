@@ -97,6 +97,7 @@ import {
   type EncounterEntryHost,
 } from "./encounter-entry";
 import {
+  buildCanonicalPaidIceRezActions,
   corpRunRootRezActionsAvailable,
   isCorpRunRootRezWindowOpen,
   passCorpRunRootRezWindow,
@@ -594,6 +595,19 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
               )
             : host.payment.spendCredits(state, side, amount),
         gainRunner: (amount) => host.payment.credits(state, "runner", amount),
+      },
+      rez: {
+        canonicalPaidActionsForIce: (cardId) =>
+          buildCanonicalPaidIceRezActions(
+            runRezWindowHostForState(state),
+            cardId,
+          ),
+        executeCanonicalPaidRezWithoutRunContinuation: (cardId, legalAction) =>
+          host.callbacks.rezIceWithoutRunContinuation(
+            state,
+            cardId,
+            legalAction,
+          ),
       },
       counters: {
         cardCounter: (cardId, counterType) =>

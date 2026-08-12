@@ -124,6 +124,9 @@ export function createRemote(state: GameState): CorpServer {
 }
 
 export function cleanupEmptyRemotes(state: GameState): void {
+  const previousServerIds = new Set(
+    state.corp.servers.map((server) => server.id),
+  );
   state.corp.servers = state.corp.servers.filter(
     (server) =>
       server.kind !== "remote" ||
@@ -131,10 +134,18 @@ export function cleanupEmptyRemotes(state: GameState): void {
       server.root.length > 0 ||
       state.run?.attackedServerId === server.id,
   );
+  const remainingServerIds = new Set(
+    state.corp.servers.map((server) => server.id),
+  );
+  const collapsedServerIds = [...previousServerIds].filter(
+    (serverId) => !remainingServerIds.has(serverId),
+  );
+  if (state.spyCountersByServer && collapsedServerIds.length > 0) {
+    const nextSpyCounters = { ...state.spyCountersByServer };
+    for (const serverId of collapsedServerIds) delete nextSpyCounters[serverId];
+    state.spyCountersByServer = nextSpyCounters;
+  }
   if (state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart) {
-    const remainingServerIds = new Set(
-      state.corp.servers.map((server) => server.id),
-    );
     state.corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart =
       state.corpTurnFlags.fortActivityServerIdsSinceCorpTurnStart.filter(
         (serverId) => remainingServerIds.has(serverId),

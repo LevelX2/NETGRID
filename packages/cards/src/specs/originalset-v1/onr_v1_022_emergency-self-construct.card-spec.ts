@@ -66,10 +66,6 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "remote_upgrade_modifier",
-      },
-      {
         kind: "strategic_role",
         role: "emergency_tool",
       },

@@ -176,6 +176,134 @@ ONR V1 013 Cockroach und ONR V1 017 Deep Thought.
   Executor noch `actionId`.
 - Zurückgestellt: nichts.
 
+## Block 002 – Karten 021 bis 040 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 002` eingeführt.
+
+### ONR V1 022 – Emergency Self-Construct
+
+- Nutzerbefund: Die permanente Meat-Damage-Prevention wurde nach der
+  Flatline-Replacement-Auflösung als optionaler Prevention-Kandidat mit
+  „Nicht verhindern“ angeboten.
+- Evidence: `docs/source/Runnerspoiler 1.0.txt:98-101` bestimmt automatische
+  Prevention allen Meat Damages. Die Errata ab
+  `docs/source/Netrunner Errata 1.70.md:1831` grenzt nur unpreventable Damage
+  aus.
+- Ursache und Korrektur: Der permanente Zustand war im generischen optionalen
+  Event-Modification-Fenster registriert. Er wird jetzt nach vollständigen
+  Replacements und vor optionaler Prevention automatisch auf null angewandt;
+  unpreventable Damage bleibt im direkten Finalresolver außerhalb dieses
+  Pfads. Es entsteht keine Choice.
+- KI-Semantik: Die sachfremde Rolle `remote_upgrade_modifier` wurde entfernt;
+  Survival-Strategie, Emergency-Tool und Line-Support bleiben die führenden
+  Annotationen.
+- Regression: Der bestehende reale Flatline-Zeuge prüft zusätzlich, dass
+  späterer Meat Damage weder Gripverlust noch Pending Choice erzeugt.
+
+### ONR V1 023 – Evil Twin und ONR V1 028 – Force Shield
+
+- Nutzerbefund: „up to 2“ war im CardSpec nicht als wählbare Menge
+  ausgedrückt.
+- Evidence: `docs/source/Runnerspoiler 1.0.txt:104-107` und `118-120` nennen
+  jeweils ausdrücklich bis zu zwei Net und/oder Core Damage.
+- Weitere Karte derselben Vertragsform: Der Sweep über kanonische
+  „up to“-Texte fand ONR V1 061 Shield mit derselben fehlenden
+  Mengenwahlsemantik. Andere Treffer verwenden bereits eigene typisierte
+  Mechaniken.
+- Korrektur: Alle drei Damage-Prevention-Quellen tragen
+  `amountMode: "up_to"`. Der vorhandene generische Prevention-Resolver erzeugt
+  daraus die Teilmengenoptionen und führt weiterhin das gemeinsame
+  Per-Turn-Limit.
+- Regression: CardImplementation-Vertragszeugen sichern Betrag, Modus,
+  Damage-Typen und Turn-Limit für alle drei Karten; die bestehende generische
+  Up-to-Runtime bleibt die einzige Ausführungsautorität.
+
+### ONR V1 026 – False Echo
+
+- Nutzerbefund: Die Runtime lief vom innersten zum äußersten ICE und setzte
+  Rez-Zustand sowie Credits direkt, außerhalb des kanonischen Rez-Lebenszyklus.
+- Evidence: `docs/source/Runnerspoiler 1.0.txt:112-114` verlangt äußerstes ICE
+  zuerst und danach nach innen. Die Errata ab
+  `docs/source/Netrunner Errata 1.70.md:1888` bestätigt die fortlaufende
+  Bezahlbarkeitsprüfung einschließlich verborgener Kosten.
+- Korrektur: Die Serverreihenfolge wird von außen nach innen traversiert. Für
+  jedes bezahlbare ICE wird die aktuelle kanonische Rez-Action samt Quote,
+  variabler Rez-Ausprägung und zusätzlichen Kosten erzeugt und durch
+  `rezCard` ausgeführt. Nur die normale Encounter-Continuation wird für diese
+  bereits erfolgreiche Run-Fortsetzung unterdrückt; On-Rez-Lifecycle,
+  Counter, Rewards und Quotes bleiben vollständig aktiv.
+- Ownership: `runner.convert_run_window` und die bestehende
+  Successful-Run-Continuation bleiben Plan und Executor. Es gibt keinen
+  zweiten Choice- oder Rez-Owner.
+- Regression: Ein Unit-Zeuge prüft die Reihenfolge außen nach innen und die
+  Delegation; ein realer Engine-Zeuge prüft Quotezahlung, beide Rez-Zustände,
+  On-Rez-Runner-Rewards, Replay und StateHash.
+
+### ONR V1 029 – Gremlins und ONR V1 034 – Incubator
+
+- Nutzerbefund: Beide Karten wurden als mögliche quellengebundene
+  Viruscounter gemeldet.
+- Ergebnis: Der mechanische Befund war beim Eingang von Block 002 bereits
+  durch Block 001 und Commit `baba8eee8` erledigt. Beide CardSpecs tragen
+  `counterScope: { kind: "shared_corp_pool" }`; Erzeugung, Verbrauch, Purge,
+  Anzeige und Tests lesen diesen Vertrag. Es wurde kein zweiter Fixpfad
+  angelegt.
+- KI-Semantik: Gremlins' sachfremde Rolle `remote_upgrade_modifier` wurde
+  durch die vorhandene generische Rolle `pressure_hq` ersetzt. Incubator
+  benötigte keine weitere Änderung.
+
+### ONR V1 032 – I Spy
+
+- Nutzerbefund: Der CardSpec-Kindname ließ Kosten, Timing, Counterort,
+  Persistenz, Expose-Ziel und Corp-Entfernungskosten unbestimmt; die Runtime
+  enthielt feste Werte.
+- Evidence: `docs/source/Runnerspoiler 1.0.txt:129-132` nennt Trash der Quelle,
+  den angegriffenen Data Fort, alle Karten innen und darauf sowie Corp-Aktion
+  plus vier Credits. Die Errata ab
+  `docs/source/Netrunner Errata 1.70.md:1952` bestätigt Installation,
+  unmittelbares Erfolgsrun-Timing, Counterverlust beim Fortkollaps und
+  Wirkungsdauer.
+- Korrektur: Der CardSpec-Vertrag parametrisiert Timing, Trash-Kosten,
+  Countertyp, -menge, -ort und -persistenz, Expose-Ziel und -dauer sowie
+  Corp-Klick-, Credit- und Entfernungsmengen. Platzierung, Corp-LegalAction
+  und Resolver lesen denselben Vertrag; kollabierende Remotes entfernen ihre
+  Spy-Counter.
+- Regression: Echte Platzierung, Sichtprojektion, parametrisierte Entfernung
+  und erneute Verdeckung bleiben grün; ein Zonenzeuge sichert den
+  Fortkollaps ab.
+
+### ONR V1 036 – Jackhammer
+
+- Nutzerbefund: Bei mehreren bezahlbaren Stealth-Karten wählte die Runtime
+  still die erste Quelle.
+- Evidence: `docs/source/Runnerspoiler 1.0.txt:146-149` verlangt den Verlust
+  von einer Stealth-Karte, falls möglich; die Auswahl ist damit bei mehreren
+  Quellen spielerbestimmt. Die Errata ab
+  `docs/source/Netrunner Errata 1.70.md:1998` ordnet den Verlust als Folge,
+  nicht als Break-Kosten ein.
+- Korrektur: Der generische Post-Break-Stealth-Vertrag öffnet bei mehreren
+  geeigneten Einzelquellen eine exakt gebundene Engine-Choice. Der bestehende
+  Mehrquellenmodus von Hammer nutzt dieselbe Continuation weiterhin als
+  Verteilung; der Einzelquellenmodus kann nicht über Karten mischen.
+- Weitere Karten derselben Vertragsform: Proteus Fubar und Wrecking Ball
+  verwenden denselben `single_stealth_card`-Vertrag und erhalten damit
+  ebenfalls die Quellenauswahl ohne kartenspezifischen Pfad.
+- Ownership: Die Choice vervollständigt nur die Payload des bereits gewählten
+  Breaks und ändert weder Action, Plan noch Executor.
+- Regression: Zwei geeignete Stealth-Karten erzeugen genau eine Auswahl; nur
+  die gewählte Karte verliert den Credit. Hammers Zwei-Credit-Verteilung,
+  private Choice-Sichtbarkeit und Replay bleiben unverändert grün.
+
+### Unveränderte Karten dieses Blocks
+
+Für Dwarf, Expert Schedule Analyzer, Fait Accompli, Flak, Grubb, Hammer, Imp,
+Invisibility, Japanese Water Torture, Joan of Arc, Krash und Loony Goon ergab
+der Nutzerblock keinen neuen Korrekturbefund. Ihre angrenzenden Verträge wurden
+nur dort als positive Gegenprobe verwendet, wo sie dieselbe generische
+Ausführung teilen.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
@@ -187,6 +315,15 @@ ONR V1 013 Cockroach und ONR V1 017 Deep Thought.
 Die fokussierten Karten-, Engine- und KI-Regressionsläufe, die vier
 Paket-Typechecks, Generator-Checks, Strukturprüfungen, Paketgrenzen,
 Formatprüfung und `git diff --check` sind für Block 001 grün.
+
+Für Block 002 sind Cards- und Engine-Typecheck, der CardSpec-AI-Hint-Check,
+77 direkt angrenzende Unit-/Vertragstests, vier reale Integrationszeugen,
+Formatprüfung und `git diff --check` grün. Ein versehentlich breit gestarteter
+Engine-Lauf bestätigte zusätzlich 1.881 von 1.884 Tests; sein verbleibender
+Draw-Aggregationsfehler ist unabhängig vom Block und betrifft den unveränderten
+Classic-Corp-Test `aggregates mandatory, scored-agenda, selected optional and
+Skivviss draws before SPG`. Nach der gewünschten Begrenzung auf sinnvolle
+Prüfungen wurde dieser Baseline-Drift nicht in den Block gezogen.
 
 Drei breitere Diagnosegates bleiben unabhängig von diesem Block bereits auf
 dem unveränderten Ausgangsstand von `main` rot:

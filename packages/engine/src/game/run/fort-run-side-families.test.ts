@@ -18,6 +18,7 @@ import {
   fortTraceBitPoolSource,
   fortTraceBitPoolTotal,
   resolveAardvarkInterceptionChoice,
+  resolveHammerStealthLossChoice,
   runnerCanUseBreakerOnCurrentFort,
   shouldOpenAardvarkInterception,
   spendFortTraceBitPool,
@@ -430,6 +431,61 @@ describe("fort run side families", () => {
       postBreakStealthLoss: 2,
       v1922RunnerProgramAbility: "post_break_stealth_loss",
     });
+  });
+
+  it("lets Jackhammer choose among multiple eligible stealth cards", () => {
+    const state = makeState();
+    const secondStealthId = "stealth_2" as CardInstanceId;
+    state.runner.rig.programs.push(secondStealthId);
+    state.cardInstances[secondStealthId] = instance(
+      secondStealthId,
+      "stealth_definition",
+      {
+        owner: "runner",
+        controller: "runner",
+        zone: { side: "runner", zone: "rig" },
+        counters: { recurring_credit: 2 },
+      },
+    );
+    const host = hostFor(state);
+    host.breaker.breakAbilityForLegalAction = () =>
+      ({
+        postBreakStealthLoss: 1,
+        postBreakStealthLossSourceMode: "single_stealth_card",
+        postBreakStealthLossOptionalIfUnavailable: true,
+      }) as ReturnType<
+        FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
+      >;
+    const action = { payload: {} } as LegalAction;
+
+    const result = applyPostBreakStealthLoss(
+      host,
+      "breaker_1" as CardInstanceId,
+      action,
+    );
+
+    expect(result.choiceStarted).toBe(true);
+    expect(state.pendingChoice).toMatchObject({
+      source: expect.stringContaining(
+        "v1922.post_break_stealth_loss:single_stealth_card:1:",
+      ),
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(2);
+    const secondOption = state.pendingChoice?.options.find(
+      (option) => option.value === secondStealthId,
+    );
+    expect(secondOption).toBeDefined();
+
+    resolveHammerStealthLossChoice(host, action, {
+      selectedChoices: { selectedOptionIds: [secondOption!.id] },
+    } as unknown as PlayerAction);
+
+    expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(2);
+    expect(
+      state.cardInstances[secondStealthId]?.counters?.recurring_credit,
+    ).toBe(1);
   });
 
   it("applies MS-todon once-per-run tag and all stealth loss", () => {

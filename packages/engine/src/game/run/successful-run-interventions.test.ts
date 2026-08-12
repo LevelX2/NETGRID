@@ -80,6 +80,7 @@ function makeHost(
   trashedCorpIds: CardInstanceId[];
   trashedRunnerIds: CardInstanceId[];
   finishedRuns: boolean[];
+  canonicallyRezzedIceIds: CardInstanceId[];
 } {
   const sourceDefinitionId =
     options.sourceDefinitionId ?? "onr_v1_358_dr-dreff";
@@ -234,6 +235,7 @@ function makeHost(
   const trashedCorpIds: CardInstanceId[] = [];
   const trashedRunnerIds: CardInstanceId[] = [];
   const finishedRuns: boolean[] = [];
+  const canonicallyRezzedIceIds: CardInstanceId[] = [];
   const host: SuccessfulRunInterventionHost = {
     state,
     cards: {
@@ -288,6 +290,33 @@ function makeHost(
       },
       gainRunner: (amount) => {
         state.runner.credits += amount;
+      },
+    },
+    rez: {
+      canonicalPaidActionsForIce: (cardId) => {
+        const cost =
+          definitions[cardInstances[cardId]!.definitionId]!.rezCost ?? 0;
+        if (cardInstances[cardId]!.rezzed || state.corp.credits < cost)
+          return [];
+        return [
+          {
+            side: "corp",
+            type: "rez_ice",
+            source: cardId,
+            costs: [{ credits: cost }],
+            payload: { cardId },
+          } as unknown as LegalAction,
+        ];
+      },
+      executeCanonicalPaidRezWithoutRunContinuation: (cardId, rezAction) => {
+        const cost = rezAction.costs[0]?.credits ?? 0;
+        state.corp.credits -= cost;
+        cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          rezzed: true,
+          faceup: true,
+        };
+        canonicallyRezzedIceIds.push(cardId);
       },
     },
     counters: {
@@ -422,6 +451,7 @@ function makeHost(
     trashedCorpIds,
     trashedRunnerIds,
     finishedRuns,
+    canonicallyRezzedIceIds,
   };
 }
 
@@ -689,6 +719,10 @@ describe("successful run interventions", () => {
       rezzedIceCount: 2,
       rezCostPaid: 6,
     });
+    expect(fixture.canonicallyRezzedIceIds).toEqual([
+      "existing_ice_2",
+      "existing_ice_1",
+    ]);
 
     fixture.state.run = {
       ...(fixture.state.run as NonNullable<GameState["run"]>),
@@ -719,6 +753,9 @@ describe("successful run interventions", () => {
       counterType: "spy",
       addedCounterAmount: 1,
       exposedServerId: "remote_1",
+      exposureTarget: "all_cards_inside_or_on_fort",
+      exposureDuration: "while_counter_present",
+      counterPersistence: "until_fort_collapses",
     });
   });
 

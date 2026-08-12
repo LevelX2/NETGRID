@@ -652,7 +652,7 @@ export function resolvePendingChoice(
     resolvePaidSourceReturnToGripChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")) {
+  if (state.pendingChoice.source.startsWith("v1922.post_break_stealth_loss:")) {
     resolveHammerStealthLossChoice(
       fortRunSideFamiliesHostForState(state),
       legalAction,

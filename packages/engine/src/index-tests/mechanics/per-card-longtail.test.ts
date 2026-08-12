@@ -2603,7 +2603,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.payload?.subroutineIndex === 0,
     );
 
-    expect(state.pendingChoice?.source).toContain("v1922.hammer_stealth_loss");
+    expect(state.pendingChoice?.source).toContain(
+      "v1922.post_break_stealth_loss:any_stealth_cards:2:",
+    );
     expect(state.pendingChoice?.side).toBe("runner");
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.pendingChoice?.minSelections).toBe(2);
@@ -2636,7 +2638,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(cardCounterAmount(state, invisibilityId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
+      hiddenZoneAction: "v1922_post_break_stealth_loss_distribution",
       selectedCount: 2,
       postBreakStealthLoss: 2,
     });
@@ -3535,6 +3537,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
 
     expect(state.run?.successful).toBe(true);
+    state.run!.runnerCreditGainOnCorpRez = 1;
     const accessState = structuredClone(state);
     const falseEcho = mustAction(
       state,
@@ -3561,7 +3564,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) => action.actionId === falseEcho.actionId,
     );
-    expect(state.runner.credits).toBe(8);
+    expect(state.runner.credits).toBe(10);
     expect(state.cardInstances[innerIce]?.rezzed).toBe(true);
     expect(state.cardInstances[outerIce]?.rezzed).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3570,7 +3573,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       rezzedIceCount: 2,
       rezCostPaid: 5,
       successfulRunForceRezCreditCost: 2,
-      runnerCreditsAfter: 8,
+      runnerCreditsAfter: 10,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,

@@ -11,6 +11,10 @@ import type {
 } from "@netgrid/shared";
 import type { ActiveNewDataFortCreationLock } from "../turn/corp-data-fort-lock";
 import type { CardRunnerUtilityLongtailImplementation } from "../../ability-engine/definition-types";
+import {
+  assertFortCounterExposeImplementation,
+  persistentFortCounterExposeImplementation,
+} from "../mechanics/fort-counter-exposure";
 
 export type CounterUtilityTriggerExecutionHost = {
   state: GameState;
@@ -194,30 +198,39 @@ function resolveCorpRemoveSpyCounter(
     "new_remote"
   >;
   const server = host.servers.mustServer(state, serverId);
+  const implementation = persistentFortCounterExposeImplementation();
+  assertFortCounterExposeImplementation(implementation);
   if (host.counters.spyCountersForServer(state, server.id) <= 0)
     throw new Error("In diesem Fort liegt kein Spy-Counter.");
   if (
-    clickCostForAction(legalAction) !== 1 ||
-    creditCostForAction(legalAction) !== 4
+    clickCostForAction(legalAction) !==
+      implementation.corpRemoveAbility.clicks ||
+    creditCostForAction(legalAction) !==
+      implementation.corpRemoveAbility.credits
   )
     throw new Error(
-      "Spy-Counter entfernen kostet genau 1 Aktion und 4 Credits.",
+      "Spy-Counter entfernen hat nicht mehr die festgelegten Kosten.",
     );
-  host.actions.spendClick(state, "corp");
-  host.credits.spend(state, "corp", 4);
+  host.actions.spendClicks(
+    state,
+    "corp",
+    implementation.corpRemoveAbility.clicks,
+  );
+  host.credits.spend(state, "corp", implementation.corpRemoveAbility.credits);
   state.spyCountersByServer = {
     ...(state.spyCountersByServer ?? {}),
     [server.id]: Math.max(
       0,
-      host.counters.spyCountersForServer(state, server.id) - 1,
+      host.counters.spyCountersForServer(state, server.id) -
+        implementation.corpRemoveAbility.amount,
     ),
   };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     serverId: server.id,
     serverLabel: host.servers.publicServerLabel(state, server.id) ?? server.id,
-    counterType: "spy",
-    removedCounterAmount: 1,
+    counterType: implementation.counter.type,
+    removedCounterAmount: implementation.corpRemoveAbility.amount,
     remainingCounters: host.counters.spyCountersForServer(state, server.id),
     removedSpyCounter: true,
     corpCreditsAfter: state.corp.credits,

@@ -1814,6 +1814,40 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("keeps Originalset two-point prevention selectable up to its limit", () => {
+    for (const definitionId of [
+      "onr_v1_023_evil-twin",
+      "onr_v1_028_force-shield",
+      "onr_v1_061_shield",
+    ]) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)
+          ?.damagePreventionSources,
+        definitionId,
+      ).toMatchObject([
+        {
+          kind: "damage_prevention",
+          amount: 2,
+          amountMode: "up_to",
+          limit: { kind: "per_turn", amount: 2 },
+        },
+      ]);
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_061_shield")
+        ?.damagePreventionSources?.[0]?.damageTypes,
+    ).toEqual(["net"]);
+    for (const definitionId of [
+      "onr_v1_023_evil-twin",
+      "onr_v1_028_force-shield",
+    ]) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)
+          ?.damagePreventionSources?.[0]?.damageTypes,
+      ).toEqual(["net", "core"]);
+    }
+  });
+
   it("describes Proteus Phase 3a variable ICE implementations", () => {
     expect(
       cardImplementationForDefinitionId("onr_proteus_020_digiconda")

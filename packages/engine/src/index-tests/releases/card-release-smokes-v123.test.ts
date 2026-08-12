@@ -1542,6 +1542,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     expect(state.spyCountersByServer?.remote_1).toBe(1);
     expect(state.runner.heap).toContain(iSpyId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      addedCounterAmount: 1,
+      counterType: "spy",
+    });
     const runnerSpyServerView = getPlayerView(state, "runner").servers.find(
       (server) => server.id === "remote_1",
     );

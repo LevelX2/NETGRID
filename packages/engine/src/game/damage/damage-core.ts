@@ -33,11 +33,41 @@ export function openDamageResolutionWindow(
 ): boolean {
   // Reihenfolge ist regelrelevant: vollständige Replacements gehen vor
   // Prevention/Boosts; PDCA ist der letzte kartenspezifische Ersatzpfad.
+  if (openReplacementWindow(state, event, legalAction)) return true;
+  if (applyPermanentMeatDamagePrevention(state, event, legalAction))
+    return false;
   return (
-    openReplacementWindow(state, event, legalAction) ||
     openEventModificationWindow(state, event, legalAction) ||
     openPdcaDamageReplacementChoice(state, event, legalAction)
   );
+}
+
+function applyPermanentMeatDamagePrevention(
+  state: GameState,
+  event: ImminentEvent,
+  legalAction: LegalAction,
+): boolean {
+  const originalAmount = Number(event.payload.amount ?? 0);
+  if (
+    state.runnerPermanentMeatDamagePrevention !== true ||
+    event.eventType !== "damage" ||
+    event.affectedSide !== "runner" ||
+    event.payload.damageType !== "meat" ||
+    !Number.isInteger(originalAmount) ||
+    originalAmount <= 0
+  )
+    return false;
+  event.payload = { ...event.payload, amount: 0 };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    eventModificationDecision: "automatic",
+    eventModificationOutcome: "prevented",
+    eventModificationSource: "permanent_meat_damage_prevention",
+    originalAmount,
+    preventedAmount: originalAmount,
+    finalAmount: 0,
+  };
+  return true;
 }
 
 export function resolveDamageOperation(

@@ -58,6 +58,13 @@ export type SuccessfulRunInterventionHost = {
     spend: (side: "corp" | "runner", amount: number) => void;
     gainRunner: (amount: number) => void;
   };
+  rez: {
+    canonicalPaidActionsForIce: (cardId: CardInstanceId) => LegalAction[];
+    executeCanonicalPaidRezWithoutRunContinuation: (
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
+  };
   counters: {
     cardCounter: (cardId: CardInstanceId, type: string) => number;
     addCardCounter: (

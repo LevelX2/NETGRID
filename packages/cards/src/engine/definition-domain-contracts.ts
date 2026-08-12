@@ -313,6 +313,23 @@ export type CardRunnerUtilityLongtailImplementation =
     }
   | {
       kind: "successful_run_fort_counter_expose";
+      timing: "immediately_after_successful_run_on_that_fort";
+      cost: { kind: "trash_source" };
+      counter: {
+        type: "spy";
+        amount: number;
+        location: "attacked_data_fort";
+        persistence: "until_fort_collapses";
+      };
+      exposure: {
+        target: "all_cards_inside_or_on_fort";
+        duration: "while_counter_present";
+      };
+      corpRemoveAbility: {
+        clicks: number;
+        credits: number;
+        amount: number;
+      };
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

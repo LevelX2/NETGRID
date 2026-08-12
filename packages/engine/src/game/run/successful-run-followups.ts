@@ -19,6 +19,10 @@ import {
 } from "../../ability-engine/card-implementation-primitives";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
+import {
+  assertFortCounterExposeImplementation,
+  fortCounterExposeImplementationForDefinition,
+} from "../mechanics/fort-counter-exposure";
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 import type {
   ActiveRun,
@@ -246,20 +250,21 @@ export function resolveSuccessfulRunForceRez(
     throw new Error("False Echo wurde fuer diesen Run bereits genutzt.");
   const server = host.servers.mustServer(serverId);
   if (abilityCost > 0) host.credits.spend("runner", abilityCost);
-  const checkedIceIds = server.ice.slice();
+  const checkedIceIds = server.ice.slice().reverse();
   let rezzedCount = 0;
   let rezCostPaid = 0;
   for (const iceId of checkedIceIds) {
     const instance = host.cards.cardInstanceFor(iceId);
     if (instance.rezzed) continue;
-    const cost = host.costs.rezCostForCard(iceId);
-    if (host.state.corp.credits < cost) continue;
-    host.credits.spend("corp", cost);
-    host.state.cardInstances[iceId] = {
-      ...instance,
-      rezzed: true,
-      faceup: true,
+    const rezAction = host.rez.canonicalPaidActionsForIce(iceId)[0];
+    if (!rezAction) continue;
+    rezAction.payload = {
+      ...(rezAction.payload ?? {}),
+      successfulRunForceRezQuote: true,
+      serverId,
     };
+    const cost = host.costs.creditCostForAction(rezAction);
+    host.rez.executeCanonicalPaidRezWithoutRunContinuation(iceId, rezAction);
     rezzedCount += 1;
     rezCostPaid += cost;
   }
@@ -359,12 +364,12 @@ export function resolveSuccessfulRunFortCounterExpose(
   >;
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("I Spy ist nicht installiert.");
-  if (
-    runnerUtilityLongtailKindForDefinition(
-      host.cards.definitionFor(sourceCardId).id,
-    ) !== "successful_run_fort_counter_expose"
-  )
+  const sourceDefinitionId = host.cards.definitionFor(sourceCardId).id;
+  const implementation =
+    fortCounterExposeImplementationForDefinition(sourceDefinitionId);
+  if (!implementation)
     throw new Error("Die I-Spy-Faehigkeit passt nicht zur Karte.");
+  assertFortCounterExposeImplementation(implementation);
   if (serverId !== run.attackedServerId)
     throw new Error("I Spy kann nur den gerade erfolgreichen Fort markieren.");
   const server = host.servers.mustServer(serverId);
@@ -376,25 +381,30 @@ export function resolveSuccessfulRunFortCounterExpose(
   host.zones.trashRunnerInstalledCardToHeap(sourceCardId, legalAction);
   host.state.spyCountersByServer = {
     ...(host.state.spyCountersByServer ?? {}),
-    [server.id]: spyCountersForServer(host.state, server.id) + 1,
+    [server.id]:
+      spyCountersForServer(host.state, server.id) +
+      implementation.counter.amount,
   };
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
+    sourceDefinitionId,
     serverId: server.id,
     serverLabel: host.servers.publicServerLabel(server.id) ?? server.id,
-    counterType: "spy",
-    addedCounterAmount: 1,
+    counterType: implementation.counter.type,
+    addedCounterAmount: implementation.counter.amount,
     spyCounterFort: server.id,
     spyCountersAfter: spyCountersForServer(host.state, server.id),
     exposedServerId: server.id,
     exposedCount: server.ice.length + server.root.length,
+    exposureTarget: implementation.exposure.target,
+    exposureDuration: implementation.exposure.duration,
+    counterPersistence: implementation.counter.persistence,
   };
   return {
     handled: true,
     sourceCardId,
-    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
+    sourceDefinitionId,
     counterPlaced: true,
     stateChanged: true,
     ...resolvedPayloadFor(legalAction),

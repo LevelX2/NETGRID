@@ -136,25 +136,6 @@ export function collectRuntimeDamagePreventionCandidates(
       });
     }
   }
-  if (
-    state.runnerPermanentMeatDamagePrevention === true &&
-    damageType === "meat"
-  ) {
-    candidates.push({
-      candidateId: `card_implementation_permanent_meat_prevent_${amount}`,
-      eventId: event.eventId,
-      kind: "prevent",
-      controller: "runner",
-      sourceRef: {
-        kind: "game_rule",
-        label: "Emergency Self-Construct",
-      },
-      priority: 141,
-      visibility: "hidden_info_barrier",
-      optional: true,
-      preventAmount: amount,
-    });
-  }
   for (const cardId of installed) {
     if (
       state.cancelledDamagePreventionSourceIdsUntilEndOfTurn?.includes(cardId)

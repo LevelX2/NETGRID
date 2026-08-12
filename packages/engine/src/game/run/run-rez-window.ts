@@ -62,34 +62,7 @@ export function buildCorpApproachActions(
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   const definition = host.cards.definitionFor(run.approachedIceId);
   const actions: LegalAction[] = [];
-  const rezQuote = quoteCorpRezCost(host.state, run.approachedIceId);
-  const rezCostReductionSourceDefinitionIds = rezQuote.modifiers.map(
-    (modifier) => modifier.sourceDefinitionId,
-  );
-  if (!ice.rezzed && rezQuote.canPay) {
-    const variableRezActions = variableIceRezActions(
-      host,
-      run.approachedIceId,
-      definition,
-      rezQuote.finalCredits,
-      rezCostReductionSourceDefinitionIds,
-    );
-    if (variableRezActions.length > 0) {
-      actions.push(...variableRezActions);
-    } else {
-      actions.push(
-        buildLegalAction(
-          host.state,
-          "corp",
-          "rez_ice",
-          `${definition.title} rezzen`,
-          run.approachedIceId,
-          costQuoteToLegalActionCosts(rezQuote),
-          costQuotePublicPayload(rezQuote),
-        ),
-      );
-    }
-  }
+  actions.push(...buildCanonicalPaidIceRezActions(host, run.approachedIceId));
   if (!ice.rezzed && !variableRezForDefinition(definition)) {
     for (const sourceId of discountedRezSourceIdsForRunIce(
       host.state,
@@ -127,6 +100,36 @@ export function buildCorpApproachActions(
     ),
   );
   return [...actions, ...buildCorpRunRootRezActions(host)];
+}
+
+export function buildCanonicalPaidIceRezActions(
+  host: RunRezWindowHost,
+  iceId: CardInstanceId,
+): LegalAction[] {
+  const ice = host.cards.cardInstanceFor(iceId);
+  const definition = host.cards.definitionFor(iceId);
+  if (ice.rezzed || definition.type !== "ice") return [];
+  const rezQuote = quoteCorpRezCost(host.state, iceId);
+  if (!rezQuote.canPay) return [];
+  const variableRezActions = variableIceRezActions(
+    host,
+    iceId,
+    definition,
+    rezQuote.finalCredits,
+    rezQuote.modifiers.map((modifier) => modifier.sourceDefinitionId),
+  );
+  if (variableRezActions.length > 0) return variableRezActions;
+  return [
+    buildLegalAction(
+      host.state,
+      "corp",
+      "rez_ice",
+      `${definition.title} rezzen`,
+      iceId,
+      costQuoteToLegalActionCosts(rezQuote),
+      costQuotePublicPayload(rezQuote),
+    ),
+  ];
 }
 
 export function buildCorpRunRootRezActions(

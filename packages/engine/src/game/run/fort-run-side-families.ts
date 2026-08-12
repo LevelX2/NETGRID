@@ -543,29 +543,39 @@ export function applyPostBreakStealthLoss(
   const optionalIfUnavailable =
     ability?.postBreakStealthLossOptionalIfUnavailable;
   if (!sourceMode || optionalIfUnavailable === undefined)
-    throw new Error("Breaker-Stealth-Verlust hat keine vollstaendige Semantik.");
+    throw new Error(
+      "Breaker-Stealth-Verlust hat keine vollstaendige Semantik.",
+    );
   const stealthSources = runnerStealthRecurringCreditSources(host);
   const availableStealth = stealthSources.reduce(
     (sum, source) => sum + source.available,
     0,
   );
-  const singleSource =
+  const eligibleSources =
     sourceMode === "single_stealth_card"
-      ? stealthSources.find((source) => source.available >= lossAmount)
-      : undefined;
-  if (sourceMode === "single_stealth_card" && !singleSource) {
+      ? stealthSources.filter((source) => source.available >= lossAmount)
+      : stealthSources;
+  if (sourceMode === "single_stealth_card" && eligibleSources.length === 0) {
     if (optionalIfUnavailable) return { handled: false };
-    throw new Error("Verpflichtender Stealth-Credit-Verlust hat keine Einzelquelle.");
+    throw new Error(
+      "Verpflichtender Stealth-Credit-Verlust hat keine Einzelquelle.",
+    );
   }
   if (sourceMode === "any_stealth_cards" && availableStealth < lossAmount) {
     if (!optionalIfUnavailable)
-      throw new Error("Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.");
+      throw new Error(
+        "Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.",
+      );
   }
   const requiredLoss =
     sourceMode === "single_stealth_card"
       ? lossAmount
       : Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return { handled: false };
+  const singleSource =
+    sourceMode === "single_stealth_card" && eligibleSources.length === 1
+      ? eligibleSources[0]
+      : undefined;
   if (singleSource) {
     host.payment.spendHostedPaymentCredits(singleSource.cardId, requiredLoss);
     legalAction.payload = {
@@ -579,8 +589,14 @@ export function applyPostBreakStealthLoss(
       stateChanged: true,
     };
   }
-  if (stealthSources.length > 1) {
-    startHammerStealthLossChoice(host, breakerId, requiredLoss, stealthSources);
+  if (eligibleSources.length > 1) {
+    startPostBreakStealthLossChoice(
+      host,
+      breakerId,
+      requiredLoss,
+      sourceMode,
+      eligibleSources,
+    );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       postBreakStealthLossPending: requiredLoss,
@@ -705,8 +721,17 @@ export function resolveHammerStealthLossChoice(
   playerAction: PlayerAction,
 ): FortRunStealthLossResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1922.hammer_stealth_loss"))
-    throw new Error("Hammer-Stealth-Choice ist nicht offen.");
+  if (!choice || !choice.source.startsWith("v1922.post_break_stealth_loss:"))
+    throw new Error("Post-Break-Stealth-Choice ist nicht offen.");
+  const [, sourceMode = "", requiredLossRaw = ""] = choice.source.split(":");
+  const requiredLoss = Number(requiredLossRaw);
+  if (
+    (sourceMode !== "single_stealth_card" &&
+      sourceMode !== "any_stealth_cards") ||
+    !Number.isInteger(requiredLoss) ||
+    requiredLoss <= 0
+  )
+    throw new Error("Post-Break-Stealth-Choice ist ungueltig gebunden.");
   const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
   if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
     throw new Error("Hammer-Stealth-Auswahl enthaelt doppelte Optionen.");
@@ -719,9 +744,19 @@ export function resolveHammerStealthLossChoice(
       typeof option?.value === "string"
         ? (option.value as CardInstanceId)
         : undefined;
-    if (!cardId) throw new Error("Ungueltige Hammer-Stealth-Auswahl.");
-    lossByCardId.set(cardId, (lossByCardId.get(cardId) ?? 0) + 1);
+    if (!cardId) throw new Error("Ungueltige Post-Break-Stealth-Auswahl.");
+    lossByCardId.set(
+      cardId,
+      (lossByCardId.get(cardId) ?? 0) +
+        (sourceMode === "single_stealth_card" ? requiredLoss : 1),
+    );
   }
+  if (
+    (sourceMode === "single_stealth_card" && lossByCardId.size !== 1) ||
+    [...lossByCardId.values()].reduce((sum, amount) => sum + amount, 0) !==
+      requiredLoss
+  )
+    throw new Error("Post-Break-Stealth-Auswahl verletzt den Quellenmodus.");
   const installed = host.cards.runnerInstalledCardIds();
   for (const [cardId, amount] of lossByCardId) {
     if (!installed.includes(cardId))
@@ -736,21 +771,22 @@ export function resolveHammerStealthLossChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
+    hiddenZoneAction: "v1922_post_break_stealth_loss_distribution",
     selectedCount: selectedOptionIds.length,
-    postBreakStealthLoss: selectedOptionIds.length,
+    postBreakStealthLoss: requiredLoss,
   };
   return {
     handled: true,
-    stealthCreditsLost: selectedOptionIds.length,
-    stateChanged: selectedOptionIds.length > 0,
+    stealthCreditsLost: requiredLoss,
+    stateChanged: requiredLoss > 0,
   };
 }
 
-function startHammerStealthLossChoice(
+function startPostBreakStealthLossChoice(
   host: FortRunSideFamiliesHost,
   breakerId: CardInstanceId,
   requiredLoss: number,
+  sourceMode: "single_stealth_card" | "any_stealth_cards",
   sources: { cardId: CardInstanceId; available: number }[],
 ): void {
   if (host.state.pendingChoice)
@@ -758,6 +794,14 @@ function startHammerStealthLossChoice(
   const options: ChoiceRequest["options"] = [];
   for (const source of sources) {
     const definition = host.cards.definitionFor(source.cardId);
+    if (sourceMode === "single_stealth_card") {
+      options.push({
+        id: `stealth_${source.cardId}`,
+        label: `${definition.title}: ${requiredLoss} Stealth-Credit${requiredLoss === 1 ? "" : "s"} verlieren`,
+        value: source.cardId,
+      });
+      continue;
+    }
     for (
       let creditIndex = 0;
       creditIndex < Math.min(source.available, requiredLoss);
@@ -771,14 +815,17 @@ function startHammerStealthLossChoice(
     }
   }
   host.state.pendingChoice = {
-    choiceId: `choice_v1922_hammer_stealth_loss_${host.state.stateVersion + 1}`,
+    choiceId: `choice_v1922_post_break_stealth_loss_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `v1922.hammer_stealth_loss:${breakerId}:${host.state.stateVersion + 1}`,
-    prompt: "Stealth-Verlust verteilen.",
+    source: `v1922.post_break_stealth_loss:${sourceMode}:${requiredLoss}:${breakerId}:${host.state.stateVersion + 1}`,
+    prompt:
+      sourceMode === "single_stealth_card"
+        ? "Stealth-Quelle für den Verlust wählen."
+        : "Stealth-Verlust verteilen.",
     kind: "select_cards",
     options,
-    minSelections: requiredLoss,
-    maxSelections: requiredLoss,
+    minSelections: sourceMode === "single_stealth_card" ? 1 : requiredLoss,
+    maxSelections: sourceMode === "single_stealth_card" ? 1 : requiredLoss,
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };

@@ -95,6 +95,7 @@ export function rezCard(
   cardId: CardInstanceId,
   rootRez: boolean,
   legalAction?: LegalAction,
+  options?: { runContinuation?: "default" | "none" },
 ): void {
   const { state } = host;
   const definition = host.cards.definitionFor(cardId);
@@ -212,6 +213,7 @@ export function rezCard(
     legalAction,
     variableIceState,
   );
+  if (options?.runContinuation === "none") return;
   if (rootRez) {
     host.run.handleRunRootRezPostRez(cardId, legalAction);
     return;

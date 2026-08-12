@@ -18,6 +18,10 @@ import {
   corpRootRezCreditOutcomeQuotePayload,
   quoteCorpRootRezCreditOutcome,
 } from "../payment/root-rez-credit-outcome";
+import {
+  assertFortCounterExposeImplementation,
+  persistentFortCounterExposeImplementation,
+} from "../mechanics/fort-counter-exposure";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -322,7 +326,12 @@ export function buildCorpMainActions(
   if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
     actions.push(buildCorpPurgeVirusAction(state));
   }
-  if (state.corp.credits >= 4) {
+  const fortCounterExpose = persistentFortCounterExposeImplementation();
+  assertFortCounterExposeImplementation(fortCounterExpose);
+  if (
+    state.corp.clicks >= fortCounterExpose.corpRemoveAbility.clicks &&
+    state.corp.credits >= fortCounterExpose.corpRemoveAbility.credits
+  ) {
     for (const server of state.corp.servers) {
       const count = spyCountersForServer(state, server.id);
       if (count <= 0) continue;
@@ -333,12 +342,17 @@ export function buildCorpMainActions(
           "trigger_ability",
           `Spy-Counter in ${server.label} entfernen`,
           "game_rule",
-          [{ clicks: 1, credits: 4 }],
+          [
+            {
+              clicks: fortCounterExpose.corpRemoveAbility.clicks,
+              credits: fortCounterExpose.corpRemoveAbility.credits,
+            },
+          ],
           {
             serverId: server.id,
             corpAbility: "remove_spy_counter",
-            counterType: "spy",
-            removedCounterAmount: 1,
+            counterType: fortCounterExpose.counter.type,
+            removedCounterAmount: fortCounterExpose.corpRemoveAbility.amount,
           },
         ),
       );

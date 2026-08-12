@@ -1483,6 +1483,14 @@ export function configureFlowRuntimeBootstrap({
           archivesAccessRequiresDecisionOrEffect:
             runtimePorts.archivesAccessRequiresDecisionOrEffect,
           resolveTestSpinRunEnd,
+          rezIceWithoutRunContinuation: (state, cardId, legalAction) =>
+            executeRezCard(
+              runtimePorts.rezCardHost(state),
+              cardId,
+              false,
+              legalAction,
+              { runContinuation: "none" },
+            ),
           installedRevealHelperCount: (state) =>
             runtimePorts.v1915InstalledRevealHelperIds(state).length,
         },

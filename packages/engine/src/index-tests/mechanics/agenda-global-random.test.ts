@@ -1553,6 +1553,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         source: "typed_emergency_flatline_replacement_witness",
       },
     ]);
+    expect(afterPermanentPrevention.pendingChoice).toBeUndefined();
     expect(afterPermanentPrevention.runner.grip).toEqual(state.runner.grip);
     expect(afterPermanentPrevention.runnerPermanentMeatDamagePrevention).toBe(
       true,
