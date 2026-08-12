@@ -394,6 +394,8 @@ export function collectRuntimeTrashPreventionCandidates(
         visibility: "hidden_info_barrier",
         optional: true,
         preventedTrashTargetIds,
+        selectablePreventTrashTargets:
+          source.mode === "one_or_more_simultaneous",
         trashPreventionSourceIndex: sourceIndex,
       });
     });

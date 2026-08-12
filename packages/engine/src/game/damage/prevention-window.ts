@@ -1,4 +1,5 @@
 import type {
+  CardInstanceId,
   ChoiceRequest,
   EventModificationCandidate,
   EventModificationWindow,
@@ -13,6 +14,7 @@ import {
   clearEventModificationState,
   compareEventModificationCandidate,
   damageTypePayload,
+  definitionFor,
   hasEventModificationConflict,
   mustArrayValue,
   numberPayload,
@@ -41,6 +43,8 @@ import {
 
 const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX = "damage_prevention_bypass_pay_";
 const SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR = "__prevent_amount_";
+const SELECTABLE_TRASH_TARGET_CHOICE_PREFIX =
+  "v120.event_modification.trash_targets";
 
 export function openEventModificationWindow(
   state: GameState,
@@ -192,7 +196,9 @@ export function eventModificationChoice(
             : event.eventType === "add_tag"
               ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTags ?? 1} Tag vermeiden`
               : event.eventType === "runner_installed_trash"
-                ? `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+                ? stageCandidate.selectablePreventTrashTargets === true
+                  ? `${stageCandidate.sourceRef.label}: geschützte Karten auswählen`
+                  : `${stageCandidate.sourceRef.label}: ${stageCandidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
                 : window.kind === "increase"
                   ? `${stageCandidate.sourceRef.label}: Schaden um ${stageCandidate.increaseAmount ?? 1} erhöhen`
                   : stageCandidate.sourceRef.kind === "card"
@@ -244,6 +250,15 @@ export function resolveEventModificationChoice(
     affectedSide: event.affectedSide ?? "",
     redactedKind: "event_modification",
   };
+  const trashTargetChoice = state.pendingChoice?.source.startsWith(
+    `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:`,
+  )
+    ? state.pendingChoice
+    : undefined;
+  const trashTargetCandidateId = trashTargetChoice?.source.split(":")[2];
+  const selectedTrashTargetIds = trashTargetChoice
+    ? selectedChoiceIds(playerAction.selectedChoices)
+    : undefined;
   if (selected === "pass") {
     if (event.eventType === "add_tag") {
       resolveAddTagImminentEvent(state, event, legalAction);
@@ -465,9 +480,13 @@ export function resolveEventModificationChoice(
     selected,
     event,
   );
-  const candidate = selectablePreventSelection
-    ? selectablePreventSelection.candidate
-    : window.candidates.find((item) => item.candidateId === selected);
+  const candidate = trashTargetCandidateId
+    ? window.candidates.find(
+        (item) => item.candidateId === trashTargetCandidateId,
+      )
+    : selectablePreventSelection
+      ? selectablePreventSelection.candidate
+      : window.candidates.find((item) => item.candidateId === selected);
   if (!candidate)
     throw new Error("Dieser Event-Modification-Kandidat ist nicht legal.");
   if (
@@ -487,6 +506,40 @@ export function resolveEventModificationChoice(
     throw new Error(
       "Dieser Event-Modification-Kandidat passt nicht zum Fenster.",
     );
+  if (
+    event.eventType === "runner_installed_trash" &&
+    candidate.selectablePreventTrashTargets === true &&
+    !trashTargetChoice
+  ) {
+    const targetIds = candidate.preventedTrashTargetIds ?? [];
+    if (targetIds.length === 0)
+      throw new Error("Die Trash-Prevention hat keine legalen Ziele.");
+    state.pendingChoice = {
+      choiceId: `v120_trash_targets_${window.windowId}_${candidate.candidateId}`,
+      side: candidate.controller,
+      source: `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:${window.windowId}:${candidate.candidateId}`,
+      prompt: "Eine oder mehrere Resources vor dem Trashen schützen",
+      kind: "select_cards",
+      options: targetIds.map((cardId) => ({
+        id: cardId,
+        cardId,
+        label: definitionFor(state, cardId).title,
+      })),
+      minSelections: 1,
+      maxSelections: targetIds.length,
+      stateVersion: state.stateVersion + 1,
+      visibility: candidate.visibility,
+    };
+    state.activeSide = candidate.controller;
+    legalAction.payload = {
+      ...basePayload,
+      eventModificationDecision: "select_targets",
+      eventModificationOutcome: "target_choice_opened",
+      candidateId: candidate.candidateId,
+      selectableTrashTargetCount: targetIds.length,
+    };
+    return;
+  }
   if (event.eventType === "add_tag") {
     revalidateTagPreventionCandidateSource(state, candidate);
     const originalAmount = numberPayload(event, "amount");
@@ -550,7 +603,17 @@ export function resolveEventModificationChoice(
   }
   if (event.eventType === "runner_installed_trash") {
     revalidateTrashPreventionCandidateSource(state, candidate, event);
-    const preventedTrashTargetIds = candidate.preventedTrashTargetIds ?? [];
+    const allowedTrashTargetIds = candidate.preventedTrashTargetIds ?? [];
+    const preventedTrashTargetIds = selectedTrashTargetIds
+      ? selectedTrashTargetIds.map((cardId) => cardId as CardInstanceId)
+      : allowedTrashTargetIds;
+    if (
+      preventedTrashTargetIds.length === 0 ||
+      preventedTrashTargetIds.some(
+        (cardId) => !allowedTrashTargetIds.includes(cardId),
+      )
+    )
+      throw new Error("Ein Trash-Prevention-Ziel ist nicht mehr legal.");
     const preventionCostPayload = applyRuntimeTrashPreventionCost(
       state,
       candidate,

@@ -16,6 +16,7 @@ import {
   addRunnerTagsWithPrevention,
   doDamage,
   openEventModificationWindow,
+  resolveEventModificationChoice,
 } from "../../game/damage/damage-core";
 import {
   CURRENT_RULES_BASELINE,
@@ -1390,6 +1391,11 @@ describe("PRO011 hidden resource timing hardening", () => {
       "onr_proteus_128_airport-locker",
       "pro011_other_resource_corp_turn",
     );
+    const corpOtherSecondId = installHiddenResource(
+      corpTurn,
+      "onr_proteus_133_chiba-bank-account",
+      "pro011_other_resource_second_corp_turn",
+    );
     corpTurn.phase = "corp_action_phase";
     corpTurn.activeSide = "corp";
     const corpTurnAction = {
@@ -1400,16 +1406,53 @@ describe("PRO011 hidden resource timing hardening", () => {
       openRunnerInstalledTrashPreventionWindow(
         corpTurn,
         corpTurnAction,
-        [corpOtherId, corpTimeId],
+        [corpOtherId, corpOtherSecondId, corpTimeId],
         "test_corp_turn",
       ),
     ).toBe(true);
     expect(corpTurn.eventModificationWindow?.candidates).toHaveLength(1);
     expect(
       corpTurn.eventModificationWindow?.candidates[0]?.preventedTrashTargetIds,
-    ).toEqual([corpOtherId]);
+    ).toEqual([corpOtherId, corpOtherSecondId]);
+    expect(
+      corpTurn.eventModificationWindow?.candidates[0]
+        ?.selectablePreventTrashTargets,
+    ).toBe(true);
     expect(JSON.stringify(getPlayerView(corpTurn, "corp"))).not.toContain(
       "Time to Collect",
+    );
+    const preventionCandidateId =
+      corpTurn.eventModificationWindow!.candidates[0]!.candidateId;
+    const firstChoice = corpTurn.pendingChoice!;
+    resolveEventModificationChoice(corpTurn, corpTurnAction, {
+      matchId: corpTurn.matchId,
+      side: "runner",
+      actionId: "runner.resolve_choice",
+      clientKnownStateVersion: firstChoice.stateVersion,
+      selectedChoices: {
+        choiceId: firstChoice.choiceId,
+        selectedOptionIds: [preventionCandidateId],
+      },
+    });
+    expect(corpTurn.pendingChoice).toMatchObject({
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 2,
+    });
+    const targetChoice = corpTurn.pendingChoice!;
+    resolveEventModificationChoice(corpTurn, corpTurnAction, {
+      matchId: corpTurn.matchId,
+      side: "runner",
+      actionId: "runner.resolve_choice",
+      clientKnownStateVersion: targetChoice.stateVersion,
+      selectedChoices: {
+        choiceId: targetChoice.choiceId,
+        selectedOptionIds: [corpOtherSecondId],
+      },
+    });
+    expect(corpTurn.runner.rig.resources).toContain(corpOtherSecondId);
+    expect(corpTurn.runner.heap).toEqual(
+      expect.arrayContaining([corpOtherId, corpTimeId]),
     );
     expect(timeId).toBeDefined();
   });

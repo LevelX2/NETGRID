@@ -640,6 +640,8 @@ export type EventModificationCandidate = {
   preventedTags?: number;
   tagPreventionSourceIndex?: number;
   preventedTrashTargetIds?: CardInstanceId[];
+  /** The controller chooses a non-empty subset of the protected targets. */
+  selectablePreventTrashTargets?: boolean;
   trashPreventionSourceIndex?: number;
   bypassCostPerDamage?: number;
   bypassPaymentSide?: Side;
