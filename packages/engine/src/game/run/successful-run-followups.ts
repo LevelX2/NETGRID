@@ -32,7 +32,7 @@ import type {
 } from "./successful-run-contracts";
 import { successfulRunServerId } from "./run-server-identities";
 
-export function applyDirectSuccessfulRunTriggers(
+export function applySuccessfulRunEndCreditTriggers(
   host: SuccessfulRunInterventionHost,
   legalAction?: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
@@ -43,7 +43,7 @@ export function applyDirectSuccessfulRunTriggers(
       (cardId) =>
         uniqueDirectLongtailKindForDefinition(
           host.cards.definitionFor(cardId).id,
-        ) === "successful_run_credit_resource",
+        ) === "successful_run_end_credit_resource",
     );
   let gainedCredits = 0;
   const sourceDefinitionIds: CardDefinitionId[] = [];
@@ -51,7 +51,7 @@ export function applyDirectSuccessfulRunTriggers(
     const implementation = uniqueDirectLongtailImplementationForDefinition(
       host.cards.definitionFor(sourceId).id,
     );
-    if (implementation?.kind !== "successful_run_credit_resource") continue;
+    if (implementation?.kind !== "successful_run_end_credit_resource") continue;
     host.credits.gainRunner(implementation.amount);
     gainedCredits += implementation.amount;
     sourceDefinitionIds.push(host.cards.definitionFor(sourceId).id);

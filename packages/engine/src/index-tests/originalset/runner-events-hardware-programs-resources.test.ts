@@ -3043,6 +3043,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.pendingChoice?.source).toMatch(/^runner_start\.order:/);
+    state = applyChoice(
+      state,
+      "runner",
+      String(state.pendingChoice?.options[0]?.id),
+    );
 
     expect(state.specialZones?.setAside).not.toContain(cloakId);
     expect(state.runner.rig.programs).toContain(cloakId);
@@ -3100,6 +3106,59 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(state.runner.rig.programs).toContain(cloakId);
     expect(cardCounterAmount(state, cloakId, "shell")).toBe(0);
     expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
+  });
+
+  it("offers paid Shell removal during a run encounter without replacing encounter actions", () => {
+    let state = resourceContactState("shell-paid-during-run", {
+      includeCloak: true,
+    });
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    const cloakId = moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === cloakId,
+    );
+    setCardCounterForTest(state, cloakId, "shell", 2);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state.timingPoint = "run.jack_out_window";
+    state.activeSide = "runner";
+    if (state.run) state.run.phase = "movement";
+
+    const actions = getLegalActions(state, "runner");
+    expect(
+      actions.some(
+        (action) =>
+          action.type === "continue_run" ||
+          action.type === "break_subroutine" ||
+          action.type === "pump_breaker" ||
+          action.type === "jack_out",
+      ),
+    ).toBe(true);
+    expect(
+      actions.some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+          action.payload?.targetCardId === cloakId,
+      ),
+    ).toBe(true);
   });
 
   it("defers Cloak install lifecycle until the Shell Traders MU choice resolves", () => {

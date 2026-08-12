@@ -89,6 +89,21 @@ export function isActiveCardImplementationStartOfRunnerTurnSource(
   );
 }
 
+export function hasDueCardImplementationStartOfRunnerTurnAbility(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+    return false;
+  const definition = deps.definitionFor(state, cardId);
+  return cardImplementationStartOfRunnerTurnAbilities(definition).some(
+    (ability) =>
+      !ability.condition ||
+      cardImplementationConditionMet(deps, state, ability.condition, cardId),
+  );
+}
+
 /**
  * Runs deterministic start-of-Corp-turn lifecycle effects for active Corp
  * sources only. The caller owns turn transition ordering; this helper just
@@ -181,8 +196,11 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   effects?: RuntimeEffectCollector,
+  onlySourceCardId?: CardInstanceId,
 ): void {
-  const sourceIds = cardImplementationRunnerInstalledSourceIds(deps, state);
+  const sourceIds = onlySourceCardId
+    ? [onlySourceCardId]
+    : cardImplementationRunnerInstalledSourceIds(deps, state);
   for (const cardId of sourceIds) {
     const instance = state.cardInstances[cardId];
     if (!instance) continue;

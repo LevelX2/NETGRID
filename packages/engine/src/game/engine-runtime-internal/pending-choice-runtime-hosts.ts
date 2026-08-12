@@ -543,9 +543,7 @@ export function createPendingChoiceRuntimeHosts(
   ): void {
     const continuation = state.pendingTraceProgramTrashContinuation;
     if (!continuation)
-      throw new Error(
-        "Es ist keine Trace-Programmtrash-Fortsetzung geöffnet.",
-      );
+      throw new Error("Es ist keine Trace-Programmtrash-Fortsetzung geöffnet.");
     if (state.pendingChoice || state.eventModificationWindow)
       throw new Error(
         "Trace-Programmtrash kann erst nach der Ziel-/Präventionswahl fortgesetzt werden.",
@@ -871,6 +869,13 @@ export function createPendingChoiceRuntimeHosts(
           deps.resolveCardImplementationMoveAdvancementChoice,
       },
       turn: {
+        resolveRunnerStartOfTurnOrderChoice:
+          deps.resolveRunnerStartOfTurnOrderChoice,
+        resumeRunnerStartOfTurnOrdering: (_state, legalAction) => {
+          const effects: ResolvedGameEffect[] = [];
+          deps.resumeRunnerStartOfTurnOrdering(state, effects);
+          deps.appendResolvedEffectsToPayload(legalAction, effects);
+        },
         resolveSatelliteMonitorsStartChoice,
       },
       constants: {

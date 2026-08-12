@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "A: Look at the top five cards of your stack. You may bring any hardware cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle the rest back into your stack.\tA, [2]: Expose any card.",
+      "A: Look at the top five cards of your stack. You may bring any hardware cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle the rest back into your stack.\tA, [2]: Expose any installed card.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(
@@ -33,6 +33,10 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_175_ronin-around",
+      },
+      {
+        source: "project_ruling",
+        reference: "Netrunner Errata 1.70: Ronin Around (installed cards only)",
       },
     ],
   },
@@ -117,7 +121,7 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "information",
       },
       {
         kind: "target_preference",

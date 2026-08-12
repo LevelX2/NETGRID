@@ -39,7 +39,6 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
-      recurringCredits: 1,
     },
     runnerUtilityLongtail: {
       capabilityKey: capabilityKey(
@@ -78,8 +77,13 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "plan_role",
+        role: "random_persistent_action_capacity",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "random_unpreventable_core_or_net_damage",
+        severity: "high",
       },
     ],
     capabilities: [],

@@ -48,7 +48,7 @@ import {
 } from "./run-continuation-execution";
 import {
   applySuccessfulRunExtraRunFollowup,
-  applyDirectSuccessfulRunTriggers,
+  applySuccessfulRunEndCreditTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
   successfulRunInterventionCost,

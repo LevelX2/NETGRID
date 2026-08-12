@@ -29071,14 +29071,14 @@
     {
       "cardId": "onr_v1_162_field-reporter-for-ice-and-data",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:7b2291e6777488c2",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f0e2403f69a82183",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f68a3cc55f241c31",
       "hint": {
         "cardId": "onr_v1_162_field-reporter-for-ice-and-data",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["resource"],
-        "planRoles": ["build_rig", "information"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
@@ -29211,7 +29211,7 @@
     {
       "cardId": "onr_v1_165_junkyard-bbs",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2ab9349490e3ded8",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b944300019aee114",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
       "hint": {
         "cardId": "onr_v1_165_junkyard-bbs",
         "side": "runner",
@@ -29303,7 +29303,7 @@
     },
     {
       "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:63d0c4d007927da4",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:70deb0e26cd9fd26",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b1e4dd936b791d37",
       "hint": {
         "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
@@ -29716,16 +29716,15 @@
     {
       "cardId": "onr_v1_171_preying-mantis",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9296a593f2017d47",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7a93523ffe0f9603",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e650908c6890ea68",
       "hint": {
         "cardId": "onr_v1_171_preying-mantis",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["resource"],
-        "planRoles": ["remote_upgrade_modifier"],
+        "planRoles": ["gain_action_capacity"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
         "strategicExchangeKinds": ["self_damage"],
         "actionCapacityProfiles": [
           {
@@ -29744,7 +29743,10 @@
         ],
         "functionSignals": ["resource.connection"],
         "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["resource_trash_if_tagged"],
+        "riskTags": [
+          "delayed_unpreventable_core_damage",
+          "resource_trash_if_tagged"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -29758,17 +29760,16 @@
     },
     {
       "cardId": "onr_v1_172_quest-for-cattekin",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3de083618a2e9665",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:091768256361e3a1",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:7c7ce7a54ef8f7e1",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f04b320e9bbb7a62",
       "hint": {
         "cardId": "onr_v1_172_quest-for-cattekin",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["resource"],
-        "planRoles": [],
+        "planRoles": ["random_persistent_action_capacity"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
         "actionCapacityProfiles": [
           {
             "class": "random_gain",
@@ -29820,6 +29821,7 @@
         "conditions": [{ "kind": "requires_start_of_turn" }],
         "costProfile": { "clicks": 1, "credits": 4 },
         "riskTags": [
+          "random_unpreventable_core_or_net_damage",
           "deterministic_random",
           "brain_damage",
           "unpreventable_damage"
@@ -29842,17 +29844,16 @@
     {
       "cardId": "onr_v1_173_restrictive-net-zoning",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:250d95353ad2edc9",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:df3f170a461cc2ce",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f76cd3c899aac50c",
       "hint": {
         "cardId": "onr_v1_173_restrictive-net-zoning",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["contest_remote"],
+        "planRoles": [],
         "valueHints": {},
-        "strategicRole": ["tax_tool"],
-        "lineSupport": ["runner.remote_contest"],
+        "strategicRole": ["corp_ice_install_tax"],
         "effects": [
           {
             "kind": "run_tax",
@@ -29865,9 +29866,7 @@
           }
         ],
         "functionSignals": ["tax.corp_ice_install"],
-        "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:run_tax",
           "effect_scope:corp",
           "effect_timing:persistent"
@@ -29978,14 +29977,14 @@
     {
       "cardId": "onr_v1_175_ronin-around",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:564125e641da8912",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:268b4e6d318fc779",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:13b157d7fc7629e3",
       "hint": {
         "cardId": "onr_v1_175_ronin-around",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": ["build_rig", "information"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -30343,7 +30342,7 @@
     {
       "cardId": "onr_v1_179_silicon-saloon-franchise",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:645486faa4844bf6",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b468c5e2a2dc0b1e",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1c2041f845b997b4",
       "hint": {
         "cardId": "onr_v1_179_silicon-saloon-franchise",
         "side": "runner",

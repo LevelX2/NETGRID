@@ -799,6 +799,7 @@ export function configureActionRuntimeBootstrap({
       buildChoiceAction: runtimePorts.choiceAction,
       corpRunnerActionPaidWindowActions:
         runtimePorts.corpRunnerActionPaidWindowActions,
+      runnerRunSpecialEffectActions: runtimePorts.runnerRunSpecialEffectActions,
     },
     counters: {
       corpActionDebtPending,

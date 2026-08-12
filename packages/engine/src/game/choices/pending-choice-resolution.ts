@@ -114,6 +114,8 @@ export type PendingChoiceResolutionHost = {
   };
   turn: {
     resolveSatelliteMonitorsStartChoice: HostFn<void>;
+    resolveRunnerStartOfTurnOrderChoice: HostFn<void>;
+    resumeRunnerStartOfTurnOrdering: HostFn<void>;
   };
   constants: {
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE: string;
@@ -276,6 +278,10 @@ export function resolvePendingChoice(
     host.cardImplementation.resolveCardImplementationMoveAdvancementChoice;
   const resolveSatelliteMonitorsStartChoice =
     host.turn.resolveSatelliteMonitorsStartChoice;
+  const resolveRunnerStartOfTurnOrderChoice =
+    host.turn.resolveRunnerStartOfTurnOrderChoice;
+  const resumeRunnerStartOfTurnOrdering =
+    host.turn.resumeRunnerStartOfTurnOrdering;
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
     host.constants
       .RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE;
@@ -355,10 +361,17 @@ export function resolvePendingChoice(
     hiddenZoneArrangeChoiceHandlerHost(state, legalAction, playerAction),
   );
   if (hiddenZoneArrangeChoice.handled) return;
+  const resumesRunnerStartOrdering = state.pendingChoice.source.startsWith(
+    "runner.installed_resource_trash_for_credits:",
+  );
   const hiddenZoneNonSearchChoice = handleHiddenZoneNonSearchChoice(
     hiddenZoneNonSearchChoiceHandlerHost(state, legalAction, playerAction),
   );
-  if (hiddenZoneNonSearchChoice.handled) return;
+  if (hiddenZoneNonSearchChoice.handled) {
+    if (resumesRunnerStartOrdering && !state.pendingChoice)
+      resumeRunnerStartOfTurnOrdering(state, legalAction);
+    return;
+  }
   const corpZoneChoice = handleCorpZoneChoice(
     corpZoneChoiceHandlerHost(state, legalAction, playerAction),
   );
@@ -392,6 +405,10 @@ export function resolvePendingChoice(
       legalAction,
       playerAction,
     );
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("runner_start.order:")) {
+    resolveRunnerStartOfTurnOrderChoice(state, legalAction, playerAction);
     return;
   }
   if (

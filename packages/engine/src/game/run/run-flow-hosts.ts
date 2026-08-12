@@ -50,7 +50,7 @@ import {
 } from "./run-continuation-execution";
 import {
   applySuccessfulRunExtraRunFollowup,
-  applyDirectSuccessfulRunTriggers,
+  applySuccessfulRunEndCreditTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
   successfulRunInterventionCost,
@@ -1025,6 +1025,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           ),
       },
       followups: {
+        applySuccessfulRunEndCreditTriggers: (legalAction) =>
+          applySuccessfulRunEndCreditTriggers(
+            successfulRunInterventionHost(state),
+            legalAction,
+          ),
         applySuccessfulRunExtraRunFollowup: (legalAction) =>
           applySuccessfulRunExtraRunFollowup(
             successfulRunInterventionHost(state),
@@ -1161,11 +1166,6 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         isV097OrLater: () => host.rules.isV097OrLater(state),
         finishRun: (successful, legalAction) =>
           host.callbacks.finishRun(state, successful, legalAction),
-        applyUniqueDirectSuccessfulRunTriggers: (legalAction) =>
-          applyDirectSuccessfulRunTriggers(
-            successfulRunInterventionHost(state),
-            legalAction,
-          ),
         successfulRunInterventionKindForSource: (sourceCardId) => {
           return successfulRunInterventionKindForDefinition(
             host.cards.definitionFor(state, sourceCardId).id,

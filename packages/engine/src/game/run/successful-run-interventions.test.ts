@@ -18,7 +18,7 @@ import {
 } from "../damage/damage-core";
 import {
   applySuccessfulRunExtraRunFollowup,
-  applyDirectSuccessfulRunTriggers,
+  applySuccessfulRunEndCreditTriggers,
   buildSuccessfulRunFollowupActions,
   finalizeDelayedSuccessfulRunAfterPassedIce,
   resolveSuccessfulRunFollowupAbility,
@@ -927,7 +927,7 @@ describe("successful run interventions", () => {
     const fixture = makeHost();
     const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
 
-    const karl = applyDirectSuccessfulRunTriggers(fixture.host, legalAction);
+    const karl = applySuccessfulRunEndCreditTriggers(fixture.host, legalAction);
     const bodyweight = applySuccessfulRunExtraRunFollowup(
       fixture.host,
       legalAction,

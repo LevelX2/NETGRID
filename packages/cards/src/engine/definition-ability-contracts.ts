@@ -103,7 +103,7 @@ export function additionalTimingCondition(
 
 export type CardUniqueDirectLongtailImplementation =
   | {
-      kind: "successful_run_credit_resource";
+      kind: "successful_run_end_credit_resource";
       amount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
     }

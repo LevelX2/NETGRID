@@ -2774,9 +2774,31 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = toRunnerTurnFromCorpMain(state);
 
+    const orderedStartDefinitionIds = [
+      "onr_v1_163_floating-runner-bbs",
+      "onr_v1_174_rigged-investments",
+    ];
+    for (const definitionId of orderedStartDefinitionIds) {
+      expect(state.pendingChoice?.source).toMatch(/^runner_start\.order:/);
+      const optionId = state.pendingChoice?.options.find(
+        (option) =>
+          typeof option.value === "string" &&
+          state.cardInstances[option.value]?.definitionId === definitionId,
+      )?.id;
+      if (!optionId) throw new Error(`Startzugoption fehlt: ${definitionId}`);
+      state = applyChoice(state, "runner", optionId);
+    }
+
     expect(state.runner.credits).toBe(creditsBeforeTurn + 4);
     expect(cardCounterAmount(state, riggedId, "bit")).toBe(11);
-    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+    const startTurnEffects = state.eventLog
+      .slice(replayStart)
+      .flatMap((event) =>
+        Array.isArray(event.publicPayload.resolvedEffects)
+          ? event.publicPayload.resolvedEffects
+          : [],
+      );
+    expect(startTurnEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "gain_credits",

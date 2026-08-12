@@ -77,6 +77,8 @@ export function handleRunEndCleanup(
   if (!resumeAfterTag && run && successful)
     applyV181SuccessfulRunCounterTriggers(host, run, legalAction);
   if (!resumeAfterTag && run && successful)
+    host.followups.applySuccessfulRunEndCreditTriggers(legalAction);
+  if (!resumeAfterTag && run && successful)
     host.followups.applySuccessfulRunExtraRunFollowup(legalAction);
   if (!resumeAfterTag && run)
     applyRunEndVirusAccessTrashCounterRemoval(host, run, legalAction);

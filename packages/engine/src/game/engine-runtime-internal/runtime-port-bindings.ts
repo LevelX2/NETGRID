@@ -5,6 +5,7 @@
 import type { RuntimePortGroups } from "./runtime-port-contracts";
 
 export let corpRunnerActionPaidWindowActions: RuntimePortGroups["actionRuntimeHosts"]["corpRunnerActionPaidWindowActions"];
+export let runnerRunSpecialEffectActions: RuntimePortGroups["actionRuntimeHosts"]["runnerRunSpecialEffectActions"];
 export let specialZoneHarnessActions: RuntimePortGroups["actionRuntimeHosts"]["specialZoneHarnessActions"];
 export let turnBasicExecutionHost: RuntimePortGroups["actionRuntimeHosts"]["turnBasicExecutionHost"];
 export let creditEconomyExecutionHost: RuntimePortGroups["actionRuntimeHosts"]["creditEconomyExecutionHost"];
@@ -433,6 +434,8 @@ export let refreshRecurringCredits: RuntimePortGroups["stateRuntimeResolvers"]["
 export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   corpRunnerActionPaidWindowActions =
     ports.actionRuntimeHosts.corpRunnerActionPaidWindowActions;
+  runnerRunSpecialEffectActions =
+    ports.actionRuntimeHosts.runnerRunSpecialEffectActions;
   specialZoneHarnessActions =
     ports.actionRuntimeHosts.specialZoneHarnessActions;
   turnBasicExecutionHost = ports.actionRuntimeHosts.turnBasicExecutionHost;

@@ -82,12 +82,6 @@ export const cardSpec = {
         kind: "plan_role",
         role: "build_rig",
       },
-      {
-        kind: "target_preference",
-        purpose: "top_trash_recovery",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
     ],
     capabilities: [],
   },

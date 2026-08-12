@@ -60,15 +60,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_upgrade_modifier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        role: "gain_action_capacity",
       },
       {
         kind: "strategic_exchange",
         exchange: "self_damage",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "delayed_unpreventable_core_damage",
+        severity: "high",
       },
     ],
     capabilities: [],

@@ -1363,6 +1363,34 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
+    expect(karlState.runner.credits).toBe(creditsBeforeRun);
+    karlState = apply(
+      karlState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    if (
+      getLegalActions(karlState, "runner").some(
+        (action) => action.type === "decline_trash",
+      )
+    )
+      karlState = apply(
+        karlState,
+        "runner",
+        (action) => action.type === "decline_trash",
+      );
+    while (
+      karlState.run &&
+      getLegalActions(karlState, "runner").some(
+        (action) => action.type === "continue_run",
+      )
+    )
+      karlState = apply(
+        karlState,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
+    expect(karlState.run).toBeUndefined();
     expect(karlState.runner.credits).toBe(creditsBeforeRun + 1);
     expect(karlState.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerCreditsAfter: karlState.runner.credits,
@@ -1414,7 +1442,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           name: "P3.59 Field/Preying Runner",
           cards: [
             { id: "onr_v1_162_field-reporter-for-ice-and-data", quantity: 1 },
-            { id: "onr_v1_171_preying-mantis", quantity: 1 },
+            { id: "onr_v1_171_preying-mantis", quantity: 2 },
             ...p359FieldPreyingRunnerCards,
           ],
         },
@@ -1440,6 +1468,19 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       state,
       "onr_v1_171_preying-mantis",
     );
+    const secondMantisId = Object.entries(state.cardInstances).find(
+      ([id, card]) =>
+        id !== mantisId && card.definitionId === "onr_v1_171_preying-mantis",
+    )?.[0] as CardInstanceId | undefined;
+    if (!secondMantisId) throw new Error("Second Preying Mantis missing");
+    removeEverywhere(state, secondMantisId);
+    state.runner.rig.resources.push(secondMantisId);
+    state.cardInstances[secondMantisId] = {
+      ...state.cardInstances[secondMantisId]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
 
     const clicksBefore = state.runner.clicks;
@@ -1453,6 +1494,16 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.payload?.cardId === mantisId,
     );
     expect(state.runner.clicks).toBe(clicksBefore + 1);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerUtilityAbility ===
+          "optional_extra_action_with_delayed_damage" &&
+        action.payload?.cardId === secondMantisId,
+    );
+    expect(state.runner.clicks).toBe(clicksBefore + 2);
 
     state = apply(
       state,
@@ -1474,13 +1525,21 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const coreBeforeEnd = state.runner.coreDamage;
     state = apply(state, "runner", (action) => action.type === "end_turn");
     expect(state.runner.credits).toBe(creditsBeforeEnd + 1);
-    expect(state.runner.coreDamage).toBe(coreBeforeEnd + 1);
+    expect(state.runner.coreDamage).toBe(coreBeforeEnd + 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       gainedCredits: 1,
       corpRezzedIceThisTurnCount: 1,
       damageType: "core",
-      damageAmount: 1,
+      damageAmount: 2,
     });
+    expect(
+      state.eventLog
+        .at(-1)
+        ?.publicPayload.resolvedEffects?.filter(
+          (effect) =>
+            effect.kind === "damage" && effect.reason === "end_of_turn",
+        ),
+    ).toHaveLength(2);
   });
 
   it("resolves P3.59 I Spy fort counters and Corp removal", () => {

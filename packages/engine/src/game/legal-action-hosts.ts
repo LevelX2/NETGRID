@@ -11,6 +11,7 @@ export type LegalActionHostCompositionHost = {
   actions: {
     buildChoiceAction: (state: GameState, choice: ChoiceRequest) => LegalAction;
     corpRunnerActionPaidWindowActions: StateHostFn<LegalAction[]>;
+    runnerRunSpecialEffectActions: StateHostFn<LegalAction[]>;
   };
   counters: {
     corpActionDebtPending: StateHostFn<number>;
@@ -18,13 +19,19 @@ export type LegalActionHostCompositionHost = {
   };
   hosts: {
     corpMainActionGenerationHost: StateHostFn<
-      ReturnType<LegalActionGenerationHost["hosts"]["corpMainActionGenerationHost"]>
+      ReturnType<
+        LegalActionGenerationHost["hosts"]["corpMainActionGenerationHost"]
+      >
     >;
     runnerMainActionGenerationHost: StateHostFn<
-      ReturnType<LegalActionGenerationHost["hosts"]["runnerMainActionGenerationHost"]>
+      ReturnType<
+        LegalActionGenerationHost["hosts"]["runnerMainActionGenerationHost"]
+      >
     >;
     runnerEncounterActionHost: StateHostFn<
-      ReturnType<LegalActionGenerationHost["hosts"]["runnerEncounterActionHost"]>
+      ReturnType<
+        LegalActionGenerationHost["hosts"]["runnerEncounterActionHost"]
+      >
     >;
     encounterEntryHost: StateHostFn<
       ReturnType<LegalActionGenerationHost["hosts"]["encounterEntryHost"]>
@@ -36,7 +43,9 @@ export type LegalActionHostCompositionHost = {
       ReturnType<LegalActionGenerationHost["hosts"]["runMovementHost"]>
     >;
     runCardImplementationActionHost: StateHostFn<
-      ReturnType<LegalActionGenerationHost["hosts"]["runCardImplementationActionHost"]>
+      ReturnType<
+        LegalActionGenerationHost["hosts"]["runCardImplementationActionHost"]
+      >
     >;
     runnerAccessActionHost: StateHostFn<
       ReturnType<LegalActionGenerationHost["hosts"]["runnerAccessActionHost"]>
@@ -116,6 +125,8 @@ export function createLegalActionHostComposition(
           buildPurgeableRunnerVirusPurgeAction(state),
         corpRunnerActionPaidWindowActions: () =>
           actions.corpRunnerActionPaidWindowActions(state),
+        runnerRunSpecialEffectActions: () =>
+          actions.runnerRunSpecialEffectActions(state),
       },
       counters: {
         purgeableRunnerVirusCounterTotal: () =>

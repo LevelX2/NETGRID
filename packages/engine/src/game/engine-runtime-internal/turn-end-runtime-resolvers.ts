@@ -115,44 +115,67 @@ export function createTurnEndRuntimeResolvers(
       (effect) => effect.kind === "damage",
     );
     if (dueEffects.length === 0) return;
-    const totalDamage = dueEffects.reduce(
-      (sum, effect) => sum + effect.amount,
-      0,
-    );
-    const damageType = dueEffects[0]!.damageType;
-    if (!dueEffects.every((effect) => effect.damageType === damageType))
-      throw new Error(
-        "Gemischte verzögerte Schadensarten sind nicht implementiert.",
-      );
     if (!dueEffects.every((effect) => effect.preventable === false))
       throw new Error(
         "Verhinderbarer verzögerter Schaden ist nicht implementiert.",
       );
-    const damageSummary = doDamage(state, {
-      damageId: `runner.end.delayed_damage.${state.stateVersion}`,
-      damageType,
-      amount: totalDamage,
-      source: "runner_end:delayed_damage",
-    });
+    const damageSummaries = dueEffects.map((effect, index) => ({
+      effect,
+      summary: doDamage(state, {
+        damageId: `runner.end.delayed_damage.${state.stateVersion}.${index}.${effect.sourceCardInstanceId}`,
+        damageType: effect.damageType,
+        amount: effect.amount,
+        source: `runner_end:${effect.sourceDefinitionId}:${effect.sourceCardInstanceId}`,
+      }),
+    }));
+    const totalDamage = damageSummaries.reduce(
+      (sum, entry) => sum + entry.summary.amount,
+      0,
+    );
+    const totalCardsTrashed = damageSummaries.reduce(
+      (sum, entry) => sum + entry.summary.cardsTrashed,
+      0,
+    );
+    const finalSummary = damageSummaries.at(-1)!.summary;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerUtilityAbility: "delayed_end_turn_damage",
       damageCannotBePrevented: true,
       damageResolved: true,
-      damageType: damageSummary.damageType,
-      damageAmount: damageSummary.amount,
-      cardsTrashed: damageSummary.cardsTrashed,
-      flatline: damageSummary.flatline,
+      damageType: finalSummary.damageType,
+      damageAmount: totalDamage,
+      cardsTrashed: totalCardsTrashed,
+      flatline: damageSummaries.some((entry) => entry.summary.flatline),
       sourceDefinitionId: dueEffects[0]!.sourceDefinitionId,
       sourceCount: dueEffects.length,
       sourceCardInstanceIds: dueEffects
         .map((effect) => effect.sourceCardInstanceId)
         .sort()
         .join(","),
-      ...(damageSummary.coreDamageAfter !== undefined
-        ? { coreDamageAfter: damageSummary.coreDamageAfter }
+      delayedDamageResolutionCount: damageSummaries.length,
+      ...(finalSummary.coreDamageAfter !== undefined
+        ? { coreDamageAfter: finalSummary.coreDamageAfter }
         : {}),
     };
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      ...damageSummaries.map(({ effect, summary }, index) => ({
+        effectId: `runner.end.delayed_damage.${state.stateVersion}.${index}.${effect.sourceCardInstanceId}`,
+        kind: "damage" as const,
+        visibility: "public" as const,
+        side: "runner" as const,
+        amount: summary.amount,
+        reason: "end_of_turn",
+        sourceDefinitionId: effect.sourceDefinitionId,
+        damageType: summary.damageType,
+        damageCannotBePrevented: true,
+        cardsTrashed: summary.cardsTrashed,
+        flatline: summary.flatline,
+        ...(summary.coreDamageAfter !== undefined
+          ? { coreDamageAfter: summary.coreDamageAfter }
+          : {}),
+      })),
+    ];
     flags.delayedEndTurnEffects = (flags.delayedEndTurnEffects ?? []).filter(
       (effect) => effect.kind !== "damage",
     );

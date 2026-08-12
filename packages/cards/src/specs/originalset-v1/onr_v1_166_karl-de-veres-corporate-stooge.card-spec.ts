@@ -13,7 +13,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Gain [1] each time you make a successful run. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+      "Gain [1] after each successful run. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -21,6 +21,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_166_karl-de-veres-corporate-stooge",
+      },
+      {
+        source: "project_ruling",
+        reference:
+          "Netrunner Errata 1.70: Karl de Veres, Corporate Stooge (end-of-run effect)",
       },
     ],
   },
@@ -51,7 +56,7 @@ export const cardSpec = {
         "unique_direct_longtail_successful_run_credit_resource",
       ),
       addressability: ["plan", "action", "quote", "debug"],
-      kind: "successful_run_credit_resource",
+      kind: "successful_run_end_credit_resource",
       amount: 1,
       visibility: "public",
     },

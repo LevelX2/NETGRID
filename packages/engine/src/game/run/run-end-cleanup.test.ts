@@ -307,6 +307,7 @@ function makeHost(
       isTokyoUnsuccessfulRunSource: (cardId) => tokyoSourceIds.has(cardId),
     },
     followups: {
+      applySuccessfulRunEndCreditTriggers: () => ({ handled: false }),
       applySuccessfulRunExtraRunFollowup: () => ({ handled: false }),
       cleanupDelayedSuccessfulRunTemporaryIce: () => {
         cleanupDelayedCount += 1;

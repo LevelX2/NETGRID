@@ -69,27 +69,13 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "contest_remote",
-      },
-      {
         kind: "strategic_role",
-        role: "tax_tool",
-      },
-      {
-        kind: "line_support",
-        lineKey: "runner.remote_contest",
-        support: "supports",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
+        role: "corp_ice_install_tax",
       },
       {
         kind: "target_preference",
         purpose: "chosen_fort_ice_tax",
-        preferences: [],
+        preferences: ["fort_with_expected_future_ice_installation"],
         avoid: ["hidden_info_dependent_choice"],
       },
     ],

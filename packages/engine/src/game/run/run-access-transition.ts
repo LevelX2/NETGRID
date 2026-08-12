@@ -95,7 +95,6 @@ export type RunAccessTransitionHost = {
   run: {
     isV097OrLater: () => boolean;
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    applyUniqueDirectSuccessfulRunTriggers: (legalAction?: LegalAction) => void;
     successfulRunInterventionKindForSource: (
       sourceCardId: CardInstanceId,
     ) => SuccessfulRunInterventionKind | undefined;
@@ -144,7 +143,6 @@ export function enterAccessFromSuccessfulRun(
       ...resolvedPayloadFor(legalAction),
     };
   markSuccessfulRunForTurn(host, run);
-  host.run.applyUniqueDirectSuccessfulRunTriggers(legalAction);
   if (
     run.successfulRunAccessReplacement === "corp_lose_credits" &&
     (!run.successfulRunRequiresCorpCredits || host.state.corp.credits > 0)

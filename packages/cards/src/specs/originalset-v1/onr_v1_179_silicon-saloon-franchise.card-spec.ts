@@ -101,15 +101,6 @@ export const cardSpec = {
         use: "economy.card",
       },
       {
-        kind: "target_preference",
-        purpose: "search_for_current_setup_or_economy_need",
-        preferences: [
-          "missing_current_coverage",
-          "central_or_remote_plan_enabler",
-        ],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",

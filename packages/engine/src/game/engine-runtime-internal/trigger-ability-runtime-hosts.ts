@@ -608,6 +608,8 @@ export function createTriggerAbilityRuntimeHosts(
           cardImplementationForDefinitionId(definition.id)
             ?.hiddenReplacementLongtail?.kind,
         publicTitle: deps.publicCardTitle,
+        additionalAgendaPointInstallCost:
+          deps.cardImplementationAgendaPointInstallCost,
       },
       credits: {
         spend: spendCredits,
@@ -626,6 +628,12 @@ export function createTriggerAbilityRuntimeHosts(
       runner: {
         runnerMemoryLimit,
         runnerProgramUsesMemory: deps.runnerProgramUsesMemory,
+        pickAgendaPointCostSource: () =>
+          deps.pickRunnerAgendaForAgendaPointCost(state) as
+            | CardInstanceId
+            | undefined,
+        spendAgendaPointFromScoredCard: (cardId) =>
+          deps.spendAgendaPointFromScoredCard(state, cardId),
       },
       hiddenZone: {
         startHiddenStackProgramInstallActivation: (sourceCardId, legalAction) =>

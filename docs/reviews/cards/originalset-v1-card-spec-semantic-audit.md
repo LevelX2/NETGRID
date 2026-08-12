@@ -751,10 +751,68 @@ Für Record Reconstructor, Tycho Mem Chip, Zetatech Mem Chip, Aujourd’Oui,
 Broker, Crash Everett, Inventive Fixer, Databroker und Diplomatic Immunity
 ergab der Nutzerblock keinen weiteren Korrekturbedarf.
 
+## Block 009 – Karten 161 bis 180 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 009` eingeführt.
+
+### Runner-Start und verzögerte Auflösung
+
+- Gleichzeitig fällige, installierte Runner-Start-of-Turn-Quellen werden nun
+  vom Runner in stabil gebundener Reihenfolge aufgelöst. Jede Quelle wird vor
+  ihrer Auflösung erneut gegen den aktuellen State geprüft. Wenn Smith’s
+  Pawnshop beispielsweise Quest for Cattekin zuerst trasht, erzeugt Quest
+  anschließend weder Würfelwurf noch Schaden oder Action.
+- Preying Mantis erzeugt am Zugende ein eigenes, unverhinderbares
+  Core-Damage-Ereignis je aktivierter Quelle. Mehrere Kopien kollabieren nicht
+  mehr zu einem gemeinsamen Damage-Event; die öffentliche Zusammenfassung
+  darf den Gesamtbetrag weiterhin aggregieren.
+- Karl de Veres’ Corporate Stooge zahlt seinen Credit erst beim tatsächlichen
+  Ende eines erfolgreichen Runs und nicht bereits beim Übergang in den
+  Access. Damit bleiben Access-Fenster und Run-Ende regeltechnisch getrennt.
+
+### The Shell Traders
+
+- Das Entfernen eines Shell-Counters ist als bezahlte Fähigkeit sowohl in der
+  Runner-Action-Phase als auch in den vorhandenen Runner-Special-Effect-
+  Fenstern eines Runs verfügbar. Die Aktion ergänzt die normalen Run-Aktionen,
+  statt Encounter- oder Jack-out-Logik zu ersetzen.
+- Beim letzten Counter wird der normale Install-Creditpreis erlassen;
+  zusätzliche Installkosten bleiben zahlbar. Sind solche Zusatzkosten nicht
+  bezahlbar, wird die gebundene Karte aus dem Spiel entfernt. Verlässt Shell
+  vorher das Spiel, bleibt die face-up beiseitegelegte Karte wie gedruckt im
+  Limbo.
+- Die Regressionsevidence umfasst bezahlbare und unbezahlbare Agenda-Punkt-
+  Zusatzkosten, MU-Auswahl sowie ein reales Jack-out-Fenster.
+
+### CardSpec-, Text- und Planning-Semantik
+
+- Hells Run und Rigged Investments nennen die Bank; Ronin Around beschränkt
+  Expose auf installierte Karten; The Shell Traders führt `face up`; Smith’s
+  Pawnshop enthält den vollständigen Unique-Reminder. Die belegten
+  Präzisierungen besitzen Projekt-Rulings beziehungsweise Quellverweise.
+- Field Reporter for ICE and Data, Junkyard BBS, Restrictive Net Zoning,
+  Ronin Around und Silicon Saloon Franchise tragen keine fachfremden
+  Informations-, Run-, Remote- oder Target-Preference-Hints mehr.
+  Restrictive Net Zoning beschreibt gezielt die Erhöhung künftiger
+  Corp-ICE-Installkosten. Mantis und Quest projizieren ihre tatsächliche
+  Action-Kapazität samt Damage-Risiko; Quests nicht gedruckter Recurring-
+  Credit wurde entfernt.
+- Die Hint-Korrekturen ändern keine Plan-, Action-, Choice- oder
+  Executor-Ownership. Das generierte Artefakt und das versionierte
+  Originalset-Review-Golden sind semantisch synchron.
+
+### Unveränderte Karten dieses Blocks
+
+Für Fall Guy, Floating Runner BBS, Leland, Corporate Bodyguard, N.E.T.O.,
+Nomad Allies, The Short Circuit und Short-Term Contract ergab der Nutzerblock
+keinen weiteren Korrekturbedarf.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 161 bis 180.
+- Als nächster regulärer Nutzerblock folgen die Karten 181 bis 200.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -842,3 +900,15 @@ Der bekannte Originalset-AI-Golden-Test bleibt unabhängig davon wegen seines
 statischen Imports des entfernten historischen Migration-Report-JSONs nicht
 startfähig; das aktuelle erzeugte Artefakt und die Review-Fixture wurden
 gezielt synchronisiert.
+
+Für Block 009 sind Cards-, Engine- und AI-Typecheck, CardSpec-AI-Hint-,
+Import-Index-, Metadaten- und Karten-Strukturgates sowie 243 fokussierte
+Engine-Tests und 37 fokussierte AI-Vertragstests grün. Die Evidence umfasst
+insbesondere geordnete Runner-Startquellen, zwei getrennte Mantis-Damage-
+Ereignisse, Karls tatsächliches Run-Ende und Shells Runfenster sowie beide
+Ausgänge zusätzlicher Installkosten. `check:engine-source-structure` ist
+unabhängig vom Block wegen eines bestehenden Checker-Fehlers bei Deklarationen
+ohne Initializer nicht ausführbar; `check:card-function-abstraction` findet
+weiterhin sein bereits fehlendes historisches Baseline-JSON nicht. Der
+Originalset-AI-Golden-Test bleibt aus demselben bekannten statischen Import
+des entfernten Migration-Reports nicht startfähig.

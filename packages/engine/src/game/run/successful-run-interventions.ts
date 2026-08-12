@@ -886,7 +886,7 @@ export function cleanupDelayedSuccessfulRunTemporaryIce(
 }
 
 export {
-  applyDirectSuccessfulRunTriggers,
+  applySuccessfulRunEndCreditTriggers,
   applySuccessfulRunExtraRunFollowup,
 } from "./successful-run-followups";
 export type {

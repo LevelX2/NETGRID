@@ -13,6 +13,8 @@ export type { ImmediateLifecycle } from "./card-implementation-runtime-lifecycle
 export { canPlayPrintedCostOnPlayImplementation } from "./card-implementation-runtime-legality";
 export { executeCardImplementationLifecycleEffects } from "./card-implementation-runtime-lifecycle-immediate";
 export {
+  cardImplementationStartOfRunnerTurnAbilities,
+  hasDueCardImplementationStartOfRunnerTurnAbility,
   executeCardImplementationRunnerRunStartEffects,
   executeCardImplementationStartOfCorpTurnEffects,
   executeCardImplementationStartOfRunnerTurnEffects,

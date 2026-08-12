@@ -584,6 +584,7 @@ export function createLegalActionRuntimeHosts(
 ): Pick<
   import("./action-runtime-port").ActionRuntimePort,
   | "corpRunnerActionPaidWindowActions"
+  | "runnerRunSpecialEffectActions"
   | "specialZoneHarnessActions"
   | "hasHiddenResourceAccessStartActions"
   | "pushCorpTraceDamageOrCardImplementationActions"
@@ -643,6 +644,43 @@ export function createLegalActionRuntimeHosts(
           id,
           definition,
           "corp_paid",
+        );
+      }
+    }
+    return actions;
+  }
+
+  function runnerRunSpecialEffectActions(state: GameState): LegalAction[] {
+    if (
+      !state.run ||
+      state.activeSide !== "runner" ||
+      (state.timingPoint !== "run.encounter_ice" &&
+        state.timingPoint !== "run.jack_out_window") ||
+      state.runner.credits < 1
+    )
+      return [];
+    const actions: LegalAction[] = [];
+    const targets = delayedInstallPreparedTargetIds(
+      deps.runnerSpecialTriggerExecutionHost(state),
+    );
+    for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
+      const sourceDefinition = definitionFor(state, sourceCardId);
+      if (
+        cardImplementationForDefinitionId(sourceDefinition.id)
+          ?.hiddenReplacementLongtail?.kind !==
+        "delayed_install_with_counter_countdown"
+      )
+        continue;
+      for (const targetCardId of targets) {
+        actions.push(
+          buildRunnerDelayedInstallRemoveCounterAction(state, {
+            sourceCardId,
+            sourceTitle: sourceDefinition.title,
+            sourceDefinitionId: sourceDefinition.id,
+            targetCardId,
+            targetDefinitionId: definitionFor(state, targetCardId).id,
+            remainingCountersBefore: cardCounter(state, targetCardId, "shell"),
+          }),
         );
       }
     }
@@ -836,6 +874,7 @@ export function createLegalActionRuntimeHosts(
 
   return {
     corpRunnerActionPaidWindowActions,
+    runnerRunSpecialEffectActions,
     specialZoneHarnessActions,
     hasHiddenResourceAccessStartActions,
     pushCorpTraceDamageOrCardImplementationActions,

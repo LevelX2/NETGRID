@@ -58,6 +58,7 @@ export type LegalActionGenerationHost = {
     buildChoiceAction: (choice: ChoiceRequest) => LegalAction;
     buildPurgeableRunnerVirusPurgeAction: HostFn<LegalAction>;
     corpRunnerActionPaidWindowActions: HostFn<LegalAction[]>;
+    runnerRunSpecialEffectActions: HostFn<LegalAction[]>;
   };
   counters: {
     purgeableRunnerVirusCounterTotal: HostFn<number>;
@@ -124,12 +125,18 @@ function buildRunnerActionsForCostPenaltySupportWindow(
     return [];
   }
   if (state.timingPoint === "run.encounter_ice")
-    return buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
-      .legalActions;
+    return [
+      ...buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
+        .legalActions,
+      ...host.actions.runnerRunSpecialEffectActions(),
+    ];
   if (state.timingPoint === "run.jack_out_window") {
     if (isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
-    return buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
-      .legalActions;
+    return [
+      ...buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
+        .legalActions,
+      ...host.actions.runnerRunSpecialEffectActions(),
+    ];
   }
   if (state.timingPoint === "run.movement_rez_window") return [];
   if (state.timingPoint === "access.resolve_card")
@@ -259,8 +266,11 @@ function buildLegalActionsUnchecked(
   }
   if (state.timingPoint === "run.encounter_ice") {
     if (side === "runner")
-      return buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
-        .legalActions;
+      return [
+        ...buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
+          .legalActions,
+        ...host.actions.runnerRunSpecialEffectActions(),
+      ];
     return side === "corp"
       ? buildCorpEncounterCardImplementationActions(
           host.hosts.runCardImplementationActionHost(),
@@ -277,8 +287,11 @@ function buildLegalActionsUnchecked(
       ];
     if (isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
     return side === "runner"
-      ? buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
-          .legalActions
+      ? [
+          ...buildRunnerMovementActions(host.hosts.runnerEncounterActionHost())
+            .legalActions,
+          ...host.actions.runnerRunSpecialEffectActions(),
+        ]
       : [];
   }
   if (state.timingPoint === "run.movement_rez_window") {

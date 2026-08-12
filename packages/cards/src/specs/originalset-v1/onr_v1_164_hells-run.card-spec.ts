@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 1 from the bank on Hell's Run when it is installed. Use this bit only to pay for increasing your link. If you use the bit, replace it at the start of your next turn.",
+      "Put 1 from the bank on Hell's Run when it is installed. Use this bit only to pay for increasing your link. If you use the bit, replace it from the bank at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,10 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_164_hells-run",
+      },
+      {
+        source: "project_ruling",
+        reference: "Netrunner Errata 1.70: Hell's Run",
       },
     ],
   },

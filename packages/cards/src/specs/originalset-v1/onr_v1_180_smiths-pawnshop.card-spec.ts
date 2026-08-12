@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "At the start of each of your turns, you may trash one of your other installed cards to gain 2 credits.\nOnly one unique card of a particular name can be in play at a time.",
+      "At the start of each of your turns, you may trash one of your other installed cards to gain 2 credits.\nOnly one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

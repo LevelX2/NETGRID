@@ -60,10 +60,6 @@ export const cardSpec = {
         role: "build_rig",
       },
       {
-        kind: "plan_role",
-        role: "information",
-      },
-      {
         kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",

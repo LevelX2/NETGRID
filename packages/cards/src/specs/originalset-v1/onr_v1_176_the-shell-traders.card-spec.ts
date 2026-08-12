@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "A: Choose a program or hardware card from your hand. Set that card aside, and put a number of Shell counters on it equal to its installation cost. When the last Shell counter on that card has been removed, install that card, at no cost. Remove one Shell counter from one card at the start of each of your turns. [1]: Remove one Shell counter from a card.",
+      "A: Choose a program or hardware card from your hand. Set that card aside face up, and put a number of Shell counters on it equal to its installation cost. When the last Shell counter on that card has been removed, install that card, at no cost. Remove one Shell counter from one card at the start of each of your turns. [1]: Remove one Shell counter from a card.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,10 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_176_the-shell-traders",
+      },
+      {
+        source: "project_ruling",
+        reference: "Netrunner Errata 1.70: The Shell Traders",
       },
     ],
   },

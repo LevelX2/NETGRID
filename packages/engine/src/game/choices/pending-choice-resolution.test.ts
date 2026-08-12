@@ -428,6 +428,12 @@ function pendingChoiceHost(
       ),
     },
     turn: {
+      resolveRunnerStartOfTurnOrderChoice: unexpected(
+        "resolveRunnerStartOfTurnOrderChoice",
+      ),
+      resumeRunnerStartOfTurnOrdering: unexpected(
+        "resumeRunnerStartOfTurnOrdering",
+      ),
       resolveSatelliteMonitorsStartChoice: unexpected(
         "resolveSatelliteMonitorsStartChoice",
       ),

@@ -172,6 +172,9 @@ export type RunEndCleanupHost = {
     isTokyoUnsuccessfulRunSource: (cardId: CardInstanceId) => boolean;
   };
   followups: {
+    applySuccessfulRunEndCreditTriggers: (
+      legalAction?: LegalAction,
+    ) => SuccessfulRunFollowupExecutionResult;
     applySuccessfulRunExtraRunFollowup: (
       legalAction?: LegalAction,
     ) => SuccessfulRunFollowupExecutionResult;

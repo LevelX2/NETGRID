@@ -1974,6 +1974,7 @@ export type GameState = {
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
     delayedInstallStartTurnResolvedSourceIds?: CardInstanceId[];
+    runnerStartOfTurnResolvedSourceIds?: CardInstanceId[];
     successfulRunExtraRunPending?: boolean;
     successfulRunExtraRunUsedThisTurn?: boolean;
     delayedEndTurnEffects?: Array<{

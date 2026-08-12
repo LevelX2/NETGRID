@@ -6,6 +6,7 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  PlayerAction,
   ResolvedGameEffect,
   ServerId,
   Side,
@@ -203,8 +204,19 @@ export type TurnRuntimePort = {
   applyStartTurnRandomEffectTables: (
     state: GameState,
     effects?: AutomaticEffectCollector,
+    onlySourceCardId?: CardInstanceId,
   ) => void;
   applyRunnerStartTurnActionEconomyEffects: (
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    onlySourceCardId?: CardInstanceId,
+  ) => void;
+  resolveRunnerStartOfTurnOrderChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resumeRunnerStartOfTurnOrdering: (
     state: GameState,
     effects?: AutomaticEffectCollector,
   ) => void;

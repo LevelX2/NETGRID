@@ -219,7 +219,6 @@ function makeHost(
         finishedRuns.push(successful);
         delete state.run;
       },
-      applyUniqueDirectSuccessfulRunTriggers: () => undefined,
       successfulRunInterventionKindForSource: () => undefined,
       successfulRunInterventionCost: () => 0,
     },
