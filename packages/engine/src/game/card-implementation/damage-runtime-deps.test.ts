@@ -64,11 +64,13 @@ function action(payload: LegalAction["payload"] = {}): LegalAction {
   } as unknown as LegalAction;
 }
 
-function host(input: {
-  replacementWindow?: boolean;
-  eventModificationWindow?: boolean;
-  calls?: { kind: string; value: unknown }[];
-} = {}): DamageRuntimeDepsHost {
+function host(
+  input: {
+    replacementWindow?: boolean;
+    eventModificationWindow?: boolean;
+    calls?: { kind: string; value: unknown }[];
+  } = {},
+): DamageRuntimeDepsHost {
   return {
     damage: {
       createDamageImminentEvent: (_state, request) => {
@@ -136,7 +138,7 @@ describe("damage card implementation runtime deps", () => {
   it("keeps the recent damage runtime check local to the damage family", () => {
     const gameState = state();
     gameState.runnerTurnFlags = {
-      runnerActionsTakenThisTurn: 4,
+      runnerActionOrdinal: 4,
       lastDamageRunnerActionOrdinal: 2,
     } as NonNullable<GameState["runnerTurnFlags"]>;
     const deps = createDamageCardImplementationRuntimeDeps(host());

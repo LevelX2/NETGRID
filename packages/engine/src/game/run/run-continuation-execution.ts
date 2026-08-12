@@ -29,6 +29,10 @@ import {
   resolveEncounterSpecialWindowSubroutine,
   type EncounterSpecialWindowHost,
 } from "./encounter-special-windows";
+import {
+  subroutineIsUnavailable,
+  trodeSetIgnoresSubroutine,
+} from "./trode-set";
 import { movePastCurrentIce, type RunMovementHost } from "./run-movement";
 import {
   finalizeDelayedSuccessfulRunAfterPassedIce,
@@ -121,11 +125,22 @@ export function continueRun(
     if (
       !subroutine ||
       state.winner ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index) ||
+      subroutineIsUnavailable(run, index) ||
       ended
     )
       continue;
+    if (trodeSetIgnoresSubroutine(state, definition, subroutine)) {
+      run.ignoredSubroutineIndexes = [
+        ...new Set([...(run.ignoredSubroutineIndexes ?? []), index]),
+      ];
+      if (legalAction)
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          runnerHardwareIgnoredApSubroutine: true,
+          ignoredSubroutineIndexes: run.ignoredSubroutineIndexes.join(","),
+        };
+      continue;
+    }
     const runnerForgoneActionOrdinal =
       subroutine.type === "set_runner_forgo_next_action"
         ? currentRunnerForgoneActionOrdinal(state)

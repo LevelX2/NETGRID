@@ -17,6 +17,10 @@ import {
   runDurationPaymentHost,
   runJackOutAdditionalCost,
 } from "./run-duration-payment";
+import {
+  subroutineIsUnavailable,
+  trodeSetIgnoresSubroutine,
+} from "./trode-set";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type EncounterSubroutine = SubroutineDefinition;
@@ -90,13 +94,24 @@ export function preparePayOrEndRunSubroutinePayment(
   legalAction?: LegalAction,
 ): EncounterResolutionResult {
   const run = mustRun(host.state);
+  const iceDefinition = encounteredIceDefinition(host.state, run);
   const payOrEndRunIndexesForThisContinue = new Set(
-    encounterSubroutineIndexesForNextContinue(run, subroutines).filter(
+    encounterSubroutineIndexesForNextContinue(
+      host.state,
+      iceDefinition,
+      run,
+      subroutines,
+    ).filter(
       (index) => subroutines[index]?.type === "end_the_run_unless_runner_pays",
     ),
   );
   const payOrTrashProgramIndexesForThisContinue = new Set(
-    encounterSubroutineIndexesForNextContinue(run, subroutines).filter(
+    encounterSubroutineIndexesForNextContinue(
+      host.state,
+      iceDefinition,
+      run,
+      subroutines,
+    ).filter(
       (index) =>
         subroutines[index]?.type ===
         "trash_installed_program_unless_runner_pays",
@@ -108,6 +123,8 @@ export function preparePayOrEndRunSubroutinePayment(
       : undefined;
   if (expectedSubroutineIds !== undefined) {
     const currentSubroutineIds = encounterSubroutinesForNextContinue(
+      host.state,
+      iceDefinition,
       run,
       subroutines,
     )
@@ -938,15 +955,22 @@ export function recordRunFullyBrokenIce(
 }
 
 function encounterSubroutinesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: ActiveRun,
   subroutines: readonly EncounterSubroutine[],
 ): EncounterSubroutine[] {
-  return encounterSubroutineIndexesForNextContinue(run, subroutines).flatMap(
-    (index) => (subroutines[index] ? [subroutines[index]!] : []),
-  );
+  return encounterSubroutineIndexesForNextContinue(
+    state,
+    iceDefinition,
+    run,
+    subroutines,
+  ).flatMap((index) => (subroutines[index] ? [subroutines[index]!] : []));
 }
 
 function encounterSubroutineIndexesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: ActiveRun,
   subroutines: readonly EncounterSubroutine[],
 ): number[] {
@@ -955,14 +979,28 @@ function encounterSubroutineIndexesForNextContinue(
     const subroutine = subroutines[index];
     if (
       !subroutine ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      subroutineIsUnavailable(run, index) ||
+      trodeSetIgnoresSubroutine(state, iceDefinition, subroutine)
     )
       continue;
     indexes.push(index);
     if (subroutine.type === "initiate_trace") break;
   }
   return indexes;
+}
+
+function encounteredIceDefinition(
+  state: GameState,
+  run: ActiveRun,
+): CardDefinition {
+  const definitionId = run.encounteredIceId
+    ? state.cardInstances[run.encounteredIceId]?.definitionId
+    : undefined;
+  const definition = definitionId
+    ? CARD_DEFINITIONS_BY_ID[definitionId]
+    : undefined;
+  if (!definition) throw new Error("Encounter-ICE-Definition fehlt.");
+  return definition;
 }
 
 function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {

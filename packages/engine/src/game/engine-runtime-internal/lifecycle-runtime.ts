@@ -24,6 +24,10 @@ import type {
   Side,
 } from "./runtime-shared";
 import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
+import {
+  microtechHostedProgramIds,
+  trashMicrotechBackedProgram,
+} from "../state/microtech-backup";
 
 export function createLifecycleRuntime(
   deps: RuntimeDeps,
@@ -67,12 +71,7 @@ export function createLifecycleRuntime(
   ): void {
     if (!state.runner.rig.programs.includes(cardId)) return;
     const hostedIds = deps.hostedCardsOn(state, cardId);
-    const backedUpHostedIds = backupProgramsOnTrashBackupHardwareBeforeTrash(
-      state,
-      hostedIds,
-    );
     for (const hostedId of hostedIds) {
-      if (backedUpHostedIds.includes(hostedId)) continue;
       trashRunnerInstalledProgram(state, hostedId);
     }
     const definition = deps.definitionFor(state, cardId);
@@ -116,37 +115,6 @@ export function createLifecycleRuntime(
       zone: { side: "runner", zone: "heap" },
     };
     deps.clearCardCounters(state, cardId);
-  }
-
-  function backupProgramsOnTrashBackupHardwareBeforeTrash(
-    state: GameState,
-    candidateProgramIds: CardInstanceId[],
-  ): CardInstanceId[] {
-    const microtechId = deps.installedProgramTrashBackupHardwareIds(state)[0];
-    if (!microtechId) return [];
-    const eligible = candidateProgramIds
-      .filter((cardId) => state.runner.rig.programs.includes(cardId))
-      .filter((cardId) => deps.definitionFor(state, cardId).type === "program")
-      .filter((cardId) => cardId !== microtechId)
-      .sort();
-    if (eligible.length === 0) return [];
-    for (const cardId of eligible) {
-      if (runnerProgramUsesMemory(state, cardId))
-        state.runner.memoryUsed = Math.max(
-          0,
-          state.runner.memoryUsed -
-            (deps.definitionFor(state, cardId).memoryCost ?? 0),
-        );
-      deps.setHostedOn(state, cardId, microtechId);
-      state.cardInstances[cardId] = {
-        ...deps.mustInstance(state.cardInstances, cardId),
-        faceup: true,
-        rezzed: true,
-        zone: { side: "runner", zone: "rig" },
-        hostedOn: microtechId,
-      };
-    }
-    return eligible;
   }
 
   function runnerProgramUsesMemory(
@@ -218,9 +186,12 @@ export function createLifecycleRuntime(
       cardId,
       "on_leave_play",
     );
+    const microtechBackedIds = microtechHostedProgramIds(state, cardId);
     for (const hostedId of deps.hostedCardsOn(state, cardId)) {
       const hostedDefinition = deps.definitionFor(state, hostedId);
-      if (hostedDefinition.type === "program")
+      if (microtechBackedIds.includes(hostedId))
+        trashMicrotechBackedProgram(state, hostedId);
+      else if (hostedDefinition.type === "program")
         trashRunnerInstalledProgram(state, hostedId);
     }
     const instanceAfterLifecycle = deps.mustInstance(
@@ -1022,7 +993,6 @@ export function createLifecycleRuntime(
   return {
     discardRandomCorpHqCards,
     trashRunnerInstalledProgram,
-    backupProgramsOnTrashBackupHardwareBeforeTrash,
     runnerProgramUsesMemory,
     trashRunnerInstalledCardToHeap,
     returnRunnerInstalledCardToGrip,

@@ -14,9 +14,11 @@ import type {
 import {
   addRunnerTagsWithPrevention,
   configureDamageCoreHost,
+  createDamageImminentEvent,
   doDamage,
   resetDamageCoreHostForTests,
   resolveDamageOperation,
+  resolveDamageImminentEvent,
   resolveEventModificationChoice,
   resolveReplacementChoice,
   type DamageCoreHost,
@@ -62,6 +64,109 @@ describe("damage core", () => {
       side: "runner",
       zone: "heap",
     });
+  });
+
+  it("binds resolved damage to the runner action that created its event", () => {
+    const gripCardId = "grip_action" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+      },
+      runnerGrip: [gripCardId],
+    });
+    configureDamageCoreHost(testHost());
+    state.activeSide = "runner";
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 7,
+      currentRunnerActionOrdinal: 7,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const event = createDamageImminentEvent(state, {
+      damageId: "action_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    delete state.runnerTurnFlags.currentRunnerActionOrdinal;
+    state.activeSide = "corp";
+    resolveDamageImminentEvent(state, event);
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBe(7);
+  });
+
+  it("does not attribute damage during a no-action bonus run", () => {
+    const gripCardId = "grip_bonus_run" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+      },
+      runnerGrip: [gripCardId],
+    });
+    configureDamageCoreHost(testHost());
+    state.activeSide = "runner";
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 7,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    state.run = { runId: "bonus_run", attackedServerId: "rd" } as any;
+
+    doDamage(state, {
+      damageId: "bonus_run_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBeUndefined();
+  });
+
+  it("attributes damage during an action-initiated run to that action", () => {
+    const gripCardId = "grip_action_run" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [gripCardId]: instance(gripCardId, "grip_card", "runner", "grip"),
+      },
+      runnerGrip: [gripCardId],
+    });
+    configureDamageCoreHost(testHost());
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 7,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    state.run = {
+      runId: "action_run",
+      attackedServerId: "rd",
+      runnerActionOrdinal: 7,
+    } as any;
+
+    doDamage(state, {
+      damageId: "action_run_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBe(7);
+  });
+
+  it("does not count fully prevented damage as action damage", () => {
+    const state = minimalState({ cardInstances: {}, runnerGrip: [] });
+    configureDamageCoreHost(testHost());
+    state.runnerTurnFlags = {
+      runnerActionOrdinal: 4,
+      currentRunnerActionOrdinal: 4,
+    } as NonNullable<GameState["runnerTurnFlags"]>;
+    const event = createDamageImminentEvent(state, {
+      damageId: "prevented_action_damage",
+      damageType: "net",
+      amount: 1,
+      source: "test",
+    });
+
+    resolveDamageImminentEvent(state, {
+      ...event,
+      payload: { ...event.payload, amount: 0 },
+    });
+
+    expect(state.runnerTurnFlags.lastDamageRunnerActionOrdinal).toBeUndefined();
   });
 
   it("keeps flatline timing and state markers stable", () => {
@@ -656,7 +761,7 @@ function testHost(): DamageCoreHost {
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
           abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
           bonusRunPending: false,

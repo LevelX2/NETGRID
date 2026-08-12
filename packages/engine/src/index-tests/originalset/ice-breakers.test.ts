@@ -2407,7 +2407,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         runAttemptsLastTurn: 0,
         damagePreventionUsage: {},
       }),
-      runnerActionsTakenThisTurn: 2,
+      runnerActionOrdinal: 2,
       lastDamageRunnerActionOrdinal: 1,
     };
     const initial = structuredClone(state);
@@ -2439,7 +2439,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
         runAttemptsLastTurn: 0,
         damagePreventionUsage: {},
       }),
-      runnerActionsTakenThisTurn: 5,
+      runnerActionOrdinal: 5,
       lastDamageRunnerActionOrdinal: 1,
     };
     expect(
@@ -2449,5 +2449,26 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
           action.payload?.cardId === lifesaverId,
       ),
     ).toBe(false);
+
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      runnerActionOrdinal: 8,
+      lastDamageRunnerActionOrdinal: 7,
+    };
+    emptyRunnerGripForTest(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = toRunnerTurn(state);
+    expect(state.runnerTurnFlags?.runnerActionOrdinal).toBe(8);
+    expect(state.runnerTurnFlags?.lastDamageRunnerActionOrdinal).toBe(7);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === lifesaverId,
+      ),
+    ).toBe(true);
   });
 });

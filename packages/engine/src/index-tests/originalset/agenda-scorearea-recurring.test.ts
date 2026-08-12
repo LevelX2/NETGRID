@@ -2275,6 +2275,92 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it.each([1, 2] as const)(
+    "applies %i R&D Interface bonus after Private LDL redirects HQ access",
+    (interfaceCount) => {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `spotcheck-private-ldl-rd-interface-${interfaceCount}`,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+            id: `spotcheck_private_ldl_rd_interface_runner_${interfaceCount}`,
+            name: "Spotcheck Private LDL R&D Interface Runner",
+            cards: [
+              { id: "onr_v1_106_private-ldl-access", quantity: 1 },
+              {
+                id: "onr_v1_139_r-and-d-interface",
+                quantity: interfaceCount,
+              },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+                (card) =>
+                  card.id !== "onr_v1_106_private-ldl-access" &&
+                  card.id !== "onr_v1_139_r-and-d-interface",
+              ),
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            id: `spotcheck_private_ldl_rd_interface_corp_${interfaceCount}`,
+            name: "Spotcheck Private LDL R&D Interface Corp",
+            cards: [
+              { id: "simple_economy_asset", quantity: 1 },
+              { id: "simple_agenda", quantity: 1 },
+              { id: "simple_economy_operation", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+                (card) =>
+                  card.id !== "simple_economy_asset" &&
+                  card.id !== "simple_agenda" &&
+                  card.id !== "simple_economy_operation",
+              ),
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 30;
+      for (let index = 0; index < interfaceCount; index += 1) {
+        const interfaceId =
+          index === 0
+            ? moveRunnerCardToGrip(state, "onr_v1_139_r-and-d-interface")
+            : moveRunnerCardCopyToGrip(state, "onr_v1_139_r-and-d-interface");
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === "install_card" &&
+            String(action.payload?.cardId) === interfaceId,
+        );
+      }
+      moveRunnerCardToGrip(state, "onr_v1_106_private-ldl-access");
+      putCorpCardOnTopOfRd(state, "simple_economy_asset");
+      putCorpCardOnTopOfRd(state, "simple_agenda");
+      putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) === "onr_v1_106_private-ldl-access",
+      );
+
+      expect(state.run).toMatchObject({
+        attackedServerId: "hq",
+        accessServerOverride: "rd",
+        successfulRunServerOverride: "rd",
+      });
+      expect(
+        state.run?.breach?.queue.filter((entry) => entry.zone === "rd"),
+      ).toHaveLength(1 + interfaceCount);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        baseAccessCount: 1,
+        installedAccessBonus: interfaceCount,
+        effectiveAccessCount: 1 + interfaceCount,
+      });
+    },
+  );
+
   it("keeps Nasuko Cycle source-bound across damage windows and removal drift", () => {
     let state = createGameAfterSetup({
       seed: "spotcheck-prevention-sources",

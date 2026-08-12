@@ -104,13 +104,13 @@ export function createGameCardImplementationRuntimeDeps(
     runnerWasDamagedDuringLastThreeActions: (state) => {
       const current = Math.max(
         0,
-        Math.floor(state.runnerTurnFlags?.runnerActionsTakenThisTurn ?? 0),
+        Math.floor(state.runnerTurnFlags?.runnerActionOrdinal ?? 0),
       );
       const lastDamage = Math.max(
         0,
         Math.floor(state.runnerTurnFlags?.lastDamageRunnerActionOrdinal ?? 0),
       );
-      return lastDamage > 0 && current - lastDamage <= 3;
+      return lastDamage > 0 && current - lastDamage < 3;
     },
     runnerMadeSuccessfulRunOnServerThisTurn: (state, server) => {
       if (server === "hq")

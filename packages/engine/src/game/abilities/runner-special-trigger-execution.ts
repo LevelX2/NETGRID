@@ -153,7 +153,9 @@ function shellTradersDefinitionId(
 ): CardDefinitionId {
   const definition = host.cards.definitionFor(host.state, sourceCardId);
   if (!isShellTradersSource(host, sourceCardId))
-    throw new Error("Die verzögerte Installationsfähigkeit passt nicht zur Karte.");
+    throw new Error(
+      "Die verzögerte Installationsfähigkeit passt nicht zur Karte.",
+    );
   return definition.id;
 }
 
@@ -214,7 +216,7 @@ export function applyDelayedInstallStartOfTurn(
     successfulHqRunThisTurn: false,
     successfulRunThisTurn: false,
     damagePreventionUsage: {},
-    runnerActionsTakenThisTurn: 0,
+    runnerActionOrdinal: 0,
     abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
     bonusRunPending: false,
@@ -222,10 +224,7 @@ export function applyDelayedInstallStartOfTurn(
   const resolvedSourceIds = (flags.delayedInstallStartTurnResolvedSourceIds ??=
     []);
   for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
-    if (
-      !isShellTradersSource(host, sourceCardId)
-    )
-      continue;
+    if (!isShellTradersSource(host, sourceCardId)) continue;
     if (resolvedSourceIds.includes(sourceCardId)) continue;
     const targetCardIds = delayedInstallPreparedTargetIds(host);
     if (targetCardIds.length === 0) return;
@@ -523,9 +522,7 @@ function resolveDelayedInstallSetAside(
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.runner.rig.resources.includes(sourceCardId))
     throw new Error("The Shell Traders ist nicht installiert.");
-  if (
-    !isShellTradersSource(host, sourceCardId)
-  )
+  if (!isShellTradersSource(host, sourceCardId))
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
   if (!delayedInstallCanPrepareTarget(host, targetCardId))
@@ -600,9 +597,7 @@ function resolveDelayedInstallRemoveCounter(
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.runner.rig.resources.includes(sourceCardId))
     throw new Error("The Shell Traders ist nicht installiert.");
-  if (
-    !isShellTradersSource(host, sourceCardId)
-  )
+  if (!isShellTradersSource(host, sourceCardId))
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
   if (!delayedInstallPreparedTargetIds(host).includes(targetCardId))

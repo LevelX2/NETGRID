@@ -23,6 +23,8 @@ import { cardImplementationCoverageForDefinitionId } from "../../card-implementa
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
+import { visibleRunnerTraceSupportQuote } from "../../game/view/visible-runner-trace-support-quote";
+import { trodeSetIgnoresSubroutine } from "../../game/run/trode-set";
 import {
   MECHANIC_SMOKE_CARD_IDS,
   MECHANIC_SMOKE_DECKS,
@@ -3527,7 +3529,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     state.runner.credits = 30;
     state.corp.credits = 30;
+    const baseLinkBefore =
+      visibleRunnerTraceSupportQuote(state).baseLinkOptions[0]?.baseLink;
     installRunnerHardwareForTest(state, "onr_v1_132_microtech-trode-set");
+    expect(
+      visibleRunnerTraceSupportQuote(state).baseLinkOptions[0]?.baseLink,
+    ).toBe(baseLinkBefore);
     const killerId = installRunnerProgramForTest(state, "simple_killer");
     state.cardInstances[killerId] = {
       ...state.cardInstances[killerId]!,
@@ -3570,6 +3577,92 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       printedDamageAmount: 4,
       damageAmount: 1,
     });
+
+    const trodeState = state;
+    const shock = CARD_DEFINITIONS_BY_ID["onr_v1_268_shock-r"]!;
+    const jackAttack = CARD_DEFINITIONS_BY_ID["onr_v1_251_jack-attack"]!;
+    const bolter = CARD_DEFINITIONS_BY_ID["onr_v1_224_bolter-cluster"]!;
+    expect(
+      trodeSetIgnoresSubroutine(trodeState, shock, shock.subroutines![0]!),
+    ).toBe(true);
+    expect(
+      trodeSetIgnoresSubroutine(
+        trodeState,
+        jackAttack,
+        jackAttack.subroutines![0]!,
+      ),
+    ).toBe(true);
+    expect(
+      trodeSetIgnoresSubroutine(
+        trodeState,
+        jackAttack,
+        jackAttack.subroutines![1]!,
+      ),
+    ).toBe(false);
+    expect(
+      trodeSetIgnoresSubroutine(trodeState, bolter, bolter.subroutines![0]!),
+    ).toBe(false);
+  });
+
+  it("ignores a normal AP subroutine before resolution and never offers it as a break target", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-microtech-trode-ignore-normal-ap",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "spotcheck_microtech_trode_ignore_runner",
+          name: "Spotcheck Microtech Trode Ignore Runner",
+          cards: [
+            { id: "onr_v1_132_microtech-trode-set", quantity: 1 },
+            { id: "simple_killer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (card) =>
+                card.id !== "onr_v1_132_microtech-trode-set" &&
+                card.id !== "simple_killer",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "spotcheck_microtech_trode_ignore_corp",
+          name: "Spotcheck Microtech Trode Ignore Corp",
+          cards: [
+            { id: "onr_v1_268_shock-r", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (card) => card.id !== "onr_v1_268_shock-r",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.corp.credits = 30;
+    installRunnerHardwareForTest(state, "onr_v1_132_microtech-trode-set");
+    const killerId = installRunnerProgramForTest(state, "simple_killer");
+    state.cardInstances[killerId] = {
+      ...state.cardInstances[killerId]!,
+      strengthModifier: 10,
+    };
+    putCorpIceOnServer(state, "rd", "onr_v1_268_shock-r");
+    state = encounterIce(state, "rd", "onr_v1_268_shock-r");
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "break_subroutine",
+      ),
+    ).toBe(false);
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.label).toBe("ICE passieren");
+    expect(continueAction.payload?.unbrokenSubroutineCount).toBe(0);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.run?.ignoredSubroutineIndexes).toEqual([0]);
   });
 
   it("hardens Corporate Ally for deterministic multi-agenda spend and payload redaction", () => {

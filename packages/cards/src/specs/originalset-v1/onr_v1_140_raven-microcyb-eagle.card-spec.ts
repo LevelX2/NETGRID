@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Provides +1 MU. Prevents 1 Net damage each turn. Put [1] from the bank on Microcyb Eagle when it is installed. Use this bit only to pay for using icebreakers during runs. If you use the bit, replace it at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+      "Provides +1 MU. Prevents up to 1 Net damage each turn. Put [1] from the bank on Microcyb Eagle when it is installed. Use this bit only to pay for using icebreakers during runs. If you use the bit, replace it from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_140_raven-microcyb-eagle",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Raven Microcyb Eagle",
+        note: "Official errata adds ‘up to’ and ‘from the bank’ to the printed text.",
       },
     ],
   },
@@ -39,6 +44,7 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
+      memoryLimitBonus: 1,
       recurringCredits: 1,
     },
     hardwareDeck: true,

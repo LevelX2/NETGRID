@@ -6,6 +6,7 @@ import type {
   LegalAction,
   Side,
 } from "@netgrid/shared";
+import { microtechHostedProgramIds } from "../state/microtech-backup";
 
 export type RunFortTriggerExecutionHost = {
   state: GameState;
@@ -37,9 +38,7 @@ export type RunFortTriggerExecutionHost = {
     resolveFortPassAdvancementWindow: (legalAction: LegalAction) => void;
     resolveStartRunIceRepositionWindow: (legalAction: LegalAction) => void;
     resolveApproachIceExposeAbility: (legalAction: LegalAction) => void;
-    resolveApproachIceExposeViewingDecision: (
-      legalAction: LegalAction,
-    ) => void;
+    resolveApproachIceExposeViewingDecision: (legalAction: LegalAction) => void;
     startHqIceSwapChoice: (legalAction: LegalAction) => void;
   };
 };
@@ -109,10 +108,7 @@ export function handleRunFortTriggerExecution(
     host.run.resolveApproachIceExposeViewingDecision(legalAction);
     return handled(legalAction);
   }
-  if (
-    legalAction.payload?.v1918UpgradeAbility ===
-    "hq_ice_swap"
-  ) {
+  if (legalAction.payload?.v1918UpgradeAbility === "hq_ice_swap") {
     host.run.startHqIceSwapChoice(legalAction);
     return handled(legalAction);
   }
@@ -124,8 +120,13 @@ export function hostedProgramIdsOnHardware(
   host: Pick<RunFortTriggerExecutionHost, "state" | "cards">,
   hostId: CardInstanceId,
 ): CardInstanceId[] {
+  if (isHostedProgramReturnSource(host, hostId))
+    return microtechHostedProgramIds(host.state, hostId);
   return hostedCardsOn(host.state, hostId)
-    .filter((cardId) => host.cards.definitionFor(host.state, cardId).type === "program")
+    .filter(
+      (cardId) =>
+        host.cards.definitionFor(host.state, cardId).type === "program",
+    )
     .sort();
 }
 
@@ -146,21 +147,32 @@ function resolveTopHostedProgramReturn(
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.runner.rig.hardware.includes(sourceCardId))
     throw new Error("Microtech Backup Drive ist nicht installiert.");
-  if (
-    !isHostedProgramReturnSource(host, sourceCardId)
-  )
-    throw new Error("Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.");
+  if (!isHostedProgramReturnSource(host, sourceCardId))
+    throw new Error(
+      "Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.",
+    );
   const targetProgramId = String(legalAction.payload?.targetProgramId ?? "");
   const topHostedId = topHostedProgramOnHardware(host, sourceCardId);
   if (!targetProgramId || targetProgramId !== topHostedId)
     throw new Error("Nur das oberste Microtech-Programm darf genommen werden.");
-  const targetDefinitionId = host.cards.definitionFor(state, targetProgramId).id;
+  const targetDefinitionId = host.cards.definitionFor(
+    state,
+    targetProgramId,
+  ).id;
   host.actions.spendClick(state, "runner");
   host.zones.removeFromAllZones(state, targetProgramId);
   state.runner.grip.push(targetProgramId);
-  const instance = host.cards.mustInstance(state.cardInstances, targetProgramId);
-  const { hostedOn: _hostedOn, ...withoutHost } = instance;
+  const instance = host.cards.mustInstance(
+    state.cardInstances,
+    targetProgramId,
+  );
+  const {
+    hostedOn: _hostedOn,
+    microtechBackupOrder: _microtechBackupOrder,
+    ...withoutHost
+  } = instance;
   void _hostedOn;
+  void _microtechBackupOrder;
   state.cardInstances[targetProgramId] = {
     ...withoutHost,
     faceup: true,
@@ -170,8 +182,7 @@ function resolveTopHostedProgramReturn(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerHardwareAbility: "return_top_hosted_program",
-    sourceDefinitionId:
-      host.cards.definitionFor(state, sourceCardId).id,
+    sourceDefinitionId: host.cards.definitionFor(state, sourceCardId).id,
     returnedCardDefinitionId: targetDefinitionId,
     returnedToGrip: true,
     hostedProgramCountAfter: hostedProgramIdsOnHardware(host, sourceCardId)
@@ -180,7 +191,7 @@ function resolveTopHostedProgramReturn(
 }
 
 function isHostedProgramReturnSource(
-  host: RunFortTriggerExecutionHost,
+  host: Pick<RunFortTriggerExecutionHost, "state" | "cards">,
   sourceCardId: CardInstanceId,
 ): boolean {
   return (

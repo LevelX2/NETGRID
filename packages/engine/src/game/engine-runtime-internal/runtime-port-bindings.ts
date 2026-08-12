@@ -378,7 +378,6 @@ export let serverDifficultyIncreaseFromRunCounters: RuntimePortGroups["stateCorp
 export let serverDifficultyReductionFromUpgrades: RuntimePortGroups["stateCorpRuntimeResolvers"]["serverDifficultyReductionFromUpgrades"];
 export let discardRandomCorpHqCards: RuntimePortGroups["lifecycleRuntime"]["discardRandomCorpHqCards"];
 export let trashRunnerInstalledProgram: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledProgram"];
-export let backupProgramsOnTrashBackupHardwareBeforeTrash: RuntimePortGroups["lifecycleRuntime"]["backupProgramsOnTrashBackupHardwareBeforeTrash"];
 export let runnerProgramUsesMemory: RuntimePortGroups["lifecycleRuntime"]["runnerProgramUsesMemory"];
 export let trashRunnerInstalledCardToHeap: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledCardToHeap"];
 export let returnRunnerInstalledCardToGrip: RuntimePortGroups["lifecycleRuntime"]["returnRunnerInstalledCardToGrip"];
@@ -419,7 +418,6 @@ export let startVirusCounterPurgePreserveChoice: RuntimePortGroups["stateRuntime
 export let parseVirusCounterPurgePreserveOption: RuntimePortGroups["stateRuntimeResolvers"]["parseVirusCounterPurgePreserveOption"];
 export let restorePurgePreservedVirusCounters: RuntimePortGroups["stateRuntimeResolvers"]["restorePurgePreservedVirusCounters"];
 export let resolveVirusCounterPurgePreserveChoice: RuntimePortGroups["stateRuntimeResolvers"]["resolveVirusCounterPurgePreserveChoice"];
-export let installedProgramTrashBackupHardwareIds: RuntimePortGroups["stateRuntimeResolvers"]["installedProgramTrashBackupHardwareIds"];
 export let availableRunnerProgramInstallCredits: RuntimePortGroups["stateRuntimeResolvers"]["availableRunnerProgramInstallCredits"];
 export let runnerCanPayInstallCost: RuntimePortGroups["stateRuntimeResolvers"]["runnerCanPayInstallCost"];
 export let runnerCostPenaltySupportCreditCapacity: RuntimePortGroups["stateRuntimeResolvers"]["runnerCostPenaltySupportCreditCapacity"];
@@ -1098,8 +1096,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   discardRandomCorpHqCards = ports.lifecycleRuntime.discardRandomCorpHqCards;
   trashRunnerInstalledProgram =
     ports.lifecycleRuntime.trashRunnerInstalledProgram;
-  backupProgramsOnTrashBackupHardwareBeforeTrash =
-    ports.lifecycleRuntime.backupProgramsOnTrashBackupHardwareBeforeTrash;
   runnerProgramUsesMemory = ports.lifecycleRuntime.runnerProgramUsesMemory;
   trashRunnerInstalledCardToHeap =
     ports.lifecycleRuntime.trashRunnerInstalledCardToHeap;
@@ -1164,8 +1160,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.stateRuntimeResolvers.restorePurgePreservedVirusCounters;
   resolveVirusCounterPurgePreserveChoice =
     ports.stateRuntimeResolvers.resolveVirusCounterPurgePreserveChoice;
-  installedProgramTrashBackupHardwareIds =
-    ports.stateRuntimeResolvers.installedProgramTrashBackupHardwareIds;
   availableRunnerProgramInstallCredits =
     ports.stateRuntimeResolvers.availableRunnerProgramInstallCredits;
   runnerCanPayInstallCost = ports.stateRuntimeResolvers.runnerCanPayInstallCost;

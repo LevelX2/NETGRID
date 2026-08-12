@@ -991,8 +991,7 @@ export function createStateRuntimeResolvers(
         (counterType === "virus"
           ? CARD_VIRUS_COUNTER_TYPES.reduce(
               (counterSum, cardVirusCounterType) =>
-                counterSum +
-                cardCounter(state, cardId, cardVirusCounterType),
+                counterSum + cardCounter(state, cardId, cardVirusCounterType),
               0,
             )
           : cardCounter(state, cardId, counterType)),
@@ -1286,18 +1285,6 @@ export function createStateRuntimeResolvers(
       remainingVirusCounters: totalCounters(state, "virus"),
     };
     delete state.pendingChoice;
-  }
-
-  function installedProgramTrashBackupHardwareIds(
-    state: GameState,
-  ): CardInstanceId[] {
-    return state.runner.rig.hardware
-      .filter(
-        (cardId) =>
-          deps.runnerUtilityLongtailKindForCard(state, cardId) ===
-          "replace_installed_program_trash_with_host_on_source",
-      )
-      .sort();
   }
 
   function availableRunnerProgramInstallCredits(state: GameState): number {
@@ -1608,7 +1595,6 @@ export function createStateRuntimeResolvers(
     parseVirusCounterPurgePreserveOption,
     restorePurgePreservedVirusCounters,
     resolveVirusCounterPurgePreserveChoice,
-    installedProgramTrashBackupHardwareIds,
     availableRunnerProgramInstallCredits,
     runnerCanPayInstallCost,
     runnerCostPenaltySupportCreditCapacity,

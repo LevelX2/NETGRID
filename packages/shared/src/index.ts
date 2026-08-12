@@ -666,6 +666,8 @@ export type EventModificationCandidate = {
   /** The controller chooses a non-empty subset of the protected targets. */
   selectablePreventTrashTargets?: boolean;
   trashPreventionSourceIndex?: number;
+  /** Targets eligible for the Microtech Backup Drive trash replacement. */
+  microtechBackupTargetIds?: CardInstanceId[];
   bypassCostPerDamage?: number;
   bypassPaymentSide?: Side;
 };
@@ -1134,6 +1136,8 @@ export type CardInstance = {
   counters?: Partial<Record<CounterType, number>>;
   tapped?: boolean;
   hostedOn?: CardInstanceId;
+  /** Bottom-to-top order for cards placed faceup on Microtech Backup Drive. */
+  microtechBackupOrder?: number;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedCardId?: CardInstanceId;
   selectedSubtype?: string;
@@ -1229,6 +1233,8 @@ export type MultiServerSuccessSequenceState = {
 
 export type RunState = {
   runId: string;
+  /** Continuous runner action ordinal that initiated this run, if any. */
+  runnerActionOrdinal?: number;
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
   successfulRunServerOverride?: Exclude<ServerId, "new_remote">;
@@ -1310,6 +1316,7 @@ export type RunState = {
   };
   brokenSubroutineIndexes: number[];
   resolvedSubroutineIndexes: number[];
+  ignoredSubroutineIndexes?: number[];
   successful: boolean;
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
@@ -1950,7 +1957,10 @@ export type GameState = {
     lastSuccessfulRunServerId?: Exclude<ServerId, "new_remote">;
     blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
-    runnerActionsTakenThisTurn?: number;
+    /** Continuous across turns; each spent runner action advances the ordinal. */
+    runnerActionOrdinal?: number;
+    /** Present only while the root runner action is being initiated. */
+    currentRunnerActionOrdinal?: number;
     lastDamageRunnerActionOrdinal?: number;
     abilityUsedSourceIdsByLimitKey?: Record<string, CardInstanceId[]>;
     restrictedActionGrants?: RestrictedActionGrantBucket;

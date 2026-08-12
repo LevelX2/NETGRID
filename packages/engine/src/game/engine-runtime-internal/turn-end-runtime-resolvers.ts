@@ -245,8 +245,7 @@ export function createTurnEndRuntimeResolvers(
       flags.successfulHqRunThisTurn = false;
       flags.successfulRunThisTurn = false;
       delete flags.lastSuccessfulRunServerId;
-      flags.runnerActionsTakenThisTurn = 0;
-      delete flags.lastDamageRunnerActionOrdinal;
+      delete flags.currentRunnerActionOrdinal;
     } else {
       const corpFlags = ensureCorpTurnFlags(state);
       corpFlags.scoredBlackOpsAgendaLastTurn =

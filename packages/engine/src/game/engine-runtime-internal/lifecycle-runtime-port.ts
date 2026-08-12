@@ -20,10 +20,6 @@ export type LifecycleRuntimePort = {
     state: GameState,
     cardId: CardInstanceId,
   ) => void;
-  backupProgramsOnTrashBackupHardwareBeforeTrash: (
-    state: GameState,
-    candidateProgramIds: CardInstanceId[],
-  ) => CardInstanceId[];
   runnerProgramUsesMemory: (
     state: GameState,
     cardId: CardInstanceId,

@@ -184,7 +184,7 @@ function makeHost(
         successfulHqRunThisTurn: false,
         successfulRunThisTurn: false,
         damagePreventionUsage: {},
-        runnerActionsTakenThisTurn: 0,
+        runnerActionOrdinal: 0,
         abilityUsedSourceIdsByLimitKey: {},
         startOfTurnFloatingCreditsApplied: false,
         bonusRunPending: false,

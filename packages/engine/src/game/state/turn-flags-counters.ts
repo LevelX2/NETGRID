@@ -104,7 +104,7 @@ export function ensureRunnerTurnFlags(
     successfulHqRunThisTurn: false,
     successfulRunThisTurn: false,
     damagePreventionUsage: {},
-    runnerActionsTakenThisTurn: 0,
+    runnerActionOrdinal: 0,
     abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
     bonusRunPending: false,
@@ -137,7 +137,7 @@ export function ensureRunnerTurnFlags(
   flags.successfulHqRunThisTurn ??= false;
   flags.successfulRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
-  flags.runnerActionsTakenThisTurn ??= 0;
+  flags.runnerActionOrdinal ??= 0;
   flags.abilityUsedSourceIdsByLimitKey ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.bonusRunPending ??= false;
@@ -172,8 +172,9 @@ export function recordRunnerActionSpent(
 ): void {
   if (!Number.isInteger(amount) || amount <= 0) return;
   const flags = ensureRunnerTurnFlags(state);
-  flags.runnerActionsTakenThisTurn =
-    Math.max(0, Math.floor(flags.runnerActionsTakenThisTurn ?? 0)) + amount;
+  flags.runnerActionOrdinal =
+    Math.max(0, Math.floor(flags.runnerActionOrdinal ?? 0)) + amount;
+  flags.currentRunnerActionOrdinal = flags.runnerActionOrdinal;
 }
 
 export function hasSuccessfulHqRunThisTurn(state: GameState): boolean {

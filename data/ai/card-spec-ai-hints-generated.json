@@ -26826,7 +26826,7 @@
     {
       "cardId": "onr_v1_131_microtech-backup-drive",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5e49014d83b8d6d9",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:cdf976dcac7ba6e0",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:89a14c311eed954d",
       "hint": {
         "cardId": "onr_v1_131_microtech-backup-drive",
         "side": "runner",
@@ -26844,10 +26844,7 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "preserve_trashed_program_for_recovery",
-            "preferences": [
-              "trash_prevention_high_value_program",
-              "program_repairs_missing_coverage"
-            ],
+            "preferences": ["program_repairs_missing_coverage"],
             "avoid": ["low_value_program"],
             "kind": "replacement_target",
             "timing": "replacement_window",
@@ -26887,15 +26884,15 @@
     },
     {
       "cardId": "onr_v1_132_microtech-trode-set",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e5990c17f957d43b",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9787b5029b0a0ace",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9576fffb5e4b0517",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
       "hint": {
         "cardId": "onr_v1_132_microtech-trode-set",
         "side": "runner",
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware"],
-        "planRoles": ["build_rig", "trace_bid_support"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "costProfile": { "clicks": 1, "credits": 1 },
         "riskTags": ["install_runner"],
@@ -27387,7 +27384,7 @@
     },
     {
       "cardId": "onr_v1_140_raven-microcyb-eagle",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e5918c56bd238932",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:8c528d9ed25bb9ba",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:962eeb44a8a17e50",
       "hint": {
         "cardId": "onr_v1_140_raven-microcyb-eagle",

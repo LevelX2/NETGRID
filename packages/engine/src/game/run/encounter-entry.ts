@@ -81,6 +81,7 @@ export function beginEncounter(
   run.encounteredIceId = encounteredIceId;
   run.brokenSubroutineIndexes = [];
   run.resolvedSubroutineIndexes = [];
+  run.ignoredSubroutineIndexes = [];
   run.traceSuccessBySubroutineIndex = {};
   delete run.encounterTemporaryTraceCredits;
   delete run.encounterTemporaryIceStrengthModifiers;
@@ -458,7 +459,10 @@ export function runnerApproachIceExposeActions(
         approachIceExposeDecision: "expose",
       },
       {
-        abilityRef: { sourceCardInstanceId: sourceCardId, sourceAbilityId: abilityId },
+        abilityRef: {
+          sourceCardInstanceId: sourceCardId,
+          sourceAbilityId: abilityId,
+        },
         effectRef: `effect.${abilityId}`,
         targetRequirements: [
           {
@@ -705,12 +709,11 @@ function approachIceExposeAbilityIdForSource(
 ): string {
   const definition = host.cards.definitionFor(sourceCardId);
   const matches = (
-    engineCardByDefinitionId(definition.id)?.engine
-      .runEncounterInterventions ?? []
+    engineCardByDefinitionId(definition.id)?.engine.runEncounterInterventions ??
+    []
   ).filter(
     (candidate) =>
-      candidate.kind ===
-      "approach_ice_expose_then_jack_out_before_rez",
+      candidate.kind === "approach_ice_expose_then_jack_out_before_rez",
   );
   if (matches.length !== 1)
     throw new Error(

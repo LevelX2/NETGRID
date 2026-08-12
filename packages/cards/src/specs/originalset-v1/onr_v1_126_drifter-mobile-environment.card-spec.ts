@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put [2] from the bank on Mobile Environment when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them at the start of your next turn.",
+      "Put [2] from the bank on Mobile Environment when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them from the bank at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,12 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_126_drifter-mobile-environment",
+      },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#“Drifter” Mobile Environment",
+        note: "Official errata adds ‘from the bank’ to the refill instruction.",
       },
     ],
   },

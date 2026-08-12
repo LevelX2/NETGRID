@@ -12,6 +12,10 @@ import {
 } from "../../ability-engine/icebreaker-abilities";
 import { addTemporaryBreakerStrengthModifierUntilEndOfTurn } from "../state/temporary-breaker-strength";
 import type { RunnerRunCreditSpendResult } from "./run-duration-payment";
+import {
+  subroutineIsUnavailable,
+  trodeSetIgnoresSubroutine,
+} from "./trode-set";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -487,8 +491,8 @@ function resolveNextSentryFreeBreakAction(
   )
     throw new Error("Der Free-Break-Effekt gilt nur für das nächste Sentry.");
   if (
-    run.brokenSubroutineIndexes.includes(subroutineIndex) ||
-    run.resolvedSubroutineIndexes.includes(subroutineIndex)
+    subroutineIsUnavailable(run, subroutineIndex) ||
+    trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine)
   )
     throw new Error("Diese Subroutine ist bereits erledigt.");
   if ((legalAction.costs[0]?.credits ?? 0) !== 0)

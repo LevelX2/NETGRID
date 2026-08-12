@@ -201,7 +201,7 @@ function makeHost(
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
         } as NonNullable<GameState["runnerTurnFlags"]>;
         return state.runnerTurnFlags;
       },

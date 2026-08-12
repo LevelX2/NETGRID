@@ -110,9 +110,6 @@ export type StateRuntimeResolverPort = {
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ) => void;
-  installedProgramTrashBackupHardwareIds: (
-    state: GameState,
-  ) => CardInstanceId[];
   availableRunnerProgramInstallCredits: (state: GameState) => number;
   runnerCanPayInstallCost: (
     state: GameState,

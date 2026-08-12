@@ -254,35 +254,40 @@ export function moveTopHostedProgramToGripForCardImplementation(
     !host.state.runner.rig.hardware.includes(input.sourceCardId)
   )
     throw new Error("Die Programm-Hostquelle ist nicht installiert.");
-  const targetCardId = Object.entries(host.state.cardInstances)
+  const hostedProgramIds = Object.entries(host.state.cardInstances)
     .filter(
       ([cardId, instance]) =>
         instance.hostedOn === input.sourceCardId &&
         host.cards.definitionFor(cardId).type === "program",
     )
     .map(([cardId]) => cardId as CardInstanceId)
-    .sort()
-    .at(-1);
+    .sort(
+      (left, right) =>
+        Math.floor(host.state.cardInstances[left]?.microtechBackupOrder ?? 0) -
+          Math.floor(
+            host.state.cardInstances[right]?.microtechBackupOrder ?? 0,
+          ) || left.localeCompare(right),
+    );
+  const targetCardId = hostedProgramIds.at(-1);
   if (!targetCardId) throw new Error("Auf der Quelle liegt kein Programm.");
   const targetDefinition = host.cards.definitionFor(targetCardId);
   host.zones.removeFromAllZones(targetCardId);
   host.state.runner.grip.unshift(targetCardId);
   const target = host.cards.mustInstance(targetCardId);
-  const { hostedOn: _hostedOn, ...withoutHost } = target;
+  const {
+    hostedOn: _hostedOn,
+    microtechBackupOrder: _microtechBackupOrder,
+    ...withoutHost
+  } = target;
   void _hostedOn;
+  void _microtechBackupOrder;
   host.state.cardInstances[targetCardId] = {
     ...withoutHost,
     zone: { side: "runner", zone: "grip" },
     faceup: true,
     rezzed: true,
   };
-  const hostedProgramCountAfter = Object.entries(
-    host.state.cardInstances,
-  ).filter(
-    ([cardId, instance]) =>
-      instance.hostedOn === input.sourceCardId &&
-      host.cards.definitionFor(cardId).type === "program",
-  ).length;
+  const hostedProgramCountAfter = hostedProgramIds.length - 1;
   const payload = {
     hiddenZoneBarrier: true,
     hiddenZoneAction: "move_top_hosted_program_to_grip",

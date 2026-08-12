@@ -17,6 +17,10 @@ import {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { icebreakerStrengthModifierFromDeclarativeCounters } from "../../ability-engine/effective-values";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
+import {
+  subroutineIsUnavailable,
+  trodeSetIgnoresSubroutine,
+} from "./trode-set";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -214,8 +218,8 @@ export function buildRunnerEncounterActions(
             subroutine,
             encounteredIceSubtypes,
           ) &&
-          !run.brokenSubroutineIndexes.includes(index) &&
-          !run.resolvedSubroutineIndexes.includes(index),
+          !subroutineIsUnavailable(run, index) &&
+          !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine),
       ),
     );
     const pump = breakerAbilities.find(
@@ -352,8 +356,8 @@ export function buildRunnerEncounterActions(
         )
           return;
         if (
-          !run.brokenSubroutineIndexes.includes(index) &&
-          !run.resolvedSubroutineIndexes.includes(index)
+          !subroutineIsUnavailable(run, index) &&
+          !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine)
         ) {
           const subroutineLabel =
             subroutines.length > 1
@@ -390,10 +394,14 @@ export function buildRunnerEncounterActions(
     }
   }
   const nextSubroutines = encounterSubroutinesForNextContinue(
+    host.state,
+    iceDefinition,
     run,
     encounterSubroutines,
   );
   const nextSubroutineIndexes = encounterSubroutineIndexesForNextContinue(
+    host.state,
+    iceDefinition,
     run,
     encounterSubroutines,
   );
@@ -540,8 +548,8 @@ function nextSentryFreeBreakActions(
   if (!encounteredIceSubtypes.includes("sentry")) return [];
   return subroutines.flatMap((subroutine, index) => {
     if (
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      subroutineIsUnavailable(run, index) ||
+      trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine)
     )
       return [];
     return [
@@ -653,8 +661,8 @@ function multiBreakSubroutineActions(
           subroutine,
           iceDefinition.subtypes,
         ) &&
-        !run.brokenSubroutineIndexes.includes(index) &&
-        !run.resolvedSubroutineIndexes.includes(index),
+        !subroutineIsUnavailable(run, index) &&
+        !trodeSetIgnoresSubroutine(host.state, iceDefinition, subroutine),
     )
     .map(({ index }) => index);
   if (breakAbility.breakAllMatchingSubroutines) {
@@ -825,18 +833,25 @@ function dynamicSubroutinePayload(
 }
 
 function encounterSubroutinesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: RunState,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
 ): NonNullable<CardDefinition["subroutines"]> {
-  return encounterSubroutineIndexesForNextContinue(run, subroutines).flatMap(
-    (index) => {
-      const subroutine = subroutines[index];
-      return subroutine ? [subroutine] : [];
-    },
-  );
+  return encounterSubroutineIndexesForNextContinue(
+    state,
+    iceDefinition,
+    run,
+    subroutines,
+  ).flatMap((index) => {
+    const subroutine = subroutines[index];
+    return subroutine ? [subroutine] : [];
+  });
 }
 
 function encounterSubroutineIndexesForNextContinue(
+  state: GameState,
+  iceDefinition: CardDefinition,
   run: RunState,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
 ): number[] {
@@ -845,8 +860,8 @@ function encounterSubroutineIndexesForNextContinue(
     const subroutine = subroutines[index];
     if (
       !subroutine ||
-      run.brokenSubroutineIndexes.includes(index) ||
-      run.resolvedSubroutineIndexes.includes(index)
+      subroutineIsUnavailable(run, index) ||
+      trodeSetIgnoresSubroutine(state, iceDefinition, subroutine)
     )
       continue;
     indexes.push(index);

@@ -204,7 +204,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       successfulHqRunThisTurn: false,
       successfulRunThisTurn: false,
       damagePreventionUsage: {},
-      runnerActionsTakenThisTurn: 0,
+      runnerActionOrdinal: 0,
     },
     corpTurnFlags: {
       scoredBlackOpsAgendaThisTurn: false,

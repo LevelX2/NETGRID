@@ -837,6 +837,13 @@ export function configureActionRuntimeBootstrap({
           trashRunnerInstalledCardToHeap: (cardId, action) =>
             runtimePorts.trashRunnerInstalledCardToHeap(state, cardId, action),
         });
+        if (
+          !state.pendingChoice &&
+          !state.imminentEvent &&
+          !state.eventModificationWindow &&
+          !state.replacementWindow
+        )
+          delete state.runnerTurnFlags?.currentRunnerActionOrdinal;
       },
     },
     perform: {

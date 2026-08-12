@@ -40,6 +40,10 @@ import {
   revalidateTagPreventionCandidateSource,
   revalidateTrashPreventionCandidateSource,
 } from "./prevention-sources";
+import {
+  isMicrotechBackupDrive,
+  placeProgramsOnMicrotechBackupDrive,
+} from "../state/microtech-backup";
 
 const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX = "damage_prevention_bypass_pay_";
 const SELECTABLE_PREVENT_AMOUNT_CHOICE_SEPARATOR = "__prevent_amount_";
@@ -495,6 +499,86 @@ export function resolveEventModificationChoice(
     )
   )
     throw new Error("Dieser Event-Modification-Kandidat ist noch nicht legal.");
+  if (
+    event.eventType === "runner_installed_trash" &&
+    candidate.kind === "interrupt" &&
+    candidate.microtechBackupTargetIds
+  ) {
+    const sourceCardId = candidate.sourceRef.instanceId;
+    if (!sourceCardId || !isMicrotechBackupDrive(state, sourceCardId))
+      throw new Error("Microtech Backup Drive ist nicht mehr installiert.");
+    if (!trashTargetChoice) {
+      state.pendingChoice = {
+        choiceId: `v120_microtech_backup_targets_${window.windowId}_${candidate.candidateId}`,
+        side: "runner",
+        source: `${SELECTABLE_TRASH_TARGET_CHOICE_PREFIX}:${window.windowId}:${candidate.candidateId}`,
+        prompt:
+          "Programme für Backup Drive auswählen (Auswahlreihenfolge: unten nach oben)",
+        kind: "select_cards",
+        options: candidate.microtechBackupTargetIds.map((cardId) => ({
+          id: cardId,
+          cardId,
+          label: definitionFor(state, cardId).title,
+        })),
+        minSelections: 0,
+        maxSelections: candidate.microtechBackupTargetIds.length,
+        stateVersion: state.stateVersion + 1,
+        visibility: candidate.visibility,
+      };
+      state.activeSide = "runner";
+      legalAction.payload = {
+        ...basePayload,
+        replacementDecision: "select_targets",
+        replacementOutcome: "target_order_choice_opened",
+        candidateId: candidate.candidateId,
+        selectableBackupTargetCount: candidate.microtechBackupTargetIds.length,
+      };
+      return;
+    }
+    const selectedBackupTargetIds = (selectedTrashTargetIds ?? []).map(
+      (cardId) => cardId as CardInstanceId,
+    );
+    if (
+      new Set(selectedBackupTargetIds).size !==
+        selectedBackupTargetIds.length ||
+      selectedBackupTargetIds.some(
+        (cardId) => !candidate.microtechBackupTargetIds?.includes(cardId),
+      )
+    )
+      throw new Error("Die Microtech-Backup-Auswahl ist nicht legal.");
+    placeProgramsOnMicrotechBackupDrive(
+      state,
+      sourceCardId,
+      selectedBackupTargetIds,
+    );
+    const summary = resolveRunnerInstalledTrashImminentEvent(
+      state,
+      event,
+      legalAction,
+      [],
+    );
+    legalAction.payload = {
+      ...basePayload,
+      ...(legalAction.payload ?? {}),
+      replacementDecision: "apply",
+      replacementOutcome:
+        selectedBackupTargetIds.length > 0
+          ? "trash_destination_replaced"
+          : "original_resolved",
+      candidateId: candidate.candidateId,
+      ...(candidate.sourceRef.definitionId
+        ? { sourceDefinitionId: candidate.sourceRef.definitionId }
+        : {}),
+      backedUpProgramCount: selectedBackupTargetIds.length,
+      backedUpProgramDefinitionIds: selectedBackupTargetIds
+        .map((cardId) => definitionFor(state, cardId).id)
+        .join(","),
+      originalAmount: summary.originalCount,
+      trashedCount: summary.trashedCount,
+    };
+    clearEventModificationState(state);
+    return;
+  }
   if (
     candidate.eventId !== event.eventId ||
     !(

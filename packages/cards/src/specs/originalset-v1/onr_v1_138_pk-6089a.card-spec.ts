@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Provides +1 MU. Put [3] from the bank on PK-6089a when it is installed. Use these bits only to pay for increasing your link. If you use any of these bits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+      "Provides +1 MU. Put [3] from the bank on PK-6089a when it is installed. Use these bits only to pay for increasing your link. If you use any of these bits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_138_pk-6089a",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#PK-6089a",
+        note: "Official errata adds ‘from the bank’ to the refill instruction.",
       },
     ],
   },

@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Prevents 1 net damage each turn.",
+    rulesText: "Prevents up to 1 Net damage each turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -18,6 +18,12 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_128_green-knight-surge-buffers",
+      },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#“Green Knight” Surge Buffers",
+        note: "Official errata makes the prevention optional with ‘up to’.",
       },
     ],
   },

@@ -113,18 +113,25 @@ export function startRun(
     legalAction,
   );
   const breachHost = host.access.breachStateHost();
+  const accessServerId = options?.accessServerOverride ?? server.id;
   const installedAccessBonus = installedAccessBonusForServer(
     breachHost,
-    server.id,
+    accessServerId,
   );
   const installedAccessBonusSourceDefinitionIds =
-    installedAccessBonusSourceDefinitionIdsForServer(breachHost, server.id);
+    installedAccessBonusSourceDefinitionIdsForServer(
+      breachHost,
+      accessServerId,
+    );
   const baseAccessCount = Math.max(1, Math.floor(accessCount));
   const effectiveAccessCount = baseAccessCount + installedAccessBonus;
   state.phase = "run";
   state.activeSide = "runner";
   state.run = {
     runId: `run_${state.stateVersion + 1}`,
+    ...(flags.currentRunnerActionOrdinal
+      ? { runnerActionOrdinal: flags.currentRunnerActionOrdinal }
+      : {}),
     attackedServerId: server.id,
     phase: "approach_ice",
     position:
@@ -137,6 +144,7 @@ export function startRun(
         : { kind: "server", serverId: server.id },
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
+    ignoredSubroutineIndexes: [],
     bartmossUsedBreakerIdsThisEncounter: [],
     aardvarkInterceptionIceIds: [],
     blinkUsedSubroutinesByBreakerThisEncounter: {},

@@ -132,8 +132,7 @@ export function createDamageCardImplementationRuntimeDeps(
     if (typeof event.payload.baseDamageAmount === "number")
       publicPayload.baseDamageAmount = event.payload.baseDamageAmount;
     if (typeof event.payload.damageAmountModifier === "number")
-      publicPayload.damageAmountModifier =
-        event.payload.damageAmountModifier;
+      publicPayload.damageAmountModifier = event.payload.damageAmountModifier;
     return {
       resolved: true,
       damageType: summary.damageType,
@@ -186,8 +185,8 @@ function runnerWasDamagedDuringLastThreeActions(state: RuntimeState): boolean {
     flags?.lastDamageRunnerActionOrdinal ?? 0,
   );
   if (lastDamageOrdinal <= 0) return false;
-  const actionsTaken = Math.floor(flags?.runnerActionsTakenThisTurn ?? 0);
-  return actionsTaken - lastDamageOrdinal < 3;
+  const currentActionOrdinal = Math.floor(flags?.runnerActionOrdinal ?? 0);
+  return currentActionOrdinal - lastDamageOrdinal < 3;
 }
 
 function damageSummaryPublicPayload(

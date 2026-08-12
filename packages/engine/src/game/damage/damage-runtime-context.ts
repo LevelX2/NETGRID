@@ -388,9 +388,17 @@ export function hiddenRunnerResourceRevealPayload(
   };
 }
 
-export function recordRunnerDamageDuringCurrentAction(state: GameState): void {
+export function recordRunnerDamageDuringCurrentAction(
+  state: GameState,
+  eventRunnerActionOrdinal?: number,
+): void {
   const flags = ensureRunnerTurnFlags(state);
-  const currentOrdinal = Math.floor(flags.runnerActionsTakenThisTurn ?? 0);
-  if (state.activeSide !== "runner" || currentOrdinal <= 0) return;
+  const currentOrdinal = Math.floor(
+    eventRunnerActionOrdinal ??
+      state.run?.runnerActionOrdinal ??
+      flags.currentRunnerActionOrdinal ??
+      0,
+  );
+  if (currentOrdinal <= 0) return;
   flags.lastDamageRunnerActionOrdinal = currentOrdinal;
 }

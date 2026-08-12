@@ -305,7 +305,7 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
           successfulHqRunThisTurn: false,
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
-          runnerActionsTakenThisTurn: 0,
+          runnerActionOrdinal: 0,
         } as NonNullable<GameState["runnerTurnFlags"]>;
         state.runnerTurnFlags.runnerReceivedTagThisTurn = true;
         legalAction.payload = {

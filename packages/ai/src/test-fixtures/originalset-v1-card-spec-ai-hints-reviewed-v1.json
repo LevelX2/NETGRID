@@ -8788,10 +8788,7 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "preserve_trashed_program_for_recovery",
-            "preferences": [
-              "trash_prevention_high_value_program",
-              "program_repairs_missing_coverage"
-            ],
+            "preferences": ["program_repairs_missing_coverage"],
             "avoid": ["low_value_program"],
             "kind": "replacement_target",
             "timing": "replacement_window",
@@ -8844,7 +8841,7 @@
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware"],
-        "planRoles": ["build_rig", "trace_bid_support"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "costProfile": {
           "clicks": 1,

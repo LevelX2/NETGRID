@@ -24,6 +24,7 @@ import { cardImplementationCoverageForDefinitionId } from "../../card-implementa
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
+import { trashRunnerInstalledCardToHeap as trashRunnerInstalledCardToHeapForTest } from "../../game/engine-runtime-internal/runtime-port-bindings";
 import {
   MECHANIC_SMOKE_CARD_IDS,
   MECHANIC_SMOKE_DECKS,
@@ -3771,6 +3772,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
         memoryBefore + expectedMu,
       );
+      if (definitionId === "onr_v1_140_raven-microcyb-eagle") {
+        expect(CARD_DEFINITIONS_BY_ID[definitionId]?.memoryLimitBonus).toBe(1);
+        expect(
+          getPlayerView(state, "corp").opponent.rig?.find(
+            (card) => card.definitionId === definitionId,
+          )?.memoryLimitBonus,
+        ).toBe(1);
+      }
       expect(cardCounterAmount(state, cardId, "bit")).toBe(expectedBits);
       expect(cardCounterAmount(state, cardId, "recurring_credit")).toBe(0);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -4330,7 +4339,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("backs up hosted programs on Microtech Backup Drive and returns the top hosted card", () => {
+  it("lets the runner order any subset of simultaneously trashed programs on Microtech Backup Drive", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-microtech-backup-drive",
@@ -4430,12 +4439,26 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", `card_${succubusId}`);
+    const backupReplacementId = state.pendingChoice?.options.find((option) =>
+      option.id.startsWith("microtech_backup_drive_"),
+    )?.id;
+    expect(backupReplacementId).toBeDefined();
+    state = applyChoice(state, "runner", backupReplacementId ?? "");
+    expect(state.pendingChoice?.minSelections).toBe(0);
+    expect(state.pendingChoice?.maxSelections).toBe(3);
+    const backedUpIds = [hostedIds[0]!, succubusId];
+    state = applyChoices(state, "runner", backedUpIds);
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    expect(state.runner.heap).toContain(succubusId);
-    for (const hostedId of hostedIds) {
-      expect(state.runner.rig.programs).toContain(hostedId);
-      expect(state.cardInstances[hostedId]?.hostedOn).toBe(microtechId);
-      expect(state.runner.heap).not.toContain(hostedId);
+    expect(state.runner.heap).toContain(hostedIds[1]);
+    for (const backedUpId of backedUpIds) {
+      expect(state.runner.rig.programs).not.toContain(backedUpId);
+      expect(state.specialZones?.setAside).toContain(backedUpId);
+      expect(state.cardInstances[backedUpId]?.hostedOn).toBe(microtechId);
+      expect(state.cardInstances[backedUpId]?.zone).toMatchObject({
+        side: "special",
+        zone: "set_aside",
+        visibility: "public",
+      });
     }
     expect(state.runner.memoryUsed).toBeLessThan(memoryBeforeTrash);
 
@@ -4452,7 +4475,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(returnAction.label).toBe(
       "Microtech Backup Drive: oberstes gesichertes Programm auf die Hand nehmen",
     );
-    const returnedId = hostedIds.slice().sort().at(-1)!;
+    const returnedId = succubusId;
     state = apply(
       state,
       "runner",
@@ -4465,10 +4488,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       actionType: "activated_card_ability",
       sourceDefinitionId: "onr_v1_131_microtech-backup-drive",
       returnedToGrip: true,
+      returnedCardDefinitionId: "onr_v1_069_succubus",
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+
+    const remainingBackedUpId = hostedIds[0]!;
+    trashRunnerInstalledCardToHeapForTest(state, microtechId);
+    expect(state.runner.heap).toContain(microtechId);
+    expect(state.runner.heap).toContain(remainingBackedUpId);
+    expect(state.specialZones?.setAside).not.toContain(remainingBackedUpId);
+    expect(state.cardInstances[remainingBackedUpId]?.hostedOn).toBeUndefined();
   });
 
   it("installs Newsgroup Filter and uses its side-safe credit action", () => {

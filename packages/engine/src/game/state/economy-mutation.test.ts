@@ -84,12 +84,12 @@ describe("economy-mutation", () => {
 
     spendClick(current, "runner");
     expect(current.runner.clicks).toBe(2);
-    expect(ensureRunnerTurnFlags(current).runnerActionsTakenThisTurn).toBe(1);
+    expect(ensureRunnerTurnFlags(current).runnerActionOrdinal).toBe(1);
     expect(ensureRunnerTurnFlags(current).runLockActionsPending).toBe(1);
 
     spendClicks(current, "runner", 2);
     expect(current.runner.clicks).toBe(0);
-    expect(ensureRunnerTurnFlags(current).runnerActionsTakenThisTurn).toBe(3);
+    expect(ensureRunnerTurnFlags(current).runnerActionOrdinal).toBe(3);
 
     spendClick(current, "corp");
     expect(current.corp.clicks).toBe(1);

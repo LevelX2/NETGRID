@@ -88,10 +88,7 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "preserve_trashed_program_for_recovery",
-        preferences: [
-          "trash_prevention_high_value_program",
-          "program_repairs_missing_coverage",
-        ],
+        preferences: ["program_repairs_missing_coverage"],
         avoid: ["low_value_program"],
       },
     ],

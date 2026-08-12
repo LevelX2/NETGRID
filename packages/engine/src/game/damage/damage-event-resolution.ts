@@ -43,6 +43,7 @@ export function doDamage(
     damageType: DamageType;
     amount: number;
     source: string;
+    runnerActionOrdinal?: number;
   },
 ): DamageSummary {
   // Dieser Finalresolver zieht sofort Zufall. Fenster müssen vor dem Aufruf
@@ -95,7 +96,7 @@ export function doDamage(
   }
 
   if (request.damageType === "core") state.runner.coreDamage += request.amount;
-  recordRunnerDamageDuringCurrentAction(state);
+  recordRunnerDamageDuringCurrentAction(state, request.runnerActionOrdinal);
 
   const summary = {
     damageType: request.damageType,
@@ -358,6 +359,14 @@ export function createDamageImminentEvent(
           }
         : {}),
       source: request.source,
+      ...((state.run?.runnerActionOrdinal ??
+        state.runnerTurnFlags?.currentRunnerActionOrdinal) !== undefined
+        ? {
+            runnerActionOrdinal:
+              state.run?.runnerActionOrdinal ??
+              state.runnerTurnFlags?.currentRunnerActionOrdinal,
+          }
+        : {}),
     },
     visibility: "hidden_info_barrier",
     createdAtStateVersion: state.stateVersion + 1,
@@ -454,6 +463,11 @@ export function resolveDamageImminentEvent(
     damageType,
     amount,
     source: stringPayload(event, "source"),
+    ...(numberPayload(event, "runnerActionOrdinal") > 0
+      ? {
+          runnerActionOrdinal: numberPayload(event, "runnerActionOrdinal"),
+        }
+      : {}),
   });
 }
 
@@ -464,11 +478,7 @@ export function resolvePdcaDamageReplacementChoice(
 ): void {
   const choice = state.pendingChoice;
   const event = state.imminentEvent;
-  if (
-    !choice ||
-    !choice.source.startsWith("damage_replacement:") ||
-    !event
-  )
+  if (!choice || !choice.source.startsWith("damage_replacement:") || !event)
     throw new Error("Es ist kein PDCA-Damage-Replacement-Fenster offen.");
   if (choice.side !== "corp" || legalAction.side !== "corp")
     throw new Error("Nur die Korp darf PDCA-Damage ersetzen.");
@@ -519,8 +529,7 @@ export function resolvePdcaDamageReplacementChoice(
   }
   source.counters = {
     ...(source.counters ?? {}),
-    pdca:
-      Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + preventedAmount,
+    pdca: Math.max(0, Math.floor(source.counters?.pdca ?? 0)) + preventedAmount,
   };
   const remainingCounters = Math.max(0, Math.floor(source.counters.pdca ?? 0));
   delete state.pendingChoice;

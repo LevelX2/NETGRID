@@ -32,6 +32,7 @@ import {
 } from "./damage-runtime-context";
 import { trashTargetIdsFromEvent } from "./damage-event-resolution";
 import { damagePreventionUsedThisTurn } from "../state/turn-flags-counters";
+import { installedMicrotechBackupDriveIds } from "../state/microtech-backup";
 
 export function cybertechThinkTankBoostCandidates(
   state: GameState,
@@ -331,6 +332,31 @@ export function collectRuntimeTrashPreventionCandidates(
   const targetIds = trashTargetIdsFromEvent(event);
   if (targetIds.length === 0 || event.affectedSide !== "runner") return [];
   const candidates: EventModificationCandidate[] = [];
+  const programTargets = targetIds.filter(
+    (targetId) =>
+      state.runner.rig.programs.includes(targetId) &&
+      definitionFor(state, targetId).type === "program",
+  );
+  for (const sourceCardId of installedMicrotechBackupDriveIds(state)) {
+    if (programTargets.length === 0) break;
+    const definition = definitionFor(state, sourceCardId);
+    candidates.push({
+      candidateId: `microtech_backup_drive_${sanitizeId(sourceCardId)}`,
+      eventId: event.eventId,
+      kind: "interrupt",
+      controller: "runner",
+      sourceRef: {
+        kind: "card",
+        instanceId: sourceCardId,
+        definitionId: definition.id,
+        label: definition.title,
+      },
+      priority: 117,
+      visibility: "hidden_info_barrier",
+      optional: true,
+      microtechBackupTargetIds: programTargets,
+    });
+  }
   for (const cardId of runnerInstalledCardIds(state)) {
     const definition = definitionFor(state, cardId);
     const sources = trashPreventionSourcesForDefinition(definition);

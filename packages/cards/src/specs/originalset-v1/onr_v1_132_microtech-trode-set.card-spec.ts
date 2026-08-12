@@ -20,6 +20,11 @@ export const cardSpec = {
         source: "card_text",
         reference: "onr_v1_132_microtech-trode-set",
       },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Microtech ’Trode Set",
+        note: "Ignored AP subroutines are neither resolved nor eligible to be broken.",
+      },
     ],
   },
   engine: {
@@ -39,7 +44,6 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
-      baseLink: 1,
     },
     runnerUtilityLongtail: {
       capabilityKey: capabilityKey(
@@ -56,10 +60,6 @@ export const cardSpec = {
       {
         kind: "plan_role",
         role: "build_rig",
-      },
-      {
-        kind: "plan_role",
-        role: "trace_bid_support",
       },
     ],
     capabilities: [],

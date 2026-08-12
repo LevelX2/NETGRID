@@ -639,10 +639,72 @@ belastbare Annotation. Total Genetic Retrofit ist nun zusätzlich mit zwei
 nacheinander gespielten Kopien bei null Tags belegt; beide
 Tag-Vermeidungscredits bleiben kumulativ erhalten.
 
+## Block 007 – Karten 121 bis 140 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 007` eingeführt.
+
+### Kanonische Errata und Projektion
+
+- Artemis 2020, Corolla Speed Chip, “Drifter” Mobile Environment, Pandora’s
+  Deck und PK-6089a nennen beim Wiederauffüllen nun ausdrücklich die Bank.
+  Dermatech Bodyplating und “Green Knight” Surge Buffers verwenden die
+  optionale Formulierung „up to“; Raven Microcyb Eagle enthält beide
+  Errata-Korrekturen.
+- Alle acht CardSpecs referenzieren die zugehörigen Abschnitte aus
+  `docs/source/Netrunner Errata 1.70.md`.
+- Raven führt den gedruckten MU-Bonus zusätzlich zum aktiven Modifier als
+  `memoryLimitBonus: 1`. CardDefinition, öffentliche Kartenprojektion und
+  effektiver Spielwert stimmen damit überein.
+
+### Lifesaver Nanosurgeons
+
+- Die turn-lokale Click-Näherung wurde durch eine fortlaufende
+  Runner-Aktionsnummer ersetzt. Eine gestartete Action bindet diese Nummer an
+  ihren Run und an erzeugte Damage-Events; vollständig verhinderter Schaden
+  erzeugt weiterhin keinen Historieneintrag.
+- Ein Bodyweight-Bonusrun besitzt keine solche Aktionsbindung. Schaden in
+  diesem Run oder zwischen Actions wird deshalb keiner vorherigen Action
+  zugerechnet. Die letzten drei Actions bleiben über Runner-Zuggrenzen hinweg
+  erhalten.
+
+### Microtech Backup Drive
+
+- Der alte automatische Sonderfall für Kinder eines getrashten Hosts ist
+  entfernt. Der gemeinsame Trash-Event enthält nun alle gleichzeitig
+  bedrohten installierten Programme; der Runner kann für Backup Drive eine
+  beliebige Teilmenge in einer expliziten Reihenfolge wählen.
+- Gesicherte Programme verlassen Rig und installierte Zone, verlieren ihren
+  Installationszustand und liegen faceup in einer öffentlichen
+  Out-of-play-Zone auf der Hardware. Nur die tatsächlich oberste Karte kann
+  per Action in die Grip zurückkehren.
+- Verlässt Backup Drive das Spiel, werden alle verbliebenen gesicherten
+  Programme in den Heap gelegt. Die Planning-Annotation bezeichnet den Pfad
+  nicht mehr fälschlich als Trash Prevention.
+
+### Microtech ’Trode Set und R&D Interface
+
+- ’Trode Set besitzt keinen Phantom-Base-Link und keine
+  `trace_bid_support`-Rolle mehr. Normale AP-Subroutinen werden vor
+  LegalAction-Erzeugung und Auflösung als ignoriert klassifiziert: Sie sind
+  weder Breakziele noch aufgelöste Subroutinen. AP-Traces und AP-Net-Damage
+  bleiben ausgenommen; letzterer wird weiterhin auf 1 reduziert.
+- Der installierte Access-Bonus wird beim Runstart auf den effektiven
+  Access-Server angewendet. Private LDL Access erhält dadurch mit einem oder
+  zwei R&D Interfaces zwei beziehungsweise drei gespeicherte R&D-Karten,
+  obwohl der physische Run auf HQ führt.
+
+### Unveränderte Karten dieses Blocks
+
+Für Armored Fridge, Bodyweight Data Crèche, Full Body Conversion, HQ
+Interface, Militech MRAM Chip, MRAM Chip, Nasuko Cycle und Parraline 5750
+ergab der Nutzerblock keinen weiteren Korrekturbedarf.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 121 bis 140.
+- Als nächster regulärer Nutzerblock folgen die Karten 141 bis 160.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -709,3 +771,14 @@ CardSpec-AI-Hint-Generator/-Check, 28 fokussierte CardSpec-Vertragstests,
 Engine-Tests für Play-, Hidden-Zone-, Run-, Encounter- und Originalset-Pfade
 sowie 24 AI-Hint-Vertragstests grün. Der bekannte unabhängige
 Classic-Corp-Draw-Baselinefehler wurde nicht in den Scope gezogen.
+
+Für Block 007 sind Shared-, Cards-, Engine- und AI-Typecheck, Generator-Check,
+acht AI-Artefakt-Vertragstests sowie 172 fokussierte Engine-Tests für
+Damage-Historie, Lifecycle, Encounter, Access und Projektion grün. Die Prüfung
+umfasst insbesondere Action- und Bonusrun-Damage, zugübergreifende
+Lifesaver-Historie, geordnete Backup-Auswahl und Drive-leaves-play, ignorierte
+sowie ausgenommene AP-Subroutinen, Private LDL mit einem und zwei R&D
+Interfaces und Ravens dreifache MU-Konsistenz. Der bestehende
+Originalset-AI-Golden-Test startet unabhängig davon nicht, weil sein bereits
+entferntes historisches Migration-Report-JSON weiterhin statisch importiert
+wird; der aktuelle generierte Artefaktvertrag ist grün.

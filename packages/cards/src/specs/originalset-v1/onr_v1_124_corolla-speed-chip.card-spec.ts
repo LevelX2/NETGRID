@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put [1] from the bank on Corolla Speed Chip when it is installed. Use this bit only to pay for using killers during runs. If you use the bit, replace it at the start of your next turn.",
+      "Put [1] from the bank on Corolla Speed Chip when it is installed. Use this bit only to pay for using killers during runs. If you use the bit, replace it from the bank at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_124_corolla-speed-chip",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Corolla Speed Chip",
+        note: "Official errata adds ‘from the bank’ to the refill instruction.",
       },
     ],
   },

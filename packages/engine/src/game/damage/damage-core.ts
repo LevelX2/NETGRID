@@ -20,6 +20,7 @@ import {
   openEventModificationWindow,
   resolveEventModificationChoice,
 } from "./prevention-window";
+import { simultaneousInstalledProgramTrashIds } from "../state/microtech-backup";
 import {
   openReplacementWindow,
   resolveReplacementChoice,
@@ -148,9 +149,13 @@ export function openRunnerInstalledTrashPreventionWindow(
     runnerInstalledCardIds(state).includes(cardId),
   );
   if (installedTargets.length === 0) return false;
-  const event = createRunnerInstalledTrashImminentEvent(
+  const simultaneousProgramTargets = simultaneousInstalledProgramTrashIds(
     state,
     installedTargets,
+  );
+  const event = createRunnerInstalledTrashImminentEvent(
+    state,
+    [...new Set([...installedTargets, ...simultaneousProgramTargets])],
     source,
   );
   return openEventModificationWindow(state, event, legalAction);
