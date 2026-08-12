@@ -78,6 +78,96 @@ describe("generic CardSpec AI-hint repair block", () => {
     );
   });
 
+  it("projects typed free-trash access without widening ordinary runs", () => {
+    const kilroy = hint("onr_v1_096_kilroy-was-here");
+    expect(kilroy.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "trash_credit",
+        scope: "rnd",
+        timing: "successful_run",
+        resource: "trash_credits",
+        target: "access.free_trash",
+        finite: true,
+      }),
+    );
+    expect(kilroy.functionSignals).toContain("economy.trash_credit");
+
+    const ordinaryRun = structuredClone(
+      planningEntry("onr_v1_096_kilroy-was-here"),
+    );
+    (ordinaryRun.planning.engine.abilities![0]!.effects[0] as any).freeTrashAccessZones =
+      [];
+    const ordinaryRunHint = deriveCardSpecAiHint(ordinaryRun as never);
+    expect(ordinaryRunHint.effects).not.toContainEqual(
+      expect.objectContaining({ target: "access.free_trash" }),
+    );
+    expect(ordinaryRunHint.functionSignals).not.toContain(
+      "economy.trash_credit",
+    );
+  });
+
+  it("projects typed installed-program trash replacement as defense support", () => {
+    const microtech = hint("onr_v1_131_microtech-backup-drive");
+    expect(microtech.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "program_trash_prevention",
+        scope: "runner",
+        timing: "prevention_window",
+        resource: "cards",
+        target: "installed_program",
+      }),
+    );
+    expect(microtech.conditions).toContainEqual({
+      kind: "requires_prevention_window",
+    });
+    expect(microtech.functionSignals).toContain(
+      "defense.program_trash_prevention",
+    );
+
+    const ordinaryHardware = structuredClone(
+      planningEntry("onr_v1_131_microtech-backup-drive"),
+    );
+    delete (ordinaryHardware.planning.engine as any).runnerUtilityLongtail;
+    const ordinaryHardwareHint = deriveCardSpecAiHint(
+      ordinaryHardware as never,
+    );
+    expect(ordinaryHardwareHint.effects ?? []).not.toContainEqual(
+      expect.objectContaining({ kind: "program_trash_prevention" }),
+    );
+    expect(ordinaryHardwareHint.functionSignals ?? []).not.toContain(
+      "defense.program_trash_prevention",
+    );
+  });
+
+  it("projects a targeted bypass run only from the exact hidden replacement contract", () => {
+    const social = hint("onr_v1_111_social-engineering");
+    expect(social.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "future_run_effect",
+          scope: "server",
+          timing: "action",
+          target: "make_run",
+        }),
+        expect.objectContaining({
+          kind: "future_encounter_effect",
+          scope: "ice",
+          timing: "during_run",
+          target: "bypass_chosen_ice",
+        }),
+      ]),
+    );
+    expect(social.functionSignals).toEqual(
+      expect.arrayContaining(["run.make_run", "run.bypass_chosen_ice"]),
+    );
+
+    expect(
+      forgedHint("onr_v1_111_social-engineering", (entry) => {
+        entry.planning.engine.hiddenReplacementLongtail.visibility = "public";
+      }),
+    ).toThrow("card_spec_unknown_targeted_bypass_run_shape");
+  });
+
   it("projects typed stack search and Blink random-break risk without card text", () => {
     expect(hint("onr_v1_177_the-short-circuit").effects).toContainEqual(
       expect.objectContaining({
@@ -94,9 +184,10 @@ describe("generic CardSpec AI-hint repair block", () => {
     });
 
     const ordinaryBreaker = structuredClone(planningEntry("onr_v1_007_blink"));
-    (ordinaryBreaker.planning.engine.icebreakerAbilities![0]! as any).special = {
-      kind: "run_end_trash_source_if_used",
-    };
+    (ordinaryBreaker.planning.engine.icebreakerAbilities![0]! as any).special =
+      {
+        kind: "run_end_trash_source_if_used",
+      };
     expect(
       deriveCardSpecAiHint(ordinaryBreaker as never).breakerProfile
         ?.randomOutcome,
@@ -167,6 +258,25 @@ describe("generic CardSpec AI-hint repair block", () => {
       kind: "requires_runner_tagged",
     });
 
+    const scorchedEarth = hint("onr_v1_302_scorched-earth");
+    expect(scorchedEarth.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "damage",
+          resource: "meat_damage",
+          amount: 4,
+        }),
+        expect.objectContaining({
+          kind: "tag_punish_payoff",
+          target: "tagged_runner_damage",
+          amount: 4,
+        }),
+      ]),
+    );
+    expect(scorchedEarth.conditions).toContainEqual({
+      kind: "requires_runner_tagged",
+    });
+
     const corporateWar = hint("onr_v1_196_corporate-war");
     expect(corporateWar.effects).toEqual(
       expect.arrayContaining([
@@ -193,6 +303,51 @@ describe("generic CardSpec AI-hint repair block", () => {
         "credit_threshold",
         "credit_swing",
         "economy_crash_on_score",
+      ]),
+    );
+  });
+
+  it("projects advancement-counter cashout and deferred encounter damage from their typed contracts", () => {
+    const laundering = hint("onr_v1_328_information-laundering");
+    expect(laundering.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "economy",
+          scope: "corp",
+          target: "economy.corp_counter_cashout",
+          amount: 4,
+        }),
+        expect.objectContaining({
+          kind: "advanceable_economy",
+          resource: "advancement_counters",
+          target: "advance.corp_counter_bank",
+        }),
+        expect.objectContaining({
+          kind: "advanceable_economy",
+          resource: "credits",
+          target: "economy.corp_counter_cashout",
+          amount: 4,
+        }),
+      ]),
+    );
+    expect(laundering.conditions).toContainEqual({
+      kind: "requires_advancement_counter",
+    });
+
+    const fatalAttractor = hint("onr_v1_242_fatal-attractor");
+    expect(fatalAttractor.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "future_encounter_effect",
+          resource: "net_damage",
+          amount: 3,
+        }),
+        expect.objectContaining({
+          kind: "damage",
+          timing: "encounter",
+          resource: "net_damage",
+          amount: 3,
+        }),
       ]),
     );
   });
@@ -236,9 +391,9 @@ describe("generic CardSpec AI-hint repair block", () => {
     expect(braindance.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "counter_economy",
+          kind: "finite_economy_pool",
           timing: "on_rez",
-          economyMode: "bank_load",
+          economyMode: "fixed_pool",
           amount: 12,
         }),
         expect.objectContaining({

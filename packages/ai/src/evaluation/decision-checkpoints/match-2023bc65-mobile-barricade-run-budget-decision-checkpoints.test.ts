@@ -77,6 +77,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
   it("counts Spin Chip credits when Krash is actually hosted on it", () => {
     const hosted = mutateFixture(fundedRemoteContestJson, (checkpoint) => {
       const state = checkpoint.engine.testOnlyGameState;
+      state.runner.credits = 13;
       state.corp.credits = 1;
       state.cardInstances[KRASH_INSTANCE_ID]!.hostedOn = SPIN_CHIP_INSTANCE_ID;
       checkpoint.source.kind = "synthetic_companion";

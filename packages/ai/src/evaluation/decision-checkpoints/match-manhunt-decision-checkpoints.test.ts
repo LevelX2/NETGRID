@@ -17,7 +17,7 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("uses the visible material tag-and-damage route before generic development", () => {
+  it("takes the certified BBS payout when Trace N cannot guarantee the visible tag-and-damage route", () => {
     const result = runAiDecisionCheckpoint(fixture(cp02Json));
 
     expect(result.ok, result.message).toBe(true);

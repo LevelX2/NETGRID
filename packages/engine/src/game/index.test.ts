@@ -193,7 +193,7 @@ describe("game facade", () => {
 
     expect(traceCorpValue(trace)).toBe(6);
     expect(traceRunnerStrength(trace)).toBe(6);
-    expect(isTraceSuccessful(trace)).toBe(false);
+    expect(isTraceSuccessful(trace)).toBe(true);
     expect(describeTraceResultFromTrace(trace)).toEqual({
       traceLimit: 4,
       corpBid: 2,
@@ -203,12 +203,12 @@ describe("game facade", () => {
       runnerBid: 2,
       postBidLinkValue: 1,
       runnerStrength: 6,
-      successful: false,
+      successful: true,
     });
     expect(trace).toEqual(before);
   });
 
-  it("starts the trace value at zero and keeps ties Runner-favorable", () => {
+  it("starts the trace value at zero and keeps ties Corp-favorable", () => {
     const trace = {
       traceId: "arch-13.strict-success",
       sourceCardInstanceId: "runner-identity",
@@ -220,17 +220,17 @@ describe("game facade", () => {
       runnerBid: 1,
     } as NonNullable<ReturnType<typeof createGame>["trace"]>;
 
-    expect(describeTraceResultFromTrace(trace, { runnerLinkFallback: 4 })).toEqual(
+    expect(describeTraceResultFromTrace(trace, { runnerLinkFallback: 0 })).toEqual(
       {
         traceLimit: 5,
         corpBid: 1,
         traceValue: 1,
         baseLinkValue: 0,
-        runnerLink: 4,
+        runnerLink: 0,
         runnerBid: 1,
         postBidLinkValue: 0,
-        runnerStrength: 5,
-        successful: false,
+        runnerStrength: 1,
+        successful: true,
       },
     );
   });

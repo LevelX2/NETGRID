@@ -518,6 +518,7 @@ function breakerCapabilityFromRecord(
   const coverage = breakerCoverageForRecord(record);
   if (coverage.length === 0) return undefined;
   const visible = record.visibleCards[0];
+  const hint = AI_HINTS_BY_CARD.get(record.cardId);
   const roleBasedBreaker =
     rolesMatch(record.roles, ["breaker_"]) ||
     record.subtypes.some((subtype) =>
@@ -560,6 +561,9 @@ function breakerCapabilityFromRecord(
       : {}),
     risks: sortedUnique([
       ...(breakerProfile?.sideEffects ?? []),
+      ...(hint?.functionSignals?.includes("breaker.self_trash_risk") === true
+        ? ["self_trash"]
+        : []),
       ...(costProfile && costProfile.sideEffectPenalty > 0
         ? ["side_effect_penalty"]
         : []),
@@ -964,16 +968,25 @@ function economyBankToolForRecord(
 function recordHasCanonicalRunnerCreditBank(
   record: CardCapabilityRecord,
 ): boolean {
+  const hasBuildOwner = record.actionPlanOwnerBindings.some(
+    (binding) =>
+      binding.owner === "runner.credit_bank" && binding.route === "build",
+  );
+  const hasCashOutOwner = record.actionPlanOwnerBindings.some(
+    (binding) =>
+      binding.owner === "runner.credit_bank" && binding.route === "cash_out",
+  );
+  const hasAutomaticCashOut = record.effects.some(
+    (effect) =>
+      effect.kind === "counter_economy" &&
+      effect.scope === "runner" &&
+      effect.resource === "credits" &&
+      effect.economyMode === "bank_cashout",
+  );
   return (
     record.side === "runner" &&
-    record.actionPlanOwnerBindings.some(
-      (binding) =>
-        binding.owner === "runner.credit_bank" && binding.route === "build",
-    ) &&
-    record.actionPlanOwnerBindings.some(
-      (binding) =>
-        binding.owner === "runner.credit_bank" && binding.route === "cash_out",
-    )
+    hasBuildOwner &&
+    (hasCashOutOwner || hasAutomaticCashOut)
   );
 }
 

@@ -517,7 +517,7 @@ describe("projectRunnerRunActions", () => {
         accessServerId: "rd",
         accessPayoffSignals: expect.arrayContaining([
           "access.replacement",
-          "access.hq_to_rnd_conversion",
+          "access.rd_via_hq",
         ]),
       }),
     ]);

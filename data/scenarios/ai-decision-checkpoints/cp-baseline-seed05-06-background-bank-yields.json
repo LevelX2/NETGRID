@@ -23241,8 +23241,7 @@
     "contractKind": "correctness",
   "acceptableActions": [
     {
-      "type": "activated_card_ability",
-      "sourceDefinitionId": "onr_v1_045_newsgroup-filter"
+      "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -23252,10 +23251,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["build_required_hand_buffer"],
       "requiredAssessmentEvidence": [
-        "runner_viable_followup_run_lock_release|run_lock_release_projection_status:blocked_funding|run_lock_release_target_credits:10|run_lock_release_funding_gap:1|run"
+        "runner_volatile_breaker_hand_buffer:4"
       ]
     }
   }

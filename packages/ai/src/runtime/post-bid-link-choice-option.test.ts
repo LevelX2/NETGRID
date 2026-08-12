@@ -16,8 +16,8 @@ describe("post-bid link choice option", () => {
       },
       {
         id: "trace_link_small",
-        label: "Small Link: +1 Link",
-        metadata: { postBidTraceLinkDelta: 1 },
+        label: "Small Link: +2 Link",
+        metadata: { postBidTraceLinkDelta: 2 },
       },
     ]);
 

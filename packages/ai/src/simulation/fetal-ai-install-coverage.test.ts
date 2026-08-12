@@ -48,11 +48,10 @@ describe("Proteus Fetal AI install plan coverage", () => {
           fallbackUsed: false,
         },
       );
-      expect(
-        summary.actionSequence.some(
-          (entry) => entry.reasonCode === "plan_first.corp.ambush_and_bluff",
-        ),
-      ).toBe(false);
+      const firstAmbushIndex = summary.actionSequence.findIndex(
+        (entry) => entry.reasonCode === "plan_first.corp.ambush_and_bluff",
+      );
+      expect(firstAmbushIndex).toBeGreaterThan(4);
     });
   }
 

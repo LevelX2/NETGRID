@@ -9947,13 +9947,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.install_card.runner_onr_classic_052_zetatech-portastation_1.runner_onr_classic_052_zetatech-portastation_1"
+        "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.credit_bank"],
-      "acceptableCapabilities": ["credit_bank_install"],
-      "requiredAssessmentEvidence": ["runner_credit_bank_install_ready"]
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["draw_for_answer_breaker_ap"],
+      "requiredAssessmentEvidence": ["target:hq"]
     }
   }
 }

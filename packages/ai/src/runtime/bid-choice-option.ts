@@ -45,11 +45,11 @@ export function selectedBidChoiceOptionId(
   ) {
     desired = maxBid;
   } else {
-    const tieBid = Math.max(
+    const winningBid = Math.max(
       0,
-      (traceContext.traceValue ?? 0) - (traceContext.runnerLink ?? 0),
+      (traceContext.traceValue ?? 0) - (traceContext.runnerLink ?? 0) + 1,
     );
-    desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, tieBid);
+    desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, winningBid);
   }
   let selected =
     bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
@@ -252,7 +252,7 @@ function runnerAvoidsTrace(
   runnerBid: number,
   traceValue: number,
 ): boolean {
-  return Math.max(0, runnerLink) + runnerBid >= Math.max(0, traceValue);
+  return Math.max(0, runnerLink) + runnerBid > Math.max(0, traceValue);
 }
 
 function corpDesiredBidAmount(

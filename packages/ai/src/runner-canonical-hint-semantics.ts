@@ -82,12 +82,39 @@ export function runnerEffectsProvideNonNoisyBreakerCredits(
   );
 }
 
+export function runnerEffectsProvideBreakerCredits(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return (
+    effects?.some(
+      (effect) =>
+        effect.kind === "recurring_economy" &&
+        effect.resource === "credits" &&
+        (effect.target === "icebreaker" ||
+          effect.target === "non_noisy_icebreaker"),
+    ) ?? false
+  );
+}
+
 export function runnerEffectsProvideDamagePrevention(
   effects: readonly AiHintStructuredEffect[] | undefined,
 ): boolean {
   return (
     effects?.some((effect) =>
       DAMAGE_PREVENTION_EFFECT_KINDS.has(effect.kind),
+    ) ?? false
+  );
+}
+
+export function runnerEffectsProvideProgramTrashPrevention(
+  effects: readonly AiHintStructuredEffect[] | undefined,
+): boolean {
+  return (
+    effects?.some(
+      (effect) =>
+        effect.kind === "program_trash_prevention" &&
+        effect.scope === "runner" &&
+        effect.target === "installed_program",
     ) ?? false
   );
 }

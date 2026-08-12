@@ -106,11 +106,20 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_150_streetware-distributor.",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("runner_main_add_three_hosted_credits"),
+        annotations: [
+          {
+            kind: "plan_owner",
+            owner: "runner.credit_bank",
+            route: "build",
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

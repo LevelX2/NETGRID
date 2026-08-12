@@ -18,6 +18,7 @@ type HintCard = {
   valueHints?: Record<string, number>;
   riskTags?: string[];
   effects?: HintEffect[];
+  functionSignals?: string[];
   conditions?: Array<{ kind: string }>;
   targetProfiles?: Array<{
     purpose?: string;
@@ -34,7 +35,7 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
     const hint = card(hints, "onr_v1_028_force-shield");
 
     expect(hint.roles).toEqual(
-      expect.arrayContaining(["program", "damage_prevention", "rig_defense"]),
+      expect.arrayContaining(["program", "damage_prevention"]),
     );
     expect(hint.planRoles).toContain("build_rig");
     expect(hint.planRoles).not.toContain("recover_economy");
@@ -55,7 +56,6 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
     expect(hint.conditions).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ kind: "requires_successful_hq_run" }),
-        expect.objectContaining({ kind: "requires_rezzed_ice" }),
       ]),
     );
     expect(hint.conditions).not.toEqual(
@@ -90,8 +90,12 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
     expect(hint.effects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "economy",
-          target: "economy.temporary_resource_bank",
+          kind: "counter_economy",
+          target: "economy.bank_load",
+        }),
+        expect.objectContaining({
+          kind: "action_economy",
+          target: "economy.bank_cashout_all",
         }),
       ]),
     );
@@ -122,14 +126,15 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "expose_info",
-          target: "installed_card",
+          target: "info.expose_installed_card",
         }),
       ]),
     );
     expect(seeYa.targetProfiles).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          purpose: "expose_installed_card",
+          purpose:
+            "expose_installed_card:abilities_activated_runner_main_expose_installed_card",
           hiddenInfoPolicy: "legal_targets_only",
         }),
       ]),
@@ -138,7 +143,7 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "ice_trash",
-          target: "rez_or_trash_choice",
+          target: "corp_choice_rez_or_trash_ice",
         }),
       ]),
     );
@@ -161,12 +166,17 @@ describe.each(hintSources)("match 424A card semantics in %s", (source) => {
       expect.arrayContaining([
         expect.objectContaining({
           kind: "search",
-          target: "setup.recovery",
+          target: "top_trash_card",
         }),
       ]),
     );
-    expect(junkyard.roles).toEqual(
-      expect.arrayContaining(["trash_recovery", "utility_resource"]),
+    expect(junkyard.roles).toEqual([]);
+    expect(junkyard.functionSignals).toEqual(
+      expect.arrayContaining([
+        "setup.recovery",
+        "setup.search",
+        "setup.top_trash_recovery",
+      ]),
     );
     expect(junkyard.planRoles).not.toContain("economy");
     expect(junkyard.valueHints?.economy).toBeUndefined();

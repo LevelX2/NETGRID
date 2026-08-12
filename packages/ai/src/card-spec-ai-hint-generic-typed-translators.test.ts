@@ -115,10 +115,7 @@ describe("generic typed CardSpec AI translators", () => {
       ]),
     );
     expect(conference.functionSignals).toEqual(
-      expect.arrayContaining([
-        "economy.generic",
-        "economy.turn_start_credit",
-      ]),
+      expect.arrayContaining(["economy.generic", "economy.turn_start_credit"]),
     );
 
     const entry = cardSpecPlanningCards().find(
@@ -414,7 +411,7 @@ describe("generic typed CardSpec AI translators", () => {
     expect(coup.cardType).toBe("agenda");
     expect(coup.effects).toContainEqual(
       expect.objectContaining({
-        kind: "counter_economy",
+        kind: "finite_economy_pool",
         scope: "corp",
         timing: "when_scored",
         target: "economy.hosted_credit_bank",
@@ -466,11 +463,53 @@ describe("generic typed CardSpec AI translators", () => {
       showToOpponent: true,
       shuffleAfter: true,
     });
+    expect(smc.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "search",
+          scope: "stack",
+          target: "program",
+        }),
+        expect.objectContaining({
+          kind: "install",
+          scope: "installed_card",
+          target: "program",
+        }),
+      ]),
+    );
+    expect(mysteryBox.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "topdeck_info",
+          scope: "stack",
+          target: "look_top_stack",
+          amount: 5,
+        }),
+        expect.objectContaining({
+          kind: "search",
+          scope: "stack",
+          target: "top_stack_matching_card",
+          amount: 5,
+        }),
+        expect.objectContaining({
+          kind: "install",
+          scope: "installed_card",
+          target: "program",
+          amount: 1,
+        }),
+      ]),
+    );
 
     const noTarget = syntheticHint({
       abilities: [activated([{ kind: "search_stack_install_like" }])],
     });
     expect(noTarget.targetProfiles).toBeUndefined();
+    expect(noTarget.effects ?? []).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: "search" }),
+        expect.objectContaining({ kind: "install" }),
+      ]),
+    );
   });
 
   it("binds a successful-run fort target only to the typed force-rez followup", () => {

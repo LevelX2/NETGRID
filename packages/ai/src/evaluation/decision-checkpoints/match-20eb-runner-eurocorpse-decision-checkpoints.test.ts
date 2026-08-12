@@ -40,7 +40,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("uses the productive program search before an early background-bank load", () => {
+  it("starts the explicitly owned early credit-bank route", () => {
     expectCheckpointToPass(fixture(firstEarlyBankLoadJson));
   });
 
@@ -118,7 +118,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(belowHandLimit);
   });
 
-  it("uses productive program search before another background-bank load", () => {
+  it("uses immediate liquidity when a one-card hand cap makes search nonproductive", () => {
     const noMeaningfulAlternative = mutateFixture(
       repeatedEarlyBankJson,
       (checkpoint) => {
@@ -128,12 +128,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.source.findingId =
           "20EB-C05-REPEATED-BANK-WITHOUT-MEANINGFUL-ALTERNATIVE";
         checkpoint.expectation = {
-          acceptableActions: [
-            {
-              type: "play_event",
-              sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
-            },
-          ],
+          acceptableActions: [{ type: "gain_credit" }],
           forbiddenActions: [
             {
               type: "activated_card_ability",
@@ -141,12 +136,10 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
             },
           ],
           planExecution: {
-            acceptablePlanKinds: ["runner.develop_board_and_hand"],
-            acceptableCapabilities: [
-              "develop_onr_v1_114_temple-microcode-outlet",
-            ],
+            acceptablePlanKinds: ["runner.economy"],
+            acceptableCapabilities: ["gain_general_liquid_credits"],
             requiredAssessmentEvidence: [
-              "source:own_runner_hand:card_specific_purpose:draw_or_search_engine:setup",
+              "runner_engine_certified_immediate_liquidity_development",
             ],
           },
         };

@@ -29718,7 +29718,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.trigger_ability.runner_onr_proteus_106_disgruntled-ice-technician_1.runner_onr_proteus_106_disgruntled-ice-technician_1",
+        "actionId": "runner.trigger_ability.runner_onr_proteus_106_disgruntled-ice-technician_1.runner_onr_proteus_106_disgruntled-ice-technician_1.onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
         "type": "trigger_ability"
       }
     ],

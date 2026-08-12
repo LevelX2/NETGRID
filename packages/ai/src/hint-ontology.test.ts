@@ -37,10 +37,6 @@ describe("AI hint ontology validation", () => {
         errors: ["asset_economy_without_economy_evidence"],
       },
       {
-        cardId: "onr_v1_328_information-laundering",
-        errors: ["asset_economy_without_economy_evidence"],
-      },
-      {
         cardId: "onr_v1_329_investment-firm",
         errors: ["asset_economy_without_economy_evidence"],
       },

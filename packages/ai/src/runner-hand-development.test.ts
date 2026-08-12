@@ -482,6 +482,39 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.legalActionId).toBeUndefined();
   });
 
+  it("binds duplicate hand cards to their own instance-specific install actions", () => {
+    const first = visibleCard("worm-1", {
+      definitionId: "onr_v1_074_worm",
+      title: "Worm",
+      type: "program",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const second = visibleCard("worm-2", {
+      definitionId: "onr_v1_074_worm",
+      title: "Worm",
+      type: "program",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const firstInstall = installAction("install-worm-1", first, 4);
+    const secondInstall = installAction("install-worm-2", second, 4);
+    const evaluations = evaluateRunnerHandDevelopment({
+      input: runnerInput({
+        credits: 8,
+        hand: [first, second],
+        legalActions: [firstInstall, secondInstall],
+      }),
+    });
+
+    expect(findByInstance(evaluations, first.instanceId).legalActionId).toBe(
+      firstInstall.actionId,
+    );
+    expect(findByInstance(evaluations, second.instanceId).legalActionId).toBe(
+      secondInstall.actionId,
+    );
+  });
+
   it("keeps expose tools relevant when the current route needs program displacement", () => {
     const mouse = visibleCard("mouse-1", {
       definitionId: "onr_v1_042_mouse",

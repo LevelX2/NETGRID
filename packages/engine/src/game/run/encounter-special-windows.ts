@@ -12,6 +12,7 @@ import {
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { capabilityKey, canonicalCapabilityId } from "@netgrid/cards/engine";
 import { buildLegalAction } from "../turn/action-builders";
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -440,7 +441,13 @@ export function fullyBrokenPassedIcePostPassActions(
         state,
         sourceCardId,
       );
+      if (!implementation)
+        throw new Error("Die Post-Pass-Fähigkeit ist nicht mehr verfügbar.");
       const amount = Math.max(0, Math.floor(implementation?.cost.amount ?? 0));
+      const sourceAbilityId = canonicalCapabilityId(
+        sourceDefinition.id,
+        implementation.capabilityKey,
+      );
       return buildLegalAction(
         state,
         "runner",
@@ -451,11 +458,22 @@ export function fullyBrokenPassedIcePostPassActions(
         {
           cardId: sourceCardId,
           sourceDefinitionId: sourceDefinition.id,
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: implementation.capabilityKey,
+          cardImplementationAbilityId: sourceAbilityId,
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId,
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "derez_fully_broken_passed_ice_and_end_run",
           paymentAmount: amount,
+        },
+        {
+          abilityRef: {
+            sourceCardInstanceId: sourceCardId,
+            sourceAbilityId,
+          },
+          effectRef: `effect.${sourceAbilityId}`,
         },
       );
     });
@@ -466,6 +484,14 @@ export function fullyBrokenPassedIcePostPassActions(
     .sort()
     .map((sourceCardId) => {
       const sourceDefinition = definitionFor(state, sourceCardId);
+      const implementation =
+        fullyBrokenPassedIceDerezOnlyImplementationForCard(state, sourceCardId);
+      if (!implementation)
+        throw new Error("Die Post-Pass-Fähigkeit ist nicht mehr verfügbar.");
+      const sourceAbilityId = canonicalCapabilityId(
+        sourceDefinition.id,
+        implementation.capabilityKey,
+      );
       return buildLegalAction(
         state,
         "runner",
@@ -475,11 +501,23 @@ export function fullyBrokenPassedIcePostPassActions(
         [],
         {
           cardId: sourceCardId,
+          sourceDefinitionId: sourceDefinition.id,
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey: implementation.capabilityKey,
+          cardImplementationAbilityId: sourceAbilityId,
           targetIceId,
           targetIceDefinitionId: targetDefinition.id,
           runnerUtilityAbility: "derez_fully_broken_passed_ice",
           abilityKind: "derez_fully_broken_passed_ice",
           cardImplementationTrashSourceCost: true,
+        },
+        {
+          abilityRef: {
+            sourceCardInstanceId: sourceCardId,
+            sourceAbilityId,
+          },
+          effectRef: `effect.${sourceAbilityId}`,
         },
       );
     });
@@ -837,6 +875,7 @@ function fullyBrokenPassedIceDerezImplementationForCard(
 ):
   | {
       kind: "derez_fully_broken_passed_ice_and_end_run";
+      capabilityKey: ReturnType<typeof capabilityKey>;
       cost: { kind: "credit"; amount: number };
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
@@ -846,9 +885,17 @@ function fullyBrokenPassedIceDerezImplementationForCard(
   const implementation = cardImplementationForDefinitionId(
     definitionFor(state, cardId).id,
   )?.runnerUtilityLongtail;
-  return implementation?.kind === "derez_fully_broken_passed_ice_and_end_run"
-    ? implementation
-    : undefined;
+  if (implementation?.kind !== "derez_fully_broken_passed_ice_and_end_run")
+    return undefined;
+  const rawCapabilityKey = (
+    implementation as typeof implementation & { capabilityKey?: unknown }
+  ).capabilityKey;
+  if (typeof rawCapabilityKey !== "string")
+    throw new Error("Die Post-Pass-Fähigkeit hat keinen Capability-Key.");
+  return {
+    ...implementation,
+    capabilityKey: capabilityKey(rawCapabilityKey),
+  };
 }
 
 function fullyBrokenPassedIceDerezOnlyImplementationForCard(
@@ -857,6 +904,7 @@ function fullyBrokenPassedIceDerezOnlyImplementationForCard(
 ):
   | {
       kind: "derez_fully_broken_passed_ice";
+      capabilityKey: ReturnType<typeof capabilityKey>;
       cost: { kind: "trash_source" };
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
@@ -866,9 +914,17 @@ function fullyBrokenPassedIceDerezOnlyImplementationForCard(
   const implementation = cardImplementationForDefinitionId(
     definitionFor(state, cardId).id,
   )?.runnerUtilityLongtail;
-  return implementation?.kind === "derez_fully_broken_passed_ice"
-    ? implementation
-    : undefined;
+  if (implementation?.kind !== "derez_fully_broken_passed_ice")
+    return undefined;
+  const rawCapabilityKey = (
+    implementation as typeof implementation & { capabilityKey?: unknown }
+  ).capabilityKey;
+  if (typeof rawCapabilityKey !== "string")
+    throw new Error("Die Post-Pass-Fähigkeit hat keinen Capability-Key.");
+  return {
+    ...implementation,
+    capabilityKey: capabilityKey(rawCapabilityKey),
+  };
 }
 
 function isRioPassRezzedIceSource(

@@ -828,7 +828,6 @@ function assertEarlyEndTurnRoute(
     justification?.kind === "forgo_exhausted_voluntary_capacity" &&
     justification.capacityKind ===
       "all_current_voluntary_actions_explicitly_nonproductive" &&
-    context.input.side === "corp" &&
     moduleId === `${context.input.side}.complete_turn` &&
     everyRemainingActionIsExplicitlyNonproductive;
   if (exhaustedVoluntaryCapacityForgoProven) return;

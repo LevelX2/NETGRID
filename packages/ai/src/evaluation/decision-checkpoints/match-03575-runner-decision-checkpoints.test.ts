@@ -45,7 +45,7 @@ describe("match 03575 runner decision checkpoints", () => {
       delete latestCorpBid.publicPayload.corpBidMax;
       delete latestCorpBid.publicPayload.traceStrength;
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["bid_1"] },
+        choice: { mustSelectOptionIds: ["bid_2"] },
       };
     });
 

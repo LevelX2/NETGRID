@@ -129,20 +129,21 @@ describe("ActionCardSemanticProfiles", () => {
     ).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          kind: "counter_economy",
+          kind: "finite_economy_pool",
           timing: "on_rez",
           scope: "corp",
           resource: "credits",
           amount: 16,
-          economyMode: "bank_load",
+          economyMode: "fixed_pool",
           target: "economy.hosted_credit_bank",
         }),
         expect.objectContaining({
-          kind: "economy",
+          kind: "action_economy",
           timing: "action",
           scope: "corp",
           resource: "credits",
-          economyMode: "bank_cashout",
+          amount: 2,
+          economyMode: "liquid_payout",
           target: "economy.hosted_credit_cashout",
         }),
       ]),

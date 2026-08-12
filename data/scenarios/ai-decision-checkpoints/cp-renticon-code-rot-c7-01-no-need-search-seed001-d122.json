@@ -13741,8 +13741,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_089_gideons-pawnshop"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
+      "acceptableCapabilities": ["develop_onr_v1_089_gideons-pawnshop"],
+      "requiredAssessmentEvidence": [
+        "source:own_runner_hand:card_specific_purpose:draw_or_search_engine:setup"
+      ]
+    }
   }
 }

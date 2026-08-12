@@ -93,15 +93,11 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_076_syd-meyer-superstores.",
       },
       {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_076_syd-meyer-superstores.",
       },
     ],
     capabilities: [],

@@ -38,7 +38,7 @@ describe("baseline seed 03 and seed 05 exact loop checkpoints", () => {
       thirdTraceWithoutPayoffJson,
     ],
     [
-      "uses Newsgroup to close the run-lock funding gap instead of background Broker investment",
+      "builds the required volatile-breaker hand buffer instead of background Broker investment",
       backgroundBankYieldsJson,
     ],
   ])("%s", (_label, json) => {

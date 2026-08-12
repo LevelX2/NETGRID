@@ -6672,13 +6672,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -6691,15 +6693,17 @@
           "setup.hand_size",
           "setup.memory",
           "defense.damage_prevention",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
           "effect:damage_prevention",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hand_size_modifier",
           "effect:hardware_trait",
@@ -6833,13 +6837,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -6851,7 +6857,9 @@
           "risk.unpreventable_brain_damage",
           "setup.deck_exclusive",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "damage.payoff",
@@ -6862,8 +6870,8 @@
         "actionTacticSignals": [
           "damage.payoff.runner",
           "economy.card",
-          "effect:counter_economy",
           "effect:damage",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -7238,25 +7246,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -7443,13 +7455,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 3,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -7457,14 +7471,16 @@
           "economy.recurring",
           "economy.recurring_link_credit",
           "resource.connection",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -7945,27 +7961,11 @@
             "confidence": "high"
           }
         ],
-        "effects": [
-          {
-            "kind": "ambush",
-            "scope": "accessed_card",
-            "timing": "on_access",
-            "target": "remote.ambush",
-            "finite": true
-          }
-        ],
         "functionSignals": [
-          "access.rnd_reveal_requirement",
-          "access.punish",
-          "remote.ambush"
+          "access.rnd_reveal_requirement"
         ],
         "tacticSignals": [
           "access.rnd_reveal_requirement"
-        ],
-        "actionTacticSignals": [
-          "effect:ambush",
-          "effect_scope:accessed_card",
-          "effect_timing:on_access"
         ],
         "conditions": [
           {
@@ -8320,27 +8320,11 @@
             "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
-        "effects": [
-          {
-            "kind": "ambush",
-            "scope": "accessed_card",
-            "timing": "on_access",
-            "target": "remote.ambush",
-            "finite": true
-          }
-        ],
         "functionSignals": [
-          "access.rnd_reveal_requirement",
-          "access.punish",
-          "remote.ambush"
+          "access.rnd_reveal_requirement"
         ],
         "tacticSignals": [
           "access.rnd_reveal_requirement"
-        ],
-        "actionTacticSignals": [
-          "effect:ambush",
-          "effect_scope:accessed_card",
-          "effect_timing:on_access"
         ],
         "conditions": [
           {
@@ -12005,7 +11989,7 @@
     {
       "cardId": "onr_proteus_046_corporate-guard-r-temps",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2128b255124e7c31",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:27baef6928835b0d",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:67cf20a651aff522",
       "hint": {
         "cardId": "onr_proteus_046_corporate-guard-r-temps",
         "side": "corp",
@@ -12015,7 +11999,7 @@
           "operation"
         ],
         "planRoles": [
-          "recover_economy"
+          "action_tempo"
         ],
         "valueHints": {
           "economy": 1
@@ -12055,7 +12039,7 @@
     {
       "cardId": "onr_proteus_047_credit-consolidation",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0635915c53a021f0",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a50790f0e1ccfa44",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_047_credit-consolidation",
         "side": "corp",
@@ -13025,7 +13009,7 @@
     {
       "cardId": "onr_proteus_054_bel-digmo-antibody",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:89cef3c78954b963",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4c38ff426964a736",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1e4daa4c1f4532e0",
       "hint": {
         "cardId": "onr_proteus_054_bel-digmo-antibody",
         "side": "corp",
@@ -13144,7 +13128,7 @@
     {
       "cardId": "onr_proteus_055_cybertech-think-tank",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:35004515346a5449",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1f71837516fafb89",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1cc34056001c40f2",
       "hint": {
         "cardId": "onr_proteus_055_cybertech-think-tank",
         "side": "corp",
@@ -13225,7 +13209,7 @@
     {
       "cardId": "onr_proteus_056_department-of-misinformation",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f0b9182c008a7b58",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:158769f1ef8eca65",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:266caeeec79bbb3a",
       "hint": {
         "cardId": "onr_proteus_056_department-of-misinformation",
         "side": "corp",
@@ -13281,7 +13265,7 @@
     {
       "cardId": "onr_proteus_057_doppelganger-antibody",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5d11508ca7b154e0",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:efded230c2c2479c",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9330cc27db3d62e3",
       "hint": {
         "cardId": "onr_proteus_057_doppelganger-antibody",
         "side": "corp",
@@ -13410,7 +13394,7 @@
     {
       "cardId": "onr_proteus_058_executive-boot-camp",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:24d6fe9e3c6525aa",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:eaa08b91e0eb5a4d",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c09da031979216fd",
       "hint": {
         "cardId": "onr_proteus_058_executive-boot-camp",
         "side": "corp",
@@ -13561,7 +13545,7 @@
     {
       "cardId": "onr_proteus_060_herman-revista",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:fd1f801ce5db27c8",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:68e6662467a96008",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2928902c0da370b0",
       "hint": {
         "cardId": "onr_proteus_060_herman-revista",
         "side": "corp",
@@ -13968,7 +13952,7 @@
     {
       "cardId": "onr_proteus_065_networked-center",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2ce1a5eef4df757a",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:15ac2e077763f433",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fb5e198b4b976997",
       "hint": {
         "cardId": "onr_proteus_065_networked-center",
         "side": "corp",
@@ -14066,7 +14050,7 @@
     {
       "cardId": "onr_proteus_066_obfuscated-fortress",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ae84912653875a42",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f6e7135e7282970a",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:82ff76591ebbec65",
       "hint": {
         "cardId": "onr_proteus_066_obfuscated-fortress",
         "side": "corp",
@@ -14161,7 +14145,7 @@
     {
       "cardId": "onr_proteus_067_panic-button",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3f48baab15c006f7",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b8680e1b47643bdf",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e59c2712c4909eae",
       "hint": {
         "cardId": "onr_proteus_067_panic-button",
         "side": "corp",
@@ -14222,6 +14206,7 @@
           }
         ],
         "functionSignals": [
+          "condition.during_hq_run",
           "draw.corp_draw",
           "setup.draw"
         ],
@@ -14272,7 +14257,7 @@
     {
       "cardId": "onr_proteus_068_pattel-antibody",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:204878a9e9556cdd",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b3f19215060122a1",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:6f2ab8905cb7bbf4",
       "hint": {
         "cardId": "onr_proteus_068_pattel-antibody",
         "side": "corp",
@@ -14309,20 +14294,9 @@
             "rationale": "Counter-Punish konkret als Icebreaker-Strength-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
         ],
-        "effects": [
-          {
-            "kind": "ambush",
-            "scope": "accessed_card",
-            "timing": "on_access",
-            "target": "remote.ambush",
-            "finite": true
-          }
-        ],
         "functionSignals": [
           "access.archives_safe_exception",
-          "access.rnd_reveal_requirement",
-          "access.punish",
-          "remote.ambush"
+          "access.rnd_reveal_requirement"
         ],
         "tacticSignals": [
           "access.archives_safe_exception",
@@ -14332,9 +14306,6 @@
         ],
         "actionTacticSignals": [
           "access.punish",
-          "effect:ambush",
-          "effect_scope:accessed_card",
-          "effect_timing:on_access",
           "punish.payoff"
         ],
         "conditions": [
@@ -14376,7 +14347,7 @@
     {
       "cardId": "onr_proteus_069_pavit-bharat",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e36b9552103514ae",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:46cbdba07d6a4d8c",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:265538c6edfdc87a",
       "hint": {
         "cardId": "onr_proteus_069_pavit-bharat",
         "side": "corp",
@@ -14456,7 +14427,7 @@
     {
       "cardId": "onr_proteus_070_rasmin-bridger",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:00638cbd52f238e1",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:16a0b87b446b0d67",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c5f463c2e2759936",
       "hint": {
         "cardId": "onr_proteus_070_rasmin-bridger",
         "side": "corp",
@@ -14505,10 +14476,37 @@
             "rationale": "Protects scoring remotes through repeated pay/stop windows."
           }
         ],
+        "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "fort",
+            "timing": "during_run",
+            "resource": "credits",
+            "target": "run.corp_pay_or_end_run",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "fort",
+            "timing": "persistent",
+            "target": "remote.scoring_protection",
+            "repeatable": true
+          }
+        ],
         "functionSignals": [
           "condition.corp_installed_or_advanced_this_fort_last_turn",
+          "run.corp_pay_or_end_run",
           "run.corp_server_lock",
-          "tax.remote"
+          "tax.remote",
+          "tax.runner_credit"
+        ],
+        "actionTacticSignals": [
+          "effect:remote_protection",
+          "effect:run_tax",
+          "effect_scope:fort",
+          "effect_timing:during_run",
+          "effect_timing:persistent"
         ],
         "conditions": [
           {
@@ -14539,7 +14537,7 @@
     {
       "cardId": "onr_proteus_071_raymond-ellison",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e3673bd35ac0df0f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c004c6b8d20ac044",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:21da21356a483661",
       "hint": {
         "cardId": "onr_proteus_071_raymond-ellison",
         "side": "corp",
@@ -14634,7 +14632,7 @@
     {
       "cardId": "onr_proteus_072_research-bunker",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:7f7adbb9af03264d",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f5f30ad73cfab473",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:559728290c7901b5",
       "hint": {
         "cardId": "onr_proteus_072_research-bunker",
         "side": "corp",
@@ -14732,7 +14730,7 @@
     {
       "cardId": "onr_proteus_073_simon-francisco",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3da4f4f7e0745fb3",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:783c3be63fd768d2",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a4335555799bd3b9",
       "hint": {
         "cardId": "onr_proteus_073_simon-francisco",
         "side": "corp",
@@ -14772,20 +14770,21 @@
         ],
         "effects": [
           {
-            "kind": "ambush",
-            "scope": "accessed_card",
+            "kind": "remote_protection",
+            "scope": "central",
             "timing": "on_access",
-            "target": "remote.ambush",
-            "finite": true
+            "resource": "cards",
+            "target": "access.corp_central_access_reduction",
+            "amount": 1,
+            "repeatable": true
           }
         ],
         "functionSignals": [
-          "access.punish",
-          "remote.ambush"
+          "access.corp_central_access_reduction"
         ],
         "actionTacticSignals": [
-          "effect:ambush",
-          "effect_scope:accessed_card",
+          "effect:remote_protection",
+          "effect_scope:central",
           "effect_timing:on_access"
         ],
         "conditions": [
@@ -14830,7 +14829,7 @@
     {
       "cardId": "onr_proteus_074_siren",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ec86c1ecff164eb8",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e6c0fc7142418f15",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:95d39d61308752ed",
       "hint": {
         "cardId": "onr_proteus_074_siren",
         "side": "corp",
@@ -14891,7 +14890,7 @@
     {
       "cardId": "onr_proteus_075_stereogram-antibody",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ffbb9a2ee3438bfa",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:3214d34f65c72173",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:3b38d5df2601dcd3",
       "hint": {
         "cardId": "onr_proteus_075_stereogram-antibody",
         "side": "corp",
@@ -15004,7 +15003,7 @@
     {
       "cardId": "onr_proteus_076_syd-meyer-superstores",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4299426fbdfbbef3",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:bb0cfa7a23e46fe6",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:937d1c4ea1e7390a",
       "hint": {
         "cardId": "onr_proteus_076_syd-meyer-superstores",
         "side": "corp",
@@ -15060,7 +15059,7 @@
     {
       "cardId": "onr_proteus_077_weapons-depot",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:84a03ea0382dbdc4",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:984109c140fcbb45",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:acb1439bd2e0c7ef",
       "hint": {
         "cardId": "onr_proteus_077_weapons-depot",
         "side": "corp",
@@ -15191,11 +15190,28 @@
             ]
           }
         ],
+        "effects": [
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
+          }
+        ],
         "functionSignals": [
-          "run.successful_run_grip_reset"
+          "run.successful_run_grip_reset",
+          "virus.purge_tax"
         ],
         "tacticSignals": [
           "run.successful_run_grip_reset"
+        ],
+        "actionTacticSignals": [
+          "effect:delayed_penalty",
+          "effect_scope:corp",
+          "effect_timing:action"
         ],
         "conditions": [
           {
@@ -15724,21 +15740,47 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "persistent_counter_effect",
+            "scope": "hq",
+            "timing": "on_access",
+            "resource": "counters",
+            "target": "access_trash_pressure",
+            "amount": 2,
+            "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "access.free_trash",
+          "virus.access_trash",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "access.payoff",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:action",
+          "effect_timing:on_access",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -15786,6 +15828,39 @@
         "valueHints": {},
         "strategyAnchors": [
           "runner.run_event_tempo"
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "post_pass_derez_fully_broken_ice_end_run",
+            "effects": [
+              {
+                "kind": "rez",
+                "scope": "ice",
+                "timing": "encounter_resolution",
+                "target": "derez",
+                "finite": true
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "run_path",
+                "timing": "encounter_resolution",
+                "target": "ends_run_after_effect",
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "ice.derez",
+              "run.ends_run_after_effect"
+            ],
+            "conditions": [
+              {
+                "kind": "requires_encounter"
+              },
+              {
+                "kind": "requires_rezzed_ice"
+              }
+            ]
+          }
         ],
         "targetProfiles": [
           {
@@ -16016,6 +16091,7 @@
           "break_sentry_subroutine",
           "install_program",
           "pump_icebreaker_strength",
+          "run_start_random_strength_bonus",
           "subtype_icebreaker",
           "subtype_killer"
         ]
@@ -16182,21 +16258,47 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "persistent_counter_effect",
+            "scope": "rnd",
+            "timing": "on_access",
+            "resource": "counters",
+            "target": "access_trash_pressure",
+            "amount": 2,
+            "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "access.free_trash",
+          "virus.access_trash",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "access.payoff",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:rnd",
+          "effect_timing:action",
+          "effect_timing:on_access",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -16289,7 +16391,7 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
@@ -16303,20 +16405,32 @@
             "resource": "cards",
             "target": "virus.central_access_per_counter",
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
-          "virus.central_access_per_counter"
+          "virus.central_access_per_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
           "access.payoff",
           "access.rnd_multiaccess",
+          "effect:delayed_penalty",
           "effect:multiaccess",
           "effect:persistent_counter_effect",
+          "effect_scope:corp",
           "effect_scope:rnd",
-          "effect_scope:runner",
+          "effect_timing:action",
           "effect_timing:persistent",
           "effect_timing:successful_run"
         ],
@@ -16641,21 +16755,34 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -16860,25 +16987,38 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -16971,7 +17111,7 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
@@ -16985,20 +17125,32 @@
             "resource": "cards",
             "target": "virus.central_access_per_counter",
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
           "virus.corp_purgeable_counter",
-          "virus.central_access_per_counter"
+          "virus.central_access_per_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
           "access.hq_multiaccess",
           "access.payoff",
+          "effect:delayed_penalty",
           "effect:multiaccess",
           "effect:persistent_counter_effect",
+          "effect_scope:corp",
           "effect_scope:hq",
-          "effect_scope:runner",
+          "effect_timing:action",
           "effect_timing:persistent",
           "effect_timing:successful_run"
         ],
@@ -17080,21 +17232,34 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "central",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.central_server_socket_counters",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:central",
+          "effect_scope:corp",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -17481,7 +17646,7 @@
     {
       "cardId": "onr_proteus_103_cruising-for-netwatch",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:36ab1bf0b28ded74",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2af6d460663cd75c",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:13d56241dafd55b5",
       "hint": {
         "cardId": "onr_proteus_103_cruising-for-netwatch",
         "side": "runner",
@@ -17933,6 +18098,37 @@
                 "hiddenInfoPolicy": "legal_targets_only"
               }
             ]
+          },
+          {
+            "capabilityKey": "post_pass_derez_fully_broken_ice_end_run",
+            "effects": [
+              {
+                "kind": "rez",
+                "scope": "ice",
+                "timing": "encounter_resolution",
+                "target": "derez",
+                "finite": true
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "run_path",
+                "timing": "encounter_resolution",
+                "target": "ends_run_after_effect",
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "ice.derez",
+              "run.ends_run_after_effect"
+            ],
+            "conditions": [
+              {
+                "kind": "requires_encounter"
+              },
+              {
+                "kind": "requires_rezzed_ice"
+              }
+            ]
           }
         ],
         "targetProfiles": [
@@ -18056,7 +18252,7 @@
     {
       "cardId": "onr_proteus_107_drone-for-a-day",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:25aae35c6a853920",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4a2f7181df805275",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8f98bd5928f0efed",
       "hint": {
         "cardId": "onr_proteus_107_drone-for-a-day",
         "side": "runner",
@@ -18074,17 +18270,6 @@
         },
         "strategicExchangeKinds": [
           "self_tag"
-        ],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": [
-              "tactic_signal_anchor:tag.source"
-            ],
-            "confidence": "medium"
-          }
         ],
         "actionCapabilitySemantics": [
           {
@@ -18113,17 +18298,6 @@
               "economy.burst_credit",
               "economy.generic",
               "tag.source"
-            ],
-            "strategySupportPairs": [
-              {
-                "strategyId": "corp.tag_trace_punish",
-                "role": "anchor_evidence",
-                "roleDetail": "anchor_evidence_tag_source",
-                "evidence": [
-                  "tactic_signal_anchor:tag.source"
-                ],
-                "confidence": "medium"
-              }
             ]
           }
         ],
@@ -18192,7 +18366,7 @@
     {
       "cardId": "onr_proteus_108_faked-hit",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9246a53a79ff3d7e",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:444093f40218ec48",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:de44e0d09ba0a404",
       "hint": {
         "cardId": "onr_proteus_108_faked-hit",
         "side": "runner",
@@ -18239,11 +18413,7 @@
         "functionSignals": [
           "damage.payoff"
         ],
-        "tacticSignals": [
-          "damage.payoff"
-        ],
         "actionTacticSignals": [
-          "damage.payoff.runner",
           "effect:damage",
           "effect_scope:runner",
           "effect_timing:action"
@@ -18325,7 +18495,7 @@
     {
       "cardId": "onr_proteus_110_hijack",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2786f3599a47d1a5",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:af13103a0d841da6",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2990cd9891608274",
       "hint": {
         "cardId": "onr_proteus_110_hijack",
         "side": "runner",
@@ -18517,7 +18687,7 @@
     {
       "cardId": "onr_proteus_113_live-news-feed",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:471981af6f9497cb",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e33e73c9f2c546f5",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f1619c1723971723",
       "hint": {
         "cardId": "onr_proteus_113_live-news-feed",
         "side": "runner",
@@ -18531,17 +18701,6 @@
           "run_pressure"
         ],
         "valueHints": {},
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": [
-              "tactic_signal_anchor:tag.source"
-            ],
-            "confidence": "medium"
-          }
-        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_run_with_bad_publicity_aftermath",
@@ -18566,17 +18725,6 @@
                 "targetType": "server",
                 "purpose": "make_run:on_play_run_with_bad_publicity_aftermath",
                 "hiddenInfoPolicy": "legal_targets_only"
-              }
-            ],
-            "strategySupportPairs": [
-              {
-                "strategyId": "corp.tag_trace_punish",
-                "role": "anchor_evidence",
-                "roleDetail": "anchor_evidence_tag_source",
-                "evidence": [
-                  "tactic_signal_anchor:tag.source"
-                ],
-                "confidence": "medium"
               }
             ]
           }
@@ -18634,7 +18782,7 @@
     {
       "cardId": "onr_proteus_114_on-the-fast-track",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:46d8996d76833309",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e7fc81c785d91f6b",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_114_on-the-fast-track",
         "side": "runner",
@@ -19383,7 +19531,7 @@
     {
       "cardId": "onr_proteus_124_stakeout",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c00015775ef02b3b",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:edaa668e63180ee2",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:13d56241dafd55b5",
       "hint": {
         "cardId": "onr_proteus_124_stakeout",
         "side": "runner",
@@ -19795,6 +19943,28 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "search_install_program",
+            "effects": [
+              {
+                "kind": "search",
+                "scope": "stack",
+                "timing": "action",
+                "resource": "cards",
+                "target": "program",
+                "finite": true
+              },
+              {
+                "kind": "install",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "program",
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "setup.program_install",
+              "setup.program_search",
+              "setup.search"
+            ],
             "targetProfiles": [
               {
                 "schemaVersion": "target-profile-v1",
@@ -19834,6 +20004,35 @@
             "purpose": "search_stack_install:search_install_program",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
+        ],
+        "effects": [
+          {
+            "kind": "search",
+            "scope": "stack",
+            "timing": "action",
+            "resource": "cards",
+            "target": "program",
+            "finite": true
+          },
+          {
+            "kind": "install",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "program",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "setup.program_install",
+          "setup.program_search",
+          "setup.search"
+        ],
+        "actionTacticSignals": [
+          "effect:install",
+          "effect:search",
+          "effect_scope:installed_card",
+          "effect_scope:stack",
+          "effect_timing:action"
         ],
         "costProfile": {
           "clicks": 1,
@@ -19904,7 +20103,7 @@
     {
       "cardId": "onr_proteus_130_back-door-to-rivals",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:514b9a6d82e0cf91",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ab493641a68800ed",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_130_back-door-to-rivals",
         "side": "runner",
@@ -20016,7 +20215,7 @@
     {
       "cardId": "onr_proteus_131_bargain-with-viacox",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d3b3aa3df925fa81",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4cb1979d0a6e95a1",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fc5b7b52549a297e",
       "hint": {
         "cardId": "onr_proteus_131_bargain-with-viacox",
         "side": "runner",
@@ -20139,7 +20338,7 @@
     {
       "cardId": "onr_proteus_133_chiba-bank-account",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a93a39e3be08292f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:6adeef9a00e286e6",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_133_chiba-bank-account",
         "side": "runner",
@@ -20160,12 +20359,13 @@
             "capabilityKey": "pay_and_trash_source_gain_four_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "during_ice_encounter",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 4,
+                "economyMode": "liquid_payout",
                 "finite": true
               }
             ],
@@ -20184,12 +20384,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "runner",
             "timing": "during_ice_encounter",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 4,
+            "economyMode": "liquid_payout",
             "finite": true
           }
         ],
@@ -20204,6 +20405,7 @@
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:action_economy",
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action",
@@ -20234,7 +20436,7 @@
     {
       "cardId": "onr_proteus_134_cortical-cybermodem",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:7e4cd6ba9b749b36",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:69dec5a32d88082f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8e8dc8a03859e54c",
       "hint": {
         "cardId": "onr_proteus_134_cortical-cybermodem",
         "side": "runner",
@@ -20287,13 +20489,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -20302,14 +20506,16 @@
           "setup.deck_exclusive",
           "setup.hand_size",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hand_size_modifier",
           "effect:hardware_trait",
@@ -20761,26 +20967,30 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
           "economy.recurring_breaker_credit",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -21092,7 +21302,8 @@
         ],
         "functionSignals": [
           "access.hq_hidden_multiaccess",
-          "access.hq_multiaccess"
+          "access.hq_multiaccess",
+          "condition.during_hq_run"
         ],
         "actionTacticSignals": [
           "access.hq_multiaccess",
@@ -21134,7 +21345,7 @@
     {
       "cardId": "onr_proteus_143_liberated-savings-account",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2d0ae37b87ecf08f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:540f4cd5dcb228a9",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_143_liberated-savings-account",
         "side": "runner",
@@ -21155,12 +21366,13 @@
             "capabilityKey": "pay_and_trash_source_gain_eleven_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "during_ice_encounter",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 11,
+                "economyMode": "liquid_payout",
                 "finite": true
               }
             ],
@@ -21179,12 +21391,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "runner",
             "timing": "during_ice_encounter",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 11,
+            "economyMode": "liquid_payout",
             "finite": true
           }
         ],
@@ -21199,6 +21412,7 @@
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:action_economy",
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action",
@@ -21543,7 +21757,7 @@
     {
       "cardId": "onr_proteus_148_runner-sensei",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:73a52dd2ab0f2416",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2ad71abaf9b5852e",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_148_runner-sensei",
         "side": "runner",
@@ -21730,7 +21944,7 @@
     {
       "cardId": "onr_proteus_150_streetware-distributor",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:01ff0597dde9b81b",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d3dbbec98f3f3fb5",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d58c6f574f2929db",
       "hint": {
         "cardId": "onr_proteus_150_streetware-distributor",
         "side": "runner",
@@ -21746,6 +21960,13 @@
         "valueHints": {
           "economy": 3
         },
+        "actionPlanOwnerBindings": [
+          {
+            "capabilityKey": "runner_main_add_three_hosted_credits",
+            "owner": "runner.credit_bank",
+            "route": "build"
+          }
+        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "runner_main_add_three_hosted_credits",
@@ -21755,45 +21976,27 @@
                 "scope": "runner",
                 "timing": "action",
                 "resource": "credits",
-                "target": "economy.hosted_credit_bank",
+                "target": "economy.bank_load",
                 "amount": 3,
+                "amountKind": "fixed",
                 "economyMode": "bank_load"
               }
             ],
             "functionSignals": [
+              "economy.counter",
               "economy.hosted_credit_bank"
             ]
           }
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
             "kind": "counter_economy",
             "scope": "runner",
             "timing": "action",
             "resource": "credits",
+            "target": "economy.bank_load",
             "amount": 3,
-            "economyMode": "bank_load",
-            "target": "economy.bank_load"
-          },
-          {
-            "kind": "counter_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "target": "economy.hosted_credit_bank",
-            "amount": 3,
+            "amountKind": "fixed",
             "economyMode": "bank_load"
           },
           {
@@ -21835,7 +22038,6 @@
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action",
-          "effect_timing:persistent",
           "effect_timing:start_of_turn"
         ],
         "conditions": [
@@ -21925,13 +22127,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -21939,14 +22143,16 @@
           "setup.deck_exclusive",
           "setup.hand_size",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hand_size_modifier",
           "effect:hardware_trait",
@@ -21994,7 +22200,7 @@
     {
       "cardId": "onr_proteus_152_swiss-bank-account",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:8c17ee2deda44cd9",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fdf589ab57e0c147",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_152_swiss-bank-account",
         "side": "runner",
@@ -22015,12 +22221,13 @@
             "capabilityKey": "pay_three_trash_source_gain_six",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "during_ice_encounter",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 6,
+                "economyMode": "liquid_payout",
                 "finite": true
               }
             ],
@@ -22033,12 +22240,13 @@
             "capabilityKey": "trash_source_gain_two_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "during_ice_encounter",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 2,
+                "economyMode": "liquid_payout",
                 "finite": true
               }
             ],
@@ -22064,21 +22272,23 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "runner",
             "timing": "during_ice_encounter",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 2,
+            "economyMode": "liquid_payout",
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "runner",
             "timing": "during_ice_encounter",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 6,
+            "economyMode": "liquid_payout",
             "finite": true
           }
         ],
@@ -22093,6 +22303,7 @@
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:action_economy",
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action",
@@ -22438,6 +22649,7 @@
           "break_sentry_subroutine",
           "install_program",
           "pump_icebreaker_strength",
+          "run_start_random_strength_bonus",
           "subtype_icebreaker",
           "subtype_random"
         ]
@@ -22960,21 +23172,47 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.source",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "hq_info",
+            "scope": "hq",
+            "timing": "start_of_turn",
+            "resource": "cards",
+            "target": "random_hq_reveal_per_counter_group",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "info.hq_reveal",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "access.payoff",
+          "effect:delayed_penalty",
+          "effect:hq_info",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:action",
+          "effect_timing:start_of_turn",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -23038,25 +23276,38 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.source",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -23120,21 +23371,34 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.corp_purgeable_runner_virus_counter",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:rnd",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -23192,25 +23456,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 3,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -23243,7 +23511,7 @@
     {
       "cardId": "onr_v1_012_clown",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:947ae37bfddca2cf",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2ebad85c42c6fea0",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_v1_012_clown",
         "side": "runner",
@@ -23251,8 +23519,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": [
           "ice_modifier",
-          "economy_asset",
-          "remote_support"
+          "program"
         ],
         "planRoles": [
           "build_rig",
@@ -23261,27 +23528,22 @@
         "valueHints": {},
         "effects": [
           {
-            "kind": "remote_protection",
+            "kind": "global_modifier",
             "scope": "ice",
             "timing": "persistent",
+            "resource": "strength",
+            "target": "ice.strength_modifier",
             "amount": 1,
-            "resource": "strength"
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "ice.strength_modifier"
         ],
-        "tacticSignals": [
-          "corp.remote_protection",
-          "ice.corp_strength_support",
-          "tax.ice"
-        ],
         "actionTacticSignals": [
-          "corp.remote_protection",
-          "effect:remote_protection",
+          "effect:global_modifier",
           "effect_scope:ice",
-          "effect_timing:persistent",
-          "remote_role:ice_modifier"
+          "effect_timing:persistent"
         ],
         "conditions": [
           {
@@ -23301,11 +23563,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "ice_modifier",
-          "threatLevel": "medium",
-          "serverScope": "server"
-        },
         "requiredMechanics": [
           "ice_strength",
           "install_program",
@@ -23349,21 +23606,34 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.source",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -23659,21 +23929,47 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.source",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "topdeck_info",
+            "scope": "rnd",
+            "timing": "start_of_turn",
+            "resource": "cards",
+            "target": "top_cards",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "info.rnd_top",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "access.payoff",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect:topdeck_info",
+          "effect_scope:corp",
+          "effect_scope:rnd",
+          "effect_timing:action",
+          "effect_timing:start_of_turn",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -24271,25 +24567,38 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "server",
+            "scope": "remote",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.successful_run_server",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "tacticSignals": [
           "corp.remote_protection"
         ],
         "actionTacticSignals": [
           "corp.remote_protection",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:server",
+          "effect_scope:corp",
+          "effect_scope:remote",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -24551,21 +24860,34 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "hq",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.source",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:hq",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -24880,21 +25202,34 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "server",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.source",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:server",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -24951,25 +25286,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -25547,6 +25886,39 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_during_run_look_top_stack_show_to_corp_then_install_matching",
+            "effects": [
+              {
+                "kind": "topdeck_info",
+                "scope": "stack",
+                "timing": "during_run",
+                "resource": "cards",
+                "target": "look_top_stack",
+                "amount": 5,
+                "finite": true
+              },
+              {
+                "kind": "search",
+                "scope": "stack",
+                "timing": "during_run",
+                "resource": "cards",
+                "target": "top_stack_matching_card",
+                "amount": 5,
+                "finite": true
+              },
+              {
+                "kind": "install",
+                "scope": "installed_card",
+                "timing": "during_run",
+                "target": "program",
+                "amount": 1,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "info.stack_top",
+              "setup.program_install",
+              "setup.search"
+            ],
             "targetProfiles": [
               {
                 "zone": "stack_top",
@@ -25566,6 +25938,47 @@
             "showToOpponent": true,
             "shuffleAfter": true
           }
+        ],
+        "effects": [
+          {
+            "kind": "topdeck_info",
+            "scope": "stack",
+            "timing": "during_run",
+            "resource": "cards",
+            "target": "look_top_stack",
+            "amount": 5,
+            "finite": true
+          },
+          {
+            "kind": "search",
+            "scope": "stack",
+            "timing": "during_run",
+            "resource": "cards",
+            "target": "top_stack_matching_card",
+            "amount": 5,
+            "finite": true
+          },
+          {
+            "kind": "install",
+            "scope": "installed_card",
+            "timing": "during_run",
+            "target": "program",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "info.stack_top",
+          "setup.program_install",
+          "setup.search"
+        ],
+        "actionTacticSignals": [
+          "effect:install",
+          "effect:search",
+          "effect:topdeck_info",
+          "effect_scope:installed_card",
+          "effect_scope:stack",
+          "effect_timing:during_run"
         ],
         "costProfile": {
           "clicks": 1,
@@ -25676,12 +26089,13 @@
             "capabilityKey": "abilities_activated_runner_main_gain_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "action",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 2,
+                "economyMode": "liquid_payout",
                 "finite": true
               }
             ],
@@ -25700,12 +26114,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "runner",
             "timing": "action",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 2,
+            "economyMode": "liquid_payout",
             "finite": true
           }
         ],
@@ -25720,6 +26135,7 @@
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:action_economy",
           "effect:economy",
           "effect_scope:runner",
           "effect_timing:action"
@@ -25818,21 +26234,34 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "server",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.chosen_fully_broken_ice",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "actionTacticSignals": [
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:server",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -25980,25 +26409,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -26069,19 +26502,32 @@
             "target": "virus.successful_run_server",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "tacticSignals": [
           "corp.remote_protection"
         ],
         "actionTacticSignals": [
           "corp.remote_protection",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
+          "effect_scope:corp",
           "effect_scope:server",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -26666,25 +27112,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -26842,10 +27292,28 @@
                 "timing": "during_run",
                 "target": "source.trash",
                 "finite": true
+              },
+              {
+                "kind": "search",
+                "scope": "stack",
+                "timing": "during_run",
+                "resource": "cards",
+                "target": "program",
+                "finite": true
+              },
+              {
+                "kind": "install",
+                "scope": "installed_card",
+                "timing": "during_run",
+                "target": "program",
+                "finite": true
               }
             ],
             "functionSignals": [
-              "risk.self_trash"
+              "risk.self_trash",
+              "setup.program_install",
+              "setup.program_search",
+              "setup.search"
             ],
             "targetProfiles": [
               {
@@ -26892,14 +27360,36 @@
             "timing": "during_run",
             "target": "source.trash",
             "finite": true
+          },
+          {
+            "kind": "search",
+            "scope": "stack",
+            "timing": "during_run",
+            "resource": "cards",
+            "target": "program",
+            "finite": true
+          },
+          {
+            "kind": "install",
+            "scope": "installed_card",
+            "timing": "during_run",
+            "target": "program",
+            "finite": true
           }
         ],
         "functionSignals": [
-          "risk.self_trash"
+          "risk.self_trash",
+          "setup.program_install",
+          "setup.program_search",
+          "setup.search"
         ],
         "actionTacticSignals": [
+          "effect:install",
           "effect:program_trash",
+          "effect:search",
+          "effect_scope:installed_card",
           "effect_scope:installed_program",
+          "effect_scope:stack",
           "effect_timing:during_run"
         ],
         "costProfile": {
@@ -27099,9 +27589,17 @@
                 "timing": "action",
                 "target": "make_run",
                 "finite": true
+              },
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run",
+                "target": "hq_via_archives",
+                "finite": true
               }
             ],
             "functionSignals": [
+              "access.hq_via_archives",
               "run.archives",
               "run.make_run"
             ]
@@ -27114,16 +27612,27 @@
             "timing": "action",
             "target": "make_run",
             "finite": true
+          },
+          {
+            "kind": "access_replacement",
+            "scope": "hq",
+            "timing": "successful_run",
+            "target": "hq_via_archives",
+            "finite": true
           }
         ],
         "functionSignals": [
           "run.make_run",
-          "run.archives"
+          "run.archives",
+          "access.hq_via_archives"
         ],
         "actionTacticSignals": [
+          "effect:access_replacement",
           "effect:future_run_effect",
           "effect_scope:archives",
-          "effect_timing:action"
+          "effect_scope:hq",
+          "effect_timing:action",
+          "effect_timing:successful_run"
         ],
         "costProfile": {
           "clicks": 1,
@@ -27267,25 +27776,38 @@
         "effects": [
           {
             "kind": "persistent_counter_effect",
-            "scope": "runner",
+            "scope": "rnd",
             "timing": "successful_run",
             "resource": "counters",
             "target": "virus.source",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "actions",
+            "target": "virus_purge",
+            "amount": 3,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "virus.counter_gain_on_successful_run",
-          "virus.corp_purgeable_counter"
+          "virus.corp_purgeable_counter",
+          "virus.purge_tax"
         ],
         "tacticSignals": [
           "draw.card"
         ],
         "actionTacticSignals": [
           "draw.card",
+          "effect:delayed_penalty",
           "effect:persistent_counter_effect",
-          "effect_scope:runner",
+          "effect_scope:corp",
+          "effect_scope:rnd",
+          "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
@@ -27668,25 +28190,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -27987,25 +28513,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -29720,9 +30250,18 @@
                 "timing": "action",
                 "target": "make_run",
                 "finite": true
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "rnd",
+                "timing": "successful_run",
+                "resource": "trash_credits",
+                "target": "access.free_trash",
+                "finite": true
               }
             ],
             "functionSignals": [
+              "economy.trash_credit",
               "run.make_run",
               "run.rnd"
             ]
@@ -29735,16 +30274,27 @@
             "timing": "action",
             "target": "make_run",
             "finite": true
+          },
+          {
+            "kind": "trash_credit",
+            "scope": "rnd",
+            "timing": "successful_run",
+            "resource": "trash_credits",
+            "target": "access.free_trash",
+            "finite": true
           }
         ],
         "functionSignals": [
           "run.make_run",
-          "run.rnd"
+          "run.rnd",
+          "economy.trash_credit"
         ],
         "actionTacticSignals": [
           "effect:future_run_effect",
+          "effect:trash_credit",
           "effect_scope:rnd",
-          "effect_timing:action"
+          "effect_timing:action",
+          "effect_timing:successful_run"
         ],
         "costProfile": {
           "clicks": 1,
@@ -30485,9 +31035,17 @@
                 "timing": "action",
                 "target": "make_run",
                 "finite": true
+              },
+              {
+                "kind": "access_replacement",
+                "scope": "rnd",
+                "timing": "successful_run",
+                "target": "rd_via_hq",
+                "finite": true
               }
             ],
             "functionSignals": [
+              "access.rd_via_hq",
               "run.hq",
               "run.make_run"
             ]
@@ -30500,16 +31058,27 @@
             "timing": "action",
             "target": "make_run",
             "finite": true
+          },
+          {
+            "kind": "access_replacement",
+            "scope": "rnd",
+            "timing": "successful_run",
+            "target": "rd_via_hq",
+            "finite": true
           }
         ],
         "functionSignals": [
           "run.make_run",
-          "run.hq"
+          "run.hq",
+          "access.rd_via_hq"
         ],
         "actionTacticSignals": [
+          "effect:access_replacement",
           "effect:future_run_effect",
           "effect_scope:hq",
-          "effect_timing:action"
+          "effect_scope:rnd",
+          "effect_timing:action",
+          "effect_timing:successful_run"
         ],
         "costProfile": {
           "clicks": 1,
@@ -30568,9 +31137,18 @@
                 "timing": "action",
                 "target": "make_run",
                 "finite": true
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "hq",
+                "timing": "successful_run",
+                "resource": "trash_credits",
+                "target": "access.free_trash",
+                "finite": true
               }
             ],
             "functionSignals": [
+              "economy.trash_credit",
               "run.hq",
               "run.make_run"
             ]
@@ -30583,16 +31161,27 @@
             "timing": "action",
             "target": "make_run",
             "finite": true
+          },
+          {
+            "kind": "trash_credit",
+            "scope": "hq",
+            "timing": "successful_run",
+            "resource": "trash_credits",
+            "target": "access.free_trash",
+            "finite": true
           }
         ],
         "functionSignals": [
           "run.make_run",
-          "run.hq"
+          "run.hq",
+          "economy.trash_credit"
         ],
         "actionTacticSignals": [
           "effect:future_run_effect",
+          "effect:trash_credit",
           "effect_scope:hq",
-          "effect_timing:action"
+          "effect_timing:action",
+          "effect_timing:successful_run"
         ],
         "costProfile": {
           "clicks": 1,
@@ -30911,6 +31500,34 @@
         "valueHints": {},
         "strategyAnchors": [
           "runner.run_event_tempo"
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "scope": "server",
+            "timing": "action",
+            "target": "make_run",
+            "finite": true
+          },
+          {
+            "kind": "future_encounter_effect",
+            "scope": "ice",
+            "timing": "during_run",
+            "target": "bypass_chosen_ice",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "run.make_run",
+          "run.bypass_chosen_ice"
+        ],
+        "actionTacticSignals": [
+          "effect:future_encounter_effect",
+          "effect:future_run_effect",
+          "effect_scope:ice",
+          "effect_scope:server",
+          "effect_timing:action",
+          "effect_timing:during_run"
         ],
         "costProfile": {
           "clicks": 1,
@@ -31534,13 +32151,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 3,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -31548,14 +32167,16 @@
           "economy.recurring_breaker_credit",
           "setup.deck_exclusive",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -31635,28 +32256,32 @@
             "repeatable": false
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "defense.brain_damage_prevention",
           "economy.recurring",
           "defense.damage_prevention",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
           "effect:damage_prevention",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -31804,13 +32429,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -31818,14 +32445,16 @@
           "economy.recurring_breaker_credit",
           "setup.deck_exclusive",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -31978,25 +32607,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -32120,25 +32753,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -32507,7 +33144,8 @@
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": [
-          "hardware"
+          "hardware",
+          "trash_prevention"
         ],
         "planRoles": [],
         "valueHints": {},
@@ -32531,6 +33169,29 @@
             "timing": "replacement_window",
             "targetType": "program",
             "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
+        "effects": [
+          {
+            "kind": "program_trash_prevention",
+            "scope": "runner",
+            "timing": "prevention_window",
+            "resource": "cards",
+            "target": "installed_program",
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "defense.program_trash_prevention"
+        ],
+        "actionTacticSignals": [
+          "effect:program_trash_prevention",
+          "effect_scope:runner",
+          "effect_timing:prevention_window"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_prevention_window"
           }
         ],
         "costProfile": {
@@ -32819,13 +33480,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 3,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -32834,14 +33497,16 @@
           "economy.recurring_link_credit",
           "setup.deck_exclusive",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -32928,13 +33593,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -32942,14 +33609,16 @@
           "economy.recurring_breaker_credit",
           "setup.deck_exclusive",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -33034,13 +33703,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 3,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -33049,14 +33720,16 @@
           "economy.recurring_link_credit",
           "setup.deck_exclusive",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -33231,13 +33904,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -33247,15 +33922,17 @@
           "setup.deck_exclusive",
           "setup.memory",
           "defense.damage_prevention",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
           "effect:damage_prevention",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -33347,27 +34024,31 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 3,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
           "setup.deck_exclusive",
           "setup.memory",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -33588,13 +34269,15 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 5,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -33605,15 +34288,17 @@
           "setup.deck_exclusive",
           "setup.memory",
           "defense.damage_prevention",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
           "effect:damage_prevention",
+          "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect:recurring_economy",
@@ -33861,25 +34546,29 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 2,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.recurring",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -34569,12 +35258,14 @@
                 "scope": "runner",
                 "timing": "action",
                 "resource": "credits",
-                "target": "economy.hosted_credit_bank",
+                "target": "economy.bank_load",
                 "amount": 3,
+                "amountKind": "fixed",
                 "economyMode": "bank_load"
               }
             ],
             "functionSignals": [
+              "economy.counter",
               "economy.hosted_credit_bank"
             ]
           },
@@ -34582,13 +35273,14 @@
             "capabilityKey": "withdraw_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "action",
                 "resource": "credits",
-                "target": "economy.hosted_credit_cashout",
+                "target": "economy.bank_cashout_all",
                 "amountKind": "all_available",
-                "economyMode": "bank_cashout"
+                "economyMode": "bank_cashout",
+                "finite": true
               }
             ],
             "functionSignals": [
@@ -34603,18 +35295,6 @@
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
             "kind": "global_modifier",
             "scope": "runner",
             "timing": "persistent",
@@ -34625,36 +35305,20 @@
             "scope": "runner",
             "timing": "action",
             "resource": "credits",
+            "target": "economy.bank_load",
             "amount": 3,
-            "economyMode": "bank_load",
-            "target": "economy.bank_load"
+            "amountKind": "fixed",
+            "economyMode": "bank_load"
           },
           {
             "kind": "action_economy",
             "scope": "runner",
             "timing": "action",
             "resource": "credits",
+            "target": "economy.bank_cashout_all",
             "amountKind": "all_available",
             "economyMode": "bank_cashout",
-            "target": "economy.bank_cashout_all"
-          },
-          {
-            "kind": "counter_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "target": "economy.hosted_credit_bank",
-            "amount": 3,
-            "economyMode": "bank_load"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "target": "economy.hosted_credit_cashout",
-            "amountKind": "all_available",
-            "economyMode": "bank_cashout"
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -34674,7 +35338,6 @@
           "economy.card",
           "effect:action_economy",
           "effect:counter_economy",
-          "effect:economy",
           "effect:global_modifier",
           "effect_scope:runner",
           "effect_timing:action",
@@ -35315,27 +35978,31 @@
             "repeatable": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
           "defense.trace_defense",
           "economy.recurring",
           "economy.recurring_link_credit",
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
           "economy.card"
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
           "effect_timing:install",
@@ -36126,11 +36793,28 @@
         "lineSupport": [
           "runner.remote_contest"
         ],
+        "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "corp",
+            "timing": "persistent",
+            "resource": "credits",
+            "target": "ice.install_cost_increase",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "tax.corp_ice_install"
+        ],
         "tacticSignals": [
           "corp.remote_protection"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection"
+          "corp.remote_protection",
+          "effect:run_tax",
+          "effect_scope:corp",
+          "effect_timing:persistent"
         ],
         "conditions": [
           {
@@ -36176,13 +36860,15 @@
         },
         "effects": [
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 12,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           },
           {
             "kind": "counter_economy",
@@ -36205,7 +36891,9 @@
           }
         ],
         "functionSignals": [
+          "economy.finite_pool",
           "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank",
           "economy.installment_credit",
           "economy.turn_start_credit"
         ],
@@ -36216,6 +36904,7 @@
           "economy.card",
           "effect:counter_economy",
           "effect:economy",
+          "effect:finite_economy_pool",
           "effect_scope:runner",
           "effect_timing:install",
           "effect_timing:start_of_turn"
@@ -36569,13 +37258,15 @@
             "capabilityKey": "abilities_activated_runner_main_take_hosted_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "action",
                 "resource": "credits",
                 "target": "economy.hosted_credit_cashout",
-                "amountKind": "dynamic",
-                "economyMode": "bank_cashout"
+                "amount": 2,
+                "amountKind": "fixed",
+                "economyMode": "liquid_payout",
+                "finite": true
               }
             ],
             "functionSignals": [
@@ -36590,43 +37281,26 @@
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
             "kind": "action_economy",
             "scope": "runner",
             "timing": "action",
             "resource": "credits",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout",
-            "target": "economy.bank_cashout_all"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
             "target": "economy.hosted_credit_cashout",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout"
+            "amount": 2,
+            "amountKind": "fixed",
+            "economyMode": "liquid_payout",
+            "finite": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "runner",
             "timing": "install",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 12,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -36636,6 +37310,7 @@
           "economy.generic",
           "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout",
+          "economy.finite_pool",
           "economy.hosted_credit_bank"
         ],
         "tacticSignals": [
@@ -36644,12 +37319,10 @@
         "actionTacticSignals": [
           "economy.card",
           "effect:action_economy",
-          "effect:counter_economy",
-          "effect:economy",
+          "effect:finite_economy_pool",
           "effect_scope:runner",
           "effect_timing:action",
-          "effect_timing:install",
-          "effect_timing:persistent"
+          "effect_timing:install"
         ],
         "conditions": [
           {
@@ -36712,12 +37385,13 @@
             "capabilityKey": "abilities_activated_runner_main_gain_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "runner",
                 "timing": "action",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 1,
+                "economyMode": "liquid_payout",
                 "finite": true
               },
               {
@@ -36754,12 +37428,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "runner",
             "timing": "action",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 1,
+            "economyMode": "liquid_payout",
             "finite": true
           },
           {
@@ -36788,6 +37463,7 @@
         "actionTacticSignals": [
           "draw.card",
           "economy.card",
+          "effect:action_economy",
           "effect:draw",
           "effect:economy",
           "effect_scope:runner",
@@ -37779,10 +38455,20 @@
             "timing": "persistent",
             "amount": 2,
             "resource": "strength"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "ice",
+            "timing": "persistent",
+            "resource": "strength",
+            "target": "ice.corp_strength_support",
+            "amount": 2,
+            "repeatable": true
           }
         ],
         "functionSignals": [
-          "ice.strength_modifier"
+          "ice.strength_modifier",
+          "ice.corp_strength_support"
         ],
         "tacticSignals": [
           "corp.remote_protection",
@@ -38006,13 +38692,15 @@
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "credits",
                 "target": "economy.hosted_credit_cashout",
-                "amountKind": "dynamic",
-                "economyMode": "bank_cashout"
+                "amount": 3,
+                "amountKind": "fixed",
+                "economyMode": "liquid_payout",
+                "finite": true
               },
               {
                 "kind": "scored_agenda_action",
@@ -38035,34 +38723,15 @@
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
             "kind": "action_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout",
-            "target": "economy.bank_cashout_all"
-          },
-          {
-            "kind": "economy",
             "scope": "corp",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "credits",
             "target": "economy.hosted_credit_cashout",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout"
+            "amount": 3,
+            "amountKind": "fixed",
+            "economyMode": "liquid_payout",
+            "finite": true
           },
           {
             "kind": "scored_agenda_action",
@@ -38072,13 +38741,15 @@
             "finite": false
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "when_scored",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 15,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -38089,6 +38760,7 @@
           "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout",
           "score.scored_agenda_action",
+          "economy.finite_pool",
           "economy.hosted_credit_bank"
         ],
         "tacticSignals": [
@@ -38098,14 +38770,10 @@
           "corp.score_progress",
           "economy.card",
           "effect:action_economy",
-          "effect:counter_economy",
-          "effect:economy",
+          "effect:finite_economy_pool",
           "effect:scored_agenda_action",
           "effect_scope:corp",
-          "effect_scope:runner",
           "effect_scope:score_area",
-          "effect_timing:action",
-          "effect_timing:persistent",
           "effect_timing:scored_activated",
           "effect_timing:when_scored"
         ],
@@ -38233,16 +38901,20 @@
         "valueHints": {},
         "effects": [
           {
-            "kind": "finite_economy_pool",
+            "kind": "action_economy",
             "scope": "corp",
-            "timing": "when_scored",
+            "timing": "scored_activated",
             "resource": "credits",
             "target": "score.install_or_rez_credit",
             "amount": 2,
-            "finite": true
+            "amountKind": "fixed",
+            "economyMode": "liquid_payout",
+            "repeatable": true,
+            "finite": false
           }
         ],
         "functionSignals": [
+          "economy.action",
           "economy.corp_install_rez_budget"
         ],
         "tacticSignals": [
@@ -38250,9 +38922,9 @@
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:finite_economy_pool",
+          "effect:action_economy",
           "effect_scope:corp",
-          "effect_timing:when_scored"
+          "effect_timing:scored_activated"
         ],
         "conditions": [
           {
@@ -38514,13 +39186,15 @@
         },
         "effects": [
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "when_scored",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 12,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           },
           {
             "kind": "economy",
@@ -38533,7 +39207,9 @@
           }
         ],
         "functionSignals": [
+          "economy.finite_pool",
           "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout"
         ],
         "tacticSignals": [
@@ -38541,8 +39217,8 @@
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
           "effect:economy",
+          "effect:finite_economy_pool",
           "effect_scope:corp",
           "effect_timing:start_of_turn",
           "effect_timing:when_scored"
@@ -38620,7 +39296,7 @@
               {
                 "kind": "draw",
                 "scope": "corp",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "cards",
                 "target": "setup.draw",
                 "amount": 2,
@@ -38652,7 +39328,7 @@
           {
             "kind": "draw",
             "scope": "corp",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "cards",
             "target": "setup.draw",
             "amount": 2,
@@ -38780,10 +39456,20 @@
             "timing": "persistent",
             "amount": 1,
             "resource": "strength"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "ice",
+            "timing": "persistent",
+            "resource": "strength",
+            "target": "ice.corp_strength_support",
+            "amount": 1,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "ice.strength_modifier",
+          "ice.corp_strength_support",
           "economy.burst_credit",
           "info.expose_installed_card"
         ],
@@ -39252,12 +39938,13 @@
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 3,
+                "economyMode": "liquid_payout",
                 "finite": true
               },
               {
@@ -39286,12 +39973,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "corp",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 3,
+            "economyMode": "liquid_payout",
             "finite": true
           },
           {
@@ -39315,6 +40003,7 @@
         "actionTacticSignals": [
           "corp.score_progress",
           "economy.card",
+          "effect:action_economy",
           "effect:economy",
           "effect:scored_agenda_action",
           "effect_scope:corp",
@@ -39415,14 +40104,14 @@
               {
                 "kind": "trace",
                 "scope": "trace",
-                "timing": "action",
+                "timing": "scored_activated",
                 "target": "trace.source",
                 "finite": true
               },
               {
                 "kind": "tag_source",
                 "scope": "runner",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "tags",
                 "target": "trace.trace_tag",
                 "amount": 1,
@@ -39475,14 +40164,14 @@
           {
             "kind": "trace",
             "scope": "trace",
-            "timing": "action",
+            "timing": "scored_activated",
             "target": "trace.source",
             "finite": true
           },
           {
             "kind": "tag_source",
             "scope": "runner",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "tags",
             "target": "trace.trace_tag",
             "amount": 1,
@@ -39509,7 +40198,6 @@
           "effect_scope:runner",
           "effect_scope:score_area",
           "effect_scope:trace",
-          "effect_timing:action",
           "effect_timing:scored_activated"
         ],
         "conditions": [
@@ -39623,9 +40311,18 @@
               {
                 "kind": "damage",
                 "scope": "runner",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "meat_damage",
                 "target": "damage.meat",
+                "amount": 1,
+                "finite": true
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "tags",
+                "target": "tagged_runner_damage",
                 "amount": 1,
                 "finite": true
               },
@@ -39639,7 +40336,8 @@
             ],
             "functionSignals": [
               "damage.payoff",
-              "score.scored_agenda_action"
+              "score.scored_agenda_action",
+              "tag.payoff"
             ],
             "conditions": [
               {
@@ -39663,9 +40361,18 @@
           {
             "kind": "damage",
             "scope": "runner",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "meat_damage",
             "target": "damage.meat",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "scored_activated",
+            "resource": "tags",
+            "target": "tagged_runner_damage",
             "amount": 1,
             "finite": true
           },
@@ -39679,6 +40386,7 @@
         ],
         "functionSignals": [
           "damage.payoff",
+          "tag.payoff",
           "score.scored_agenda_action"
         ],
         "tacticSignals": [
@@ -39691,9 +40399,9 @@
           "damage.payoff.runner",
           "effect:damage",
           "effect:scored_agenda_action",
+          "effect:tag_punish_payoff",
           "effect_scope:runner",
           "effect_scope:score_area",
-          "effect_timing:action",
           "effect_timing:scored_activated",
           "punish.payoff",
           "tag.payoff"
@@ -39764,13 +40472,15 @@
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "credits",
                 "target": "economy.hosted_credit_cashout",
-                "amountKind": "dynamic",
-                "economyMode": "bank_cashout"
+                "amount": 3,
+                "amountKind": "fixed",
+                "economyMode": "liquid_payout",
+                "finite": true
               },
               {
                 "kind": "scored_agenda_action",
@@ -39793,34 +40503,15 @@
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
             "kind": "action_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout",
-            "target": "economy.bank_cashout_all"
-          },
-          {
-            "kind": "economy",
             "scope": "corp",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "credits",
             "target": "economy.hosted_credit_cashout",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout"
+            "amount": 3,
+            "amountKind": "fixed",
+            "economyMode": "liquid_payout",
+            "finite": true
           },
           {
             "kind": "scored_agenda_action",
@@ -39830,13 +40521,15 @@
             "finite": false
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "when_scored",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 12,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -39847,6 +40540,7 @@
           "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout",
           "score.scored_agenda_action",
+          "economy.finite_pool",
           "economy.hosted_credit_bank"
         ],
         "tacticSignals": [
@@ -39856,14 +40550,10 @@
           "corp.score_progress",
           "economy.card",
           "effect:action_economy",
-          "effect:counter_economy",
-          "effect:economy",
+          "effect:finite_economy_pool",
           "effect:scored_agenda_action",
           "effect_scope:corp",
-          "effect_scope:runner",
           "effect_scope:score_area",
-          "effect_timing:action",
-          "effect_timing:persistent",
           "effect_timing:scored_activated",
           "effect_timing:when_scored"
         ],
@@ -39930,12 +40620,13 @@
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 3,
+                "economyMode": "liquid_payout",
                 "finite": true
               },
               {
@@ -39962,12 +40653,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "corp",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 3,
+            "economyMode": "liquid_payout",
             "finite": true
           },
           {
@@ -39991,6 +40683,7 @@
         "actionTacticSignals": [
           "corp.score_progress",
           "economy.card",
+          "effect:action_economy",
           "effect:economy",
           "effect:scored_agenda_action",
           "effect_scope:corp",
@@ -40249,14 +40942,14 @@
               {
                 "kind": "trace",
                 "scope": "trace",
-                "timing": "action",
+                "timing": "scored_activated",
                 "target": "trace.source",
                 "finite": true
               },
               {
                 "kind": "tag_source",
                 "scope": "runner",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "tags",
                 "target": "trace.trace_tag",
                 "amount": 1,
@@ -40309,14 +41002,14 @@
           {
             "kind": "trace",
             "scope": "trace",
-            "timing": "action",
+            "timing": "scored_activated",
             "target": "trace.source",
             "finite": true
           },
           {
             "kind": "tag_source",
             "scope": "runner",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "tags",
             "target": "trace.trace_tag",
             "amount": 1,
@@ -40343,7 +41036,6 @@
           "effect_scope:runner",
           "effect_scope:score_area",
           "effect_scope:trace",
-          "effect_timing:action",
           "effect_timing:scored_activated"
         ],
         "conditions": [
@@ -40429,7 +41121,10 @@
           }
         ],
         "functionSignals": [
-          "score.bonus_agenda_point"
+          "score.bonus_agenda_point",
+          "advance.overadvance_payoff",
+          "score.overadvance_bonus",
+          "score.overadvance_scaling"
         ],
         "actionTacticSignals": [
           "effect:score_acceleration",
@@ -40707,9 +41402,18 @@
               {
                 "kind": "damage",
                 "scope": "runner",
-                "timing": "action",
+                "timing": "scored_activated",
                 "resource": "meat_damage",
                 "target": "damage.meat",
+                "amount": 2,
+                "finite": true
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "tags",
+                "target": "tagged_runner_damage",
                 "amount": 2,
                 "finite": true
               },
@@ -40723,7 +41427,8 @@
             ],
             "functionSignals": [
               "damage.payoff",
-              "score.scored_agenda_action"
+              "score.scored_agenda_action",
+              "tag.payoff"
             ],
             "conditions": [
               {
@@ -40747,9 +41452,18 @@
           {
             "kind": "damage",
             "scope": "runner",
-            "timing": "action",
+            "timing": "scored_activated",
             "resource": "meat_damage",
             "target": "damage.meat",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "scored_activated",
+            "resource": "tags",
+            "target": "tagged_runner_damage",
             "amount": 2,
             "finite": true
           },
@@ -40763,6 +41477,7 @@
         ],
         "functionSignals": [
           "damage.payoff",
+          "tag.payoff",
           "score.scored_agenda_action"
         ],
         "tacticSignals": [
@@ -40775,9 +41490,9 @@
           "damage.payoff.runner",
           "effect:damage",
           "effect:scored_agenda_action",
+          "effect:tag_punish_payoff",
           "effect_scope:runner",
           "effect_scope:score_area",
-          "effect_timing:action",
           "effect_timing:scored_activated",
           "punish.payoff",
           "tag.payoff"
@@ -40945,10 +41660,20 @@
             "timing": "persistent",
             "amount": 1,
             "resource": "strength"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "ice",
+            "timing": "persistent",
+            "resource": "strength",
+            "target": "ice.corp_strength_support",
+            "amount": 1,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "ice.strength_modifier",
+          "ice.corp_strength_support",
           "economy.burst_credit",
           "info.expose_installed_card"
         ],
@@ -43504,7 +44229,8 @@
         "aiSupportStatus": "ai_supported",
         "roles": [
           "ice",
-          "sentry_ice"
+          "sentry_ice",
+          "ap_ice"
         ],
         "planRoles": [
           "protect_hq",
@@ -43533,11 +44259,36 @@
             "rationale": "ICE Semantic Review v1: Fatal Attractor bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
           }
         ],
+        "effects": [
+          {
+            "kind": "future_encounter_effect",
+            "scope": "runner",
+            "timing": "encounter",
+            "resource": "net_damage",
+            "target": "next_encounter_unless_fully_break_damage",
+            "amount": 3,
+            "finite": true
+          },
+          {
+            "kind": "damage",
+            "scope": "runner",
+            "timing": "encounter",
+            "resource": "net_damage",
+            "target": "damage.net",
+            "amount": 3,
+            "finite": true
+          }
+        ],
         "tacticSignals": [
           "damage.payoff"
         ],
         "actionTacticSignals": [
-          "damage.payoff.runner"
+          "corp.ice_protection",
+          "damage.payoff.runner",
+          "effect:damage",
+          "effect:future_encounter_effect",
+          "effect_scope:runner",
+          "effect_timing:encounter"
         ],
         "conditions": [
           {
@@ -43565,7 +44316,6 @@
         "requiredMechanics": [
           "encounter_ice",
           "install_ice",
-          "next_encounter_unless_fully_break_damage",
           "rez_ice",
           "subtype_ap",
           "subtype_black ice",
@@ -49605,13 +50355,48 @@
             "confidence": "high"
           }
         ],
+        "effects": [
+          {
+            "kind": "hardware_trash",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "credits",
+            "target": "installed_runner_hardware_non_cybernetics",
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "tags",
+            "target": "tagged_runner_hardware_trash",
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "access.corp_hardware_trash",
+          "tag.payoff"
+        ],
         "tacticSignals": [
           "punish.payoff",
           "tag.payoff"
         ],
         "actionTacticSignals": [
+          "effect:hardware_trash",
+          "effect:tag_punish_payoff",
+          "effect_scope:runner",
+          "effect_timing:action",
           "punish.payoff",
-          "tag.payoff"
+          "tag.payoff",
+          "target.runner_hardware_trash"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          },
+          {
+            "kind": "requires_installed_hardware"
+          }
         ],
         "costProfile": {
           "clicks": 1
@@ -49820,10 +50605,20 @@
                 "target": "damage.meat",
                 "amount": 2,
                 "finite": true
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "tagged_runner_damage",
+                "amount": 2,
+                "finite": true
               }
             ],
             "functionSignals": [
-              "damage.payoff"
+              "damage.payoff",
+              "tag.payoff"
             ],
             "conditions": [
               {
@@ -49852,10 +50647,20 @@
             "target": "damage.meat",
             "amount": 2,
             "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "tags",
+            "target": "tagged_runner_damage",
+            "amount": 2,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "damage.payoff"
+          "damage.payoff",
+          "tag.payoff"
         ],
         "tacticSignals": [
           "damage.payoff",
@@ -49865,6 +50670,7 @@
         "actionTacticSignals": [
           "damage.payoff.runner",
           "effect:damage",
+          "effect:tag_punish_payoff",
           "effect_scope:runner",
           "effect_timing:action",
           "punish.payoff",
@@ -49972,10 +50778,20 @@
                 "target": "damage.meat",
                 "amount": 4,
                 "finite": true
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "tagged_runner_damage",
+                "amount": 4,
+                "finite": true
               }
             ],
             "functionSignals": [
-              "damage.payoff"
+              "damage.payoff",
+              "tag.payoff"
             ],
             "conditions": [
               {
@@ -50004,10 +50820,20 @@
             "target": "damage.meat",
             "amount": 4,
             "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "tags",
+            "target": "tagged_runner_damage",
+            "amount": 4,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "damage.payoff"
+          "damage.payoff",
+          "tag.payoff"
         ],
         "tacticSignals": [
           "damage.payoff",
@@ -50017,6 +50843,7 @@
         "actionTacticSignals": [
           "damage.payoff.runner",
           "effect:damage",
+          "effect:tag_punish_payoff",
           "effect_scope:runner",
           "effect_timing:action",
           "punish.payoff",
@@ -50466,10 +51293,20 @@
                 "target": "damage.meat",
                 "amount": 5,
                 "finite": true
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "tagged_runner_damage",
+                "amount": 5,
+                "finite": true
               }
             ],
             "functionSignals": [
-              "damage.payoff"
+              "damage.payoff",
+              "tag.payoff"
             ],
             "conditions": [
               {
@@ -50498,10 +51335,20 @@
             "target": "damage.meat",
             "amount": 5,
             "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "tags",
+            "target": "tagged_runner_damage",
+            "amount": 5,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "damage.payoff"
+          "damage.payoff",
+          "tag.payoff"
         ],
         "tacticSignals": [
           "damage.payoff",
@@ -50511,6 +51358,7 @@
         "actionTacticSignals": [
           "damage.payoff.runner",
           "effect:damage",
+          "effect:tag_punish_payoff",
           "effect_scope:runner",
           "effect_timing:action",
           "punish.payoff",
@@ -50646,13 +51494,15 @@
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
                 "timing": "action",
                 "resource": "credits",
                 "target": "economy.hosted_credit_cashout",
-                "amountKind": "dynamic",
-                "economyMode": "bank_cashout"
+                "amount": 2,
+                "amountKind": "fixed",
+                "economyMode": "liquid_payout",
+                "finite": true
               }
             ],
             "functionSignals": [
@@ -50667,43 +51517,26 @@
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
             "kind": "action_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout",
-            "target": "economy.bank_cashout_all"
-          },
-          {
-            "kind": "economy",
             "scope": "corp",
             "timing": "action",
             "resource": "credits",
             "target": "economy.hosted_credit_cashout",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout"
+            "amount": 2,
+            "amountKind": "fixed",
+            "economyMode": "liquid_payout",
+            "finite": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "on_rez",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 16,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -50713,6 +51546,7 @@
           "economy.generic",
           "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout",
+          "economy.finite_pool",
           "economy.hosted_credit_bank"
         ],
         "tacticSignals": [
@@ -50721,13 +51555,10 @@
         "actionTacticSignals": [
           "economy.card",
           "effect:action_economy",
-          "effect:counter_economy",
-          "effect:economy",
+          "effect:finite_economy_pool",
           "effect_scope:corp",
-          "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:on_rez",
-          "effect_timing:persistent",
           "remote_role:asset_economy"
         ],
         "conditions": [
@@ -50996,13 +51827,15 @@
         ],
         "effects": [
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "on_rez",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 12,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           },
           {
             "kind": "economy",
@@ -51015,7 +51848,9 @@
           }
         ],
         "functionSignals": [
+          "economy.finite_pool",
           "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout"
         ],
         "tacticSignals": [
@@ -51023,8 +51858,8 @@
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
           "effect:economy",
+          "effect:finite_economy_pool",
           "effect_scope:corp",
           "effect_timing:on_rez",
           "effect_timing:start_of_turn",
@@ -51429,6 +52264,9 @@
         "conditions": [
           {
             "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
           }
         ],
         "costProfile": {
@@ -51599,11 +52437,21 @@
             "timing": "persistent",
             "amount": 1,
             "resource": "strength"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "ice",
+            "timing": "persistent",
+            "resource": "strength",
+            "target": "ice.corp_strength_support",
+            "amount": 1,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "economy.rez_discount",
-          "ice.strength_modifier"
+          "ice.strength_modifier",
+          "ice.corp_strength_support"
         ],
         "tacticSignals": [
           "corp.remote_protection",
@@ -51699,12 +52547,14 @@
                 "scope": "corp",
                 "timing": "action",
                 "resource": "credits",
-                "target": "economy.hosted_credit_bank",
+                "target": "economy.bank_load",
                 "amount": 3,
+                "amountKind": "fixed",
                 "economyMode": "bank_load"
               }
             ],
             "functionSignals": [
+              "economy.counter",
               "economy.hosted_credit_bank"
             ]
           },
@@ -51712,13 +52562,14 @@
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
                 "timing": "action",
                 "resource": "credits",
-                "target": "economy.hosted_credit_cashout",
+                "target": "economy.bank_cashout_all",
                 "amountKind": "all_available",
-                "economyMode": "bank_cashout"
+                "economyMode": "bank_cashout",
+                "finite": true
               }
             ],
             "functionSignals": [
@@ -51733,52 +52584,24 @@
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
-            "kind": "counter_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "amount": 3,
-            "economyMode": "bank_load",
-            "target": "economy.bank_load"
-          },
-          {
-            "kind": "action_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "amountKind": "all_available",
-            "economyMode": "bank_cashout",
-            "target": "economy.bank_cashout_all"
-          },
-          {
             "kind": "counter_economy",
             "scope": "corp",
             "timing": "action",
             "resource": "credits",
-            "target": "economy.hosted_credit_bank",
+            "target": "economy.bank_load",
             "amount": 3,
+            "amountKind": "fixed",
             "economyMode": "bank_load"
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "corp",
             "timing": "action",
             "resource": "credits",
-            "target": "economy.hosted_credit_cashout",
+            "target": "economy.bank_cashout_all",
             "amountKind": "all_available",
-            "economyMode": "bank_cashout"
+            "economyMode": "bank_cashout",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -51797,11 +52620,8 @@
           "economy.card",
           "effect:action_economy",
           "effect:counter_economy",
-          "effect:economy",
           "effect_scope:corp",
-          "effect_scope:runner",
-          "effect_timing:action",
-          "effect_timing:persistent"
+          "effect_timing:action"
         ],
         "conditions": [
           {
@@ -52300,6 +53120,9 @@
         "conditions": [
           {
             "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
           }
         ],
         "costProfile": {
@@ -52370,9 +53193,31 @@
             "rationale": "Static ICE install discount supports ICE buildout/tax; it is not a rez discount and should not create a separate economy_rez_reserve anchor by itself."
           }
         ],
+        "effects": [
+          {
+            "kind": "install_discount",
+            "scope": "corp",
+            "timing": "persistent",
+            "resource": "credits",
+            "target": "ice.install_cost_discount",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "setup.install_discount"
+        ],
+        "actionTacticSignals": [
+          "effect:install_discount",
+          "effect_scope:corp",
+          "effect_timing:persistent"
+        ],
         "conditions": [
           {
             "kind": "requires_installed_ice"
+          },
+          {
+            "kind": "requires_rezzed_card"
           }
         ],
         "costProfile": {
@@ -52533,13 +53378,15 @@
         ],
         "effects": [
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "on_rez",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 12,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           },
           {
             "kind": "economy",
@@ -52552,7 +53399,9 @@
           }
         ],
         "functionSignals": [
+          "economy.finite_pool",
           "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout"
         ],
         "tacticSignals": [
@@ -52560,8 +53409,8 @@
         ],
         "actionTacticSignals": [
           "economy.card",
-          "effect:counter_economy",
           "effect:economy",
+          "effect:finite_economy_pool",
           "effect_scope:corp",
           "effect_timing:on_rez",
           "effect_timing:start_of_turn",
@@ -52777,6 +53626,32 @@
             "capabilityKey": "abilities_activated_corp_main_gain_credits_per_advancement_counter_on_source",
             "effects": [
               {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.corp_counter_cashout",
+                "amount": 4,
+                "finite": true
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "advancement_counters",
+                "target": "advance.corp_counter_bank",
+                "repeatable": true
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.corp_counter_cashout",
+                "amount": 4,
+                "repeatable": true
+              },
+              {
                 "kind": "resource_trash",
                 "scope": "installed_card",
                 "timing": "action",
@@ -52785,11 +53660,44 @@
               }
             ],
             "functionSignals": [
+              "advance.corp_counter_bank",
+              "economy.corp_counter_cashout",
               "risk.self_trash"
+            ],
+            "conditions": [
+              {
+                "kind": "requires_advancement_counter"
+              }
             ]
           }
         ],
         "effects": [
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.corp_counter_cashout",
+            "amount": 4,
+            "finite": true
+          },
+          {
+            "kind": "advanceable_economy",
+            "scope": "remote",
+            "timing": "action",
+            "resource": "advancement_counters",
+            "target": "advance.corp_counter_bank",
+            "repeatable": true
+          },
+          {
+            "kind": "advanceable_economy",
+            "scope": "remote",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.corp_counter_cashout",
+            "amount": 4,
+            "repeatable": true
+          },
           {
             "kind": "resource_trash",
             "scope": "installed_card",
@@ -52799,6 +53707,8 @@
           }
         ],
         "functionSignals": [
+          "advance.corp_counter_bank",
+          "economy.corp_counter_cashout",
           "risk.self_trash"
         ],
         "tacticSignals": [
@@ -52806,10 +53716,19 @@
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:advanceable_economy",
+          "effect:economy",
           "effect:resource_trash",
+          "effect_scope:corp",
           "effect_scope:installed_card",
+          "effect_scope:remote",
           "effect_timing:action",
           "remote_role:asset_economy"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          }
         ],
         "costProfile": {
           "clicks": 1,
@@ -52953,20 +53872,24 @@
         ],
         "effects": [
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "on_rez",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 1,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
-          "economy.hosted_credit_bank"
+          "economy.finite_pool",
+          "economy.hosted_credit_bank",
+          "economy.temporary_resource_bank"
         ],
         "actionTacticSignals": [
-          "effect:counter_economy",
+          "effect:finite_economy_pool",
           "effect_scope:corp",
           "effect_timing:on_rez"
         ],
@@ -53455,13 +54378,15 @@
             "capabilityKey": "abilities_activated_corp_main_take_hosted_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
                 "timing": "action",
                 "resource": "credits",
                 "target": "economy.hosted_credit_cashout",
-                "amountKind": "dynamic",
-                "economyMode": "bank_cashout"
+                "amount": 3,
+                "amountKind": "fixed",
+                "economyMode": "liquid_payout",
+                "finite": true
               }
             ],
             "functionSignals": [
@@ -53476,43 +54401,26 @@
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
             "kind": "action_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout",
-            "target": "economy.bank_cashout_all"
-          },
-          {
-            "kind": "economy",
             "scope": "corp",
             "timing": "action",
             "resource": "credits",
             "target": "economy.hosted_credit_cashout",
-            "amountKind": "dynamic",
-            "economyMode": "bank_cashout"
+            "amount": 3,
+            "amountKind": "fixed",
+            "economyMode": "liquid_payout",
+            "finite": true
           },
           {
-            "kind": "counter_economy",
+            "kind": "finite_economy_pool",
             "scope": "corp",
             "timing": "on_rez",
             "resource": "credits",
             "target": "economy.hosted_credit_bank",
             "amount": 15,
-            "economyMode": "bank_load"
+            "amountKind": "fixed",
+            "economyMode": "fixed_pool",
+            "finite": true
           }
         ],
         "functionSignals": [
@@ -53522,6 +54430,7 @@
           "economy.generic",
           "economy.temporary_resource_bank",
           "economy.hosted_credit_cashout",
+          "economy.finite_pool",
           "economy.hosted_credit_bank"
         ],
         "tacticSignals": [
@@ -53530,13 +54439,10 @@
         "actionTacticSignals": [
           "economy.card",
           "effect:action_economy",
-          "effect:counter_economy",
-          "effect:economy",
+          "effect:finite_economy_pool",
           "effect_scope:corp",
-          "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:on_rez",
-          "effect_timing:persistent",
           "remote_role:asset_economy"
         ],
         "conditions": [
@@ -54058,10 +54964,20 @@
                 "target": "damage.meat",
                 "amount": 1,
                 "finite": true
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags",
+                "target": "tagged_runner_damage",
+                "amount": 1,
+                "finite": true
               }
             ],
             "functionSignals": [
-              "damage.payoff"
+              "damage.payoff",
+              "tag.payoff"
             ],
             "conditions": [
               {
@@ -54090,10 +55006,20 @@
             "target": "damage.meat",
             "amount": 1,
             "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "tags",
+            "target": "tagged_runner_damage",
+            "amount": 1,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "damage.payoff"
+          "damage.payoff",
+          "tag.payoff"
         ],
         "tacticSignals": [
           "damage.payoff",
@@ -54103,6 +55029,7 @@
         "actionTacticSignals": [
           "damage.payoff.runner",
           "effect:damage",
+          "effect:tag_punish_payoff",
           "effect_scope:runner",
           "effect_timing:action",
           "punish.payoff",
@@ -54175,12 +55102,13 @@
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
                 "timing": "action",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 6,
+                "economyMode": "liquid_payout",
                 "finite": true
               }
             ],
@@ -54201,12 +55129,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "corp",
             "timing": "action",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 6,
+            "economyMode": "liquid_payout",
             "finite": true
           }
         ],
@@ -54221,6 +55150,7 @@
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:action_economy",
           "effect:economy",
           "effect_scope:corp",
           "effect_timing:action",
@@ -54304,45 +55234,27 @@
                 "scope": "corp",
                 "timing": "action",
                 "resource": "credits",
-                "target": "economy.hosted_credit_bank",
+                "target": "economy.bank_load",
                 "amount": 3,
+                "amountKind": "fixed",
                 "economyMode": "bank_load"
               }
             ],
             "functionSignals": [
+              "economy.counter",
               "economy.hosted_credit_bank"
             ]
           }
         ],
         "effects": [
           {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.action_credit"
-          },
-          {
-            "kind": "economy",
-            "scope": "runner",
-            "timing": "persistent",
-            "target": "economy.temporary_resource_bank"
-          },
-          {
-            "kind": "counter_economy",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "credits",
-            "amount": 3,
-            "economyMode": "bank_load",
-            "target": "economy.bank_load"
-          },
-          {
             "kind": "counter_economy",
             "scope": "corp",
             "timing": "action",
             "resource": "credits",
-            "target": "economy.hosted_credit_bank",
+            "target": "economy.bank_load",
             "amount": 3,
+            "amountKind": "fixed",
             "economyMode": "bank_load"
           },
           {
@@ -54372,9 +55284,7 @@
           "effect:counter_economy",
           "effect:economy",
           "effect_scope:corp",
-          "effect_scope:runner",
           "effect_timing:action",
-          "effect_timing:persistent",
           "effect_timing:start_of_turn",
           "remote_role:asset_economy"
         ],
@@ -54751,12 +55661,13 @@
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
             "effects": [
               {
-                "kind": "economy",
+                "kind": "action_economy",
                 "scope": "corp",
                 "timing": "action",
                 "resource": "credits",
                 "target": "economy.burst_credit",
                 "amount": 1,
+                "economyMode": "liquid_payout",
                 "finite": true
               }
             ],
@@ -54823,12 +55734,13 @@
             "finite": true
           },
           {
-            "kind": "economy",
+            "kind": "action_economy",
             "scope": "corp",
             "timing": "action",
             "resource": "credits",
             "target": "economy.burst_credit",
             "amount": 1,
+            "economyMode": "liquid_payout",
             "finite": true
           },
           {
@@ -54856,6 +55768,7 @@
         ],
         "actionTacticSignals": [
           "economy.card",
+          "effect:action_economy",
           "effect:advance",
           "effect:economy",
           "effect_scope:corp",
@@ -55164,10 +56077,20 @@
             "timing": "persistent",
             "amount": 1,
             "resource": "strength"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "ice",
+            "timing": "persistent",
+            "resource": "strength",
+            "target": "ice.corp_strength_support",
+            "amount": 1,
+            "repeatable": true
           }
         ],
         "functionSignals": [
-          "ice.strength_modifier"
+          "ice.strength_modifier",
+          "ice.corp_strength_support"
         ],
         "tacticSignals": [
           "corp.remote_protection",
@@ -55335,12 +56258,32 @@
             "rationale": "Discounts ICE installation on this fort; supports building a glacier/tax server."
           }
         ],
+        "effects": [
+          {
+            "kind": "install_discount",
+            "scope": "fort",
+            "timing": "persistent",
+            "resource": "credits",
+            "target": "ice.install_cost_discount",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "setup.install_discount"
+        ],
         "actionTacticSignals": [
+          "effect:install_discount",
+          "effect_scope:fort",
+          "effect_timing:persistent",
           "remote_role:ice_modifier"
         ],
         "conditions": [
           {
             "kind": "requires_installed_ice"
+          },
+          {
+            "kind": "requires_rezzed_card"
           }
         ],
         "costProfile": {
@@ -56080,12 +57023,26 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
+        "effects": [
+          {
+            "kind": "future_encounter_effect",
+            "scope": "run_path",
+            "timing": "successful_run",
+            "target": "ice.corp_hq_runpath_insert",
+            "finite": true
+          }
+        ],
         "functionSignals": [
           "condition.corp_installed_or_advanced_this_fort_last_turn",
+          "ice.corp_fort_defense",
           "run.corp_server_lock",
+          "tax.ice",
           "tax.remote"
         ],
         "actionTacticSignals": [
+          "effect:future_encounter_effect",
+          "effect_scope:run_path",
+          "effect_timing:successful_run",
           "remote_role:run_tax"
         ],
         "conditions": [
@@ -56307,11 +57264,21 @@
             "timing": "persistent",
             "amount": 1,
             "resource": "strength"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "ice",
+            "timing": "persistent",
+            "resource": "strength",
+            "target": "ice.corp_strength_support",
+            "amount": 1,
+            "repeatable": true
           }
         ],
         "functionSignals": [
           "economy.rez_discount",
-          "ice.strength_modifier"
+          "ice.strength_modifier",
+          "ice.corp_strength_support"
         ],
         "tacticSignals": [
           "corp.remote_protection",
@@ -56516,7 +57483,9 @@
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
+        "roles": [
+          "run_defense"
+        ],
         "planRoles": [
           "remote_upgrade_rez_support"
         ],
@@ -56561,16 +57530,32 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
+        "effects": [
+          {
+            "kind": "rez_discount",
+            "scope": "fort",
+            "timing": "during_run",
+            "resource": "credits",
+            "target": "ice.corp_rez_discount",
+            "repeatable": true
+          }
+        ],
         "functionSignals": [
           "condition.corp_installed_or_advanced_this_fort_last_turn",
           "run.corp_server_lock",
-          "tax.remote"
+          "tax.remote",
+          "economy.rez_discount",
+          "ice.corp_rez_discount",
+          "remote.scoring_protection"
         ],
         "tacticSignals": [
           "corp.remote_protection"
         ],
         "actionTacticSignals": [
           "corp.remote_protection",
+          "effect:rez_discount",
+          "effect_scope:fort",
+          "effect_timing:during_run",
           "remote_role:scoring_protection"
         ],
         "conditions": [
@@ -56809,11 +57794,40 @@
             "rationale": "Agenda steal tax is direct scoring-remote defense."
           }
         ],
+        "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "accessed_card",
+            "timing": "on_access",
+            "resource": "credits",
+            "target": "agenda_steal_cost",
+            "amount": 5,
+            "repeatable": true
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "fort",
+            "timing": "persistent",
+            "target": "remote.agenda_steal_tax",
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "remote.agenda_steal_tax",
+          "remote.scoring_protection",
+          "tax.runner_credit"
+        ],
         "tacticSignals": [
           "corp.remote_protection"
         ],
         "actionTacticSignals": [
           "corp.remote_protection",
+          "effect:remote_protection",
+          "effect:run_tax",
+          "effect_scope:accessed_card",
+          "effect_scope:fort",
+          "effect_timing:on_access",
+          "effect_timing:persistent",
           "remote_role:agenda_steal_tax"
         ],
         "conditions": [
@@ -57174,11 +58188,55 @@
             "rationale": "Additional subroutine directly protects scoring remotes."
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "corp_rez_window",
+            "targetType": "installed_ice",
+            "purpose": "add_etr_subroutine_to_fort_ice",
+            "preferences": [],
+            "avoid": [
+              "hidden_info_dependent_choice"
+            ],
+            "hiddenInfoPolicy": "legal_targets_only",
+            "serverScope": "source_fort",
+            "activeRunConstraint": "same_fort_upcoming_ice_when_active"
+          }
+        ],
+        "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "fort",
+            "timing": "during_run",
+            "resource": "credits",
+            "target": "run.corp_pay_or_end_run",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "fort",
+            "timing": "persistent",
+            "target": "remote.scoring_protection",
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "run.corp_pay_or_end_run",
+          "remote.scoring_protection",
+          "tax.runner_credit"
+        ],
         "tacticSignals": [
           "corp.remote_protection"
         ],
         "actionTacticSignals": [
           "corp.remote_protection",
+          "effect:remote_protection",
+          "effect:run_tax",
+          "effect_scope:fort",
+          "effect_timing:during_run",
+          "effect_timing:persistent",
           "remote_role:scoring_protection"
         ],
         "conditions": [
@@ -57406,12 +58464,27 @@
         "strategyAnchors": [
           "corp.ice_tax_glacier"
         ],
+        "effects": [
+          {
+            "kind": "run_tax",
+            "scope": "fort",
+            "timing": "during_run",
+            "resource": "credits",
+            "target": "run.corp_stealth_credit_lockout",
+            "repeatable": true
+          }
+        ],
         "functionSignals": [
           "condition.corp_installed_or_advanced_this_fort_last_turn",
           "run.corp_server_lock",
-          "tax.remote"
+          "tax.remote",
+          "run.corp_stealth_credit_lockout",
+          "tax.runner_credit"
         ],
         "actionTacticSignals": [
+          "effect:run_tax",
+          "effect_scope:fort",
+          "effect_timing:during_run",
           "remote_role:run_tax"
         ],
         "conditions": [

@@ -80,11 +80,6 @@ export const cardSpec = {
         kind: "strategic_exchange",
         exchange: "self_damage",
       },
-      {
-        kind: "tactic_interpretation",
-        signal: "damage.payoff",
-        use: "damage.payoff.runner",
-      },
     ],
     capabilities: [],
   },

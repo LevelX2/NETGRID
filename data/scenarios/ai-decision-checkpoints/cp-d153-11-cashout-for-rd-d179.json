@@ -12929,13 +12929,17 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.archives"
+        "actionId": "runner.end_turn"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_archives_information"],
-      "requiredAssessmentEvidence": ["target:archives"]
+      "acceptablePlanKinds": ["runner.complete_turn"],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
+      "requiredAssessmentEvidence": [
+        "productive_legal_routes_exhausted"
+      ]
     }
   }
 }

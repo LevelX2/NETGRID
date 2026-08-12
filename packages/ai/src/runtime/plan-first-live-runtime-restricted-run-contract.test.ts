@@ -6,7 +6,6 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   aiInput,
   legalAction,
@@ -249,7 +248,7 @@ describe("plan-first Engine-restricted run contract", () => {
     });
   });
 
-  it("preserves the hard EndTurn contract when the only ordinary Remote run has no current payoff", () => {
+  it("ends the turn when the only ordinary Remote run is explicitly nonproductive", () => {
     resetResidentPlanPortfolioMemory();
     const runRemote = legalAction(
       "runner.start_run.remote_1",
@@ -284,27 +283,24 @@ describe("plan-first Engine-restricted run contract", () => {
       score: -420,
     };
 
-    let failure: unknown;
-    try {
-      liveContext({
-        evaluateRunnerRunTargets: () => [noPayoffRemote],
-      }).chooseSemanticRuntimeAction(input, {});
-    } catch (error) {
-      failure = error;
-    }
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [noPayoffRemote],
+    }).chooseSemanticRuntimeAction(input, {});
 
-    expect(failure).toBeInstanceOf(PlanResolutionFailure);
-    expect(failure).toMatchObject({
-      code: "end_turn_with_usable_capacity",
-      context: {
-        side: "runner",
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: ["end_turn", "start_run"],
-        unresolvedActionIds: [runRemote.actionId],
-        owner: "rules_contract",
+    expect(decision).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.complete_turn",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.complete_turn",
       },
     });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+        "plan_assessment_evidence:productive_legal_routes_exhausted",
+      ]),
+    );
   });
 });
 

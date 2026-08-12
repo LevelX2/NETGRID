@@ -96,8 +96,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_077_weapons-depot.",
       },
     ],
     capabilities: [],

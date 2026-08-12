@@ -144,6 +144,15 @@ describe("plan-first Central information-action ownership", () => {
 
   it("keeps an underreserved private-look run blocked in its Central parent", () => {
     resetResidentPlanPortfolioMemory();
+    const protocol = visibleCard(
+      "rd-protocol",
+      "runner",
+      "hardware",
+      {
+        definitionId: "onr_v1_050_r-and-d-protocol-files",
+        title: "R&D Protocol Files",
+      },
+    );
     const protocolRun = legalAction(
       "underreserved-protocol-rd",
       "runner",
@@ -151,9 +160,9 @@ describe("plan-first Central information-action ownership", () => {
       "Run R&D with R&D Protocol Files",
       { credits: 0, clicks: 1 },
       {
-        source: "rd-protocol",
+        source: protocol.instanceId,
         payload: {
-          cardId: "rd-protocol",
+          cardId: protocol.instanceId,
           serverId: "rd",
           runActionKind: "make_run",
           successfulRunAccessReplacement: "private_look_top_rd",
@@ -169,27 +178,35 @@ describe("plan-first Central information-action ownership", () => {
       { credits: 0, clicks: 1 },
     );
     const input = aiInput("runner", [protocolRun, credit]);
-    input.playerView.own.credits = 10;
+    input.playerView.own.credits = 12;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.rig = [protocol];
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
     const target = {
       ...safeRuntimeRunTarget(protocolRun.actionId, "rd"),
       accessPayoff: "access_bonus" as const,
       knownAccessState: "known_payoff" as const,
       pathCost: 10,
-      creditsAfterRun: 0,
-      recommendation: "run_now" as const,
+      creditsAfterRun: 2,
+      recommendation: "gain_credits_first" as const,
       score: 320,
       prerunReserveQuote: {
         purpose: "information" as const,
         status: "blocked" as const,
         riskTolerance: "standard" as const,
         knownPathCost: 10,
-        creditsAfterKnownPath: 0,
+        creditsAfterKnownPath: 2,
         unknownIceCount: 1,
         unknownIcePositions: [0],
         corpRezCredits: 12,
         visibleCoverage: "typed_only" as const,
         requiredCredits: 3,
-        creditGap: 3,
+        creditGap: 1,
         requiredHandBuffer: 3,
         handBufferGap: 0,
         evidence: ["prerun_reserve_status:blocked"],
@@ -207,7 +224,7 @@ describe("plan-first Central information-action ownership", () => {
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_portfolio_blocked:plan:runner.pressure_central:central%3Ard",
+        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ard",
       ]),
     );
   });

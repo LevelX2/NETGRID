@@ -14,6 +14,7 @@ type PendingChoiceOption = PendingChoice["options"][number];
 const PROGRAM_TRASH_CHOICE_SOURCE_PREFIX =
   "card_implementation.trash_installed_program";
 const PROGRAM_TRASH_SUBROUTINE_TYPES = new Set([
+  "initiate_trace",
   "trash_installed_program",
   "trash_installed_program_unless_runner_pays",
 ]);
@@ -25,6 +26,7 @@ type ProgramTrashChoiceContext = {
   sourceDefinitionId: string;
   subroutineId: string;
   subroutineType: string;
+  continuation: "encounter" | "trace_success";
 };
 
 /**
@@ -63,6 +65,12 @@ export function selectedCorpProgramTrashChoiceOptionIds(
     boardIce.effectiveRunQuote.iceDefinitionId !== context.sourceDefinitionId ||
     subroutine?.id !== context.subroutineId ||
     subroutine.type !== context.subroutineType ||
+    (context.continuation === "encounter" &&
+      context.subroutineType === "initiate_trace") ||
+    (context.continuation === "trace_success" &&
+      (context.subroutineType !== "initiate_trace" ||
+        subroutine.traceSuccessEffect?.type !==
+          "end_run_trash_program_and_run_lock")) ||
     choice.side !== "corp" ||
     choice.kind !== "select_cards" ||
     choice.visibility !== "public" ||
@@ -139,7 +147,7 @@ function parseProgramTrashChoiceSource(
   source: string,
 ): ProgramTrashChoiceContext | undefined {
   const parts = source.split(":");
-  if (parts.length !== 7 || parts[0] !== PROGRAM_TRASH_CHOICE_SOURCE_PREFIX)
+  if (parts.length !== 8 || parts[0] !== PROGRAM_TRASH_CHOICE_SOURCE_PREFIX)
     return undefined;
   const subroutineIndex = Number(parts[3]);
   if (!Number.isSafeInteger(subroutineIndex) || subroutineIndex < 0)
@@ -149,6 +157,9 @@ function parseProgramTrashChoiceSource(
     return undefined;
   const subroutineType = parts[6]!;
   if (!PROGRAM_TRASH_SUBROUTINE_TYPES.has(subroutineType)) return undefined;
+  const continuation = parts[7];
+  if (continuation !== "encounter" && continuation !== "trace_success")
+    return undefined;
   return {
     runId: decoded[0]!,
     sourceIceId: decoded[1]!,
@@ -156,6 +167,7 @@ function parseProgramTrashChoiceSource(
     sourceDefinitionId: decoded[2]!,
     subroutineId: decoded[3]!,
     subroutineType,
+    continuation,
   };
 }
 

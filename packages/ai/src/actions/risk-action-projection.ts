@@ -241,13 +241,13 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
     ),
     server.root,
   );
-  const visibleEndRunSubroutineCount = visibleEndRunSubroutineCountForPath(
-    params.visibleIce,
-  );
-  const randomBreakCanAttemptVisibleEtrPath = visibleEndRunSubroutineCount > 0;
+  const visibleBreakworthySubroutineCount =
+    visibleRandomBreakCandidateSubroutineCountForPath(params.visibleIce);
+  const randomBreakCanAttemptVisiblePath =
+    visibleBreakworthySubroutineCount > 0;
   if (
     fullPath.assessedKnownIceCount <= 0 ||
-    (!fullPath.canReachAccess && !randomBreakCanAttemptVisibleEtrPath)
+    (!fullPath.canReachAccess && !randomBreakCanAttemptVisiblePath)
   ) {
     return undefined;
   }
@@ -271,7 +271,10 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
   const currentHandCount = input.playerView.own.gripOrHq.length;
   const handAfterActionCost =
     currentHandCount - (params.consumesKnownOwnHandCard === true ? 1 : 0);
-  const visibleSubroutinesLikely = Math.max(1, visibleEndRunSubroutineCount);
+  const visibleSubroutinesLikely = Math.max(
+    1,
+    visibleBreakworthySubroutineCount,
+  );
   const payoffOverride = randomBreakOrDamageRiskPayoffOverride(
     params.accessPayoff,
     params.scoreThreat,
@@ -309,8 +312,8 @@ export function randomBreakOrDamageRiskCanCarryRunPath(
 ): boolean {
   return Boolean(
     assessment?.pathDependsOnRandomBreakOrDamage &&
-      !assessment.blockedByHandBuffer &&
-      !assessment.breakWouldBeExcludedInEncounter,
+    !assessment.blockedByHandBuffer &&
+    !assessment.breakWouldBeExcludedInEncounter,
   );
 }
 
@@ -601,23 +604,26 @@ function actionConsumesKnownOwnHandCard(
   );
 }
 
-function visibleEndRunSubroutineCountForPath(
+function visibleRandomBreakCandidateSubroutineCountForPath(
   iceCards: readonly VisibleServerIce[],
 ): number {
   return iceCards.reduce(
-    (sum, ice) => sum + visibleEndRunSubroutineCountForIce(ice),
+    (sum, ice) => sum + visibleRandomBreakCandidateSubroutineCountForIce(ice),
     0,
   );
 }
 
-function visibleEndRunSubroutineCountForIce(ice: VisibleServerIce): number {
+function visibleRandomBreakCandidateSubroutineCountForIce(
+  ice: VisibleServerIce,
+): number {
   if (!ice.known || ice.rezzed !== true || !ice.definitionId) return 0;
   const quote = ice.effectiveRunQuote;
   if (quote && quote.iceDefinitionId === ice.definitionId) {
     return quote.subroutines.filter(
       (subroutine) =>
         subroutine.type === "end_the_run" ||
-        subroutine.type === "end_the_run_unless_runner_pays",
+        subroutine.type === "end_the_run_unless_runner_pays" ||
+        subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true,
     ).length;
   }
   return (

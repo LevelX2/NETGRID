@@ -6,7 +6,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 const FIXTURES = [
-  ["stops a funded development search with no remaining need", noNeedSearchJson],
+  ["uses the bound trash-recovery search for current setup", noNeedSearchJson],
   ["scores instead of installing unrezzable matchpoint ice", unrezzableMatchpointIceJson],
 ] as const;
 

@@ -362,6 +362,7 @@ function aiInput(params: {
 }): AiDecisionInput {
   const playerView: PlayerView = {
     stateVersion: 1,
+    turnSerial: 1,
     side: "runner",
     activeSide: "runner",
     phase: "runner_action_phase",

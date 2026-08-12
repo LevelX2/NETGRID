@@ -20602,20 +20602,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_139_r-and-d-interface"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "type": "draw_card"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["develop_onr_v1_139_r-and-d-interface"],
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
       "requiredAssessmentEvidence": [
-        "source:own_runner_hand:card_specific_purpose:access_payoff:setup"
+        "runner_engine_certified_immediate_liquidity_development"
       ]
     }
   }

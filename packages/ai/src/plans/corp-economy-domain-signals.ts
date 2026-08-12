@@ -48,16 +48,6 @@ export function corpTurnLiquidityDevelopmentNeed(
   );
   const remainingClicks = input.playerView.own.clicks;
   if (remainingClicks <= 0 || exactCandidates.length !== 1) return undefined;
-  const handSize = input.playerView.own.gripOrHq.length;
-  const maximumHandSize = input.playerView.own.maxHandSize;
-  if (
-    Number.isSafeInteger(handSize) &&
-    Number.isSafeInteger(maximumHandSize) &&
-    handSize > maximumHandSize
-  ) {
-    return undefined;
-  }
-
   const resident = corpResidentTurnLiquidityDevelopment(
     previous,
     currentTurnKey,
@@ -261,6 +251,7 @@ function corpResidentVisibleLiquiditySaturation(
     previous.instances.some(
       (instance) =>
         instance.moduleId === "corp.complete_turn" &&
+        instance.createdAtStateVersion === input.playerView.stateVersion &&
         instance.evidenceRefs.some(
           (reference) =>
             reference.code ===

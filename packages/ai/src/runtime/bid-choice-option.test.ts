@@ -183,7 +183,7 @@ describe("selectedBidChoiceOptionId", () => {
           sourceDefinitionId: "onr_v1_246_fragmentation-storm",
         },
       ),
-    ).toBe("bid_4");
+    ).toBe("bid_5");
   });
 });
 

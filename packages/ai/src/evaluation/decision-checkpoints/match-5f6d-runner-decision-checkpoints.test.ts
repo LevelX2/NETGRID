@@ -46,7 +46,7 @@ describe("match 5F6D runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("keeps the minimal bid when a trace cannot be won", () => {
+  it("keeps the minimal winning bid under the Trace-Limit model", () => {
     expectCheckpointToPass(fixture(unwinnableTraceControlJson));
   });
 
@@ -117,7 +117,7 @@ describe("match 5F6D runner decision checkpoints", () => {
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "5F6D-C04-VISIBLE-TAG-PUNISH";
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["bid_2"] },
+        choice: { mustSelectOptionIds: ["bid_3"] },
       };
     });
 

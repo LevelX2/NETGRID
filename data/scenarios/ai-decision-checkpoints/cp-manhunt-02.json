@@ -7043,15 +7043,22 @@
   "expectation": {
     "forbiddenActions": [
       {
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
-        "type": "activated_card_ability"
+        "sourceDefinitionId": "onr_v1_284_chance-observation",
+        "type": "play_operation"
       }
     ],
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_284_chance-observation",
-        "type": "play_operation"
+        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
+        "type": "activated_card_ability"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign"
+      ]
+    }
   }
 }

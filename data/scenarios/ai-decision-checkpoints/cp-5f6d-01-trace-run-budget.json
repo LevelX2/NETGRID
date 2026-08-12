@@ -156,7 +156,7 @@
   },
   "engine": {
     "stateVersion": 105,
-    "stateHash": "fnv1a:f4015f2f",
+    "stateHash": "fnv1a:9d3d7683",
     "testOnlyGameState": {
       "matchId": "match_5f6d027aecbe34e2",
       "baseline": {
@@ -2837,7 +2837,8 @@
         "sourceCardInstanceId": "corp_onr_v1_249_hunter_1",
         "sourceDefinitionId": "onr_v1_249_hunter",
         "subroutineIndex": 0,
-        "baseTraceStrength": 5,
+        "traceLimit": 5,
+        "effectiveTraceLimit": 5,
         "corpBidMax": 4,
         "status": "runner_bid",
         "successEffect": {
@@ -2845,7 +2846,7 @@
           "amount": 1
         },
         "corpBid": 0,
-        "traceStrength": 5,
+        "traceValue": 0,
         "runnerLink": 0
       },
       "pendingChoice": {
@@ -7230,7 +7231,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": ["bid_0"]
+      "mustSelectOptionIds": ["bid_1"]
     }
   }
 }

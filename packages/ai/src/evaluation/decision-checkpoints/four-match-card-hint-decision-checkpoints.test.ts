@@ -45,7 +45,6 @@ describe("four-match card-hint decision checkpoints", () => {
             actionId: selectedAction.actionId,
             actionType: "play_event",
             stateVersion: result.input.playerView.stateVersion,
-            target: { kind: "server", id: "rd" },
           },
           turnPlanning: {
             shadowComparison: {

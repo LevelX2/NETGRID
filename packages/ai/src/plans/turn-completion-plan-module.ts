@@ -61,8 +61,7 @@ export function createTurnCompletionPlanModule(side: Side): PlanModule {
             current.standardEndTurnActionIds.includes(candidate.actionId),
           )
           .map((candidate) => ({ candidate, stepValue: -10_000 })),
-        ...(context.input.side === "corp" &&
-        context.input.playerView.own.clicks > 0 &&
+      ...(context.input.playerView.own.clicks > 0 &&
         explicitlyNonproductiveActionIds.length > 0
           ? {
               earlyEndTurnJustification: {

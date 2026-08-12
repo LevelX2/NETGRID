@@ -72,23 +72,7 @@ export const cardSpec = {
         role: "run_pressure",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey(
-          "on_play_run_with_bad_publicity_aftermath",
-        ),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "medium",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

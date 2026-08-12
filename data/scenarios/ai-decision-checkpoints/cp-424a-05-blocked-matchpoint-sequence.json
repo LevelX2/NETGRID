@@ -11227,7 +11227,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.play_event.runner_onr_v1_097_livewires-contacts_3.runner_onr_v1_097_livewires-contacts_3"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_097_livewires-contacts"
       }
     ],
     "planExecution": {

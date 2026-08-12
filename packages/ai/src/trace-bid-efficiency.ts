@@ -130,7 +130,7 @@ export function selectEfficientPostBidLinkOption(
 
   const corpTotal = Math.max(0, traceValue);
   const currentRunnerTotal = Math.max(0, runnerBase);
-  if (currentRunnerTotal >= corpTotal) {
+  if (currentRunnerTotal > corpTotal) {
     return postBidTraceLinkSelection(
       passOption ?? fallbackOption,
       passOption
@@ -147,7 +147,7 @@ export function selectEfficientPostBidLinkOption(
         ? [{ option, delta }]
         : [];
     })
-    .filter((candidate) => currentRunnerTotal + candidate.delta >= corpTotal)
+    .filter((candidate) => currentRunnerTotal + candidate.delta > corpTotal)
     .sort(
       (left, right) =>
         left.delta - right.delta ||
@@ -193,7 +193,7 @@ function runnerAvoidsTrace(
   runnerBid: number,
   corpTotal: number,
 ): boolean {
-  return runnerBase + runnerBid >= corpTotal;
+  return runnerBase + runnerBid > corpTotal;
 }
 
 function currentRunnerTraceStrength(

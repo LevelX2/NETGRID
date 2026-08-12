@@ -108,7 +108,7 @@
   },
   "engine": {
     "stateVersion": 61,
-    "stateHash": "fnv1a:327268c1",
+    "stateHash": "fnv1a:f598f4b6",
     "testOnlyGameState": {
       "matchId": "match_03575bf4efae5bc7",
       "baseline": {
@@ -2592,22 +2592,23 @@
         "sourceCardInstanceId": "corp_onr_proteus_026_hunting-pack_1",
         "sourceDefinitionId": "onr_proteus_026_hunting-pack",
         "subroutineIndex": 0,
-        "baseTraceStrength": 5,
-        "corpBidMax": 10,
+        "traceLimit": 5,
+        "effectiveTraceLimit": 5,
+        "corpBidMax": 5,
         "status": "runner_bid",
         "successEffect": {
           "type": "add_tag",
           "amount": 1
         },
         "corpBid": 1,
-        "traceStrength": 6,
+        "traceValue": 1,
         "runnerLink": 0
       },
       "pendingChoice": {
         "choiceId": "run_57.corp_onr_proteus_026_hunting-pack_1.0.trace.runner.bid.61",
         "side": "runner",
         "source": "trace:run_57.corp_onr_proteus_026_hunting-pack_1.0.trace",
-        "prompt": "Runner Link-Bid wählen (Trace 6, Link 0)",
+        "prompt": "Runner Link-Bid wählen (Trace 1, Link 0)",
         "kind": "bid_amount",
         "options": [
           {
@@ -3812,8 +3813,9 @@
           "traceId": "run_36.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "sourceCardId": "corp_onr_proteus_026_hunting-pack_1",
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "runPhase": "encounter_ice",
           "effectKind": "trace",
           "targets": {
@@ -3840,10 +3842,11 @@
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
           "traceId": "run_36.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "traceStep": "corp_bid",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "corpBid": 0,
-          "traceStrength": 5,
+          "traceValue": 0,
           "runnerLink": 0,
           "traceBaseLinkChoiceOpened": false,
           "corpCreditBid": 0,
@@ -3875,9 +3878,10 @@
           "tagsAdded": 0,
           "traceId": "run_36.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "traceStep": "runner_bid",
-          "baseTraceStrength": 5,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
           "corpBid": 0,
-          "traceStrength": 5,
+          "traceValue": 0,
           "runnerLink": 0,
           "runnerBid": 5,
           "runnerStrength": 5,
@@ -4329,8 +4333,9 @@
           "traceId": "run_57.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "sourceCardId": "corp_onr_proteus_026_hunting-pack_1",
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "runPhase": "encounter_ice",
           "effectKind": "trace",
           "targets": {
@@ -4357,10 +4362,11 @@
           "sourceDefinitionId": "onr_proteus_026_hunting-pack",
           "traceId": "run_57.corp_onr_proteus_026_hunting-pack_1.0.trace",
           "traceStep": "corp_bid",
-          "baseTraceStrength": 5,
-          "corpBidMax": 10,
+          "traceLimit": 5,
+          "effectiveTraceLimit": 5,
+          "corpBidMax": 5,
           "corpBid": 1,
-          "traceStrength": 6,
+          "traceValue": 1,
           "runnerLink": 0,
           "traceBaseLinkChoiceOpened": false,
           "corpCreditBid": 1,
@@ -5644,7 +5650,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": ["bid_0"]
+      "mustSelectOptionIds": ["bid_2"]
     }
   }
 }

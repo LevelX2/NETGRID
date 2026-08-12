@@ -180,7 +180,7 @@ describe("economy card hint contracts", () => {
           amount: 3,
           amountKind: "fixed",
           economyMode: "bank_load",
-          kind: "finite_economy_pool",
+          kind: "counter_economy",
           resource: "credits",
         }),
         expect.objectContaining({

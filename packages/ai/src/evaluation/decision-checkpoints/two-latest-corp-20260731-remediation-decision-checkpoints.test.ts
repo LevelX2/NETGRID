@@ -28,7 +28,7 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     },
   );
 
-  it("converts the exact guaranteed same-turn agenda line before ordinary defense", () => {
+  it("funds exact HQ defense when the agenda cannot score this turn", () => {
     const result = runAiDecisionCheckpoint(fixture(sameTurnScoreD34Json));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });

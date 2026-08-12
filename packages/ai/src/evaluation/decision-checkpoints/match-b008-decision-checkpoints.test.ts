@@ -43,7 +43,7 @@ describe("match B008 older decision checkpoints", () => {
         acceptableActions: [
           {
             actionId:
-              "runner.play_event.runner_onr_proteus_119_promises-promises_3.runner_onr_proteus_119_promises-promises_3",
+              "runner.play_event.runner_onr_proteus_119_promises-promises_3.runner_onr_proteus_119_promises-promises_3.onr_proteus_119_promises-promises:on_play_mark_next_agenda_access_point_gain",
           },
         ],
         planExecution: {

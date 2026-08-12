@@ -42,7 +42,7 @@ describe("plan-first Runner run-lock parent-plan contract", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:gain_general_liquid_credits",
-        "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+        "plan_assessment_evidence:runner_engine_certified_immediate_liquidity_development",
       ]),
     );
   });

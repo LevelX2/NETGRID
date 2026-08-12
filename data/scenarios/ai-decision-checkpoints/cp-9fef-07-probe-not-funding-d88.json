@@ -7738,22 +7738,23 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.remote_1"
-      },
-      {
-        "actionId": "runner.draw_card"
+        "type": "start_run",
+        "targetServerId": "archives"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "runner.gain_credit"
+      },
+      {
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_v1_154_broker"
       }
     ],
-    "runTargets": [
-      {
-        "actionId": "runner.start_run.remote_1",
-        "requiredEvidence": ["run_commitment:probe_only"]
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_archives_information"],
+      "requiredAssessmentEvidence": ["target:archives"]
+    }
   }
 }

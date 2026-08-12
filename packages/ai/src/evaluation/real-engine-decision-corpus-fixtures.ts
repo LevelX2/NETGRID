@@ -87,17 +87,17 @@ export const REAL_ENGINE_TARGET_CHOICE_FOLLOWUP_CANDIDATE_KINDS = [
 ] as const satisfies readonly TargetChoiceFollowupCandidateKind[];
 
 const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
-  runner_real_low_credits: expectation(["start_run"], {
+  runner_real_low_credits: expectation(["start_run", "play_event"], {
     pilotEligibleScopes: ["runner_safe_access"],
     forbiddenMistakes: ["missed_safe_access"],
     notes: ["low credits should still take free unknown R&D access"],
   }),
-  runner_real_safe_hq_access: expectation(["start_run"], {
+  runner_real_safe_hq_access: expectation(["start_run", "play_event"], {
     pilotEligibleScopes: ["runner_safe_access"],
     forbiddenMistakes: ["missed_safe_access"],
     notes: ["safe central run should stay visible to shadow league"],
   }),
-  runner_real_safe_rd_access: expectation(["start_run"], {
+  runner_real_safe_rd_access: expectation(["start_run", "play_event"], {
     pilotEligibleScopes: ["runner_safe_access"],
     forbiddenMistakes: ["missed_safe_access"],
   }),

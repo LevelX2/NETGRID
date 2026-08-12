@@ -58,14 +58,12 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "action_tempo",
       },
       {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_046_corporate-guard-r-temps.",
       },
     ],
     capabilities: [],

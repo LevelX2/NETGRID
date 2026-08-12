@@ -10,31 +10,48 @@ import type {
 import {
   runnerArchivesHasQualifiedHiddenPayoff,
   runnerArchivesScoreComponents,
+  runnerArchivesSpeculativeProbeDisposition,
 } from "./runner-archives-score";
 
 describe("runnerArchivesScoreComponents", () => {
-  it("treats a lone hidden card as a concrete information plan", () => {
+  it("does not treat a lone hidden card as a concrete information plan", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
 
-    expect(components(input)).toEqual([
-      expect.objectContaining({
-        key: "runner_archives_hidden_information",
-        value: 700,
-        reason: expect.stringContaining("archives_hidden_information_window:true"),
-      }),
-    ]);
+    expect(components(input)).toEqual([]);
+    expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(false);
   });
 
-  it("keeps the same explicit information value when no other action remains", () => {
-    const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
-    input.legalActions = [startRunArchives(), endTurn()];
-
-    expect(components(input)).toEqual([
+  it("admits an ordinary probe in exactly one replay-stable bucket out of eight", () => {
+    const inputs = Array.from({ length: 64 }, (_value, index) => {
+      const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
+      input.seed = `archives-probe-seed-${index}`;
+      return input;
+    });
+    const admitted = inputs.find(
+      (input) => runnerArchivesSpeculativeProbeDisposition(input).admitted,
+    );
+    const declined = inputs.find(
+      (input) => !runnerArchivesSpeculativeProbeDisposition(input).admitted,
+    );
+    expect(admitted).toBeDefined();
+    expect(declined).toBeDefined();
+    expect(runnerArchivesSpeculativeProbeDisposition(admitted!)).toMatchObject({
+      admitted: true,
+      bucket: 0,
+    });
+    expect(components(admitted!)).toEqual([
       expect.objectContaining({
         key: "runner_archives_hidden_information",
-        value: 700,
+        value: 35,
+        reason: expect.stringContaining(
+          "archives_hidden_information_qualified:seeded_one_in_eight_probe",
+        ),
       }),
     ]);
+    expect(components(declined!)).toEqual([]);
+    expect(runnerArchivesSpeculativeProbeDisposition(admitted!)).toEqual(
+      runnerArchivesSpeculativeProbeDisposition(admitted!),
+    );
   });
 
   it("values hidden Archives cards while Corp R&D is under pressure", () => {
@@ -43,23 +60,28 @@ describe("runnerArchivesScoreComponents", () => {
     expect(components(input)).toEqual([
       expect.objectContaining({
         key: "runner_archives_hidden_information",
-        value: 700,
+        value: 260,
         reason: expect.stringContaining("archives_corp_deck_pressure:true"),
       }),
     ]);
   });
 
-  it("does not require Runner match point to qualify hidden Archives information", () => {
+  it("qualifies hidden Archives information when the Runner is at matchpoint", () => {
     const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
-    input.playerView.own.agendaPoints = 5;
+    input.playerView.own.agendaPoints = 6;
 
     expect(components(input)).toEqual([
       expect.objectContaining({
         key: "runner_archives_hidden_information",
-        value: 700,
-        reason: expect.stringContaining("archives_runner_match_pressure:true"),
+        value: 420,
+        reason: expect.stringContaining("archives_runner_matchpoint:true"),
       }),
     ]);
+
+    const twoPointsAway = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
+    twoPointsAway.playerView.own.agendaPoints = 5;
+    expect(runnerArchivesHasQualifiedHiddenPayoff(twoPointsAway)).toBe(false);
+    expect(components(twoPointsAway)).toEqual([]);
   });
 
   it("values a still-unseen random HQ discard", () => {
@@ -77,22 +99,22 @@ describe("runnerArchivesScoreComponents", () => {
     expect(components(input)).toEqual([
       expect.objectContaining({
         key: "runner_archives_hidden_information",
-        value: 700,
+        value: 480,
         reason: expect.stringContaining("archives_random_discard_unseen:true"),
       }),
     ]);
   });
 
-  it("admits one hidden Archives card as a concrete information plan", () => {
-    const input = aiInput({ hiddenArchives: 1, corpDeckCount: 14 });
+  it("admits a large hidden Archives accumulation as a low-value information plan", () => {
+    const input = aiInput({ hiddenArchives: 10, corpDeckCount: 14 });
 
     expect(runnerArchivesHasQualifiedHiddenPayoff(input)).toBe(true);
     expect(components(input)).toEqual([
       expect.objectContaining({
         key: "runner_archives_hidden_information",
-        value: 700,
+        value: 120,
         reason: expect.stringContaining(
-          "archives_hidden_information_window:true",
+          "archives_hidden_information_qualified:large_hidden_accumulation",
         ),
       }),
     ]);

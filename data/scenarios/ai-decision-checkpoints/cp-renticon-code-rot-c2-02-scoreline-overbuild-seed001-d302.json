@@ -29082,7 +29082,9 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_203_hostile-takeover",
+        "targetServerId": "remote_1"
       }
     ],
     "forbiddenActions": [
@@ -29098,10 +29100,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["install_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_score_protection_funding_gap:remote_2:2"
+        "corp_funded_protected_score_install:remote_1"
       ]
     }
   }

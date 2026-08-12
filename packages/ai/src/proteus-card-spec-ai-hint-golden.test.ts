@@ -57,7 +57,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
       tagPreventionCosts:
         "credit_and_forgo_next_action_is_action_debt_credit_and_trash_source_is_not_an_action_penalty",
       capabilityStrategyEvidence:
-        "exact24_pairs_on_14_cards_after_removing_three_opponent_strategy_misclassifications",
+        "exact22_pairs_on_12_cards_after_removing_five_opponent_strategy_misclassifications",
       passiveHuntingPackPair:
         "discarded_non_action_addressable_relative_ice_trace_classification",
       disintegratorTargetProfile:
@@ -154,7 +154,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:6649132c76a709d4cce625e5d9f0d216e4a7c44e3ada7226ce33058271f8ed18",
+      "sha256:e9948a86c68058cb5faa9caa84b871539c14342333a6b1394c19563660cc08ac",
     );
   });
 
@@ -174,8 +174,20 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
 
     expect(actionCapacity).toHaveLength(16);
     expect(new Set(actionCapacity.map(({ cardId }) => cardId)).size).toBe(15);
-    expect(actionPairs).toHaveLength(24);
-    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(14);
+    expect(actionPairs).toHaveLength(22);
+    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(12);
+    for (const cardId of [
+      "onr_proteus_105_demolition-run",
+      "onr_proteus_107_drone-for-a-day",
+      "onr_proteus_113_live-news-feed",
+      "onr_proteus_121_remote-detonator",
+      "onr_proteus_129_back-door-to-netwatch",
+    ]) {
+      expect(
+        actionPairs.filter((entry) => entry.cardId === cardId),
+        cardId,
+      ).toEqual([]);
+    }
     expect(
       actionPairs.every(
         ({ pair }) =>
@@ -198,6 +210,18 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
     );
     expect(expendable?.requiredMechanics).toContain("trash_source");
     expect(expendable?.requiredMechanics).not.toContain("future_action_debt");
+
+    const guardTemps = reviewedGolden.cards.find(
+      ({ cardId }) => cardId === "onr_proteus_046_corporate-guard-r-temps",
+    )?.hint;
+    expect(guardTemps?.planRoles).toContain("action_tempo");
+    expect(guardTemps?.planRoles).not.toContain("recover_economy");
+
+    const fakedHit = reviewedGolden.cards.find(
+      ({ cardId }) => cardId === "onr_proteus_108_faked-hit",
+    )?.hint;
+    expect(fakedHit?.strategicExchangeKinds).toContain("self_damage");
+    expect(fakedHit?.actionTacticSignals).not.toContain("damage.payoff.runner");
   });
 
   it("pins the reviewed target and value reconciliations", () => {

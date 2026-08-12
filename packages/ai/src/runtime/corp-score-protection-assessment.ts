@@ -978,15 +978,21 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
   if (!card.definitionId) return false;
   const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
   if (!definition) return false;
-  return definition.mechanics.some(
-    (mechanic) =>
-      mechanic === "encounter_ice" ||
-      mechanic === "bypass_ice" ||
-      mechanic === "corp_bypass_payment" ||
-      mechanic === "run_spending_cap" ||
-      mechanic === "run_flow" ||
-      mechanic === "run_modifier" ||
-      mechanic.includes("ice_strength_modifier"),
+  const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  return (
+    hint?.functionSignals?.includes("ice.strength_modifier") === true ||
+    hint?.requiredMechanics?.includes("run_start_random_strength_bonus") ===
+      true ||
+    definition.mechanics.some(
+      (mechanic) =>
+        mechanic === "encounter_ice" ||
+        mechanic === "bypass_ice" ||
+        mechanic === "corp_bypass_payment" ||
+        mechanic === "run_spending_cap" ||
+        mechanic === "run_flow" ||
+        mechanic === "run_modifier" ||
+        mechanic.includes("ice_strength_modifier"),
+    )
   );
 }
 

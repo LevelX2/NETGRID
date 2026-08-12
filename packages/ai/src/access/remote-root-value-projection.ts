@@ -42,15 +42,16 @@ export function projectRemoteRootValue(
   const valueScore = Math.max(0, input.valueHints?.remoteRootValue ?? 0);
   const hasFiniteEconomyEffect = effects.some(
     (effect) =>
-      effect.kind === "economy" &&
+      (effect.kind === "economy" ||
+        effect.kind === "finite_economy_pool") &&
       effect.scope === "corp" &&
       effect.finite === true,
   );
   const hasRecurringEconomyEffect = effects.some(
     (effect) =>
-      effect.kind === "economy" &&
+      (effect.kind === "economy" || effect.kind === "recurring_economy") &&
       effect.scope === "corp" &&
-      effect.resource === "credit" &&
+      (effect.resource === "credit" || effect.resource === "credits") &&
       effect.finite !== true,
   );
   const roleText = roles.join(" ");

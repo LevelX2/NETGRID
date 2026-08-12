@@ -1,112 +1,118 @@
-import { getPlayerView } from "@netgrid/engine";
-import type { DeckDefinition } from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+  getPlayerView,
+} from "@netgrid/engine";
+import type {
+  CardInstanceId,
+  DeckDefinition,
+  GameState,
+  LegalAction,
+  Side,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import proteusDecksJson from "../../../../data/decks/proteus-playtest-decks-2026-05-25.json";
-import { simulateAiGame } from "../simulation";
-import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
-import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
+import { chooseRunnerAction } from "../index";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../plans/resident-plan-portfolio-memory";
+import { buildAiDecisionInput } from "../runtime/ai-decision-input";
+
+const CRASH_EVERETT = "onr_v1_157_crash-everett-inventive-fixer";
 
 describe("Crash Everett draw-plan continuation", () => {
   it("resolves the private replacement choice under the exact preceding Runner executor", () => {
-    const captures: AiSimulationDecisionCheckpointCapture[] = [];
-    const residentSnapshots: Array<
-      ReturnType<typeof residentPlanPortfolioSnapshot>
-    > = [];
-    const summary = simulateAiGame({
-      seed: "proteus-pilot-holdout-01",
-      maxActions: 24,
-      runnerDeck: deck("proteus_runner_rd_bad_publicity_2026_05_25"),
-      corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
-      runnerControllerMode: "current_candidate",
-      corpControllerMode: "current_candidate",
-      testOnlyDecisionCheckpointCapture: {
-        actionIndices: [22, 23],
-        capture: (snapshot) => {
-          captures.push(snapshot);
-          residentSnapshots.push(residentPlanPortfolioSnapshot(snapshot.input));
-        },
-      },
-    });
+    resetResidentPlanPortfolioMemory();
+    const runnerDeck = deck("proteus_runner_rd_bad_publicity_2026_05_25");
+    const corpDeck = deck("proteus_corp_region_fast_score_2026_05_25");
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "crash-everett-plan-continuation",
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    const crashId = moveRunnerCardToGrip(state, CRASH_EVERETT);
+    state = applyLegal(
+      state,
+      "runner",
+      getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === crashId,
+      ),
+    );
 
-    const draw = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 22,
+    const drawInput = withOnlyActionType(
+      decisionInput(state, runnerDeck, "draw"),
+      "draw_card",
     );
-    const choice = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 23,
-    );
-    const drawCapture = captures.find(
-      (capture) => capture.state.stateVersion === 22,
-    );
-    const choiceCapture = captures.find(
-      (capture) => capture.state.stateVersion === 23,
-    );
-    const drawExecutor = draw?.evidence.find((entry) =>
+    const drawDecision = chooseRunnerAction(drawInput);
+    const drawStateVersion = state.stateVersion;
+    state = applyDecision(state, "runner", drawDecision);
+
+    const choiceInput = decisionInput(state, runnerDeck, "choice");
+    const residentAtChoice = residentPlanPortfolioSnapshot(choiceInput);
+    const choiceDecision = chooseRunnerAction(choiceInput);
+    const drawExecutor = (drawDecision.evidence ?? []).find((entry) =>
       entry.startsWith("plan_first_executor:"),
     );
-    const choiceExecutor = choice?.evidence.find((entry) =>
+    const choiceExecutor = (choiceDecision.evidence ?? []).find((entry) =>
       entry.startsWith("plan_first_executor:"),
     );
 
     expect({
-      stateContinuation: choiceCapture?.state.pendingChoice?.continuation,
-      continuation: choiceCapture?.input.playerView.pendingChoice?.continuation,
-      residentAtChoice: residentSnapshots[1],
+      stateContinuation: state.pendingChoice?.continuation,
+      continuation: choiceInput.playerView.pendingChoice?.continuation,
+      residentAtChoice,
     }).toMatchObject({
       continuation: {
         family: "runner_hidden_draw_keep_or_top_replacement",
-        originActionId: "runner.draw_card",
+        originActionId: drawDecision.actionId,
       },
       stateContinuation: {
         family: "runner_hidden_draw_keep_or_top_replacement",
-        originActionId: "runner.draw_card",
+        originActionId: drawDecision.actionId,
       },
       residentAtChoice: {
         side: "runner",
-        stateVersion: 22,
+        stateVersion: drawStateVersion,
         selectedActionOrigin: {
-          selectedActionId: "runner.draw_card",
-          selectedAtStateVersion: 22,
+          selectedActionId: drawDecision.actionId,
+          selectedAtStateVersion: drawStateVersion,
         },
       },
     });
-    expect(summary.errors).toEqual([]);
-    expect(summary.runtimeFailures).toEqual([]);
-    expect(draw).toMatchObject({
-      selectedActionId: "runner.draw_card",
-      actionType: "draw_card",
+    expect(drawDecision).toMatchObject({
+      actionId: expect.stringContaining("runner.draw"),
       fallbackUsed: false,
     });
-    expect(choice).toMatchObject({
-      selectedActionId: "runner.resolve_choice",
-      actionType: "resolve_choice",
-      planKind: draw?.planKind,
-      reasonCode: draw?.reasonCode,
+    expect(choiceDecision).toMatchObject({
+      actionId: "runner.resolve_choice",
+      reasonCode: drawDecision.reasonCode,
       fallbackUsed: false,
     });
     expect(drawExecutor).toBeDefined();
     expect(choiceExecutor).toBe(drawExecutor);
-
-    const continuation =
-      choiceCapture?.input.playerView.pendingChoice?.continuation;
-    expect(continuation).toMatchObject({
+    expect(choiceInput.playerView.pendingChoice?.continuation).toMatchObject({
       family: "runner_hidden_draw_keep_or_top_replacement",
-      originActionId: "runner.draw_card",
-      sourceCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
-      createdAtStateVersion: 23,
+      originActionId: drawDecision.actionId,
+      sourceCardDefinitionId: CRASH_EVERETT,
+      createdAtStateVersion: state.stateVersion,
     });
     expect(
-      choiceCapture?.input.playerView.pendingChoice?.options.every(
+      choiceInput.playerView.pendingChoice?.options.every(
         (option) => option.card?.known && option.card.definitionId,
       ),
     ).toBe(true);
-    expect(
-      choiceCapture
-        ? getPlayerView(choiceCapture.state, "corp").pendingChoice
-        : undefined,
-    ).toBeUndefined();
-    expect(drawCapture?.input.playerView.stateVersion).toBe(22);
-  }, 20_000);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
 });
 
 function deck(deckId: string): DeckDefinition {
@@ -115,4 +121,147 @@ function deck(deckId: string): DeckDefinition {
   );
   if (!result) throw new Error(`Missing Proteus pilot deck ${deckId}`);
   return result;
+}
+
+function snapshot(deckDefinition: DeckDefinition): AiDeckStrategyDeckSnapshot {
+  return {
+    deckSnapshotId: `${deckDefinition.id}-snapshot`,
+    side: deckDefinition.side,
+    cards: deckDefinition.cards.map((card) => ({
+      cardId: card.id,
+      quantity: card.quantity,
+    })),
+  };
+}
+
+function decisionInput(
+  state: GameState,
+  runnerDeck: DeckDefinition,
+  suffix: string,
+) {
+  return buildAiDecisionInput(state, "runner", {
+    decisionId: `crash-everett:${suffix}:${state.stateVersion}`,
+    profileId: "crash-everett-plan-continuation",
+    ownDeckSnapshot: snapshot(runnerDeck),
+  });
+}
+
+function withOnlyActionType(
+  input: ReturnType<typeof decisionInput>,
+  type: LegalAction["type"],
+): ReturnType<typeof decisionInput> {
+  const legalActions = input.legalActions.filter(
+    (action) => action.type === type,
+  );
+  if (legalActions.length !== 1) {
+    throw new Error(`Expected exactly one ${type} action.`);
+  }
+  return {
+    ...input,
+    legalActions,
+    playerView: {
+      ...input.playerView,
+      legalActions,
+    },
+  };
+}
+
+function toRunnerTurn(state: GameState): GameState {
+  let next = applyLegal(
+    state,
+    "corp",
+    getLegalActions(state, "corp").find(
+      (action) => action.type === "mandatory_draw",
+    ),
+  );
+  next = applyLegal(
+    next,
+    "corp",
+    getLegalActions(next, "corp").find((action) => action.type === "end_turn"),
+  );
+  while (next.pendingChoice?.side === "corp") {
+    next = applyLegal(
+      next,
+      "corp",
+      getLegalActions(next, "corp").find(
+        (action) => action.type === "resolve_choice",
+      ),
+    );
+  }
+  return next;
+}
+
+function moveRunnerCardToGrip(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(
+    ([, card]) => card.definitionId === definitionId,
+  );
+  if (!entry) throw new Error(`Missing ${definitionId}.`);
+  const [cardId, card] = entry;
+  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
+  state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
+  state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
+  state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
+  state.runner.rig.programs = state.runner.rig.programs.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.rig.hardware = state.runner.rig.hardware.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.rig.resources = state.runner.rig.resources.filter(
+    (id) => id !== cardId,
+  );
+  state.runner.grip.unshift(cardId);
+  state.cardInstances[cardId] = {
+    ...card,
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
+  return cardId;
+}
+
+function applyDecision(
+  state: GameState,
+  side: Side,
+  decision: ReturnType<typeof chooseRunnerAction>,
+): GameState {
+  if (!decision.actionId) throw new Error("AI decision has no actionId.");
+  return applyLegal(
+    state,
+    side,
+    getLegalActions(state, side).find(
+      (action) => action.actionId === decision.actionId,
+    ),
+    decision.selectedChoices,
+  );
+}
+
+function applyLegal(
+  state: GameState,
+  side: Side,
+  action: LegalAction | undefined,
+  selectedChoices?: ReturnType<typeof chooseRunnerAction>["selectedChoices"],
+): GameState {
+  if (!action) throw new Error(`Missing ${side} fixture action.`);
+  const resolvedChoices =
+    selectedChoices ??
+    (action.type === "resolve_choice" && state.pendingChoice
+      ? {
+          choiceId: state.pendingChoice.choiceId,
+          selectedOptionIds: [String(state.pendingChoice.options[0]?.id)],
+        }
+      : undefined);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    ...(resolvedChoices ? { selectedChoices: resolvedChoices } : {}),
+    idempotencyKey: `${side}:${state.stateVersion}:${action.actionId}`,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
 }

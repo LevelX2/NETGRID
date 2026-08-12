@@ -66,6 +66,7 @@ function actionCardSemanticProfileFromHint(
   );
   const compatibilitySignals = uniqueStrings([
     ...(extendedHint.tacticSignals ?? []),
+    ...(hint.functionSignals ?? []),
     ...hint.roles.map((role) => `role:${role}`),
     ...hint.planRoles.map((role) => `plan_role:${role}`),
     ...(hint.lineSupport ?? []).map((line) => `line_support:${line}`),

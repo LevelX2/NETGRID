@@ -379,8 +379,10 @@ export function runnerTurnLiquidityCandidateIsMaterializable(
     projection?.clickCost === 1 &&
     projection.creditCost === 0 &&
     projection.cardsDrawn === 0 &&
-    projection.cardsConsumed === 0 &&
-    projection.netHandDelta === 0 &&
+    ((projection.cardsConsumed === 0 && projection.netHandDelta === 0) ||
+      (candidate.actionType === "play_event" &&
+        projection.cardsConsumed === 1 &&
+        projection.netHandDelta === -1)) &&
     projection.payoutMode === "fixed" &&
     projection.reliability === "guaranteed" &&
     ((projection.source === "basic_action_contract" &&

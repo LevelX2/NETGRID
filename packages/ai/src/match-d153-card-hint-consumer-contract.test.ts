@@ -120,13 +120,15 @@ describe("match D153 card hint consumer contract", () => {
         (tool) => tool.cardId === JUNKYARD,
       ),
     ).toBe(false);
-    expect(result.decision?.actionId).toBe("runner.gain_credit");
+    expect(result.decision?.actionId).toBe("runner.end_turn");
     expect(result.decision?.fallbackUsed).toBe(false);
-    expect(result.decision?.decisionDebug?.planKind).toBe("runner.economy");
+    expect(result.decision?.decisionDebug?.planKind).toBe(
+      "runner.complete_turn",
+    );
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:gain_general_liquid_credits",
-        "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
+        "plan_assessment_evidence:productive_legal_routes_exhausted",
         "plan_priority_class:P6",
       ]),
     );
@@ -159,12 +161,12 @@ describe("match D153 card hint consumer contract", () => {
     expect(cashOutCandidate).toMatchObject({
       sourceDefinitionId: BROKER,
       effectTargets: expect.arrayContaining([
-        "economy.action_credit",
-        "economy.temporary_resource_bank",
+        "economy.bank_load",
+        "economy.bank_cashout_all",
       ]),
       actionTacticSignals: expect.arrayContaining([
         "effect:action_economy",
-        "effect:counter_economy",
+        "economy.hosted_credit_cashout",
       ]),
     });
   });

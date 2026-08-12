@@ -86,8 +86,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_103_cruising-for-netwatch.",
       },
     ],
     capabilities: [],

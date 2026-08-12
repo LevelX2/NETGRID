@@ -66,16 +66,6 @@ export const cardSpec = {
         kind: "plan_role",
         role: "safe_probe_run",
       },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "remote_role",
-        role: "ice_modifier",
-        threatLevel: "medium",
-      },
     ],
     capabilities: [],
   },

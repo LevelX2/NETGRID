@@ -107,9 +107,7 @@ function costEffectiveWallBreakerInHand() {
   });
 }
 
-function costIneffectiveWallInput(
-  actions: ReturnType<typeof legalAction>[],
-) {
+function costIneffectiveWallInput(actions: ReturnType<typeof legalAction>[]) {
   const input = aiInput("runner", actions);
   input.playerView.own.credits = 4;
   input.playerView.own.clicks = 3;
@@ -198,8 +196,7 @@ function costIneffectiveCoverageCapabilities(
     risks: [],
     restrictions: [],
     quantityKnownInDeck: 1,
-    locations:
-      alternative === "in_hand" ? ["in_hand", "in_deck"] : ["in_deck"],
+    locations: alternative === "in_hand" ? ["in_hand", "in_deck"] : ["in_deck"],
     confidence: "high",
     evidence: ["test_known_efficient_wall_role"],
   };
@@ -1867,7 +1864,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
     expect(tutorDecision.evidence).toContain(
-      "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+      "plan_assessment_evidence:runner_engine_certified_immediate_liquidity_development",
     );
   });
 
@@ -2297,8 +2294,8 @@ describe("authoritative plan-first live runtime", () => {
         ],
       }).chooseSemanticRuntimeAction(input, {}),
     ).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.runner.economy",
+      actionId: endTurn.actionId,
+      reasonCode: "plan_first.runner.complete_turn",
       fallbackUsed: false,
     });
   });
@@ -2316,8 +2313,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
           cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
@@ -2336,11 +2332,9 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId:
-            "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           gainCreditsAmount: 3,
@@ -2429,8 +2423,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-2",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
           cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
@@ -2523,8 +2516,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
           cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
@@ -2543,11 +2535,9 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId:
-            "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           gainCreditsAmount: 3,
@@ -2690,11 +2680,9 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId:
-            "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           hostedCreditTakeMode: "all",
@@ -2806,8 +2794,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "store_credits",
           cardImplementationAbilityId: "onr_v1_154_broker:store_credits",
           cardImplementationAddsHostedCredits: true,
@@ -2826,11 +2813,9 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "broker-card",
           sourceDefinitionId: "onr_v1_154_broker",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId:
-            "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
           cardImplementationTakesHostedCredits: true,
           hostedCreditTakeAmount: 3,
           hostedCreditTakeMode: "all",
@@ -8116,6 +8101,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+          cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
           cardImplementationLifecycleLeavePlayPaymentStatus: "unpayable",
@@ -8155,6 +8145,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+          cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
           cardImplementationLifecycleLeavePlayPaymentStatus: "unpayable",
@@ -8363,6 +8358,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+          cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
           cardImplementationLifecycleLeavePlayPaymentStatus: "payable",
@@ -8386,7 +8386,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("retains a payable Loan and rejects its lifecycle EndTurn while clicks remain", () => {
+  it("retains a payable Loan and completes a saturated turn through standard EndTurn", () => {
     resetResidentPlanPortfolioMemory();
     const loanEnd = legalAction(
       "runner.loan.end_turn",
@@ -8398,6 +8398,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+          cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
           cardImplementationLifecycleLeavePlayPaymentStatus: "payable",
@@ -8431,8 +8436,8 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
-    expect(decision.actionId).toBe(credit.actionId);
-    expect(decision.reasonCode).toBe("plan_first.runner.economy");
+    expect(decision.actionId).toBe(standardEnd.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.complete_turn");
     expect(decision.actionId).not.toBe(loanEnd.actionId);
     expect(decision.evidence).toContain(
       "plan_portfolio_blocked_evidence:plan:runner.resource_lifecycle:onr_v1_168_loan-from-chiba%3Aloan-1:runner_resource_leave_deferred_until_capacity_spent",
@@ -8459,6 +8464,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-1",
         payload: {
           cardId: "loan-1",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+          cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
           cardImplementationLifecycleLeavePlayPaymentStatus: "payable",
@@ -8475,6 +8485,11 @@ describe("authoritative plan-first live runtime", () => {
         source: "loan-2",
         payload: {
           cardId: "loan-2",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_v1_168_loan-from-chiba:trash_at_end_of_turn",
+          cardImplementationAbilityKey: "trash_at_end_of_turn",
           cardImplementationLifecycleAction: "end_of_runner_turn",
           cardImplementationLifecycleLeavePlayPaymentAmount: 10,
           cardImplementationLifecycleLeavePlayPaymentStatus: "payable",
@@ -8676,33 +8691,33 @@ describe("authoritative plan-first live runtime", () => {
     reserveSatisfied.playerView.own.clicks = 3;
     reserveSatisfied.playerView.own.credits = 20;
     reserveSatisfied.playerView.opponent.deckCount = 10;
-    const continued = liveContext().chooseSemanticRuntimeAction(
+    const completed = liveContext().chooseSemanticRuntimeAction(
       reserveSatisfied,
       {},
     );
-    expect(continued).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.runner.economy",
+    expect(completed).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.complete_turn",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           priority: {
             effectiveClass: "P6",
-            p6Contract: "temporary_bounded_liquidity_transition",
+            p6Contract: "turn_completion",
           },
-          route: { actionId: credit.actionId },
+          route: { actionId: end.actionId },
         },
       },
     });
-    expect(continued.evidence ?? []).toContain(
-      "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+    expect(completed.evidence ?? []).toContain(
+      "plan_assessment_evidence:productive_legal_routes_exhausted",
     );
     expect(
       JSON.stringify(residentPlanPortfolioSnapshot(reserveSatisfied)),
-    ).toContain('"kind":"develop_liquidity"');
+    ).not.toContain('"kind":"develop_liquidity"');
   });
 
-  it("does not end the turn with clicks remaining after install routes are rejected", () => {
+  it("ends the turn when every remaining install route is explicitly rejected", () => {
     resetResidentPlanPortfolioMemory();
     const cardInstanceId = "deferred-program";
     const directInstall = legalAction(
@@ -8754,11 +8769,15 @@ describe("authoritative plan-first live runtime", () => {
       finalInstallFit: -500,
     });
 
-    expect(() =>
+    expect(
       liveContext({
         evaluateRunnerHandDevelopment: () => [deferred],
       }).chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("end_turn_with_usable_capacity");
+    ).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.complete_turn",
+      fallbackUsed: false,
+    });
   });
 
   it("uses its finite economy plan instead of generic option development when hand capacity is full", () => {
@@ -8848,7 +8867,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("binds a recurring-economy hold only to the installed source's own economy action", () => {
+  it("does not invent recurring-economy ownership for a forged activated gain on an automatic turn-start source", () => {
     resetResidentPlanPortfolioMemory();
     const conference = visibleCard("conference", "runner", "resource", {
       definitionId: "onr_v1_184_top-runners-conference",
@@ -8881,10 +8900,10 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: ownEconomyAction.actionId,
-      reasonCode: "plan_first.runner.recurring_economy",
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.recurring_economy",
+        planKind: "runner.economy",
       },
     });
   });
@@ -9612,7 +9631,7 @@ describe("authoritative plan-first live runtime", () => {
     },
   );
 
-  it("does not end the turn with clicks remaining when a run has no known payoff", () => {
+  it("ends the turn when the only remaining run has no known payoff", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
       "runner.end_turn",
@@ -9646,14 +9665,18 @@ describe("authoritative plan-first live runtime", () => {
       score: -420,
     };
 
-    expect(() =>
+    expect(
       liveContext({
         evaluateRunnerRunTargets: () => [noPayoff],
       }).chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("end_turn_with_usable_capacity");
+    ).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.complete_turn",
+      fallbackUsed: false,
+    });
   });
 
-  it("does not end the turn with clicks remaining when a run has negative payoff", () => {
+  it("ends the turn when the only remaining run has negative payoff", () => {
     resetResidentPlanPortfolioMemory();
     const end = legalAction(
       "runner.end_turn",
@@ -9690,11 +9713,15 @@ describe("authoritative plan-first live runtime", () => {
       score: -1_000,
     };
 
-    expect(() =>
+    expect(
       liveContext({
         evaluateRunnerRunTargets: () => [negativePayoff],
       }).chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("end_turn_with_usable_capacity");
+    ).toMatchObject({
+      actionId: end.actionId,
+      reasonCode: "plan_first.runner.complete_turn",
+      fallbackUsed: false,
+    });
   });
 
   it("fails closed when a positive reachable Remote action has no plan route", () => {
@@ -10160,7 +10187,7 @@ describe("authoritative plan-first live runtime", () => {
       },
     });
     expect(accessDecision.evidence).toContain(
-      "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+      "plan_assessment_evidence:runner_engine_certified_immediate_liquidity_development",
     );
   });
 
@@ -11149,7 +11176,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("admits one 6/7 terminal central probe and reopens it only for a new turn or public knowledge refresh", () => {
+  it("lets the current route quote, not no-access action history, govern a 6/7 terminal central probe", () => {
     const runHq = legalAction(
       "run-hq",
       "runner",
@@ -11185,8 +11212,30 @@ describe("authoritative plan-first live runtime", () => {
       recommendation: "run_if_free" as const,
       score: -40,
     };
+    let routeIsBlocked = false;
+    const blockedTerminalProbe = {
+      ...terminalProbe,
+      pathPassability: "blocked_missing_coverage" as const,
+      routeQuote: {
+        ...terminalProbe.routeQuote,
+        reachability: "no_access" as const,
+        noAccessReason: "missing_breaker_coverage",
+        evidence: [
+          "route_reachability:no_access",
+          "route_funding_gap:0",
+          "route_unknown_ice_count:0",
+        ],
+      },
+      recommendation: "find_breaker_first" as const,
+      evidence: [
+        "path_passability:blocked_missing_coverage",
+        "missing_breaker_coverage:sentry",
+      ],
+    };
     const context = liveContext({
-      evaluateRunnerRunTargets: () => [terminalProbe],
+      evaluateRunnerRunTargets: () => [
+        routeIsBlocked ? blockedTerminalProbe : terminalProbe,
+      ],
     });
 
     resetResidentPlanPortfolioMemory();
@@ -11228,6 +11277,7 @@ describe("authoritative plan-first live runtime", () => {
         publicPayload: { actor: "runner", actionType: "jack_out" },
       },
     ];
+    routeIsBlocked = true;
     resetResidentPlanPortfolioMemory();
     const noAccessDecision = context.chooseSemanticRuntimeAction(noAccess, {
       runnerTurnPlannerMode: "legacy_compare",
@@ -11237,9 +11287,7 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
     });
-    expect(noAccessDecision.evidence).toContain(
-      "plan_portfolio_blocked_evidence:plan:runner.pressure_central:central%3Ahq:runner_same_server_no_access_attempt_requires_progress:hq:9",
-    );
+    expect(noAccessDecision.actionId).not.toBe(runHq.actionId);
 
     const developedAfterNoAccess = structuredClone(noAccess);
     developedAfterNoAccess.playerView.stateVersion = 23;
@@ -11255,6 +11303,18 @@ describe("authoritative plan-first live runtime", () => {
       visibilityClass: "public",
       publicPayload: { actor: "runner", actionType: "gain_credit" },
     });
+    resetResidentPlanPortfolioMemory();
+    expect(
+      context.chooseSemanticRuntimeAction(developedAfterNoAccess, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+
+    routeIsBlocked = false;
     resetResidentPlanPortfolioMemory();
     expect(
       context.chooseSemanticRuntimeAction(developedAfterNoAccess, {
@@ -11375,7 +11435,7 @@ describe("authoritative plan-first live runtime", () => {
         fallbackUsed: false,
       });
       expect(decision.evidence, malformed.label).toContain(
-        "plan_portfolio_blocked_evidence:plan:runner.pressure_central:central%3Ahq:runner_run_attempt_cadence_event_turn_invalid:hq:hq-run-start",
+        "plan_portfolio_blocked_evidence:plan:runner.pressure_central:central%3Ahq:runner_central_pressure_cadence_event_turn_invalid:hq:hq-run-start",
       );
     }
 
@@ -11747,6 +11807,12 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "post_pass_derez_fully_broken_ice_end_run",
+          cardImplementationAbilityId:
+            "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "banpei",
           targetIceDefinitionId: "onr_v1_223_banpei",
@@ -11861,6 +11927,12 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "post_pass_derez_fully_broken_ice_end_run",
+          cardImplementationAbilityId:
+            "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "data-wall",
           targetIceDefinitionId: "onr_v1_237_data-wall",
@@ -11919,7 +11991,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("owns a generic run-remainder strength boost without knowing its card definition", () => {
+  it("owns a generic run-remainder strength boost that does not claim a CardSpec source", () => {
     resetResidentPlanPortfolioMemory();
     const boost = legalAction(
       "runner.trigger_ability.generic-run-strength-boost",
@@ -11984,6 +12056,12 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "disgruntled-event",
           sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "post_pass_derez_fully_broken_ice_end_run",
+          cardImplementationAbilityId:
+            "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
           abilityId: "derez_fully_broken_passed_ice_and_end_run",
           targetIceId: "banpei",
           targetIceDefinitionId: "onr_v1_223_banpei",
@@ -12210,7 +12288,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("does not repeat an unchanged no-access Remote run in the same turn", () => {
+  it("uses the current Remote route quote instead of a hidden same-turn no-access cadence", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
       "run-remote",
@@ -12233,18 +12311,7 @@ describe("authoritative plan-first live runtime", () => {
     run.expiresAtStateVersion = 22;
     credit.expiresAtStateVersion = 22;
     input.playerView.own.credits = 5;
-    input.playerView.servers = [
-      server(
-        "remote_1",
-        [],
-        [
-          visibleCard("remote-agenda", "corp", "agenda", {
-            definitionId: "onr_v1_203_hostile-takeover",
-            advancementCounters: 1,
-          }),
-        ],
-      ),
-    ];
+    input.playerView.servers = [server("remote_1")];
     input.eventTail = [
       {
         eventId: "remote-run-start-no-access",
@@ -12271,21 +12338,44 @@ describe("authoritative plan-first live runtime", () => {
         publicPayload: { actor: "runner", actionType: "jack_out" },
       },
     ];
-    const target = {
+    const reachableTarget = {
       ...safeRuntimeRunTarget(run.actionId, "remote_1"),
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       scoreThreat: true,
       score: 400,
     };
+    const blockedTarget = {
+      ...reachableTarget,
+      pathPassability: "blocked_missing_coverage" as const,
+      routeQuote: {
+        ...reachableTarget.routeQuote,
+        reachability: "no_access" as const,
+        noAccessReason: "missing_breaker_coverage",
+        evidence: [
+          "route_reachability:no_access",
+          "route_funding_gap:0",
+          "route_unknown_ice_count:0",
+        ],
+      },
+      recommendation: "find_breaker_first" as const,
+      evidence: [
+        "path_passability:blocked_missing_coverage",
+        "missing_breaker_coverage:sentry",
+      ],
+    };
+    let routeIsBlocked = true;
 
-    const decision = liveContext({
-      evaluateRunnerRunTargets: () => [target],
-    }).chooseSemanticRuntimeAction(input, {
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [
+        routeIsBlocked ? blockedTarget : reachableTarget,
+      ],
+    });
+    const blockedDecision = context.chooseSemanticRuntimeAction(input, {
       runnerTurnPlannerMode: "legacy_compare",
     });
 
-    expect(decision).toMatchObject({
+    expect(blockedDecision).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
@@ -12299,6 +12389,18 @@ describe("authoritative plan-first live runtime", () => {
           },
         },
       },
+    });
+
+    routeIsBlocked = false;
+    resetResidentPlanPortfolioMemory();
+    expect(
+      context.chooseSemanticRuntimeAction(input, {
+        runnerTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
     });
   });
 
@@ -12539,6 +12641,7 @@ describe("authoritative plan-first live runtime", () => {
     const accessInput = aiInput("runner", [decline, trash]);
     const krumz = visibleCard("corp-krumz", "corp", "asset", {
       definitionId: "onr_v1_330_krumz",
+      counters: { bit: 1 },
     });
     accessInput.playerView.stateVersion = 2;
     accessInput.playerView.timingPoint = "access.resolve_card";
@@ -13253,7 +13356,9 @@ describe("authoritative plan-first live runtime", () => {
         "plan_assessment_evidence:cost_ineffective_coverage:hq:10",
       ]),
     );
-    const fundingCoverage = residentPlanPortfolioSnapshot(input)?.instances.find(
+    const fundingCoverage = residentPlanPortfolioSnapshot(
+      input,
+    )?.instances.find(
       (instance) => instance.moduleId === "runner.rig_and_coverage",
     );
     expect(fundingCoverage?.moduleState).toMatchObject({
@@ -13262,8 +13367,7 @@ describe("authoritative plan-first live runtime", () => {
         needKind: "cost_ineffective_coverage",
         targetServerId: "hq",
         requesterModuleId: "runner.pressure_central",
-        requesterPlanInstanceId:
-          "plan:runner.pressure_central:central%3Ahq",
+        requesterPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
         currentKnownPathCost: 10,
         currentPathFundingGap: 6,
         recoveryMode: "install_visible_answer",
@@ -13470,8 +13574,7 @@ describe("authoritative plan-first live runtime", () => {
       need: {
         targetCredits: 13,
         gap: 4,
-        parentPlanInstanceId:
-          "plan:runner.pressure_central:central%3Ahq",
+        parentPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
       },
     });
   });
@@ -13496,9 +13599,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerRunTargets: () => [target],
     }).chooseSemanticRuntimeAction(input, {});
 
-    expect(decision.reasonCode).not.toBe(
-      "plan_first.runner.rig_and_coverage",
-    );
+    expect(decision.reasonCode).not.toBe("plan_first.runner.rig_and_coverage");
     expect(
       residentPlanPortfolioSnapshot(input)?.instances.some(
         (instance) => instance.moduleId === "runner.rig_and_coverage",
@@ -13834,6 +13935,12 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "junkyard-bbs",
           sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "abilities_activated_runner_main_move_top_trash_to_grip",
+          cardImplementationAbilityId:
+            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "rent-i-con-top",
           targetCardDefinitionId: "onr_classic_031_rent-i-con",
@@ -13937,6 +14044,12 @@ describe("authoritative plan-first live runtime", () => {
         payload: {
           cardId: "junkyard-bbs",
           sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+          cardImplementationCapabilityBindingKind:
+            "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "abilities_activated_runner_main_move_top_trash_to_grip",
+          cardImplementationAbilityId:
+            "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
           cardImplementationEffectKind: "move_top_trash_to_grip",
           targetCardId: "rent-i-con-top",
           targetCardDefinitionId: "onr_classic_031_rent-i-con",

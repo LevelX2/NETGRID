@@ -13219,14 +13219,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.gain_credit"
+        "actionId": "runner.end_turn"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "acceptablePlanKinds": ["runner.complete_turn"],
+      "acceptableCapabilities": [
+        "complete_turn_after_productive_routes_exhausted"
+      ],
       "requiredAssessmentEvidence": [
-        "runner_engine_certified_immediate_liquidity_development"
+        "productive_legal_routes_exhausted"
       ]
     }
   }

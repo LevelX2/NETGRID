@@ -903,6 +903,57 @@ describe("visible run analysis targeted breaker paths", () => {
       knownPathBlockedByEtr: true,
     });
   });
+
+  it("includes Canis Major's unbroken future-strength effect in the full pre-run path quote", () => {
+    const innerCodeGate = classicCodeGateIce("inner-code-gate");
+    const outerCanis: VisibleCard = {
+      instanceId: "outer-canis-major",
+      definitionId: "onr_v1_225_canis-major",
+      title: "Canis Major",
+      side: "corp",
+      type: "ice",
+      known: true,
+      rezzed: true,
+      strength: 4,
+      subtypes: ["sentry", "watchdog"],
+      effectiveRunQuote: {
+        iceInstanceId: "outer-canis-major",
+        iceDefinitionId: "onr_v1_225_canis-major",
+        effectiveStrength: 4,
+        subroutines: [
+          {
+            id: "outer-canis-major:future-strength",
+            type: "set_run_future_strength_bonus",
+            amount: 2,
+            unbrokenRunEffect: { increasesFutureIceStrength: 2 },
+          },
+        ],
+      },
+    };
+
+    const withoutFutureStrength = assessKnownRezzedIcePath(
+      [innerCodeGate],
+      [codecrackerBreaker("runner-codecracker")],
+      3,
+    );
+    const withCanisFutureStrength = assessKnownRezzedIcePath(
+      [innerCodeGate, outerCanis],
+      [codecrackerBreaker("runner-codecracker")],
+      3,
+    );
+
+    expect(withoutFutureStrength).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 2,
+      creditsAfterPath: 1,
+    });
+    expect(withCanisFutureStrength).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      unpayableReason: "ice_unaffordable",
+    });
+  });
 });
 
 describe("visible run analysis text-derived breaker costs", () => {

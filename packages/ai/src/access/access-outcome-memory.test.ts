@@ -347,6 +347,54 @@ describe("access outcome memory", () => {
     });
   });
 
+  it("retains the latest observed no-progress access across later failed runs on the unchanged remote", () => {
+    const input = aiInput({
+      eventTail: [
+        publicEvent("evt-run-accessed", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        publicEvent("evt-access", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "remote_1",
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+        publicEvent("evt-run-failed", 10, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverId: "remote_1",
+        }),
+        publicEvent("evt-end-run", 11, "end_run", {
+          actor: "runner",
+          actionType: "end_run",
+          serverId: "remote_1",
+        }),
+      ],
+      servers: [
+        server("remote_1", [
+          visibleCard("remote-root", {
+            definitionId: "onr_v1_317_data-masons",
+            type: "asset",
+            trashCost: 1,
+          }),
+        ]),
+      ],
+    });
+
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+    ).toMatchObject({
+      applies: true,
+      suppressesPlanBonus: true,
+      evidence: expect.arrayContaining([
+        "remote_access_outcome_source_event:evt-access",
+        "repeated_remote_no_progress_suppressed",
+      ]),
+    });
+  });
+
   it("keeps an explicit declined trash suppressed until the remote or economy changes", () => {
     const input = aiInput({
       eventTail: [

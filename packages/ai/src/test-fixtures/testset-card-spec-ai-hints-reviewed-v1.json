@@ -81,6 +81,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "riskTags": [
           "encounter"
         ],
@@ -209,6 +214,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 3
+        },
         "riskTags": [
           "hidden_ice"
         ],
@@ -289,6 +297,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 2
+        },
         "riskTags": [
           "hidden_ice"
         ],
@@ -354,6 +365,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "riskTags": [
           "encounter"
         ],
@@ -389,6 +405,25 @@
           "setup"
         ],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_draw_event_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "setup.draw"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "draw",
@@ -397,10 +432,20 @@
             "resource": "cards",
             "amount": 2,
             "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 2,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "draw.runner_draw"
+          "draw.runner_draw",
+          "setup.draw"
         ],
         "tacticSignals": [
           "draw.runner_draw"
@@ -410,6 +455,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": [
           "hidden_zone_change"
         ],
@@ -443,6 +492,25 @@
           "setup"
         ],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_draw_operation_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "setup.draw"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "draw",
@@ -451,10 +519,20 @@
             "resource": "cards",
             "amount": 2,
             "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 2,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "draw.corp_draw"
+          "draw.corp_draw",
+          "setup.draw"
         ],
         "tacticSignals": [
           "draw.card",
@@ -466,6 +544,10 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": [
           "hidden_zone_change"
         ],
@@ -523,6 +605,9 @@
           "effect_scope:corp",
           "effect_timing:on_rez"
         ],
+        "costProfile": {
+          "credits": 1
+        },
         "riskTags": [
           "hidden_root"
         ],
@@ -560,6 +645,26 @@
         "valueHints": {
           "economy": 3
         },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_economy_event_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 4,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -567,11 +672,21 @@
             "timing": "action",
             "amount": 4,
             "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 4,
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.generic",
-          "economy.runner_credit_burst"
+          "economy.runner_credit_burst",
+          "economy.burst_credit"
         ],
         "tacticSignals": [
           "economy.runner_credit_burst"
@@ -581,6 +696,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -612,6 +731,26 @@
         "valueHints": {
           "economy": 3
         },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_economy_operation_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 4,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -619,11 +758,21 @@
             "timing": "action",
             "amount": 4,
             "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 4,
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.corp_credit_burst",
-          "economy.generic"
+          "economy.generic",
+          "economy.burst_credit"
         ],
         "tacticSignals": [
           "economy.card",
@@ -635,6 +784,10 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -692,6 +845,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2,
+          "memory": 1
+        },
         "riskTags": [
           "encounter"
         ],
@@ -755,6 +913,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "riskTags": [
           "encounter"
         ],
@@ -825,6 +988,88 @@
         ],
         "planRoles": [],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_run_event_on_play",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              },
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "successful_run",
+                "resource": "credits",
+                "target": "run.successful_run_credit_gain",
+                "amount": 2,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "run.any_server",
+              "run.make_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:simple_run_event_on_play",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "server",
+            "purpose": "make_run:simple_run_event_on_play",
+            "hiddenInfoPolicy": "legal_targets_only"
+          }
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "scope": "runner",
+            "timing": "action",
+            "target": "make_run",
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "successful_run",
+            "resource": "credits",
+            "target": "run.successful_run_credit_gain",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "run.make_run",
+          "run.any_server",
+          "economy.burst_credit"
+        ],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect:future_run_effect",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "effect_timing:successful_run"
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": [
           "run"
         ],
@@ -905,6 +1150,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": [
           "hidden_ice"
         ],
@@ -939,6 +1187,10 @@
         ],
         "planRoles": [],
         "valueHints": {},
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "riskTags": [
           "install_runner"
         ],
@@ -1017,6 +1269,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 3
+        },
         "riskTags": [
           "hidden_ice",
           "tag"
@@ -1068,6 +1323,7 @@
             "role": "payoff_anchor",
             "roleDetail": "payoff_anchor",
             "evidence": [
+              "condition.runner_tagged",
               "punish.payoff",
               "tag.payoff"
             ],
@@ -1080,10 +1336,21 @@
             "role": "payoff_anchor",
             "roleDetail": "payoff_anchor",
             "evidence": [
+              "condition.runner_tagged",
               "punish.payoff",
               "tag.payoff"
             ],
             "confidence": "high"
+          }
+        ],
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "simple_tag_punishment_operation_on_play",
+            "conditions": [
+              {
+                "kind": "requires_runner_tagged"
+              }
+            ]
           }
         ],
         "effects": [
@@ -1116,6 +1383,10 @@
             "kind": "requires_runner_tagged"
           }
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "riskTags": [
           "tag"
         ],
@@ -1195,6 +1466,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": [
           "hidden_ice"
         ],
@@ -1230,6 +1504,9 @@
         "planRoles": [],
         "valueHints": {
           "remoteRootValue": 1
+        },
+        "costProfile": {
+          "credits": 0
         },
         "riskTags": [
           "hidden_root"
@@ -1294,6 +1571,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4,
+          "memory": 1
+        },
         "riskTags": [
           "encounter"
         ],
@@ -1330,6 +1612,25 @@
           "setup"
         ],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_archive_planning_operation_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "setup.draw"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "draw",
@@ -1338,10 +1639,20 @@
             "resource": "cards",
             "amount": 3,
             "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 3,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "draw.corp_draw"
+          "draw.corp_draw",
+          "setup.draw"
         ],
         "tacticSignals": [
           "draw.card",
@@ -1353,6 +1664,10 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": [
           "hidden_zone_change"
         ],
@@ -1387,6 +1702,26 @@
         "valueHints": {
           "economy": 3
         },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_burst_credit_event_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 6,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -1394,11 +1729,21 @@
             "timing": "action",
             "amount": 6,
             "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 6,
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.generic",
-          "economy.runner_credit_burst"
+          "economy.runner_credit_burst",
+          "economy.burst_credit"
         ],
         "tacticSignals": [
           "economy.runner_credit_burst"
@@ -1408,6 +1753,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1462,6 +1811,9 @@
           "effect_scope:corp",
           "effect_timing:on_rez"
         ],
+        "costProfile": {
+          "credits": 2
+        },
         "riskTags": [
           "hidden_root"
         ],
@@ -1501,6 +1853,26 @@
         "valueHints": {
           "economy": 3
         },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_credit_surge_operation_on_play",
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits",
+                "target": "economy.burst_credit",
+                "amount": 7,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "economy",
@@ -1508,11 +1880,21 @@
             "timing": "action",
             "amount": 7,
             "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "corp",
+            "timing": "action",
+            "resource": "credits",
+            "target": "economy.burst_credit",
+            "amount": 7,
+            "finite": true
           }
         ],
         "functionSignals": [
           "economy.corp_credit_burst",
-          "economy.generic"
+          "economy.generic",
+          "economy.burst_credit"
         ],
         "tacticSignals": [
           "economy.card",
@@ -1524,6 +1906,10 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1553,6 +1939,25 @@
           "setup"
         ],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_deep_draw_event_on_play",
+            "effects": [
+              {
+                "kind": "draw",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "cards",
+                "target": "setup.draw",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "setup.draw"
+            ]
+          }
+        ],
         "effects": [
           {
             "kind": "draw",
@@ -1561,10 +1966,20 @@
             "resource": "cards",
             "amount": 3,
             "finite": true
+          },
+          {
+            "kind": "draw",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "cards",
+            "target": "setup.draw",
+            "amount": 3,
+            "finite": true
           }
         ],
         "functionSignals": [
-          "draw.runner_draw"
+          "draw.runner_draw",
+          "setup.draw"
         ],
         "tacticSignals": [
           "draw.runner_draw"
@@ -1574,6 +1989,10 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
+        },
         "riskTags": [
           "hidden_zone_change"
         ],
@@ -1651,6 +2070,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": [
           "hidden_ice"
         ],
@@ -1685,6 +2107,10 @@
         ],
         "planRoles": [],
         "valueHints": {},
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "riskTags": [
           "install_runner"
         ],
@@ -1720,6 +2146,88 @@
         ],
         "valueHints": {
           "economy": 3
+        },
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "v08_overclock_run_event_on_play",
+            "effects": [
+              {
+                "kind": "future_run_effect",
+                "scope": "runner",
+                "timing": "action",
+                "target": "make_run",
+                "finite": true
+              },
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "successful_run",
+                "resource": "credits",
+                "target": "run.successful_run_credit_gain",
+                "amount": 3,
+                "finite": true
+              }
+            ],
+            "functionSignals": [
+              "economy.burst_credit",
+              "run.any_server",
+              "run.make_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "server",
+                "purpose": "make_run:v08_overclock_run_event_on_play",
+                "hiddenInfoPolicy": "legal_targets_only"
+              }
+            ]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "server",
+            "purpose": "make_run:v08_overclock_run_event_on_play",
+            "hiddenInfoPolicy": "legal_targets_only"
+          }
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "scope": "runner",
+            "timing": "action",
+            "target": "make_run",
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "successful_run",
+            "resource": "credits",
+            "target": "run.successful_run_credit_gain",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "functionSignals": [
+          "run.make_run",
+          "run.any_server",
+          "economy.burst_credit"
+        ],
+        "actionTacticSignals": [
+          "effect:economy",
+          "effect:future_run_effect",
+          "effect_scope:runner",
+          "effect_timing:action",
+          "effect_timing:successful_run"
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1
         },
         "riskTags": [
           "run"
@@ -1783,6 +2291,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
         "riskTags": [
           "encounter"
         ],
@@ -1884,6 +2397,11 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 4,
+          "memory": 1
+        },
         "riskTags": [
           "encounter"
         ],
@@ -1947,6 +2465,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 5
+        },
         "riskTags": [
           "hidden_ice"
         ],
@@ -2026,6 +2547,9 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
+        "costProfile": {
+          "credits": 4
+        },
         "riskTags": [
           "hidden_ice",
           "tag"

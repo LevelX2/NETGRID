@@ -5563,15 +5563,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_event",
-        "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet"
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_proteus_150_streetware-distributor"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["develop_onr_v1_114_temple-microcode-outlet"],
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_build"],
       "requiredAssessmentEvidence": [
-        "source:own_runner_hand:card_specific_purpose:draw_or_search_engine:setup"
+        "runner_credit_bank_continue_to_value_target"
       ]
     }
   }

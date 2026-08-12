@@ -116,6 +116,7 @@ export const KNOWN_HINT_EFFECT_SCOPES = [
   "corp",
   "fort",
   "server",
+  "central",
   "ice",
   "hq",
   "rnd",

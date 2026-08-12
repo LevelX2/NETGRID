@@ -179,23 +179,25 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   if (currentKnownRootDefinitionIds.length === 0) return undefined;
   if (currentKnownRemoteHasAgenda(input, serverId)) return undefined;
   const history = mergedPublicHistory(input);
-  const lastRunIndex = findLastIndex(
+  const lastAccessIndex = findLastIndex(
     history,
+    (event) =>
+      publicActor(event) === "runner" &&
+      publicActionType(event) === "access_card" &&
+      eventServerId(event) === serverId,
+  );
+  if (lastAccessIndex < 0) return undefined;
+  const lastRunIndex = findLastIndex(
+    history.slice(0, lastAccessIndex),
     (event) =>
       publicActor(event) === "runner" &&
       publicActionType(event) === "start_run" &&
       eventServerId(event) === serverId,
   );
   if (lastRunIndex < 0) return undefined;
-  const afterRun = history.slice(lastRunIndex + 1);
-  const accessEvent = afterRun.find(
-    (event) =>
-      publicActor(event) === "runner" &&
-      publicActionType(event) === "access_card" &&
-      eventServerId(event) === serverId,
-  );
-  if (!accessEvent) return undefined;
-  const progressEvent = afterRun.find(
+  const accessEvent = history[lastAccessIndex]!;
+  const afterAccess = history.slice(lastAccessIndex + 1);
+  const progressEvent = afterAccess.find(
     (event) =>
       publicActor(event) === "runner" &&
       (publicActionType(event) === "trash_accessed_card" ||
@@ -204,7 +206,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   );
   if (progressEvent) return undefined;
   if (remoteChangedAfterAccess(input, serverId, accessEvent)) return undefined;
-  const declineEvent = afterRun.find(
+  const declineEvent = afterAccess.find(
     (event) =>
       event.stateVersionAfter > accessEvent.stateVersionAfter &&
       publicActor(event) === "runner" &&

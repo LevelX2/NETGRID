@@ -23,6 +23,42 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
     ).toEqual(["card_breaker_1"]);
   });
 
+  it("binds the same target choice after a trace-success trash effect", () => {
+    const { input, action } = fixture();
+    const choice = input.playerView.pendingChoice!;
+    choice.source = [
+      "card_implementation.trash_installed_program",
+      "run_1",
+      "colonel_1",
+      "0",
+      "onr_proteus_029_colonel-failure",
+      "trace_program_trash",
+      "initiate_trace",
+      "trace_success",
+    ].join(":");
+    input.playerView.servers[0]!.ice[0]!.effectiveRunQuote!.subroutines = [
+      {
+        id: "trace_program_trash",
+        type: "initiate_trace",
+        traceLimit: 4,
+        traceSuccessEffect: {
+          type: "end_run_trash_program_and_run_lock",
+          amount: 1,
+        },
+      },
+    ];
+
+    expect(
+      selectedCorpProgramTrashChoiceOptionIds(
+        input,
+        action,
+        choice,
+        choice.options,
+        () => [],
+      ),
+    ).toEqual(["card_utility_1"]);
+  });
+
   it.each([
     [
       "wrong encountered ICE",
@@ -74,6 +110,7 @@ function fixture(): {
     "onr_proteus_029_colonel-failure",
     "trash_program",
     "trash_installed_program",
+    "encounter",
   ].join(":");
   const input = {
     side: "corp",
@@ -115,6 +152,7 @@ function fixture(): {
         },
       ],
       run: {
+        runId: "run_1",
         attackedServerId: "rd",
         phase: "encounter_ice",
         position: { kind: "ice", serverId: "rd", iceIndex: 0 },

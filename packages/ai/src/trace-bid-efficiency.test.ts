@@ -25,7 +25,7 @@ describe("Trace bid efficiency", () => {
     });
   });
 
-  it("keeps the cheapest Runner bid that changes the Trace outcome", () => {
+  it("keeps the cheapest Runner bid that exceeds the Corp Trace value", () => {
     const selection = selectEfficientTraceBidOption({
       side: "runner",
       bidOptions: [
@@ -33,15 +33,16 @@ describe("Trace bid efficiency", () => {
         { id: "bid_1", amount: 1 },
         { id: "bid_2", amount: 2 },
         { id: "bid_3", amount: 3 },
+        { id: "bid_4", amount: 4 },
       ],
-      desiredAmount: 3,
+      desiredAmount: 4,
       traceValue: 3,
       runnerLink: 0,
       corpBid: 1,
     });
 
     expect(selection).toEqual({
-      option: { id: "bid_3", amount: 3 },
+      option: { id: "bid_4", amount: 4 },
       reason: "trace_bid_existing_choice",
     });
   });
@@ -54,15 +55,16 @@ describe("Trace bid efficiency", () => {
         { id: "bid_1", amount: 1 },
         { id: "bid_2", amount: 2 },
         { id: "bid_3", amount: 3 },
+        { id: "bid_4", amount: 4 },
       ],
-      desiredAmount: 3,
+      desiredAmount: 4,
       traceValue: 3,
       runnerLink: 1,
       corpBid: 1,
     });
 
     expect(selection).toEqual({
-      option: { id: "bid_2", amount: 2 },
+      option: { id: "bid_3", amount: 3 },
       reason: "trace_bid_minimal_outcome_bid",
     });
   });
@@ -97,7 +99,7 @@ describe("Trace bid efficiency", () => {
       ],
       fallbackOptionId: "trace_link_signpost",
       traceValue: 5,
-      runnerStrength: 5,
+      runnerStrength: 6,
     });
 
     expect(selection).toEqual({
@@ -129,11 +131,11 @@ describe("Trace bid efficiency", () => {
 
     expect(selection).toEqual({
       option: {
-        id: "trace_link_springboard",
-        label: "The Springboard: +1 Link",
-        linkDelta: 1,
+        id: "trace_link_signpost",
+        label: "Signpost: +2 Link",
+        linkDelta: 2,
       },
-      reason: "post_bid_link_minimal_outcome_delta",
+      reason: "post_bid_link_existing_choice",
     });
   });
 

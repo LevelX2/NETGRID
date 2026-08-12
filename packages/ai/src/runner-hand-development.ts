@@ -116,9 +116,11 @@ import {
 } from "./runner/hand-development/runner-persistent-install-evaluation";
 import {
   runnerEffectsProvideDamagePrevention,
+  runnerEffectsProvideBreakerCredits,
   runnerEffectsProvideExposeInformation,
   runnerEffectsProvideMultiaccess,
   runnerEffectsProvideNonNoisyBreakerCredits,
+  runnerEffectsProvideProgramTrashPrevention,
   runnerEffectsProvideSearch,
   runnerEffectsProvideTagPrevention,
   runnerEffectsProvideTopTrashRecovery,
@@ -424,7 +426,7 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     return "duplicate_or_low_value";
   }
   if (
-    runnerEffectsProvideNonNoisyBreakerCredits(
+    runnerEffectsProvideBreakerCredits(
       context.signals.structuredEffects,
     )
   ) {
@@ -442,7 +444,12 @@ function roleForCard(context: CardContext): RunnerHandDevelopmentRole {
     looksLikeDrawOrSearch(text)
   )
     return "draw_or_search_engine";
-  if (looksLikeDefense(text)) return "defense_support";
+  if (
+    runnerEffectsProvideProgramTrashPrevention(
+      context.signals.structuredEffects,
+    ) || looksLikeDefense(text)
+  )
+    return "defense_support";
   if (
     runnerEffectsProvideExposeInformation(context.signals.structuredEffects) ||
     runnerEffectsProvideMultiaccess(context.signals.structuredEffects) ||
@@ -1019,6 +1026,11 @@ function redactedEvidenceForCard(params: {
     `legal_action_present:${params.context.legalAction !== undefined}`,
     `matching_action_candidates:${params.context.matchingCandidates.length}`,
     `duplicate_installed:${params.context.duplicateInstalled}`,
+    ...(runnerEffectsProvideBreakerCredits(
+      params.context.signals.structuredEffects,
+    )
+      ? ["breaker_recurring_economy"]
+      : []),
     ...(params.context.signals.requiresSameTurnAccess
       ? [
           "same_turn_access_required:true",

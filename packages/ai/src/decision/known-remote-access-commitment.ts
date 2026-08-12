@@ -293,6 +293,7 @@ function knownRemoteTrashCreditSupport(
               kind?: string;
               resource?: string;
               target?: string;
+              economyMode?: string;
             }>;
           }
         | undefined
@@ -304,7 +305,12 @@ function knownRemoteTrashCreditSupport(
         continue;
       }
       if (!trashSupportEffectMatchesRoot(effect.target, rootType)) continue;
-      if (effect.kind === "trash_credit") {
+      if (
+        effect.kind === "trash_credit" ||
+        (effect.kind === "recurring_economy" &&
+          effect.resource === "credits" &&
+          effect.economyMode === "restricted_credit")
+      ) {
         const amount = Math.max(0, Math.floor(effect.amount ?? 0));
         if (amount <= 0) continue;
         dedicatedCredits += amount;
@@ -348,6 +354,17 @@ function trashSupportEffectMatchesRoot(
     return true;
   }
   if (normalized === rootType) return true;
+  const tokens = new Set(normalized.split(/[._:-]+/).filter(Boolean));
+  if (rootType === "asset" && tokens.has("node") && tokens.has("trash")) {
+    return true;
+  }
+  if (
+    rootType === "upgrade" &&
+    tokens.has("upgrade") &&
+    tokens.has("trash")
+  ) {
+    return true;
+  }
   return normalized === "node" && rootType === "asset";
 }
 

@@ -38,6 +38,17 @@ describe("remoteTrashRoleForVisibleCard", () => {
     ).toBe("score_acceleration");
   });
 
+  it("classifies a visible structured hosted-credit pool as economy without a legacy role", () => {
+    expect(
+      remoteTrashRoleForVisibleCard({
+        ...card(),
+        definitionId: "onr_v1_330_krumz",
+        counters: { bit: 1 },
+      }),
+    ).toBe("economy");
+
+  });
+
   it("matches remote trash roles by bounded role terms", () => {
     expect(roleForRoles(["remote_agenda_protection"])).toBe(
       "scoring_protection",

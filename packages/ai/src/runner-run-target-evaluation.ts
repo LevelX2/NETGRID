@@ -1922,6 +1922,11 @@ function effectScopeMatchesTarget(
 ): boolean {
   if (!scope) return false;
   if (targetKind === "rd" && scope === "rnd") return true;
+  if (
+    scope === "central" &&
+    (targetKind === "hq" || targetKind === "rd" || targetKind === "archives")
+  )
+    return true;
   if (scope === targetKind) return true;
   if (scope === "server") return true;
   if (targetKind === "remote" && scope === "remote") return true;

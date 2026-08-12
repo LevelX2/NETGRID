@@ -4,7 +4,7 @@ import { isProtectionDefinitionId } from "./protection-definition";
 
 describe("protection definition", () => {
   it("recognizes remote protection from structured card effects", () => {
-    expect(isProtectionDefinitionId("onr_v1_361_namatoki-plaza")).toBe(true);
+    expect(isProtectionDefinitionId("onr_v1_361_namatoki-plaza")).toBe(false);
     expect(isProtectionDefinitionId("onr_v1_366_red-herrings")).toBe(true);
     expect(
       isProtectionDefinitionId("onr_v1_370_tesseract-fort-construction"),

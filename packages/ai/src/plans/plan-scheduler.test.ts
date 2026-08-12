@@ -725,7 +725,6 @@ describe("shared plan scheduler", () => {
   });
 
   it.each([
-    ["corp", "explicitly_nonproductive", CORP_PLAN_PRIORITY_POLICY],
     ["runner", "assessment_unknown", RUNNER_PLAN_PRIORITY_POLICY],
     ["corp", "assessment_unknown", CORP_PLAN_PRIORITY_POLICY],
   ] as const)(
@@ -948,25 +947,30 @@ describe("shared plan scheduler", () => {
     );
   });
 
-  it("accepts early EndTurn only when the completion plan proves the exact remaining action set nonproductive", () => {
-    const credit = candidate("credit");
-    const endTurn = standardEndTurnCandidate();
-    const schedulerContext = context("corp", [credit, endTurn]);
+  it.each([
+    ["runner", RUNNER_PLAN_PRIORITY_POLICY],
+    ["corp", CORP_PLAN_PRIORITY_POLICY],
+  ] as const)(
+    "accepts early %s EndTurn only when the completion plan proves the exact remaining action set nonproductive",
+    (side, policy) => {
+    const credit = candidate("credit", side);
+    const endTurn = standardEndTurnCandidate(side);
+    const schedulerContext = context(side, [credit, endTurn]);
     schedulerContext.input.playerView.own.clicks = 1;
     schedulerContext.actionDispositions = [
       {
         actionId: credit.actionId,
         disposition: "explicitly_nonproductive",
-        ownerModuleId: "corp.economy",
+        ownerModuleId: `${side}.economy`,
         evidenceCode:
-          "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",
+          `${side}_basic_credit_rejected_visible_liquidity_demand_satisfied`,
       },
     ];
-    const economy = module("corp", "corp.economy", "P6", credit);
+    const economy = module(side, `${side}.economy`, "P6", credit);
     economy.discover = () => [];
     const completion = module(
-      "corp",
-      "corp.complete_turn",
+      side,
+      `${side}.complete_turn`,
       "P6",
       endTurn,
       -10_000,
@@ -989,8 +993,8 @@ describe("shared plan scheduler", () => {
     const result = runPlanScheduler({
       context: schedulerContext,
       registry: createSidePlanRegistry({
-        side: "corp",
-        priorityPolicy: CORP_PLAN_PRIORITY_POLICY,
+        side,
+        priorityPolicy: policy,
         modules: [economy, completion],
       }),
       resolveEngineWindow: () => undefined,
@@ -999,7 +1003,8 @@ describe("shared plan scheduler", () => {
     expect(result.lane === "plan" && result.route.head.actionId).toBe(
       endTurn.actionId,
     );
-  });
+    },
+  );
 
   it("rejects incomplete or ambiguous nonproductive action dispositions", () => {
     const action = candidate("credit");

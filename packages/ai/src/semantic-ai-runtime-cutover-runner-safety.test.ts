@@ -696,6 +696,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
       }),
     ];
     input.playerView.stateVersion = 39;
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = 39;
+    }
 
     const decision = chooseRunnerAction(input, {
       runnerTurnPlannerMode: "legacy_compare",

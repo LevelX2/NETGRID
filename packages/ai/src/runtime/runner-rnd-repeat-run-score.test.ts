@@ -60,7 +60,7 @@ describe("staleKnownRndRepeatRunPenalty", () => {
         "plan_priority_class:P6",
         "plan_module:runner.economy",
         "plan_step_capability:gain_general_liquid_credits",
-        "plan_assessment_evidence:runner_engine_certified_basic_liquidity_development",
+        "plan_assessment_evidence:runner_engine_certified_immediate_liquidity_development",
       ]),
     );
     expect(runAlternative?.whyNot).toEqual(

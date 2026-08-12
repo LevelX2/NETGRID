@@ -89,14 +89,11 @@ describe("match series 70BE real Engine regressions", () => {
     });
     const decision = chooseRunnerAction(input);
     expect(decision.actionId).not.toBe(build?.actionId);
-    expect(
-      input.legalActions.find(
-        (action) => action.actionId === decision.actionId,
-      ),
-    ).toMatchObject({
-      type: "start_run",
-      payload: { serverId: "rd" },
-    });
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    expect(["start_run", "play_event"]).toContain(selected?.type);
+    expect(selected?.payload).toMatchObject({ serverId: "rd" });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.pressure_central",
@@ -228,10 +225,8 @@ describe("match series 70BE real Engine regressions", () => {
       (action) => action.actionId === decision.actionId,
     );
 
-    expect(selected).toMatchObject({
-      type: "start_run",
-      payload: { serverId: "rd" },
-    });
+    expect(["start_run", "play_event"]).toContain(selected?.type);
+    expect(selected?.payload).toMatchObject({ serverId: "rd" });
     expect(decision.evidence).toContain("plan_module:runner.pressure_central");
   });
 

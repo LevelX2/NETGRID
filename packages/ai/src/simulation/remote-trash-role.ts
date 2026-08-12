@@ -8,6 +8,7 @@ import {
 } from "../remote-role-ontology-consumer";
 import { cardRolesForId } from "../runtime/card-role-lookup";
 import { rolesMatch } from "../runtime/role-match";
+import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 
 export type RemoteTrashRole =
   | "economy"
@@ -51,6 +52,20 @@ export function remoteTrashRoleForVisibleCard(
   const hint = card.definitionId
     ? REMOTE_TRASH_ROLE_AI_HINTS.get(card.definitionId)
     : undefined;
+  const structuredValue = card.definitionId
+    ? projectRemoteRootValue({
+        definitionId: card.definitionId,
+        visibleCard: card,
+        ...(hint?.effects ? { effects: hint.effects } : {}),
+        ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
+      })
+    : undefined;
+  if (
+    structuredValue?.kind === "finite_economy_pool" ||
+    structuredValue?.kind === "recurring_economy"
+  ) {
+    return "economy";
+  }
   const roles = cardRolesForId(card.definitionId, REMOTE_TRASH_ROLE_AI_HINTS);
   const runtimeDefinition = card.definitionId
     ? RUNTIME_CARDS[card.definitionId]

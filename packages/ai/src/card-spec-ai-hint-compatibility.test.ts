@@ -25,8 +25,6 @@ const cases: Array<{
     values: { economy: 3 },
     purposes: [],
     effectTargets: [
-      "economy.action_credit",
-      "economy.temporary_resource_bank",
       "resource.connection",
       "economy.bank_load",
       "economy.bank_cashout_all",
@@ -97,7 +95,10 @@ const cases: Array<{
       "temporary_install",
     ],
     values: {},
-    purposes: ["temporary_program_install"],
+    purposes: [
+      "temporary_program_install",
+      "choose_stack_or_trash_program_install:install_program_from_stack_or_trash",
+    ],
     effectTargets: [
       "program_search",
       "program",
@@ -116,7 +117,7 @@ const cases: Array<{
     strategies: ["corp.ice_tax_glacier"],
     strategyCovered: true,
     qualityConfidence: "high",
-    effectTargets: [],
+    effectTargets: ["ice.corp_strength_support"],
   },
   {
     id: "onr_proteus_020_digiconda",
@@ -151,6 +152,7 @@ const cases: Array<{
       "access.corp_net_damage_ambush",
       "access.corp_net_damage_ambush",
       "access.corp_net_damage_ambush",
+      "remote.ambush",
     ],
   },
   {
@@ -195,19 +197,20 @@ const signalCases: Record<
       "economy.generic",
       "economy.temporary_resource_bank",
       "resource.connection",
+      "economy.hosted_credit_bank",
+      "economy.hosted_credit_cashout",
     ],
     tacticSignals: ["economy.card"],
     actionTacticSignals: [
       "economy.card",
       "effect:action_economy",
       "effect:counter_economy",
-      "effect:economy",
       "effect:global_modifier",
       "effect_scope:runner",
       "effect_timing:action",
       "effect_timing:persistent",
     ],
-    conditions: ["requires_installed_resource"],
+    conditions: ["requires_installed_resource", "requires_credit_pool"],
     requiredMechanics: [
       "abilities",
       "action",
@@ -228,7 +231,6 @@ const signalCases: Record<
       "economy.counter",
       "economy.generic",
       "economy.high_risk_burst_credit",
-      "economy.turn_start_credit",
       "risk.debt_loss_condition",
       "risk.lose_game_debt",
     ],
@@ -335,7 +337,11 @@ const signalCases: Record<
     ],
   },
   "onr_v1_317_data-masons": {
-    functionSignals: ["economy.rez_discount", "ice.strength_modifier"],
+    functionSignals: [
+      "economy.rez_discount",
+      "ice.strength_modifier",
+      "ice.corp_strength_support",
+    ],
     tacticSignals: [
       "corp.remote_protection",
       "ice.corp_rez_discount",
@@ -404,6 +410,8 @@ const signalCases: Record<
       "access.corp_net_damage_ambush",
       "access.rnd_reveal_requirement",
       "advance.corp_counter_bank",
+      "access.punish",
+      "remote.ambush",
     ],
     tacticSignals: [
       "access.archives_safe_exception",
@@ -416,7 +424,9 @@ const signalCases: Record<
     ],
     actionTacticSignals: [
       "damage.payoff.runner",
+      "effect:ambush",
       "effect:damage",
+      "effect_scope:accessed_card",
       "effect_scope:runner",
       "effect_timing:on_access",
     ],
@@ -439,7 +449,6 @@ const signalCases: Record<
   "onr_v1_197_data-fort-reclamation": {
     functionSignals: [
       "economy.corp_install_rez_budget",
-      "economy.generic",
       "install.corp_new_remote_fort_from_hq",
       "score.remote_fort_creation",
       "score.remote_install_budget",
@@ -460,7 +469,6 @@ const signalCases: Record<
       "effect_timing:when_scored",
     ],
     conditions: [
-      "requires_hq_agenda",
       "requires_score_window",
       "requires_scored_agenda",
     ],
@@ -557,11 +565,19 @@ describe("CS06 effective AI hint compatibility", () => {
       expect.arrayContaining([
         expect.objectContaining({
           strategyId: "corp.ambush_bluff",
-          evidence: ["access.corp_net_damage_ambush", "access.punish"],
+          evidence: [
+            "access.corp_net_damage_ambush",
+            "access.punish",
+            "remote.ambush",
+          ],
         }),
         expect.objectContaining({
           strategyId: "corp.damage_kill",
-          evidence: ["access.corp_net_damage_ambush", "damage.payoff"],
+          evidence: [
+            "access.corp_damage_ambush",
+            "access.corp_net_damage_ambush",
+            "damage.payoff",
+          ],
         }),
       ]),
     );
@@ -601,7 +617,11 @@ describe("CS06 effective AI hint compatibility", () => {
         strategyId: "corp.ambush_bluff",
         role: "punish_payoff",
         roleDetail: "access_net_damage_payoff",
-        evidence: ["access.corp_net_damage_ambush", "access.punish"],
+        evidence: [
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "remote.ambush",
+        ],
         confidence: "high",
       },
       {
@@ -609,7 +629,11 @@ describe("CS06 effective AI hint compatibility", () => {
         strategyId: "corp.damage_kill",
         role: "punish_payoff",
         roleDetail: "access_net_damage_payoff",
-        evidence: ["access.corp_net_damage_ambush", "damage.payoff"],
+        evidence: [
+          "access.corp_damage_ambush",
+          "access.corp_net_damage_ambush",
+          "damage.payoff",
+        ],
         confidence: "medium",
       },
       {

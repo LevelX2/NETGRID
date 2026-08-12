@@ -38,15 +38,15 @@ describe("match D153 Runner decision checkpoints", () => {
       breakBeforeEtrD134Json,
     ],
     [
-      "F06 takes free Archives information instead of an unbound Broker payout at D179",
+      "F06 completes the turn when the ordinary Archives probe is not admitted at D179",
       cashoutForRdD179Json,
     ],
     [
-      "F06 takes certified immediate liquidity without an unbound Broker payout at D185",
+      "F06 completes the turn without an unbound Broker payout at D185",
       cashoutForRdD185Json,
     ],
     [
-      "F07 takes free Archives information instead of an unbound reserve step at D161",
+      "F07 completes the turn when the ordinary Archives probe is not admitted at D161",
       buildRemoteReserveD161Json,
     ],
     [

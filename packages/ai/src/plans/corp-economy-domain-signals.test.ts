@@ -159,7 +159,7 @@ describe("corp economy domain signals", () => {
     });
   });
 
-  it("does not develop generic liquidity while HQ overflow requires cleanup", () => {
+  it("may develop liquidity before mandatory HQ cleanup", () => {
     const input = decisionInput({
       credits: 2,
       clicks: 2,
@@ -180,7 +180,12 @@ describe("corp economy domain signals", () => {
         undefined,
         "corp:23",
       ),
-    ).toBeUndefined();
+    ).toMatchObject({
+      targetCredits: 9,
+      currentCreditsAtRevalidation: 2,
+      gap: 7,
+      actionIds: ["basic-credit"],
+    });
   });
 
   it("extends a completed resident target only across the finite remaining clicks", () => {
@@ -236,6 +241,7 @@ describe("corp economy domain signals", () => {
       instances: [
         {
           moduleId: "corp.complete_turn",
+          createdAtStateVersion: 12,
           evidenceRefs: [
             {
               code: "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",

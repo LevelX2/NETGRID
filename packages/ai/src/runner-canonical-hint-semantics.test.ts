@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { AiHintStructuredEffect } from "./hint-ontology";
 import {
   runnerEffectsProvideDamagePrevention,
+  runnerEffectsProvideBreakerCredits,
   runnerEffectsProvideExposeInformation,
   runnerEffectsProvideMultiaccess,
   runnerEffectsProvideNonNoisyBreakerCredits,
@@ -107,6 +108,17 @@ describe("canonical Runner hint semantics", () => {
 
   it("distinguishes non-noisy breaker credits from generic recurring credits", () => {
     expect(
+      runnerEffectsProvideBreakerCredits([
+        effect({
+          kind: "recurring_economy",
+          timing: "persistent",
+          scope: "runner",
+          resource: "credits",
+          target: "icebreaker",
+        }),
+      ]),
+    ).toBe(true);
+    expect(
       runnerEffectsProvideNonNoisyBreakerCredits([
         effect({
           kind: "recurring_economy",
@@ -119,6 +131,17 @@ describe("canonical Runner hint semantics", () => {
     ).toBe(true);
     expect(
       runnerEffectsProvideNonNoisyBreakerCredits([
+        effect({
+          kind: "recurring_economy",
+          timing: "persistent",
+          scope: "runner",
+          resource: "credits",
+          target: "link",
+        }),
+      ]),
+    ).toBe(false);
+    expect(
+      runnerEffectsProvideBreakerCredits([
         effect({
           kind: "recurring_economy",
           timing: "persistent",

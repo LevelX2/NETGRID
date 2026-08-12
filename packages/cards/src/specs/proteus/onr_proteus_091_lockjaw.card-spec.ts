@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Trash Lockjaw: Give one of your icebreakers +2 strength for the remainder of this run. Use this ability only during an encounter with a piece of ice.",
+      "[T]: Give one of your icebreakers +2 strength for the remainder of this run. Use this ability only during an encounter with a piece of ice.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

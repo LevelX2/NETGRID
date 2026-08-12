@@ -8,6 +8,7 @@ import {
   runnerCoveragePlanHandDisposition,
   runnerDevelopmentCardAdmission,
   runnerFundingRouteCandidateIsMaterializable,
+  runnerTurnLiquidityCandidateIsMaterializable,
   type RunnerCorePlanDomain,
 } from "./runner-core-plan-modules";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
@@ -1279,6 +1280,28 @@ describe("Runner core plan modules", () => {
       gap: 2,
       cadence: { maximumConversions: 2 },
     });
+  });
+
+  it("accepts a guaranteed one-shot credit event as current-turn liquidity", () => {
+    const livewire = exactCardCreditCandidate("livewire-credit", 3);
+    livewire.actionType = "play_event";
+    livewire.costProfile.clickCost = 1;
+    livewire.economyProjection = {
+      ...livewire.economyProjection!,
+      cardsConsumed: 1,
+      netHandDelta: -1,
+      payoutMode: "fixed",
+      reliability: "guaranteed",
+    };
+    const hybrid = structuredClone(livewire);
+    hybrid.economyProjection = {
+      ...hybrid.economyProjection!,
+      cardsDrawn: 1,
+      netHandDelta: 0,
+    };
+
+    expect(runnerTurnLiquidityCandidateIsMaterializable(livewire)).toBe(true);
+    expect(runnerTurnLiquidityCandidateIsMaterializable(hybrid)).toBe(false);
   });
 
   it("fails closed when the current-turn liquidity signal is stale or internally unbounded", () => {

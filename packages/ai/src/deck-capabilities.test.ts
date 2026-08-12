@@ -373,6 +373,42 @@ describe("DeckCapabilityProfile", () => {
     expect(profile.runner?.economyBankTools).toEqual([]);
   });
 
+  it("recognizes a canonical build action with automatic installment cashout", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard(
+        "streetware-1",
+        "onr_proteus_150_streetware-distributor",
+        "runner",
+        "resource",
+        { title: "Streetware Distributor" },
+      ),
+    ];
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "streetware-build",
+          "runner",
+          "activated_card_ability",
+          "streetware-1",
+          "Streetware Distributor: 3 Credits auflegen",
+          { cardImplementationAddsHostedCredits: true },
+        ),
+      ],
+    });
+
+    expect(profile.runner?.economyBankTools).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: "streetware-1",
+        buildActionLegal: true,
+        buildActionIds: ["streetware-build"],
+        cashOutActionLegal: false,
+      }),
+    ]);
+  });
+
   it("does not infer a Runner credit-bank contract from a deposit phrase", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [

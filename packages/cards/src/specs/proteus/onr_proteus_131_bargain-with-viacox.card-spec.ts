@@ -80,8 +80,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_131_bargain-with-viacox.",
       },
     ],
     capabilities: [],

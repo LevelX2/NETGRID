@@ -1174,11 +1174,10 @@ export function actionMatchesCard(
   if (action.side !== "runner") return false;
   const persistentDevelopment = persistentDevelopmentActionProjection(action);
   if (persistentDevelopment) {
-    return (
-      persistentDevelopment.developsGripCard &&
-      (persistentDevelopment.targetCardId === card.instanceId ||
-        persistentDevelopment.targetDefinitionId === card.definitionId)
-    );
+    if (!persistentDevelopment.developsGripCard) return false;
+    return persistentDevelopment.targetCardId !== undefined
+      ? persistentDevelopment.targetCardId === card.instanceId
+      : persistentDevelopment.targetDefinitionId === card.definitionId;
   }
   if (
     action.type !== "install_card" &&
@@ -1189,10 +1188,15 @@ export function actionMatchesCard(
     return false;
   }
   const payload = action.payload ?? {};
+  const instanceIds = [
+    action.source !== "basic_action" ? action.source : undefined,
+    payload.cardId,
+    payload.sourceCardId,
+  ].filter((value): value is string => typeof value === "string");
+  if (instanceIds.length > 0) {
+    return instanceIds.includes(card.instanceId);
+  }
   return (
-    action.source === card.instanceId ||
-    payload.cardId === card.instanceId ||
-    payload.sourceCardId === card.instanceId ||
     payload.sourceDefinitionId === card.definitionId ||
     payload.cardDefinitionId === card.definitionId ||
     payload.targetCardDefinitionId === card.definitionId

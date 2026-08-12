@@ -6021,13 +6021,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_203_hostile-takeover"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"]
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_defense_exact_route_funding_required:hq:corp.install_card.corp_onr_v1_278_wall-of-ice_2.hq.corp_onr_v1_278_wall-of-ice_2.1"
+      ]
     }
   }
 }

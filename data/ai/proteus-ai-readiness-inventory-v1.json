@@ -36,12 +36,12 @@
       "access_ambush": 11,
       "bad_publicity": 8,
       "baseline": 41,
-      "complex_multi_ability": 10,
+      "complex_multi_ability": 8,
       "hidden_resource": 16,
       "random_outcome": 4,
       "run_modification": 11,
-      "target_choice": 25,
-      "temporary_action": 13,
+      "target_choice": 24,
+      "temporary_action": 16,
       "virus_counter": 7,
       "x_cost": 8
     }
@@ -3506,7 +3506,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 2,
-        "effectCount": 0
+        "effectCount": 2
       },
       "removalConditions": [
         "hidden_resource_decision_smoke_green",
@@ -3648,9 +3648,9 @@
       "cardId": "onr_proteus_134_cortical-cybermodem",
       "side": "runner",
       "cardType": "hardware",
-      "primaryFamily": "complex_multi_ability",
+      "primaryFamily": "temporary_action",
       "classificationReasons": [
-        "multiple_semantic_surfaces"
+        "temporary_or_delayed_semantics"
       ],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25"
@@ -3662,7 +3662,7 @@
         "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_complex_multi_ability"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 0,
         "effectCount": 5
@@ -3779,9 +3779,9 @@
       "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
       "side": "runner",
       "cardType": "hardware",
-      "primaryFamily": "target_choice",
+      "primaryFamily": "temporary_action",
       "classificationReasons": [
-        "target_profile_present"
+        "temporary_or_delayed_semantics"
       ],
       "pilotDeckIds": [],
       "evidence": {
@@ -3796,7 +3796,7 @@
         "effectCount": 2
       },
       "removalConditions": [
-        "target_choice_decision_smoke_green",
+        "temporary_action_decision_smoke_green",
         "strategy_coverage_or_explicit_non_strategy_decision"
       ]
     },
@@ -4084,7 +4084,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 0,
-        "effectCount": 6
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -4095,9 +4095,9 @@
       "cardId": "onr_proteus_151_sunburst-cranial-interface",
       "side": "runner",
       "cardType": "hardware",
-      "primaryFamily": "complex_multi_ability",
+      "primaryFamily": "temporary_action",
       "classificationReasons": [
-        "multiple_semantic_surfaces"
+        "temporary_or_delayed_semantics"
       ],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25"
@@ -4109,7 +4109,7 @@
         "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_complex_multi_ability"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 0,
         "effectCount": 5

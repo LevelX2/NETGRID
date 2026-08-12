@@ -25,7 +25,7 @@ describe("deck strategy completeness gate", () => {
     cards: Array<{ cardId: string; quantity: number }>;
   }>;
 
-  it("covers all 44 active standard decks deterministically", () => {
+  it("classifies all 44 active standard decks and exposes under-equipped lists deterministically", () => {
     expect(activeDecks).toHaveLength(44);
     const neutralDeckNames: string[] = [];
 
@@ -51,7 +51,15 @@ describe("deck strategy completeness gate", () => {
       }
     }
 
-    expect(neutralDeckNames).toEqual(["Ghost Circuit"]);
+    expect(neutralDeckNames).toEqual([
+      "Bit-Denial Lock",
+      "Deep Market Engine",
+      "Ghost Circuit",
+      "Inside Forgery Loop",
+      "Krashkurs: Clown-Kreditmaschine",
+      "Proteus Runner - Hidden Backdoor Sabotage",
+      "Rent-I-Con: Das Shellspiel",
+    ]);
   });
 
   it("keeps all 21 versioned snapshots deterministic and taxonomy-complete", () => {

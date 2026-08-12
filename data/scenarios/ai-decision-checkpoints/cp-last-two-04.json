@@ -100,7 +100,7 @@
   },
   "engine": {
     "stateVersion": 529,
-    "stateHash": "fnv1a:557b2618",
+    "stateHash": "fnv1a:ed6744a3",
     "testOnlyGameState": {
       "matchId": "match_1d63717d70fc81ef",
       "baseline": {
@@ -2281,8 +2281,9 @@
         "traceId": "op_trace.529.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2",
         "sourceCardInstanceId": "corp_onr_v1_284_chance-observation_2",
         "sourceDefinitionId": "onr_v1_284_chance-observation",
-        "baseTraceStrength": 5,
-        "corpBidMax": 15,
+        "traceLimit": 5,
+        "effectiveTraceLimit": 5,
+        "corpBidMax": 5,
         "status": "corp_bid",
         "successEffect": {
           "type": "add_tag",
@@ -2296,7 +2297,7 @@
         "choiceId": "op_trace.529.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2.corp.bid.529",
         "side": "corp",
         "source": "trace:op_trace.529.onr_v1_284_chance-observation.corp_onr_v1_284_chance-observation_2",
-        "prompt": "Korp Trace-Bid wählen (Base Trace 5)",
+        "prompt": "Korp Trace-Gebot wählen (Limit 5)",
         "kind": "bid_amount",
         "options": [
           {
@@ -2334,66 +2335,6 @@
             "label": "5 Credits",
             "publicLabel": "5 Credits",
             "value": 5
-          },
-          {
-            "id": "bid_6",
-            "label": "6 Credits",
-            "publicLabel": "6 Credits",
-            "value": 6
-          },
-          {
-            "id": "bid_7",
-            "label": "7 Credits",
-            "publicLabel": "7 Credits",
-            "value": 7
-          },
-          {
-            "id": "bid_8",
-            "label": "8 Credits",
-            "publicLabel": "8 Credits",
-            "value": 8
-          },
-          {
-            "id": "bid_9",
-            "label": "9 Credits",
-            "publicLabel": "9 Credits",
-            "value": 9
-          },
-          {
-            "id": "bid_10",
-            "label": "10 Credits",
-            "publicLabel": "10 Credits",
-            "value": 10
-          },
-          {
-            "id": "bid_11",
-            "label": "11 Credits",
-            "publicLabel": "11 Credits",
-            "value": 11
-          },
-          {
-            "id": "bid_12",
-            "label": "12 Credits",
-            "publicLabel": "12 Credits",
-            "value": 12
-          },
-          {
-            "id": "bid_13",
-            "label": "13 Credits",
-            "publicLabel": "13 Credits",
-            "value": 13
-          },
-          {
-            "id": "bid_14",
-            "label": "14 Credits",
-            "publicLabel": "14 Credits",
-            "value": 14
-          },
-          {
-            "id": "bid_15",
-            "label": "15 Credits",
-            "publicLabel": "15 Credits",
-            "value": 15
           }
         ],
         "minSelections": 1,

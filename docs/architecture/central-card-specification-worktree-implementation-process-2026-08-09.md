@@ -468,12 +468,20 @@ Umsetzungsstand 2026-08-12:
   Sicherheitsbedarfe sind fokussiert abgesichert. Synthetische Zeugen
   verwenden wie produktive Engine-Actions die kanonischen
   `store_credits`-/`withdraw_credits`-Bindings.
-- Die im Playtest sichtbaren Access-losen Wiederholungsruns wurden nicht über
-  einen Kostenfallback kaschiert. Random-Break-or-Damage-Routen werden nun bei
-  Runbeginn, Jack-out-Revalidierung und verbleibender Encounter-Pfadprüfung
-  mit demselben side-sicheren Risikovertrag bewertet. Nach einem Run ohne
-  Access bleibt derselbe Server gesperrt, bis sichtbare
-  Routenentwicklungs-Evidence vorliegt.
+- Die im Playtest sichtbaren Access-losen Wiederholungsruns werden nicht über
+  eine verlaufsbasierte Sperre oder einen Kostenfallback kaschiert.
+  Random-Break-or-Damage-Routen werden bei Runbeginn,
+  Jack-out-Revalidierung und verbleibender Encounter-Pfadprüfung mit demselben
+  side-sicheren Risikovertrag bewertet. Vor jedem neuen Run entscheidet der
+  aktuelle vollständige Routen-Quote einschließlich ungebrochener Effekte auf
+  folgendes ICE; bloßes Kartenziehen oder Creditnehmen gilt nicht als Beleg
+  einer passierbar gewordenen Route.
+- Der fokussierte Canis-Major-Zeuge belegt die Ursachenachse: Ein inneres Code
+  Gate ist ohne den Run-Dauer-Effekt bezahlbar und mit dessen `+2`-Stärke bei
+  unverändertem Rig und Creditpool nicht erreichbar. Der aktuelle reale
+  Baseline-Slot `strategy_panel_hybrid_score_punish_cheap_bag` mit Seed
+  `ai-behavior-baseline-v1-10` endet akzeptiert nach 103 Entscheidungen ohne
+  Jack-out oder harten Fehler.
 - Corp-Punish-Quotes bilden öffentlich sichtbare, counterbezahlte
   Damage-Prevention als begrenzte Antwortspanne ab. Dadurch bleibt eine
   sichtbare Trace-Tag-/Damage-Folgeroute vollständig quotierbar, ohne

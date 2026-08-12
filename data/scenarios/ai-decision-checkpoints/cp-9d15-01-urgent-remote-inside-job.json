@@ -4997,14 +4997,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2"
+        "actionId": "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run"
       }
     ],
     "runTargets": [
       {
         "requiredEvidence": ["run_action_projection_bypass_first_ice:true"],
         "targetServerId": "remote_1",
-        "actionId": "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2",
+        "actionId": "runner.play_event.runner_onr_v1_094_inside-job_2.remote_1.runner_onr_v1_094_inside-job_2.onr_v1_094_inside-job:abilities_on_play_make_run",
         "recommendation": "run_now",
         "pathPassability": "reachable"
       }

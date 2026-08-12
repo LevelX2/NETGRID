@@ -509,10 +509,10 @@ function certifyExactTraceTagResponse(
   if (!maximumRunnerBid || !zeroRunnerBid) return undefined;
 
   // Original Trace is open and sequential: Corp bids first from zero up to
-  // the Trace limit, then Runner responds. A tie belongs to the Runner, so a
-  // successful tag branch exists only if the maximum Corp bid exceeds Link.
+  // the Trace limit, then Runner responds. A tie belongs to the Corp, so a
+  // successful tag branch exists once the maximum Corp bid reaches Link.
   const runnerLink = afterCorpBid.trace.runnerLink!;
-  if (maximumCorpBid.value <= runnerLink) return undefined;
+  if (maximumCorpBid.value < runnerLink) return undefined;
   const tieCorpBid = corpBidOptions.find(
     (option) => option.value === runnerLink,
   );
@@ -529,11 +529,21 @@ function certifyExactTraceTagResponse(
       tieRunnerWindow && tieRunnerZero
         ? applyExactChoice(tieRunnerWindow, "runner", tieRunnerZero.id)
         : undefined;
+    const tiedOutcomes = tied ? exactTagApplicationOutcomes(tied) : undefined;
+    if (!tiedOutcomes) {
+      return undefined;
+    }
+    const tiedTagAmounts = tiedOutcomes.states.map(
+      (outcome) => outcome.runner.tags - simulationState.runner.tags,
+    );
     if (
-      !tied ||
-      tied.trace !== undefined ||
-      tied.pendingChoice !== undefined ||
-      tied.runner.tags !== simulationState.runner.tags
+      tiedTagAmounts.some(
+        (amount) =>
+          !Number.isSafeInteger(amount) ||
+          amount < 0 ||
+          amount > tagEffect.amount,
+      ) ||
+      Math.max(...tiedTagAmounts) !== tagEffect.amount
     ) {
       return undefined;
     }

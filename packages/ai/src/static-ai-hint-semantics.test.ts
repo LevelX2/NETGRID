@@ -29,14 +29,7 @@ describe("static AI hint semantics", () => {
     expect(hqInterface?.tacticSignals).toEqual(
       hintById.get("onr_v1_129_hq-interface")?.actionTacticSignals,
     );
-    expect(hqInterface?.strategySupport).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          strategyId: "runner.hq_pressure",
-          role: "payoff_anchor",
-        }),
-      ]),
-    );
+    expect(hqInterface?.strategySupport).toEqual([]);
   });
 
   it("keeps the ETR compatibility and effect semantics of the audited ICE", () => {
@@ -51,7 +44,12 @@ describe("static AI hint semantics", () => {
         expect.arrayContaining(["corp_ice.end_run", "ice.etr"]),
       );
       expect(hint?.actionTacticSignals).toEqual(
-        expect.arrayContaining(["effect:etr", "effect:remote_protection"]),
+        expect.arrayContaining([
+          "corp.remote_protection",
+          "effect:etr",
+          "effect_scope:run_path",
+          "effect_timing:encounter_resolution",
+        ]),
       );
     }
   });

@@ -13,9 +13,9 @@ const FIXTURES = [
     negativeInstallJson,
   ],
   ["stops a saturated coverage search", saturatedSearchJson],
-  ["converts a rich-credit repeat into progress", richCreditRepeatJson],
+  ["funds the bound same-turn economy development", richCreditRepeatJson],
   [
-    "converts the overflow window into a free Archives information run",
+    "does not force an ordinary Archives run outside its deterministic opportunity",
     overflowDrawJson,
   ],
 ] as const;

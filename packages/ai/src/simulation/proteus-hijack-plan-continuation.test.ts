@@ -20,22 +20,22 @@ describe("Proteus Hijack plan continuation", () => {
       runnerControllerMode: "current_candidate",
       corpControllerMode: "current_candidate",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: [68, 69],
+        actionIndices: [65, 66],
         capture: (snapshot) => captures.push(snapshot),
       },
     });
 
     const play = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 68,
+      (entry) => entry.stateVersionBefore === 65,
     );
     const choice = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 69,
+      (entry) => entry.stateVersionBefore === 66,
     );
     const playCapture = captures.find(
-      (capture) => capture.state.stateVersion === 68,
+      (capture) => capture.state.stateVersion === 65,
     );
     const choiceCapture = captures.find(
-      (capture) => capture.state.stateVersion === 69,
+      (capture) => capture.state.stateVersion === 66,
     );
 
     expect(summary.errors).toEqual([]);
@@ -85,7 +85,7 @@ describe("Proteus Hijack plan continuation", () => {
         "runner.play_event.runner_onr_proteus_110_hijack_1.runner_onr_proteus_110_hijack_1",
       sourceCardDefinitionId: "onr_proteus_110_hijack",
       sourceCapabilityKey: "install_grip_program_or_hardware_with_temp_credits",
-      createdAtStateVersion: 69,
+      createdAtStateVersion: 66,
     });
     expect(
       choiceCapture

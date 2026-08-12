@@ -313,6 +313,70 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
+  it("lets a completed Broker cycle yield to meaningful hand development", () => {
+    const bankSource = visibleCard(
+      "runner-credit-bank-source",
+      "runner",
+      "resource",
+      {
+        definitionId: "onr_v1_154_broker",
+        title: "Credit Bank Source",
+      },
+    );
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "activated_card_ability",
+        "Credits auf Bank legen",
+        { credits: 0 },
+        {
+          source: bankSource.instanceId,
+          payload: brokerAbilityPayload("build", bankSource.instanceId),
+        },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 9;
+    input.playerView.own.rig = [bankSource];
+    input.playerView.own.gripOrHq = [
+      visibleCard("runner-hand-1", "runner", "resource"),
+      visibleCard("runner-hand-2", "runner", "resource"),
+      visibleCard("runner-hand-3", "runner", "resource"),
+      visibleCard("runner-hand-4", "runner", "resource"),
+    ];
+    input.playerView.own.stackOrRdCount = 10;
+    input.eventTail = [
+      publicEvent("bank-load", "activated_card_ability", 1, {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        sourceDefinitionId: bankSource.definitionId,
+        hostedCreditsAdded: 3,
+        hostedCreditsAfter: 3,
+      }),
+      publicEvent("bank-cash-out", "activated_card_ability", 2, {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        sourceDefinitionId: bankSource.definitionId,
+        hostedCreditsTaken: 3,
+        hostedCreditsAfter: 0,
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expectPlanDecision(decision, {
+      actionId: "draw",
+      planKind: "runner.develop_board_and_hand",
+      capability: "develop_runner_option_development",
+      priorityClass: "P6",
+    });
+    expect(actionAlternative(decision, "broker-load")?.selected).toBe(false);
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "runner_credit_bank_hold_completed_cycle_for_development",
+    );
+  });
+
   it("keeps Broker held and uses last productive liquidity above the finite reserve", () => {
     const bankSource = visibleCard(
       "runner-credit-bank-source",

@@ -1,7 +1,7 @@
 # Trace Open Bidding Alignment Plan
 
 Status: Policy-Abgleich umgesetzt
-Stand: 2026-05-17
+Stand: 2026-08-12
 Primärer Agent: card-enablement-ai-knowledge-agent
 
 ## Zielbild
@@ -9,20 +9,20 @@ Primärer Agent: card-enablement-ai-knowledge-agent
 NETGRID bleibt bei der modernen, offenen Trace-Logik:
 
 - Die Korp wählt zuerst ein sichtbares Trace-Gebot.
-- Der Runner wählt danach sein Link-Gebot mit Kenntnis von Basis-Trace, Korp-Gebot, aktueller Trace-Stärke und eigenem Link.
-- Ein Trace ist erfolgreich, wenn `traceStrength > runnerStrength`.
-- Gleichstand genügt dem Runner, um den Trace abzuwehren.
-- Die Zahl bei "Trace N" ist die Basis-Trace-Stärke, nicht die gesamte Obergrenze.
-- "Unbegrenzt" meint nicht unendlich, sondern "bis zur aktuell zahlbaren Regelobergrenze".
+- Der Runner wählt danach sein Link-Gebot mit Kenntnis von Trace-Limit, Korp-Gebot, aktuellem Trace-Wert und eigenem Link.
+- `Trace N` setzt das Trace-Limit N. Die Korp darf 0 bis zum effektiven Limit ausgeben; der tatsächlich ausgegebene Betrag bildet den Trace-Wert.
+- Ein Trace ist erfolgreich, wenn `traceValue >= runnerStrength`.
+- Gleichstand reicht der Korp für einen erfolgreichen Trace.
+- Trace-Wert und Trace-Limit sind getrennte Größen; Modifier müssen ausdrücklich eine oder beide Größen verändern.
 
-Damit weicht NETGRID bewusst vom ursprünglichen blinden beziehungsweise gleichzeitig verdeckten Netrunner-Auktionsgefühl ab. Diese Abweichung ist gewollt, weil die offene Android-Netrunner-nahe Sequenz für digitale Bedienung, KI-Entscheidungen, Chronik und Debugging praktikabler ist.
+Damit übernimmt NETGRID Trace-Limit, Trace-Wert und die Corp-freundliche Gleichstandsregel des Originalspiels, weicht aber weiterhin bewusst vom ursprünglichen blinden beziehungsweise gleichzeitig verdeckten Auktionsablauf ab. Die offene sequenzielle Bedienung bleibt für UI, KI, Chronik und Debugging verbindlich; eine verdeckte Originalablauf-Variante kann später als Spieloption folgen.
 
 Dieses Dokument war ursprünglich ein Planungsartefakt. Der P0-Regel- und Dokumentationsabgleich ist am 2026-05-17 umgesetzt worden; verbleibende P1/P2-Punkte bleiben als Folgearbeit beschrieben.
 
 ## Umsetzungsergebnis 2026-05-17
 
 - Die offene sequenzielle Trace-Regel ist als verbindliche NETGRID-Regel bestätigt: Korp-Gebot zuerst, danach Runner-Gebot mit sichtbarer Trace-Stärke.
-- Der Kernvertrag bleibt `traceStrength = baseTraceStrength + corpBid` und `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`; erfolgreich ist nur `traceStrength > runnerStrength`.
+- Der aktuelle Kernvertrag ist `traceValue = corpBid + traceValueModifiers` bei `0 <= corpBid <= effectiveTraceLimit` und `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`; erfolgreich ist `traceValue >= runnerStrength`.
 - Öffentlich sichtbare Korp-Gebote sind ein erlaubter Trace-Schritt und kein Hidden-Info-Leak.
 - Runner-`PendingChoice`-Daten bleiben runner-privat; Reconnect, KI, PublicEvents, Undo-Preview und Chronik dürfen keine privaten Choice-Rohdaten der falschen Seite enthalten.
 - Signpost und The Springboard sind nicht mehr offen: `spotcheck-2026-05-16-trace-link-post-bid-resolvers` hat beide Karten auf moderne post-bid Trace-Link-Choices gebracht.
@@ -59,14 +59,14 @@ Dieses Dokument war ursprünglich ein Planungsartefakt. Der P0-Regel- und Dokume
 
 ### Engine
 
-Die Engine startet Trace-Fenster offen und sequenziell. Bei ICE-Subroutinen wird die Basis-Trace-Stärke aus der Subroutine gelesen, dann ein Korp-Bid-Fenster geöffnet. Die Korp kann innerhalb der zahlbaren Obergrenze bieten. Danach wird die sichtbare Trace-Stärke berechnet und ein Runner-Bid-Fenster geöffnet.
+Die Engine startet Trace-Fenster offen und sequenziell. Bei ICE-Subroutinen wird das Trace-Limit aus der Subroutine gelesen und ein Korp-Bid-Fenster für 0 bis zum effektiven Limit geöffnet. Der tatsächlich bezahlte Betrag bildet den sichtbaren Trace-Wert; danach wird das Runner-Bid-Fenster geöffnet.
 
 Der Kernvergleich ist aktuell:
 
 ```text
-traceStrength = baseTraceStrength + corpBid
+traceValue = corpBid + traceValueModifiers
 runnerStrength = runnerLink + runnerBid
-traceSuccessful = traceStrength > runnerStrength
+traceSuccessful = traceValue >= runnerStrength
 ```
 
 Das ist für die gewählte moderne Logik korrekt.
@@ -77,7 +77,7 @@ Die Chronik zeigt aktuell öffentlich, welches Korp-Gebot gewählt wurde. Unter 
 
 ### KI
 
-Die Korp-KI bietet aktuell sehr einfach abhängig vom Schwierigkeitsgrad. Die Runner-KI bietet so, dass sie bei ausreichenden Mitteln mindestens Gleichstand erreicht. Das passt zum offenen Modell, ist aber noch nicht vollständig quellen- und karteneffektsensitiv.
+Die Korp-KI bietet innerhalb des effektiven Trace-Limits. Die Runner-KI muss bei ausreichenden Mitteln den sichtbaren Trace-Wert um mindestens 1 übertreffen; Gleichstand wehrt den Trace nicht ab.
 
 ### Regeln und Kartentexte
 
@@ -98,9 +98,9 @@ Die größte verbleibende Drift liegt nicht im Trace-Kern, sondern in Kartentext
 
 - Offene Korp-Gebote in der Chronik sind unter dem NETGRID-Zielmodell korrekt.
 - Runner-Entscheidung nach sichtbarem Korp-Gebot ist korrekt.
-- Gleichstand zugunsten des Runners ist korrekt.
-- `Trace N` als Basiswert plus Korp-Gebot ist korrekt.
-- "Unbegrenzt" ist als "bis zur zahlbaren Obergrenze" gemeint, sollte aber sprachlich präziser werden.
+- Gleichstand zugunsten der Korp ist korrekt.
+- `Trace N` als Korp-Gebotslimit ist korrekt.
+- Die angebotenen Korp-Gebote sind auf das effektive Trace-Limit und die tatsächlich zahlbaren Quellen begrenzt.
 
 ### Was noch abzugleichen ist
 
@@ -196,7 +196,7 @@ Für Karten wie Signpost und The Springboard sollte kein neues verdecktes Reveal
 3. Runner-Bid-Fenster enthält normale Credit-Gebote und verfügbare Link-Booster.
 4. Runner kann Link-Booster bezahlen oder einsetzen, solange sie für diesen Trace legal sind.
 5. Engine berechnet `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`.
-6. Trace-Erfolg bleibt `traceStrength > runnerStrength`.
+6. Trace-Erfolg ist `traceValue >= runnerStrength`.
 
 Vorteile:
 
@@ -254,13 +254,13 @@ Kurzfristig Option A beibehalten und sauber dokumentieren. Option B nur dann pla
 
 ### Begriffe
 
-- `Trace N`: Basis-Trace-Stärke N.
-- `Korp-Gebot`: sichtbare Zusatzstärke, bezahlt aus zulässigen Korp-Quellen.
-- `Trace-Stärke`: Basis-Trace-Stärke plus Korp-Gebot plus zulässige Trace-Modifikatoren.
+- `Trace N`: Trace-Limit N.
+- `Korp-Gebot`: sichtbarer bezahlter Trace-Wert innerhalb des effektiven Limits.
+- `Trace-Wert`: Korp-Gebot plus ausdrückliche Trace-Wert-Modifikatoren.
 - `Runner-Link`: statischer aktueller Link des Runners vor Runner-Gebot.
 - `Runner-Gebot`: bezahlte Zusatzstärke aus Credits und zulässigen Link-Bid-Quellen.
 - `Runner-Stärke`: Runner-Link plus Runner-Gebot plus temporäre Link-Booster.
-- `Korp-Bid-Obergrenze`: maximal wählbares Korp-Gebot nach Credits, Zusatzquellen und Limits.
+- `Korp-Bid-Obergrenze`: Minimum aus effektivem Trace-Limit und tatsächlich zahlbaren Credits beziehungsweise Zusatzquellen.
 - `Runner-Bid-Obergrenze`: maximal wählbares Runner-Gebot nach Credits und Zusatzquellen.
 
 ### UI-Verbesserungen
@@ -280,9 +280,9 @@ Kurzfristig Option A beibehalten und sauber dokumentieren. Option B nur dann pla
 
 ### Engine
 
-- Data Raven: Basis 5, Korp-Gebot 2, Runner-Link 0, Runner-Gebot 6 => Trace erfolgreich.
-- Data Raven: Basis 5, Korp-Gebot 2, Runner-Link 0, Runner-Gebot 7 => Trace abgewehrt.
-- Gleichstand schützt Runner.
+- Data Raven: Trace-Limit 5, Korp-Gebot 2, Runner-Link 0, Runner-Gebot 2 => Trace erfolgreich.
+- Data Raven: Trace-Limit 5, Korp-Gebot 2, Runner-Link 0, Runner-Gebot 3 => Trace abgewehrt.
+- Gleichstand gewinnt die Korp.
 - Rabbit reduziert nur die Korp-Bid-Obergrenze bei ICE-Traces.
 - Hacker Tracker Central erhöht verfügbare Korp-Bid-Quellen und erhält nach Trace Counter.
 - Krumz-Bits werden korrekt als Korp-Bid-Quelle verbraucht.
@@ -306,7 +306,7 @@ Kurzfristig Option A beibehalten und sauber dokumentieren. Option B nur dann pla
 
 ### KI
 
-- Runner-KI bietet bei offenem Trace mindestens bis Gleichstand, wenn möglich.
+- Runner-KI bietet bei offenem Trace mindestens einen Punkt über den Trace-Wert, wenn möglich und strategisch sinnvoll.
 - Runner-KI berücksichtigt Link-Booster und wiederkehrende Link-Credits.
 - Korp-KI überschreitet nie die aktuelle Bid-Obergrenze.
 - KI-Reason-Codes nennen sichtbare moderne Trace-Entscheidungen.

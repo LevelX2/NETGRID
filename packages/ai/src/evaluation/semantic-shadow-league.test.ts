@@ -261,7 +261,7 @@ describe("SemanticShadowLeague", () => {
     });
     expect(
       scenario(report, "runner_real_low_credits").expectedTopActionTypes,
-    ).toEqual(["start_run"]);
+    ).toEqual(["play_event", "start_run"]);
     expect(
       scenario(report, "runner_real_low_credits").expectedPilotEligibleScopes,
     ).toEqual(["runner_safe_access"]);
@@ -279,7 +279,7 @@ describe("SemanticShadowLeague", () => {
     );
     expect(
       scenario(report, "runner_real_safe_hq_access").expectedTopActionTypes,
-    ).toEqual(["start_run"]);
+    ).toEqual(["play_event", "start_run"]);
     expect(
       scenario(report, "runner_real_remote_score_threat")
         .remoteContestPilotCandidate,

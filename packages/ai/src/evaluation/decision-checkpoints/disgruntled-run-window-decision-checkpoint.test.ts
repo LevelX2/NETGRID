@@ -63,7 +63,7 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     const actionId =
-      "runner.trigger_ability.runner_onr_proteus_106_disgruntled-ice-technician_1.runner_onr_proteus_106_disgruntled-ice-technician_1";
+      "runner.trigger_ability.runner_onr_proteus_106_disgruntled-ice-technician_1.runner_onr_proteus_106_disgruntled-ice-technician_1.onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run";
     const planInstanceId = "plan:runner.convert_run_window:run%3A277";
     expect(result.selectedAction).toMatchObject({
       actionId,
@@ -73,6 +73,11 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
       payload: {
         abilityId: "derez_fully_broken_passed_ice_and_end_run",
         sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityKey:
+          "post_pass_derez_fully_broken_ice_end_run",
+        cardImplementationAbilityId:
+          "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
         targetIceId: "corp_onr_v1_237_data-wall_1",
         targetIceDefinitionId: "onr_v1_237_data-wall",
         paymentAmount: 0,
@@ -125,8 +130,9 @@ describe("Disgruntled Ice Technician run-window checkpoint", () => {
       sourceCardInstanceId:
         "runner_onr_proteus_106_disgruntled-ice-technician_1",
       sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
-      abilityId: "derez_fully_broken_passed_ice_and_end_run",
-      abilityBindingMethod: "engine_payload",
+      abilityId:
+        "onr_proteus_106_disgruntled-ice-technician:post_pass_derez_fully_broken_ice_end_run",
+      abilityBindingMethod: "canonical_capability_id",
       projectionIssues: [],
     });
     expect(JSON.stringify(result.input)).not.toMatch(

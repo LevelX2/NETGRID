@@ -101,8 +101,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_134_cortical-cybermodem.",
       },
     ],
     capabilities: [],
