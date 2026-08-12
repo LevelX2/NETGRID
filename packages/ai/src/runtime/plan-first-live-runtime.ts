@@ -256,7 +256,10 @@ import {
   visibleDeflectorSubroutineCanResolve,
 } from "../visible-run-analysis";
 import { runnerRemoteHasKnownNoCurrentPayoff } from "./runner-known-access-payoff-context";
-import { runnerStrategicExchangeHardExclusion } from "./runner-strategic-exchange";
+import {
+  runnerStrategicExchangeHardExclusion,
+  runnerStrategicExchangeKinds,
+} from "./runner-strategic-exchange";
 import {
   currentEncounteredIceCard,
   currentRunHasPendingAutoPassIce,
@@ -1886,6 +1889,17 @@ export function runnerActionDispositions(
       continue;
     }
     if (
+      runnerStrategicExchangeKinds(candidate).includes("self_damage") &&
+      !delegatedFundingActionIds.has(candidate.actionId)
+    ) {
+      add(
+        candidate.actionId,
+        "runner.economy",
+        "runner_self_damage_economy_requires_bound_parent_funding",
+      );
+      continue;
+    }
+    if (
       candidate.semanticActionType === "turn_flow.end_turn" &&
       candidate.sourceKind === "card" &&
       !specializedEconomyActionIds.has(candidate.actionId)
@@ -3264,6 +3278,7 @@ function buildRunnerDomain(
                 deadline: "end_of_current_turn",
                 targetCredits: route.targetCredits,
                 remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+                allowStrategicExchange: true,
                 evidence: [
                   route.projectionEvidenceCode,
                   "run_lock_release_conversion_click_reserved:1",
@@ -4085,6 +4100,14 @@ function buildRunnerDomain(
           )
         : undefined;
       if (executableNow && !candidate) return [];
+      if (
+        candidate !== undefined &&
+        runnerStrategicExchangeKinds(candidate).includes("self_damage")
+      ) {
+        // Irreversible financing is support for an already selected parent
+        // plan, never a standalone board-development objective.
+        return [];
+      }
       if (
         candidate !== undefined &&
         runnerAccessPayoffInstallLacksBoundAccessRoute(
@@ -5618,6 +5641,7 @@ type RunnerExactFundingRouteRequest = Pick<
 > & {
   remainingClicks: number;
   allowIncrementalProgress?: boolean;
+  allowStrategicExchange?: boolean;
 };
 
 function runnerExactFundingRouteContract(
@@ -5646,7 +5670,11 @@ function runnerExactFundingRouteContract(
   });
   const result = searchFundingRoutes({
     demand,
-    candidates: candidates.filter(runnerFundingRouteCandidateIsMaterializable),
+    candidates: runnerExactFundingRouteCandidates(
+      candidates,
+      request,
+      demand,
+    ),
     remainingClicks: request.remainingClicks,
     maxSteps: Math.max(1, request.remainingClicks),
     maxRoutes: 8,
@@ -5678,6 +5706,72 @@ function runnerExactFundingRouteContract(
       evidenceCodes: [...new Set([...result.evidence, ...bestRoute.evidence])],
     },
   };
+}
+
+function runnerExactFundingRouteCandidates(
+  candidates: readonly ActionSemanticCandidate[],
+  request: RunnerExactFundingRouteRequest,
+  demand: ReturnType<typeof createRunnerCreditDemand>,
+): ActionSemanticCandidate[] {
+  const materializable = candidates.filter(
+    runnerFundingRouteCandidateIsMaterializable,
+  );
+  const ordinary = materializable.filter(
+    (candidate) =>
+      !runnerStrategicExchangeKinds(candidate).includes("self_damage"),
+  );
+  if (request.allowStrategicExchange !== true) return ordinary;
+
+  const routeCoversDemand = (
+    routeCandidates: readonly ActionSemanticCandidate[],
+  ): boolean => {
+    const result = searchFundingRoutes({
+      demand,
+      candidates: routeCandidates,
+      remainingClicks: request.remainingClicks,
+      maxSteps: Math.max(1, request.remainingClicks),
+      maxRoutes: 8,
+    });
+    return (
+      result.bestRoute.status === "covered_guaranteed" &&
+      result.bestRoute.reliability === "guaranteed" &&
+      result.bestRoute.horizon === "same_turn" &&
+      result.bestRoute.projectedGap === 0
+    );
+  };
+  if (routeCoversDemand(ordinary)) return ordinary;
+
+  const selfDamageCandidates = materializable
+    .filter((candidate) =>
+      runnerStrategicExchangeKinds(candidate).includes("self_damage"),
+    )
+    .sort(
+      (left, right) =>
+        runnerCandidateSelfDamageAmount(left) -
+          runnerCandidateSelfDamageAmount(right) ||
+        (left.economyProjection?.netLiquidCreditGain ?? 0) -
+          (right.economyProjection?.netLiquidCreditGain ?? 0) ||
+        left.actionId.localeCompare(right.actionId),
+    );
+  const smallestSufficientSelfDamage = selfDamageCandidates.find(
+    (candidate) => routeCoversDemand([...ordinary, candidate]),
+  );
+  return smallestSufficientSelfDamage === undefined
+    ? ordinary
+    : [...ordinary, smallestSufficientSelfDamage];
+}
+
+function runnerCandidateSelfDamageAmount(
+  candidate: ActionSemanticCandidate,
+): number {
+  return (candidate.costProfile.selfDamage ?? []).reduce(
+    (total, damage) =>
+      total +
+      (typeof damage.amount === "number" && Number.isFinite(damage.amount)
+        ? Math.max(0, damage.amount)
+        : Number.POSITIVE_INFINITY),
+    0,
+  );
 }
 
 function runnerImmediateGeneralLiquidEconomyRoute(
@@ -6092,6 +6186,7 @@ function runnerRunFundingSupport(
     deadline: "end_of_current_turn",
     targetCredits: input.playerView.own.credits + gap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+    allowStrategicExchange: true,
     evidence: [
       `runner_run_support_target:${evaluation.targetServerId}`,
       "runner_run_conversion_click_reserved:1",
@@ -17216,6 +17311,7 @@ function runnerCoverageFundingActionIds(
     targetCredits: answerInstallCost,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowIncrementalProgress,
+    allowStrategicExchange: !allowIncrementalProgress,
     evidence: [
       `coverage_gap:${gapId}`,
       "coverage_install_conversion_click_reserved:1",

@@ -9452,6 +9452,185 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("rejects Do the 'Drine as standalone economy without a bound parent need", () => {
+    resetResidentPlanPortfolioMemory();
+    const drineOne = legalAction(
+      "drine-1",
+      "runner",
+      "play_event",
+      "Do the 'Drine: 1 Core Damage",
+      { credits: 0, clicks: 1 },
+      {
+        source: "drine-card",
+        payload: {
+          cardId: "drine-card",
+          sourceDefinitionId: "onr_classic_036_do-the-drine",
+          xValue: 1,
+          damageType: "core",
+          damageAmount: 1,
+          damageCannotBePrevented: true,
+          gainCreditsAmount: 4,
+        },
+      },
+    );
+    const drineTwo = legalAction(
+      "drine-2",
+      "runner",
+      "play_event",
+      "Do the 'Drine: 2 Core Damage",
+      { credits: 0, clicks: 1 },
+      {
+        source: "drine-card",
+        payload: {
+          cardId: "drine-card",
+          sourceDefinitionId: "onr_classic_036_do-the-drine",
+          xValue: 2,
+          damageType: "core",
+          damageAmount: 2,
+          damageCannotBePrevented: true,
+          gainCreditsAmount: 8,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [drineOne, drineTwo, credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("drine-card", "runner", "event", {
+        definitionId: "onr_classic_036_do-the-drine",
+      }),
+      visibleCard("buffer-1", "runner", "event"),
+      visibleCard("buffer-2", "runner", "event"),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "drine-card",
+          definitionId: "onr_classic_036_do-the-drine",
+          legalActionId: drineOne.actionId,
+          priority: 300,
+          currentNeed: "acute",
+          strategicFit: "strong",
+        }),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "runner_self_damage_economy_requires_bound_parent_funding",
+    );
+  });
+
+  it("binds the smallest sufficient Do the 'Drine choice to an exact remote funding need", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-remote",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const drine = (amount: 1 | 2) =>
+      legalAction(
+        `drine-${amount}`,
+        "runner",
+        "play_event",
+        `Do the 'Drine: ${amount} Core Damage`,
+        { credits: 0, clicks: 1 },
+        {
+          source: "drine-card",
+          payload: {
+            cardId: "drine-card",
+            sourceDefinitionId: "onr_classic_036_do-the-drine",
+            xValue: amount,
+            damageType: "core",
+            damageAmount: amount,
+            damageCannotBePrevented: true,
+            gainCreditsAmount: amount * 4,
+          },
+        },
+      );
+    const drineOne = drine(1);
+    const drineTwo = drine(2);
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, drineOne, drineTwo, credit]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("drine-card", "runner", "event", {
+        definitionId: "onr_classic_036_do-the-drine",
+      }),
+      visibleCard("buffer-1", "runner", "event"),
+      visibleCard("buffer-2", "runner", "event"),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      pathCost: 0,
+      creditsAfterRun: 4,
+      runCommitment: "probe_only" as const,
+      unknownUnrezzedIceCount: 1,
+      scoreThreat: true,
+      recommendation: "gain_credits_first" as const,
+      score: 500,
+    };
+    const completeEconomy = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations: [],
+    });
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [],
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        ...completeEconomy,
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 8,
+        fundingNeed: true,
+        buildEconomyBeforePressure: true,
+        creditReservePolicy: {
+          ...completeEconomy.creditReservePolicy,
+          contestReserve: 8,
+        },
+        evidence: ["test_remote_score_threat"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: drineOne.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId:
+        "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId:
+        "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+    });
+  });
+
   it.each([
     ["central", "hq", "runner.pressure_central"],
     ["remote", "remote_1", "runner.contest_remote"],
