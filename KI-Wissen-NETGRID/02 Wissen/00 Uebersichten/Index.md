@@ -7,16 +7,16 @@ Stand: 2026-08-12
 - [[Projektueberblick]]: Zielbild, Scope und Architekturgrundsätze.
 - [[Aktueller Projektstatus]]: verdichteter aktueller Produkt- und Implementierungsstand.
 - `docs/codex/CODEX_STATUS.md`: kompakter technischer Current-State-Einstieg.
-- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`: konsolidierte Folgeplanung.
 - `docs/README.md`: Struktur und Retention der Projektdokumentation.
 
 ## Planung und Arbeit
 
-- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`: aktuelle Release- und Produktplanung.
-- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`: langfristige Produktvision.
 - `docs/activities/inbox/`: offene kleine Findings und Nacharbeiten.
 - `docs/activities/in-progress/`: aktuell beanspruchte Pakete.
+- `docs/decisions/product-version-and-build-identification-2026-07-17.md`: Produktreife `V0.9` und Git-basierte Buildkennung.
 - `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`: verbindliches Current-State-Prinzip.
+
+Es gibt derzeit keine dauerhaft führende monolithische Release-Roadmap. Größere neue Vorhaben erhalten bei Bedarf einen explizit aktuellen Scope-/Releaseplan; nach Abschluss wird historische Release-Evidence entfernt.
 
 ## Architektur
 
@@ -60,13 +60,13 @@ Aktive Gates umfassen je nach Scope insbesondere:
 
 - Lokaler Start: `scripts/start-netgrid.ps1`.
 - Lokaler Transfer: `docs/runbooks/netgrid-local-transfer.md`.
-- SQLite-Wartung: `docs/runbooks/maintenance-control-plane.md`.
+- SQLite-Wartung und laufende Matchanalyse: `docs/runbooks/maintenance-control-plane.md`.
 - Account-Alpha-Betrieb: `docs/runbooks/account-alpha-operations.md`.
 - Browser-E2E: `scripts/run-e2e.mjs` und `tests/e2e/`.
 - Monatslogs: [[../../../03 Betrieb/Log]].
 
 ## Dokumentationsregel
 
-- Current State steht in aktuellen Architektur-, Status-, Roadmap-, Entscheidungs- und Runbook-Artefakten.
-- Abgeschlossene Prozessketten, Einzelreviews und Rohreports werden nach Referenzprüfung entfernt; Git-Historie ersetzt ein Dokumentationsarchiv.
+- Current State steht in aktuellen Architektur-, Status-, Entscheidungs-, Runbook- und laufenden Activity-Artefakten.
+- Abgeschlossene Releaseketten, Prozesse, Einzelreviews und Rohreports werden nach Referenzprüfung entfernt; Git-Historie ersetzt ein Dokumentationsarchiv.
 - Umfangreiche Benchmarks, Traces und lokale Analyseausgaben gehören nicht dauerhaft nach `docs/`.

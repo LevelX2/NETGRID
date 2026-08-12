@@ -7,19 +7,23 @@ Stand: 2026-08-12
 Für den aktuellen Projektstand gelten in dieser Reihenfolge:
 
 1. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-2. `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
-3. `docs/architecture/README.md`
-4. `docs/architecture/engine/README.md`
-5. `docs/architecture/ai/README.md`
+2. `docs/architecture/README.md`
+3. `docs/architecture/engine/README.md`
+4. `docs/architecture/ai/README.md`
+5. passende `docs/runbooks/` und `docs/activities/`
 6. paketlokale `AGENTS.md`, Code, Tests und ausführbare Gates
 
-Historische Statuschroniken, abgeschlossene Prozesse und alte Goal-Verläufe werden nicht mehr als zweite Steuerungsschicht im Arbeitsbaum gepflegt. Dafür reicht die Git-Historie.
+Historische Statuschroniken, abgeschlossene Releasepakete, Prozesse und Reviews werden nicht als zweite Steuerungsschicht im Arbeitsbaum gepflegt. Dafür reicht die Git-Historie.
 
-## Produktstand
+## Produktstand und Version
 
 NETGRID ist eine private Version-0-Webanwendung mit deterministischer Rules Engine, lokalem/private-LAN-Multiplayer, SQLite-Storage, Deckbibliothek, Kartenkatalog, Replay-/Undo-Grundlage, Human-vs-Human, Human-vs-KI und KI-vs-KI-Analysepfaden.
 
-Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebotene `LegalActions` ein; die Engine revalidiert Zustand, Kosten, Ziel, Choice und Legalität vor der Ausführung. Hidden-Info-Schutz, Replay, StateHash und seedbasierter Zufall bleiben verbindliche Nicht-Scope-Grenzen für fachfremde Änderungen.
+Die sichtbare Produktreife ist `V0.9`; die technische Buildkennung wird aus Git ermittelt. Führend ist `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
+
+Es gibt derzeit keine dauerhaft führende monolithische Release-Roadmap. Aktuelle Arbeit wird über `docs/activities/inbox/`, `docs/activities/in-progress/`, den Current-State-Status und bei Bedarf einen explizit aktuellen Scope-/Releaseplan gesteuert. Nach Abschluss wird die historische Release-Evidence entfernt.
+
+Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebotene `LegalActions` ein; die Engine revalidiert Zustand, Kosten, Ziel, Choice und Legalität vor der Ausführung. Hidden-Info-Schutz, Replay, StateHash und seedbasierter Zufall bleiben verbindliche Grenzen.
 
 ## Engine und Karten
 
@@ -28,7 +32,7 @@ Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Auto
 Der CardSpec-Migrationsprozess CS00 bis CS13 ist abgeschlossen und integriert. Aktuell gilt:
 
 - `@netgrid/cards` ist die zentrale kartenspezifische Autoren- und Projektionsschicht;
-- `@netgrid/cards/engine` liefert der Engine die mechanischen CardImplementation-, Runtime- und Source-Ref-Projektionen;
+- `@netgrid/cards/engine` liefert der Engine mechanische CardImplementation-, Runtime- und Source-Ref-Projektionen;
 - `packages/engine/src/card-implementations/registry.ts` besitzt keine zweite manuelle Autorenregistry;
 - Coverage ist Metadaten-/Auditlogik und bezieht Implementierungs-, Runtime- und Source-Informationen aus CardSpec;
 - die Rules Engine bleibt alleinige Autorität für Legalität und Ausführung.
@@ -52,7 +56,7 @@ Führend:
 - `docs/architecture/ai/change-compass.md`
 - `packages/ai/AGENTS.md`
 
-Weitere KI-Arbeit ist überwiegend Play-Strength- und Modulerweiterung. Konkrete neue Beobachtungen werden als kleine Activities und Regressionstests geführt, nicht als neue globale Heuristikschicht.
+Weitere KI-Arbeit ist überwiegend Play-Strength- und Modulerweiterung. Neue Beobachtungen werden als kleine Activities und Regressionstests geführt, nicht als neue globale Heuristikschicht oder dauerhafte Reviewchronik.
 
 ## Plattform und Betrieb
 
@@ -62,7 +66,7 @@ Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
 - `maintenance-control-plane.md`
 - `netgrid-local-transfer.md`
 
-Öffentliche Matchlisten, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays sind umgesetzt. Aktuelle Produkt- und Plattformplanung liegt in der konsolidierten Roadmap; abgeschlossene Einzelprozesse sind keine zweite aktuelle Spezifikation.
+Öffentliche Matchlisten innerhalb der privaten Anwendung, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays sind umgesetzt. Neue Plattformarbeit wird als aktueller Scope geführt und nach Integration in Status, Architektur, Entscheidung oder Runbook zurückgeführt.
 
 ## Aktuelle Arbeit
 
@@ -70,7 +74,7 @@ Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
 - `docs/activities/in-progress/`: aktuell beanspruchte Pakete.
 - `docs/activities/done/`: nur kurzlebiger Abschluss-Slot; abgeschlossene Einzelpakete werden nach Rückführung des Ergebnisses entfernt.
 - Die CardSpec-Umstellung ist technisch abgeschlossen; aktuelle Karten-/KI-Arbeit baut auf diesem Vertrag auf.
-- Die Dokumentationsbereinigung folgt dem Current-State-Prinzip und entfernt historische Prozess-, Review- und Release-Evidence, sobald kein aktueller Vertrags- oder Gate-Nutzen mehr besteht.
+- Die Dokumentationsbereinigung folgt dem Current-State-Prinzip und entfernt historische Prozess-, Review- und Release-Evidence ohne aktuellen Vertrags- oder Gate-Nutzen.
 
 ## Zentrale Gates
 
@@ -87,6 +91,6 @@ Vollständige Testshards werden nach Wirkung und vereinbartem Integrationscheckp
 
 ## Dokumentationsregel
 
-Führende Dokumente beschreiben den **heutigen** Architektur-, Produkt-, Gate- oder Betriebszustand. Abgeschlossene Implementierungsprozesse, Zwischenstände, Benchmarks, Replay-/Trace-Rohdaten und alte Statuschroniken werden nicht vorsorglich konserviert. Git-Historie übernimmt die historische Nachvollziehbarkeit.
+Führende Dokumente beschreiben den heutigen Architektur-, Produkt-, Gate- oder Betriebszustand. Abgeschlossene Implementierungsprozesse, Releasepakete, Reviews, Zwischenstände, Benchmarks, Replay-/Trace-Rohdaten und alte Statuschroniken werden nicht vorsorglich konserviert. Git-Historie übernimmt die historische Nachvollziehbarkeit.
 
 Retention: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`.
