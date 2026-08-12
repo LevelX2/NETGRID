@@ -123,6 +123,11 @@ type MakeHostInput = {
   scoredAgendas?: Record<string, unknown>;
   rezRootCalls?: CardInstanceId[];
   successfulCorpInstallCounter?: { count: number };
+  canEffectDrivenInstallRez?: (
+    cardId: CardInstanceId,
+    serverId: string,
+    variantId: string,
+  ) => boolean;
 };
 
 function makeHost(
@@ -339,6 +344,40 @@ function makeHost(
         if (input.successfulCorpInstallCounter)
           input.successfulCorpInstallCounter.count += 1;
       },
+      finalizeCorpInstallAfterExternalPayment: (cardId, server) => {
+        state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+        const cardDefinition = definitions[cardId];
+        if (cardDefinition?.type === "ice") server.ice.push(cardId);
+        else server.root.push(cardId);
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: false,
+          rezzed: false,
+          zone:
+            cardDefinition?.type === "ice"
+              ? { side: "corp", zone: "serverIce", serverId: server.id }
+              : { side: "corp", zone: "serverRoot", serverId: server.id },
+        };
+        if (cardDefinition?.subtypes?.includes("region")) {
+          const olderRegions = server.root.filter(
+            (candidateId) =>
+              candidateId !== cardId &&
+              definitions[candidateId]?.subtypes?.includes("region"),
+          );
+          server.root = server.root.filter(
+            (candidateId) => !olderRegions.includes(candidateId),
+          );
+          for (const olderId of olderRegions) {
+            state.corp.archives.unshift(olderId);
+            state.cardInstances[olderId] = {
+              ...cardInstances[olderId]!,
+              faceup: true,
+              rezzed: true,
+              zone: { side: "corp", zone: "archives" },
+            };
+          }
+        }
+      },
       resolveCorpRootRez: (cardId) => {
         rezRootCalls.push(cardId);
       },
@@ -458,6 +497,54 @@ function makeHost(
           corpCreditsSpent,
         };
       },
+      effectDrivenRezVariants: (cardId) => [
+        {
+          variantId: "fixed",
+          label: definitions[cardId]?.title ?? cardId,
+          additionalCreditCost: 0,
+          payload: { cardId },
+        },
+      ],
+      rezInstalledIceWaivingBaseCost: (cardId, variantId) => {
+        if (variantId !== "fixed") throw new Error("unknown test variant");
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        return {
+          installCreditsPaid: 0,
+          rezAdditionalCreditsPaid: 0,
+          rezAgendaPointsPaid: 0,
+          installed: true,
+          rezzed: true,
+        };
+      },
+      installAndRezIceWaivingBaseCosts: (cardId, server, variantId) => {
+        if (variantId !== "fixed") throw new Error("unknown test variant");
+        state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+        server.ice.push(cardId);
+        state.cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+          zone: { side: "corp", zone: "serverIce", serverId: server.id },
+        };
+        if (input.successfulCorpInstallCounter)
+          input.successfulCorpInstallCounter.count += 1;
+        return {
+          installCreditsPaid: 0,
+          rezAdditionalCreditsPaid: 0,
+          rezAgendaPointsPaid: 0,
+          installed: true,
+          rezzed: true,
+        };
+      },
+      preflightInstallAndRezIceWaivingBaseCosts: () => undefined,
+      canInstallAndRezIceWaivingBaseCosts: (cardId, serverId, variantId) =>
+        variantId === "fixed" &&
+        (input.canEffectDrivenInstallRez?.(cardId, serverId, variantId) ??
+          true),
     },
   };
 }
@@ -1081,16 +1168,16 @@ describe("corp install rez sequence handlers", () => {
         .filter((option) => option.selectable !== false)
         .map((option) => option.value),
     ).toEqual([
-      "ice_1|hq",
-      "ice_1|rd",
-      "ice_1|archives",
-      "ice_1|remote_1",
-      "ice_1|new_remote",
-      "ice_2|hq",
-      "ice_2|rd",
-      "ice_2|archives",
-      "ice_2|remote_1",
-      "ice_2|new_remote",
+      "ice_1|hq|fixed",
+      "ice_1|rd|fixed",
+      "ice_1|archives|fixed",
+      "ice_1|remote_1|fixed",
+      "ice_1|new_remote|fixed",
+      "ice_2|hq|fixed",
+      "ice_2|rd|fixed",
+      "ice_2|archives|fixed",
+      "ice_2|remote_1|fixed",
+      "ice_2|new_remote|fixed",
     ]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "agenda_purge_runner_review_completed",
@@ -1132,10 +1219,10 @@ describe("corp install rez sequence handlers", () => {
     host.legalAction.payload = {};
     handleCorpInstallRezSequenceChoice(host);
     const rdOption = host.state.pendingChoice?.options.find(
-      (option) => option.value === "ice_1|rd",
+      (option) => option.value === "ice_1|rd|fixed",
     )?.id;
     const newRemoteOption = host.state.pendingChoice?.options.find(
-      (option) => option.value === "ice_2|new_remote",
+      (option) => option.value === "ice_2|new_remote|fixed",
     )?.id;
     expect(rdOption).toBeDefined();
     expect(newRemoteOption).toBeDefined();
@@ -1234,6 +1321,36 @@ describe("corp install rez sequence handlers", () => {
     });
   });
 
+  it("leaves revealed ICE in R&D when no legal paid install-and-rez route exists", () => {
+    const host = makeHost({
+      rd: ["ice_1", "operation_1"] as CardInstanceId[],
+      scoreArea: ["agenda_purge_agenda"] as CardInstanceId[],
+      canEffectDrivenInstallRez: () => false,
+    });
+
+    resolveAgendaPurgeInstallTargets(
+      host,
+      "agenda_purge_agenda" as CardInstanceId,
+    );
+    host.playerAction = playerAction(["done"]);
+    host.legalAction.side = "runner";
+    host.legalAction.payload = {};
+    const result = handleCorpInstallRezSequenceChoice(host);
+
+    expect(result.deletePendingChoice).toBe(true);
+    expect(result.installedCardIds).toEqual([]);
+    expect(result.trashedCardIds).toEqual(["operation_1"]);
+    expect(host.state.corp.rd).toEqual(["ice_1"]);
+    expect(host.state.corp.archives).toEqual(["operation_1"]);
+    expect(host.legalAction.payload).toMatchObject({
+      revealedIceCount: 1,
+      agendaPurgeUninstallableIceCount: 1,
+      installedIceCount: 0,
+      trashedCount: 1,
+      agendaPurgeTargetChoiceOpened: false,
+    });
+  });
+
   it("starts and resolves Priority Requisition free rez without normal rez cost", () => {
     const server = {
       id: "remote_1" as Exclude<ServerId, "new_remote">,
@@ -1255,7 +1372,7 @@ describe("corp install rez sequence handlers", () => {
       "card_implementation.scored_agenda_free_rez:priority_agenda:8",
     );
 
-    host.playerAction = playerAction(["card_ice_1"]);
+    host.playerAction = playerAction(["rez_ice_1_fixed"]);
     const result = handleCorpInstallRezSequenceChoice(host);
 
     expect(result.rezzedCardIds).toEqual(["ice_1"]);
@@ -1266,7 +1383,9 @@ describe("corp install rez sequence handlers", () => {
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTarget: "ice_1",
       scoredAgendaFreeRezTargetDefinitionId: "ice_1_def",
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: 3,
+      rezAdditionalCreditsPaid: 0,
+      rezAgendaPointsPaid: 0,
     });
   });
 

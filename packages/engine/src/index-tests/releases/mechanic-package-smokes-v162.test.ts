@@ -1528,14 +1528,15 @@ describe("V1.6.2 Mechanikpaket B", () => {
       maxSelections: 1,
     });
     expect(getPlayerView(priority, "runner").pendingChoice).toBeUndefined();
-    priority = applyChoices(priority, "corp", [`card_${highCostIceId}`]);
+    priority = applyChoices(priority, "corp", [`rez_${highCostIceId}_fixed`]);
     expect(priority.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(priority.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(priority.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "scored_agenda_free_rez",
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTargetDefinitionId: "onr_v1_230_cortical-scanner",
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: 7,
+      rezAdditionalCreditsPaid: 0,
     });
   });
 

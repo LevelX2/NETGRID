@@ -874,10 +874,71 @@ Corporate Downsizing und Corporate War ergab der Nutzerblock keinen weiteren
 Korrekturbedarf. Detroit Police Contract benötigt keinen eigenen CardSpec-Fix,
 ist aber durch den generischen Corp-Startvertrag abgedeckt.
 
+## Block 011 – Karten 201 bis 220 und gemeinsamer Effect-driven-Install-/Rez-Vertrag
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 011` eingeführt.
+
+### Ice Transmutation
+
+- Der Vertrag vervielfacht pro Mark nicht nur gedruckte, sondern alle vom
+  Ziel-ICE selbst bereitgestellten Subroutinen. Dazu zählen später erzeugte
+  eigene Trace-, ETR- und Encounter-Subroutinen; von anderen Karten oder ICE
+  hinzugefügte Subroutinen bleiben einfach.
+- Marks bleiben beim Derezzen erhalten, werden aber beim Verlassen der
+  installierten Corp-Zone gelöscht. Ein deinstalliertes und erneut
+  installiertes ICE übernimmt deshalb keine alte Transmutation.
+- Die öffentliche Resolution beschreibt den dauerhaften
+  Self-provided-Vertrag und behauptet keine nur beim Score bekannte Anzahl
+  duplizierter Subroutinen.
+
+### Gemeinsamer Effect-driven-Install-/Rez-Vertrag
+
+- Priority Requisition verwendet den kanonischen Rezpfad. Nur die gedruckten
+  Rez-Credits werden erlassen; variable „above rez cost“-Credits,
+  Agenda-Punkt-Zusatzkosten, Legality und On-Rez-Lifecycle bleiben erhalten.
+- Security Purge bindet für jedes installierbare ICE eine konkrete
+  Server-/Rez-Variante. Normale serverabhängige Install- und gedruckte
+  Rez-Credits werden erlassen, externe Installtaxes sowie variable und
+  Agenda-Punkt-Rezkosten bleiben zahlbar. Die gesamte gewählte Reihenfolge
+  wird vor der ersten Mutation auf einem Zustandsklon revalidiert und danach
+  durch dieselben kanonischen Install-/Rez-Finalizer ausgeführt. ICE ohne
+  legalen bezahlbaren Pfad bleiben in R&D; nur die übrigen aufgedeckten Karten
+  gehen offen in die Archives.
+- Data Fort Reclamation schließt sich für bereits bezahlte ICE- und Root-
+  Installationen demselben Install-Finalizer an. Der bestehende temporäre
+  Credit- und optionale Rezvertrag bleibt erhalten, während Unique-, Server-,
+  Region-, On-Install-, Fort- und Install-Trigger-Regeln zentral laufen.
+
+### CardSpec- und Planning-Semantik
+
+- Executive Extraction und Genetics-Visionary Acquisition besitzen keine
+  Phantom-Ziele mehr. Ice Transmutation wählt keine einzelne Subroutine und
+  trägt keine Remote-Beschränkung.
+- Main-Office Relocation, Netwatch Operations Office, On-Call Solo Team,
+  Priority Requisition, Private Cybernet Police, Security Net Optimization,
+  Security Purge und Strike Force Kali verlieren fachfremde Remote-,
+  Central-, Bait- oder Economy-Rollen.
+- Security Purges capability-nahe Choice-Semantik bewertet die tatsächliche
+  Serverplatzierung der aufgedeckten ICE. Superior Net Barriers bewertet die
+  Auswahl der aufzudeckenden Walls einschließlich Informationspreis. Die
+  typisierte AI-Projektion erhält dafür `server` beziehungsweise
+  `installed_ice` als tatsächliche Zieldimension; Plan-, Route-, Action-,
+  Choice- und Executor-Ownership bleiben unverändert.
+
+### Unveränderte Karten dieses Blocks
+
+Für Hostile Takeover, Marine Arcology, Political Coup, Political Overthrow,
+Project Babylon und Tycho Extension ergab der Nutzerblock keinen funktionalen
+Korrekturbedarf. Polymer Breakthrough und Subsidiary Branch benötigen keinen
+Kartensonderpfad und sind durch den in Block 010 eingeführten gemeinsamen
+Corp-Startreihenfolgevertrag abgedeckt.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 201 bis 220.
+- Als nächster regulärer Nutzerblock folgen die Karten 221 bis 240.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -986,3 +1047,19 @@ Submarine-Uplink-Semantik. Der breite AI-Typecheck bleibt unabhängig vom
 Block wegen seiner statischen Imports der bereits entfernten historischen
 Migration-Report-JSONs nicht startfähig; diese fehlenden lokalen Artefakte
 wurden nicht als Kompatibilitätsfallback wieder eingeführt.
+
+Für Block 011 sind Cards- und Engine-Typecheck, CardSpec-AI-Hint-Generator
+und -Check, der CardSpec-Kompatibilitätsvertrag, 64 fokussierte
+AI-Hint-Vertragstests sowie die direkt angrenzenden Unit- und
+Integrationszeugen grün. Die Engine-Evidence umfasst insbesondere
+Self-provided gegenüber fremden Subroutinen, Counter-Lifetime, Data Fort,
+Priority-Rez mit variablen und Agenda-Punkt-Zusatzkosten, Security Purge mit
+externem Installtax sowie den nicht installierbaren Reveal-Fall. Ein anfangs
+versehentlich paketweit gestarteter Engine-Lauf zeigte 1.895 von 1.910 Tests
+grün; zehn der fünfzehn Fehler lagen in bekannten oder fachfremden Fixtures,
+die fünf auditnahen Erwartungen wurden auf die neuen gebundenen
+Server-/Rez-Varianten aktualisiert und anschließend fokussiert grün geprüft.
+Der bekannte Originalset-AI-Golden-Test bleibt unabhängig davon wegen seines
+statischen Imports des entfernten historischen Migration-Report-JSONs nicht
+startfähig; aktuelles Artefakt, Review-Fixture und die ausführbaren
+Hint-Verträge sind synchron.

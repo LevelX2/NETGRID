@@ -5977,13 +5977,28 @@ function deriveTargetProfiles(
   const scoredAgenda = entry.planning.engine.scoredAgenda;
   if (scoredAgenda !== undefined && "capabilityKey" in scoredAgenda) {
     const target = capabilityPreferences.get(scoredAgenda.capabilityKey);
-    if (target !== undefined)
+    if (target !== undefined) {
+      const scoredTargetShape =
+        scoredAgenda.kind === "reveal_top_rd_install_and_rez_ice_trash_rest"
+          ? {
+              kind: "install_target" as const,
+              targetType: "server" as const,
+            }
+          : scoredAgenda.kind === "reveal_installed_ice_subtype_for_credits"
+            ? {
+                kind: "use_target" as const,
+                targetType: "installed_ice" as const,
+              }
+            : {
+                kind: "install_target" as const,
+                targetType: "card" as const,
+              };
       return [
         {
           schemaVersion: "target-profile-v1",
-          kind: "install_target",
+          kind: scoredTargetShape.kind,
           timing: "on_score",
-          targetType: "card",
+          targetType: scoredTargetShape.targetType,
           purpose: target.purpose,
           ...(target.preferences === undefined
             ? {}
@@ -6006,6 +6021,7 @@ function deriveTargetProfiles(
           hiddenInfoPolicy: "public_or_controller_known_only",
         },
       ];
+    }
   }
   return [];
 }

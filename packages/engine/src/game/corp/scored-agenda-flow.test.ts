@@ -379,7 +379,7 @@ describe("scored agenda flow", () => {
           counterType: "mark",
           counterAmount: 1,
           strengthBonusPerCounter: 1,
-          duplicateEachPrintedSubroutinePerCounter: true,
+          duplicateEachSelfProvidedSubroutinePerCounter: true,
           visibility: "public",
         },
       },
@@ -443,7 +443,7 @@ describe("scored agenda flow", () => {
       cardImplementationTargetKind: "rezzed_installed_ice",
       cardImplementationCounterType: "mark",
       strengthBonus: 1,
-      duplicatedSubroutineCount: 1,
+      cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter: true,
     });
   });
 
@@ -458,7 +458,7 @@ describe("scored agenda flow", () => {
           counterType: "mark",
           counterAmount: 1,
           strengthBonusPerCounter: 1,
-          duplicateEachPrintedSubroutinePerCounter: true,
+          duplicateEachSelfProvidedSubroutinePerCounter: true,
           visibility: "public",
         },
       },

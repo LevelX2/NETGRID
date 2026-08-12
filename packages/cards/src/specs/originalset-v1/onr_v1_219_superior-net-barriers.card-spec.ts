@@ -82,10 +82,6 @@ export const cardSpec = {
         role: "build_scoring_remote",
       },
       {
-        kind: "plan_role",
-        role: "wall_remote_plan",
-      },
-      {
         kind: "strategic_role",
         role: "tax_tool",
       },
@@ -109,11 +105,6 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",
       },
@@ -123,7 +114,24 @@ export const cardSpec = {
         rating: "medium",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "scored_agenda_reveal_installed_ice_subtype_for_credits",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_walls_to_reveal_for_credits",
+            preferences: [
+              "prefer_reveal_when_credit_value_exceeds_information_cost",
+              "prefer_already_public_or_low_information_value_walls",
+            ],
+            avoid: ["avoid_revealing_high_value_hidden_ice_without_need"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

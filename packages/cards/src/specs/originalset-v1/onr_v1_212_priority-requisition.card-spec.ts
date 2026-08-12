@@ -77,10 +77,6 @@ export const cardSpec = {
         role: "scoring_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -107,11 +103,6 @@ export const cardSpec = {
         confidence: "medium",
         rationale:
           "Agenda Semantic Review v1 maps Priority Requisition to corp.remote_scoring as scoring_tool/free_rez_remote_defense.",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
       },
       {
         kind: "target_preference",

@@ -33,7 +33,7 @@ export function startScoredRezzedIceMarkModifierChoice(
     scoredAgenda.counterType !== "mark" ||
     scoredAgenda.counterAmount !== 1 ||
     scoredAgenda.strengthBonusPerCounter !== 1 ||
-    scoredAgenda.duplicateEachPrintedSubroutinePerCounter !== true
+    scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter !== true
   )
     throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag ist ungueltig.");
   const targets = rezzedInstalledIceMarkModifierTargetIds(host);
@@ -89,8 +89,8 @@ export function startScoredRezzedIceMarkModifierChoice(
     cardImplementationCounterAmount: scoredAgenda.counterAmount,
     cardImplementationStrengthBonusPerCounter:
       scoredAgenda.strengthBonusPerCounter,
-    cardImplementationDuplicateEachPrintedSubroutinePerCounter:
-      scoredAgenda.duplicateEachPrintedSubroutinePerCounter,
+    cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter:
+      scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter,
     eligibleIceCount: targets.length,
   });
 }
@@ -134,7 +134,7 @@ export function resolveScoredRezzedIceMarkModifierChoice(
     scoredAgenda.counterType !== "mark" ||
     scoredAgenda.counterAmount !== 1 ||
     scoredAgenda.strengthBonusPerCounter !== 1 ||
-    scoredAgenda.duplicateEachPrintedSubroutinePerCounter !== true
+    scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter !== true
   )
     throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag passt nicht.");
   host.counters.addCardCounter(
@@ -171,12 +171,9 @@ export function resolveScoredRezzedIceMarkModifierChoice(
     cardImplementationCounterAmount: scoredAgenda.counterAmount,
     cardImplementationStrengthBonusPerCounter:
       scoredAgenda.strengthBonusPerCounter,
-    cardImplementationDuplicateEachPrintedSubroutinePerCounter:
-      scoredAgenda.duplicateEachPrintedSubroutinePerCounter,
+    cardImplementationDuplicateEachSelfProvidedSubroutinePerCounter:
+      scoredAgenda.duplicateEachSelfProvidedSubroutinePerCounter,
     strengthBonus: markCount * scoredAgenda.strengthBonusPerCounter,
-    duplicatedSubroutineCount:
-      (host.cards.definitionFor(targetIceId).subroutines?.length ?? 0) *
-      markCount,
   });
 }
 

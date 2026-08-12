@@ -200,7 +200,7 @@ export function scoredRezzedIceMarkModifier(
     counterType: "mark",
     counterAmount: 1,
     strengthBonusPerCounter: 1,
-    duplicateEachPrintedSubroutinePerCounter: true,
+    duplicateEachSelfProvidedSubroutinePerCounter: true,
     visibility: "public",
   };
 }

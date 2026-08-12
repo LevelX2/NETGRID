@@ -533,6 +533,35 @@ describe("generic typed CardSpec AI translators", () => {
     });
   });
 
+  it("keeps scored agenda server placement and reveal choices on their actual target dimensions", () => {
+    const hintFor = (cardId: string) => {
+      const entry = cardSpecPlanningCards().find(
+        (candidate) => candidate.definition.id === cardId,
+      );
+      if (!entry) throw new Error(`missing_test_card:${cardId}`);
+      return deriveCardSpecAiHint(entry);
+    };
+
+    expect(hintFor("onr_v1_216_security-purge").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        kind: "install_target",
+        timing: "on_score",
+        targetType: "server",
+        purpose: "choose_server_for_revealed_ice_install",
+      }),
+    );
+    expect(
+      hintFor("onr_v1_219_superior-net-barriers").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "use_target",
+        timing: "on_score",
+        targetType: "installed_ice",
+        purpose: "choose_walls_to_reveal_for_credits",
+      }),
+    );
+  });
+
   it("binds a successful-run fort target only to the typed force-rez followup", () => {
     const entry = targetAnnotatedEntry("onr_v1_026_false-echo");
 
@@ -584,7 +613,7 @@ describe("generic typed CardSpec AI translators", () => {
           ).length ?? 0),
         0,
       ),
-    ).toBe(75);
+    ).toBe(71);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),

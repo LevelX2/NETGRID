@@ -1667,21 +1667,21 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       maxSelections: 1,
     });
     const corpChoice = getPlayerView(state, "corp").pendingChoice;
-    expect(corpChoice?.options.map((option) => option.card?.title)).toEqual([
+    expect(corpChoice?.options.map((option) => option.label)).toEqual([
       "Cortical Scanner",
       "Crystal Wall",
-      undefined,
+      "Überspringen",
     ]);
     expect(corpChoice?.options.at(-1)?.label).toBe("Überspringen");
     expect(
       corpChoice?.options
         .filter((option) => option.id !== "skip")
-        .every((option) => option.card?.known),
+        .every((option) => option.label.length > 0),
     ).toBe(true);
     expect(
       corpChoice?.options
         .filter((option) => option.id !== "skip")
-        .every((option) => option.card?.type === "ice"),
+        .every((option) => option.publicLabel === "Installiertes ICE"),
     ).toBe(true);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
@@ -1699,7 +1699,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${highCostIceId}`],
+        selectedOptionIds: [`rez_${highCostIceId}_fixed`],
       },
     });
     expect(wrongSide.ok).toBe(false);
@@ -1711,7 +1711,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       clientKnownStateVersion: state.stateVersion - 1,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${highCostIceId}`],
+        selectedOptionIds: [`rez_${highCostIceId}_fixed`],
       },
     });
     expect(stale.ok).toBe(false);
@@ -1728,7 +1728,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       clientKnownStateVersion: drift.stateVersion,
       selectedChoices: {
         choiceId: drift.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${highCostIceId}`],
+        selectedOptionIds: [`rez_${highCostIceId}_fixed`],
       },
     });
     expect(driftResult.ok).toBe(false);
@@ -1746,14 +1746,15 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       skipped.eventLog.at(-1)?.publicPayload.hiddenZoneAction,
     ).toBeUndefined();
 
-    state = applyChoices(state, "corp", [`card_${highCostIceId}`]);
+    state = applyChoices(state, "corp", [`rez_${highCostIceId}_fixed`]);
     expect(state.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(state.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "scored_agenda_free_rez",
       scoredAgendaFreeRezFreeRez: true,
       scoredAgendaFreeRezTargetDefinitionId: "onr_v1_230_cortical-scanner",
-      rezCostPaid: 0,
+      rezBaseCreditCostWaived: 7,
+      rezAdditionalCreditsPaid: 0,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

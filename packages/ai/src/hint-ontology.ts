@@ -462,6 +462,7 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "adds_relevant_encounter_tax",
   "prefer_reveal_when_credit_value_exceeds_information_cost",
   "prefer_already_public_or_low_information_value_code_gates",
+  "prefer_already_public_or_low_information_value_walls",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
