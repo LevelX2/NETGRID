@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   runnerStrategicExchangeHardExclusion,
   runnerStrategicExchangeKinds,
+  runnerStrategicExchangeRequiresBoundParent,
 } from "./runner-strategic-exchange";
 
 function candidate(
@@ -114,5 +115,44 @@ describe("runner strategic exchange classification", () => {
         action,
       ),
     ).toBe("runner_strategic_exchange_opponent_terminal_score");
+  });
+
+  it("requires a concrete parent for a debt installation without relying on a card identity", () => {
+    expect(
+      runnerStrategicExchangeRequiresBoundParent(
+        candidate({
+          semanticActionType: "install.card",
+          strategicExchangeKinds: ["debt_financing"],
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("requires a concrete parent for an action that pays self damage", () => {
+    expect(
+      runnerStrategicExchangeRequiresBoundParent(
+        candidate({
+          strategicExchangeKinds: ["self_damage"],
+          costProfile: {
+            costKnownStatus: "known",
+            additionalCosts: [],
+            selfDamage: [
+              {
+                type: "core",
+                amount: 1,
+              },
+            ],
+          },
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  it("does not parent-bind every strategic exchange category", () => {
+    expect(
+      runnerStrategicExchangeRequiresBoundParent(
+        candidate({ strategicExchangeKinds: ["temporary_resource"] }),
+      ),
+    ).toBe(false);
   });
 });

@@ -9914,6 +9914,266 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("rejects debt financing as standalone board development without a bound parent", () => {
+    resetResidentPlanPortfolioMemory();
+    const loan = legalAction(
+      "install-debt",
+      "runner",
+      "install_card",
+      "Install credit exchange",
+      { credits: 0, clicks: 1 },
+      {
+        source: "debt-card",
+        payload: {
+          cardId: "debt-card",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          gainCreditsAmount: 12,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [loan, credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("debt-card", "runner", "resource", {
+        definitionId: "onr_v1_168_loan-from-chiba",
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "debt-card",
+          definitionId: "onr_v1_168_loan-from-chiba",
+          legalActionId: loan.actionId,
+          priority: 9_000,
+          currentNeed: "acute",
+          strategicFit: "strong",
+        }),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "strategic_exchange_requires_bound_parent",
+    );
+  });
+
+  it.each([
+    {
+      label: "low payoff",
+      accessPayoff: "fresh" as const,
+      scoreThreat: false,
+      unknownIce: 0,
+      riskyCoverage: false,
+    },
+    {
+      label: "uncovered unknown ICE",
+      accessPayoff: "score_threat" as const,
+      scoreThreat: true,
+      unknownIce: 1,
+      riskyCoverage: false,
+    },
+  ])(
+    "does not bind debt financing to a $label run",
+    ({ accessPayoff, scoreThreat, unknownIce, riskyCoverage }) => {
+      resetResidentPlanPortfolioMemory();
+      const run = legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "remote_1" } },
+      );
+      const loan = legalAction(
+        "install-debt",
+        "runner",
+        "install_card",
+        "Install credit exchange",
+        { credits: 0, clicks: 1 },
+        {
+          source: "debt-card",
+          payload: {
+            cardId: "debt-card",
+            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            gainCreditsAmount: 12,
+          },
+        },
+      );
+      const credit = legalAction(
+        "credit",
+        "runner",
+        "gain_credit",
+        "Gain 1 Credit",
+        { credits: 0, clicks: 1 },
+      );
+      const input = aiInput("runner", [run, loan, credit]);
+      input.playerView.own.credits = 0;
+      input.playerView.own.clicks = 2;
+      input.playerView.own.gripOrHq = [
+        visibleCard("debt-card", "runner", "resource", {
+          definitionId: "onr_v1_168_loan-from-chiba",
+        }),
+      ];
+      const target = {
+        ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+        targetKind: "remote" as const,
+        accessTargetKind: "remote" as const,
+        accessPayoff,
+        knownAccessState: "unknown" as const,
+        pathCost: 2,
+        creditsAfterRun: -2,
+        runCommitment: "probe_only" as const,
+        unknownUnrezzedIceCount: unknownIce,
+        riskyUniversalCoverage: riskyCoverage,
+        scoreThreat,
+        recommendation: "gain_credits_first" as const,
+        score: 500,
+      };
+      const completeEconomy = buildRunnerEconomyPosture({
+        input,
+        handDevelopmentEvaluations: [],
+      });
+
+      const decision = liveContext({
+        evaluateRunnerHandDevelopment: () => [],
+        evaluateRunnerRunTargets: () => [target],
+        buildRunnerEconomyPosture: () => ({
+          ...completeEconomy,
+          minimumCreditFloor: 0,
+          desiredCreditReserve: 2,
+          fundingNeed: true,
+          buildEconomyBeforePressure: true,
+          creditReservePolicy: {
+            ...completeEconomy.creditReservePolicy,
+            contestReserve: 2,
+          },
+          evidence: ["test_debt_parent_rejected"],
+        }),
+      }).chooseSemanticRuntimeAction(input, {});
+
+      expect(decision.actionId).not.toBe(loan.actionId);
+      expect(JSON.stringify(decision.decisionDebug)).toContain(
+        "strategic_exchange_requires_bound_parent",
+      );
+    },
+  );
+
+  it("binds canonical debt financing to the exact profitable run parent and its safe exit reserve", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-remote",
+      "runner",
+      "start_run",
+      "Run remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const loan = legalAction(
+      "install-debt",
+      "runner",
+      "install_card",
+      "Install credit exchange",
+      { credits: 0, clicks: 1 },
+      {
+        source: "debt-card",
+        payload: {
+          cardId: "debt-card",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          gainCreditsAmount: 12,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, loan, credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("debt-card", "runner", "resource", {
+        definitionId: "onr_v1_168_loan-from-chiba",
+      }),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      pathCost: 2,
+      creditsAfterRun: -2,
+      runCommitment: "full_path" as const,
+      unknownUnrezzedIceCount: 1,
+      riskyUniversalCoverage: true,
+      scoreThreat: true,
+      recommendation: "gain_credits_first" as const,
+      score: 500,
+    };
+    const completeEconomy = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations: [],
+    });
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [],
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        ...completeEconomy,
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 2,
+        fundingNeed: true,
+        buildEconomyBeforePressure: true,
+        creditReservePolicy: {
+          ...completeEconomy.creditReservePolicy,
+          contestReserve: 2,
+        },
+        evidence: ["test_profitable_debt_parent"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: loan.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId:
+        "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId:
+        "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          openNeedIds: ["run-support:remote:remote_1"],
+        }),
+        expect.objectContaining({
+          instanceId:
+            "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          parentInstanceId:
+            "plan:runner.contest_remote:remote%3Aremote_1",
+          parentNeedId: "run-support:remote:remote_1",
+        }),
+      ]),
+    });
+  });
+
   it("rejects Do the 'Drine as standalone economy without a bound parent need", () => {
     resetResidentPlanPortfolioMemory();
     const drineOne = legalAction(

@@ -209,6 +209,33 @@ export function deterministicOnPlayResourcePayload(
 }
 
 /**
+ * Projects direct, unconditional controller credit gains from the canonical
+ * on-install lifecycle into the exact install LegalAction. This keeps the
+ * Rules Engine as the source of the quote while allowing planners to bind a
+ * guaranteed funding step before the card is installed.
+ */
+export function deterministicOnInstallResourcePayload(
+  definition: CardDefinition,
+  controller: "corp" | "runner",
+): Record<string, number> {
+  const effects =
+    cardImplementationForDefinitionId(definition.id)?.lifecycle?.on_install ??
+    [];
+  const gainCreditsAmount = effects.reduce((sum, effect) => {
+    if (
+      effect.kind !== "gain_credits" ||
+      (effect.recipient !== "controller" && effect.recipient !== controller) ||
+      !Number.isSafeInteger(effect.amount) ||
+      effect.amount <= 0
+    ) {
+      return sum;
+    }
+    return sum + effect.amount;
+  }, 0);
+  return gainCreditsAmount > 0 ? { gainCreditsAmount } : {};
+}
+
+/**
  * Evaluates the small declarative condition vocabulary used by migrated cards.
  *
  * Conditions are checked during LegalAction generation and revalidation;

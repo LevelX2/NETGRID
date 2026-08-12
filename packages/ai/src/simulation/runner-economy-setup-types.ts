@@ -1,8 +1,8 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { rolesMatch } from "../runtime/role-match";
+import { runnerDebtFinancingProfile } from "../runtime/runner-canonical-card-facts";
 
 const SHORT_TERM_CONTRACT_CARD_ID = "onr_v1_178_short-term-contract";
-const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
 const MRAM_HAND_SIZE_CARD_IDS = new Set([
   "onr_v1_133_militech-mram-chip",
   "onr_v1_134_mram-chip",
@@ -175,7 +175,8 @@ export function runnerEconomySetupActionClass(
       ? (definition.mechanics as string[])
       : [];
   const isShortTermContract = definitionId === SHORT_TERM_CONTRACT_CARD_ID;
-  const isLoanFromChiba = definitionId === LOAN_FROM_CHIBA_CARD_ID;
+  const debtFinancing =
+    runnerDebtFinancingProfile(definitionId) !== undefined;
   const isMramHandSize =
     definitionId !== undefined && MRAM_HAND_SIZE_CARD_IDS.has(definitionId);
   const economy = dependencies.isRunnerEconomyAction(input, action);
@@ -211,7 +212,7 @@ export function runnerEconomySetupActionClass(
         rolesMatch(mechanics, ["counter", "resource_action"])),
     loanDebtEconomy:
       economy &&
-      (isLoanFromChiba ||
+      (debtFinancing ||
         rolesMatch(roles, ["loan", "debt"])),
     recurringEconomy:
       economy &&
@@ -224,11 +225,11 @@ export function runnerEconomySetupActionClass(
     recovery,
     downsideEconomy:
       economy &&
-      (isLoanFromChiba ||
+      (debtFinancing ||
         rolesMatch(roles, ["risk", "downside", "penalty", "tag"])),
     delayedPenaltyEconomy:
       economy &&
-      (isLoanFromChiba ||
+      (debtFinancing ||
         rolesMatch(roles, ["delayed", "penalty"])),
   };
 }

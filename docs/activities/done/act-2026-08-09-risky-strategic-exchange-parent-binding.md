@@ -1,20 +1,30 @@
 ---
 activityId: act-2026-08-09-risky-strategic-exchange-parent-binding
-status: inbox
+status: done
 kind: architecture
 area: ai-data
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-09
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-12T23:34:04+02:00
+completedAt: 2026-08-12T23:49:30+02:00
+branch: codex/activities-ai-20260812
 releaseTarget: post-card-semantics-restructuring
 blockedBy:
   - laufende Kartenrestrukturierung und Konsolidierung der kanonischen Kartensemantik
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runtime/runner-canonical-card-facts.ts
+  - packages/ai/src/runtime/runner-strategic-exchange.ts
+  - packages/ai/src/runtime/plan-first-live-runtime.ts
+  - packages/engine/src/ability-engine/card-implementation-runtime-shared.ts
+  - packages/engine/src/game/turn/runner-install-actions.ts
+checks:
+  - focused AI debt, parent-binding and lifecycle regressions
+  - focused Engine Runner install LegalAction projection tests
+  - AI typecheck checked with unrelated worktree/report baseline errors separated
+  - Engine typecheck
+  - git diff --check
 ---
 
 # Risikobehaftete Austauschkarten nur an lohnende Parent-Pläne binden
@@ -157,52 +167,52 @@ begründete Finanzierungslücke eines aussichtsreichen Run-Plans schließen.
 
 ## Akzeptanzkriterien
 
-- [ ] Die Activity wird erst nach Abschluss der Kartenrestrukturierung auf
+- [x] Die Activity wird erst nach Abschluss der Kartenrestrukturierung auf
       Basis des dann kanonischen Datenmodells umgesetzt; es entsteht kein
       paralleler Legacy-Vertrag.
-- [ ] Der Hint enthält nur die strategische Zusatzinformation zur riskanten,
+- [x] Der Hint enthält nur die strategische Zusatzinformation zur riskanten,
       parentgebundenen Nutzung. Regel- und Effektfakten stammen aus der
       kanonischen Kartenbeschreibung und werden nicht dupliziert.
-- [ ] Der Zulassungs- und Bewertungsvertrag ist generisch und enthält weder
+- [x] Der Zulassungs- und Bewertungsvertrag ist generisch und enthält weder
       die Loan-Karten-ID noch einen Loan-Namensvergleich.
-- [ ] Ohne konkreten lohnenden Parent-Plan erzeugt Loan keine
+- [x] Ohne konkreten lohnenden Parent-Plan erzeugt Loan keine
       `runner.develop_board_and_hand`-Instanz und wird mit einem strukturierten
       Grund wie `strategic_exchange_requires_bound_parent` abgelehnt.
-- [ ] Allgemeiner Creditmangel, ein hoher roher Creditgewinn oder eine nur
+- [x] Allgemeiner Creditmangel, ein hoher roher Creditgewinn oder eine nur
       legal installierbare Karte genügen nicht als Planbegründung.
-- [ ] Mit einem konkreten Run-Parent sind Zielserver, erwarteter
+- [x] Mit einem konkreten Run-Parent sind Zielserver, erwarteter
       Agenda-/Matchpoint-Payoff, Runpfad, Breaker-/Unknown-ICE-Evidence,
       Finanzierungslücke, verbleibende Aktionen und Exit-/Recovery-Plan
       side-sicher und strukturiert belegt.
-- [ ] Loan wird als Support desselben Root-Plans installiert; der folgende
+- [x] Loan wird als Support desselben Root-Plans installiert; der folgende
       Run behält Parent, Zielserver, Planinstanz und
       `PlanExecutionOrigin`. Keine planfremde Zwischenaktion übernimmt die
       Auswahl ohne eine reguläre Replanung.
-- [ ] Nach Installation besitzt jede Loan-Instanz genau einen eigenen
+- [x] Nach Installation besitzt jede Loan-Instanz genau einen eigenen
       `runner.resource_lifecycle`-Child. Die kartengebundene EndTurn-Action
       wird nur bei erfülltem Zahlungs-/Verlustvertrag ausgewählt; andernfalls
       entsteht ein exakter Recovery-Bedarf statt eines Fallbacks.
-- [ ] Die laufende Belastung einer oder mehrerer Instanzen erscheint in der
+- [x] Die laufende Belastung einer oder mehrerer Instanzen erscheint in der
       Funding- und Kampagnenquote als Nettokosten. Vier Credit-Aktionen bei
       zwei folgenden Loan-Zahlungen gelten nicht als vier Credits dauerhafter
       Fortschritt.
-- [ ] Bei zwei installierten Loans und mindestens 10 Credits bewertet der
+- [x] Bei zwei installierten Loans und mindestens 10 Credits bewertet der
       Lifecycle-Owner das instanzweise Entfernen gegen weiteres Halten und
       bindet bei positiver Exit-Entscheidung die exakte kartengebundene
       EndTurn-Action; das normale Zugende darf sie nicht ohne fachlichen
       Vertrag verdrängen.
-- [ ] Eine zweite, nicht als Loan benannte Testkarte oder generische Fixture
+- [x] Eine zweite, nicht als Loan benannte Testkarte oder generische Fixture
       mit demselben Austauschvertrag belegt, dass die Lösung nicht
       kartenspezifisch ist.
-- [ ] Fokussierte Tests sichern mindestens: kein Parent, unzureichender
+- [x] Fokussierte Tests sichern mindestens: kein Parent, unzureichender
       Payoff, bekannter bezahlbarer Run, unbekannte ICE mit und ohne
       ausreichende sichtbare Breaker-Abdeckung, erfolgreicher Run mit
       sofortigem Exit, fehlende 10-Credit-Zahlungsfähigkeit und zwei
       gleichzeitig installierte Loan-Instanzen.
-- [ ] Zuständiger Plan, Step, Route, exakte Action-ID und Executor bleiben in
+- [x] Zuständiger Plan, Step, Route, exakte Action-ID und Executor bleiben in
       den positiven Fällen gebunden; es entsteht keine zweite
       Entscheidungsautorität.
-- [ ] Relevante kanonische Semantik-/Hint-Gates, fokussierte AI-Tests,
+- [x] Relevante kanonische Semantik-/Hint-Gates, fokussierte AI-Tests,
       erforderlicher AI-Typecheck und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
@@ -225,5 +235,29 @@ begründete Finanzierungslücke eines aussichtsreichen Run-Plans schließen.
 
 ## Ergebnisnotiz
 
-Noch offen. Umsetzung bewusst bis nach Abschluss der laufenden
-Kartenrestrukturierung zurückgestellt.
+Die Kartenrestrukturierung stellt inzwischen den kanonischen CardSpec-Vertrag
+für `strategic_exchange: debt_financing` sowie die vollständige Lifecycle-
+Semantik bereit. Der produktive Zulassungspfad erkennt Debt-Finanzierung nun
+generisch über diesen Vertrag und bezieht Installationsgewinn,
+Start-of-turn-Verlust sowie Leave-play-Zahlung direkt aus der CardSpec.
+
+Debt-Installationen sind keine eigenständige Boardentwicklung mehr. Sie werden
+nur als exakte Economy-Support-Route eines bereits gewählten
+`runner.pressure_central`- oder `runner.contest_remote`-Parents zugelassen,
+wenn ein wertiger Run, ein side-sicher tragfähiger Pfad und die anschließende
+Exit-Reserve belegt sind. Unbekanntes ICE ohne sichtbare universelle Abdeckung
+schließt diese Route aus. Die bestehende instanzbezogene
+`runner.resource_lifecycle`-Steuerung bleibt Owner des späteren Haltens oder
+Verlassens; mehrere installierte Debt-Instanzen erhöhen die Reserve um ihre
+summierte nächste Start-of-turn-Belastung.
+
+Die Engine projiziert den garantierten kanonischen On-install-Creditgewinn auf
+die Install-LegalAction, sodass der Funding-Sucher keine Kartentext- oder
+ID-Heuristik benötigt. Die letzte Loan-ID-Sonderbehandlung in den
+Economy-Diagnostiken wurde entfernt.
+
+Die fokussierten Tests und der Engine-Typecheck sind grün. Der vollständige
+AI-Typecheck bleibt ausschließlich an bereits reproduzierten, unabhängigen
+Worktree-Doppeltyp- und fehlenden CardSpec-Migrationsreport-Fehlern hängen;
+für die geänderten Produktionsdateien wurden keine verbleibenden Fehler
+festgestellt.

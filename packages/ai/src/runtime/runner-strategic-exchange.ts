@@ -2,6 +2,7 @@ import type { AiDecisionInput } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { AiHintStrategicExchangeKind } from "../hint-ontology";
+import { runnerDebtFinancingProfile } from "./runner-canonical-card-facts";
 
 export type RunnerStrategicExchangeKind = AiHintStrategicExchangeKind;
 
@@ -21,6 +22,9 @@ export function runnerStrategicExchangeKinds(
   const kinds = new Set<RunnerStrategicExchangeKind>(
     candidate.strategicExchangeKinds ?? [],
   );
+  if (runnerDebtFinancingProfile(candidate.sourceDefinitionId)) {
+    kinds.add("debt_financing");
+  }
   if (
     candidate.costProfile.agendaPointCost !== undefined ||
     risks.has("agenda_cost") ||
@@ -103,4 +107,16 @@ export function runnerStrategicExchangeHardExclusion(
     return "runner_strategic_exchange_opponent_terminal_score";
   }
   return undefined;
+}
+
+export function runnerStrategicExchangeRequiresBoundParent(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const kinds = runnerStrategicExchangeKinds(candidate);
+  return (
+    (kinds.includes("debt_financing") &&
+      candidate.semanticActionType === "install.card") ||
+    (kinds.includes("self_damage") &&
+      (candidate.costProfile.selfDamage?.length ?? 0) > 0)
+  );
 }

@@ -43,7 +43,11 @@ import {
   randomBreakOrDamageRiskCanCarryRunPath,
   randomBreakOrDamageRiskProfileForDefinitionId,
 } from "../actions/risk-action-projection";
-import { runnerNoRunRecurringEconomyProfile } from "./runner-canonical-card-facts";
+import {
+  runnerDebtFinancingProfile,
+  runnerInstalledDebtFinancingLiability,
+  runnerNoRunRecurringEconomyProfile,
+} from "./runner-canonical-card-facts";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
 import { runnerDiscardChoicePlanBinding } from "./runner-discard-choice-plan";
@@ -259,6 +263,7 @@ import { runnerRemoteHasKnownNoCurrentPayoff } from "./runner-known-access-payof
 import {
   runnerStrategicExchangeHardExclusion,
   runnerStrategicExchangeKinds,
+  runnerStrategicExchangeRequiresBoundParent,
 } from "./runner-strategic-exchange";
 import {
   currentEncounteredIceCard,
@@ -1924,6 +1929,8 @@ export function runnerActionDispositions(
     }
   }
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(domain);
+  const boundStrategicExchangeFundingActionIds =
+    runnerBoundStrategicExchangeFundingActionIds(domain);
   const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
     input,
     candidates,
@@ -1943,13 +1950,15 @@ export function runnerActionDispositions(
       continue;
     }
     if (
-      runnerStrategicExchangeKinds(candidate).includes("self_damage") &&
-      !delegatedFundingActionIds.has(candidate.actionId)
+      runnerStrategicExchangeRequiresBoundParent(candidate) &&
+      !boundStrategicExchangeFundingActionIds.has(candidate.actionId)
     ) {
       add(
         candidate.actionId,
         "runner.economy",
-        "runner_self_damage_economy_requires_bound_parent_funding",
+        runnerStrategicExchangeKinds(candidate).includes("self_damage")
+          ? "runner_self_damage_economy_requires_bound_parent_funding"
+          : "strategic_exchange_requires_bound_parent",
       );
       continue;
     }
@@ -2808,6 +2817,22 @@ export function runnerActionDispositions(
   );
 }
 
+function runnerBoundStrategicExchangeFundingActionIds(
+  domain: RunnerPlanDomain,
+): Set<string> {
+  return new Set(
+    domain.fundingNeeds.flatMap((need) =>
+      need.kind === "parent_plan_support" &&
+      (need.parentPlanInstanceId.startsWith(
+        "plan:runner.pressure_central:",
+      ) ||
+        need.parentPlanInstanceId.startsWith("plan:runner.contest_remote:"))
+        ? need.routeActionIds
+        : [],
+    ),
+  );
+}
+
 type RunnerFundingOwnershipDomain = Pick<
   RunnerPlanDomain,
   | "fundingNeeds"
@@ -2917,6 +2942,11 @@ function buildRunnerDomain(
 ): RunnerPlanDomain {
   const currentCredits = input.playerView.own.credits;
   const remainingClicks = input.playerView.own.clicks;
+  const debtLiability = runnerInstalledDebtFinancingLiability(
+    (input.playerView.own.rig ?? []).map((card) => card.definitionId),
+  );
+  const portfolioReserveTargetCredits =
+    economy.desiredCreditReserve + debtLiability.nextTurnCreditLoss;
   const installedCardLiquidationChoice =
     runnerInstalledCardLiquidationChoiceSignal(input, candidates);
   const handDevelopmentOwnedImmediateEconomyActionIds = new Set(
@@ -2982,22 +3012,26 @@ function buildRunnerDomain(
       priority: "phase_reserve",
       hardness: "soft",
       deadline: "end_of_current_turn",
-      targetCredits: economy.desiredCreditReserve,
+      targetCredits: portfolioReserveTargetCredits,
       remainingClicks: input.playerView.own.clicks,
       allowIncrementalProgress: true,
-      evidence: ["runner_finite_portfolio_credit_reserve"],
+      evidence: [
+        "runner_finite_portfolio_credit_reserve",
+        `runner_debt_next_turn_credit_loss:${debtLiability.nextTurnCreditLoss}`,
+        `runner_debt_total_leave_play_cost:${debtLiability.totalLeavePlayPayCost}`,
+      ],
     },
   );
   const portfolioReserveFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
     input.playerView.own.clicks > 0 &&
-    currentCredits < economy.desiredCreditReserve
+    currentCredits < portfolioReserveTargetCredits
       ? [
           {
             kind: "portfolio_reserve",
             needId: "runner-portfolio-credit-reserve",
-            targetCredits: economy.desiredCreditReserve,
+            targetCredits: portfolioReserveTargetCredits,
             currentCreditsAtRevalidation: currentCredits,
-            gap: economy.desiredCreditReserve - currentCredits,
+            gap: portfolioReserveTargetCredits - currentCredits,
             priorityClass: "P6",
             revalidation: {
               stateVersion: input.playerView.stateVersion,
@@ -4262,7 +4296,7 @@ function buildRunnerDomain(
       }
       if (
         candidate !== undefined &&
-        runnerStrategicExchangeKinds(candidate).includes("self_damage")
+        runnerStrategicExchangeRequiresBoundParent(candidate)
       ) {
         // Irreversible financing is support for an already selected parent
         // plan, never a standalone board-development objective.
@@ -5959,6 +5993,19 @@ type RunnerExactFundingRouteRequest = Pick<
   remainingClicks: number;
   allowIncrementalProgress?: boolean;
   allowStrategicExchange?: boolean;
+  debtFinancingParent?: Readonly<{
+    planInstanceId: string;
+    runActionId: string;
+    targetServerId: string;
+    accessPayoff: RunnerRunTargetEvaluation["accessPayoff"];
+    scoreThreat: boolean;
+    score: number;
+    pathPassability: RunnerRunTargetEvaluation["pathPassability"];
+    creditsAfterRun: number;
+    unknownUnrezzedIceCount: number;
+    riskyUniversalCoverage: boolean;
+    remainingClicksAfterRun: number;
+  }>;
 };
 
 function runnerExactFundingRouteContract(
@@ -6030,8 +6077,7 @@ function runnerExactFundingRouteCandidates(
     runnerFundingRouteCandidateIsMaterializable,
   );
   const ordinary = materializable.filter(
-    (candidate) =>
-      !runnerStrategicExchangeKinds(candidate).includes("self_damage"),
+    (candidate) => !runnerStrategicExchangeRequiresBoundParent(candidate),
   );
   if (request.allowStrategicExchange !== true) return ordinary;
 
@@ -6054,24 +6100,79 @@ function runnerExactFundingRouteCandidates(
   };
   if (routeCoversDemand(ordinary)) return ordinary;
 
-  const selfDamageCandidates = materializable
-    .filter((candidate) =>
-      runnerStrategicExchangeKinds(candidate).includes("self_damage"),
-    )
+  const parentBoundCandidates = materializable
+    .filter((candidate) => {
+      const kinds = runnerStrategicExchangeKinds(candidate);
+      return (
+        kinds.includes("self_damage") ||
+        (kinds.includes("debt_financing") &&
+          runnerDebtFinancingCandidateHasSafeBoundRunExit(
+            candidate,
+            request,
+          ))
+      );
+    })
     .sort(
       (left, right) =>
-        runnerCandidateSelfDamageAmount(left) -
-          runnerCandidateSelfDamageAmount(right) ||
+        runnerCandidateStrategicExchangeBurden(left) -
+          runnerCandidateStrategicExchangeBurden(right) ||
         (left.economyProjection?.netLiquidCreditGain ?? 0) -
           (right.economyProjection?.netLiquidCreditGain ?? 0) ||
         left.actionId.localeCompare(right.actionId),
     );
-  const smallestSufficientSelfDamage = selfDamageCandidates.find((candidate) =>
+  const smallestSufficientExchange = parentBoundCandidates.find((candidate) =>
     routeCoversDemand([...ordinary, candidate]),
   );
-  return smallestSufficientSelfDamage === undefined
+  return smallestSufficientExchange === undefined
     ? ordinary
-    : [...ordinary, smallestSufficientSelfDamage];
+    : [...ordinary, smallestSufficientExchange];
+}
+
+function runnerDebtFinancingCandidateHasSafeBoundRunExit(
+  candidate: ActionSemanticCandidate,
+  request: RunnerExactFundingRouteRequest,
+): boolean {
+  const parent = request.debtFinancingParent;
+  const profile = runnerDebtFinancingProfile(candidate.sourceDefinitionId);
+  const projection = candidate.economyProjection;
+  if (
+    !parent ||
+    !request.sourcePlanId ||
+    parent.planInstanceId !== request.sourcePlanId ||
+    candidate.semanticActionType !== "install.card" ||
+    !profile ||
+    projection?.source !== "legal_action_payload" ||
+    projection.reliability !== "guaranteed" ||
+    projection.confidence !== "high" ||
+    projection.grossLiquidCreditGain !== profile.installCreditGain ||
+    projection.creditCost !== profile.installCost ||
+    parent.pathPassability !== "reachable" ||
+    parent.score <= 0 ||
+    (!parent.scoreThreat &&
+      parent.accessPayoff !== "agenda" &&
+      parent.accessPayoff !== "score_threat") ||
+    (parent.unknownUnrezzedIceCount > 0 &&
+      !parent.riskyUniversalCoverage) ||
+    parent.remainingClicksAfterRun < 0
+  ) {
+    return false;
+  }
+  const netGain = projection.netLiquidCreditGain;
+  return (
+    typeof netGain === "number" &&
+    Number.isFinite(netGain) &&
+    parent.creditsAfterRun + netGain >= profile.leavePlayPayCost
+  );
+}
+
+function runnerCandidateStrategicExchangeBurden(
+  candidate: ActionSemanticCandidate,
+): number {
+  const debt = runnerDebtFinancingProfile(candidate.sourceDefinitionId);
+  if (debt) {
+    return debt.leavePlayPayCost + debt.startOfTurnCreditLoss;
+  }
+  return runnerCandidateSelfDamageAmount(candidate) * 1_000;
 }
 
 function runnerCandidateSelfDamageAmount(
@@ -6500,6 +6601,19 @@ function runnerRunFundingSupport(
     targetCredits: input.playerView.own.credits + gap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowStrategicExchange: true,
+    debtFinancingParent: {
+      planInstanceId: parentPlanInstanceId,
+      runActionId: evaluation.actionId,
+      targetServerId: evaluation.targetServerId,
+      accessPayoff: evaluation.accessPayoff,
+      scoreThreat: evaluation.scoreThreat,
+      score: evaluation.score,
+      pathPassability: evaluation.pathPassability,
+      creditsAfterRun: evaluation.creditsAfterRun,
+      unknownUnrezzedIceCount: evaluation.unknownUnrezzedIceCount ?? 0,
+      riskyUniversalCoverage: evaluation.riskyUniversalCoverage,
+      remainingClicksAfterRun: Math.max(0, input.playerView.own.clicks - 2),
+    },
     evidence: [
       `runner_run_support_target:${evaluation.targetServerId}`,
       "runner_run_conversion_click_reserved:1",
