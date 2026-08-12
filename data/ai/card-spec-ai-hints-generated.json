@@ -12271,7 +12271,7 @@
     },
     {
       "cardId": "onr_proteus_049_emergency-rig",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6bd6c871fe3930e5",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2843ac86346ef76a",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:88336ef56c1440d1",
       "hint": {
         "cardId": "onr_proteus_049_emergency-rig",
@@ -12374,7 +12374,7 @@
         ],
         "requiredMechanics": [
           "abilities",
-          "bounded_x_by_rez_cost_min_one",
+          "chosen_x_min_one",
           "free_rez_installed_ice_with_counters",
           "on_play",
           "play_operation"
@@ -13478,8 +13478,8 @@
     },
     {
       "cardId": "onr_proteus_059_government-contract",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:707af0d8b2ca6d5c",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d8368c19e19231c5",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:430a624a5b541c9e",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45c14fc961ea3425",
       "hint": {
         "cardId": "onr_proteus_059_government-contract",
         "side": "corp",
@@ -13514,7 +13514,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "corp_main_spend_advancement_for_install_rez_credits",
+            "capabilityKey": "corp_paid_spend_advancement_for_install_rez_credits",
             "conditions": [
               {
                 "kind": "requires_advancement_counter"
@@ -13633,8 +13633,8 @@
     },
     {
       "cardId": "onr_proteus_061_ldl-traffic-analyzers",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:410e03fdcefa8f61",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b4e7e57990453ebd",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:998f990eb01037ba",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:477351673065484b",
       "hint": {
         "cardId": "onr_proteus_061_ldl-traffic-analyzers",
         "side": "corp",
@@ -13663,7 +13663,7 @@
               "trace.corp_credit_support"
             ],
             "confidence": "medium",
-            "rationale": "Advancement counters convert to trace-only temporary credits; not a tag source."
+            "rationale": "Advancement counters convert to temporary credits that expire with the current trace; the credits are not purpose-restricted."
           }
         ],
         "actionCapabilitySemantics": [
@@ -13708,8 +13708,8 @@
     },
     {
       "cardId": "onr_proteus_062_lesley-major",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c9a1e7d48fa64bd0",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:68b7caa1ac9ffb55",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:44aaf303851036f7",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:58c68f835ecaefe7",
       "hint": {
         "cardId": "onr_proteus_062_lesley-major",
         "side": "corp",
@@ -13796,7 +13796,7 @@
     {
       "cardId": "onr_proteus_063_lisa-blight",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3dab85c6d0fd2132",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a7c545bca30ae470",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:12f272c3a4ccca0f",
       "hint": {
         "cardId": "onr_proteus_063_lisa-blight",
         "side": "corp",
@@ -13882,7 +13882,7 @@
     {
       "cardId": "onr_proteus_064_marcel-desoleil",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b925ed8101e8a135",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a31a78154078c6b1",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e7cac3dde39455d1",
       "hint": {
         "cardId": "onr_proteus_064_marcel-desoleil",
         "side": "corp",
@@ -15157,7 +15157,7 @@
     },
     {
       "cardId": "onr_proteus_078_armageddon",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a43cf1d56d994889",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:95275fea6a1fbd2e",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_078_armageddon",
@@ -15662,7 +15662,7 @@
     },
     {
       "cardId": "onr_proteus_084_crumble",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2af960eb99f5c457",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:cfad8aa0d51c0a9c",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:904a286d89525b89",
       "hint": {
         "cardId": "onr_proteus_084_crumble",
@@ -16120,7 +16120,7 @@
     },
     {
       "cardId": "onr_proteus_089_garbage-in",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f1b8f243454a0257",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:36aba7ac3b32f1f8",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:28f779ac14aedbf0",
       "hint": {
         "cardId": "onr_proteus_089_garbage-in",
@@ -16607,7 +16607,7 @@
     },
     {
       "cardId": "onr_proteus_094_scaldan",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:67912a182426ef6c",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d45df1ec2d9a6358",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_094_scaldan",
@@ -16826,7 +16826,7 @@
     },
     {
       "cardId": "onr_proteus_097_taxman",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e7b9fc74793bc700",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:28098978d74d280c",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:dbe734a51d79a629",
       "hint": {
         "cardId": "onr_proteus_097_taxman",
@@ -17028,7 +17028,7 @@
     },
     {
       "cardId": "onr_proteus_099_viral-pipeline",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9e4e59312e417435",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d8e0b1e79fb0264b",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_099_viral-pipeline",
@@ -17041,6 +17041,11 @@
           "safe_probe_run"
         ],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "convert_socket_set_to_pipe_counter"
+          }
+        ],
         "actionCapacityProfiles": [
           {
             "class": "action_cost",
@@ -17111,6 +17116,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
+          "activated_ability",
           "install_program",
           "subtype_virus"
         ]
@@ -18854,7 +18860,7 @@
     {
       "cardId": "onr_proteus_118_prearranged-drop",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d4400638be3885cc",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:574a7a8c22e6f510",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
       "hint": {
         "cardId": "onr_proteus_118_prearranged-drop",
         "side": "runner",
@@ -19008,7 +19014,7 @@
     {
       "cardId": "onr_proteus_120_reconnaissance",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:aba882832472bfff",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d1cd0d01cba8c3fd",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a787e7c3a28e6ef7",
       "hint": {
         "cardId": "onr_proteus_120_reconnaissance",
         "side": "runner",
@@ -19058,17 +19064,16 @@
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
-            "purpose": "expose_ice_on_relevant_run_path",
+            "purpose": "choose_server_for_corp_rez_credit_gain",
             "preferences": [
-              "relevant_server_ice",
-              "blocks_relevant_run_path"
+              "high_expected_corp_rez_count"
             ],
             "avoid": [
               "hidden_info_dependent_choice"
             ],
             "kind": "use_target",
             "timing": "on_play",
-            "targetType": "installed_ice",
+            "targetType": "server",
             "hiddenInfoPolicy": "legal_targets_only"
           },
           {

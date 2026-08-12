@@ -4023,7 +4023,7 @@
         ],
         "requiredMechanics": [
           "abilities",
-          "bounded_x_by_rez_cost_min_one",
+          "chosen_x_min_one",
           "free_rez_installed_ice_with_counters",
           "on_play",
           "play_operation"
@@ -4992,7 +4992,7 @@
         ],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "corp_main_spend_advancement_for_install_rez_credits",
+            "capabilityKey": "corp_paid_spend_advancement_for_install_rez_credits",
             "conditions": [
               {
                 "kind": "requires_advancement_counter"
@@ -5106,7 +5106,7 @@
             "roleDetail": "trace_credit_enabler",
             "evidence": ["trace.corp_credit_support"],
             "confidence": "medium",
-            "rationale": "Advancement counters convert to trace-only temporary credits; not a tag source."
+            "rationale": "Advancement counters convert to temporary credits that expire with the current trace; the credits are not purpose-restricted."
           }
         ],
         "actionCapabilitySemantics": [
@@ -7692,6 +7692,11 @@
         "roles": [],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
+        "actionCapabilitySemantics": [
+          {
+            "capabilityKey": "convert_socket_set_to_pipe_counter"
+          }
+        ],
         "actionCapacityProfiles": [
           {
             "class": "action_cost",
@@ -7759,7 +7764,11 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["install_program", "subtype_virus"]
+        "requiredMechanics": [
+          "activated_ability",
+          "install_program",
+          "subtype_virus"
+        ]
       }
     },
     {
@@ -9418,12 +9427,12 @@
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
-            "purpose": "expose_ice_on_relevant_run_path",
-            "preferences": ["relevant_server_ice", "blocks_relevant_run_path"],
+            "purpose": "choose_server_for_corp_rez_credit_gain",
+            "preferences": ["high_expected_corp_rez_count"],
             "avoid": ["hidden_info_dependent_choice"],
             "kind": "use_target",
             "timing": "on_play",
-            "targetType": "installed_ice",
+            "targetType": "server",
             "hiddenInfoPolicy": "legal_targets_only"
           },
           {

@@ -40,10 +40,10 @@
       "hidden_resource": 16,
       "random_outcome": 4,
       "run_modification": 11,
-      "target_choice": 24,
+      "target_choice": 25,
       "temporary_action": 13,
       "virus_counter": 7,
-      "x_cost": 9
+      "x_cost": 8
     }
   },
   "cards": [
@@ -1359,9 +1359,9 @@
       "cardId": "onr_proteus_049_emergency-rig",
       "side": "corp",
       "cardType": "operation",
-      "primaryFamily": "x_cost",
+      "primaryFamily": "target_choice",
       "classificationReasons": [
-        "variable_x_semantics"
+        "target_profile_present"
       ],
       "pilotDeckIds": [
         "proteus_corp_region_fast_score_2026_05_25"
@@ -1373,7 +1373,7 @@
         "confidence": "medium",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_x_cost"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
         ],
         "targetProfileCount": 1,
         "effectCount": 2
