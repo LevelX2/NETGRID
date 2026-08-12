@@ -278,6 +278,47 @@ describe("encounter entry", () => {
     expect(state.activeSide).toBe("runner");
   });
 
+  it("consumes Social Engineering only after entering the chosen ICE encounter", () => {
+    const state = makeState({ iceDefinitionId: "simple_ice" });
+    state.run!.secretSpendGuessRunAutoPassIceId = "ice_1" as CardInstanceId;
+    const { host } = hostFor(state);
+    const firstAction = runnerAction(state);
+
+    const first = beginEncounter(host, "ice_1" as CardInstanceId, firstAction);
+
+    expect(first).toMatchObject({
+      handled: true,
+      encounterStarted: true,
+      iceId: "ice_1",
+    });
+    expect(state.run).toMatchObject({
+      phase: "encounter_ice",
+      encounteredIceId: "ice_1",
+    });
+    expect(state.run?.secretSpendGuessRunAutoPassIceId).toBeUndefined();
+    expect(firstAction.payload).toMatchObject({
+      autoPassChosenIce: true,
+      secretSpendGuessRunAutoPassedIce: true,
+      targetCardDefinitionId: "simple_ice",
+    });
+
+    state.run!.phase = "approach_ice";
+    state.timingPoint = "run.approach_ice";
+    const secondAction = runnerAction(state);
+    const second = beginEncounter(
+      host,
+      "ice_1" as CardInstanceId,
+      secondAction,
+    );
+
+    expect(second).toMatchObject({ handled: true, encounterStarted: true });
+    expect(secondAction.payload).not.toMatchObject({
+      secretSpendGuessRunAutoPassedIce: true,
+    });
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(state.activeSide).toBe("runner");
+  });
+
   it("attaches a paid run-wide encounter tax and its public ICE target to the entry action", () => {
     const state = makeState({ iceDefinitionId: "simple_ice" });
     state.run!.encounterTaxForFutureIce = 2;

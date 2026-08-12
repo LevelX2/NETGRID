@@ -296,7 +296,7 @@ durch den Block-Commit mit dem Betreff
   die gewählte Karte verliert den Credit. Hammers Zwei-Credit-Verteilung,
   private Choice-Sichtbarkeit und Replay bleiben unverändert grün.
 
-### Unveränderte Karten dieses Blocks
+### Im ersten Durchlauf unveränderte Karten dieses Blocks
 
 Für Dwarf, Expert Schedule Analyzer, Fait Accompli, Flak, Grubb, Hammer, Imp,
 Invisibility, Japanese Water Torture, Joan of Arc, Krash und Loony Goon ergab
@@ -596,6 +596,49 @@ Nutzerblock keinen weiteren mechanischen Korrekturbefund. Die bei vier dieser
 Karten genannten AI-Bereinigungen ändern daran nichts. Die Zuordnung 119/120
 folgt der Repo-Collector-Nummerierung.
 
+### Nachprüfung zu Block 006
+
+Eine zweite, engere Quellen- und Runtime-Prüfung hat die zuvor als unverändert
+geführten Karten 102, 105, 110, 111, 113, 119 und 120 korrigiert:
+
+- Open-Ended Mileage Program deklariert die optionale Rücknahme jetzt als
+  Entscheidung beim Spielen mit einem zusätzlichen Credit. Die LegalActions
+  bieten getrennt „normal spielen“ und „spielen und zurücknehmen“ an; die
+  Zusatzkosten werden vor der Auflösung bezahlt, das Event liegt während
+  seiner Effekte im Heap und kehrt erst danach in die Grip zurück. Die alte
+  nachgelagerte Bezahl-Choice ist für diese Karte entfallen.
+- Priority Wreck berichtet `corpLostCredits` aus der tatsächlichen
+  Vorher-/Nachher-Differenz der Corp-Credits. Zahlt der Runner mehr als die
+  Corp besitzt, bleibt `runnerPaidAmount` höher, während der ausgewiesene
+  Corp-Verlust korrekt bei null Credits gedeckelt ist.
+- Sneak Preview deklariert „Shuffle your stack afterwards“ unabhängig davon,
+  ob das installierte Programm aus Stack oder Heap stammt. Auch der Heap-Pfad
+  mischt deshalb deterministisch den Stack. Die Karte bleibt Support der
+  Breaker-Suchlinie, ist aber kein eigener Strategieanker.
+- Social Engineering überspringt das gewählte ICE nicht mehr in der
+  Approach-Phase. Die Corp erhält ihr reguläres Rez-Fenster, ein gerezztes
+  Ziel wird tatsächlich encountered, und erst im Encounter wird der
+  automatische Pass genau einmal verbraucht. Ein unrezztes, nicht
+  encountered ICE verbraucht den Marker nicht. Evidence:
+  `docs/source/Netrunner Errata 1.70.md:2398-2408`.
+- Synchronized Attack on HQ verwendet als kanonischen Klarstellungstext nun
+  die Einzelkartenentscheidung „für jede Karte [2] zahlen oder diese Karte
+  abwerfen“. Die bestehende private Corp-Choice wählt konkrete behaltene
+  Karten und bezahlt weiterhin [2] je Karte. Die Quelle ist ausdrücklich als
+  in der Errata-Sammlung dokumentierte inoffizielle Klarstellung referenziert.
+- Arasaka Portable Prototype und “Armadillo” Armored Road Home enthalten die
+  offizielle Errata-Ergänzung `from the bank` im Wiederauffülltext samt
+  Quellenreferenz. Die bereits korrekte Runtime ändert sich dadurch nicht.
+
+Zusätzlich ist Private LDL Access kein eigener R&D-Strategieanker mehr,
+sondern bleibt Enabler und Support der bestehenden R&D-Pressure-Linie. Für
+Weather-to-Finance Pipe wurde kein neuer freier Credit-Denial-String erfunden:
+die geschlossene CardSpec-Taktikontologie besitzt derzeit keinen passenden
+verbrauchbaren Runner-Credit-Denial-Wert; `pressure_hq` bleibt daher die
+belastbare Annotation. Total Genetic Retrofit ist nun zusätzlich mit zwei
+nacheinander gespielten Kopien bei null Tags belegt; beide
+Tag-Vermeidungscredits bleiben kumulativ erhalten.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
@@ -659,3 +702,10 @@ AI-Hint-Artefakt ändert ausschließlich die erwarteten Regel- oder
 Planungsfingerprints und Semantiken von Playful AI, Private LDL Access,
 Synchronized Attack on HQ, Temple Microcode Outlet, Terrorist Reprisal,
 Total Genetic Retrofit und Weather-to-Finance Pipe.
+
+Für die Nachprüfung zu Block 006 sind Cards- und Engine-Typecheck,
+CardSpec-AI-Hint-Generator/-Check, 28 fokussierte CardSpec-Vertragstests,
+192 fokussierte
+Engine-Tests für Play-, Hidden-Zone-, Run-, Encounter- und Originalset-Pfade
+sowie 24 AI-Hint-Vertragstests grün. Der bekannte unabhängige
+Classic-Corp-Draw-Baselinefehler wurde nicht in den Scope gezogen.

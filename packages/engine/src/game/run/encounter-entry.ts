@@ -187,6 +187,35 @@ export function beginEncounter(
       stateChanged: true,
     };
   }
+  if (run.secretSpendGuessRunAutoPassIceId === encounteredIceId) {
+    delete run.secretSpendGuessRunAutoPassIceId;
+    const subroutineCount = (
+      printedSubroutinesForCardImplementation(encounteredDefinition) ??
+      encounteredDefinition.subroutines ??
+      []
+    ).length;
+    run.resolvedSubroutineIndexes = Array.from(
+      { length: subroutineCount },
+      (_, index) => index,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        autoPassChosenIce: true,
+        secretSpendGuessRunAutoPassedIce: true,
+        targetCardDefinitionId: encounteredDefinition.id,
+      };
+    }
+    host.callbacks.continueRun?.(legalAction);
+    return {
+      handled: true,
+      encounterStarted: true,
+      iceId: encounteredIceId,
+      sourceDefinitionId: encounteredDefinition.id,
+      resolvedPayload: legalAction?.payload,
+      stateChanged: true,
+    };
+  }
   host.state.timingPoint = "run.encounter_ice";
   host.state.activeSide = "runner";
   return {

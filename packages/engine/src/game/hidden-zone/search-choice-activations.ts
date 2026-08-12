@@ -326,13 +326,13 @@ export function startStackOrTrashProgramInstallActivation(
     sourceCardId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     installCost: "free";
-    shuffleStackIfSearched: true;
+    shuffleStackAfterwards: true;
     returnInstalledCardToGripAtEndOfTurn: true;
   },
 ): HiddenZoneSearchActivationResult {
   if (
     input.installCost !== "free" ||
-    input.shuffleStackIfSearched !== true ||
+    input.shuffleStackAfterwards !== true ||
     input.returnInstalledCardToGripAtEndOfTurn !== true
   )
     throw new Error("Diese Programminstallation ist nicht unterstuetzt.");

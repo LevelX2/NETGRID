@@ -257,7 +257,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       MECHANIC_SMOKE_GAMES.runAccess("v1915-priority-wreck-hq-replacement"),
     );
     state.runner.credits = 8;
-    state.corp.credits = 5;
+    state.corp.credits = 1;
     moveRunnerCardToGrip(state, "onr_v1_105_priority-wreck");
     const hqCardId = moveCorpCardToHq(state, "simple_economy_operation");
     keepOnlyCorpHqCard(state, hqCardId);
@@ -283,12 +283,12 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state = applyChoice(state, "runner", "pay_2");
     expect(state.run).toBeUndefined();
     expect(state.runner.credits).toBe(6);
-    expect(state.corp.credits).toBe(3);
+    expect(state.corp.credits).toBe(0);
     expect(state.corp.hq).toContain(hqCardId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       accessReplacement: "runner_spend_corp_lose_credits",
       runnerPaidAmount: 2,
-      corpLostCredits: 2,
+      corpLostCredits: 1,
       sourceDefinitionId: "onr_v1_105_priority-wreck",
     });
 

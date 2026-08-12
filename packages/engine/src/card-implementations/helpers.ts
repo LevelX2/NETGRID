@@ -343,7 +343,7 @@ export function chooseStackOrTrashProgramInstallEffect(): Extract<
   return {
     kind: "choose_stack_or_trash_program_install",
     installCost: "free",
-    shuffleStackIfSearched: true,
+    shuffleStackAfterwards: true,
     returnInstalledCardToGripAtEndOfTurn: true,
     visibility: "hidden_info_barrier",
   };

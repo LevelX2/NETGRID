@@ -1761,7 +1761,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(nextTurn.randomDrawRecords.length).toBe(randomAfterFirstQuest);
   });
 
-  it("resolves Social Engineering secret guess and auto-passes the chosen ICE on a wrong guess", () => {
+  it("resolves Social Engineering secret guess, rez window and one encounter auto-pass", () => {
     const socialRunnerDeck = MECHANIC_SMOKE_DECKS.runAccess.runner;
     const socialCorpDeck = {
       ...MECHANIC_SMOKE_DECKS.runAccess.corp,
@@ -1924,10 +1924,19 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload)).not.toContain(
       "simple_barrier_ice",
     );
-    wrong = apply(wrong, "corp", (action) => action.type === "decline_rez");
+    wrong = apply(
+      wrong,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    expect(wrong.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(wrong.run?.secretSpendGuessRunAutoPassIceId).toBeUndefined();
     expect(wrong.run?.position).toMatchObject({
       kind: "server",
       serverId: "rd",
+    });
+    expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
+      targetCardDefinitionId: "simple_barrier_ice",
     });
   });
 

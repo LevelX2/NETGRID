@@ -13,7 +13,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put [2] from the bank on Armored Road Home when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them at the start of your next turn. [T]: Prevent up to 3 meat damage.",
+      "Put [2] from the bank on Armored Road Home when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them from the bank at the start of your next turn. [T]: Prevent up to 3 meat damage.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -21,6 +21,12 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_120_armadillo-armored-road-home",
+      },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#Armadillo Armored Road Home",
+        note: "Official errata adds ‘from the bank’ to the refill instruction.",
       },
     ],
   },

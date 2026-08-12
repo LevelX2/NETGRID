@@ -24894,7 +24894,7 @@
     },
     {
       "cardId": "onr_v1_102_open-ended-mileage-program",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b6b3ac63d00696f7",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c75a5fac8cbdf618",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:30c12475c5d013c9",
       "hint": {
         "cardId": "onr_v1_102_open-ended-mileage-program",
@@ -25118,7 +25118,7 @@
     {
       "cardId": "onr_v1_106_private-ldl-access",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:68d3b01c3f1e11b0",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:bb03beb4d7434858",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:bf5980492c17f045",
       "hint": {
         "cardId": "onr_v1_106_private-ldl-access",
         "side": "runner",
@@ -25128,7 +25128,6 @@
         "planRoles": ["pressure_hq", "pressure_rnd"],
         "valueHints": {},
         "strategicRole": ["enabler"],
-        "strategyAnchors": ["runner.rnd_pressure"],
         "lineSupport": ["runner.rnd_pressure"],
         "actionCapabilitySemantics": [
           {
@@ -25380,8 +25379,8 @@
     },
     {
       "cardId": "onr_v1_110_sneak-preview",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:37cf37c74055e883",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e2a063abaf011bb7",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:dcf4fd0cb3787e00",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:de4b7a4a74ef5bae",
       "hint": {
         "cardId": "onr_v1_110_sneak-preview",
         "side": "runner",
@@ -25391,7 +25390,6 @@
         "planRoles": ["build_rig", "recover_rig"],
         "valueHints": {},
         "strategicRole": ["enabler"],
-        "strategyAnchors": ["runner.search.breaker"],
         "lineSupport": ["runner.search.breaker"],
         "strategicExchangeKinds": ["temporary_resource"],
         "actionCapabilitySemantics": [

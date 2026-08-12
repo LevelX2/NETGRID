@@ -2574,7 +2574,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     ).toBe(false);
   });
 
-  it("PRO010 lets rezzed Twisty resolve after Social Engineering auto-pass", () => {
+  it("PRO010 lets rezzed Twisty resolve after Social Engineering enters and auto-passes its encounter", () => {
     let state = proteusSocialEngineeringTwistyGame(
       "proteus-pro010-social-rezzed-twisty",
     );

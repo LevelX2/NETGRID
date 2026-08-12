@@ -452,7 +452,7 @@ describe("compileProspectiveCapabilities", () => {
           {
             kind: "choose_stack_or_trash_program_install",
             installCost: "free",
-            shuffleStackIfSearched: true,
+            shuffleStackAfterwards: true,
             returnInstalledCardToGripAtEndOfTurn: true,
             visibility: "hidden_info_barrier",
           },
@@ -471,7 +471,7 @@ describe("compileProspectiveCapabilities", () => {
       expect.objectContaining({
         kind: "choose_stack_or_trash_program_install",
         installCost: "free",
-        shuffleStackIfSearched: true,
+        shuffleStackAfterwards: true,
         returnInstalledCardToGripAtEndOfTurn: true,
         visibility: "hidden_info_barrier",
       }),

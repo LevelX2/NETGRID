@@ -329,7 +329,7 @@ export function resolveTemporaryProgramSearchInstallSelection(input: {
     sourceZone,
     sourceDefinitionId,
     isCardImplementationChoice,
-    shuffleNeeded: sourceZone === "stack",
+    shuffleNeeded: isCardImplementationChoice || sourceZone === "stack",
   };
 }
 

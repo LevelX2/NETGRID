@@ -223,7 +223,7 @@ export function resolveActivatedCardImplementationAbility(
         ),
       startChooseStackOrTrashProgramInstall: (
         installCost,
-        shuffleStackIfSearched,
+        shuffleStackAfterwards,
         returnInstalledCardToGripAtEndOfTurn,
       ) =>
         deps.startStackOrTrashProgramInstallChoice(
@@ -232,7 +232,7 @@ export function resolveActivatedCardImplementationAbility(
           match.cardId,
           match.definition.id,
           installCost,
-          shuffleStackIfSearched,
+          shuffleStackAfterwards,
           returnInstalledCardToGripAtEndOfTurn,
         ),
       startLookTopStackShowToCorpThenInstallMatching: (

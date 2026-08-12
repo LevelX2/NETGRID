@@ -240,7 +240,7 @@ export function createHiddenZoneCardImplementationRuntimeDeps(
       sourceCardId,
       sourceDefinitionId,
       installCost,
-      shuffleStackIfSearched,
+      shuffleStackAfterwards,
       returnInstalledCardToGripAtEndOfTurn,
     ) =>
       startStackOrTrashProgramInstallActivation(
@@ -249,7 +249,7 @@ export function createHiddenZoneCardImplementationRuntimeDeps(
           sourceCardId,
           sourceDefinitionId,
           installCost,
-          shuffleStackIfSearched,
+          shuffleStackAfterwards,
           returnInstalledCardToGripAtEndOfTurn,
         },
       ),

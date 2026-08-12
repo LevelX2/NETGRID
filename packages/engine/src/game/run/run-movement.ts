@@ -319,10 +319,6 @@ export function passApproachedIce(
 ): RunMovementResult {
   const run = mustRun(host.state);
   if (!run.approachedIceId) throw new Error("Kein ICE wird approached.");
-  if (run.secretSpendGuessRunAutoPassIceId === run.approachedIceId) {
-    delete run.secretSpendGuessRunAutoPassIceId;
-    return movePastCurrentIce(host, legalAction);
-  }
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   if (ice.rezzed && run.bypassFirstIceRemaining) {
     markRunStartBypassAutoPass(host, run.approachedIceId, legalAction);
@@ -350,11 +346,6 @@ export function approachOrEncounterIce(
   const run = mustRun(state);
   const ice = host.cards.cardInstanceFor(approachedIceId);
   run.approachedIceId = approachedIceId;
-  const secretSpendAutoPass =
-    run.secretSpendGuessRunAutoPassIceId === approachedIceId;
-  if (secretSpendAutoPass) {
-    markSecretSpendGuessAutoPass(legalAction);
-  }
   if (ice.rezzed) {
     if (host.rules.corpRunRootRezActionsAvailable()) {
       const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } =
@@ -374,7 +365,6 @@ export function approachOrEncounterIce(
         stateChanged: true,
       };
     }
-    if (secretSpendAutoPass) return passApproachedIce(host, legalAction);
     if (run.bypassFirstIceRemaining) {
       markRunStartBypassAutoPass(host, approachedIceId, legalAction);
       run.bypassFirstIceRemaining = false;
@@ -917,17 +907,6 @@ function fortRunWindowImplementationForCard<
     (window): window is Extract<CardFortRunWindowImplementation, { kind: K }> =>
       window.kind === kind,
   );
-}
-
-function markSecretSpendGuessAutoPass(
-  legalAction: LegalAction | undefined,
-): void {
-  if (!legalAction) return;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    autoPassChosenIce: true,
-    secretSpendGuessRunAutoPassedIce: true,
-  };
 }
 
 function markRunStartBypassAutoPass(

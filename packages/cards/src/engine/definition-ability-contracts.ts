@@ -48,6 +48,11 @@ export type OnPlayCardAbilityImplementation = {
   kind: "on_play";
   costs: OnPlayCardAbilityCostImplementation;
   condition?: CardConditionImplementation;
+  sourceDisposition?: {
+    kind: "return_to_grip_instead_of_trash";
+    additionalCreditCost: number;
+    decisionTiming: "when_played";
+  };
   effects: CardEffectImplementation[];
 };
 

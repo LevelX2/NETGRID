@@ -792,8 +792,7 @@ export function createCardLifecycleRuntimeHosts(
             state.timingPoint === "run.approach_ice" &&
             run?.phase === "approach_ice" &&
             run.approachedIceId === cardId &&
-            (run.secretSpendGuessRunAutoPassIceId === cardId ||
-              run.bypassFirstIceRemaining === true)
+            run.bypassFirstIceRemaining === true
           ) {
             passApproachedIce(deps.runMovementHostForState(state), legalAction);
             return true;

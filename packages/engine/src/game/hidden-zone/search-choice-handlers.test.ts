@@ -453,6 +453,32 @@ describe("hidden-zone search choice handlers", () => {
     });
   });
 
+  it("shuffles the stack after Sneak Preview installs from the heap", () => {
+    const testHost = host(
+      choice({
+        source: `p3_38.stack_or_trash_program_install:${sneakPreviewInstanceId}:${sneakPreviewDefinitionId}:heap:1`,
+      }),
+      playerAction(`card_${programId}`),
+      {
+        stack: [secondProgramId],
+        heap: [programId],
+      },
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      shufflePerformed: true,
+      installedCardId: programId,
+    });
+    expect(testHost.legalAction.payload).toMatchObject({
+      searchShuffleAfter: true,
+      shuffled: true,
+    });
+  });
+
   it("keeps Sneak Preview selectable at full MU and resumes after trashing a program", () => {
     const installed: CardInstanceId[] = [];
     const testHost = host(

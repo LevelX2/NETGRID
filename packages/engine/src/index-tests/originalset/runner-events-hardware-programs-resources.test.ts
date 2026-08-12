@@ -342,13 +342,41 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     ).toBe(true);
 
     let untaggedTotal = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.traceTags(
-        "spotcheck-total-genetic-retrofit-untagged",
-      ),
+      createGameAfterSetup({
+        seed: "spotcheck-total-genetic-retrofit-untagged",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.traceTags.runner,
+          id: "spotcheck_total_genetic_retrofit_untagged_runner",
+          cards: MECHANIC_SMOKE_DECKS.traceTags.runner.cards.map((entry) =>
+            entry.id === "onr_v1_116_total-genetic-retrofit"
+              ? { ...entry, quantity: 2 }
+              : entry,
+          ),
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+        agendaPointsToWin: 7,
+      }),
     );
     untaggedTotal.runner.credits = 20;
     untaggedTotal.runner.tags = 0;
-    moveRunnerCardToGrip(untaggedTotal, "onr_v1_116_total-genetic-retrofit");
+    const firstRetrofitId = moveRunnerCardToGrip(
+      untaggedTotal,
+      "onr_v1_116_total-genetic-retrofit",
+    );
+    const secondRetrofitId = Object.entries(untaggedTotal.cardInstances).find(
+      ([cardId, card]) =>
+        cardId !== firstRetrofitId &&
+        card.definitionId === "onr_v1_116_total-genetic-retrofit",
+    )?.[0];
+    if (!secondRetrofitId)
+      throw new Error("Missing second Total Genetic Retrofit copy.");
+    removeEverywhere(untaggedTotal, secondRetrofitId);
+    untaggedTotal.runner.grip.push(secondRetrofitId);
+    untaggedTotal.cardInstances[secondRetrofitId] = {
+      ...untaggedTotal.cardInstances[secondRetrofitId]!,
+      zone: { side: "runner", zone: "grip" },
+      faceup: true,
+    };
     untaggedTotal = apply(
       untaggedTotal,
       "runner",
@@ -359,6 +387,16 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     );
     expect(untaggedTotal.runner.tags).toBe(0);
     expect(untaggedTotal.runnerTagAvoidanceCredits).toBe(1);
+    untaggedTotal = apply(
+      untaggedTotal,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(untaggedTotal, action) ===
+          "onr_v1_116_total-genetic-retrofit",
+    );
+    expect(untaggedTotal.runner.tags).toBe(0);
+    expect(untaggedTotal.runnerTagAvoidanceCredits).toBe(2);
   });
 
   it("keeps run, stack-search and reprisal events side-safe and replayable", () => {
@@ -664,7 +702,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       state,
       "runner",
       (action) =>
-        action.type === "play_event" && action.payload?.cardId === eventId,
+        action.type === "play_event" &&
+        action.payload?.cardId === eventId &&
+        action.payload?.onPlaySourceDisposition ===
+          "return_to_grip_instead_of_trash",
     );
     const removed = structuredClone(state);
     removeEverywhere(removed, eventId);
@@ -684,15 +725,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       (action) => action.actionId === legal.actionId,
     );
     expect(state.runner.tags).toBe(0);
-    expect(state.pendingChoice?.source).toContain(
-      "card_implementation.paid_source_return_to_grip",
-    );
-    state = applyChoice(state, "runner", "pay_1_return_to_grip");
+    expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.grip).toContain(eventId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      abilityId: "remove_tag_optional_return",
-      returnedToGrip: true,
-      paidCredits: 1,
+      normalCreditsSpent: 1,
+      removedTags: 1,
+      runnerTagsAfter: 0,
     });
     expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(
       true,

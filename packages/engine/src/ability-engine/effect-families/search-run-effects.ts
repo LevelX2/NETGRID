@@ -128,7 +128,7 @@ export function executeSearchRunEffect(input: CardEffectFamilyInput): boolean {
         );
       if (
         effect.installCost !== "free" ||
-        effect.shuffleStackIfSearched !== true ||
+        effect.shuffleStackAfterwards !== true ||
         effect.returnInstalledCardToGripAtEndOfTurn !== true
       )
         throw new Error(
@@ -140,7 +140,7 @@ export function executeSearchRunEffect(input: CardEffectFamilyInput): boolean {
         );
       const choiceResult = context.startChooseStackOrTrashProgramInstall(
         effect.installCost,
-        effect.shuffleStackIfSearched,
+        effect.shuffleStackAfterwards,
         effect.returnInstalledCardToGripAtEndOfTurn,
       );
       mergePublicPayload(publicPayload, choiceResult.publicPayload);

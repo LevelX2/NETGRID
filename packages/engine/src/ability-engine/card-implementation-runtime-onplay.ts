@@ -187,7 +187,7 @@ export function executeOnPlayCardImplementationAbility(
         ),
       startChooseStackOrTrashProgramInstall: (
         installCost,
-        shuffleStackIfSearched,
+        shuffleStackAfterwards,
         returnInstalledCardToGripAtEndOfTurn,
       ) =>
         deps.startStackOrTrashProgramInstallChoice(
@@ -196,7 +196,7 @@ export function executeOnPlayCardImplementationAbility(
           cardId,
           definition.id,
           installCost,
-          shuffleStackIfSearched,
+          shuffleStackAfterwards,
           returnInstalledCardToGripAtEndOfTurn,
         ),
       startLookTopStackShowToCorpThenInstallMatching: (

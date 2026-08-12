@@ -127,7 +127,7 @@ export type CardImplementationRuntimeHiddenDependencies = {
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
     installCost: "free",
-    shuffleStackIfSearched: true,
+    shuffleStackAfterwards: true,
     returnInstalledCardToGripAtEndOfTurn: true,
   ) => CardEffectHiddenInfoResult;
   startLookTopStackShowToCorpThenInstallMatchingChoice: (

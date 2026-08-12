@@ -141,7 +141,7 @@ export type CardEffectExecutionContext = {
   ) => CardEffectHiddenInfoResult;
   startChooseStackOrTrashProgramInstall?: (
     installCost: "free",
-    shuffleStackIfSearched: true,
+    shuffleStackAfterwards: true,
     returnInstalledCardToGripAtEndOfTurn: true,
   ) => CardEffectHiddenInfoResult;
   startLookTopStackShowToCorpThenInstallMatching?: (

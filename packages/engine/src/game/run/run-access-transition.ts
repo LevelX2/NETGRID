@@ -369,14 +369,16 @@ export function resolveSuccessfulRunCreditLossSpendChoice(
     throw new Error("Credit-Loss-Betrag ist ungueltig.");
   if (amount > host.state.runner.credits)
     throw new Error("Der Runner kann diesen Credit-Loss-Betrag nicht zahlen.");
+  const corpCreditsBefore = host.state.corp.credits;
   host.state.runner.credits -= amount;
   host.state.corp.credits = Math.max(0, host.state.corp.credits - amount);
+  const corpLostCredits = corpCreditsBefore - host.state.corp.credits;
   delete host.state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     accessReplacement: "runner_spend_corp_lose_credits",
     runnerPaidAmount: amount,
-    corpLostCredits: amount,
+    corpLostCredits,
     runnerCreditsAfter: host.state.runner.credits,
     corpCreditsAfter: host.state.corp.credits,
     hiddenZoneBarrier: true,

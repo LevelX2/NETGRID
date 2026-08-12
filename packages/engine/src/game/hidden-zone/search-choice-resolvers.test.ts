@@ -143,6 +143,22 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
 
+    expect(resolveTemporaryProgramSearchInstallSelection({
+      choice: choice({
+        source:
+          "p3_38.stack_or_trash_program_install:source_card:onr_v1_110_sneak-preview:heap:8",
+      }),
+      selectedCardId: programId,
+      legalTargetIds: [programId],
+      defaultSourceDefinitionId: undefined,
+    })).toEqual({
+      selectedCardId: programId,
+      sourceZone: "heap",
+      sourceDefinitionId: "onr_v1_110_sneak-preview",
+      isCardImplementationChoice: true,
+      shuffleNeeded: true,
+    });
+
     expect(resolveRevealedStackProgramInstallSelection({
       choice: choice({
         source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",

@@ -52,16 +52,16 @@ export const cardSpec = {
         condition: {
           kind: "runner_is_tagged",
         },
+        sourceDisposition: {
+          kind: "return_to_grip_instead_of_trash",
+          additionalCreditCost: 1,
+          decisionTiming: "when_played",
+        },
         effects: [
           {
             kind: "remove_tags",
             recipient: "runner",
             mode: "amount",
-            amount: 1,
-            visibility: "public",
-          },
-          {
-            kind: "return_source_to_grip_if_paid",
             amount: 1,
             visibility: "public",
           },

@@ -53,7 +53,7 @@ export const cardSpec = {
           {
             kind: "choose_stack_or_trash_program_install",
             installCost: "free",
-            shuffleStackIfSearched: true,
+            shuffleStackAfterwards: true,
             returnInstalledCardToGripAtEndOfTurn: true,
             visibility: "hidden_info_barrier",
           },
@@ -64,7 +64,6 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      { kind: "strategy_anchor", strategyKey: "runner.search.breaker" },
       {
         kind: "line_support",
         lineKey: "runner.search.breaker",

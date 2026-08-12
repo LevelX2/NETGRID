@@ -410,7 +410,7 @@ export type SearchStackInstallEffectImplementation = {
 export type ChooseStackOrTrashProgramInstallEffectImplementation = {
   kind: "choose_stack_or_trash_program_install";
   installCost: "free";
-  shuffleStackIfSearched: true;
+  shuffleStackAfterwards: true;
   returnInstalledCardToGripAtEndOfTurn: true;
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };

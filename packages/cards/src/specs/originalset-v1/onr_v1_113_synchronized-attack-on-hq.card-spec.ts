@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Play only if you made a successful run on HQ this turn. The Corp discards all cards. The Corp can retain cards by paying [2] for each card not discarded.",
+      "Play only if you made a successful run on HQ this turn. For each card stored in HQ, the Corp either pays [2] or discards that card.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,12 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_113_synchronized-attack-on-hq",
+      },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#Synchronized Attack on HQ",
+        note: "Clarifying wording recorded as unofficial errata.",
       },
     ],
   },

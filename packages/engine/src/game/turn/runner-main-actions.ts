@@ -12,6 +12,7 @@ import {
   deterministicOnPlayResourcePayload,
   isPrintedCostOnPlayAbility,
   onPlayCardImplementationClickCost,
+  printedCostOnPlayImplementation,
 } from "../../ability-engine/card-implementation-runtime-shared";
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
 import { fixedPlayCostCredits } from "../payment/play-cost";
@@ -732,6 +733,9 @@ export function buildRunnerMainActions(
       const playEventClickCost = canPlayCardImplementation
         ? runnerEventClickCost(host, definition)
         : 1;
+      const onPlaySourceDisposition = canPlayCardImplementation
+        ? printedCostOnPlayImplementation(definition)?.sourceDisposition
+        : undefined;
       if (state.runner.clicks < playEventClickCost) continue;
       const targetedEvent = cardImplementationForDefinitionId(
         definition.id,
@@ -879,6 +883,43 @@ export function buildRunnerMainActions(
             eventAbilityMetadata,
           ),
         );
+        if (
+          onPlaySourceDisposition?.kind === "return_to_grip_instead_of_trash" &&
+          onPlaySourceDisposition.decisionTiming === "when_played" &&
+          state.runner.credits +
+            restrictedHostedCredits(state, "play_events") +
+            runnerCostPenaltySupportCreditCapacity(state) >=
+            eventPlayCost + onPlaySourceDisposition.additionalCreditCost
+        ) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "play_event",
+              `${definition.title} spielen und zurücknehmen`,
+              id,
+              [
+                {
+                  clicks: playEventClickCost,
+                  credits:
+                    eventPlayCost +
+                    onPlaySourceDisposition.additionalCreditCost,
+                },
+              ],
+              {
+                cardId: id,
+                ...deterministicResourcePayload,
+                ...resolverActionPayload,
+                ...eventCapabilityBinding?.payload,
+                onPlaySourceDisposition: "return_to_grip_instead_of_trash",
+                decision: "return_to_grip_instead_of_trash",
+                additionalSourceDispositionCreditCost:
+                  onPlaySourceDisposition.additionalCreditCost,
+              },
+              eventAbilityMetadata,
+            ),
+          );
+        }
       }
     }
   }

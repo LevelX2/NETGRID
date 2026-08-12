@@ -930,14 +930,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_102_open-ended-mileage-program",
     );
 
-    const legal = mustAction(
-      state,
-      "runner",
+    const mileageActions = getLegalActions(state, "runner").filter(
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) ===
           "onr_v1_102_open-ended-mileage-program",
     );
+    expect(mileageActions).toHaveLength(2);
+    expect(
+      mileageActions.map((action) => action.costs[0]?.credits).sort(),
+    ).toEqual([0, 1]);
+    const legal = mileageActions.find(
+      (action) =>
+        action.payload?.onPlaySourceDisposition ===
+        "return_to_grip_instead_of_trash",
+    );
+    if (!legal) throw new Error("Open-Ended return action missing.");
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
@@ -963,37 +971,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state = apply(
       state,
       "runner",
-      (action) =>
-        action.type === "play_event" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_102_open-ended-mileage-program",
+      (action) => action.actionId === legal.actionId,
     );
     expect(state.runner.tags).toBe(0);
-    expect(state.pendingChoice?.source).toContain(
-      "card_implementation.paid_source_return_to_grip",
-    );
-    expect(state.pendingChoice?.visibility).toBe("public");
-    expect(state.runner.heap).toContain(eventCardId);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_event",
-      cardDefinitionId: "onr_v1_102_open-ended-mileage-program",
-      abilityId: "remove_tag_optional_return",
-      removedTags: 1,
-      runnerTagsAfter: 0,
-    });
-
-    state = applyChoice(state, "runner", "pay_1_return_to_grip");
     expect(state.pendingChoice).toBeUndefined();
     expect(state.runner.grip).toContain(eventCardId);
     expect(state.runner.heap).not.toContain(eventCardId);
     expect(state.runner.credits).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
-      choiceKind: "select_option",
-      abilityId: "remove_tag_optional_return",
-      returnedToGrip: true,
-      paidCredits: 1,
-      runnerCreditsAfter: 1,
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_102_open-ended-mileage-program",
+      removedTags: 1,
+      runnerTagsAfter: 0,
+      normalCreditsSpent: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"stack"|"cardInstances"|"privatePayload"/,

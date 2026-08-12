@@ -231,7 +231,9 @@ function cardSearchPresentationForChoice(
         : "program",
       reveal: "hidden",
       destination: temporaryInstall ? "install_program" : "grip",
-      shuffleAfter: false,
+      shuffleAfter: choice.source.startsWith(
+        "p3_38.stack_or_trash_program_install",
+      ),
       showNonMatchingCards: true,
       ...(temporaryInstall ? { temporaryReturnAtEndOfTurn: true } : {}),
     };
