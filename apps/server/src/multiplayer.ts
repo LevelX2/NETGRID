@@ -4,6 +4,7 @@ import {
   beliefStateInvariantSignature,
   buildAiDecisionInput,
   chooseAiAction,
+  exportAiRuntimeCheckpoint,
   isAiDeckSnapshotRuntimeError,
   residentPlanPortfolioSnapshot,
   reconstructBeliefState,
@@ -11,6 +12,8 @@ import {
   selectAiDecisionSideForState,
   type AiDeckSnapshotRuntimeErrorCode,
   type AiDeckSnapshotRuntimeExpectation,
+  type AiDecisionInputWithDeckCapabilities,
+  type AiRuntimeCheckpointV1,
   type ResidentPlanPortfolio,
   type RunnerOpponentModel,
 } from "@netgrid/ai";
@@ -501,6 +504,22 @@ export type AiDecisionHistoricalAudit = {
     };
     actorState: Omit<PlayerView, "legalActions" | "publicEvents">;
   };
+  checkpointCapture?: {
+    schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1";
+    provenance: "persisted_at_decision";
+    actor: Side;
+    stateVersion: number;
+    stateHash: string;
+    input: AiDecisionInputWithDeckCapabilities;
+    runtime: AiRuntimeCheckpointV1;
+    validation: {
+      sideSafeInput: true;
+      inputMatchesActor: true;
+      inputMatchesStateVersion: true;
+      legalActionSetMatchesHistoricalAudit: true;
+      humanPrivateHandExcluded: true;
+    };
+  };
   beliefState: AiDecisionBeliefCapture;
   runAndEncounterProjection:
     | {
@@ -928,6 +947,7 @@ type PreparedAiDecision = {
   stateVersion: number;
   side: Side;
   decision: AiDecision;
+  input: AiDecisionInputWithDeckCapabilities;
 };
 
 export class InMemoryMatchStorage implements MultiplayerStorage {
@@ -3439,7 +3459,7 @@ export class MultiplayerService {
         decision = cached.decision;
       } else {
         this.preparedAiDecisions.delete(record.match.matchId);
-        let aiInput: AiDecisionInput;
+        let aiInput: AiDecisionInputWithDeckCapabilities;
         try {
           const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
             record,
@@ -3485,6 +3505,7 @@ export class MultiplayerService {
           stateVersion: record.gameState.stateVersion,
           side: activeAiSide,
           decision,
+          input: structuredClone(aiInput),
         });
         if (this.captureResidentPlanPortfolioFor(record, aiInput))
           await this.persist(record);
@@ -4480,6 +4501,8 @@ export class MultiplayerService {
       );
     }
     if (!beliefState) diagnostics.unavailableSections.push("beliefState");
+    if (!audit?.checkpointCapture)
+      diagnostics.unavailableSections.push("checkpointCapture");
     if (ownDeckSnapshot.provenance === "unavailable")
       diagnostics.unavailableSections.push("ownDeckSnapshot");
     if (
@@ -4493,6 +4516,11 @@ export class MultiplayerService {
       aiTrace: source.trace,
       surroundingEvents: source.surroundingEvents,
       audit: audit ?? unavailableAudit,
+      checkpointCapture: audit?.checkpointCapture ?? {
+        schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+        provenance: "unavailable",
+        reason: "historical_checkpoint_capture_not_persisted",
+      },
       beliefState: beliefState ?? {
         schemaVersion: "netgrid-ai-belief-capture-v1",
         provenance: "unavailable",
@@ -4504,6 +4532,7 @@ export class MultiplayerService {
           ? [
               "decisionTrace",
               "historicalDecisionAudit",
+              ...(audit.checkpointCapture ? ["checkpointCapture"] : []),
               ...(beliefState ? ["beliefState"] : []),
               ...(ownDeckSnapshot.provenance === "persisted"
                 ? ["ownDeckSnapshot"]
@@ -5637,6 +5666,7 @@ export class MultiplayerService {
     if (legalActions.length === 0) return { ok: false, code: "ai_no_action" };
     const prepared = this.preparedAiDecisions.get(record.match.matchId);
     let decision: AiDecision;
+    let decisionInput: AiDecisionInputWithDeckCapabilities;
     if (
       prepared &&
       prepared.stateVersion === state.stateVersion &&
@@ -5644,10 +5674,11 @@ export class MultiplayerService {
     ) {
       // The decision shown in the inspector is the decision applied below.
       decision = prepared.decision;
+      decisionInput = structuredClone(prepared.input);
     } else {
       this.preparedAiDecisions.delete(record.match.matchId);
       const controller = record.match.aiControllers?.[side];
-      let input: AiDecisionInput;
+      let input: AiDecisionInputWithDeckCapabilities;
       try {
         const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
           record,
@@ -5664,6 +5695,7 @@ export class MultiplayerService {
           expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
         });
         this.restoreResidentPlanPortfolioFor(record, input);
+        decisionInput = input;
       } catch (error) {
         if (isAiDeckSnapshotRuntimeError(error))
           return { ok: false, code: error.code };
@@ -5694,6 +5726,7 @@ export class MultiplayerService {
         };
       }
       this.captureResidentPlanPortfolioFor(record, input);
+      decisionInput = input;
     }
     const directLegalAction =
       decision.selectionKind === "engine_randomized_ice_install_selection" ||
@@ -5815,6 +5848,7 @@ export class MultiplayerService {
       legalActions,
       legalAction,
       decision,
+      decisionInput,
       normalizeAiDecisionTraceMode(record.match.aiTraceMode),
       occurredAt,
     );
@@ -6792,6 +6826,7 @@ function aiDecisionTraceFor(
   historicalLegalActions: readonly LegalAction[],
   legalAction: LegalAction,
   decision: AiDecision,
+  decisionInput: AiDecisionInputWithDeckCapabilities,
   mode: AiDecisionTraceMode,
   createdAt: string,
 ): AiDecisionTraceRecord | undefined {
@@ -6811,6 +6846,7 @@ function aiDecisionTraceFor(
     historicalLegalActions,
     legalAction,
     beliefState,
+    decisionInput,
   );
   const decisionIndex = nextAiDecisionIndex(record);
   const selectedActionType = legalAction.type;
@@ -6918,6 +6954,7 @@ function historicalAuditFor(
   legalActions: readonly LegalAction[],
   selectedAction: LegalAction,
   beliefState: AiDecisionBeliefCapture,
+  decisionInput: AiDecisionInputWithDeckCapabilities,
 ): AiDecisionHistoricalAudit {
   const actorView = getPlayerView(state, side);
   const {
@@ -6939,6 +6976,17 @@ function historicalAuditFor(
   const attackedServer = run
     ? actorView.servers.find((server) => server.id === run.attackedServerId)
     : undefined;
+  if (
+    decisionInput.side !== side ||
+    decisionInput.playerView.side !== side ||
+    decisionInput.playerView.stateVersion !== snapshot.stateVersion ||
+    decisionInput.legalActions.length !== legalActions.length ||
+    !decisionInput.legalActions.every((action) =>
+      legalActions.some((candidate) => candidate.actionId === action.actionId),
+    )
+  ) {
+    throw new Error("ai_trace_checkpoint_capture_binding_mismatch");
+  }
   return {
     schemaVersion: "ai-decision-historical-audit-v1",
     capture: "persisted",
@@ -6985,6 +7033,25 @@ function historicalAuditFor(
       },
       actorState,
     },
+    checkpointCapture: {
+      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+      provenance: "persisted_at_decision",
+      actor: side,
+      stateVersion: snapshot.stateVersion,
+      stateHash: snapshot.stateHash,
+      input: structuredClone(decisionInput),
+      runtime: exportAiRuntimeCheckpoint(
+        decisionInput,
+        requiredCheckpointDeckSnapshotId(decisionInput),
+      ),
+      validation: {
+        sideSafeInput: true,
+        inputMatchesActor: true,
+        inputMatchesStateVersion: true,
+        legalActionSetMatchesHistoricalAudit: true,
+        humanPrivateHandExcluded: true,
+      },
+    },
     beliefState,
     runAndEncounterProjection: run
       ? {
@@ -7001,6 +7068,16 @@ function historicalAuditFor(
           reason: "not_in_run_at_decision",
         },
   };
+}
+
+function requiredCheckpointDeckSnapshotId(
+  input: AiDecisionInputWithDeckCapabilities,
+): string {
+  const deckSnapshotId = input.ownDeckSnapshot?.deckSnapshotId;
+  if (!deckSnapshotId) {
+    throw new Error("ai_trace_checkpoint_deck_snapshot_missing");
+  }
+  return deckSnapshotId;
 }
 
 function beliefCaptureFor(
@@ -7138,6 +7215,7 @@ export function unavailableHistoricalAudit(): {
     engineEvidence: HistoricalAuditAvailability;
     analysisSnapshot: HistoricalAuditAvailability;
     runAndEncounterProjection: HistoricalAuditAvailability;
+    checkpointCapture: HistoricalAuditAvailability;
   };
 } {
   const unavailable = {
@@ -7153,6 +7231,7 @@ export function unavailableHistoricalAudit(): {
       engineEvidence: unavailable,
       analysisSnapshot: unavailable,
       runAndEncounterProjection: unavailable,
+      checkpointCapture: unavailable,
     },
   };
 }

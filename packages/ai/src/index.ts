@@ -601,3 +601,8 @@ export {
   chooseCorpAction,
   chooseRunnerAction,
 } from "./ai-runtime-public-entrypoints";
+export {
+  AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
+  exportAiRuntimeCheckpoint,
+} from "./evaluation/decision-checkpoints/runtime-checkpoint";
+export type { AiRuntimeCheckpointV1 } from "./evaluation/decision-checkpoints/runtime-checkpoint";

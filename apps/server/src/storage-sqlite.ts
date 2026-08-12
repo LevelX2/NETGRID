@@ -382,6 +382,11 @@ export type StorageMaintenanceAiDecisionTraceIndexEntry = {
       schemaVersion?: string;
       reason?: string;
     };
+    checkpointCapture: {
+      status: "persisted" | "reconstructed" | "unavailable";
+      schemaVersion?: string;
+      reason?: string;
+    };
   };
 };
 
@@ -418,6 +423,7 @@ export type StorageMaintenanceMatchAnalysisBundle = {
     historicalAudit: "ai-decision-historical-audit-v1";
     beliefCapture: "netgrid-ai-belief-capture-v1";
     ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1";
+    checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v1";
   };
   match: {
     matchId: string;
@@ -440,6 +446,21 @@ export type StorageMaintenanceMatchAnalysisBundle = {
   traces?: StorageMaintenanceAiDecisionTraceDetail[];
   beliefStates?: Array<Record<string, unknown>>;
   ownDeckSnapshot?: StorageMaintenanceOwnDeckSnapshot;
+  eventCoverage?: {
+    returnedEventCount: number;
+    firstEventIndex?: number;
+    lastEventIndex?: number;
+    firstStateVersion?: number;
+    lastStateVersion?: number;
+    terminalStateIncluded: boolean;
+  };
+  terminal: {
+    isTerminal: boolean;
+    status: MatchStatus;
+    finalStateVersion?: number;
+    finalStateHash?: string;
+    resultSnapshot?: StoredMatch["resultSnapshot"];
+  };
   diagnostics: {
     warnings: string[];
     unavailableSections: string[];
@@ -1000,6 +1021,16 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         stateVersions.length > 0 ? Math.min(...stateVersions) : undefined;
       const lastStateVersion =
         stateVersions.length > 0 ? Math.max(...stateVersions) : undefined;
+      const hasNarrowDecisionScope =
+        normalized.turn !== undefined ||
+        normalized.fromDecision !== undefined ||
+        normalized.toDecision !== undefined;
+      const eventUpperStateVersion =
+        !hasNarrowDecisionScope &&
+        analysisMatchStatusIsTerminal(match.status) &&
+        match.stateVersion !== undefined
+          ? Number(match.stateVersion)
+          : lastStateVersion;
       const eventRows = normalized.includeEvents
         ? (this.db
             .prepare(
@@ -1015,8 +1046,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
               matchId,
               firstStateVersion ?? null,
               firstStateVersion ?? null,
-              lastStateVersion ?? null,
-              lastStateVersion ?? null,
+              eventUpperStateVersion ?? null,
+              eventUpperStateVersion ?? null,
               MATCH_ANALYSIS_EVENT_LIMIT + 1,
             ) as Array<{
             eventId: string;
@@ -1080,6 +1111,28 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       : undefined;
     if (ownDeckSnapshot?.provenance === "unavailable")
       unavailableSections.push("ownDeckSnapshot");
+    const persistedRecord = JSON.parse(materialized.match.recordJson) as Pick<
+      StoredMatch,
+      "resultSnapshot"
+    >;
+    const terminalStateIncluded =
+      analysisMatchStatusIsTerminal(materialized.match.status) &&
+      materialized.match.stateVersion !== undefined &&
+      materialized.match.stateHash !== undefined &&
+      events?.some(
+        (event) =>
+          event.stateVersionAfter === Number(materialized.match.stateVersion) &&
+          event.stateHashAfter === materialized.match.stateHash,
+      ) === true;
+    if (
+      normalized.includeEvents &&
+      analysisMatchStatusIsTerminal(materialized.match.status) &&
+      !terminalStateIncluded
+    ) {
+      warnings.push(
+        "Das zurückgegebene Eventfenster enthält den terminalen Matchzustand nicht.",
+      );
+    }
     return {
       schemaVersion: "netgrid-match-analysis-bundle-v2",
       schemaVersions: {
@@ -1087,6 +1140,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         historicalAudit: "ai-decision-historical-audit-v1",
         beliefCapture: "netgrid-ai-belief-capture-v1",
         ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
+        checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v1",
       },
       match: {
         matchId: materialized.match.matchId,
@@ -1120,6 +1174,35 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         ? { beliefStates: compactBeliefTimeline(decisionRecords) }
         : {}),
       ...(ownDeckSnapshot ? { ownDeckSnapshot } : {}),
+      eventCoverage: {
+        returnedEventCount: events?.length ?? 0,
+        ...(events?.[0]
+          ? {
+              firstEventIndex: events[0].eventIndex,
+              firstStateVersion: events[0].stateVersionBefore,
+            }
+          : {}),
+        ...(events?.at(-1)
+          ? {
+              lastEventIndex: events.at(-1)!.eventIndex,
+              lastStateVersion: events.at(-1)!.stateVersionAfter,
+            }
+          : {}),
+        terminalStateIncluded,
+      },
+      terminal: {
+        isTerminal: analysisMatchStatusIsTerminal(materialized.match.status),
+        status: materialized.match.status,
+        ...(materialized.match.stateVersion === undefined
+          ? {}
+          : { finalStateVersion: Number(materialized.match.stateVersion) }),
+        ...(materialized.match.stateHash
+          ? { finalStateHash: materialized.match.stateHash }
+          : {}),
+        ...(persistedRecord.resultSnapshot
+          ? { resultSnapshot: persistedRecord.resultSnapshot }
+          : {}),
+      },
       diagnostics: { warnings, unavailableSections },
     };
   }
@@ -3651,10 +3734,12 @@ function matchAnalysisTraceDetail(
   traceJson: Record<string, unknown>,
   includeBeliefState: boolean,
 ): Record<string, unknown> {
-  if (includeBeliefState) return traceJson;
   const detail = structuredClone(traceJson);
   const historicalAudit = recordValue(detail.historicalAudit);
-  if (historicalAudit) delete historicalAudit.beliefState;
+  if (historicalAudit) {
+    if (!includeBeliefState) delete historicalAudit.beliefState;
+    delete historicalAudit.checkpointCapture;
+  }
   return detail;
 }
 
@@ -3741,6 +3826,15 @@ function analysisScope(
       ? {}
       : { toDecision: filters.toDecision }),
   };
+}
+
+function analysisMatchStatusIsTerminal(status: MatchStatus): boolean {
+  return (
+    status === "cancelled" ||
+    status === "abandoned" ||
+    status === "forfeited" ||
+    status === "finished"
+  );
 }
 
 function normalizeCleanupFilters(
@@ -4437,6 +4531,7 @@ function historicalAuditAvailability(
       engineEvidence: unavailable.engineEvidence,
       analysisSnapshot: unavailable.analysisSnapshot,
       runAndEncounterProjection: unavailable.runAndEncounterProjection,
+      checkpointCapture: unavailable.checkpointCapture,
     };
   }
   return {
@@ -4460,6 +4555,15 @@ function historicalAuditAvailability(
         ? { reason: audit.runAndEncounterProjection.reason }
         : {}),
     },
+    checkpointCapture: audit.checkpointCapture
+      ? {
+          status: "persisted",
+          schemaVersion: audit.checkpointCapture.schemaVersion,
+        }
+      : {
+          status: "unavailable",
+          reason: "historical_checkpoint_capture_not_persisted",
+        },
   };
 }
 

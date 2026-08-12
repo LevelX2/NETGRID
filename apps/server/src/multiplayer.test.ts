@@ -1490,7 +1490,13 @@ describe("Backend 0.5 private storage maintenance", () => {
           historicalAudit?: string;
           beliefCapture?: string;
           ownDeckSnapshot?: string;
+          checkpointCapture?: string;
         };
+        eventCoverage?: {
+          returnedEventCount?: number;
+          terminalStateIncluded?: boolean;
+        };
+        terminal?: { isTerminal?: boolean; status?: string };
         beliefStates?: Array<{
           decisionIndex?: number;
           provenance?: string;
@@ -1531,6 +1537,8 @@ describe("Backend 0.5 private storage maintenance", () => {
           historicalAudit: "ai-decision-historical-audit-v1",
           beliefCapture: "netgrid-ai-belief-capture-v1",
           ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
+          checkpointCapture:
+            "netgrid-ai-decision-checkpoint-capture-v1",
         },
         match: {
           matchId: active.matchId,
@@ -1539,6 +1547,14 @@ describe("Backend 0.5 private storage maintenance", () => {
         scope: { turn: 1, side: "corp", fromDecision: 1, toDecision: 1 },
       });
       expect(activeBundle.events?.length).toBeGreaterThan(0);
+      expect(activeBundle.eventCoverage).toMatchObject({
+        returnedEventCount: activeBundle.events?.length,
+        terminalStateIncluded: false,
+      });
+      expect(activeBundle.terminal).toMatchObject({
+        isTerminal: false,
+        status: "active",
+      });
       expect(activeBundle.decisions).toEqual([
         expect.objectContaining({
           decisionIndex: 1,
@@ -1638,6 +1654,23 @@ describe("Backend 0.5 private storage maintenance", () => {
             rulesBaseline?: { engineSchemaVersion?: string };
           };
           analysisSnapshot?: { actorState?: unknown };
+          checkpointCapture?: {
+            schemaVersion?: string;
+            provenance?: string;
+            input?: {
+              side?: string;
+              playerView?: { side?: string; stateVersion?: number };
+              legalActions?: Array<{ actionId?: string }>;
+            };
+            runtime?: { schemaVersion?: string };
+            validation?: Record<string, boolean>;
+          };
+        };
+        checkpointCapture?: {
+          schemaVersion?: string;
+          provenance?: string;
+          input?: { side?: string };
+          runtime?: { schemaVersion?: string };
         };
         surroundingEvents?: Array<{ eventId?: string }>;
         beliefState?: {
@@ -1686,6 +1719,21 @@ describe("Backend 0.5 private storage maintenance", () => {
           ?.engineSchemaVersion,
       ).toBeDefined();
       expect(decisionContext.audit?.analysisSnapshot?.actorState).toBeDefined();
+      expect(decisionContext.checkpointCapture).toMatchObject({
+        schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+        provenance: "persisted_at_decision",
+        input: { side: "corp" },
+        runtime: { schemaVersion: "ai-runtime-checkpoint-v1" },
+      });
+      expect(decisionContext.audit?.checkpointCapture).toMatchObject({
+        validation: {
+          sideSafeInput: true,
+          inputMatchesActor: true,
+          inputMatchesStateVersion: true,
+          legalActionSetMatchesHistoricalAudit: true,
+          humanPrivateHandExcluded: true,
+        },
+      });
       expect(decisionContext.beliefState).toMatchObject({
         schemaVersion: "netgrid-ai-belief-capture-v1",
         provenance: "persisted",
@@ -1718,6 +1766,9 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(decisionContext.provenance?.persisted).toContain("beliefState");
       expect(decisionContext.provenance?.persisted).toContain(
         "ownDeckSnapshot",
+      );
+      expect(decisionContext.provenance?.persisted).toContain(
+        "checkpointCapture",
       );
       expect(decisionContext.provenance?.reconstructed).toContain(
         "ownDeckZoneBalance",
@@ -1836,7 +1887,12 @@ describe("Backend 0.5 private storage maintenance", () => {
             "analysisSnapshot",
             "runAndEncounterProjection",
             "beliefState",
+            "checkpointCapture",
           ]),
+        },
+        checkpointCapture: {
+          provenance: "unavailable",
+          reason: "historical_checkpoint_capture_not_persisted",
         },
         beliefState: {
           provenance: "unavailable",
@@ -1852,11 +1908,31 @@ describe("Backend 0.5 private storage maintenance", () => {
         match?: { status?: string };
         events?: unknown;
         traces?: unknown;
+        eventCoverage?: {
+          returnedEventCount?: number;
+          terminalStateIncluded?: boolean;
+        };
+        terminal?: {
+          isTerminal?: boolean;
+          status?: string;
+          finalStateVersion?: number;
+          finalStateHash?: string;
+        };
         diagnostics?: { warnings?: string[] };
       };
       expect(finishedBundle.match?.status).toBe("finished");
       expect(finishedBundle.events).toBeUndefined();
       expect(finishedBundle.traces).toBeUndefined();
+      expect(finishedBundle.eventCoverage).toEqual({
+        returnedEventCount: 0,
+        terminalStateIncluded: false,
+      });
+      expect(finishedBundle.terminal).toMatchObject({
+        isTerminal: true,
+        status: "finished",
+        finalStateVersion: finishedRecord.gameState.stateVersion,
+        finalStateHash: hashState(finishedRecord.gameState),
+      });
       expect(finishedBundle.diagnostics?.warnings).toContain(
         "Für den gewählten Entscheidungsbereich sind keine KI-Traces gespeichert.",
       );
