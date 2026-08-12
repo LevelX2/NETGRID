@@ -915,7 +915,7 @@ export function buildRevealedStackProgramInstallRunActions(
   run: ActiveRun,
 ): LegalAction[] {
   const state = host.state;
-  const used = new Set(run.hiddenStackInstallUsedSourceIdsThisRun ?? []);
+  const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
   if (state.runner.stack.length === 0) return [];
   return state.runner.rig.programs
     .slice()
@@ -924,11 +924,16 @@ export function buildRevealedStackProgramInstallRunActions(
     .filter((cardId) =>
       cardImplementationForDefinitionId(
         host.cards.definitionFor(cardId).id,
-      )?.abilities?.some((ability) =>
-        ability.effects?.some(
-          (effect) =>
-            effect.kind === "look_top_stack_show_to_corp_then_install_matching",
-        ),
+      )?.abilities?.some(
+        (ability) =>
+          ability.kind === "activated" &&
+          ability.limit?.kind === "once_per_run_per_source" &&
+          ability.limit.scope === "source" &&
+          ability.effects?.some(
+            (effect) =>
+              effect.kind ===
+              "look_top_stack_show_to_corp_then_install_matching",
+          ),
       ),
     )
     .map((sourceCardId) => {

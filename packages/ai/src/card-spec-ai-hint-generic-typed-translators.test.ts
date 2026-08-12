@@ -512,6 +512,27 @@ describe("generic typed CardSpec AI translators", () => {
     );
   });
 
+  it("compiles Reflector's single any-of matcher without duplicating coverage", () => {
+    expect(actualHint("onr_v1_055_reflector").breakerProfile).toMatchObject({
+      coverage: ["unknown_special"],
+      breakCost: 0,
+      maxSubroutinesPerBreak: 1,
+    });
+  });
+
+  it("retains runner self-trash semantics when trashing is an ability cost", () => {
+    expect(actualHint("onr_v1_059_self-modifying-code")).toMatchObject({
+      effects: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "program_trash",
+          timing: "during_run",
+          target: "source.trash",
+        }),
+      ]),
+      functionSignals: expect.arrayContaining(["risk.self_trash"]),
+    });
+  });
+
   it("binds a successful-run fort target only to the typed force-rez followup", () => {
     const entry = targetAnnotatedEntry("onr_v1_026_false-echo");
 

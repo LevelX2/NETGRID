@@ -5003,7 +5003,17 @@
         "lineSupport": ["runner.hq_pressure"],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "trash_source_look_at_hq"
+            "capabilityKey": "trash_source_look_at_hq",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"]
           }
         ],
         "targetProfiles": [
@@ -5026,13 +5036,26 @@
             "resource": "cards",
             "target": "full_reveal",
             "repeatable": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
           }
         ],
-        "functionSignals": ["info.hq", "resource.connection"],
+        "functionSignals": [
+          "info.hq",
+          "resource.connection",
+          "risk.self_trash"
+        ],
         "actionTacticSignals": [
           "access.payoff",
           "effect:hq_info",
+          "effect:resource_trash",
           "effect_scope:hq",
+          "effect_scope:installed_card",
           "effect_timing:action"
         ],
         "conditions": [
@@ -5448,7 +5471,17 @@
         "lineSupport": ["runner.rnd_pressure"],
         "actionCapabilitySemantics": [
           {
-            "capabilityKey": "trash_source_look_at_rd_top_three"
+            "capabilityKey": "trash_source_look_at_rd_top_three",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"]
           }
         ],
         "targetProfiles": [
@@ -5472,12 +5505,21 @@
             "target": "top_cards",
             "amount": 3,
             "repeatable": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
           }
         ],
-        "functionSignals": ["info.rnd_topdeck"],
+        "functionSignals": ["info.rnd_topdeck", "risk.self_trash"],
         "actionTacticSignals": [
           "access.payoff",
+          "effect:resource_trash",
           "effect:topdeck_info",
+          "effect_scope:installed_card",
           "effect_scope:rnd",
           "effect_timing:action"
         ],

@@ -1699,6 +1699,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "runner",
       (action) => action.actionId === mysteryAction.actionId,
     );
+    expect(state.run?.successfulRunAbilityUsedSourceIds).toContain(mysteryId);
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       visibility: "public",
@@ -1797,6 +1798,62 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       selfTrashed: false,
       installedProgramCount: 0,
     });
+  });
+
+  it("pays Self-Modifying Code's trash-source cost before opening its stack-install choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-self-modifying-code-cost",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "spotcheck_smc_runner",
+          name: "Spotcheck Self-Modifying Code Runner",
+          cards: [
+            { id: "onr_v1_059_self-modifying-code", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.runner.memoryLimit = 8;
+    const sourceId = installRunnerProgramForTest(
+      state,
+      "onr_v1_059_self-modifying-code",
+    );
+    const targetId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const ability = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_059_self-modifying-code",
+    );
+    expect(ability.payload).toMatchObject({
+      cardImplementationTrashSourceCost: true,
+    });
+    expect(ability.payload?.cardImplementationTrashesSource).toBeUndefined();
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === ability.actionId,
+    );
+
+    expect(state.runner.heap).toContain(sourceId);
+    expect(state.runner.rig.programs).not.toContain(sourceId);
+    expect(
+      state.pendingChoice?.options.map((option) => option.value),
+    ).toContain(targetId);
   });
 
   it("loads Corolla Speed Chip with one restricted Killer recurring credit and refreshes it", () => {

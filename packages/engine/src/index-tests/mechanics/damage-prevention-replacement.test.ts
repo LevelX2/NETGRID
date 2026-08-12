@@ -312,7 +312,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     const preserveOptions =
       state.pendingChoice?.options
         .map((option) => option.id)
-        .filter((id) => id.startsWith(`card:${cacheId}:`))
+        .filter((id) => id.startsWith(`card:virus:${cacheId}:`))
         .slice(0, 2) ?? [];
     state = applyChoices(state, "runner", preserveOptions);
     expect(cardCounterAmount(state, cacheId, "virus")).toBe(2);

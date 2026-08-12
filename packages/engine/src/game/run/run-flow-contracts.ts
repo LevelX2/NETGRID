@@ -307,6 +307,7 @@ export type RunFlowHost = {
     addVirusCounterWithCounterPrevention: (
       state: GameState,
       cardId: CardInstanceId,
+      counterType: CounterType,
       amount: number,
       legalAction?: LegalAction,
     ) => number;

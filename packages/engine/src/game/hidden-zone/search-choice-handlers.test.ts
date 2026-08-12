@@ -657,6 +657,7 @@ describe("hidden-zone search choice handlers", () => {
       playerAction("done"),
       { stack: [programId, hardwareId] },
     );
+    testHost.state.run!.successfulRunAbilityUsedSourceIds = [sourceCardId];
 
     const result = handleHiddenZoneSearchChoice(testHost);
 
@@ -694,6 +695,7 @@ describe("hidden-zone search choice handlers", () => {
       playerAction(`card_${programId}`),
       { stack: [programId, hardwareId] },
     );
+    testHost.state.run!.successfulRunAbilityUsedSourceIds = [sourceCardId];
 
     const result = handleHiddenZoneSearchChoice(testHost);
 
@@ -737,6 +739,7 @@ describe("hidden-zone search choice handlers", () => {
       playerAction("done"),
       { stack: [hardwareId] },
     );
+    testHost.state.run!.successfulRunAbilityUsedSourceIds = [sourceCardId];
 
     const result = handleHiddenZoneSearchChoice(testHost);
 

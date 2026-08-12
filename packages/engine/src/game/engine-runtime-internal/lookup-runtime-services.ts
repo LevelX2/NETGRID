@@ -3,6 +3,7 @@ import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
 import {
+  CARD_VIRUS_COUNTER_TYPES,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -833,12 +834,22 @@ export function createLookupRuntimeServices(
   function visibleVirusCounterTargetIds(state: GameState): CardInstanceId[] {
     const targets = new Set<CardInstanceId>();
     for (const cardId of runnerInstalledCardIds(state)) {
-      if (cardCounter(state, cardId, "virus") > 0) targets.add(cardId);
+      if (
+        CARD_VIRUS_COUNTER_TYPES.some(
+          (counterType) => cardCounter(state, cardId, counterType) > 0,
+        )
+      )
+        targets.add(cardId);
     }
     for (const cardId of corpInstalledCardIds(state)) {
       const instance = state.cardInstances[cardId];
       if (!instance?.rezzed) continue;
-      if (cardCounter(state, cardId, "virus") > 0) targets.add(cardId);
+      if (
+        CARD_VIRUS_COUNTER_TYPES.some(
+          (counterType) => cardCounter(state, cardId, counterType) > 0,
+        )
+      )
+        targets.add(cardId);
     }
     return [...targets];
   }

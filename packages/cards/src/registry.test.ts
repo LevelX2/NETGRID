@@ -163,6 +163,49 @@ describe("CardRegistry", () => {
     expect(registryEditorSummary(registry).capabilityCount).toBe(2);
   });
 
+  it("preserves Original Set 041-060 ability identity, limits and costs", () => {
+    const mysteryBox = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_043_mystery-box" as CardDefinitionId,
+    )!;
+    const reflector = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_055_reflector" as CardDefinitionId,
+    )!;
+    const selfModifyingCode = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_059_self-modifying-code" as CardDefinitionId,
+    )!;
+
+    expect(mysteryBox.text.rulesText).toMatch(/^\[0\]:/);
+    expect(mysteryBox.engine.abilities).toMatchObject([
+      {
+        kind: "activated",
+        limit: { kind: "once_per_run_per_source", scope: "source" },
+      },
+    ]);
+    expect(reflector.text.rulesText).toMatch(/^\[0\]:/);
+    expect(reflector.engine.icebreakerAbilities).toHaveLength(1);
+    expect(reflector.engine.icebreakerAbilities).toMatchObject([
+      {
+        capabilityKey: "icebreaker_abilities_break_subroutine",
+        kind: "break_subroutine",
+        matches: {
+          kind: "subroutine_tag_any_of",
+          tags: ["stun", "hellbolt", "knockout"],
+        },
+      },
+    ]);
+    expect(selfModifyingCode.text.rulesText).toMatch(/^\[T\]:/);
+    expect(selfModifyingCode.engine.abilities).toMatchObject([
+      {
+        kind: "activated",
+        costs: [{ kind: "trash_source", amount: 1 }],
+        effects: [{ kind: "search_stack_install" }],
+      },
+    ]);
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

@@ -46,7 +46,7 @@ describe("hidden zone trigger execution", () => {
     state.run = {
       runId: "run_1",
       attackedServerId: "rd",
-      hiddenStackInstallUsedSourceIdsThisRun: [],
+      successfulRunAbilityUsedSourceIds: [],
     } as any;
     state.runner.rig.programs = [sourceId];
     state.runner.stack = [programId, resourceId];
@@ -73,9 +73,7 @@ describe("hidden zone trigger execution", () => {
       actionType: "trigger_ability",
     });
 
-    expect(state.run?.hiddenStackInstallUsedSourceIdsThisRun).toEqual([
-      sourceId,
-    ]);
+    expect(state.run?.successfulRunAbilityUsedSourceIds).toEqual([sourceId]);
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
       kind: "select_cards",
@@ -105,7 +103,7 @@ describe("hidden zone trigger execution", () => {
     state.run = {
       runId: "run_1",
       attackedServerId: "rd",
-      hiddenStackInstallUsedSourceIdsThisRun: [],
+      successfulRunAbilityUsedSourceIds: [],
     } as any;
     state.runner.rig.programs = [sourceId];
     state.runner.stack = [resourceId];

@@ -60,6 +60,7 @@ export type StateRuntimeResolverPort = {
   addVirusCounterWithCounterPrevention: (
     state: GameState,
     targetCardId: CardInstanceId,
+    counterType: CounterType,
     amount: number,
     legalAction?: LegalAction,
   ) => number;

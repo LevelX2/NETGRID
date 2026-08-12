@@ -181,6 +181,8 @@ function breakMatcherFields(
     return { iceDefinitionIds: [...matcher.definitionIds] };
   if (matcher.kind === "subroutine_tag")
     return { subroutineBreakTags: [matcher.tag] };
+  if (matcher.kind === "subroutine_tag_any_of")
+    return { subroutineBreakTags: [...matcher.tags] };
   return { subroutineBreakTags: ["trace"] };
 }
 

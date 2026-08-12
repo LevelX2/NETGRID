@@ -8,7 +8,10 @@ import type {
   PurgeableRunnerVirusCounterType,
   Side,
 } from "@netgrid/shared";
-import { PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES } from "@netgrid/shared";
+import {
+  CARD_VIRUS_COUNTER_TYPES,
+  PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES,
+} from "@netgrid/shared";
 
 export type DrawTaxDecision = "auto" | "pay" | "tag";
 
@@ -390,7 +393,8 @@ export function purgeVirusCounters(state: GameState): number {
   const total = totalCounters(state, "virus");
   if (total <= 0) throw new Error("Es gibt keine Virus-Counter zu purgen.");
   for (const cardId of Object.keys(state.cardInstances)) {
-    setCardCounter(state, cardId as CardInstanceId, "virus", 0);
+    for (const counterType of CARD_VIRUS_COUNTER_TYPES)
+      setCardCounter(state, cardId as CardInstanceId, counterType, 0);
   }
   if (state.poxCountersByServer) state.poxCountersByServer = {};
   if (state.serverAgendaCostCountersByServer)
@@ -401,7 +405,19 @@ export function purgeVirusCounters(state: GameState): number {
 function totalCounters(state: GameState, counterType: CounterType): number {
   const cardCounterTotal = Object.keys(state.cardInstances).reduce(
     (sum, cardId) =>
-      sum + cardCounter(state, cardId as CardInstanceId, counterType),
+      sum +
+      (counterType === "virus"
+        ? CARD_VIRUS_COUNTER_TYPES.reduce(
+            (counterSum, cardVirusCounterType) =>
+              counterSum +
+              cardCounter(
+                state,
+                cardId as CardInstanceId,
+                cardVirusCounterType,
+              ),
+            0,
+          )
+        : cardCounter(state, cardId as CardInstanceId, counterType)),
     0,
   );
   if (counterType !== "virus") return cardCounterTotal;

@@ -817,11 +817,10 @@ function specialCounterDisplays(
     ...(corpProjectedVirusCounterKind(definition)
       ? []
       : singleCounterDisplay(counters.virus, {
-          id: definition.type === "ice" ? "pattel" : "virus",
+          id: "virus",
           displayKind: "virus",
-          label: definition.type === "ice" ? "Pattel-Counter" : "Virus-Counter",
-          ariaLabelName:
-            definition.type === "ice" ? "Pattel-Counter" : "Virus-Counter",
+          label: "Virus-Counter",
+          ariaLabelName: "Virus-Counter",
           counterType: "virus",
           usageHint: "status_marker",
         })),
@@ -891,7 +890,7 @@ function specialCounterDisplays(
     }),
     ...singleCounterDisplay(counters.pattel, {
       id: "pattel",
-      displayKind: "generic_counter",
+      displayKind: "virus",
       label: "Pattel-Counter",
       ariaLabelName: "Pattel-Counter",
       counterType: "pattel",
@@ -1490,7 +1489,7 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     state.run?.encounteredIceId === iceId
       ? Math.max(0, Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0))
       : 0;
-  const pattelsReduction = cardCounter(state, iceId, "virus");
+  const pattelsReduction = cardCounter(state, iceId, "pattel");
   const baseStrength =
     instance.variableIceState?.family === "x_strength" &&
     typeof instance.variableIceState.strength === "number"

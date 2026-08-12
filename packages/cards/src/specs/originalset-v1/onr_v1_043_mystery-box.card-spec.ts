@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "0: Show the top five cards of your stack to the Corp. If any of those cards are programs, trash Mystery Box and then install one of those programs, at no cost. Shuffle your stack afterwards. Use this ability only during a run and only once each run.",
+      "[0]: Show the top five cards of your stack to the Corp. If any of those cards are programs, trash Mystery Box and then install one of those programs, at no cost. Shuffle your stack afterwards. Use this ability only during a run and only once each run.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(
@@ -57,6 +57,10 @@ export const cardSpec = {
         kind: "activated",
         timing: "during_run",
         costs: [],
+        limit: {
+          kind: "once_per_run_per_source",
+          scope: "source",
+        },
         effects: [
           {
             kind: "look_top_stack_show_to_corp_then_install_matching",

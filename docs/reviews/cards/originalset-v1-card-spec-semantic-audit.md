@@ -304,9 +304,83 @@ der Nutzerblock keinen neuen Korrekturbefund. Ihre angrenzenden Verträge wurden
 nur dort als positive Gegenprobe verwendet, wo sie dieselbe generische
 Ausführung teilen.
 
+## Block 003 – Karten 041 bis 060 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 003` eingeführt.
+
+### ONR V1 043 – Mystery Box
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:190-192`
+  erlaubt die Fähigkeit nur während eines Runs und nur einmal je Run. Der
+  CardSpec enthielt zwar Ablauf und Timing, aber kein deklaratives Limit.
+- Korrektur: Die Capability trägt jetzt
+  `once_per_run_per_source`. Initiierung und Wiederholungsverbot verwenden
+  den vorhandenen generischen Run-Limit-Zustand; der redundante verdeckte
+  Mystery-Box-Sonderzustand wurde entfernt. Die Choice-Continuation verbraucht
+  das Limit nicht ein zweites Mal.
+- Regression: CardSpec-Vertrag, erste Aktivierung, anschließende Sperre und
+  Fortsetzung der bereits gestarteten Stack-Auswahl sind fokussiert gesichert.
+
+### ONR V1 046 – Pattel's Virus
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:202-204`
+  benennt ausdrücklich Pattel-Counter auf vollständig gebrochenem ICE und
+  Stärke minus 1 je Pattel-Counter; die Virus-Purge-Zugehörigkeit folgt aus
+  demselben Text und den Virus-Hinweisen ab
+  `docs/source/Netrunner Errata 1.70.md:2168`.
+- Ursache und Korrektur: Die Spec-Identität `pattel` kollabierte in Run-End-
+  Runtime, Anzeige und Stärkeberechnung zu `virus`. Erzeugung, verbleibende
+  Choice-Menge, View und beide Stärkepfade erhalten jetzt `pattel`. Die
+  gemeinsame Liste purgebarer Virus-Counter enthält `virus` und `pattel`;
+  Purge-Replacement und Wiederherstellung bewahren die konkrete Identität.
+- Regression: Einzel- und Mehrzielplatzierung, Stärke, Anzeige, normaler
+  Purge sowie Code-Viral-Cache-Erhaltung sind mit Pattel-Identität gesichert.
+
+### ONR V1 055 – Reflector
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:241-243`
+  enthält genau eine `[0]`-Fähigkeit mit drei alternativen
+  Subroutinenklassen.
+- Korrektur: Die drei künstlich getrennten Capabilities wurden zu einer
+  stabilen Capability mit dem generischen Matcher
+  `subroutine_tag_any_of` zusammengeführt. Engine und KI-Hint-Compiler lesen
+  dieselbe Tagliste; der kanonische Text bewahrt `[0]`.
+- Ownership: Der bestehende Break-Plan bleibt alleiniger Owner. Der Matcher
+  erweitert nur die legalen Ziele derselben Ability und erzeugt weder Route
+  noch Resolverautorität.
+- Generischer Sweep: Unter den bestehenden `subroutine_tag`-CardSpecs war
+  Reflector der einzige gesplittete Any-of-Fall; es wurde kein weiterer
+  Capability-Split gefunden.
+
+### ONR V1 059 – Self-Modifying Code
+
+- Nutzerbefund und Evidence: `docs/source/Runnerspoiler 1.0.txt:257-260`
+  kennzeichnet das Trashing mit `[T]` als Aktivierungskosten. Die Errata ab
+  `docs/source/Netrunner Errata 1.70.md:2330` ändert das Nutzungsfenster und
+  bestätigt die Installationskosten, nicht die Kostenart des Quell-Trashs.
+- Korrektur: `trash_source` liegt jetzt in `costs` und nicht mehr in
+  `effects`; der kanonische Text verwendet `[T]:`. Der vorhandene generische
+  Kostenpfad trasht und revalidiert die Quelle vor der Stack-Auswahl. Der
+  KI-Hint-Compiler projiziert Self-Trash-Semantik nun auch aus typisierten
+  Ability-Kosten, ohne einen zweiten Ausführungsweg einzuführen.
+- Regression: Die LegalAction weist Trash-Kosten statt Trash-Effekt aus; bei
+  Beginn der Fähigkeit liegt die Quelle bereits im Heap, bevor die gebundene
+  Such-Choice fortgesetzt wird.
+
+### Unveränderte Karten dieses Blocks
+
+Für Microtech AI Interface, Mouse, Netspace Inverter, Newsgroup Filter, Pile
+Driver, Poltergeist, Pox, R&D-Protocol Files, Rabbit, Raffles, Ramming Piston,
+Raptor, Replicator, Scatter Shot, SeeYa und Shaka ergab der Nutzerblock keinen
+neuen Korrekturbefund. Rabbit bleibt insbesondere auf der Senkung des Trace
+Limits und nicht einer Basis-Trace-Stärke modelliert.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
+- Als nächster regulärer Nutzerblock folgen die Karten 061 bis 080.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -336,3 +410,11 @@ dem unveränderten Ausgangsstand von `main` rot:
   Baseline-Berichte. Der Block fügt nach Entfernung des zwischenzeitlich
   erkannten Butcher-Boy-Namensleaks weder eine neue Kategorie noch einen neuen
   Befund hinzu; die generierten Baseline-Berichte bleiben unverändert.
+
+Für Block 003 sind die vier betroffenen Paket-Typechecks, CardSpec-AI-Hint-
+Generator- und Strukturgates, die fokussierten CardSpec-, Engine-, Runtime-
+Integrations- und KI-Golden-Regressionsläufe sowie der gezielte
+Purge-Replacement-Zeuge grün. Ein versehentlich breit gestarteter Engine-Lauf
+bestätigte 1.884 von 1.885 Tests; sein einziger Draw-Aggregationsfehler ist
+derselbe unveränderte Classic-Corp-Baseline-Drift wie in Block 002. Der Lauf
+wurde nicht als Block-Gate gewertet und nicht in den Scope gezogen.

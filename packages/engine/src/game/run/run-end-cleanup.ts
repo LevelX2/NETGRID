@@ -651,8 +651,11 @@ export function resolveBrokenIceVirusCounterChoice(
     1,
     Math.floor(Number(choice.source.match(/amount=(\d+)/)?.[1] ?? 1)),
   );
+  if (!choice.source.includes("counterType=pattel"))
+    throw new Error("Der Broken-ICE-Virus-Counter-Typ ist ungueltig.");
   const added = host.counters.addVirusCounterWithCounterPrevention(
     targetIceId,
+    "pattel",
     amount,
     legalAction,
   );
@@ -661,7 +664,7 @@ export function resolveBrokenIceVirusCounterChoice(
     abilityId: "broken_ice_virus_counter",
     brokenIceVirusCounterAdded: added,
     targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
-    remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
+    remainingCounters: host.counters.cardCounter(targetIceId, "pattel"),
     choiceVisibility: "public",
   };
   delete host.state.pendingChoice;

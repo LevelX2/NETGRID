@@ -340,9 +340,6 @@ export function handleRevealedStackProgramInstallCorpReviewChoice(
   )
     throw new Error("Die Stack-Show-Quelle ist nicht mehr installiert.");
   const run = requireRun(host);
-  const used = run.successfulRunAbilityUsedSourceIds ?? [];
-  if (used.includes(sourceCardId as CardInstanceId))
-    throw new Error("Diese Kartenquelle wurde in diesem Run bereits genutzt.");
   const topCardsAtReveal = topCardsRaw
     .split(",")
     .filter((cardId): cardId is CardInstanceId => Boolean(cardId));
@@ -361,10 +358,6 @@ export function handleRevealedStackProgramInstallCorpReviewChoice(
       host.install.canInstallRunnerProgramFromZone(cardId, "stack", "free"),
   );
   if (!installableProgramIds.length) {
-    run.successfulRunAbilityUsedSourceIds = [
-      ...used,
-      sourceCardId as CardInstanceId,
-    ].sort();
     host.shuffleRunnerStack(
       `p3_38_stack_show_install:no_program:${sourceCardId}:${run.runId}`,
     );
@@ -452,10 +445,7 @@ export function handleLookTopStackShowInstallChoice(
       sourceDefinitionId
   )
     throw new Error("Die Stack-Show-Quelle ist nicht mehr installiert.");
-  const run = requireRun(host);
-  const used = run.successfulRunAbilityUsedSourceIds ?? [];
-  if (used.includes(sourceCardId as CardInstanceId))
-    throw new Error("Diese Kartenquelle wurde in diesem Run bereits genutzt.");
+  requireRun(host);
   const topCardsAtReveal = topCardsRaw
     .split(",")
     .filter((cardId): cardId is CardInstanceId => Boolean(cardId));
@@ -495,10 +485,6 @@ export function handleLookTopStackShowInstallChoice(
   );
   if (!installed)
     throw new Error("Das Programm kann nicht installiert werden.");
-  run.successfulRunAbilityUsedSourceIds = [
-    ...used,
-    sourceCardId as CardInstanceId,
-  ].sort();
   host.shuffleRunnerStack(
     `p3_38_stack_show_install:${choice.choiceId}:shuffle`,
   );
@@ -724,8 +710,9 @@ function handleRunnerStackSearchChoice(
     shuffled: true,
     ...(stackSearchGripSourceCardId
       ? {
-          sourceDefinitionId:
-            host.cards.definitionFor(stackSearchGripSourceCardId).id,
+          sourceDefinitionId: host.cards.definitionFor(
+            stackSearchGripSourceCardId,
+          ).id,
           cardDefinitionId: host.cards.definitionFor(cardId).id,
           publicRevealDefinitionId: host.cards.definitionFor(cardId).id,
           publicRevealKind: "reveal",
@@ -944,10 +931,17 @@ function handlePaidStackProgramInstallStackChoice(
       host.shuffleRunnerStack(
         `paid_stack_program_install:${choice.choiceId}:shuffle`,
       );
-    const sourceCardId = choice.source.split(":")[1] as CardInstanceId | undefined;
+    const sourceCardId = choice.source.split(":")[1] as
+      | CardInstanceId
+      | undefined;
     if (!sourceCardId)
-      throw new Error("Die Stack-Programminstallation hat keine gebundene Quelle.");
-    const opened = host.startRunnerProgramFreeMemoryChoice(cardId, sourceCardId);
+      throw new Error(
+        "Die Stack-Programminstallation hat keine gebundene Quelle.",
+      );
+    const opened = host.startRunnerProgramFreeMemoryChoice(
+      cardId,
+      sourceCardId,
+    );
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       ...buildPaidStackProgramInstallMemoryDeferredPayload(plan, {

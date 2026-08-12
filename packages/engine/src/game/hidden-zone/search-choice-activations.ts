@@ -582,7 +582,7 @@ export function handleTopFiveProgramInstallActivation(
     throw new Error("Die offengelegte Stack-Quelle ist nicht installiert.");
   const oncePerRunPlan = createSourceOncePerRunPostInstallPlan({
     sourceCardId,
-    usedSourceIdsThisRun: run.hiddenStackInstallUsedSourceIdsThisRun ?? [],
+    usedSourceIdsThisRun: run.successfulRunAbilityUsedSourceIds ?? [],
   });
   const topCards = host.state.runner.stack.slice(0, 5);
   if (topCards.length === 0) throw new Error("Der Stack ist leer.");
@@ -591,7 +591,7 @@ export function handleTopFiveProgramInstallActivation(
   );
   applySourceOncePerRunPostInstallPlan(oncePerRunPlan, {
     markUsedThisRun: (usedSourceIds) => {
-      run.hiddenStackInstallUsedSourceIdsThisRun = usedSourceIds;
+      run.successfulRunAbilityUsedSourceIds = usedSourceIds;
     },
   });
   if (programIds.length === 0) {

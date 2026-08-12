@@ -275,6 +275,7 @@ export type CardIcebreakerBreakMatcherImplementation =
       definitionIds: readonly CardDefinitionId[];
     }
   | { kind: "subroutine_tag"; tag: string }
+  | { kind: "subroutine_tag_any_of"; tags: readonly string[] }
   | { kind: "subroutine_traces" };
 
 export type CardIcebreakerBreakSideEffectImplementation =

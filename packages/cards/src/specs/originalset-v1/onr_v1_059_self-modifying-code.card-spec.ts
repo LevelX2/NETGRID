@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "T: Search your stack for a program and install that program, if you can. Shuffle your stack afterwards. Use this ability only during a run.",
+      "[T]: Search your stack for a program and install that program, if you can. Shuffle your stack afterwards. Use this ability only during a run.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(
@@ -56,12 +56,8 @@ export const cardSpec = {
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
         timing: "during_run",
-        costs: [],
+        costs: [{ kind: "trash_source", amount: 1 }],
         effects: [
-          {
-            kind: "trash_source",
-            visibility: "public",
-          },
           {
             kind: "search_stack_install",
             filter: "program",

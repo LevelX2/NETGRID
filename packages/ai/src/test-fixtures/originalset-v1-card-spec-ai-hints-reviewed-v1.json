@@ -1529,7 +1529,7 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_upgrade_modifier"],
+        "planRoles": [],
         "valueHints": {},
         "strategicRole": ["emergency_tool"],
         "strategyAnchors": ["runner.survival_defense"],
@@ -1933,7 +1933,7 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_upgrade_modifier"],
+        "planRoles": ["pressure_hq"],
         "valueHints": {},
         "actionCapacityProfiles": [
           {
@@ -2909,7 +2909,8 @@
           "abilities",
           "activated",
           "install_program",
-          "look_top_stack_show_to_corp_then_install_matching"
+          "look_top_stack_show_to_corp_then_install_matching",
+          "once_per_run_per_source"
         ]
       }
     },
@@ -10805,6 +10806,16 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_remove_tags",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"],
             "conditions": [
               {
                 "kind": "requires_runner_tagged"
@@ -10821,11 +10832,24 @@
             "target": "remove_tags",
             "finite": true,
             "amount": 3
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
           }
         ],
-        "functionSignals": ["defense.tag_prevention", "tag.removal"],
+        "functionSignals": [
+          "defense.tag_prevention",
+          "tag.removal",
+          "risk.self_trash"
+        ],
         "actionTacticSignals": [
+          "effect:resource_trash",
           "effect:tag_prevention",
+          "effect_scope:installed_card",
           "effect_scope:runner",
           "effect_timing:action",
           "survival.defense"

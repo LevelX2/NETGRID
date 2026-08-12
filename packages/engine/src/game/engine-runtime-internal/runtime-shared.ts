@@ -137,6 +137,7 @@ export type VirusCounterPurgePreserveTarget =
   | {
       kind: "card";
       cardId: CardInstanceId;
+      counterType: Extract<CounterType, "virus" | "pattel">;
       index: number;
     }
   | {

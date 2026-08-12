@@ -617,7 +617,7 @@ export function createCardStrengthCostRuntimeServices(
             Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0),
           )
         : 0;
-    const pattelsReduction = cardCounter(state, iceId, "virus");
+    const pattelsReduction = cardCounter(state, iceId, "pattel");
     const baseStrength =
       instance.variableIceState?.family === "x_strength" &&
       typeof instance.variableIceState.strength === "number"

@@ -5498,7 +5498,19 @@
         "strategyAnchors": ["runner.hq_pressure"],
         "lineSupport": ["runner.hq_pressure"],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "trash_source_look_at_hq" }
+          {
+            "capabilityKey": "trash_source_look_at_hq",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"]
+          }
         ],
         "targetProfiles": [
           {
@@ -5520,13 +5532,26 @@
             "resource": "cards",
             "target": "full_reveal",
             "repeatable": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
           }
         ],
-        "functionSignals": ["info.hq", "resource.connection"],
+        "functionSignals": [
+          "info.hq",
+          "resource.connection",
+          "risk.self_trash"
+        ],
         "actionTacticSignals": [
           "access.payoff",
           "effect:hq_info",
+          "effect:resource_trash",
           "effect_scope:hq",
+          "effect_scope:installed_card",
           "effect_timing:action"
         ],
         "conditions": [
@@ -5933,7 +5958,19 @@
         "strategyAnchors": ["runner.rnd_pressure"],
         "lineSupport": ["runner.rnd_pressure"],
         "actionCapabilitySemantics": [
-          { "capabilityKey": "trash_source_look_at_rd_top_three" }
+          {
+            "capabilityKey": "trash_source_look_at_rd_top_three",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"]
+          }
         ],
         "targetProfiles": [
           {
@@ -5956,12 +5993,21 @@
             "target": "top_cards",
             "amount": 3,
             "repeatable": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
           }
         ],
-        "functionSignals": ["info.rnd_topdeck"],
+        "functionSignals": ["info.rnd_topdeck", "risk.self_trash"],
         "actionTacticSignals": [
           "access.payoff",
+          "effect:resource_trash",
           "effect:topdeck_info",
+          "effect_scope:installed_card",
           "effect_scope:rnd",
           "effect_timing:action"
         ],
@@ -16162,6 +16208,13 @@
             "capabilityKey": "search_install_program",
             "effects": [
               {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "source.trash",
+                "finite": true
+              },
+              {
                 "kind": "search",
                 "scope": "stack",
                 "timing": "action",
@@ -16178,6 +16231,7 @@
               }
             ],
             "functionSignals": [
+              "risk.self_trash",
               "setup.program_install",
               "setup.program_search",
               "setup.search"
@@ -16224,6 +16278,13 @@
         ],
         "effects": [
           {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
+          },
+          {
             "kind": "search",
             "scope": "stack",
             "timing": "action",
@@ -16240,12 +16301,14 @@
           }
         ],
         "functionSignals": [
+          "risk.self_trash",
           "setup.program_install",
           "setup.program_search",
           "setup.search"
         ],
         "actionTacticSignals": [
           "effect:install",
+          "effect:resource_trash",
           "effect:search",
           "effect_scope:installed_card",
           "effect_scope:stack",
@@ -16284,7 +16347,34 @@
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "actionCapabilitySemantics": [
-          { "capabilityKey": "trace_success_cancel_window" }
+          {
+            "capabilityKey": "trace_success_cancel_window",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "trace_success",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"]
+          }
+        ],
+        "effects": [
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "trace_success",
+            "target": "source.trash",
+            "finite": true
+          }
+        ],
+        "functionSignals": ["risk.self_trash"],
+        "actionTacticSignals": [
+          "effect:resource_trash",
+          "effect_scope:installed_card",
+          "effect_timing:trace_success"
         ],
         "costProfile": { "clicks": 1, "credits": 0 },
         "quality": {
@@ -16512,6 +16602,13 @@
             "capabilityKey": "pay_and_trash_source_gain_four_credits",
             "effects": [
               {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "during_ice_encounter",
+                "target": "source.trash",
+                "finite": true
+              },
+              {
                 "kind": "action_economy",
                 "scope": "runner",
                 "timing": "during_ice_encounter",
@@ -16522,7 +16619,11 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic",
+              "risk.self_trash"
+            ]
           }
         ],
         "effects": [
@@ -16531,6 +16632,13 @@
             "scope": "runner",
             "timing": "action",
             "amount": 4,
+            "finite": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "during_ice_encounter",
+            "target": "source.trash",
             "finite": true
           },
           {
@@ -16547,6 +16655,7 @@
         "functionSignals": [
           "economy.generic",
           "economy.runner_credit_burst",
+          "risk.self_trash",
           "economy.burst_credit"
         ],
         "tacticSignals": ["economy.card", "economy.runner_credit_burst"],
@@ -16554,6 +16663,8 @@
           "economy.card",
           "effect:action_economy",
           "effect:economy",
+          "effect:resource_trash",
+          "effect_scope:installed_card",
           "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:during_ice_encounter"
@@ -17224,6 +17335,16 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "hq_access_start_add_two_accesses",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "on_access",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"],
             "conditions": [{ "kind": "requires_during_run" }],
             "strategySupportPairs": [
               {
@@ -17252,18 +17373,29 @@
             "target": "access.hq_hidden_multiaccess",
             "amount": 2,
             "finite": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "on_access",
+            "target": "source.trash",
+            "finite": true
           }
         ],
         "functionSignals": [
           "access.hq_hidden_multiaccess",
           "access.hq_multiaccess",
-          "condition.during_hq_run"
+          "condition.during_hq_run",
+          "risk.self_trash"
         ],
         "actionTacticSignals": [
           "access.hq_multiaccess",
           "access.payoff",
           "effect:multiaccess",
+          "effect:resource_trash",
           "effect_scope:hq",
+          "effect_scope:installed_card",
+          "effect_timing:on_access",
           "effect_timing:persistent"
         ],
         "conditions": [{ "kind": "requires_during_run" }],
@@ -17303,6 +17435,13 @@
             "capabilityKey": "pay_and_trash_source_gain_eleven_credits",
             "effects": [
               {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "during_ice_encounter",
+                "target": "source.trash",
+                "finite": true
+              },
+              {
                 "kind": "action_economy",
                 "scope": "runner",
                 "timing": "during_ice_encounter",
@@ -17313,7 +17452,11 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic",
+              "risk.self_trash"
+            ]
           }
         ],
         "effects": [
@@ -17322,6 +17465,13 @@
             "scope": "runner",
             "timing": "action",
             "amount": 11,
+            "finite": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "during_ice_encounter",
+            "target": "source.trash",
             "finite": true
           },
           {
@@ -17338,6 +17488,7 @@
         "functionSignals": [
           "economy.generic",
           "economy.runner_credit_burst",
+          "risk.self_trash",
           "economy.burst_credit"
         ],
         "tacticSignals": ["economy.card", "economy.runner_credit_burst"],
@@ -17345,6 +17496,8 @@
           "economy.card",
           "effect:action_economy",
           "effect:economy",
+          "effect:resource_trash",
+          "effect_scope:installed_card",
           "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:during_ice_encounter"
@@ -17534,6 +17687,16 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "rd_access_start_add_two_accesses",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "on_access",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"],
             "conditions": [{ "kind": "requires_during_run" }],
             "strategySupportPairs": [
               {
@@ -17562,17 +17725,28 @@
             "target": "access.rnd_hidden_multiaccess",
             "amount": 2,
             "finite": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "on_access",
+            "target": "source.trash",
+            "finite": true
           }
         ],
         "functionSignals": [
           "access.rnd_hidden_multiaccess",
-          "access.rnd_multiaccess"
+          "access.rnd_multiaccess",
+          "risk.self_trash"
         ],
         "actionTacticSignals": [
           "access.payoff",
           "access.rnd_multiaccess",
           "effect:multiaccess",
+          "effect:resource_trash",
+          "effect_scope:installed_card",
           "effect_scope:rnd",
+          "effect_timing:on_access",
           "effect_timing:persistent"
         ],
         "conditions": [{ "kind": "requires_during_run" }],
@@ -17708,6 +17882,16 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "during_run_trash_source_pass_ap_ice",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "during_run",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"],
             "conditions": [{ "kind": "requires_encounter" }]
           }
         ],
@@ -17717,12 +17901,22 @@
             "scope": "runner",
             "timing": "persistent",
             "target": "resource.connection"
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "during_run",
+            "target": "source.trash",
+            "finite": true
           }
         ],
-        "functionSignals": ["resource.connection"],
+        "functionSignals": ["resource.connection", "risk.self_trash"],
         "actionTacticSignals": [
           "effect:global_modifier",
+          "effect:resource_trash",
+          "effect_scope:installed_card",
           "effect_scope:runner",
+          "effect_timing:during_run",
           "effect_timing:persistent"
         ],
         "conditions": [{ "kind": "requires_encounter" }],
@@ -17980,6 +18174,13 @@
             "capabilityKey": "pay_three_trash_source_gain_six",
             "effects": [
               {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "during_ice_encounter",
+                "target": "source.trash",
+                "finite": true
+              },
+              {
                 "kind": "action_economy",
                 "scope": "runner",
                 "timing": "during_ice_encounter",
@@ -17990,11 +18191,22 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic",
+              "risk.self_trash"
+            ]
           },
           {
             "capabilityKey": "trash_source_gain_two_credits",
             "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "during_ice_encounter",
+                "target": "source.trash",
+                "finite": true
+              },
               {
                 "kind": "action_economy",
                 "scope": "runner",
@@ -18006,7 +18218,11 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["economy.burst_credit", "economy.generic"]
+            "functionSignals": [
+              "economy.burst_credit",
+              "economy.generic",
+              "risk.self_trash"
+            ]
           }
         ],
         "effects": [
@@ -18022,6 +18238,13 @@
             "scope": "runner",
             "timing": "action",
             "amount": 6,
+            "finite": true
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "during_ice_encounter",
+            "target": "source.trash",
             "finite": true
           },
           {
@@ -18048,6 +18271,7 @@
         "functionSignals": [
           "economy.generic",
           "economy.runner_credit_burst",
+          "risk.self_trash",
           "economy.burst_credit"
         ],
         "tacticSignals": ["economy.card", "economy.runner_credit_burst"],
@@ -18055,6 +18279,8 @@
           "economy.card",
           "effect:action_economy",
           "effect:economy",
+          "effect:resource_trash",
+          "effect_scope:installed_card",
           "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:during_ice_encounter"
@@ -18191,6 +18417,13 @@
             "capabilityKey": "trace_post_bid_trash_source_link_plus_three",
             "effects": [
               {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "trace_window",
+                "target": "source.trash",
+                "finite": true
+              },
+              {
                 "kind": "link",
                 "scope": "runner",
                 "timing": "trace_window",
@@ -18200,10 +18433,21 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["defense.trace_defense", "trace.link_boost"]
+            "functionSignals": [
+              "defense.trace_defense",
+              "risk.self_trash",
+              "trace.link_boost"
+            ]
           }
         ],
         "effects": [
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "trace_window",
+            "target": "source.trash",
+            "finite": true
+          },
           {
             "kind": "link",
             "scope": "runner",
@@ -18214,9 +18458,15 @@
             "finite": true
           }
         ],
-        "functionSignals": ["defense.trace_defense", "trace.link_boost"],
+        "functionSignals": [
+          "risk.self_trash",
+          "defense.trace_defense",
+          "trace.link_boost"
+        ],
         "actionTacticSignals": [
           "effect:link",
+          "effect:resource_trash",
+          "effect_scope:installed_card",
           "effect_scope:runner",
           "effect_timing:trace_window"
         ],
@@ -20778,7 +21028,7 @@
     },
     {
       "cardId": "onr_v1_043_mystery-box",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d18f3552f4cc8e36",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:465597e3e9ecd26f",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4a296a4990c4ab15",
       "hint": {
         "cardId": "onr_v1_043_mystery-box",
@@ -20901,7 +21151,8 @@
           "abilities",
           "activated",
           "install_program",
-          "look_top_stack_show_to_corp_then_install_matching"
+          "look_top_stack_show_to_corp_then_install_matching",
+          "once_per_run_per_source"
         ]
       }
     },
@@ -21639,7 +21890,7 @@
     },
     {
       "cardId": "onr_v1_055_reflector",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:63bb4d7fd539d30b",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:749765e6139edfa2",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:17b6d6c8acf5533c",
       "hint": {
         "cardId": "onr_v1_055_reflector",
@@ -21889,7 +22140,7 @@
     },
     {
       "cardId": "onr_v1_059_self-modifying-code",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ffec188b421fa24f",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:593ad8d90662de75",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:eac6ef96b2738f52",
       "hint": {
         "cardId": "onr_v1_059_self-modifying-code",
@@ -28656,6 +28907,16 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_remove_tags",
+            "effects": [
+              {
+                "kind": "resource_trash",
+                "scope": "installed_card",
+                "timing": "action",
+                "target": "source.trash",
+                "finite": true
+              }
+            ],
+            "functionSignals": ["risk.self_trash"],
             "conditions": [{ "kind": "requires_runner_tagged" }]
           }
         ],
@@ -28668,11 +28929,24 @@
             "target": "remove_tags",
             "finite": true,
             "amount": 3
+          },
+          {
+            "kind": "resource_trash",
+            "scope": "installed_card",
+            "timing": "action",
+            "target": "source.trash",
+            "finite": true
           }
         ],
-        "functionSignals": ["defense.tag_prevention", "tag.removal"],
+        "functionSignals": [
+          "defense.tag_prevention",
+          "tag.removal",
+          "risk.self_trash"
+        ],
         "actionTacticSignals": [
+          "effect:resource_trash",
           "effect:tag_prevention",
+          "effect_scope:installed_card",
           "effect_scope:runner",
           "effect_timing:action",
           "survival.defense"

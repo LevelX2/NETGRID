@@ -320,6 +320,7 @@ function deriveActionCapabilitySemantics(
         targetProfiles: [],
       };
       appendTypedCondition(overlay.conditions, ability.condition);
+      appendGenericAbilityCosts(overlay, entry, ability);
       for (const effect of ability.effects ?? []) {
         appendGenericAbilityEffect(overlay, entry, ability, effect);
         appendGenericTargetProfile(overlay.targetProfiles, ability, effect);
@@ -502,6 +503,7 @@ function deriveGenericTypedHintOverlay(
 
   for (const ability of engine.abilities ?? []) {
     appendTypedCondition(overlay.conditions, ability.condition);
+    appendGenericAbilityCosts(overlay, entry, ability);
     for (const effect of ability.effects ?? []) {
       appendGenericAbilityEffect(overlay, entry, ability, effect);
       appendGenericTargetProfile(overlay.targetProfiles, ability, effect);
@@ -1267,6 +1269,41 @@ function controlledSide(
   recipient: "controller" | "runner" | "corp",
 ): "runner" | "corp" {
   return recipient === "controller" ? entry.definition.side : recipient;
+}
+
+function appendGenericAbilityCosts(
+  overlay: GenericTypedHintOverlay,
+  entry: PlanningEntry,
+  ability: PlanningAbility,
+): void {
+  if (
+    entry.definition.side !== "runner" ||
+    !Array.isArray(ability.costs) ||
+    !ability.costs.some((cost) => cost.kind === "trash_source")
+  )
+    return;
+  const timing =
+    entry.definition.type === "agenda" && ability.kind === "activated"
+      ? ("scored_activated" as const)
+      : typedEffectTiming(ability);
+  overlay.effects.push({
+    kind:
+      entry.definition.type === "program"
+        ? "program_trash"
+        : entry.definition.type === "hardware"
+          ? "hardware_trash"
+          : "resource_trash",
+    scope:
+      entry.definition.type === "program"
+        ? "installed_program"
+        : entry.definition.type === "hardware"
+          ? "hardware"
+          : "installed_card",
+    timing,
+    target: "source.trash",
+    finite: true,
+  });
+  overlay.functionSignals.push("risk.self_trash");
 }
 
 function appendGenericAbilityEffect(
@@ -6854,6 +6891,12 @@ function breakerCoverageForMatches(
   if (matches.kind === "subroutine_traces") return ["trace"];
   if (matches.kind === "subroutine_tag")
     return [breakerCoverageForSpecializedSubtype(matches.tag)];
+  if (matches.kind === "subroutine_tag_any_of")
+    return [
+      ...new Set(
+        matches.tags.map((tag) => breakerCoverageForSpecializedSubtype(tag)),
+      ),
+    ];
   return ["unknown_special"];
 }
 

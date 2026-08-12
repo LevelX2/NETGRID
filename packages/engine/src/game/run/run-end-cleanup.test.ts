@@ -275,8 +275,8 @@ function makeHost(
         };
         state.cardInstances[cardId] = instances[cardId]!;
       },
-      addVirusCounterWithCounterPrevention: (cardId, amount) => {
-        host.counters.addCardCounter(cardId, "virus" as CounterType, amount);
+      addVirusCounterWithCounterPrevention: (cardId, counterType, amount) => {
+        host.counters.addCardCounter(cardId, counterType, amount);
         return amount;
       },
       preventOneVirusCounterWithCounterPrevention: () => ({
@@ -1100,7 +1100,7 @@ describe("run end cleanup", () => {
     fixture.state.pendingChoice = {
       choiceId: "broken_ice_virus_counter_8",
       side: "runner",
-      source: "broken_ice.virus_counter:ice_1:8:amount=2",
+      source: "broken_ice.virus_counter:ice_1:8:counterType=pattel:amount=2",
       prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
       kind: "select_cards",
       options: [
@@ -1125,7 +1125,8 @@ describe("run end cleanup", () => {
     } as unknown as Parameters<typeof resolveBrokenIceVirusCounterChoice>[2]);
 
     expect(fixture.state.pendingChoice).toBeUndefined();
-    expect(fixture.state.cardInstances.ice_1?.counters?.virus).toBe(2);
+    expect(fixture.state.cardInstances.ice_1?.counters?.pattel).toBe(2);
+    expect(fixture.state.cardInstances.ice_1?.counters?.virus).toBeUndefined();
     expect(fixture.legalAction.payload).toMatchObject({
       abilityId: "broken_ice_virus_counter",
       brokenIceVirusCounterAdded: 2,

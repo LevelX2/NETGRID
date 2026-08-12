@@ -184,6 +184,7 @@ export function applyV181SuccessfulRunCounterTriggers(
       const targetIceId = targetIceIds[0]!;
       const added = host.counters.addVirusCounterWithCounterPrevention(
         targetIceId,
+        "pattel",
         pattelSources.length,
         legalAction,
       );
@@ -193,7 +194,7 @@ export function applyV181SuccessfulRunCounterTriggers(
           abilityId: "broken_ice_virus_counter",
           brokenIceVirusCounterAdded: added,
           targetCardDefinitionId: host.cards.definitionFor(targetIceId).id,
-          remainingCounters: host.counters.cardCounter(targetIceId, "virus"),
+          remainingCounters: host.counters.cardCounter(targetIceId, "pattel"),
         };
       }
     } else if (targetIceIds.length > 1) {
@@ -201,6 +202,7 @@ export function applyV181SuccessfulRunCounterTriggers(
         host,
         targetIceIds,
         legalAction,
+        "pattel",
         pattelSources.length,
       );
     }
@@ -323,6 +325,7 @@ export function applyV181SuccessfulRunCounterTriggers(
     if (trigger.counterScope.kind === "source_card") {
       const added = host.counters.addVirusCounterWithCounterPrevention(
         cardId,
+        implementation.counterKind as CounterType,
         trigger.amount,
         legalAction,
       );
@@ -333,7 +336,10 @@ export function applyV181SuccessfulRunCounterTriggers(
           virusCounterType: implementation.counterKind,
           virusCounterLocation: "source",
           sourceDefinitionId: definition.id,
-          virusCountersAfter: host.counters.cardCounter(cardId, "virus"),
+          virusCountersAfter: host.counters.cardCounter(
+            cardId,
+            implementation.counterKind as CounterType,
+          ),
         };
       }
       continue;
@@ -471,6 +477,7 @@ export function startBrokenIceVirusCounterChoice(
   host: RunEndCleanupHost,
   targetIceIds: CardInstanceId[],
   legalAction?: LegalAction,
+  counterType: Extract<CounterType, "pattel"> = "pattel",
   amount = 1,
 ): void {
   if (host.state.pendingChoice)
@@ -491,7 +498,7 @@ export function startBrokenIceVirusCounterChoice(
   host.state.pendingChoice = {
     choiceId: `broken_ice_virus_counter_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `broken_ice.virus_counter:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:amount=${amount}`,
+    source: `broken_ice.virus_counter:${options.map((option) => option.value).join(",")}:${host.state.stateVersion + 1}:counterType=${counterType}:amount=${amount}`,
     prompt: "Gebrochenes ICE fuer Virus-Counter waehlen.",
     kind: "select_cards",
     options,

@@ -226,6 +226,12 @@ export type CounterType =
   | "term"
   | "drip";
 
+/** Card-instance counter identities that the printed Virus purge removes. */
+export const CARD_VIRUS_COUNTER_TYPES = [
+  "virus",
+  "pattel",
+] as const satisfies readonly CounterType[];
+
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
   | { type: "net_damage"; amount: number }
@@ -1418,7 +1424,6 @@ export type RunState = {
   runEndCounterAwardBreakerIds?: CardInstanceId[];
   runOnceBreakTagAndStealthLossUsedBreakerIds?: CardInstanceId[];
   runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
-  hiddenStackInstallUsedSourceIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<

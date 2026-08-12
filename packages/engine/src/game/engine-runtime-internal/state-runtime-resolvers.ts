@@ -7,6 +7,7 @@ import { createCardRuntimeHosts } from "./card-runtime-hosts";
 import { createFlowRuntimeHosts } from "./flow-runtime-hosts";
 import { createStateRuntimeServices } from "./state-runtime-services";
 import {
+  CARD_VIRUS_COUNTER_TYPES,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -872,6 +873,7 @@ export function createStateRuntimeResolvers(
   function addVirusCounterWithCounterPrevention(
     state: GameState,
     targetCardId: CardInstanceId,
+    counterType: CounterType,
     amount: number,
     legalAction?: LegalAction,
   ): number {
@@ -889,7 +891,7 @@ export function createStateRuntimeResolvers(
         preventionChargesSpent += prevention.preventionChargesSpent;
         continue;
       }
-      addCardCounter(state, targetCardId, "virus", 1);
+      addCardCounter(state, targetCardId, counterType, 1);
       added += 1;
     }
     if (legalAction && prevented > 0) {
@@ -984,7 +986,16 @@ export function createStateRuntimeResolvers(
 
   function totalCounters(state: GameState, counterType: CounterType): number {
     const cardCounterTotal = Object.keys(state.cardInstances).reduce(
-      (sum, cardId) => sum + cardCounter(state, cardId, counterType),
+      (sum, cardId) =>
+        sum +
+        (counterType === "virus"
+          ? CARD_VIRUS_COUNTER_TYPES.reduce(
+              (counterSum, cardVirusCounterType) =>
+                counterSum +
+                cardCounter(state, cardId, cardVirusCounterType),
+              0,
+            )
+          : cardCounter(state, cardId, counterType)),
       0,
     );
     if (counterType !== "virus") return cardCounterTotal;
@@ -1026,16 +1037,19 @@ export function createStateRuntimeResolvers(
       }
     > = [];
     for (const cardId of deps.visibleVirusCounterTargetIds(state).sort()) {
-      const amount = cardCounter(state, cardId, "virus");
       const title = definitionFor(state, cardId).title;
-      for (let index = 1; index <= amount; index += 1) {
-        targets.push({
-          kind: "card",
-          cardId,
-          index,
-          optionId: `card:${cardId}:${index}`,
-          publicLabel: `${title} Virus-Counter ${index}`,
-        });
+      for (const counterType of CARD_VIRUS_COUNTER_TYPES) {
+        const amount = cardCounter(state, cardId, counterType);
+        for (let index = 1; index <= amount; index += 1) {
+          targets.push({
+            kind: "card",
+            cardId,
+            counterType,
+            index,
+            optionId: `card:${counterType}:${cardId}:${index}`,
+            publicLabel: `${title} ${counterType === "pattel" ? "Pattel" : "Virus"}-Counter ${index}`,
+          });
+        }
       }
     }
     for (const [serverId, rawAmount] of Object.entries(
@@ -1103,15 +1117,37 @@ export function createStateRuntimeResolvers(
   function parseVirusCounterPurgePreserveOption(
     optionId: string,
   ): VirusCounterPurgePreserveTarget | undefined {
-    const [kind, id, indexRaw] = optionId.split(":");
-    const index = Number(indexRaw);
-    if (!Number.isInteger(index) || index <= 0) return undefined;
-    if (kind === "card" && id)
-      return { kind: "card", cardId: id as CardInstanceId, index };
-    if (kind === "pox" && id && id !== "new_remote")
+    const parts = optionId.split(":");
+    const kind = parts[0];
+    if (kind === "pox") {
+      const serverId = parts[1];
+      const index = Number(parts[2]);
+      if (
+        !serverId ||
+        serverId === "new_remote" ||
+        !Number.isInteger(index) ||
+        index <= 0
+      )
+        return undefined;
       return {
         kind: "pox",
-        serverId: id as Exclude<ServerId, "new_remote">,
+        serverId: serverId as Exclude<ServerId, "new_remote">,
+        index,
+      };
+    }
+    const counterType = parts[1];
+    const id = parts[2];
+    const index = Number(parts[3]);
+    if (!Number.isInteger(index) || index <= 0) return undefined;
+    if (
+      kind === "card" &&
+      (counterType === "virus" || counterType === "pattel") &&
+      id
+    )
+      return {
+        kind: "card",
+        cardId: id as CardInstanceId,
+        counterType,
         index,
       };
     return undefined;
@@ -1132,7 +1168,7 @@ export function createStateRuntimeResolvers(
       throw new Error(
         "Diese Replacement-Faehigkeit kann hoechstens 2 Counter behalten.",
       );
-    const beforeCardCounts = new Map<CardInstanceId, number>();
+    const beforeCardCounts = new Map<string, number>();
     const beforePoxCounts = new Map<Exclude<ServerId, "new_remote">, number>();
     const preservedCardDefinitionIds: CardDefinitionId[] = [];
     for (const target of selectedTargets) {
@@ -1141,14 +1177,15 @@ export function createStateRuntimeResolvers(
           throw new Error(
             "Ein Virus-Counter-Erhaltungsziel ist nicht mehr legal.",
           );
+        const key = `${target.counterType}:${target.cardId}`;
         const count =
-          beforeCardCounts.get(target.cardId) ??
-          cardCounter(state, target.cardId, "virus");
+          beforeCardCounts.get(key) ??
+          cardCounter(state, target.cardId, target.counterType);
         if (target.index > count)
           throw new Error(
             "Ein zu erhaltender Virus-Counter existiert nicht mehr.",
           );
-        beforeCardCounts.set(target.cardId, count);
+        beforeCardCounts.set(key, count);
       } else {
         mustServer(state, target.serverId);
         const count =
@@ -1169,17 +1206,27 @@ export function createStateRuntimeResolvers(
 
     purgeVirusCounters(state);
 
-    const cardPreserveCounts = new Map<CardInstanceId, number>();
+    const cardPreserveCounts = new Map<
+      string,
+      {
+        cardId: CardInstanceId;
+        counterType: Extract<CounterType, "virus" | "pattel">;
+        amount: number;
+      }
+    >();
     const poxPreserveCounts = new Map<
       Exclude<ServerId, "new_remote">,
       number
     >();
     for (const target of selectedTargets) {
       if (target.kind === "card") {
-        cardPreserveCounts.set(
-          target.cardId,
-          (cardPreserveCounts.get(target.cardId) ?? 0) + 1,
-        );
+        const key = `${target.counterType}:${target.cardId}`;
+        const current = cardPreserveCounts.get(key);
+        cardPreserveCounts.set(key, {
+          cardId: target.cardId,
+          counterType: target.counterType,
+          amount: (current?.amount ?? 0) + 1,
+        });
       } else {
         poxPreserveCounts.set(
           target.serverId,
@@ -1187,8 +1234,8 @@ export function createStateRuntimeResolvers(
         );
       }
     }
-    for (const [cardId, amount] of cardPreserveCounts) {
-      setCardCounter(state, cardId, "virus", amount);
+    for (const { cardId, counterType, amount } of cardPreserveCounts.values()) {
+      setCardCounter(state, cardId, counterType, amount);
       preservedCardDefinitionIds.push(definitionFor(state, cardId).id);
     }
     for (const [serverId, amount] of poxPreserveCounts) {

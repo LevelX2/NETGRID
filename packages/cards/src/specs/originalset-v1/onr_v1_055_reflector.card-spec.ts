@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "(0): Break stun, hellbolt, or knockout subroutine.",
+    rulesText: "[0]: Break stun, hellbolt, or knockout subroutine.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -50,36 +50,8 @@ export const cardSpec = {
           amount: 0,
         },
         matches: {
-          kind: "subroutine_tag",
-          tag: "stun",
-        },
-        visibility: "public",
-      },
-      {
-        capabilityKey: capabilityKey("icebreaker_abilities_break_subroutine_a"),
-        addressability: ["plan", "action", "quote", "debug"],
-        kind: "break_subroutine",
-        cost: {
-          kind: "credit",
-          amount: 0,
-        },
-        matches: {
-          kind: "subroutine_tag",
-          tag: "hellbolt",
-        },
-        visibility: "public",
-      },
-      {
-        capabilityKey: capabilityKey("icebreaker_abilities_break_subroutine_b"),
-        addressability: ["plan", "action", "quote", "debug"],
-        kind: "break_subroutine",
-        cost: {
-          kind: "credit",
-          amount: 0,
-        },
-        matches: {
-          kind: "subroutine_tag",
-          tag: "knockout",
+          kind: "subroutine_tag_any_of",
+          tags: ["stun", "hellbolt", "knockout"],
         },
         visibility: "public",
       },

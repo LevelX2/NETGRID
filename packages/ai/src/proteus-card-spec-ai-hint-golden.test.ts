@@ -154,7 +154,7 @@ describe("Proteus CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:e9948a86c68058cb5faa9caa84b871539c14342333a6b1394c19563660cc08ac",
+      "sha256:23b72c3441644c39e6d4599c1df0cf2ca1c86bfa21264e9e3d0c461085a46dc5",
     );
   });
 

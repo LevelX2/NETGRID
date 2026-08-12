@@ -984,10 +984,16 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.counters.setCardCounter(state, cardId, counterType, amount),
         addCardCounter: (cardId, counterType, amount) =>
           host.counters.addCardCounter(state, cardId, counterType, amount),
-        addVirusCounterWithCounterPrevention: (cardId, amount, legalAction) =>
+        addVirusCounterWithCounterPrevention: (
+          cardId,
+          counterType,
+          amount,
+          legalAction,
+        ) =>
           host.counters.addVirusCounterWithCounterPrevention(
             state,
             cardId,
+            counterType,
             amount,
             legalAction,
           ),

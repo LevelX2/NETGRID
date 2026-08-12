@@ -208,12 +208,14 @@ describe("visibleBreakerEncounterQuote", () => {
         iceSubtypes: ["sentry"],
         subroutines: [
           { id: "stun", type: "do_damage", breakTags: ["stun"] },
+          { id: "hellbolt", type: "do_damage", breakTags: ["hellbolt"] },
+          { id: "knockout", type: "do_damage", breakTags: ["knockout"] },
           { id: "other", type: "end_the_run" },
         ],
       }),
     ).toMatchObject({
       coverageStatus: "partial",
-      breakOptions: [{ breakableSubroutineIndexes: [0], creditCost: 0 }],
+      breakOptions: [{ breakableSubroutineIndexes: [0, 1, 2], creditCost: 0 }],
     });
   });
 

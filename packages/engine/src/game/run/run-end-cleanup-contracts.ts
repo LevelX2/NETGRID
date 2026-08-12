@@ -140,6 +140,7 @@ export type RunEndCleanupHost = {
     ) => void;
     addVirusCounterWithCounterPrevention: (
       targetCardId: CardInstanceId,
+      counterType: CounterType,
       amount: number,
       legalAction?: LegalAction,
     ) => number;

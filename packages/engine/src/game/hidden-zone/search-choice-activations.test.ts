@@ -342,7 +342,7 @@ describe("hidden-zone search choice activations", () => {
       programFound: true,
       choiceVisibility: "public",
     });
-    expect(host.state.run?.hiddenStackInstallUsedSourceIdsThisRun).toEqual([
+    expect(host.state.run?.successfulRunAbilityUsedSourceIds).toEqual([
       sourceCardId,
     ]);
   });
