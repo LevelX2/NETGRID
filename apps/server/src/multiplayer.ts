@@ -7739,7 +7739,7 @@ function matchResultSnapshotFor(
     actionCount: actionEvents.length,
     runCount: countType("start_run"),
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
-    successfulRunCount: countType("access_card"),
+    successfulRunCount: successfulRunCountForResult(actionEvents),
     stolenAgendaCount: countType("steal_agenda"),
     scoredAgendaCount: countType("score_agenda"),
     finalStateHash,
@@ -7754,6 +7754,16 @@ function matchResultSnapshotFor(
         }
       : {}),
   };
+}
+
+export function successfulRunCountForResult(
+  events: readonly EventRecord[],
+): number {
+  return events.filter(
+    (event) =>
+      event.publicPayload.type === "access_card" &&
+      event.publicPayload.publicPayload.accessIndex === 0,
+  ).length;
 }
 
 function resultSummaryFor(

@@ -70,6 +70,7 @@ import {
 import {
   InMemoryMatchStorage,
   MultiplayerService,
+  successfulRunCountForResult,
   type ActionPersistenceLoadInput,
   type EventRecord,
   type JoinMatchResult,
@@ -8362,6 +8363,36 @@ describe("MVP 0.2 multiplayer service", () => {
     );
     expect(corpPayload.resultSummary?.viewerOutcome).toBe("lost");
     expect(corpPayload.legalActions).toEqual([]);
+  });
+
+  it("counts a multiaccess breach as one successful run", () => {
+    const accessEvent = (eventId: string, accessIndex: number): EventRecord =>
+      ({
+        eventId,
+        matchId: "multiaccess-result-test",
+        stateVersionBefore: accessIndex,
+        stateVersionAfter: accessIndex + 1,
+        stateHashAfter: `fnv1a:${eventId}`,
+        publicPayload: {
+          eventId,
+          type: "access_card",
+          stateVersionBefore: accessIndex,
+          stateVersionAfter: accessIndex + 1,
+          stateHashAfter: `fnv1a:${eventId}`,
+          publicPayload: { accessIndex },
+        },
+        privatePayloadLocalOnly: false,
+        hiddenInfoBarrier: true,
+      }) as EventRecord;
+
+    expect(
+      successfulRunCountForResult([
+        accessEvent("first-run-0", 0),
+        accessEvent("first-run-1", 1),
+        accessEvent("first-run-2", 2),
+        accessEvent("second-run-0", 0),
+      ]),
+    ).toBe(2);
   });
 
   it("applies the selected, same-as-player, fixed and deterministic random KI deck policies without exposing decklists", async () => {

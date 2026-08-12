@@ -188,7 +188,7 @@ export function GameOverModal({
           <Stat value={result.agendaPointsToWin} unit="Zielwert" />
           <Stat value={result.actionCount} unit="Aktionen" />
           <Stat value={result.runCount} unit="Runs" />
-          <Stat value={result.successfulRunCount} unit="Zugriffe" />
+          <Stat value={result.successfulRunCount} unit="Erfolgreiche Runs" />
           <Stat value={result.stolenAgendaCount} unit="Gestohlen" />
           <Stat value={result.scoredAgendaCount} unit="Gescored" />
         </div>
