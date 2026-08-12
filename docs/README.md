@@ -13,7 +13,7 @@ Stand: 2026-08-12
 - `reviews/`: aktuell benötigte Querschnittsreviews, Audits und Gate-Evidence.
 - `decisions/`: dauerhafte Projekt-, Produkt-, Git- und Dokumentationsentscheidungen.
 - `runbooks/`: wiederholbare lokale Betriebs-, Diagnose- und Wartungsabläufe.
-- `codex/`: aktueller Codex-Status und noch nicht konsolidierte Steuerungsartefakte.
+- `codex/`: kompakter technischer Current-State-Einstieg.
 - `ui-designsets/`: aktive UI-/Branding-Referenzen.
 - `derived/`: reiner Übergangsbereich; hier sollen keine neuen Dokumente entstehen.
 
@@ -27,7 +27,7 @@ Ein Dokument bleibt im Arbeitsbaum, wenn es heute mindestens eine konkrete Funkt
 - aktive Quelle oder Runbook;
 - offenes oder laufendes Arbeitspaket.
 
-Abgeschlossene Prozess-, Implementierungs-, Audit-, Benchmark-, Replay-, Trace-, Zwischenstands- und Migrationsartefakte werden nach Referenzprüfung entfernt, sobald ihr aktueller Erkenntniswert in führenden Dokumenten, Code, Tests oder Gates steckt. Sie werden nicht vorsorglich nach `archive/` verschoben.
+Abgeschlossene Prozess-, Implementierungs-, Audit-, Benchmark-, Replay-, Trace-, Zwischenstands- und Migrationsartefakte werden nach Referenzprüfung entfernt, sobald ihr aktueller Erkenntniswert in führenden Dokumenten, Code, Tests oder Gates steckt. Sie werden nicht vorsorglich in einen Archivordner verschoben.
 
 Große generierte Rohreports und lokale Analyseausgaben gehören nicht dauerhaft nach `docs/`. Wenn sie für laufende Arbeit benötigt werden, liegen sie in dafür vorgesehenen Daten-/Local-Bereichen oder werden reproduzierbar neu erzeugt.
 
