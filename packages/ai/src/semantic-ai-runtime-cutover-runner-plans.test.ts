@@ -316,7 +316,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     );
   });
 
-  it("lets a completed Broker cycle yield to meaningful hand development", () => {
+  it("starts a new Broker cycle after cashout instead of replacing three stored credits with one liquid credit", () => {
     const bankSource = visibleCard(
       "runner-credit-bank-source",
       "runner",
@@ -369,13 +369,14 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     const decision = chooseRunnerAction(input);
 
     expectPlanDecision(decision, {
-      actionId: "draw",
-      planKind: "runner.develop_board_and_hand",
-      capability: "develop_runner_option_development",
-      priorityClass: "P6",
+      actionId: "broker-load",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_build",
+      priorityClass: "P5",
+      assessmentEvidence: "runner_credit_bank_first_load",
     });
-    expect(actionAlternative(decision, "broker-load")?.selected).toBe(false);
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
+    expect(actionAlternative(decision, "draw")?.selected).toBe(false);
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
       "runner_credit_bank_hold_completed_cycle_for_development",
     );
   });

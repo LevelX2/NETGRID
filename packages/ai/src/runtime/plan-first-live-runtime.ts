@@ -15801,23 +15801,9 @@ function runnerCreditBankSignals(
     const combinedCreditAccess =
       input.playerView.own.credits + currentStoredCredits;
     const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool);
-    const completedPriorCycle = creditBankCompletedPriorCycle(input, tool);
-    const meaningfulDevelopmentAlternative =
-      runnerCreditBankMeaningfulDevelopmentAlternative({
-        input,
-        handDevelopment,
-        sourceDefinitionId: tool.cardId,
-      });
-    const repeatedCycleShouldYield =
-      completedPriorCycle &&
-      meaningfulDevelopmentAlternative &&
-      !convertibleRunFundingNeed &&
-      !convertibleDevelopmentFundingNeed &&
-      !matureBankDevelopmentFundingNeed;
     const shouldBuild =
       buildActionLegal &&
       !alreadyBuiltThisTurn &&
-      !repeatedCycleShouldYield &&
       !convertibleRunFundingNeed &&
       !convertibleDevelopmentFundingNeed &&
       (!urgentCreditFloor || input.playerView.own.clicks === 1) &&
@@ -15843,15 +15829,13 @@ function runnerCreditBankSignals(
             developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
               ? `runner_credit_bank_cashout_delegation_missing_exact_route:${developmentCashOutAdmission.route?.targetCardInstanceId ?? "unknown"}`
-              : repeatedCycleShouldYield
-                ? "runner_credit_bank_hold_completed_cycle_for_development"
-                : alreadyBuiltThisTurn
-                  ? "runner_credit_bank_hold_instance_built_this_turn"
-                  : combinedCreditAccess >= 20 || currentStoredCredits >= 12
-                    ? "runner_credit_bank_hold_comfortable_value"
-                    : convertibleDevelopmentFundingNeed
-                      ? "runner_credit_bank_cashout_delegated_to_development_plan"
-                      : "runner_credit_bank_hold_no_current_conversion_need",
+              : alreadyBuiltThisTurn
+                ? "runner_credit_bank_hold_instance_built_this_turn"
+                : combinedCreditAccess >= 20 || currentStoredCredits >= 12
+                  ? "runner_credit_bank_hold_comfortable_value"
+                  : convertibleDevelopmentFundingNeed
+                    ? "runner_credit_bank_cashout_delegated_to_development_plan"
+                    : "runner_credit_bank_hold_no_current_conversion_need",
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
             ...(developmentCashOutAdmission.admitted &&
             !convertibleDevelopmentFundingNeed
@@ -15889,83 +15873,6 @@ function runnerCreditBankSignals(
       },
     ];
   });
-}
-
-function creditBankCompletedPriorCycle(
-  input: AiDecisionInput,
-  tool: NonNullable<
-    DeckCapabilityProfile["runner"]
-  >["economyBankTools"][number],
-): boolean {
-  const history = mergedPublicHistory(input);
-  let observedLoad = false;
-  for (const event of history) {
-    const payload = event.publicPayload;
-    const sourceDefinitionId =
-      typeof payload.sourceDefinitionId === "string"
-        ? payload.sourceDefinitionId
-        : typeof payload.cardDefinitionId === "string"
-          ? payload.cardDefinitionId
-          : undefined;
-    if (payload.actor !== "runner" || sourceDefinitionId !== tool.cardId) {
-      continue;
-    }
-    const effects = Array.isArray(payload.resolvedEffects)
-      ? payload.resolvedEffects
-      : [];
-    const loaded =
-      (typeof payload.hostedCreditsAdded === "number" &&
-        payload.hostedCreditsAdded > 0) ||
-      effects.some(
-        (effect) =>
-          typeof effect === "object" &&
-          effect !== null &&
-          "kind" in effect &&
-          effect.kind === "add_hosted_credits",
-      );
-    if (loaded) observedLoad = true;
-    const emptied =
-      observedLoad &&
-      ((typeof payload.hostedCreditsTaken === "number" &&
-        payload.hostedCreditsTaken > 0 &&
-        payload.hostedCreditsAfter === 0) ||
-        effects.some(
-          (effect) =>
-            typeof effect === "object" &&
-            effect !== null &&
-            "kind" in effect &&
-            effect.kind === "take_hosted_credits" &&
-            "remainingCounters" in effect &&
-            effect.remainingCounters === 0,
-        ));
-    if (emptied) return true;
-  }
-  return false;
-}
-
-function runnerCreditBankMeaningfulDevelopmentAlternative(params: {
-  input: AiDecisionInput;
-  handDevelopment: readonly RunnerHandDevelopmentEvaluation[];
-  sourceDefinitionId: string;
-}): boolean {
-  const meaningfulDraw = params.input.legalActions.some(
-    (action) =>
-      action.side === "runner" &&
-      action.type === "draw_card" &&
-      params.input.playerView.own.stackOrRdCount > 0 &&
-      params.input.playerView.own.gripOrHq.length <
-        params.input.playerView.own.maxHandSize,
-  );
-  if (meaningfulDraw) return true;
-  return params.handDevelopment.some(
-    (evaluation) =>
-      evaluation.definitionId !== params.sourceDefinitionId &&
-      evaluation.legalActionId !== undefined &&
-      evaluation.availability === "legal_now" &&
-      evaluation.strategicFit !== "blocked" &&
-      evaluation.currentNeed !== "none" &&
-      evaluation.currentNeed !== "later",
-  );
 }
 
 function runnerCandidateProvidesCreditBankBuild(
