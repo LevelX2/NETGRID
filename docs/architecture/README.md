@@ -9,7 +9,8 @@ Stand: 2026-08-12
 Zu den aktuellen Fachbereichen gehören unter anderem:
 
 - `ai/`: aktuelle KI-Zielarchitektur und Plan-/Controller-/Trace-Verträge;
-- `ability-engine/` und `engine/`: Engine-, Kartenlogik- und Ausführungsverträge;
+- `engine/`: aktuelle Rules-Engine-, Runtime-, Kartenlogik- und Ausführungsverträge;
+- `central-card-specification-and-registry-target-state-2026-08-09.md`: führende CardSpec- und Registry-Architektur für die kanonische kartenspezifische Autorenquelle;
 - `card-rules/`: Kartenregel-, Timing- und Semantikverträge;
 - `card-images/`: Kartenbild- und Anzeigegrenzen;
 - `deck-library/`: lokale Deckbibliothek und Storage-Verträge;

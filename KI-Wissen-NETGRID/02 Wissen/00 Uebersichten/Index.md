@@ -25,7 +25,9 @@
 ## Architektur
 
 - Engine-Grundsätze: `packages/engine/AGENTS.md` und
-  `docs/architecture/ability-engine/README.md`.
+  `docs/architecture/engine/README.md`.
+- Kanonische Kartenspezifikation und Registry-Zielbild:
+  `docs/architecture/central-card-specification-and-registry-target-state-2026-08-09.md`.
 - AI-Current-State: `docs/architecture/ai/README.md`.
 - Card-Rule-Text und Symbole:
   `docs/architecture/card-rules/card-rule-text-formatting-spec.md`.
