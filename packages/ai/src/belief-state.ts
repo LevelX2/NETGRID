@@ -973,6 +973,9 @@ function deriveKnownHqHandMemory(
       ? rndTopDefinitionFromEvent(event, classification, definitionId)
       : undefined;
     const privateRndDefinitions = event ? rndPrivateLookDefinitions(event) : [];
+    const storedGypsyAgendaDefinitionId = event
+      ? gypsyStoredAgendaInHqDefinitionId(event, classification)
+      : undefined;
 
     if (fullHqRevealDefinitions.length > 0) {
       knownCards.length = 0;
@@ -1011,6 +1014,18 @@ function deriveKnownHqHandMemory(
         definitionId,
         invalidationReasons,
       );
+      continue;
+    }
+    if (storedGypsyAgendaDefinitionId) {
+      knownCards.push({
+        key: `${classification.eventId}:gypsy_stored_agenda:${knownCards.length}`,
+        definitionId: storedGypsyAgendaDefinitionId,
+        eventId: classification.eventId,
+      });
+      invalidationReasons.push(
+        `gypsy_known_agenda_stored_in_hq:${classification.eventId}`,
+      );
+      knownRndSequence = [];
       continue;
     }
     reconcileHqCandidateGroups(
@@ -1108,6 +1123,27 @@ function deriveKnownHqHandMemory(
     invalidationReasons,
     ledger,
   };
+}
+
+function gypsyStoredAgendaInHqDefinitionId(
+  event: PublicGameEvent,
+  classification: BeliefEventClassification,
+): string | undefined {
+  if (
+    classification.actor !== "runner" ||
+    classification.actionType !== "resolve_choice" ||
+    event.publicPayload.hiddenZoneAction !==
+      "gypsy_schedule_analyzer_reveal_rd_until_agenda" ||
+    event.publicPayload.agendaStoredInHq !== true
+  ) {
+    return undefined;
+  }
+  const definitionId = stringValue(
+    event.publicPayload.storedAgendaDefinitionId,
+  );
+  return definitionId && definitionLooksAgenda(definitionId)
+    ? definitionId
+    : undefined;
 }
 
 function deriveHqHandLedger(
