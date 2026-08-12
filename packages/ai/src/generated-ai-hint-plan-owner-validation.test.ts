@@ -25,6 +25,25 @@ describe("generated AI-hint plan-owner validation", () => {
       "invalid_card_spec_ai_hint_artifact_hint:onr_v1_154_broker",
     );
   });
+
+  it("validates the catalog-safe action capability semantics envelope", () => {
+    const duplicate = structuredClone(generatedArtifact) as any;
+    duplicate.cards[0].hint.actionCapabilitySemantics = [
+      { capabilityKey: "same" },
+      { capabilityKey: "same" },
+    ];
+    expect(() => validateGeneratedArtifact(duplicate)).toThrow(
+      "invalid_card_spec_ai_hint_artifact_hint",
+    );
+
+    const malformed = structuredClone(generatedArtifact) as any;
+    malformed.cards[0].hint.actionCapabilitySemantics = [
+      { capabilityKey: "valid", effects: ["not-an-effect"] },
+    ];
+    expect(() => validateGeneratedArtifact(malformed)).toThrow(
+      "invalid_card_spec_ai_hint_artifact_hint",
+    );
+  });
 });
 
 function artifactWithBrokerBindings(): any {

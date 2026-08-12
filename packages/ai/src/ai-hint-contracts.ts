@@ -68,3 +68,110 @@ export type CardSpecAiHintArtifact = {
     hint: AiCardHint;
   }>;
 };
+
+export type AiHintActionCapabilitySemanticsContractIssue = {
+  severity: "error";
+  kind: "invalid_shape";
+  path: string;
+  message: string;
+};
+
+export function validateAiHintActionCapabilitySemanticsContract(
+  semantics: unknown,
+): {
+  valid: boolean;
+  issues: AiHintActionCapabilitySemanticsContractIssue[];
+  errors: AiHintActionCapabilitySemanticsContractIssue[];
+  warnings: never[];
+} {
+  const errors: AiHintActionCapabilitySemanticsContractIssue[] = [];
+  const addError = (path: string, message: string): void => {
+    errors.push({ severity: "error", kind: "invalid_shape", path, message });
+  };
+  const path = "$.actionCapabilitySemantics";
+  if (semantics === undefined)
+    return { valid: true, issues: errors, errors, warnings: [] };
+  if (!Array.isArray(semantics)) {
+    addError(path, "Expected array.");
+    return { valid: false, issues: errors, errors, warnings: [] };
+  }
+
+  const seen = new Set<string>();
+  let previousCapabilityKey: string | undefined;
+  semantics.forEach((entry, index) => {
+    const entryPath = `${path}[${index}]`;
+    if (!isRecord(entry)) {
+      addError(entryPath, "Expected object.");
+      return;
+    }
+    const unknownKeys = Object.keys(entry).filter(
+      (key) =>
+        ![
+          "capabilityKey",
+          "effects",
+          "functionSignals",
+          "conditions",
+          "targetProfiles",
+          "strategySupportPairs",
+        ].includes(key),
+    );
+    if (unknownKeys.length > 0)
+      addError(entryPath, `Unknown fields: ${unknownKeys.join(",")}.`);
+    if (
+      typeof entry.capabilityKey !== "string" ||
+      entry.capabilityKey.length === 0
+    )
+      addError(`${entryPath}.capabilityKey`, "Expected non-empty string.");
+    else {
+      if (seen.has(entry.capabilityKey))
+        addError(
+          `${entryPath}.capabilityKey`,
+          "Capability semantics must be unique.",
+        );
+      if (
+        previousCapabilityKey !== undefined &&
+        previousCapabilityKey.localeCompare(entry.capabilityKey) >= 0
+      )
+        addError(
+          `${entryPath}.capabilityKey`,
+          "Capability semantics must be strictly sorted by capabilityKey.",
+        );
+      seen.add(entry.capabilityKey);
+      previousCapabilityKey = entry.capabilityKey;
+    }
+    for (const field of [
+      "effects",
+      "conditions",
+      "targetProfiles",
+      "strategySupportPairs",
+    ] as const)
+      if (
+        entry[field] !== undefined &&
+        (!Array.isArray(entry[field]) ||
+          entry[field].some((value) => !isRecord(value)))
+      )
+        addError(`${entryPath}.${field}`, "Expected an array of objects.");
+    if (
+      entry.functionSignals !== undefined &&
+      (!Array.isArray(entry.functionSignals) ||
+        entry.functionSignals.some(
+          (signal) => typeof signal !== "string" || signal.length === 0,
+        ))
+    )
+      addError(
+        `${entryPath}.functionSignals`,
+        "Expected non-empty strings.",
+      );
+  });
+
+  return {
+    valid: errors.length === 0,
+    issues: errors,
+    errors,
+    warnings: [],
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}

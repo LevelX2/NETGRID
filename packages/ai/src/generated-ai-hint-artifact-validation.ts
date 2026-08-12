@@ -2,9 +2,9 @@ import {
   CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
   CARD_SPEC_AI_HINT_COMPILER_VERSION,
   type CardSpecAiHintArtifact,
+  validateAiHintActionCapabilitySemanticsContract,
   validateAiHintActionPlanOwnerBindings,
 } from "./ai-hint-contracts";
-import { validateAiHintActionCapabilitySemantics } from "./hint-ontology";
 
 export function validateGeneratedArtifact(
   value: unknown,
@@ -75,7 +75,7 @@ export function validateGeneratedArtifact(
       throw new Error(
         `invalid_card_spec_ai_hint_artifact_hint:${record.cardId}:${ownerValidation.errors[0]?.path ?? "$"}`,
       );
-    const capabilityValidation = validateAiHintActionCapabilitySemantics(
+    const capabilityValidation = validateAiHintActionCapabilitySemanticsContract(
       record.hint.actionCapabilitySemantics,
     );
     if (!capabilityValidation.valid)
