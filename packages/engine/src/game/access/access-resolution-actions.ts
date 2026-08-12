@@ -87,6 +87,8 @@ export function handleAccessExecution(
       return { ...result, paidCredits };
     }
     case "trash_accessed_card":
+      if (legalAction.payload?.hiddenResourceCurrentAccessTrash === true)
+        return openMercenaryCurrentAccessTrashChoice(host, legalAction);
       return trashAccessedCard(
         host,
         host.state.run?.accessedCardId ?? "",
@@ -97,6 +99,214 @@ export function handleAccessExecution(
     default:
       return { handled: false };
   }
+}
+
+const MERCENARY_CURRENT_ACCESS_TRASH_CHOICE_PREFIX =
+  "card_implementation.current_access_free_trash";
+
+function mercenaryCurrentAccessEligibleCardIds(
+  host: AccessFlowHost,
+): CardInstanceId[] {
+  const run = mustRun(host);
+  const breach = run.breach;
+  const candidates = breach
+    ? breach.queue
+        .filter(
+          (entry, index) =>
+            index <= breach.currentIndex &&
+            (entry.status === "accessed" || entry.status === "declined"),
+        )
+        .map((entry) => entry.cardInstanceId)
+    : run.accessedCardId
+      ? [run.accessedCardId]
+      : [];
+  return [...new Set(candidates)].filter((cardId) => {
+    const instance = host.state.cardInstances[cardId];
+    return (
+      instance?.zone.side === "corp" && instance.zone.zone !== "archives"
+    );
+  });
+}
+
+function openMercenaryCurrentAccessTrashChoice(
+  host: AccessFlowHost,
+  legalAction: LegalAction,
+): AccessExecutionResult {
+  const run = mustRun(host);
+  const sourceCardId = String(
+    legalAction.payload?.hiddenResourceSourceCardId ?? "",
+  ) as CardInstanceId;
+  const sourceInstance = host.state.cardInstances[sourceCardId];
+  if (
+    !sourceInstance ||
+    sourceInstance.controller !== "runner" ||
+    !host.state.runner.rig.resources.includes(sourceCardId)
+  )
+    throw new Error("Die Mercenary-Subcontract-Quelle ist nicht installiert.");
+  const sourceDefinition = host.cards.definitionFor(sourceCardId);
+  const utility = cardImplementationForDefinitionId(sourceDefinition.id)
+    ?.runnerUtilityLongtail;
+  if (utility?.kind !== "hidden_resource_current_access_free_trash")
+    throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Quelle.");
+  if (utility.cost.kind !== "credit_and_trash_source")
+    throw new Error("Die Hidden-Resource-Kosten passen nicht zur Quelle.");
+  const expectedCost = Math.max(0, Math.floor(utility.cost.amount));
+  if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+    throw new Error("Die Hidden-Resource-Kosten sind nicht mehr gueltig.");
+  if (
+    legalAction.payload?.accessTrashCostOverride !== 0 ||
+    legalAction.payload?.freeAccessTrash !== true
+  )
+    throw new Error(
+      "Der Hidden-Resource-Trash ist kein gueltiger kostenloser Trash.",
+    );
+  const eligibleCardIds = mercenaryCurrentAccessEligibleCardIds(host);
+  if (eligibleCardIds.length === 0)
+    throw new Error("Es gibt keine aktuell zugreifbare Karte fuer diese Faehigkeit.");
+  if (
+    expectedCost > 0 &&
+    openRunnerCostPenaltySupportWindow(host.state, legalAction, {
+      amount: expectedCost,
+      availableWithoutSupport: host.state.runner.credits,
+      context: "runner_access_trash",
+    })
+  )
+    return { handled: true, stateChanged: true };
+  if (host.state.runner.credits < expectedCost)
+    throw new Error("Runner kann die Hidden-Resource-Kosten nicht bezahlen.");
+  closeRunnerCostPenaltySupportWindowForPayment(
+    host.state,
+    legalAction,
+    expectedCost,
+  );
+  host.payment.spendRunnerCredits(expectedCost);
+  const revealPayload = hiddenRunnerResourceRevealPayload(
+    host.state,
+    sourceCardId,
+  );
+  host.zones.trashRunnerInstalledCardToHeap(sourceCardId);
+  const choiceId = `current_access_free_trash_${host.state.stateVersion + 1}`;
+  host.state.pendingChoice = {
+    choiceId,
+    side: "runner",
+    source: `${MERCENARY_CURRENT_ACCESS_TRASH_CHOICE_PREFIX}:${run.runId}:${sourceCardId}:${sourceDefinition.id}`,
+    prompt: "Eine oder mehrere aktuell zugreifbare Karten trashen",
+    kind: "select_cards",
+    options: eligibleCardIds.map((cardId) => ({
+      id: cardId,
+      label: host.cards.definitionFor(cardId).title,
+      cardId,
+    })),
+    minSelections: 1,
+    maxSelections: eligibleCardIds.length,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  host.state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...revealPayload,
+    choiceId,
+    sourceTrashed: true,
+    trashedCardDefinitionId: sourceDefinition.id,
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "proteus_hidden_current_access_free_trash_choice",
+    currentAccessTrashCandidateCount: eligibleCardIds.length,
+  };
+  return {
+    handled: true,
+    stateChanged: true,
+    ...resolvedPayloadFor(legalAction),
+  };
+}
+
+export function resolveMercenaryCurrentAccessTrashChoice(
+  host: AccessFlowHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = host.state.pendingChoice;
+  if (
+    !choice?.source.startsWith(
+      `${MERCENARY_CURRENT_ACCESS_TRASH_CHOICE_PREFIX}:`,
+    )
+  )
+    throw new Error("Die Current-Access-Trash-Choice ist nicht offen.");
+  const [, runId, sourceCardId, sourceDefinitionId] = choice.source.split(":");
+  const run = mustRun(host);
+  if (run.runId !== runId)
+    throw new Error("Die Current-Access-Trash-Choice gehoert zu einem anderen Run.");
+  const sourceInstance = host.state.cardInstances[sourceCardId as CardInstanceId];
+  if (
+    !sourceInstance ||
+    sourceInstance.definitionId !== sourceDefinitionId ||
+    sourceInstance.zone.side !== "runner" ||
+    sourceInstance.zone.zone !== "heap"
+  )
+    throw new Error("Die bezahlte Current-Access-Trash-Quelle ist ungueltig.");
+  const selectedIds = selectedChoiceIds(playerAction.selectedChoices).map(
+    (id) => id as CardInstanceId,
+  );
+  const eligibleIds = new Set(mercenaryCurrentAccessEligibleCardIds(host));
+  if (selectedIds.some((cardId) => !eligibleIds.has(cardId)))
+    throw new Error("Ein Current-Access-Trash-Ziel ist nicht mehr gueltig.");
+
+  const currentCardId = run.accessedCardId;
+  const priorSelectedIds = selectedIds.filter(
+    (cardId) => cardId !== currentCardId,
+  );
+  if (run.breach && priorSelectedIds.length > 0) {
+    const selectedSet = new Set(priorSelectedIds);
+    run.breach = {
+      ...run.breach,
+      queue: run.breach.queue.map((entry) =>
+        selectedSet.has(entry.cardInstanceId)
+          ? { ...entry, status: "trashed" as const }
+          : entry,
+      ),
+      accessedSummaries: run.breach.accessedSummaries.map((summary) => {
+        const entry = run.breach?.queue.find(
+          (candidate) => candidate.entryId === summary.entryId,
+        );
+        return entry && selectedSet.has(entry.cardInstanceId)
+          ? { ...summary, status: "trashed" as const }
+          : summary;
+      }),
+    };
+  }
+
+  const trashedDefinitionIds: string[] = [];
+  for (const cardId of selectedIds) {
+    const definition = host.cards.definitionFor(cardId);
+    const instance = host.cards.cardInstanceFor(cardId);
+    if (
+      instance.zone.side === "corp" &&
+      instance.zone.zone === "serverRoot" &&
+      instance.zone.serverId === (run.breach?.serverId ?? run.attackedServerId)
+    )
+      host.steal.snapshotPersistentStealCostModifiersForSource(
+        cardId,
+        instance.zone.serverId,
+        legalAction,
+      );
+    host.trash.trashCorpInstalledCardToArchives(cardId, legalAction);
+    recordAccessTrashConsequences(host, cardId, definition);
+    trashedDefinitionIds.push(definition.id);
+  }
+  delete host.state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "proteus_hidden_current_access_free_trash_resolved",
+    currentAccessTrashCount: selectedIds.length,
+    currentAccessTrashDefinitionIds: trashedDefinitionIds.join(","),
+  };
+
+  if (currentCardId && selectedIds.includes(currentCardId)) {
+    completeCurrentBreachAccess(host, "trashed", legalAction);
+    return;
+  }
+  host.state.activeSide = "runner";
 }
 
 export function revalidateStealAgendaCost(
@@ -511,71 +721,6 @@ export function trashAccessedCard(
       "Karten in Archives können beim Zugriff nicht getrasht werden.",
     );
   }
-  const hiddenResourceSourceCardId = String(
-    legalAction?.payload?.hiddenResourceSourceCardId ?? "",
-  ) as CardInstanceId;
-  if (legalAction?.payload?.hiddenResourceCurrentAccessTrash === true) {
-    if (definition.type === "agenda")
-      throw new Error(
-        "Agendas koennen nicht als Hidden-Resource-Trash-Ziel gewaehlt werden.",
-      );
-    const sourceInstance = host.state.cardInstances[hiddenResourceSourceCardId];
-    if (
-      !sourceInstance ||
-      sourceInstance.controller !== "runner" ||
-      !host.state.runner.rig.resources.includes(hiddenResourceSourceCardId)
-    )
-      throw new Error(
-        "Die Mercenary-Subcontract-Quelle ist nicht installiert.",
-      );
-    const sourceDefinition = host.cards.definitionFor(
-      hiddenResourceSourceCardId,
-    );
-    const utility = cardImplementationForDefinitionId(
-      sourceDefinition.id,
-    )?.runnerUtilityLongtail;
-    if (utility?.kind !== "hidden_resource_current_access_free_trash")
-      throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Quelle.");
-    if (utility.cost.kind !== "credit_and_trash_source")
-      throw new Error("Die Hidden-Resource-Kosten passen nicht zur Quelle.");
-    const expectedCost = Math.max(0, Math.floor(utility.cost.amount));
-    if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
-      throw new Error("Die Hidden-Resource-Kosten sind nicht mehr gueltig.");
-    if (overrideCost !== 0 || legalAction.payload?.freeAccessTrash !== true)
-      throw new Error(
-        "Der Hidden-Resource-Trash ist kein gueltiger kostenloser Trash.",
-      );
-    if (
-      expectedCost > 0 &&
-      openRunnerCostPenaltySupportWindow(host.state, legalAction!, {
-        amount: expectedCost,
-        availableWithoutSupport: host.state.runner.credits,
-        context: "runner_access_trash",
-      })
-    )
-      return { handled: true, stateChanged: true };
-    if (host.state.runner.credits < expectedCost)
-      throw new Error("Runner kann die Hidden-Resource-Kosten nicht bezahlen.");
-    closeRunnerCostPenaltySupportWindowForPayment(
-      host.state,
-      legalAction!,
-      expectedCost,
-    );
-    host.payment.spendRunnerCredits(expectedCost);
-    const revealPayload = hiddenRunnerResourceRevealPayload(
-      host.state,
-      hiddenResourceSourceCardId,
-    );
-    host.zones.trashRunnerInstalledCardToHeap(hiddenResourceSourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      ...revealPayload,
-      sourceTrashed: true,
-      trashedCardDefinitionId: sourceDefinition.id,
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "proteus_hidden_current_access_free_trash",
-    };
-  }
   const availableWithoutSupport = availableRunnerAccessTrashCredits(
     host.accessActions,
     cardId as CardInstanceId,
@@ -652,25 +797,11 @@ export function trashAccessedCard(
     cardId as CardInstanceId,
     legalAction,
   );
-  if (
-    definition.type === "asset" &&
-    host.cards.cardHasSubtype(definition, "node")
-  ) {
-    host.runner.ensureTurnFlags().trashedNodeThisTurn = true;
-  }
-  if (host.cards.cardHasSubtype(definition, "advertisement")) {
-    host.runner.ensureTurnFlags().trashedAdvertisementThisTurn = true;
-    if (run)
-      run.trashedAdvertisementCount =
-        Math.max(0, Math.floor(run.trashedAdvertisementCount ?? 0)) + 1;
-  }
-  if (host.cards.cardHasSubtype(definition, "black_ops") && run) {
-    run.trashedBlackOpsCount =
-      Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) + 1;
-  }
-  if (host.cards.cardHasSubtype(definition, "transactions")) {
-    host.runner.ensureTurnFlags().trashedTransactionsThisTurn = true;
-  }
+  recordAccessTrashConsequences(
+    host,
+    cardId as CardInstanceId,
+    definition,
+  );
   consumeAccessTrashCounters(host, definition, legalAction);
   if (host.state.run?.breach) {
     return {
@@ -688,6 +819,30 @@ export function trashAccessedCard(
     ...resolvedPayloadFor(legalAction),
     stateChanged: true,
   };
+}
+
+function recordAccessTrashConsequences(
+  host: AccessFlowHost,
+  _cardId: CardInstanceId,
+  definition: CardDefinition,
+): void {
+  const run = host.state.run;
+  if (
+    definition.type === "asset" &&
+    host.cards.cardHasSubtype(definition, "node")
+  )
+    host.runner.ensureTurnFlags().trashedNodeThisTurn = true;
+  if (host.cards.cardHasSubtype(definition, "advertisement")) {
+    host.runner.ensureTurnFlags().trashedAdvertisementThisTurn = true;
+    if (run)
+      run.trashedAdvertisementCount =
+        Math.max(0, Math.floor(run.trashedAdvertisementCount ?? 0)) + 1;
+  }
+  if (host.cards.cardHasSubtype(definition, "black_ops") && run)
+    run.trashedBlackOpsCount =
+      Math.max(0, Math.floor(run.trashedBlackOpsCount ?? 0)) + 1;
+  if (host.cards.cardHasSubtype(definition, "transactions"))
+    host.runner.ensureTurnFlags().trashedTransactionsThisTurn = true;
 }
 
 export function attachAccessOriginPayload(

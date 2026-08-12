@@ -405,6 +405,9 @@ function pendingChoiceHost(
       resolveAccessProgramInstallMemoryChoice: unexpected(
         "resolveAccessProgramInstallMemoryChoice",
       ),
+      resolveMercenaryCurrentAccessTrashChoice: unexpected(
+        "resolveMercenaryCurrentAccessTrashChoice",
+      ),
       resolveSuccessfulRunCreditLossSpendChoice: unexpected(
         "resolveSuccessfulRunCreditLossSpendChoice",
       ),

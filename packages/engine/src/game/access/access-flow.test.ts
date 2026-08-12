@@ -6,6 +6,7 @@ import type {
   CorpServer,
   GameState,
   LegalAction,
+  PlayerAction,
   ServerId,
   SpecialZoneState,
 } from "@netgrid/shared";
@@ -14,6 +15,7 @@ import type { RunnerAccessActionHost } from "./access-actions";
 import {
   advanceArchivesBreachPastNonDecisionCards,
   handleAccessExecution,
+  resolveMercenaryCurrentAccessTrashChoice,
   type AccessFlowHost,
 } from "./access-flow";
 
@@ -267,7 +269,16 @@ function makeHost(
     trash: {
       trashCorpInstalledCardToArchives: (cardId) => {
         trashedCards.push(cardId);
+        host.zones.removeFromAllZones(cardId);
         state.corp.archives.push(cardId);
+        const instance = state.cardInstances[cardId];
+        if (instance)
+          state.cardInstances[cardId] = {
+            ...instance,
+            faceup: true,
+            rezzed: true,
+            zone: { side: "corp", zone: "archives" },
+          };
       },
     },
     run: {
@@ -680,14 +691,15 @@ describe("access flow execution", () => {
 
     const result = handleAccessExecution(host, legalAction);
 
-    expect(result).toMatchObject({
-      handled: true,
-      trashedCardId: "operation",
-      runFinished: true,
-    });
+    expect(result).toMatchObject({ handled: true, stateChanged: true });
     expect(spentRunnerCredits).toEqual([4]);
-    expect(trashPayments).toEqual([{ amount: 0, cardId: "operation" }]);
-    expect(trashedCards).toEqual(["operation"]);
+    expect(trashPayments).toEqual([]);
+    expect(trashedCards).toEqual([]);
+    expect(state.pendingChoice).toMatchObject({
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+    });
     expect(state.runner.credits).toBe(6);
     expect(state.runner.rig.resources).not.toContain("mercenary");
     expect(state.runner.heap).toContain("mercenary");
@@ -700,8 +712,32 @@ describe("access flow execution", () => {
     expect(legalAction.payload).toMatchObject({
       sourceTrashed: true,
       trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
-      hiddenZoneAction: "proteus_hidden_current_access_free_trash",
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash_choice",
     });
+    resolveMercenaryCurrentAccessTrashChoice(
+      host,
+      {
+        side: "runner",
+        type: "resolve_choice",
+        actionId: "runner.resolve_choice",
+        label: "Trash",
+        source: "choice",
+        payload: { choiceId: state.pendingChoice?.choiceId },
+      } as unknown as LegalAction,
+      {
+        matchId: "match",
+        side: "runner",
+        actionId: "runner.resolve_choice",
+        clientKnownStateVersion: state.pendingChoice!.stateVersion,
+        selectedChoices: {
+          choiceId: state.pendingChoice!.choiceId,
+          selectedOptionIds: ["operation"],
+        },
+      } as PlayerAction,
+    );
+    expect(trashedCards).toEqual(["operation"]);
+    expect(state.corp.archives).toEqual(["operation"]);
+    expect(state.run).toBeUndefined();
 
     const wrongKindAction = structuredClone(legalAction);
     wrongKindAction.payload = {
@@ -727,7 +763,7 @@ describe("access flow execution", () => {
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
-          faceup: false,
+          faceup: true,
           rezzed: false,
           tapped: false,
           advancementCounters: 0,
@@ -759,7 +795,7 @@ describe("access flow execution", () => {
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
-          faceup: false,
+          faceup: true,
           rezzed: false,
           tapped: false,
           advancementCounters: 0,
@@ -770,9 +806,30 @@ describe("access flow execution", () => {
     agendaState.state.runner.rig.resources = ["mercenary" as CardInstanceId];
     const agendaAction = structuredClone(legalAction);
     agendaAction.payload = { ...agendaAction.payload, cardId: "agenda" };
-    expect(() => handleAccessExecution(agendaState.host, agendaAction)).toThrow(
-      "Agendas koennen nicht als Hidden-Resource-Trash-Ziel",
+    handleAccessExecution(agendaState.host, agendaAction);
+    resolveMercenaryCurrentAccessTrashChoice(
+      agendaState.host,
+      {
+        side: "runner",
+        type: "resolve_choice",
+        actionId: "runner.resolve_choice",
+        label: "Trash agenda",
+        source: "choice",
+        payload: { choiceId: agendaState.state.pendingChoice?.choiceId },
+      } as unknown as LegalAction,
+      {
+        matchId: "match",
+        side: "runner",
+        actionId: "runner.resolve_choice",
+        clientKnownStateVersion:
+          agendaState.state.pendingChoice!.stateVersion,
+        selectedChoices: {
+          choiceId: agendaState.state.pendingChoice!.choiceId,
+          selectedOptionIds: ["agenda"],
+        },
+      } as PlayerAction,
     );
+    expect(agendaState.trashedCards).toEqual(["agenda"]);
 
     const poorState = makeHost({
       run: {
@@ -793,7 +850,7 @@ describe("access flow execution", () => {
           owner: "runner",
           controller: "runner",
           zone: { side: "runner", zone: "rig" },
-          faceup: false,
+          faceup: true,
           rezzed: false,
           tapped: false,
           advancementCounters: 0,
@@ -806,6 +863,141 @@ describe("access flow execution", () => {
     expect(() => handleAccessExecution(poorState.host, legalAction)).toThrow(
       "Runner kann die Hidden-Resource-Kosten nicht bezahlen.",
     );
+  });
+
+  it("lets Mercenary trash a paid subset of already revealed current-breach cards including agendas", () => {
+    const definitions = {
+      asset: definition("asset_def", "asset"),
+      agenda: definition("agenda_def", "agenda"),
+      mercenary: definition(
+        "onr_proteus_145_mercenary-subcontract",
+        "resource",
+      ),
+    };
+    const run = {
+      runId: "run_multi",
+      attackedServerId: "rd",
+      accessedCardId: "agenda",
+      breach: {
+        breachId: "run_multi.breach",
+        serverId: "rd",
+        accessMode: "multi",
+        queue: [
+          {
+            entryId: "run_multi.breach.0",
+            cardInstanceId: "asset",
+            serverId: "rd",
+            zone: "rd",
+            status: "declined",
+            hiddenInfo: true,
+          },
+          {
+            entryId: "run_multi.breach.1",
+            cardInstanceId: "agenda",
+            serverId: "rd",
+            zone: "rd",
+            status: "accessed",
+            hiddenInfo: true,
+          },
+        ],
+        currentIndex: 1,
+        completed: false,
+        accessedSummaries: [
+          {
+            entryId: "run_multi.breach.0",
+            status: "declined",
+            cardDefinitionId: "asset_def",
+          },
+        ],
+      },
+    } as unknown as NonNullable<GameState["run"]>;
+    const { host, state, spentRunnerCredits, trashedCards } = makeHost({
+      run,
+      definitions,
+      instances: {
+        asset: instance("asset", "asset_def", { side: "corp", zone: "rd" }),
+        agenda: instance("agenda", "agenda_def", {
+          side: "corp",
+          zone: "rd",
+        }),
+        mercenary: {
+          id: "mercenary" as CardInstanceId,
+          instanceId: "mercenary" as CardInstanceId,
+          definitionId: "onr_proteus_145_mercenary-subcontract",
+          owner: "runner",
+          controller: "runner",
+          zone: { side: "runner", zone: "rig" },
+          faceup: false,
+          rezzed: false,
+          tapped: false,
+          advancementCounters: 0,
+        } as unknown as CardInstance,
+      },
+      corpRd: ["asset", "agenda"],
+    });
+    state.cardInstances.mercenary = {
+      ...state.cardInstances.mercenary!,
+      faceup: true,
+    };
+    state.runner.rig.resources = ["mercenary" as CardInstanceId];
+    const activation = {
+      side: "runner",
+      type: "trash_accessed_card",
+      actionId: "runner.trash_accessed_card.agenda.mercenary",
+      label: "Mercenary",
+      source: "agenda",
+      costs: [{ credits: 4 }],
+      payload: {
+        cardId: "agenda",
+        accessTrashCostOverride: 0,
+        freeAccessTrash: true,
+        hiddenResourceCurrentAccessTrash: true,
+        hiddenResourceSourceCardId: "mercenary",
+        hiddenResourceSourceDefinitionId:
+          "onr_proteus_145_mercenary-subcontract",
+      },
+    } as unknown as LegalAction;
+
+    handleAccessExecution(host, activation);
+
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "asset",
+      "agenda",
+    ]);
+    expect(state.pendingChoice).toMatchObject({
+      minSelections: 1,
+      maxSelections: 2,
+      visibility: "hidden_info_barrier",
+    });
+    const choice = state.pendingChoice!;
+    const resolution = {
+      side: "runner",
+      type: "resolve_choice",
+      actionId: "runner.resolve_choice",
+      label: "Trash both",
+      source: "choice",
+      payload: { choiceId: choice.choiceId },
+    } as unknown as LegalAction;
+    resolveMercenaryCurrentAccessTrashChoice(host, resolution, {
+      matchId: "match",
+      side: "runner",
+      actionId: resolution.actionId,
+      clientKnownStateVersion: choice.stateVersion,
+      selectedChoices: {
+        choiceId: choice.choiceId,
+        selectedOptionIds: ["asset", "agenda"],
+      },
+    });
+
+    expect(spentRunnerCredits).toEqual([4]);
+    expect(trashedCards).toEqual(["asset", "agenda"]);
+    expect(state.corp.archives).toEqual(["asset", "agenda"]);
+    expect(state.runner.heap).toEqual(["mercenary"]);
+    expect(state.run).toBeUndefined();
+    expect(resolution.payload).toMatchObject({
+      currentAccessTrashCount: 2,
+      currentAccessTrashDefinitionIds: "asset_def,agenda_def",
+    });
   });
 
   it("adds Highlighter access context to each breached R&D access", () => {

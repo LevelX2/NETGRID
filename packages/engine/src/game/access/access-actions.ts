@@ -142,6 +142,8 @@ export function buildRunnerAccessActions(
     };
   }
   const definition = host.cards.definitionFor(run.accessedCardId);
+  const currentAccessTrashActions =
+    hiddenResourceCurrentAccessTrashActions(host, run);
   const freeTrashSource = freeTrashAccessSourceForCurrentAccessCard(
     host,
     run,
@@ -152,7 +154,7 @@ export function buildRunnerAccessActions(
   if (definition.type === "agenda") {
     const accessReplacement = agendaAccessReplacementForDefinition(definition);
     if (accessReplacement?.kind === "install_as_runner_program") {
-      const legalActions: LegalAction[] = [];
+      const legalActions: LegalAction[] = [...currentAccessTrashActions];
       if (
         runnerAgendaProgramInstallMemoryReachable(
           host,
@@ -220,12 +222,13 @@ export function buildRunnerAccessActions(
         };
         return {
           handled: true,
-          legalActions: [declineStealAction],
+          legalActions: [...currentAccessTrashActions, declineStealAction],
         };
       }
       return {
         handled: true,
         legalActions: [
+          ...currentAccessTrashActions,
           host.actions.buildLegalAction(
             "runner",
             "steal_agenda",
@@ -244,6 +247,7 @@ export function buildRunnerAccessActions(
     return {
       handled: true,
       legalActions: [
+        ...currentAccessTrashActions,
         host.actions.buildLegalAction(
           "runner",
           "steal_agenda",
@@ -432,8 +436,6 @@ function hiddenResourceCurrentAccessTrashActions(
 ): LegalAction[] {
   const accessedCardId = run.accessedCardId;
   if (!accessedCardId) return [];
-  const accessedDefinition = host.cards.definitionFor(accessedCardId);
-  if (accessedDefinition.type === "agenda") return [];
   return host.state.runner.rig.resources
     .slice()
     .sort()
@@ -455,7 +457,7 @@ function hiddenResourceCurrentAccessTrashActions(
         host.actions.buildLegalAction(
           "runner",
           "trash_accessed_card",
-          `${sourceDefinition.title}: aktuelle Karte kostenlos trashen`,
+          `${sourceDefinition.title}: zugreifbare Karten kostenlos trashen`,
           accessedCardId,
           [{ credits: utility.cost.amount }],
           {

@@ -1935,8 +1935,6 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     };
     mercenaryState.activeSide = "runner";
     mercenaryState.timingPoint = "access.resolve_card";
-    // Access is represented by one current run.accessedCardId. Multiaccess repeats
-    // this window per accessed card, so Mercenary's "one or more" is sequential here.
     const mercenaryAction = getLegalActions(mercenaryState, "runner").find(
       (candidate) =>
         candidate.payload?.hiddenResourceCurrentAccessTrash === true &&
@@ -1953,13 +1951,19 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       mercenaryId,
       "onr_proteus_145_mercenary-subcontract",
     );
+    result = resolveChoice(mercenaryState, "runner", operationId);
+    expect(result.ok).toBe(true);
+    mercenaryState = result.state;
     expect(mercenaryState.corp.archives).toContain(operationId);
-    expect(mercenaryState.eventLog.at(-1)?.publicPayload).toMatchObject({
+    expect(mercenaryState.eventLog.at(-2)?.publicPayload).toMatchObject({
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_145_mercenary-subcontract",
       sourceTrashed: true,
       trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
-      hiddenZoneAction: "proteus_hidden_current_access_free_trash",
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash_choice",
+    });
+    expect(mercenaryState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "proteus_hidden_current_access_free_trash_resolved",
     });
 
     const agendaState = runnerState("pro012-mercenary-agenda");
@@ -1982,14 +1986,28 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     if (agendaRdServer)
       agendaRdServer.root = agendaRdServer.root.filter((id) => id !== agendaId);
     agendaState.cardInstances[agendaId]!.zone = { side: "corp", zone: "rd" };
-    agendaState.run = { ...mercenaryState.run!, accessedCardId: agendaId };
+    agendaState.run = {
+      runId: "pro012_agenda_current_access",
+      attackedServerId: "rd",
+      phase: "access",
+      position: { kind: "server", serverId: "rd" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+      accessedCardId: agendaId,
+    };
+    agendaState.activeSide = "runner";
     agendaState.timingPoint = "access.resolve_card";
-    expect(
-      getLegalActions(agendaState, "runner").some(
-        (candidate) =>
-          candidate.payload?.hiddenResourceCurrentAccessTrash === true,
-      ),
-    ).toBe(false);
+    const agendaMercenaryAction = getLegalActions(agendaState, "runner").find(
+      (candidate) =>
+        candidate.payload?.hiddenResourceCurrentAccessTrash === true,
+    );
+    expect(agendaMercenaryAction).toBeDefined();
+    result = applyLegal(agendaState, "runner", agendaMercenaryAction!);
+    expect(result.ok).toBe(true);
+    result = resolveChoice(result.state, "runner", agendaId);
+    expect(result.ok).toBe(true);
+    expect(result.state.corp.archives).toContain(agendaId);
   });
 
   it("PRO012 Back Door to Netwatch cancels a successful trace and adds Bad Publicity only for non-tag effects", () => {

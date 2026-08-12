@@ -101,6 +101,7 @@ export type PendingChoiceResolutionHost = {
   };
   access: {
     resolveAccessProgramInstallMemoryChoice: HostFn<void>;
+    resolveMercenaryCurrentAccessTrashChoice: HostFn<void>;
     resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
     runAccessTransitionHost: HostFn<unknown>;
     resolvePreAccessTopRdReorderChoice: HostFn<void>;
@@ -259,6 +260,8 @@ export function resolvePendingChoice(
     host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const resolveAccessProgramInstallMemoryChoice =
     host.access.resolveAccessProgramInstallMemoryChoice;
+  const resolveMercenaryCurrentAccessTrashChoice =
+    host.access.resolveMercenaryCurrentAccessTrashChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
   const resolvePreAccessTopRdReorderChoice =
     host.access.resolvePreAccessTopRdReorderChoice;
@@ -591,6 +594,18 @@ export function resolvePendingChoice(
     )
   ) {
     resolveAccessProgramInstallMemoryChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.current_access_free_trash:",
+    )
+  ) {
+    resolveMercenaryCurrentAccessTrashChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (

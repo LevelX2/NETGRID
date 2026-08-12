@@ -43,7 +43,10 @@ import {
   resumeRunnerDrawSequenceAfterTagPrevention,
   resumeStartOfTurnAfterTagPrevention,
 } from "./runtime-port-bindings";
-import { resolveAccessProgramInstallMemoryChoice } from "../access/access-flow";
+import {
+  resolveAccessProgramInstallMemoryChoice,
+  resolveMercenaryCurrentAccessTrashChoice,
+} from "../access/access-flow";
 import { resolveRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memory-checkpoint";
 import { resolveStrategicPlanningGroupDrawChoice } from "../choices/strategic-planning-group-draw-choice";
 import { addRunnerTagsWithPrevention } from "../damage/damage-core";
@@ -836,6 +839,17 @@ export function createPendingChoiceRuntimeHosts(
           playerAction,
         ) => {
           resolveAccessProgramInstallMemoryChoice(
+            deps.accessFlow.accessFlowHost(state),
+            legalAction,
+            playerAction,
+          );
+        },
+        resolveMercenaryCurrentAccessTrashChoice: (
+          _state,
+          legalAction,
+          playerAction,
+        ) => {
+          resolveMercenaryCurrentAccessTrashChoice(
             deps.accessFlow.accessFlowHost(state),
             legalAction,
             playerAction,
