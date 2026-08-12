@@ -61,7 +61,7 @@ export const cardSpec = {
             target: "chosen_installed_ice",
             counterType: "kludge",
             amount: {
-              kind: "bounded_x_by_rez_cost_min_one",
+              kind: "chosen_x_min_one",
             },
             lifecycle: "remove_one_counter_start_corp_turn_trash_on_last",
             visibility: "public",

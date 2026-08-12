@@ -305,8 +305,9 @@ describe("PRO019 rule-contract baseline utilities", () => {
     }
   });
 
-  it("plays Emergency Rig through LegalActions with bounded nonzero X", () => {
+  it("lets Emergency Rig choose any affordable nonzero X independent of the ICE rez cost", () => {
     let state = corpActionState("pro019-emergency");
+    state.corp.credits = 5;
     addCorpHq(state, EMERGENCY_RIG, "emergency_1");
     const iceId = addCorpIce(state, WALL, "wall_1", "remote_1");
 
@@ -320,11 +321,15 @@ describe("PRO019 rule-contract baseline utilities", () => {
         (left, right) =>
           Number(left.payload?.xValue) - Number(right.payload?.xValue),
       );
-    expect(actions.map((action) => action.payload?.xValue)).toEqual([1, 2, 3]);
+    expect(actions.map((action) => action.payload?.xValue)).toEqual([
+      1, 2, 3, 4, 5,
+    ]);
     expect(actions.map((action) => action.costs)).toEqual([
       [{ clicks: 1, credits: 1 }],
       [{ clicks: 1, credits: 2 }],
       [{ clicks: 1, credits: 3 }],
+      [{ clicks: 1, credits: 4 }],
+      [{ clicks: 1, credits: 5 }],
     ]);
     expect(new Set(actions.map((action) => action.actionId)).size).toBe(
       actions.length,
@@ -339,25 +344,37 @@ describe("PRO019 rule-contract baseline utilities", () => {
     ).toEqual([
       {
         xMinimum: 1,
-        xMaximum: 3,
+        xMaximum: 5,
         xCreditsPerUnit: 1,
         variableCostKind: "printed_play_cost",
       },
       {
         xMinimum: 1,
-        xMaximum: 3,
+        xMaximum: 5,
         xCreditsPerUnit: 1,
         variableCostKind: "printed_play_cost",
       },
       {
         xMinimum: 1,
-        xMaximum: 3,
+        xMaximum: 5,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+      {
+        xMinimum: 1,
+        xMaximum: 5,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+      {
+        xMinimum: 1,
+        xMaximum: 5,
         xCreditsPerUnit: 1,
         variableCostKind: "printed_play_cost",
       },
     ]);
 
-    const selected = actions.find((action) => action.payload?.xValue === 3);
+    const selected = actions.find((action) => action.payload?.xValue === 5);
     expect(selected).toBeDefined();
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -365,8 +382,8 @@ describe("PRO019 rule-contract baseline utilities", () => {
     state = applySelected(state, "corp", selected!.actionId);
 
     expect(state.cardInstances[iceId]?.rezzed).toBe(true);
-    expect(state.cardInstances[iceId]?.counters?.kludge).toBe(3);
-    expect(state.corp.credits).toBe(creditsBefore - 3);
+    expect(state.cardInstances[iceId]?.counters?.kludge).toBe(5);
+    expect(state.corp.credits).toBe(creditsBefore - 5);
     expect(hashState(state)).toMatch(/^fnv1a:/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

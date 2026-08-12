@@ -198,6 +198,10 @@ export type CardEffectExecutionContext = {
   rezInstalledIceWithLifecycleCounters?: (input: {
     counterType: Extract<CounterType, "kludge" | "term">;
     amount: number;
+    amountKind:
+      | "bounded_x_by_rez_cost_min_one"
+      | "chosen_x_min_one"
+      | "target_rez_cost";
     lifecycle:
       | "remove_one_counter_start_corp_turn_trash_on_last"
       | "rent_to_own_start_corp_turn";

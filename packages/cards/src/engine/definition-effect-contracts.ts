@@ -267,7 +267,7 @@ export type GainTemporaryTraceCreditsEffectImplementation = {
   kind: "gain_temporary_trace_credits";
   recipient: "corp";
   amount: number;
-  usableFor: "current_trace";
+  usableFor: "unrestricted_during_current_trace";
   cleanup: "trace_end";
   visibility: Extract<EventVisibilityClass, "public">;
 };
@@ -302,6 +302,7 @@ export type FreeRezInstalledIceWithCountersEffectImplementation = {
   counterType: Extract<CounterType, "kludge" | "term">;
   amount:
     | { kind: "bounded_x_by_rez_cost_min_one" }
+    | { kind: "chosen_x_min_one" }
     | { kind: "target_rez_cost" };
   lifecycle:
     | "remove_one_counter_start_corp_turn_trash_on_last"

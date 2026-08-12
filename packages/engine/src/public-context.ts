@@ -620,6 +620,7 @@ export function publicContextForAction(
       "hackerTrackerCountersAdded",
       "temporaryTraceCreditsSpent",
       "temporaryTraceCreditsRemaining",
+      "temporaryTraceCreditsReturned",
       "temporaryTraceCreditsSourceDefinitionId",
       "fangRunEnded",
       "runnerRunLockCreditCost",
@@ -719,6 +720,7 @@ export function publicContextForAction(
       "passIceTrashProgramPrompt",
       "passIceTrashProgramCandidateCount",
       "temporaryTraceCredits",
+      "temporaryTraceCreditsReturned",
       "temporaryTraceCreditsSourceDefinitionId",
       "temporaryCreditsReturned",
     ]) {

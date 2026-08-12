@@ -18,7 +18,7 @@ export const cardSpec = {
           "trace_window_spend_advancement_for_trace_credits",
         ),
         actionLabel:
-          "LDL Traffic Analyzers: 1 Advancement-Counter für 5 Trace-Credits ausgeben",
+          "LDL Traffic Analyzers: 1 Advancement-Counter für 5 temporäre Credits ausgeben",
       },
     ],
   },
@@ -76,7 +76,7 @@ export const cardSpec = {
             kind: "gain_temporary_trace_credits",
             recipient: "corp",
             amount: 5,
-            usableFor: "current_trace",
+            usableFor: "unrestricted_during_current_trace",
             cleanup: "trace_end",
             visibility: "public",
           },
@@ -108,21 +108,17 @@ export const cardSpec = {
         evidenceProfile: "trace_credit_enabler",
         confidence: "medium",
         rationale:
-          "Advancement counters convert to trace-only temporary credits; not a tag source.",
+          "Advancement counters convert to temporary credits that expire with the current trace; the credits are not purpose-restricted.",
       },
       {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_061_ldl-traffic-analyzers.",
       },
       {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_061_ldl-traffic-analyzers.",
       },
     ],
     capabilities: [],

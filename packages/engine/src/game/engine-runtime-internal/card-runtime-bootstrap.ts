@@ -778,6 +778,10 @@ export function configureCardRuntimeBootstrap() {
     input: {
       counterType: Extract<CounterType, "kludge" | "term">;
       amount: number;
+      amountKind:
+        | "bounded_x_by_rez_cost_min_one"
+        | "chosen_x_min_one"
+        | "target_rez_cost";
       lifecycle:
         | "remove_one_counter_start_corp_turn_trash_on_last"
         | "rent_to_own_start_corp_turn";
@@ -815,10 +819,10 @@ export function configureCardRuntimeBootstrap() {
         0,
       );
       const creditsBeforePayment = state.corp.credits + paidCredits;
-      const upperBound = Math.min(
-        Math.max(1, targetRezCost),
-        creditsBeforePayment,
-      );
+      const upperBound =
+        input.amountKind === "bounded_x_by_rez_cost_min_one"
+          ? Math.min(Math.max(1, targetRezCost), creditsBeforePayment)
+          : creditsBeforePayment;
       if (
         Number(legalAction.payload?.xUpperBound) !== upperBound ||
         Number(legalAction.payload?.xMinimum) !== 1 ||

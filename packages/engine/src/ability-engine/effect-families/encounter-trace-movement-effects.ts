@@ -92,14 +92,15 @@ export function executeEncounterTraceMovementEffect(
           "free_rez_installed_ice_with_counters requires a target context.",
         );
       const amount =
-        effect.amount.kind === "bounded_x_by_rez_cost_min_one"
-          ? Math.max(0, Math.floor(Number(context.xValue ?? 0)))
-          : Math.max(0, Math.floor(Number(context.targetRezCost ?? 0)));
+        effect.amount.kind === "target_rez_cost"
+          ? Math.max(0, Math.floor(Number(context.targetRezCost ?? 0)))
+          : Math.max(0, Math.floor(Number(context.xValue ?? 0)));
       mergePublicPayload(
         publicPayload,
         context.rezInstalledIceWithLifecycleCounters({
           counterType: effect.counterType,
           amount,
+          amountKind: effect.amount.kind,
           lifecycle: effect.lifecycle,
         }).publicPayload,
       );

@@ -47,6 +47,7 @@ import {
   traceBaseLinkChoicePublicPayload,
 } from "./base-link";
 import { describeTraceResultFromTrace } from "./trace-result";
+import { returnUnusedCorpTraceWindowCredits } from "./temporary-trace-credit-lifecycle";
 import {
   requireTracePhase,
   traceIsInPhase,
@@ -1157,6 +1158,8 @@ function completeTraceWithoutRun(
           trace.successEffect.targetCardInstanceId,
         )
       : {};
+  const temporaryTraceCreditReturnPayload =
+    returnUnusedCorpTraceWindowCredits(state);
   if (options.deletePendingChoice) delete state.pendingChoice;
   delete state.trace;
   if (trace.returnTimingPoint && trace.returnActiveSide && trace.returnPhase) {
@@ -1181,6 +1184,7 @@ function completeTraceWithoutRun(
       : {}),
     traceSuccessful: successful,
     tagsAdded: 0,
+    ...temporaryTraceCreditReturnPayload,
     ...(hackerTrackerCountersAdded > 0
       ? {
           hackerTrackerCountersAdded,

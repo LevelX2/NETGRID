@@ -56,7 +56,7 @@ export const cardSpec = {
           kind: "credit",
           amount: 5,
         },
-        target: "advanceable_installed_card_in_this_fort",
+        target: "installed_card_in_this_fort",
         amount: 2,
         limit: "once_per_run_per_source",
         visibility: "public",
@@ -107,8 +107,6 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_062_lesley-major.",
       },
     ],
     capabilities: [],

@@ -1572,6 +1572,8 @@ export type TraceState = {
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     remaining: number;
+    includedInCorpCreditPool: true;
+    usableFor: "unrestricted_during_current_trace";
     returnUnusedAtTraceEnd: true;
   };
 };

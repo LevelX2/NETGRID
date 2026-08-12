@@ -664,10 +664,13 @@ export function cardImplementationOperationLegalActions(
       const targetDefinition = definitionFor(host.state, targetCardId);
       const targetRezCost = host.cards.rezCostForCard?.(targetCardId) ?? 0;
       if (freeRezEffect.counterType === "kludge") {
-        const xUpperBound = Math.min(
-          Math.max(1, targetRezCost),
-          Math.max(0, Math.floor(host.state.corp.credits)),
-        );
+        const xUpperBound =
+          freeRezEffect.amount.kind === "bounded_x_by_rez_cost_min_one"
+            ? Math.min(
+                Math.max(1, targetRezCost),
+                Math.max(0, Math.floor(host.state.corp.credits)),
+              )
+            : Math.max(0, Math.floor(host.state.corp.credits));
         for (let x = 1; x <= xUpperBound; x += 1) {
           actions.push(
             host.actions.buildLegalAction(

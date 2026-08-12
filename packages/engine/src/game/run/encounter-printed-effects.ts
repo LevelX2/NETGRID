@@ -13,6 +13,7 @@ import {
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { describeTraceResultFromTrace } from "../trace/trace-result";
+import { returnUnusedCorpTraceWindowCredits } from "../trace/temporary-trace-credit-lifecycle";
 import { credits } from "../state/economy-mutation";
 import {
   appendResolvedSubroutineEffect,
@@ -584,6 +585,10 @@ export function applyPrintedTraceSuccessFollowups(
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
   let traceDamagePayload: Record<string, unknown> = {};
+  let temporaryTraceCreditReturnPayload: Record<
+    string,
+    string | number | boolean
+  > = {};
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   let traceResourceTrashPayload: Record<string, unknown> = {};
   const traceCounterPayload = successful
@@ -620,6 +625,8 @@ export function applyPrintedTraceSuccessFollowups(
       source: `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
     });
     if (options.deletePendingChoice) delete state.pendingChoice;
+    temporaryTraceCreditReturnPayload =
+      returnUnusedCorpTraceWindowCredits(state);
     delete state.trace;
     if (host.callbacks.openDamageResolutionWindow(event, legalAction)) {
       legalAction.payload = {
@@ -630,6 +637,7 @@ export function applyPrintedTraceSuccessFollowups(
         traceSuccessful: true,
         traceNetDamageAmount: damageAmount,
         damagePreventionWindowOpened: true,
+        ...temporaryTraceCreditReturnPayload,
       };
       return {
         handled: true,
@@ -660,6 +668,9 @@ export function applyPrintedTraceSuccessFollowups(
     };
   }
   if (options.deletePendingChoice) delete state.pendingChoice;
+  if (state.trace)
+    temporaryTraceCreditReturnPayload =
+      returnUnusedCorpTraceWindowCredits(state);
   delete state.trace;
   if (state.run) {
     if (trace.subroutineIndex !== undefined) {
@@ -711,6 +722,7 @@ export function applyPrintedTraceSuccessFollowups(
       : {}),
     traceSuccessful: successful,
     tagsAdded: 0,
+    ...temporaryTraceCreditReturnPayload,
     ...traceCounterPayload,
     ...(hackerTrackerCountersAdded > 0
       ? {

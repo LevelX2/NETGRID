@@ -281,7 +281,7 @@ function openCorpTraceBidWindow(
     traceId: "pro014_trace",
     sourceCardInstanceId: sourceCardId,
     sourceDefinitionId: state.cardInstances[sourceCardId]!.definitionId,
-    traceLimit: 0,
+    traceLimit: 5,
     corpBidMax: 5,
     status: "corp_bid",
     successEffect: { type: "none" },
@@ -563,6 +563,9 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     );
     expect(state.corp.credits).toBe(3);
     expect(state.corpTemporaryInstallRezCredits?.remaining).toBe(3);
+    expect(
+      state.eventLog.at(-1)?.publicPayload.cardImplementationAbilityTiming,
+    ).toBe("corp_paid");
 
     addCorpRoot(state, SIREN, "siren_temp_only", "remote_1", true);
     for (const cardId of state.corp.hq.slice()) removeEverywhere(state, cardId);
@@ -610,9 +613,31 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     );
     expect(installState.corpTemporaryInstallRezCredits?.remaining).toBe(2);
     expect(installState.corp.credits).toBe(2);
+
+    const paidWindowState = baseState("pro014-government-paid-window");
+    const paidWindowGovernment = addCorpRoot(
+      paidWindowState,
+      GOVERNMENT_CONTRACT,
+      "government_paid_window",
+      "remote_1",
+      true,
+    );
+    paidWindowState.cardInstances[
+      paidWindowGovernment
+    ]!.advancementCounters = 1;
+    paidWindowState.activeSide = "runner";
+    paidWindowState.phase = "runner_action_phase";
+    paidWindowState.timingPoint = "runner_action.main";
+    expect(
+      getLegalActions(paidWindowState, "corp").some(
+        (action) =>
+          action.source === paidWindowGovernment &&
+          action.payload?.cardImplementationAbilityTiming === "corp_paid",
+      ),
+    ).toBe(true);
   });
 
-  it("scopes LDL Traffic Analyzers credits to the active trace bid", () => {
+  it("grants LDL credits to the Corp pool and returns the unspent amount when the trace ends", () => {
     let state = baseState("pro014-ldl");
     const ldlId = addCorpRoot(state, LDL, "ldl_1", "remote_1", true);
     state.cardInstances[ldlId]!.advancementCounters = 1;
@@ -627,14 +652,20 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     );
     expect(state.cardInstances[ldlId]?.advancementCounters).toBe(0);
     expect(state.trace?.corpTemporaryTraceCredits?.remaining).toBe(5);
+    expect(state.corp.credits).toBe(5);
 
-    const traceLimit = state.trace?.traceLimit ?? 0;
-    state = applyChoice(state, "corp", `bid_${traceLimit}`);
-    expect(state.trace?.corpBid).toBe(traceLimit);
-    expect(state.trace?.corpTemporaryTraceCredits?.remaining).toBe(
-      5 - traceLimit,
-    );
+    state = applyChoice(state, "corp", "bid_2");
+    expect(state.trace?.corpBid).toBe(2);
+    expect(state.trace?.corpTemporaryTraceCredits?.remaining).toBe(3);
+    expect(state.corp.credits).toBe(3);
+
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.trace).toBeUndefined();
     expect(state.corp.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      temporaryTraceCreditsReturned: 3,
+      corpCreditsAfter: 0,
+    });
 
     const noTrace = baseState("pro014-ldl-no-trace");
     const noTraceLdl = addCorpRoot(noTrace, LDL, "ldl_2", "remote_1", true);

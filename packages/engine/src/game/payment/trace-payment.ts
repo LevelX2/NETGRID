@@ -467,6 +467,10 @@ export function quoteCorpTraceBidPayment(
     0,
     Math.floor(trace.corpTemporaryTraceCredits?.remaining ?? 0),
   );
+  const normalCorpCreditsAvailable = Math.max(
+    0,
+    deps.corpCreditsAvailable(state) - implementationTemporaryTraceCreditsAvailable,
+  );
   const fortTraceBitPoolAvailable =
     trace.fortTraceBitPoolSourceCardInstanceId && trace.fortTraceBitPoolServerId
       ? deps.fortTraceBitPoolTotal(state)
@@ -533,7 +537,7 @@ export function quoteCorpTraceBidPayment(
       {
         kind: "corp_credits",
         priority: 30,
-        available: deps.corpCreditsAvailable(state),
+        available: normalCorpCreditsAvailable,
       },
       {
         kind: "corp_trace_bit_pool",
@@ -896,11 +900,7 @@ export function payCorpTraceBidQuote(
       Math.max(0, Math.floor(trace.corpTemporaryTraceCredits.remaining ?? 0)),
       remainingTemporaryTracePayment,
     );
-    trace.corpTemporaryTraceCredits.remaining = Math.max(
-      0,
-      Math.floor(trace.corpTemporaryTraceCredits.remaining ?? 0) -
-        implementationTemporaryTraceCreditsSpent,
-    );
+    deps.spendCorpCredits(state, implementationTemporaryTraceCreditsSpent);
     remainingTemporaryTracePayment -= implementationTemporaryTraceCreditsSpent;
   }
   const encounterTemporaryTraceCreditsSpent =

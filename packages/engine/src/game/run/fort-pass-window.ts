@@ -68,7 +68,7 @@ export function buildCorpFortPassWindowActions(
     if (!implementation) continue;
     const cost = Math.max(0, Math.floor(implementation.cost.amount));
     if (host.state.corp.credits < cost) continue;
-    const targets = advanceableInstalledCardTargetsOnServer(host, server.id);
+    const targets = installedCardTargetsInsideServer(host, server.id);
     for (const targetCardId of targets) {
       const sourceDefinition = host.cards.definitionFor(sourceCardId);
       const targetDefinition = host.cards.definitionFor(targetCardId);
@@ -307,10 +307,8 @@ export function resolveFortPassAdvancementWindow(
   );
   if (!implementation)
     throw new Error("Die Fort-Pass-Quelle hat keine passende Ability.");
-  if (!isInstalledCorpCardAdvanceable(host, targetCardId))
-    throw new Error(
-      "Das Fort-Pass-Ziel kann keine Advancement-Counter erhalten.",
-    );
+  if (!installedCardIsInsideServer(host, targetCardId, server.id))
+    throw new Error("Das Fort-Pass-Ziel liegt nicht mehr in diesem Fort.");
   const cost = Math.max(0, Math.floor(implementation.cost.amount));
   if (creditCostForAction(legalAction) !== cost)
     throw new Error("Die Fort-Pass-Kosten passen nicht mehr.");
@@ -807,38 +805,27 @@ export function resolveHqIceSwapChoice(
   };
 }
 
-function advanceableInstalledCardTargetsOnServer(
+function installedCardTargetsInsideServer(
   host: FortPassWindowHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): CardInstanceId[] {
-  return host.servers
-    .mustServer(serverId)
-    .root.slice()
-    .sort()
-    .filter((cardId) => isInstalledCorpCardAdvanceable(host, cardId));
+  return host.servers.mustServer(serverId).root.slice().sort();
 }
 
-function isInstalledCorpCardAdvanceable(
+function installedCardIsInsideServer(
   host: FortPassWindowHost,
   cardId: CardInstanceId,
+  serverId: Exclude<ServerId, "new_remote">,
 ): boolean {
-  const definition = host.cards.definitionFor(cardId);
   const instance = host.state.cardInstances[cardId];
-  if (
-    !instance ||
-    instance.controller !== "corp" ||
-    instance.zone.side !== "corp" ||
-    instance.zone.zone !== "serverRoot" ||
-    !host.state.corp.servers.some((server) => server.root.includes(cardId))
-  )
-    return false;
-  if (definition.type === "agenda") return true;
-  if (
-    cardImplementationForDefinitionId(definition.id)?.advanceable?.while ===
-    "installed_before_and_after_rez"
-  )
-    return true;
-  return false;
+  return Boolean(
+    instance &&
+      instance.controller === "corp" &&
+        instance.zone.side === "corp" &&
+        instance.zone.zone === "serverRoot" &&
+        instance.zone.serverId === serverId &&
+        host.servers.mustServer(serverId).root.includes(cardId),
+  );
 }
 
 function fortRunWindowImplementationForCard<

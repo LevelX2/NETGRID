@@ -30,6 +30,18 @@ export function spendCredits(
   if (side === "corp") {
     if (state.corp.credits < amount)
       throw new Error("Die Korp kann die Kosten nicht bezahlen.");
+    const traceCredits = state.trace?.corpTemporaryTraceCredits;
+    if (traceCredits) {
+      if (
+        traceCredits.includedInCorpCreditPool !== true ||
+        traceCredits.usableFor !== "unrestricted_during_current_trace"
+      )
+        throw new Error("Der temporäre Trace-Credit-Pool ist ungültig.");
+      traceCredits.remaining = Math.max(
+        0,
+        traceCredits.remaining - Math.min(amount, traceCredits.remaining),
+      );
+    }
     state.corp.credits -= amount;
     return;
   }

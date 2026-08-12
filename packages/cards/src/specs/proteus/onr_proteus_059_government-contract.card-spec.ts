@@ -15,7 +15,7 @@ export const cardSpec = {
     capabilityText: [
       {
         capabilityKey: capabilityKey(
-          "corp_main_spend_advancement_for_install_rez_credits",
+          "corp_paid_spend_advancement_for_install_rez_credits",
         ),
         actionLabel:
           "Government Contract: 1 Advancement-Counter für 3 Installations-/Rez-Credits ausgeben",
@@ -55,11 +55,11 @@ export const cardSpec = {
     abilities: [
       {
         capabilityKey: capabilityKey(
-          "corp_main_spend_advancement_for_install_rez_credits",
+          "corp_paid_spend_advancement_for_install_rez_credits",
         ),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
-        timing: "corp_main",
+        timing: "corp_paid",
         costs: [
           {
             kind: "advancement_counter",
@@ -119,15 +119,11 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_059_government-contract.",
       },
       {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
-        rationale:
-          "Migrated from reviewed Proteus hint onr_proteus_059_government-contract.",
       },
     ],
     capabilities: [],
