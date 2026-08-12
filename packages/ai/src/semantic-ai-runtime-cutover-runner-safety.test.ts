@@ -287,6 +287,83 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(debugText).toContain("pump_required_count:1");
   });
 
+  it("uses Matador's bound +5 pump once to reach a strength-5 sentry", () => {
+    const matador = visibleCard("runner-matador", "runner", "program", {
+      definitionId: "onr_classic_028_matador",
+      title: "Matador",
+      subtypes: ["icebreaker", "killer"],
+      strength: 0,
+    });
+    const hunter = quotedEndTheRunIce({
+      instanceId: "corp-hunter",
+      definitionId: "onr_v1_249_hunter",
+      title: "Hunter",
+      strength: 5,
+      subtype: "sentry",
+    });
+    const pump = legalAction(
+      "pump-matador",
+      "runner",
+      "pump_breaker",
+      "Matador: Stärke +5",
+      { credits: 3 },
+      {
+        source: matador.instanceId,
+        visibility: "private_to_actor",
+        payload: {
+          breakerId: matador.instanceId,
+          iceId: hunter.instanceId,
+          pumpStrengthAmount: 5,
+        },
+      },
+    );
+    const continueIntoEtr = legalAction(
+      "continue-hunter-etr",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen (Run endet)",
+      { credits: 0 },
+      {
+        visibility: "private_to_actor",
+        payload: {
+          encounterContinue: true,
+          unbrokenSubroutineCount: 1,
+          encounterWillEndRun: true,
+          sourceDefinitionId: "onr_v1_249_hunter",
+        },
+      },
+    );
+    pump.timingPoint = "run.encounter_ice";
+    continueIntoEtr.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [pump, continueIntoEtr]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 0;
+    input.playerView.own.rig = [matador];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [hunter]),
+      server("archives"),
+    ];
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: hunter,
+      successful: false,
+    };
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(pump.actionId);
+    expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
+    expect(debugText).not.toContain("pump_required_count:5");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.convert_run_window",
+    );
+  });
+
   it("uses visible non-noisy run credits when deciding whether pumps can reach a break", () => {
     const codecracker: VisibleCard = {
       instanceId: "runner-codecracker",

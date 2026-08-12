@@ -246,6 +246,7 @@ describe("runner encounter action generation", () => {
       cardId: "breaker_1",
       breakerId: "breaker_1",
       iceId: "ice_1",
+      pumpStrengthAmount: 1,
       cardImplementationCapabilityBindingKind: "card_spec_capability_key",
       cardImplementationAbilityKey: "simple_killer_pump",
       cardImplementationAbilityId: "simple_killer:simple_killer_pump",
@@ -430,7 +431,11 @@ describe("runner encounter action generation", () => {
         testCase.definitionId,
       ).toMatchObject({
         costs: [{ credits: testCase.pumpCost }],
-        payload: { breakerId: "breaker_1", iceId: "ice_1" },
+        payload: {
+          breakerId: "breaker_1",
+          iceId: "ice_1",
+          pumpStrengthAmount: testCase.pumpAmount,
+        },
       });
       expect(
         result.legalActions.find((action) => action.type === "pump_breaker"),

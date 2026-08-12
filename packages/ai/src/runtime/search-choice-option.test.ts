@@ -94,6 +94,43 @@ describe("selectedSearchChoiceOptionIds", () => {
     expect(selected).toEqual(["ap-breaker"]);
   });
 
+  it("executes the exact target definition prebound by the coverage plan", () => {
+    const choice = searchChoice(
+      [
+        option("psychic-friend", "Psychic Friend", "program", {
+          definitionId: "onr_classic_030_psychic-friend",
+          installCost: 2,
+          memoryCost: 1,
+        }),
+        option("rent-i-con-a", "Rent-I-Con", "program", {
+          definitionId: "onr_classic_031_rent-i-con",
+          installCost: 3,
+          memoryCost: 2,
+        }),
+      ],
+      1,
+    );
+
+    expect(
+      selectedSearchChoiceOptionIds(choice, choice.options, {
+        features: {
+          credits: 8,
+          memoryRemaining: 4,
+          hasInstalledNonNoisyIcebreaker: true,
+          rigRoles: new Set(["breaker_killer"]),
+          rigDefinitionIds: new Set(["onr_classic_028_matador"]),
+        },
+        effectsForCardId: () => [],
+        rolesForCardId: (definitionId) =>
+          definitionId === "onr_classic_031_rent-i-con"
+            ? ["breaker_universal"]
+            : ["breaker_code_gate"],
+        requiredCoverage: "breaker_code_gate",
+        preferredCardDefinitionId: "onr_classic_031_rent-i-con",
+      }),
+    ).toEqual(["rent-i-con-a"]);
+  });
+
   it("prefers a new installable support program over breaker copies already in rig and grip", () => {
     const choice = searchChoice(
       [
@@ -295,8 +332,7 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: scenario.credits,
         memoryRemaining: scenario.memoryRemaining,
-        hasInstalledNonNoisyIcebreaker:
-          scenario.hasInstalledNonNoisyIcebreaker,
+        hasInstalledNonNoisyIcebreaker: scenario.hasInstalledNonNoisyIcebreaker,
         rigRoles: new Set(),
         rigDefinitionIds: new Set(),
       },

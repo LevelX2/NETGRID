@@ -555,6 +555,46 @@ describe("belief-state HQ hand memory retention", () => {
     );
   });
 
+  it("remembers an agenda that Gypsy Schedule Analyzer stores in HQ", () => {
+    const gypsyResolution = publicEvent(
+      "evt_gypsy_resolution",
+      "resolve_choice",
+      1,
+      {
+        actor: "runner",
+        actionType: "resolve_choice",
+        hiddenZoneAction:
+          "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+        agendaStoredInHq: true,
+        storedAgendaDefinitionId: "onr_v1_220_tycho-extension",
+        revealedAgendaDefinitionIds: "onr_v1_220_tycho-extension",
+      },
+    );
+
+    const memory = reconstructBeliefState(
+      runnerInput([gypsyResolution], 6),
+    ).runnerOpponentModel?.hqHandMemory;
+
+    expect(memory).toMatchObject({
+      handCount: 6,
+      knownDefinitions: ["onr_v1_220_tycho-extension"],
+      knownCount: 1,
+      allCardsKnown: false,
+      ledger: {
+        unknownRestCount: 5,
+        safeDefinitions: [
+          expect.objectContaining({
+            definitionId: "onr_v1_220_tycho-extension",
+            count: 1,
+          }),
+        ],
+      },
+    });
+    expect(memory?.invalidationReasons).toContain(
+      "gypsy_known_agenda_stored_in_hq:evt_gypsy_resolution",
+    );
+  });
+
   it("keeps a known R&D-drawn operation in HQ after an unrelated hidden ICE install", () => {
     const rdAccess = publicEvent("evt_rd_access", "access_card", 1, {
       actor: "runner",

@@ -424,6 +424,9 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(drineActions.map((action) => action.payload?.xValue)).toEqual([
       1, 2, 3,
     ]);
+    expect(
+      drineActions.map((action) => action.payload?.gainCreditsAmount),
+    ).toEqual([4, 8, 12]);
     expect(drineActions.map((action) => action.payload)).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
