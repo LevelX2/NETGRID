@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Provides +1 MU. Prevents 1 meat damage each turn. Put 5 credits on Techtronica Utility Suit when it is installed. Use these credits only to pay for increasing your link. If you use any of these credits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+      "Provides +1 MU. Prevents up to 1 meat damage each turn. Put [5] from the bank on Techtronica Utility Suit when it is installed. Use these credits only to pay for increasing your link. If you use any of these credits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,12 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_143_techtronica-utility-suit",
+      },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#Techtronica Utility Suit",
+        note: "Official errata adds ‘up to’ and ‘from the bank’ to the printed text.",
       },
     ],
   },
@@ -39,6 +45,8 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
+      memoryLimitBonus: 1,
+      recurringCredits: 5,
     },
     hardwareDeck: true,
     modifiers: [

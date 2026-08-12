@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Installing Corporate Ally costs 1 agenda point, in addition to the normal cost. The difficulty of all agendas is +1.",
+      "Installing Corporate Ally costs 1 agenda point, in addition to the normal cost. The difficulty of all agendas is +1. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -74,29 +74,11 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "contest_remote",
-      },
-      {
-        kind: "strategic_role",
-        role: "scoring_tool",
-      },
-      {
-        kind: "line_support",
-        lineKey: "runner.remote_contest",
-        support: "supports",
+        role: "agenda_pressure",
       },
       {
         kind: "strategic_exchange",
         exchange: "score_progress",
-      },
-      {
-        kind: "strategic_exchange",
-        exchange: "board_or_hand_sacrifice",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
       },
     ],
     capabilities: [],

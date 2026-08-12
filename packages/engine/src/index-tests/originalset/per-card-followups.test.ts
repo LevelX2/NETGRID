@@ -3584,6 +3584,14 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       state,
       "onr_v1_145_wutech-mem-chip",
     );
+    expect(
+      CARD_DEFINITIONS_BY_ID["onr_v1_145_wutech-mem-chip"]?.memoryLimitBonus,
+    ).toBe(1);
+    expect(
+      getPlayerView(state, "corp").opponent.rig?.find(
+        (card) => card.definitionId === "onr_v1_145_wutech-mem-chip",
+      )?.memoryLimitBonus,
+    ).toBe(1);
     const installedProgramIds = [
       installRunnerProgramForTest(state, "simple_decoder"),
       installRunnerProgramCopyForTest(state, "simple_decoder"),

@@ -353,6 +353,115 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     });
   });
 
+  it("stacks Code Viral Cache purge preservation per installed source", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "originalset-code-viral-cache-stacking",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+          id: "originalset_code_viral_cache_stacking_runner",
+          name: "Originalset Code Viral Cache Stacking Runner",
+          cards: MECHANIC_SMOKE_DECKS.damagePrevention.runner.cards.map(
+            (card) =>
+              card.id === "onr_v1_155_code-viral-cache"
+                ? { ...card, quantity: 2 }
+                : card,
+          ),
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    const cacheIds = Object.entries(state.cardInstances)
+      .filter(([, card]) => card.definitionId === "onr_v1_155_code-viral-cache")
+      .map(([id]) => id as CardInstanceId)
+      .sort();
+    expect(cacheIds).toHaveLength(2);
+    for (const cacheId of cacheIds) {
+      removeEverywhere(state, cacheId);
+      state.runner.rig.resources.push(cacheId);
+      state.cardInstances[cacheId] = {
+        ...state.cardInstances[cacheId]!,
+        zone: { side: "runner", zone: "rig" },
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    setCardCounterForTest(state, cacheIds[0]!, "virus", 3);
+    setCardCounterForTest(state, cacheIds[1]!, "virus", 2);
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 10;
+
+    const purgeInitial = structuredClone(state);
+    const purgeReplayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "purge_virus_counters",
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      maxSelections: 4,
+      source: expect.stringContaining(cacheIds.join(",")),
+    });
+    const preserveOptions =
+      state.pendingChoice?.options.slice(0, 4).map((option) => option.id) ?? [];
+    state = applyChoices(state, "runner", preserveOptions);
+    expect(
+      cacheIds.reduce(
+        (sum, cacheId) => sum + cardCounterAmount(state, cacheId, "virus"),
+        0,
+      ),
+    ).toBe(4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_155_code-viral-cache",
+      sourceCount: 2,
+      preservedCounterAmount: 4,
+      remainingVirusCounters: 4,
+    });
+    const purgeReplay = replayEvents(
+      purgeInitial,
+      state.eventLog.slice(purgeReplayStart),
+    );
+    expect(purgeReplay.ok).toBe(true);
+    expect(hashState(purgeReplay.state)).toBe(hashState(state));
+
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 1;
+    state.corp.credits = 5;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.corpAbility ===
+          "trash_installed_runner_resource_source" &&
+        action.payload?.cardId === cacheIds[0],
+    );
+    const remainingCacheId = cacheIds[1]!;
+    setCardCounterForTest(state, remainingCacheId, "virus", 3);
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "purge_virus_counters",
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      maxSelections: 2,
+      source: expect.stringContaining(remainingCacheId),
+    });
+  });
+
   it("spends Armored Fridge counters for meat prevention and trashes the empty source", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.damagePrevention("v1913-armored-fridge"),

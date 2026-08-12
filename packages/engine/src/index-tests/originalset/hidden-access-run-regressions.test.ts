@@ -1509,6 +1509,15 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     ).toMatchObject({
       installCost: 9,
     });
+    for (const definitionId of [
+      "onr_v1_148_access-through-alpha",
+      "onr_v1_149_access-to-arasaka",
+      "onr_v1_150_access-to-kiribati",
+      "onr_v1_152_back-door-to-hilliard",
+      "onr_v1_153_back-door-to-orbital-air",
+    ]) {
+      expect(CARD_DEFINITIONS_BY_ID[definitionId]?.baseLink).toBeUndefined();
+    }
 
     for (const [definitionId, baseLink, baseCost, pumpCost] of specs) {
       let state = toRunnerTurn(

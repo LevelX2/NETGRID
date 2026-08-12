@@ -1084,11 +1084,12 @@ export function createStateRuntimeResolvers(
       throw new Error(
         "Keine installierte Virus-Purge-Erhaltungsquelle gefunden.",
       );
+    const maxPreserveCounters = Math.min(sourceIds.length * 2, targets.length);
     state.pendingChoice = {
       choiceId: `runner_virus_purge_replacement_${state.stateVersion + 1}`,
       side: "runner",
-      source: `runner_virus_counter_purge_replacement:${sourceCardId}:${state.stateVersion + 1}`,
-      prompt: "Bis zu zwei Virus-Counter behalten.",
+      source: `runner_virus_counter_purge_replacement:${sourceIds.join(",")}:${state.stateVersion + 1}`,
+      prompt: `Bis zu ${maxPreserveCounters} Virus-Counter behalten.`,
       kind: "select_cards",
       options: targets.map((target) => ({
         id: target.optionId,
@@ -1097,7 +1098,7 @@ export function createStateRuntimeResolvers(
         value: target.optionId,
       })),
       minSelections: 0,
-      maxSelections: Math.min(2, targets.length),
+      maxSelections: maxPreserveCounters,
       stateVersion: state.stateVersion + 1,
       visibility: "public",
     };
@@ -1105,9 +1106,10 @@ export function createStateRuntimeResolvers(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       sourceDefinitionId: definitionFor(state, sourceCardId).id,
+      sourceCount: sourceIds.length,
       runnerVirusCounterPurgeReplacementOpened: true,
       eligibleCounterCount: targets.length,
-      maxPreserveCounters: Math.min(2, targets.length),
+      maxPreserveCounters,
       purgedCounterType: "virus",
     };
     return true;
@@ -1155,6 +1157,7 @@ export function createStateRuntimeResolvers(
   function restorePurgePreservedVirusCounters(
     state: GameState,
     selectedOptionIds: string[],
+    maxPreserveCounters = 2,
   ): { preserved: number; preservedCardDefinitionIds: CardDefinitionId[] } {
     const selectedTargets = selectedOptionIds
       .map(parseVirusCounterPurgePreserveOption)
@@ -1163,9 +1166,9 @@ export function createStateRuntimeResolvers(
       );
     if (selectedTargets.length !== selectedOptionIds.length)
       throw new Error("Die Virus-Counter-Erhaltungsauswahl ist ungueltig.");
-    if (selectedTargets.length > 2)
+    if (selectedTargets.length > maxPreserveCounters)
       throw new Error(
-        "Diese Replacement-Faehigkeit kann hoechstens 2 Counter behalten.",
+        `Die aktiven Replacement-Quellen koennen hoechstens ${maxPreserveCounters} Counter behalten.`,
       );
     const beforeCardCounts = new Map<string, number>();
     const beforePoxCounts = new Map<Exclude<ServerId, "new_remote">, number>();
@@ -1260,20 +1263,34 @@ export function createStateRuntimeResolvers(
       !choice.source.startsWith("runner_virus_counter_purge_replacement")
     )
       throw new Error("Es ist keine Virus-Counter-Erhaltungs-Choice offen.");
-    const [, sourceCardId] = choice.source.split(":");
+    const [, encodedSourceCardIds] = choice.source.split(":");
+    const sourceCardIds = [...new Set(encodedSourceCardIds?.split(",") ?? [])]
+      .filter(Boolean)
+      .sort() as CardInstanceId[];
+    const installedSourceIds = new Set(
+      installedVirusCounterPurgePreserveSourceIds(state),
+    );
     if (
-      !sourceCardId ||
-      !installedVirusCounterPurgePreserveSourceIds(state).includes(sourceCardId)
+      sourceCardIds.length === 0 ||
+      sourceCardIds.some(
+        (sourceCardId) => !installedSourceIds.has(sourceCardId),
+      )
     )
       throw new Error("Die Replacement-Quelle ist nicht mehr installiert.");
     const selected = selectedChoiceIds(playerAction.selectedChoices);
     const legalOptionIds = new Set(choice.options.map((option) => option.id));
     if (selected.some((optionId) => !legalOptionIds.has(optionId)))
       throw new Error("Die Virus-Counter-Erhaltungsauswahl ist nicht legal.");
-    const result = restorePurgePreservedVirusCounters(state, selected);
+    const maxPreserveCounters = sourceCardIds.length * 2;
+    const result = restorePurgePreservedVirusCounters(
+      state,
+      selected,
+      maxPreserveCounters,
+    );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+      sourceDefinitionId: definitionFor(state, sourceCardIds[0]!).id,
+      sourceCount: sourceCardIds.length,
       purgedCounterType: "virus",
       preservedCounterAmount: result.preserved,
       ...(result.preservedCardDefinitionIds.length > 0

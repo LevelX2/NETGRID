@@ -38,6 +38,7 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
+      memoryLimitBonus: 1,
     },
     modifiers: [
       {

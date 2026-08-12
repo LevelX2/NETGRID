@@ -89,7 +89,7 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "avoid_tags",
       },
     ],
     capabilities: [],

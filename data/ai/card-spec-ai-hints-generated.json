@@ -27503,7 +27503,7 @@
     },
     {
       "cardId": "onr_v1_141_raven-microcyb-owl",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5368c41b66e19a1f",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b45060730a4ff1f7",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:962eeb44a8a17e50",
       "hint": {
         "cardId": "onr_v1_141_raven-microcyb-owl",
@@ -27703,7 +27703,7 @@
     },
     {
       "cardId": "onr_v1_143_techtronica-utility-suit",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3667e2a1a5c436e5",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:bff93f85f1f8cc59",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:813161611cb42295",
       "hint": {
         "cardId": "onr_v1_143_techtronica-utility-suit",
@@ -27866,7 +27866,7 @@
     },
     {
       "cardId": "onr_v1_145_wutech-mem-chip",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d49a3403d753d8ff",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5c7bb65bd2f02f97",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
       "hint": {
         "cardId": "onr_v1_145_wutech-mem-chip",
@@ -28024,7 +28024,7 @@
     },
     {
       "cardId": "onr_v1_148_access-through-alpha",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:47d2b7402de1dca4",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0a925862fdb1c36e",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9787b5029b0a0ace",
       "hint": {
         "cardId": "onr_v1_148_access-through-alpha",
@@ -28089,7 +28089,7 @@
     },
     {
       "cardId": "onr_v1_149_access-to-arasaka",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:fc7eaab54b547fa1",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4971c2c9fe10b9fd",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9787b5029b0a0ace",
       "hint": {
         "cardId": "onr_v1_149_access-to-arasaka",
@@ -28184,7 +28184,7 @@
     },
     {
       "cardId": "onr_v1_150_access-to-kiribati",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b24ce994883a51e8",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2161a69adf056c56",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9787b5029b0a0ace",
       "hint": {
         "cardId": "onr_v1_150_access-to-kiribati",
@@ -28379,7 +28379,7 @@
     },
     {
       "cardId": "onr_v1_152_back-door-to-hilliard",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c55c8a1f54f959b3",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e33a911540b4f071",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9787b5029b0a0ace",
       "hint": {
         "cardId": "onr_v1_152_back-door-to-hilliard",
@@ -28474,7 +28474,7 @@
     },
     {
       "cardId": "onr_v1_153_back-door-to-orbital-air",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4f43a15368df2647",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:8a602641ab0e64ed",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9787b5029b0a0ace",
       "hint": {
         "cardId": "onr_v1_153_back-door-to-orbital-air",
@@ -28744,18 +28744,16 @@
     {
       "cardId": "onr_v1_156_corporate-ally",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1cfd7906b319a742",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:81f1f13eb62b23c2",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:5f5f5e302426e72c",
       "hint": {
         "cardId": "onr_v1_156_corporate-ally",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "contest_remote"],
+        "planRoles": ["build_rig", "agenda_pressure"],
         "valueHints": {},
-        "strategicRole": ["scoring_tool"],
-        "lineSupport": ["runner.remote_contest"],
-        "strategicExchangeKinds": ["score_progress", "board_or_hand_sacrifice"],
+        "strategicExchangeKinds": ["score_progress"],
         "effects": [
           {
             "kind": "global_modifier",
@@ -28779,13 +28777,11 @@
           "score.undefined_difficulty_increase"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
           "remote.agenda_difficulty_increase",
           "score.agenda_difficulty_increase",
           "score.undefined_difficulty_increase"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:global_modifier",
           "effect_scope:remote",
           "effect_scope:runner",
@@ -28865,14 +28861,14 @@
     {
       "cardId": "onr_v1_158_danshis-second-id",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ebd53cd563307679",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ef9cb020a86314ec",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7f1c28f2bdf8f6c6",
       "hint": {
         "cardId": "onr_v1_158_danshis-second-id",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["tag_removal"],
-        "planRoles": ["build_rig", "recover_economy", "recover_from_tags"],
+        "planRoles": ["build_rig", "avoid_tags", "recover_from_tags"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {

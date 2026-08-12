@@ -701,10 +701,60 @@ Für Armored Fridge, Bodyweight Data Crèche, Full Body Conversion, HQ
 Interface, Militech MRAM Chip, MRAM Chip, Nasuko Cycle und Parraline 5750
 ergab der Nutzerblock keinen weiteren Korrekturbedarf.
 
+## Block 008 – Karten 141 bis 160 und generische Folgefunde
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 008` eingeführt.
+
+### Kanonische Errata und strukturierte Projektion
+
+- Raven Microcyb Owl verwendet `[3]`, nennt beim Wiederauffüllen ausdrücklich
+  die Bank und führt den gedruckten MU-Bonus zusätzlich zum aktiven Modifier
+  als `memoryLimitBonus: 1`.
+- Techtronica™ Utility Suit enthält alle drei offiziellen
+  Errata-Präzisierungen. `memoryLimitBonus: 1` und `recurringCredits: 5`
+  vervollständigen die öffentliche CardDefinition-/Kartenprojektion.
+- WuTech Mem Chip führt `memoryLimitBonus: 1`; ZZ22 Speed Chip nennt beim
+  Wiederauffüllen die Bank. Die Errata-Änderungen referenzieren die jeweiligen
+  Abschnitte aus `docs/source/Netrunner Errata 1.70.md`.
+- Access through Alpha, Access to Arasaka, Access to Kiribati, Back Door to
+  Hilliard und Back Door to Orbital Air besitzen keine statische
+  `baseLink`-Characteristic mehr. Ihr Base Link entsteht ausschließlich durch
+  die bezahlte beziehungsweise aktivierte `use_base_link`-Ability.
+
+### Code Viral Cache
+
+- Der Purge-Replacement-Vertrag bindet nun alle installierten Quellen in
+  stabil sortierter Reihenfolge. Seine Auswahlkapazität beträgt zwei Counter
+  je weiterhin installierter Quelle; zwei Caches können daher gemeinsam bis
+  zu vier Counter erhalten.
+- Quelle, Quellanzahl und Auswahlobergrenze bleiben im Pending-Choice- und
+  Eventvertrag deterministisch gebunden. Ein Replay-Zeuge bestätigt den
+  identischen Endzustand. Nach dem Trash einer Kopie sinkt die Kapazität beim
+  nächsten Purge wieder auf zwei.
+
+### Planning-Semantik
+
+- Corporate Ally ist Agenda-Pressure gegen das Corp-Scoring und kein
+  Corp-Remote-Schutz. Der falsche `scoring_tool`-Anker, die Remote-Contest-
+  Linienbindung und der nicht vorhandene Board-/Hand-Sacrifice wurden
+  entfernt; der tatsächliche Agenda-Punkt-Exchange bleibt erhalten. Der
+  kanonische Text enthält außerdem den vollständigen Unique-Reminder.
+- Danshi’s Second ID verwendet die bestehende Runner-Rolle `avoid_tags` statt
+  `recover_economy`. Diese Änderungen bleiben deklarative Hint-Korrekturen;
+  Plan-, Action-, Choice- und Executor-Ownership ändern sich nicht.
+
+### Unveränderte Karten dieses Blocks
+
+Für Record Reconstructor, Tycho Mem Chip, Zetatech Mem Chip, Aujourd’Oui,
+Broker, Crash Everett, Inventive Fixer, Databroker und Diplomatic Immunity
+ergab der Nutzerblock keinen weiteren Korrekturbedarf.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 141 bis 160.
+- Als nächster regulärer Nutzerblock folgen die Karten 161 bis 180.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -782,3 +832,13 @@ Interfaces und Ravens dreifache MU-Konsistenz. Der bestehende
 Originalset-AI-Golden-Test startet unabhängig davon nicht, weil sein bereits
 entferntes historisches Migration-Report-JSON weiterhin statisch importiert
 wird; der aktuelle generierte Artefaktvertrag ist grün.
+
+Für Block 008 sind Cards-, Engine- und AI-Typecheck, Generator-Check, acht
+AI-Artefakt-Vertragstests sowie 147 fokussierte Engine-Tests für
+Purge-Replacement, Projektion, Base Link und angrenzende Originalset-Pfade
+grün. Die Code-Viral-Cache-Evidence umfasst eine und zwei Quellen, die
+Rückkehr auf Kapazität zwei nach Source-Trash sowie deterministisches Replay.
+Der bekannte Originalset-AI-Golden-Test bleibt unabhängig davon wegen seines
+statischen Imports des entfernten historischen Migration-Report-JSONs nicht
+startfähig; das aktuelle erzeugte Artefakt und die Review-Fixture wurden
+gezielt synchronisiert.

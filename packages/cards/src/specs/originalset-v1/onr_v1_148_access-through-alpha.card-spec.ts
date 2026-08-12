@@ -47,7 +47,6 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
-      baseLink: 9,
     },
     abilities: [
       {

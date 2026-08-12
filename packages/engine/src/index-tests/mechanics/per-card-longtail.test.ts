@@ -3772,7 +3772,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
         memoryBefore + expectedMu,
       );
-      if (definitionId === "onr_v1_140_raven-microcyb-eagle") {
+      if (
+        [
+          "onr_v1_140_raven-microcyb-eagle",
+          "onr_v1_141_raven-microcyb-owl",
+          "onr_v1_143_techtronica-utility-suit",
+        ].includes(definitionId)
+      ) {
         expect(CARD_DEFINITIONS_BY_ID[definitionId]?.memoryLimitBonus).toBe(1);
         expect(
           getPlayerView(state, "corp").opponent.rig?.find(
@@ -3780,6 +3786,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           )?.memoryLimitBonus,
         ).toBe(1);
       }
+      if (definitionId === "onr_v1_143_techtronica-utility-suit")
+        expect(CARD_DEFINITIONS_BY_ID[definitionId]?.recurringCredits).toBe(5);
       expect(cardCounterAmount(state, cardId, "bit")).toBe(expectedBits);
       expect(cardCounterAmount(state, cardId, "recurring_credit")).toBe(0);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({

@@ -10637,11 +10637,9 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "contest_remote"],
+        "planRoles": ["build_rig", "agenda_pressure"],
         "valueHints": {},
-        "strategicRole": ["scoring_tool"],
-        "lineSupport": ["runner.remote_contest"],
-        "strategicExchangeKinds": ["score_progress", "board_or_hand_sacrifice"],
+        "strategicExchangeKinds": ["score_progress"],
         "effects": [
           {
             "kind": "global_modifier",
@@ -10665,13 +10663,11 @@
           "score.undefined_difficulty_increase"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
           "remote.agenda_difficulty_increase",
           "score.agenda_difficulty_increase",
           "score.undefined_difficulty_increase"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:global_modifier",
           "effect_scope:remote",
           "effect_scope:runner",
@@ -10764,7 +10760,7 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["tag_removal"],
-        "planRoles": ["build_rig", "recover_economy", "recover_from_tags"],
+        "planRoles": ["build_rig", "avoid_tags", "recover_from_tags"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
