@@ -172,6 +172,8 @@ export function createGameCardImplementationRuntimeDeps(
       host.callbacks.startDistributeAdvancementCounters,
     startMoveAdvancementCounters: host.callbacks.startMoveAdvancementCounters,
     addRunnerTagsWithPrevention: host.callbacks.addRunnerTagsWithPrevention,
+    addCorpPurgeableRunnerVirusCounter:
+      host.callbacks.addCorpPurgeableRunnerVirusCounter,
     revealHiddenRunnerResource: (state, sourceCardId) =>
       host.callbacks.revealHiddenRunnerResource?.(state, sourceCardId) ?? {},
     addCurrentRunAccessCount: (state, server, amount) => {

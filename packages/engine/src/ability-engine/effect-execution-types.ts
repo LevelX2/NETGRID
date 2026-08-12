@@ -3,6 +3,7 @@ import type {
   CardInstanceId,
   CounterType,
   DamageType,
+  PurgeableRunnerVirusCounterType,
   MultiServerSuccessSequenceState,
   ResolvedGameEffect,
   ServerId,
@@ -49,6 +50,10 @@ export type CardEffectExecutionContext = {
     sourceCardId: CardInstanceId,
     counterType: Extract<CounterType, "ablative" | "trauma" | "boon">,
     amount: number,
+  ) => CardEffectCounterResult;
+  addCorpPurgeableRunnerVirusCounter?: (
+    counterType: Extract<PurgeableRunnerVirusCounterType, "pipe">,
+    amount: 1,
   ) => CardEffectCounterResult;
   removeRunnerTags?: (
     mode: "amount" | "up_to_amount" | "all",
@@ -257,6 +262,7 @@ export type CardEffectCounterResult = {
     | "militech"
     | "pattel"
     | "breaker_strength_penalty"
+    | "pipe"
   >;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;

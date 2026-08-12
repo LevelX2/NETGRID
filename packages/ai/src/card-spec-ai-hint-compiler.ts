@@ -1912,7 +1912,7 @@ function deriveClosedMechanicalHintOverlay(
         const temporaryShape =
           effect.target === "chosen_installed_ice" &&
           effect.counterType === "kludge" &&
-          effect.amount.kind === "bounded_x_by_rez_cost_min_one" &&
+          effect.amount.kind === "chosen_x_min_one" &&
           effect.lifecycle ===
             "remove_one_counter_start_corp_turn_trash_on_last";
         const installmentShape =

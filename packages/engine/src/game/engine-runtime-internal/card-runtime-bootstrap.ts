@@ -176,6 +176,7 @@ import {
   purgeVirusCounters,
   type TurnBasicExecutionHost,
 } from "../turn/turn-basic-execution";
+import { addPurgeableRunnerVirusCounter } from "../run/run-end-counter-triggers";
 import { type CreditEconomyExecutionHost } from "../economy/credit-economy-execution";
 import { type TriggerAbilityExecutionHost } from "../abilities/trigger-ability-execution";
 import {
@@ -1215,6 +1216,58 @@ export function configureCardRuntimeBootstrap() {
         startPaidSourceReturnToGripChoice:
           runtimePorts.startPaidSourceReturnToGripChoice,
         addRunnerTagsWithPrevention,
+        addCorpPurgeableRunnerVirusCounter: (
+          state,
+          legalAction,
+          counterType,
+          amount,
+          sourceDefinitionId,
+        ) => {
+          let added = 0;
+          let prevented = 0;
+          let creditsPaid = 0;
+          let preventionChargesSpent = 0;
+          for (let index = 0; index < amount; index += 1) {
+            const prevention =
+              runtimePorts.preventOneVirusCounterWithCounterPrevention(state);
+            if (prevention.prevented) {
+              prevented += 1;
+              creditsPaid += prevention.creditsPaid;
+              preventionChargesSpent += prevention.preventionChargesSpent;
+            } else {
+              added += addPurgeableRunnerVirusCounter(
+                state,
+                { kind: "corp" },
+                counterType,
+                1,
+              );
+            }
+          }
+          const countersAfter = purgeableRunnerVirusCounterAmount(
+            state.purgeableRunnerVirusCounters?.corp,
+            counterType,
+          );
+          return {
+            amount: added,
+            counterType,
+            countersAfter,
+            publicPayload: {
+              counterType,
+              addedCounterAmount: added,
+              remainingCounters: countersAfter,
+              sourceDefinitionId,
+              ...(prevented > 0
+                ? {
+                    virusCounterAvoided: prevented,
+                    counterPreventionCreditsPaid: creditsPaid,
+                    runnerVirusCounterPreventionChargesSpent:
+                      preventionChargesSpent,
+                    corpCreditsAfter: state.corp.credits,
+                  }
+                : {}),
+            },
+          };
+        },
       },
     };
   }

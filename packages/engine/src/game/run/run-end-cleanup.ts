@@ -17,6 +17,9 @@ import type { CardVirusCounterImplementation } from "../../ability-engine/defini
 import type { SuccessfulRunFollowupExecutionResult } from "./successful-run-interventions";
 import {
   applyV181SuccessfulRunCounterTriggers,
+  compactPurgeableRunnerVirusCounters,
+  purgeableRunnerVirusCounterAmount,
+  setPurgeableRunnerVirusCounterAmount,
   unsuccessfulRunCorpCreditBonus,
 } from "./run-end-counter-triggers";
 import type {
@@ -73,6 +76,8 @@ export function handleRunEndCleanup(
     applyV181SuccessfulRunCounterTriggers(host, run, legalAction);
   if (!resumeAfterTag && run && successful)
     host.followups.applySuccessfulRunExtraRunFollowup(legalAction);
+  if (!resumeAfterTag && run)
+    applyRunEndVirusAccessTrashCounterRemoval(host, run, legalAction);
   if (!resumeAfterTag && run && successful) {
     const flags = host.runner.ensureTurnFlags();
     flags.successfulRunThisTurn = true;
@@ -215,6 +220,40 @@ export function handleRunEndCleanup(
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
   };
+}
+
+export function applyRunEndVirusAccessTrashCounterRemoval(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  const uses = run.virusAccessTrashCounterUses ?? [];
+  if (uses.length === 0) return;
+  const corpCounters = host.state.purgeableRunnerVirusCounters?.corp;
+  if (!corpCounters)
+    throw new Error("Run-end virus access-trash counters are missing.");
+  for (const use of uses) {
+    const before = purgeableRunnerVirusCounterAmount(
+      corpCounters,
+      use.counterType,
+    );
+    const removed = Math.min(before, use.removeAtRunEnd);
+    setPurgeableRunnerVirusCounterAmount(
+      corpCounters,
+      use.counterType,
+      before - removed,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        proteusRunnerVirusFreeTrashCounterType: use.counterType,
+        garbageCountersSpent: removed,
+        garbageCountersAfter: before - removed,
+        garbageCounterRemovalSourceDefinitionId: use.sourceDefinitionId,
+      };
+    }
+  }
+  compactPurgeableRunnerVirusCounters(host.state);
 }
 
 export function recordRunEndTrashBreakerUsage(

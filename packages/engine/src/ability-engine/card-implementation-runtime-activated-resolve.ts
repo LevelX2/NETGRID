@@ -283,6 +283,14 @@ export function resolveActivatedCardImplementationAbility(
         deps.addHostedCredits(state, sourceCardId, amount),
       addCountersToSource: (sourceCardId, counterType, amount) =>
         deps.addCountersToSource(state, sourceCardId, counterType, amount),
+      addCorpPurgeableRunnerVirusCounter: (counterType, amount) =>
+        deps.addCorpPurgeableRunnerVirusCounter(
+          state,
+          legalAction,
+          counterType,
+          amount,
+          match.definition.id,
+        ),
       removeRunnerTags: (mode, amount) =>
         deps.removeRunnerTags(state, mode, amount),
       avoidNextTag: (amount) => deps.avoidNextTag(state, amount),

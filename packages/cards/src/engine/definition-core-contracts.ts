@@ -6,6 +6,7 @@
  */
 import type {
   CounterType,
+  PurgeableRunnerVirusCounterType,
   EventVisibilityClass,
   ServerId,
 } from "@netgrid/shared";
@@ -108,6 +109,15 @@ export type CardAbilityCostImplementation =
   | {
       kind: "trash_corp_rd_top";
       amount: 2;
+    }
+  | {
+      kind: "corp_purgeable_runner_virus_counter";
+      counterType: Extract<
+        PurgeableRunnerVirusCounterType,
+        "socket_archives" | "socket_hq" | "socket_rd"
+      >;
+      server: "archives" | "hq" | "rd";
+      amount: 1;
     };
 
 export type CardSubroutineImplementation =

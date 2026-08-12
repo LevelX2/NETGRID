@@ -4,6 +4,7 @@ import {
   type CorpDrawContinuation,
   type GameState,
   type LegalAction,
+  type PurgeableRunnerVirusCounterType,
   type ResolvedGameEffect,
 } from "@netgrid/shared";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
@@ -683,72 +684,101 @@ export function createTurnCorpStartRuntimeResolvers(
     effects?: AutomaticEffectCollector,
   ): void {
     const corpCounters = state.purgeableRunnerVirusCounters?.corp;
-    const scaldanCounters = purgeableRunnerVirusCounterAmount(
-      corpCounters,
-      "scaldan",
-    );
-    for (let index = 0; index < scaldanCounters; index += 1) {
-      const randomPurpose = `proteus.scaldan.corp_start.${state.stateVersion}.${index}`;
-      const dieRoll = rollDeterministicDie(state, randomPurpose);
-      const badPublicityAdded = dieRoll >= 5 ? 1 : 0;
-      if (badPublicityAdded > 0) state.corp.badPublicity += badPublicityAdded;
-      effects?.push({
-        effectId: `corp.start.proteus.scaldan.${index}`,
-        kind: badPublicityAdded > 0 ? "add_bad_publicity" : "counter_change",
-        visibility: "public",
-        side: "corp",
-        amount: badPublicityAdded,
-        reason: "start_of_turn",
-        counterType: "scaldan",
-        remainingCounters: scaldanCounters,
-        sourceDefinitionId: deps.PROTEUS_SCALDAN_ID,
-        sourceTitle: links.publicCardTitle(deps.PROTEUS_SCALDAN_ID),
-        randomPurpose,
-        dieSize: 6,
-        dieRoll,
-        randomCounterAfter: state.randomCounter,
-        ...(badPublicityAdded > 0
-          ? {
-              badPublicityAdded,
-              corpBadPublicityAfter: state.corp.badPublicity,
-            }
-          : {}),
-      });
-    }
-    const taxCounters = purgeableRunnerVirusCounterAmount(corpCounters, "tax");
-    const taxLoss = Math.min(state.corp.credits, Math.floor(taxCounters / 2));
-    if (taxLoss > 0) {
-      state.corp.credits -= taxLoss;
-      effects?.push(
-        links.automaticLoseCreditsEffect(
-          "corp.start.proteus.taxman",
-          "corp",
-          taxLoss,
-          deps.PROTEUS_TAXMAN_ID,
-        ),
+    for (const implementation of CARD_IMPLEMENTATIONS) {
+      const virusCounter = implementation.virusCounter;
+      const start = virusCounter?.startOfCorpTurn;
+      if (
+        !virusCounter ||
+        !start ||
+        !("counterSource" in start) ||
+        start.counterSource !== "corp_purgeable_runner_virus_counter"
+      )
+        continue;
+      const counterType =
+        virusCounter.counterKind as PurgeableRunnerVirusCounterType;
+      const counterAmount = purgeableRunnerVirusCounterAmount(
+        corpCounters,
+        counterType,
       );
+      if (counterAmount <= 0) continue;
+      const sourceDefinitionId = implementation.cardDefinitionId;
+      const sourceTitle = links.publicCardTitle(sourceDefinitionId);
+      if (start.kind === "roll_per_counter_add_bad_publicity") {
+        for (let index = 0; index < counterAmount; index += 1) {
+          const randomPurpose = `virus.${sourceDefinitionId}.corp_start.${state.stateVersion}.${index}`;
+          const dieRoll = rollDeterministicDie(state, randomPurpose);
+          const badPublicityAdded = start.successDieValues.includes(
+            dieRoll as 5 | 6,
+          )
+            ? start.amountPerSuccess
+            : 0;
+          if (badPublicityAdded > 0)
+            state.corp.badPublicity += badPublicityAdded;
+          effects?.push({
+            effectId: `corp.start.virus.${sourceDefinitionId}.${index}`,
+            kind:
+              badPublicityAdded > 0
+                ? "add_bad_publicity"
+                : "counter_change",
+            visibility: start.visibility,
+            side: "corp",
+            amount: badPublicityAdded,
+            reason: "start_of_turn",
+            counterType,
+            remainingCounters: counterAmount,
+            sourceDefinitionId,
+            sourceTitle,
+            randomPurpose,
+            dieSize: start.dieSize,
+            dieRoll,
+            randomCounterAfter: state.randomCounter,
+            ...(badPublicityAdded > 0
+              ? {
+                  badPublicityAdded,
+                  corpBadPublicityAfter: state.corp.badPublicity,
+                }
+              : {}),
+          });
+        }
+        continue;
+      }
+      if (start.kind === "lose_credits_per_counter_group") {
+        const requestedLoss =
+          Math.floor(counterAmount / start.perCounters) * start.amountPerGroup;
+        const creditLoss = Math.min(state.corp.credits, requestedLoss);
+        if (creditLoss <= 0) continue;
+        state.corp.credits -= creditLoss;
+        effects?.push(
+          links.automaticLoseCreditsEffect(
+            `corp.start.virus.${sourceDefinitionId}`,
+            "corp",
+            creditLoss,
+            sourceDefinitionId,
+          ),
+        );
+        continue;
+      }
+      if (start.kind === "forgo_actions_per_counter") {
+        const actionDebt = counterAmount * start.amountPerCounter;
+        addCorpActionDebt(state, {
+          amount: actionDebt,
+          reason: "pipe_counter",
+          source: "start_of_turn_effect",
+        });
+        effects?.push({
+          effectId: `corp.start.virus.${sourceDefinitionId}`,
+          kind: "counter_change",
+          visibility: start.visibility,
+          side: "corp",
+          amount: actionDebt,
+          reason: "start_of_turn",
+          counterType,
+          remainingCounters: counterAmount,
+          sourceDefinitionId,
+          sourceTitle,
+        });
+      }
     }
-
-    const pipeCounters = purgeableRunnerVirusCounterAmount(
-      corpCounters,
-      "pipe",
-    );
-    if (pipeCounters <= 0) return;
-    addCorpActionDebt(state, {
-      amount: pipeCounters,
-      reason: "pipe_counter",
-      source: "start_of_turn_effect",
-    });
-    effects?.push({
-      effectId: "corp.start.pipe_counter",
-      kind: "counter_change",
-      visibility: "public",
-      side: "corp",
-      amount: pipeCounters,
-      reason: "start_of_turn",
-      counterType: "pipe",
-      remainingCounters: pipeCounters,
-    });
   }
 
   function openCorpStartTurnRestrictedActionOffers(

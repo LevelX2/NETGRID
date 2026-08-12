@@ -850,6 +850,25 @@ export type CardVirusCounterKindImplementation =
 
 export type CardVirusCounterImplementation = {
   counterKind: CardVirusCounterKindImplementation;
+  onCorpInstall?: {
+    kind: "roll_per_counter_trash_installed_card_and_remove_counter_on_success";
+    counterSource: "corp_purgeable_runner_virus_counter";
+    dieSize: 6;
+    successDieValue: 6;
+    removeCounterPerSuccess: 1;
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
+  accessTrash?: {
+    kind: "free_trash_accessed_card_at_counter_threshold";
+    server: "hq" | "rd";
+    counterSource: "corp_purgeable_runner_virus_counter";
+    threshold: 2;
+    includeNormallyUntrashable: true;
+    counterRemoval:
+      | { timing: "none" }
+      | { timing: "run_end_if_used"; amount: 2 };
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
   addOnSuccessfulRun?: {
     server:
       | "hq"
@@ -911,6 +930,27 @@ export type CardVirusCounterImplementation = {
         kind: "draw_extra_cards_per_counter";
         amountPerCounter: 1;
         visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+      }
+    | {
+        kind: "roll_per_counter_add_bad_publicity";
+        counterSource: "corp_purgeable_runner_virus_counter";
+        dieSize: 6;
+        successDieValues: readonly [5, 6];
+        amountPerSuccess: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
+      }
+    | {
+        kind: "lose_credits_per_counter_group";
+        counterSource: "corp_purgeable_runner_virus_counter";
+        perCounters: 2;
+        amountPerGroup: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
+      }
+    | {
+        kind: "forgo_actions_per_counter";
+        counterSource: "corp_purgeable_runner_virus_counter";
+        amountPerCounter: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
       };
   continuousEffect?:
     | {

@@ -162,43 +162,6 @@ export function socketCounterTypeForServer(
   return undefined;
 }
 
-export function convertCompleteSocketSetsToPipeCounters(
-  state: GameState,
-): number {
-  const servers = state.purgeableRunnerVirusCounters?.servers;
-  if (!servers) return 0;
-  const archives = servers.archives;
-  const hq = servers.hq;
-  const rd = servers.rd;
-  const completeSets = Math.min(
-    purgeableRunnerVirusCounterAmount(archives, "socket_archives"),
-    purgeableRunnerVirusCounterAmount(hq, "socket_hq"),
-    purgeableRunnerVirusCounterAmount(rd, "socket_rd"),
-  );
-  if (completeSets <= 0) return 0;
-  if (!archives || !hq || !rd)
-    throw new Error("Viral-Pipeline-Socket-Counter fehlen.");
-  setPurgeableRunnerVirusCounterAmount(
-    archives,
-    "socket_archives",
-    purgeableRunnerVirusCounterAmount(archives, "socket_archives") -
-      completeSets,
-  );
-  setPurgeableRunnerVirusCounterAmount(
-    hq,
-    "socket_hq",
-    purgeableRunnerVirusCounterAmount(hq, "socket_hq") - completeSets,
-  );
-  setPurgeableRunnerVirusCounterAmount(
-    rd,
-    "socket_rd",
-    purgeableRunnerVirusCounterAmount(rd, "socket_rd") - completeSets,
-  );
-  addPurgeableRunnerVirusCounter(state, { kind: "corp" }, "pipe", completeSets);
-  compactPurgeableRunnerVirusCounters(state);
-  return completeSets;
-}
-
 export function applyV181SuccessfulRunCounterTriggers(
   host: RunEndCleanupHost,
   run: ActiveRun,
@@ -319,9 +282,6 @@ export function applyV181SuccessfulRunCounterTriggers(
         legalAction,
       );
       const added = counterSummary.added;
-      const pipeCounterAdded = convertCompleteSocketSetsToPipeCounters(
-        host.state,
-      );
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -337,15 +297,6 @@ export function applyV181SuccessfulRunCounterTriggers(
             socketCounterType,
           ),
           sourceCardDefinitionId: definition.id,
-          ...(pipeCounterAdded > 0
-            ? {
-                pipeCounterAdded,
-                pipeCounterTotalAfter: purgeableRunnerVirusCounterAmount(
-                  host.state.purgeableRunnerVirusCounters?.corp,
-                  "pipe",
-                ),
-              }
-            : {}),
         };
         const socketEffectInput: Parameters<
           typeof appendRunnerVirusCounterEffect
@@ -372,21 +323,6 @@ export function applyV181SuccessfulRunCounterTriggers(
           socketEffectInput.serverLabel = socketServerLabel;
         if (added > 0)
           appendRunnerVirusCounterEffect(legalAction, socketEffectInput);
-        if (pipeCounterAdded > 0) {
-          appendRunnerVirusCounterEffect(legalAction, {
-            run,
-            sourceCardId: cardId,
-            sourceDefinitionId: definition.id,
-            sourceTitle: definition.title,
-            side: "corp",
-            counterType: "pipe",
-            added: pipeCounterAdded,
-            remainingCounters: purgeableRunnerVirusCounterAmount(
-              host.state.purgeableRunnerVirusCounters?.corp,
-              "pipe",
-            ),
-          });
-        }
       }
       continue;
     }

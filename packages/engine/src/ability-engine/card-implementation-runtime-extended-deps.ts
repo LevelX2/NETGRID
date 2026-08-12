@@ -4,6 +4,7 @@ import type {
   CounterType,
   GameState,
   LegalAction,
+  PurgeableRunnerVirusCounterType,
   ServerId,
   Side,
 } from "@netgrid/shared";
@@ -112,6 +113,13 @@ export type CardImplementationRuntimeExtendedDependencies = {
     sourceCardId: CardInstanceId,
     counterType: Extract<CounterType, "ablative" | "trauma" | "boon">,
     amount: number,
+  ) => CardEffectCounterResult;
+  addCorpPurgeableRunnerVirusCounter: (
+    state: GameState,
+    legalAction: LegalAction,
+    counterType: Extract<PurgeableRunnerVirusCounterType, "pipe">,
+    amount: 1,
+    sourceDefinitionId: CardDefinition["id"],
   ) => CardEffectCounterResult;
   removeRunnerTags: (
     state: GameState,

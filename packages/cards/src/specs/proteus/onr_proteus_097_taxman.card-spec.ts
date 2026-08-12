@@ -50,6 +50,13 @@ export const cardSpec = {
         amount: 1,
         visibility: "public",
       },
+      startOfCorpTurn: {
+        kind: "lose_credits_per_counter_group",
+        counterSource: "corp_purgeable_runner_virus_counter",
+        perCounters: 2,
+        amountPerGroup: 1,
+        visibility: "public",
+      },
     },
   },
   planningAnnotations: {

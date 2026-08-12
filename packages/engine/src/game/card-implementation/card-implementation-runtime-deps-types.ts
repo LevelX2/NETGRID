@@ -138,5 +138,6 @@ export type GameCardImplementationRuntimeDepsHost = {
       sourceCardId: CardInstanceId,
     ) => void;
     addRunnerTagsWithPrevention: CardImplementationRuntimeDependencies["addRunnerTagsWithPrevention"];
+    addCorpPurgeableRunnerVirusCounter: CardImplementationRuntimeDependencies["addCorpPurgeableRunnerVirusCounter"];
   };
 };

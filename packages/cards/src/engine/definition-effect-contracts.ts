@@ -9,6 +9,7 @@ import type {
   CounterType,
   DamageType,
   EventVisibilityClass,
+  PurgeableRunnerVirusCounterType,
   ServerId,
 } from "@netgrid/shared";
 import type { CardSubroutineImplementation } from "./definition-core-contracts";
@@ -27,6 +28,7 @@ export type CardEffectImplementation =
   | AvoidNextTagEffectImplementation
   | ReturnSourceToGripIfPaidEffectImplementation
   | AddCountersToSourceEffectImplementation
+  | AddCorpPurgeableRunnerVirusCounterEffectImplementation
   | DamageEffectImplementation
   | TraceEffectImplementation
   | MakeRunEffectImplementation
@@ -150,6 +152,13 @@ export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
     "militech" | "pattel" | "breaker_strength_penalty"
   >;
   amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type AddCorpPurgeableRunnerVirusCounterEffectImplementation = {
+  kind: "add_corp_purgeable_runner_virus_counter";
+  counterType: Extract<PurgeableRunnerVirusCounterType, "pipe">;
+  amount: 1;
   visibility: Extract<EventVisibilityClass, "public">;
 };
 

@@ -755,9 +755,6 @@ export function createCardLifecycleRuntimeHosts(
             "on_install",
           ),
       },
-      constants: {
-        PROTEUS_ARMAGEDDON_ID: deps.PROTEUS_ARMAGEDDON_ID,
-      },
     };
   }
 

@@ -50,6 +50,14 @@ export const cardSpec = {
         amount: 1,
         visibility: "public",
       },
+      startOfCorpTurn: {
+        kind: "roll_per_counter_add_bad_publicity",
+        counterSource: "corp_purgeable_runner_virus_counter",
+        dieSize: 6,
+        successDieValues: [5, 6],
+        amountPerSuccess: 1,
+        visibility: "public",
+      },
     },
   },
   planningAnnotations: {

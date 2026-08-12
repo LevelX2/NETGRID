@@ -6,11 +6,15 @@ import {
   type CorpServer,
   type GameState,
   type LegalAction,
+  type PurgeableRunnerVirusCounterType,
   type ResolvedGameEffect,
   type ServerId,
   type Side,
 } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../../card-implementations/registry";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
 import { assertCorpIceInstallAllowed } from "./corp-ice-install-restrictions";
 import {
@@ -154,9 +158,6 @@ export type InstallCardHost = {
       definition: CardDefinition,
       cardId: CardInstanceId,
     ) => void;
-  };
-  constants: {
-    PROTEUS_ARMAGEDDON_ID: CardDefinitionId;
   };
 };
 
@@ -691,24 +692,43 @@ function applyArmageddonDoomCounterInstallRolls(
 ): void {
   const { state } = host;
   if (legalAction.side && legalAction.side !== "corp") return;
+  const owners = CARD_IMPLEMENTATIONS.filter(
+    (implementation) =>
+      implementation.virusCounter?.onCorpInstall?.kind ===
+      "roll_per_counter_trash_installed_card_and_remove_counter_on_success",
+  );
+  if (owners.length === 0) return;
+  if (owners.length !== 1)
+    throw new Error(
+      `Expected exactly one Corp-install virus-counter owner; received ${owners.length}.`,
+    );
+  const owner = owners[0]!;
+  const virusCounter = owner.virusCounter!;
+  const trigger = virusCounter.onCorpInstall!;
+  const counterType =
+    virusCounter.counterKind as PurgeableRunnerVirusCounterType;
   const corpCounters = state.purgeableRunnerVirusCounters?.corp;
-  const doomCounters = purgeableRunnerVirusCounterAmount(corpCounters, "doom");
-  if (!corpCounters || doomCounters <= 0) return;
+  const countersBefore = purgeableRunnerVirusCounterAmount(
+    corpCounters,
+    counterType,
+  );
+  if (!corpCounters || countersBefore <= 0) return;
   let hits = 0;
   const dieRolls: number[] = [];
   const randomPurposes: string[] = [];
-  for (let index = 0; index < doomCounters; index += 1) {
-    const randomPurpose = `proteus.armageddon.install.${state.stateVersion}.${installedCardId}.${index}`;
+  for (let index = 0; index < countersBefore; index += 1) {
+    const randomPurpose = `virus.${owner.cardDefinitionId}.install.${state.stateVersion}.${installedCardId}.${index}`;
     const dieRoll = host.counters.rollDeterministicDie(randomPurpose);
     randomPurposes.push(randomPurpose);
     dieRolls.push(dieRoll);
-    if (dieRoll === 6) hits += 1;
+    if (dieRoll === trigger.successDieValue) hits += 1;
   }
   if (hits > 0) {
+    const countersRemoved = hits * trigger.removeCounterPerSuccess;
     setPurgeableRunnerVirusCounterAmount(
       corpCounters,
-      "doom",
-      doomCounters - hits,
+      counterType,
+      countersBefore - countersRemoved,
     );
     if (
       Object.keys(corpCounters).length === 0 &&
@@ -730,13 +750,13 @@ function applyArmageddonDoomCounterInstallRolls(
     proteusDoomInstallRolls: dieRolls.join(","),
     proteusDoomRandomPurposes: randomPurposes.join(","),
     proteusDoomHits: hits,
-    doomCountersBefore: doomCounters,
+    doomCountersBefore: countersBefore,
     doomCountersAfter: purgeableRunnerVirusCounterAmount(
       state.purgeableRunnerVirusCounters?.corp,
-      "doom",
+      counterType,
     ),
     randomCounterAfter: state.randomCounter,
-    proteusDoomSourceDefinitionId: host.constants.PROTEUS_ARMAGEDDON_ID,
+    proteusDoomSourceDefinitionId: owner.cardDefinitionId,
     ...(hits > 0
       ? {
           trashedInstalledCardDefinitionId:

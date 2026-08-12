@@ -1209,6 +1209,11 @@ export type RunState = {
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
   freeTrashAccessZones?: Array<"rd" | "hq">;
+  virusAccessTrashCounterUses?: Array<{
+    counterType: Extract<PurgeableRunnerVirusCounterType, "garbage">;
+    removeAtRunEnd: number;
+    sourceDefinitionId: CardDefinitionId;
+  }>;
   grantBonusRunOnFinish?: boolean;
   successfulRunAccessReplacement?:
     | "corp_lose_credits"

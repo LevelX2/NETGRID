@@ -531,7 +531,6 @@ import {
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
 import {
   CARD_IMPLEMENTATIONS,
-  cardImplementationCounterOwnerDefinitionId,
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import {
@@ -589,15 +588,6 @@ import type {
 } from "../../ability-engine/definition-types";
 
 export type AutomaticEffectCollector = ResolvedGameEffect[];
-export const PROTEUS_TAXMAN_ID =
-  cardImplementationCounterOwnerDefinitionId("tax");
-export const PROTEUS_SCALDAN_ID =
-  cardImplementationCounterOwnerDefinitionId("scaldan");
-export const PIPE_COUNTER_CORP_START_EFFECT_SOURCE_ID =
-  "pipe_counter_corp_start_effect" as CardDefinitionId;
-export const PROTEUS_ARMAGEDDON_ID =
-  cardImplementationCounterOwnerDefinitionId("doom");
-
 // Effective-value helpers are pure/read-only. Legacy agenda-difficulty pieces
 // are still injected through runtime wiring so this module avoids public-facade
 // imports without changing existing score legality or revalidation ordering.

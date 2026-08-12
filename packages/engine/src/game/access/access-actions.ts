@@ -6,19 +6,35 @@ import type {
   CorpServer,
   GameState,
   LegalAction,
+  PurgeableRunnerVirusCounterType,
   ServerId,
 } from "@netgrid/shared";
 import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { quoteAccessTrashCost } from "../../ability-engine/trash-cost-modifiers";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
-import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../../card-implementations/registry";
 import { runnerCostPenaltySupportCreditCapacity } from "../payment/runner-payment-support";
 import { runnerProgramInstallMemoryReachable } from "../install/runner-program-install-memory";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type AccessQueueZone = ActiveBreach["queue"][number]["zone"];
-type AccessTrashCounterType = "crumble" | "garbage";
+type AccessTrashCounterType = Extract<
+  PurgeableRunnerVirusCounterType,
+  "crumble" | "garbage"
+>;
+
+type AccessTrashCounterSource = {
+  enabled: boolean;
+  counterType?: AccessTrashCounterType;
+  sourceDefinitionId?: CardDefinitionId;
+  counterRemoval?:
+    | { timing: "none" }
+    | { timing: "run_end_if_used"; amount: 2 };
+};
 
 export type RunnerAccessActionHost = {
   state: GameState;
@@ -152,9 +168,34 @@ export function buildRunnerAccessActions(
   const freeTrashEnabled = freeTrashSource.enabled;
   const accessedFromArchives = isCurrentAccessFromArchives(host, run);
   if (definition.type === "agenda") {
+    const virusFreeTrashAction =
+      freeTrashSource.enabled &&
+      freeTrashSource.counterType &&
+      freeTrashSource.sourceDefinitionId
+      ? [
+          host.actions.buildLegalAction(
+            "runner",
+            "trash_accessed_card",
+            `${definition.title} kostenlos trashen`,
+            run.accessedCardId,
+            [],
+            {
+              accessTrashCostOverride: 0,
+              freeAccessTrash: true,
+              proteusRunnerVirusFreeTrashCounterType:
+                freeTrashSource.counterType,
+              proteusRunnerVirusFreeTrashSourceDefinitionId:
+                freeTrashSource.sourceDefinitionId,
+            },
+          ),
+        ]
+      : [];
     const accessReplacement = agendaAccessReplacementForDefinition(definition);
     if (accessReplacement?.kind === "install_as_runner_program") {
-      const legalActions: LegalAction[] = [...currentAccessTrashActions];
+      const legalActions: LegalAction[] = [
+        ...currentAccessTrashActions,
+        ...virusFreeTrashAction,
+      ];
       if (
         runnerAgendaProgramInstallMemoryReachable(
           host,
@@ -222,13 +263,18 @@ export function buildRunnerAccessActions(
         };
         return {
           handled: true,
-          legalActions: [...currentAccessTrashActions, declineStealAction],
+          legalActions: [
+            ...currentAccessTrashActions,
+            ...virusFreeTrashAction,
+            declineStealAction,
+          ],
         };
       }
       return {
         handled: true,
         legalActions: [
           ...currentAccessTrashActions,
+          ...virusFreeTrashAction,
           host.actions.buildLegalAction(
             "runner",
             "steal_agenda",
@@ -248,6 +294,7 @@ export function buildRunnerAccessActions(
       handled: true,
       legalActions: [
         ...currentAccessTrashActions,
+        ...virusFreeTrashAction,
         host.actions.buildLegalAction(
           "runner",
           "steal_agenda",
@@ -486,8 +533,7 @@ export function freeTrashAccessSourceForCurrentAccessCard(
   host: RunnerAccessActionHost,
   run: ActiveRun,
   definition: CardDefinition,
-): { enabled: boolean; counterType?: AccessTrashCounterType } {
-  if (definition.type === "agenda") return { enabled: false };
+): AccessTrashCounterSource {
   const currentZone =
     run.breach?.queue[run.breach.currentIndex]?.zone ??
     accessQueueZone(run.accessServerOverride ?? run.attackedServerId);
@@ -506,16 +552,35 @@ export function freeTrashAccessSourceForCurrentAccessCard(
       definition.type === "upgrade" &&
       (accessServerId === "hq" || accessServerId === "rd"));
   if (!zoneMatchesAccessTrashCounter) return { enabled: false };
+  if (accessServerId !== "hq" && accessServerId !== "rd")
+    return { enabled: false };
+  const owners = CARD_IMPLEMENTATIONS.filter(
+    (implementation) =>
+      implementation.virusCounter?.accessTrash?.kind ===
+        "free_trash_accessed_card_at_counter_threshold" &&
+      implementation.virusCounter.accessTrash.server === accessServerId,
+  );
+  if (owners.length === 0) return { enabled: false };
+  if (owners.length !== 1)
+    throw new Error(
+      `Expected exactly one virus access-trash owner for ${accessServerId}; received ${owners.length}.`,
+    );
+  const owner = owners[0]!;
+  const virusCounter = owner.virusCounter!;
+  const accessTrash = virusCounter.accessTrash!;
+  if (accessTrash.includeNormallyUntrashable !== true)
+    throw new Error("Virus access-trash must explicitly include untrashable cards.");
+  const counterType = virusCounter.counterKind as AccessTrashCounterType;
   if (
-    accessServerId === "hq" &&
-    Math.max(0, Math.floor(corpCounters?.crumble ?? 0)) >= 2
+    Math.max(0, Math.floor(corpCounters?.[counterType] ?? 0)) >=
+    accessTrash.threshold
   )
-    return { enabled: true, counterType: "crumble" };
-  if (
-    accessServerId === "rd" &&
-    Math.max(0, Math.floor(corpCounters?.garbage ?? 0)) >= 2
-  )
-    return { enabled: true, counterType: "garbage" };
+    return {
+      enabled: true,
+      counterType,
+      sourceDefinitionId: owner.cardDefinitionId,
+      counterRemoval: accessTrash.counterRemoval,
+    };
   return { enabled: false };
 }
 

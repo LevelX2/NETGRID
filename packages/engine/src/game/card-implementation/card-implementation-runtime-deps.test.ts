@@ -327,7 +327,18 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       startPaidSourceReturnToGripChoice: () => {
         calls.push("return_choice");
       },
-      addRunnerTagsWithPrevention: () => false,
+    addRunnerTagsWithPrevention: () => false,
+    addCorpPurgeableRunnerVirusCounter: (
+      _state,
+      _legalAction,
+      counterType,
+      amount,
+    ) => ({
+      amount,
+      counterType,
+      countersAfter: amount,
+      publicPayload: {},
+    }),
       startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: () => {
         calls.push("senatorial_field_trip_choice");
         return { publicPayload: { choiceOpened: true } };

@@ -5,6 +5,49 @@ export function executeCounterEffect(input: CardEffectFamilyInput): boolean {
     input;
 
   switch (effect.kind) {
+    case "add_corp_purgeable_runner_virus_counter": {
+      runtime.assertPositiveIntegerAmount(
+        "add_corp_purgeable_runner_virus_counter",
+        effect.amount,
+      );
+      runtime.assertPublicVisibility(
+        "add_corp_purgeable_runner_virus_counter",
+        effect.visibility,
+      );
+      if (effect.counterType !== "pipe" || effect.amount !== 1)
+        throw new Error(
+          "add_corp_purgeable_runner_virus_counter supports one Pipe counter.",
+        );
+      if (!context.addCorpPurgeableRunnerVirusCounter)
+        throw new Error(
+          "add_corp_purgeable_runner_virus_counter requires a virus-counter execution context.",
+        );
+      const addResult = context.addCorpPurgeableRunnerVirusCounter(
+        effect.counterType,
+        effect.amount,
+      );
+      runtime.mergePublicPayload(publicPayload, addResult.publicPayload);
+      resolvedEffects.push({
+        effectId: runtime.publicEffectId(
+          context,
+          index,
+          "add_corp_purgeable_runner_virus_counter",
+        ),
+        kind: "counter_change",
+        visibility: effect.visibility,
+        side: "corp",
+        amount: addResult.amount,
+        counterType: addResult.counterType,
+        addedCounterAmount: addResult.amount,
+        remainingCounters: addResult.countersAfter,
+        reason: runtime.effectReason(context),
+        ...(context.sourceDefinitionId
+          ? { sourceDefinitionId: context.sourceDefinitionId }
+          : {}),
+        ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+      });
+      return true;
+    }
     case "add_counters_to_source": {
       runtime.assertPositiveIntegerAmount(
         "add_counters_to_source",

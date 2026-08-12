@@ -283,6 +283,28 @@ describe("generic CardSpec AI-hint repair block", () => {
     }
   });
 
+  it("projects Emergency Rig from the unbounded chosen-X free-rez contract", () => {
+    expect(hint("onr_proteus_049_emergency-rig").effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "rez",
+          target: "corp_ice.free_rez",
+        }),
+        expect.objectContaining({
+          kind: "rez",
+          target: "corp_ice.temporary_rez",
+        }),
+      ]),
+    );
+    expect(
+      forgedHint("onr_proteus_049_emergency-rig", (entry) => {
+        entry.planning.engine.abilities[0].effects[0].amount = {
+          kind: "bounded_x_by_rez_cost_min_one",
+        };
+      }),
+    ).toThrow("card_spec_unknown_free_rez_ice_shape");
+  });
+
   it("fails closed for malformed near-shapes and does not widen restrictions", () => {
     const malformed = [
       forgedHint("onr_v1_042_mouse", (entry) => {

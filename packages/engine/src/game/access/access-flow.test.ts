@@ -1070,7 +1070,7 @@ describe("access flow execution", () => {
     });
   });
 
-  it("spends Garbage counters when Proteus free trash is used", () => {
+  it("defers Garbage counter spending until the run ends", () => {
     const breach = {
       breachId: "run_1.breach",
       serverId: "rd" as Exclude<ServerId, "new_remote">,
@@ -1130,11 +1130,12 @@ describe("access flow execution", () => {
     });
     expect(trashPayments).toEqual([{ amount: 0, cardId: "operation" }]);
     expect(trashedCards).toEqual(["operation"]);
-    expect(state.purgeableRunnerVirusCounters?.corp?.garbage).toBe(1);
+    expect(state.purgeableRunnerVirusCounters?.corp?.garbage).toBe(3);
     expect(legalAction.payload).toMatchObject({
       proteusRunnerVirusFreeTrashCounterType: "garbage",
-      garbageCountersSpent: 2,
-      garbageCountersAfter: 1,
+      garbageCountersSpent: 0,
+      garbageCountersAfter: 3,
+      garbageCountersRemoveAtRunEnd: 2,
     });
   });
 

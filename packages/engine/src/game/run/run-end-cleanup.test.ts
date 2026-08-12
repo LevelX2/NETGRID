@@ -866,7 +866,7 @@ describe("run end cleanup", () => {
     });
   });
 
-  it("adds central socket counters and converts complete Viral Pipeline sets to Pipe", () => {
+  it("adds a central socket counter without automatically converting a complete set", () => {
     const fixture = makeHost({
       run: {
         runId: "run_pipeline",
@@ -911,19 +911,21 @@ describe("run end cleanup", () => {
     handleRunEndCleanup(fixture.host, true, fixture.legalAction);
 
     expect(fixture.state.purgeableRunnerVirusCounters).toMatchObject({
-      corp: { pipe: 1 },
+      servers: {
+        archives: { socket_archives: 1 },
+        hq: { socket_hq: 1 },
+        rd: { socket_rd: 1 },
+      },
     });
-    expect(fixture.state.purgeableRunnerVirusCounters?.servers).toBeUndefined();
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp?.pipe ?? 0).toBe(0);
     expect(fixture.legalAction.payload).toMatchObject({
       proteusRunnerVirusCounter: true,
       runId: "run_pipeline",
       serverId: "archives",
       counterType: "socket_archives",
       counterDelta: 1,
-      counterTotalAfter: 0,
+      counterTotalAfter: 1,
       sourceCardDefinitionId: "onr_proteus_099_viral-pipeline",
-      pipeCounterAdded: 1,
-      pipeCounterTotalAfter: 1,
     });
     expect(fixture.legalAction.resolvedEffects).toEqual(
       expect.arrayContaining([
@@ -934,15 +936,38 @@ describe("run end cleanup", () => {
           reason: "proteus_runner_virus_successful_run",
           sourceDefinitionId: "onr_proteus_099_viral-pipeline",
         }),
-        expect.objectContaining({
-          kind: "counter_change",
-          counterType: "pipe",
-          addedCounterAmount: 1,
-          reason: "proteus_runner_virus_successful_run",
-          sourceDefinitionId: "onr_proteus_099_viral-pipeline",
-        }),
       ]),
     );
+  });
+
+  it("removes Garbage counters once at run end after one or more free trashes", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_garbage",
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        virusAccessTrashCounterUses: [
+          {
+            counterType: "garbage",
+            removeAtRunEnd: 2,
+            sourceDefinitionId: "onr_proteus_089_garbage-in",
+          },
+        ],
+      } as unknown as NonNullable<GameState["run"]>,
+    });
+    fixture.state.purgeableRunnerVirusCounters = { corp: { garbage: 3 } };
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp?.garbage).toBe(1);
+    expect(fixture.legalAction.payload).toMatchObject({
+      proteusRunnerVirusFreeTrashCounterType: "garbage",
+      garbageCountersSpent: 2,
+      garbageCountersAfter: 1,
+      garbageCounterRemovalSourceDefinitionId:
+        "onr_proteus_089_garbage-in",
+    });
   });
 
   it("derezzes Olivia Salazar temporary rezzed ICE at run end", () => {

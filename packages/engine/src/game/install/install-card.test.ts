@@ -555,9 +555,5 @@ function testHost(
         calls.lifecycle.push(cardId);
       },
     },
-    constants: {
-      PROTEUS_ARMAGEDDON_ID:
-        "onr_proteus_078_armageddon" as CardDefinitionId,
-    },
   };
 }

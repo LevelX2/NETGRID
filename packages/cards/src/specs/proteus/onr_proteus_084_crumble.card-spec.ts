@@ -50,6 +50,15 @@ export const cardSpec = {
         amount: 1,
         visibility: "public",
       },
+      accessTrash: {
+        kind: "free_trash_accessed_card_at_counter_threshold",
+        server: "hq",
+        counterSource: "corp_purgeable_runner_virus_counter",
+        threshold: 2,
+        includeNormallyUntrashable: true,
+        counterRemoval: { timing: "none" },
+        visibility: "public",
+      },
     },
   },
   planningAnnotations: {

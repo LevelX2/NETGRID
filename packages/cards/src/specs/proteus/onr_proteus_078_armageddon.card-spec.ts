@@ -53,6 +53,19 @@ export const cardSpec = {
         visibility: "public",
       },
     ],
+    virusCounter: {
+      capabilityKey: capabilityKey("doom_counter_corp_install_roll"),
+      addressability: ["plan", "action", "quote", "debug"],
+      counterKind: "doom",
+      onCorpInstall: {
+        kind: "roll_per_counter_trash_installed_card_and_remove_counter_on_success",
+        counterSource: "corp_purgeable_runner_virus_counter",
+        dieSize: 6,
+        successDieValue: 6,
+        removeCounterPerSuccess: 1,
+        visibility: "public",
+      },
+    },
   },
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
