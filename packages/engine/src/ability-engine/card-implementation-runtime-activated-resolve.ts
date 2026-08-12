@@ -4,6 +4,7 @@ import type {
   GameState,
   LegalAction,
   ServerId,
+  SubroutineDefinition,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { executeCardImplementationEffects } from "./effect-interpreter";
@@ -338,8 +339,8 @@ export function resolveActivatedCardImplementationAbility(
             sourceTitle: match.definition.title,
             targetIceId: target.iceId,
             originalSubroutineId: target.subroutineId,
-            subroutineKind: target.subroutineKind,
-            ...(target.amount !== undefined ? { amount: target.amount } : {}),
+            subroutineKind: target.subroutine.type,
+            copiedSubroutine: copiedSubroutineSnapshot(target.subroutine),
           },
         ];
         return {
@@ -420,6 +421,16 @@ export function resolveActivatedCardImplementationAbility(
       originalActionPayload: effectPayload,
     };
   return true;
+}
+
+function copiedSubroutineSnapshot(
+  subroutine: SubroutineDefinition,
+): SubroutineDefinition {
+  const copy = structuredClone(subroutine) as SubroutineDefinition & {
+    dynamicSubroutine?: unknown;
+  };
+  delete copy.dynamicSubroutine;
+  return copy;
 }
 
 function activatedMatchForCorpDrawContinuation(

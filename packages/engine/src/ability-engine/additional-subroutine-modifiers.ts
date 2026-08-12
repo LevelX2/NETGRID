@@ -35,7 +35,7 @@ export type DynamicSubroutineAttribution = {
   sourceDefinitionId: CardDefinitionId;
   sourceTitle: string;
   modifierKind: "additional_subroutine";
-  subroutineKind: CardSubroutineImplementation["kind"];
+  subroutineKind: SubroutineDefinition["type"];
 };
 
 export type DynamicSubroutineDefinition = SubroutineDefinition & {
@@ -281,6 +281,8 @@ export function copiedRunSubroutinesForIceAfterOriginal(
         record.originalSubroutineId === originalSubroutineId,
     )
     .map((record, index) => {
+      if (!record.copiedSubroutine)
+        throw new Error("runtime_copied_subroutine_snapshot_missing");
       const publicId = `card_implementation.${record.sourceDefinitionId}.copied_subroutine.${index + 1}.${record.subroutineKind}`;
       const dynamicSubroutine: DynamicSubroutineAttribution = {
         internalId: `${publicId}.${record.sourceCardInstanceId}.${record.targetIceId}.${record.originalSubroutineId}`,
@@ -291,17 +293,9 @@ export function copiedRunSubroutinesForIceAfterOriginal(
         modifierKind: "additional_subroutine",
         subroutineKind: record.subroutineKind,
       };
-      if (record.subroutineKind === "end_the_run") {
-        return {
-          id: publicId,
-          type: "end_the_run",
-          dynamicSubroutine,
-        };
-      }
       return {
+        ...structuredClone(record.copiedSubroutine),
         id: publicId,
-        type: "end_the_run_unless_runner_pays",
-        amount: Math.max(0, Math.floor(record.amount ?? 0)),
         dynamicSubroutine,
       };
     });

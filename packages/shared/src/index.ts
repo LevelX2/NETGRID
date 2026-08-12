@@ -1342,8 +1342,9 @@ export type RunState = {
     sourceTitle: string;
     targetIceId?: CardInstanceId;
     originalSubroutineId?: string;
-    subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
+    subroutineKind: SubroutineType;
     amount?: number;
+    copiedSubroutine?: SubroutineDefinition;
   }>;
   lastPassedIceId?: CardInstanceId;
   fortPassWindowUsedSourceIdsThisRun?: CardInstanceId[];

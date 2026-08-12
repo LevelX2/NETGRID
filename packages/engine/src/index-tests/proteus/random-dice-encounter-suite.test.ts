@@ -27,6 +27,7 @@ const ROADBLOCK = "onr_proteus_035_roadblock";
 const EXECUTIVE_BOOT_CAMP = "onr_proteus_058_executive-boot-camp";
 const LISA_BLIGHT = "onr_proteus_063_lisa-blight";
 const FORWARDS_LEGACY = "onr_proteus_087_forwards-legacy";
+const SIMPLE_TAG_ICE = "simple_tag_ice";
 const WALL = "onr_v1_279_wall-of-static";
 const SCORCHED_EARTH = "onr_v1_302_scorched-earth";
 
@@ -541,6 +542,55 @@ describe("Proteus PRO016 random dice encounter suite", () => {
     ).toBe(false);
   });
 
+  it("copies a current non-ETR subroutine into both the quote and encounter resolution", () => {
+    let state = baseState("pro016-lisa-current-subroutine");
+    const lisa = addCorpRoot(
+      state,
+      LISA_BLIGHT,
+      "lisa_current",
+      "remote_1",
+      true,
+    );
+    const tagIce = addCorpIce(
+      state,
+      SIMPLE_TAG_ICE,
+      "lisa_tag_ice",
+      "remote_1",
+      true,
+    );
+    addCorpHq(state, SCORCHED_EARTH, "lisa_current_hq_1");
+    state = encounterIce(state, "remote_1", tagIce);
+    state.timingPoint = "run.jack_out_window";
+    const action = mustAction(
+      state,
+      "corp",
+      (candidate) =>
+        candidate.type === "activated_card_ability" &&
+        candidate.source === lisa &&
+        candidate.payload?.targetCardId === tagIce &&
+        candidate.payload?.subroutineIndex === 0,
+    );
+    expect(action.payload?.subroutineId).toBe("simple_tag_ice_tag");
+    state = applyLegal(state, "corp", action.actionId);
+    state.run!.phase = "encounter_ice";
+    state.timingPoint = "run.encounter_ice";
+
+    const effectiveSubroutines =
+      getPlayerView(state, "runner")
+        .servers.find((server) => server.id === "remote_1")
+        ?.ice.find((ice) => ice.instanceId === tagIce)?.effectiveRunQuote
+        ?.subroutines ?? [];
+    expect(effectiveSubroutines.slice(0, 3).map((subroutine) => subroutine.type))
+      .toEqual(["give_runner_tag", "give_runner_tag", "end_the_run"]);
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (candidate) => candidate.type === "continue_run",
+    );
+    expect(String(continueAction.payload?.encounterSubroutineIds).split(","))
+      .toEqual(effectiveSubroutines.map((subroutine) => subroutine.id));
+  });
+
   it("keeps Lisa Blight subroutine copies run-scoped and rejects stale duplicate targets", () => {
     let state = baseState("pro016-lisa-duplicate");
     const lisa = addCorpRoot(
@@ -580,6 +630,10 @@ describe("Proteus PRO016 random dice encounter suite", () => {
         targetIceId: wall,
         originalSubroutineId: String(firstAction.payload?.subroutineId ?? ""),
         subroutineKind: "end_the_run",
+        copiedSubroutine: {
+          id: String(firstAction.payload?.subroutineId ?? ""),
+          type: "end_the_run",
+        },
       },
     ];
     const staleResult = applyAction(staleState, {

@@ -4,8 +4,9 @@ import type {
   GameState,
   LegalAction,
   ServerId,
+  SubroutineDefinition,
 } from "@netgrid/shared";
-import { printedSubroutinesForCardImplementation } from "./printed-subroutine-implementations";
+import { effectiveIceRunSubroutines } from "../game/run/effective-ice-run-subroutines";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import {
   advancementCounterCostForActivatedAbility,
@@ -563,8 +564,7 @@ export type SameFortSubroutineTarget = {
   iceDefinition: CardDefinition;
   subroutineIndex: number;
   subroutineId: string;
-  subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";
-  amount?: number;
+  subroutine: SubroutineDefinition;
 };
 
 export function sourceServerId(
@@ -594,16 +594,12 @@ export function sameFortSubroutineTargets(
     const instance = state.cardInstances[iceId];
     if (!instance || instance.controller !== "corp") continue;
     const definition = deps.definitionFor(state, iceId);
-    const subroutines =
-      printedSubroutinesForCardImplementation(definition) ??
-      definition.subroutines ??
-      [];
+    const subroutines = effectiveIceRunSubroutines(
+      state,
+      iceId,
+      definition,
+    );
     subroutines.forEach((subroutine, subroutineIndex) => {
-      if (
-        subroutine.type !== "end_the_run" &&
-        subroutine.type !== "end_the_run_unless_runner_pays"
-      )
-        return;
       if (
         state.run?.encounterAdditionalSubroutines?.some(
           (record) =>
@@ -618,10 +614,7 @@ export function sameFortSubroutineTargets(
         iceDefinition: definition,
         subroutineIndex,
         subroutineId: subroutine.id,
-        subroutineKind: subroutine.type,
-        ...(subroutine.type === "end_the_run_unless_runner_pays"
-          ? { amount: subroutine.amount }
-          : {}),
+        subroutine,
       });
     });
   }

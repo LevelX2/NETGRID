@@ -95,6 +95,7 @@ import {
   spendCredits,
 } from "../state/economy-mutation";
 import { publicIceRunSubroutineDerivation } from "../run/public-ice-run-derivation";
+import { effectiveIceRunSubroutines } from "../run/effective-ice-run-subroutines";
 import {
   addCardCounter,
   cardCounter,
@@ -492,10 +493,6 @@ import {
 } from "../view/card-view";
 import { toPublicEvent } from "../view/public-event-view";
 import { validateGameState } from "../validation";
-import {
-  additionalSubroutinesForIce,
-  currentEncounterAdditionalSubroutinesForIce,
-} from "../../ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-subroutine-cost-modifiers";
 import {
   effectiveAgendaDifficulty,
@@ -508,7 +505,6 @@ import {
   publicServerLabelForCard,
   serverChoiceDisplayLabel,
 } from "../../public-context";
-import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
 import { traceSuccessEffectForCardImplementation } from "../../ability-engine/trace-implementations";
 import {
   icebreakerAbilityForLegalAction,
@@ -1034,67 +1030,13 @@ export function createCardRuntimeDepsHosts(
     iceDefinition: CardDefinition,
   ): NonNullable<CardDefinition["subroutines"]> {
     const run = state.run;
-    const transmutationCopies = run?.encounteredIceId
-      ? cardCounter(state, run.encounteredIceId, "mark")
-      : 0;
-    const printedSubroutines =
-      printedSubroutinesForCardImplementation(iceDefinition) ??
-      iceDefinition.subroutines ??
-      [];
-    const publicDerivation = run?.encounteredIceId
-      ? publicIceRunSubroutineDerivation(
+    return run?.encounteredIceId
+      ? effectiveIceRunSubroutines(
           state,
           run.encounteredIceId,
-          printedSubroutines,
+          iceDefinition,
         )
-      : {
-          printedSubroutines: [...printedSubroutines],
-          appendedSubroutines: [],
-        };
-    const subroutines = publicDerivation.printedSubroutines.flatMap(
-      (subroutine) => {
-        const copies = [subroutine];
-        for (let index = 0; index < transmutationCopies; index += 1) {
-          copies.push({
-            ...subroutine,
-            id: `${subroutine.id}.scored_rezzed_ice_mark_modifier.${index + 1}`,
-          });
-        }
-        return copies;
-      },
-    );
-    if (
-      run?.encounteredIceId &&
-      run.futureEncounterEndTheRunSourceIceId &&
-      run.encounteredIceId !== run.futureEncounterEndTheRunSourceIceId
-    ) {
-      subroutines.push({
-        id: "v1922_tutor_future_end_the_run",
-        type: "end_the_run",
-      });
-    }
-    if (run?.encounteredIceId) {
-      subroutines.push(
-        ...publicDerivation.appendedSubroutines.filter(
-          (subroutine) => subroutine.type === "end_the_run",
-        ),
-      );
-      subroutines.push(
-        ...currentEncounterAdditionalSubroutinesForIce(
-          state,
-          run.encounteredIceId,
-        ),
-      );
-      subroutines.push(
-        ...publicDerivation.appendedSubroutines.filter(
-          (subroutine) => subroutine.type === "initiate_trace",
-        ),
-      );
-      subroutines.push(
-        ...additionalSubroutinesForIce(state, run.encounteredIceId),
-      );
-    }
-    return subroutines;
+      : [];
   }
 
   function variableTraceSubroutineForCurrentEncounter(
