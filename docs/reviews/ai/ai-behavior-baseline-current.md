@@ -1,7 +1,7 @@
-# AI Behavior Baseline v1 – aktueller Arbeitsbaumstand
+# AI Behavior Baseline v1 – aktuelle Commit-Referenz
 
-Stand: 2026-08-13  
-Status: Hard Gates grün; Referenz wegen uncommittetem Arbeitsbaum vorläufig
+Stand: 2026-08-13
+Status: Hard Gates grün; reproduzierbare Commit-Referenz
 
 ## Prüfvertrag
 
@@ -10,13 +10,13 @@ Status: Hard Gates grün; Referenz wegen uncommittetem Arbeitsbaum vorläufig
 - höchstens 480 Aktionen je Partie;
 - Runner und Corp jeweils `current_candidate`;
 - 60 Partien mit 14.034 Entscheidungen;
-- lokaler Arbeitsbaum auf Basis von Git-Head `180335e5b`.
+- sauberer Commitstand `20728ec4e`.
 
 Der Lauf liegt lokal unter
-`data/local/ai-behavior-baseline-v1-current-180335e5b-2026-08-13.*`.
-Die Dateien werden nicht versioniert. Da der Runner nur `gitHead` und keinen
-Arbeitsbaum-Fingerprint speichert, wird dieser Stand erst nach Commit und
-erneutem identischem Lauf zur reproduzierbaren Commit-Referenz.
+`data/local/ai-behavior-baseline-v1-current-20728ec4e-2026-08-13.*`.
+Die Dateien werden nicht versioniert. Aggregate, Slotwerte und Hard-Gate-
+Signatur sind identisch mit dem unmittelbar vorherigen grünen Arbeitsbaumlauf
+auf Basis von `180335e5b`; die Referenz ist nun über `gitHead` reproduzierbar.
 
 ## Ergebnis
 
@@ -52,7 +52,7 @@ Die Korrekturen folgen dem Plan-first-Vertrag:
 
 ## Verhaltenswerte und Aussagegrenze
 
-Der grüne Arbeitsbaumstand misst absolut:
+Die grüne Commit-Referenz misst absolut:
 
 - Missed Score Window Rate: 0,146 bei 103 Fenstern;
 - Advanced Remote Contest Skip Rate: 0,831 bei 556 Gelegenheiten;
