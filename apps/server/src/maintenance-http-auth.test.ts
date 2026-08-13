@@ -25,6 +25,7 @@ describe("ARC-001 maintenance HTTP security", () => {
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(true);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("::1"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(true);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("::ffff:127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/decisions/1", config)).toBe(true);
+    expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/ai-decision-traces/matches/match", config)).toBe(true);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/future-endpoint", config)).toBe(false);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("203.0.113.9"), "/api/storage/maintenance/analysis/matches/match/bundle", config)).toBe(false);
     expect(mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(request("127.0.0.1"), "/api/storage/maintenance/analysis/matches/match/bundle", { ...config, profile: "private_internet" })).toBe(false);
@@ -82,6 +83,10 @@ describe("ARC-001 maintenance HTTP security", () => {
       const analysis = await fetch(`${baseUrl}/api/storage/maintenance/analysis/matches/missing/bundle`);
       expect(analysis.status).toBe(404);
       expect(await analysis.json()).toMatchObject({ error: { code: "not_found" } });
+
+      const traceIndex = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/missing`);
+      expect(traceIndex.status).toBe(200);
+      expect(await traceIndex.json()).toEqual({ traces: [] });
 
       expect((await fetch(`${baseUrl}/api/storage/maintenance/summary`)).status).toBe(401);
       expect((await fetch(`${baseUrl}/api/storage/maintenance/cleanup/preview`, { method: "POST" })).status).toBe(401);
