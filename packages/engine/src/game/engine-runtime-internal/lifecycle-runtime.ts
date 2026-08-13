@@ -220,6 +220,80 @@ export function createLifecycleRuntime(
     deps.clearCardCounters(state, cardId);
   }
 
+  function trashRunnerInstalledCardsToHeapBatch(
+    state: GameState,
+    cardIds: readonly CardInstanceId[],
+    legalAction?: LegalAction,
+  ): void {
+    const uniqueIds = [...new Set(cardIds)];
+    if (uniqueIds.length !== cardIds.length)
+      throw new Error("Ein Batch-Trash darf eine Karte nur einmal enthalten.");
+    const snapshots = uniqueIds.map((cardId) => {
+      const definition = deps.definitionFor(state, cardId);
+      if (definition.type !== "hardware" && definition.type !== "resource")
+        throw new Error(
+          "Der geordnete Batch-Trash unterstützt nur Hardware und Ressourcen.",
+        );
+      const rig =
+        definition.type === "hardware"
+          ? state.runner.rig.hardware
+          : state.runner.rig.resources;
+      if (!rig.includes(cardId))
+        throw new Error("Ein Batch-Trash-Ziel ist nicht mehr installiert.");
+      return {
+        cardId,
+        definition,
+        instance: deps.mustInstance(state.cardInstances, cardId),
+        hostedIds: deps.hostedCardsOn(state, cardId),
+        microtechBackedIds: microtechHostedProgramIds(state, cardId),
+      };
+    });
+
+    // The selected cards leave play as one batch before any leave-play,
+    // hosted-card, memory, or other consequential processing begins.
+    for (const snapshot of snapshots) {
+      const { hostedOn: _hostedOn, ...withoutHost } = snapshot.instance;
+      void _hostedOn;
+      deps.removeFromAllZones(state, snapshot.cardId);
+      state.runner.heap.push(snapshot.cardId);
+      state.cardInstances[snapshot.cardId] = {
+        ...withoutHost,
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "heap" },
+      };
+      deps.clearCardCounters(state, snapshot.cardId);
+    }
+
+    for (const snapshot of snapshots) {
+      deps.executeCardImplementationLifecycleEffects(
+        deps.cardImplementationRuntimeDeps,
+        state,
+        legalAction,
+        snapshot.definition,
+        snapshot.cardId,
+        "on_leave_play",
+      );
+      for (const hostedId of snapshot.hostedIds) {
+        const hostedDefinition = deps.definitionFor(state, hostedId);
+        if (snapshot.microtechBackedIds.includes(hostedId))
+          trashMicrotechBackedProgram(state, hostedId);
+        else if (hostedDefinition.type === "program")
+          trashRunnerInstalledProgram(state, hostedId);
+      }
+      if (
+        snapshot.definition.type === "hardware" &&
+        !deps.hasCardImplementationMemoryUnitModifier(snapshot.definition) &&
+        (snapshot.definition.memoryLimitBonus ?? 0) > 0
+      )
+        state.runner.memoryLimit = Math.max(
+          0,
+          state.runner.memoryLimit -
+            (snapshot.definition.memoryLimitBonus ?? 0),
+        );
+    }
+  }
+
   function returnRunnerInstalledCardToGrip(
     state: GameState,
     cardId: CardInstanceId,
@@ -995,6 +1069,7 @@ export function createLifecycleRuntime(
     trashRunnerInstalledProgram,
     runnerProgramUsesMemory,
     trashRunnerInstalledCardToHeap,
+    trashRunnerInstalledCardsToHeapBatch,
     returnRunnerInstalledCardToGrip,
     returnRunnerInstalledProgramsToGripForAccess,
     trashCorpInstalledCardToArchives,

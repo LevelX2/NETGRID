@@ -809,7 +809,7 @@ export function createCorpRuntimeResolvers(
     const trashCount = Number(
       legalAction.payload?.hardwareTrashByCounterTrashCount,
     );
-    if (!Number.isInteger(trashCount) || trashCount <= 0)
+    if (!Number.isInteger(trashCount) || trashCount < 0)
       throw new Error(
         "Hardware-Trash-by-Counter braucht eine gueltige X-Auswahl.",
       );
@@ -854,132 +854,251 @@ export function createCorpRuntimeResolvers(
       throw new Error(
         "Hardware-Trash-by-Counter findet nicht genug nicht-Cybernetics-Hardware.",
       );
-    if (eligibleHardwareIds.length > trashCount) {
-      startHardwareTrashByCounterChoice(
-        state,
-        eligibleHardwareIds,
-        trashCount,
-        legalAction,
-      );
+    if (trashCount === 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hardwareTrashByCounterTrashCount: 0,
+        trashedHardwareCount: 0,
+      };
       return;
     }
-    trashHardwareByCounter(state, eligibleHardwareIds, legalAction);
+    startRunnerInstalledMultiTrashChoice(
+      state,
+      legalAction,
+      {
+        effectKind: "installed_hardware_trash_by_counter",
+        targetCardType: "hardware",
+        minimumTargets: trashCount,
+        maximumTargets: trashCount,
+        selectionOrdering: "ordered",
+        excludesSubtype: "cybernetics",
+      },
+      eligibleHardwareIds,
+    );
   }
 
-  function startHardwareTrashByCounterChoice(
+  function resolveTaggedRunnerResourceMultiTrashOperation(
     state: GameState,
-    eligibleHardwareIds: CardInstanceId[],
-    trashCount: number,
     legalAction: LegalAction,
+    minimumTargets: number,
+    maximumTargets: number,
+    selectionOrdering: "ordered" | "unordered",
+  ): void {
+    const resourceIds = state.runner.rig.resources.slice();
+    const boundedMaximum = Math.min(maximumTargets, resourceIds.length);
+    if (boundedMaximum === 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        runnerInstalledMultiTrashTargetCount: 0,
+        trashedResourceCount: 0,
+      };
+      return;
+    }
+    startRunnerInstalledMultiTrashChoice(
+      state,
+      legalAction,
+      {
+        effectKind: "trash_runner_resources_if_tagged",
+        targetCardType: "resource",
+        minimumTargets: Math.min(minimumTargets, boundedMaximum),
+        maximumTargets: boundedMaximum,
+        selectionOrdering,
+      },
+      resourceIds,
+    );
+  }
+
+  function startRunnerInstalledMultiTrashChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    input: {
+      effectKind: NonNullable<
+        GameState["pendingRunnerInstalledMultiTrash"]
+      >["effectKind"];
+      targetCardType: "resource" | "hardware";
+      minimumTargets: number;
+      maximumTargets: number;
+      selectionOrdering: "ordered" | "unordered";
+      excludesSubtype?: string;
+    },
+    eligibleCardIds: CardInstanceId[],
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
+    if (state.pendingRunnerInstalledMultiTrash)
+      throw new Error("Es ist bereits ein Multi-Trash-Vertrag aktiv.");
+    const sourceCardInstanceId = String(
+      legalAction.payload?.cardId ?? legalAction.source ?? "",
+    ) as CardInstanceId;
+    const sourceDefinitionId = definitionFor(state, sourceCardInstanceId).id;
+    const eligibleTargets = eligibleCardIds.map((cardId) => {
+      const concealed =
+        input.targetCardType === "resource" &&
+        isConcealedRunnerResource(state, cardId);
+      return {
+        cardInstanceId: cardId,
+        choiceValue: concealed ? hiddenRunnerResourceSlotId(cardId) : cardId,
+      };
+    });
+    state.pendingRunnerInstalledMultiTrash = {
+      sourceCardInstanceId,
+      sourceDefinitionId,
+      ...input,
+      eligibleTargets,
+    };
     state.pendingChoice = {
-      choiceId: `installed_hardware_trash_by_counter_${state.stateVersion + 1}`,
+      choiceId: `runner_installed_multi_trash_${state.stateVersion + 1}`,
       side: "corp",
-      source: `card_implementation.installed_hardware_trash_by_counter:${trashCount}:${state.stateVersion + 1}`,
-      prompt: `Hardware-Trash-by-Counter: ${trashCount} Hardware trashen`,
+      source: "card_implementation.runner_installed_multi_trash",
+      sourceCardInstanceId,
+      sourceCardDefinitionId: sourceDefinitionId,
+      prompt:
+        input.effectKind === "trash_runner_resources_if_tagged"
+          ? `Bis zu ${input.maximumTargets} Runner-Ressourcen trashen`
+          : `${input.maximumTargets} Hardware in Trash-Reihenfolge auswählen`,
       kind: "select_cards",
-      options: eligibleHardwareIds.map((cardId) => {
-        const definition = definitionFor(state, cardId);
+      options: eligibleTargets.map(({ cardInstanceId, choiceValue }) => {
+        const concealed = choiceValue !== cardInstanceId;
+        const definition = definitionFor(state, cardInstanceId);
         return {
-          id: `card_${cardId}`,
-          label: definition.title,
-          publicLabel: definition.title,
-          value: cardId,
+          id: `target_${choiceValue}`,
+          label: concealed ? "Verdeckte Runner-Ressource" : definition.title,
+          publicLabel: concealed
+            ? "Verdeckte Runner-Ressource"
+            : definition.title,
+          value: choiceValue,
         };
       }),
-      minSelections: trashCount,
-      maxSelections: trashCount,
+      minSelections: input.minimumTargets,
+      maxSelections: input.maximumTargets,
+      selectionOrdering: input.selectionOrdering,
       stateVersion: state.stateVersion + 1,
       visibility: "public",
     };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      hardwareTrashByCounterChoiceOpened: true,
-      eligibleHardwareCount: eligibleHardwareIds.length,
-      hardwareTrashByCounterTrashCount: trashCount,
+      runnerInstalledMultiTrashChoiceOpened: true,
+      runnerInstalledMultiTrashMinimumTargets: input.minimumTargets,
+      runnerInstalledMultiTrashMaximumTargets: input.maximumTargets,
+      runnerInstalledMultiTrashOrdering: input.selectionOrdering,
+      ...(input.effectKind === "installed_hardware_trash_by_counter"
+        ? {
+            hardwareTrashByCounterChoiceOpened: true,
+            eligibleHardwareCount: eligibleCardIds.length,
+            hardwareTrashByCounterTrashCount: input.maximumTargets,
+          }
+        : { eligibleResourceCount: eligibleCardIds.length }),
     };
   }
 
-  function hardwareTrashByCounterTrashCountFromChoiceSource(
-    source: string,
-  ): number {
-    const [, rawTrashCount] = source.split(":");
-    const trashCount = Number(rawTrashCount);
-    if (!Number.isInteger(trashCount) || trashCount <= 0)
-      throw new Error(
-        "Hardware-Trash-by-Counter-Choice hat keine gueltige X-Auswahl.",
-      );
-    return trashCount;
-  }
-
-  function resolveHardwareTrashByCounterChoice(
+  function resolveRunnerInstalledMultiTrashChoice(
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
+    const continuation = state.pendingRunnerInstalledMultiTrash;
     if (
       !choice ||
-      !choice.source.startsWith(
-        "card_implementation.installed_hardware_trash_by_counter",
-      )
+      choice.source !== "card_implementation.runner_installed_multi_trash" ||
+      !continuation
     )
-      throw new Error("Es ist keine Hardware-Trash-by-Counter-Choice offen.");
-    const trashCount = hardwareTrashByCounterTrashCountFromChoiceSource(
-      choice.source,
-    );
-    const selectedIds = deps.selectedChoiceCardIds(
-      choice,
-      playerAction,
-    ) as CardInstanceId[];
-    if (selectedIds.length !== trashCount)
+      throw new Error("Es ist keine Runner-Multi-Trash-Choice offen.");
+    const selectedValues = deps.selectedChoiceCardIds(choice, playerAction);
+    if (
+      selectedValues.length < continuation.minimumTargets ||
+      selectedValues.length > continuation.maximumTargets
+    )
       throw new Error(
-        "Hardware-Trash-by-Counter braucht genau X Hardware-Ziele.",
+        "Die Runner-Multi-Trash-Choice hat eine ungueltige Zielanzahl.",
       );
-    const legalTargets = new Set(
-      hardwareTrashByCounterEligibleHardwareIds(state),
+    const targetByChoiceValue = new Map(
+      continuation.eligibleTargets.map((target) => [
+        target.choiceValue,
+        target.cardInstanceId,
+      ]),
+    );
+    const selectedIds = selectedValues.map((value) => {
+      const cardId = targetByChoiceValue.get(value);
+      if (!cardId)
+        throw new Error("Ein Runner-Multi-Trash-Ziel ist nicht gebunden.");
+      return cardId;
+    });
+    if (new Set(selectedIds).size !== selectedIds.length)
+      throw new Error("Ein Runner-Multi-Trash-Ziel wurde doppelt gewählt.");
+    if (
+      continuation.targetCardType === "hardware" &&
+      !continuation.excludesSubtype
+    )
+      throw new Error("Der Hardware-Multi-Trash braucht seine Subtypgrenze.");
+    const currentLegalTargets = new Set(
+      continuation.targetCardType === "hardware"
+        ? eligibleInstalledRunnerHardwareIds(
+            state,
+            continuation.excludesSubtype!,
+          )
+        : state.runner.rig.resources,
     );
     for (const cardId of selectedIds) {
-      if (!legalTargets.has(cardId))
-        throw new Error(
-          "Hardware-Trash-by-Counter darf dieses Hardware-Ziel nicht trashen.",
-        );
+      if (!currentLegalTargets.has(cardId))
+        throw new Error("Ein Runner-Multi-Trash-Ziel ist nicht mehr legal.");
     }
     delete state.pendingChoice;
-    trashHardwareByCounter(state, selectedIds, legalAction);
+    delete state.pendingRunnerInstalledMultiTrash;
+    trashRunnerInstalledCardsAsBatch(
+      state,
+      selectedIds,
+      continuation.effectKind,
+      legalAction,
+    );
   }
 
-  function trashHardwareByCounter(
+  function trashRunnerInstalledCardsAsBatch(
     state: GameState,
-    hardwareIds: CardInstanceId[],
+    targetIds: CardInstanceId[],
+    effectKind: NonNullable<
+      GameState["pendingRunnerInstalledMultiTrash"]
+    >["effectKind"],
     legalAction: LegalAction,
   ): void {
-    const definitionIds = hardwareIds.map(
+    const definitionIds = targetIds.map(
       (cardId) => definitionFor(state, cardId).id,
     );
+    if (targetIds.length === 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        runnerInstalledMultiTrashTargetCount: 0,
+        ...(effectKind === "installed_hardware_trash_by_counter"
+          ? { trashedHardwareCount: 0 }
+          : { trashedResourceCount: 0 }),
+      };
+      return;
+    }
     if (
       openRunnerInstalledTrashPreventionWindow(
         state,
         legalAction,
-        hardwareIds,
-        "installed_hardware_trash_by_counter",
+        targetIds,
+        effectKind,
+        "ordered_batch",
       )
     )
       return;
-    for (const cardId of hardwareIds) {
-      if (!hardwareTrashByCounterEligibleHardwareIds(state).includes(cardId))
-        throw new Error(
-          "Hardware-Trash-by-Counter darf dieses Hardware-Ziel nicht mehr trashen.",
-        );
-      deps.trashRunnerInstalledCardToHeap(state, cardId);
-    }
+    deps.trashRunnerInstalledCardsToHeapBatch(state, targetIds, legalAction);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      hardwareTrashByCounterTrashCount: hardwareIds.length,
-      trashedHardwareCount: hardwareIds.length,
-      trashedHardwareDefinitionIds: definitionIds.join(","),
+      runnerInstalledMultiTrashTargetCount: targetIds.length,
+      runnerInstalledMultiTrashOrdering: "ordered",
+      ...(effectKind === "installed_hardware_trash_by_counter"
+        ? {
+            hardwareTrashByCounterTrashCount: targetIds.length,
+            trashedHardwareCount: targetIds.length,
+            trashedHardwareDefinitionIds: definitionIds.join(","),
+          }
+        : {
+            trashedResourceCount: targetIds.length,
+            trashedResourceDefinitionIds: definitionIds.join(","),
+          }),
     };
   }
 
@@ -1508,10 +1627,8 @@ export function createCorpRuntimeResolvers(
     hardwareTrashByCounterLegalActions,
     hardwareTrashByCounterTrashCountFromPayload,
     resolveHardwareTrashByCounterOperation,
-    startHardwareTrashByCounterChoice,
-    hardwareTrashByCounterTrashCountFromChoiceSource,
-    resolveHardwareTrashByCounterChoice,
-    trashHardwareByCounter,
+    resolveTaggedRunnerResourceMultiTrashOperation,
+    resolveRunnerInstalledMultiTrashChoice,
     advancementPlacementLegalActions,
     resolveAgendaCounterOperation,
     resolveAdvancementPlacementOperation,

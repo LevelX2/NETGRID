@@ -31,6 +31,7 @@ export type CardImplementationRuntimeExtendedDependencies = {
     sourceCardId: CardInstanceId,
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
+    minimumAmount: 0 | 1,
   ) => number;
   corpHqCardCount: (state: GameState) => number;
   runnerValuPakInstallableProgramCount: (state: GameState) => number;
@@ -223,6 +224,7 @@ export type CardImplementationRuntimeExtendedDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
+    minimumAmount: 0 | 1,
   ) => CardEffectAdvancementChoiceResult;
   addCurrentEncounterAdditionalSubroutine: (
     state: GameState,

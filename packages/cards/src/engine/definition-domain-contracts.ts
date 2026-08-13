@@ -95,7 +95,9 @@ export type CardCorpUtilityImplementation = (
     }
   | {
       kind: "trash_runner_resources_if_tagged";
+      min: 0;
       max: 2;
+      selectionOrdering: "unordered";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

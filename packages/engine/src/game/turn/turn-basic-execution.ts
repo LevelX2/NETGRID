@@ -12,6 +12,12 @@ import {
   CARD_VIRUS_COUNTER_TYPES,
   PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES,
 } from "@netgrid/shared";
+import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  clearRestrictedActionGrant,
+  restrictedActionGrant,
+  restrictedActionGrantRemaining,
+} from "../state/restricted-action-grants";
 
 export type DrawTaxDecision = "auto" | "pay" | "tag";
 
@@ -137,6 +143,34 @@ export function handleTurnBasicExecution(
       state.runner.tags = Math.max(0, state.runner.tags - 1);
       return handled(legalAction);
     case "purge_virus_counters": {
+      if (legalAction.payload?.v1922EdgerunnerTempsPurgeAction === true) {
+        const flags = state.corpTurnFlags;
+        const grant = restrictedActionGrant(
+          flags,
+          RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+        );
+        const conversion = grant?.conversions?.find(
+          (candidate) => candidate.actionType === "purge_virus_counters",
+        );
+        if (
+          !conversion ||
+          restrictedActionGrantRemaining(
+            flags,
+            RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+          ) !== conversion.requiredActions ||
+          legalAction.payload.actionCapacityConversionRequiredActions !==
+            conversion.requiredActions
+        )
+          throw new Error(
+            "Der Edgerunner-Purge braucht die vollständige deklarierte Aktionskapazität.",
+          );
+        if (!flags) throw new Error("Der Edgerunner-Aktionsvertrag fehlt.");
+        clearRestrictedActionGrant(
+          flags,
+          RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+        );
+        flags.edgerunnerTempsInstallActionsRemaining = 0;
+      }
       host.turn.spendClicks(state, "corp", 3);
       if (
         host.callbacks.startVirusCounterPurgePreserveChoice(state, legalAction)

@@ -224,6 +224,8 @@ function hostFor(
       hardwareTrashByCounterEligibleHardwareIds: () => [RESOURCE_ID],
       resolveHardwareTrashByCounterOperation: () =>
         calls.push("hardwareTrashByCounter"),
+      resolveTaggedRunnerResourceMultiTrashOperation: () =>
+        calls.push("runnerResourceMultiTrash"),
     },
     cardImplementation: {
       canPlayPrintedCostOnPlay: () => true,

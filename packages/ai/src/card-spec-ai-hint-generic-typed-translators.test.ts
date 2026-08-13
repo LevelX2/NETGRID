@@ -613,7 +613,7 @@ describe("generic typed CardSpec AI translators", () => {
           ).length ?? 0),
         0,
       ),
-    ).toBe(71);
+    ).toBe(74);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),

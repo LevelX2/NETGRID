@@ -793,12 +793,18 @@ export function createPlayBoardRuntimeHosts(
             amount,
             distribution as never,
           ),
-        moveAdvancementOptions: (sourceCardId, source, maxAmount) =>
+        moveAdvancementOptions: (
+          sourceCardId,
+          source,
+          maxAmount,
+          minimumAmount,
+        ) =>
           deps.moveAdvancementOptions(
             state,
             sourceCardId,
             source as never,
             maxAmount,
+            minimumAmount,
           ),
         resolveAgendaCounterOperation: (legalAction, sourceDefinitionId) =>
           deps.resolveAgendaCounterOperation(
@@ -816,6 +822,19 @@ export function createPlayBoardRuntimeHosts(
           deps.hardwareTrashByCounterEligibleHardwareIds(state),
         resolveHardwareTrashByCounterOperation: (legalAction) =>
           deps.resolveHardwareTrashByCounterOperation(state, legalAction),
+        resolveTaggedRunnerResourceMultiTrashOperation: (
+          legalAction,
+          minimumTargets,
+          maximumTargets,
+          selectionOrdering,
+        ) =>
+          deps.resolveTaggedRunnerResourceMultiTrashOperation(
+            state,
+            legalAction,
+            minimumTargets,
+            maximumTargets,
+            selectionOrdering,
+          ),
       },
       cardImplementation: {
         canPlayPrintedCostOnPlay: (definition) =>

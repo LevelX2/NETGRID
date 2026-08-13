@@ -72,20 +72,8 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "recover_economy",
-      },
-      {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
         kind: "strategic_role",
         role: "enabler",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.tag_trace_punish",
       },
       {
         kind: "line_support",
@@ -103,23 +91,13 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "tag.payoff",
-        use: "tag.payoff",
-      },
-      {
-        kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "punish.payoff",
-        use: "punish.payoff",
-      },
-      {
         kind: "value_interpretation",
         axis: "economy",
-        rating: "high",
+        rating: "low",
       },
     ],
     capabilities: [
@@ -132,14 +110,6 @@ export const cardSpec = {
             role: "anchor_evidence",
             roleDetail: "anchor_evidence_tag_source",
             evidenceAnchor: "tag.source",
-            confidence: "high",
-          },
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "payoff_anchor",
-            roleDetail: "payoff_anchor_tag_payoff",
-            evidenceAnchor: "tag.payoff",
             confidence: "high",
           },
         ],

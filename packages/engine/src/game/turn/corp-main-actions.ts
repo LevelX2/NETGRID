@@ -766,9 +766,13 @@ export function buildCorpMainActions(
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
-    const sourceDefinitionId =
-      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install
-        ?.sourceDefinitionId;
+    const remainingActions = edgerunnerTempsInstallActionsRemaining(state);
+    const grant =
+      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install;
+    const sourceDefinitionId = grant?.sourceDefinitionId;
+    const purgeConversion = grant?.conversions?.find(
+      (conversion) => conversion.actionType === "purge_virus_counters",
+    );
     if (!sourceDefinitionId)
       throw new Error(
         "Restricted install actions require their typed source definition.",
@@ -794,19 +798,32 @@ export function buildCorpMainActions(
         .filter(
           (candidate) =>
             candidate.type === "install_card" ||
+            (candidate.type === "purge_virus_counters" &&
+              purgeConversion !== undefined &&
+              remainingActions === purgeConversion.requiredActions) ||
             candidate.type === "end_turn" ||
             candidate.payload?.actionEconomyAbility ===
               "decline_edgerunner_temps_install_actions",
         )
         .map((candidate) =>
-          candidate.type === "install_card"
+          candidate.type === "install_card" ||
+          candidate.type === "purge_virus_counters"
             ? {
                 ...candidate,
                 payload: {
                   ...(candidate.payload ?? {}),
-                  v1922EdgerunnerTempsInstallAction: true,
-                  actionCapacityRestriction: "install_only",
-                  actionCapacityAllowedActionType: "install_card",
+                  ...(candidate.type === "install_card"
+                    ? { v1922EdgerunnerTempsInstallAction: true }
+                    : {
+                        v1922EdgerunnerTempsPurgeAction: true,
+                        actionCapacityConversionRequiredActions:
+                          purgeConversion!.requiredActions,
+                      }),
+                  actionCapacityRestriction:
+                    candidate.type === "install_card"
+                      ? "install_only"
+                      : "forfeit_all_three_for_purge",
+                  actionCapacityAllowedActionType: candidate.type,
                   actionCapacityReliability: "guaranteed",
                   actionCapacityExpiresAt: "side_turn_end",
                 },
@@ -815,9 +832,18 @@ export function buildCorpMainActions(
                   candidate.side,
                   {
                     ...(candidate.payload ?? {}),
-                    v1922EdgerunnerTempsInstallAction: true,
-                    actionCapacityRestriction: "install_only",
-                    actionCapacityAllowedActionType: "install_card",
+                    ...(candidate.type === "install_card"
+                      ? { v1922EdgerunnerTempsInstallAction: true }
+                      : {
+                          v1922EdgerunnerTempsPurgeAction: true,
+                          actionCapacityConversionRequiredActions:
+                            purgeConversion!.requiredActions,
+                        }),
+                    actionCapacityRestriction:
+                      candidate.type === "install_card"
+                        ? "install_only"
+                        : "forfeit_all_three_for_purge",
+                    actionCapacityAllowedActionType: candidate.type,
                     actionCapacityReliability: "guaranteed",
                     actionCapacityExpiresAt: "side_turn_end",
                   },

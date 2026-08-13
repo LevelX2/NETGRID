@@ -6672,6 +6672,22 @@ function deriveClosedExtendedTargetProfile(
       targetType: "card",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
+  if (engine.corpUtility?.kind === "trash_runner_resources_if_tagged")
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_use",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (engine.corpUtility?.kind === "installed_hardware_trash_by_counter")
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_use",
+      targetType: "card",
+      hiddenInfoPolicy: "visible_or_known_only",
+    };
   throw new Error(
     `card_spec_target_preference_without_supported_mechanical_owner: ${entry.definition.id}`,
   );

@@ -6191,6 +6191,109 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it.each([0, 1])(
+    "keeps Planning Consultants legal with %i card in R&D",
+    (rdCardCount) => {
+      const corpDeck: DeckDefinition = {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        id: `onr_v1_corp_v1922_planning_consultants_${rdCardCount}`,
+        name: `O:NR V1.9.22 Planning Consultants ${rdCardCount}`,
+        cards: [
+          { id: "onr_v1_298_planning-consultants", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+        ],
+      };
+      let state = createGameAfterSetup({
+        seed: `v1922-planning-consultants-${rdCardCount}`,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck,
+        agendaPointsToWin: 7,
+      });
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      const operationId = moveCorpCardToHq(
+        state,
+        "onr_v1_298_planning-consultants",
+      );
+      const movedToArchives = state.corp.rd.slice(rdCardCount);
+      state.corp.rd = state.corp.rd.slice(0, rdCardCount);
+      state.corp.archives.push(...movedToArchives);
+      for (const cardId of movedToArchives) {
+        const instance = state.cardInstances[cardId];
+        if (instance) instance.zone = { side: "corp", zone: "archives" };
+      }
+
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "play_operation" && action.source === operationId,
+      );
+
+      expect(state.pendingChoice).toBeUndefined();
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "play_operation",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+        arrangedCount: rdCardCount,
+        reorderNoOp: true,
+      });
+    },
+  );
+
+  it("allows Falsified-Transactions Expert to move zero counters", () => {
+    const corpDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      id: "onr_v1_corp_v1922_falsified_transactions_zero",
+      name: "O:NR V1.9.22 Falsified Transactions Zero",
+      cards: [
+        { id: "onr_v1_291_falsified-transactions-expert", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-falsified-transactions-zero",
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+      corpDeck,
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const operationId = moveCorpCardToHq(
+      state,
+      "onr_v1_291_falsified-transactions-expert",
+    );
+    keepOnlyCorpHqCard(state, operationId);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" && action.source === operationId,
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(state.pendingChoice?.options).toEqual([
+      expect.objectContaining({
+        id: "move_no_advancement_counters",
+        value: "none|none|0",
+      }),
+    ]);
+    state = applyChoice(state, "corp", "move_no_advancement_counters");
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      advancementCountersMoved: 0,
+      movedAdvancementCounters: 0,
+    });
+  });
+
   it("plays Edgerunner, Inc., Temps as a consecutive Corp install-only action bundle", () => {
     const corpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -6348,6 +6451,73 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("converts all three unused Edgerunner Temps actions into a virus purge", () => {
+    const corpDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      id: "onr_v1_corp_v1922_edgerunner_temps_purge",
+      name: "O:NR V1.9.22 Edgerunner Temps Purge",
+      cards: [
+        { id: "onr_v1_289_edgerunner-inc-temps", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-edgerunner-temps-purge",
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+      corpDeck,
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const operationId = moveCorpCardToHq(
+      state,
+      "onr_v1_289_edgerunner-inc-temps",
+    );
+    keepOnlyCorpHqCard(state, operationId);
+    const runnerCardId = Object.keys(state.cardInstances).find(
+      (cardId) => state.cardInstances[cardId]?.owner === "runner",
+    );
+    if (!runnerCardId) throw new Error("Missing runner virus-counter target");
+    setCardCounterForTest(state, runnerCardId, "virus", 2);
+    state.corp.clicks = 1;
+
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "play_operation" && action.source === operationId,
+      ),
+    ).toBe(true);
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" && action.source === operationId,
+    );
+    const purge = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "purge_virus_counters" &&
+        action.payload?.v1922EdgerunnerTempsPurgeAction === true,
+    );
+    expect(purge.payload).toMatchObject({
+      actionCapacityRestriction: "forfeit_all_three_for_purge",
+      actionCapacityAllowedActionType: "purge_virus_counters",
+    });
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === purge.actionId,
+    );
+
+    expect(cardCounterAmount(state, runnerCardId, "virus")).toBe(0);
+    expect(state.corp.clicks).toBe(0);
+    expect(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining).toBe(0);
+    expect(
+      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install,
+    ).toBeUndefined();
+    expect(validateGameState(state).ok).toBe(true);
   });
 
   it("rezzes Zombie as core-damage ICE with replay-stable public run resolution", () => {

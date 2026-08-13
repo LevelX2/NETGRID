@@ -33,6 +33,7 @@ import {
   scoredCorpAgendaIds,
   stringPayload,
   trashRunnerInstalledCardToHeap,
+  trashRunnerInstalledCardsToHeapBatch,
   runnerInstalledCardIds,
   type DamageSummary,
 } from "./damage-runtime-context";
@@ -576,6 +577,7 @@ export function createRunnerInstalledTrashImminentEvent(
   state: GameState,
   targetCardIds: CardInstanceId[],
   source: string,
+  resolutionMode: "sequential" | "ordered_batch" = "sequential",
 ): ImminentEvent {
   return {
     eventId: `imminent_runner_trash_${state.stateVersion + 1}_${sanitizeId(source)}`,
@@ -590,6 +592,7 @@ export function createRunnerInstalledTrashImminentEvent(
         .join(","),
       amount: targetCardIds.length,
       source,
+      resolutionMode,
     },
     visibility: "hidden_info_barrier",
     createdAtStateVersion: state.stateVersion + 1,
@@ -607,20 +610,44 @@ export function resolveRunnerInstalledTrashImminentEvent(
   const targetIds = trashTargetIdsFromEvent(event);
   const prevented = new Set(preventedTargetIds);
   const trashedDefinitionIds: CardDefinitionId[] = [];
-  let trashedCount = 0;
-  for (const targetId of targetIds) {
-    if (prevented.has(targetId)) continue;
-    if (!runnerInstalledCardIds(state).includes(targetId)) continue;
-    trashedDefinitionIds.push(definitionFor(state, targetId).id);
-    trashRunnerInstalledCardToHeap(state, targetId, legalAction);
-    trashedCount += 1;
-  }
+  const resolvedTargetIds = targetIds.filter(
+    (targetId) =>
+      !prevented.has(targetId) &&
+      runnerInstalledCardIds(state).includes(targetId),
+  );
+  trashedDefinitionIds.push(
+    ...resolvedTargetIds.map((targetId) => definitionFor(state, targetId).id),
+  );
+  if (stringPayload(event, "resolutionMode") === "ordered_batch")
+    trashRunnerInstalledCardsToHeapBatch(state, resolvedTargetIds, legalAction);
+  else
+    for (const targetId of resolvedTargetIds)
+      trashRunnerInstalledCardToHeap(state, targetId, legalAction);
+  const trashedCount = resolvedTargetIds.length;
+  const effectKind = stringPayload(event, "source");
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     preventedTrashCount: preventedTargetIds.length,
     trashedCount,
     trashedCardDefinitionId: trashedDefinitionIds[0] ?? "",
     trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+    ...(stringPayload(event, "resolutionMode") === "ordered_batch"
+      ? {
+          runnerInstalledMultiTrashTargetCount: targetIds.length,
+          runnerInstalledMultiTrashOrdering: "ordered",
+        }
+      : {}),
+    ...(effectKind === "installed_hardware_trash_by_counter"
+      ? {
+          trashedHardwareCount: trashedCount,
+          trashedHardwareDefinitionIds: trashedDefinitionIds.join(","),
+        }
+      : effectKind === "trash_runner_resources_if_tagged"
+        ? {
+            trashedResourceCount: trashedCount,
+            trashedResourceDefinitionIds: trashedDefinitionIds.join(","),
+          }
+        : {}),
   };
   return {
     originalCount: targetIds.length,

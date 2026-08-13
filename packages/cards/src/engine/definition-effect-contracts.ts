@@ -255,6 +255,7 @@ export type MoveAdvancementCountersEffectImplementation = {
   source: "chosen_card" | "source_card";
   target: "chosen_installed_advanceable_card";
   maxAmount: number | "all";
+  minimumAmount?: 0 | 1;
   visibility: Extract<EventVisibilityClass, "public">;
 };
 

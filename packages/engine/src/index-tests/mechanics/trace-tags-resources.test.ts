@@ -922,7 +922,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       definitionId: "onr_v1_299_power-grid-overload",
       playCost: {
         kind: "variable_x",
-        minimumX: 1,
+        minimumX: 0,
         creditsPerX: 1,
         maximumX: { kind: "context" },
       },
@@ -968,10 +968,15 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload" &&
         action.payload?.hardwareTrashByCounterTrashCount === 1,
     );
+    const taggedTargetOption = tagged.pendingChoice?.options.find(
+      (option) => option.value === hardwareId,
+    );
+    if (!taggedTargetOption) throw new Error("Missing hardware trash option");
+    tagged = applyChoices(tagged, "corp", [taggedTargetOption.id]);
     expect(tagged.runner.rig.hardware).not.toContain(hardwareId);
     expect(tagged.runner.heap).toContain(hardwareId);
     expect(tagged.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
+      actionType: "resolve_choice",
       hardwareTrashByCounterTrashCount: 1,
       trashedHardwareCount: 1,
     });
@@ -998,6 +1003,38 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
           agendaPointsToWin: 7,
         }),
       );
+
+    let zeroOnly = makeState("v1914-power-grid-overload-zero");
+    const zeroOnlyOperationId = moveCorpCardToHq(
+      zeroOnly,
+      "onr_v1_299_power-grid-overload",
+    );
+    zeroOnly.runner.tags = 1;
+    zeroOnly = apply(
+      zeroOnly,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    zeroOnly = apply(
+      zeroOnly,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    zeroOnly.corp.credits = 0;
+    zeroOnly = apply(
+      zeroOnly,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.cardId === zeroOnlyOperationId &&
+        action.payload?.hardwareTrashByCounterTrashCount === 0,
+    );
+    expect(zeroOnly.pendingChoice).toBeUndefined();
+    expect(zeroOnly.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      hardwareTrashByCounterTrashCount: 0,
+      trashedHardwareCount: 0,
+    });
 
     let rdOnly = makeState("v1914-power-grid-overload-rd-only");
     const rdOnlyInterfaceId = installRunnerHardwareForTest(
@@ -1035,7 +1072,17 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) => action.actionId === rdOnlyAction.actionId,
     );
-    expect(rdOnly.pendingChoice).toBeUndefined();
+    expect(rdOnly.pendingChoice).toMatchObject({
+      side: "corp",
+      minSelections: 1,
+      maxSelections: 1,
+      selectionOrdering: "ordered",
+    });
+    const rdOnlyTargetOption = rdOnly.pendingChoice?.options.find(
+      (option) => option.value === rdOnlyInterfaceId,
+    );
+    if (!rdOnlyTargetOption) throw new Error("Missing hardware trash option");
+    rdOnly = applyChoices(rdOnly, "corp", [rdOnlyTargetOption.id]);
     expect(rdOnly.runner.heap).toContain(rdOnlyInterfaceId);
     expect(rdOnly.runner.rig.hardware).toContain(rdOnlyCyberneticsId);
 
@@ -1078,8 +1125,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       powerGridActions.map(
         (action) => action.payload?.hardwareTrashByCounterTrashCount,
       ),
-    ).toEqual([1, 2]);
+    ).toEqual([0, 1, 2]);
     expect(powerGridActions.map((action) => action.costs)).toEqual([
+      [{ clicks: 1, credits: 0 }],
       [{ clicks: 1, credits: 1 }],
       [{ clicks: 1, credits: 2 }],
     ]);
@@ -1094,8 +1142,16 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       })),
     ).toEqual([
       {
+        xValue: 0,
+        xMinimum: 0,
+        xMaximum: 2,
+        xUpperBound: 2,
+        xCreditsPerUnit: 1,
+        variableCostKind: "printed_play_cost",
+      },
+      {
         xValue: 1,
-        xMinimum: 1,
+        xMinimum: 0,
         xMaximum: 2,
         xUpperBound: 2,
         xCreditsPerUnit: 1,
@@ -1103,7 +1159,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       },
       {
         xValue: 2,
-        xMinimum: 1,
+        xMinimum: 0,
         xMaximum: 2,
         xUpperBound: 2,
         xCreditsPerUnit: 1,
@@ -1112,9 +1168,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     ]);
     expect(
       new Set(powerGridActions.map((action) => action.actionId)).size,
-    ).toBe(2);
+    ).toBe(3);
 
-    const trashTwo = powerGridActions[1]!;
+    const trashTwo = powerGridActions[2]!;
     const staleHash = hashState(state);
     expect(
       applyAction(state, {
@@ -1150,12 +1206,28 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     });
     expect(xTwoResult.ok).toBe(true);
     if (!xTwoResult.ok) throw new Error(xTwoResult.error.message);
-    const xTwoState = xTwoResult.state;
+    let xTwoState = xTwoResult.state;
     expect(xTwoState.corp.credits).toBe(creditsBeforeXTwo - 2);
-    expect(xTwoState.pendingChoice).toBeUndefined();
+    expect(xTwoState.pendingChoice).toMatchObject({
+      minSelections: 2,
+      maxSelections: 2,
+      selectionOrdering: "ordered",
+    });
+    const xTwoOptions = xTwoState.pendingChoice?.options;
+    if (!xTwoOptions || xTwoOptions.length !== 2)
+      throw new Error("Missing ordered hardware trash options");
+    xTwoState = applyChoices(
+      xTwoState,
+      "corp",
+      xTwoOptions.map((option) => option.id).reverse(),
+    );
     expect(xTwoState.runner.heap).toEqual(
       expect.arrayContaining([rdInterfaceId, simpleHardwareId]),
     );
+    expect(xTwoState.runner.heap.slice(-2)).toEqual([
+      simpleHardwareId,
+      rdInterfaceId,
+    ]);
     const xTwoReplay = replayEvents(
       xTwoInitial,
       xTwoState.eventLog.slice(xTwoReplayStart),
@@ -1185,6 +1257,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       minSelections: 1,
       maxSelections: 1,
       visibility: "public",
+      selectionOrdering: "ordered",
     });
     expect(
       state.pendingChoice?.options.map((option) => option.value).sort(),

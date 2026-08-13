@@ -274,6 +274,7 @@ export function pushActivatedCardImplementationActionsForTiming(
         sourceCardId,
         moveAdvancementEffect.source,
         moveAdvancementEffect.maxAmount,
+        moveAdvancementEffect.minimumAmount ?? 1,
       ) === 0
     )
       continue;

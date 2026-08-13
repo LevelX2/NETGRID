@@ -276,8 +276,8 @@ function pendingChoiceHost(
       resolveRunnerDrawSequenceChoice: unexpected(
         "resolveRunnerDrawSequenceChoice",
       ),
-      resolveHardwareTrashByCounterChoice: unexpected(
-        "resolveHardwareTrashByCounterChoice",
+      resolveRunnerInstalledMultiTrashChoice: unexpected(
+        "resolveRunnerInstalledMultiTrashChoice",
       ),
       resolveAdvancementPlacementChoice: unexpected(
         "resolveAdvancementPlacementChoice",

@@ -56,14 +56,6 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "run_punish",
-      },
-      {
-        kind: "plan_role",
-        role: "economy",
-      },
-      {
         kind: "strategic_role",
         role: "defensive_tool",
       },
@@ -80,11 +72,6 @@ export const cardSpec = {
         confidence: "medium",
         rationale:
           "Operations Semantic Review v2: ice_rearrange_conceal / glacier_support.",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
       },
     ],
     capabilities: [],

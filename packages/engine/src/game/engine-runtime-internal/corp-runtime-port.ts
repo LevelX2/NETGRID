@@ -50,22 +50,17 @@ export type CorpRuntimePort = TurnCorpRuntimePort & {
     state: GameState,
     legalAction: LegalAction,
   ) => void;
-  startHardwareTrashByCounterChoice: (
+  resolveTaggedRunnerResourceMultiTrashOperation: (
     state: GameState,
-    eligibleHardwareIds: CardInstanceId[],
-    trashCount: number,
     legalAction: LegalAction,
+    minimumTargets: number,
+    maximumTargets: number,
+    selectionOrdering: "ordered" | "unordered",
   ) => void;
-  hardwareTrashByCounterTrashCountFromChoiceSource: (source: string) => number;
-  resolveHardwareTrashByCounterChoice: (
+  resolveRunnerInstalledMultiTrashChoice: (
     state: GameState,
     legalAction: LegalAction,
     playerAction: PlayerAction,
-  ) => void;
-  trashHardwareByCounter: (
-    state: GameState,
-    hardwareIds: CardInstanceId[],
-    legalAction: LegalAction,
   ) => void;
   advancementPlacementLegalActions: (
     state: GameState,

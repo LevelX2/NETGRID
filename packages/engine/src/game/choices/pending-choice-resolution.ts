@@ -43,7 +43,7 @@ export type PendingChoiceResolutionHost = {
     resolveStrategicPlanningGroupDrawChoice: HostFn<void>;
     resolveCrashEverettDrawChoice: HostFn<void>;
     resolveRunnerDrawSequenceChoice: HostFn<void>;
-    resolveHardwareTrashByCounterChoice: HostFn<void>;
+    resolveRunnerInstalledMultiTrashChoice: HostFn<void>;
     resolveAdvancementPlacementChoice: HostFn<void>;
     resolveDerezRezzedBlackIceChoice: HostFn<void>;
     resolvePayRezCostToTrashRezzedIceChoice: HostFn<void>;
@@ -178,8 +178,8 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveCrashEverettDrawChoice;
   const resolveRunnerDrawSequenceChoice =
     host.hiddenZone.resolveRunnerDrawSequenceChoice;
-  const resolveHardwareTrashByCounterChoice =
-    host.hiddenZone.resolveHardwareTrashByCounterChoice;
+  const resolveRunnerInstalledMultiTrashChoice =
+    host.hiddenZone.resolveRunnerInstalledMultiTrashChoice;
   const resolveAdvancementPlacementChoice =
     host.hiddenZone.resolveAdvancementPlacementChoice;
   const resolveDerezRezzedBlackIceChoice =
@@ -576,11 +576,10 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith(
-      "card_implementation.installed_hardware_trash_by_counter",
-    )
+    state.pendingChoice.source ===
+    "card_implementation.runner_installed_multi_trash"
   ) {
-    resolveHardwareTrashByCounterChoice(state, legalAction, playerAction);
+    resolveRunnerInstalledMultiTrashChoice(state, legalAction, playerAction);
     return;
   }
   if (

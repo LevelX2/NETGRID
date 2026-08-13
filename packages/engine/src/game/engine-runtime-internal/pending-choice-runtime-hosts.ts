@@ -734,8 +734,8 @@ export function createPendingChoiceRuntimeHosts(
         resolveStrategicPlanningGroupDrawChoice,
         resolveCrashEverettDrawChoice: deps.resolveCrashEverettDrawChoice,
         resolveRunnerDrawSequenceChoice: deps.resolveRunnerDrawSequenceChoice,
-        resolveHardwareTrashByCounterChoice:
-          deps.resolveHardwareTrashByCounterChoice,
+        resolveRunnerInstalledMultiTrashChoice:
+          deps.resolveRunnerInstalledMultiTrashChoice,
         resolveAdvancementPlacementChoice:
           deps.resolveAdvancementPlacementChoice,
         resolveDerezRezzedBlackIceChoice,

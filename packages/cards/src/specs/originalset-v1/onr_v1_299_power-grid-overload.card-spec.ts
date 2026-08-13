@@ -37,7 +37,7 @@ export const cardSpec = {
       },
       playCost: {
         kind: "variable_x",
-        minimumX: 1,
+        minimumX: 0,
         creditsPerX: 1,
         maximumX: {
           kind: "context",
@@ -95,6 +95,12 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "punish.payoff",
         use: "punish.payoff",
+      },
+      {
+        kind: "target_preference",
+        purpose: "trash_tagged_runner_hardware",
+        preferences: ["use_choice_option_with_visible_board_payoff"],
+        avoid: ["hidden_info_dependent_choice"],
       },
     ],
     capabilities: [

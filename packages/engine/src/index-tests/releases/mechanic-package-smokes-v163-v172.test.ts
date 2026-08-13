@@ -1887,14 +1887,34 @@ describe("V1.7.2 Mechanikpaket F", () => {
         sourceDefinition(state, action) ===
           "onr_v1_286_corporate-detective-agency",
     );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      minSelections: 0,
+      maxSelections: 2,
+      selectionOrdering: "unordered",
+    });
+    const declineAll = applyChoices(structuredClone(state), "corp", []);
+    expect(declineAll.runner.rig.resources).toHaveLength(3);
+    expect(declineAll.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      trashedResourceCount: 0,
+    });
+    const selectedResourceOptions = state.pendingChoice?.options.slice(0, 2);
+    if (!selectedResourceOptions || selectedResourceOptions.length !== 2)
+      throw new Error("Missing Corporate Detective Agency resource options");
+    state = applyChoices(
+      state,
+      "corp",
+      selectedResourceOptions.map((option) => option.id),
+    );
 
     expect(state.runner.rig.resources).toHaveLength(1);
     expect(
       state.runner.heap.filter((cardId) => resourcesBefore.includes(cardId)),
     ).toHaveLength(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
-      cardDefinitionId: "onr_v1_286_corporate-detective-agency",
+      actionType: "resolve_choice",
+      trashedResourceCount: 2,
     });
   });
 

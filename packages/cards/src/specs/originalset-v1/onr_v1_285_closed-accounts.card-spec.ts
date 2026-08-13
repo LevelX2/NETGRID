@@ -66,14 +66,6 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
-        kind: "plan_role",
-        role: "recover_economy",
-      },
-      {
         kind: "strategic_role",
         role: "punish_payoff",
       },
@@ -102,18 +94,8 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
-        kind: "tactic_interpretation",
         signal: "punish.payoff",
         use: "punish.payoff",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "high",
       },
     ],
     capabilities: [

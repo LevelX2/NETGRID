@@ -61,7 +61,7 @@ export const cardSpec = {
         kind: "target_preference",
         purpose: "install_best_legal_target",
         preferences: [
-          "high_install_cost_or_memory",
+          "best_cards_for_current_plan",
           "central_or_remote_plan_enabler",
         ],
         avoid: ["hidden_info_dependent_choice"],

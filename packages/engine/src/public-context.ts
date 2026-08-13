@@ -780,6 +780,12 @@ export function publicContextForAction(
       "hardwareTrashByCounterTrashCount",
       "hardwareTrashByCounterChoiceOpened",
       "eligibleHardwareCount",
+      "eligibleResourceCount",
+      "runnerInstalledMultiTrashChoiceOpened",
+      "runnerInstalledMultiTrashMinimumTargets",
+      "runnerInstalledMultiTrashMaximumTargets",
+      "runnerInstalledMultiTrashOrdering",
+      "runnerInstalledMultiTrashTargetCount",
       "trashedHardwareCount",
       "trashedHardwareDefinitionIds",
       "runnerRunAttemptsLastTurn",
@@ -955,6 +961,7 @@ export function publicContextForAction(
       context.movedToGripCount = legalAction.payload.movedToGripCount;
     if (typeof legalAction.payload.arrangedCount === "number")
       context.arrangedCount = legalAction.payload.arrangedCount;
+    if (legalAction.payload.reorderNoOp === true) context.reorderNoOp = true;
     if (typeof legalAction.payload.trashedCount === "number")
       context.trashedCount = legalAction.payload.trashedCount;
     for (const key of [
@@ -1476,8 +1483,17 @@ export function publicContextForAction(
     "hardwareTrashByCounterTrashCount",
     "hardwareTrashByCounterChoiceOpened",
     "eligibleHardwareCount",
+    "eligibleResourceCount",
+    "runnerInstalledMultiTrashChoiceOpened",
+    "runnerInstalledMultiTrashMinimumTargets",
+    "runnerInstalledMultiTrashMaximumTargets",
+    "runnerInstalledMultiTrashOrdering",
+    "runnerInstalledMultiTrashTargetCount",
     "trashedHardwareCount",
     "trashedHardwareDefinitionIds",
+    "trashedResourceCount",
+    "trashedResourceDefinitionIds",
+    "movedAdvancementCounters",
     "creditsLost",
     "tagsAdded",
     "runnerTagsAfter",

@@ -1529,6 +1529,8 @@ export function configureFlowRuntimeBootstrap({
       removeFromAllZones,
       trashRunnerInstalledCardToHeap:
         runtimePorts.trashRunnerInstalledCardToHeap,
+      trashRunnerInstalledCardsToHeapBatch:
+        runtimePorts.trashRunnerInstalledCardsToHeapBatch,
       returnRunnerInstalledCardToGrip:
         runtimePorts.returnRunnerInstalledCardToGrip,
     },

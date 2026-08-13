@@ -2456,7 +2456,7 @@
         },
         {
           "cardId": "onr_v1_287_datapool-by-zetatech",
-          "title": "Datapool by Zetatech",
+          "title": "Datapool® by Zetatech",
           "spotcheckStatus": "completed",
           "result": "engine_ok_tagged_two_tags_payload_revalidation_hardened",
           "followUpStatus": "fixed_and_tested"

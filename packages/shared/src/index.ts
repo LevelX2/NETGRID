@@ -428,6 +428,10 @@ export type RestrictedActionGrantState = {
     limit: number;
     appliesTo: "run_icebreaker_or_link";
   };
+  conversions?: Array<{
+    actionType: ActionType;
+    requiredActions: number;
+  }>;
   cleanupTiming: "side_turn_end" | "side_turn_start" | "on_remaining_zero";
 };
 
@@ -886,6 +890,7 @@ export type ChoiceRequest = {
   options: ChoiceOption[];
   minSelections: number;
   maxSelections: number;
+  selectionOrdering?: "ordered" | "unordered";
   stateVersion: number;
   visibility: EventVisibilityClass;
   stackSearchResolution?: StackSearchResolution;
@@ -1896,6 +1901,22 @@ export type GameState = {
     targetCardId: CardInstanceId;
     runId: string;
     amount: number;
+  };
+  pendingRunnerInstalledMultiTrash?: {
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    effectKind:
+      | "trash_runner_resources_if_tagged"
+      | "installed_hardware_trash_by_counter";
+    targetCardType: "resource" | "hardware";
+    minimumTargets: number;
+    maximumTargets: number;
+    selectionOrdering: "ordered" | "unordered";
+    excludesSubtype?: string;
+    eligibleTargets: Array<{
+      cardInstanceId: CardInstanceId;
+      choiceValue: string;
+    }>;
   };
   pendingCorpDraw?: CorpDrawTransaction;
   runnerDrawSequence?: RunnerDrawSequence;

@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId("onr_v1_287_datapool-by-zetatech"),
-    title: "Datapool by Zetatech",
+    title: "Datapool® by Zetatech",
     side: "corp",
     cardType: "operation",
   },
@@ -66,20 +66,8 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "punish_tagged_runner",
-      },
-      {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
         kind: "strategic_role",
         role: "enabler",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.tag_trace_punish",
       },
       {
         kind: "line_support",
@@ -95,16 +83,6 @@ export const cardSpec = {
         rationale:
           "Operations Semantic Review v2: tag_snowball_followup. Review-v2-Rolle tag_snowball_followup wird als validierbare Hauptrolle enabler mit roleDetail gespeichert.",
       },
-      {
-        kind: "tactic_interpretation",
-        signal: "tag.payoff",
-        use: "tag.payoff",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "punish.payoff",
-        use: "punish.payoff",
-      },
     ],
     capabilities: [
       {
@@ -116,14 +94,6 @@ export const cardSpec = {
             role: "anchor_evidence",
             roleDetail: "anchor_evidence_tag_source",
             evidenceAnchor: "tag.source",
-            confidence: "high",
-          },
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "payoff_anchor",
-            roleDetail: "payoff_anchor_tag_payoff",
-            evidenceAnchor: "tag.payoff",
             confidence: "high",
           },
         ],

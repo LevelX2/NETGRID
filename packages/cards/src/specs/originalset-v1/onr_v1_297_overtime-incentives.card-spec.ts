@@ -80,11 +80,6 @@ export const cardSpec = {
         rationale:
           "Immediate action capacity can complete an otherwise click-blocked same-turn score-conversion path; legality and the gained amount remain Engine/LegalAction facts.",
       },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "high",
-      },
     ],
     capabilities: [],
   },

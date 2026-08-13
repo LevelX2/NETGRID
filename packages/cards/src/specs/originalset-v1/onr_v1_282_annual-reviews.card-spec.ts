@@ -63,10 +63,6 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "recover_economy",
-      },
-      {
         kind: "tactic_interpretation",
         signal: "draw.card",
         use: "draw.card",

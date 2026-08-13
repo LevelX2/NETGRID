@@ -49,21 +49,15 @@ export const cardSpec = {
       ),
       addressability: ["plan", "action", "quote", "debug"],
       kind: "trash_runner_resources_if_tagged",
+      min: 0,
       max: 2,
+      selectionOrdering: "unordered",
       visibility: "public",
     },
   },
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
-        kind: "plan_role",
-        role: "protect_hq",
-      },
       {
         kind: "strategic_role",
         role: "punish_payoff",
@@ -95,6 +89,12 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "punish.payoff",
         use: "punish.payoff",
+      },
+      {
+        kind: "target_preference",
+        purpose: "trash_tagged_runner_resources",
+        preferences: ["use_choice_option_with_visible_board_payoff"],
+        avoid: ["hidden_info_dependent_choice"],
       },
     ],
     capabilities: [

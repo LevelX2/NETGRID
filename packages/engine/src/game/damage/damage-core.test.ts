@@ -28,7 +28,10 @@ import {
   eventModificationStageCandidates,
 } from "./prevention-window";
 import { collectRuntimeTrashPreventionCandidates } from "./prevention-sources";
-import { createRunnerInstalledTrashImminentEvent } from "./damage-event-resolution";
+import {
+  createRunnerInstalledTrashImminentEvent,
+  resolveRunnerInstalledTrashImminentEvent,
+} from "./damage-event-resolution";
 
 describe("damage core", () => {
   afterEach(() => {
@@ -336,6 +339,54 @@ describe("damage core", () => {
       selectablePreventTrashTargets: true,
       maxPreventedTrashTargets: 1,
       preventedTrashTargetIds: [firstTargetId, secondTargetId],
+    });
+  });
+
+  it("preserves ordered surviving targets in one batch after trash prevention", () => {
+    const targetIds = ["hardware_a", "hardware_b", "hardware_c"].map(
+      (id) => id as CardInstanceId,
+    );
+    const state = minimalState({
+      cardInstances: Object.fromEntries(
+        targetIds.map((cardId) => [
+          cardId,
+          instance(cardId, `${cardId}_def`, "runner", "identity"),
+        ]),
+      ),
+      runnerGrip: [],
+    });
+    state.runner.rig.hardware = [...targetIds];
+    const batches: CardInstanceId[][] = [];
+    const host = testHost();
+    host.zones.trashRunnerInstalledCardsToHeapBatch = (next, cardIds) => {
+      batches.push([...cardIds]);
+      for (const cardId of cardIds) {
+        next.runner.rig.hardware = next.runner.rig.hardware.filter(
+          (candidate) => candidate !== cardId,
+        );
+        next.runner.heap.push(cardId);
+      }
+    };
+    configureDamageCoreHost(host);
+    const event = createRunnerInstalledTrashImminentEvent(
+      state,
+      [targetIds[2]!, targetIds[0]!, targetIds[1]!],
+      "installed_hardware_trash_by_counter",
+      "ordered_batch",
+    );
+    const legalAction = actionFor("corp", "resolve_choice");
+
+    resolveRunnerInstalledTrashImminentEvent(state, event, legalAction, [
+      targetIds[0]!,
+    ]);
+
+    expect(batches).toEqual([[targetIds[2], targetIds[1]]]);
+    expect(state.runner.heap).toEqual([targetIds[2], targetIds[1]]);
+    expect(legalAction.payload).toMatchObject({
+      preventedTrashCount: 1,
+      trashedHardwareCount: 2,
+      runnerInstalledMultiTrashTargetCount: 3,
+      runnerInstalledMultiTrashOrdering: "ordered",
     });
   });
 

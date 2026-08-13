@@ -59,6 +59,7 @@ export const cardSpec = {
             source: "chosen_card",
             target: "chosen_installed_advanceable_card",
             maxAmount: 3,
+            minimumAmount: 0,
             visibility: "public",
           },
         ],
@@ -85,6 +86,15 @@ export const cardSpec = {
         confidence: "high",
         rationale:
           "Operations Semantic Review v2: advancement_counter_transfer / fast_advance.",
+      },
+      {
+        kind: "target_preference",
+        purpose: "move_advancement_counters_for_score_conversion",
+        preferences: [
+          "best_cards_for_current_plan",
+          "prefer_option_that_protects_agenda_or_remote_pressure",
+        ],
+        avoid: ["option_with_no_visible_current_payoff"],
       },
     ],
     capabilities: [],

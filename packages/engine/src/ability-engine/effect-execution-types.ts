@@ -188,6 +188,7 @@ export type CardEffectExecutionContext = {
   startMoveAdvancementCounters?: (
     source: "chosen_card" | "source_card",
     maxAmount: number | "all",
+    minimumAmount: 0 | 1,
   ) => CardEffectAdvancementChoiceResult;
   addCurrentEncounterAdditionalSubroutine?: (input: {
     subroutineKind: "end_the_run" | "end_the_run_unless_runner_pays";

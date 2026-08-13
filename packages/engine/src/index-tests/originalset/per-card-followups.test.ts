@@ -1878,7 +1878,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
                 reason: "card_resolver",
                 runnerTagsAfter: 3,
                 sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
-                sourceTitle: "Datapool by Zetatech",
+                sourceTitle: "Datapool® by Zetatech",
               }),
             ],
           });

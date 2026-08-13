@@ -1118,10 +1118,57 @@ Status: umgesetzt und durch fokussierte Gates verifiziert.
   vervollständigt ausschließlich die bereits ausgelöste Engine-Fortsetzung
   und trifft keine Server-, Karten- oder Strategieentscheidung.
 
+## Block 015 – Karten 281 bis 300, geordneter Batch-Trash und Aktionskapazität
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### Multi-Card-Trash
+
+- Corporate Detective Agency bindet jetzt vor der Auflösung eine Corp-Wahl
+  von null bis zwei Runner-Ressourcen. Verdeckte Ressourcen werden dabei nur
+  über öffentliche Slot-Identitäten angeboten; ihre Kartenidentität fließt
+  weder in die Choice noch in die AI-Bewertung ein.
+- Power Grid Overload erlaubt den regelkonformen Wert X = 0 auch ohne
+  installiertes Hardwareziel. Für X > 0 bindet die Corp genau X
+  Nicht-Cybernetics-Hardwarekarten in der gewählten Trash-Reihenfolge.
+- Beide Karten verwenden denselben Runner-Installed-Multi-Trash-Vertrag. Die
+  vollständige Zielmenge durchläuft ein gemeinsames Trash-Imminent- und
+  Prevention-/Replacement-Fenster; danach verlassen alle nicht verhinderten
+  Primärkarten das Spiel, bevor Leave-play-, Hosted-Card- und Memory-Folgen
+  abgearbeitet werden. Damit bleiben insbesondere Time to Collect und
+  Umbrella Policy zuständig, ohne Kartensonderresolver zu benötigen.
+
+### Aktionskapazität und Nullvarianten
+
+- Edgerunner, Inc., Temps trägt im typisierten Restricted-Action-Grant die
+  alternative Konversion seiner drei ungenutzten Installationsaktionen. Sind
+  alle drei noch vorhanden, kann `corp.respond_to_virus_pressure` sie als
+  vollständige Kapazität für einen Virus-Purge aufgeben; diese Route zählt
+  bereits für die Spiellegalität der Operation.
+- Planning Consultants bleibt bei null oder einer Karte in R&D legal und
+  beendet die private Reorder-Fortsetzung ohne Choice als No-op.
+- Für Falsified-Transactions Expert gilt die projektweit konsistente
+  normative Entscheidung, dass `up to three` einschließlich null gilt. Der
+  CardSpec trägt `minimumAmount: 0`, und die Engine bietet die ausdrückliche
+  Nullauswahl auch ohne positiven Transfer an.
+
+### Kanonische Daten und Planning-Semantik
+
+- Karte 287 heißt sichtbar `Datapool® by Zetatech`; technische Definition-ID
+  und Printing-ID bleiben stabil.
+- Draw, gegnerische Creditvernichtung und Action Capacity werden nicht mehr
+  als eigene Economy-Recovery fehlklassifiziert. Tag-Quellen bleiben von
+  Tag-Payoffs getrennt; New Blood trägt nur ICE-Control-/Glacier-Support.
+- Operationen 292 und 300 besitzen keine installierte Remote-Rolle. Die
+  TargetProfiles von 286, 289, 291, 292, 299 und 300 beziehen sich auf
+  öffentlich beziehungsweise controller-bekannte Zielwerte und den bereits
+  gewählten Plan. Es entstand kein Choice-Resolver mit eigener Server-,
+  Karten- oder Strategieautorität.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 281 bis 300.
+- Als nächster regulärer Nutzerblock folgen die Karten 301 bis 320.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1282,3 +1329,17 @@ Migration-Report-JSONs nicht startfähig. Der ebenfalls bereits auf aktuellem
 Legacy-Bindungen; beide Baselinefehler sind unverändert und wurden nicht in
 diesen Kartenblock gezogen. Aktuelles Hint-Artefakt und Review-Fixture sind
 für alle 20 Karten gezielt synchronisiert.
+
+Für Block 015 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check sowie die fokussierten Multi-Trash-, Action-Capacity-,
+Advancement-Move-, Hidden-Zone-, View- und AI-Compiler-Verträge grün. Die
+Evidence umfasst null bis zwei Corporate-Detective-Agency-Ziele, X = 0 ohne
+Hardware, geordnete Power-Grid-Overload-Ziele, Batch-Trash nach Prävention,
+den Edgerunner-Purge sowie Planning-Consultants- und Falsified-Transactions-
+Nullvarianten. Der AI-Typecheck und der Originalset-AI-Golden-Test bleiben
+unabhängig vom Block wegen ihrer statischen Imports bereits entfernter
+historischer Review-JSONs nicht startfähig; Hint-Artefakt und die Review-
+Fixture für Karten 281–300 sind gezielt synchronisiert. Ein unveränderter
+Trace-Longtail-Test erwartet bei Microtech ’Trode Set weiterhin einen
+Basis-Link, obwohl dessen aktuelle CardSpec keinen Link-Modifikator besitzt;
+dieser fachfremde Baselinepunkt wurde nicht in Block 015 gezogen.

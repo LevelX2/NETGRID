@@ -324,7 +324,7 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
-  it("describes Datapool by Zetatech through a tagged on-play add_tags effect", () => {
+  it("describes Datapool® by Zetatech through a tagged on-play add_tags effect", () => {
     expect(
       cardImplementationForDefinitionId("onr_v1_287_datapool-by-zetatech")
         ?.abilities,

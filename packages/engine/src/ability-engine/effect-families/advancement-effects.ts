@@ -1,6 +1,8 @@
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeAdvancementEffect(input: CardEffectFamilyInput): boolean {
+export function executeAdvancementEffect(
+  input: CardEffectFamilyInput,
+): boolean {
   const { context, effect, publicPayload, runtime } = input;
 
   switch (effect.kind) {
@@ -29,7 +31,10 @@ export function executeAdvancementEffect(input: CardEffectFamilyInput): boolean 
       return true;
     }
     case "move_advancement_counters": {
-      runtime.assertPublicVisibility("move_advancement_counters", effect.visibility);
+      runtime.assertPublicVisibility(
+        "move_advancement_counters",
+        effect.visibility,
+      );
       if (effect.target !== "chosen_installed_advanceable_card")
         throw new Error(
           "move_advancement_counters target must be chosen_installed_advanceable_card.",
@@ -48,6 +53,7 @@ export function executeAdvancementEffect(input: CardEffectFamilyInput): boolean 
       const choiceResult = context.startMoveAdvancementCounters(
         effect.source,
         effect.maxAmount,
+        effect.minimumAmount ?? 1,
       );
       runtime.mergePublicPayload(publicPayload, choiceResult.publicPayload);
       return true;

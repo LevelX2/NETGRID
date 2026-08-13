@@ -59,6 +59,9 @@ export function visibleChoice(
       }),
       minSelections: choice.minSelections,
       maxSelections: choice.maxSelections,
+      ...(choice.selectionOrdering
+        ? { selectionOrdering: choice.selectionOrdering }
+        : {}),
       stateVersion: choice.stateVersion,
       visibility: choice.visibility,
       ...(stackSearchResolution ? { stackSearchResolution } : {}),

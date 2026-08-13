@@ -50,6 +50,11 @@ export type DamageCoreHost = {
       cardId: CardInstanceId,
       legalAction?: LegalAction,
     ) => void;
+    trashRunnerInstalledCardsToHeapBatch?: (
+      state: GameState,
+      cardIds: readonly CardInstanceId[],
+      legalAction?: LegalAction,
+    ) => void;
     returnRunnerInstalledCardToGrip: (
       state: GameState,
       cardId: CardInstanceId,
@@ -162,6 +167,21 @@ export function trashRunnerInstalledCardToHeap(
     cardId,
     legalAction,
   );
+}
+
+export function trashRunnerInstalledCardsToHeapBatch(
+  state: GameState,
+  cardIds: readonly CardInstanceId[],
+  legalAction?: LegalAction,
+): void {
+  const batch =
+    requireDamageCoreHost().zones.trashRunnerInstalledCardsToHeapBatch;
+  if (batch) {
+    batch(state, cardIds, legalAction);
+    return;
+  }
+  for (const cardId of cardIds)
+    trashRunnerInstalledCardToHeap(state, cardId, legalAction);
 }
 
 export function returnRunnerInstalledCardToGrip(

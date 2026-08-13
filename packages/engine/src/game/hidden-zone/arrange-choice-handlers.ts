@@ -391,8 +391,16 @@ export function startCorpRdTopReorderChoice(
   if (!isCorpRdTopReorderSource(host, sourceCardId))
     throw new Error("Die R&D-Reorder-Quelle passt nicht zur Karte.");
   const topCards = host.state.corp.rd.slice(0, 5);
-  if (topCards.length < 2)
-    throw new Error("Nicht genug Karten fuer die R&D-Reorder-Choice.");
+  if (topCards.length < 2) {
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+      arrangedCount: topCards.length,
+      reorderNoOp: true,
+    };
+    return;
+  }
   host.state.pendingChoice = {
     choiceId: `v1922_corp_rd_arrange_top5_${host.state.stateVersion + 1}`,
     side: "corp",

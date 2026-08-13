@@ -61,6 +61,7 @@ export type TurnCorpRuntimePort = {
     sourceCardId: CardInstanceId,
     sourceMode: MoveAdvancementSourceMode,
     maxAmount: number | "all",
+    minimumAmount?: 0 | 1,
   ) => Array<{ id: string; label: string; publicLabel: string; value: string }>;
   startCardImplementationMoveAdvancementChoice: (
     state: GameState,
@@ -69,6 +70,7 @@ export type TurnCorpRuntimePort = {
     sourceDefinitionId: CardDefinitionId,
     sourceMode: MoveAdvancementSourceMode,
     maxAmount: number | "all",
+    minimumAmount?: 0 | 1,
   ) => { publicPayload?: Record<string, string | number | boolean> };
   resolveCardImplementationMoveAdvancementChoice: (
     state: GameState,

@@ -7,6 +7,7 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import { CARD_VIRUS_COUNTER_TYPES } from "@netgrid/shared";
 import type {
   CardCorpUtilityImplementation,
   CardEffectImplementation,
@@ -21,8 +22,10 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 import {
   fixedPlayCostCredits,
   minimumPlayCostCredits,
+  playCostForDefinition,
 } from "../payment/play-cost";
 import { definitionFor } from "../state/card-server-lookup";
+import { cardCounter } from "../state/turn-flags-counters";
 import {
   RESTRICTED_ACTION_GRANT_KEYS,
   setRestrictedActionGrant,
@@ -127,6 +130,7 @@ export type CorpOperationResolutionHost = {
       sourceCardId: CardInstanceId,
       source: unknown,
       maxAmount: number | "all",
+      minimumAmount?: 0 | 1,
     ) => unknown[];
     resolveAgendaCounterOperation: (
       legalAction: LegalAction,
@@ -140,6 +144,12 @@ export type CorpOperationResolutionHost = {
   operations: {
     hardwareTrashByCounterEligibleHardwareIds: () => CardInstanceId[];
     resolveHardwareTrashByCounterOperation: (legalAction: LegalAction) => void;
+    resolveTaggedRunnerResourceMultiTrashOperation: (
+      legalAction: LegalAction,
+      minimumTargets: number,
+      maximumTargets: number,
+      selectionOrdering: "ordered" | "unordered",
+    ) => void;
   };
   cardImplementation: {
     canPlayPrintedCostOnPlay: (definition: CardDefinition) => boolean;
@@ -235,8 +245,12 @@ export function canPlayCorpUtilityOperation(
 ): boolean {
   switch (utility.kind) {
     case "gain_restricted_install_actions":
-      return host.state.corp.hq.some((cardId) =>
-        host.cards.isCorpInstallableCardType(definitionFor(host.state, cardId)),
+      return (
+        host.state.corp.hq.some((cardId) =>
+          host.cards.isCorpInstallableCardType(
+            definitionFor(host.state, cardId),
+          ),
+        ) || hasVirusCountersToPurge(host.state)
       );
     case "x_future_actions_and_credit_forfeit":
       return host.state.corp.credits >= utility.costMultiplier;
@@ -259,19 +273,24 @@ export function canPlayCorpUtilityOperation(
         )
       );
     case "corp_rd_top_reorder":
-      return host.state.corp.rd.length >= 2;
+      return true;
     case "encounter_tag":
       return host.corp.runnerStoleAgendaLastTurn();
     case "gain_credits_from_stolen_agenda_advancement_history":
       return host.corp.runnerStoleAgendaLastTurn();
     case "trash_runner_resources_if_tagged":
       return host.state.runner.tags > 0;
-    case "installed_hardware_trash_by_counter":
+    case "installed_hardware_trash_by_counter": {
+      const playCost = playCostForDefinition(_definition);
+      if (playCost.kind !== "variable_x") return false;
       return (
         host.state.runner.tags > 0 &&
-        host.state.corp.credits > 0 &&
-        host.operations.hardwareTrashByCounterEligibleHardwareIds().length > 0
+        (playCost.minimumX === 0 ||
+          (host.state.corp.credits >= playCost.creditsPerX &&
+            host.operations.hardwareTrashByCounterEligibleHardwareIds().length >
+              0))
       );
+    }
     case "runner_memory_limit_modifier_until_end_of_turn":
       return host.state.runner.tags > 0;
     default:
@@ -304,6 +323,12 @@ export function resolveCorpUtilityOperation(
           actionType: "install_card",
           remainingActions: utility.amount,
           costProfile: "extra_click",
+          conversions: [
+            {
+              actionType: "purge_virus_counters",
+              requiredActions: utility.amount,
+            },
+          ],
           cleanupTiming: "side_turn_end",
         },
       );
@@ -457,22 +482,15 @@ export function resolveCorpUtilityOperation(
     }
     case "trash_runner_resources_if_tagged": {
       host.runner.requireRunnerTagged();
-      const targetIds = host.state.runner.rig.resources
-        .slice()
-        .sort()
-        .slice(0, utility.max);
-      const targetDefinitionIds = targetIds.map(
-        (cardId) => definitionFor(host.state, cardId).id,
+      host.operations.resolveTaggedRunnerResourceMultiTrashOperation(
+        legalAction,
+        utility.min,
+        utility.max,
+        utility.selectionOrdering,
       );
-      for (const cardId of targetIds) {
-        if (!host.state.runner.rig.resources.includes(cardId)) continue;
-        host.zones.trashRunnerInstalledCardToHeap(cardId);
-      }
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         v1951CorpUtilityAbility: "trash_runner_resources_if_tagged",
-        trashedResourceCount: targetIds.length,
-        trashedResourceDefinitionIds: targetDefinitionIds.join(","),
       };
       return;
     }
@@ -488,6 +506,22 @@ export function resolveCorpUtilityOperation(
     default:
       throw new Error("Diese Korp-Utility-Operation ist nicht spielbar.");
   }
+}
+
+function hasVirusCountersToPurge(state: GameState): boolean {
+  if (
+    Object.keys(state.cardInstances).some((cardId) =>
+      CARD_VIRUS_COUNTER_TYPES.some(
+        (counterType) =>
+          cardCounter(state, cardId as CardInstanceId, counterType) > 0,
+      ),
+    )
+  )
+    return true;
+  return [
+    ...Object.values(state.poxCountersByServer ?? {}),
+    ...Object.values(state.serverAgendaCostCountersByServer ?? {}),
+  ].some((amount) => Math.max(0, Math.floor(Number(amount ?? 0))) > 0);
 }
 
 export function hasPrintedCostOnPlayCardImplementation(
@@ -850,6 +884,7 @@ function onPlayCardImplementationChoicesAreAvailable(
         "" as CardInstanceId,
         effect.source,
         effect.maxAmount,
+        effect.minimumAmount ?? 1,
       ).length === 0
     )
       return false;

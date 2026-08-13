@@ -338,7 +338,7 @@ export function executeOnPlayCardImplementationAbility(
           amount,
           distribution,
         ),
-      startMoveAdvancementCounters: (source, maxAmount) =>
+      startMoveAdvancementCounters: (source, maxAmount, minimumAmount) =>
         deps.startMoveAdvancementCounters(
           state,
           legalAction,
@@ -346,6 +346,7 @@ export function executeOnPlayCardImplementationAbility(
           definition.id,
           source,
           maxAmount,
+          minimumAmount,
         ),
       rezInstalledIceWithLifecycleCounters: (input) =>
         deps.rezInstalledIceWithLifecycleCounters(

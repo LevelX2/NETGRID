@@ -1186,12 +1186,14 @@ export function configureCardRuntimeBootstrap() {
           sourceCardId,
           source,
           maxAmount,
+          minimumAmount,
         ) =>
           runtimePorts.moveAdvancementOptions(
             state,
             sourceCardId,
             source,
             maxAmount,
+            minimumAmount,
           ).length,
         discardRandomCorpHqCards: (state, sourceDefinitionId, count) =>
           runtimePorts.discardRandomCorpHqCards(

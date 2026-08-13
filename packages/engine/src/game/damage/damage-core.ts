@@ -144,6 +144,7 @@ export function openRunnerInstalledTrashPreventionWindow(
   legalAction: LegalAction,
   targetCardIds: CardInstanceId[],
   source: string,
+  resolutionMode: "sequential" | "ordered_batch" = "sequential",
 ): boolean {
   const installedTargets = targetCardIds.filter((cardId) =>
     runnerInstalledCardIds(state).includes(cardId),
@@ -157,6 +158,7 @@ export function openRunnerInstalledTrashPreventionWindow(
     state,
     [...new Set([...installedTargets, ...simultaneousProgramTargets])],
     source,
+    resolutionMode,
   );
   return openEventModificationWindow(state, event, legalAction);
 }

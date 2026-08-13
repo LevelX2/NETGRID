@@ -311,7 +311,7 @@ export function resolveActivatedCardImplementationAbility(
           amount,
           distribution,
         ),
-      startMoveAdvancementCounters: (source, maxAmount) =>
+      startMoveAdvancementCounters: (source, maxAmount, minimumAmount) =>
         deps.startMoveAdvancementCounters(
           state,
           legalAction,
@@ -319,6 +319,7 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.id,
           source,
           maxAmount,
+          minimumAmount,
         ),
       addCurrentEncounterAdditionalSubroutine: (input) =>
         deps.addCurrentEncounterAdditionalSubroutine(

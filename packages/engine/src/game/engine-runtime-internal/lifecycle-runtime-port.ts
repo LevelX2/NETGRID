@@ -29,6 +29,11 @@ export type LifecycleRuntimePort = {
     cardId: CardInstanceId,
     legalAction?: LegalAction,
   ) => void;
+  trashRunnerInstalledCardsToHeapBatch: (
+    state: GameState,
+    cardIds: readonly CardInstanceId[],
+    legalAction?: LegalAction,
+  ) => void;
   returnRunnerInstalledCardToGrip: (
     state: GameState,
     cardId: CardInstanceId,

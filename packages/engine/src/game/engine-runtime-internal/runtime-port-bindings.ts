@@ -70,10 +70,8 @@ export let hardwareTrashByCounterEligibleHardwareIds: RuntimePortGroups["corpRun
 export let hardwareTrashByCounterLegalActions: RuntimePortGroups["corpRuntimeResolvers"]["hardwareTrashByCounterLegalActions"];
 export let hardwareTrashByCounterTrashCountFromPayload: RuntimePortGroups["corpRuntimeResolvers"]["hardwareTrashByCounterTrashCountFromPayload"];
 export let resolveHardwareTrashByCounterOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveHardwareTrashByCounterOperation"];
-export let startHardwareTrashByCounterChoice: RuntimePortGroups["corpRuntimeResolvers"]["startHardwareTrashByCounterChoice"];
-export let hardwareTrashByCounterTrashCountFromChoiceSource: RuntimePortGroups["corpRuntimeResolvers"]["hardwareTrashByCounterTrashCountFromChoiceSource"];
-export let resolveHardwareTrashByCounterChoice: RuntimePortGroups["corpRuntimeResolvers"]["resolveHardwareTrashByCounterChoice"];
-export let trashHardwareByCounter: RuntimePortGroups["corpRuntimeResolvers"]["trashHardwareByCounter"];
+export let resolveTaggedRunnerResourceMultiTrashOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveTaggedRunnerResourceMultiTrashOperation"];
+export let resolveRunnerInstalledMultiTrashChoice: RuntimePortGroups["corpRuntimeResolvers"]["resolveRunnerInstalledMultiTrashChoice"];
 export let advancementPlacementLegalActions: RuntimePortGroups["corpRuntimeResolvers"]["advancementPlacementLegalActions"];
 export let resolveAgendaCounterOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveAgendaCounterOperation"];
 export let resolveAdvancementPlacementOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveAdvancementPlacementOperation"];
@@ -383,6 +381,7 @@ export let discardRandomCorpHqCards: RuntimePortGroups["lifecycleRuntime"]["disc
 export let trashRunnerInstalledProgram: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledProgram"];
 export let runnerProgramUsesMemory: RuntimePortGroups["lifecycleRuntime"]["runnerProgramUsesMemory"];
 export let trashRunnerInstalledCardToHeap: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledCardToHeap"];
+export let trashRunnerInstalledCardsToHeapBatch: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledCardsToHeapBatch"];
 export let returnRunnerInstalledCardToGrip: RuntimePortGroups["lifecycleRuntime"]["returnRunnerInstalledCardToGrip"];
 export let returnRunnerInstalledProgramsToGripForAccess: RuntimePortGroups["lifecycleRuntime"]["returnRunnerInstalledProgramsToGripForAccess"];
 export let trashCorpInstalledCardToArchives: RuntimePortGroups["lifecycleRuntime"]["trashCorpInstalledCardToArchives"];
@@ -551,13 +550,10 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.corpRuntimeResolvers.hardwareTrashByCounterTrashCountFromPayload;
   resolveHardwareTrashByCounterOperation =
     ports.corpRuntimeResolvers.resolveHardwareTrashByCounterOperation;
-  startHardwareTrashByCounterChoice =
-    ports.corpRuntimeResolvers.startHardwareTrashByCounterChoice;
-  hardwareTrashByCounterTrashCountFromChoiceSource =
-    ports.corpRuntimeResolvers.hardwareTrashByCounterTrashCountFromChoiceSource;
-  resolveHardwareTrashByCounterChoice =
-    ports.corpRuntimeResolvers.resolveHardwareTrashByCounterChoice;
-  trashHardwareByCounter = ports.corpRuntimeResolvers.trashHardwareByCounter;
+  resolveTaggedRunnerResourceMultiTrashOperation =
+    ports.corpRuntimeResolvers.resolveTaggedRunnerResourceMultiTrashOperation;
+  resolveRunnerInstalledMultiTrashChoice =
+    ports.corpRuntimeResolvers.resolveRunnerInstalledMultiTrashChoice;
   advancementPlacementLegalActions =
     ports.corpRuntimeResolvers.advancementPlacementLegalActions;
   resolveAgendaCounterOperation =
@@ -1108,6 +1104,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
   runnerProgramUsesMemory = ports.lifecycleRuntime.runnerProgramUsesMemory;
   trashRunnerInstalledCardToHeap =
     ports.lifecycleRuntime.trashRunnerInstalledCardToHeap;
+  trashRunnerInstalledCardsToHeapBatch =
+    ports.lifecycleRuntime.trashRunnerInstalledCardsToHeapBatch;
   returnRunnerInstalledCardToGrip =
     ports.lifecycleRuntime.returnRunnerInstalledCardToGrip;
   returnRunnerInstalledProgramsToGripForAccess =
