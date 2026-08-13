@@ -465,7 +465,7 @@ export type AiDecisionHistoricalAudit = {
   legalActions: {
     schemaVersion: "netgrid-historical-legal-actions-v1";
     actions: AiDecisionHistoricalLegalAction[];
-    selectedActionId: string;
+    selectedActionId?: string;
     actionSetSha256: string;
   };
   engineEvidence: {
@@ -474,12 +474,14 @@ export type AiDecisionHistoricalAudit = {
     stateVersion: number;
     matchVersion: number;
     rulesBaseline: RulesBaseline;
-    decisionEventId: string;
-    selectedActionId: string;
+    outcome?: "applied" | "failed_before_apply";
+    decisionEventId?: string;
+    eventAnchorId?: string;
+    selectedActionId?: string;
     validation: {
       actor: Side;
-      actionWasInHistoricalLegalActions: true;
-      engineApplyActionValidated: true;
+      actionWasInHistoricalLegalActions: true | "not_applicable";
+      engineApplyActionValidated: boolean;
       bindingFields: Array<
         | "side"
         | "actionId"
@@ -5716,6 +5718,7 @@ export class MultiplayerService {
           state,
           side,
           legalActions,
+          decisionInput,
           "choose",
           error,
         );
@@ -5871,6 +5874,7 @@ export class MultiplayerService {
     state: GameState,
     side: Side,
     legalActions: readonly LegalAction[],
+    decisionInput: AiDecisionInputWithDeckCapabilities,
     phase: AiDecisionFailurePhase,
     error: unknown,
   ): string | undefined {
@@ -5880,6 +5884,14 @@ export class MultiplayerService {
     const diagnosticCode = `ai_attempt_${record.match.matchId}_${decisionIndex}`;
     const createdAt = this.now();
     const failure = structuredAiDecisionFailure(error);
+    const snapshot = this.snapshotFor(
+      record.match.matchId,
+      state,
+      record.match.matchVersion,
+      `snap_ai_attempt_${decisionIndex}`,
+      false,
+    );
+    const beliefState = beliefCaptureFor(record, state, side);
     const turn =
       chronicleTurnNumberForEvent(
         record.eventLog.map((entry) => entry.publicPayload),
@@ -5912,20 +5924,21 @@ export class MultiplayerService {
           ].sort(),
           ...failure,
         },
+        historicalAudit: historicalFailureAuditFor(
+          state,
+          snapshot,
+          anchorEvent.eventId,
+          side,
+          legalActions,
+          beliefState,
+          decisionInput,
+        ),
       },
     };
     const traces = record.aiDecisionTraces ?? [];
     traces.push(trace);
     record.aiDecisionTraces = traces;
-    record.stateSnapshots.push(
-      this.snapshotFor(
-        record.match.matchId,
-        state,
-        record.match.matchVersion,
-        `snap_ai_attempt_${decisionIndex}`,
-        false,
-      ),
-    );
+    record.stateSnapshots.push(snapshot);
     return diagnosticCode;
   }
 
@@ -6912,6 +6925,7 @@ function structuredAiDecisionFailure(error: unknown): Record<string, unknown> {
   const planId = stringValue(details.planId);
   const step = stringValue(details.step) ?? stringValue(details.stepId);
   const route = stringValue(details.route);
+  const planResolution = structuredPlanResolutionFailure(details);
   return {
     error: {
       name,
@@ -6928,7 +6942,65 @@ function structuredAiDecisionFailure(error: unknown): Record<string, unknown> {
           },
         }
       : {}),
+    ...(planResolution ? { planResolution } : {}),
   };
+}
+
+function structuredPlanResolutionFailure(
+  details: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  const context =
+    details.context &&
+    typeof details.context === "object" &&
+    !Array.isArray(details.context)
+      ? (details.context as Record<string, unknown>)
+      : undefined;
+  if (!context) return undefined;
+  const code = stringValue(details.code);
+  const side = stringValue(context.side);
+  const timingPoint = stringValue(context.timingPoint);
+  const owner = stringValue(context.owner);
+  const removalCondition = stringValue(context.removalCondition);
+  const stateVersion = finiteNumber(context.stateVersion);
+  const legalActionTypes = stringArray(context.legalActionTypes);
+  const unresolvedActionIds = stringArray(context.unresolvedActionIds);
+  const planInstanceId = stringValue(context.planInstanceId);
+  const stepId = stringValue(context.stepId);
+  const candidateCount = finiteNumber(context.candidateCount);
+  const assessmentCount = finiteNumber(context.assessmentCount);
+  const routeCount = finiteNumber(context.routeCount);
+  if (!code || !side || !timingPoint || !owner || stateVersion === undefined)
+    return undefined;
+  return {
+    code,
+    side,
+    stateVersion,
+    timingPoint,
+    owner,
+    ...(removalCondition ? { removalCondition } : {}),
+    legalActionTypes,
+    ...(unresolvedActionIds.length > 0 ? { unresolvedActionIds } : {}),
+    ...(planInstanceId ? { planInstanceId } : {}),
+    ...(stepId ? { stepId } : {}),
+    ...(candidateCount !== undefined ? { candidateCount } : {}),
+    ...(assessmentCount !== undefined ? { assessmentCount } : {}),
+    ...(routeCount !== undefined ? { routeCount } : {}),
+  };
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value
+        .map((entry) => stringValue(entry))
+        .filter((entry): entry is string => entry !== undefined)
+        .slice(0, 64)
+    : [];
+}
+
+function finiteNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }
 
 function minimalAiDecisionTraceJson(
@@ -7003,7 +7075,9 @@ function historicalAuditFor(
       stateVersion: snapshot.stateVersion,
       matchVersion: snapshot.matchVersion,
       rulesBaseline: state.baseline,
+      outcome: "applied",
       decisionEventId: event.eventId,
+      eventAnchorId: event.eventId,
       selectedActionId,
       validation: {
         actor: side,
@@ -7061,6 +7135,121 @@ function historicalAuditFor(
           ...(attackedServer ? { attackedServer } : {}),
           ...(actorView.own.rig ? { ownRig: actorView.own.rig } : {}),
           ...(selectedActionEffects ? { selectedActionEffects } : {}),
+        }
+      : {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "unavailable",
+          reason: "not_in_run_at_decision",
+        },
+  };
+}
+
+function historicalFailureAuditFor(
+  state: GameState,
+  snapshot: StateSnapshot,
+  eventAnchorId: string,
+  side: Side,
+  legalActions: readonly LegalAction[],
+  beliefState: AiDecisionBeliefCapture,
+  decisionInput: AiDecisionInputWithDeckCapabilities,
+): AiDecisionHistoricalAudit {
+  const actorView = getPlayerView(state, side);
+  const {
+    legalActions: _legalActions,
+    publicEvents: _publicEvents,
+    ...actorState
+  } = actorView;
+  const actions = legalActions.map((action) =>
+    historicalLegalActionFor(state, action),
+  );
+  if (
+    decisionInput.side !== side ||
+    decisionInput.playerView.side !== side ||
+    decisionInput.playerView.stateVersion !== snapshot.stateVersion ||
+    decisionInput.legalActions.length !== legalActions.length ||
+    !decisionInput.legalActions.every((action) =>
+      legalActions.some((candidate) => candidate.actionId === action.actionId),
+    )
+  ) {
+    throw new Error("ai_failure_trace_checkpoint_capture_binding_mismatch");
+  }
+  const run = actorView.run;
+  const attackedServer = run
+    ? actorView.servers.find((server) => server.id === run.attackedServerId)
+    : undefined;
+  return {
+    schemaVersion: "ai-decision-historical-audit-v1",
+    capture: "persisted",
+    actor: side,
+    legalActions: {
+      schemaVersion: "netgrid-historical-legal-actions-v1",
+      actions,
+      actionSetSha256: createHash("sha256")
+        .update(JSON.stringify(actions))
+        .digest("hex"),
+    },
+    engineEvidence: {
+      schemaVersion: "netgrid-decision-engine-evidence-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      rulesBaseline: state.baseline,
+      outcome: "failed_before_apply",
+      eventAnchorId,
+      validation: {
+        actor: side,
+        actionWasInHistoricalLegalActions: "not_applicable",
+        engineApplyActionValidated: false,
+        bindingFields: [
+          "side",
+          "stateVersion",
+          "timingPoint",
+          "costs",
+          "targets",
+          "choices",
+          "lifecycle",
+          "parentOrContinuation",
+        ],
+      },
+    },
+    analysisSnapshot: {
+      schemaVersion: "netgrid-actor-analysis-snapshot-v1",
+      stateHash: snapshot.stateHash,
+      stateVersion: snapshot.stateVersion,
+      matchVersion: snapshot.matchVersion,
+      verification: {
+        status: "verified_at_capture",
+        algorithm: "engine_hash_state",
+      },
+      actorState,
+    },
+    checkpointCapture: {
+      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+      provenance: "persisted_at_decision",
+      actor: side,
+      stateVersion: snapshot.stateVersion,
+      stateHash: snapshot.stateHash,
+      input: structuredClone(decisionInput),
+      runtime: exportAiRuntimeCheckpoint(
+        decisionInput,
+        requiredCheckpointDeckSnapshotId(decisionInput),
+      ),
+      validation: {
+        sideSafeInput: true,
+        inputMatchesActor: true,
+        inputMatchesStateVersion: true,
+        legalActionSetMatchesHistoricalAudit: true,
+        humanPrivateHandExcluded: true,
+      },
+    },
+    beliefState,
+    runAndEncounterProjection: run
+      ? {
+          schemaVersion: "netgrid-run-encounter-projection-v1",
+          status: "persisted",
+          run,
+          ...(attackedServer ? { attackedServer } : {}),
+          ...(actorView.own.rig ? { ownRig: actorView.own.rig } : {}),
         }
       : {
           schemaVersion: "netgrid-run-encounter-projection-v1",
