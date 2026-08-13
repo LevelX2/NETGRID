@@ -1668,12 +1668,8 @@ function runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
-  if (
-    candidate.semanticActionType !== "install.card" ||
-    !candidate.actionId.endsWith(".runner_program_trash_before_install")
-  ) {
+  if (!runnerCandidateIsOptionalProgramTrashInstall(input, candidate))
     return false;
-  }
   const sourceDefinitionId = runnerCandidateSourceDefinitionId(
     input,
     candidate,
@@ -1683,6 +1679,20 @@ function runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
     (input.playerView.own.rig ?? []).some(
       (installed) => installed.definitionId === sourceDefinitionId,
     )
+  );
+}
+
+function runnerCandidateIsOptionalProgramTrashInstall(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (candidate.semanticActionType !== "install.card") return false;
+  const legalAction = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  );
+  return (
+    legalAction?.payload?.runnerProgramTrashBeforeInstall === true ||
+    candidate.actionId.endsWith(".runner_program_trash_before_install")
   );
 }
 
@@ -1997,15 +2007,12 @@ export function runnerActionDispositions(
     }
     if (
       runnerMatchpointReserveBlocksOverlappingBreakerInstall(
-        input,
-        candidate,
-        coverageOwnedActionIds,
-        domain.coverageGaps,
-      ) &&
-      !runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
-        input,
-        candidate,
-      )
+      input,
+      candidate,
+      coverageOwnedActionIds,
+      domain.coverageGaps,
+    ) &&
+      !runnerCandidateIsOptionalProgramTrashInstall(input, candidate)
     ) {
       add(
         candidate.actionId,
@@ -2147,8 +2154,7 @@ export function runnerActionDispositions(
     );
     if (!sourceCardInstanceId) continue;
     const optionalProgramTrashInstall =
-      legalAction?.payload?.runnerProgramTrashBeforeInstall === true ||
-      candidate.actionId.endsWith(".runner_program_trash_before_install");
+      runnerCandidateIsOptionalProgramTrashInstall(input, candidate);
     if (!optionalProgramTrashInstall) continue;
     const sourceDefinitionId = runnerCandidateSourceDefinitionId(
       input,
