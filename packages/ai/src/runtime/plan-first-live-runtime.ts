@@ -73,6 +73,7 @@ import {
   immediateCorpLiquidCreditGain,
   type CorpCorePlanDomain,
   type CorpDefenseSignal,
+  type CorpGenericDefenseSignal,
   type CorpExactIceRezRouteProjection,
   type CorpEconomyImmediateOperationSignal,
   type CorpEconomyVisibleCardWithdrawalSignal,
@@ -9523,6 +9524,7 @@ function buildCorpDomain(
   const remoteProjects: CorpCorePlanDomain["remoteProjects"] = [];
   const mergedDefenseNeeds: CorpCorePlanDomain["defenseNeeds"] =
     mergeDefenseSignals([
+      ...corpTerminalCentralRezReserveSignals(input, centralDefenseAllocation),
       ...candidates.flatMap((candidate): CorpDefenseSignal[] => {
         const postPassIceLifecycle = corpPostPassIceLifecycleDefenseSignal(
           input,
@@ -13551,6 +13553,90 @@ function corpPunishFundingParentPriority(
   return signal.priorityClass ?? "P4";
 }
 
+function corpTerminalCentralRezReserveSignals(
+  input: AiDecisionInput,
+  centralDefenseAllocation: CorpCentralDefenseAllocation | undefined,
+): CorpGenericDefenseSignal[] {
+  if (
+    input.side !== "corp" ||
+    input.playerView.timingPoint !== "corp_action.main" ||
+    input.playerView.run !== undefined ||
+    input.playerView.own.clicks <= 0 ||
+    input.playerView.agendaPointsToWin -
+      input.playerView.opponent.agendaPoints !==
+      1 ||
+    centralDefenseAllocation?.status !== "known"
+  ) {
+    return [];
+  }
+  const serverId = centralDefenseAllocation.selectedServerId;
+  if (centralDefenseAllocation.evidence[serverId].threat !== "terminal") {
+    return [];
+  }
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) return [];
+  const reserveCandidate = server.ice
+    .flatMap((ice) => {
+      const quote = ice.effectiveRezCostQuote;
+      const defense = visibleCorpIceDefenseProfile(ice);
+      if (
+        ice.rezzed === true ||
+        !ice.definitionId ||
+        !defense.isVisibleIce ||
+        (!defense.hasImmediateStop &&
+          !defense.hasMeaningfulTaxOrDamage &&
+          !defense.hasEncounterDisruption) ||
+        quote?.context !== "installed" ||
+        quote.cardId !== ice.instanceId ||
+        quote.targetServerId !== serverId ||
+        quote.projectedServerId !== serverId ||
+        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+        quote.complete !== true ||
+        quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+        !Number.isSafeInteger(quote.finalCredits) ||
+        quote.finalCredits <= input.playerView.own.credits
+      ) {
+        return [];
+      }
+      return [
+        {
+          ice,
+          requiredCredits: quote.finalCredits,
+          fundingGap: quote.finalCredits - input.playerView.own.credits,
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        left.fundingGap - right.fundingGap ||
+        left.requiredCredits - right.requiredCredits ||
+        technicalIdCompare(left.ice.instanceId, right.ice.instanceId),
+    )[0];
+  if (!reserveCandidate) return [];
+  return [
+    {
+      kind: "generic",
+      defenseId: `terminal-central-rez-reserve:${serverId}:${reserveCandidate.ice.instanceId}`,
+      serverId,
+      phase: "fund_rez_reserve",
+      sourceDefinitionIds: [reserveCandidate.ice.definitionId!],
+      targetIceInstanceId: reserveCandidate.ice.instanceId,
+      urgent: true,
+      centralPressure: "terminal",
+      rezReserveNeed: {
+        observedAtStateVersion: input.playerView.stateVersion,
+        currentCredits: input.playerView.own.credits,
+        requiredCredits: reserveCandidate.requiredCredits,
+        fundingGap: reserveCandidate.fundingGap,
+      },
+      value: 12,
+      evidenceCode: `corp_terminal_central_rez_reserve_required:${serverId}:${reserveCandidate.ice.instanceId}:gap_${reserveCandidate.fundingGap}`,
+    },
+  ];
+}
+
 function corpDefenseReserveNeeds(
   input: AiDecisionInput,
   defenseNeeds: readonly CorpDefenseSignal[],
@@ -13565,13 +13651,7 @@ function corpDefenseReserveNeeds(
       : [],
   );
   return defenseNeeds.flatMap((need) => {
-    if (
-      need.kind !== "generic" ||
-      need.phase !== "install_ice" ||
-      need.installRoute?.disposition !== "funding_only"
-    ) {
-      return [];
-    }
+    if (need.kind !== "generic") return [];
     const fundingPriority = corpGenericDefensePriorityClass([need]);
     if (
       productivePriorities.some(
@@ -13580,24 +13660,40 @@ function corpDefenseReserveNeeds(
     ) {
       return [];
     }
-    const projection = need.installRoute.projection;
-    if (!knownInstallRouteHasUsefulEffectBlockedByFunding(projection)) {
-      return [];
-    }
-    const gap = projection.after.minimumAdditionalCreditsToSatisfy;
+    const installProjection =
+      need.phase === "install_ice" &&
+      need.installRoute?.disposition === "funding_only" &&
+      knownInstallRouteHasUsefulEffectBlockedByFunding(
+        need.installRoute.projection,
+      )
+        ? need.installRoute.projection
+        : undefined;
+    const reserve =
+      need.phase === "fund_rez_reserve" ? need.rezReserveNeed : undefined;
+    const gap =
+      installProjection?.after.minimumAdditionalCreditsToSatisfy ??
+      reserve?.fundingGap;
+    const targetCredits =
+      reserve?.requiredCredits ??
+      (typeof gap === "number"
+        ? input.playerView.own.credits + gap
+        : undefined);
+    const iceInstanceId =
+      installProjection?.sourceCardInstanceId ?? need.targetIceInstanceId;
     if (
       typeof gap !== "number" ||
       !Number.isSafeInteger(gap) ||
       gap <= 0 ||
-      !Number.isSafeInteger(input.playerView.own.credits + gap)
+      typeof targetCredits !== "number" ||
+      !Number.isSafeInteger(targetCredits) ||
+      !iceInstanceId
     ) {
       return [];
     }
-    const targetCredits = input.playerView.own.credits + gap;
     return [
       {
         kind: "parent_funding",
-        needId: `defense-reserve:${need.serverId}:${projection.sourceCardInstanceId}`,
+        needId: `defense-reserve:${need.serverId}:${iceInstanceId}`,
         gap,
         actionIds: immediateFundingActionIds,
         immediateDefenseConversion: true,
@@ -13610,7 +13706,7 @@ function corpDefenseReserveNeeds(
         incrementalDefenseReserve: {
           targetCredits,
           serverId: need.serverId,
-          iceInstanceId: projection.sourceCardInstanceId,
+          iceInstanceId,
         },
         urgentForScore: false,
         evidenceCode: need.evidenceCode,

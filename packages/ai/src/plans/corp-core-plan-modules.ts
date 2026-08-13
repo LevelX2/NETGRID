@@ -149,6 +149,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "resolve_run_redirect"
     | "resolve_post_pass_ice_lifecycle"
     | "draw_for_ice"
+    | "fund_rez_reserve"
     | "rez_response"
     | "activate_run_defense"
     | "decline_rez";
@@ -172,6 +173,12 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
       | "funding_required";
     rezFundingGap?: number;
     projection: KnownCorpFundedIceInstallRouteProjection;
+  }>;
+  rezReserveNeed?: Readonly<{
+    observedAtStateVersion: number;
+    currentCredits: number;
+    requiredCredits: number;
+    fundingGap: number;
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
   value: number;
@@ -1444,6 +1451,7 @@ export function corpGenericDefensePriorityClass(
         signal.urgent &&
         (signal.phase === "install_ice" ||
           signal.phase === "install_defense_support" ||
+          signal.phase === "fund_rez_reserve" ||
           signal.phase === "resolve_install_targets" ||
           signal.phase === "resolve_run_redirect" ||
           signal.phase === "resolve_post_pass_ice_lifecycle" ||
@@ -1785,41 +1793,42 @@ function validatedEconomyNeeds(
     if (!isDefenseFundingShape) return false;
     const parentNeed = currentDomain.defenseNeeds.find(
       (need): need is CorpGenericDefenseSignal =>
-        need.kind === "generic" &&
-        need.phase === "install_ice" &&
-        need.defenseId === signal.parentNeedId,
+        need.kind === "generic" && need.defenseId === signal.parentNeedId,
     );
     const validFundingActions = new Set(
       context.actionCandidates
         .filter(immediateCorpLiquidCreditGain)
         .map((candidate) => candidate.actionId),
     );
-    const projection = parentNeed?.installRoute?.projection;
-    const exactGap = projection?.after.minimumAdditionalCreditsToSatisfy;
-    const exactTargetCredits =
-      typeof exactGap === "number" &&
-      Number.isSafeInteger(exactGap) &&
-      exactGap > 0
-        ? context.input.playerView.own.credits + exactGap
-        : undefined;
-    const exactNeedId = projection
-      ? `defense-reserve:${parentNeed.serverId}:${projection.sourceCardInstanceId}`
+    const requirement = parentNeed
+      ? genericDefenseFundingRequirement(
+          parentNeed,
+          context.input.playerView.own.credits,
+        )
+      : undefined;
+    const exactNeedId = requirement
+      ? `defense-reserve:${parentNeed!.serverId}:${requirement.iceInstanceId}`
       : undefined;
     return (
       signal.needId !== exactNeedId ||
       signal.immediateDefenseConversion !== true ||
       signal.parentPlanInstanceId !== expectedDefenseParent ||
       !parentNeed ||
-      parentNeed.installRoute?.disposition !== "funding_only" ||
-      projection?.targetServerId !== parentNeed.serverId ||
-      signal.gap !== exactGap ||
+      !requirement ||
+      !genericDefenseFundingRequirementIsCurrent(
+        context,
+        parentNeed,
+        requirement,
+      ) ||
+      signal.gap !== requirement.gap ||
       signal.parentPriorityClass !==
         corpGenericDefensePriorityClass([parentNeed]) ||
       signal.evidenceCode !== parentNeed.evidenceCode ||
-      signal.incrementalDefenseReserve?.targetCredits !== exactTargetCredits ||
+      signal.incrementalDefenseReserve?.targetCredits !==
+        requirement.targetCredits ||
       signal.incrementalDefenseReserve?.serverId !== parentNeed.serverId ||
       signal.incrementalDefenseReserve?.iceInstanceId !==
-        projection?.sourceCardInstanceId ||
+        requirement.iceInstanceId ||
       signal.actionIds.length === 0 ||
       signal.actionIds.some((actionId) => !validFundingActions.has(actionId))
     );
@@ -2371,6 +2380,7 @@ function defenseCandidates(
       )
       .map((candidate) => ({ candidate, stepValue: 1 }));
   }
+  if (signal.phase === "fund_rez_reserve") return [];
   if (signal.phase === "install_ice") {
     const route = signal.installRoute;
     const exactCandidates = exactGenericDefenseInstallCandidates(
@@ -2565,26 +2575,28 @@ function genericDefenseFundingAlternativeExists(
   context: PlanSchedulerContext,
   signal: CorpGenericDefenseSignal,
 ): boolean {
-  const projection = signal.installRoute?.projection;
-  const gap = projection?.after.minimumAdditionalCreditsToSatisfy;
+  const requirement = genericDefenseFundingRequirement(
+    signal,
+    context.input.playerView.own.credits,
+  );
   if (
-    signal.phase !== "install_ice" ||
-    signal.installRoute?.disposition !== "funding_only" ||
-    !projection ||
-    typeof gap !== "number" ||
-    !Number.isSafeInteger(gap) ||
-    gap <= 0
-  ) {
+    !requirement ||
+    !genericDefenseFundingRequirementIsCurrent(context, signal, requirement)
+  )
     return false;
-  }
-  const expectedNeedId = `defense-reserve:${signal.serverId}:${projection.sourceCardInstanceId}`;
+  const expectedNeedId = `defense-reserve:${signal.serverId}:${requirement.iceInstanceId}`;
   const need = corpDomainIfAvailable(context)?.economyNeeds.find(
     (candidate) =>
       candidate.kind === "parent_funding" &&
       candidate.needId === expectedNeedId &&
       candidate.parentNeedId === signal.defenseId &&
       candidate.immediateDefenseConversion === true &&
-      candidate.gap === gap,
+      candidate.gap === requirement.gap &&
+      candidate.incrementalDefenseReserve?.targetCredits ===
+        requirement.targetCredits &&
+      candidate.incrementalDefenseReserve?.serverId === signal.serverId &&
+      candidate.incrementalDefenseReserve?.iceInstanceId ===
+        requirement.iceInstanceId,
   );
   return (
     need?.actionIds.some((actionId) =>
@@ -2595,6 +2607,97 @@ function genericDefenseFundingAlternativeExists(
           corpEconomyCandidateHasExecutablePayload(context.input, candidate),
       ),
     ) === true
+  );
+}
+
+function genericDefenseFundingRequirement(
+  signal: CorpGenericDefenseSignal,
+  currentCredits?: number,
+):
+  | Readonly<{
+      gap: number;
+      targetCredits?: number;
+      iceInstanceId: string;
+    }>
+  | undefined {
+  if (
+    signal.phase === "install_ice" &&
+    signal.installRoute?.disposition === "funding_only"
+  ) {
+    const projection = signal.installRoute.projection;
+    const gap = projection.after.minimumAdditionalCreditsToSatisfy;
+    if (typeof gap !== "number" || !Number.isSafeInteger(gap) || gap <= 0) {
+      return undefined;
+    }
+    return {
+      gap,
+      ...(typeof currentCredits === "number" &&
+      Number.isSafeInteger(currentCredits) &&
+      currentCredits >= 0
+        ? { targetCredits: currentCredits + gap }
+        : {}),
+      iceInstanceId: projection.sourceCardInstanceId,
+    };
+  }
+  const reserve = signal.rezReserveNeed;
+  if (
+    signal.phase !== "fund_rez_reserve" ||
+    !signal.targetIceInstanceId ||
+    !reserve ||
+    !Number.isSafeInteger(reserve.currentCredits) ||
+    !Number.isSafeInteger(reserve.requiredCredits) ||
+    !Number.isSafeInteger(reserve.fundingGap) ||
+    reserve.currentCredits < 0 ||
+    reserve.requiredCredits <= reserve.currentCredits ||
+    reserve.fundingGap !== reserve.requiredCredits - reserve.currentCredits
+  ) {
+    return undefined;
+  }
+  return {
+    gap: reserve.fundingGap,
+    targetCredits: reserve.requiredCredits,
+    iceInstanceId: signal.targetIceInstanceId,
+  };
+}
+
+function genericDefenseFundingRequirementIsCurrent(
+  context: PlanSchedulerContext,
+  signal: CorpGenericDefenseSignal,
+  requirement: Readonly<{
+    gap: number;
+    targetCredits?: number;
+    iceInstanceId: string;
+  }>,
+): boolean {
+  if (signal.phase === "install_ice") {
+    return (
+      signal.installRoute?.disposition === "funding_only" &&
+      signal.installRoute.projection.targetServerId === signal.serverId &&
+      signal.installRoute.projection.sourceCardInstanceId ===
+        requirement.iceInstanceId
+    );
+  }
+  const reserve = signal.rezReserveNeed;
+  const ice = context.input.playerView.servers
+    .find((server) => server.id === signal.serverId)
+    ?.ice.find(
+      (candidate) => candidate.instanceId === requirement.iceInstanceId,
+    );
+  const quote = ice?.effectiveRezCostQuote;
+  return (
+    signal.phase === "fund_rez_reserve" &&
+    reserve?.observedAtStateVersion === context.input.playerView.stateVersion &&
+    reserve.currentCredits === context.input.playerView.own.credits &&
+    reserve.requiredCredits === requirement.targetCredits &&
+    ice?.rezzed !== true &&
+    quote?.context === "installed" &&
+    quote.cardId === requirement.iceInstanceId &&
+    quote.targetServerId === signal.serverId &&
+    quote.projectedServerId === signal.serverId &&
+    quote.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    quote.complete === true &&
+    quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
+    quote.finalCredits === requirement.targetCredits
   );
 }
 
@@ -3469,22 +3572,13 @@ function defenseResourceGaps(
   if (selectedBand.kind !== "generic" || selectedBand.candidates.length > 0)
     return [];
   return selectedBand.eligibleSignals.flatMap((signal) => {
-    if (
-      signal.phase !== "install_ice" ||
-      signal.installRoute?.disposition !== "funding_only"
-    ) {
-      return [];
-    }
-    const gap =
-      signal.installRoute.projection.after.minimumAdditionalCreditsToSatisfy;
-    if (typeof gap !== "number" || !Number.isSafeInteger(gap) || gap <= 0) {
-      return [];
-    }
+    const requirement = genericDefenseFundingRequirement(signal);
+    if (!requirement) return [];
     return [
       {
         needId: signal.defenseId,
         capability: "credits",
-        minimum: gap,
+        minimum: requirement.gap,
         available: 0,
         deadline: signal.urgent ? "current_turn" : "multi_turn",
       } satisfies ResourceGap,
@@ -4532,6 +4626,12 @@ function isValidDefenseSignal(
             knownNonNegativeInteger(installRoute.rezFundingGap)) &&
           validKnownInstallProjection(installRoute.projection)
         : installRoute === undefined) &&
+      (value.phase === "fund_rez_reserve"
+        ? validCorpRezReserveNeed(value.rezReserveNeed) &&
+          nonEmptyString(value.targetIceInstanceId) &&
+          value.centralPressure === "terminal" &&
+          value.urgent === true
+        : value.rezReserveNeed === undefined) &&
       (value.choiceResolution === undefined ||
         (value.phase === "resolve_install_targets" &&
           validAgendaPurgeDefenseChoiceResolution(
@@ -4772,9 +4872,33 @@ function genericDefensePhase(
     value === "resolve_run_redirect" ||
     value === "resolve_post_pass_ice_lifecycle" ||
     value === "draw_for_ice" ||
+    value === "fund_rez_reserve" ||
     value === "rez_response" ||
     value === "activate_run_defense" ||
     value === "decline_rez"
+  );
+}
+
+function validCorpRezReserveNeed(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const reserve = value as Record<string, unknown>;
+  return (
+    hasOnlyKeys(
+      reserve,
+      new Set([
+        "observedAtStateVersion",
+        "currentCredits",
+        "requiredCredits",
+        "fundingGap",
+      ]),
+    ) &&
+    knownNonNegativeInteger(reserve.observedAtStateVersion) &&
+    knownNonNegativeInteger(reserve.currentCredits) &&
+    knownNonNegativeInteger(reserve.requiredCredits) &&
+    knownNonNegativeInteger(reserve.fundingGap) &&
+    (reserve.fundingGap as number) > 0 &&
+    (reserve.requiredCredits as number) - (reserve.currentCredits as number) ===
+      reserve.fundingGap
   );
 }
 
@@ -4941,6 +5065,7 @@ const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "immediateInstallSupport",
   "rezWindowVerdict",
   "installRoute",
+  "rezReserveNeed",
   "rezRoute",
   "value",
   "evidenceCode",

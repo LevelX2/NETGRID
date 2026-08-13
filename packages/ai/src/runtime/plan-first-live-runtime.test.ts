@@ -46,6 +46,8 @@ import {
   restoreAiRuntimeCheckpoint,
 } from "../evaluation/decision-checkpoints/runtime-checkpoint";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
+import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 
 function quotedFixtureIce(params: {
   instanceId: string;
@@ -8005,6 +8007,165 @@ describe("authoritative plan-first live runtime", () => {
     ).toMatchObject({
       actionId: "install-agenda-existing",
       reasonCode: "plan_first.corp.score_agenda",
+    });
+  });
+
+  it("funds an exact four-credit R&D rez reserve at runner matchpoint before remote development", () => {
+    const stateVersion = 1;
+    const credit = legalAction(
+      "terminal-rd-reserve-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const installCanisNew = legalAction(
+      "install-canis-new-remote",
+      "corp",
+      "install_card",
+      "Install Canis Major in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "canis-major",
+        payload: {
+          cardId: "canis-major",
+          sourceDefinitionId: "onr_v1_225_canis-major",
+          serverId: "new_remote",
+          placement: "ice",
+          postInstallRezQuoteCardId: "canis-major",
+          postInstallRezQuoteTargetServerId: "new_remote",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 4,
+          postInstallRezQuoteFinalCredits: 4,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
+    const input = aiInput("corp", [installCanisNew, credit]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.stackOrRdCount = 2;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.opponent.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("canis-major", "corp", "ice", {
+        definitionId: "onr_v1_225_canis-major",
+        title: "Canis Major",
+        rezCost: 4,
+        strength: 0,
+        subtypes: ["sentry"],
+      }),
+      visibleCard("hq-chance", "corp", "operation", {
+        definitionId: "onr_v1_284_chance-observation",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("rd-crystal-wall", "corp", "ice", {
+          definitionId: "onr_v1_232_crystal-wall",
+          title: "Crystal Wall",
+          rezCost: 4,
+          strength: 3,
+          subtypes: ["wall"],
+          rezzed: false,
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "rd-crystal-wall",
+            targetServerId: "rd",
+            projectedServerId: "rd",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 4,
+            finalCredits: 4,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
+        }),
+      ]),
+      server("archives"),
+    ];
+    input.playerView.corpCentralAccessQuotes = ["hq", "rd"].map((serverId) => ({
+      serverId: serverId as "hq" | "rd",
+      stateVersion,
+      complete: true as const,
+      effectiveAccessCount: 1,
+      isMultiaccess: false,
+      sourceDefinitionIds: [],
+      serverBoundEffects: [],
+    }));
+    input.playerView.specialZones = {
+      setAside: [],
+      removedFromGame: [],
+      setAsideCount: 0,
+      removedFromGameCount: 0,
+    };
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "terminal-rd-rez-reserve",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_232_crystal-wall", quantity: 1 },
+        { cardId: "onr_v1_225_canis-major", quantity: 1 },
+        { cardId: "onr_v1_284_chance-observation", quantity: 2 },
+        { cardId: "onr_v1_201_executive-extraction", quantity: 1 },
+      ],
+    });
+    expect(allocateCorpCentralDefenseFromAiFacts({ input })).toMatchObject({
+      status: "known",
+      selectedServerId: "rd",
+      evidence: { rd: { threat: "terminal" } },
+    });
+    expect(
+      visibleCorpIceDefenseProfile(input.playerView.servers[1]!.ice[0]),
+    ).toMatchObject({ isVisibleIce: true, hasImmediateStop: true });
+
+    resetResidentPlanPortfolioMemory();
+    const firstCredit = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(firstCredit).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(firstCredit.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:corp.defend_servers:server-defense-portfolio",
+        "plan_priority_class:P2",
+        "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:rd-crystal-wall:gap_2",
+      ]),
+    );
+    expect((firstCredit.evidence ?? []).join("\n")).not.toContain(
+      "install-canis-new-remote",
+    );
+
+    const oneCreditShort = structuredClone(input);
+    oneCreditShort.decisionId = "terminal-rd-reserve:2:corp";
+    oneCreditShort.playerView.stateVersion = 2;
+    oneCreditShort.playerView.own.credits = 3;
+    oneCreditShort.playerView.own.clicks = 1;
+    oneCreditShort.playerView.corpCentralAccessQuotes?.forEach(
+      (quote) => (quote.stateVersion = 2),
+    );
+    oneCreditShort.playerView.servers[1]!.ice[0]!.effectiveRezCostQuote = {
+      ...oneCreditShort.playerView.servers[1]!.ice[0]!.effectiveRezCostQuote!,
+      expiresAtStateVersion: 2,
+    };
+    for (const action of oneCreditShort.legalActions) {
+      action.expiresAtStateVersion = 2;
+    }
+    Object.assign(oneCreditShort, {
+      planningStateIdentity: buildPlanningStateIdentity(oneCreditShort),
+    });
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(oneCreditShort, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
     });
   });
 
