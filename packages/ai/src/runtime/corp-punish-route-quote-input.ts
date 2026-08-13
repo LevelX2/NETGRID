@@ -182,8 +182,9 @@ function currentHardwareTrashActionId(
   sourceCardInstanceId: string,
 ): string | undefined {
   return input.legalActions
-    .filter(
-      (action) =>
+    .filter((action) => {
+      const trashCount = action.payload?.hardwareTrashByCounterTrashCount;
+      return (
         action.side === "corp" &&
         action.type === "play_operation" &&
         action.source === sourceCardInstanceId &&
@@ -191,8 +192,12 @@ function currentHardwareTrashActionId(
         action.timingPoint === input.playerView.timingPoint &&
         action.expiresAtStateVersion === input.playerView.stateVersion &&
         action.targetRequirements.length === 0 &&
-        (action.choiceRequirements?.length ?? 0) === 0,
-    )
+        (action.choiceRequirements?.length ?? 0) === 0 &&
+        typeof trashCount === "number" &&
+        Number.isSafeInteger(trashCount) &&
+        trashCount > 0
+      );
+    })
     .sort(
       (left, right) =>
         legalActionCreditCost(left) - legalActionCreditCost(right) ||

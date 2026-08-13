@@ -857,7 +857,7 @@ function certifyHardwareTrashStep(
   if (
     playCost.kind !== "variable_x" ||
     !Number.isSafeInteger(playCost.minimumX) ||
-    playCost.minimumX < 1 ||
+    playCost.minimumX < 0 ||
     !Number.isSafeInteger(playCost.creditsPerX) ||
     playCost.creditsPerX < 1
   ) {
@@ -917,7 +917,8 @@ function certifyHardwareTrashStep(
   if (request.currentLegalActionId && !currentActionProjection) {
     return { ok: false, reason: "head_legal_action_unavailable" };
   }
-  const selectedX = currentActionProjection?.selectedX ?? playCost.minimumX;
+  const selectedX =
+    currentActionProjection?.selectedX ?? Math.max(playCost.minimumX, 1);
   const credits =
     currentActionProjection?.credits ?? selectedX * playCost.creditsPerX;
   if (!Number.isSafeInteger(credits) || credits < 1) {

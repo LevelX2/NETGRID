@@ -379,7 +379,8 @@ describe("card set support catalog source", () => {
         expect(definition.cost, cardId).toBeUndefined();
         expect(card.playCost).toEqual({
           kind: "variable_x",
-          minimumX: 1,
+          minimumX:
+            cardId === "onr_v1_299_power-grid-overload" ? 0 : 1,
           creditsPerX: 1,
           maximumX: { kind: "context" },
         });

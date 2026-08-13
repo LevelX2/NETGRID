@@ -284,7 +284,7 @@ function scoringWindowVisibleOperationCost(
   if (
     playCost.kind !== "variable_x" ||
     !Number.isInteger(playCost.minimumX) ||
-    playCost.minimumX < 1 ||
+    playCost.minimumX < 0 ||
     !Number.isInteger(playCost.creditsPerX) ||
     playCost.creditsPerX < 1 ||
     playCost.maximumX?.kind !== "context"

@@ -662,7 +662,7 @@ function validateSourcePlayCost(card: CardSetCard): string[] {
     playCost.kind !== "variable_x" ||
     !hasExactKeys(playCost, ["kind", "minimumX", "creditsPerX", "maximumX"]) ||
     !Number.isInteger(playCost.minimumX) ||
-    playCost.minimumX < 1 ||
+    playCost.minimumX < 0 ||
     !Number.isInteger(playCost.creditsPerX) ||
     playCost.creditsPerX <= 0 ||
     playCost.maximumX?.kind !== "context" ||

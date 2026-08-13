@@ -453,7 +453,7 @@ function validateResolvedPlayCost(card: CatalogCard): string[] {
       "maximumX",
     ]) ||
     !Number.isInteger(card.playCost.minimumX) ||
-    card.playCost.minimumX < 1 ||
+    card.playCost.minimumX < 0 ||
     !Number.isInteger(card.playCost.creditsPerX) ||
     card.playCost.creditsPerX <= 0 ||
     card.playCost.maximumX?.kind !== "context" ||

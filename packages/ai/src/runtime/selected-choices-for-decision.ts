@@ -14,6 +14,7 @@ import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement
 import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
+import { corpInstalledHardwareTrashOperationProfile } from "./corp-canonical-card-facts";
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
 import {
   selectedDiscardChoiceOptionIds,
@@ -647,9 +648,8 @@ export function selectedChoicesForDecision(
   if (
     input.side === "corp" &&
     choice.kind === "select_cards" &&
-    choice.source.startsWith(
-      "card_implementation.installed_hardware_trash_by_counter:",
-    )
+    choice.source === "card_implementation.runner_installed_multi_trash" &&
+    corpInstalledHardwareTrashOperationProfile(choice.sourceCardDefinitionId)
   ) {
     const selected = selectedCorpHardwareTrashChoiceOptionIds(
       input,

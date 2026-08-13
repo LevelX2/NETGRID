@@ -108,6 +108,20 @@ describe("visible card heuristics", () => {
         undefined,
       ),
     ).toBe(1);
+    expect(
+      visibleCardPlayOrInstallCost(
+        card({
+          type: "operation",
+          playCost: {
+            kind: "variable_x",
+            minimumX: 0,
+            creditsPerX: 1,
+            maximumX: { kind: "context" },
+          },
+        }),
+        undefined,
+      ),
+    ).toBe(0);
   });
 
   it("fails closed when a visible play card has no play-cost model", () => {

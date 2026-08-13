@@ -1218,7 +1218,7 @@ function validHardwareTrashProjection(
       projection.eligibleTargetInstanceIds.length ||
     projection.eligibleTargetCount < 1 ||
     !nonNegativeInteger(projection.minimumX) ||
-    projection.minimumX < 1 ||
+    projection.minimumX < 0 ||
     !nonNegativeInteger(projection.selectedX) ||
     projection.selectedX < projection.minimumX ||
     !nonNegativeInteger(projection.legalMaximumX) ||
@@ -2685,6 +2685,9 @@ function sanitizeVisibleChoiceRequest(
     }),
     minSelections: choice.minSelections,
     maxSelections: choice.maxSelections,
+    ...(choice.selectionOrdering
+      ? { selectionOrdering: choice.selectionOrdering }
+      : {}),
     stateVersion: choice.stateVersion,
     visibility: choice.visibility,
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
