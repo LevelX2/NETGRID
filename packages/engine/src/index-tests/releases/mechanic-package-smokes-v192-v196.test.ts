@@ -1428,6 +1428,58 @@ describe("V1.9.6 Mechanikpaket O", () => {
     ).toBe(1);
   });
 
+  it("adds the Data Raven tag before its counter when tag prevention suspends", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v196-data-raven-tag-before-counter",
+        runnerDeck: {
+          ...ONR_V1_9_6_RUNNER_DECK,
+          id: "v196_data_raven_tag_before_counter_runner",
+          cards: [
+            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            ...ONR_V1_9_6_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_6_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    installRunnerResourceForTest(state, "onr_v1_161_fall-guy");
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const corpBid = state.pendingChoice?.options.at(-1);
+    if (!corpBid) throw new Error("Data-Raven-Corp-Bid fehlt.");
+    state = applyChoice(state, "corp", corpBid.id);
+    state = applyChoice(state, "runner", "bid_0");
+
+    expect(state.runner.tags).toBe(0);
+    expect(
+      cardCounterAmount(state, state.runner.identity, "trace_tag_counter"),
+    ).toBe(0);
+    expect(state.pendingAddTagContinuation).toMatchObject({
+      kind: "trace_add_counter",
+      sourceDefinitionId: "onr_v1_236_data-raven",
+      counterType: "trace_tag_counter",
+      counterAmount: 1,
+    });
+    state = applyChoice(state, "runner", "pass");
+    expect(state.runner.tags).toBe(1);
+    expect(
+      cardCounterAmount(state, state.runner.identity, "trace_tag_counter"),
+    ).toBe(1);
+    expect(state.pendingAddTagContinuation).toBeUndefined();
+  });
+
   it("suspends the Data Raven Runner-start tag and resumes once after avoid or pass", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

@@ -135,8 +135,7 @@ export function createRunAccessLegalActionHostComposition(
         buildCorpDuringRunCardImplementationActions(
           cardImplementation.runCardImplementationActionHost(state),
         ).legalActions,
-      executeCardImplementationRunnerRunStartEffects:
-        run.executeCardImplementationRunnerRunStartEffects,
+      beginRunnerRunStartOrdering: run.beginRunnerRunStartOrdering,
       applyRunnerTraceCounterRunStartEffects:
         run.applyRunnerTraceCounterRunStartEffects,
       applyRunStartRandomStrengthBonus: run.applyRunStartRandomStrengthBonus,
@@ -172,8 +171,7 @@ export function createRunAccessLegalActionHostComposition(
       ...(cards.runnerProgramUsesMemory
         ? { runnerProgramUsesMemory: cards.runnerProgramUsesMemory }
         : {}),
-      accessEffectsForDefinition:
-        cardImplementation.accessEffectsForDefinition,
+      accessEffectsForDefinition: cardImplementation.accessEffectsForDefinition,
       hiddenReplacementLongtailKindForDefinition:
         cardImplementation.hiddenReplacementLongtailKindForDefinition,
     },

@@ -215,14 +215,14 @@ export type RunFlowHost = {
     corpDuringRunCardImplementationLegalActions: (
       state: GameState,
     ) => LegalAction[];
-    executeCardImplementationRunnerRunStartEffects: (
+    beginRunnerRunStartOrdering: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunnerTraceCounterRunStartEffects: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunStartRandomStrengthBonus: (
       state: GameState,
       legalAction?: LegalAction,
@@ -243,7 +243,9 @@ export type RunFlowHost = {
       sourceDefinitionId: CardDefinitionId,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
-    ) => Record<string, unknown>;
+      damageAmount: number,
+      legalAction: LegalAction,
+    ) => { payload: Record<string, unknown>; suspended: boolean };
     resolveTraceTrashRunnerResourceSuccess: (
       state: GameState,
       sourceDefinitionId: CardDefinitionId,
@@ -455,6 +457,7 @@ export type RunFlowAdapters = {
     options?: StartRunOptions,
     legalAction?: LegalAction,
   ) => void;
+  resumeRunStart: (state: GameState, legalAction?: LegalAction) => void;
   continueRun: (state: GameState, legalAction?: LegalAction) => void;
   runCoreExecutionHost: (state: GameState) => RunCoreExecutionHost;
   runContinuationExecutionHost: (

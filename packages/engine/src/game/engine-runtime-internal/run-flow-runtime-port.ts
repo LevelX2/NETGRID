@@ -16,9 +16,20 @@ export type RunFlowRuntimePort = {
     options?: StartRunOptions,
     legalAction?: LegalAction,
   ) => void;
+  resumeRunStart: (state: GameState, legalAction?: LegalAction) => void;
+  beginRunnerRunStartOrdering: (
+    state: GameState,
+    legalAction?: LegalAction,
+  ) => boolean;
+  resolveRunnerRunStartOrderChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: import("@netgrid/shared").PlayerAction,
+  ) => boolean;
   applyRunStartRandomStrengthBonus: (
     state: GameState,
     legalAction?: LegalAction,
+    onlySourceCardId?: CardInstanceId,
   ) => void;
   continueRun: (state: GameState, legalAction?: LegalAction) => void;
   addCurrentRunAccessCount: (

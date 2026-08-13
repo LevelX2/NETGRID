@@ -612,6 +612,35 @@ export function createPendingChoiceRuntimeHosts(
       case "runner_start_turn":
         resumeStartOfTurnAfterTagPrevention(state, legalAction);
         return;
+      case "trace_add_counter": {
+        const effect = deps.traceCounterEffectDefinitionFor(
+          continuation.counterType,
+        );
+        if (
+          !effect ||
+          effect.sourceDefinitionId !== continuation.sourceDefinitionId ||
+          continuation.counterAmount <= 0
+        )
+          throw new Error("Die Trace-Counter-Fortsetzung ist veraltet.");
+        delete state.pendingAddTagContinuation;
+        deps.addCardCounter(
+          state,
+          state.runner.identity,
+          continuation.counterType,
+          continuation.counterAmount,
+        );
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          addedCounterAmount: continuation.counterAmount,
+          counterType: continuation.counterType,
+          remainingCounters: deps.cardCounter(
+            state,
+            state.runner.identity,
+            continuation.counterType,
+          ),
+        };
+        return;
+      }
     }
   }
 
@@ -830,6 +859,16 @@ export function createPendingChoiceRuntimeHosts(
         resolveClassicDeflectorChoice,
         resolveTrashProgramChoice,
         resumeTraceProgramTrashContinuation,
+        resolveTraceHardwareWreckerTargetChoice:
+          deps.resolveTraceHardwareWreckerTargetChoice,
+        resumeTraceHardwareWreckerAfterTrash:
+          deps.resumeTraceHardwareWreckerAfterTrash,
+        resumeRunnerTraceCounterRunStartEffects:
+          deps.resumeRunnerTraceCounterRunStartEffects,
+        resumeRunStart: deps.resumeRunStart,
+        resolveRunnerRunStartOrderChoice: deps.resolveRunnerRunStartOrderChoice,
+        applyRunnerTraceCounterRunStartEffects:
+          deps.applyRunnerTraceCounterRunStartEffects,
       },
       access: {
         resolveAccessProgramInstallMemoryChoice: (

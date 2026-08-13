@@ -40,6 +40,7 @@ import {
   type RunAccessTransitionHost,
 } from "./run-access-transition";
 import {
+  resumeRunAfterStartEffects,
   startRun as startRunFromRunCore,
   type RunCoreExecutionHost,
   type StartRunOptions,
@@ -143,6 +144,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
     );
   }
 
+  function resumeRunStart(state: GameState, legalAction?: LegalAction): void {
+    resumeRunAfterStartEffects(runCoreExecutionHost(state), legalAction);
+  }
+
   function runCoreExecutionHost(state: GameState): RunCoreExecutionHost {
     return {
       state,
@@ -165,8 +170,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         isV099OrLater: () => host.rules.isV099OrLater(state),
       },
       callbacks: {
-        executeCardImplementationRunnerRunStartEffects:
-          host.run.executeCardImplementationRunnerRunStartEffects,
+        beginRunnerRunStartOrdering: host.run.beginRunnerRunStartOrdering,
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
         applyRunStartRandomStrengthBonus:
@@ -764,12 +768,16 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         sourceDefinitionId,
         sourceCardInstanceId,
         traceId,
+        damageAmount,
+        actionToResolve,
       ) =>
         host.trace.resolveTraceHardwareWreckerSuccess(
           state,
           sourceDefinitionId as CardDefinitionId,
           sourceCardInstanceId,
           traceId,
+          damageAmount,
+          actionToResolve,
         ),
       resolveTraceTrashRunnerResourceSuccess: (
         sourceDefinitionId,
@@ -1188,6 +1196,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
 
   return {
     startRun,
+    resumeRunStart,
     continueRun,
     runCoreExecutionHost,
     runContinuationExecutionHost,

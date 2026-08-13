@@ -216,10 +216,14 @@ function hostFor(state: GameState): {
         isV099OrLater: () => true,
       },
       callbacks: {
-        executeCardImplementationRunnerRunStartEffects: () =>
-          calls.push("cardImplementationRunStart"),
-        applyRunnerTraceCounterRunStartEffects: () =>
-          calls.push("traceCounterRunStart"),
+        beginRunnerRunStartOrdering: () => {
+          calls.push("cardImplementationRunStart");
+          return false;
+        },
+        applyRunnerTraceCounterRunStartEffects: () => {
+          calls.push("traceCounterRunStart");
+          return false;
+        },
         applyRunStartRandomStrengthBonus: () =>
           calls.push("runStartRandomStrengthBonus"),
         openStartOfRunFortUtilityWindow: () => false,
@@ -277,7 +281,6 @@ describe("run-core-execution", () => {
     expect(calls).toEqual([
       "cardImplementationRunStart",
       "traceCounterRunStart",
-      "runStartRandomStrengthBonus",
       `beginEncounter:${OUTER_ICE_ID}`,
     ]);
   });

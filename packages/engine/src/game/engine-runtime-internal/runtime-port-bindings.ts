@@ -273,6 +273,8 @@ export let isDrawTaxSourceDefinition: RuntimePortGroups["flowRuntimeHosts"]["isD
 export let isCorpInstalledEconomyCreditSource: RuntimePortGroups["flowRuntimeHosts"]["isCorpInstalledEconomyCreditSource"];
 export let isCorpTraceCounterPoolSource: RuntimePortGroups["flowRuntimeHosts"]["isCorpTraceCounterPoolSource"];
 export let applyRunnerTraceCounterRunStartEffects: RuntimePortGroups["flowRuntimeHosts"]["applyRunnerTraceCounterRunStartEffects"];
+export let beginRunnerRunStartOrdering: RuntimePortGroups["flowRuntimeHosts"]["beginRunnerRunStartOrdering"];
+export let resolveRunnerRunStartOrderChoice: RuntimePortGroups["flowRuntimeHosts"]["resolveRunnerRunStartOrderChoice"];
 export let applyRunStartRandomStrengthBonus: RuntimePortGroups["flowRuntimeHosts"]["applyRunStartRandomStrengthBonus"];
 export let continueRun: RuntimePortGroups["flowRuntimeHosts"]["continueRun"];
 export let addCurrentRunAccessCount: RuntimePortGroups["flowRuntimeHosts"]["addCurrentRunAccessCount"];
@@ -927,6 +929,10 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.flowRuntimeHosts.isCorpTraceCounterPoolSource;
   applyRunnerTraceCounterRunStartEffects =
     ports.flowRuntimeHosts.applyRunnerTraceCounterRunStartEffects;
+  beginRunnerRunStartOrdering =
+    ports.flowRuntimeHosts.beginRunnerRunStartOrdering;
+  resolveRunnerRunStartOrderChoice =
+    ports.flowRuntimeHosts.resolveRunnerRunStartOrderChoice;
   applyRunStartRandomStrengthBonus =
     ports.flowRuntimeHosts.applyRunStartRandomStrengthBonus;
   continueRun = ports.flowRuntimeHosts.continueRun;

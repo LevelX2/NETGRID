@@ -74,14 +74,14 @@ export type RunCoreExecutionHost = {
     isV099OrLater: () => boolean;
   };
   callbacks: {
-    executeCardImplementationRunnerRunStartEffects: (
+    beginRunnerRunStartOrdering: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunnerTraceCounterRunStartEffects: (
       state: GameState,
       legalAction?: LegalAction,
-    ) => void;
+    ) => boolean;
     applyRunStartRandomStrengthBonus: (
       state: GameState,
       legalAction?: LegalAction,
@@ -108,10 +108,6 @@ export function startRun(
   const flags = host.turn.ensureRunnerTurnFlags();
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
   flags.runAttemptsThisGame = (flags.runAttemptsThisGame ?? 0) + 1;
-  host.callbacks.executeCardImplementationRunnerRunStartEffects(
-    state,
-    legalAction,
-  );
   const breachHost = host.access.breachStateHost();
   const accessServerId = options?.accessServerOverride ?? server.id;
   const installedAccessBonus = installedAccessBonusForServer(
@@ -283,8 +279,11 @@ export function startRun(
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
-  host.callbacks.applyRunnerTraceCounterRunStartEffects(state, legalAction);
+  if (host.callbacks.beginRunnerRunStartOrdering(state, legalAction)) return;
+  const runStartDamageSuspended =
+    host.callbacks.applyRunnerTraceCounterRunStartEffects(state, legalAction);
   if (state.winner) return;
+  if (runStartDamageSuspended) return;
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -300,7 +299,17 @@ export function startRun(
         : {}),
     };
   }
-  host.callbacks.applyRunStartRandomStrengthBonus(state, legalAction);
+  resumeRunAfterStartEffects(host, legalAction);
+}
+
+export function resumeRunAfterStartEffects(
+  host: RunCoreExecutionHost,
+  legalAction?: LegalAction,
+): void {
+  const { state } = host;
+  const run = state.run;
+  if (!run) throw new Error("Die Run-Start-Fortsetzung hat keinen Run.");
+  const server = host.servers.mustServer(run.attackedServerId);
   if (host.callbacks.openStartOfRunFortUtilityWindow(state, legalAction))
     return;
   if (server.ice.length > 0) {
@@ -310,7 +319,7 @@ export function startRun(
       iceIndex,
       "Server has no approached ice.",
     );
-    state.run.approachedIceId = approachedIceId;
+    run.approachedIceId = approachedIceId;
     approachOrEncounterIce(
       host.run.movementHost(),
       approachedIceId,

@@ -88,10 +88,10 @@ export function collectEventModificationCandidates(
   state: GameState,
   event: ImminentEvent,
 ): EventModificationCandidate[] {
-  if (event.payload.cannotBePrevented === true) return [];
   if (event.eventType === "damage") {
     const cybertech = cybertechThinkTankBoostCandidates(state, event);
     if (cybertech.length > 0) return cybertech;
+    if (event.payload.cannotBePrevented === true) return [];
     const runtime = collectRuntimeDamagePreventionCandidates(state, event);
     const harness = collectHarnessDamagePreventionCandidates(state, event);
     return [...runtime, ...harness];

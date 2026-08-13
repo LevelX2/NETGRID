@@ -25,7 +25,21 @@ export type StateRuntimeResolverPort = {
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
     traceId: string,
-  ) => NonNullable<LegalAction["payload"]>;
+    damageAmount: number,
+    legalAction: LegalAction,
+  ) => {
+    payload: NonNullable<LegalAction["payload"]>;
+    suspended: boolean;
+  };
+  resolveTraceHardwareWreckerTargetChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
+  resumeTraceHardwareWreckerAfterTrash: (
+    state: GameState,
+    legalAction: LegalAction,
+  ) => void;
   resolveTraceTrashRunnerResourceSuccess: (
     state: GameState,
     sourceDefinitionId: CardDefinitionId,

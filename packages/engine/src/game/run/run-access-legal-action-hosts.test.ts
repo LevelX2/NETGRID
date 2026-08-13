@@ -129,10 +129,14 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         targetState.run as NonNullable<GameState["run"]>,
       currentEncounterSubroutines: () => [],
       runRemainderStrengthBonusForBreaker: () => 0,
-      executeCardImplementationRunnerRunStartEffects: () =>
-        calls.push("runStartEffects"),
-      applyRunnerTraceCounterRunStartEffects: () =>
-        calls.push("traceCounterRunStart"),
+      beginRunnerRunStartOrdering: () => {
+        calls.push("runStartEffects");
+        return false;
+      },
+      applyRunnerTraceCounterRunStartEffects: () => {
+        calls.push("traceCounterRunStart");
+        return false;
+      },
       applyRunStartRandomStrengthBonus: () =>
         calls.push("runStartRandomStrengthBonus"),
       finishRun: (_state: GameState, successful: boolean) =>

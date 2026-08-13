@@ -226,9 +226,11 @@ import {
   doDamage,
   hiddenRunnerResourceRevealPayload,
   isRunnerHardwareDeckDefinition,
+  openDamageResolutionWindow,
   openEventModificationWindow,
   openReplacementWindow,
   openRunnerInstalledTrashPreventionWindow,
+  createRunnerInstalledTrashImminentEvent,
   resolveDamageImminentEvent,
   resolveDamageOperation,
   resolveEventModificationChoice,
@@ -613,34 +615,154 @@ export function createStateRuntimeResolvers(
     sourceDefinitionId: CardDefinitionId,
     sourceCardInstanceId: CardInstanceId,
     traceId: string,
-  ): NonNullable<LegalAction["payload"]> {
-    const targetHardwareId = deps.runnerInstalledHardwareTrashTarget(state);
-    const targetDefinitionId = targetHardwareId
-      ? definitionFor(state, targetHardwareId).id
-      : undefined;
-    if (targetHardwareId)
-      deps.trashRunnerInstalledCardToHeap(state, targetHardwareId);
-    const damageAmount = 2;
-    const summary = doDamage(state, {
-      damageId: `${traceId}.${sourceCardInstanceId}.unpreventable_meat`,
-      damageType: "meat",
-      amount: damageAmount,
-      source: `trace_success:${sourceDefinitionId}`,
-    });
-    return {
+    damageAmount: number,
+    legalAction: LegalAction,
+  ): {
+    payload: NonNullable<LegalAction["payload"]>;
+    suspended: boolean;
+  } {
+    if (!Number.isInteger(damageAmount) || damageAmount <= 0)
+      throw new Error("Trace-Hardware-Wrecker-Damage ist ungültig.");
+    const hardwareIds = state.runner.rig.hardware.slice().sort();
+    state.pendingTraceHardwareWreckerContinuation = {
+      sourceDefinitionId,
+      sourceCardInstanceId,
+      traceId,
+      damageAmount,
+      stage: "select_hardware",
+    };
+    const payload = {
       traceSuccessEffect: "hardware_trash_meat_damage_end_run",
       sourceDefinitionId,
       trashedCardType: "hardware",
-      trashedCount: targetHardwareId ? 1 : 0,
-      ...(targetDefinitionId
-        ? { trashedCardDefinitionId: targetDefinitionId }
-        : {}),
       damageCannotBePrevented: true,
-      damageResolved: true,
-      damageType: summary.damageType,
-      damageAmount: summary.amount,
-      cardsTrashed: summary.cardsTrashed,
-      flatline: summary.flatline,
+      printedDamageAmount: damageAmount,
+    };
+    if (hardwareIds.length === 0) {
+      legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+      resolveTraceHardwareWreckerDamage(state, legalAction);
+      return { payload: legalAction.payload ?? payload, suspended: false };
+    }
+    state.pendingChoice = {
+      choiceId: `trace_hardware_wrecker_${traceId}_${state.stateVersion + 1}`,
+      side: "corp",
+      source: `trace_success.hardware_wrecker:${traceId}`,
+      prompt: "Wähle die Hardware, die getrasht wird.",
+      kind: "select_cards",
+      options: hardwareIds.map((cardId) => ({
+        id: `hardware_${cardId}`,
+        cardId,
+        label: definitionFor(state, cardId).title,
+        value: cardId,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    state.activeSide = "corp";
+    return {
+      payload: { ...payload, hardwareTrashChoiceOpened: true },
+      suspended: true,
+    };
+  }
+
+  function resolveTraceHardwareWreckerTargetChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const continuation = state.pendingTraceHardwareWreckerContinuation;
+    const choice = state.pendingChoice;
+    if (
+      !continuation ||
+      continuation.stage !== "select_hardware" ||
+      !choice?.source.startsWith("trace_success.hardware_wrecker:")
+    )
+      throw new Error("Es ist keine Trace-Hardware-Auswahl offen.");
+    if (legalAction.side !== "corp" || playerAction.side !== "corp")
+      throw new Error("Nur die Corp wählt die zu trashende Hardware.");
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const targetHardwareId = choice.options.find(
+      (option) => option.id === selectedId,
+    )?.value as CardInstanceId | undefined;
+    if (
+      !targetHardwareId ||
+      !state.runner.rig.hardware.includes(targetHardwareId)
+    )
+      throw new Error("Die gewählte Hardware ist nicht mehr installiert.");
+    const targetDefinitionId = definitionFor(state, targetHardwareId).id;
+    delete state.pendingChoice;
+    state.pendingTraceHardwareWreckerContinuation = {
+      ...continuation,
+      stage: "trash_prevention",
+      targetHardwareId,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      sourceDefinitionId: continuation.sourceDefinitionId,
+      selectedHardwareDefinitionId: targetDefinitionId,
+      trashedCardType: "hardware",
+      damageCannotBePrevented: true,
+      printedDamageAmount: continuation.damageAmount,
+    };
+    if (
+      openRunnerInstalledTrashPreventionWindow(
+        state,
+        legalAction,
+        [targetHardwareId],
+        `trace_success:${continuation.sourceDefinitionId}`,
+      )
+    )
+      return;
+    const event = createRunnerInstalledTrashImminentEvent(
+      state,
+      [targetHardwareId],
+      `trace_success:${continuation.sourceDefinitionId}`,
+    );
+    resolveRunnerInstalledTrashImminentEvent(state, event, legalAction, []);
+    resolveTraceHardwareWreckerDamage(state, legalAction);
+  }
+
+  function resumeTraceHardwareWreckerAfterTrash(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingTraceHardwareWreckerContinuation;
+    if (!continuation || continuation.stage !== "trash_prevention")
+      throw new Error("Es ist keine Trace-Hardware-Trash-Fortsetzung offen.");
+    if (state.pendingChoice || state.eventModificationWindow)
+      throw new Error(
+        "Das Hardware-Trash-Fenster ist noch nicht abgeschlossen.",
+      );
+    resolveTraceHardwareWreckerDamage(state, legalAction);
+  }
+
+  function resolveTraceHardwareWreckerDamage(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingTraceHardwareWreckerContinuation;
+    if (!continuation)
+      throw new Error("Trace-Hardware-Wrecker-Fortsetzung fehlt.");
+    delete state.pendingTraceHardwareWreckerContinuation;
+    const event = createDamageImminentEvent(state, {
+      damageId: `${continuation.traceId}.${continuation.sourceCardInstanceId}.unpreventable_meat`,
+      damageType: "meat",
+      amount: continuation.damageAmount,
+      source: `trace_success:${continuation.sourceDefinitionId}`,
+    });
+    event.payload = { ...event.payload, cannotBePrevented: true };
+    if (openDamageResolutionWindow(state, event, legalAction)) return;
+    const summary = resolveDamageImminentEvent(state, event);
+    setDamagePayload(legalAction, summary);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      sourceDefinitionId: continuation.sourceDefinitionId,
+      damageCannotBePrevented: true,
+      printedDamageAmount: continuation.damageAmount,
     };
   }
 
@@ -1588,6 +1710,8 @@ export function createStateRuntimeResolvers(
 
   return {
     resolveTraceHardwareWreckerSuccess,
+    resolveTraceHardwareWreckerTargetChoice,
+    resumeTraceHardwareWreckerAfterTrash,
     resolveTraceTrashRunnerResourceSuccess,
     encounterTemporaryTraceCreditsAvailable,
     spendEncounterTemporaryTraceCredits,

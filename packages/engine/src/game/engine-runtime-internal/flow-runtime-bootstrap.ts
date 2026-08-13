@@ -1283,15 +1283,7 @@ export function configureFlowRuntimeBootstrap({
           runtimePorts.subroutinesForCurrentEncounter,
         runRemainderStrengthBonusForBreaker:
           runtimePorts.runRemainderStrengthBonusForBreaker,
-        executeCardImplementationRunnerRunStartEffects: (
-          callbackState,
-          legalAction,
-        ) =>
-          executeCardImplementationRunnerRunStartEffects(
-            cardImplementationRuntimeDeps,
-            callbackState,
-            legalAction,
-          ),
+        beginRunnerRunStartOrdering: runtimePorts.beginRunnerRunStartOrdering,
         applyRunnerTraceCounterRunStartEffects:
           runtimePorts.applyRunnerTraceCounterRunStartEffects,
         applyRunStartRandomStrengthBonus:

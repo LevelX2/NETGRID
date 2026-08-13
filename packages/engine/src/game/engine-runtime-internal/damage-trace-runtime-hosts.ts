@@ -209,6 +209,7 @@ import {
   doDamage,
   hiddenRunnerResourceRevealPayload,
   isRunnerHardwareDeckDefinition,
+  openDamageResolutionWindow,
   openEventModificationWindow,
   openReplacementWindow,
   openRunnerInstalledTrashPreventionWindow,
@@ -729,8 +730,61 @@ export function createDamageTraceRuntimeHosts(
   function applyRunnerTraceCounterRunStartEffects(
     state: GameState,
     legalAction?: LegalAction,
-  ): void {
-    for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+  ): boolean {
+    return resolveRunnerTraceCounterRunStartEffects(state, legalAction, 0, 0, {
+      totalDamageAmount: 0,
+      totalCardsTrashed: 0,
+    });
+  }
+
+  function resumeRunnerTraceCounterRunStartEffects(
+    state: GameState,
+    legalAction: LegalAction,
+  ): boolean {
+    const continuation = state.pendingRunStartDamageContinuation;
+    if (!continuation)
+      throw new Error("Es ist keine Run-Start-Damage-Fortsetzung offen.");
+    if (state.pendingChoice || state.eventModificationWindow)
+      throw new Error(
+        "Das Run-Start-Damage-Fenster ist noch nicht abgeschlossen.",
+      );
+    if (state.run?.runId !== continuation.runId)
+      throw new Error("Die Run-Start-Damage-Fortsetzung ist veraltet.");
+    const currentDamage = Math.max(
+      0,
+      Number(legalAction.payload?.damageAmount ?? 0),
+    );
+    const currentCardsTrashed = Math.max(
+      0,
+      Number(legalAction.payload?.cardsTrashed ?? 0),
+    );
+    delete state.pendingRunStartDamageContinuation;
+    return resolveRunnerTraceCounterRunStartEffects(
+      state,
+      legalAction,
+      continuation.counterEffectIndex,
+      continuation.nextCounterOrdinal,
+      {
+        totalDamageAmount: continuation.totalDamageAmount + currentDamage,
+        totalCardsTrashed: continuation.totalCardsTrashed + currentCardsTrashed,
+      },
+    );
+  }
+
+  function resolveRunnerTraceCounterRunStartEffects(
+    state: GameState,
+    legalAction: LegalAction | undefined,
+    startEffectIndex: number,
+    startCounterOrdinal: number,
+    aggregate: { totalDamageAmount: number; totalCardsTrashed: number },
+  ): boolean {
+    const counterEffects = runnerTraceCounterEffectDefinitions();
+    for (
+      let counterEffectIndex = startEffectIndex;
+      counterEffectIndex < counterEffects.length;
+      counterEffectIndex += 1
+    ) {
+      const counterEffect = counterEffects[counterEffectIndex]!;
       if (!counterEffect.runStart) continue;
       const counterCount = cardCounter(
         state,
@@ -738,38 +792,66 @@ export function createDamageTraceRuntimeHosts(
         counterEffect.counterType,
       );
       if (counterCount <= 0) continue;
-      const damageAmount =
-        counterCount * counterEffect.runStart.amountPerCounter;
       const damageType =
         counterEffect.runStart.damageType === "brain" ? "core" : "net";
-      const summary = doDamage(state, {
-        damageId: `${state.run?.runId ?? `run_${state.stateVersion + 1}`}.${counterEffect.counterType}_counter_start_damage`,
-        damageType,
-        amount: damageAmount,
-        source: `counter:${counterEffect.sourceDefinitionId}`,
-      });
-      if (legalAction) {
+      const firstCounterOrdinal =
+        counterEffectIndex === startEffectIndex ? startCounterOrdinal : 0;
+      for (
+        let counterOrdinal = firstCounterOrdinal;
+        counterOrdinal < counterCount;
+        counterOrdinal += 1
+      ) {
+        if (!legalAction)
+          throw new Error("Run-Start-Damage benötigt eine LegalAction.");
+        const event = createDamageImminentEvent(state, {
+          damageId: `${state.run?.runId ?? `run_${state.stateVersion + 1}`}.${counterEffect.counterType}_counter_${counterOrdinal + 1}_start_damage`,
+          damageType,
+          amount: counterEffect.runStart.amountPerCounter,
+          source: `counter:${counterEffect.sourceDefinitionId}`,
+        });
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           sourceDefinitionId: counterEffect.sourceDefinitionId,
           counterType: counterEffect.counterType,
           counterCount,
           [`${counterEffect.counterType}CounterCount`]: counterCount,
-          damageResolved: true,
-          damageType: summary.damageType,
-          damageAmount: summary.amount,
-          cardsTrashed: summary.cardsTrashed,
-          flatline: summary.flatline,
-          ...(summary.coreDamageAfter !== undefined
-            ? {
-                coreDamageAfter: summary.coreDamageAfter,
-                runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter,
-              }
-            : {}),
+          damageSourceOrdinal: counterOrdinal + 1,
+          damageSourceCount: counterCount,
         };
+        if (openDamageResolutionWindow(state, event, legalAction)) {
+          const runId = state.run?.runId;
+          if (!runId)
+            throw new Error("Run-Start-Damage hat keinen aktiven Run.");
+          state.pendingRunStartDamageContinuation = {
+            runId,
+            counterEffectIndex,
+            nextCounterOrdinal: counterOrdinal + 1,
+            counterCount,
+            sourceDefinitionId: counterEffect.sourceDefinitionId,
+            counterType: counterEffect.counterType,
+            damageType,
+            amountPerCounter: counterEffect.runStart.amountPerCounter,
+            totalDamageAmount: aggregate.totalDamageAmount,
+            totalCardsTrashed: aggregate.totalCardsTrashed,
+          };
+          return true;
+        }
+        const summary = resolveDamageImminentEvent(state, event);
+        aggregate.totalDamageAmount += summary.amount;
+        aggregate.totalCardsTrashed += summary.cardsTrashed;
+        setDamagePayload(legalAction, summary);
+        if (state.winner) return false;
       }
-      if (state.winner) return;
     }
+    if (legalAction && aggregate.totalDamageAmount >= 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        damageResolved: true,
+        damageAmount: aggregate.totalDamageAmount,
+        cardsTrashed: aggregate.totalCardsTrashed,
+      };
+    }
+    return false;
   }
 
   function corpTraceCounterPoolSourceIds(state: GameState): CardInstanceId[] {
@@ -876,6 +958,7 @@ export function createDamageTraceRuntimeHosts(
     isCorpInstalledEconomyCreditSource,
     isCorpTraceCounterPoolSource,
     applyRunnerTraceCounterRunStartEffects,
+    resumeRunnerTraceCounterRunStartEffects,
     corpTraceCounterPoolSourceIds,
     corpTraceCounterPoolCounterType,
     corpTraceCounterPoolTotal,

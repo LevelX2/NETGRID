@@ -98,6 +98,12 @@ export type PendingChoiceResolutionHost = {
     resolveClassicDeflectorChoice: HostFn<void>;
     resolveTrashProgramChoice: HostFn<void>;
     resumeTraceProgramTrashContinuation: HostFn<void>;
+    resolveTraceHardwareWreckerTargetChoice: HostFn<void>;
+    resumeTraceHardwareWreckerAfterTrash: HostFn<void>;
+    resumeRunnerTraceCounterRunStartEffects: HostFn<boolean>;
+    resumeRunStart: HostFn<void>;
+    resolveRunnerRunStartOrderChoice: HostFn<boolean>;
+    applyRunnerTraceCounterRunStartEffects: HostFn<boolean>;
   };
   access: {
     resolveAccessProgramInstallMemoryChoice: HostFn<void>;
@@ -307,6 +313,7 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v121.replacement")) {
     resolveReplacementChoice(state, legalAction, playerAction);
+    resumeRunStartDamageIfReady(host, state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("corp_start.order:")) {
@@ -333,10 +340,19 @@ export function resolvePendingChoice(
       state.pendingPreventableTrashCostContinuation
     )
       resumePreventableTrashCostContinuation(state, legalAction);
+    if (
+      !state.pendingChoice &&
+      !state.eventModificationWindow &&
+      state.pendingTraceHardwareWreckerContinuation?.stage ===
+        "trash_prevention"
+    )
+      host.run.resumeTraceHardwareWreckerAfterTrash(state, legalAction);
+    resumeRunStartDamageIfReady(host, state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("damage_replacement:")) {
     resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
+    resumeRunStartDamageIfReady(host, state, legalAction);
     return;
   }
   if (
@@ -349,12 +365,38 @@ export function resolvePendingChoice(
     resolveStartOfRunFortUtilityChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("runner_run_start.order:")) {
+    const suspended = host.run.resolveRunnerRunStartOrderChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    if (!suspended) {
+      const damageSuspended = host.run.applyRunnerTraceCounterRunStartEffects(
+        state,
+        legalAction,
+      );
+      if (!damageSuspended && !state.winner && state.run)
+        host.run.resumeRunStart(state, legalAction);
+    }
+    return;
+  }
   if (
     state.pendingChoice.source.startsWith(
       "card_implementation.classic_deflector",
     )
   ) {
     resolveClassicDeflectorChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("trace_success.hardware_wrecker:")
+  ) {
+    host.run.resolveTraceHardwareWreckerTargetChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (
@@ -838,4 +880,24 @@ export function resolvePendingChoice(
     return;
   }
   delete state.pendingChoice;
+}
+
+function resumeRunStartDamageIfReady(
+  host: PendingChoiceResolutionHost,
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (
+    state.pendingChoice ||
+    state.eventModificationWindow ||
+    state.replacementWindow ||
+    !state.pendingRunStartDamageContinuation
+  )
+    return;
+  const suspended = host.run.resumeRunnerTraceCounterRunStartEffects(
+    state,
+    legalAction,
+  );
+  if (!suspended && !state.winner && state.run)
+    host.run.resumeRunStart(state, legalAction);
 }

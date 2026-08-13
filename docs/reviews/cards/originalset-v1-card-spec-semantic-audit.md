@@ -935,10 +935,66 @@ Korrekturbedarf. Polymer Breakthrough und Subsidiary Branch benötigen keinen
 Kartensonderpfad und sind durch den in Block 010 eingeführten gemeinsamen
 Corp-Startreihenfolgevertrag abgedeckt.
 
+## Block 012 – Karten 221 bis 240 und gemeinsamer Run-Start-Vertrag
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Der Eintrag wird
+durch den Block-Commit mit dem Betreff
+`fix(cards): audit originalset semantic block 012` eingeführt.
+
+### Cerberus und Runner-kontrollierter Run-Start
+
+- Jeder Cerberus-Counter erzeugt eine eigene präventierbare Quelle von zwei
+  Net-Damage. Die Engine öffnet dafür jeweils den normalen Damage-Imminent-
+  und Prevention-Vertrag und setzt einen unterbrochenen Run-Start danach
+  deterministisch fort.
+- Gleichzeitige eigene Run-Start-Quellen werden nach Erzeugung des Run-State
+  durch den Runner geordnet. Das umfasst sowohl CardImplementation-Trigger
+  als auch deklarative zufällige Breaker-Stärkeboni. Erst danach folgen
+  gegnerische Cerberus-Counter und anschließend das normale Run-Fortschreiten.
+- Die Reihenfolge ist als gebundene Continuation im State gespeichert. Jede
+  Auswahl wird gegen die noch tatsächlich fälligen Quellen revalidiert; es
+  gibt keinen kartenspezifischen Cerberus-/AI-Boon-Resolver.
+
+### Cinderella und Data Raven
+
+- Cinderellas erfolgreiche Trace-Folgen bilden eine sequenzielle
+  Continuation: zuerst endet der Run, danach wählt die Corp ein installiertes
+  Hardware-Ziel, der normale Runner-Trash-Prevention-Vertrag wird abgewickelt
+  und zuletzt entstehen unpräventierbare Meat Damage über die normale
+  Damage-Pipeline.
+- Dadurch kann Umbrella Policy das gewählte Hardware schützen, während
+  gültige Damage-Modifikatoren wie eine gescorte Bioweapons Engineering den
+  unpräventierbaren Schaden weiterhin erhöhen. Die gedruckte Basismenge bleibt
+  CardSpec-Eingabe und ist nicht im Resolver verdoppelt.
+- Data Raven verarbeitet bei erfolgreichem Trace zuerst Tag und
+  Tag-Prevention. Der Data-Raven-Counter wird erst nach Abschluss dieses
+  Fensters hinzugefügt; eine Unterbrechung bewahrt die Fortsetzung explizit.
+
+### CardSpec- und Planning-Semantik
+
+- Normale Defensive- und Chain-ICE in 221, 223–224, 229–235 und 237–240 sind
+  keine eigenen `corp.ice_tax_glacier`-Strategieanker mehr. Ihre bestehenden
+  Defense-, Tax-, Damage- und Run-Control-Supportsignale bleiben erhalten.
+- Cerberus und Cinderella tragen keinen falschen
+  `corp.tag_trace_punish`-Anker mehr: Beide verwenden Trace, erzeugen aber
+  keine Tags. Data Raven behält diesen Anker als echte persistente
+  Trace-/Tag-Engine; Ball and Chain sowie Canis Major und Canis Minor bleiben
+  unverändert.
+- `corp.defend_servers` bleibt der fachliche Planowner. Geändert wurden nur
+  deklarative Hints und Engine-Fortsetzungen; Choice-Resolver wählen weder
+  Server noch Strategie oder Action neu.
+
+### Bewusste Nichtänderungen
+
+Der Name `D’Arc Knight` bleibt bis zu einer belastbaren Canonical-Source-
+Entscheidung unverändert; das abweichende Spoiler-Spacing allein reicht nicht
+für eine Umbenennung. Für Ball and Chain, Canis Major und Canis Minor ergab
+der Nutzerblock weder funktionalen noch deklarativen Korrekturbedarf.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 221 bis 240.
+- Als nächster regulärer Nutzerblock folgen die Karten 241 bis 260.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1063,3 +1119,13 @@ Der bekannte Originalset-AI-Golden-Test bleibt unabhängig davon wegen seines
 statischen Imports des entfernten historischen Migration-Report-JSONs nicht
 startfähig; aktuelles Artefakt, Review-Fixture und die ausführbaren
 Hint-Verträge sind synchron.
+
+Für Block 012 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check sowie 95 fokussierte Engine-Tests grün. Die Evidence
+umfasst insbesondere Cinderellas Corp-Zielwahl, Umbrella-Trash-Prävention und
+Bioweapons-Modifikation, getrennte Cerberus-Damage-Quellen, Data Ravens
+Tag-vor-Counter-Reihenfolge sowie Runner-Ordering mehrerer eigener
+Run-Start-Quellen einschließlich Replay-/StateHash-Stabilität. Der bekannte
+Originalset-AI-Golden-Test bleibt unabhängig davon wegen seines statischen
+Imports des entfernten historischen Migration-Report-JSONs nicht startfähig;
+aktuelles Artefakt und Review-Fixture sind gezielt synchronisiert.

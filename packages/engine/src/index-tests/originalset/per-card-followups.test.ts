@@ -3226,11 +3226,14 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       );
       state.runner.credits = 20;
       state.corp.credits = 20;
-      installRunnerHardwareForTest(
+      const armadilloId = installRunnerHardwareForTest(
         state,
         "onr_v1_120_armadillo-armored-road-home",
       );
-      installRunnerHardwareForTest(state, "onr_v1_132_microtech-trode-set");
+      const trodeSetId = installRunnerHardwareForTest(
+        state,
+        "onr_v1_132_microtech-trode-set",
+      );
       installRunnerResourceForTest(
         state,
         "onr_v1_167_leland-corporate-bodyguard",
@@ -3260,12 +3263,22 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       state = applyChoice(state, "corp", `bid_${traceValue}`);
       state = applyChoice(state, "runner", "bid_0");
       expect(state.runner.tags).toBe(0);
-      expect(state.pendingChoice).toBeUndefined();
-      expect(state.run).toBeUndefined();
-      expect(state.runner.heap.length).toBeGreaterThan(0);
+      expect(state.pendingChoice).toMatchObject({
+        side: "corp",
+        source: expect.stringContaining("trace_success.hardware_wrecker"),
+      });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceSuccessful: true,
         tagsAdded: 0,
+        traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      });
+      state = applyChoice(state, "corp", `hardware_${trodeSetId}`);
+      expect(state.pendingChoice).toBeUndefined();
+      expect(state.run).toBeUndefined();
+      expect(state.runner.rig.hardware).toContain(armadilloId);
+      expect(state.runner.rig.hardware).not.toContain(trodeSetId);
+      expect(state.runner.heap.length).toBeGreaterThan(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceSuccessEffect: "hardware_trash_meat_damage_end_run",
         trashedCount: 1,
         damageCannotBePrevented: true,
@@ -3403,7 +3416,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     successful.runner.credits = 20;
     successful.corp.credits = 20;
-    installRunnerHardwareForTest(
+    const successfulHardwareId = installRunnerHardwareForTest(
       successful,
       "onr_v1_120_armadillo-armored-road-home",
     );
@@ -3434,9 +3447,241 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(successful.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
       traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+    });
+    successful = applyChoice(
+      successful,
+      "corp",
+      `hardware_${successfulHardwareId}`,
+    );
+    expect(successful.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
       trashedCount: 1,
       damageAmount: 2,
     });
+  });
+
+  it("lets Umbrella Policy protect Cinderella hardware and still applies boosted unpreventable meat damage", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-cinderella-pipeline",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+          id: "spotcheck_cinderella_pipeline_runner",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.runner.cards,
+            { id: "onr_v1_120_armadillo-armored-road-home", quantity: 1 },
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_cinderella_pipeline_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_190_bioweapons-engineering", quantity: 1 },
+            { id: "onr_v1_228_cinderella", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    drawRunnerCardsForTest(state, 6);
+    const hardwareId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_120_armadillo-armored-road-home",
+    );
+    const umbrellaId = installRunnerResourceForTest(
+      state,
+      "onr_v1_186_umbrella-policy",
+    );
+    const bioweaponsId = moveCorpCardToHq(
+      state,
+      "onr_v1_190_bioweapons-engineering",
+    );
+    state.corp.hq = state.corp.hq.filter((cardId) => cardId !== bioweaponsId);
+    state.corp.scoreArea.push(bioweaponsId);
+    state.cardInstances[bioweaponsId] = {
+      ...state.cardInstances[bioweaponsId]!,
+      zone: { side: "corp", zone: "scoreArea" },
+      faceup: true,
+      rezzed: true,
+    };
+    putCorpIceOnServer(state, "rd", "onr_v1_228_cinderella");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_6");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.run).toBeUndefined();
+    state = applyChoice(state, "corp", `hardware_${hardwareId}`);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    const umbrellaOption = state.pendingChoice?.options.find((option) =>
+      option.label.includes("Umbrella"),
+    );
+    if (!umbrellaOption) throw new Error("Umbrella-Prevention fehlt.");
+    const gripBeforeDamage = state.runner.grip.length;
+    state = applyChoice(state, "runner", umbrellaOption.id);
+    while (state.pendingChoice) {
+      const next = state.pendingChoice.source.startsWith(
+        "v120.event_modification.trash_targets:",
+      )
+        ? state.pendingChoice.options[0]
+        : state.pendingChoice.options.find(
+            (option) => option.id === "pass" || option.id.endsWith("_0"),
+          );
+      if (!next) throw new Error("Cinderella-Damage-Fortsetzung fehlt.");
+      state = applyChoice(state, state.pendingChoice.side, next.id);
+    }
+
+    expect(state.runner.rig.hardware).toContain(hardwareId);
+    expect(state.runner.rig.resources).not.toContain(umbrellaId);
+    expect(state.runner.heap).toContain(umbrellaId);
+    expect(state.runner.grip).toHaveLength(gripBeforeDamage - 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      trashedCount: 0,
+      damageCannotBePrevented: true,
+      printedDamageAmount: 2,
+      damageAmount: 3,
+      cardsTrashed: 3,
+    });
+  });
+
+  it("resolves every Cerberus counter as its own preventable run-start damage source", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-cerberus-preventable-sources",
+        runnerDeck: MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_cerberus_preventable_sources_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_227_cerberus", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    drawRunnerCardsForTest(state, 6);
+    installRunnerHardwareForTest(
+      state,
+      "onr_v1_128_green-knight-surge-buffers",
+    );
+    setCardCounterForTest(state, state.runner.identity, "cerberus", 2);
+    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.pendingRunStartDamageContinuation).toMatchObject({
+      counterType: "cerberus",
+      nextCounterOrdinal: 1,
+      counterCount: 2,
+      amountPerCounter: 2,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    const preventOne = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!preventOne) throw new Error("Cerberus-Prevention fehlt.");
+    state = applyChoice(state, "runner", preventOne.id);
+
+    expect(state.pendingRunStartDamageContinuation).toBeUndefined();
+    expect(state.runner.grip).toHaveLength(gripBefore - 3);
+    expect(state.run?.phase).toBe("approach_ice");
+    expect(state.run?.approachedIceId).toBeDefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      counterType: "cerberus",
+      cerberusCounterCount: 2,
+      damageAmount: 3,
+      cardsTrashed: 3,
+    });
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("lets the Runner order multiple own start-of-run sources before Corp counter effects", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-run-start-controller-order",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+          id: "spotcheck_run_start_controller_order_runner",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards,
+            { id: "onr_v1_002_ai-boon", quantity: 1 },
+            { id: "onr_v1_184_top-runners-conference", quantity: 1 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.runAccess.corp,
+        agendaPointsToWin: 99,
+      }),
+    );
+    const aiBoonId = installRunnerProgramForTest(state, "onr_v1_002_ai-boon");
+    const conferenceId = installRunnerResourceForTest(
+      state,
+      "onr_v1_184_top-runners-conference",
+    );
+    drawRunnerCardsForTest(state, 6);
+    setCardCounterForTest(state, state.runner.identity, "cerberus", 1);
+    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.pendingRunStartSourceOrder?.remaining).toHaveLength(2);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("runner_run_start.order"),
+    });
+    const conferenceOption = state.pendingChoice?.options.find(
+      (option) => option.value === `card_implementation:${conferenceId}`,
+    );
+    if (!conferenceOption) throw new Error("Run-Start-Ordering fehlt.");
+    state = applyChoice(state, "runner", conferenceOption.id);
+
+    expect(state.pendingRunStartSourceOrder).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.rig.resources).not.toContain(conferenceId);
+    expect(state.runner.heap).toContain(conferenceId);
+    expect(
+      state.run?.runStartRandomStrengthByBreaker?.[aiBoonId],
+    ).toBeGreaterThanOrEqual(1);
+    expect(state.runner.grip).toHaveLength(gripBefore - 2);
+    expect(state.run?.phase).toBe("approach_ice");
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
   it("places Management Shake-Up advancement counters and scales Shattered Remains hardware trash", () => {

@@ -215,7 +215,10 @@ function makeHost(
         runnerGripBefore: 4,
         runnerGripAfter: 2,
       }) as DamageSummary,
-    resolveTraceHardwareWreckerSuccess: () => ({}),
+    resolveTraceHardwareWreckerSuccess: () => ({
+      payload: {},
+      suspended: false,
+    }),
     resolveTraceTrashRunnerResourceSuccess: () => ({}),
     resolveTraceSuccessTrashProgramSubroutine: () => ({ suspended: false }),
     setDamagePayload: (summary) => {

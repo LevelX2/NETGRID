@@ -104,6 +104,31 @@ export function hasDueCardImplementationStartOfRunnerTurnAbility(
   );
 }
 
+export function hasDueCardImplementationRunnerRunStartAbility(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  if (!isActiveCardImplementationStartOfRunnerTurnSource(deps, state, cardId))
+    return false;
+  const definition = deps.definitionFor(state, cardId);
+  return cardImplementationRunnerRunStartAbilities(definition).some(
+    (ability) =>
+      !ability.condition ||
+      cardImplementationConditionMet(deps, state, ability.condition, cardId),
+  );
+}
+
+export function cardImplementationRunnerRunStartSourceIds(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+): CardInstanceId[] {
+  return cardImplementationRunnerInstalledSourceIds(deps, state).filter(
+    (cardId) =>
+      hasDueCardImplementationRunnerRunStartAbility(deps, state, cardId),
+  );
+}
+
 export function hasDueCardImplementationStartOfCorpTurnAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -289,8 +314,11 @@ export function executeCardImplementationRunnerRunStartEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction?: LegalAction,
+  onlySourceCardId?: CardInstanceId,
 ): void {
-  const sourceIds = cardImplementationRunnerInstalledSourceIds(deps, state);
+  const sourceIds = onlySourceCardId
+    ? [onlySourceCardId]
+    : cardImplementationRunnerInstalledSourceIds(deps, state);
   for (const cardId of sourceIds) {
     const instance = state.cardInstances[cardId];
     if (!instance) continue;

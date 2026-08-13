@@ -72,10 +72,6 @@ export const cardSpec = {
         role: "punish_payoff",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.damage_kill",
         support: "supports",

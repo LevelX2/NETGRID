@@ -71,7 +71,9 @@ export type EncounterPrintedEffectHost = {
       sourceDefinitionId: string,
       sourceCardInstanceId: CardInstanceId,
       traceId: string,
-    ) => Record<string, unknown>;
+      damageAmount: number,
+      legalAction: LegalAction,
+    ) => { payload: Record<string, unknown>; suspended: boolean };
     resolveTraceTrashRunnerResourceSuccess: (
       sourceDefinitionId: string,
       sourceCardInstanceId: CardInstanceId,
@@ -591,9 +593,9 @@ export function applyPrintedTraceSuccessFollowups(
   > = {};
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   let traceResourceTrashPayload: Record<string, unknown> = {};
-  const traceCounterPayload = successful
-    ? applyTraceCounterSuccess(host, trace.successEffect)
-    : {};
+  let traceCounterPayload: Record<string, string | number> = {};
+  if (successful && trace.successEffect.type === "add_counter")
+    traceCounterPayload = applyTraceCounterSuccess(host, trace.successEffect);
   if (
     successful &&
     trace.successEffect.type === "trash_runner_resource_and_add_tag"
@@ -684,13 +686,37 @@ export function applyPrintedTraceSuccessFollowups(
       trace.successEffect.type ===
         "end_run_trash_hardware_and_unpreventable_meat_damage"
     ) {
-      traceHardwareWreckerPayload =
-        host.callbacks.resolveTraceHardwareWreckerSuccess(
-          trace.sourceDefinitionId,
-          trace.sourceCardInstanceId,
-          trace.traceId,
-        );
       if (!state.winner && state.run) host.callbacks.finishRun(false);
+      const hardwareWrecker = host.callbacks.resolveTraceHardwareWreckerSuccess(
+        trace.sourceDefinitionId,
+        trace.sourceCardInstanceId,
+        trace.traceId,
+        trace.successEffect.amount,
+        legalAction,
+      );
+      traceHardwareWreckerPayload = hardwareWrecker.payload;
+      if (hardwareWrecker.suspended) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          traceId: trace.traceId,
+          traceStep,
+          sourceDefinitionId: trace.sourceDefinitionId,
+          traceSuccessful: true,
+          tagsAdded: 0,
+          ...traceHardwareWreckerPayload,
+        };
+        return {
+          handled: true,
+          suspended: true,
+          traceSuccessful: true,
+          tagsAdded: 0,
+          hackerTrackerCountersAdded,
+          runnerRunEnded: true,
+          runnerRunLockCreditCost,
+          payload: legalAction.payload,
+          stateChanged: true,
+        };
+      }
     } else if (runnerRunEnded) {
       host.callbacks.finishRun(false);
     } else {
@@ -754,6 +780,18 @@ export function applyPrintedTraceSuccessFollowups(
     ...(legalAction.payload ?? {}),
     ...payload,
   };
+  if (
+    successful &&
+    trace.successEffect.type === "add_tag_and_counter" &&
+    tagAmount > 0
+  ) {
+    state.pendingAddTagContinuation = {
+      kind: "trace_add_counter",
+      sourceDefinitionId: trace.sourceDefinitionId,
+      counterType: trace.successEffect.counterType,
+      counterAmount: trace.successEffect.amount,
+    };
+  }
   const tagPreventionWindowOpened =
     tagAmount > 0
       ? host.callbacks.addRunnerTagsWithPrevention(
@@ -762,6 +800,18 @@ export function applyPrintedTraceSuccessFollowups(
           `trace:${trace.sourceDefinitionId}:${trace.traceId}`,
         )
       : false;
+  if (
+    successful &&
+    trace.successEffect.type === "add_tag_and_counter" &&
+    !tagPreventionWindowOpened
+  ) {
+    delete state.pendingAddTagContinuation;
+    traceCounterPayload = applyTraceCounterSuccess(host, trace.successEffect);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...traceCounterPayload,
+    };
+  }
   const tagsAdded = Number(legalAction.payload?.tagsAdded ?? 0);
   const finalPayload = legalAction.payload ?? payload;
   return {

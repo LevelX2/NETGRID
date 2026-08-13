@@ -165,6 +165,7 @@ export {
   aggregateDamageSummaries,
   createAddTagImminentEvent,
   createDamageImminentEvent,
+  createRunnerInstalledTrashImminentEvent,
   doDamage,
   openPdcaDamageReplacementChoice,
   resolveDamageImminentEvent,

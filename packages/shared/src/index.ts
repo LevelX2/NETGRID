@@ -1762,6 +1762,12 @@ export type PendingAddTagContinuation =
       runnerTagsBefore: number;
     }
   | {
+      kind: "trace_add_counter";
+      sourceDefinitionId: CardDefinitionId;
+      counterType: CounterType;
+      counterAmount: number;
+    }
+  | {
       kind: "successful_run_access_replacement";
       runId: string;
       runnerTagsBefore: number;
@@ -1834,6 +1840,33 @@ export type GameState = {
     traceId: string;
     traceStep: "runner_bid" | "post_bid_link";
     additionalTagAmount?: number;
+  };
+  pendingTraceHardwareWreckerContinuation?: {
+    sourceDefinitionId: CardDefinitionId;
+    sourceCardInstanceId: CardInstanceId;
+    traceId: string;
+    damageAmount: number;
+    stage: "select_hardware" | "trash_prevention";
+    targetHardwareId?: CardInstanceId;
+  };
+  pendingRunStartDamageContinuation?: {
+    runId: string;
+    counterEffectIndex: number;
+    nextCounterOrdinal: number;
+    counterCount: number;
+    sourceDefinitionId: CardDefinitionId;
+    counterType: CounterType;
+    damageType: DamageType;
+    amountPerCounter: number;
+    totalDamageAmount: number;
+    totalCardsTrashed: number;
+  };
+  pendingRunStartSourceOrder?: {
+    runId: string;
+    remaining: Array<{
+      kind: "card_implementation" | "random_strength";
+      sourceCardId: CardInstanceId;
+    }>;
   };
   pendingPreventableTrashCostContinuation?: {
     kind: "runner_run_strength_boost";

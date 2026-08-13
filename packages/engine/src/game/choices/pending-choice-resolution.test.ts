@@ -400,6 +400,22 @@ function pendingChoiceHost(
       resumeTraceProgramTrashContinuation: unexpected(
         "resumeTraceProgramTrashContinuation",
       ),
+      resolveTraceHardwareWreckerTargetChoice: unexpected(
+        "resolveTraceHardwareWreckerTargetChoice",
+      ),
+      resumeTraceHardwareWreckerAfterTrash: unexpected(
+        "resumeTraceHardwareWreckerAfterTrash",
+      ),
+      resumeRunnerTraceCounterRunStartEffects: unexpected(
+        "resumeRunnerTraceCounterRunStartEffects",
+      ),
+      resumeRunStart: unexpected("resumeRunStart"),
+      resolveRunnerRunStartOrderChoice: unexpected(
+        "resolveRunnerRunStartOrderChoice",
+      ),
+      applyRunnerTraceCounterRunStartEffects: unexpected(
+        "applyRunnerTraceCounterRunStartEffects",
+      ),
     },
     access: {
       resolveAccessProgramInstallMemoryChoice: unexpected(
