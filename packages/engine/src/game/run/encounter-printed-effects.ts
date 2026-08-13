@@ -550,6 +550,7 @@ export function applyPrintedTraceSuccessFollowups(
   ) {
     state.trace = { ...trace, status: "trace_success_program_trash" };
     if (options.deletePendingChoice) delete state.pendingChoice;
+    if (state.run) host.callbacks.finishRun(false);
     const trashChoice =
       host.callbacks.resolveTraceSuccessTrashProgramSubroutine(
         trace,
@@ -569,7 +570,7 @@ export function applyPrintedTraceSuccessFollowups(
         traceSuccessful: true,
         tagsAdded: 0,
         hackerTrackerCountersAdded: 0,
-        runnerRunEnded: false,
+        runnerRunEnded: true,
         runnerRunLockCreditCost: 0,
         payload: legalAction.payload ?? {},
         stateChanged: true,

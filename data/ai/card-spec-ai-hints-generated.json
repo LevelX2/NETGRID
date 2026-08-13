@@ -35754,7 +35754,7 @@
     {
       "cardId": "onr_v1_241_fang-2-0",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:632d66b7d158eff3",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fc0da71ef5ed1192",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7c174c128927d646",
       "hint": {
         "cardId": "onr_v1_241_fang-2-0",
         "side": "corp",
@@ -35764,7 +35764,6 @@
         "planRoles": ["defend_server"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -35964,7 +35963,7 @@
     {
       "cardId": "onr_v1_243_fetch-4-0-1",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:17725b0719213403",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b8f4001128123e45",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:3c36d8da780d007e",
       "hint": {
         "cardId": "onr_v1_243_fetch-4-0-1",
         "side": "corp",
@@ -35973,7 +35972,6 @@
         "roles": ["ice", "sentry_ice", "damage"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.tag_trace_punish"],
         "actionStrategySupportPairs": [
           {
             "strategyId": "corp.tag_trace_punish",
@@ -36068,7 +36066,7 @@
     {
       "cardId": "onr_v1_244_filter",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:10adb343a1b77ee7",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8d37c6ff5c1c9ceb",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:33dd08d78d095603",
       "hint": {
         "cardId": "onr_v1_244_filter",
         "side": "corp",
@@ -36077,7 +36075,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -36120,7 +36117,7 @@
     {
       "cardId": "onr_v1_245_fire-wall",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5fc3be90adcc5f2c",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8d37c6ff5c1c9ceb",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:33dd08d78d095603",
       "hint": {
         "cardId": "onr_v1_245_fire-wall",
         "side": "corp",
@@ -36129,7 +36126,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -36172,7 +36168,7 @@
     {
       "cardId": "onr_v1_246_fragmentation-storm",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2ce08b7452ab2690",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d543397a02aa5086",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4fdc5052f8b008ce",
       "hint": {
         "cardId": "onr_v1_246_fragmentation-storm",
         "side": "corp",
@@ -36182,7 +36178,6 @@
         "planRoles": ["defend_server", "program_pressure"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -36314,7 +36309,7 @@
     {
       "cardId": "onr_v1_247_haunting-inquisition",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ed755adf29c0d38b",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d18f9798674af0fc",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:93c04c407a7f5524",
       "hint": {
         "cardId": "onr_v1_247_haunting-inquisition",
         "side": "corp",
@@ -36324,7 +36319,6 @@
         "planRoles": [],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -36539,7 +36533,7 @@
     {
       "cardId": "onr_v1_249_hunter",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a771d3e5dfb42bd1",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b8f4001128123e45",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:3c36d8da780d007e",
       "hint": {
         "cardId": "onr_v1_249_hunter",
         "side": "corp",
@@ -36548,7 +36542,6 @@
         "roles": ["ice", "sentry_ice", "damage"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.tag_trace_punish"],
         "actionStrategySupportPairs": [
           {
             "strategyId": "corp.tag_trace_punish",
@@ -36643,7 +36636,7 @@
     {
       "cardId": "onr_v1_250_ice-pick-willie",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9625a6523fcdb516",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:006ec51028502abc",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:37131af047ce66cc",
       "hint": {
         "cardId": "onr_v1_250_ice-pick-willie",
         "side": "corp",
@@ -36652,7 +36645,6 @@
         "roles": ["ice", "etr_ice", "sentry_ice", "program_trash_ice"],
         "planRoles": ["protect_rnd", "protect_hq", "build_scoring_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "program_trash",
@@ -36833,7 +36825,7 @@
     {
       "cardId": "onr_v1_252_keeper",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:76ff6da61ca3b11a",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8d37c6ff5c1c9ceb",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:33dd08d78d095603",
       "hint": {
         "cardId": "onr_v1_252_keeper",
         "side": "corp",
@@ -36842,7 +36834,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -36885,7 +36876,7 @@
     {
       "cardId": "onr_v1_253_laser-wire",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:dd0d089faeee5463",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d2248be113f22e1d",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:33dd08d78d095603",
       "hint": {
         "cardId": "onr_v1_253_laser-wire",
         "side": "corp",
@@ -36894,7 +36885,6 @@
         "roles": ["ice", "damage_ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "damage",
@@ -36921,12 +36911,10 @@
           "corp.remote_protection",
           "corp_ice.damage_source",
           "corp_ice.end_run",
-          "corp_ice.net_damage",
-          "damage.payoff"
+          "corp_ice.net_damage"
         ],
         "actionTacticSignals": [
           "corp.remote_protection",
-          "damage.payoff.runner",
           "effect:damage",
           "effect:etr",
           "effect_scope:run_path",
@@ -36960,7 +36948,7 @@
     {
       "cardId": "onr_v1_254_liche",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e759bdaae057800e",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f0b2f8e897f9caa4",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4a6934140cc51e30",
       "hint": {
         "cardId": "onr_v1_254_liche",
         "side": "corp",
@@ -36970,7 +36958,6 @@
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.damage_kill"],
         "strategySupportPairs": [
           {
@@ -37254,7 +37241,7 @@
     {
       "cardId": "onr_v1_256_mazer",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:fa5c22553c797521",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8d37c6ff5c1c9ceb",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:33dd08d78d095603",
       "hint": {
         "cardId": "onr_v1_256_mazer",
         "side": "corp",
@@ -37263,7 +37250,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -37306,7 +37292,7 @@
     {
       "cardId": "onr_v1_257_nerve-labyrinth",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:382d49b96e30e85d",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d2248be113f22e1d",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c6bb5e09cfa10105",
       "hint": {
         "cardId": "onr_v1_257_nerve-labyrinth",
         "side": "corp",
@@ -37315,7 +37301,6 @@
         "roles": ["ice", "damage_ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "damage",
@@ -37381,7 +37366,7 @@
     {
       "cardId": "onr_v1_258_neural-blade",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d51a5f00d3aa4b54",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:dcb918e00ea837d4",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b41d545894464c3c",
       "hint": {
         "cardId": "onr_v1_258_neural-blade",
         "side": "corp",
@@ -37398,7 +37383,6 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -37480,7 +37464,7 @@
     },
     {
       "cardId": "onr_v1_259_in-the-face",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:baccd392140f2f26",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b6f13652a006b6a6",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8d37c6ff5c1c9ceb",
       "hint": {
         "cardId": "onr_v1_259_in-the-face",
@@ -37526,7 +37510,7 @@
           "end_the_run",
           "install_ice",
           "rez_ice",
-          "subtype_deckrash",
+          "subtype_DecKrash",
           "subtype_sentry"
         ]
       }

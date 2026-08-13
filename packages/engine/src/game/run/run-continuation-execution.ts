@@ -64,12 +64,9 @@ export type RunContinuationExecutionHost = {
     host: () => RunMovementHost;
   };
   damage: {
-    dealDamage: (input: {
-      damageId: string;
-      damageType: "net";
-      amount: number;
-      source: string;
-    }) => CoreDamageSummary;
+    createDamageImminentEvent: EncounterPrintedEffectHost["callbacks"]["createDamageImminentEvent"];
+    openDamageResolutionWindow: EncounterPrintedEffectHost["callbacks"]["openDamageResolutionWindow"];
+    resolveDamageImminentEvent: EncounterPrintedEffectHost["callbacks"]["resolveDamageImminentEvent"];
     setDamagePayload: (
       legalAction: LegalAction,
       summary: CoreDamageSummary,
@@ -255,15 +252,24 @@ export function continueRun(
   }).ended;
   if (state.winner) return;
   const encounteredIceId = run.encounteredIceId;
-  resolvePostEncounterNetDamage(host.encounter.resolutionHost(), {
-    subroutines,
-    damageSummaries,
-    legalAction,
-    dealDamage: (input) => host.damage.dealDamage(input),
-    setDamagePayload: (summary) => {
-      if (legalAction) host.damage.setDamagePayload(legalAction, summary);
+  const postEncounterDamage = resolvePostEncounterNetDamage(
+    host.encounter.resolutionHost(),
+    {
+      subroutines,
+      damageSummaries,
+      legalAction,
+      createDamageImminentEvent: (input) =>
+        host.damage.createDamageImminentEvent(input),
+      openDamageResolutionWindow: (event, action) =>
+        host.damage.openDamageResolutionWindow(event, action),
+      resolveDamageImminentEvent: (event) =>
+        host.damage.resolveDamageImminentEvent(event),
+      setDamagePayload: (summary) => {
+        if (legalAction) host.damage.setDamagePayload(legalAction, summary);
+      },
     },
-  });
+  );
+  if (postEncounterDamage.suspended) return;
   if (state.winner) return;
   cleanupEncounterDurationMarkers(host.encounter.resolutionHost());
   host.cleanup.resetBreakerStrength();

@@ -69,10 +69,6 @@ export const cardSpec = {
         kind: "plan_role",
         role: "protect_rnd",
       },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.tag_trace_punish",
-      },
     ],
     capabilities: [
       {

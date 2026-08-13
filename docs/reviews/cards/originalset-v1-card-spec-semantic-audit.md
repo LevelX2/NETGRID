@@ -991,10 +991,80 @@ Entscheidung unverändert; das abweichende Spoiler-Spacing allein reicht nicht
 für eine Umbenennung. Für Ball and Chain, Canis Major und Canis Minor ergab
 der Nutzerblock weder funktionalen noch deklarativen Korrekturbedarf.
 
+## Block 013 – Karten 241 bis 260 und gemeinsamer Action-Consumption-Vertrag
+
+Status: umgesetzt und fokussiert verifiziert.
+
+### Fatal Attractor und verzögerter Encounter-Schaden
+
+- Fatal Attractors 3 Net Damage nach dem nächsten nicht vollständig
+  gebrochenen ICE werden nicht mehr direkt finalisiert. Der verzögerte
+  Schaden erzeugt jetzt ein normales Damage-Imminent-Event und öffnet den
+  regulären Prevention-/Replacement-Vertrag.
+- Der verzögerte Marker wird vor einer möglichen Unterbrechung konsumiert.
+  Die anschließende Run-Fortsetzung kann dieselbe Damage-Quelle daher nicht
+  ein zweites Mal erzeugen.
+
+### Fragmentation Storm und geordnete Trace-Folgen
+
+- Der erfolgreiche Trace folgt der gedruckten Reihenfolge: zuerst endet der
+  Run, danach wählt die Corp ein installiertes Programm über den normalen
+  Trash-/Prevention-Pfad, und erst nach diesem Schritt entsteht die Sperre
+  gegen weitere Runs bis zur Bezahlung einer Aktion und eines Credits.
+- Die Programmwahl bleibt nach dem Run-Ende an Trace, Quellen-ICE und
+  Subroutine gebunden. Sie benötigt keinen künstlich fortbestehenden
+  Encounter-State und führt keine neue Zielentscheidung außerhalb der
+  Engine-Continuation ein.
+- Homewrecker verwendet bereits den in Block 012 korrigierten gemeinsamen
+  Cinderella-Vertrag. Ein gemeinsamer Kartenzeuge bestätigt Corp-Zielwahl,
+  Run-Ende vor der Wahl, normalen Hardware-Trash und modifizierbare,
+  unpräventierbare Meat Damage für beide Karten.
+
+### Einheitlicher Verbrauch von Runner-Aktionskapazität
+
+- Einzelne Clicks, mehrere gemeinsam bezahlte Clicks und tatsächlich
+  verlorene beziehungsweise später eingezogene Aktionen laufen über einen
+  gemeinsamen Action-Consumption-Vertrag.
+- Jeder verbrauchte Aktionspunkt erhöht denselben Runner-Aktionsordinal und
+  reduziert `runLockActionsPending` um denselben Betrag. Haunting
+  Inquisition kann deshalb nicht mehr durch eine Mehrfach-Click-Aktion
+  zeitlich falsch verlängert werden; zukünftige Action-Schulden verwenden
+  denselben Vertrag.
+
+### Mastiff, Canonical Data und Quellenprüfung
+
+- Der aus Block 012 stammende generische Counter-Run-Start-Vertrag wird auch
+  für Mastiff kartenspezifisch abgesichert: Jeder Mastiff-Counter erzeugt
+  eine eigene präventierbare 1-Core-/Brain-Damage-Quelle. Prävention einer
+  Quelle fasst die übrigen Counter nicht zu einem gemeinsamen Ereignis
+  zusammen.
+- Ein Scan der Originalkarte bestätigt Mastiffs `Trace 5`; die vorhandene
+  CardSpec bleibt deshalb unverändert. Der Textspoiler hatte an dieser Stelle
+  lediglich den Wert ausgelassen. Scanquelle: [Original-Netrunner-Corp-
+  Kartenscans, Bild mit Mastiff](https://www.ebay.com/itm/264840548453).
+- Die kanonische Identität von Karte 259 lautet wieder
+  `π in the 'Face`; die sichtbare Subtypenliste bewahrt `DecKrash`. Der
+  technische ASCII-Slug bleibt stabil.
+
+### Planning-Semantik
+
+- Gewöhnliche Defensive-ICE 241, 244–247, 250, 252–254 und 256–258 tragen
+  keinen eigenen `corp.ice_tax_glacier`-Strategieanker mehr. Vorhandene
+  Defense-, Tax-, Damage- und ICE-Chain-Supportsignale bleiben erhalten.
+- Fetch 4.0.1 und Hunter bleiben Trace-/Tag-Support, sind als einzelne
+  einfache Tag-ICE aber keine eigenen `corp.tag_trace_punish`-Anker mehr.
+  Jack Attack und Pocket Virtual Reality behalten ihre begründeten Anker.
+- Laser Wire wird bei nur 1 Net Damage nicht mehr als strategischer
+  `damage.payoff` klassifiziert. Die mechanischen Damage- und
+  Defense-Signale bleiben erhalten.
+- `corp.defend_servers` bleibt der fachliche Planowner. Es wurden weder ein
+  paralleler Plan noch neue Server-, Ziel- oder Strategy-Entscheidungen in
+  Choice-Resolvern eingeführt.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 241 bis 260.
+- Als nächster regulärer Nutzerblock folgen die Karten 261 bis 280.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1129,3 +1199,15 @@ Run-Start-Quellen einschließlich Replay-/StateHash-Stabilität. Der bekannte
 Originalset-AI-Golden-Test bleibt unabhängig davon wegen seines statischen
 Imports des entfernten historischen Migration-Report-JSONs nicht startfähig;
 aktuelles Artefakt und Review-Fixture sind gezielt synchronisiert.
+
+Für Block 013 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check sowie 113 fokussierte Engine-, CardSpec-/Registry- und
+AI-Artefakttests grün. Die Engine-Evidence umfasst Mehrfach-Click- und
+Action-Debt-Verbrauch, Fatal-Attractor-Prevention, Fragmentation Storms
+Reihenfolge, Homewrecker über den gemeinsamen Hardware-Wrecker-Vertrag und
+getrennte Mastiff-Counter-Damage-Quellen. Ein versehentlich breit gestarteter
+Engine-Lauf wurde nicht als Gate gewertet; nach Korrektur des neuen
+Mastiff-Zeugen sind alle auditnahen Tests fokussiert grün. Die übrigen dort
+sichtbaren Fehler betreffen unveränderte bekannte beziehungsweise
+fachfremde Test-Fixtures und wurden entsprechend dem begrenzten Testauftrag
+nicht in diesen Block gezogen.

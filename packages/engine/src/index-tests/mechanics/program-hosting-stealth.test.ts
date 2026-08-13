@@ -506,6 +506,8 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       side: "corp",
       kind: "select_cards",
     });
+    expect(state.run).toBeUndefined();
+    expect(state.runnerTurnFlags?.runLockActionsPending ?? 0).toBe(0);
     state = applyChoice(state, "corp", `card_${pileDriverId}`);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,

@@ -4,10 +4,7 @@ import {
   type CreditGainRequest,
   type CreditGainResult,
 } from "../economy/credit-gain";
-import {
-  ensureRunnerTurnFlags,
-  recordRunnerActionSpent,
-} from "./turn-flags-counters";
+import { recordRunnerActionSpent } from "./turn-flags-counters";
 
 export function credits(
   state: GameState,
@@ -50,12 +47,6 @@ export function spendCredits(
   state.runner.credits -= amount;
 }
 
-export function consumeRunnerRunLockAction(state: GameState): void {
-  const flags = ensureRunnerTurnFlags(state);
-  const pending = Math.max(0, Math.floor(flags.runLockActionsPending ?? 0));
-  flags.runLockActionsPending = pending > 0 ? pending - 1 : 0;
-}
-
 export function spendClick(state: GameState, side: Side): void {
   if (side === "corp") {
     if (state.corp.clicks <= 0)
@@ -67,7 +58,6 @@ export function spendClick(state: GameState, side: Side): void {
     throw new Error("Der Runner hat keine Clicks mehr.");
   state.runner.clicks -= 1;
   recordRunnerActionSpent(state, 1);
-  consumeRunnerRunLockAction(state);
 }
 
 export function spendClicks(

@@ -212,7 +212,12 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         host: () => runMovementHostForState(state),
       },
       damage: {
-        dealDamage: (input) => host.damage.doDamage(state, input),
+        createDamageImminentEvent: (input) =>
+          host.damage.createDamageImminentEvent(state, input),
+        openDamageResolutionWindow: (event, legalAction) =>
+          host.damage.openDamageResolutionWindow(state, event, legalAction),
+        resolveDamageImminentEvent: (event) =>
+          host.damage.resolveDamageImminentEvent(state, event),
         setDamagePayload: (legalAction, summary) =>
           host.damage.setDamagePayload(legalAction, summary),
       },

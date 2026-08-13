@@ -885,12 +885,21 @@ export function resolveTrashProgramChoice(
   if (!choice?.source.startsWith(TRASH_PROGRAM_CHOICE_SOURCE_PREFIX))
     throw new Error("Programmtrash-Choice ist nicht offen.");
   const context = parseTrashProgramChoiceSource(choice.source);
-  const run = mustRun(host.state);
-  if (
-    run.runId !== context.runId ||
-    run.encounteredIceId !== context.sourceIceId
-  )
-    throw new Error("Die Programmtrash-Choice passt nicht mehr zum Encounter.");
+  if (context.continuation === "encounter") {
+    const run = mustRun(host.state);
+    if (
+      run.runId !== context.runId ||
+      run.encounteredIceId !== context.sourceIceId
+    )
+      throw new Error(
+        "Die Programmtrash-Choice passt nicht mehr zum Encounter.",
+      );
+  } else if (
+    host.state.trace?.traceId !== context.runId ||
+    host.state.trace.sourceCardInstanceId !== context.sourceIceId
+  ) {
+    throw new Error("Die Programmtrash-Choice passt nicht mehr zum Trace.");
+  }
   const sourceInstance = host.state.cardInstances[context.sourceIceId];
   if (
     !sourceInstance?.rezzed ||
@@ -1000,16 +1009,24 @@ function startTrashProgramChoice(
     | "initiate_trace"
     | "trash_installed_program"
     | "trash_installed_program_unless_runner_pays";
-  const run = mustRun(host.state);
-  const sourceIceId = run.encounteredIceId;
+  const run = host.state.run;
+  const trace = host.state.trace;
+  const sourceIceId =
+    input.continuation === "trace_success"
+      ? trace?.sourceCardInstanceId
+      : run?.encounteredIceId;
   if (!sourceIceId)
     throw new Error("Programmtrash-Choice benötigt ein Encounter-ICE.");
+  const continuationId =
+    input.continuation === "trace_success" ? trace?.traceId : run?.runId;
+  if (!continuationId)
+    throw new Error("Programmtrash-Choice benötigt eine Fortsetzungsbindung.");
   const choiceId = `trash_installed_program_${host.state.stateVersion + 1}`;
   host.state.pendingChoice = {
     choiceId,
     side: "corp",
     source: trashProgramChoiceSource({
-      runId: run.runId,
+      runId: continuationId,
       sourceIceId,
       subroutineIndex: input.subroutineIndex,
       sourceDefinitionId: input.definition.id,
@@ -1029,7 +1046,7 @@ function startTrashProgramChoice(
     stateVersion: host.state.stateVersion + 1,
     visibility: "public",
   };
-  if (!run.resolvedSubroutineIndexes.includes(input.subroutineIndex))
+  if (run && !run.resolvedSubroutineIndexes.includes(input.subroutineIndex))
     run.resolvedSubroutineIndexes.push(input.subroutineIndex);
   host.state.activeSide = "corp";
   legalActionPayload(input.legalAction, {

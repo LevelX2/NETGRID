@@ -4,7 +4,7 @@ export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
     cardDefinitionId: cardDefinitionId("onr_v1_259_in-the-face"),
-    title: "Pi in the 'Face",
+    title: "π in the 'Face",
     side: "corp",
     cardType: "ice",
   },
@@ -25,7 +25,7 @@ export const cardSpec = {
     schemaVersion: "card-mechanical-spec-v1",
     characteristics: {
       faction: "onr1996_neutral",
-      subtypes: ["deckrash", "sentry"],
+      subtypes: ["DecKrash", "sentry"],
       numeric: {
         installCost: null,
         memoryCost: null,

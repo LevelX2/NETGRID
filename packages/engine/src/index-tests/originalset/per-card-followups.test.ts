@@ -2502,7 +2502,11 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("keeps Pi in the 'Face and Endless Corridor subroutine indices side-safe", () => {
+  it("keeps π in the 'Face and Endless Corridor subroutine indices side-safe", () => {
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_259_in-the-face"]).toMatchObject({
+      title: "π in the 'Face",
+      subtypes: ["DecKrash", "sentry"],
+    });
     let piState = toRunnerTurn(v112kCardReleaseGame("spotcheck-pi-face"));
     piState.runner.credits = 20;
     piState.corp.credits = 20;
@@ -3556,6 +3560,84 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     });
   });
 
+  it("routes Fatal Attractor post-encounter Net damage through normal prevention", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-fatal-attractor-prevention",
+        runnerDeck: MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_fatal_attractor_prevention_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_242_fatal-attractor", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    drawRunnerCardsForTest(state, 6);
+    installRunnerHardwareForTest(
+      state,
+      "onr_v1_128_green-knight-surge-buffers",
+    );
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(state, "rd", "onr_v1_242_fatal-attractor");
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_242_fatal-attractor",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    const gripBeforeDamage = state.runner.grip.length;
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    expect(state.run?.fatalDamageActiveForEncounter).toBe(false);
+    const preventOne = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!preventOne) throw new Error("Fatal-Attractor-Prevention fehlt.");
+    state = applyChoice(state, "runner", preventOne.id);
+
+    expect(state.runner.grip).toHaveLength(gripBeforeDamage - 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 2,
+    });
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("resolves every Cerberus counter as its own preventable run-start damage source", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -3614,6 +3696,68 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       damageAmount: 3,
       cardsTrashed: 3,
     });
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("resolves every Mastiff counter as its own preventable run-start damage source", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-mastiff-preventable-sources",
+        runnerDeck: MECHANIC_SMOKE_DECKS.damagePrevention.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
+          id: "spotcheck_mastiff_preventable_sources_corp",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards,
+            { id: "onr_v1_255_mastiff", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 99,
+      }),
+    );
+    drawRunnerCardsForTest(state, 6);
+    const lifesaverId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_130_lifesaver-nanosurgeons",
+    );
+    setCardCounterForTest(state, state.runner.identity, "mastiff", 2);
+    putCorpIceOnServer(state, "rd", "onr_v1_255_mastiff");
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.pendingRunStartDamageContinuation).toMatchObject({
+      counterType: "mastiff",
+      damageType: "core",
+      nextCounterOrdinal: 1,
+      counterCount: 2,
+      amountPerCounter: 1,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("event_modification"),
+    });
+    const preventOne = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!preventOne) throw new Error("Mastiff-Core-Damage-Prevention fehlt.");
+    state = applyChoice(state, "runner", preventOne.id);
+
+    expect(state.pendingRunStartDamageContinuation).toBeUndefined();
+    expect(state.runner.grip).toHaveLength(gripBefore - 1);
+    expect(state.runner.coreDamage).toBe(1);
+    expect(state.runner.heap).toContain(lifesaverId);
+    expect(state.run?.phase).toBe("approach_ice");
     const replay = replayEvents(
       initial,
       state.eventLog.slice(initial.eventLog.length),

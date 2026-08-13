@@ -13,7 +13,10 @@ import {
   definitionFor,
   runnerInstalledCardIds,
 } from "../state/card-server-lookup";
-import { ensureRunnerTurnFlags } from "../state/turn-flags-counters";
+import {
+  ensureRunnerTurnFlags,
+  recordRunnerActionCapacityConsumed,
+} from "../state/turn-flags-counters";
 import type {
   AutomaticEffectCollector,
   RestrictedActionFamily,
@@ -26,6 +29,7 @@ type ActionEconomyGrant = NonNullable<
 export function applyRunnerForgoNextAction(state: GameState): void {
   if (state.runner.clicks > 0) {
     state.runner.clicks = Math.max(0, state.runner.clicks - 1);
+    recordRunnerActionCapacityConsumed(state, 1);
     return;
   }
   addRunnerFutureActionDebt(state, 1);
@@ -74,6 +78,7 @@ export function consumeRunnerFutureActionDebt(state: GameState): number {
   pending -= clicksConsumed;
   consumed += clicksConsumed;
   flags.forgoNextActionsPending = pending;
+  recordRunnerActionCapacityConsumed(state, consumed);
   return consumed;
 }
 

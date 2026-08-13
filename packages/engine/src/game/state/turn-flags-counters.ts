@@ -170,11 +170,22 @@ export function recordRunnerActionSpent(
   state: GameState,
   amount: number,
 ): void {
+  recordRunnerActionCapacityConsumed(state, amount);
+}
+
+export function recordRunnerActionCapacityConsumed(
+  state: GameState,
+  amount: number,
+): void {
   if (!Number.isInteger(amount) || amount <= 0) return;
   const flags = ensureRunnerTurnFlags(state);
   flags.runnerActionOrdinal =
     Math.max(0, Math.floor(flags.runnerActionOrdinal ?? 0)) + amount;
   flags.currentRunnerActionOrdinal = flags.runnerActionOrdinal;
+  flags.runLockActionsPending = Math.max(
+    0,
+    Math.floor(flags.runLockActionsPending ?? 0) - amount,
+  );
 }
 
 export function hasSuccessfulHqRunThisTurn(state: GameState): boolean {

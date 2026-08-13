@@ -3,6 +3,7 @@ import {
   type CardInstance,
   type CardInstanceId,
   type GameState,
+  type ImminentEvent,
   type LegalAction,
   type SubroutineDefinition,
 } from "@netgrid/shared";
@@ -263,11 +264,16 @@ describe("encounter resolution boundary", () => {
       {
         subroutines,
         damageSummaries: [],
-        dealDamage: (input) => {
+        createDamageImminentEvent: (input) => {
           dealt.push(input);
+          return { payload: input } as unknown as ImminentEvent;
+        },
+        openDamageResolutionWindow: () => false,
+        resolveDamageImminentEvent: (event) => {
+          const amount = Number(event.payload.amount);
           return {
             damageType: "net",
-            amount: input.amount,
+            amount,
             cardsTrashed: 1,
             flatline: false,
             runnerGripBefore: 5,
@@ -304,11 +310,15 @@ describe("encounter resolution boundary", () => {
     resolvePostEncounterNetDamage(encounterResolutionHost(fullyBroken), {
       subroutines,
       damageSummaries: [],
-      dealDamage: (input) => {
+      createDamageImminentEvent: (input) => {
         fullyBrokenDealt.push(input);
+        return { payload: input } as unknown as ImminentEvent;
+      },
+      openDamageResolutionWindow: () => false,
+      resolveDamageImminentEvent: (event) => {
         return {
           damageType: "net",
-          amount: input.amount,
+          amount: Number(event.payload.amount),
           cardsTrashed: 1,
           flatline: false,
         };
@@ -317,6 +327,42 @@ describe("encounter resolution boundary", () => {
     });
     expect(fullyBrokenDealt).toEqual([]);
     expect(fullyBroken.run?.fullyBrokenIceIds).toEqual(["ice_1"]);
+  });
+
+  it("opens normal prevention for Fatal-Attractor damage and consumes the delayed marker", () => {
+    const state = makeState();
+    state.run!.fatalDamageActiveForEncounter = true;
+    state.run!.fatalDamageAmountForEncounter = 3;
+    state.run!.fatalDamageSourceDefinitionId = "onr_v1_242_fatal-attractor";
+    const legalAction = { payload: {} } as LegalAction;
+    const event = { payload: { amount: 3 } } as unknown as ImminentEvent;
+
+    const result = resolvePostEncounterNetDamage(
+      encounterResolutionHost(state),
+      {
+        subroutines: [{ id: "etr", type: "end_the_run" }],
+        damageSummaries: [],
+        legalAction,
+        createDamageImminentEvent: () => event,
+        openDamageResolutionWindow: (openedEvent, action) => {
+          expect(openedEvent).toBe(event);
+          expect(action).toBe(legalAction);
+          return true;
+        },
+        resolveDamageImminentEvent: () => {
+          throw new Error("suspended damage must not resolve immediately");
+        },
+        setDamagePayload: () => undefined,
+      },
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      suspended: true,
+      stateChanged: true,
+    });
+    expect(state.run?.fatalDamageActiveForEncounter).toBe(false);
+    expect(state.run?.fatalDamageAmountForEncounter).toBeUndefined();
   });
 
   it("can start the Viral-15 pass choice directly with stable source and payload", () => {

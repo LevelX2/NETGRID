@@ -4,6 +4,7 @@ import type {
   CardInstanceId,
   CorpServer,
   GameState,
+  ImminentEvent,
   LegalAction,
   ServerId,
   SubroutineDefinition,
@@ -271,7 +272,9 @@ function hostFor(
         host: movementHost,
       },
       damage: {
-        dealDamage: () => ({
+        createDamageImminentEvent: () => ({}) as ImminentEvent,
+        openDamageResolutionWindow: () => false,
+        resolveDamageImminentEvent: () => ({
           damageType: "net",
           amount: 0,
           cardsTrashed: 0,

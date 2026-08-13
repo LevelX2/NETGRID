@@ -17759,7 +17759,6 @@
         "planRoles": ["defend_server"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -17980,7 +17979,6 @@
         "roles": ["ice", "sentry_ice", "damage"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.tag_trace_punish"],
         "actionStrategySupportPairs": [
           {
             "strategyId": "corp.tag_trace_punish",
@@ -18092,7 +18090,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -18148,7 +18145,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -18205,7 +18201,6 @@
         "planRoles": ["defend_server", "program_pressure"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -18355,7 +18350,6 @@
         "planRoles": [],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -18591,7 +18585,6 @@
         "roles": ["ice", "sentry_ice", "damage"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.tag_trace_punish"],
         "actionStrategySupportPairs": [
           {
             "strategyId": "corp.tag_trace_punish",
@@ -18703,7 +18696,6 @@
         "roles": ["ice", "etr_ice", "sentry_ice", "program_trash_ice"],
         "planRoles": ["protect_rnd", "protect_hq", "build_scoring_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "program_trash",
@@ -18907,7 +18899,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -18963,7 +18954,6 @@
         "roles": ["ice", "damage_ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "damage",
@@ -18990,12 +18980,10 @@
           "corp.remote_protection",
           "corp_ice.damage_source",
           "corp_ice.end_run",
-          "corp_ice.net_damage",
-          "damage.payoff"
+          "corp_ice.net_damage"
         ],
         "actionTacticSignals": [
           "corp.remote_protection",
-          "damage.payoff.runner",
           "effect:damage",
           "effect:etr",
           "effect_scope:run_path",
@@ -19043,7 +19031,6 @@
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.damage_kill"],
         "strategySupportPairs": [
           {
@@ -19348,7 +19335,6 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -19404,7 +19390,6 @@
         "roles": ["ice", "damage_ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "damage",
@@ -19491,7 +19476,6 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -19631,7 +19615,7 @@
           "end_the_run",
           "install_ice",
           "rez_ice",
-          "subtype_deckrash",
+          "subtype_DecKrash",
           "subtype_sentry"
         ]
       }

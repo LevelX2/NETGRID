@@ -68,10 +68,6 @@ export const cardSpec = {
         role: "protect_rnd",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
         kind: "tactic_interpretation",
         signal: "damage.payoff",
         use: "damage.payoff.runner",

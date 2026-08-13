@@ -5,6 +5,7 @@ import {
   type CardInstanceId,
   type DamageType,
   type GameState,
+  type ImminentEvent,
   type LegalAction,
   type PlayerAction,
   type ResolvedGameEffect,
@@ -69,6 +70,7 @@ export type EncounterResolutionResult = {
 
 export type PostEncounterResult = {
   handled: boolean;
+  suspended?: boolean;
   forcedRunEndAfterEncounter?: boolean;
   runShouldEnd?: boolean;
   stateChanged?: boolean;
@@ -462,12 +464,17 @@ export function resolvePostEncounterNetDamage(
     subroutines: readonly EncounterSubroutine[];
     damageSummaries: DamageSummary[];
     legalAction?: LegalAction | undefined;
-    dealDamage: (input: {
+    createDamageImminentEvent: (input: {
       damageId: string;
       damageType: "net";
       amount: number;
       source: string;
-    }) => DamageSummary;
+    }) => ImminentEvent;
+    openDamageResolutionWindow: (
+      event: ImminentEvent,
+      legalAction: LegalAction,
+    ) => boolean;
+    resolveDamageImminentEvent: (event: ImminentEvent) => DamageSummary;
     setDamagePayload: (summary: DamageSummary) => void;
   },
 ): PostEncounterResult {
@@ -484,12 +491,20 @@ export function resolvePostEncounterNetDamage(
       Math.floor(run.fatalDamageAmountForEncounter ?? 0),
     );
     if (!encounterFullyBroken && fatalDamageAmount > 0 && encounteredIceId) {
-      const summary = options.dealDamage({
+      const event = options.createDamageImminentEvent({
         damageId: `${run.runId}.${encounteredIceId}.post_encounter_net_damage`,
         damageType: "net",
         amount: fatalDamageAmount,
         source: nextEncounterFatalDamageSource(run),
       });
+      run.fatalDamageActiveForEncounter = false;
+      delete run.fatalDamageAmountForEncounter;
+      if (
+        options.legalAction &&
+        options.openDamageResolutionWindow(event, options.legalAction)
+      )
+        return { handled: true, suspended: true, stateChanged: true };
+      const summary = options.resolveDamageImminentEvent(event);
       options.damageSummaries.push(summary);
       options.setDamagePayload(
         aggregateDamageSummaries(options.damageSummaries),
