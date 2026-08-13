@@ -1061,10 +1061,67 @@ Status: umgesetzt und fokussiert verifiziert.
   paralleler Plan noch neue Server-, Ziel- oder Strategy-Entscheidungen in
   Choice-Resolvern eingeführt.
 
+## Block 014 – Karten 261 bis 280 und stapelbare Run-Modifikatoren
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### TKO 2.0 und Zombie
+
+- TKO 2.0 besitzt jetzt genau eine gedruckte, adressierbare Subroutine. Ihr
+  geschlossener CardSpec-Vertrag bildet die Textreihenfolge
+  `end_run → runner_forgoes_next_action` ab; Runtime, sichtbare Run-Quote und
+  KI-Funktionsprojektion konsumieren dieselbe zusammengesetzte Identität.
+- Die Engine beendet den Run vor dem Action-Verzicht. Der reale Kartenpfad
+  prüft weiterhin den verlorenen Aktionsordinal, Replay und StateHash; der
+  Runner muss nicht mehr zwei künstlich getrennte Subroutinen brechen.
+- Zombies regelwirksame Subtypen sind auf `black ice` und `sentry` korrigiert.
+  Das unbelegte `ap` und der aus dem Kartennamen abgeleitete Phantomsubtyp
+  `zombie` wurden entfernt. Die beiden getrennten Brain-/Core-Damage-Quellen,
+  ETR, Werte und Damage-Kill-Semantik bleiben unverändert.
+
+### Tutor und Viral 15
+
+- Wiederholbare Run-Duration-Effekte werden nicht mehr in einzelne
+  Source-ID-Slots geschrieben. Tutor registriert pro Auflösung eine eigene,
+  quellattribuierte Modifier-Instanz; jedes spätere ICE erhält pro aktiver
+  Instanz eine zusätzliche ETR-Subroutine nach seinen übrigen Subroutinen.
+- Viral 15 registriert entsprechend eine eigene Program-Trash-Instanz je
+  Auflösung. Nach jedem passierten gerezzten ICE wird pro aktiver Instanz eine
+  getrennte Runner-Choice abgewickelt. Jede Choice wird gegen die weiterhin
+  installierten Programme revalidiert; der bereits additive Jack-out-Tax
+  bleibt unverändert.
+- Modifier-IDs, Reihenfolge und Source-Attribution sind deterministisch und
+  Teil des Run-State. Dynamische Tutor-Subroutinen werden in der sichtbaren
+  Quote über ein strukturiertes Run-Duration-Merkmal klassifiziert, nicht
+  über eine Karten-ID oder einen geparsten Subroutinenamen.
+
+### Vacuum Link
+
+- Bei Wurf 1 bis 3 öffnet Vacuum Link jetzt die gedruckte explizite
+  Runner-Wahl zwischen `resume_from_rezzed_ice_back` und `jack_out`. Ziel und
+  Zahl der zurückzuspringenden gerezzten ICE liegen strukturiert im Run-State.
+- Erst die Choice setzt den Run an das berechnete ICE zurück oder beendet ihn.
+  Das karteneigene Jack-out-Angebot funktioniert auch bei einer normalen
+  Jack-out-Sperre; es wird nicht als gewöhnliche Jack-out-Action mit fremden
+  Kosten oder Locks vermischt.
+
+### Planning-Semantik
+
+- Die überhöhten `corp.ice_tax_glacier`-Strategieanker wurden im gesamten
+  Block entfernt. Defense-, Damage-, Tax- und Deep-ICE-Support bleiben
+  erhalten; insbesondere Tutor, Shock.r, Vacuum Link, Viral 15 und Virizz
+  liefern weiterhin starke, aber nicht strategiebegründende Supportsignale.
+- Virizz ist als `break_subroutine_tax_amplifier` statt als Run-Lock
+  beschrieben. Viral 15 trägt die präzise Rolle
+  `run_duration_program_trash_and_jack_out_tax_ice`.
+- `corp.defend_servers` bleibt alleiniger Planowner. Die Vacuum-Link-Choice
+  vervollständigt ausschließlich die bereits ausgelöste Engine-Fortsetzung
+  und trifft keine Server-, Karten- oder Strategieentscheidung.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 261 bis 280.
+- Als nächster regulärer Nutzerblock folgen die Karten 281 bis 300.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1211,3 +1268,17 @@ Mastiff-Zeugen sind alle auditnahen Tests fokussiert grün. Die übrigen dort
 sichtbaren Fehler betreffen unveränderte bekannte beziehungsweise
 fachfremde Test-Fixtures und wurden entsprechend dem begrenzten Testauftrag
 nicht in diesen Block gezogen.
+
+Für Block 014 sind Shared-, Cards-, Engine- und AI-Typecheck, CardSpec-AI-
+Hint-Generator und -Check sowie die fokussierten CardSpec-, Engine-Grenz-,
+Kartenintegrations- und AI-Vertragstests grün. Die Engine-Evidence umfasst
+insbesondere TKO als eine Subroutine mit End-run-vor-Forgo-Reihenfolge, zwei
+getrennt attribuierte Tutor-Modifikatoren, zwei sequenzielle Viral-15-
+Programmwahlen, beide Vacuum-Link-Choice-Ausgänge einschließlich normaler
+Jack-out-Sperre und Zombies exakte Subtypen. Der bekannte Originalset-AI-
+Golden-Test bleibt wegen seines statischen Imports des entfernten
+Migration-Report-JSONs nicht startfähig. Der ebenfalls bereits auf aktuellem
+`main` rote Action-Strategy-Owner-Test erwartet 48 statt der vorhandenen 45
+Legacy-Bindungen; beide Baselinefehler sind unverändert und wurden nicht in
+diesen Kartenblock gezogen. Aktuelles Hint-Artefakt und Review-Fixture sind
+für alle 20 Karten gezielt synchronisiert.

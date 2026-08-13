@@ -60,10 +60,6 @@ export const cardSpec = {
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -72,10 +68,10 @@ export const cardSpec = {
         kind: "strategy_support",
         strategyKey: "corp.ice_tax_glacier",
         role: "tax_tool",
-        roleDetail: "run_lock_ice",
+        roleDetail: "break_subroutine_tax_amplifier",
         confidence: "high",
         rationale:
-          "ICE Semantic Review v1: Virizz bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten.",
+          "Originalset-Audit Block 014: Virizz erhöht die Kosten jeder gebrochenen ICE-Subroutine für den Rest des Runs und unterstützt damit Tax-/Deep-ICE-Pläne, ohne den Run direkt zu sperren.",
       },
     ],
     capabilities: [],

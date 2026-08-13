@@ -16,6 +16,7 @@ import {
   resolveFullyBrokenPassedIceTrash,
   resolveSecretSpendCompareChoice,
   resolveRezzedIceRewindSubroutine,
+  resolveRezzedIceRewindChoice,
   fullyBrokenPassedIceTrashPostPassActions,
 } from "./encounter-special-windows";
 
@@ -210,7 +211,7 @@ describe("encounter special windows boundary", () => {
     });
   });
 
-  it("rewinds Vacuum Link by deterministic die using rezzed ICE and preserves the random purpose", () => {
+  it("offers Vacuum Link's explicit Runner choice and resumes from the counted rezzed ICE", () => {
     const state = makeState();
     state.run!.encounteredIceId = "ice_current" as CardInstanceId;
     const legalAction = { payload: {} } as LegalAction;
@@ -238,6 +239,36 @@ describe("encounter special windows boundary", () => {
     expect(purposes).toEqual([
       "rewind_run_to_rezzed_ice_by_die.run_1.ice_current",
     ]);
+    expect(state.run?.vacuumLinkRewindChoice).toMatchObject({
+      rezzedIceBack: 2,
+      targetIceId: "ice_outer",
+      targetIceIndex: 2,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "card_implementation.vacuum_link_rewind",
+      kind: "select_option",
+      visibility: "public",
+    });
+    expect(legalAction.payload).toMatchObject({
+      rezzedIceRewindDieRoll: 2,
+      rezzedIceRewindChoiceOpened: true,
+      rezzedIceRewindRezzedIceBack: 2,
+      rezzedIceRewindTargetIceId: "ice_outer",
+      rezzedIceRewindTargetIceIndex: 2,
+    });
+
+    const resolved = resolveRezzedIceRewindChoice(
+      host,
+      legalAction,
+      playerChoice("resume_from_rezzed_ice_back"),
+    );
+
+    expect(resolved).toMatchObject({
+      handled: true,
+      repositionIceId: "ice_outer",
+      repositionIndex: 2,
+    });
     expect(state.run).toMatchObject({
       phase: "movement",
       position: { kind: "ice", serverId: "rd", iceIndex: 2 },
@@ -245,12 +276,47 @@ describe("encounter special windows boundary", () => {
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
     });
+    expect(state.pendingChoice).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
-      rezzedIceRewindDieRoll: 2,
+      rezzedIceRewindChoice: "resume_from_rezzed_ice_back",
       rezzedIceRewindApplied: true,
       rezzedIceRewindRezzedIceBack: 2,
       rezzedIceRewindTargetIceId: "ice_outer",
       rezzedIceRewindTargetIceIndex: 2,
+    });
+  });
+
+  it("lets Vacuum Link jack out through the card choice even while normal jack out is locked", () => {
+    const state = makeState();
+    state.run!.jackOutLockedForRun = true;
+    let finished: boolean | undefined;
+    const legalAction = { payload: {} } as LegalAction;
+    const host = encounterSpecialWindowHost(state, {
+      rollDie: () => 1,
+      finishRun: (successful) => {
+        finished = successful;
+        delete state.run;
+      },
+    });
+
+    resolveRezzedIceRewindSubroutine(host, legalAction);
+    const result = resolveRezzedIceRewindChoice(
+      host,
+      legalAction,
+      playerChoice("jack_out"),
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      runnerJacksOut: true,
+      runShouldEnd: true,
+    });
+    expect(finished).toBe(false);
+    expect(state.run).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+    expect(legalAction.payload).toMatchObject({
+      rezzedIceRewindChoice: "jack_out",
+      rezzedIceRewindApplied: false,
     });
   });
 

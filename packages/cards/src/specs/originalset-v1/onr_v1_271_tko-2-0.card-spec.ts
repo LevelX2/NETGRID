@@ -44,16 +44,12 @@ export const cardSpec = {
     printedSubroutines: [
       {
         capabilityKey: capabilityKey(
-          "printed_subroutines_runner_forgoes_next_action",
+          "printed_subroutines_end_run_and_runner_forgoes_next_action",
         ),
         addressability: ["plan", "action", "quote", "debug"],
-        kind: "runner_forgoes_next_action",
+        kind: "end_the_run_and_runner_forgoes_next_action",
+        sequence: ["end_the_run", "runner_forgoes_next_action"],
         breakTags: ["knockout"],
-      },
-      {
-        capabilityKey: capabilityKey("printed_subroutines_end_the_run"),
-        addressability: ["plan", "action", "quote", "debug"],
-        kind: "end_the_run",
       },
     ],
   },
@@ -75,10 +71,6 @@ export const cardSpec = {
       {
         kind: "strategic_role",
         role: "tax_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
       },
       {
         kind: "line_support",
@@ -103,7 +95,7 @@ export const cardSpec = {
     capabilities: [
       {
         capabilityKey: capabilityKey(
-          "printed_subroutines_runner_forgoes_next_action",
+          "printed_subroutines_end_run_and_runner_forgoes_next_action",
         ),
         annotations: [
           {

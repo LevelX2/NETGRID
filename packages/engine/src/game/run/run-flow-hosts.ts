@@ -906,6 +906,10 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             actionToResolve,
           ),
         resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
+        finishRun: (successful, actionToResolve) =>
+          host.callbacks.finishRun(state, successful, actionToResolve),
+        applyRunnerForgoNextAction: () =>
+          host.callbacks.applyRunnerForgoNextAction(state),
       },
     });
   }

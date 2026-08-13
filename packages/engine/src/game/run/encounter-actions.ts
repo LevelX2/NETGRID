@@ -413,12 +413,14 @@ export function buildRunnerEncounterActions(
     (subroutine) =>
       subroutine.type === "end_the_run" ||
       subroutine.type === "end_the_run_unless_runner_pays" ||
-      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action",
   );
   const hardEndRun = nextSubroutines.some(
     (subroutine) =>
       subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action",
   );
   const payOrEndRunEntries = nextSubroutineIndexes
     .map((index) => ({ index, subroutine: encounterSubroutines[index] }))

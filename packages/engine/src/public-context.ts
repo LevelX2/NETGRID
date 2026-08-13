@@ -147,6 +147,8 @@ export function publicContextForAction(
     "vacuumLinkTargetIceIndex",
     "rezzedIceRewindDieRoll",
     "rezzedIceRewindApplied",
+    "rezzedIceRewindChoiceOpened",
+    "rezzedIceRewindChoice",
     "rezzedIceRewindRezzedIceBack",
     "rezzedIceRewindTargetIceIndex",
     "temporaryDiscountedRunEndDerez",

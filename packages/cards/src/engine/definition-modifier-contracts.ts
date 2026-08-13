@@ -612,6 +612,12 @@ export type CardPrintedSubroutineImplementation =
       breakTags?: readonly string[];
     }
   | {
+      kind: "end_the_run_and_runner_forgoes_next_action";
+      sequence: readonly ["end_the_run", "runner_forgoes_next_action"];
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
       kind: "trace";
       traceLimit: number;
       onSuccess: readonly CardTraceSuccessEffectImplementation[];

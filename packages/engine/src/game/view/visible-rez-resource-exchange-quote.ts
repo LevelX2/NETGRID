@@ -124,7 +124,8 @@ function hardEndTheRunSubroutineCount(
   return quote.subroutines.filter(
     (subroutine) =>
       subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn",
+      subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action",
   ).length;
 }
 

@@ -5,12 +5,13 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { effectiveIceRunSubroutines } from "./effective-ice-run-subroutines";
 
 const CRYSTAL_WALL = "onr_v1_232_crystal-wall" as CardDefinitionId;
 
 describe("effective ICE run subroutines", () => {
-  it("duplicates self-provided subroutines per mark but not a subroutine supplied by another ICE", () => {
+  it("stacks separately attributed run-duration subroutines without mark-copying external modifiers", () => {
     const targetId = "target_ice" as CardInstanceId;
     const externalSourceId = "external_source_ice" as CardInstanceId;
     const definition = CARD_DEFINITIONS_BY_ID[CRYSTAL_WALL]!;
@@ -50,7 +51,22 @@ describe("effective ICE run subroutines", () => {
       run: {
         attackedServerId: "rd",
         encounteredIceId: targetId,
-        futureEncounterEndTheRunSourceIceId: externalSourceId,
+        runDurationAdditionalSubroutineModifiers: [
+          {
+            modifierId: "tutor_modifier_1",
+            sourceCardInstanceId: externalSourceId,
+            sourceDefinitionId: CRYSTAL_WALL,
+            subroutineKind: "end_the_run",
+            append: "after_existing",
+          },
+          {
+            modifierId: "tutor_modifier_2",
+            sourceCardInstanceId: externalSourceId,
+            sourceDefinitionId: CRYSTAL_WALL,
+            subroutineKind: "end_the_run",
+            append: "after_existing",
+          },
+        ],
         encounterAdditionalSubroutines: [
           {
             sourceCardInstanceId: targetId,
@@ -62,23 +78,29 @@ describe("effective ICE run subroutines", () => {
       },
     } as unknown as GameState;
 
-    const subroutines = effectiveIceRunSubroutines(
-      state,
-      targetId,
-      definition,
-    );
+    const subroutines = effectiveIceRunSubroutines(state, targetId, definition);
     const ids = subroutines.map((subroutine) => subroutine.id);
 
     expect(
-      ids.filter((id) => id === "v1922_tutor_future_end_the_run"),
-    ).toHaveLength(1);
+      ids.filter((id) => id.includes("run_duration.tutor_modifier_")),
+    ).toHaveLength(2);
+    expect(
+      subroutines
+        .filter((subroutine) =>
+          subroutine.id.includes("run_duration.tutor_modifier_"),
+        )
+        .map((subroutine) => dynamicSubroutineAttributionFor(subroutine)),
+    ).toEqual([
+      expect.objectContaining({ sourceCardInstanceId: externalSourceId }),
+      expect.objectContaining({ sourceCardInstanceId: externalSourceId }),
+    ]);
     expect(
       ids.filter((id) =>
         id.includes("current_encounter_additional_subroutine"),
       ),
     ).toHaveLength(2);
     expect(subroutines).toHaveLength(
-      (definition.subroutines?.length ?? 0) * 2 + 3,
+      (definition.subroutines?.length ?? 0) * 2 + 4,
     );
   });
 });

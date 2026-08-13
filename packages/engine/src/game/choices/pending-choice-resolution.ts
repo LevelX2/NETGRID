@@ -719,7 +719,8 @@ export function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith(
       "card_implementation.secret_spend_compare",
-    )
+    ) ||
+    state.pendingChoice.source === "card_implementation.vacuum_link_rewind"
   ) {
     resolveSecretSpendCompareChoiceInRunModule(
       encounterSpecialWindowHostForState(state),

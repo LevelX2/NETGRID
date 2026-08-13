@@ -129,6 +129,7 @@ function makeHost(
     definitions?: Record<string, CardDefinition>;
     preventTrash?: boolean;
     runnerForgo?: () => void;
+    finishRun?: (successful: boolean, legalAction?: LegalAction) => void;
     revealCorpRdTop?: (legalAction: LegalAction) => void;
     startCorpRdArrangeChoice?: EncounterPrintedNonTraceHost["choices"]["startCorpRdArrangeChoice"];
   } = {},
@@ -272,6 +273,21 @@ function makeHost(
     },
     callbacks: {
       resetBreakerStrength: () => undefined,
+      finishRun:
+        options.finishRun ??
+        (() => {
+          delete state.run;
+        }),
+      applyRunnerForgoNextAction:
+        options.runnerForgo ??
+        (() => {
+          state.runnerTurnFlags ??= {
+            stoleAgendaThisTurn: false,
+            stoleAgendaLastTurn: false,
+          };
+          state.runnerTurnFlags.forgoNextActionsPending =
+            (state.runnerTurnFlags.forgoNextActionsPending ?? 0) + 1;
+        }),
     },
   });
 }
@@ -521,6 +537,39 @@ describe("encounter printed non-trace effects boundary", () => {
       runnerForgoNextActions: 1,
     });
     expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(1);
+  });
+
+  it("resolves TKO 2.0 as one subroutine in printed end-run then action-forgo order", () => {
+    const state = makeState();
+    const order: string[] = [];
+    const result = resolveEncounterPrintedNonTraceEffect(
+      makeHost(state, {
+        finishRun: () => {
+          order.push("end_run");
+          delete state.run;
+        },
+        runnerForgo: () => {
+          order.push("runner_forgoes_next_action");
+        },
+      }),
+      {
+        definition: definition("tko", "TKO 2.0", "ice"),
+        subroutine: {
+          id: "tko_single_subroutine",
+          type: "end_the_run_and_runner_forgoes_next_action",
+        } as SubroutineDefinition,
+        subroutineIndex: 0,
+        legalAction: { payload: {} } as LegalAction,
+      },
+    );
+
+    expect(order).toEqual(["end_run", "runner_forgoes_next_action"]);
+    expect(result).toMatchObject({
+      handled: true,
+      runShouldEnd: true,
+      runnerForgoNextActions: 1,
+    });
+    expect(state.run).toBeUndefined();
   });
 
   it("applies Haunting-style cannot-run lock with the existing payload values", () => {

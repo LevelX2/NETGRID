@@ -35,6 +35,7 @@ export type DynamicSubroutineAttribution = {
   sourceDefinitionId: CardDefinitionId;
   sourceTitle: string;
   modifierKind: "additional_subroutine";
+  runDuration?: true;
   subroutineKind: SubroutineDefinition["type"];
 };
 

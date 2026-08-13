@@ -179,7 +179,7 @@ function visibleEffectiveSubroutine(
     ...(dynamic
       ? {
           dynamicSourceKind:
-            subroutine.id === "v1922_tutor_future_end_the_run"
+            dynamic.runDuration === true
               ? "run_duration_additional_subroutine"
               : "additional_subroutine",
         }
@@ -222,6 +222,7 @@ function visibleUnbrokenRunEffectForSubroutine(
     case "set_runner_run_lock_actions":
       return { createsRunLockOrActionTax: Math.max(1, amount) };
     case "set_runner_forgo_next_action":
+    case "end_the_run_and_runner_forgoes_next_action":
       return { createsRunLockOrActionTax: 1 };
     default:
       return undefined;

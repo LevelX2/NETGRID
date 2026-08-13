@@ -103,6 +103,8 @@ export type EncounterPrintedNonTraceHost = {
       legalAction?: LegalAction,
     ) => void;
     resetBreakerStrength?: () => void;
+    finishRun?: (successful: boolean, legalAction?: LegalAction) => void;
+    applyRunnerForgoNextAction?: () => void;
   };
 };
 
@@ -249,6 +251,24 @@ export function resolveEncounterPrintedNonTraceEffect(
       legalAction,
       source,
     });
+
+  if (subroutine.type === "end_the_run_and_runner_forgoes_next_action") {
+    if (
+      !host.callbacks?.finishRun ||
+      !host.callbacks.applyRunnerForgoNextAction
+    )
+      throw new Error("End-run/action-forgo callbacks fehlen.");
+    host.callbacks.finishRun(false, legalAction);
+    host.callbacks.applyRunnerForgoNextAction();
+    return {
+      handled: true,
+      ...source,
+      runShouldEnd: true,
+      runnerForgoNextActions: 1,
+      stateChanged: true,
+    } satisfies DirectEndRunSubroutineResult &
+      DirectActionForgoSubroutineResult;
+  }
 
   const markerResult = resolveRunDurationMarkerSubroutine(
     host.encounter.resolutionHost,

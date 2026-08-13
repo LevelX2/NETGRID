@@ -265,6 +265,7 @@ describe("CardSpec compatibility implementation projection", () => {
     const expectedKinds = [
       "damage",
       "end_the_run",
+      "end_the_run_and_runner_forgoes_next_action",
       "next_encounter_unless_fully_break_damage",
       "prohibit_break_and_jack_out_next_ice",
       "prohibit_break_next_ice",
@@ -276,7 +277,6 @@ describe("CardSpec compatibility implementation projection", () => {
       "run_duration_ice_strength",
       "run_duration_jack_out_cost",
       "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out",
-      "runner_forgoes_next_action",
       "runner_run_lock_actions",
       "secret_spend_compare_end_run_unless_corp_spent_at_least_runner",
       "trace",
@@ -290,7 +290,7 @@ describe("CardSpec compatibility implementation projection", () => {
     const subroutines = originalsetIce.flatMap(
       (engine) => engine.engine.printedSubroutines ?? [],
     );
-    expect(subroutines).toHaveLength(99);
+    expect(subroutines).toHaveLength(98);
     expect(
       [...new Set(subroutines.map((subroutine) => subroutine.kind))].sort(),
     ).toEqual(expectedKinds);

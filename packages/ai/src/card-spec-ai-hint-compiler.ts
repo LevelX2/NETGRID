@@ -565,7 +565,10 @@ function deriveGenericTypedHintOverlay(
       });
       overlay.functionSignals.push("corp_ice.run_lock", "run.lock");
     }
-    if (subroutine.kind === "runner_forgoes_next_action") {
+    if (
+      subroutine.kind === "runner_forgoes_next_action" ||
+      subroutine.kind === "end_the_run_and_runner_forgoes_next_action"
+    ) {
       overlay.effects.push({
         kind: "action_penalty",
         scope: "runner",
@@ -3265,7 +3268,10 @@ function deriveActionCapacityProfiles(
       actionTypes: ["start_run"],
     });
   for (const subroutine of engine.printedSubroutines ?? [])
-    if (subroutine.kind === "runner_forgoes_next_action")
+    if (
+      subroutine.kind === "runner_forgoes_next_action" ||
+      subroutine.kind === "end_the_run_and_runner_forgoes_next_action"
+    )
       profiles.push({
         class: "action_loss",
         timing: "encounter",
@@ -9539,7 +9545,10 @@ function derivedActionStrategyEvidence(
     expectedAnchor = "tag.payoff";
     expectedRole = "payoff_anchor";
     expectedStrategies = new Set(["corp.tag_trace_punish"]);
-  } else if (kind === "runner_forgoes_next_action") {
+  } else if (
+    kind === "runner_forgoes_next_action" ||
+    kind === "end_the_run_and_runner_forgoes_next_action"
+  ) {
     expectedAnchor = "corp_ice.runner_action_loss";
     expectedRole = "anchor_evidence";
     expectedStrategies = new Set(["corp.ice_tax_glacier"]);
@@ -10600,6 +10609,7 @@ function derivedStrategyEvidence(
         "runner_run_lock_actions",
         "prohibit_break_and_jack_out_next_ice",
         "runner_forgoes_next_action",
+        "end_the_run_and_runner_forgoes_next_action",
         "run_duration_additional_subroutine",
         "random_resume_from_rezzed_ice_back_or_jack_out",
         "run_duration_jack_out_cost",

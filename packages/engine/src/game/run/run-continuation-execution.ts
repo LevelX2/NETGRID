@@ -139,7 +139,8 @@ export function continueRun(
       continue;
     }
     const runnerForgoneActionOrdinal =
-      subroutine.type === "set_runner_forgo_next_action"
+      subroutine.type === "set_runner_forgo_next_action" ||
+      subroutine.type === "end_the_run_and_runner_forgoes_next_action"
         ? currentRunnerForgoneActionOrdinal(state)
         : undefined;
     if (subroutine.requiresSuccessfulTraceSubroutineIndex !== undefined) {
@@ -221,6 +222,7 @@ export function continueRun(
     );
     if (nonTraceResult.suspended) return;
     if (nonTraceResult.runRedirected) return;
+    if (!state.run) return;
     if (nonTraceResult.runShouldEnd) ended = true;
     const specialWindow = resolveEncounterSpecialWindowSubroutine(
       host.encounter.specialWindowHost(),

@@ -270,8 +270,20 @@ export function resolveRunDurationMarkerSubroutine(
     };
   }
   if (subroutine.type === "set_run_future_end_the_run_subroutine") {
-    if (run.encounteredIceId)
-      run.futureEncounterEndTheRunSourceIceId = run.encounteredIceId;
+    if (!run.encounteredIceId)
+      throw new Error("Zusätzliche Run-Subroutine benötigt ein Encounter-ICE.");
+    const modifierIndex =
+      (run.runDurationAdditionalSubroutineModifiers?.length ?? 0) + 1;
+    run.runDurationAdditionalSubroutineModifiers = [
+      ...(run.runDurationAdditionalSubroutineModifiers ?? []),
+      {
+        modifierId: `${run.runId}.${run.encounteredIceId}.${subroutine.id}.${modifierIndex}`,
+        sourceCardInstanceId: run.encounteredIceId,
+        sourceDefinitionId: definition.id,
+        subroutineKind: "end_the_run",
+        append: "after_existing",
+      },
+    ];
     legalActionPayload(legalAction, {
       v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
       sourceDefinitionId: definition.id,
@@ -280,7 +292,7 @@ export function resolveRunDurationMarkerSubroutine(
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["futureEncounterEndTheRunSourceIceId"],
+      setRunMarkers: ["runDurationAdditionalSubroutineModifiers"],
       stateChanged: true,
     };
   }
@@ -323,7 +335,16 @@ export function resolveRunDurationMarkerSubroutine(
   if (subroutine.type === "set_run_pass_rezzed_ice_program_trash") {
     if (!run.encounteredIceId)
       throw new Error("Program-Trash-Runmodifier benoetigt ein Encounter-ICE.");
-    run.passRezzedIceProgramTrashSourceIceId = run.encounteredIceId;
+    const modifierIndex =
+      (run.passRezzedIceProgramTrashModifiers?.length ?? 0) + 1;
+    run.passRezzedIceProgramTrashModifiers = [
+      ...(run.passRezzedIceProgramTrashModifiers ?? []),
+      {
+        modifierId: `${run.runId}.${run.encounteredIceId}.${subroutine.id}.${modifierIndex}`,
+        sourceCardInstanceId: run.encounteredIceId,
+        sourceDefinitionId: definition.id,
+      },
+    ];
     legalActionPayload(legalAction, {
       passIceTrashProgramPrompt: true,
       sourceDefinitionId: definition.id,
@@ -332,7 +353,7 @@ export function resolveRunDurationMarkerSubroutine(
       handled: true,
       sourceDefinitionId: definition.id,
       subroutineId: subroutine.id,
-      setRunMarkers: ["passRezzedIceProgramTrashSourceIceId"],
+      setRunMarkers: ["passRezzedIceProgramTrashModifiers"],
       mustTrashProgramAfterPass: true,
       stateChanged: true,
     };
@@ -535,7 +556,10 @@ export function passedIceFollowupMarkersForCurrentIce(
   host: EncounterResolutionHost,
 ): {
   activeIceProgramTrashPendingPassedIceId?: CardInstanceId;
-  passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
+  passRezzedIceProgramTrashPending?: {
+    passedIceId: CardInstanceId;
+    remainingModifierIds: string[];
+  };
   fullyBrokenPassedIcePendingId?: CardInstanceId;
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
 } {
@@ -547,10 +571,17 @@ export function passedIceFollowupMarkersForCurrentIce(
     mustInstance(host.state.cardInstances, passedIceId).rezzed
       ? { activeIceProgramTrashPendingPassedIceId: passedIceId }
       : {}),
-    ...(run.passRezzedIceProgramTrashSourceIceId &&
+    ...(run.passRezzedIceProgramTrashModifiers?.length &&
     passedIceId &&
     mustInstance(host.state.cardInstances, passedIceId).rezzed
-      ? { passRezzedIceProgramTrashPendingPassedIceId: passedIceId }
+      ? {
+          passRezzedIceProgramTrashPending: {
+            passedIceId,
+            remainingModifierIds: run.passRezzedIceProgramTrashModifiers.map(
+              (modifier) => modifier.modifierId,
+            ),
+          },
+        }
       : {}),
     ...(passedIceId &&
     mustInstance(host.state.cardInstances, passedIceId).rezzed &&
@@ -655,13 +686,12 @@ export function startActiveIceProgramTrashChoice(
 export function startPassRezzedIceProgramTrashChoice(
   host: EncounterResolutionHost,
   passedIceId: CardInstanceId,
+  sourceIceId: CardInstanceId,
   legalAction?: LegalAction,
 ): PassIceFollowupResult {
   const state = host.state;
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const run = mustRun(state);
-  const sourceIceId = run.passRezzedIceProgramTrashSourceIceId;
-  if (!sourceIceId) return { handled: false };
+  mustRun(state);
   const sourceDefinition = definitionFor(state, sourceIceId);
   const programOptions = state.runner.rig.programs
     .filter((cardId) => state.cardInstances[cardId])
@@ -685,6 +715,8 @@ export function startPassRezzedIceProgramTrashChoice(
   state.pendingChoice = {
     choiceId: `p3_56_pass_ice_program_trash_${state.stateVersion + 1}`,
     side: "runner",
+    sourceCardInstanceId: sourceIceId,
+    sourceCardDefinitionId: sourceDefinition.id,
     source: `p3_56.pass_ice_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
     prompt: `${sourceDefinition.title}: installiertes Programm trashen.`,
     kind: "select_cards",
@@ -771,7 +803,8 @@ export function resolvePassRezzedIceProgramTrashChoice(
   const choice = state.pendingChoice;
   if (!choice || !choice.source.startsWith("p3_56.pass_ice_program_trash"))
     throw new Error("Pass-ICE-Programmtrash-Choice ist nicht offen.");
-  const [, sourceIceId, passedIceId] = choice.source.split(":");
+  const sourceIceId = choice.sourceCardInstanceId;
+  const passedIceId = state.run?.passRezzedIceProgramTrashPending?.passedIceId;
   if (!sourceIceId || !state.cardInstances[sourceIceId])
     throw new Error("Die Programmtrash-Quelle ist nicht mehr gueltig.");
   if (!passedIceId || !state.cardInstances[passedIceId])
@@ -795,8 +828,10 @@ export function resolvePassRezzedIceProgramTrashChoice(
     programTrashCount: 1,
     trashedCardDefinitionId: selectedDefinitionId,
   };
+  const next = handlePostPassProgramTrashChoices(host, legalAction);
   return {
     handled: true,
+    ...(next.choiceOpened ? { choiceOpened: true } : {}),
     sourceDefinitionId: definitionFor(state, sourceIceId).id,
     stateChanged: true,
   };
@@ -822,18 +857,36 @@ export function handlePostPassProgramTrashChoices(
     );
     if (result.choiceOpened) return result;
   }
-  if (host.state.run?.passRezzedIceProgramTrashPendingPassedIceId) {
-    const pendingPassedIceId =
-      host.state.run.passRezzedIceProgramTrashPendingPassedIceId;
-    const {
-      passRezzedIceProgramTrashPendingPassedIceId: _pending,
-      ...runWithoutPending
-    } = host.state.run;
-    void _pending;
-    host.state.run = runWithoutPending;
+  while (host.state.run) {
+    const runWithPending = host.state.run;
+    const pending = runWithPending.passRezzedIceProgramTrashPending;
+    if (!pending) break;
+    const [modifierId, ...remainingModifierIds] = pending.remainingModifierIds;
+    if (!modifierId) {
+      const {
+        passRezzedIceProgramTrashPending: _pending,
+        ...runWithoutPending
+      } = runWithPending;
+      void _pending;
+      host.state.run = runWithoutPending;
+      break;
+    }
+    const modifier = runWithPending.passRezzedIceProgramTrashModifiers?.find(
+      (candidate) => candidate.modifierId === modifierId,
+    );
+    if (!modifier)
+      throw new Error("Program-Trash-Runmodifier fehlt oder ist veraltet.");
+    host.state.run = {
+      ...runWithPending,
+      passRezzedIceProgramTrashPending: {
+        ...pending,
+        remainingModifierIds,
+      },
+    };
     const result = startPassRezzedIceProgramTrashChoice(
       host,
-      pendingPassedIceId,
+      pending.passedIceId,
+      modifier.sourceCardInstanceId,
       legalAction,
     );
     if (result.choiceOpened) return result;

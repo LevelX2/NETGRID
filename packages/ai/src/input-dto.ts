@@ -2158,6 +2158,7 @@ const VISIBLE_EFFECTIVE_SUBROUTINE_TYPES = {
   set_next_encounter_no_break_subroutines: true,
   set_run_jack_out_lock: true,
   set_runner_forgo_next_action: true,
+  end_the_run_and_runner_forgoes_next_action: true,
   set_runner_run_lock_actions: true,
   set_run_jack_out_additional_cost: true,
   set_run_pass_rezzed_ice_program_trash: true,

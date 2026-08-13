@@ -67,10 +67,6 @@ export const cardSpec = {
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -79,10 +75,10 @@ export const cardSpec = {
         kind: "strategy_support",
         strategyKey: "corp.ice_tax_glacier",
         role: "tax_tool",
-        roleDetail: "run_lock_ice",
+        roleDetail: "run_duration_program_trash_and_jack_out_tax_ice",
         confidence: "high",
         rationale:
-          "ICE Semantic Review v1: Viral 15 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten.",
+          "Originalset-Audit Block 014: Viral 15 verstärkt den gesamten Run durch kumulierenden Jack-out-Tax und separate Program-Trash-Folgen; es unterstützt Glacier/Deep-ICE, ohne selbst die Deckstrategie zu definieren.",
       },
     ],
     capabilities: [],

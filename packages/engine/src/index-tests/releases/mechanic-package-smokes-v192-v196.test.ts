@@ -674,7 +674,9 @@ describe("V1.9.3 Mechanikpaket L", () => {
       getPlayerView(tkoState, "corp")
         .publicEvents.at(-1)
         ?.publicPayload.resolvedEffects?.find(
-          (effect) => effect.subroutineType === "set_runner_forgo_next_action",
+          (effect) =>
+            effect.subroutineType ===
+            "end_the_run_and_runner_forgoes_next_action",
         ),
     ).toEqual(
       expect.objectContaining({

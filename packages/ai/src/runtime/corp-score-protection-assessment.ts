@@ -586,6 +586,7 @@ const CONSERVATIVE_NON_ACCESS_PREVENTING_SUBROUTINE_TYPES = new Set<
   "set_next_encounter_no_break_subroutines",
   "set_run_jack_out_lock",
   "set_runner_forgo_next_action",
+  "end_the_run_and_runner_forgoes_next_action",
   "set_run_jack_out_additional_cost",
   "set_run_pass_rezzed_ice_program_trash",
   "rewind_run_to_rezzed_ice_by_die",
@@ -596,7 +597,8 @@ function isHardEndTheRunSubroutine(
 ): boolean {
   return (
     subroutine.type === "end_the_run" ||
-    subroutine.type === "end_the_run_and_trash_source_at_end_of_turn"
+    subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+    subroutine.type === "end_the_run_and_runner_forgoes_next_action"
   );
 }
 

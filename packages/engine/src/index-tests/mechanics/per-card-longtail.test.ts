@@ -6351,6 +6351,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   });
 
   it("rezzes Zombie as core-damage ICE with replay-stable public run resolution", () => {
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_280_zombie"]?.subtypes).toEqual([
+      "black ice",
+      "sentry",
+    ]);
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-zombie",
@@ -6489,7 +6493,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state = enterEncounterFromMovementWindow(state);
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    expect(state.run?.futureEncounterEndTheRunSourceIceId).toBe(tutorId);
+    expect(state.run?.runDurationAdditionalSubroutineModifiers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: tutorId,
+        sourceDefinitionId: "onr_v1_274_tutor",
+        subroutineKind: "end_the_run",
+        append: "after_existing",
+      }),
+    ]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       abilityId: "tutor_future_end_the_run_subroutine",
@@ -6951,10 +6962,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) => action.actionId === continueAction.actionId,
     );
-    expect(state.run?.passRezzedIceProgramTrashSourceIceId).toBe(viralId);
-    expect(state.run?.passRezzedIceProgramTrashPendingPassedIceId).toBe(
-      viralId,
-    );
+    expect(state.run?.passRezzedIceProgramTrashModifiers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: viralId,
+        sourceDefinitionId: "onr_v1_276_viral-15",
+      }),
+    ]);
+    expect(state.run?.passRezzedIceProgramTrashPending).toEqual({
+      passedIceId: viralId,
+      remainingModifierIds: [expect.any(String)],
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       jackOutAdditionalCost: 1,

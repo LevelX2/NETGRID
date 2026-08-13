@@ -439,6 +439,18 @@ function projectPrintedSubroutines(
         type: "set_runner_forgo_next_action",
         ...projectBreakTags(subroutine.breakTags),
       } satisfies SubroutineDefinition;
+    if (subroutine.kind === "end_the_run_and_runner_forgoes_next_action") {
+      if (
+        subroutine.sequence.join(",") !==
+        "end_the_run,runner_forgoes_next_action"
+      )
+        throw new Error("card_spec_invalid_end_run_action_forgo_sequence");
+      return {
+        id: subroutine.capabilityKey,
+        type: "end_the_run_and_runner_forgoes_next_action",
+        ...projectBreakTags(subroutine.breakTags),
+      } satisfies SubroutineDefinition;
+    }
     if (subroutine.kind === "prohibit_break_next_ice")
       return {
         id: subroutine.capabilityKey,

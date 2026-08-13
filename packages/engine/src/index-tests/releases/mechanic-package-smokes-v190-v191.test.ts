@@ -960,6 +960,12 @@ describe("V1.9.0 Mechanikpaket I", () => {
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
       if (die < 2 || die > 3) continue;
+      expect(state.pendingChoice).toMatchObject({
+        side: "runner",
+        source: "card_implementation.vacuum_link_rewind",
+        kind: "select_option",
+      });
+      state = applyChoice(state, "runner", "resume_from_rezzed_ice_back");
       const run = state.run;
       expect(run?.phase).toBe("movement");
       expect(run?.position.kind).toBe("ice");

@@ -522,11 +522,11 @@ describe("CardImplementation coverage and registry invariants", () => {
         amount: 6,
       }),
     );
-    expect(
-      CARD_DEFINITIONS_BY_ID["onr_v1_271_tko-2-0"]?.subroutines,
-    ).toContainEqual(
-      expect.objectContaining({ type: "set_runner_forgo_next_action" }),
-    );
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_271_tko-2-0"]?.subroutines).toEqual([
+      expect.objectContaining({
+        type: "end_the_run_and_runner_forgoes_next_action",
+      }),
+    ]);
     expect(
       cardImplementationForDefinitionId("onr_v1_247_haunting-inquisition")
         ?.printedSubroutines,

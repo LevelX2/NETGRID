@@ -115,8 +115,15 @@ export function resolveEncounterSpecialWindowSubroutine(
       run.resolvedSubroutineIndexes.push(subroutineIndex);
     return { handled: true, suspended: true, stateChanged: true };
   }
-  if (subroutine.type === "rewind_run_to_rezzed_ice_by_die")
-    return resolveRezzedIceRewindSubroutine(host, legalAction);
+  if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
+    const result = resolveRezzedIceRewindSubroutine(host, legalAction);
+    if (
+      result.suspended &&
+      !mustRun(host.state).resolvedSubroutineIndexes.includes(subroutineIndex)
+    )
+      mustRun(host.state).resolvedSubroutineIndexes.push(subroutineIndex);
+    return result;
+  }
   return { handled: false };
 }
 
@@ -159,6 +166,8 @@ export function resolveSecretSpendCompareChoice(
   playerAction: PlayerAction,
 ): SecretSpendCompareResult {
   const state = host.state;
+  if (state.pendingChoice?.source === "card_implementation.vacuum_link_rewind")
+    return resolveRezzedIceRewindChoice(host, legalAction, playerAction);
   const choice = state.pendingChoice;
   const comparison = state.secretSpendComparison;
   if (
@@ -280,26 +289,37 @@ export function resolveRezzedIceRewindSubroutine(
     "Rezzed-ICE-Rewind-Ziel-ICE fehlt.",
   );
 
-  const {
-    encounteredIceId: _encounteredIceId,
-    accessedCardId: _accessedCardId,
-    ...runWithoutEncounter
-  } = run;
-  void _encounteredIceId;
-  void _accessedCardId;
-  state.run = {
-    ...runWithoutEncounter,
-    phase: "movement",
-    position: { kind: "ice", serverId: server.id, iceIndex: targetIndex },
-    approachedIceId: targetIceId,
-    brokenSubroutineIndexes: [],
-    resolvedSubroutineIndexes: [],
+  run.vacuumLinkRewindChoice = {
+    sourceIceId: run.encounteredIceId,
+    sourceDefinitionId: definitionFor(state, run.encounteredIceId).id,
+    rezzedIceBack: die,
+    targetIceId,
+    targetIceIndex: targetIndex,
   };
-  state.timingPoint = "run.jack_out_window";
+  state.pendingChoice = {
+    choiceId: `card_implementation.vacuum_link_rewind:${run.runId}:${state.stateVersion + 1}`,
+    side: "runner",
+    source: "card_implementation.vacuum_link_rewind",
+    sourceCardInstanceId: run.encounteredIceId,
+    sourceCardDefinitionId: definitionFor(state, run.encounteredIceId).id,
+    prompt: "Vacuum Link: Run vom bestimmten ICE fortsetzen oder ausjacken.",
+    kind: "select_option",
+    options: [
+      {
+        id: "resume_from_rezzed_ice_back",
+        label: "Run vom bestimmten ICE fortsetzen",
+        value: "resume_from_rezzed_ice_back",
+      },
+      { id: "jack_out", label: "Ausjacken", value: "jack_out" },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
   state.activeSide = "runner";
-  host.callbacks?.resetBreakerStrength?.();
   legalActionPayload(legalAction, {
-    rezzedIceRewindApplied: true,
+    rezzedIceRewindChoiceOpened: true,
     rezzedIceRewindRezzedIceBack: die,
     rezzedIceRewindTargetIceId: targetIceId,
     rezzedIceRewindTargetIceIndex: targetIndex,
@@ -310,6 +330,89 @@ export function resolveRezzedIceRewindSubroutine(
     dieRoll: die,
     repositionIceId: targetIceId,
     repositionIndex: targetIndex,
+    stateChanged: true,
+  };
+}
+
+export function resolveRezzedIceRewindChoice(
+  host: EncounterSpecialWindowHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): RezzedIceRewindResult {
+  const state = host.state;
+  const choice = state.pendingChoice;
+  const run = mustRun(state);
+  const pending = run.vacuumLinkRewindChoice;
+  if (
+    !choice ||
+    choice.source !== "card_implementation.vacuum_link_rewind" ||
+    !pending
+  )
+    throw new Error("Vacuum-Link-Rewind-Choice ist nicht offen.");
+  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  if (
+    selectedOptionId !== "resume_from_rezzed_ice_back" &&
+    selectedOptionId !== "jack_out"
+  )
+    throw new Error("Vacuum-Link-Rewind-Auswahl ist ungueltig.");
+  delete state.pendingChoice;
+
+  if (selectedOptionId === "jack_out") {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      rezzedIceRewindChoice: "jack_out",
+      rezzedIceRewindApplied: false,
+      sourceDefinitionId: pending.sourceDefinitionId,
+    };
+    host.callbacks?.finishRun?.(false, legalAction);
+    return {
+      handled: true,
+      runnerJacksOut: true,
+      runShouldEnd: true,
+      stateChanged: true,
+    };
+  }
+
+  const server = mustServer(state, run.attackedServerId);
+  if (server.ice[pending.targetIceIndex] !== pending.targetIceId)
+    throw new Error("Vacuum-Link-Rewind-Ziel ist nicht mehr gueltig.");
+  const {
+    encounteredIceId: _encounteredIceId,
+    accessedCardId: _accessedCardId,
+    vacuumLinkRewindChoice: _vacuumLinkRewindChoice,
+    ...runWithoutEncounter
+  } = run;
+  void _encounteredIceId;
+  void _accessedCardId;
+  void _vacuumLinkRewindChoice;
+  state.run = {
+    ...runWithoutEncounter,
+    phase: "movement",
+    position: {
+      kind: "ice",
+      serverId: server.id,
+      iceIndex: pending.targetIceIndex,
+    },
+    approachedIceId: pending.targetIceId,
+    brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: [],
+  };
+  state.timingPoint = "run.jack_out_window";
+  state.activeSide = "runner";
+  host.callbacks?.resetBreakerStrength?.();
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    rezzedIceRewindChoice: "resume_from_rezzed_ice_back",
+    rezzedIceRewindApplied: true,
+    rezzedIceRewindRezzedIceBack: pending.rezzedIceBack,
+    rezzedIceRewindTargetIceId: pending.targetIceId,
+    rezzedIceRewindTargetIceIndex: pending.targetIceIndex,
+    sourceDefinitionId: pending.sourceDefinitionId,
+  };
+  return {
+    handled: true,
+    repositionIceId: pending.targetIceId,
+    repositionIndex: pending.targetIceIndex,
     stateChanged: true,
   };
 }

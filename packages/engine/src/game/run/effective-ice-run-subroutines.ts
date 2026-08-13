@@ -106,32 +106,30 @@ function runDurationAdditionalSubroutinesForIce(
   state: GameState,
   iceId: CardInstanceId,
 ): SubroutineDefinition[] {
-  const sourceIceId = state.run?.futureEncounterEndTheRunSourceIceId;
-  if (!sourceIceId || sourceIceId === iceId) return [];
+  const modifiers = state.run?.runDurationAdditionalSubroutineModifiers ?? [];
+  if (modifiers.length === 0) return [];
   if (!iceIsOnCurrentRunServer(state, iceId)) return [];
-  const sourceDefinitionId = state.cardInstances[sourceIceId]?.definitionId;
-  const sourceTitle = sourceDefinitionId
-    ? CARD_DEFINITIONS_BY_ID[sourceDefinitionId]?.title
-    : undefined;
-  return [
-    {
-      id: "v1922_tutor_future_end_the_run",
-      type: "end_the_run",
-      ...(sourceDefinitionId
-        ? {
-            dynamicSubroutine: {
-              internalId: `run_duration.${sourceDefinitionId}.additional_subroutine.${sourceIceId}`,
-              publicId: `run_duration.${sourceDefinitionId}.additional_subroutine`,
-              sourceCardInstanceId: sourceIceId,
-              sourceDefinitionId,
-              sourceTitle: sourceTitle ?? sourceDefinitionId,
-              modifierKind: "additional_subroutine",
-              subroutineKind: "end_the_run",
-            },
-          }
-        : {}),
-    } as SubroutineDefinition,
-  ];
+  return modifiers
+    .filter((modifier) => modifier.sourceCardInstanceId !== iceId)
+    .map((modifier) => {
+      const sourceTitle =
+        CARD_DEFINITIONS_BY_ID[modifier.sourceDefinitionId]?.title ??
+        modifier.sourceDefinitionId;
+      return {
+        id: `run_duration.${modifier.modifierId}.end_the_run`,
+        type: "end_the_run",
+        dynamicSubroutine: {
+          internalId: `run_duration.${modifier.modifierId}.additional_subroutine`,
+          publicId: `run_duration.${modifier.sourceDefinitionId}.additional_subroutine`,
+          sourceCardInstanceId: modifier.sourceCardInstanceId,
+          sourceDefinitionId: modifier.sourceDefinitionId,
+          sourceTitle,
+          modifierKind: "additional_subroutine",
+          runDuration: true,
+          subroutineKind: "end_the_run",
+        },
+      } as SubroutineDefinition;
+    });
 }
 
 function iceIsOnCurrentRunServer(

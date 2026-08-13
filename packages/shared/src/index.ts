@@ -277,6 +277,7 @@ export type SubroutineType =
   | "set_next_encounter_no_break_subroutines"
   | "set_run_jack_out_lock"
   | "set_runner_forgo_next_action"
+  | "end_the_run_and_runner_forgoes_next_action"
   | "set_runner_run_lock_actions"
   | "set_run_jack_out_additional_cost"
   | "set_run_pass_rezzed_ice_program_trash"
@@ -1357,15 +1358,35 @@ export type RunState = {
   encounterTaxSourceDefinitionId?: CardDefinitionId;
   breakSubroutineAdditionalCost?: number;
   breakSubroutineAdditionalCostSourceDefinitionId?: CardDefinitionId;
-  futureEncounterEndTheRunSourceIceId?: CardInstanceId;
+  runDurationAdditionalSubroutineModifiers?: Array<{
+    modifierId: string;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    subroutineKind: "end_the_run";
+    append: "after_existing";
+  }>;
   turbeauAccessTraceConsumedByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, CardInstanceId[]>
   >;
   activeIceProgramTrashSourceIceId?: CardInstanceId;
   activeIceProgramTrashPendingPassedIceId?: CardInstanceId;
-  passRezzedIceProgramTrashSourceIceId?: CardInstanceId;
-  passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
+  passRezzedIceProgramTrashModifiers?: Array<{
+    modifierId: string;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+  }>;
+  passRezzedIceProgramTrashPending?: {
+    passedIceId: CardInstanceId;
+    remainingModifierIds: string[];
+  };
   jackOutAdditionalCostForRun?: number;
+  vacuumLinkRewindChoice?: {
+    sourceIceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    rezzedIceBack: number;
+    targetIceId: CardInstanceId;
+    targetIceIndex: number;
+  };
   encounterTemporaryTraceCredits?: {
     sourceIceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;

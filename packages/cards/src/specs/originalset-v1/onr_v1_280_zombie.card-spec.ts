@@ -26,7 +26,7 @@ export const cardSpec = {
     schemaVersion: "card-mechanical-spec-v1",
     characteristics: {
       faction: "onr1996_neutral",
-      subtypes: ["ap", "black ice", "sentry", "zombie"],
+      subtypes: ["black ice", "sentry"],
       numeric: {
         installCost: null,
         memoryCost: null,
@@ -71,10 +71,6 @@ export const cardSpec = {
       {
         kind: "strategic_role",
         role: "punish_payoff",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
       },
       {
         kind: "line_support",

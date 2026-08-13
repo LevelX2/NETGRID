@@ -225,6 +225,18 @@ export function printedSubroutineDefinitionForImplementation(
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
+  if (subroutine.kind === "end_the_run_and_runner_forgoes_next_action") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    if (
+      subroutine.sequence.join(",") !== "end_the_run,runner_forgoes_next_action"
+    )
+      throw new Error("Unsupported end-run/action-forgo sequence.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "end_the_run_and_runner_forgoes_next_action",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "deflect_run") {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const cost =
@@ -303,10 +315,7 @@ export function printedSubroutineDefinitionForImplementation(
   }
   if (subroutine.kind === "trace") {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
-    const traceLimit = Math.max(
-      0,
-      Math.floor(subroutine.traceLimit),
-    );
+    const traceLimit = Math.max(0, Math.floor(subroutine.traceLimit));
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "initiate_trace",
