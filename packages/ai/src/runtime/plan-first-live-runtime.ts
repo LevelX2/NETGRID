@@ -93,6 +93,7 @@ import {
   createRunnerCorePlanModules,
   runnerRolesCoverCoverageGap,
   runnerDevelopmentCardAdmission,
+  runnerDefenseReactionReserveIsCurrentPhase,
   runnerExactBasicLiquidCreditCandidate,
   runnerTurnLiquidityCandidateIsMaterializable,
   runnerFundingRouteCandidateIsMaterializable,
@@ -1663,6 +1664,28 @@ function runnerMatchpointReserveBlocksOverlappingBreakerInstall(
   });
 }
 
+function runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (
+    candidate.semanticActionType !== "install.card" ||
+    !candidate.actionId.endsWith(".runner_program_trash_before_install")
+  ) {
+    return false;
+  }
+  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+    input,
+    candidate,
+  );
+  return (
+    sourceDefinitionId !== undefined &&
+    (input.playerView.own.rig ?? []).some(
+      (installed) => installed.definitionId === sourceDefinitionId,
+    )
+  );
+}
+
 function runnerProgramSearchRecentlyResolved(input: AiDecisionInput): boolean {
   return uniqueBy(
     [...input.playerView.publicEvents, ...input.eventTail],
@@ -1932,7 +1955,11 @@ export function runnerActionDispositions(
       );
     }
   }
-  const delegatedFundingActionIds = runnerDelegatedFundingActionIds(domain);
+  const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
+    domain,
+    candidates,
+    input.playerView.stateVersion,
+  );
   const boundStrategicExchangeFundingActionIds =
     runnerBoundStrategicExchangeFundingActionIds(domain);
   const coverageOwnedActionIds = runnerCoverageOwnedActionIds(
@@ -1953,17 +1980,19 @@ export function runnerActionDispositions(
       );
       continue;
     }
-    if (
-      runnerStrategicExchangeRequiresBoundParent(candidate) &&
-      !boundStrategicExchangeFundingActionIds.has(candidate.actionId)
-    ) {
-      add(
-        candidate.actionId,
-        "runner.economy",
-        runnerStrategicExchangeKinds(candidate).includes("self_damage")
-          ? "runner_self_damage_economy_requires_bound_parent_funding"
-          : "strategic_exchange_requires_bound_parent",
-      );
+    if (runnerStrategicExchangeRequiresBoundParent(candidate)) {
+      if (!boundStrategicExchangeFundingActionIds.has(candidate.actionId)) {
+        add(
+          candidate.actionId,
+          "runner.economy",
+          runnerStrategicExchangeKinds(candidate).includes("self_damage")
+            ? "runner_self_damage_economy_requires_bound_parent_funding"
+            : "strategic_exchange_requires_bound_parent",
+        );
+      }
+      // Bound strategic exchanges are exclusively owned by their exact
+      // parent-support route. Generic development and economy classification
+      // must not create a second authority for the same action.
       continue;
     }
     if (
@@ -1972,6 +2001,10 @@ export function runnerActionDispositions(
         candidate,
         coverageOwnedActionIds,
         domain.coverageGaps,
+      ) &&
+      !runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
+        input,
+        candidate,
       )
     ) {
       add(
@@ -2117,17 +2150,21 @@ export function runnerActionDispositions(
       legalAction?.payload?.runnerProgramTrashBeforeInstall === true ||
       candidate.actionId.endsWith(".runner_program_trash_before_install");
     if (!optionalProgramTrashInstall) continue;
+    const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+      input,
+      candidate,
+    );
     const duplicateDefinitionAlreadyInstalled =
-      candidate.sourceDefinitionId !== undefined &&
-      (input.playerView.own.rig ?? []).some(
-        (installed) => installed.definitionId === candidate.sourceDefinitionId,
+      runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
+        input,
+        candidate,
       );
     if (duplicateDefinitionAlreadyInstalled) {
       optionalProgramTrashInstallDispositionActionIds.add(candidate.actionId);
       add(
         candidate.actionId,
         "runner.develop_board_and_hand",
-        `runner_program_trash_install_rejected_duplicate_definition:${candidate.sourceDefinitionId}`,
+        `runner_program_trash_install_rejected_duplicate_definition:${sourceDefinitionId}`,
       );
       continue;
     }
@@ -2509,6 +2546,7 @@ export function runnerActionDispositions(
       .map((candidate) => candidate.actionId),
   );
   const specializedPlanOwnedActionIds = new Set([
+    ...boundStrategicExchangeFundingActionIds,
     ...domain.creditBanks.flatMap((signal) => [
       ...signal.actionIds,
       ...(signal.rejectedActionIds ?? []),
@@ -2847,6 +2885,8 @@ type RunnerFundingOwnershipDomain = Pick<
 
 function runnerDelegatedFundingActionIds(
   domain: RunnerFundingOwnershipDomain,
+  candidates: readonly ActionSemanticCandidate[],
+  stateVersion: number,
 ): Set<string> {
   const actionIds = new Set<string>();
   for (const need of domain.fundingNeeds) {
@@ -2867,8 +2907,17 @@ function runnerDelegatedFundingActionIds(
     if (!gap.answerInHand || (gap.fundingGap ?? 0) <= 0) continue;
     for (const actionId of gap.fundingActionIds) actionIds.add(actionId);
   }
-  for (const actionId of domain.defense.reactionReserveNeed?.actionIds ?? []) {
-    actionIds.add(actionId);
+  if (
+    runnerDefenseReactionReserveIsCurrentPhase({
+      actionCandidates: candidates,
+      stateVersion,
+      signals: domain.defense,
+    })
+  ) {
+    for (const actionId of domain.defense.reactionReserveNeed?.actionIds ??
+      []) {
+      actionIds.add(actionId);
+    }
   }
   return actionIds;
 }
@@ -2954,6 +3003,11 @@ function buildRunnerDomain(
   const handDevelopmentOwnedImmediateEconomyActionIds = new Set(
     handDevelopment.flatMap((evaluation) =>
       evaluation.legalActionId !== undefined &&
+      candidates.some(
+        (candidate) =>
+          candidate.actionId === evaluation.legalActionId &&
+          runnerGenericDevelopmentMayOwnAction(candidate),
+      ) &&
       evaluation.availability === "legal_now" &&
       evaluation.deferReason === "none" &&
       evaluation.liquidityTiming === "immediate" &&
@@ -2970,7 +3024,9 @@ function buildRunnerDomain(
         (candidate) =>
           !handDevelopmentOwnedImmediateEconomyActionIds.has(
             candidate.actionId,
-          ) && runnerTurnLiquidityCandidateIsMaterializable(candidate),
+          ) &&
+          runnerTurnLiquidityCandidateIsMaterializable(candidate) &&
+          !runnerStrategicExchangeRequiresBoundParent(candidate),
       )
       .map((candidate) => candidate.actionId),
     (actionId) => actionId,
@@ -4220,14 +4276,18 @@ function buildRunnerDomain(
     ],
     (signal) => signal.contestId,
   );
-  const delegatedFundingActionIds = runnerDelegatedFundingActionIds({
-    fundingNeeds,
-    coverageGaps,
-    defense,
-    resourceLifecycle,
-    centralPressure,
-    remoteContests,
-  });
+  const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
+    {
+      fundingNeeds,
+      coverageGaps,
+      defense,
+      resourceLifecycle,
+      centralPressure,
+      remoteContests,
+    },
+    candidates,
+    input.playerView.stateVersion,
+  );
   const rejectedCreditBankActionIds = new Set(
     creditBanks.flatMap((signal) => signal.rejectedActionIds ?? []),
   );
@@ -5945,7 +6005,9 @@ function runnerDevelopmentFundingRoute(
   });
   const result = searchFundingRoutes({
     demand,
-    candidates,
+    candidates: candidates.filter(
+      (candidate) => !runnerStrategicExchangeRequiresBoundParent(candidate),
+    ),
     remainingClicks: remainingFundingClicks,
     maxSteps: Math.max(1, remainingFundingClicks),
     maxRoutes: 8,
@@ -5983,6 +6045,7 @@ function runnerDevelopmentFundingRoute(
       `development_funding_route_status:${result.bestRoute.status}`,
       `development_funding_route_horizon:${result.bestRoute.horizon}`,
       `development_funding_route_gap:${result.bestRoute.projectedGap}`,
+      "development_funding_strategic_exchange_requires_parent:true",
       `development_funding_route_ready:${actionIds.length > 0}`,
     ],
   };
@@ -16862,16 +16925,22 @@ function runnerRecurringEconomySignals(
         profile.turnStartCredits,
         installedThisTurn || realization.payoutCount === 0,
       );
+      const independentEconomyRouteAvailable = candidates.some(
+        (candidate) =>
+          candidate.sourceKind !== "basic_action" &&
+          candidate.semanticActionType === "economy.gain_credit" &&
+          runnerTurnLiquidityCandidateIsMaterializable(candidate),
+      );
       const holdActionIds =
-        runDecision.decision === "wait"
+        runDecision.decision === "wait" && !independentEconomyRouteAvailable
           ? candidates
               .filter(
                 (candidate) =>
-                  (candidate.semanticActionType === "draw.card" &&
+                  candidate.sourceKind === "basic_action" &&
+                  ((candidate.semanticActionType === "draw.card" &&
                     input.playerView.own.gripOrHq.length <
                       input.playerView.own.maxHandSize) ||
-                  candidate.semanticActionType === "economy.gain_credit" ||
-                  candidate.semanticActionType === "turn_flow.end_turn",
+                    candidate.semanticActionType === "economy.gain_credit"),
               )
               .map((candidate) => candidate.actionId)
           : [];
