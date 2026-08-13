@@ -9029,7 +9029,7 @@ function buildCorpDomain(
       )
       .map((project) => project.agendaInstanceId!),
   );
-  const executableScoreProjectIds = new Set(
+  const actionableScoreProjectIds = new Set(
     proposedScoreProjects
       .filter(
         (project) =>
@@ -9037,15 +9037,20 @@ function buildCorpDomain(
           project.serverId !== undefined &&
           project.agendaInstanceId !== undefined &&
           agendaInstancesWithPreparedRemote.has(project.agendaInstanceId) &&
-          corpPreparedScoreProjectHasExecutableCurrentStep(
+          (corpPreparedScoreProjectHasExecutableCurrentStep(
             input,
             candidates,
             project,
-          ),
+          ) ||
+            corpPreparedScoreProjectHasImmediateFundingSupport(
+              input,
+              candidates,
+              project,
+            )),
       )
       .map((project) => project.projectId),
   );
-  const agendaInstancesWithExecutablePreparedRemote = new Set(
+  const agendaInstancesWithActionablePreparedRemote = new Set(
     proposedScoreProjects
       .filter(
         (project) =>
@@ -9053,7 +9058,7 @@ function buildCorpDomain(
           project.serverId !== undefined &&
           project.serverId !== "new_remote" &&
           project.agendaInstanceId !== undefined &&
-          executableScoreProjectIds.has(project.projectId),
+          actionableScoreProjectIds.has(project.projectId),
       )
       .map((project) => project.agendaInstanceId!),
   );
@@ -9065,10 +9070,10 @@ function buildCorpDomain(
           project.serverId === "new_remote" &&
           project.agendaInstanceId !== undefined &&
           agendaInstancesWithPreparedRemote.has(project.agendaInstanceId) &&
-          (agendaInstancesWithExecutablePreparedRemote.has(
+          (agendaInstancesWithActionablePreparedRemote.has(
             project.agendaInstanceId,
           ) ||
-            !executableScoreProjectIds.has(project.projectId))
+            !actionableScoreProjectIds.has(project.projectId))
         ),
     ),
   );
@@ -12125,6 +12130,43 @@ function corpPreparedScoreProjectHasExecutableCurrentStep(
   );
 }
 
+function corpPreparedScoreProjectHasImmediateFundingSupport(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  project: CorpScoreProjectSignal,
+): boolean {
+  if (
+    project.serverId === undefined ||
+    project.serverId === "new_remote" ||
+    project.phase !== "install_agenda"
+  ) {
+    return false;
+  }
+  const preparedRemote = input.playerView.servers.find(
+    (server) => server.id === project.serverId,
+  );
+  if (
+    !preparedRemote ||
+    preparedRemote.root.length > 0 ||
+    preparedRemote.ice.length === 0
+  ) {
+    return false;
+  }
+  const scan = corpScoreProtectionInstallRouteScan(input, candidates, project);
+  return (
+    scan.directInstallRouteState.knowledge === "known" &&
+    scan.directInstallRouteState.disposition === "funding_only" &&
+    typeof scan.fundingGap === "number" &&
+    scan.fundingGap > 0 &&
+    candidates.some(
+      (candidate) =>
+        corpEconomyActionIsOwned(candidate) &&
+        immediateCorpLiquidCreditGain(candidate) > 0 &&
+        corpEconomyCandidateHasExecutablePayload(input, candidate),
+    )
+  );
+}
+
 function corpFirstScoreProtectionLayerCanPrecedeFunding(
   input: AiDecisionInput,
   project: CorpScoreProjectSignal,
@@ -13403,6 +13445,7 @@ function corpRequiredEconomyNeeds(
       project.terminalScore ||
       project.conversion?.residentParent === true ||
       project.conversion?.runnerStealIsMatchpoint === true ||
+      (project.conversion?.existingRemoteIceCount ?? 0) > 0 ||
       (project.conversion?.realizedStrategySupportCount ?? 0) > 0) &&
     exactAmbushSetupCardIds.size === 0 &&
     !projectsWithCurrentProtectionSupport.has(project.projectId)

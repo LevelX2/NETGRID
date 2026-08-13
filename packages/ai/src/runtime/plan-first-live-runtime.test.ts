@@ -7839,11 +7839,20 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
+    const fundPreparedCredit = legalAction(
+      "fund-prepared-remote",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
     const input = aiInput("corp", [
       installAgendaNew,
       installAgendaExisting,
       installIceNew,
       installIceExisting,
+      fundPreparedCredit,
     ]);
     for (const action of input.legalActions) {
       action.expiresAtStateVersion = stateVersion;
@@ -7938,6 +7947,33 @@ describe("authoritative plan-first live runtime", () => {
     expect(siblingPortfolio).not.toContain(
       '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1","effect":"progress"',
     );
+
+    const fundPreparedInput = structuredClone(input);
+    fundPreparedInput.decisionId = "fund-prepared-score-remote:1:corp";
+    fundPreparedInput.playerView.own.credits = 1;
+    resetResidentPlanPortfolioMemory();
+    const fundedPreparedDecision = liveContext().chooseSemanticRuntimeAction(
+      fundPreparedInput,
+      {},
+    );
+    expect(fundedPreparedDecision).toMatchObject({
+      actionId: fundPreparedCredit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(fundedPreparedDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
+      ]),
+    );
+    const fundedPreparedPortfolio = JSON.stringify(
+      residentPlanPortfolioSnapshot(fundPreparedInput),
+    );
+    expect(fundedPreparedPortfolio).toContain(
+      '"parentInstanceId":"plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1"',
+    );
+    expect(fundedPreparedPortfolio).not.toContain("new_remote");
 
     const protectedInput = structuredClone(input);
     protectedInput.playerView.stateVersion = 2;
