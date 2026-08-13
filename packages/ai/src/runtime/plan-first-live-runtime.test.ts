@@ -1479,6 +1479,78 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("classifies a duplicate optional program-trash install only through its exact variant owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-ms-todon.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Install MS-todon after trashing a program",
+      { credits: 4, clicks: 1 },
+      {
+        source: "ms-todon-card",
+        payload: {
+          cardId: "ms-todon-card",
+          sourceDefinitionId: "onr_classic_029_ms-todon",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [install, credit]);
+    input.playerView.own.credits = 10;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.own.rig = [
+      visibleCard("installed-ms-todon", "runner", "program", {
+        definitionId: "onr_classic_029_ms-todon",
+        title: "MS-todon",
+        strength: 2,
+        subtypes: ["icebreaker", "killer", "noisy"],
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("ms-todon-card", "runner", "program", {
+        definitionId: "onr_classic_029_ms-todon",
+        title: "MS-todon",
+        installCost: 4,
+        strength: 2,
+        subtypes: ["icebreaker", "killer", "noisy"],
+      }),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "ms-todon-card",
+          definitionId: "onr_classic_029_ms-todon",
+          legalActionId: install.actionId,
+          priority: 0,
+          deferReason: "duplicate",
+          duplicateRole: "redundant_duplicate",
+          finalInstallFit: -100,
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 7,
+        desiredCreditReserve: 12,
+        fundingNeed: true,
+        evidence: ["test_matchpoint_remote_reserve"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+  });
+
   it("selects a blocked payoff Social Engineering route through central pressure and persists its exact continuation", () => {
     resetResidentPlanPortfolioMemory();
     const social = legalAction(
@@ -14342,6 +14414,8 @@ describe("authoritative plan-first live runtime", () => {
       kind: "select_cards",
       source:
         "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:2",
+      sourceCardInstanceId: "temple-card",
+      sourceCardDefinitionId: "onr_v1_114_temple-microcode-outlet",
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
@@ -15115,6 +15189,8 @@ describe("authoritative plan-first live runtime", () => {
       kind: "select_cards",
       source:
         "p3_37.search_trash_to_grip:gideon-card:onr_v1_089_gideons-pawnshop:any_card:private:2",
+      sourceCardInstanceId: "gideon-card",
+      sourceCardDefinitionId: "onr_v1_089_gideons-pawnshop",
       prompt: "Choose a heap card",
       minSelections: 1,
       maxSelections: 1,
@@ -15865,6 +15941,8 @@ describe("authoritative plan-first live runtime", () => {
       side: "runner",
       kind: "select_cards",
       source: `p3_37.search_stack_to_grip:${searchToolInstanceId}:${searchToolDefinitionId}:program:private:shuffle:2`,
+      sourceCardInstanceId: searchToolInstanceId,
+      sourceCardDefinitionId: searchToolDefinitionId,
       prompt: "Choose a program",
       minSelections: 1,
       maxSelections: 1,
@@ -15942,6 +16020,8 @@ describe("authoritative plan-first live runtime", () => {
     choiceInput.playerView.pendingChoice = {
       ...choiceInput.playerView.pendingChoice,
       source: `p3_37.search_stack_to_grip:${alternateSearchToolInstanceId}:${alternateSearchToolDefinitionId}:program:private:shuffle:2`,
+      sourceCardInstanceId: alternateSearchToolInstanceId,
+      sourceCardDefinitionId: alternateSearchToolDefinitionId,
     };
     expect(() =>
       selectedChoicesForDecision(choiceInput, resolve, choiceDependencies),

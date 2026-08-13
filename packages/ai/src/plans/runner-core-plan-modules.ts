@@ -1311,11 +1311,15 @@ function defenseModule(): PlanModule {
         );
       const phase = invalidReactionReserveContract
         ? "build_reaction_reserve"
-        : defensePhase(context, signals);
+        : defensePhase(
+            context.actionCandidates,
+            context.input.playerView.stateVersion,
+            signals,
+          );
       if (!phase) return [];
       const candidates = invalidReactionReserveContract
         ? []
-        : defenseCandidates(context, phase, signals);
+        : defenseCandidates(context.actionCandidates, phase, signals);
       return [
         proposal({
           moduleId: "runner.defense_and_recovery",
@@ -1345,7 +1349,11 @@ function defenseModule(): PlanModule {
             context.input.playerView.stateVersion,
           ));
       const candidates = reactionReserveContractValid
-        ? defenseCandidates(context, current.phase, current.signals)
+        ? defenseCandidates(
+            context.actionCandidates,
+            current.phase,
+            current.signals,
+          )
         : [];
       const priorityClass = defensePriorityClass(current.signals);
       return assessment(
@@ -1359,7 +1367,7 @@ function defenseModule(): PlanModule {
     materialize: (instance, _assessment, context) => {
       const current = state<DefenseState>(instance);
       const candidates = defenseCandidates(
-        context,
+        context.actionCandidates,
         current.phase,
         current.signals,
       );
@@ -2123,7 +2131,8 @@ function coverageFundingCandidates(
 }
 
 function defensePhase(
-  context: PlanSchedulerContext,
+  actionCandidates: readonly ActionSemanticCandidate[],
+  stateVersion: number,
   signals: RunnerDefenseSignals,
 ): DefenseState["phase"] | undefined {
   const openPhases: DefenseState["phase"][] = [];
@@ -2140,22 +2149,19 @@ function defensePhase(
     openPhases.push("build_hand_buffer");
   if (
     signals.reactionReserveNeed &&
-    validRunnerDefenseFundingNeed(
-      signals.reactionReserveNeed,
-      context.input.playerView.stateVersion,
-    )
+    validRunnerDefenseFundingNeed(signals.reactionReserveNeed, stateVersion)
   )
     openPhases.push("build_reaction_reserve");
   if (signals.forgoUnsafeRunCapacity) openPhases.push("forgo_unsafe_run");
   return (
     openPhases.find(
-      (phase) => defenseCandidates(context, phase, signals).length > 0,
+      (phase) => defenseCandidates(actionCandidates, phase, signals).length > 0,
     ) ?? openPhases[0]
   );
 }
 
 function defenseCandidates(
-  context: PlanSchedulerContext,
+  actionCandidates: readonly ActionSemanticCandidate[],
   phase: DefenseState["phase"],
   signals: RunnerDefenseSignals,
 ): PlanMaterialization["candidates"] {
@@ -2169,7 +2175,7 @@ function defenseCandidates(
     signals.reactionReserveNeed?.actionIds ?? [],
   );
   const handBufferActionIds = new Set(signals.handBufferActionIds ?? []);
-  return context.actionCandidates
+  return actionCandidates
     .filter((candidate) => {
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
@@ -2217,6 +2223,20 @@ function defenseCandidates(
                       1,
                   ),
     }));
+}
+
+export function runnerDefenseReactionReserveIsCurrentPhase(params: {
+  actionCandidates: readonly ActionSemanticCandidate[];
+  stateVersion: number;
+  signals: RunnerDefenseSignals;
+}): boolean {
+  return (
+    defensePhase(
+      params.actionCandidates,
+      params.stateVersion,
+      params.signals,
+    ) === "build_reaction_reserve"
+  );
 }
 
 function defenseCapability(

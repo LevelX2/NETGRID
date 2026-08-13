@@ -49,6 +49,7 @@ import {
   selectedRunnerTargetedBypassChoiceOptionId,
   selectedRunnerTargetedBypassHideChoiceOptionId,
 } from "./runner-targeted-bypass-choice";
+import { selectedRunnerStartOfTurnOrderChoiceOptionId } from "./runner-start-of-turn-order-choice";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -480,6 +481,26 @@ export function selectedChoicesForDecision(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "runner_delayed_install",
     );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("runner_start.order:")
+  ) {
+    const selectedOptionId = selectedRunnerStartOfTurnOrderChoiceOptionId(
+      input,
+      action,
+      choice,
+      selectableOptions,
+    );
+    if (!selectedOptionId) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Resolve Runner start-of-turn ordering only from the exact current rule window and complete canonical source-effect profiles.",
+      );
+    }
+    return resolved([selectedOptionId], "runner_start_of_turn_order");
   }
   if (
     choice.kind === "select_cards" &&
@@ -1901,27 +1922,14 @@ function runnerCoverageSearchChoiceBinding(
         candidate.actionId === moduleState.selectedSearchActionId &&
         typeof candidate.sourceCardInstanceId === "string" &&
         typeof candidate.sourceDefinitionId === "string" &&
-        choice.source.includes(`:${candidate.sourceCardInstanceId}:`) &&
-        choice.source.includes(`:${candidate.sourceDefinitionId}:`) &&
-        (candidate.targetCardInstanceId === undefined ||
-          (typeof candidate.targetCardInstanceId === "string" &&
-            choice.options.some(
-              (option) =>
-                option.card?.instanceId === candidate.targetCardInstanceId &&
-                (candidate.targetDefinitionId === undefined ||
-                  option.card?.definitionId === candidate.targetDefinitionId),
-            ))) &&
-        (candidate.targetDefinitionId === undefined ||
-          choice.options.some(
-            (option) =>
-              option.card?.definitionId === candidate.targetDefinitionId,
-          )),
+        choice.sourceCardInstanceId === candidate.sourceCardInstanceId &&
+        choice.sourceCardDefinitionId === candidate.sourceDefinitionId,
     ) ?? [];
   if (bindings.length !== 1) {
     throw coverageSearchChoiceBindingFailure(
       input,
       executor.instanceId,
-      "The current search choice source does not match exactly one binding for the selected coverage-search LegalAction.",
+      "The current structured search-choice source does not match exactly one binding for the selected coverage-search LegalAction.",
     );
   }
   const binding = bindings[0];
