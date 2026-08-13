@@ -71,6 +71,7 @@ export let hardwareTrashByCounterLegalActions: RuntimePortGroups["corpRuntimeRes
 export let hardwareTrashByCounterTrashCountFromPayload: RuntimePortGroups["corpRuntimeResolvers"]["hardwareTrashByCounterTrashCountFromPayload"];
 export let resolveHardwareTrashByCounterOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveHardwareTrashByCounterOperation"];
 export let resolveTaggedRunnerResourceMultiTrashOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveTaggedRunnerResourceMultiTrashOperation"];
+export let startRunnerInstalledMultiTrashChoice: RuntimePortGroups["corpRuntimeResolvers"]["startRunnerInstalledMultiTrashChoice"];
 export let resolveRunnerInstalledMultiTrashChoice: RuntimePortGroups["corpRuntimeResolvers"]["resolveRunnerInstalledMultiTrashChoice"];
 export let advancementPlacementLegalActions: RuntimePortGroups["corpRuntimeResolvers"]["advancementPlacementLegalActions"];
 export let resolveAgendaCounterOperation: RuntimePortGroups["corpRuntimeResolvers"]["resolveAgendaCounterOperation"];
@@ -411,6 +412,7 @@ export let runnerActionsPerTurn: RuntimePortGroups["stateRuntimeResolvers"]["run
 export let agendaPoints: RuntimePortGroups["stateRuntimeResolvers"]["agendaPoints"];
 export let addVirusCounterWithCounterPrevention: RuntimePortGroups["stateRuntimeResolvers"]["addVirusCounterWithCounterPrevention"];
 export let preventOneVirusCounterWithCounterPrevention: RuntimePortGroups["stateRuntimeResolvers"]["preventOneVirusCounterWithCounterPrevention"];
+export let resolveVirusCounterPreventionChoice: RuntimePortGroups["stateRuntimeResolvers"]["resolveVirusCounterPreventionChoice"];
 export let addVisibleCardCounter: RuntimePortGroups["stateRuntimeResolvers"]["addVisibleCardCounter"];
 export let spendVisibleCardCounter: RuntimePortGroups["stateRuntimeResolvers"]["spendVisibleCardCounter"];
 export let totalCounters: RuntimePortGroups["stateRuntimeResolvers"]["totalCounters"];
@@ -552,6 +554,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.corpRuntimeResolvers.resolveHardwareTrashByCounterOperation;
   resolveTaggedRunnerResourceMultiTrashOperation =
     ports.corpRuntimeResolvers.resolveTaggedRunnerResourceMultiTrashOperation;
+  startRunnerInstalledMultiTrashChoice =
+    ports.corpRuntimeResolvers.startRunnerInstalledMultiTrashChoice;
   resolveRunnerInstalledMultiTrashChoice =
     ports.corpRuntimeResolvers.resolveRunnerInstalledMultiTrashChoice;
   advancementPlacementLegalActions =
@@ -1152,6 +1156,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.stateRuntimeResolvers.addVirusCounterWithCounterPrevention;
   preventOneVirusCounterWithCounterPrevention =
     ports.stateRuntimeResolvers.preventOneVirusCounterWithCounterPrevention;
+  resolveVirusCounterPreventionChoice =
+    ports.stateRuntimeResolvers.resolveVirusCounterPreventionChoice;
   addVisibleCardCounter = ports.stateRuntimeResolvers.addVisibleCardCounter;
   spendVisibleCardCounter = ports.stateRuntimeResolvers.spendVisibleCardCounter;
   totalCounters = ports.stateRuntimeResolvers.totalCounters;

@@ -1,4 +1,5 @@
 import type {
+  CardDefinitionId,
   CardInstanceId,
   DamageType,
   GameState,
@@ -159,6 +160,12 @@ export function openRunnerInstalledTrashPreventionWindow(
     [...new Set([...installedTargets, ...simultaneousProgramTargets])],
     source,
     resolutionMode,
+    typeof legalAction.payload?.cardId === "string"
+      ? (legalAction.payload.cardId as CardInstanceId)
+      : undefined,
+    typeof legalAction.payload?.sourceDefinitionId === "string"
+      ? (legalAction.payload.sourceDefinitionId as CardDefinitionId)
+      : undefined,
   );
   return openEventModificationWindow(state, event, legalAction);
 }

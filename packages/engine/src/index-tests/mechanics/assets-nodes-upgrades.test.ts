@@ -1151,6 +1151,86 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("resolves each Corporate Negotiating Center exactly once", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1917-corporate-negotiating-center-two-copies",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+          id: "v1917_corporate_negotiating_center_two_copies",
+          name: "Corporate Negotiating Center Two Copies",
+          cards: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.map((card) =>
+            card.id === "onr_v1_314_corporate-negotiating-center"
+              ? { ...card, quantity: 2 }
+              : card,
+          ),
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    const centerIds = Object.entries(state.cardInstances)
+      .filter(
+        ([, card]) =>
+          card.definitionId === "onr_v1_314_corporate-negotiating-center",
+      )
+      .map(([id]) => id as CardInstanceId);
+    expect(centerIds).toHaveLength(2);
+    for (const [index, centerId] of centerIds.entries()) {
+      removeEverywhere(state, centerId);
+      const serverId = `remote_${index + 1}` as `remote_${number}`;
+      state.corp.servers.push({
+        id: serverId,
+        kind: "remote",
+        label: `Remote ${index + 1}`,
+        ice: [],
+        root: [centerId],
+      });
+      state.cardInstances[centerId] = {
+        ...state.cardInstances[centerId]!,
+        zone: { side: "corp", zone: "serverRoot", serverId },
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    const firstAgendaId = moveCorpCardToHq(state, "simple_agenda");
+    const secondAgendaId = moveCorpCardCopyToHq(state, "simple_agenda");
+    const creditsBefore = state.corp.credits;
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("corp_start.order:"),
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    const secondCenterFirst = state.pendingChoice?.options.find(
+      (option) => option.value === centerIds[1],
+    )?.id;
+    if (!secondCenterFirst)
+      throw new Error(
+        "Missing second Corporate Negotiating Center order option",
+      );
+    state = applyChoice(state, "corp", secondCenterFirst);
+    state = applyChoices(state, "corp", [
+      `card_${firstAgendaId}`,
+      `card_${secondAgendaId}`,
+    ]);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("show_hq_agendas_for_credits"),
+    });
+    state = applyChoices(state, "corp", [
+      `card_${firstAgendaId}`,
+      `card_${secondAgendaId}`,
+    ]);
+
+    expect(state.corp.credits).toBe(creditsBefore + 4);
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
   it("resolves Rescheduler as deterministic HQ shuffle into R&D and draw", () => {
     let reorderState = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1917-rescheduler-hq-shuffle",

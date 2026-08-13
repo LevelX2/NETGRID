@@ -122,6 +122,17 @@ export type AccessEffectHandlerHost = {
       targetIds: CardInstanceId[],
       sourceDefinitionId: CardDefinitionId,
     ) => boolean;
+    startRunnerInstalledMultiTrashChoice: (
+      sourceCardId: CardInstanceId,
+      input: {
+        effectKind: "access_hardware_trash_by_advancement";
+        targetCardType: "hardware";
+        minimumTargets: number;
+        maximumTargets: number;
+        selectionOrdering: "ordered";
+      },
+      eligibleCardIds: CardInstanceId[],
+    ) => void;
   };
 };
 

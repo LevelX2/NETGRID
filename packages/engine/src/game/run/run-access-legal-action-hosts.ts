@@ -236,6 +236,8 @@ export function createRunAccessLegalActionHostComposition(
     choices: {
       openRunnerInstalledTrashPreventionWindow:
         choices.openRunnerInstalledTrashPreventionWindow,
+      startRunnerInstalledMultiTrashChoice:
+        choices.startRunnerInstalledMultiTrashChoice,
     },
     turn: {
       ensureRunnerTurnFlags: callbacks.turn.ensureRunnerTurnFlags,

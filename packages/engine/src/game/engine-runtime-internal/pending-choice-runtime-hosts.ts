@@ -736,6 +736,8 @@ export function createPendingChoiceRuntimeHosts(
         resolveRunnerDrawSequenceChoice: deps.resolveRunnerDrawSequenceChoice,
         resolveRunnerInstalledMultiTrashChoice:
           deps.resolveRunnerInstalledMultiTrashChoice,
+        resolveVirusCounterPreventionChoice:
+          deps.resolveVirusCounterPreventionChoice,
         resolveAdvancementPlacementChoice:
           deps.resolveAdvancementPlacementChoice,
         resolveDerezRezzedBlackIceChoice,

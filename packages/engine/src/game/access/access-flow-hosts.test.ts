@@ -175,6 +175,7 @@ function hostFor(calls: string[]): AccessFlowCompositionHost {
     },
     choices: {
       openRunnerInstalledTrashPreventionWindow: () => false,
+      startRunnerInstalledMultiTrashChoice: () => undefined,
     },
     turn: {
       ensureRunnerTurnFlags: (targetState) => {

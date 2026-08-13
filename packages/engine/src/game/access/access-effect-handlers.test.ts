@@ -367,6 +367,7 @@ function makeHost(legalAction: LegalAction) {
       trashRunnerInstalledCardToHeap: (cardId) => calls.trashed.push(cardId),
       trashCorpInstalledCardToArchives: (cardId) => calls.trashed.push(cardId),
       openRunnerInstalledTrashPreventionWindow: () => false,
+      startRunnerInstalledMultiTrashChoice: () => undefined,
     },
   };
   return { host, calls, state };

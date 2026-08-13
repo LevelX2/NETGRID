@@ -80,11 +80,6 @@ export const cardSpec = {
           "Persistent draw-linked tag pressure is a tag source, not a tagged payoff. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
         kind: "remote_role",
         role: "tag_punish_asset",
         threatLevel: "medium",

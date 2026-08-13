@@ -63,7 +63,10 @@ export type AccessFlowCompositionHost = {
     runnerDuringRunCardImplementationLegalActions: (
       state: GameState,
     ) => LegalAction[];
-    hiddenStackInstallRunActions: (state: GameState, run: ActiveRun) => LegalAction[];
+    hiddenStackInstallRunActions: (
+      state: GameState,
+      run: ActiveRun,
+    ) => LegalAction[];
     startPostAccessInstalledProgramChoice: (
       state: GameState,
       run: ActiveRun,
@@ -150,7 +153,9 @@ export type AccessFlowCompositionHost = {
   };
   zones: {
     removeFromAllZones: (state: GameState, cardId: CardInstanceId) => void;
-    ensureSpecialZones: (state: GameState) => ReturnType<AccessFlowHost["zones"]["ensureSpecialZones"]>;
+    ensureSpecialZones: (
+      state: GameState,
+    ) => ReturnType<AccessFlowHost["zones"]["ensureSpecialZones"]>;
     trashCorpInstalledCardToArchives: (
       state: GameState,
       cardId: CardInstanceId,
@@ -165,11 +170,15 @@ export type AccessFlowCompositionHost = {
       cardId: CardInstanceId,
       sourceDefinitionId: CardDefinitionId,
       reason: "access",
-    ) => ReturnType<AccessEffectHandlerHost["corpCards"]["shuffleCorpCardIntoRd"]>;
+    ) => ReturnType<
+      AccessEffectHandlerHost["corpCards"]["shuffleCorpCardIntoRd"]
+    >;
     returnRunnerInstalledProgramsToGripForAccess: (
       state: GameState,
       cardIds: readonly CardInstanceId[],
-    ) => ReturnType<AccessEffectHandlerHost["runnerCards"]["returnInstalledProgramsToGrip"]>;
+    ) => ReturnType<
+      AccessEffectHandlerHost["runnerCards"]["returnInstalledProgramsToGrip"]
+    >;
   };
   choices: {
     openRunnerInstalledTrashPreventionWindow: (
@@ -178,6 +187,19 @@ export type AccessFlowCompositionHost = {
       targetIds: CardInstanceId[],
       sourceDefinitionId: CardDefinitionId,
     ) => boolean;
+    startRunnerInstalledMultiTrashChoice: (
+      state: GameState,
+      legalAction: LegalAction,
+      sourceCardId: CardInstanceId,
+      input: {
+        effectKind: "access_hardware_trash_by_advancement";
+        targetCardType: "hardware";
+        minimumTargets: number;
+        maximumTargets: number;
+        selectionOrdering: "ordered";
+      },
+      eligibleCardIds: CardInstanceId[],
+    ) => void;
   };
   turn: {
     ensureRunnerTurnFlags: (
@@ -276,7 +298,8 @@ export function createAccessFlowAdapters(
           host.run.successfulRunProgramActions(state, run),
         runnerDuringRunCardImplementationLegalActions: () =>
           host.run.runnerDuringRunCardImplementationLegalActions(state),
-        hiddenStackInstallRunActions: (run) => host.run.hiddenStackInstallRunActions(state, run),
+        hiddenStackInstallRunActions: (run) =>
+          host.run.hiddenStackInstallRunActions(state, run),
       },
     };
   }
@@ -493,6 +516,20 @@ export function createAccessFlowAdapters(
             legalAction,
             targetIds,
             sourceDefinitionId,
+          );
+        },
+        startRunnerInstalledMultiTrashChoice: (
+          sourceCardId,
+          input,
+          eligibleCardIds,
+        ) => {
+          if (!legalAction) throw new Error("Multi-Trash-Aktion fehlt.");
+          host.choices.startRunnerInstalledMultiTrashChoice(
+            state,
+            legalAction,
+            sourceCardId,
+            input,
+            eligibleCardIds,
           );
         },
       },

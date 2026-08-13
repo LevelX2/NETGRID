@@ -1907,7 +1907,8 @@ export type GameState = {
     sourceDefinitionId: CardDefinitionId;
     effectKind:
       | "trash_runner_resources_if_tagged"
-      | "installed_hardware_trash_by_counter";
+      | "installed_hardware_trash_by_counter"
+      | "access_hardware_trash_by_advancement";
     targetCardType: "resource" | "hardware";
     minimumTargets: number;
     maximumTargets: number;
@@ -1917,6 +1918,32 @@ export type GameState = {
       cardInstanceId: CardInstanceId;
       choiceValue: string;
     }>;
+  };
+  pendingVirusCounterPrevention?: {
+    targets: Array<
+      | {
+          kind: "card";
+          cardId: CardInstanceId;
+          counterType: CounterType;
+        }
+      | {
+          kind: "corp_pool";
+          counterType: PurgeableRunnerVirusCounterType;
+        }
+      | {
+          kind: "server_pool";
+          serverId: Exclude<ServerId, "new_remote">;
+          counterType: PurgeableRunnerVirusCounterType;
+        }
+      | {
+          kind: "pox_server";
+          serverId: Exclude<ServerId, "new_remote">;
+        }
+      | {
+          kind: "fait_server";
+          serverId: Exclude<ServerId, "new_remote">;
+        }
+    >;
   };
   pendingCorpDraw?: CorpDrawTransaction;
   runnerDrawSequence?: RunnerDrawSequence;

@@ -57,6 +57,21 @@ export type CorpRuntimePort = TurnCorpRuntimePort & {
     maximumTargets: number,
     selectionOrdering: "ordered" | "unordered",
   ) => void;
+  startRunnerInstalledMultiTrashChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    input: {
+      effectKind: NonNullable<
+        GameState["pendingRunnerInstalledMultiTrash"]
+      >["effectKind"];
+      targetCardType: "resource" | "hardware";
+      minimumTargets: number;
+      maximumTargets: number;
+      selectionOrdering: "ordered" | "unordered";
+      excludesSubtype?: string;
+    },
+    eligibleCardIds: CardInstanceId[],
+  ) => void;
   resolveRunnerInstalledMultiTrashChoice: (
     state: GameState,
     legalAction: LegalAction,

@@ -279,6 +279,9 @@ function pendingChoiceHost(
       resolveRunnerInstalledMultiTrashChoice: unexpected(
         "resolveRunnerInstalledMultiTrashChoice",
       ),
+      resolveVirusCounterPreventionChoice: unexpected(
+        "resolveVirusCounterPreventionChoice",
+      ),
       resolveAdvancementPlacementChoice: unexpected(
         "resolveAdvancementPlacementChoice",
       ),

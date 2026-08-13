@@ -112,8 +112,11 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "establish_tag_source_in_protected_empty_remote",
-        preferences: ["protects_agenda_remote"],
-        avoid: [],
+        preferences: [
+          "best_cards_for_current_plan",
+          "use_choice_option_with_visible_board_payoff",
+        ],
+        avoid: ["option_with_no_visible_current_payoff"],
       },
       {
         kind: "value_interpretation",

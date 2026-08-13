@@ -1014,8 +1014,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             amount,
             legalAction,
           ),
-        preventOneVirusCounterWithCounterPrevention: () =>
-          host.counters.preventOneVirusCounterWithCounterPrevention(state),
+        preventOneVirusCounterWithCounterPrevention: (target) =>
+          host.counters.preventOneVirusCounterWithCounterPrevention(
+            state,
+            target,
+          ),
         poxCountersForServer: (serverId) =>
           host.counters.poxCountersForServer(state, serverId),
       },

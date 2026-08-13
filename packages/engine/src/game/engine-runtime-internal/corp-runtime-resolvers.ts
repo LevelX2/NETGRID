@@ -1027,16 +1027,18 @@ export function createCorpRuntimeResolvers(
     if (new Set(selectedIds).size !== selectedIds.length)
       throw new Error("Ein Runner-Multi-Trash-Ziel wurde doppelt gewählt.");
     if (
-      continuation.targetCardType === "hardware" &&
+      continuation.effectKind === "installed_hardware_trash_by_counter" &&
       !continuation.excludesSubtype
     )
       throw new Error("Der Hardware-Multi-Trash braucht seine Subtypgrenze.");
     const currentLegalTargets = new Set(
       continuation.targetCardType === "hardware"
-        ? eligibleInstalledRunnerHardwareIds(
-            state,
-            continuation.excludesSubtype!,
-          )
+        ? continuation.excludesSubtype
+          ? eligibleInstalledRunnerHardwareIds(
+              state,
+              continuation.excludesSubtype,
+            )
+          : state.runner.rig.hardware
         : state.runner.rig.resources,
     );
     for (const cardId of selectedIds) {
@@ -1045,6 +1047,11 @@ export function createCorpRuntimeResolvers(
     }
     delete state.pendingChoice;
     delete state.pendingRunnerInstalledMultiTrash;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      cardId: continuation.sourceCardInstanceId,
+      sourceDefinitionId: continuation.sourceDefinitionId,
+    };
     trashRunnerInstalledCardsAsBatch(
       state,
       selectedIds,
@@ -1070,7 +1077,9 @@ export function createCorpRuntimeResolvers(
         runnerInstalledMultiTrashTargetCount: 0,
         ...(effectKind === "installed_hardware_trash_by_counter"
           ? { trashedHardwareCount: 0 }
-          : { trashedResourceCount: 0 }),
+          : effectKind === "access_hardware_trash_by_advancement"
+            ? { trashedHardwareCount: 0 }
+            : { trashedResourceCount: 0 }),
       };
       return;
     }
@@ -1095,10 +1104,34 @@ export function createCorpRuntimeResolvers(
             trashedHardwareCount: targetIds.length,
             trashedHardwareDefinitionIds: definitionIds.join(","),
           }
-        : {
-            trashedResourceCount: targetIds.length,
-            trashedResourceDefinitionIds: definitionIds.join(","),
-          }),
+        : effectKind === "access_hardware_trash_by_advancement"
+          ? {
+              hiddenZoneBarrier: true,
+              hiddenZoneAction: "v1919_access_ambush_trash_installed",
+              ambushDefinitionId: definitionFor(
+                state,
+                String(legalAction.payload?.cardId ?? "") as CardInstanceId,
+              ).id,
+              advancementCounterCount: Math.max(
+                0,
+                Math.floor(
+                  mustInstance(
+                    state.cardInstances,
+                    String(legalAction.payload?.cardId ?? "") as CardInstanceId,
+                  ).advancementCounters,
+                ),
+              ),
+              targetTrashCount: targetIds.length,
+              trashedCount: targetIds.length,
+              trashedHardwareCount: targetIds.length,
+              trashedCardType: "hardware",
+              trashedCardDefinitionId: definitionIds[0] ?? "",
+              trashedCardDefinitionIds: definitionIds.join(","),
+            }
+          : {
+              trashedResourceCount: targetIds.length,
+              trashedResourceDefinitionIds: definitionIds.join(","),
+            }),
     };
   }
 
@@ -1628,6 +1661,7 @@ export function createCorpRuntimeResolvers(
     hardwareTrashByCounterTrashCountFromPayload,
     resolveHardwareTrashByCounterOperation,
     resolveTaggedRunnerResourceMultiTrashOperation,
+    startRunnerInstalledMultiTrashChoice,
     resolveRunnerInstalledMultiTrashChoice,
     advancementPlacementLegalActions,
     resolveAgendaCounterOperation,

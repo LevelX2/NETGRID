@@ -1231,7 +1231,11 @@ export function configureCardRuntimeBootstrap() {
           let preventionChargesSpent = 0;
           for (let index = 0; index < amount; index += 1) {
             const prevention =
-              runtimePorts.preventOneVirusCounterWithCounterPrevention(state);
+              runtimePorts.preventOneVirusCounterWithCounterPrevention(state, {
+                kind: "corp_pool",
+                counterType,
+              });
+            if (prevention.deferred) continue;
             if (prevention.prevented) {
               prevented += 1;
               creditsPaid += prevention.creditsPaid;

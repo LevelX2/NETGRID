@@ -57,23 +57,12 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      { kind: "strategy_anchor", strategyKey: "corp.economy_rez_reserve" },
-      { kind: "strategy_anchor", strategyKey: "corp.ice_tax_glacier" },
       {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
       },
       { kind: "strategic_role", role: "tax_tool" },
-      { kind: "plan_role", role: "protect_rnd" },
-      { kind: "plan_role", role: "protect_hq" },
-      { kind: "plan_role", role: "bait_runner" },
-      { kind: "remote_role", role: "ice_modifier", threatLevel: "medium" },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
       {
         kind: "strategy_support",
         strategyKey: "corp.ice_tax_glacier",
@@ -81,20 +70,10 @@ export const cardSpec = {
         roleDetail: "ice_tax_support",
         confidence: "high",
       },
-      { kind: "value_interpretation", axis: "economy", rating: "medium" },
       {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
-      },
-      {
-        kind: "target_preference",
-        purpose: "rez_best_defensive_ice",
-        preferences: [
-          "high_rez_cost_relief",
-          "blocks_relevant_run_path",
-          "protects_agenda_remote",
-        ],
       },
     ],
   },

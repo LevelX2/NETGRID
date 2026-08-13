@@ -1165,10 +1165,55 @@ Status: umgesetzt und durch fokussierte Gates verifiziert.
   gewählten Plan. Es entstand kein Choice-Resolver mit eigener Server-,
   Karten- oder Strategieautorität.
 
+## Block 016 – Karten 301 bis 320, Lifecycle-, Multi-Trash- und Replacement-Verträge
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### Start-of-turn und optionale Replacement-Choices
+
+- Corporate Negotiating Center wird nur noch über den source-bound
+  CardImplementation-Lifecycle ausgelöst. Der zusätzliche Legacy-Aufruf nach
+  der geordneten Corp-Startphase ist entfernt; nach einer HQ-Reveal-Choice
+  setzt die Engine die noch offenen Startquellen fort. Eine und zwei Kopien
+  zahlen dadurch exakt einmal je installierter Kopie und bleiben gegenüber
+  anderen Corp-Startquellen frei anordenbar.
+- Disinfectant, Inc. bezahlt die Counter-Vermeidung nicht mehr automatisch.
+  Jeder eintreffende Virus-Counter wird als eigene Fortsetzung gebunden; die
+  Corp kann passen oder eine konkrete noch unbenutzte gerezzte Quelle wählen
+  und deren Creditkosten bezahlen. Bei mehreren Kopien wird nur die gewählte
+  Once-per-turn-Quelle verbraucht.
+
+### Gemeinsamer Hardware-Batch-Trash
+
+- Corprunner’s Shattered Remains wählt Hardware nicht mehr nach technischer
+  Instance-ID. Die Corp bindet die vollständige öffentliche Zielmenge und
+  ihre Reihenfolge vor der Auflösung.
+- Die Karte verwendet denselben geordneten Runner-Installed-Multi-Trash-
+  Vertrag wie Corporate Detective Agency und Power Grid Overload. Das
+  gemeinsame Trash-Imminent-Fenster lässt Prevention und Replacement zu;
+  anschließend verlassen alle nicht verhinderten Primärziele das Spiel,
+  bevor Hosted-, Leave-play- und Memory-Folgen abgearbeitet werden. Die
+  historische `destroy`-zu-`trash`-Errata ist am CardSpec referenziert.
+
+### Nullauswahl und Planning-Semantik
+
+- Die projektweite Auslegung von `up to` einschließlich null gilt auch für
+  Team Restructuring. Die Operation bleibt ohne advancebares Ziel legal und
+  bietet die ausdrückliche Nullverteilung an; positive Verteilungen behalten
+  unterschiedliche Ziele bei.
+- Reine Tag-/Damage-Payoffs tragen keine Bait-Rolle. Trojan Horse bleibt
+  Tag-Quelle statt Tag-Payoff; globale Draw-Tax-, Wall- und Code-Gate-
+  Modifikatoren besitzen keine feste Serverrolle oder fingierte Zielwahl.
+  Corporate Negotiating Center ist Informationspreis und Economy statt
+  Informationsdruck, Shattered Remains Hardware-Ambush statt Economy.
+- Die Annotationen wurden für die Karten 301–320 neu erzeugt und in der
+  reviewed Originalset-Fixture synchronisiert. Es entstand kein zusätzlicher
+  Choice-Resolver mit eigener Server-, Karten- oder Strategieautorität.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 301 bis 320.
+- Als nächster regulärer Nutzerblock folgen die Karten 321 bis 340.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1343,3 +1388,16 @@ Fixture für Karten 281–300 sind gezielt synchronisiert. Ein unveränderter
 Trace-Longtail-Test erwartet bei Microtech ’Trode Set weiterhin einen
 Basis-Link, obwohl dessen aktuelle CardSpec keinen Link-Modifikator besitzt;
 dieser fachfremde Baselinepunkt wurde nicht in Block 015 gezogen.
+
+Für Block 016 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check, acht AI-Artefakt-Vertragstests sowie 27 fokussierte
+Engine-Zeugen grün. Die Evidence umfasst eine und zwei Corporate Negotiating
+Center ohne Legacy-Doppeltrigger, Team Restructurings Nullziel, Shattered
+Remains mit Corp-Wahl und gemeinsamem Prevention-fähigem Batch-Trash,
+Disinfectant-Pass, zwei frei gewählte Quellen und den No-credit-Pfad sowie die
+bestehenden Data-Masons-/Encoder-Verträge. Ein zuvor versehentlich paketweit
+gestarteter Engine-Lauf wurde nicht als Block-Gate gewertet; seine auditnahen
+alten Sofortauflösungs-Erwartungen wurden auf die neuen Choice-Verträge
+aktualisiert und anschließend fokussiert grün geprüft. Aktuelles Hint-Artefakt
+und die einschlägigen reviewed Originalset-Einträge für Karten 301–320 sind
+gezielt synchronisiert.

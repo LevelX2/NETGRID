@@ -44,6 +44,7 @@ export type PendingChoiceResolutionHost = {
     resolveCrashEverettDrawChoice: HostFn<void>;
     resolveRunnerDrawSequenceChoice: HostFn<void>;
     resolveRunnerInstalledMultiTrashChoice: HostFn<void>;
+    resolveVirusCounterPreventionChoice: HostFn<void>;
     resolveAdvancementPlacementChoice: HostFn<void>;
     resolveDerezRezzedBlackIceChoice: HostFn<void>;
     resolvePayRezCostToTrashRezzedIceChoice: HostFn<void>;
@@ -432,10 +433,16 @@ export function resolvePendingChoice(
       resumeRunnerStartOfTurnOrdering(state, legalAction);
     return;
   }
+  const resumesCorpStartOrderingAfterCorpZone =
+    state.pendingChoice.source.startsWith("p3_36.show_hq_agendas_for_credits:");
   const corpZoneChoice = handleCorpZoneChoice(
     corpZoneChoiceHandlerHost(state, legalAction, playerAction),
   );
-  if (corpZoneChoice.handled) return;
+  if (corpZoneChoice.handled) {
+    if (resumesCorpStartOrderingAfterCorpZone && !state.pendingChoice)
+      resumeCorpStartOfTurnOrdering(state, undefined, legalAction);
+    return;
+  }
   const corpInstallRezSequenceChoice = handleCorpInstallRezSequenceChoice(
     corpInstallRezSequenceHandlerHost(state, legalAction, playerAction),
   );
@@ -580,6 +587,17 @@ export function resolvePendingChoice(
     "card_implementation.runner_installed_multi_trash"
   ) {
     resolveRunnerInstalledMultiTrashChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source ===
+    "card_implementation.counter_prevention_replacement"
+  ) {
+    host.hiddenZone.resolveVirusCounterPreventionChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (

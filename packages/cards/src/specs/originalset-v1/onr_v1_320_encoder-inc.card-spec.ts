@@ -75,28 +75,8 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "protect_rnd",
-      },
-      {
-        kind: "plan_role",
-        role: "protect_hq",
-      },
-      {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
         kind: "strategic_role",
         role: "tax_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
       },
       {
         kind: "line_support",
@@ -111,31 +91,6 @@ export const cardSpec = {
         confidence: "high",
         rationale:
           "Code-Gate scope is a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal.",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "remote_role",
-        role: "scoring_protection",
-        threatLevel: "high",
-      },
-      {
-        kind: "target_preference",
-        purpose: "rez_best_defensive_ice",
-        preferences: [
-          "high_rez_cost_relief",
-          "blocks_relevant_run_path",
-          "protects_agenda_remote",
-        ],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "medium",
       },
       {
         kind: "value_interpretation",

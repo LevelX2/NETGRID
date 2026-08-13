@@ -760,6 +760,12 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "runner",
       (action) => action.type === "access_card",
     );
+    expect(hardwareState.pendingChoice?.source).toBe(
+      "card_implementation.runner_installed_multi_trash",
+    );
+    hardwareState = applyChoices(hardwareState, "corp", [
+      `target_${hardwareId}`,
+    ]);
     expect(hardwareState.runner.heap).toContain(hardwareId);
     expect(hardwareState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",

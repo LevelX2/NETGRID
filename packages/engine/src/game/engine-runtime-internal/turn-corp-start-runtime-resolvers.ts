@@ -29,7 +29,6 @@ import {
   purgeableRunnerVirusCounterAmount,
 } from "../turn/turn-basic-execution";
 import { addRunnerTagsWithPrevention } from "../damage/damage-core";
-import { startCorpHqAgendaRevealChoice } from "../hidden-zone/corp-zone-choice-handlers";
 import { startScoredAgendaStartDrawChoice } from "../corp/scored-agenda-flow";
 import {
   clearActivityGatedFortRunMarkers,
@@ -671,13 +670,6 @@ export function createTurnCorpStartRuntimeResolvers(
         continue;
       }
     }
-    if (!state.pendingChoice)
-      startCorpHqAgendaRevealChoice(
-        deps.corpZoneChoiceHandlerHost(state, {
-          side: "corp",
-          payload: {},
-        } as LegalAction),
-      );
     return state.pendingChoice !== undefined;
   }
 

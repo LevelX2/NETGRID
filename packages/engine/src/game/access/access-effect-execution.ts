@@ -1233,11 +1233,12 @@ export function trashRunnerInstalledTargetsForAccessEffect(
   effectIndex: number,
 ): void {
   const legalAction = requireLegalAction(host);
-  const selectedTargetIds = runnerInstalledTrashCandidatesForAccessEffect(
+  const eligibleTargetIds = runnerInstalledTrashCandidatesForAccessEffect(
     host,
     target,
-  ).slice(0, amount);
-  if (selectedTargetIds.length === 0) {
+  );
+  const targetCount = Math.min(amount, eligibleTargetIds.length);
+  if (targetCount === 0) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneAction: "v1919_access_ambush_no_target",
@@ -1248,6 +1249,27 @@ export function trashRunnerInstalledTargetsForAccessEffect(
     };
     return;
   }
+  if (target === "hardware") {
+    const sourceCardId = host.state.run?.accessedCardId;
+    if (
+      !sourceCardId ||
+      host.cards.definitionFor(sourceCardId).id !== sourceDefinition.id
+    )
+      throw new Error("Der Hardware-Trash-Access-Quelle fehlt.");
+    host.trash.startRunnerInstalledMultiTrashChoice(
+      sourceCardId,
+      {
+        effectKind: "access_hardware_trash_by_advancement",
+        targetCardType: "hardware",
+        minimumTargets: targetCount,
+        maximumTargets: targetCount,
+        selectionOrdering: "ordered",
+      },
+      eligibleTargetIds,
+    );
+    return;
+  }
+  const selectedTargetIds = eligibleTargetIds.slice(0, targetCount);
   const targetDefinitionIds = selectedTargetIds.map(
     (targetId) => host.cards.definitionFor(targetId).id,
   );

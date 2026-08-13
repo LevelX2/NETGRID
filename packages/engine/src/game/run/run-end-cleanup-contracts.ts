@@ -144,10 +144,15 @@ export type RunEndCleanupHost = {
       amount: number,
       legalAction?: LegalAction,
     ) => number;
-    preventOneVirusCounterWithCounterPrevention: () => {
+    preventOneVirusCounterWithCounterPrevention: (
+      target?: NonNullable<
+        GameState["pendingVirusCounterPrevention"]
+      >["targets"][number],
+    ) => {
       prevented: boolean;
       creditsPaid: number;
       preventionChargesSpent: number;
+      deferred?: boolean;
     };
     poxCountersForServer: (serverId: Exclude<ServerId, "new_remote">) => number;
   };

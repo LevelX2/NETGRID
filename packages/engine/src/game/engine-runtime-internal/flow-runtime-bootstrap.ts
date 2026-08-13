@@ -1311,6 +1311,24 @@ export function configureFlowRuntimeBootstrap({
         hiddenZoneArrangeChoiceHandlerHost:
           runtimePorts.hiddenZoneArrangeChoiceHandlerHost,
         openRunnerInstalledTrashPreventionWindow,
+        startRunnerInstalledMultiTrashChoice: (
+          state,
+          legalAction,
+          sourceCardId,
+          input,
+          eligibleCardIds,
+        ) => {
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId: sourceCardId,
+          };
+          runtimePorts.startRunnerInstalledMultiTrashChoice(
+            state,
+            legalAction,
+            input,
+            eligibleCardIds,
+          );
+        },
       },
       cardImplementation: {
         accessEffectsForDefinition: (definitionId) =>

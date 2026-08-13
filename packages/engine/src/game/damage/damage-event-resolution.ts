@@ -578,11 +578,20 @@ export function createRunnerInstalledTrashImminentEvent(
   targetCardIds: CardInstanceId[],
   source: string,
   resolutionMode: "sequential" | "ordered_batch" = "sequential",
+  sourceCardId?: CardInstanceId,
+  sourceDefinitionId?: CardDefinitionId,
 ): ImminentEvent {
   return {
     eventId: `imminent_runner_trash_${state.stateVersion + 1}_${sanitizeId(source)}`,
     eventType: "runner_installed_trash",
-    source: { kind: "game_rule" },
+    source:
+      sourceCardId && sourceDefinitionId
+        ? {
+            kind: "card",
+            instanceId: sourceCardId,
+            definitionId: sourceDefinitionId,
+          }
+        : { kind: "game_rule" },
     controller: "corp",
     affectedSide: "runner",
     payload: {
@@ -647,7 +656,17 @@ export function resolveRunnerInstalledTrashImminentEvent(
             trashedResourceCount: trashedCount,
             trashedResourceDefinitionIds: trashedDefinitionIds.join(","),
           }
-        : {}),
+        : effectKind === "access_hardware_trash_by_advancement"
+          ? {
+              hiddenZoneBarrier: true,
+              hiddenZoneAction: "v1919_access_ambush_trash_installed",
+              ambushDefinitionId: event.source.definitionId ?? "",
+              advancementCounterCount: targetIds.length,
+              targetTrashCount: targetIds.length,
+              trashedHardwareCount: trashedCount,
+              trashedCardType: "hardware",
+            }
+          : {}),
   };
   return {
     originalCount: targetIds.length,
