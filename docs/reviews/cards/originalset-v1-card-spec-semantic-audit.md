@@ -1210,10 +1210,64 @@ Status: umgesetzt und durch fokussierte Gates verifiziert.
   reviewed Originalset-Fixture synchronisiert. Es entstand kein zusätzlicher
   Choice-Resolver mit eigener Server-, Karten- oder Strategieautorität.
 
+## Block 017 – Karten 321 bis 340, Credit-, Action- und Startzugverträge
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### Gemeinsame Auswahl-, Payment- und Replacement-Verträge
+
+- Experimental AI bindet die von der Corp gewählten installierten Programme
+  vollständig vor der Auflösung und verwendet den gemeinsamen
+  Prevention-fähigen Runner-Installed-Batch-Trash. Die historische
+  `destroy`-zu-`trash`-Errata ist am CardSpec referenziert.
+- Trace-Bids können normale Credits, Krumz-Bits und einzelne
+  Hacker-Tracker-Counter quellgenau binden. Mehrere zulässige Aufteilungen
+  erzeugen eine Corp-Choice; eine eindeutig erzwungene Aufteilung wird ohne
+  künstliches Zwischenfenster ausgeführt und vor dem Bezahlen revalidiert.
+- Investment Firm ersetzt nicht mehr nur die Basic Credit Action. Jeder
+  Creditgewinn außerhalb des Corp-Startfensters bindet eine optionale
+  Umleitungsmenge von null bis N; jede aktive Kopie erhält zwei Credits je
+  umgeleitetem Credit. Operations und Mehr-Credit-Gewinne sind von demselben
+  Vertrag erfasst, die eigene Auszahlung nimmt an der source-bound
+  Startzugreihenfolge teil.
+
+### Startzug, Aktionskapazität und Leave-play
+
+- Holovid Campaign deklariert das regelkonforme Rezfenster am Corp-Zugbeginn.
+  Nach dem Rezzen wird die neu fällige Quelle dynamisch in die geordnete
+  Startzugauflösung aufgenommen; unrezzte andere Campaigns öffnen kein
+  unbegründetes Rezfenster.
+- Remote Facility und Nevinyrral vergeben ihre zusätzlichen Aktionen als
+  source-bound Grants. Die Engine erzeugt ausdrückliche LegalAction-Varianten
+  für den Verbrauch; eine noch unbenutzte Aktion wird beim Leave-play
+  widerrufen und `on_rez` plus Startzug kann pro Quelle und Turn nicht doppelt
+  gewähren.
+- Nevinyrrals Verlustbedingung liegt am zentralen Zonenentfernungsvertrag und
+  greift damit auch bei Uninstall beziehungsweise Return-to-HQ. Schlaghund
+  speichert nach suspendiertem Damage eine Damage-zu-Trash-Fortsetzung und
+  trasht die Quelle nach abgeschlossener Prevention; eine Flatline beendet die
+  Partie ohne nachgelagerte Mutation.
+
+### Kosten, Access und Planning-Semantik
+
+- Information Laundering snapshottet seine Advancement-Counter vor den
+  Kosten, bezahlt `trash_source` als Aktivierungskosten und berechnet erst
+  danach den Creditgewinn. Eine installierte Setup!-Kopie löst nur gerezzt
+  aus; HQ, R&D und Archives behalten ihre getrennten Access-Verträge.
+- Hacker Tracker Central verwendet kanonisch `trace value`; Pacifica Regional
+  AI trägt die Turn-Only-Errata. Beide sowie Experimental AI referenzieren die
+  historische Errataquelle.
+- Draw, HQ-Kapazität, ICE-Buildout, globaler Run-Tax, Tag-Snowball,
+  Action Capacity und Hand-Cycling sind für die Karten 321–340
+  richtungsgetreu annotiert. Fingierte Remote-Ziele, Memory-Präferenzen für
+  Corp-ICE und Credit-Economy-Signale ohne Creditgewinn sind entfernt. Die
+  reviewed Originalset-Fixture wurde aus dem aktuellen Hint-Artefakt
+  synchronisiert.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 321 bis 340.
+- Als nächster regulärer Nutzerblock folgen die Karten 341 bis 360.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1400,4 +1454,14 @@ gestarteter Engine-Lauf wurde nicht als Block-Gate gewertet; seine auditnahen
 alten Sofortauflösungs-Erwartungen wurden auf die neuen Choice-Verträge
 aktualisiert und anschließend fokussiert grün geprüft. Aktuelles Hint-Artefakt
 und die einschlägigen reviewed Originalset-Einträge für Karten 301–320 sind
+gezielt synchronisiert.
+
+Für Block 017 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check sowie die fokussierten Access-, Credit-, Trace-,
+Startzug-, Zonen-, Damage-Continuation- und Kartenintegrationszeugen grün.
+Die Evidence umfasst insbesondere Corp-Programmauswahl und Batch-Trash,
+Investment Firm bei Mehr-Credit-Operations und mehreren Kopien, source-bound
+Trace-Zahlungsquellen, Holovids Start-Rez, Nevinyrral-Uninstall,
+Remote-Facility-Action-Revocation, Schlaghund-Fortsetzung und unrezzed Setup!.
+Hint-Artefakt und reviewed Originalset-Einträge für Karten 321–340 sind
 gezielt synchronisiert.

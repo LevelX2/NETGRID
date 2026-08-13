@@ -656,15 +656,21 @@ export function resolveRunnerInstalledTrashImminentEvent(
             trashedResourceCount: trashedCount,
             trashedResourceDefinitionIds: trashedDefinitionIds.join(","),
           }
-        : effectKind === "access_hardware_trash_by_advancement"
+        : effectKind === "access_hardware_trash_by_advancement" ||
+            effectKind === "access_program_trash_by_advancement"
           ? {
               hiddenZoneBarrier: true,
               hiddenZoneAction: "v1919_access_ambush_trash_installed",
               ambushDefinitionId: event.source.definitionId ?? "",
               advancementCounterCount: targetIds.length,
               targetTrashCount: targetIds.length,
-              trashedHardwareCount: trashedCount,
-              trashedCardType: "hardware",
+              ...(effectKind === "access_hardware_trash_by_advancement"
+                ? { trashedHardwareCount: trashedCount }
+                : { trashedProgramCount: trashedCount }),
+              trashedCardType:
+                effectKind === "access_hardware_trash_by_advancement"
+                  ? "hardware"
+                  : "program",
             }
           : {}),
   };

@@ -373,6 +373,7 @@ export type CorpActionDebtState = {
 };
 
 export type RestrictedActionFamily =
+  | "any_action"
   | "corp_install"
   | "gain_credit"
   | "draw_card"
@@ -394,6 +395,7 @@ export type TurnBoundExtraActionOffer = {
 
 export type TurnBoundExtraActionGrant = TurnBoundExtraActionOffer & {
   remaining: number;
+  oncePerTurnPerSource?: boolean;
   forced?: boolean;
   targetServerId?: Exclude<ServerId, "new_remote">;
   targetCardInstanceId?: CardInstanceId;
@@ -1632,6 +1634,9 @@ export type TraceState = {
       amount: number;
     }>;
   };
+  corpBidPaymentSelection?: {
+    bid: number;
+  };
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];
@@ -1720,6 +1725,38 @@ export type CorpDrawContinuation =
       optionalAgendaCardCount: number;
       skivvissCardCount: number;
       additionalSourceDefinitionIds: CardDefinitionId[];
+    };
+
+export type CardCreditGainContinuation =
+  | {
+      kind: "card_effect_on_play";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+    }
+  | {
+      kind: "card_effect_activated";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      sourceAbilityId: string;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+      originalActionPayload: LegalActionPayload;
+    }
+  | {
+      kind: "card_effect_immediate_lifecycle";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      lifecycle: "on_rez" | "on_install" | "on_score" | "on_leave_play";
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+    }
+  | {
+      kind: "corp_root_rez_obligation";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      gainedCredits: number;
     };
 
 export type CorpDrawTransaction = {
@@ -1887,6 +1924,24 @@ export type GameState = {
     totalDamageAmount: number;
     totalCardsTrashed: number;
   };
+  pendingDamageFollowup?: {
+    kind: "trash_corp_source";
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+  };
+  pendingCorpCreditGainReplacement?: {
+    requestedAmount: number;
+    baseAmount: number;
+    bonusAmount: number;
+    creditsBefore: number;
+    modifierSourceDefinitionIds: CardDefinitionId[];
+    investmentFirmSourceIds: CardInstanceId[];
+    sourceDefinitionId?: CardDefinitionId;
+    sourceCardId?: CardInstanceId;
+    sourceKind: string;
+    sourceReason: string;
+    continuation?: CardCreditGainContinuation;
+  };
   pendingRunStartSourceOrder?: {
     runId: string;
     remaining: Array<{
@@ -1908,8 +1963,9 @@ export type GameState = {
     effectKind:
       | "trash_runner_resources_if_tagged"
       | "installed_hardware_trash_by_counter"
-      | "access_hardware_trash_by_advancement";
-    targetCardType: "resource" | "hardware";
+      | "access_hardware_trash_by_advancement"
+      | "access_program_trash_by_advancement";
+    targetCardType: "resource" | "hardware" | "program";
     minimumTargets: number;
     maximumTargets: number;
     selectionOrdering: "ordered" | "unordered";

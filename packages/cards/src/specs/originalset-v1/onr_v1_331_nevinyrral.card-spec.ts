@@ -45,6 +45,15 @@ export const cardSpec = {
       controller: "corp",
     },
     lifecycle: {
+      on_rez: [
+        {
+          kind: "gain_actions",
+          recipient: "controller",
+          amount: 1,
+          sourceBoundUntilUsed: true,
+          visibility: "public",
+        },
+      ],
       start_of_corp_turn: [
         {
           effects: [
@@ -52,6 +61,7 @@ export const cardSpec = {
               kind: "gain_actions",
               recipient: "controller",
               amount: 1,
+              sourceBoundUntilUsed: true,
               visibility: "public",
             },
           ],
@@ -78,7 +88,7 @@ export const cardSpec = {
       {
         kind: "value_interpretation",
         axis: "remote_root_value",
-        rating: "low",
+        rating: "very_high",
       },
     ],
     capabilities: [],

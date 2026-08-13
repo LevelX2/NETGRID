@@ -35,11 +35,16 @@ import {
   isFortTraceBitPoolSource,
   fortTraceBitPoolCapacityForCard,
 } from "../run/fort-run-side-families";
-import { CARD_IMPLEMENTATIONS } from "../../card-implementations/registry";
 import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "../../card-implementations/registry";
+import {
+  executeCardImplementationLifecycleEffects,
   executeCardImplementationStartOfCorpTurnEffects,
   hasDueCardImplementationStartOfCorpTurnAbility,
 } from "../../ability-engine/card-implementation-runtime";
+import { cardImplementationStartOfCorpTurnAbilities } from "../../ability-engine/card-implementation-runtime-lifecycle-start";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import type { AutomaticEffectCollector, RuntimeDeps } from "./runtime-shared";
 import {
@@ -60,6 +65,7 @@ type TurnCorpStartRuntimeResolvers = Pick<
   | "applyInstalledIceCounterLifecycle"
   | "applyCorpStartOfTurnEffects"
   | "resolveCorpStartOfTurnOrderChoice"
+  | "resolveCorpStartOfTurnRezChoice"
   | "resumeCorpStartOfTurnOrdering"
   | "applyPurgeableRunnerVirusCorpStartEffects"
   | "openCorpStartTurnRestrictedActionOffers"
@@ -417,8 +423,117 @@ export function createTurnCorpStartRuntimeResolvers(
     applyScoredAgendaCreditEconomyAtCorpStart(state, effects);
     applyScoredAgendaActionEconomyAtCorpStart(state, effects);
     applyInstalledIceCounterLifecycle(state);
+    if (openCorpStartOfTurnRezChoice(state)) return;
+    continueCorpStartAfterRezWindow(state, effects, legalAction);
+  }
+
+  function continueCorpStartAfterRezWindow(
+    state: GameState,
+    effects?: AutomaticEffectCollector,
+    legalAction?: LegalAction,
+  ): void {
     if (applyCorpStartOfTurnEffects(state, effects, legalAction)) return;
     openCorpStartTurnRestrictedActionOffers(state, effects);
+  }
+
+  function affordableUnrezzedCorpStartSourceIds(
+    state: GameState,
+  ): CardInstanceId[] {
+    return state.corp.servers
+      .flatMap((server) => server.root)
+      .filter((cardId) => {
+        const instance = state.cardInstances[cardId];
+        if (!instance || instance.rezzed) return false;
+        const definition = definitionFor(state, cardId);
+        return (
+          cardImplementationForDefinitionId(definition.id)?.lifecycle
+            ?.can_rez_at_start_of_corp_turn === true &&
+          cardImplementationStartOfCorpTurnAbilities(definition).length > 0 &&
+          state.corp.credits >= deps.rezCostForCard(state, cardId)
+        );
+      })
+      .sort();
+  }
+
+  function openCorpStartOfTurnRezChoice(state: GameState): boolean {
+    const sourceIds = affordableUnrezzedCorpStartSourceIds(state);
+    if (sourceIds.length === 0) return false;
+    const nextStateVersion = state.stateVersion + 1;
+    state.pendingChoice = {
+      choiceId: `corp_start_rez_${nextStateVersion}`,
+      side: "corp",
+      source: `corp_start.rez:${nextStateVersion}`,
+      prompt: "Karte am Beginn des Zuges rezzen?",
+      kind: "select_option",
+      options: [
+        ...sourceIds.map((sourceId) => ({
+          id: `rez_${sourceId}`,
+          label: `${definitionFor(state, sourceId).title} für ${deps.rezCostForCard(state, sourceId)} Credits rezzen`,
+          value: sourceId,
+        })),
+        { id: "pass", label: "Nicht rezzen", value: "pass" },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: nextStateVersion,
+      visibility: "hidden_info_barrier",
+    };
+    return true;
+  }
+
+  function resolveCorpStartOfTurnRezChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: import("@netgrid/shared").PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    if (!choice?.source.startsWith("corp_start.rez:"))
+      throw new Error("Es ist kein Rezfenster am Korp-Zugbeginn offen.");
+    if (legalAction.side !== "corp" || playerAction.side !== "corp")
+      throw new Error("Nur die Korp darf am eigenen Zugbeginn rezzen.");
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    if (!choice.options.some((option) => option.id === selectedId))
+      throw new Error("Die Rez-Auswahl am Korp-Zugbeginn ist ungültig.");
+    delete state.pendingChoice;
+    if (selectedId === "pass") {
+      continueCorpStartAfterRezWindow(state, undefined, legalAction);
+      return;
+    }
+    const sourceId = selectedId?.startsWith("rez_")
+      ? (selectedId.slice("rez_".length) as CardInstanceId)
+      : undefined;
+    if (
+      !sourceId ||
+      !affordableUnrezzedCorpStartSourceIds(state).includes(sourceId)
+    )
+      throw new Error(
+        "Die gewählte Startzugquelle kann nicht mehr gerezzt werden.",
+      );
+    const instance = mustInstance(state.cardInstances, sourceId);
+    const definition = definitionFor(state, sourceId);
+    const rezCost = deps.rezCostForCard(state, sourceId);
+    deps.spendCredits(state, "corp", rezCost);
+    state.cardInstances[sourceId] = {
+      ...instance,
+      faceup: true,
+      rezzed: true,
+    };
+    executeCardImplementationLifecycleEffects(
+      deps.cardImplementationRuntimeDeps,
+      state,
+      legalAction,
+      definition,
+      sourceId,
+      "on_rez",
+    );
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: definition.id,
+      rezCostPaid: rezCost,
+      corpCreditsAfter: state.corp.credits,
+    };
+    if (!openCorpStartOfTurnRezChoice(state))
+      continueCorpStartAfterRezWindow(state, undefined, legalAction);
   }
 
   function applyInstalledIceCounterLifecycle(state: GameState): void {
@@ -631,44 +746,6 @@ export function createTurnCorpStartRuntimeResolvers(
           });
         }
       }
-      if (deps.isCorpInstalledEconomyCreditSource(state, cardId)) {
-        if (cardCounter(state, cardId, "recurring_credit") > 0) {
-          spendCardCounter(state, cardId, "recurring_credit", 1);
-          credits(state, "corp", 1, {
-            kind: "turn_effect",
-            sourceDefinitionId: definitionId,
-            sourceCardId: cardId,
-            reason: "installed_economy_start_of_corp_turn",
-          });
-          const remainingCounters = cardCounter(
-            state,
-            cardId,
-            "recurring_credit",
-          );
-          effects?.push(
-            links.automaticGainCreditsEffect(
-              `corp.start.installed_economy_credit.${cardId}`,
-              "corp",
-              1,
-              definitionId,
-            ),
-          );
-          effects?.push({
-            effectId: `corp.start.installed_economy_credit.counter.${cardId}`,
-            kind: "counter_change",
-            visibility: "public",
-            side: "corp",
-            amount: remainingCounters,
-            reason: "start_of_turn",
-            counterType: "recurring_credit",
-            removedCounterAmount: 1,
-            remainingCounters,
-            sourceDefinitionId: definitionId,
-            sourceTitle: links.publicCardTitle(definitionId),
-          });
-        }
-        continue;
-      }
     }
     return state.pendingChoice !== undefined;
   }
@@ -682,6 +759,11 @@ export function createTurnCorpStartRuntimeResolvers(
             state,
             sourceId,
           )
+        )
+          return true;
+        if (
+          deps.isCorpInstalledEconomyCreditSource(state, sourceId) &&
+          cardCounter(state, sourceId, "recurring_credit") > 0
         )
           return true;
         const definition = definitionFor(state, sourceId);
@@ -722,6 +804,45 @@ export function createTurnCorpStartRuntimeResolvers(
     sourceId: CardInstanceId,
     effects?: AutomaticEffectCollector,
   ): void {
+    if (
+      deps.isCorpInstalledEconomyCreditSource(state, sourceId) &&
+      cardCounter(state, sourceId, "recurring_credit") > 0
+    ) {
+      const definition = definitionFor(state, sourceId);
+      spendCardCounter(state, sourceId, "recurring_credit", 1);
+      credits(state, "corp", 1, {
+        kind: "turn_effect",
+        sourceDefinitionId: definition.id,
+        sourceCardId: sourceId,
+        reason: "installed_economy_start_of_corp_turn",
+      });
+      const remainingCounters = cardCounter(
+        state,
+        sourceId,
+        "recurring_credit",
+      );
+      effects?.push(
+        links.automaticGainCreditsEffect(
+          `corp.start.installed_economy_credit.${sourceId}`,
+          "corp",
+          1,
+          definition.id,
+        ),
+      );
+      effects?.push({
+        effectId: `corp.start.installed_economy_credit.counter.${sourceId}`,
+        kind: "counter_change",
+        visibility: "public",
+        side: "corp",
+        amount: remainingCounters,
+        reason: "start_of_turn",
+        counterType: "recurring_credit",
+        removedCounterAmount: 1,
+        remainingCounters,
+        sourceDefinitionId: definition.id,
+        sourceTitle: links.publicCardTitle(definition.id),
+      });
+    }
     executeCardImplementationStartOfCorpTurnEffects(
       deps.cardImplementationRuntimeDeps,
       state,
@@ -1067,6 +1188,7 @@ export function createTurnCorpStartRuntimeResolvers(
     applyInstalledIceCounterLifecycle,
     applyCorpStartOfTurnEffects,
     resolveCorpStartOfTurnOrderChoice,
+    resolveCorpStartOfTurnRezChoice,
     resumeCorpStartOfTurnOrdering,
     applyPurgeableRunnerVirusCorpStartEffects,
     openCorpStartTurnRestrictedActionOffers,

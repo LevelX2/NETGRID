@@ -54,7 +54,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_economy",
+        role: "remote_asset_pressure",
       },
       {
         kind: "strategic_role",

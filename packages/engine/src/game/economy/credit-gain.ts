@@ -1,11 +1,15 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
+  type CardCreditGainContinuation,
   type CardDefinitionId,
   type CardInstanceId,
   type GameState,
+  type LegalAction,
+  type PlayerAction,
   type Side,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { selectedChoiceIds } from "../choices/choice-validation";
 
 export type CardEffectCreditGainSource = {
   kind: "card_effect";
@@ -82,9 +86,70 @@ export function applyCreditGain(
     ? activeCreditGainModifiers(state, request)
     : { amount: 0, sourceDefinitionIds: [] };
   const requestedAmount = request.baseAmount + modifiers.amount;
-  const interceptedAmount = countsAsStandardGain && destination.kind === "normal_pool"
-    ? interceptCorpCreditForfeitDebt(state, request.side, requestedAmount)
-    : 0;
+  const investmentFirmSourceIds = activeInvestmentFirmSourceIds(state);
+  if (
+    shouldOpenInvestmentFirmReplacement(
+      state,
+      request,
+      destination,
+      requestedAmount,
+      investmentFirmSourceIds,
+    )
+  ) {
+    const nextStateVersion = state.stateVersion + 1;
+    state.pendingCorpCreditGainReplacement = {
+      requestedAmount,
+      baseAmount: request.baseAmount,
+      bonusAmount: modifiers.amount,
+      creditsBefore,
+      modifierSourceDefinitionIds: modifiers.sourceDefinitionIds,
+      investmentFirmSourceIds,
+      ...(request.source.sourceDefinitionId
+        ? { sourceDefinitionId: request.source.sourceDefinitionId }
+        : {}),
+      ...(request.source.sourceCardId
+        ? { sourceCardId: request.source.sourceCardId }
+        : {}),
+      sourceKind: request.source.kind,
+      sourceReason: request.source.reason,
+    };
+    state.pendingChoice = {
+      choiceId: `investment_firm_credit_gain_${nextStateVersion}`,
+      side: "corp",
+      source: `investment_firm.credit_gain:${nextStateVersion}`,
+      prompt: `Wie viele der ${requestedAmount} Credits zu Investment Firm umleiten?`,
+      kind: "select_option",
+      options: Array.from({ length: requestedAmount + 1 }, (_, amount) => ({
+        id: `redirect_${amount}`,
+        label:
+          amount === 0
+            ? "Keine Credits umleiten"
+            : `${amount} umleiten; ${amount * 2} auf jede Investment Firm`,
+        value: amount,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: nextStateVersion,
+      visibility: "public",
+    };
+    return {
+      side: request.side,
+      baseAmount: request.baseAmount,
+      bonusAmount: modifiers.amount,
+      requestedAmount,
+      interceptedAmount: 0,
+      creditedAmount: 0,
+      creditsBefore,
+      creditsAfter: creditsBefore,
+      destination,
+      countsAsStandardGain,
+      modifierSourceDefinitionIds: modifiers.sourceDefinitionIds,
+    };
+  }
+  const interceptedAmount =
+    countsAsStandardGain && destination.kind === "normal_pool"
+      ? interceptCorpCreditForfeitDebt(state, request.side, requestedAmount)
+      : 0;
   const creditedAmount = requestedAmount - interceptedAmount;
 
   creditDestination(state, request.side, destination, creditedAmount);
@@ -102,6 +167,116 @@ export function applyCreditGain(
     countsAsStandardGain,
     modifierSourceDefinitionIds: modifiers.sourceDefinitionIds,
   };
+}
+
+function activeInvestmentFirmSourceIds(state: GameState): CardInstanceId[] {
+  return (state.corp.servers ?? [])
+    .flatMap((server) => server.root)
+    .filter((cardId) => {
+      const instance = state.cardInstances[cardId];
+      return (
+        instance?.rezzed === true &&
+        cardImplementationForDefinitionId(instance.definitionId)
+          ?.remainingReplacementLongtail?.kind ===
+          "basic_credit_diversion_to_recurring_credits"
+      );
+    })
+    .sort();
+}
+
+function shouldOpenInvestmentFirmReplacement(
+  state: GameState,
+  request: CreditGainRequest,
+  destination: CreditGainDestination,
+  requestedAmount: number,
+  sourceIds: CardInstanceId[],
+): boolean {
+  if (
+    request.side !== "corp" ||
+    destination.kind !== "normal_pool" ||
+    requestedAmount <= 0 ||
+    sourceIds.length === 0
+  )
+    return false;
+  if (
+    state.activeSide === "corp" &&
+    state.phase === "corp_draw_phase" &&
+    state.timingPoint === "corp_draw.mandatory_draw"
+  )
+    return false;
+  if (state.pendingChoice || state.pendingCorpCreditGainReplacement)
+    throw new Error("Credit-Gain-Replacement ist bereits offen.");
+  return !(
+    request.source.kind === "turn_effect" &&
+    /start_of_(corp_)?turn|start_of_turn|corp_start/i.test(
+      request.source.reason,
+    )
+  );
+}
+
+export function resolveInvestmentFirmCreditGainChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): CardCreditGainContinuation | undefined {
+  const choice = state.pendingChoice;
+  const pending = state.pendingCorpCreditGainReplacement;
+  if (!choice?.source.startsWith("investment_firm.credit_gain:") || !pending)
+    throw new Error("Es ist kein Investment-Firm-Replacement offen.");
+  if (choice.side !== "corp" || legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Investment Firm auflösen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find((candidate) => candidate.id === selected);
+  const redirectedAmount = Number(option?.value);
+  if (
+    !Number.isInteger(redirectedAmount) ||
+    redirectedAmount < 0 ||
+    redirectedAmount > pending.requestedAmount
+  )
+    throw new Error("Die Investment-Firm-Umleitung ist ungültig.");
+  const currentSourceIds = activeInvestmentFirmSourceIds(state);
+  if (
+    pending.investmentFirmSourceIds.some(
+      (sourceId) => !currentSourceIds.includes(sourceId),
+    )
+  )
+    throw new Error("Eine gebundene Investment Firm ist nicht mehr aktiv.");
+  const poolAmount = pending.requestedAmount - redirectedAmount;
+  const continuation = pending.continuation;
+  const interceptedAmount = interceptCorpCreditForfeitDebt(
+    state,
+    "corp",
+    poolAmount,
+  );
+  const creditedAmount = poolAmount - interceptedAmount;
+  creditDestination(state, "corp", { kind: "normal_pool" }, creditedAmount);
+  for (const sourceId of pending.investmentFirmSourceIds) {
+    const source = state.cardInstances[sourceId];
+    if (!source) throw new Error("Investment-Firm-Quelle fehlt.");
+    source.counters = {
+      ...(source.counters ?? {}),
+      recurring_credit:
+        Math.max(0, Math.floor(source.counters?.recurring_credit ?? 0)) +
+        redirectedAmount * 2,
+    };
+  }
+  delete state.pendingChoice;
+  delete state.pendingCorpCreditGainReplacement;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    investmentFirmCreditGainReplaced: redirectedAmount > 0,
+    investmentFirmRedirectedAmount: redirectedAmount,
+    investmentFirmSourceCount: pending.investmentFirmSourceIds.length,
+    investmentFirmCreditsAddedPerSource: redirectedAmount * 2,
+    creditGainRequestedAmount: pending.requestedAmount,
+    creditGainInterceptedAmount: interceptedAmount,
+    gainedCredits: creditedAmount,
+    corpCreditsAfter: state.corp.credits,
+    ...(pending.sourceDefinitionId
+      ? { creditGainSourceDefinitionId: pending.sourceDefinitionId }
+      : {}),
+  };
+  return continuation;
 }
 
 export function prepareRunnerRunTemporaryCreditGain(

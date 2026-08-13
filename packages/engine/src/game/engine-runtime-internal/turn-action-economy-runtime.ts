@@ -94,7 +94,8 @@ export function compactActionEconomy(state: GameState): void {
   if (economy.grants)
     economy.grants = economy.grants.filter(
       (grant) =>
-        grant.remaining > 0 && isTurnBoundExtraActionGrantCurrent(state, grant),
+        (grant.remaining > 0 || grant.oncePerTurnPerSource === true) &&
+        isTurnBoundExtraActionGrantCurrent(state, grant),
     );
   if (economy.futureGrants)
     economy.futureGrants = economy.futureGrants.filter(
@@ -190,6 +191,45 @@ export function addTurnBoundExtraActionGrant(
   else state.runner.clicks += 1;
 }
 
+export function grantSourceBoundActions(
+  state: GameState,
+  input: {
+    side: Side;
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+  },
+): number {
+  const amount = Math.max(0, Math.floor(input.amount));
+  if (amount <= 0) return 0;
+  const economy = ensureActionEconomy(state);
+  const alreadyGranted = (economy.grants ?? []).some(
+    (grant) =>
+      grant.side === input.side &&
+      grant.sourceCardInstanceId === input.sourceCardInstanceId &&
+      grant.oncePerTurnPerSource === true &&
+      isTurnBoundExtraActionGrantCurrent(state, grant),
+  );
+  if (alreadyGranted) return 0;
+  economy.grants = [
+    ...(economy.grants ?? []),
+    {
+      side: input.side,
+      sourceCardInstanceId: input.sourceCardInstanceId,
+      sourceDefinitionId: input.sourceDefinitionId,
+      restriction: "any_action",
+      optional: true,
+      remaining: amount,
+      oncePerTurnPerSource: true,
+      createdAtStateVersion: state.stateVersion,
+      createdDuringTurnSerial: currentTurnSerial(state),
+    },
+  ];
+  if (input.side === "corp") state.corp.clicks += amount;
+  else state.runner.clicks += amount;
+  return amount;
+}
+
 export function consumeRestrictedExtraActionForAction(
   state: GameState,
   legalAction: LegalAction,
@@ -200,7 +240,10 @@ export function consumeRestrictedExtraActionForAction(
     (grant) =>
       grant.side === legalAction.side &&
       grant.remaining > 0 &&
-      actionMatchesRestrictedGrant(state, legalAction, grant),
+      actionMatchesRestrictedGrant(state, legalAction, grant) &&
+      (grant.restriction !== "any_action" ||
+        legalAction.payload?.sourceBoundActionGrantCardId ===
+          grant.sourceCardInstanceId),
   );
   if (index < 0) return;
   const grant = grants[index]!;
@@ -210,6 +253,9 @@ export function consumeRestrictedExtraActionForAction(
     restrictedExtraActionConsumed: true,
     restrictedExtraActionSourceDefinitionId: grant.sourceDefinitionId,
     restrictedActionFamily: grant.restriction,
+    ...(grant.restriction === "any_action"
+      ? { sourceBoundActionGrantConsumed: true }
+      : {}),
   };
   compactActionEconomy(state);
 }
@@ -219,6 +265,8 @@ function actionMatchesRestrictedGrant(
   legalAction: LegalAction,
   grant: ActionEconomyGrant,
 ): boolean {
+  if (grant.restriction === "any_action")
+    return legalAction.costs.some((cost) => (cost.clicks ?? 0) > 0);
   if (grant.restriction === "corp_install")
     return legalAction.type === "install_card";
   if (grant.restriction === "gain_credit")
@@ -278,12 +326,42 @@ export function filterActionsForRestrictedExtraActions(
 ): LegalAction[] {
   const grants = activeRestrictedGrantsForSide(state, side);
   if (grants.length === 0) return actions;
+  const sourceBoundGrants = grants.filter(
+    (grant) => grant.restriction === "any_action",
+  );
+  const actionsWithSourceBoundVariants = [
+    ...actions,
+    ...actions.flatMap((candidate) =>
+      candidate.costs.some((cost) => (cost.clicks ?? 0) > 0)
+        ? sourceBoundGrants.map((grant) => ({
+            ...candidate,
+            actionId: `${candidate.actionId}.source_bound_action.${grant.sourceCardInstanceId}`,
+            label: `${candidate.label} (${publicCardTitle(grant.sourceDefinitionId)}-Aktion)`,
+            payload: {
+              ...(candidate.payload ?? {}),
+              sourceBoundActionGrantCardId: grant.sourceCardInstanceId,
+              sourceBoundActionGrantDefinitionId: grant.sourceDefinitionId,
+            },
+          }))
+        : [],
+    ),
+  ];
+  const restrictedGrants = grants.filter(
+    (grant) => grant.restriction !== "any_action",
+  );
+  if (restrictedGrants.length === 0) return actionsWithSourceBoundVariants;
   const clicks = side === "corp" ? state.corp.clicks : state.runner.clicks;
-  const forced = forcedRestrictedGrantsForSide(state, side);
+  const forced = forcedRestrictedGrantsForSide(state, side).filter(
+    (grant) => grant.restriction !== "any_action",
+  );
   const relevant =
-    forced.length > 0 ? forced : clicks <= grants.length ? grants : [];
-  if (relevant.length === 0) return actions;
-  const matching = actions.filter((candidate) =>
+    forced.length > 0
+      ? forced
+      : clicks <= restrictedGrants.length
+        ? restrictedGrants
+        : [];
+  if (relevant.length === 0) return actionsWithSourceBoundVariants;
+  const matching = actionsWithSourceBoundVariants.filter((candidate) =>
     relevant.some((grant) =>
       actionMatchesRestrictedGrant(state, candidate, grant),
     ),
@@ -321,7 +399,9 @@ export function filterActionsForRestrictedExtraActions(
   }
   return [
     ...matching,
-    ...actions.filter((candidate) => candidate.type === "end_turn"),
+    ...actionsWithSourceBoundVariants.filter(
+      (candidate) => candidate.type === "end_turn",
+    ),
   ];
 }
 

@@ -501,7 +501,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.corp.clicks).toBe(clicksBefore - 1);
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining("corp_installed_economy.credit_choice"),
+      source: expect.stringContaining("investment_firm.credit_gain"),
       minSelections: 1,
       maxSelections: 1,
     });
@@ -509,12 +509,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       getPlayerView(state, "corp").pendingChoice?.options.map(
         (option) => option.id,
       ),
-    ).toEqual(
-      expect.arrayContaining([
-        "take_credit",
-        `corp_installed_economy_credit_${firmId}`,
-      ]),
-    );
+    ).toEqual(expect.arrayContaining(["redirect_0", "redirect_1"]));
     const resolve = mustAction(
       state,
       "corp",
@@ -528,7 +523,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         clientKnownStateVersion: state.stateVersion,
         selectedChoices: {
           choiceId: state.pendingChoice?.choiceId,
-          selectedOptionIds: [`corp_installed_economy_credit_${firmId}`],
+          selectedOptionIds: ["redirect_1"],
         },
       }).ok,
     ).toBe(false);
@@ -540,7 +535,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         clientKnownStateVersion: state.stateVersion - 1,
         selectedChoices: {
           choiceId: state.pendingChoice?.choiceId,
-          selectedOptionIds: [`corp_installed_economy_credit_${firmId}`],
+          selectedOptionIds: ["redirect_1"],
         },
       }),
     ).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
@@ -553,7 +548,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       clientKnownStateVersion: normalState.stateVersion,
       selectedChoices: {
         choiceId: normalState.pendingChoice?.choiceId,
-        selectedOptionIds: ["take_credit"],
+        selectedOptionIds: ["redirect_0"],
       },
       idempotencyKey: "v1917-investment-firm-normal-credit",
     });
@@ -571,7 +566,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       clientKnownStateVersion: state.stateVersion,
       selectedChoices: {
         choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`corp_installed_economy_credit_${firmId}`],
+        selectedOptionIds: ["redirect_1"],
       },
       idempotencyKey: "v1917-investment-firm-store-credit",
     });
@@ -589,11 +584,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     ).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      cardDefinitionId: "onr_v1_329_investment-firm",
-      counterType: "recurring_credit",
-      addedCounterAmount: 2,
-      remainingCounters: 2,
       gainedCredits: 0,
+      amounts: {
+        investmentFirmRedirectedAmount: 1,
+        investmentFirmCreditsAddedPerSource: 2,
+        gainedCredits: 0,
+      },
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -604,6 +600,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const startTurnReplayStart = state.eventLog.length;
     state = toRunnerTurnFromCorpMain(state);
     state = apply(state, "runner", (action) => action.type === "end_turn");
+    if (state.pendingChoice?.source.startsWith("corp_start.order:"))
+      state = applyChoices(state, "corp", [state.pendingChoice.options[0]!.id]);
     expect(state.corp.credits).toBe(creditsBeforeTurnStartDrain + 1);
     expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(1);
     expect(state.corp.archives).not.toContain(firmId);
@@ -709,16 +707,105 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const multiOptions = multi.pendingChoice?.options.map(
       (option) => option.id,
     );
-    expect(multiOptions).toHaveLength(3);
-    expect(multiOptions).toEqual(
-      expect.arrayContaining([
-        "take_credit",
-        `corp_installed_economy_credit_${firstFirm}`,
-        `corp_installed_economy_credit_${secondFirm}`,
-      ]),
-    );
+    expect(multiOptions).toEqual(["redirect_0", "redirect_1"]);
+    multi = applyChoices(multi, "corp", ["redirect_1"]);
+    expect(cardCounterAmount(multi, firstFirm, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(multi, secondFirm, "recurring_credit")).toBe(2);
     expect(validateGameState(state).ok).toBe(true);
     expect(validateGameState(multi).ok).toBe(true);
+  });
+
+  it("applies Investment Firm to multi-credit Operation gains", () => {
+    let state = createGameAfterSetup({
+      seed: "v1917-investment-firm-operation-gain",
+      runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+        id: "v1917_investment_firm_operation_gain_corp",
+        cards: [
+          { id: "onr_v1_290_efficiency-experts", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards,
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const firmId = putCorpRootInRemote(state, "onr_v1_329_investment-firm");
+    state.cardInstances[firmId] = {
+      ...state.cardInstances[firmId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const operationId = moveCorpCardToHq(
+      state,
+      "onr_v1_290_efficiency-experts",
+    );
+    const creditsBefore = state.corp.credits;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.cardId === operationId,
+    );
+
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "redirect_0",
+      "redirect_1",
+      "redirect_2",
+      "redirect_3",
+    ]);
+    expect(state.corp.credits).toBe(creditsBefore);
+    state = applyChoices(state, "corp", ["redirect_2"]);
+    expect(state.corp.credits).toBe(creditsBefore + 1);
+    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(4);
+  });
+
+  it("resumes lifecycle effects after an Investment Firm credit choice", () => {
+    let state = createGameAfterSetup({
+      seed: "v1917-investment-firm-lifecycle-continuation",
+      runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+        id: "v1917_investment_firm_lifecycle_corp",
+        cards: [
+          { id: "onr_v1_308_acme-savings-and-loan", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards,
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    scoreCorpAgendaForTest(state, "simple_agenda");
+    const firmId = putCorpRootInRemote(state, "onr_v1_329_investment-firm");
+    state.cardInstances[firmId] = {
+      ...state.cardInstances[firmId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const acmeId = putCorpRootInRemote(
+      state,
+      "onr_v1_308_acme-savings-and-loan",
+    );
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_card" && action.payload?.cardId === acmeId,
+    );
+
+    expect(state.pendingChoice?.source).toContain(
+      "investment_firm.credit_gain",
+    );
+    expect(state.corp.archives).not.toContain(acmeId);
+    state = applyChoices(state, "corp", ["redirect_6"]);
+
+    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(12);
+    expect(state.corp.archives).toContain(acmeId);
+    expect(state.pendingChoice).toBeUndefined();
   });
 
   it("loads and spends Spinn Public Relations bits through CardImplementation", () => {
@@ -813,6 +900,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const creditsBefore = state.corp.credits;
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    if (state.pendingChoice?.source.startsWith("corp_start.order:"))
+      state = applyChoices(state, "corp", [state.pendingChoice.options[0]!.id]);
 
     expect(state.corp.credits).toBe(creditsBefore + 3);
     expect(

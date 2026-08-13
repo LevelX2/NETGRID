@@ -192,8 +192,10 @@ export type AccessFlowCompositionHost = {
       legalAction: LegalAction,
       sourceCardId: CardInstanceId,
       input: {
-        effectKind: "access_hardware_trash_by_advancement";
-        targetCardType: "hardware";
+        effectKind:
+          | "access_hardware_trash_by_advancement"
+          | "access_program_trash_by_advancement";
+        targetCardType: "hardware" | "program";
         minimumTargets: number;
         maximumTargets: number;
         selectionOrdering: "ordered";

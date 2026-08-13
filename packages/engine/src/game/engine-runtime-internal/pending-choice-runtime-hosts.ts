@@ -19,7 +19,10 @@ import type {
   ServerId,
   Side,
 } from "./runtime-shared";
-import type { CorpDrawContinuation } from "@netgrid/shared";
+import type {
+  CardCreditGainContinuation,
+  CorpDrawContinuation,
+} from "@netgrid/shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
 import {
   resolveClassicDeflectorChoice as resolveClassicDeflectorChoiceInRunModule,
@@ -29,7 +32,10 @@ import { applyPrintedTraceSuccessFollowups } from "../run/encounter-printed-effe
 import { resumeAccessEffectAfterTagPrevention } from "../access/access-effect-handlers";
 import {
   resumeActivatedCardImplementationAfterCorpDraw,
+  resumeActivatedCardImplementationAfterCreditGain,
+  resumeCardImplementationLifecycleAfterCreditGain,
   resumeOnPlayCardImplementationAfterCorpDraw,
+  resumeOnPlayCardImplementationAfterCreditGain,
   resumeOnPlayCardImplementationAfterTagPrevention,
 } from "../../ability-engine/card-implementation-runtime";
 import { startCorpHqCardToRdChoice } from "../hidden-zone/nonsearch-choice-handlers";
@@ -43,6 +49,7 @@ import {
   resumeEndTurnAfterTagPrevention,
   resumeRunnerDrawSequenceAfterTagPrevention,
   resumeStartOfTurnAfterTagPrevention,
+  trashCorpInstalledCardToArchives,
 } from "./runtime-port-bindings";
 import {
   resolveAccessProgramInstallMemoryChoice,
@@ -52,6 +59,7 @@ import { resolveRunnerMemoryCheckpointChoice } from "../checkpoints/runner-memor
 import { resolveStrategicPlanningGroupDrawChoice } from "../choices/strategic-planning-group-draw-choice";
 import { addRunnerTagsWithPrevention } from "../damage/damage-core";
 import { rollDeterministicDie } from "../state/draw-random";
+import { resumeObligationDebtRootRezAfterCreditGain } from "../run/run-rez-window";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
@@ -689,11 +697,54 @@ export function createPendingChoiceRuntimeHosts(
     }
   }
 
+  function resumeCardCreditGainContinuation(
+    state: GameState,
+    legalAction: LegalAction,
+    continuation: CardCreditGainContinuation,
+  ): void {
+    switch (continuation.kind) {
+      case "card_effect_on_play":
+        resumeOnPlayCardImplementationAfterCreditGain(
+          deps.cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          continuation,
+        );
+        return;
+      case "card_effect_activated":
+        resumeActivatedCardImplementationAfterCreditGain(
+          deps.cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          continuation,
+        );
+        return;
+      case "card_effect_immediate_lifecycle":
+        resumeCardImplementationLifecycleAfterCreditGain(
+          deps.cardImplementationRuntimeDeps,
+          state,
+          legalAction,
+          continuation,
+        );
+        return;
+      case "corp_root_rez_obligation":
+        resumeObligationDebtRootRezAfterCreditGain(
+          deps.runRezWindowHostForState(state),
+          legalAction,
+          continuation,
+        );
+        return;
+    }
+  }
+
   function pendingChoiceResolutionHost(
     state: GameState,
   ): PendingChoiceResolutionHost {
     return {
       state,
+      lifecycle: {
+        trashCorpInstalledCardToArchives,
+      },
       setup: {
         resolveSetupMulliganChoice,
         resolveDiscardChoice,
@@ -703,6 +754,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveEventModificationChoice: deps.resolveEventModificationChoice,
         resumeAddTagContinuation,
         resumeCorpDrawContinuation,
+        resumeCardCreditGainContinuation,
         resolvePdcaDamageReplacementChoice:
           deps.resolvePdcaDamageReplacementChoice,
       },
@@ -914,6 +966,7 @@ export function createPendingChoiceRuntimeHosts(
       turn: {
         resolveCorpStartOfTurnOrderChoice:
           deps.resolveCorpStartOfTurnOrderChoice,
+        resolveCorpStartOfTurnRezChoice: deps.resolveCorpStartOfTurnRezChoice,
         resumeCorpStartOfTurnOrdering: deps.resumeCorpStartOfTurnOrdering,
         resolveRunnerStartOfTurnOrderChoice:
           deps.resolveRunnerStartOfTurnOrderChoice,

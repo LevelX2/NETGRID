@@ -1,4 +1,5 @@
 import type {
+  CardCreditGainContinuation,
   CardInstanceId,
   CorpDrawContinuation,
   GameState,
@@ -29,10 +30,7 @@ export function resolveActivatedCardImplementationAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
   legalAction: LegalAction,
-  continuation?: Extract<
-    CorpDrawContinuation,
-    { kind: "card_effect_activated" }
-  >,
+  continuation?: ActivatedCardEffectContinuation,
 ): boolean {
   const initialMatch = continuation
     ? undefined
@@ -54,6 +52,10 @@ export function resolveActivatedCardImplementationAbility(
       sourceBeforeCosts.zone.zone === "serverIce")
       ? sourceBeforeCosts.zone.serverId
       : undefined;
+  const sourceAdvancementCountersBeforeCosts = Math.max(
+    0,
+    Math.floor(sourceBeforeCosts.advancementCounters),
+  );
   const costPublicPayload: Record<string, string | number | boolean> = {};
   if (!continuation) {
     validateActivatedCardImplementationAbility(deps, state, legalAction, match);
@@ -78,6 +80,7 @@ export function resolveActivatedCardImplementationAbility(
       sourceTitle: match.definition.title,
       sourceCapabilityKey: match.binding.capabilityKey,
       ...(sourceServerId ? { sourceServerId } : {}),
+      sourceAdvancementCountersBeforeCosts,
       ...(typeof effectPayload.targetCardId === "string"
         ? { targetCardId: effectPayload.targetCardId as CardInstanceId }
         : {}),
@@ -87,7 +90,9 @@ export function resolveActivatedCardImplementationAbility(
         .controller,
       effectIndexOffset: startEffectIndex,
       creditGainOrdinalOffset: continuation?.creditGainOrdinal ?? 0,
-      isEffectSuspended: () => Boolean(state.pendingCorpDraw),
+      isEffectSuspended: () =>
+        Boolean(state.pendingCorpDraw) ||
+        Boolean(state.pendingCorpCreditGainReplacement),
       gainCredits: (side, amount, gainOrdinal, kind) =>
         deps.gainCredits(state, {
           side,
@@ -97,6 +102,13 @@ export function resolveActivatedCardImplementationAbility(
           gainOrdinal,
           kind,
           reason: "card_resolver",
+        }),
+      grantSourceBoundActions: (side, amount) =>
+        deps.grantSourceBoundActions(state, {
+          side,
+          sourceCardInstanceId: match.cardId,
+          sourceDefinitionId: match.definition.id,
+          amount,
         }),
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
@@ -430,8 +442,26 @@ export function resolveActivatedCardImplementationAbility(
       creditGainOrdinal: result.creditGainOrdinal,
       originalActionPayload: effectPayload,
     };
+  if (
+    result.suspendedAtEffectIndex !== undefined &&
+    state.pendingCorpCreditGainReplacement &&
+    result.suspendedAtEffectIndex + 1 < match.ability.effects.length
+  )
+    state.pendingCorpCreditGainReplacement.continuation = {
+      kind: "card_effect_activated",
+      sourceCardId: match.cardId,
+      sourceDefinitionId: match.definition.id,
+      sourceAbilityId: match.binding.sourceAbilityId,
+      nextEffectIndex: result.suspendedAtEffectIndex + 1,
+      creditGainOrdinal: result.creditGainOrdinal,
+      originalActionPayload: effectPayload,
+    };
   return true;
 }
+
+type ActivatedCardEffectContinuation =
+  | Extract<CorpDrawContinuation, { kind: "card_effect_activated" }>
+  | Extract<CardCreditGainContinuation, { kind: "card_effect_activated" }>;
 
 function copiedSubroutineSnapshot(
   subroutine: SubroutineDefinition,
@@ -446,10 +476,7 @@ function copiedSubroutineSnapshot(
 function activatedMatchForCorpDrawContinuation(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
-  continuation: Extract<
-    CorpDrawContinuation,
-    { kind: "card_effect_activated" }
-  >,
+  continuation: ActivatedCardEffectContinuation,
 ) {
   const definition = deps.definitionFor(state, continuation.sourceCardId);
   if (definition.id !== continuation.sourceDefinitionId)
@@ -459,7 +486,10 @@ function activatedMatchForCorpDrawContinuation(
     continuation,
   );
   const { ability } = binding;
-  if (ability.effects[continuation.drawEffectIndex]?.kind !== "draw_cards")
+  if (
+    "drawEffectIndex" in continuation &&
+    ability.effects[continuation.drawEffectIndex]?.kind !== "draw_cards"
+  )
     throw new Error("Die aktivierte Draw-Fortsetzung hat keinen Draw-Effekt.");
   return {
     cardId: continuation.sourceCardId,
@@ -467,6 +497,25 @@ function activatedMatchForCorpDrawContinuation(
     ability,
     binding,
   };
+}
+
+export function resumeActivatedCardImplementationAfterCreditGain(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CardCreditGainContinuation,
+    { kind: "card_effect_activated" }
+  >,
+): void {
+  if (state.pendingChoice || state.pendingCorpCreditGainReplacement)
+    throw new Error("Der Credit-Gain ist noch nicht abgeschlossen.");
+  resolveActivatedCardImplementationAbility(
+    deps,
+    state,
+    legalAction,
+    continuation,
+  );
 }
 
 export function resumeActivatedCardImplementationAfterCorpDraw(

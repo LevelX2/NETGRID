@@ -915,7 +915,7 @@ export function createCorpRuntimeResolvers(
       effectKind: NonNullable<
         GameState["pendingRunnerInstalledMultiTrash"]
       >["effectKind"];
-      targetCardType: "resource" | "hardware";
+      targetCardType: "resource" | "hardware" | "program";
       minimumTargets: number;
       maximumTargets: number;
       selectionOrdering: "ordered" | "unordered";
@@ -955,7 +955,7 @@ export function createCorpRuntimeResolvers(
       prompt:
         input.effectKind === "trash_runner_resources_if_tagged"
           ? `Bis zu ${input.maximumTargets} Runner-Ressourcen trashen`
-          : `${input.maximumTargets} Hardware in Trash-Reihenfolge auswählen`,
+          : `${input.maximumTargets} ${input.targetCardType === "program" ? "Programme" : "Hardware"} in Trash-Reihenfolge auswählen`,
       kind: "select_cards",
       options: eligibleTargets.map(({ cardInstanceId, choiceValue }) => {
         const concealed = choiceValue !== cardInstanceId;
@@ -1039,7 +1039,9 @@ export function createCorpRuntimeResolvers(
               continuation.excludesSubtype,
             )
           : state.runner.rig.hardware
-        : state.runner.rig.resources,
+        : continuation.targetCardType === "program"
+          ? state.runner.rig.programs
+          : state.runner.rig.resources,
     );
     for (const cardId of selectedIds) {
       if (!currentLegalTargets.has(cardId))
@@ -1079,7 +1081,9 @@ export function createCorpRuntimeResolvers(
           ? { trashedHardwareCount: 0 }
           : effectKind === "access_hardware_trash_by_advancement"
             ? { trashedHardwareCount: 0 }
-            : { trashedResourceCount: 0 }),
+            : effectKind === "access_program_trash_by_advancement"
+              ? { trashedProgramCount: 0 }
+              : { trashedResourceCount: 0 }),
       };
       return;
     }
@@ -1104,7 +1108,8 @@ export function createCorpRuntimeResolvers(
             trashedHardwareCount: targetIds.length,
             trashedHardwareDefinitionIds: definitionIds.join(","),
           }
-        : effectKind === "access_hardware_trash_by_advancement"
+        : effectKind === "access_hardware_trash_by_advancement" ||
+            effectKind === "access_program_trash_by_advancement"
           ? {
               hiddenZoneBarrier: true,
               hiddenZoneAction: "v1919_access_ambush_trash_installed",
@@ -1123,8 +1128,13 @@ export function createCorpRuntimeResolvers(
               ),
               targetTrashCount: targetIds.length,
               trashedCount: targetIds.length,
-              trashedHardwareCount: targetIds.length,
-              trashedCardType: "hardware",
+              ...(effectKind === "access_hardware_trash_by_advancement"
+                ? { trashedHardwareCount: targetIds.length }
+                : { trashedProgramCount: targetIds.length }),
+              trashedCardType:
+                effectKind === "access_hardware_trash_by_advancement"
+                  ? "hardware"
+                  : "program",
               trashedCardDefinitionId: definitionIds[0] ?? "",
               trashedCardDefinitionIds: definitionIds.join(","),
             }

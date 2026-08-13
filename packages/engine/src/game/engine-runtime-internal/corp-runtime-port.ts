@@ -64,7 +64,7 @@ export type CorpRuntimePort = TurnCorpRuntimePort & {
       effectKind: NonNullable<
         GameState["pendingRunnerInstalledMultiTrash"]
       >["effectKind"];
-      targetCardType: "resource" | "hardware";
+      targetCardType: "resource" | "hardware" | "program";
       minimumTargets: number;
       maximumTargets: number;
       selectionOrdering: "ordered" | "unordered";

@@ -1282,9 +1282,13 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.pendingChoice?.source).toBe(
+      "card_implementation.runner_installed_multi_trash",
+    );
+    state = applyChoices(state, "corp", [`target_${blinkId}`]);
     expect(state.runner.heap).toContain(blinkId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "access_card",
+      actionType: "resolve_choice",
       ambushDefinitionId: "onr_v1_323_experimental-ai",
       trashedCardDefinitionId: "onr_v1_007_blink",
     });
@@ -1332,6 +1336,11 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
+    const programOptions = state.pendingChoice?.options.map(
+      (option) => option.id,
+    );
+    expect(programOptions).toHaveLength(2);
+    state = applyChoices(state, "corp", programOptions ?? []);
     expect(
       state.runner.heap.map((id) => state.cardInstances[id]?.definitionId),
     ).toEqual(expect.arrayContaining(["simple_decoder", "simple_fracter"]));

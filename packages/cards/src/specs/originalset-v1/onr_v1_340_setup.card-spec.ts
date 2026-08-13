@@ -46,7 +46,7 @@ export const cardSpec = {
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_access",
         sourceZones: ["installed", "hq", "rd", "archives"],
-        installedSourceActivation: "any_rez_state",
+        installedSourceActivation: "requires_rezzed",
         ignoreIfAccessedFrom: ["archives"],
         revealIfAccessedFrom: ["rd"],
         visibility: "hidden_info_barrier",

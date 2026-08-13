@@ -80,6 +80,7 @@ export type GameCardImplementationRuntimeDepsHost = {
       payload?: LegalAction["payload"],
     ) => LegalAction;
     appendResolvedEffectsToPayload: CardImplementationRuntimeDependencies["appendResolvedEffectsToPayload"];
+    grantSourceBoundActions: CardImplementationRuntimeDependencies["grantSourceBoundActions"];
   };
   run: {
     startRun: (

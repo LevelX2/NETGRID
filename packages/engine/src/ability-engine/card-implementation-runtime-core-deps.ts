@@ -75,6 +75,15 @@ export type CardImplementationRuntimeCoreDependencies = {
           };
     },
   ) => CardEffectCreditGainResult;
+  grantSourceBoundActions: (
+    state: GameState,
+    input: {
+      side: Side;
+      sourceCardInstanceId: CardInstanceId;
+      sourceDefinitionId: CardDefinition["id"];
+      amount: number;
+    },
+  ) => number;
   createAction: (
     state: GameState,
     side: Side,

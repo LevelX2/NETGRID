@@ -77,17 +77,12 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_economy",
+        role: "remote_asset_modifier",
       },
       {
         kind: "tactic_interpretation",
         signal: "draw.card",
         use: "draw.card",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "medium",
       },
       {
         kind: "value_interpretation",

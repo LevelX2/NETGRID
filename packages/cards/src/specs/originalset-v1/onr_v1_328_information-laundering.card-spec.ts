@@ -64,16 +64,16 @@ export const cardSpec = {
             kind: "action",
             amount: 1,
           },
+          {
+            kind: "trash_source",
+            amount: 1,
+          },
         ],
         effects: [
           {
             kind: "gain_credits_per_advancement_counter_on_source",
             recipient: "controller",
             amountPerCounter: 4,
-            visibility: "public",
-          },
-          {
-            kind: "trash_source",
             visibility: "public",
           },
         ],

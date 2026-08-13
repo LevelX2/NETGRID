@@ -1,5 +1,6 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import * as runtimePorts from "./runtime-port-bindings";
+import { grantSourceBoundActions } from "./turn-action-economy-runtime";
 import {
   type ActionType,
   type ChoiceRequest,
@@ -1104,13 +1105,20 @@ export function configureCardRuntimeBootstrap() {
                     sourceDefinitionId: input.sourceDefinitionId,
                     reason: input.reason,
                   }
-                : {
-                    kind: "card_effect",
-                    sourceCardId: input.sourceCardId,
-                    sourceDefinitionId: input.sourceDefinitionId,
-                    gainOrdinal: input.gainOrdinal,
-                    reason: input.reason,
-                  },
+                : input.reason === "start_of_turn"
+                  ? {
+                      kind: "turn_effect",
+                      sourceCardId: input.sourceCardId,
+                      sourceDefinitionId: input.sourceDefinitionId,
+                      reason: "start_of_corp_turn",
+                    }
+                  : {
+                      kind: "card_effect",
+                      sourceCardId: input.sourceCardId,
+                      sourceDefinitionId: input.sourceDefinitionId,
+                      gainOrdinal: input.gainOrdinal,
+                      reason: input.reason,
+                    },
             ...(input.destination ? { destination: input.destination } : {}),
           });
           return {
@@ -1124,6 +1132,7 @@ export function configureCardRuntimeBootstrap() {
         createAction: action,
         appendResolvedEffectsToPayload:
           runtimePorts.appendResolvedEffectsToPayload,
+        grantSourceBoundActions,
       },
       run: {
         startRun: (

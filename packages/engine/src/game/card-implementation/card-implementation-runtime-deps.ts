@@ -59,6 +59,7 @@ export function createGameCardImplementationRuntimeDeps(
     gainCredits: host.credits.gainCredits,
     createAction: host.actions.createAction,
     appendResolvedEffectsToPayload: host.actions.appendResolvedEffectsToPayload,
+    grantSourceBoundActions: host.actions.grantSourceBoundActions,
     ...host.callbacks.effectAdapters,
     ...createTraceCardImplementationRuntimeDeps(host.trace),
     ...createDamageCardImplementationRuntimeDeps(host.damage),

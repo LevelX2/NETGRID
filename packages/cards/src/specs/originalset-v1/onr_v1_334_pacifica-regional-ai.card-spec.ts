@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "You may advance Pacifica Regional AI before and after you rez it.\nRegional AI advancement counter: Gain an action.",
+      "You may advance Pacifica Regional AI before and after you rez it.\nRegional AI advancement counter: Gain an action. Use this ability only during your turn.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(
@@ -28,6 +28,10 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_334_pacifica-regional-ai",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Pacifica Regional AI",
       },
     ],
   },
@@ -106,11 +110,6 @@ export const cardSpec = {
         confidence: "high",
         rationale:
           "Advancement-counter-to-action conversion remains a plausible Fast-Advance anchor. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
       },
       {
         kind: "remote_role",

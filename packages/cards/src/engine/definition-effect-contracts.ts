@@ -751,6 +751,7 @@ export type GainActionsEffectImplementation = {
   kind: "gain_actions";
   recipient: "controller" | "runner" | "corp";
   amount: number;
+  sourceBoundUntilUsed?: boolean;
   visibility: EventVisibilityClass;
 };
 

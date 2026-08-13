@@ -1,4 +1,9 @@
-import type { GameState, LegalAction, PlayerAction } from "@netgrid/shared";
+import type {
+  CardInstanceId,
+  GameState,
+  LegalAction,
+  PlayerAction,
+} from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
 import { createGame } from "../create-game";
 import {
@@ -160,6 +165,61 @@ describe("pending choice resolution", () => {
     expect(resolveRunnerDrawSequenceChoice).toHaveBeenCalledOnce();
     expect(resolveRunnerDrawSequenceChoice.mock.calls[0]?.[0]).toBe(state);
   });
+
+  it("resumes Schlaghund's source trash after a suspended damage choice", () => {
+    const state = stateWithChoice(
+      "damage_choice",
+      "v120.event_modification:damage_1",
+    );
+    const sourceId = "schlaghund_1" as CardInstanceId;
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [sourceId],
+    });
+    state.cardInstances[sourceId] = {
+      instanceId: sourceId,
+      definitionId: "onr_v1_339_schlaghund",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.pendingDamageFollowup = {
+      kind: "trash_corp_source",
+      sourceCardInstanceId: sourceId,
+      sourceDefinitionId: "onr_v1_339_schlaghund",
+    };
+    const trashSource = vi.fn();
+    const resolveDamageChoice = vi.fn((current: GameState) => {
+      delete current.pendingChoice;
+      delete current.eventModificationWindow;
+    });
+
+    const legalAction = choiceAction("damage_choice");
+    resolvePendingChoice(
+      pendingChoiceHost(state, {
+        lifecycle: { trashCorpInstalledCardToArchives: trashSource },
+        replacement: {
+          resolveEventModificationChoice: resolveDamageChoice,
+        },
+      }),
+      legalAction,
+      playerChoice("damage_choice"),
+    );
+
+    expect(trashSource).toHaveBeenCalledWith(state, sourceId, legalAction);
+    expect(state.pendingDamageFollowup).toBeUndefined();
+    expect(legalAction.payload).toMatchObject({
+      sourceDefinitionId: "onr_v1_339_schlaghund",
+      selfTrashed: true,
+    });
+  });
 });
 
 function stateWithChoice(choiceId: string, source: string): GameState {
@@ -214,6 +274,8 @@ function playerChoice(
 function pendingChoiceHost(
   state: GameState,
   overrides: Partial<{
+    lifecycle: Partial<PendingChoiceResolutionHost["lifecycle"]>;
+    replacement: Partial<PendingChoiceResolutionHost["replacement"]>;
     setup: Partial<PendingChoiceResolutionHost["setup"]>;
     hiddenZone: Partial<PendingChoiceResolutionHost["hiddenZone"]>;
     runner: Partial<PendingChoiceResolutionHost["runner"]>;
@@ -226,6 +288,12 @@ function pendingChoiceHost(
 
   return {
     state,
+    lifecycle: {
+      trashCorpInstalledCardToArchives: unexpected(
+        "trashCorpInstalledCardToArchives",
+      ),
+      ...overrides.lifecycle,
+    },
     setup: {
       resolveSetupMulliganChoice: unexpected("resolveSetupMulliganChoice"),
       resolveDiscardChoice: unexpected("resolveDiscardChoice"),
@@ -238,9 +306,13 @@ function pendingChoiceHost(
       ),
       resumeAddTagContinuation: unexpected("resumeAddTagContinuation"),
       resumeCorpDrawContinuation: unexpected("resumeCorpDrawContinuation"),
+      resumeCardCreditGainContinuation: unexpected(
+        "resumeCardCreditGainContinuation",
+      ),
       resolvePdcaDamageReplacementChoice: unexpected(
         "resolvePdcaDamageReplacementChoice",
       ),
+      ...overrides.replacement,
     },
     trace: {
       resolveTraceChoice: unexpected("resolveTraceChoice"),
@@ -452,6 +524,9 @@ function pendingChoiceHost(
     turn: {
       resolveCorpStartOfTurnOrderChoice: unexpected(
         "resolveCorpStartOfTurnOrderChoice",
+      ),
+      resolveCorpStartOfTurnRezChoice: unexpected(
+        "resolveCorpStartOfTurnRezChoice",
       ),
       resumeCorpStartOfTurnOrdering: unexpected(
         "resumeCorpStartOfTurnOrdering",

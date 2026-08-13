@@ -2236,6 +2236,30 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("rezzes Holovid in the Corp start window and resolves its newly due source", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "spotcheck-holovid-start-rez",
+    );
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const holovidId = putCorpRootInRemote(state, "onr_v1_326_holovid-campaign");
+    const creditsBefore = state.corp.credits;
+
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.pendingChoice?.source).toContain("corp_start.rez:");
+    expect(state.pendingChoice?.options.map((option) => option.id)).toContain(
+      `rez_${holovidId}`,
+    );
+    state = applyChoice(state, "corp", `rez_${holovidId}`);
+
+    expect(state.cardInstances[holovidId]?.rezzed).toBe(true);
+    expect(cardCounterAmount(state, holovidId, "bit")).toBe(11);
+    expect(state.corp.credits).toBe(creditsBefore - 3);
+    expect(state.pendingChoice).toBeUndefined();
+  });
+
   it("loads Braindance Campaign with 12 public bits and drains 2 at Corp turn start", () => {
     let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "spotcheck-braindance-bits",

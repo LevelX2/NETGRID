@@ -1,14 +1,19 @@
 import type {
+  CardCreditGainContinuation,
   CorpDrawContinuation,
   GameState,
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
+import { resolveInvestmentFirmCreditGainChoice } from "../economy/credit-gain";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
 export type PendingChoiceResolutionHost = {
   state: GameState;
+  lifecycle: {
+    trashCorpInstalledCardToArchives: HostFn<void>;
+  };
   setup: {
     resolveSetupMulliganChoice: HostFn<void>;
     resolveDiscardChoice: HostFn<void>;
@@ -18,6 +23,7 @@ export type PendingChoiceResolutionHost = {
     resolveEventModificationChoice: HostFn<void>;
     resumeAddTagContinuation: HostFn<void>;
     resumeCorpDrawContinuation: HostFn<void>;
+    resumeCardCreditGainContinuation: HostFn<void>;
     resolvePdcaDamageReplacementChoice: HostFn<void>;
   };
   trace: {
@@ -122,6 +128,7 @@ export type PendingChoiceResolutionHost = {
   };
   turn: {
     resolveCorpStartOfTurnOrderChoice: HostFn<void>;
+    resolveCorpStartOfTurnRezChoice: HostFn<void>;
     resumeCorpStartOfTurnOrdering: HostFn<void>;
     resolveSatelliteMonitorsStartChoice: HostFn<void>;
     resolveRunnerStartOfTurnOrderChoice: HostFn<void>;
@@ -146,6 +153,8 @@ export function resolvePendingChoice(
   const resumeAddTagContinuation = host.replacement.resumeAddTagContinuation;
   const resumeCorpDrawContinuation =
     host.replacement.resumeCorpDrawContinuation;
+  const resumeCardCreditGainContinuation =
+    host.replacement.resumeCardCreditGainContinuation;
   const resolvePdcaDamageReplacementChoice =
     host.replacement.resolvePdcaDamageReplacementChoice;
   const resolveTraceChoice = host.trace.resolveTraceChoice;
@@ -321,6 +330,10 @@ export function resolvePendingChoice(
     resolveCorpStartOfTurnOrderChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("corp_start.rez:")) {
+    host.turn.resolveCorpStartOfTurnRezChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v120.event_modification")) {
     resolveEventModificationChoice(state, legalAction, playerAction);
     if (
@@ -349,11 +362,13 @@ export function resolvePendingChoice(
     )
       host.run.resumeTraceHardwareWreckerAfterTrash(state, legalAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
+    resumeDamageFollowupIfReady(host, state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("damage_replacement:")) {
     resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
+    resumeDamageFollowupIfReady(host, state, legalAction);
     return;
   }
   if (
@@ -553,6 +568,14 @@ export function resolvePendingChoice(
     )
   ) {
     resolveCorpInstalledEconomyCreditChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("investment_firm.credit_gain:")) {
+    const continuation: CardCreditGainContinuation | undefined =
+      state.pendingCorpCreditGainReplacement?.continuation;
+    resolveInvestmentFirmCreditGainChoice(state, legalAction, playerAction);
+    if (continuation)
+      resumeCardCreditGainContinuation(state, legalAction, continuation);
     return;
   }
   if (
@@ -898,6 +921,32 @@ export function resolvePendingChoice(
     return;
   }
   delete state.pendingChoice;
+}
+
+function resumeDamageFollowupIfReady(
+  host: PendingChoiceResolutionHost,
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const followup = state.pendingDamageFollowup;
+  if (!followup || state.pendingChoice || state.eventModificationWindow) return;
+  delete state.pendingDamageFollowup;
+  if (state.winner) return;
+  const source = state.cardInstances[followup.sourceCardInstanceId];
+  const stillInstalled = state.corp.servers.some((server) =>
+    server.root.includes(followup.sourceCardInstanceId),
+  );
+  if (!source || !stillInstalled) return;
+  host.lifecycle.trashCorpInstalledCardToArchives(
+    state,
+    followup.sourceCardInstanceId,
+    legalAction,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: followup.sourceDefinitionId,
+    selfTrashed: true,
+  };
 }
 
 function resumeRunStartDamageIfReady(

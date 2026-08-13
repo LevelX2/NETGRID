@@ -640,12 +640,18 @@ function accessSourceDefinitionIdsForRuntime(): {
       hasAccessEffect(
         implementation,
         (effect) =>
+          effect.sourceZones.includes("installed") &&
+          effect.sourceZones.includes("hq") &&
+          effect.sourceZones.includes("rd") &&
+          effect.ignoreIfAccessedFrom?.includes("archives") === true &&
           effect.effects.some(
             (candidate) =>
               candidate.kind === "damage" &&
               candidate.damageType === "net" &&
               candidate.amount === 2,
-          ) && effect.installedSourceActivation === "any_rez_state",
+          ) &&
+          (effect.installedSourceActivation ?? "requires_rezzed") ===
+            "requires_rezzed",
       ),
     ),
     trap: unique("paid net-damage-and-tag ambush", (implementation) =>

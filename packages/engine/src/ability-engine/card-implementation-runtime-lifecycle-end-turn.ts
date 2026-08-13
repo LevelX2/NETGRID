@@ -186,6 +186,13 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
           kind,
           reason: "end_of_turn",
         }),
+      grantSourceBoundActions: (side, amount) =>
+        deps.grantSourceBoundActions(state, {
+          side,
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId: definition.id,
+          amount,
+        }),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       addCountersToSource: (sourceCardId, counterType, amount) =>

@@ -1249,7 +1249,7 @@ export function trashRunnerInstalledTargetsForAccessEffect(
     };
     return;
   }
-  if (target === "hardware") {
+  if (target === "hardware" || target === "program") {
     const sourceCardId = host.state.run?.accessedCardId;
     if (
       !sourceCardId ||
@@ -1259,8 +1259,11 @@ export function trashRunnerInstalledTargetsForAccessEffect(
     host.trash.startRunnerInstalledMultiTrashChoice(
       sourceCardId,
       {
-        effectKind: "access_hardware_trash_by_advancement",
-        targetCardType: "hardware",
+        effectKind:
+          target === "hardware"
+            ? "access_hardware_trash_by_advancement"
+            : "access_program_trash_by_advancement",
+        targetCardType: target,
         minimumTargets: targetCount,
         maximumTargets: targetCount,
         selectionOrdering: "ordered",

@@ -181,6 +181,11 @@ export type TurnRuntimePort = {
     legalAction: LegalAction,
     playerAction: PlayerAction,
   ) => void;
+  resolveCorpStartOfTurnRezChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
   resumeCorpStartOfTurnOrdering: (
     state: GameState,
     effects?: AutomaticEffectCollector,

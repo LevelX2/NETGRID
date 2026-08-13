@@ -76,10 +76,9 @@ export function executeCreditEffect(input: CardEffectFamilyInput): boolean {
         throw new Error(
           "gain_credits_per_advancement_counter_on_source source is missing.",
         );
-      const advancementCounterCount = Math.max(
-        0,
-        Math.floor(source.advancementCounters),
-      );
+      const advancementCounterCount =
+        context.sourceAdvancementCountersBeforeCosts ??
+        Math.max(0, Math.floor(source.advancementCounters));
       const amount = advancementCounterCount * effect.amountPerCounter;
       const side = runtime.recipientSide(context, effect.recipient);
       const gain = runtime.gainCredits(state, side, amount);

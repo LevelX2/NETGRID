@@ -134,6 +134,76 @@ describe("trace payment pools", () => {
     );
   });
 
+  it("binds and spends the Corp-selected specialized trace source", () => {
+    const krumzId = "krumz_1" as CardInstanceId;
+    const trackerId = "tracker_1" as CardInstanceId;
+    const trace = corpBidTrace({ traceLimit: 5 });
+    const state = stateForTrace(trace, { corpCredits: 1 });
+    const available = new Map<CardInstanceId, number>([
+      [krumzId, 1],
+      [trackerId, 1],
+    ]);
+    const deps = corpDeps({
+      corpTraceBitPoolTotal: () => available.get(krumzId) ?? 0,
+      corpTraceCounterPoolTotal: () => available.get(trackerId) ?? 0,
+      corpTraceBitPoolSources: () => [
+        {
+          kind: "corp_trace_bit_pool",
+          sourceCardInstanceId: krumzId,
+          sourceDefinitionId: "onr_v1_330_krumz",
+          available: available.get(krumzId) ?? 0,
+        },
+      ],
+      corpTraceCounterPoolSources: () => [
+        {
+          kind: "corp_trace_counter_pool",
+          sourceCardInstanceId: trackerId,
+          sourceDefinitionId: "onr_v1_325_hacker-tracker-central",
+          available: available.get(trackerId) ?? 0,
+        },
+      ],
+      spendCorpTraceBitPoolSource: (_state, sourceId, amount) => {
+        available.set(sourceId, (available.get(sourceId) ?? 0) - amount);
+        return amount;
+      },
+      spendCorpTraceCounterPoolSource: (_state, sourceId, amount) => {
+        available.set(sourceId, (available.get(sourceId) ?? 0) - amount);
+        return amount;
+      },
+    });
+    const quote = quoteCorpTraceBidPayment(deps, state, trace, 1, [
+      {
+        kind: "corp_trace_bit_pool",
+        sourceCardInstanceId: krumzId,
+        amount: 0,
+      },
+      {
+        kind: "corp_trace_counter_pool",
+        sourceCardInstanceId: trackerId,
+        amount: 1,
+      },
+    ]);
+
+    expect(quote).toMatchObject({
+      canPay: true,
+      normalCreditsToPay: 0,
+      corpTraceBitsToPay: 0,
+      corpTraceCountersToPay: 1,
+    });
+    expect(quote.breakdown).toContainEqual(
+      expect.objectContaining({
+        sourceCardInstanceId: trackerId,
+        amount: 1,
+      }),
+    );
+
+    payCorpTraceBidQuote(deps, state, trace, quote);
+
+    expect(state.corp.credits).toBe(1);
+    expect(available.get(krumzId)).toBe(1);
+    expect(available.get(trackerId)).toBe(0);
+  });
+
   it("quotes and spends Runner trace-link pools without a Hells Run payment kind", () => {
     const pkId = "pk_1" as CardInstanceId;
     const hellsId = "hells_1" as CardInstanceId;

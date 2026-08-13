@@ -37,6 +37,8 @@ export type CardLifecycleImplementation = {
   start_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
   end_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
   on_runner_run_start?: readonly CardLifecycleTriggeredAbilityImplementation[];
+  /** The printed timing explicitly permits rez immediately before this source's Corp-turn-start ability. */
+  can_rez_at_start_of_corp_turn?: boolean;
 };
 
 export type CardInstallTargetBindingImplementation = {

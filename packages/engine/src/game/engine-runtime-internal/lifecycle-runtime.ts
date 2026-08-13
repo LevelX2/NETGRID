@@ -230,14 +230,20 @@ export function createLifecycleRuntime(
       throw new Error("Ein Batch-Trash darf eine Karte nur einmal enthalten.");
     const snapshots = uniqueIds.map((cardId) => {
       const definition = deps.definitionFor(state, cardId);
-      if (definition.type !== "hardware" && definition.type !== "resource")
+      if (
+        definition.type !== "hardware" &&
+        definition.type !== "resource" &&
+        definition.type !== "program"
+      )
         throw new Error(
-          "Der geordnete Batch-Trash unterstützt nur Hardware und Ressourcen.",
+          "Der geordnete Batch-Trash unterstützt nur Hardware, Ressourcen und Programme.",
         );
       const rig =
         definition.type === "hardware"
           ? state.runner.rig.hardware
-          : state.runner.rig.resources;
+          : definition.type === "resource"
+            ? state.runner.rig.resources
+            : state.runner.rig.programs;
       if (!rig.includes(cardId))
         throw new Error("Ein Batch-Trash-Ziel ist nicht mehr installiert.");
       return {
@@ -246,6 +252,11 @@ export function createLifecycleRuntime(
         instance: deps.mustInstance(state.cardInstances, cardId),
         hostedIds: deps.hostedCardsOn(state, cardId),
         microtechBackedIds: microtechHostedProgramIds(state, cardId),
+        programMemoryCost:
+          definition.type === "program" &&
+          runnerProgramUsesMemory(state, cardId)
+            ? runnerInstalledProgramMemoryCost(state, cardId)
+            : 0,
       };
     });
 
@@ -290,6 +301,11 @@ export function createLifecycleRuntime(
           0,
           state.runner.memoryLimit -
             (snapshot.definition.memoryLimitBonus ?? 0),
+        );
+      if (snapshot.programMemoryCost > 0)
+        state.runner.memoryUsed = Math.max(
+          0,
+          state.runner.memoryUsed - snapshot.programMemoryCost,
         );
     }
   }
@@ -411,9 +427,6 @@ export function createLifecycleRuntime(
           cleanup.kind === "trash_agenda_or_node_if_fort_over_capacity" &&
           cleanup.target === "agenda_or_node_inside_same_fort",
       );
-    const rezzedNevinyrralLeftPlay =
-      deps.uniqueDirectLongtailKindForDefinition(definition.id) ===
-        "rezzed_leave_action_gain_asset" && instance.rezzed === true;
     const { hostedOn: _hostedOn, ...withoutHost } = instance;
     void _hostedOn;
     deps.removeFromAllZones(state, cardId);
@@ -433,19 +446,12 @@ export function createLifecycleRuntime(
         legalAction,
       );
     }
-    if (rezzedNevinyrralLeftPlay) {
-      state.winner = "runner";
-      state.gameEndReason = "nevinyrral_left_play";
-      state.phase = "game_over";
-      state.timingPoint = "game.checkpoint";
-      state.activeSide = "runner";
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gameEndReason: "nevinyrral_left_play",
-          sourceDefinitionId: definition.id,
-        };
-      }
+    if (state.gameEndReason === "nevinyrral_left_play" && legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gameEndReason: "nevinyrral_left_play",
+        sourceDefinitionId: definition.id,
+      };
     }
   }
 
