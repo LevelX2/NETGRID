@@ -16,6 +16,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
+import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
 import {
   buildBoundedCorpPunishRouteRequests,
   withDecisionLocalCorpPunishRouteQuotes,
@@ -46,10 +47,10 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
     const actions = powerGridActions(input.legalActions);
     expect(
       actions.map((action) => action.payload?.hardwareTrashByCounterTrashCount),
-    ).toEqual([1, 2]);
+    ).toEqual([0, 1, 2]);
     const [request] = buildBoundedCorpPunishRouteRequests(input);
     if (!request) throw new Error("Missing executable Power Grid request.");
-    expect(request.steps[0]?.currentLegalActionId).toBe(actions[0]!.actionId);
+    expect(request.steps[0]?.currentLegalActionId).toBe(actions[1]!.actionId);
     const rawQuote = quoteCorpPunishRoute(state, request);
     if (rawQuote.ok && !rawQuote.quote.complete) {
       throw new Error(
@@ -62,13 +63,13 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
         complete: true,
         steps: [
           {
-            currentLegalAction: { actionId: actions[0]!.actionId },
+            currentLegalAction: { actionId: actions[1]!.actionId },
           },
         ],
       },
     });
     const xTwoRequest = structuredClone(request);
-    xTwoRequest.steps[0]!.currentLegalActionId = actions[1]!.actionId;
+    xTwoRequest.steps[0]!.currentLegalActionId = actions[2]!.actionId;
     const xTwoQuote = quoteCorpPunishRoute(state, xTwoRequest);
     expect(xTwoQuote).toMatchObject({
       ok: true,
@@ -78,7 +79,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
         steps: [
           {
             credits: 2,
-            currentLegalAction: { actionId: actions[1]!.actionId },
+            currentLegalAction: { actionId: actions[2]!.actionId },
             hardwareTrashProjection: {
               selectedX: 2,
               legalMaximumX: 2,
@@ -103,13 +104,13 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
           kind: "hardware_trash",
           sourceCapabilityId: POWER_GRID_CAPABILITY_ID,
           credits: 1,
-          currentLegalAction: { actionId: actions[0]!.actionId },
+          currentLegalAction: { actionId: actions[1]!.actionId },
           hardwareTrashProjection: {
             kind: "installed_runner_hardware",
             targetKnowledge: "public_exact",
             eligibleTargetCount: 2,
             excludedSubtype: "cybernetics",
-            minimumX: 1,
+            minimumX: 0,
             selectedX: 1,
             legalMaximumX: 2,
             creditsPerX: 1,
@@ -127,7 +128,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
       persistTacticalPlanMemory: false,
       corpTurnPlannerMode: "legacy_compare",
     });
-    expect(playDecision.actionId).toBe(actions[0]!.actionId);
+    expect(playDecision.actionId).toBe(actions[1]!.actionId);
     expect(playDecision.fallbackUsed).toBe(false);
     state = applyDecision(state, playDecision);
 
@@ -144,6 +145,22 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
       .map((option) => option.id)
       .sort()[0];
     if (!expectedOptionId) throw new Error("Missing hardware choice option.");
+    const choiceInput = decisionInput(state);
+    expect(choiceInput.playerView.pendingChoice?.selectionOrdering).toBe(
+      "ordered",
+    );
+    const choiceAction = choiceInput.legalActions.find(
+      (action) => action.type === "resolve_choice",
+    );
+    if (!choice || !choiceAction) throw new Error("Missing hardware choice.");
+    expect(
+      selectedCorpHardwareTrashChoiceOptionIds(
+        choiceInput,
+        choiceAction,
+        choice,
+        choice.options,
+      ),
+    ).toEqual([expectedOptionId]);
 
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
@@ -165,7 +182,11 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
       hardware: [RD_INTERFACE, SIMPLE_HARDWARE],
     });
     const initialInput = decisionInput(state);
-    expect(powerGridActions(initialInput.legalActions)).toHaveLength(0);
+    expect(
+      powerGridActions(initialInput.legalActions).map(
+        (action) => action.payload?.hardwareTrashByCounterTrashCount,
+      ),
+    ).toEqual([0]);
 
     const initialQuoted = withDecisionLocalCorpPunishRouteQuotes(
       initialInput,
@@ -212,13 +233,17 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
 
     const fundedInput = decisionInput(state);
     const fundedActions = powerGridActions(fundedInput.legalActions);
-    expect(fundedActions).toHaveLength(1);
+    expect(
+      fundedActions.map(
+        (action) => action.payload?.hardwareTrashByCounterTrashCount,
+      ),
+    ).toEqual([0, 1]);
     const playDecision = chooseCorpAction(fundedInput, {
       quoteCorpPunishRoute: (request) => quoteCorpPunishRoute(state, request),
       persistTacticalPlanMemory: false,
       corpTurnPlannerMode: "legacy_compare",
     });
-    expect(playDecision.actionId).toBe(fundedActions[0]!.actionId);
+    expect(playDecision.actionId).toBe(fundedActions[1]!.actionId);
     state = applyDecision(state, playDecision);
     const choiceDecision = chooseCorpAction(decisionInput(state), {
       persistTacticalPlanMemory: false,
@@ -322,7 +347,7 @@ describe("Power Grid decision-local real-Engine punish quote", () => {
       const forged = structuredClone(result);
       const head = forged.quote.steps[0]!;
       if (drift === "current action drift") {
-        head.currentLegalAction!.actionId = actions[1]!.actionId;
+        head.currentLegalAction!.actionId = actions[2]!.actionId;
       } else if (drift === "capability drift") {
         head.sourceCapabilityId = "ability:on_play:0";
       } else {

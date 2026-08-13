@@ -1,12 +1,13 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { corpInstalledHardwareTrashOperationProfile } from "./corp-canonical-card-facts";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >;
 type PendingChoiceOption = PendingChoice["options"][number];
 
-const HARDWARE_TRASH_CHOICE_SOURCE =
-  /^card_implementation\.installed_hardware_trash_by_counter:([1-9]\d*):(0|[1-9]\d*)$/;
+const RUNNER_INSTALLED_MULTI_TRASH_CHOICE_SOURCE =
+  "card_implementation.runner_installed_multi_trash";
 
 /**
  * Resolves the exact public target choice opened by the Engine-certified
@@ -21,21 +22,23 @@ export function selectedCorpHardwareTrashChoiceOptionIds(
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
 ): string[] | undefined {
-  const sourceMatch = HARDWARE_TRASH_CHOICE_SOURCE.exec(choice.source);
-  if (!sourceMatch || input.side !== "corp") return undefined;
-  const trashCount = Number(sourceMatch[1]);
-  const sourceStateVersion = Number(sourceMatch[2]);
+  const trashCount = choice.minSelections;
   const requirement = action.choiceRequirements?.[0];
   if (
+    input.side !== "corp" ||
+    choice.source !== RUNNER_INSTALLED_MULTI_TRASH_CHOICE_SOURCE ||
+    typeof choice.sourceCardInstanceId !== "string" ||
+    choice.sourceCardInstanceId.length === 0 ||
+    !corpInstalledHardwareTrashOperationProfile(choice.sourceCardDefinitionId) ||
     !Number.isSafeInteger(trashCount) ||
     trashCount < 1 ||
-    sourceStateVersion !== input.playerView.stateVersion ||
     choice.side !== "corp" ||
     choice.kind !== "select_cards" ||
     choice.visibility !== "public" ||
     choice.stateVersion !== input.playerView.stateVersion ||
     choice.minSelections !== trashCount ||
     choice.maxSelections !== trashCount ||
+    choice.selectionOrdering !== "ordered" ||
     action.side !== "corp" ||
     action.type !== "resolve_choice" ||
     action.source !== "game_rule" ||
@@ -45,7 +48,7 @@ export function selectedCorpHardwareTrashChoiceOptionIds(
     requirement?.choiceId !== choice.choiceId ||
     requirement.minSelections !== trashCount ||
     requirement.maxSelections !== trashCount ||
-    selectableOptions.length <= trashCount ||
+    selectableOptions.length < trashCount ||
     requirement.optionIds.length !== selectableOptions.length
   ) {
     return undefined;
@@ -77,7 +80,7 @@ export function selectedCorpHardwareTrashChoiceOptionIds(
     optionBindings.every(
       (binding) =>
         binding.cardId !== undefined &&
-        binding.optionId === `card_${binding.cardId}` &&
+        binding.optionId === `target_${binding.cardId}` &&
         visibleHardwareIds.has(binding.cardId),
     ) &&
     new Set(optionCardIds).size === optionCardIds.length &&

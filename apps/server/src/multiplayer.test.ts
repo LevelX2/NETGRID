@@ -12296,6 +12296,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     let runnerMainChoices = 0;
+    let failedLegalActions: LegalAction[] = [];
     const service = new MultiplayerService(storage, {
       tokenSalt: "ai-choose-failure-attempt",
       chooseAiAction: (input, options): AiDecision => {
@@ -12303,6 +12304,7 @@ describe("MVP 0.2 multiplayer service", () => {
           return chooseRuntimeAiAction(input, options);
         runnerMainChoices += 1;
         if (runnerMainChoices === 3) {
+          failedLegalActions = structuredClone(input.legalActions);
           const failure = Object.assign(
             new Error("private runner hand detail belongs only in maintenance"),
             {
@@ -12310,6 +12312,21 @@ describe("MVP 0.2 multiplayer service", () => {
               planKind: "runner.develop_board_and_hand",
               step: "fund",
               route: "basic_credit",
+              context: {
+                side: "runner",
+                stateVersion: input.playerView.stateVersion,
+                timingPoint: input.playerView.timingPoint,
+                legalActionTypes: input.legalActions.map(
+                  (action) => action.type,
+                ),
+                unresolvedActionIds: input.legalActions
+                  .filter((action) => action.type !== "end_turn")
+                  .map((action) => action.actionId),
+                owner: "scheduler",
+                removalCondition:
+                  "Provide at least one ready assessed plan for the legal voluntary actions.",
+                candidateCount: input.legalActions.length,
+              },
             },
           );
           throw failure;
@@ -12452,15 +12469,104 @@ describe("MVP 0.2 multiplayer service", () => {
               code: "test.choose_exception",
               message: "private runner hand detail belongs only in maintenance",
             },
+            planResolution: {
+              code: "test.choose_exception",
+              side: "runner",
+              stateVersion: beforeFailure.gameState.stateVersion,
+              owner: "scheduler",
+              removalCondition:
+                "Provide at least one ready assessed plan for the legal voluntary actions.",
+            },
           },
         },
+      });
+      expect(bundle?.decisions.at(-1)?.auditAvailability).toMatchObject({
+        historicalLegalActions: { status: "persisted" },
+        engineEvidence: { status: "persisted" },
+        analysisSnapshot: { status: "persisted" },
+        checkpointCapture: { status: "persisted" },
       });
       expect(bundle?.traces?.at(-1)?.detail).toMatchObject({
         attempt: {
           diagnosticCode: `ai_attempt_${created.matchId}_${failureDecisionIndex}`,
           eventAnchorId,
         },
+        historicalAudit: {
+          capture: "persisted",
+          actor: "runner",
+          legalActions: {
+            schemaVersion: "netgrid-historical-legal-actions-v1",
+          },
+          engineEvidence: {
+            outcome: "failed_before_apply",
+            eventAnchorId,
+            validation: {
+              actionWasInHistoricalLegalActions: "not_applicable",
+              engineApplyActionValidated: false,
+            },
+          },
+        },
       });
+      const decisionContext = await service.storageMaintenanceDecisionAnalysis(
+        created.matchId,
+        failureDecisionIndex,
+      );
+      expect(decisionContext).toMatchObject({
+        schemaVersion: "netgrid-decision-analysis-context-v2",
+        audit: {
+          capture: "persisted",
+          actor: "runner",
+          legalActions: {
+            actions: expect.arrayContaining([
+              expect.objectContaining({
+                actionId: expect.any(String),
+                actionType: expect.any(String),
+                timingPoint: expect.any(String),
+                costs: expect.any(Array),
+                targetRequirements: expect.any(Array),
+                bindings: expect.any(Object),
+              }),
+            ]),
+          },
+          analysisSnapshot: {
+            stateVersion: beforeFailure.gameState.stateVersion,
+            verification: { status: "verified_at_capture" },
+          },
+          checkpointCapture: {
+            provenance: "persisted_at_decision",
+            actor: "runner",
+            stateVersion: beforeFailure.gameState.stateVersion,
+            input: {
+              side: "runner",
+              playerView: {
+                side: "runner",
+                stateVersion: beforeFailure.gameState.stateVersion,
+              },
+            },
+            runtime: {
+              schemaVersion: "ai-runtime-checkpoint-v1",
+            },
+          },
+        },
+      });
+      const capturedActions = (
+        (
+          decisionContext?.audit as {
+            legalActions?: {
+              actions?: Array<{ actionId: string; payload?: unknown }>;
+            };
+          }
+        )?.legalActions?.actions ?? []
+      ).map((action) => ({
+        actionId: action.actionId,
+        payload: action.payload,
+      }));
+      expect(capturedActions).toStrictEqual(
+        failedLegalActions.map((action) => ({
+          actionId: action.actionId,
+          payload: action.payload,
+        })),
+      );
     } finally {
       storage.close?.();
       await rm(dir, { recursive: true, force: true });
