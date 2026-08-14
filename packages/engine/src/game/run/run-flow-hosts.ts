@@ -593,7 +593,19 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       costs: {
         creditCostForAction: (legalAction) =>
           host.payment.creditCostForAction(legalAction),
-        rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
+        printedRezCostForCard: (cardId) =>
+          Math.max(0, host.cards.definitionFor(state, cardId).rezCost ?? 0),
+        corpIceInstallTotalCost: (cardId, server) =>
+          host.payment.corpIceInstallTotalCost(state, cardId, server),
+      },
+      install: {
+        finalizeCorpIceInstallInnermost: (cardId, server, legalAction) =>
+          host.install.finalizeCorpIceInstallInnermost(
+            state,
+            cardId,
+            server,
+            legalAction,
+          ),
       },
       credits: {
         spend: (side, amount) =>
@@ -1014,8 +1026,11 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             amount,
             legalAction,
           ),
-        preventOneVirusCounterWithCounterPrevention: () =>
-          host.counters.preventOneVirusCounterWithCounterPrevention(state),
+        preventOneVirusCounterWithCounterPrevention: (target) =>
+          host.counters.preventOneVirusCounterWithCounterPrevention(
+            state,
+            target,
+          ),
         poxCountersForServer: (serverId) =>
           host.counters.poxCountersForServer(state, serverId),
       },

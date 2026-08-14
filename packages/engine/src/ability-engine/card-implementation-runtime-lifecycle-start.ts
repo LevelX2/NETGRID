@@ -206,6 +206,13 @@ export function executeCardImplementationStartOfCorpTurnEffects(
               kind,
               reason: "start_of_turn",
             }),
+          grantSourceBoundActions: (side, amount) =>
+            deps.grantSourceBoundActions(state, {
+              side,
+              sourceCardInstanceId: cardId,
+              sourceDefinitionId: definition.id,
+              amount,
+            }),
           drawCards: (side, amount) => deps.drawCards(state, side, amount),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),
@@ -285,6 +292,13 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
               kind,
               reason: "start_of_turn",
             }),
+          grantSourceBoundActions: (side, amount) =>
+            deps.grantSourceBoundActions(state, {
+              side,
+              sourceCardInstanceId: cardId,
+              sourceDefinitionId: definition.id,
+              amount,
+            }),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),
           takeHostedCredits: (sourceCardId, side, amount) =>
@@ -351,6 +365,13 @@ export function executeCardImplementationRunnerRunStartEffects(
               gainOrdinal,
               kind,
               reason: "run_start",
+            }),
+          grantSourceBoundActions: (side, amount) =>
+            deps.grantSourceBoundActions(state, {
+              side,
+              sourceCardInstanceId: cardId,
+              sourceDefinitionId: definition.id,
+              amount,
             }),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),

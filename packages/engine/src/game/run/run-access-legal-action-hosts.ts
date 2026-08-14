@@ -52,6 +52,7 @@ export type RunAccessLegalActionHostCompositionHost = {
       | "isRestrictedHostedCreditSource"
       | "spendRunnerAccessTrashCredits"
     >;
+  install: RunFlowHost["install"];
   choices: RunFlowHost["choices"] & AccessFlowCompositionHost["choices"];
   cardImplementation: {
     accessEffectsForDefinition: AccessFlowCompositionHost["cards"]["accessEffectsForDefinition"];
@@ -93,6 +94,7 @@ export function createRunAccessLegalActionHostComposition(
   const run = requiredGroup(host.run, "run");
   const access = requiredGroup(host.access, "access");
   const payment = requiredGroup(host.payment, "payment");
+  const install = requiredGroup(host.install, "install");
   const choices = requiredGroup(host.choices, "choices");
   const cardImplementation = requiredGroup(
     host.cardImplementation,
@@ -148,9 +150,11 @@ export function createRunAccessLegalActionHostComposition(
       credits: payment.credits,
       rezCostForCard: payment.rezCostForCard,
       creditCostForAction: payment.creditCostForAction,
+      corpIceInstallTotalCost: payment.corpIceInstallTotalCost,
       spendCorpRunTemporaryCreditsForCurrentRunCost:
         payment.spendCorpRunTemporaryCreditsForCurrentRunCost,
     },
+    install,
     counters: callbacks.counters,
     ice: callbacks.ice,
     zones: callbacks.zones,
@@ -236,6 +240,8 @@ export function createRunAccessLegalActionHostComposition(
     choices: {
       openRunnerInstalledTrashPreventionWindow:
         choices.openRunnerInstalledTrashPreventionWindow,
+      startRunnerInstalledMultiTrashChoice:
+        choices.startRunnerInstalledMultiTrashChoice,
     },
     turn: {
       ensureRunnerTurnFlags: callbacks.turn.ensureRunnerTurnFlags,

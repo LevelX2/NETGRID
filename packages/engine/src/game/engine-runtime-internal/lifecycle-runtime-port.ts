@@ -55,6 +55,11 @@ export type LifecycleRuntimePort = {
     sourceDefinitionId: CardDefinitionId,
     legalAction?: LegalAction,
   ) => void;
+  resolveFortCapacityCleanupChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
   drawRunnerCard: (
     state: GameState,
     drawTaxDecision?: DrawTaxDecision,

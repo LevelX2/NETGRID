@@ -774,6 +774,38 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
 });
 
 describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () => {
+  it("allows Team Restructuring to choose zero targets", () => {
+    let state = apply(
+      MECHANIC_SMOKE_GAMES.agendaScoring("team-restructuring-zero-targets"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    moveCorpCardToHq(state, "onr_v1_305_team-restructuring");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_305_team-restructuring",
+    );
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [expect.objectContaining({ id: "placement_none" })],
+    });
+    state = applyChoice(state, "corp", "placement_none");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_305_team-restructuring",
+      addedAdvancementCounters: 0,
+      targetCount: 0,
+    });
+  });
+
   it("keeps V1.9.19 agenda and operation targets deterministic and leak-safe", () => {
     let state = MECHANIC_SMOKE_GAMES.agendaScoring(
       "spotcheck-agenda-run-recurring-v1919",

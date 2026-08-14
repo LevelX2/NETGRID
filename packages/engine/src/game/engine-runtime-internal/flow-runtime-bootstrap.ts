@@ -200,6 +200,7 @@ import {
   type RunnerSpecialTriggerExecutionHost,
 } from "../abilities/runner-special-trigger-execution";
 import {
+  finalizeCorpIceInstallAfterExternalPayment,
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
@@ -640,12 +641,18 @@ function accessSourceDefinitionIdsForRuntime(): {
       hasAccessEffect(
         implementation,
         (effect) =>
+          effect.sourceZones.includes("installed") &&
+          effect.sourceZones.includes("hq") &&
+          effect.sourceZones.includes("rd") &&
+          effect.ignoreIfAccessedFrom?.includes("archives") === true &&
           effect.effects.some(
             (candidate) =>
               candidate.kind === "damage" &&
               candidate.damageType === "net" &&
               candidate.amount === 2,
-          ) && effect.installedSourceActivation === "any_rez_state",
+          ) &&
+          (effect.installedSourceActivation ?? "requires_rezzed") ===
+            "requires_rezzed",
       ),
     ),
     trap: unique("paid net-damage-and-tag ambush", (implementation) =>
@@ -1300,6 +1307,7 @@ export function configureFlowRuntimeBootstrap({
         credits,
         rezCostForCard,
         creditCostForAction: runtimePorts.creditCostForAction,
+        corpIceInstallTotalCost: runtimePorts.corpIceInstallTotalCost,
         hostedPaymentCredits,
         spendCorpRunTemporaryCreditsForCurrentRunCost,
         restrictedHostedCreditSourceIds,
@@ -1307,10 +1315,38 @@ export function configureFlowRuntimeBootstrap({
         spendRunnerAccessTrashCredits:
           runtimePorts.spendRunnerAccessTrashCredits,
       },
+      install: {
+        finalizeCorpIceInstallInnermost: (state, cardId, server, legalAction) =>
+          finalizeCorpIceInstallAfterExternalPayment(
+            runtimePorts.installCardHost(state),
+            cardId,
+            server,
+            legalAction,
+            { placement: "innermost" },
+          ),
+      },
       choices: {
         hiddenZoneArrangeChoiceHandlerHost:
           runtimePorts.hiddenZoneArrangeChoiceHandlerHost,
         openRunnerInstalledTrashPreventionWindow,
+        startRunnerInstalledMultiTrashChoice: (
+          state,
+          legalAction,
+          sourceCardId,
+          input,
+          eligibleCardIds,
+        ) => {
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId: sourceCardId,
+          };
+          runtimePorts.startRunnerInstalledMultiTrashChoice(
+            state,
+            legalAction,
+            input,
+            eligibleCardIds,
+          );
+        },
       },
       cardImplementation: {
         accessEffectsForDefinition: (definitionId) =>

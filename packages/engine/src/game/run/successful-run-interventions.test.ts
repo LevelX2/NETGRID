@@ -69,6 +69,7 @@ function makeHost(
     sourceTitle?: string;
     hqIceRezCost?: number;
     existingIceCount?: number;
+    iceInstallCostModifier?: number;
   } = {},
 ): {
   state: GameState;
@@ -281,8 +282,24 @@ function makeHost(
     },
     costs: {
       creditCostForAction: (legalAction) => legalAction.costs[0]?.credits ?? 0,
-      rezCostForCard: (cardId) =>
+      printedRezCostForCard: (cardId) =>
         definitions[cardInstances[cardId]!.definitionId]!.rezCost ?? 0,
+      corpIceInstallTotalCost: (_cardId, server) => ({
+        totalCost:
+          server.ice.length + Math.floor(options.iceInstallCostModifier ?? 0),
+      }),
+    },
+    install: {
+      finalizeCorpIceInstallInnermost: (cardId, server) => {
+        state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+        server.ice.unshift(cardId);
+        cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: false,
+          rezzed: false,
+          zone: { side: "corp", zone: "serverIce", serverId: server.id },
+        };
+      },
     },
     credits: {
       spend: (side, amount) => {
@@ -400,6 +417,10 @@ function makeHost(
           server.ice = server.ice.filter((candidate) => candidate !== cardId);
           server.root = server.root.filter((candidate) => candidate !== cardId);
         }
+        if (state.specialZones)
+          state.specialZones.setAside = state.specialZones.setAside.filter(
+            (candidate) => candidate !== cardId,
+          );
       },
       trashCorpInstalledCardToArchives: (cardId) => {
         trashedCorpIds.push(cardId);
@@ -573,7 +594,12 @@ describe("successful run interventions", () => {
     });
     expect(fixture.state.corp.credits).toBe(8);
     expect(fixture.state.corp.hq).toEqual([]);
-    expect(fixture.servers[0]!.ice[0]).toBe("hq_ice");
+    expect(fixture.servers[0]!.ice).not.toContain("hq_ice");
+    expect(fixture.state.specialZones?.setAside).toContain("hq_ice");
+    expect(fixture.state.cardInstances.hq_ice).toMatchObject({
+      rezzed: false,
+      zone: { side: "special", zone: "set_aside", visibility: "public" },
+    });
     expect(fixture.state.run?.phase).toBe("encounter_ice");
     expect(fixture.begunEncounters).toEqual(["hq_ice"]);
     expect(legalAction.payload).toMatchObject({
@@ -622,6 +648,31 @@ describe("successful run interventions", () => {
     });
   });
 
+  it("applies normal ICE-install cost modifiers to Jenny Jett", () => {
+    const fixture = makeHost({
+      sourceDefinitionId: "onr_v1_359_jenny-jett",
+      sourceTitle: "Jenny Jett",
+      existingIceCount: 2,
+      iceInstallCostModifier: 2,
+    });
+    fixture.state.pendingChoice = delayedChoice(
+      "install_hq_ice_innermost_after_successful_run",
+    );
+    const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
+
+    const result = resolveSuccessfulRunInterventionChoice(
+      fixture.host,
+      legalAction,
+      {
+        selectedChoices: { selectedOptionIds: ["ice_hq_ice"] },
+      } as unknown as PlayerAction,
+    );
+
+    expect(result).toMatchObject({ installCost: 4 });
+    expect(fixture.state.corp.credits).toBe(6);
+    expect(fixture.servers[0]!.ice[0]).toBe("hq_ice");
+  });
+
   it("finalizes delayed success and trashes Dr. Dreff temporary ICE after passing it", () => {
     const fixture = makeHost();
     fixture.state.run = {
@@ -635,7 +686,13 @@ describe("successful run interventions", () => {
     };
     fixture.state.cardInstances.hq_ice = {
       ...fixture.state.cardInstances.hq_ice!,
-      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      faceup: true,
+      rezzed: false,
+      zone: { side: "special", zone: "set_aside", visibility: "public" },
+    };
+    fixture.state.specialZones = {
+      setAside: ["hq_ice"],
+      removedFromGame: [],
     };
     const legalAction = { payload: {}, costs: [] } as unknown as LegalAction;
 
@@ -646,7 +703,8 @@ describe("successful run interventions", () => {
     );
 
     expect(result).toMatchObject({ handled: true, successFinalized: true });
-    expect(fixture.trashedCorpIds).toEqual(["hq_ice"]);
+    expect(fixture.state.corp.archives).toContain("hq_ice");
+    expect(fixture.trashedCorpIds).toEqual([]);
     expect(fixture.state.run?.delayedSuccessfulRun).toBeUndefined();
     expect(legalAction.payload).toMatchObject({
       temporaryEncounterTrashed: true,

@@ -2205,7 +2205,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_disinfectant_runner",
           name: "P3.51 Disinfectant Runner",
           cards: [
-            { id: "onr_v1_009_butcher-boy", quantity: 1 },
+            { id: "onr_v1_009_butcher-boy", quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.counterRecurring.runner.cards.filter(
               (card) => card.id !== "onr_v1_009_butcher-boy",
             ),
@@ -2216,7 +2216,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           id: "p351_disinfectant_corp",
           name: "P3.51 Disinfectant Corp",
           cards: [
-            { id: "onr_v1_319_disinfectant-inc", quantity: 1 },
+            { id: "onr_v1_319_disinfectant-inc", quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.counterRecurring.corp.cards.filter(
               (card) => card.id !== "onr_v1_319_disinfectant-inc",
             ),
@@ -2226,27 +2226,25 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       }),
     );
     disinfectant.corp.credits = 3;
-    const disinfectantId = moveCorpCardToHq(
-      disinfectant,
-      "onr_v1_319_disinfectant-inc",
-    );
-    removeEverywhere(disinfectant, disinfectantId);
-    const disinfectantServer = {
-      id: "remote_1",
-      kind: "remote",
-      label: "Remote 1",
-      ice: [],
-      root: [],
-    } as (typeof disinfectant.corp.servers)[number];
-    disinfectant.corp.servers.push(disinfectantServer);
-    disinfectantServer.root.push(disinfectantId);
-    disinfectant.cardInstances[disinfectantId] = {
-      ...disinfectant.cardInstances[disinfectantId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
-      faceup: true,
-      rezzed: true,
-    };
+    const disinfectantIds = [
+      addRezzedCorpRootForTest(
+        disinfectant,
+        "onr_v1_319_disinfectant-inc",
+        "remote_1",
+        "disinfectant_first",
+      ),
+      addRezzedCorpRootForTest(
+        disinfectant,
+        "onr_v1_319_disinfectant-inc",
+        "remote_2",
+        "disinfectant_second",
+      ),
+    ];
     const butcherId = installRunnerProgramForTest(
+      disinfectant,
+      "onr_v1_009_butcher-boy",
+    );
+    const secondButcherId = installRunnerProgramCopyForTest(
       disinfectant,
       "onr_v1_009_butcher-boy",
     );
@@ -2259,6 +2257,29 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       };
     }
     moveCorpCardToHq(disinfectant, "simple_economy_operation");
+
+    let noCredit = structuredClone(disinfectant);
+    noCredit.corp.credits = 0;
+    noCredit = apply(
+      noCredit,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    noCredit = apply(
+      noCredit,
+      "runner",
+      (action) =>
+        action.type === "access_card" ||
+        action.type === "steal_agenda" ||
+        action.type === "decline_trash",
+    );
+    expect(noCredit.pendingChoice).toBeUndefined();
+    expect(
+      noCredit.purgeableRunnerVirusCounters?.corp
+        ?.successful_hq_run_pair_credit,
+    ).toBe(2);
+
     disinfectant = apply(
       disinfectant,
       "runner",
@@ -2273,14 +2294,64 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.type === "steal_agenda" ||
         action.type === "decline_trash",
     );
-    expect(cardCounterAmount(disinfectant, butcherId, "virus")).toBe(0);
-    expect(disinfectant.corp.credits).toBe(2);
-    expect(disinfectant.eventLog.at(-1)?.publicPayload).toMatchObject({
-      amounts: {
-        virusCounterAvoided: 1,
-        counterPreventionCreditsPaid: 1,
-      },
+    expect(disinfectant.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "card_implementation.counter_prevention_replacement",
     });
+    expect(cardCounterAmount(disinfectant, butcherId, "virus")).toBe(0);
+    expect(cardCounterAmount(disinfectant, secondButcherId, "virus")).toBe(0);
+    expect(disinfectant.corp.credits).toBe(3);
+    expect(
+      disinfectant.pendingVirusCounterPrevention?.targets.map((target) =>
+        target.kind === "corp_pool" ? target.counterType : target.kind,
+      ),
+    ).toEqual([
+      "successful_hq_run_pair_credit",
+      "successful_hq_run_pair_credit",
+    ]);
+
+    let declined = structuredClone(disinfectant);
+    declined = applyChoice(declined, "corp", "pass");
+    expect(declined.pendingChoice?.source).toBe(
+      "card_implementation.counter_prevention_replacement",
+    );
+    declined = applyChoice(declined, "corp", "pass");
+    expect(
+      declined.purgeableRunnerVirusCounters?.corp
+        ?.successful_hq_run_pair_credit,
+    ).toBe(2);
+    expect(declined.corp.credits).toBe(3);
+
+    const firstPreventionOption = disinfectant.pendingChoice?.options.find(
+      (option) => option.value === disinfectantIds[1],
+    );
+    expect(firstPreventionOption).toBeDefined();
+    disinfectant = applyChoice(
+      disinfectant,
+      "corp",
+      firstPreventionOption?.id ?? "",
+    );
+    expect(
+      disinfectant.pendingChoice?.options.some(
+        (option) => option.value === disinfectantIds[1],
+      ),
+    ).toBe(false);
+    const secondPreventionOption = disinfectant.pendingChoice?.options.find(
+      (option) => option.value === disinfectantIds[0],
+    );
+    disinfectant = applyChoice(
+      disinfectant,
+      "corp",
+      secondPreventionOption?.id ?? "",
+    );
+    expect(cardCounterAmount(disinfectant, butcherId, "virus")).toBe(0);
+    expect(cardCounterAmount(disinfectant, secondButcherId, "virus")).toBe(0);
+    expect(
+      disinfectant.purgeableRunnerVirusCounters?.corp
+        ?.successful_hq_run_pair_credit ?? 0,
+    ).toBe(0);
+    expect(disinfectant.corp.credits).toBe(1);
+    expect(disinfectant.pendingChoice).toBeUndefined();
   });
 
   it("starts Stumble through Wilderspace runs with a temporary trace-link bonus from CardImplementation", () => {

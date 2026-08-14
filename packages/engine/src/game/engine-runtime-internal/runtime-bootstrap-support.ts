@@ -919,6 +919,42 @@ export const corpTracePaymentDeps: CorpTracePaymentDependencies = {
     runtimePorts.corpTraceCounterPoolTotal(state),
   spendCorpTraceCounterPool: (state, amount) =>
     runtimePorts.spendCorpTraceCounterPoolCounters(state, amount),
+  corpTraceBitPoolSources: (state) =>
+    recurringTraceCreditPoolSourceIds(state).map((cardId) => ({
+      kind: "corp_trace_bit_pool" as const,
+      sourceCardInstanceId: cardId,
+      sourceDefinitionId: definitionFor(state, cardId).id,
+      available: cardCounter(state, cardId, "bit"),
+    })),
+  spendCorpTraceBitPoolSource: (state, cardId, amount) => {
+    const available = cardCounter(state, cardId, "bit");
+    const spent = Math.min(available, Math.max(0, Math.floor(amount)));
+    spendCardCounter(state, cardId, "bit", spent);
+    return spent;
+  },
+  corpTraceCounterPoolSources: (state) =>
+    runtimePorts.corpTraceCounterPoolSourceIds(state).map((cardId) => {
+      const counterType = runtimePorts.corpTraceCounterPoolCounterType(
+        state,
+        cardId,
+      );
+      return {
+        kind: "corp_trace_counter_pool" as const,
+        sourceCardInstanceId: cardId,
+        sourceDefinitionId: definitionFor(state, cardId).id,
+        available: cardCounter(state, cardId, counterType),
+      };
+    }),
+  spendCorpTraceCounterPoolSource: (state, cardId, amount) => {
+    const counterType = runtimePorts.corpTraceCounterPoolCounterType(
+      state,
+      cardId,
+    );
+    const available = cardCounter(state, cardId, counterType);
+    const spent = Math.min(available, Math.max(0, Math.floor(amount)));
+    spendCardCounter(state, cardId, counterType, spent);
+    return spent;
+  },
   cardCounter,
 };
 

@@ -1282,9 +1282,13 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.pendingChoice?.source).toBe(
+      "card_implementation.runner_installed_multi_trash",
+    );
+    state = applyChoices(state, "corp", [`target_${blinkId}`]);
     expect(state.runner.heap).toContain(blinkId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "access_card",
+      actionType: "resolve_choice",
       ambushDefinitionId: "onr_v1_323_experimental-ai",
       trashedCardDefinitionId: "onr_v1_007_blink",
     });
@@ -1332,6 +1336,11 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
+    const programOptions = state.pendingChoice?.options.map(
+      (option) => option.id,
+    );
+    expect(programOptions).toHaveLength(2);
+    state = applyChoices(state, "corp", programOptions ?? []);
     expect(
       state.runner.heap.map((id) => state.cardInstances[id]?.definitionId),
     ).toEqual(expect.arrayContaining(["simple_decoder", "simple_fracter"]));
@@ -3947,8 +3956,22 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     );
     access = passRootRezWindowBeforeAccessIfOpen(access);
     access = apply(access, "runner", (action) => action.type === "access_card");
+    expect(access.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "card_implementation.runner_installed_multi_trash",
+      minSelections: 2,
+      maxSelections: 2,
+      selectionOrdering: "ordered",
+    });
+    const orderedHardwareOptions = [secondHardware, firstHardware].map(
+      (hardwareId) =>
+        access.pendingChoice?.options.find(
+          (option) => option.value === hardwareId,
+        )?.id ?? "",
+    );
+    access = applyChoices(access, "corp", orderedHardwareOptions);
     expect(access.runner.heap).toEqual(
-      expect.arrayContaining([firstHardware, secondHardware]),
+      expect.arrayContaining([secondHardware, firstHardware]),
     );
     expect(access.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
@@ -4050,6 +4073,17 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(accessResult.ok).toBe(true);
     if (!accessResult.ok) throw new Error(accessResult.error.message);
     state = accessResult.state;
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "card_implementation.runner_installed_multi_trash",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    const hardwareTrashOption = state.pendingChoice?.options.find(
+      (option) => option.value === wuTechId,
+    );
+    expect(hardwareTrashOption).toBeDefined();
+    state = applyChoice(state, "corp", hardwareTrashOption?.id ?? "");
 
     expect(state.runner.heap).toContain(wuTechId);
     expect(state.runner.memoryUsed).toBe(5);

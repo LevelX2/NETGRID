@@ -81,7 +81,7 @@ export function createTurnCorpRuntime(
     distribution: AdvancementDistributionMode,
   ): AdvancementDistributionOption[] {
     const targets = advanceableInstalledCardTargets(state);
-    if (amount <= 0 || targets.length === 0) return [];
+    if (amount <= 0) return [];
     if (distribution === "single_target") {
       return targets.map((targetId) => {
         const title = deps.definitionFor(state, targetId).title;
@@ -95,7 +95,14 @@ export function createTurnCorpRuntime(
       });
     }
     if (distribution === "up_to_distinct_targets_one_each") {
-      const options: AdvancementDistributionOption[] = [];
+      const options: AdvancementDistributionOption[] = [
+        {
+          id: "placement_none",
+          label: "Keine Advancement-Counter legen",
+          publicLabel: "Keine Advancement-Counter legen",
+          value: "none",
+        },
+      ];
       for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
         const firstTargetId = deps.mustArrayValue(
           targets,
@@ -218,6 +225,7 @@ export function createTurnCorpRuntime(
   function parseAdvancementDistributionValue(
     value: string,
   ): Array<[CardInstanceId, number]> {
+    if (value === "none") return [];
     if (!value) throw new Error("Advancement-Choice hat keine Auswahl.");
     return value.split("|").map((entry) => {
       const [targetId, rawAmount] = entry.split(":");
@@ -281,7 +289,7 @@ export function createTurnCorpRuntime(
       }
     }
     if (mode === "up_to_distinct_targets_one_each") {
-      if (total < 1 || total > amount)
+      if (total > amount)
         throw new Error("Team Restructuring braucht bis zu zwei Ziele.");
       return;
     }

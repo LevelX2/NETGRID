@@ -388,6 +388,42 @@ describe("CardRegistry", () => {
     ]);
   });
 
+  it("keeps the final Originalset audit block canonical and planning-precise", () => {
+    const namatoki = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_361_namatoki-plaza" as CardDefinitionId,
+    )!;
+    const tokyoChiba = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_371_tokyo-chiba-infighting" as CardDefinitionId,
+    )!;
+    const washington = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_374_washington-d-c-city-grid" as CardDefinitionId,
+    )!;
+
+    expect(namatoki.engine.leavePlayCleanup).toContainEqual(
+      expect.objectContaining({
+        kind: "trash_agenda_or_node_if_fort_over_capacity",
+        selection: "corp_choice",
+      }),
+    );
+    expect(tokyoChiba.text.rulesText).toContain(
+      "Only one region may be installed in each fort. Trash older ones.",
+    );
+    expect(washington.planningAnnotations?.card).not.toContainEqual(
+      expect.objectContaining({
+        kind: "tactic_interpretation",
+        signal: "corp.remote_protection",
+      }),
+    );
+    expect(washington.planningAnnotations?.card).toContainEqual({
+      kind: "remote_role",
+      role: "score_acceleration",
+      threatLevel: "medium",
+    });
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

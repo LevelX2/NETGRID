@@ -148,8 +148,15 @@ export function successfulRunInterventionCost(
   hqIceId: CardInstanceId,
 ): number {
   if (kind === "temporary_hq_ice_encounter_after_successful_run")
-    return Math.max(0, Math.floor(host.costs.rezCostForCard(hqIceId) / 2));
-  return Math.max(0, Math.floor(host.servers.mustServer(serverId).ice.length));
+    return Math.max(
+      0,
+      Math.floor(host.costs.printedRezCostForCard(hqIceId) / 2),
+    );
+  const server = host.servers.mustServer(serverId);
+  return Math.max(
+    0,
+    Math.floor(host.costs.corpIceInstallTotalCost(hqIceId, server).totalCost),
+  );
 }
 
 export function buildSuccessfulRunFollowupActions(
@@ -712,8 +719,6 @@ export function resolveSuccessfulRunInterventionChoice(
     hqIceId as CardInstanceId,
   );
   host.credits.spend("corp", cost);
-  host.zones.removeFromAllZones(hqIceId as CardInstanceId);
-  server.ice.unshift(hqIceId as CardInstanceId);
   run.successfulRunInterventionUsedSourceIds = [
     ...used,
     sourceCardId as CardInstanceId,
@@ -722,11 +727,18 @@ export function resolveSuccessfulRunInterventionChoice(
   delete host.state.pendingChoice;
 
   if (kind === "temporary_hq_ice_encounter_after_successful_run") {
+    host.zones.removeFromAllZones(hqIceId as CardInstanceId);
+    const specialZones = (host.state.specialZones ??= {
+      setAside: [],
+      removedFromGame: [],
+    });
+    specialZones.setAside.push(hqIceId as CardInstanceId);
+    specialZones.setAside.sort();
     host.state.cardInstances[hqIceId] = {
       ...host.cards.cardInstanceFor(hqIceId as CardInstanceId),
       faceup: true,
-      rezzed: true,
-      zone: { side: "corp", zone: "serverIce", serverId: server.id },
+      rezzed: false,
+      zone: { side: "special", zone: "set_aside", visibility: "public" },
     };
     host.state.run = {
       ...run,
@@ -772,12 +784,11 @@ export function resolveSuccessfulRunInterventionChoice(
     };
   }
 
-  host.state.cardInstances[hqIceId] = {
-    ...host.cards.cardInstanceFor(hqIceId as CardInstanceId),
-    faceup: false,
-    rezzed: false,
-    zone: { side: "corp", zone: "serverIce", serverId: server.id },
-  };
+  host.install.finalizeCorpIceInstallInnermost(
+    hqIceId as CardInstanceId,
+    server,
+    legalAction,
+  );
   host.state.run = {
     ...run,
     phase: "approach_ice",

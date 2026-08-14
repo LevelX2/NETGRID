@@ -18,6 +18,8 @@ export type CardEffectExecutionContext = {
   sourceCapabilityKey?: string;
   /** Captured before a trash-source cost moves the source out of its fort. */
   sourceServerId?: Exclude<ServerId, "new_remote">;
+  /** Captured before costs can move or clear counters from the source. */
+  sourceAdvancementCountersBeforeCosts?: number;
   targetCardId?: CardInstanceId;
   xValue?: number;
   targetRezCost?: number;
@@ -31,6 +33,7 @@ export type CardEffectExecutionContext = {
     gainOrdinal: number,
     kind: "standard" | "temporary_grant",
   ) => CardEffectCreditGainResult;
+  grantSourceBoundActions?: (side: Side, amount: number) => number;
   addRunnerTagsWithPrevention?: (amount: number) => boolean;
   isEffectSuspended?: () => boolean;
   drawCards?: (side: Side, amount: number) => CardEffectDrawCardsResult;

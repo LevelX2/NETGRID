@@ -20,6 +20,10 @@ export const cardSpec = {
         source: "card_text",
         reference: "onr_v1_323_experimental-ai",
       },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Experimental AI",
+      },
     ],
   },
   engine: {
@@ -103,11 +107,6 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "remote.ambush",
         use: "remote.ambush",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
       },
       {
         kind: "tactic_interpretation",

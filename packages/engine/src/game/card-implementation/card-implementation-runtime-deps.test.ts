@@ -139,6 +139,7 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
     actions: {
       createAction: () => action(),
       appendResolvedEffectsToPayload: () => undefined,
+      grantSourceBoundActions: () => 0,
     },
     run: {
       startRun: (
@@ -381,6 +382,7 @@ describe("game card implementation runtime deps root", () => {
         "startRun",
         "finishRun",
         "gainCredits",
+        "grantSourceBoundActions",
         "startPrivateLook",
         "exposeInstalledCorpCardTargets",
         "exposeInstalledCorpCard",

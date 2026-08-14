@@ -222,6 +222,28 @@ function choiceContinuation(
     return undefined;
   }
   if (choice.side !== "corp") return undefined;
+  const continuation = choice.continuation;
+  if (
+    choice.source === "card_implementation.fort_capacity_cleanup" &&
+    continuation?.family === "corp_fort_capacity_cleanup" &&
+    continuation.originActionId === legalAction.actionId &&
+    continuation.createdAtStateVersion === choice.stateVersion &&
+    continuation.sourceCardDefinitionId.length > 0 &&
+    choice.sourceCardDefinitionId === continuation.sourceCardDefinitionId &&
+    continuation.candidateCardInstanceIds.length > 1 &&
+    new Set(continuation.candidateCardInstanceIds).size ===
+      continuation.candidateCardInstanceIds.length &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    choice.options.length === continuation.candidateCardInstanceIds.length &&
+    choice.options.every(
+      (option, index) =>
+        option.value === continuation.candidateCardInstanceIds[index],
+    )
+  )
+    return continuation;
   if (
     choice.source.startsWith("p3_34.distribute_advancement:") ||
     choice.source.startsWith("p3_34.move_advancement:")

@@ -89,15 +89,11 @@ export const cardSpec = {
           "Operations Semantic Review v2: advancement_counter_burst / fast_advance / overadvance_candidate.",
       },
       {
-        kind: "remote_role",
-        role: "score_acceleration",
-        threatLevel: "medium",
-      },
-      {
         kind: "target_preference",
         purpose: "advance_high_value_corp_card",
         preferences: [
           "prefer_option_that_protects_agenda_or_remote_pressure",
+          "best_cards_for_current_plan",
           "central_or_remote_plan_enabler",
         ],
         avoid: ["hidden_info_dependent_choice"],

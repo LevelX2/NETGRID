@@ -1,4 +1,5 @@
 import type {
+  CardCreditGainContinuation,
   CardDefinition,
   CardInstance,
   CardInstanceId,
@@ -436,17 +437,15 @@ export function resolveCorpRootRezEffect(
       acmeLongtail?.kind === "obligation_debt"
         ? acmeLongtail.gainCreditsOnRez
         : 12;
-    host.callbacks.addActiveObligation(1);
-    host.callbacks.trashCorpInstalledCardToArchives(cardId, legalAction);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
+    if (host.state.pendingCorpCreditGainReplacement) {
+      host.state.pendingCorpCreditGainReplacement.continuation = {
+        kind: "corp_root_rez_obligation",
+        sourceCardId: cardId,
+        sourceDefinitionId: definition.id,
         gainedCredits,
-        selfTrashed: true,
-        obligationDebtActive: host.callbacks.activeObligationCount() > 0,
-        obligationDebtCountAfter: host.callbacks.activeObligationCount(),
-        corpCreditsAfter: host.state.corp.credits,
       };
+    } else {
+      finishObligationDebtRootRez(host, cardId, gainedCredits, legalAction);
     }
   }
   return {
@@ -457,6 +456,50 @@ export function resolveCorpRootRezEffect(
     resolvedPayload: legalAction?.payload,
     stateChanged: true,
   };
+}
+
+function finishObligationDebtRootRez(
+  host: RunRezWindowHost,
+  cardId: CardInstanceId,
+  gainedCredits: number,
+  legalAction?: LegalAction,
+): void {
+  host.callbacks.addActiveObligation(1);
+  host.callbacks.trashCorpInstalledCardToArchives(cardId, legalAction);
+  if (!legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    gainedCredits,
+    selfTrashed: true,
+    obligationDebtActive: host.callbacks.activeObligationCount() > 0,
+    obligationDebtCountAfter: host.callbacks.activeObligationCount(),
+    corpCreditsAfter: host.state.corp.credits,
+  };
+}
+
+export function resumeObligationDebtRootRezAfterCreditGain(
+  host: RunRezWindowHost,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CardCreditGainContinuation,
+    { kind: "corp_root_rez_obligation" }
+  >,
+): void {
+  const source = host.state.cardInstances[continuation.sourceCardId];
+  if (
+    !source ||
+    source.definitionId !== continuation.sourceDefinitionId ||
+    !host.state.corp.servers.some((server) =>
+      server.root.includes(continuation.sourceCardId),
+    )
+  )
+    throw new Error("Die Obligation-Quelle ist nicht mehr installiert.");
+  finishObligationDebtRootRez(
+    host,
+    continuation.sourceCardId,
+    continuation.gainedCredits,
+    legalAction,
+  );
 }
 
 export function startRezInterruptJackOutChoice(

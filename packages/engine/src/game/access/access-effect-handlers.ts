@@ -108,8 +108,7 @@ export function resolveAccessPaymentChoice(
     !accessEffectApplies(host, sourceId, effect, accessZone)
   )
     throw new Error("Der Access-Payment-Kontext ist nicht mehr gueltig.");
-  const useOption =
-    effect.cost.kind === "corp_may_pay_credits" ? "pay" : "use";
+  const useOption = effect.cost.kind === "corp_may_pay_credits" ? "pay" : "use";
   if (selectedOptionId !== useOption && selectedOptionId !== "decline")
     throw new Error("Die Access-Payment-Auswahl ist ungueltig.");
   setAccessEffectBasePayload(legalAction, definition, accessZone, effect);
@@ -182,7 +181,8 @@ export function resolveAccessPaymentChoice(
     sourceCardId: sourceId,
     sourceDefinitionId: definition.id,
     accessZone,
-    paidCredits: effect.cost.kind === "corp_may_pay_credits" ? effect.cost.amount : 0,
+    paidCredits:
+      effect.cost.kind === "corp_may_pay_credits" ? effect.cost.amount : 0,
     deletePendingChoice: true,
     resolvedPayload: legalAction.payload as AccessPayload,
     ...(host.legalAction?.resolvedEffects
@@ -254,6 +254,79 @@ export function resumeAccessEffectAfterTagPrevention(
       sourceTitle: definition.title,
     },
   ];
+  if (host.state.winner) return;
+  executeCardImplementationAccessEffectSteps(
+    host,
+    continuation.sourceCardId,
+    definition,
+    effect,
+    continuation.effectIndex,
+    continuation.nextStepIndex,
+  );
+}
+
+export function resumeAccessEffectAfterDamagePrevention(
+  host: AccessEffectHandlerHost,
+): void {
+  const legalAction = requireLegalAction(host);
+  const continuation = host.state.pendingAccessEffectDamageContinuation;
+  if (!continuation)
+    throw new Error("Es ist keine Access-Damage-Fortsetzung offen.");
+  if (
+    host.state.pendingChoice ||
+    host.state.replacementWindow ||
+    host.state.eventModificationWindow ||
+    host.state.run?.accessedCardId !== continuation.sourceCardId
+  )
+    throw new Error("Der Access-Damage-Kontext ist nicht mehr gültig.");
+  const definition = host.cards.definitionFor(continuation.sourceCardId);
+  const effect = host.cards.accessEffectsForDefinition(definition.id)[
+    continuation.effectIndex
+  ];
+  const accessZone = cardImplementationAccessZone(
+    host,
+    continuation.sourceCardId,
+  );
+  const damageStep = effect?.effects[continuation.damageStepIndex];
+  if (
+    !effect ||
+    accessZone !== continuation.accessZone ||
+    !effect.sourceZones.includes(accessZone) ||
+    (effect.ignoreIfAccessedFrom ?? []).includes(accessZone) ||
+    (damageStep?.kind !== "damage" &&
+      damageStep?.kind !== "damage_from_source_advancement_counters")
+  )
+    throw new Error("Die Access-Damage-Fortsetzung ist veraltet.");
+
+  delete host.state.pendingAccessEffectDamageContinuation;
+  setAccessEffectBasePayload(
+    legalAction,
+    definition,
+    accessZone,
+    effect,
+    false,
+  );
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    {
+      effectId: accessEffectId(
+        definition,
+        continuation.sourceCardId,
+        continuation.damageStepIndex,
+        damageStep.kind,
+      ),
+      kind: "damage",
+      visibility: damageStep.visibility,
+      side: "runner",
+      amount: Number(legalAction.payload?.damageAmount ?? 0),
+      damageType: damageStep.damageType,
+      cardsTrashed: Number(legalAction.payload?.cardsTrashed ?? 0),
+      reason: "access_effect",
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+    },
+  ];
+  if (host.state.winner) return;
   executeCardImplementationAccessEffectSteps(
     host,
     continuation.sourceCardId,
@@ -270,9 +343,7 @@ export function resolveAccessInstalledRunnerProgramReturnChoice(
 ): AccessEffectHandlerResult {
   const legalAction = requireLegalAction(host);
   const choice = host.state.pendingChoice;
-  if (
-    choice?.source.startsWith("classic.shock_treatment_programs")
-  )
+  if (choice?.source.startsWith("classic.shock_treatment_programs"))
     return resolveShockTreatmentProgramChoice(host, selectedOptionIds);
   if (!choice || !choice.source.startsWith("proteus.return_runner_programs"))
     throw new Error("Es ist keine Runner-Program-Return-Choice offen.");
@@ -362,26 +433,36 @@ export function resolveShockTreatmentProgramChoice(
     throw new Error("Die Shock-Treatment-Choice ist nicht mehr gültig.");
   const sourceId = sourceCardId as CardInstanceId;
   const definition = host.cards.definitionFor(sourceId);
-  const effect = host.cards.accessEffectsForDefinition(definition.id)[effectIndex];
+  const effect = host.cards.accessEffectsForDefinition(definition.id)[
+    effectIndex
+  ];
   const accessZone = cardImplementationAccessZone(host, sourceId);
   if (
     accessZone !== accessZoneRaw ||
     !effect ||
     !accessEffectApplies(host, sourceId, effect, accessZone)
   )
-    throw new Error("Der Shock-Treatment-Access-Kontext ist nicht mehr gültig.");
+    throw new Error(
+      "Der Shock-Treatment-Access-Kontext ist nicht mehr gültig.",
+    );
   const step = effect.effects.find(
-    (candidate) => candidate.kind === "trash_installed_runner_hardware_and_programs",
+    (candidate) =>
+      candidate.kind === "trash_installed_runner_hardware_and_programs",
   );
   if (!step || step.chooser !== "corp")
     throw new Error("Die Shock-Treatment-Choice passt nicht zur Karte.");
   const selectedIds = selectedCardIdsFromChoice(choice, selectedOptionIds);
-  const candidates = runnerInstalledTrashCandidatesForAccessEffect(host, "program");
+  const candidates = runnerInstalledTrashCandidatesForAccessEffect(
+    host,
+    "program",
+  );
   if (selectedIds.length !== Math.min(step.programAmount, candidates.length))
     throw new Error("Die falsche Anzahl Runner-Programme wurde gewählt.");
   for (const selectedId of selectedIds) {
     if (!candidates.includes(selectedId))
-      throw new Error("Das gewählte Runner-Programm ist nicht mehr installiert.");
+      throw new Error(
+        "Das gewählte Runner-Programm ist nicht mehr installiert.",
+      );
   }
   delete host.state.pendingChoice;
   trashInstalledRunnerHardwareAndProgramsForAccessEffect(

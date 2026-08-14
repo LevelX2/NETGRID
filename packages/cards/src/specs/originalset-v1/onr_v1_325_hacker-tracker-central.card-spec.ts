@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "After each trace attempt, whether successful or not, put 1 from the bank on Hacker Tracker Central. During a trace attempt, each bit you spend from Hacker Tracker Central increases by 1 both your trace strength and your trace limit.",
+      "After each trace attempt, whether successful or not, put 1 from the bank on Hacker Tracker Central. During a trace attempt, each bit you spend from Hacker Tracker Central increases by 1 both your trace value and your trace limit.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_325_hacker-tracker-central",
+      },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#Hacker Tracker Central",
       },
     ],
   },
@@ -85,12 +90,6 @@ export const cardSpec = {
         kind: "remote_role",
         role: "tag_punish_asset",
         threatLevel: "medium",
-      },
-      {
-        kind: "target_preference",
-        purpose: "establish_fort_trace_support",
-        preferences: ["protects_agenda_remote"],
-        avoid: [],
       },
       {
         kind: "value_interpretation",

@@ -133,6 +133,8 @@ const AMOUNT_KEYS = [
   "runnerStackAfter",
   "valuPakRestrictedActionsForgone",
   "valuPakTemporaryCreditsReturned",
+  "investmentFirmRedirectedAmount",
+  "investmentFirmCreditsAddedPerSource",
 ] as const;
 
 const TARGET_KEYS = [

@@ -1,5 +1,6 @@
 import type {
   CardDefinition,
+  CardCreditGainContinuation,
   CardInstanceId,
   CorpDrawContinuation,
   GameState,
@@ -60,6 +61,13 @@ export function executeOnPlayCardImplementationAbility(
           kind,
           reason: "card_resolver",
         }),
+      grantSourceBoundActions: (side, amount) =>
+        deps.grantSourceBoundActions(state, {
+          side,
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId: definition.id,
+          amount,
+        }),
       addRunnerTagsWithPrevention: (amount) => {
         runnerTagsBeforeSuspendedEffect = state.runner.tags;
         effectSuspended = deps.addRunnerTagsWithPrevention(
@@ -71,7 +79,9 @@ export function executeOnPlayCardImplementationAbility(
         return effectSuspended;
       },
       isEffectSuspended: () =>
-        effectSuspended || Boolean(state.pendingCorpDraw),
+        effectSuspended ||
+        Boolean(state.pendingCorpDraw) ||
+        Boolean(state.pendingCorpCreditGainReplacement),
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(
@@ -391,7 +401,46 @@ export function executeOnPlayCardImplementationAbility(
         nextEffectIndex: result.suspendedAtEffectIndex + 1,
         creditGainOrdinal: result.creditGainOrdinal,
       };
+    if (
+      state.pendingCorpCreditGainReplacement &&
+      result.suspendedAtEffectIndex + 1 < ability.effects.length
+    )
+      state.pendingCorpCreditGainReplacement.continuation = {
+        kind: "card_effect_on_play",
+        sourceCardId: cardId,
+        sourceDefinitionId: definition.id,
+        nextEffectIndex: result.suspendedAtEffectIndex + 1,
+        creditGainOrdinal: result.creditGainOrdinal,
+      };
   }
+}
+
+export function resumeOnPlayCardImplementationAfterCreditGain(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  legalAction: LegalAction,
+  continuation: Extract<
+    CardCreditGainContinuation,
+    { kind: "card_effect_on_play" }
+  >,
+): void {
+  if (state.pendingChoice || state.pendingCorpCreditGainReplacement)
+    throw new Error("Der Credit-Gain ist noch nicht abgeschlossen.");
+  const definition = deps.definitionFor(state, continuation.sourceCardId);
+  if (definition.id !== continuation.sourceDefinitionId)
+    throw new Error("Die On-Play-Credit-Quelle ist veraltet.");
+  executeOnPlayCardImplementationAbility(
+    deps,
+    state,
+    legalAction,
+    definition,
+    continuation.sourceCardId,
+    {
+      startEffectIndex: continuation.nextEffectIndex,
+      creditGainOrdinal: continuation.creditGainOrdinal,
+      skipLegalityCheck: true,
+    },
+  );
 }
 
 export function resumeOnPlayCardImplementationAfterCorpDraw(

@@ -204,15 +204,6 @@ export function handleCreditEconomyExecution(
     );
   }
   host.actions.spendClick(state, legalAction.side);
-  if (
-    host.delegates.shouldOpenCorpInstalledEconomyCreditChoice(
-      state,
-      legalAction,
-    )
-  ) {
-    host.delegates.startCorpInstalledEconomyCreditChoice(state, legalAction);
-    return handled(legalAction);
-  }
   if (legalAction.payload?.v1911HiddenZoneAbility) {
     host.hiddenZone.resolveV1911RunnerHiddenZoneAbility(state, legalAction);
     return handled(legalAction);

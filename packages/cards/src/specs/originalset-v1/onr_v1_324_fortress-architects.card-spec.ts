@@ -63,7 +63,7 @@ export const cardSpec = {
       },
       {
         kind: "strategic_role",
-        role: "tax_tool",
+        role: "enabler",
       },
       {
         kind: "line_support",
@@ -73,20 +73,11 @@ export const cardSpec = {
       {
         kind: "strategy_support",
         strategyKey: "corp.ice_tax_glacier",
-        role: "tax_tool",
-        roleDetail: "ice_tax_support",
+        role: "enabler",
+        roleDetail: "ice_buildout_install_discount",
         confidence: "medium",
         rationale:
           "Static ICE install discount supports ICE buildout/tax; it is not a rez discount and should not create a separate economy_rez_reserve anchor by itself.",
-      },
-      {
-        kind: "target_preference",
-        purpose: "install_best_legal_target",
-        preferences: [
-          "high_install_cost_or_memory",
-          "central_or_remote_plan_enabler",
-        ],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "value_interpretation",

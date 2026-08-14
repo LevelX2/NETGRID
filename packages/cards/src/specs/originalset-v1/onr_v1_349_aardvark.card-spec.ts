@@ -70,12 +70,6 @@ export const cardSpec = {
         role: "protect_hq",
       },
       {
-        kind: "target_preference",
-        purpose: "restrict_or_trash_worm_breaker",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",

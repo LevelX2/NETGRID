@@ -53,7 +53,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_run_start_tax",
+        role: "remote_asset_pressure",
       },
       {
         kind: "strategic_role",
@@ -72,16 +72,6 @@ export const cardSpec = {
         confidence: "medium",
         rationale:
           "Start-of-run credit tax supports tax/glacier without creating run legality. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "remote_role",
-        role: "run_tax",
-        threatLevel: "medium",
       },
       {
         kind: "value_interpretation",

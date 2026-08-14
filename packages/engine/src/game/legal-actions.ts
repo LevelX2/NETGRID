@@ -261,7 +261,12 @@ function buildLegalActionsUnchecked(
         ? runnerApproachIceExposeActions(encounterEntryHost)
         : [];
     return side === "corp"
-      ? buildCorpApproachActions(host.hosts.runRezWindowHost())
+      ? [
+          ...buildCorpApproachActions(host.hosts.runRezWindowHost()),
+          ...buildCorpDuringRunCardImplementationActions(
+            host.hosts.runCardImplementationActionHost(),
+          ).legalActions,
+        ]
       : [];
   }
   if (state.timingPoint === "run.encounter_ice") {

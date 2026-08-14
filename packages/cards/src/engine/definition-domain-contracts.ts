@@ -37,6 +37,8 @@ export type CardLifecycleImplementation = {
   start_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
   end_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
   on_runner_run_start?: readonly CardLifecycleTriggeredAbilityImplementation[];
+  /** The printed timing explicitly permits rez immediately before this source's Corp-turn-start ability. */
+  can_rez_at_start_of_corp_turn?: boolean;
 };
 
 export type CardInstallTargetBindingImplementation = {
@@ -727,7 +729,7 @@ export type CardFortCapacityModifierImplementation = {
 export type CardLeavePlayCleanupImplementation = {
   kind: "trash_agenda_or_node_if_fort_over_capacity";
   target: "agenda_or_node_inside_same_fort";
-  selection: "deterministic_lowest_instance_id";
+  selection: "corp_choice";
   visibility: Extract<EventVisibilityClass, "public">;
 };
 

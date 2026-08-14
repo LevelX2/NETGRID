@@ -80,10 +80,6 @@ export const cardSpec = {
         role: "remote_asset_modifier",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.asset_economy",
-      },
-      {
         kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",

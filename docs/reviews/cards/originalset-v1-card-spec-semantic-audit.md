@@ -1165,10 +1165,202 @@ Status: umgesetzt und durch fokussierte Gates verifiziert.
   gewählten Plan. Es entstand kein Choice-Resolver mit eigener Server-,
   Karten- oder Strategieautorität.
 
+## Block 016 – Karten 301 bis 320, Lifecycle-, Multi-Trash- und Replacement-Verträge
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### Start-of-turn und optionale Replacement-Choices
+
+- Corporate Negotiating Center wird nur noch über den source-bound
+  CardImplementation-Lifecycle ausgelöst. Der zusätzliche Legacy-Aufruf nach
+  der geordneten Corp-Startphase ist entfernt; nach einer HQ-Reveal-Choice
+  setzt die Engine die noch offenen Startquellen fort. Eine und zwei Kopien
+  zahlen dadurch exakt einmal je installierter Kopie und bleiben gegenüber
+  anderen Corp-Startquellen frei anordenbar.
+- Disinfectant, Inc. bezahlt die Counter-Vermeidung nicht mehr automatisch.
+  Jeder eintreffende Virus-Counter wird als eigene Fortsetzung gebunden; die
+  Corp kann passen oder eine konkrete noch unbenutzte gerezzte Quelle wählen
+  und deren Creditkosten bezahlen. Bei mehreren Kopien wird nur die gewählte
+  Once-per-turn-Quelle verbraucht.
+
+### Gemeinsamer Hardware-Batch-Trash
+
+- Corprunner’s Shattered Remains wählt Hardware nicht mehr nach technischer
+  Instance-ID. Die Corp bindet die vollständige öffentliche Zielmenge und
+  ihre Reihenfolge vor der Auflösung.
+- Die Karte verwendet denselben geordneten Runner-Installed-Multi-Trash-
+  Vertrag wie Corporate Detective Agency und Power Grid Overload. Das
+  gemeinsame Trash-Imminent-Fenster lässt Prevention und Replacement zu;
+  anschließend verlassen alle nicht verhinderten Primärziele das Spiel,
+  bevor Hosted-, Leave-play- und Memory-Folgen abgearbeitet werden. Die
+  historische `destroy`-zu-`trash`-Errata ist am CardSpec referenziert.
+
+### Nullauswahl und Planning-Semantik
+
+- Die projektweite Auslegung von `up to` einschließlich null gilt auch für
+  Team Restructuring. Die Operation bleibt ohne advancebares Ziel legal und
+  bietet die ausdrückliche Nullverteilung an; positive Verteilungen behalten
+  unterschiedliche Ziele bei.
+- Reine Tag-/Damage-Payoffs tragen keine Bait-Rolle. Trojan Horse bleibt
+  Tag-Quelle statt Tag-Payoff; globale Draw-Tax-, Wall- und Code-Gate-
+  Modifikatoren besitzen keine feste Serverrolle oder fingierte Zielwahl.
+  Corporate Negotiating Center ist Informationspreis und Economy statt
+  Informationsdruck, Shattered Remains Hardware-Ambush statt Economy.
+- Die Annotationen wurden für die Karten 301–320 neu erzeugt und in der
+  reviewed Originalset-Fixture synchronisiert. Es entstand kein zusätzlicher
+  Choice-Resolver mit eigener Server-, Karten- oder Strategieautorität.
+
+## Block 017 – Karten 321 bis 340, Credit-, Action- und Startzugverträge
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### Gemeinsame Auswahl-, Payment- und Replacement-Verträge
+
+- Experimental AI bindet die von der Corp gewählten installierten Programme
+  vollständig vor der Auflösung und verwendet den gemeinsamen
+  Prevention-fähigen Runner-Installed-Batch-Trash. Die historische
+  `destroy`-zu-`trash`-Errata ist am CardSpec referenziert.
+- Trace-Bids können normale Credits, Krumz-Bits und einzelne
+  Hacker-Tracker-Counter quellgenau binden. Mehrere zulässige Aufteilungen
+  erzeugen eine Corp-Choice; eine eindeutig erzwungene Aufteilung wird ohne
+  künstliches Zwischenfenster ausgeführt und vor dem Bezahlen revalidiert.
+- Investment Firm ersetzt nicht mehr nur die Basic Credit Action. Jeder
+  Creditgewinn außerhalb des Corp-Startfensters bindet eine optionale
+  Umleitungsmenge von null bis N; jede aktive Kopie erhält zwei Credits je
+  umgeleitetem Credit. Operations und Mehr-Credit-Gewinne sind von demselben
+  Vertrag erfasst, die eigene Auszahlung nimmt an der source-bound
+  Startzugreihenfolge teil.
+
+### Startzug, Aktionskapazität und Leave-play
+
+- Holovid Campaign deklariert das regelkonforme Rezfenster am Corp-Zugbeginn.
+  Nach dem Rezzen wird die neu fällige Quelle dynamisch in die geordnete
+  Startzugauflösung aufgenommen; unrezzte andere Campaigns öffnen kein
+  unbegründetes Rezfenster.
+- Remote Facility und Nevinyrral vergeben ihre zusätzlichen Aktionen als
+  source-bound Grants. Die Engine erzeugt ausdrückliche LegalAction-Varianten
+  für den Verbrauch; eine noch unbenutzte Aktion wird beim Leave-play
+  widerrufen und `on_rez` plus Startzug kann pro Quelle und Turn nicht doppelt
+  gewähren.
+- Nevinyrrals Verlustbedingung liegt am zentralen Zonenentfernungsvertrag und
+  greift damit auch bei Uninstall beziehungsweise Return-to-HQ. Schlaghund
+  speichert nach suspendiertem Damage eine Damage-zu-Trash-Fortsetzung und
+  trasht die Quelle nach abgeschlossener Prevention; eine Flatline beendet die
+  Partie ohne nachgelagerte Mutation.
+
+### Kosten, Access und Planning-Semantik
+
+- Information Laundering snapshottet seine Advancement-Counter vor den
+  Kosten, bezahlt `trash_source` als Aktivierungskosten und berechnet erst
+  danach den Creditgewinn. Eine installierte Setup!-Kopie löst nur gerezzt
+  aus; HQ, R&D und Archives behalten ihre getrennten Access-Verträge.
+- Hacker Tracker Central verwendet kanonisch `trace value`; Pacifica Regional
+  AI trägt die Turn-Only-Errata. Beide sowie Experimental AI referenzieren die
+  historische Errataquelle.
+- Draw, HQ-Kapazität, ICE-Buildout, globaler Run-Tax, Tag-Snowball,
+  Action Capacity und Hand-Cycling sind für die Karten 321–340
+  richtungsgetreu annotiert. Fingierte Remote-Ziele, Memory-Präferenzen für
+  Corp-ICE und Credit-Economy-Signale ohne Creditgewinn sind entfernt. Die
+  reviewed Originalset-Fixture wurde aus dem aktuellen Hint-Artefakt
+  synchronisiert.
+
+## Block 018 – Karten 341 bis 360, Access-, Run- und Zugstartverträge
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### Suspendierbare Access- und Trash-Auflösung
+
+- Geordnete CardImplementation-Access-Schritte besitzen nach einem
+  suspendierten Damage-Ereignis eine gebundene Fortsetzung. TRAP! fügt den
+  Tag deshalb erst hinzu, nachdem Damage-Replacement und -Prevention
+  vollständig abgeschlossen sind; ein offenes Fenster wird nicht mehr durch
+  den Folgeschritt überschrieben.
+- Chimera verwendet bei mehreren installierten Daemons die gemeinsame
+  Corp-Zielwahl und den Prevention-fähigen Runner-Installed-Batch-Trash. Bei
+  nur einem legalen Ziel entsteht kein bedeutungsloses Zwischenfenster.
+- Ein abgelehntes Aardvark-Rezfenster verbraucht die Reaktion nicht. Solange
+  Aardvark unrezzed bleibt, kann eine spätere Worm-Nutzung am selben ICE die
+  Reaktion erneut anbieten.
+
+### Paid Window und Runner-Zugstart
+
+- Vapor Ops gibt einen Advancement-Counter für einen Credit in Corp-Paid-
+  und den echten Run-Rezfenstern aus. Die separate Action zum Verschieben von
+  Countern bleibt auf die Corp-Hauptphase beschränkt.
+- Verzögertes Agenda-Scoring durch Bizarre Encryption Scheme ist eine
+  revalidierte Quelle derselben Runner-Startzugreihenfolge wie installierte
+  Runner-Karten. Der Runner bestimmt die Reihenfolge gleichzeitig fälliger
+  Quellen; ungültig gewordene Agendaquellen werden nicht aufgelöst.
+
+### Dr. Dreff, Jenny Jett und kanonische Errata
+
+- Dr. Dreff bezahlt die Hälfte der gedruckten Rez-Kosten. Das HQ-ICE wird
+  öffentlich transient beiseitegelegt, aber weder installiert noch gerezzt;
+  nach dem Encounter geht es ohne Install-/Rez-/Leave-play-Lifecycle in die
+  Archives.
+- Jenny Jett verwendet den normalen ICE-Installquote einschließlich
+  zusätzlicher Kosten und Modifikatoren und schließt danach den kanonischen
+  Install-Lifecycle in der innersten Position ab. Erst anschließend beginnt
+  der Approach.
+- Beide CardSpecs verwenden die historische Trigger-Errata „passes the last
+  piece of ice … or declares a run … when it has no ice“ und referenzieren
+  `docs/source/Netrunner Errata 1.70.md`.
+
+### Planning-Semantik
+
+- Statische globale oder fortgebundene Modifikatoren tragen keine fingierte
+  Einzelzielwahl. Unbegründete Economy-, Bait-, feste Zentralserver- und
+  Remote-Protection-Signale wurden entfernt; normale Supportkarten wurden
+  von übergewichteten Strategy Anchors auf richtungsgetreuen Support
+  zurückgestuft.
+- TRAP! bleibt Ambush-Anchor und Tag-Support, Solo Squad ein wiederholbarer
+  Tagged-Damage-Payoff, Crybaby ein persistenter Trace-Enabler. Die reviewed
+  Originalset-Fixture wurde für Karten 341–360 aus dem aktuellen Hint-
+  Artefakt synchronisiert.
+
+## Block 019 – Karten 361 bis 374 und Abschluss des Originalsets
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Mit Karte 374 ist
+der inhaltliche CardSpec-Durchgang durch das Originalset 001–374 vollständig.
+
+### Namatoki Plaza – Corp-Wahl beim Kapazitäts-Cleanup
+
+- `trash_agenda_or_node_if_fort_over_capacity` deklariert keine technische
+  Lowest-Instance-ID-Auswahl mehr, sondern eine echte Corp-Choice.
+- Verlässt Namatoki Plaza das Spiel und wird das Fort dadurch überbelegt,
+  bindet der Lifecycle-Owner alle Agendas und Nodes dieses Forts. Bei
+  Mehrdeutigkeit öffnet er eine source-bound, actor-private Corp-Choice;
+  ohne Überbelegung entsteht kein Zwischenfenster.
+- Die Folgeaktion revalidiert Fort, Kapazität und die vollständige gebundene
+  Kandidatenmenge. Erst danach wird das gewählte Ziel öffentlich in die
+  Archives getrasht und als aufgelöster Effekt protokolliert.
+- Die Regression wählt wahlweise Agenda oder Node, prüft den jeweils anderen
+  Verbleib im Fort, Runner-Redaction sowie deterministisches Replay und
+  StateHash. Der generische Einzielpfad bleibt automatisch; im heutigen
+  gültigen Fortmodell entsteht Überbelegung nach Verlust des einzelnen
+  Zusatzslots allerdings regulär erst bei mindestens zwei Hauptkarten.
+
+### Tokyo-Chiba und Washington, D.C.
+
+- Tokyo-Chiba Infightings kanonischer Region-Text enthält wieder den
+  fehlenden Abschlusssatz `Trash older ones.`. Die zentrale Region-Runtime
+  bleibt unverändert, weil Rez-on-install, Bezahlbarkeit und Ersatz älterer
+  Regionen bereits generisch gelten.
+- Washington, D.C., City Grid bleibt mechanisch unverändert. Die
+  Planning-Semantik beschreibt den Difficulty-Rabatt nun als vorhandene
+  `score_acceleration` statt als Remote-Protection; das präzise
+  `score.agenda_difficulty_discount`-Funktionssignal und der
+  Remote-Scoring-Support bleiben erhalten.
+- New Galveston, Olivia Salazar, Omni Kismet, Paris, Red Herrings, Rio de
+  Janeiro, Roving Submarine, Singapore, Tesseract Fort Construction, Turbeau
+  Delacroix und Twenty-Four-Hour Surveillance bleiben nach der Prüfung
+  unverändert. Insbesondere werden Region-Grundregeln nicht redundant in
+  einzelne CardSpecs kopiert.
+
 ## Bekannte offene Punkte
 
-- Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 301 bis 320.
+- Der inhaltliche CardSpec-Durchgang durch das Originalset 001–374 ist
+  vollständig. Es gibt keinen weiteren regulären Originalset-Kartenblock.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1343,3 +1535,43 @@ Fixture für Karten 281–300 sind gezielt synchronisiert. Ein unveränderter
 Trace-Longtail-Test erwartet bei Microtech ’Trode Set weiterhin einen
 Basis-Link, obwohl dessen aktuelle CardSpec keinen Link-Modifikator besitzt;
 dieser fachfremde Baselinepunkt wurde nicht in Block 015 gezogen.
+
+Für Block 016 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check, acht AI-Artefakt-Vertragstests sowie 27 fokussierte
+Engine-Zeugen grün. Die Evidence umfasst eine und zwei Corporate Negotiating
+Center ohne Legacy-Doppeltrigger, Team Restructurings Nullziel, Shattered
+Remains mit Corp-Wahl und gemeinsamem Prevention-fähigem Batch-Trash,
+Disinfectant-Pass, zwei frei gewählte Quellen und den No-credit-Pfad sowie die
+bestehenden Data-Masons-/Encoder-Verträge. Ein zuvor versehentlich paketweit
+gestarteter Engine-Lauf wurde nicht als Block-Gate gewertet; seine auditnahen
+alten Sofortauflösungs-Erwartungen wurden auf die neuen Choice-Verträge
+aktualisiert und anschließend fokussiert grün geprüft. Aktuelles Hint-Artefakt
+und die einschlägigen reviewed Originalset-Einträge für Karten 301–320 sind
+gezielt synchronisiert.
+
+Für Block 017 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check sowie die fokussierten Access-, Credit-, Trace-,
+Startzug-, Zonen-, Damage-Continuation- und Kartenintegrationszeugen grün.
+Die Evidence umfasst insbesondere Corp-Programmauswahl und Batch-Trash,
+Investment Firm bei Mehr-Credit-Operations und mehreren Kopien, source-bound
+Trace-Zahlungsquellen, Holovids Start-Rez, Nevinyrral-Uninstall,
+Remote-Facility-Action-Revocation, Schlaghund-Fortsetzung und unrezzed Setup!.
+Hint-Artefakt und reviewed Originalset-Einträge für Karten 321–340 sind
+gezielt synchronisiert.
+
+Für Block 018 sind Cards- und Engine-Typecheck, CardSpec-AI-Hint-Generator
+und -Check sowie 102 fokussierte Access-, Choice-, Run-, Zugstart- und
+Originalset-Integrationszeugen grün. Die Evidence umfasst insbesondere
+TRAP!-Damage-Fortsetzung, Aardvark nach abgelehnter Reaktion, Chimera über den
+gemeinsamen Multi-Trash-Vertrag, Bizarre-Startzugordering sowie Dr. Dreffs
+transientes nicht installiertes ICE und Jenny Jetts modifizierte kanonische
+Innermost-Installation. Hint-Artefakt und reviewed Originalset-Einträge für
+Karten 341–360 sind gezielt synchronisiert.
+
+Für Block 019 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check sowie 55 fokussierte CardSpec-, Choice-,
+Kartenintegrations- und AI-Artefakttests grün. Die Evidence umfasst
+Namatokis frei wählbare Agenda-/Node-Ziele, Redaction, Replay und StateHash,
+Tokyo-Chibas vollständigen kanonischen Region-Text sowie Washingtons
+Score-Acceleration-Projektion. Hint-Artefakt und reviewed Originalset-
+Einträge für Karten 361, 371 und 374 sind gezielt synchronisiert.

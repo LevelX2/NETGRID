@@ -60,24 +60,8 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "protect_rnd",
-      },
-      {
-        kind: "plan_role",
-        role: "protect_hq",
-      },
-      {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
         kind: "strategic_role",
         role: "tax_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
       },
       {
         kind: "line_support",
@@ -92,16 +76,6 @@ export const cardSpec = {
         confidence: "medium",
         rationale:
           "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
-      },
-      {
-        kind: "target_preference",
-        purpose: "rez_best_defensive_ice",
-        preferences: [
-          "high_rez_cost_relief",
-          "blocks_relevant_run_path",
-          "protects_agenda_remote",
-        ],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "value_interpretation",

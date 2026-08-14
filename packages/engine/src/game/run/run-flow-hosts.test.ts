@@ -194,6 +194,10 @@ function hostFor(calls: string[]): RunFlowHost {
       credits: () => undefined,
       rezCostForCard: () => 0,
       creditCostForAction: () => 0,
+      corpIceInstallTotalCost: () => ({ totalCost: 0 }),
+    },
+    install: {
+      finalizeCorpIceInstallInnermost: () => undefined,
     },
     counters: {
       cardCounter: () => 0,

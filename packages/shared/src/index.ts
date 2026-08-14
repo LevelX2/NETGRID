@@ -373,6 +373,7 @@ export type CorpActionDebtState = {
 };
 
 export type RestrictedActionFamily =
+  | "any_action"
   | "corp_install"
   | "gain_credit"
   | "draw_card"
@@ -394,6 +395,7 @@ export type TurnBoundExtraActionOffer = {
 
 export type TurnBoundExtraActionGrant = TurnBoundExtraActionOffer & {
   remaining: number;
+  oncePerTurnPerSource?: boolean;
   forced?: boolean;
   targetServerId?: Exclude<ServerId, "new_remote">;
   targetCardInstanceId?: CardInstanceId;
@@ -898,6 +900,14 @@ export type ChoiceRequest = {
 };
 
 export type ChoiceContinuation =
+  | {
+      family: "corp_fort_capacity_cleanup";
+      originActionId: string;
+      sourceCardDefinitionId: CardDefinitionId;
+      serverId: Exclude<ServerId, "new_remote">;
+      candidateCardInstanceIds: CardInstanceId[];
+      createdAtStateVersion: number;
+    }
   | {
       family: "corp_advancement_counter";
       originActionId: string;
@@ -1462,7 +1472,6 @@ export type RunState = {
   runOnceBreakTagAndStealthLossUsedBreakerIds?: CardInstanceId[];
   runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
-  aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<
     Record<CardInstanceId, number[]>
   >;
@@ -1632,6 +1641,9 @@ export type TraceState = {
       amount: number;
     }>;
   };
+  corpBidPaymentSelection?: {
+    bid: number;
+  };
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];
@@ -1720,6 +1732,38 @@ export type CorpDrawContinuation =
       optionalAgendaCardCount: number;
       skivvissCardCount: number;
       additionalSourceDefinitionIds: CardDefinitionId[];
+    };
+
+export type CardCreditGainContinuation =
+  | {
+      kind: "card_effect_on_play";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+    }
+  | {
+      kind: "card_effect_activated";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      sourceAbilityId: string;
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+      originalActionPayload: LegalActionPayload;
+    }
+  | {
+      kind: "card_effect_immediate_lifecycle";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      lifecycle: "on_rez" | "on_install" | "on_score" | "on_leave_play";
+      nextEffectIndex: number;
+      creditGainOrdinal: number;
+    }
+  | {
+      kind: "corp_root_rez_obligation";
+      sourceCardId: CardInstanceId;
+      sourceDefinitionId: CardDefinitionId;
+      gainedCredits: number;
     };
 
 export type CorpDrawTransaction = {
@@ -1862,6 +1906,13 @@ export type GameState = {
   pendingChoice?: PendingChoice;
   hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
+  pendingAccessEffectDamageContinuation?: {
+    sourceCardId: CardInstanceId;
+    effectIndex: number;
+    damageStepIndex: number;
+    nextStepIndex: number;
+    accessZone: "installed" | "hq" | "rd" | "archives";
+  };
   pendingTraceProgramTrashContinuation?: {
     traceId: string;
     traceStep: "runner_bid" | "post_bid_link";
@@ -1887,6 +1938,24 @@ export type GameState = {
     totalDamageAmount: number;
     totalCardsTrashed: number;
   };
+  pendingDamageFollowup?: {
+    kind: "trash_corp_source";
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+  };
+  pendingCorpCreditGainReplacement?: {
+    requestedAmount: number;
+    baseAmount: number;
+    bonusAmount: number;
+    creditsBefore: number;
+    modifierSourceDefinitionIds: CardDefinitionId[];
+    investmentFirmSourceIds: CardInstanceId[];
+    sourceDefinitionId?: CardDefinitionId;
+    sourceCardId?: CardInstanceId;
+    sourceKind: string;
+    sourceReason: string;
+    continuation?: CardCreditGainContinuation;
+  };
   pendingRunStartSourceOrder?: {
     runId: string;
     remaining: Array<{
@@ -1907,8 +1976,11 @@ export type GameState = {
     sourceDefinitionId: CardDefinitionId;
     effectKind:
       | "trash_runner_resources_if_tagged"
-      | "installed_hardware_trash_by_counter";
-    targetCardType: "resource" | "hardware";
+      | "installed_hardware_trash_by_counter"
+      | "access_hardware_trash_by_advancement"
+      | "access_program_trash_by_advancement"
+      | "access_daemon_trash";
+    targetCardType: "resource" | "hardware" | "program" | "daemon";
     minimumTargets: number;
     maximumTargets: number;
     selectionOrdering: "ordered" | "unordered";
@@ -1917,6 +1989,32 @@ export type GameState = {
       cardInstanceId: CardInstanceId;
       choiceValue: string;
     }>;
+  };
+  pendingVirusCounterPrevention?: {
+    targets: Array<
+      | {
+          kind: "card";
+          cardId: CardInstanceId;
+          counterType: CounterType;
+        }
+      | {
+          kind: "corp_pool";
+          counterType: PurgeableRunnerVirusCounterType;
+        }
+      | {
+          kind: "server_pool";
+          serverId: Exclude<ServerId, "new_remote">;
+          counterType: PurgeableRunnerVirusCounterType;
+        }
+      | {
+          kind: "pox_server";
+          serverId: Exclude<ServerId, "new_remote">;
+        }
+      | {
+          kind: "fait_server";
+          serverId: Exclude<ServerId, "new_remote">;
+        }
+    >;
   };
   pendingCorpDraw?: CorpDrawTransaction;
   runnerDrawSequence?: RunnerDrawSequence;

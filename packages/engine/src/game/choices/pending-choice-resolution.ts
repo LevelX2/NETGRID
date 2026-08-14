@@ -1,14 +1,20 @@
 import type {
+  CardCreditGainContinuation,
   CorpDrawContinuation,
   GameState,
   LegalAction,
   PlayerAction,
 } from "@netgrid/shared";
+import { resolveInvestmentFirmCreditGainChoice } from "../economy/credit-gain";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
 export type PendingChoiceResolutionHost = {
   state: GameState;
+  lifecycle: {
+    trashCorpInstalledCardToArchives: HostFn<void>;
+    resolveFortCapacityCleanupChoice: HostFn<void>;
+  };
   setup: {
     resolveSetupMulliganChoice: HostFn<void>;
     resolveDiscardChoice: HostFn<void>;
@@ -18,6 +24,7 @@ export type PendingChoiceResolutionHost = {
     resolveEventModificationChoice: HostFn<void>;
     resumeAddTagContinuation: HostFn<void>;
     resumeCorpDrawContinuation: HostFn<void>;
+    resumeCardCreditGainContinuation: HostFn<void>;
     resolvePdcaDamageReplacementChoice: HostFn<void>;
   };
   trace: {
@@ -44,6 +51,7 @@ export type PendingChoiceResolutionHost = {
     resolveCrashEverettDrawChoice: HostFn<void>;
     resolveRunnerDrawSequenceChoice: HostFn<void>;
     resolveRunnerInstalledMultiTrashChoice: HostFn<void>;
+    resolveVirusCounterPreventionChoice: HostFn<void>;
     resolveAdvancementPlacementChoice: HostFn<void>;
     resolveDerezRezzedBlackIceChoice: HostFn<void>;
     resolvePayRezCostToTrashRezzedIceChoice: HostFn<void>;
@@ -106,6 +114,7 @@ export type PendingChoiceResolutionHost = {
     applyRunnerTraceCounterRunStartEffects: HostFn<boolean>;
   };
   access: {
+    resumeAccessEffectAfterDamagePrevention: HostFn<void>;
     resolveAccessProgramInstallMemoryChoice: HostFn<void>;
     resolveMercenaryCurrentAccessTrashChoice: HostFn<void>;
     resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
@@ -121,6 +130,7 @@ export type PendingChoiceResolutionHost = {
   };
   turn: {
     resolveCorpStartOfTurnOrderChoice: HostFn<void>;
+    resolveCorpStartOfTurnRezChoice: HostFn<void>;
     resumeCorpStartOfTurnOrdering: HostFn<void>;
     resolveSatelliteMonitorsStartChoice: HostFn<void>;
     resolveRunnerStartOfTurnOrderChoice: HostFn<void>;
@@ -145,6 +155,8 @@ export function resolvePendingChoice(
   const resumeAddTagContinuation = host.replacement.resumeAddTagContinuation;
   const resumeCorpDrawContinuation =
     host.replacement.resumeCorpDrawContinuation;
+  const resumeCardCreditGainContinuation =
+    host.replacement.resumeCardCreditGainContinuation;
   const resolvePdcaDamageReplacementChoice =
     host.replacement.resolvePdcaDamageReplacementChoice;
   const resolveTraceChoice = host.trace.resolveTraceChoice;
@@ -303,6 +315,16 @@ export function resolvePendingChoice(
   const choiceId = String(legalAction.payload?.choiceId ?? "");
   if (!state.pendingChoice || state.pendingChoice.choiceId !== choiceId)
     throw new Error("Diese Choice ist nicht offen.");
+  if (
+    state.pendingChoice.source === "card_implementation.fort_capacity_cleanup"
+  ) {
+    host.lifecycle.resolveFortCapacityCleanupChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
   if (state.pendingChoice.source === "setup.mulligan") {
     resolveSetupMulliganChoice(state, legalAction, playerAction);
     return;
@@ -313,11 +335,16 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v121.replacement")) {
     resolveReplacementChoice(state, legalAction, playerAction);
+    resumeAccessDamageIfReady(host, state, legalAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("corp_start.order:")) {
     resolveCorpStartOfTurnOrderChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("corp_start.rez:")) {
+    host.turn.resolveCorpStartOfTurnRezChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v120.event_modification")) {
@@ -348,11 +375,15 @@ export function resolvePendingChoice(
     )
       host.run.resumeTraceHardwareWreckerAfterTrash(state, legalAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
+    resumeDamageFollowupIfReady(host, state, legalAction);
+    resumeAccessDamageIfReady(host, state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("damage_replacement:")) {
     resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
+    resumeDamageFollowupIfReady(host, state, legalAction);
+    resumeAccessDamageIfReady(host, state, legalAction);
     return;
   }
   if (
@@ -432,10 +463,16 @@ export function resolvePendingChoice(
       resumeRunnerStartOfTurnOrdering(state, legalAction);
     return;
   }
+  const resumesCorpStartOrderingAfterCorpZone =
+    state.pendingChoice.source.startsWith("p3_36.show_hq_agendas_for_credits:");
   const corpZoneChoice = handleCorpZoneChoice(
     corpZoneChoiceHandlerHost(state, legalAction, playerAction),
   );
-  if (corpZoneChoice.handled) return;
+  if (corpZoneChoice.handled) {
+    if (resumesCorpStartOrderingAfterCorpZone && !state.pendingChoice)
+      resumeCorpStartOfTurnOrdering(state, undefined, legalAction);
+    return;
+  }
   const corpInstallRezSequenceChoice = handleCorpInstallRezSequenceChoice(
     corpInstallRezSequenceHandlerHost(state, legalAction, playerAction),
   );
@@ -548,6 +585,14 @@ export function resolvePendingChoice(
     resolveCorpInstalledEconomyCreditChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("investment_firm.credit_gain:")) {
+    const continuation: CardCreditGainContinuation | undefined =
+      state.pendingCorpCreditGainReplacement?.continuation;
+    resolveInvestmentFirmCreditGainChoice(state, legalAction, playerAction);
+    if (continuation)
+      resumeCardCreditGainContinuation(state, legalAction, continuation);
+    return;
+  }
   if (
     state.pendingChoice.source.startsWith(
       "card_implementation.strategic_planning_group_draw:",
@@ -580,6 +625,17 @@ export function resolvePendingChoice(
     "card_implementation.runner_installed_multi_trash"
   ) {
     resolveRunnerInstalledMultiTrashChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source ===
+    "card_implementation.counter_prevention_replacement"
+  ) {
+    host.hiddenZone.resolveVirusCounterPreventionChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (
@@ -880,6 +936,47 @@ export function resolvePendingChoice(
     return;
   }
   delete state.pendingChoice;
+}
+
+function resumeDamageFollowupIfReady(
+  host: PendingChoiceResolutionHost,
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const followup = state.pendingDamageFollowup;
+  if (!followup || state.pendingChoice || state.eventModificationWindow) return;
+  delete state.pendingDamageFollowup;
+  if (state.winner) return;
+  const source = state.cardInstances[followup.sourceCardInstanceId];
+  const stillInstalled = state.corp.servers.some((server) =>
+    server.root.includes(followup.sourceCardInstanceId),
+  );
+  if (!source || !stillInstalled) return;
+  host.lifecycle.trashCorpInstalledCardToArchives(
+    state,
+    followup.sourceCardInstanceId,
+    legalAction,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: followup.sourceDefinitionId,
+    selfTrashed: true,
+  };
+}
+
+function resumeAccessDamageIfReady(
+  host: PendingChoiceResolutionHost,
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (
+    state.pendingChoice ||
+    state.eventModificationWindow ||
+    state.replacementWindow ||
+    !state.pendingAccessEffectDamageContinuation
+  )
+    return;
+  host.access.resumeAccessEffectAfterDamagePrevention(state, legalAction);
 }
 
 function resumeRunStartDamageIfReady(

@@ -389,6 +389,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) => action.actionId === trash.actionId,
     );
     expect(accessState.corp.archives).toContain(namatokiId);
+    expect(accessState.pendingChoice).toBeUndefined();
     expect(validateGameState(accessState).ok).toBe(true);
     const replay = replayEvents(
       initial,
@@ -493,9 +494,42 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) => action.type === "trash_accessed_card",
     );
     expect(state.corp.archives).toContain(namatokiId);
-    expect(
-      [agendaId, assetId].filter((id) => state.corp.archives.includes(id)),
-    ).toHaveLength(1);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "card_implementation.fort_capacity_cleanup",
+      visibility: "hidden_info_barrier",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.value)).toEqual([
+      agendaId,
+      assetId,
+    ]);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      agendaId,
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      assetId,
+    );
+    const agendaChoice = state.pendingChoice?.options.find(
+      (option) => option.value === agendaId,
+    )?.id;
+    const assetChoice = state.pendingChoice?.options.find(
+      (option) => option.value === assetId,
+    )?.id;
+    if (!agendaChoice) throw new Error("Namatoki agenda choice missing");
+    if (!assetChoice) throw new Error("Namatoki asset choice missing");
+    const agendaSelectionState = applyChoice(
+      structuredClone(state),
+      "corp",
+      agendaChoice,
+    );
+    expect(agendaSelectionState.corp.archives).toContain(agendaId);
+    expect(agendaSelectionState.corp.archives).not.toContain(assetId);
+    state = applyChoice(state, "corp", assetChoice);
+    expect(state.corp.archives).toContain(assetId);
+    expect(state.corp.archives).not.toContain(agendaId);
     expect(
       state.corp.servers
         .find((server) => server.id === "remote_1")

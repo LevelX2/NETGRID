@@ -7,6 +7,7 @@ import {
 import { mustInstance, runnerInstalledCardIds } from "./card-server-lookup";
 import { nextCanonicalRemoteServerId } from "./remote-server-id";
 import { clearCardCounters } from "./turn-flags-counters";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 
 export function ensureSpecialZones(state: GameState): SpecialZoneState {
   state.specialZones ??= { setAside: [], removedFromGame: [] };
@@ -16,6 +17,7 @@ export function ensureSpecialZones(state: GameState): SpecialZoneState {
 }
 
 export function removeFromAllZones(state: GameState, cardId: string): void {
+  const instanceBeforeMove = state.cardInstances[cardId];
   const wasInstalledCard =
     runnerInstalledCardIds(state).includes(cardId) ||
     state.corp.servers.some(
@@ -48,6 +50,39 @@ export function removeFromAllZones(state: GameState, cardId: string): void {
     (id) => id !== cardId,
   );
   if (wasInstalledCard) clearCardCounters(state, cardId);
+  if (wasInstalledCard && state.actionEconomy?.grants) {
+    let revokedCorpActions = 0;
+    let revokedRunnerActions = 0;
+    for (const grant of state.actionEconomy.grants) {
+      if (
+        grant.sourceCardInstanceId !== cardId ||
+        grant.restriction !== "any_action" ||
+        grant.remaining <= 0
+      )
+        continue;
+      if (grant.side === "corp") revokedCorpActions += grant.remaining;
+      else revokedRunnerActions += grant.remaining;
+      grant.remaining = 0;
+    }
+    state.corp.clicks = Math.max(0, state.corp.clicks - revokedCorpActions);
+    state.runner.clicks = Math.max(
+      0,
+      state.runner.clicks - revokedRunnerActions,
+    );
+  }
+  if (
+    wasInstalledCard &&
+    instanceBeforeMove?.owner === "corp" &&
+    instanceBeforeMove.rezzed === true &&
+    cardImplementationForDefinitionId(instanceBeforeMove.definitionId)
+      ?.uniqueDirectLongtail?.kind === "rezzed_leave_action_gain_asset"
+  ) {
+    state.winner = "runner";
+    state.gameEndReason = "nevinyrral_left_play";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "runner";
+  }
 }
 
 export function hostedCardsOn(

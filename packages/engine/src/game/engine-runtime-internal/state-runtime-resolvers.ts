@@ -1006,7 +1006,12 @@ export function createStateRuntimeResolvers(
     let creditsPaid = 0;
     let preventionChargesSpent = 0;
     for (let index = 0; index < amount; index += 1) {
-      const prevention = preventOneVirusCounterWithCounterPrevention(state);
+      const prevention = preventOneVirusCounterWithCounterPrevention(state, {
+        kind: "card",
+        cardId: targetCardId,
+        counterType,
+      });
+      if (prevention.deferred) continue;
       if (prevention.prevented) {
         prevented += 1;
         creditsPaid += prevention.creditsPaid;
@@ -1030,52 +1035,264 @@ export function createStateRuntimeResolvers(
     return added;
   }
 
-  function preventOneVirusCounterWithCounterPrevention(state: GameState): {
-    prevented: boolean;
-    creditsPaid: number;
-    preventionChargesSpent: number;
-  } {
+  type VirusCounterPreventionTarget = NonNullable<
+    GameState["pendingVirusCounterPrevention"]
+  >["targets"][number];
+
+  function counterPreventionSourceIds(state: GameState): CardInstanceId[] {
+    const flags = ensureCorpTurnFlags(state);
+    return deps
+      .rezzedCorpRootCardIds(state)
+      .filter((cardId: CardInstanceId) => {
+        const utility = deps.corpUtilityImplementationForCard(state, cardId);
+        return (
+          utility?.kind === "counter_prevention_replacement" &&
+          utility.cost.kind === "credit" &&
+          utility.cost.amount <= state.corp.credits &&
+          !abilityUsageSourceUsed(
+            flags.counterPreventionUsedSourceIdsThisTurn,
+            cardId,
+          )
+        );
+      })
+      .sort();
+  }
+
+  function consumeStoredVirusCounterPreventionCharge(
+    state: GameState,
+  ): boolean {
     const storedCharges = Math.max(
       0,
       Math.floor(state.corpRunnerVirusCounterPreventionCharges ?? 0),
     );
-    if (storedCharges > 0) {
-      const remaining = storedCharges - 1;
-      if (remaining > 0)
-        state.corpRunnerVirusCounterPreventionCharges = remaining;
-      else delete state.corpRunnerVirusCounterPreventionCharges;
+    if (storedCharges <= 0) return false;
+    const remaining = storedCharges - 1;
+    if (remaining > 0)
+      state.corpRunnerVirusCounterPreventionCharges = remaining;
+    else delete state.corpRunnerVirusCounterPreventionCharges;
+    return true;
+  }
+
+  function startVirusCounterPreventionChoice(state: GameState): void {
+    const continuation = state.pendingVirusCounterPrevention;
+    const target = continuation?.targets[0];
+    if (!target)
+      throw new Error("Der Virus-Counter-Prevention fehlt ihr Ziel.");
+    if (state.pendingChoice)
+      throw new Error(
+        "Vor Virus-Counter-Prevention ist bereits eine Choice offen.",
+      );
+    const sourceIds = counterPreventionSourceIds(state);
+    if (sourceIds.length === 0)
+      throw new Error("Virus-Counter-Prevention hat keine legale Quelle.");
+    state.pendingChoice = {
+      choiceId: `virus_counter_prevention_${state.stateVersion + 1}`,
+      side: "corp",
+      source: "card_implementation.counter_prevention_replacement",
+      prompt: "Virus-Counter vermeiden?",
+      kind: "select_option",
+      options: [
+        {
+          id: "pass",
+          label: "Virus-Counter erhalten",
+          publicLabel: "Virus-Counter erhalten",
+          value: "pass",
+        },
+        ...sourceIds.map((sourceId) => {
+          const definition = definitionFor(state, sourceId);
+          return {
+            id: `prevent_${sourceId}`,
+            label: `${definition.title}: 1 Credit zahlen`,
+            publicLabel: `${definition.title}: 1 Credit zahlen`,
+            value: sourceId,
+          };
+        }),
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "public",
+    };
+  }
+
+  function applyVirusCounterPreventionTarget(
+    state: GameState,
+    target: VirusCounterPreventionTarget,
+  ): void {
+    switch (target.kind) {
+      case "card":
+        addCardCounter(state, target.cardId, target.counterType, 1);
+        return;
+      case "corp_pool": {
+        const bucket = ((state.purgeableRunnerVirusCounters ??= {}).corp ??=
+          {});
+        bucket[target.counterType] =
+          Math.max(0, Math.floor(bucket[target.counterType] ?? 0)) + 1;
+        return;
+      }
+      case "server_pool": {
+        const servers = ((state.purgeableRunnerVirusCounters ??= {}).servers ??=
+          {});
+        const bucket = (servers[target.serverId] ??= {});
+        bucket[target.counterType] =
+          Math.max(0, Math.floor(bucket[target.counterType] ?? 0)) + 1;
+        return;
+      }
+      case "pox_server":
+        state.poxCountersByServer = {
+          ...(state.poxCountersByServer ?? {}),
+          [target.serverId]:
+            Math.max(
+              0,
+              Math.floor(state.poxCountersByServer?.[target.serverId] ?? 0),
+            ) + 1,
+        };
+        return;
+      case "fait_server":
+        state.serverAgendaCostCountersByServer = {
+          ...(state.serverAgendaCostCountersByServer ?? {}),
+          [target.serverId]:
+            Math.max(
+              0,
+              Math.floor(
+                state.serverAgendaCostCountersByServer?.[target.serverId] ?? 0,
+              ),
+            ) + 1,
+        };
+        return;
+    }
+  }
+
+  function resumeVirusCounterPreventionQueue(
+    state: GameState,
+    legalAction: LegalAction,
+  ): void {
+    const continuation = state.pendingVirusCounterPrevention;
+    if (!continuation) return;
+    let automaticallyPrevented = 0;
+    let added = 0;
+    while (continuation.targets.length > 0) {
+      if (consumeStoredVirusCounterPreventionCharge(state)) {
+        continuation.targets.shift();
+        automaticallyPrevented += 1;
+        continue;
+      }
+      if (counterPreventionSourceIds(state).length > 0) {
+        startVirusCounterPreventionChoice(state);
+        break;
+      }
+      const target = continuation.targets.shift();
+      if (!target) break;
+      applyVirusCounterPreventionTarget(state, target);
+      added += 1;
+    }
+    if (continuation.targets.length === 0)
+      delete state.pendingVirusCounterPrevention;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      virusCounterAddedAfterChoice:
+        Number(legalAction.payload?.virusCounterAddedAfterChoice ?? 0) + added,
+      virusCounterAvoided:
+        Number(legalAction.payload?.virusCounterAvoided ?? 0) +
+        automaticallyPrevented,
+      corpRunnerVirusCounterPreventionChargesAfter:
+        state.corpRunnerVirusCounterPreventionCharges ?? 0,
+      corpCreditsAfter: state.corp.credits,
+    };
+  }
+
+  function resolveVirusCounterPreventionChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    const continuation = state.pendingVirusCounterPrevention;
+    const target = continuation?.targets[0];
+    if (
+      !choice ||
+      choice.source !== "card_implementation.counter_prevention_replacement" ||
+      !continuation ||
+      !target
+    )
+      throw new Error("Es ist keine Virus-Counter-Prevention-Choice offen.");
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+    const option = choice.options.find(
+      (candidate) => candidate.id === selectedId,
+    );
+    if (!option || typeof option.value !== "string")
+      throw new Error("Die Virus-Counter-Prevention-Auswahl ist ungueltig.");
+    delete state.pendingChoice;
+    continuation.targets.shift();
+    if (option.value === "pass") {
+      applyVirusCounterPreventionTarget(state, target);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        virusCounterPreventionDecision: "pass",
+        virusCounterAddedAfterChoice: 1,
+      };
+    } else {
+      const sourceId = option.value as CardInstanceId;
+      if (!counterPreventionSourceIds(state).includes(sourceId))
+        throw new Error(
+          "Die Virus-Counter-Prevention-Quelle ist nicht mehr legal.",
+        );
+      const utility = deps.corpUtilityImplementationForCard(state, sourceId);
+      if (utility?.kind !== "counter_prevention_replacement")
+        throw new Error("Die Virus-Counter-Prevention-Quelle ist veraltet.");
+      state.corp.credits -= utility.cost.amount;
+      const flags = ensureCorpTurnFlags(state);
+      flags.counterPreventionUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
+        flags.counterPreventionUsedSourceIdsThisTurn,
+        sourceId,
+      );
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        virusCounterPreventionDecision: "prevent",
+        counterPreventionSourceCardId: sourceId,
+        counterPreventionSourceDefinitionId: definitionFor(state, sourceId).id,
+        counterPreventionCreditsPaid: utility.cost.amount,
+        virusCounterAvoided: 1,
+      };
+    }
+    resumeVirusCounterPreventionQueue(state, legalAction);
+  }
+
+  function preventOneVirusCounterWithCounterPrevention(
+    state: GameState,
+    target?: VirusCounterPreventionTarget,
+  ): {
+    prevented: boolean;
+    creditsPaid: number;
+    preventionChargesSpent: number;
+    deferred?: boolean;
+  } {
+    if (state.pendingVirusCounterPrevention && target) {
+      state.pendingVirusCounterPrevention.targets.push(target);
+      return {
+        prevented: false,
+        creditsPaid: 0,
+        preventionChargesSpent: 0,
+        deferred: true,
+      };
+    }
+    if (consumeStoredVirusCounterPreventionCharge(state)) {
       return {
         prevented: true,
         creditsPaid: 0,
         preventionChargesSpent: 1,
       };
     }
-    const flags = ensureCorpTurnFlags(state);
-    const sourceId = deps
-      .rezzedCorpRootCardIds(state)
-      .filter((cardId: CardInstanceId) =>
-        deps.hasCorpUtilityKind(
-          state,
-          cardId,
-          "counter_prevention_replacement",
-        ),
-      )
-      .filter(
-        (cardId: CardInstanceId) =>
-          !abilityUsageSourceUsed(
-            flags.counterPreventionUsedSourceIdsThisTurn,
-            cardId,
-          ),
-      )
-      .sort()[0];
-    if (!sourceId || state.corp.credits < 1)
+    if (!target || counterPreventionSourceIds(state).length === 0)
       return { prevented: false, creditsPaid: 0, preventionChargesSpent: 0 };
-    state.corp.credits -= 1;
-    flags.counterPreventionUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
-      flags.counterPreventionUsedSourceIdsThisTurn,
-      sourceId,
-    );
-    return { prevented: true, creditsPaid: 1, preventionChargesSpent: 0 };
+    state.pendingVirusCounterPrevention = { targets: [target] };
+    startVirusCounterPreventionChoice(state);
+    return {
+      prevented: false,
+      creditsPaid: 0,
+      preventionChargesSpent: 0,
+      deferred: true,
+    };
   }
 
   function addVisibleCardCounter(
@@ -1727,6 +1944,7 @@ export function createStateRuntimeResolvers(
     agendaPoints,
     addVirusCounterWithCounterPrevention,
     preventOneVirusCounterWithCounterPrevention,
+    resolveVirusCounterPreventionChoice,
     addVisibleCardCounter,
     spendVisibleCardCounter,
     totalCounters,

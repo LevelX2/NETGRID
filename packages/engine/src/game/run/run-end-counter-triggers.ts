@@ -26,6 +26,7 @@ import { successfulRunServerId } from "./run-server-identities";
 export type RunnerVirusCounterPreventionSummary = {
   added: number;
   prevented: number;
+  deferred: number;
   creditsPaid: number;
   preventionChargesSpent: number;
 };
@@ -89,16 +90,24 @@ export function addPurgeableRunnerVirusCounter(
 export function applyRunnerVirusCounterPrevention(
   host: RunEndCleanupHost,
   amount: number,
+  target: NonNullable<
+    GameState["pendingVirusCounterPrevention"]
+  >["targets"][number],
   legalAction?: LegalAction,
 ): RunnerVirusCounterPreventionSummary {
   const normalized = Math.max(0, Math.floor(amount));
   let added = 0;
   let prevented = 0;
+  let deferred = 0;
   let creditsPaid = 0;
   let preventionChargesSpent = 0;
   for (let index = 0; index < normalized; index += 1) {
     const prevention =
-      host.counters.preventOneVirusCounterWithCounterPrevention();
+      host.counters.preventOneVirusCounterWithCounterPrevention(target);
+    if (prevention.deferred) {
+      deferred += 1;
+      continue;
+    }
     if (prevention.prevented) {
       prevented += 1;
       creditsPaid += prevention.creditsPaid;
@@ -124,7 +133,7 @@ export function applyRunnerVirusCounterPrevention(
       corpCreditsAfter: host.state.corp.credits,
     };
   }
-  return { added, prevented, creditsPaid, preventionChargesSpent };
+  return { added, prevented, deferred, creditsPaid, preventionChargesSpent };
 }
 
 export function addPurgeableRunnerVirusCounterWithPrevention(
@@ -136,7 +145,14 @@ export function addPurgeableRunnerVirusCounterWithPrevention(
   amount: number,
   legalAction?: LegalAction,
 ): RunnerVirusCounterPreventionSummary {
-  const summary = applyRunnerVirusCounterPrevention(host, amount, legalAction);
+  const summary = applyRunnerVirusCounterPrevention(
+    host,
+    amount,
+    scope.kind === "corp"
+      ? { kind: "corp_pool", counterType }
+      : { kind: "server_pool", serverId: scope.serverId, counterType },
+    legalAction,
+  );
   if (summary.added > 0) {
     addPurgeableRunnerVirusCounter(
       host.state,
@@ -343,6 +359,7 @@ export function applyV181SuccessfulRunCounterTriggers(
       const counterSummary = applyRunnerVirusCounterPrevention(
         host,
         trigger.amount,
+        { kind: "pox_server", serverId },
         legalAction,
       );
       const added = counterSummary.added;
@@ -376,6 +393,7 @@ export function applyV181SuccessfulRunCounterTriggers(
       const counterSummary = applyRunnerVirusCounterPrevention(
         host,
         trigger.amount,
+        { kind: "fait_server", serverId },
         legalAction,
       );
       const added = counterSummary.added;

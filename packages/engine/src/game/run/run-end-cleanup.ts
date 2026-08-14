@@ -657,6 +657,7 @@ export function resolveBrokenIceVirusCounterChoice(
   );
   if (!choice.source.includes("counterType=pattel"))
     throw new Error("Der Broken-ICE-Virus-Counter-Typ ist ungueltig.");
+  delete host.state.pendingChoice;
   const added = host.counters.addVirusCounterWithCounterPrevention(
     targetIceId,
     "pattel",
@@ -671,7 +672,6 @@ export function resolveBrokenIceVirusCounterChoice(
     remainingCounters: host.counters.cardCounter(targetIceId, "pattel"),
     choiceVisibility: "public",
   };
-  delete host.state.pendingChoice;
 }
 
 export function resetBreakerStrength(state: GameState): void {

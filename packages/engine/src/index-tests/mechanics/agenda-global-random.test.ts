@@ -419,16 +419,15 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "runner",
       (action) => action.type === "access_card",
     );
+    accessState = applyChoices(accessState, "corp", [`target_${programId}`]);
     expect(accessState.runner.heap).toContain(programId);
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "access_card",
+      actionType: "resolve_choice",
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
       ambushDefinitionId: "onr_v1_323_experimental-ai",
       trashedCardDefinitionId: "simple_decoder",
     });
-    expect(accessState.eventLog.at(-1)?.visibilityClass).toBe(
-      "hidden_info_barrier",
-    );
+    expect(accessState.eventLog.at(-1)?.visibilityClass).toBe("public");
     expect(accessState.run?.accessedCardId).toBe(
       programTrashByAdvancementAssetId,
     );
@@ -760,6 +759,12 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "runner",
       (action) => action.type === "access_card",
     );
+    expect(hardwareState.pendingChoice?.source).toBe(
+      "card_implementation.runner_installed_multi_trash",
+    );
+    hardwareState = applyChoices(hardwareState, "corp", [
+      `target_${hardwareId}`,
+    ]);
     expect(hardwareState.runner.heap).toContain(hardwareId);
     expect(hardwareState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
@@ -3162,6 +3167,16 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
     state.runner.tags = 6;
+    while (state.runner.grip.length < 10) {
+      const cardId = state.runner.stack.shift();
+      if (!cardId)
+        throw new Error("Schlaghund test needs ten Runner grip cards.");
+      state.runner.grip.push(cardId);
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        zone: { side: "runner", zone: "grip" },
+      };
+    }
 
     const assetId = putCorpRootInRemote(state, "onr_v1_339_schlaghund");
     state.cardInstances[assetId] = {
@@ -3206,8 +3221,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       (action) => action.actionId === legal.actionId,
     );
 
-    const randomRecord = state.randomDrawRecords.at(-1);
-    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+    const randomRecord = state.randomDrawRecords[randomBefore];
+    expect(state.randomDrawRecords).toHaveLength(randomBefore + 11);
     expect(randomRecord?.purpose).toBe(
       "v1921.die.onr_v1_339_schlaghund.tag_damage",
     );

@@ -82,14 +82,6 @@ export const cardSpec = {
         role: "remote_asset_pressure",
       },
       {
-        kind: "strategic_role",
-        role: "win_condition",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.tag_trace_punish",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.damage_kill",
         support: "supports",
@@ -102,7 +94,7 @@ export const cardSpec = {
       {
         kind: "strategy_support",
         strategyKey: "corp.damage_kill",
-        role: "win_condition",
+        role: "punish_payoff",
         roleDetail: "tagged_meat_payoff",
         confidence: "medium",
         rationale:
@@ -111,7 +103,7 @@ export const cardSpec = {
       {
         kind: "strategy_support",
         strategyKey: "corp.tag_trace_punish",
-        role: "win_condition",
+        role: "punish_payoff",
         roleDetail: "tagged_meat_payoff",
         confidence: "medium",
         rationale: "Tagged-runner payoff; not a tag source.",
@@ -142,21 +134,7 @@ export const cardSpec = {
         rating: "low",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey("abilities_activated_corp_main_damage"),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "payoff_anchor",
-            roleDetail: "payoff_anchor_tag_payoff",
-            evidenceAnchor: "tag.payoff",
-            confidence: "high",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

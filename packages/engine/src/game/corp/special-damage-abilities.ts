@@ -149,12 +149,12 @@ export function handleCorpSpecialDamageAbilityAction(
   host: CorpSpecialDamageAbilityHost,
 ): CorpSpecialDamageAbilityExecutionResult {
   const legalAction = host.legalAction;
-  if (!legalAction || legalAction.type !== "gain_credit") return { handled: false };
-  if (
-    legalAction.payload?.v1920AssetAbility ===
-    "tagged_meat_damage"
-  ) {
-    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!legalAction || legalAction.type !== "gain_credit")
+    return { handled: false };
+  if (legalAction.payload?.v1920AssetAbility === "tagged_meat_damage") {
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
     handleTaggedMeatDamageAction(host, sourceCardId);
     return {
       handled: true,
@@ -173,7 +173,9 @@ export function handleCorpSpecialDamageAbilityAction(
     throw new Error("Schlaghund nutzt keine Wuerfelprobe mehr.");
   }
   if (legalAction.payload?.v1921AssetAbility === "schlaghund_tag_damage") {
-    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+    const sourceCardId = String(
+      legalAction.payload?.cardId ?? "",
+    ) as CardInstanceId;
     handleSchlaghundAction(host, sourceCardId);
     return {
       handled: true,
@@ -201,7 +203,9 @@ function handleTaggedMeatDamageAction(
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese Tagged-Damage-Faehigkeit nutzen.");
   if (!host.cards.rezzedCorpRootCardIds().includes(sourceCardId))
-    throw new Error("Die Tagged-Damage-Faehigkeit ist nicht rezzed installiert.");
+    throw new Error(
+      "Die Tagged-Damage-Faehigkeit ist nicht rezzed installiert.",
+    );
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation =
     host.cards.uniqueDirectLongtailImplementationForDefinition(definition.id);
@@ -273,7 +277,13 @@ function handleSchlaghundAction(
     implementation.damageAmount,
     definition.id,
   );
-  if (!host.state.pendingChoice) {
+  if (host.state.pendingChoice) {
+    host.state.pendingDamageFollowup = {
+      kind: "trash_corp_source",
+      sourceCardInstanceId: sourceCardId,
+      sourceDefinitionId: definition.id,
+    };
+  } else if (!host.state.winner) {
     host.trash.trashCorpInstalledCardToArchives(sourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

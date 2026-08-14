@@ -78,11 +78,22 @@ export type StateRuntimeResolverPort = {
     amount: number,
     legalAction?: LegalAction,
   ) => number;
-  preventOneVirusCounterWithCounterPrevention: (state: GameState) => {
+  preventOneVirusCounterWithCounterPrevention: (
+    state: GameState,
+    target?: NonNullable<
+      GameState["pendingVirusCounterPrevention"]
+    >["targets"][number],
+  ) => {
     prevented: boolean;
     creditsPaid: number;
     preventionChargesSpent: number;
+    deferred?: boolean;
   };
+  resolveVirusCounterPreventionChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ) => void;
   addVisibleCardCounter: (
     state: GameState,
     cardId: CardInstanceId,

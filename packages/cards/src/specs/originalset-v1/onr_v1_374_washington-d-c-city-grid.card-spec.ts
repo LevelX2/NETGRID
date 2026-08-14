@@ -86,13 +86,8 @@ export const cardSpec = {
           "Agenda difficulty discount in this remote opens scoring windows.",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
         kind: "remote_role",
-        role: "scoring_protection",
+        role: "score_acceleration",
         threatLevel: "medium",
       },
       {

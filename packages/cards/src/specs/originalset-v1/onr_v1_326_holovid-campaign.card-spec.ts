@@ -41,6 +41,7 @@ export const cardSpec = {
       },
     },
     lifecycle: {
+      can_rez_at_start_of_corp_turn: true,
       on_rez: [
         {
           kind: "add_hosted_credits",

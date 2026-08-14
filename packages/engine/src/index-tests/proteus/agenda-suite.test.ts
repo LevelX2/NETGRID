@@ -228,7 +228,6 @@ function openAccess(
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     bartmossUsedBreakerIdsThisEncounter: [],
-    aardvarkInterceptionIceIds: [],
     blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: true,
     accessCount: 1,

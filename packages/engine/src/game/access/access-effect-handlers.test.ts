@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 import type { CardAccessEffectImplementation } from "../../ability-engine/definition-types";
 import {
   handleAccessEffectsForCard,
+  resumeAccessEffectAfterDamagePrevention,
   resolveAccessPaymentChoice,
   type AccessEffectHandlerHost,
 } from "./access-effect-handlers";
@@ -279,6 +280,7 @@ function makeHost(legalAction: LegalAction) {
           damageType: type,
           damageAmount: amount,
         };
+        return false;
       },
       doDamage: (_id, type, amount, source) => {
         calls.damages.push({ type, amount, source });
@@ -367,6 +369,7 @@ function makeHost(legalAction: LegalAction) {
       trashRunnerInstalledCardToHeap: (cardId) => calls.trashed.push(cardId),
       trashCorpInstalledCardToArchives: (cardId) => calls.trashed.push(cardId),
       openRunnerInstalledTrashPreventionWindow: () => false,
+      startRunnerInstalledMultiTrashChoice: () => undefined,
     },
   };
   return { host, calls, state };
@@ -448,6 +451,38 @@ describe("access effect handlers", () => {
       damageResolved: true,
       damageAmount: 3,
     });
+  });
+
+  it("resumes TRAP! with the tag only after damage prevention finishes", () => {
+    const action = accessAction("trap");
+    const { host, state } = makeHost(action);
+    host.damage.resolveDamageOperation = () => true;
+
+    handleAccessEffectsForCard(host, "trap" as CardInstanceId);
+    resolveAccessPaymentChoice(host, "pay");
+
+    expect(state.pendingAccessEffectDamageContinuation).toMatchObject({
+      sourceCardId: "trap",
+      damageStepIndex: 0,
+      nextStepIndex: 1,
+      accessZone: "rd",
+    });
+    expect(state.runner.tags).toBe(1);
+
+    action.payload = {
+      ...(action.payload ?? {}),
+      damageResolved: true,
+      damageAmount: 2,
+      cardsTrashed: 2,
+    };
+    resumeAccessEffectAfterDamagePrevention(host);
+
+    expect(state.pendingAccessEffectDamageContinuation).toBeUndefined();
+    expect(state.runner.tags).toBe(2);
+    expect(action.resolvedEffects?.map((effect) => effect.kind)).toEqual([
+      "damage",
+      "add_tags",
+    ]);
   });
 
   it("revalidates the installed source rez state before resolving payment", () => {

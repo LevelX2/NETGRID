@@ -22,6 +22,11 @@ export const cardSpec = {
         source: "card_text",
         reference: "onr_v1_315_corprunners-shattered-remains",
       },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#Corprunner's Shattered Remains",
+      },
     ],
   },
   engine: {
@@ -108,11 +113,6 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
-        kind: "tactic_interpretation",
         signal: "punish.payoff",
         use: "punish.payoff",
       },
@@ -125,6 +125,12 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
+      },
+      {
+        kind: "target_preference",
+        purpose: "trash_runner_hardware_on_access",
+        preferences: ["use_choice_option_with_visible_board_payoff"],
+        avoid: ["hidden_info_dependent_choice"],
       },
     ],
     capabilities: [],

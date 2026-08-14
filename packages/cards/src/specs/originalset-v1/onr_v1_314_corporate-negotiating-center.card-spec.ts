@@ -64,10 +64,6 @@ export const cardSpec = {
         role: "remote_asset_economy",
       },
       {
-        kind: "plan_role",
-        role: "hidden_information_pressure",
-      },
-      {
         kind: "strategy_anchor",
         strategyKey: "corp.asset_economy",
       },

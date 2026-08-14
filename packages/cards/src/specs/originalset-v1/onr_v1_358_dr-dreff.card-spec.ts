@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Whenever Runner makes a successful run on this fort, you may choose an ice card stored in HQ. Pay half of that card's rez cost, rounded down, to force Runner to encounter it; the run is not considered successful unless Runner passes that piece of ice. Trash that ice after the encounter ends. Use this ability only once during each run on this fort.",
+      "Whenever the Runner passes the last piece of ice on this fort or declares a run on it when it has no ice, you may choose an ice card stored in HQ. Pay half of that card's rez cost, rounded down, to force Runner to encounter it; the run is not considered successful unless Runner passes that piece of ice. Trash that ice after the encounter ends. Use this ability only once during each run on this fort.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_358_dr-dreff",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Dr. Dreff",
+        note: "Canonical trigger wording plus not-installed/not-rezzed encounter rulings.",
       },
     ],
   },
@@ -69,10 +74,6 @@ export const cardSpec = {
       {
         kind: "strategic_role",
         role: "defensive_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
       },
       {
         kind: "line_support",

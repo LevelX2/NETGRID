@@ -281,6 +281,19 @@ export type RunFlowHost = {
     credits: (state: GameState, side: Side, amount: number) => void;
     rezCostForCard: (state: GameState, cardId: CardInstanceId) => number;
     creditCostForAction: (legalAction: LegalAction) => number;
+    corpIceInstallTotalCost: (
+      state: GameState,
+      cardId: CardInstanceId,
+      server: CorpServer,
+    ) => { totalCost: number };
+  };
+  install: {
+    finalizeCorpIceInstallInnermost: (
+      state: GameState,
+      cardId: CardInstanceId,
+      server: CorpServer,
+      legalAction: LegalAction,
+    ) => void;
   };
   counters: {
     cardCounter: (
@@ -313,10 +326,16 @@ export type RunFlowHost = {
       amount: number,
       legalAction?: LegalAction,
     ) => number;
-    preventOneVirusCounterWithCounterPrevention: (state: GameState) => {
+    preventOneVirusCounterWithCounterPrevention: (
+      state: GameState,
+      target?: NonNullable<
+        GameState["pendingVirusCounterPrevention"]
+      >["targets"][number],
+    ) => {
       prevented: boolean;
       creditsPaid: number;
       preventionChargesSpent: number;
+      deferred?: boolean;
     };
     poxCountersForServer: (
       state: GameState,

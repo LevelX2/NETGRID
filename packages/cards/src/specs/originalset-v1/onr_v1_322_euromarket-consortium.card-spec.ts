@@ -96,11 +96,6 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "tactic_interpretation",
         signal: "draw.card",
         use: "draw.card",
       },

@@ -57,11 +57,6 @@ export const cardSpec = {
         role: "hidden_information_pressure",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "draw.card",
-        use: "draw.card",
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",

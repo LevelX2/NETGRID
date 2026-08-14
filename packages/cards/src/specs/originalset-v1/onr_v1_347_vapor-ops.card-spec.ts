@@ -64,7 +64,8 @@ export const cardSpec = {
         ),
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
-        timing: "corp_main",
+        timing: "corp_paid",
+        additionalTimings: [{ timing: "corp_during_run" }],
         costs: [
           {
             kind: "advancement_counter",

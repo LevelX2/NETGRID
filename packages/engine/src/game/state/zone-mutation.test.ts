@@ -138,6 +138,49 @@ describe("zone-mutation", () => {
     expect(current.cardInstances[CORP_ASSET]?.counters).toBeUndefined();
   });
 
+  it("applies rezzed Nevinyrral leave-play loss to uninstall as well as trash", () => {
+    const current = state();
+    current.cardInstances[CORP_ASSET] = {
+      ...current.cardInstances[CORP_ASSET]!,
+      definitionId: "onr_v1_331_nevinyrral",
+      rezzed: true,
+    };
+
+    uninstallCorpInstalledCardToHq(current, CORP_ASSET);
+
+    expect(current.winner).toBe("runner");
+    expect(current.gameEndReason).toBe("nevinyrral_left_play");
+    expect(current.phase).toBe("game_over");
+  });
+
+  it("revokes only an unused source-bound action when its source leaves play", () => {
+    const current = state();
+    current.activeSide = "corp";
+    current.phase = "corp_action_phase";
+    current.turnSerial = 2;
+    current.corp.clicks = 4;
+    current.actionEconomy = {
+      grants: [
+        {
+          side: "corp",
+          sourceCardInstanceId: CORP_ASSET,
+          sourceDefinitionId: "onr_v1_335_remote-facility",
+          restriction: "any_action",
+          optional: true,
+          remaining: 1,
+          oncePerTurnPerSource: true,
+          createdAtStateVersion: 1,
+          createdDuringTurnSerial: 2,
+        },
+      ],
+    };
+
+    removeFromAllZones(current, CORP_ASSET);
+
+    expect(current.corp.clicks).toBe(3);
+    expect(current.actionEconomy.grants?.[0]?.remaining).toBe(0);
+  });
+
   it("manages hosted card links and rejects cycles with existing errors", () => {
     const current = state();
 
