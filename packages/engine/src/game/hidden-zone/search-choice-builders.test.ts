@@ -271,6 +271,8 @@ describe("hidden-zone search choice builders", () => {
       choiceId: "v1911_temporary_program_install_source_8",
       source:
         "p3_38.stack_or_trash_program_install_source:source_card:source_definition:8",
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: sourceDefinitionId,
       prompt: "Sneak-Preview-Quelle wählen",
       visibility: "hidden_info_barrier",
     });
