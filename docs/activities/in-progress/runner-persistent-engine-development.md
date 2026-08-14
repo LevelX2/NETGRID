@@ -1,6 +1,6 @@
 # Runner Persistent Engine Development
 
-Status: in Umsetzung – RPED-00 bis RPED-02 abgeschlossen, RPED-03 aktiv
+Status: in Umsetzung – RPED-00 bis RPED-03 abgeschlossen, RPED-04 aktiv
 Quelle: Nutzerauftrag vom 2026-08-14 und Review-Rückmeldung aus `pasted-text.txt`
 
 ## Zielprüfung
@@ -104,7 +104,7 @@ prepared
 Genau ein Zustand beziehungsweise Paket ist aktiv. Ein Paketwechsel erfolgt
 erst nach Done-Gate und Commit.
 
-Aktueller Zustand: `focused_verification`.
+Aktueller Zustand: `simulation_comparison`.
 
 ## Diagnoseergebnis RPED-00
 
@@ -208,6 +208,37 @@ Paketchecks:
   fehlenden Migration-Review-JSONs und der unveränderte Sneak-Preview-
   Testtypfehler;
 - `git diff --check`: grün.
+
+## Umsetzungsergebnis RPED-03
+
+- Die residente Reserve-Funding-Regression prüft jetzt über zwei Funding-
+  Entscheidungen und die anschließende Installation hinweg dieselbe konkrete
+  Root- und Executor-Instanz von `runner.develop_board_and_hand`.
+- Planmodul, Ausführungszustand, exakte Step-ID, Route und Action-ID bleiben in
+  jeder Entscheidung gebunden; es wird kein Fallback und kein zweiter Owner
+  eingeführt.
+- Eine zweite identische kombinierte Engine bleibt trotz der neuen atomaren
+  Engine-Funktionsdeckung ein `redundant_duplicate` mit
+  `already_satisfied`-Readiness.
+- Die thematische Regression umfasst außerdem vorhandene Breaker-, MU-,
+  Handpuffer-, Remote-Bedrohungs- und produktive-Run-Gegenfälle sowie
+  konsumierende und generische Kartenfixtures. Damit entsteht weder eine
+  allgemeine Überinstallation noch eine Aufwertung bedingter Run-Folgeeffekte
+  zu freier Action Capacity.
+
+Paketchecks:
+
+- thematische Vitest-Teilmenge: 37/37 grün;
+- exakte residente Plan-Ownership nach der letzten Assertionsschärfung: 1/1
+  grün;
+- `check:ai-hint-metadata-contracts`, `check:ai-source-structure` und
+  `check:ai-generic-card-id-guards`: grün;
+- das ergänzende `check:ai-action-capacity` bleibt durch fünf unveränderte
+  Main-Baseline-Verstöße für Corp-Zielverträge rot; kein Befund betrifft die
+  neue Runner-Engine-Semantik;
+- AI-Typecheck erneut ausgeführt; verbleibend sind ausschließlich die bereits
+  dokumentierten vier fehlenden Migration-Review-JSONs und der unveränderte
+  Sneak-Preview-Testtypfehler.
 
 ## Paketfolge
 

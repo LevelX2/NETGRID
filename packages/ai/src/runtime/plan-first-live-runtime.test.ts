@@ -11401,6 +11401,31 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     );
+    const planInstanceId =
+      "plan:runner.develop_board_and_hand:card%3Asaloon-engine-card";
+    const expectedOwnedDecision = (
+      actionId: string,
+      phase: "fund" | "execute",
+    ) => ({
+      actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.develop_board_and_hand",
+        planFirstDecision: {
+          rootPlanInstanceId: planInstanceId,
+          leafExecutorInstanceId: planInstanceId,
+          selectedPlan: {
+            moduleId: "runner.develop_board_and_hand",
+            executionState: "executor",
+          },
+          route: {
+            actionId,
+            stepId: `${planInstanceId}:${phase}`,
+          },
+        },
+      },
+    });
     let currentEvaluation = protectedEngineHandEvaluation(10, install.actionId);
     const context = liveContext({
       evaluateRunnerHandDevelopment: () => [currentEvaluation],
@@ -11421,10 +11446,12 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
 
-    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.runner.develop_board_and_hand",
-      fallbackUsed: false,
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject(
+      expectedOwnedDecision(credit.actionId, "fund"),
+    );
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: planInstanceId,
+      executorInstanceId: planInstanceId,
     });
     expect(
       residentPlanPortfolioSnapshot(input)?.instances.find(
@@ -11452,10 +11479,12 @@ describe("authoritative plan-first live runtime", () => {
     for (const action of second.legalActions) action.expiresAtStateVersion = 2;
     second.playerView.legalActions = second.legalActions;
     currentEvaluation = protectedEngineHandEvaluation(11, install.actionId);
-    expect(context.chooseSemanticRuntimeAction(second, {})).toMatchObject({
-      actionId: credit.actionId,
-      reasonCode: "plan_first.runner.develop_board_and_hand",
-      fallbackUsed: false,
+    expect(context.chooseSemanticRuntimeAction(second, {})).toMatchObject(
+      expectedOwnedDecision(credit.actionId, "fund"),
+    );
+    expect(residentPlanPortfolioSnapshot(second)).toMatchObject({
+      rootForegroundInstanceId: planInstanceId,
+      executorInstanceId: planInstanceId,
     });
     expect(
       residentPlanPortfolioSnapshot(second)?.instances.find(
@@ -11471,10 +11500,12 @@ describe("authoritative plan-first live runtime", () => {
     for (const action of ready.legalActions) action.expiresAtStateVersion = 3;
     ready.playerView.legalActions = ready.legalActions;
     currentEvaluation = protectedEngineHandEvaluation(12, install.actionId);
-    expect(context.chooseSemanticRuntimeAction(ready, {})).toMatchObject({
-      actionId: install.actionId,
-      reasonCode: "plan_first.runner.develop_board_and_hand",
-      fallbackUsed: false,
+    expect(context.chooseSemanticRuntimeAction(ready, {})).toMatchObject(
+      expectedOwnedDecision(install.actionId, "execute"),
+    );
+    expect(residentPlanPortfolioSnapshot(ready)).toMatchObject({
+      rootForegroundInstanceId: planInstanceId,
+      executorInstanceId: planInstanceId,
     });
   });
 

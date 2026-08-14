@@ -1098,6 +1098,50 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     ).toContain("persistent_engine:multi_output_action:cards+credits");
   });
 
+  it("keeps a second identical combined engine redundant", () => {
+    const candidate = visibleCard("saloon-second-copy", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+      installCost: 8,
+    });
+    const installed = visibleCard("saloon-installed-copy", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 20,
+          hand: [candidate, visibleCard("buffer", { type: "event" })],
+          rig: [installed],
+          legalActions: [
+            installAction("install-saloon-second", candidate, 8),
+          ],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: [
+            "runner.economy_setup_before_pressure",
+            "runner.draw_or_search_setup",
+          ],
+        }),
+      }),
+      candidate.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "duplicate",
+      persistentInstallEvaluation: {
+        installedSameDefinitionCount: 1,
+        installedSameFunctionalGroupCount: 1,
+        duplicateRole: "redundant_duplicate",
+        engineAssessment: {
+          readiness: "already_satisfied",
+          alreadySatisfied: true,
+        },
+      },
+    });
+  });
+
   it("recognizes the same combined engine semantics without a known card id", () => {
     const definitionId = "test-generic-combined-action-engine";
     AI_HINTS_BY_CARD.set(definitionId, {
