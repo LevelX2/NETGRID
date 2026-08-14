@@ -6,20 +6,27 @@ import { simulateAiGame } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 const RUNNER_DECK_ID = "standard_runner_last_call_at_rd";
-const RUNNER_DECK_HASH = "standard-deck:a71c0dcc";
+const RUNNER_DECK_HASH = "standard-deck:76a00e66";
 
 describe("Last Call at R&D exact choice-window regressions", () => {
-  it("resolves the Seed 1 Runner start window from its full canonical source profiles and replays deterministically", () => {
+  it("resolves the frozen singleton-variant Seed 1 Runner start window from its full canonical source profiles and replays deterministically", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const first = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-01",
       corpDeckId: "standard_corp_universal_fast_advance",
+      runnerCards: singletonKeyCardRegressionCards(),
+      runnerDeckHash: "standard-deck:a71c0dcc",
       captures,
-      actionIndices: [70],
+      capturePredicate: (snapshot) =>
+        snapshot.input.playerView.pendingChoice?.source.startsWith(
+          "runner_start.order:",
+        ) === true,
     });
     const second = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-01",
       corpDeckId: "standard_corp_universal_fast_advance",
+      runnerCards: singletonKeyCardRegressionCards(),
+      runnerDeckHash: "standard-deck:a71c0dcc",
     });
 
     assertRegularReplay(first);
@@ -27,18 +34,24 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(first.finalStateHash).toBe(second.finalStateHash);
     expect(first.actionSequence).toEqual(second.actionSequence);
 
-    const capture = captures.find((entry) => entry.state.stateVersion === 70);
+    const capture = captures.find((entry) =>
+      entry.input.playerView.pendingChoice?.source.startsWith(
+        "runner_start.order:",
+      ),
+    );
+    expect(capture).toBeDefined();
+    const stateVersion = capture!.state.stateVersion;
     const resolution = first.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 70,
+      (entry) => entry.stateVersionBefore === stateVersion,
     );
     expect(capture?.input.playerView.pendingChoice).toMatchObject({
-      choiceId: "runner_start_order_70",
+      choiceId: `runner_start_order_${stateVersion}`,
       side: "runner",
-      source: "runner_start.order:70",
+      source: `runner_start.order:${stateVersion}`,
       kind: "select_cards",
       minSelections: 1,
       maxSelections: 1,
-      stateVersion: 70,
+      stateVersion,
       visibility: "hidden_info_barrier",
     });
     expect(
@@ -66,27 +79,44 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       seed: "last-call-panel-siren-batch-01-game-06",
       corpDeckId: "standard_corp_siren_fortress",
       captures,
-      actionIndices: [129, 130],
+      capturePredicate: (snapshot) =>
+        snapshot.input.legalActions.some(
+          (action) =>
+            action.type === "play_operation" &&
+            String(action.source).includes("onr_v1_296_off-site-backups"),
+        ) ||
+        snapshot.input.playerView.pendingChoice?.source.startsWith(
+          "v1922.corp_archives_to_hq:",
+        ) === true,
     });
 
     assertRegularReplay(summary);
+    const sourceCapture = captures.find((entry) =>
+      entry.input.legalActions.some(
+        (action) =>
+          action.type === "play_operation" &&
+          String(action.source).includes("onr_v1_296_off-site-backups"),
+      ),
+    );
+    const choiceCapture = captures.find((entry) =>
+      entry.input.playerView.pendingChoice?.source.startsWith(
+        "v1922.corp_archives_to_hq:",
+      ),
+    );
+    expect(sourceCapture).toBeDefined();
+    expect(choiceCapture).toBeDefined();
     const source = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 129,
+      (entry) => entry.stateVersionBefore === sourceCapture!.state.stateVersion,
     );
     const choice = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 130,
-    );
-    const sourceCapture = captures.find(
-      (entry) => entry.state.stateVersion === 129,
-    );
-    const choiceCapture = captures.find(
-      (entry) => entry.state.stateVersion === 130,
+      (entry) => entry.stateVersionBefore === choiceCapture!.state.stateVersion,
     );
     const sourceAction = sourceCapture?.input.legalActions.find(
       (action) =>
         action.type === "play_operation" &&
-        action.source === "corp_onr_v1_296_off-site-backups_2",
+        String(action.source).includes("onr_v1_296_off-site-backups"),
     );
+    expect(sourceAction).toBeDefined();
     const executor = source?.evidence.find((entry) =>
       entry.startsWith("plan_first_executor:"),
     );
@@ -98,17 +128,16 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       fallbackUsed: false,
     });
     expect(sourceAction).toMatchObject({
-      source: "corp_onr_v1_296_off-site-backups_2",
+      source: expect.stringContaining("onr_v1_296_off-site-backups"),
     });
     expect(choiceCapture?.input.playerView.pendingChoice).toMatchObject({
-      choiceId: "v1922_corp_archives_to_hq_130",
+      choiceId: `v1922_corp_archives_to_hq_${choiceCapture!.state.stateVersion}`,
       side: "corp",
-      source:
-        "v1922.corp_archives_to_hq:corp_onr_v1_296_off-site-backups_2:130",
+      source: `v1922.corp_archives_to_hq:${sourceAction!.source}:${choiceCapture!.state.stateVersion}`,
       kind: "select_cards",
       minSelections: 1,
       maxSelections: 1,
-      stateVersion: 130,
+      stateVersion: choiceCapture!.state.stateVersion,
       visibility: "hidden_info_barrier",
     });
     expect(choice).toMatchObject({
@@ -144,16 +173,27 @@ function simulateStandardGame(params: {
   seed: string;
   corpDeckId: string;
   captures?: AiSimulationDecisionCheckpointCapture[];
-  actionIndices?: number[];
+  runnerCards?: StandardDeck["cards"];
+  runnerDeckHash?: string;
+  capturePredicate?: (
+    snapshot: AiSimulationDecisionCheckpointCapture,
+  ) => boolean;
 }) {
   const runner = standardDeck(RUNNER_DECK_ID);
+  const runnerForSimulation =
+    params.runnerCards === undefined
+      ? runner
+      : { ...runner, cards: params.runnerCards };
   const corp = standardDeck(params.corpDeckId);
   return simulateAiGame({
     seed: params.seed,
     maxActions: 480,
-    runnerDeck: deckDefinition(runner),
+    runnerDeck: deckDefinition(runnerForSimulation),
     corpDeck: deckDefinition(corp),
-    runnerDeckMetadata: deckMetadata(runner, RUNNER_DECK_HASH),
+    runnerDeckMetadata: deckMetadata(
+      runnerForSimulation,
+      params.runnerDeckHash ?? RUNNER_DECK_HASH,
+    ),
     corpDeckMetadata: deckMetadata(
       corp,
       corp.deckHash ?? `standard-deck:${corp.standardDeckId}`,
@@ -162,16 +202,31 @@ function simulateStandardGame(params: {
     corpControllerMode: "current_candidate",
     runnerDifficulty: "hard",
     corpDifficulty: "hard",
-    ...(params.captures && params.actionIndices
+    ...(params.captures && params.capturePredicate
       ? {
           testOnlyDecisionCheckpointCapture: {
-            actionIndices: params.actionIndices,
-            capture: (snapshot: AiSimulationDecisionCheckpointCapture) =>
-              params.captures!.push(snapshot),
+            actionIndices: Array.from({ length: 480 }, (_, index) => index),
+            capture: (snapshot: AiSimulationDecisionCheckpointCapture) => {
+              if (params.capturePredicate!(snapshot))
+                params.captures!.push(snapshot);
+            },
           },
         }
       : {}),
   });
+}
+
+function singletonKeyCardRegressionCards(): StandardDeck["cards"] {
+  const quantities = new Map([
+    ["onr_v1_076_all-nighter", 2],
+    ["onr_v1_086_forged-activation-orders", 2],
+    ["onr_v1_123_bodyweight-data-creche", 1],
+    ["onr_v1_179_silicon-saloon-franchise", 1],
+  ]);
+  return standardDeck(RUNNER_DECK_ID).cards.map((card) => ({
+    ...card,
+    quantity: quantities.get(card.cardId) ?? card.quantity,
+  }));
 }
 
 function standardDeck(standardDeckId: string): StandardDeck {

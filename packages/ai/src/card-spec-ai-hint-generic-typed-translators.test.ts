@@ -596,6 +596,35 @@ describe("generic typed CardSpec AI translators", () => {
     ).toThrow("card_spec_target_preference_without_supported_mechanical_owner");
   });
 
+  it("projects Data Crèche as a successful-run bonus run without grip-reset semantics", () => {
+    const hint = actualHint("onr_v1_123_bodyweight-data-creche");
+
+    expect(hint).toMatchObject({
+      roles: expect.arrayContaining(["run_support"]),
+      effects: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "future_run_effect",
+          timing: "after_successful_run",
+          target: "make_run",
+        }),
+      ]),
+      functionSignals: expect.arrayContaining(["run.make_run"]),
+      requiredMechanics: expect.arrayContaining([
+        "successful_run_trigger",
+        "make_run",
+      ]),
+    });
+    expect(hint.roles).not.toContain("remote_support");
+    expect(hint.functionSignals).not.toContain("run.successful_run_grip_reset");
+    expect(hint.tacticSignals ?? []).not.toContain(
+      "run.successful_run_grip_reset",
+    );
+    expect(hint.requiredMechanics).not.toEqual(
+      expect.arrayContaining(["shuffle_grip_into_stack", "draw_cards"]),
+    );
+    expect(hint.riskTags).not.toContain("hidden_zone");
+  });
+
   it("compiles all Originalset target preferences through exact typed owner unions", () => {
     const entries = cardSpecPlanningCards().filter(
       (entry) =>

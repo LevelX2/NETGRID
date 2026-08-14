@@ -5580,9 +5580,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["hidden_zone"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": {
-          "remoteRootValue": 1
-        },
+        "valueHints": { "remoteRootValue": 1 },
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff"],
@@ -5611,16 +5609,10 @@
         ],
         "actionTacticSignals": ["access.punish", "punish.payoff"],
         "conditions": [
-          {
-            "kind": "requires_accessed_card"
-          },
-          {
-            "kind": "requires_rnd_top"
-          }
+          { "kind": "requires_accessed_card" },
+          { "kind": "requires_rnd_top" }
         ],
-        "costProfile": {
-          "credits": 0
-        },
+        "costProfile": { "credits": 0 },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",
@@ -5639,6 +5631,7 @@
           "accessEffects",
           "add_counter_to_all_installed_runner_icebreakers",
           "corp_may_pay_credits",
+          "icebreaker_strength_modifier_per_counter",
           "install_remote",
           "on_access",
           "rez_card",
@@ -6323,7 +6316,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["program", "remote_support"],
+        "roles": ["program"],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "actionCapacityProfiles": [
@@ -6353,24 +6346,15 @@
             "repeatable": true
           }
         ],
-        "functionSignals": ["run.successful_run_grip_reset", "virus.purge_tax"],
-        "tacticSignals": ["run.successful_run_grip_reset"],
+        "functionSignals": ["virus.purge_tax"],
         "actionTacticSignals": [
           "effect:delayed_penalty",
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "conditions": [
-          {
-            "kind": "requires_successful_run"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 1,
-          "memory": 1
-        },
-        "riskTags": ["hidden_zone", "successful_run"],
+        "conditions": [{ "kind": "requires_successful_run" }],
+        "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
+        "riskTags": ["successful_run"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6380,9 +6364,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "draw_cards",
           "install_program",
-          "shuffle_grip_into_stack",
           "subtype_random",
           "subtype_virus",
           "successful_run_trigger"
@@ -10834,25 +10816,17 @@
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
-        "roles": ["resource", "remote_support"],
+        "roles": ["resource"],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["runner.hq_pressure"],
         "lineSupport": ["runner.hq_pressure"],
-        "functionSignals": ["run.successful_run_grip_reset"],
-        "tacticSignals": ["economy.card", "run.successful_run_grip_reset"],
+        "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "conditions": [
-          {
-            "kind": "requires_successful_run"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
-        "riskTags": ["hidden_zone", "successful_run"],
+        "conditions": [{ "kind": "requires_successful_run" }],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["successful_run", "hidden_zone"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -10862,9 +10836,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "draw_cards",
           "install_resource",
-          "shuffle_grip_into_stack",
           "subtype_hidden",
           "subtype_sabotage",
           "successful_run_trigger"
@@ -10878,7 +10850,7 @@
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
-        "roles": ["resource", "remote_support"],
+        "roles": ["resource"],
         "planRoles": ["build_rig", "safe_probe_run"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
@@ -10896,22 +10868,11 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "functionSignals": ["run.successful_run_grip_reset"],
-        "tacticSignals": [
-          "corp.remote_protection",
-          "run.successful_run_grip_reset"
-        ],
+        "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [
-          {
-            "kind": "requires_successful_run"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
-        "riskTags": ["hidden_zone", "successful_run"],
+        "conditions": [{ "kind": "requires_successful_run" }],
+        "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["successful_run", "hidden_zone"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -10921,9 +10882,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "draw_cards",
           "install_resource",
-          "shuffle_grip_into_stack",
           "subtype_hidden",
           "subtype_sabotage",
           "successful_run_trigger"
