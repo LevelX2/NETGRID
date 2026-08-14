@@ -6,6 +6,8 @@ import type {
   PlayerAction,
 } from "@netgrid/shared";
 import { resolveInvestmentFirmCreditGainChoice } from "../economy/credit-gain";
+import { resumeRunEndTrashUsedBreakers } from "../run/run-end-cleanup";
+import type { RunEndCleanupHost } from "../run/run-end-cleanup-contracts";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -374,6 +376,15 @@ export function resolvePendingChoice(
         "trash_prevention"
     )
       host.run.resumeTraceHardwareWreckerAfterTrash(state, legalAction);
+    if (
+      !state.pendingChoice &&
+      !state.eventModificationWindow &&
+      state.pendingRunEndTrashContinuation
+    )
+      resumeRunEndTrashUsedBreakers(
+        runEndCleanupHost(state) as RunEndCleanupHost,
+        legalAction,
+      );
     resumeRunStartDamageIfReady(host, state, legalAction);
     resumeDamageFollowupIfReady(host, state, legalAction);
     resumeAccessDamageIfReady(host, state, legalAction);

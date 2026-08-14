@@ -58,7 +58,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_scoring_remote",
+        role: "protect_remote",
       },
       {
         kind: "strategic_role",
@@ -82,8 +82,12 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "rearrange_fort_ice",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "blocks_relevant_run_path",
+          "adds_relevant_encounter_tax",
+          "protects_agenda_remote",
+        ],
+        avoid: ["irrelevant_server_ice"],
       },
       {
         kind: "value_interpretation",

@@ -642,7 +642,7 @@ describe("generic typed CardSpec AI translators", () => {
           ).length ?? 0),
         0,
       ),
-    ).toBe(74);
+    ).toBe(65);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
@@ -669,14 +669,6 @@ describe("generic typed CardSpec AI translators", () => {
         "onr_v1_046_pattels-virus",
         {
           timing: "after_successful_run",
-          targetType: "installed_ice",
-          serverScope: "source_fort",
-        },
-      ],
-      [
-        "onr_v1_068_startup-immolator",
-        {
-          timing: "encounter_resolution",
           targetType: "installed_ice",
           serverScope: "source_fort",
         },

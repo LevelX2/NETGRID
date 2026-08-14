@@ -14,6 +14,7 @@ import {
   handleRunEndCleanup,
   recordFortBoundBreakerUsage,
   recordRunEndTrashBreakerUsage,
+  resumeRunEndTrashUsedBreakers,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "./run-end-cleanup";
@@ -55,6 +56,12 @@ function makeHost(
     tokyoAmount?: number;
     dupreSourceIds?: CardInstanceId[];
     runEndTrashSourceIds?: CardInstanceId[];
+    resolveRunnerInstalledProgramTrash?: (
+      state: GameState,
+      cardId: CardInstanceId,
+      source: string,
+      legalAction: LegalAction,
+    ) => { suspended: boolean };
     virusImplementations?: Record<string, CardVirusCounterImplementation>;
   } = {},
 ): {
@@ -318,11 +325,19 @@ function makeHost(
       cleanupEmptyRemotes: () => {
         resetBreakerStrengthCount += 1;
       },
-      trashRunnerInstalledProgram: (cardId) => {
+      resolveRunnerInstalledProgramTrash: (cardId, source, legalAction) => {
+        if (options.resolveRunnerInstalledProgramTrash)
+          return options.resolveRunnerInstalledProgramTrash(
+            state,
+            cardId,
+            source,
+            legalAction,
+          );
         state.runner.rig.programs = state.runner.rig.programs.filter(
           (candidate) => candidate !== cardId,
         );
         state.runner.heap = [...(state.runner.heap ?? []), cardId];
+        return { suspended: false };
       },
     },
   };
@@ -1233,6 +1248,91 @@ describe("run end cleanup", () => {
       trashedCount: 1,
       trashedCardDefinitionId: "rent_def",
       publicRevealDefinitionIds: "rent_def",
+    });
+  });
+
+  it("keeps duplicate Rent-I-Con uses as sequential preventable run-end effects", () => {
+    let trashResolutionCalls = 0;
+    const fixture = makeHost({
+      run: {
+        runId: "run_rent_twice",
+        attackedServerId: "remote_1",
+        phase: "movement",
+        position: { kind: "server", serverId: "remote_1" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["rent" as CardInstanceId],
+      definitions: {
+        rent_def: definition("rent_def", "program"),
+      },
+      instances: {
+        rent: instance("rent", "rent_def", { side: "runner", zone: "rig" }),
+      },
+      runEndTrashSourceIds: ["rent" as CardInstanceId],
+      resolveRunnerInstalledProgramTrash: (
+        state,
+        cardId,
+        source,
+      ) => {
+        trashResolutionCalls += 1;
+        expect(source).toBe("run_end_trash_source_if_used:rent");
+        if (trashResolutionCalls === 1) {
+          state.pendingChoice = {
+            choiceId: "rent_trash_prevention",
+            side: "runner",
+            source: "v120.event_modification.prevent",
+            prompt: "Trash verhindern",
+            kind: "select_option",
+            options: [],
+            minSelections: 1,
+            maxSelections: 1,
+            stateVersion: state.stateVersion + 1,
+            visibility: "public",
+          };
+          return { suspended: true };
+        }
+        state.runner.rig.programs = state.runner.rig.programs.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.heap = [...(state.runner.heap ?? []), cardId];
+        return { suspended: false };
+      },
+    });
+
+    recordRunEndTrashBreakerUsage(fixture.host, "rent" as CardInstanceId);
+    recordRunEndTrashBreakerUsage(fixture.host, "rent" as CardInstanceId);
+    expect(fixture.state.run?.runEndTrashUsedBreakerIdsThisRun).toEqual([
+      "rent",
+      "rent",
+    ]);
+
+    const initial = handleRunEndCleanup(
+      fixture.host,
+      false,
+      fixture.legalAction,
+    );
+    expect(initial.stateChanged).toBe(true);
+    expect(fixture.state.run).toBeDefined();
+    expect(fixture.state.runner.rig.programs).toContain("rent");
+    expect(fixture.state.pendingRunEndTrashContinuation).toMatchObject({
+      remainingSourceCardIds: ["rent"],
+      activeSourceCardId: "rent",
+      effectCount: 2,
+    });
+
+    delete fixture.state.pendingChoice;
+    resumeRunEndTrashUsedBreakers(fixture.host, fixture.legalAction);
+
+    expect(trashResolutionCalls).toBe(2);
+    expect(fixture.state.run).toBeUndefined();
+    expect(fixture.state.runner.rig.programs).not.toContain("rent");
+    expect(fixture.state.runner.heap).toContain("rent");
+    expect(fixture.state.pendingRunEndTrashContinuation).toBeUndefined();
+    expect(fixture.legalAction.payload).toMatchObject({
+      v1922RunnerProgramAbility: "run_end_trash_used_breaker",
+      runEndTrashEffectCount: 2,
+      runEndTrashPreventedOrReplacedCount: 1,
+      trashedCount: 1,
+      trashedCardDefinitionId: "rent_def",
     });
   });
 

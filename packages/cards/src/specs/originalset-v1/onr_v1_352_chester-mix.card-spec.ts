@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "The cost to install ice on this fort is reduced by 2.",
+    rulesText: "The cost to install ice on this fort is reduced by [2].",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -65,10 +65,6 @@ export const cardSpec = {
       {
         kind: "strategic_role",
         role: "support_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
       },
       {
         kind: "line_support",

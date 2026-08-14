@@ -548,6 +548,98 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  it("resolves two Rent-I-Con break uses as separate run-end trash effects", () => {
+    const fixture = engineIceRezWindow("onr_v1_239_endless-corridor", 0, {
+      runnerCredits: 2,
+      runnerPrograms: [
+        "onr_classic_031_rent-i-con",
+        "onr_v1_038_joan-of-arc",
+      ],
+    });
+    let state = applyEngineAction(
+      fixture.state,
+      "corp",
+      fixture.engineAction.actionId,
+      "rez-endless-corridor",
+    );
+    const rentIConId = "exact_runner_program_0" as CardInstanceId;
+    const joanId = "exact_runner_program_1" as CardInstanceId;
+
+    for (const subroutineIndex of [0, 1]) {
+      const breakAction = getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.source === rentIConId &&
+          action.payload?.subroutineIndex === subroutineIndex,
+      );
+      if (!breakAction)
+        throw new Error(`Missing Rent-I-Con break ${subroutineIndex}`);
+      state = applyEngineAction(
+        state,
+        "runner",
+        breakAction.actionId,
+        `break-endless-corridor-${subroutineIndex}`,
+      );
+    }
+    expect(state.run?.runEndTrashUsedBreakerIdsThisRun).toEqual([
+      rentIConId,
+      rentIConId,
+    ]);
+
+    for (let step = 0; step < 8 && state.run && !state.pendingChoice; step += 1) {
+      const action = getLegalActions(state, "runner").find(
+        (candidate) =>
+          candidate.type === "continue_run" || candidate.type === "access_card",
+      );
+      if (!action) throw new Error("Run completion did not reach prevention");
+      state = applyEngineAction(
+        state,
+        "runner",
+        action.actionId,
+        `complete-rent-run-${step}`,
+      );
+    }
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "v120.event_modification.prevent",
+    });
+    const joanCandidate = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    );
+    if (!joanCandidate) throw new Error("Joan prevention is not offered");
+    state = applyEngineChoice(
+      state,
+      "runner",
+      joanCandidate.id,
+      "choose-joan-prevention",
+    );
+
+    expect(state.pendingChoice?.source).toMatch(
+      /^v120\.event_modification\.trash_targets:/,
+    );
+    const rentTarget = state.pendingChoice?.options.find(
+      (option) => option.value === rentIConId || option.id === rentIConId,
+    );
+    if (!rentTarget) throw new Error("Rent-I-Con prevention target is absent");
+    state = applyEngineChoice(
+      state,
+      "runner",
+      rentTarget.id,
+      "prevent-first-rent-trash",
+    );
+
+    expect(state.run).toBeUndefined();
+    expect(state.runner.rig.programs).not.toContain(rentIConId);
+    expect(state.runner.heap).toContain(rentIConId);
+    expect(state.runner.rig.programs).not.toContain(joanId);
+    expect(state.runner.heap).toContain(joanId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_classic_031_rent-i-con",
+    });
+  });
+
   it("rezzes a free persistent Filter on the active central server even when Codecracker breaks it for free", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_244_filter", 0, {
@@ -1348,6 +1440,30 @@ function applyEngineAction(
     actionId,
     clientKnownStateVersion: state.stateVersion,
     idempotencyKey,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
+
+function applyEngineChoice(
+  state: GameState,
+  side: "corp" | "runner",
+  selectedOptionId: string,
+  idempotencyKey: string,
+): GameState {
+  const action = getLegalActions(state, side).find(
+    (candidate) => candidate.type === "resolve_choice",
+  );
+  if (!action) throw new Error("Engine did not expose resolve_choice");
+  const choiceId = state.pendingChoice?.choiceId;
+  if (!choiceId) throw new Error("Engine has no pending choice");
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey,
+    selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "All code gates have +1 strength. When you score Encryption Breakthrough, reveal as many code gates as you wish. Then, gain 1 for each revealed or rezzed code gate.",
+      "All code gates have +1 strength. When you score Encryption Breakthrough, reveal as many code gates as you wish. Then, gain [1] for each revealed or rezzed code gate.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

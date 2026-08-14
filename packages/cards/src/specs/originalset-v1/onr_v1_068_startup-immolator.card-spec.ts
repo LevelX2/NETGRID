@@ -57,14 +57,7 @@ export const cardSpec = {
   },
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
-    card: [
-      {
-        kind: "target_preference",
-        purpose: "trash_fully_broken_ice",
-        preferences: ["current_encounter_ice"],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-    ],
+    card: [],
     capabilities: [],
   },
   printings: [

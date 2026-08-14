@@ -85,19 +85,9 @@ export const cardSpec = {
         role: "enabler",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.hq_pressure",
-      },
-      {
         kind: "line_support",
         lineKey: "runner.hq_pressure",
         support: "supports",
-      },
-      {
-        kind: "target_preference",
-        purpose: "private_hq_full_information",
-        preferences: ["use_choice_option_with_visible_board_payoff"],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "risk_interpretation",

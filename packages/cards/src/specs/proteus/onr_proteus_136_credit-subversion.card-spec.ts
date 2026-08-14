@@ -70,25 +70,16 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "pressure_hq",
       },
       {
         kind: "strategic_role",
         role: "punish_payoff",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.hq_pressure",
-      },
-      {
         kind: "line_support",
         lineKey: "runner.hq_pressure",
         support: "supports",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
       },
     ],
     capabilities: [],

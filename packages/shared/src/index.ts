@@ -1971,6 +1971,16 @@ export type GameState = {
     runId: string;
     amount: number;
   };
+  pendingRunEndTrashContinuation?: {
+    runId: string;
+    deferActionDebtConsumption: boolean;
+    remainingSourceCardIds: CardInstanceId[];
+    activeSourceCardId?: CardInstanceId;
+    activeSourceDefinitionId?: CardDefinitionId;
+    effectCount: number;
+    preventedOrReplacedCount: number;
+    trashedDefinitionIds: CardDefinitionId[];
+  };
   pendingRunnerInstalledMultiTrash?: {
     sourceCardInstanceId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
