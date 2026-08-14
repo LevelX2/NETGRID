@@ -139,14 +139,28 @@ export type ResidentPlanPortfolio = {
   campaigns?: ResidentCorpCampaign[];
   turnPlanCommitment?: TurnPlanCommitment;
   turnPlanExecutionLease?: TurnPlanExecutionLease;
-  selectedActionOrigin?: {
-    rootPlanInstanceId: string;
-    executorInstanceId: string;
-    selectedActionId: string;
-    selectedAtStateVersion: number;
-    immediateChoicePolicy: "trash_lowest_visible_drawn_card";
-  };
+  selectedActionOrigin?: ResidentSelectedActionOrigin;
 };
+
+export type ResidentSelectedActionOrigin = Readonly<{
+  rootPlanInstanceId: string;
+  executorInstanceId: string;
+  selectedActionId: string;
+  selectedAtStateVersion: number;
+}> &
+  (
+    | Readonly<{
+        immediateChoicePolicy: "trash_lowest_visible_drawn_card";
+      }>
+    | Readonly<{
+        immediateChoicePolicy: "select_bound_corp_archives_cards_to_hq";
+        sourceCardInstanceId: string;
+        sourceCardDefinitionId: string;
+        selectionMode: "one" | "all";
+        eligibleArchiveCardInstanceIds: string[];
+        selectedArchiveCardInstanceIds: string[];
+      }>
+  );
 
 export type ReconcileResidentPlanPortfolioParams = {
   side: Side;
@@ -524,11 +538,33 @@ export function assertResidentPlanPortfolio(
       (instance) =>
         instance.instanceId === selectedActionOrigin.executorInstanceId,
     );
+    const originPolicyValid =
+      selectedActionOrigin.immediateChoicePolicy ===
+        "trash_lowest_visible_drawn_card" ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "select_bound_corp_archives_cards_to_hq" &&
+        selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
+        selectedActionOrigin.sourceCardDefinitionId.trim().length > 0 &&
+        (selectedActionOrigin.selectionMode === "one" ||
+          selectedActionOrigin.selectionMode === "all") &&
+        selectedActionOrigin.eligibleArchiveCardInstanceIds.length > 0 &&
+        new Set(selectedActionOrigin.eligibleArchiveCardInstanceIds).size ===
+          selectedActionOrigin.eligibleArchiveCardInstanceIds.length &&
+        selectedActionOrigin.selectedArchiveCardInstanceIds.length > 0 &&
+        new Set(selectedActionOrigin.selectedArchiveCardInstanceIds).size ===
+          selectedActionOrigin.selectedArchiveCardInstanceIds.length &&
+        selectedActionOrigin.selectedArchiveCardInstanceIds.every((cardId) =>
+          selectedActionOrigin.eligibleArchiveCardInstanceIds.includes(cardId),
+        ) &&
+        (selectedActionOrigin.selectionMode !== "one" ||
+          selectedActionOrigin.selectedArchiveCardInstanceIds.length === 1) &&
+        (selectedActionOrigin.selectionMode !== "all" ||
+          selectedActionOrigin.selectedArchiveCardInstanceIds.length ===
+            selectedActionOrigin.eligibleArchiveCardInstanceIds.length));
     if (
       selectedActionOrigin.selectedActionId.trim().length === 0 ||
       selectedActionOrigin.selectedAtStateVersion !== portfolio.stateVersion ||
-      selectedActionOrigin.immediateChoicePolicy !==
-        "trash_lowest_visible_drawn_card" ||
+      !originPolicyValid ||
       !root ||
       !executor ||
       portfolio.rootForegroundInstanceId !== root.instanceId ||

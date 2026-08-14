@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createAiHintsByCard } from "../ai-hints";
 import {
+  corpArchivesToHqOperationProfile,
   corpConditionalScoreCreditProfile,
   corpDirectTagOperationProfile,
   corpDefinitionHasTraceSource,
@@ -19,6 +20,27 @@ import {
 const hints = createAiHintsByCard();
 
 describe("canonical Corp card facts", () => {
+  it("reads the complete Archives-to-HQ choice contract from CardSpec mechanics", () => {
+    expect(
+      corpArchivesToHqOperationProfile("onr_v1_296_off-site-backups"),
+    ).toMatchObject({
+      capabilityKey: "corp_utility_corp_archives_to_hq",
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      corpArchivesToHqOperationProfile("onr_classic_018_reclamation-project"),
+    ).toMatchObject({
+      capabilityKey: "return_archives_ice_to_hq",
+      maxSelections: "all",
+      filterCardType: "ice",
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      corpArchivesToHqOperationProfile("onr_v1_281_accounts-receivable"),
+    ).toBeUndefined();
+  });
+
   it("reads conditional score thresholds and hosted banks from CardSpec mechanics", () => {
     expect(
       corpConditionalScoreCreditProfile("onr_v1_196_corporate-war"),
@@ -52,13 +74,11 @@ describe("canonical Corp card facts", () => {
   });
 
   it("distinguishes trace sources and tagged-damage payoffs mechanically", () => {
-    expect(corpDefinitionHasTraceSource("onr_proteus_050_manhunt")).toBe(
-      true,
-    );
+    expect(corpDefinitionHasTraceSource("onr_proteus_050_manhunt")).toBe(true);
     expect(corpDefinitionHasTraceSource("onr_v1_221_asp")).toBe(true);
-    expect(
-      corpDefinitionHasTraceSource("onr_v1_196_corporate-war"),
-    ).toBe(false);
+    expect(corpDefinitionHasTraceSource("onr_v1_196_corporate-war")).toBe(
+      false,
+    );
     expect(
       corpDefinitionHasTraceTagSource("onr_v1_284_chance-observation"),
     ).toBe(true);
@@ -69,9 +89,7 @@ describe("canonical Corp card facts", () => {
     expect(corpDefinitionHasTagSource("onr_v1_284_chance-observation")).toBe(
       true,
     );
-    expect(corpDefinitionHasTagSource("onr_v1_302_scorched-earth")).toBe(
-      false,
-    );
+    expect(corpDefinitionHasTagSource("onr_v1_302_scorched-earth")).toBe(false);
     expect(
       corpDirectTagOperationProfile("onr_proteus_048_data-sifters"),
     ).toMatchObject({ capabilityKey: "on_play_tag_after_runner_trashed_node" });
@@ -79,9 +97,7 @@ describe("canonical Corp card facts", () => {
       corpTaggedCreditDenialOperationProfile("onr_v1_285_closed-accounts"),
     ).toMatchObject({ capabilityKey: "abilities_on_play_lose_credits" });
 
-    expect(
-      corpTaggedDamagePayoffProfile("onr_v1_327_i-got-a-rock"),
-    ).toEqual({
+    expect(corpTaggedDamagePayoffProfile("onr_v1_327_i-got-a-rock")).toEqual({
       requiredRunnerTags: 2,
       agendaPointCost: 3,
       damageType: "meat",

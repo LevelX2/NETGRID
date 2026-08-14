@@ -110,6 +110,8 @@ const MAINTENANCE_ANALYSIS_BUNDLE_ROUTE =
   /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/bundle$/;
 const MAINTENANCE_DECISION_ANALYSIS_ROUTE =
   /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/decisions\/(\d+)$/;
+const MAINTENANCE_AI_TRACE_INDEX_ROUTE =
+  /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)$/;
 
 function resolveRepositoryStoragePath(path: string): string {
   return resolve(NETGRID_REPOSITORY_ROOT, path);
@@ -4238,7 +4240,8 @@ export function mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
 function isExplicitLocalReadOnlyAnalysisRoute(pathname: string): boolean {
   return (
     MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.test(pathname) ||
-    MAINTENANCE_DECISION_ANALYSIS_ROUTE.test(pathname)
+    MAINTENANCE_DECISION_ANALYSIS_ROUTE.test(pathname) ||
+    MAINTENANCE_AI_TRACE_INDEX_ROUTE.test(pathname)
   );
 }
 

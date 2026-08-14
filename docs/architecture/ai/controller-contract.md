@@ -1,7 +1,7 @@
 # AI Controller Spec
 
 Status: **Current State**
-Stand: 2026-08-02
+Stand: 2026-08-14
 
 ## Ziel
 
@@ -55,6 +55,13 @@ zweite Auswahlautorität.
 Choice-Resolver dürfen nur die Payload einer bereits gewählten und exakt
 gebundenen Action vervollständigen. Sie dürfen weder Action-ID noch Quelle,
 Server, Ziel, Ressourcenstrategie, Executor oder Planpriorität neu wählen.
+
+Bei einer kartenquellengebundenen Hidden-Zone-Choice projiziert die Engine die
+kanonische Herkunft zusätzlich strukturiert als `sourceCardInstanceId` und
+`sourceCardDefinitionId`. Die AI bindet diese Werte zusammen mit der bereits
+gewählten Action-ID und StateVersion; den opaken `source`-String darf sie nicht
+als Ersatzquelle parsen. So bleibt der auswählende Plan auch über die Choice
+hinweg alleiniger Owner.
 
 ## Fail-closed und Coverage
 

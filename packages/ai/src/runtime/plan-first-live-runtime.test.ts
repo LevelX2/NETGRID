@@ -1551,6 +1551,93 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("classifies a matchpoint-reserved optional Cyfermaster trash-install only through its variant owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const direct = legalAction(
+      "runner.install_card.runner_onr_v1_016_cyfermaster_2.runner_onr_v1_016_cyfermaster_2",
+      "runner",
+      "install_card",
+      "Install Cyfermaster",
+      { credits: 4, clicks: 1 },
+      {
+        source: "runner_onr_v1_016_cyfermaster_2",
+        payload: { cardId: "runner_onr_v1_016_cyfermaster_2" },
+      },
+    );
+    const withTrash = legalAction(
+      "runner.install_card.runner_onr_v1_016_cyfermaster_2.runner_onr_v1_016_cyfermaster_2.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Cyfermaster",
+      { credits: 4, clicks: 1 },
+      {
+        source: "runner_onr_v1_016_cyfermaster_2",
+        payload: {
+          cardId: "runner_onr_v1_016_cyfermaster_2",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [direct, withTrash, credit]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 2;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.own.rig = [
+      visibleCard("runner_onr_v1_039_krash_1", "runner", "program", {
+        definitionId: "onr_v1_039_krash",
+        title: "Krash",
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard(
+        "runner_onr_v1_016_cyfermaster_2",
+        "runner",
+        "program",
+        {
+          definitionId: "onr_v1_016_cyfermaster",
+          title: "Cyfermaster",
+          installCost: 4,
+          subtypes: ["icebreaker"],
+        },
+      ),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "runner_onr_v1_016_cyfermaster_2",
+          definitionId: "onr_v1_016_cyfermaster",
+          legalActionId: direct.actionId,
+          priority: 0,
+          deferReason: "preserve_credit_floor",
+          finalInstallFit: -100,
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 7,
+        desiredCreditReserve: 12,
+        fundingNeed: true,
+        evidence: ["test_matchpoint_remote_reserve"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.economy" },
+    });
+  });
+
   it("selects a blocked payoff Social Engineering route through central pressure and persists its exact continuation", () => {
     resetResidentPlanPortfolioMemory();
     const social = legalAction(

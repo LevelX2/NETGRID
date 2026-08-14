@@ -276,6 +276,12 @@ export function buildTemporaryProgramInstallSourceChoice(input: {
     maxSelections: 1,
     stateVersion: nextStateVersion,
     visibility: "hidden_info_barrier",
+    ...(input.sourceCardId
+      ? {
+          sourceCardInstanceId: input.sourceCardId,
+          sourceCardDefinitionId: input.sourceDefinitionId,
+        }
+      : {}),
   };
 }
 
@@ -313,6 +319,12 @@ export function buildTemporaryProgramInstallChoice(input: {
     maxSelections: 1,
     stateVersion: nextStateVersion,
     visibility: "hidden_info_barrier",
+    ...(input.sourceCardId
+      ? {
+          sourceCardInstanceId: input.sourceCardId,
+          sourceCardDefinitionId: input.sourceDefinitionId,
+        }
+      : {}),
     cardSearchPresentation: {
       sourceZone: input.sourceZone,
       selectableFilter: "program",

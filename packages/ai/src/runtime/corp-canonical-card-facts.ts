@@ -45,6 +45,14 @@ export type CorpScoreConversionProfile = Readonly<{
   gainsCorpActions: boolean;
 }>;
 
+export type CorpArchivesToHqOperationProfile = Readonly<{
+  capabilityKey: string;
+  sourceCapabilityId: string;
+  maxSelections: 1 | "all";
+  filterCardType?: "ice";
+  visibility: "hidden_info_barrier";
+}>;
+
 export function corpConditionalScoreCreditProfile(
   definitionId: string | undefined,
 ): CorpConditionalScoreCreditProfile | undefined {
@@ -260,6 +268,38 @@ export function corpInstalledHardwareTrashOperationProfile(
       planning.planning.cardDefinitionId,
       utility.capabilityKey,
     ),
+  };
+}
+
+export function corpArchivesToHqOperationProfile(
+  definitionId: string | undefined,
+): CorpArchivesToHqOperationProfile | undefined {
+  const planning = planningCard(definitionId);
+  const utility = planning?.planning.engine.corpUtility;
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "operation" ||
+    utility?.kind !== "corp_archives_to_hq" ||
+    utility.visibility !== "hidden_info_barrier" ||
+    (utility.maxSelections !== undefined &&
+      utility.maxSelections !== 1 &&
+      utility.maxSelections !== "all") ||
+    (utility.filter?.cardType !== undefined &&
+      utility.filter.cardType !== "ice")
+  ) {
+    return undefined;
+  }
+  return {
+    capabilityKey: utility.capabilityKey,
+    sourceCapabilityId: canonicalCapabilityId(
+      planning.planning.cardDefinitionId,
+      utility.capabilityKey,
+    ),
+    maxSelections: utility.maxSelections ?? 1,
+    ...(utility.filter?.cardType
+      ? { filterCardType: utility.filter.cardType }
+      : {}),
+    visibility: utility.visibility,
   };
 }
 

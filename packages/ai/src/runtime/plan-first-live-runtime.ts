@@ -154,6 +154,7 @@ import {
 } from "../plans/corp-defense-domain-signals";
 import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
 import {
+  corpArchivesToHqOperationProfile,
   corpCandidateProvidesScoreConversion,
   corpConditionalScoreCreditProfile,
   corpDefinitionHasTraceSource,
@@ -498,6 +499,7 @@ export function choosePlanFirstLiveAction(
     if (planBoundRunnerEventInstallChoice) return undefined;
     return (
       resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
+      resolvePlanBoundCorpArchivesToHqChoice(schedulerContext, previous) ??
       resolveEngineWindow(schedulerContext)
     );
   };
@@ -654,6 +656,12 @@ export function choosePlanFirstLiveAction(
   bindSelectedCorpDefenseDrawAttempt(input, result);
   bindSelectedCorpHandDrawAttempt(input, result);
   bindSelectedCorpHqOverflowConversion(input, result);
+  bindSelectedCorpArchivesToHqChoiceContinuation(
+    input,
+    result,
+    candidates,
+    dependencies.discardKeepScore,
+  );
   bindSelectedCorpDefenseHqHold(input, result);
   bindSelectedPlanActionOrigin(input, result, candidates);
   if (
@@ -1000,6 +1008,198 @@ function bindSelectedCorpHqOverflowConversion(
       signal.handSize - signal.maximumHandSize - 1,
     ),
   };
+}
+
+function bindSelectedCorpArchivesToHqChoiceContinuation(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  candidates: readonly ActionSemanticCandidate[],
+  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
+): void {
+  if (input.side !== "corp" || result.lane !== "plan") return;
+  const selectedAction = input.legalActions.find(
+    (action) => action.actionId === result.route.head.actionId,
+  );
+  const selectedCandidate = candidates.find(
+    (candidate) => candidate.actionId === result.route.head.actionId,
+  );
+  const profile = corpArchivesToHqOperationProfile(
+    selectedCandidate?.sourceDefinitionId,
+  );
+  if (!profile) return;
+
+  const rootPlanInstanceId = result.portfolio.rootForegroundInstanceId;
+  const executorInstanceId = result.portfolio.executorInstanceId;
+  const executor = result.portfolio.instances.find(
+    (instance) => instance.instanceId === executorInstanceId,
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: CorpPlanDomain["handManagement"][number] }
+    | undefined;
+  const signal = moduleState?.signal;
+  const source = selectedCandidate?.sourceCardInstanceId
+    ? input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === selectedCandidate.sourceCardInstanceId,
+      )
+    : undefined;
+  const sourceDefinitionId = source?.definitionId;
+  const exactOwningRoute =
+    executor?.moduleId === "corp.hand_and_agenda_management" &&
+    executor.executionState === "executor" &&
+    moduleState?.kind === "hand" &&
+    signal?.phase === "resolve_hq_overflow" &&
+    signal.actionIds?.includes(result.route.head.actionId) === true &&
+    rootPlanInstanceId !== undefined &&
+    executorInstanceId !== undefined &&
+    selectedAction?.side === "corp" &&
+    selectedAction.type === "play_operation" &&
+    selectedAction.source === selectedCandidate?.sourceCardInstanceId &&
+    selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
+    selectedCandidate?.sourceKind === "card" &&
+    source?.known === true &&
+    sourceDefinitionId === selectedCandidate.sourceDefinitionId &&
+    selectedCandidate.sourceDefinitionId !== undefined &&
+    result.portfolio.instances.some(
+      (instance) =>
+        instance.instanceId === rootPlanInstanceId && instance.side === "corp",
+    );
+  if (!exactOwningRoute || !selectedAction || !selectedCandidate) return;
+  if (!discardKeepScore) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [selectedAction.actionId],
+      owner: "plan_module",
+      planInstanceId: executor.instanceId,
+      stepId: result.route.head.stepId,
+      removalCondition:
+        "The Corp hand plan must provide its generic keep-value scorer before binding an Archives-to-HQ target.",
+    });
+  }
+  const selection = selectedCorpArchivesToHqCards(
+    input,
+    profile,
+    discardKeepScore,
+  );
+  if (!selection) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [selectedAction.actionId],
+      owner: "continuation",
+      planInstanceId: executor.instanceId,
+      stepId: result.route.head.stepId,
+      removalCondition:
+        "Bind an Archives-to-HQ continuation only from complete canonical source effects and the exact current known Archives card set.",
+    });
+  }
+  result.portfolio.selectedActionOrigin = {
+    rootPlanInstanceId,
+    executorInstanceId,
+    selectedActionId: selectedAction.actionId,
+    selectedAtStateVersion: input.playerView.stateVersion,
+    immediateChoicePolicy: "select_bound_corp_archives_cards_to_hq",
+    sourceCardInstanceId: source.instanceId,
+    sourceCardDefinitionId: sourceDefinitionId!,
+    selectionMode: profile.maxSelections === "all" ? "all" : "one",
+    eligibleArchiveCardInstanceIds: selection.eligibleCardInstanceIds,
+    selectedArchiveCardInstanceIds: selection.selectedCardInstanceIds,
+  };
+}
+
+function selectedCorpArchivesToHqCards(
+  input: AiDecisionInput,
+  profile: NonNullable<ReturnType<typeof corpArchivesToHqOperationProfile>>,
+  discardKeepScore: NonNullable<PlanFirstLiveDependencies["discardKeepScore"]>,
+):
+  | {
+      eligibleCardInstanceIds: string[];
+      selectedCardInstanceIds: string[];
+    }
+  | undefined {
+  const eligible = input.playerView.own.heapOrArchives.filter(
+    (card) =>
+      card.known === true &&
+      typeof card.definitionId === "string" &&
+      (profile.filterCardType === undefined ||
+        card.type === profile.filterCardType),
+  );
+  if (
+    eligible.length === 0 ||
+    new Set(eligible.map((card) => card.instanceId)).size !== eligible.length
+  ) {
+    return undefined;
+  }
+  const scoringInput: AiDecisionInput = {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        gripOrHq: [
+          ...input.playerView.own.gripOrHq,
+          ...eligible.filter(
+            (archiveCard) =>
+              !input.playerView.own.gripOrHq.some(
+                (handCard) => handCard.instanceId === archiveCard.instanceId,
+              ),
+          ),
+        ],
+      },
+    },
+  };
+  const ranked = eligible
+    .map((card) => ({ card, score: discardKeepScore(scoringInput, card) }))
+    .sort(compareCorpArchivesToHqCandidates);
+  const selected =
+    profile.maxSelections === "all"
+      ? ranked
+      : ranked.length > 0
+        ? [ranked[0]!]
+        : [];
+  if (selected.length === 0) return undefined;
+  return {
+    eligibleCardInstanceIds: eligible.map((card) => card.instanceId),
+    selectedCardInstanceIds: selected.map((entry) => entry.card.instanceId),
+  };
+}
+
+function compareCorpArchivesToHqCandidates(
+  left: { card: VisibleCard; score: DiscardChoiceKeepScore },
+  right: { card: VisibleCard; score: DiscardChoiceKeepScore },
+): number {
+  return (
+    corpArchiveRetentionRank(right.score.planDisposition) -
+      corpArchiveRetentionRank(left.score.planDisposition) ||
+    right.score.total - left.score.total ||
+    (left.card.title ?? "").localeCompare(right.card.title ?? "", "de") ||
+    left.card.instanceId.localeCompare(right.card.instanceId)
+  );
+}
+
+function corpArchiveRetentionRank(
+  disposition: DiscardChoiceKeepScore["planDisposition"],
+): number {
+  switch (disposition) {
+    case "current_plan_route":
+      return 5;
+    case "support_for_need":
+    case "campaign_hold":
+      return 4;
+    case "blocked_but_developable":
+      return 2;
+    case "assessment_unknown":
+      return 1;
+    case "redundant":
+    case "currently_dead":
+    case "discard_candidate":
+    case undefined:
+      return 0;
+  }
 }
 
 function bindSelectedCorpDefenseHqHold(
@@ -1668,12 +1868,8 @@ function runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {
-  if (
-    candidate.semanticActionType !== "install.card" ||
-    !candidate.actionId.endsWith(".runner_program_trash_before_install")
-  ) {
+  if (!runnerCandidateIsOptionalProgramTrashInstall(input, candidate))
     return false;
-  }
   const sourceDefinitionId = runnerCandidateSourceDefinitionId(
     input,
     candidate,
@@ -1683,6 +1879,20 @@ function runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
     (input.playerView.own.rig ?? []).some(
       (installed) => installed.definitionId === sourceDefinitionId,
     )
+  );
+}
+
+function runnerCandidateIsOptionalProgramTrashInstall(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (candidate.semanticActionType !== "install.card") return false;
+  const legalAction = input.legalActions.find(
+    (action) => action.actionId === candidate.actionId,
+  );
+  return (
+    legalAction?.payload?.runnerProgramTrashBeforeInstall === true ||
+    candidate.actionId.endsWith(".runner_program_trash_before_install")
   );
 }
 
@@ -2002,10 +2212,7 @@ export function runnerActionDispositions(
         coverageOwnedActionIds,
         domain.coverageGaps,
       ) &&
-      !runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
-        input,
-        candidate,
-      )
+      !runnerCandidateIsOptionalProgramTrashInstall(input, candidate)
     ) {
       add(
         candidate.actionId,
@@ -2147,8 +2354,7 @@ export function runnerActionDispositions(
     );
     if (!sourceCardInstanceId) continue;
     const optionalProgramTrashInstall =
-      legalAction?.payload?.runnerProgramTrashBeforeInstall === true ||
-      candidate.actionId.endsWith(".runner_program_trash_before_install");
+      runnerCandidateIsOptionalProgramTrashInstall(input, candidate);
     if (!optionalProgramTrashInstall) continue;
     const sourceDefinitionId = runnerCandidateSourceDefinitionId(
       input,
@@ -14877,6 +15083,124 @@ function resolvePlanBoundRunnerHiddenDrawChoice(
       rootPlanInstanceId: origin.rootPlanInstanceId,
       leafPlanInstanceId: origin.executorInstanceId,
       side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
+function resolvePlanBoundCorpArchivesToHqChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "corp" ||
+    !choice?.source.startsWith("v1922.corp_archives_to_hq:")
+  ) {
+    return undefined;
+  }
+  const origin = previous?.selectedActionOrigin;
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const originIsArchivesToHq =
+    origin?.immediateChoicePolicy === "select_bound_corp_archives_cards_to_hq";
+  const expectedChoiceSource = originIsArchivesToHq
+    ? `v1922.corp_archives_to_hq:${origin.sourceCardInstanceId}:${context.input.playerView.stateVersion}`
+    : undefined;
+  const expectedChoiceId = originIsArchivesToHq
+    ? `v1922_corp_archives_to_hq_${context.input.playerView.stateVersion}`
+    : undefined;
+  const optionCardInstanceIds = choice.options.map((option) => option.value);
+  const exactOptionSet =
+    originIsArchivesToHq &&
+    optionCardInstanceIds.every(
+      (cardId): cardId is string => typeof cardId === "string",
+    ) &&
+    optionCardInstanceIds.length ===
+      origin.eligibleArchiveCardInstanceIds.length &&
+    new Set(optionCardInstanceIds).size === optionCardInstanceIds.length &&
+    optionCardInstanceIds.every((cardId) =>
+      origin.eligibleArchiveCardInstanceIds.includes(cardId),
+    );
+  const expectedMinimum = originIsArchivesToHq
+    ? origin.selectionMode === "all"
+      ? 0
+      : 1
+    : undefined;
+  const expectedMaximum = originIsArchivesToHq
+    ? origin.selectionMode === "all"
+      ? origin.eligibleArchiveCardInstanceIds.length
+      : 1
+    : undefined;
+  const exactBinding =
+    originIsArchivesToHq &&
+    choice.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.choiceId === expectedChoiceId &&
+    choice.source === expectedChoiceSource &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.minSelections === expectedMinimum &&
+    choice.maxSelections === expectedMaximum &&
+    exactOptionSet &&
+    previous !== undefined &&
+    previous.side === "corp" &&
+    previous.stateVersion === context.input.playerView.stateVersion - 1 &&
+    origin.selectedAtStateVersion === previous.stateVersion &&
+    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    previous.executorInstanceId === origin.executorInstanceId &&
+    root !== undefined &&
+    root.side === "corp" &&
+    executor?.moduleId === "corp.hand_and_agenda_management" &&
+    action !== undefined &&
+    action.side === "corp" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !action || !previous || !origin) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition:
+        "Resolve Corp Archives-to-HQ only from the immediately preceding hand-plan executor, exact selected source operation and complete current Engine choice contract.",
+    });
+  }
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_corp_archives_to_hq_choice",
+    origin: {
+      rootPlanInstanceId: origin.rootPlanInstanceId,
+      leafPlanInstanceId: origin.executorInstanceId,
+      side: "corp",
       windowKind: "mandatory_choice",
       windowId: choice.choiceId,
       stateVersion: context.input.playerView.stateVersion,
