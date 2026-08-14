@@ -225,6 +225,107 @@ function selectedCorpHqShuffleOptionIdsFromResidentHandPlan(
   return [...binding.selectedOptionIds];
 }
 
+function selectedCorpArchivesToHqOptionIdsFromBoundContinuation(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const origin = portfolio?.selectedActionOrigin;
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const root = portfolio?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const [requirement] = action.choiceRequirements ?? [];
+  const bound =
+    origin?.immediateChoicePolicy === "select_bound_corp_archives_cards_to_hq";
+  const selectedCardIds = bound ? origin.selectedArchiveCardInstanceIds : [];
+  const eligibleCardIds = bound ? origin.eligibleArchiveCardInstanceIds : [];
+  const optionCardIds = selectableOptions.map((option) => option.value);
+  const exactOptionSet =
+    optionCardIds.every(
+      (cardId): cardId is string => typeof cardId === "string",
+    ) &&
+    optionCardIds.length === eligibleCardIds.length &&
+    new Set(optionCardIds).size === optionCardIds.length &&
+    optionCardIds.every((cardId) => eligibleCardIds.includes(cardId));
+  const expectedMinimum = bound
+    ? origin.selectionMode === "all"
+      ? 0
+      : 1
+    : undefined;
+  const expectedMaximum = bound
+    ? origin.selectionMode === "all"
+      ? eligibleCardIds.length
+      : 1
+    : undefined;
+  const exactBinding =
+    bound &&
+    input.side === "corp" &&
+    choice.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.choiceId ===
+      `v1922_corp_archives_to_hq_${input.playerView.stateVersion}` &&
+    choice.source ===
+      `v1922.corp_archives_to_hq:${origin.sourceCardInstanceId}:${input.playerView.stateVersion}` &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === expectedMinimum &&
+    choice.maxSelections === expectedMaximum &&
+    exactOptionSet &&
+    selectedCardIds.length > 0 &&
+    selectedCardIds.every((cardId) => eligibleCardIds.includes(cardId)) &&
+    portfolio !== undefined &&
+    portfolio.side === "corp" &&
+    portfolio.stateVersion === input.playerView.stateVersion - 1 &&
+    origin.selectedAtStateVersion === portfolio.stateVersion &&
+    portfolio.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    portfolio.executorInstanceId === origin.executorInstanceId &&
+    root !== undefined &&
+    root.side === "corp" &&
+    executor?.moduleId === "corp.hand_and_agenda_management" &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === selectableOptions.length &&
+    selectableOptions.every((option) =>
+      requirement.optionIds.includes(option.id),
+    );
+  if (!exactBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Corp Archives-to-HQ resolver must complete only the exact target payload bound by the immediately preceding hand-plan source action and current Engine choice contract.",
+    );
+  }
+  const selected = selectableOptions
+    .filter(
+      (option) =>
+        typeof option.value === "string" &&
+        selectedCardIds.includes(option.value),
+    )
+    .map((option) => option.id);
+  if (selected.length !== selectedCardIds.length) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The current Corp Archives-to-HQ option set must still contain every target card bound by the source plan action.",
+    );
+  }
+  return selected;
+}
+
 function selectedRunnerHiddenDrawReplacementOptionId(
   input: AiDecisionInput,
   action: LegalAction,
@@ -383,6 +484,22 @@ export function selectedChoicesForDecision(
         currentPortfolio,
       ),
       "resident_runner_hidden_draw_replacement",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("v1922.corp_archives_to_hq:")
+  ) {
+    return resolved(
+      selectedCorpArchivesToHqOptionIdsFromBoundContinuation(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_corp_archives_to_hq",
     );
   }
   if (

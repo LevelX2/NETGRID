@@ -6,6 +6,8 @@ import {
   runnerInstalledDebtFinancingLiability,
   runnerNoRunRecurringEconomyProfile,
   runnerNoRunRecurringEconomyProfileFromPlanningCard,
+  runnerStartOfTurnCreditProfile,
+  runnerStartOfTurnCreditProfileFromPlanningCard,
 } from "./runner-canonical-card-facts";
 
 describe("Runner canonical card facts", () => {
@@ -150,6 +152,44 @@ describe("Runner canonical card facts", () => {
       instanceCount: 2,
       nextTurnCreditLoss: 2,
       totalLeavePlayPayCost: 20,
+    });
+  });
+
+  it("profiles a hosted-credit start trigger without identifying the card by name", () => {
+    expect(
+      runnerStartOfTurnCreditProfile("onr_v1_174_rigged-investments"),
+    ).toEqual({
+      orderClass: "credit_gain",
+      amount: 1,
+      sourceEffect: "take_hosted_credits",
+    });
+    expect(
+      runnerStartOfTurnCreditProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          engine: {
+            lifecycle: {
+              start_of_runner_turn: [
+                {
+                  effects: [
+                    {
+                      kind: "take_hosted_credits",
+                      source: "source",
+                      recipient: "controller",
+                      amount: 2,
+                    },
+                    { kind: "trash_source_when_empty" },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      } as never),
+    ).toEqual({
+      orderClass: "credit_gain",
+      amount: 2,
+      sourceEffect: "take_hosted_credits",
     });
   });
 });

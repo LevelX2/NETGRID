@@ -25,6 +25,12 @@ export type RunnerDebtFinancingLiability = Readonly<{
   totalLeavePlayPayCost: number;
 }>;
 
+export type RunnerStartOfTurnCreditProfile = Readonly<{
+  orderClass: "credit_loss" | "credit_gain";
+  amount: number;
+  sourceEffect: "lose_credits" | "gain_credits" | "take_hosted_credits";
+}>;
+
 export function runnerInstalledDebtFinancingLiability(
   definitionIds: readonly (string | undefined)[],
 ): RunnerDebtFinancingLiability {
@@ -169,6 +175,89 @@ export function runnerNoRunRecurringEconomyProfileFromPlanningCard(
         invalidatingActionType: "start_run",
       }
     : undefined;
+}
+
+/**
+ * Canonical source profile for a Runner start-of-turn ordering window.
+ *
+ * The Engine opens that window only for installed sources that have a due
+ * start-of-turn implementation.  The AI therefore accepts a source only when
+ * its complete lifecycle effect list is an explicitly understood credit
+ * consequence.  This deliberately does not identify cards by title or ID.
+ */
+export function runnerStartOfTurnCreditProfile(
+  definitionId: string | undefined,
+): RunnerStartOfTurnCreditProfile | undefined {
+  if (!definitionId) return undefined;
+  return runnerStartOfTurnCreditProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerStartOfTurnCreditProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerStartOfTurnCreditProfile | undefined {
+  const planning = card?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const effects = (
+    planning.engine.lifecycle?.start_of_runner_turn ?? []
+  ).flatMap((ability) => ability.effects);
+  if (effects.length === 0) return undefined;
+
+  const creditEffects: RunnerStartOfTurnCreditProfile[] = [];
+  for (const effect of effects) {
+    if (
+      effect.kind === "lose_credits" &&
+      (effect.recipient === "runner" || effect.recipient === "controller") &&
+      positiveSafeInteger(effect.amount)
+    ) {
+      creditEffects.push({
+        orderClass: "credit_loss",
+        amount: effect.amount,
+        sourceEffect: "lose_credits",
+      });
+      continue;
+    }
+    if (
+      effect.kind === "gain_credits" &&
+      (effect.recipient === "runner" || effect.recipient === "controller") &&
+      positiveSafeInteger(effect.amount)
+    ) {
+      creditEffects.push({
+        orderClass: "credit_gain",
+        amount: effect.amount,
+        sourceEffect: "gain_credits",
+      });
+      continue;
+    }
+    if (
+      effect.kind === "take_hosted_credits" &&
+      effect.source === "source" &&
+      effect.recipient === "controller" &&
+      positiveSafeInteger(effect.amount)
+    ) {
+      creditEffects.push({
+        orderClass: "credit_gain",
+        amount: effect.amount,
+        sourceEffect: "take_hosted_credits",
+      });
+    }
+  }
+  const allEffectsAreProfiled = effects.every(
+    (effect) =>
+      effect.kind === "lose_credits" ||
+      effect.kind === "gain_credits" ||
+      effect.kind === "take_hosted_credits" ||
+      effect.kind === "trash_source_when_empty",
+  );
+  if (
+    !allEffectsAreProfiled ||
+    creditEffects.length !== 1 ||
+    !positiveSafeInteger(creditEffects[0]?.amount)
+  ) {
+    return undefined;
+  }
+  return creditEffects[0]!;
 }
 
 function positiveSafeInteger(value: unknown): value is number {

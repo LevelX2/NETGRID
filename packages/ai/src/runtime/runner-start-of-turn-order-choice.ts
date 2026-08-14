@@ -1,9 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import {
-  runnerDebtFinancingProfile,
-  runnerNoRunRecurringEconomyProfile,
-} from "./runner-canonical-card-facts";
+import { runnerStartOfTurnCreditProfile } from "./runner-canonical-card-facts";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -90,29 +87,16 @@ function boundStartOfTurnOption(
   );
   if (!source?.definitionId) return undefined;
 
-  const debt = runnerDebtFinancingProfile(source.definitionId);
-  if (debt) {
-    return {
-      optionId: option.id,
-      sourceCardInstanceId: source.instanceId,
-      definitionId: source.definitionId,
-      orderClass: "credit_loss",
-      amount: debt.startOfTurnCreditLoss,
-    };
-  }
-  const recurringEconomy = runnerNoRunRecurringEconomyProfile(
-    source.definitionId,
-  );
-  if (recurringEconomy) {
-    return {
-      optionId: option.id,
-      sourceCardInstanceId: source.instanceId,
-      definitionId: source.definitionId,
-      orderClass: "credit_gain",
-      amount: recurringEconomy.turnStartCredits,
-    };
-  }
-  return undefined;
+  const profile = runnerStartOfTurnCreditProfile(source.definitionId);
+  return profile
+    ? {
+        optionId: option.id,
+        sourceCardInstanceId: source.instanceId,
+        definitionId: source.definitionId,
+        orderClass: profile.orderClass,
+        amount: profile.amount,
+      }
+    : undefined;
 }
 
 function runnerStartOrderSourceStateVersion(
