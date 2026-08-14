@@ -501,7 +501,11 @@ export function executeCardImplementationAccessEffectSteps(
       effectIndex,
       resolvedEffects,
     );
-    if (host.state.pendingAddTagContinuation) {
+    if (
+      host.state.winner ||
+      host.state.pendingAddTagContinuation ||
+      host.state.pendingAccessEffectDamageContinuation
+    ) {
       if (resolvedEffects.length > 0) {
         legalAction.resolvedEffects = [
           ...(legalAction.resolvedEffects ?? []),
@@ -542,11 +546,21 @@ export function executeCardImplementationAccessEffectStep(
   const legalAction = requireLegalAction(host);
   switch (step.kind) {
     case "damage": {
-      host.damage.resolveDamageOperation(
+      const suspended = host.damage.resolveDamageOperation(
         step.damageType,
         step.amount,
         definition.id,
       );
+      if (suspended) {
+        host.state.pendingAccessEffectDamageContinuation = {
+          sourceCardId: cardId,
+          effectIndex,
+          damageStepIndex: index,
+          nextStepIndex: index + 1,
+          accessZone: cardImplementationAccessZone(host, cardId),
+        };
+        return;
+      }
       if (legalAction.payload?.damageResolved === true) {
         resolvedEffects.push({
           effectId: accessEffectId(definition, cardId, index, "damage"),
@@ -578,11 +592,21 @@ export function executeCardImplementationAccessEffectStep(
         damageAmount: amount,
       };
       if (amount <= 0) return;
-      host.damage.resolveDamageOperation(
+      const suspended = host.damage.resolveDamageOperation(
         step.damageType,
         amount,
         definition.id,
       );
+      if (suspended) {
+        host.state.pendingAccessEffectDamageContinuation = {
+          sourceCardId: cardId,
+          effectIndex,
+          damageStepIndex: index,
+          nextStepIndex: index + 1,
+          accessZone: cardImplementationAccessZone(host, cardId),
+        };
+        return;
+      }
       if (legalAction.payload?.damageResolved === true) {
         resolvedEffects.push({
           effectId: accessEffectId(
@@ -1249,7 +1273,7 @@ export function trashRunnerInstalledTargetsForAccessEffect(
     };
     return;
   }
-  if (target === "hardware" || target === "program") {
+  if (eligibleTargetIds.length > targetCount || targetCount > 1) {
     const sourceCardId = host.state.run?.accessedCardId;
     if (
       !sourceCardId ||
@@ -1262,7 +1286,9 @@ export function trashRunnerInstalledTargetsForAccessEffect(
         effectKind:
           target === "hardware"
             ? "access_hardware_trash_by_advancement"
-            : "access_program_trash_by_advancement",
+            : target === "daemon"
+              ? "access_daemon_trash"
+              : "access_program_trash_by_advancement",
         targetCardType: target,
         minimumTargets: targetCount,
         maximumTargets: targetCount,

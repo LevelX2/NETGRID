@@ -78,7 +78,7 @@ export function resolveDamageOperation(
   damageType: DamageType,
   amount: number,
   source: string,
-): void {
+): boolean {
   const request = {
     damageId: `${state.matchId}.${state.stateVersion}.${source}`,
     damageType,
@@ -86,7 +86,7 @@ export function resolveDamageOperation(
     source: `operation:${source}`,
   };
   const event = createDamageImminentEvent(state, request);
-  if (openDamageResolutionWindow(state, event, legalAction)) return;
+  if (openDamageResolutionWindow(state, event, legalAction)) return true;
   const summary = resolveDamageImminentEvent(state, event);
   setDamagePayload(legalAction, summary);
   const payload = (legalAction.payload ??= {});
@@ -94,6 +94,7 @@ export function resolveDamageOperation(
     payload.baseDamageAmount = event.payload.baseDamageAmount;
   if (typeof event.payload.damageAmountModifier === "number")
     payload.damageAmountModifier = event.payload.damageAmountModifier;
+  return false;
 }
 
 export function addRunnerTagsWithPrevention(

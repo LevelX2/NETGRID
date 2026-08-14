@@ -59,7 +59,7 @@ export type AccessEffectHandlerHost = {
       damageType: DamageType,
       amount: number,
       sourceDefinitionId: CardDefinitionId,
-    ) => void;
+    ) => boolean;
     doDamage: (
       damageId: string,
       damageType: DamageType,
@@ -127,8 +127,9 @@ export type AccessEffectHandlerHost = {
       input: {
         effectKind:
           | "access_hardware_trash_by_advancement"
-          | "access_program_trash_by_advancement";
-        targetCardType: "hardware" | "program";
+          | "access_program_trash_by_advancement"
+          | "access_daemon_trash";
+        targetCardType: "hardware" | "program" | "daemon";
         minimumTargets: number;
         maximumTargets: number;
         selectionOrdering: "ordered";

@@ -662,6 +662,7 @@ export function finalizeCorpIceInstallAfterExternalPayment(
   cardId: CardInstanceId,
   server: CorpServer,
   legalAction: LegalAction,
+  options: { placement?: "outermost" | "innermost" } = {},
 ): void {
   const definition = host.cards.definitionFor(cardId);
   if (definition.type !== "ice")
@@ -675,7 +676,8 @@ export function finalizeCorpIceInstallAfterExternalPayment(
     );
   assertCorpIceInstallAllowed(definition, server);
   host.zones.removeFromAllZones(cardId);
-  server.ice.push(cardId);
+  if (options.placement === "innermost") server.ice.unshift(cardId);
+  else server.ice.push(cardId);
   host.state.cardInstances[cardId] = {
     ...host.cards.mustInstance(cardId),
     faceup: false,

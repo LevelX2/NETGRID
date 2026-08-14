@@ -493,6 +493,9 @@ function pendingChoiceHost(
       ),
     },
     access: {
+      resumeAccessEffectAfterDamagePrevention: unexpected(
+        "resumeAccessEffectAfterDamagePrevention",
+      ),
       resolveAccessProgramInstallMemoryChoice: unexpected(
         "resolveAccessProgramInstallMemoryChoice",
       ),

@@ -1464,7 +1464,6 @@ export type RunState = {
   runOnceBreakTagAndStealthLossUsedBreakerIds?: CardInstanceId[];
   runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
-  aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<
     Record<CardInstanceId, number[]>
   >;
@@ -1899,6 +1898,13 @@ export type GameState = {
   pendingChoice?: PendingChoice;
   hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
+  pendingAccessEffectDamageContinuation?: {
+    sourceCardId: CardInstanceId;
+    effectIndex: number;
+    damageStepIndex: number;
+    nextStepIndex: number;
+    accessZone: "installed" | "hq" | "rd" | "archives";
+  };
   pendingTraceProgramTrashContinuation?: {
     traceId: string;
     traceStep: "runner_bid" | "post_bid_link";
@@ -1964,8 +1970,9 @@ export type GameState = {
       | "trash_runner_resources_if_tagged"
       | "installed_hardware_trash_by_counter"
       | "access_hardware_trash_by_advancement"
-      | "access_program_trash_by_advancement";
-    targetCardType: "resource" | "hardware" | "program";
+      | "access_program_trash_by_advancement"
+      | "access_daemon_trash";
+    targetCardType: "resource" | "hardware" | "program" | "daemon";
     minimumTargets: number;
     maximumTargets: number;
     selectionOrdering: "ordered" | "unordered";

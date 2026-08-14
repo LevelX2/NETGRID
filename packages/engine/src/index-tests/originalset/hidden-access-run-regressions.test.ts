@@ -4854,6 +4854,49 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(stolenResult.ok).toBe(false);
   });
 
+  it("offers Vapor Ops in the Corp rez window during a run", () => {
+    let state = apply(
+      originalsetReorderCounterRunlockGame("vapor-ops-run-rez-window"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    const vaporId = putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_card" && action.payload?.cardId === vaporId,
+    );
+    state.cardInstances[vaporId] = {
+      ...state.cardInstances[vaporId]!,
+      advancementCounters: 1,
+    };
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    const vaporAction = getLegalActions(state, "corp").find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === vaporId &&
+        action.payload?.cardImplementationAbilityLabel ===
+          "Vapor Ops: Advancement-Counter für 1 Credit ausgeben",
+    );
+    expect(vaporAction).toBeDefined();
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === vaporAction!.actionId,
+    );
+    expect(state.cardInstances[vaporId]?.advancementCounters).toBe(0);
+  });
+
   it("labels Vapor Ops advancement move choices with counter amount and target", () => {
     let state = apply(
       MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-vapor-ops-move-labels"),

@@ -92,10 +92,6 @@ export const cardSpec = {
         strategyKey: "corp.ambush_bluff",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.tag_trace_punish",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ambush_bluff",
         support: "supports",
@@ -144,21 +140,7 @@ export const cardSpec = {
         rating: "low",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey("access_effects_on_access_damage"),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "high",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

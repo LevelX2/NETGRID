@@ -80,7 +80,7 @@ export type AccessFlowCompositionHost = {
       damageType: DamageType,
       amount: number,
       sourceDefinitionId: CardDefinitionId,
-    ) => void;
+    ) => boolean;
     doDamage: (
       state: GameState,
       input: {
@@ -194,8 +194,9 @@ export type AccessFlowCompositionHost = {
       input: {
         effectKind:
           | "access_hardware_trash_by_advancement"
-          | "access_program_trash_by_advancement";
-        targetCardType: "hardware" | "program";
+          | "access_program_trash_by_advancement"
+          | "access_daemon_trash";
+        targetCardType: "hardware" | "program" | "daemon";
         minimumTargets: number;
         maximumTargets: number;
         selectionOrdering: "ordered";
@@ -411,7 +412,7 @@ export function createAccessFlowAdapters(
       damage: {
         resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {
           if (!legalAction) throw new Error("Damage-Aktion fehlt.");
-          host.damage.resolveDamageOperation(
+          return host.damage.resolveDamageOperation(
             state,
             legalAction,
             damageType,

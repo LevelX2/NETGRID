@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Whenever Runner makes a successful run on this fort, you may choose an ice card stored in HQ. Install that piece of ice on this fort in the innermost position, \tpaying an installation cost of [1] for each piece of ice already on the fort. Runner is now considered to be approaching that piece of ice. Use this ability only once during each run on this fort.",
+      "Whenever the Runner passes the last piece of ice on this fort or declares a run on it when it has no ice, you may choose an ice card stored in HQ. Install that piece of ice on this fort in the innermost position, paying an installation cost of [1] for each piece of ice already on the fort. Runner is now considered to be approaching that piece of ice. Use this ability only once during each run on this fort.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_359_jenny-jett",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Jenny Jett",
+        note: "Canonical trigger wording and normal ICE-install cost modifiers.",
       },
     ],
   },
@@ -77,14 +82,6 @@ export const cardSpec = {
       {
         kind: "strategic_role",
         role: "defensive_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
       },
       {
         kind: "line_support",

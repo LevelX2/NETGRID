@@ -164,8 +164,6 @@ export function shouldOpenAardvarkInterception(
     })
   )
     return false;
-  if (run.aardvarkInterceptionIceIds?.includes(run.encounteredIceId))
-    return false;
   const aardvarkId = host.servers
     .mustServer(run.attackedServerId)
     .root.slice()
@@ -202,10 +200,6 @@ export function startAardvarkInterceptionChoice(
     legalAction.payload?.subroutineIndex === undefined
       ? "none"
       : String(legalAction.payload.subroutineIndex);
-  const usedIceIds = run.aardvarkInterceptionIceIds ?? [];
-  if (!usedIceIds.includes(run.encounteredIceId))
-    usedIceIds.push(run.encounteredIceId);
-  run.aardvarkInterceptionIceIds = usedIceIds;
   host.state.pendingChoice = {
     choiceId: `v199_aardvark_${host.state.stateVersion + 1}`,
     side: "corp",

@@ -200,6 +200,7 @@ import {
   type RunnerSpecialTriggerExecutionHost,
 } from "../abilities/runner-special-trigger-execution";
 import {
+  finalizeCorpIceInstallAfterExternalPayment,
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
@@ -1306,12 +1307,23 @@ export function configureFlowRuntimeBootstrap({
         credits,
         rezCostForCard,
         creditCostForAction: runtimePorts.creditCostForAction,
+        corpIceInstallTotalCost: runtimePorts.corpIceInstallTotalCost,
         hostedPaymentCredits,
         spendCorpRunTemporaryCreditsForCurrentRunCost,
         restrictedHostedCreditSourceIds,
         isRestrictedHostedCreditSource,
         spendRunnerAccessTrashCredits:
           runtimePorts.spendRunnerAccessTrashCredits,
+      },
+      install: {
+        finalizeCorpIceInstallInnermost: (state, cardId, server, legalAction) =>
+          finalizeCorpIceInstallAfterExternalPayment(
+            runtimePorts.installCardHost(state),
+            cardId,
+            server,
+            legalAction,
+            { placement: "innermost" },
+          ),
       },
       choices: {
         hiddenZoneArrangeChoiceHandlerHost:

@@ -62,14 +62,6 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "protect_rnd",
-      },
-      {
-        kind: "plan_role",
-        role: "protect_hq",
-      },
-      {
-        kind: "plan_role",
         role: "build_scoring_remote",
       },
       {
@@ -95,20 +87,9 @@ export const cardSpec = {
           "Fort-wide ICE strength support increases break cost and supports tax/glacier.",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
         kind: "remote_role",
         role: "ice_modifier",
         threatLevel: "medium",
-      },
-      {
-        kind: "target_preference",
-        purpose: "buff_all_ice_on_fort",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "value_interpretation",

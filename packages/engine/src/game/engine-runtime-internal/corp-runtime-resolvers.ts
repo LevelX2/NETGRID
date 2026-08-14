@@ -915,7 +915,7 @@ export function createCorpRuntimeResolvers(
       effectKind: NonNullable<
         GameState["pendingRunnerInstalledMultiTrash"]
       >["effectKind"];
-      targetCardType: "resource" | "hardware" | "program";
+      targetCardType: "resource" | "hardware" | "program" | "daemon";
       minimumTargets: number;
       maximumTargets: number;
       selectionOrdering: "ordered" | "unordered";
@@ -955,7 +955,7 @@ export function createCorpRuntimeResolvers(
       prompt:
         input.effectKind === "trash_runner_resources_if_tagged"
           ? `Bis zu ${input.maximumTargets} Runner-Ressourcen trashen`
-          : `${input.maximumTargets} ${input.targetCardType === "program" ? "Programme" : "Hardware"} in Trash-Reihenfolge auswählen`,
+          : `${input.maximumTargets} ${input.targetCardType === "hardware" ? "Hardware" : input.targetCardType === "daemon" ? "Daemon" : "Programme"} in Trash-Reihenfolge auswählen`,
       kind: "select_cards",
       options: eligibleTargets.map(({ cardInstanceId, choiceValue }) => {
         const concealed = choiceValue !== cardInstanceId;
@@ -1041,6 +1041,10 @@ export function createCorpRuntimeResolvers(
           : state.runner.rig.hardware
         : continuation.targetCardType === "program"
           ? state.runner.rig.programs
+          : continuation.targetCardType === "daemon"
+            ? state.runner.rig.programs.filter((cardId) =>
+                definitionFor(state, cardId).subtypes.includes("daemon"),
+              )
           : state.runner.rig.resources,
     );
     for (const cardId of selectedIds) {
@@ -1109,7 +1113,8 @@ export function createCorpRuntimeResolvers(
             trashedHardwareDefinitionIds: definitionIds.join(","),
           }
         : effectKind === "access_hardware_trash_by_advancement" ||
-            effectKind === "access_program_trash_by_advancement"
+            effectKind === "access_program_trash_by_advancement" ||
+            effectKind === "access_daemon_trash"
           ? {
               hiddenZoneBarrier: true,
               hiddenZoneAction: "v1919_access_ambush_trash_installed",
@@ -1117,15 +1122,19 @@ export function createCorpRuntimeResolvers(
                 state,
                 String(legalAction.payload?.cardId ?? "") as CardInstanceId,
               ).id,
-              advancementCounterCount: Math.max(
-                0,
-                Math.floor(
-                  mustInstance(
-                    state.cardInstances,
-                    String(legalAction.payload?.cardId ?? "") as CardInstanceId,
-                  ).advancementCounters,
-                ),
-              ),
+              ...(effectKind === "access_daemon_trash"
+                ? {}
+                : {
+                    advancementCounterCount: Math.max(
+                      0,
+                      Math.floor(
+                        mustInstance(
+                          state.cardInstances,
+                          String(legalAction.payload?.cardId ?? "") as CardInstanceId,
+                        ).advancementCounters,
+                      ),
+                    ),
+                  }),
               targetTrashCount: targetIds.length,
               trashedCount: targetIds.length,
               ...(effectKind === "access_hardware_trash_by_advancement"
@@ -1134,7 +1143,9 @@ export function createCorpRuntimeResolvers(
               trashedCardType:
                 effectKind === "access_hardware_trash_by_advancement"
                   ? "hardware"
-                  : "program",
+                  : effectKind === "access_daemon_trash"
+                    ? "daemon"
+                    : "program",
               trashedCardDefinitionId: definitionIds[0] ?? "",
               trashedCardDefinitionIds: definitionIds.join(","),
             }

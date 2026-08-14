@@ -88,10 +88,6 @@ export const cardSpec = {
       },
       {
         kind: "strategic_role",
-        role: "punish_payoff",
-      },
-      {
-        kind: "strategic_role",
         role: "enabler",
       },
       {
@@ -134,16 +130,6 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "access.punish",
         use: "access.punish",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "punish.payoff",
-        use: "punish.payoff",
-      },
-      {
-        kind: "remote_role",
-        role: "tag_punish_asset",
-        threatLevel: "medium",
       },
       {
         kind: "value_interpretation",

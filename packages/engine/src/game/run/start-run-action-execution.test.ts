@@ -101,7 +101,6 @@ function hostFor(
           brokenSubroutineIndexes: [],
           resolvedSubroutineIndexes: [],
           bartmossUsedBreakerIdsThisEncounter: [],
-          aardvarkInterceptionIceIds: [],
           blinkUsedSubroutinesByBreakerThisEncounter: {},
           successful: false,
           accessCount: 1,

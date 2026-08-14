@@ -418,9 +418,20 @@ export function trashTemporaryEncounterIce(
   legalAction?: LegalAction,
 ): boolean {
   const instance = host.state.cardInstances[temporaryIceId];
-  if (instance?.zone.side !== "corp" || instance.zone.zone !== "serverIce")
+  if (
+    instance?.zone.side !== "special" ||
+    instance.zone.zone !== "set_aside" ||
+    !(host.state.specialZones?.setAside ?? []).includes(temporaryIceId)
+  )
     return false;
-  host.zones.trashCorpInstalledCardToArchives(temporaryIceId, legalAction);
+  host.zones.removeFromAllZones(temporaryIceId);
+  host.state.corp.archives.push(temporaryIceId);
+  host.state.cardInstances[temporaryIceId] = {
+    ...instance,
+    faceup: true,
+    rezzed: false,
+    zone: { side: "corp", zone: "archives" },
+  };
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

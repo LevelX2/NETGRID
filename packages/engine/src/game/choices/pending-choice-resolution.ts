@@ -113,6 +113,7 @@ export type PendingChoiceResolutionHost = {
     applyRunnerTraceCounterRunStartEffects: HostFn<boolean>;
   };
   access: {
+    resumeAccessEffectAfterDamagePrevention: HostFn<void>;
     resolveAccessProgramInstallMemoryChoice: HostFn<void>;
     resolveMercenaryCurrentAccessTrashChoice: HostFn<void>;
     resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
@@ -323,6 +324,7 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v121.replacement")) {
     resolveReplacementChoice(state, legalAction, playerAction);
+    resumeAccessDamageIfReady(host, state, legalAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
     return;
   }
@@ -363,12 +365,14 @@ export function resolvePendingChoice(
       host.run.resumeTraceHardwareWreckerAfterTrash(state, legalAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
     resumeDamageFollowupIfReady(host, state, legalAction);
+    resumeAccessDamageIfReady(host, state, legalAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("damage_replacement:")) {
     resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
     resumeRunStartDamageIfReady(host, state, legalAction);
     resumeDamageFollowupIfReady(host, state, legalAction);
+    resumeAccessDamageIfReady(host, state, legalAction);
     return;
   }
   if (
@@ -947,6 +951,21 @@ function resumeDamageFollowupIfReady(
     sourceDefinitionId: followup.sourceDefinitionId,
     selfTrashed: true,
   };
+}
+
+function resumeAccessDamageIfReady(
+  host: PendingChoiceResolutionHost,
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (
+    state.pendingChoice ||
+    state.eventModificationWindow ||
+    state.replacementWindow ||
+    !state.pendingAccessEffectDamageContinuation
+  )
+    return;
+  host.access.resumeAccessEffectAfterDamagePrevention(state, legalAction);
 }
 
 function resumeRunStartDamageIfReady(

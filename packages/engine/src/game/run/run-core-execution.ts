@@ -142,7 +142,6 @@ export function startRun(
     resolvedSubroutineIndexes: [],
     ignoredSubroutineIndexes: [],
     bartmossUsedBreakerIdsThisEncounter: [],
-    aardvarkInterceptionIceIds: [],
     blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: false,
     accessCount: effectiveAccessCount,

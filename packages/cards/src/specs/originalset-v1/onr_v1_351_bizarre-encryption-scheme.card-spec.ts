@@ -63,10 +63,6 @@ export const cardSpec = {
         role: "build_scoring_remote",
       },
       {
-        kind: "plan_role",
-        role: "bait_runner",
-      },
-      {
         kind: "strategic_role",
         role: "defensive_tool",
       },
@@ -87,11 +83,6 @@ export const cardSpec = {
         confidence: "high",
         rationale:
           "Delays immediate agenda steal from a remote run and buys the Corp a scoring window.",
-      },
-      {
-        kind: "remote_role",
-        role: "agenda_steal_tax",
-        threatLevel: "medium",
       },
       {
         kind: "value_interpretation",

@@ -52,7 +52,18 @@ export type SuccessfulRunInterventionHost = {
   };
   costs: {
     creditCostForAction: (legalAction: LegalAction) => number;
-    rezCostForCard: (cardId: CardInstanceId) => number;
+    printedRezCostForCard: (cardId: CardInstanceId) => number;
+    corpIceInstallTotalCost: (
+      cardId: CardInstanceId,
+      server: GameState["corp"]["servers"][number],
+    ) => { totalCost: number };
+  };
+  install: {
+    finalizeCorpIceInstallInnermost: (
+      cardId: CardInstanceId,
+      server: GameState["corp"]["servers"][number],
+      legalAction: LegalAction,
+    ) => void;
   };
   credits: {
     spend: (side: "corp" | "runner", amount: number) => void;

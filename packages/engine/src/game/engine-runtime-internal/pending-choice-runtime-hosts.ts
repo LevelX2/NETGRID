@@ -29,7 +29,10 @@ import {
   resolveTrashProgramChoice as resolveTrashProgramChoiceInRunModule,
 } from "../run/encounter-printed-nontrace-effects";
 import { applyPrintedTraceSuccessFollowups } from "../run/encounter-printed-effects";
-import { resumeAccessEffectAfterTagPrevention } from "../access/access-effect-handlers";
+import {
+  resumeAccessEffectAfterDamagePrevention,
+  resumeAccessEffectAfterTagPrevention,
+} from "../access/access-effect-handlers";
 import {
   resumeActivatedCardImplementationAfterCorpDraw,
   resumeActivatedCardImplementationAfterCreditGain,
@@ -925,6 +928,10 @@ export function createPendingChoiceRuntimeHosts(
           deps.applyRunnerTraceCounterRunStartEffects,
       },
       access: {
+        resumeAccessEffectAfterDamagePrevention: (_state, legalAction) =>
+          resumeAccessEffectAfterDamagePrevention(
+            deps.accessEffectHandlerHost(state, legalAction),
+          ),
         resolveAccessProgramInstallMemoryChoice: (
           _state,
           legalAction,

@@ -149,7 +149,6 @@ export function createTurnRunnerStartRuntimeResolvers(
       clearAbilityUsageSourceIds();
     delete flags.incubatorPendingTransforms;
     consumeRunnerFutureActionDebt(state);
-    resolveDelayedAccessEffects(state, effects);
     deps.refreshRecurringCredits(state, "runner", effects);
     untapRunnerCardsAtTurnStart(state);
     applyRunnerStartOfTurnEffects(state, effects, "begin", legalAction);
@@ -189,54 +188,8 @@ export function createTurnRunnerStartRuntimeResolvers(
     state: GameState,
     effects?: AutomaticEffectCollector,
   ): void {
-    const delayed = state.delayedAccessEffects ?? [];
-    if (delayed.length === 0) return;
-    const remaining: NonNullable<GameState["delayedAccessEffects"]> = [];
-    for (const entry of delayed) {
-      if (
-        entry.kind !== "delayed_agenda_access_replacement" ||
-        entry.resolveAt !== "runner_start_turn"
-      ) {
-        remaining.push(entry);
-        continue;
-      }
-      const instance = state.cardInstances[entry.agendaId];
-      const server = state.corp.servers.find(
-        (candidate) => candidate.id === entry.serverId,
-      );
-      if (
-        !instance ||
-        instance.zone.side !== "corp" ||
-        instance.zone.zone !== "serverRoot" ||
-        instance.zone.serverId !== entry.serverId ||
-        !server?.root.includes(entry.agendaId)
-      ) {
-        continue;
-      }
-      const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId];
-      if (!definition || definition.type !== "agenda") {
-        remaining.push(entry);
-        continue;
-      }
-      removeFromAllZones(state, entry.agendaId);
-      state.runner.scoreArea.push(entry.agendaId);
-      state.cardInstances[entry.agendaId] = {
-        ...instance,
-        faceup: true,
-        rezzed: true,
-        zone: { side: "runner", zone: "scoreArea" },
-      };
-      effects?.push(
-        links.automaticScoreAgendaEffect(
-          `runner.start.delayed_agenda_access.${entry.agendaId}`,
-          definition.id,
-          entry.sourceDefinitionId,
-          deps.agendaPointsForScoredCard(state, entry.agendaId),
-        ),
-      );
-    }
-    if (remaining.length > 0) state.delayedAccessEffects = remaining;
-    else delete state.delayedAccessEffects;
+    for (const sourceId of delayedAgendaAccessStartSourceIds(state))
+      resolveDelayedAgendaAccessStartSource(state, sourceId, effects);
   }
 
   function applyRunnerStartOfTurnEffects(
@@ -249,6 +202,16 @@ export function createTurnRunnerStartRuntimeResolvers(
     if (resumePoint === "after_delayed_install_choice") {
       resumeRunnerStartOfTurnOrdering(state, effects);
       return;
+    }
+    if (state.delayedAccessEffects) {
+      state.delayedAccessEffects = state.delayedAccessEffects.filter(
+        (entry) =>
+          entry.kind !== "delayed_agenda_access_replacement" ||
+          entry.resolveAt !== "runner_start_turn" ||
+          delayedAgendaAccessEntryIsDue(state, entry),
+      );
+      if (state.delayedAccessEffects.length === 0)
+        delete state.delayedAccessEffects;
     }
     const flags = ensureRunnerTurnFlags(state);
     const counterEffects = deps.runnerTraceCounterEffectDefinitions();
@@ -363,8 +326,9 @@ export function createTurnRunnerStartRuntimeResolvers(
   }
 
   function runnerStartOfTurnSourceIds(state: GameState): CardInstanceId[] {
-    return runnerInstalledCardIds(state)
-      .filter((sourceId) => {
+    return [
+      ...delayedAgendaAccessStartSourceIds(state),
+      ...runnerInstalledCardIds(state).filter((sourceId) => {
         const definition = definitionFor(state, sourceId);
         if (
           hasDueCardImplementationStartOfRunnerTurnAbility(
@@ -397,8 +361,78 @@ export function createTurnRunnerStartRuntimeResolvers(
             deps.runnerSpecialTriggerExecutionHost(state),
           ).length > 0
         );
-      })
+      }),
+    ].sort();
+  }
+
+  function delayedAgendaAccessStartSourceIds(
+    state: GameState,
+  ): CardInstanceId[] {
+    return (state.delayedAccessEffects ?? [])
+      .filter(
+        (entry) =>
+          entry.kind === "delayed_agenda_access_replacement" &&
+          entry.resolveAt === "runner_start_turn" &&
+          delayedAgendaAccessEntryIsDue(state, entry),
+      )
+      .map((entry) => entry.agendaId)
       .sort();
+  }
+
+  function delayedAgendaAccessEntryIsDue(
+    state: GameState,
+    entry: NonNullable<GameState["delayedAccessEffects"]>[number],
+  ): boolean {
+    if (entry.kind !== "delayed_agenda_access_replacement") return false;
+    const instance = state.cardInstances[entry.agendaId];
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === entry.serverId,
+    );
+    return Boolean(
+      instance &&
+      instance.zone.side === "corp" &&
+      instance.zone.zone === "serverRoot" &&
+      instance.zone.serverId === entry.serverId &&
+      server?.root.includes(entry.agendaId) &&
+      CARD_DEFINITIONS_BY_ID[instance.definitionId]?.type === "agenda",
+    );
+  }
+
+  function resolveDelayedAgendaAccessStartSource(
+    state: GameState,
+    agendaId: CardInstanceId,
+    effects?: AutomaticEffectCollector,
+  ): void {
+    const entry = (state.delayedAccessEffects ?? []).find(
+      (candidate) =>
+        candidate.kind === "delayed_agenda_access_replacement" &&
+        candidate.resolveAt === "runner_start_turn" &&
+        candidate.agendaId === agendaId,
+    );
+    if (!entry || !delayedAgendaAccessEntryIsDue(state, entry)) return;
+    const instance = state.cardInstances[agendaId]!;
+    const definition = CARD_DEFINITIONS_BY_ID[instance.definitionId]!;
+    state.delayedAccessEffects = (state.delayedAccessEffects ?? []).filter(
+      (candidate) => candidate !== entry,
+    );
+    if (state.delayedAccessEffects.length === 0)
+      delete state.delayedAccessEffects;
+    removeFromAllZones(state, agendaId);
+    state.runner.scoreArea.push(agendaId);
+    state.cardInstances[agendaId] = {
+      ...instance,
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "scoreArea" },
+    };
+    effects?.push(
+      links.automaticScoreAgendaEffect(
+        `runner.start.delayed_agenda_access.${agendaId}`,
+        definition.id,
+        entry.sourceDefinitionId,
+        deps.agendaPointsForScoredCard(state, agendaId),
+      ),
+    );
   }
 
   function startRunnerStartOfTurnOrderChoice(
@@ -463,6 +497,10 @@ export function createTurnRunnerStartRuntimeResolvers(
     sourceId: CardInstanceId,
     effects?: AutomaticEffectCollector,
   ): void {
+    if (delayedAgendaAccessStartSourceIds(state).includes(sourceId)) {
+      resolveDelayedAgendaAccessStartSource(state, sourceId, effects);
+      return;
+    }
     if (!runnerInstalledCardIds(state).includes(sourceId)) return;
     executeCardImplementationStartOfRunnerTurnEffects(
       deps.cardImplementationRuntimeDeps,

@@ -63,20 +63,8 @@ export const cardSpec = {
         role: "build_scoring_remote",
       },
       {
-        kind: "plan_role",
-        role: "protect_rnd",
-      },
-      {
-        kind: "plan_role",
-        role: "protect_hq",
-      },
-      {
         kind: "strategic_role",
         role: "support_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
       },
       {
         kind: "strategy_anchor",
@@ -100,12 +88,6 @@ export const cardSpec = {
         kind: "remote_role",
         role: "ice_modifier",
         threatLevel: "medium",
-      },
-      {
-        kind: "target_preference",
-        purpose: "discount_ice_install_on_fort",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "value_interpretation",

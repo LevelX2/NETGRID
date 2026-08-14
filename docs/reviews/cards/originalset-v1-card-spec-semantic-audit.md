@@ -1264,10 +1264,64 @@ Status: umgesetzt und durch fokussierte Gates verifiziert.
   reviewed Originalset-Fixture wurde aus dem aktuellen Hint-Artefakt
   synchronisiert.
 
+## Block 018 – Karten 341 bis 360, Access-, Run- und Zugstartverträge
+
+Status: umgesetzt und durch fokussierte Gates verifiziert.
+
+### Suspendierbare Access- und Trash-Auflösung
+
+- Geordnete CardImplementation-Access-Schritte besitzen nach einem
+  suspendierten Damage-Ereignis eine gebundene Fortsetzung. TRAP! fügt den
+  Tag deshalb erst hinzu, nachdem Damage-Replacement und -Prevention
+  vollständig abgeschlossen sind; ein offenes Fenster wird nicht mehr durch
+  den Folgeschritt überschrieben.
+- Chimera verwendet bei mehreren installierten Daemons die gemeinsame
+  Corp-Zielwahl und den Prevention-fähigen Runner-Installed-Batch-Trash. Bei
+  nur einem legalen Ziel entsteht kein bedeutungsloses Zwischenfenster.
+- Ein abgelehntes Aardvark-Rezfenster verbraucht die Reaktion nicht. Solange
+  Aardvark unrezzed bleibt, kann eine spätere Worm-Nutzung am selben ICE die
+  Reaktion erneut anbieten.
+
+### Paid Window und Runner-Zugstart
+
+- Vapor Ops gibt einen Advancement-Counter für einen Credit in Corp-Paid-
+  und den echten Run-Rezfenstern aus. Die separate Action zum Verschieben von
+  Countern bleibt auf die Corp-Hauptphase beschränkt.
+- Verzögertes Agenda-Scoring durch Bizarre Encryption Scheme ist eine
+  revalidierte Quelle derselben Runner-Startzugreihenfolge wie installierte
+  Runner-Karten. Der Runner bestimmt die Reihenfolge gleichzeitig fälliger
+  Quellen; ungültig gewordene Agendaquellen werden nicht aufgelöst.
+
+### Dr. Dreff, Jenny Jett und kanonische Errata
+
+- Dr. Dreff bezahlt die Hälfte der gedruckten Rez-Kosten. Das HQ-ICE wird
+  öffentlich transient beiseitegelegt, aber weder installiert noch gerezzt;
+  nach dem Encounter geht es ohne Install-/Rez-/Leave-play-Lifecycle in die
+  Archives.
+- Jenny Jett verwendet den normalen ICE-Installquote einschließlich
+  zusätzlicher Kosten und Modifikatoren und schließt danach den kanonischen
+  Install-Lifecycle in der innersten Position ab. Erst anschließend beginnt
+  der Approach.
+- Beide CardSpecs verwenden die historische Trigger-Errata „passes the last
+  piece of ice … or declares a run … when it has no ice“ und referenzieren
+  `docs/source/Netrunner Errata 1.70.md`.
+
+### Planning-Semantik
+
+- Statische globale oder fortgebundene Modifikatoren tragen keine fingierte
+  Einzelzielwahl. Unbegründete Economy-, Bait-, feste Zentralserver- und
+  Remote-Protection-Signale wurden entfernt; normale Supportkarten wurden
+  von übergewichteten Strategy Anchors auf richtungsgetreuen Support
+  zurückgestuft.
+- TRAP! bleibt Ambush-Anchor und Tag-Support, Solo Squad ein wiederholbarer
+  Tagged-Damage-Payoff, Crybaby ein persistenter Trace-Enabler. Die reviewed
+  Originalset-Fixture wurde für Karten 341–360 aus dem aktuellen Hint-
+  Artefakt synchronisiert.
+
 ## Bekannte offene Punkte
 
 - Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 341 bis 360.
+- Als nächster regulärer Nutzerblock folgen die Karten 361 bis 380.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1465,3 +1519,12 @@ Trace-Zahlungsquellen, Holovids Start-Rez, Nevinyrral-Uninstall,
 Remote-Facility-Action-Revocation, Schlaghund-Fortsetzung und unrezzed Setup!.
 Hint-Artefakt und reviewed Originalset-Einträge für Karten 321–340 sind
 gezielt synchronisiert.
+
+Für Block 018 sind Cards- und Engine-Typecheck, CardSpec-AI-Hint-Generator
+und -Check sowie 102 fokussierte Access-, Choice-, Run-, Zugstart- und
+Originalset-Integrationszeugen grün. Die Evidence umfasst insbesondere
+TRAP!-Damage-Fortsetzung, Aardvark nach abgelehnter Reaktion, Chimera über den
+gemeinsamen Multi-Trash-Vertrag, Bizarre-Startzugordering sowie Dr. Dreffs
+transientes nicht installiertes ICE und Jenny Jetts modifizierte kanonische
+Innermost-Installation. Hint-Artefakt und reviewed Originalset-Einträge für
+Karten 341–360 sind gezielt synchronisiert.

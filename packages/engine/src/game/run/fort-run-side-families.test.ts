@@ -365,6 +365,29 @@ describe("fort run side families", () => {
     });
   });
 
+  it("offers Aardvark again on the same ICE after the Corp declines", () => {
+    const state = makeState();
+    const host = hostFor(state);
+    const worm = "worm_1" as CardInstanceId;
+    const action = {
+      side: "runner",
+      type: "pump_breaker",
+      source: worm,
+      costs: [{ credits: 1 }],
+      payload: { breakerId: worm },
+    } as unknown as LegalAction;
+
+    startAardvarkInterceptionChoice(host, worm, "pump_breaker", action);
+    resolveAardvarkInterceptionChoice(host, action, {
+      side: "corp",
+      actionId: "choice",
+      selectedChoices: { selectedOptionIds: ["decline"] },
+    } as unknown as PlayerAction);
+
+    expect(state.cardInstances.aardvark_1?.rezzed).toBe(false);
+    expect(shouldOpenAardvarkInterception(host, worm)).toBe(true);
+  });
+
   it("keeps server run restrictions and server activity stable", () => {
     const state = makeState();
     const host = hostFor(state);

@@ -44096,17 +44096,16 @@
     {
       "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a923aeb325c07b47",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b9ed0338ebe4e9a4",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a9e817b5a6781b41",
       "hint": {
         "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["ice_modifier", "economy_asset", "remote_support"],
-        "planRoles": ["protect_rnd", "protect_hq", "bait_runner"],
+        "planRoles": [],
         "valueHints": { "economy": 1, "remoteRootValue": 2 },
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.economy_rez_reserve"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -44116,24 +44115,6 @@
             "evidence": ["ice.corp_rez_discount", "tax.ice"],
             "confidence": "medium",
             "rationale": "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
-          }
-        ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "rez_best_defensive_ice",
-            "preferences": [
-              "high_rez_cost_relief",
-              "blocks_relevant_run_path",
-              "protects_agenda_remote"
-            ],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["black_ice"],
-            "serverScope": "any_visible_server"
           }
         ],
         "effects": [
@@ -44175,7 +44156,7 @@
     {
       "cardId": "onr_v1_342_solo-squad",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d81c13ed9e320eb1",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:59fa210deff0d091",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9141e3e795443683",
       "hint": {
         "cardId": "onr_v1_342_solo-squad",
         "side": "corp",
@@ -44184,13 +44165,11 @@
         "roles": [],
         "planRoles": ["remote_asset_pressure"],
         "valueHints": { "remoteRootValue": 1 },
-        "strategicRole": ["win_condition"],
-        "strategyAnchors": ["corp.tag_trace_punish"],
         "lineSupport": ["corp.damage_kill", "corp.tag_trace_punish"],
         "strategySupportPairs": [
           {
             "strategyId": "corp.damage_kill",
-            "role": "win_condition",
+            "role": "punish_payoff",
             "roleDetail": "tagged_meat_payoff",
             "evidence": [
               "condition.runner_tagged",
@@ -44201,20 +44180,11 @@
           },
           {
             "strategyId": "corp.tag_trace_punish",
-            "role": "win_condition",
+            "role": "punish_payoff",
             "roleDetail": "tagged_meat_payoff",
             "evidence": ["condition.runner_tagged", "tag.payoff"],
             "confidence": "medium",
             "rationale": "Tagged-runner payoff; not a tag source."
-          }
-        ],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "payoff_anchor",
-            "roleDetail": "payoff_anchor_tag_payoff",
-            "evidence": ["tactic_signal_anchor:tag.payoff"],
-            "confidence": "high"
           }
         ],
         "actionCapabilitySemantics": [
@@ -44241,16 +44211,7 @@
               }
             ],
             "functionSignals": ["damage.payoff", "tag.payoff"],
-            "conditions": [{ "kind": "requires_runner_tagged" }],
-            "strategySupportPairs": [
-              {
-                "strategyId": "corp.tag_trace_punish",
-                "role": "payoff_anchor",
-                "roleDetail": "payoff_anchor_tag_payoff",
-                "evidence": ["tactic_signal_anchor:tag.payoff"],
-                "confidence": "high"
-              }
-            ]
+            "conditions": [{ "kind": "requires_runner_tagged" }]
           }
         ],
         "effects": [
@@ -44318,7 +44279,7 @@
     {
       "cardId": "onr_v1_343_south-african-mining-corp",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ee777715ec032b09",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:5f86c1813d1952c5",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c38504318c863a0d",
       "hint": {
         "cardId": "onr_v1_343_south-african-mining-corp",
         "side": "corp",
@@ -44327,7 +44288,6 @@
         "roles": ["economy", "asset"],
         "planRoles": ["remote_asset_modifier"],
         "valueHints": { "remoteRootValue": 1 },
-        "strategyAnchors": ["corp.asset_economy"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
@@ -44528,7 +44488,7 @@
     {
       "cardId": "onr_v1_345_trap",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:cecb9c605206bc74",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:290b4293558d5a4f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:687f8ba57a5c95c1",
       "hint": {
         "cardId": "onr_v1_345_trap",
         "side": "corp",
@@ -44538,7 +44498,7 @@
         "planRoles": ["remote_asset_trap"],
         "valueHints": { "remoteRootValue": 1, "damage": 3 },
         "strategicRole": ["punish_payoff", "enabler"],
-        "strategyAnchors": ["corp.ambush_bluff", "corp.tag_trace_punish"],
+        "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff", "corp.tag_trace_punish"],
         "strategySupportPairs": [
           {
@@ -44560,15 +44520,6 @@
             "evidence": ["access.corp_net_damage_ambush"],
             "confidence": "medium",
             "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
-          }
-        ],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
-            "confidence": "high"
           }
         ],
         "effects": [
@@ -44648,7 +44599,7 @@
     {
       "cardId": "onr_v1_346_vacant-soulkiller",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0dfdef3409771d40",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8e1ddb63a8a022d7",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b68f6d9d0734e431",
       "hint": {
         "cardId": "onr_v1_346_vacant-soulkiller",
         "side": "corp",
@@ -44705,14 +44656,12 @@
           "access.punish",
           "advance.corp_counter_bank",
           "damage.payoff",
-          "economy.card",
           "punish.payoff",
           "remote.ambush"
         ],
         "actionTacticSignals": [
           "access.punish",
           "damage.payoff.runner",
-          "economy.card",
           "effect:ambush",
           "effect:damage",
           "effect_scope:accessed_card",
@@ -44760,7 +44709,7 @@
     },
     {
       "cardId": "onr_v1_347_vapor-ops",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1ef4979d707b6441",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ab06dfaea593acb2",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2af8f19b0931d0cf",
       "hint": {
         "cardId": "onr_v1_347_vapor-ops",
@@ -45053,7 +45002,7 @@
     {
       "cardId": "onr_v1_349_aardvark",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:745ef9aa242925c6",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ac1f91d043e3c20c",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a733a5b7d99a56b3",
       "hint": {
         "cardId": "onr_v1_349_aardvark",
         "side": "corp",
@@ -45062,18 +45011,6 @@
         "roles": [],
         "planRoles": ["build_scoring_remote", "protect_rnd", "protect_hq"],
         "valueHints": { "remoteRootValue": 3 },
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "restrict_or_trash_worm_breaker",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "kind": "use_target",
-            "timing": "start_of_run",
-            "targetType": "ice_position",
-            "hiddenInfoPolicy": "public_or_controller_known_only"
-          }
-        ],
         "functionSignals": [
           "condition.corp_installed_or_advanced_this_fort_last_turn",
           "run.corp_server_lock",
@@ -45101,14 +45038,14 @@
     {
       "cardId": "onr_v1_350_antiquated-interface-routines",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c4b86513cf570a0f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ca50d3ee99443442",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:37a85e81b2a7c485",
       "hint": {
         "cardId": "onr_v1_350_antiquated-interface-routines",
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade", "ice_modifier", "economy_asset"],
-        "planRoles": ["protect_rnd", "protect_hq", "build_scoring_remote"],
+        "planRoles": ["build_scoring_remote"],
         "valueHints": { "remoteRootValue": 2 },
         "strategicRole": ["tax_tool"],
         "strategyAnchors": ["corp.ice_tax_glacier"],
@@ -45145,13 +45082,8 @@
           "ice.strength_modifier",
           "ice.corp_strength_support"
         ],
-        "tacticSignals": [
-          "corp.remote_protection",
-          "ice.corp_strength_support",
-          "tax.ice"
-        ],
+        "tacticSignals": ["ice.corp_strength_support", "tax.ice"],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:remote_protection",
           "effect_scope:ice",
           "effect_timing:persistent",
@@ -45187,14 +45119,14 @@
     {
       "cardId": "onr_v1_351_bizarre-encryption-scheme",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5d87cc2a66203e0e",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2c04960ce8de9b10",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d22d3287d64fc203",
       "hint": {
         "cardId": "onr_v1_351_bizarre-encryption-scheme",
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
-        "planRoles": ["build_scoring_remote", "bait_runner"],
+        "planRoles": ["build_scoring_remote"],
         "valueHints": { "remoteRootValue": 2 },
         "strategicRole": ["defensive_tool"],
         "strategyAnchors": ["corp.remote_scoring"],
@@ -45209,7 +45141,6 @@
             "rationale": "Delays immediate agenda steal from a remote run and buys the Corp a scoring window."
           }
         ],
-        "actionTacticSignals": ["remote_role:agenda_steal_tax"],
         "costProfile": { "credits": 0 },
         "riskTags": ["hidden_root"],
         "quality": {
@@ -45221,11 +45152,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "agenda_steal_tax",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "requiredMechanics": [
           "delayed_agenda_access_replacement",
           "hiddenReplacementLongtail",
@@ -45241,17 +45167,17 @@
     {
       "cardId": "onr_v1_352_chester-mix",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ebfbeda54df6b931",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:6630bf3deb259a31",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:957ae4840a9099c0",
       "hint": {
         "cardId": "onr_v1_352_chester-mix",
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
-        "planRoles": ["build_scoring_remote", "protect_rnd", "protect_hq"],
+        "planRoles": ["build_scoring_remote"],
         "valueHints": { "economy": 2, "remoteRootValue": 2 },
         "strategicRole": ["support_tool"],
-        "strategyAnchors": ["corp.economy_rez_reserve", "corp.ice_tax_glacier"],
+        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -45399,7 +45325,7 @@
     {
       "cardId": "onr_v1_354_crybaby",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b1825c6f2aef49cb",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:92425b6e8a7dcaca",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b2a931b5f5bbc601",
       "hint": {
         "cardId": "onr_v1_354_crybaby",
         "side": "corp",
@@ -45408,7 +45334,7 @@
         "roles": ["hidden_zone", "ambush", "upgrade"],
         "planRoles": ["remote_upgrade_trap"],
         "valueHints": { "remoteRootValue": 2 },
-        "strategicRole": ["punish_payoff", "enabler"],
+        "strategicRole": ["enabler"],
         "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff", "corp.tag_trace_punish"],
         "strategySupportPairs": [
@@ -45455,7 +45381,6 @@
           "access.punish",
           "damage.corp_persistent_damage_counter",
           "defense.corp_run_end_counter",
-          "punish.payoff",
           "remote.ambush"
         ],
         "actionTacticSignals": [
@@ -45468,9 +45393,7 @@
           "effect_scope:runner",
           "effect_timing:on_access",
           "effect_timing:persistent",
-          "punish.payoff",
-          "remote.ambush",
-          "remote_role:tag_punish_asset"
+          "remote.ambush"
         ],
         "conditions": [{ "kind": "requires_accessed_card" }],
         "costProfile": { "credits": 1 },
@@ -45490,11 +45413,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "tag_punish_asset",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "requiredMechanics": [
           "access_effect",
           "rez_card",
@@ -45822,7 +45740,7 @@
     {
       "cardId": "onr_v1_358_dr-dreff",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c9e4dbd85a0652bc",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:0fefaf1d83624a41",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f289f5b5026d5669",
       "hint": {
         "cardId": "onr_v1_358_dr-dreff",
         "side": "corp",
@@ -45832,7 +45750,6 @@
         "planRoles": ["remote_upgrade_tax"],
         "valueHints": { "remoteRootValue": 1 },
         "strategicRole": ["tax_tool", "defensive_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -45914,7 +45831,7 @@
     {
       "cardId": "onr_v1_359_jenny-jett",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:220dc57bf36f364f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2f684c79baf786a5",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4ab87696b8ec27fa",
       "hint": {
         "cardId": "onr_v1_359_jenny-jett",
         "side": "corp",
@@ -45928,7 +45845,6 @@
         ],
         "valueHints": { "remoteRootValue": 2 },
         "strategicRole": ["tax_tool", "defensive_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -45998,7 +45914,7 @@
     {
       "cardId": "onr_v1_360_jerusalem-city-grid",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:1691ed75dd5b1261",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:5c6ac2c60d22a3ea",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:48ae77e5b9eb5eb9",
       "hint": {
         "cardId": "onr_v1_360_jerusalem-city-grid",
         "side": "corp",
@@ -46008,7 +45924,7 @@
         "planRoles": ["remote_upgrade_modifier"],
         "valueHints": { "remoteRootValue": 1 },
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.economy_rez_reserve", "corp.ice_tax_glacier"],
+        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -46022,20 +45938,6 @@
             ],
             "confidence": "high",
             "rationale": "Wall rez discount plus wall strength is clear glacier/tax support."
-          }
-        ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "discount_and_buff_wall_ice_on_fort",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["wall"],
-            "serverScope": "any_visible_server"
           }
         ],
         "effects": [
@@ -46069,13 +45971,11 @@
           "ice.corp_strength_support"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
           "ice.corp_rez_discount",
           "ice.corp_strength_support",
           "tax.ice"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:remote_protection",
           "effect:rez_discount",
           "effect_scope:ice",

@@ -83,10 +83,6 @@ export const cardSpec = {
       },
       {
         kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
-        kind: "strategy_anchor",
         strategyKey: "corp.ice_tax_glacier",
       },
       {
@@ -104,20 +100,9 @@ export const cardSpec = {
           "Wall rez discount plus wall strength is clear glacier/tax support.",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
         kind: "remote_role",
         role: "ice_modifier",
         threatLevel: "medium",
-      },
-      {
-        kind: "target_preference",
-        purpose: "discount_and_buff_wall_ice_on_fort",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "value_interpretation",
