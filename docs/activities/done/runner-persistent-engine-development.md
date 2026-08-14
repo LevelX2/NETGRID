@@ -1,6 +1,6 @@
 # Runner Persistent Engine Development
 
-Status: in Umsetzung – RPED-00 bis RPED-04 abgeschlossen, finale Integration aktiv
+Status: abgeschlossen – lokal in `main` integriert
 Quelle: Nutzerauftrag vom 2026-08-14 und Review-Rückmeldung aus `pasted-text.txt`
 
 ## Zielprüfung
@@ -104,7 +104,7 @@ prepared
 Genau ein Zustand beziehungsweise Paket ist aktiv. Ein Paketwechsel erfolgt
 erst nach Done-Gate und Commit.
 
-Aktueller Zustand: `final_integration`.
+Aktueller Zustand: `complete`.
 
 ## Diagnoseergebnis RPED-00
 
@@ -314,6 +314,19 @@ Follow-up-Fund:
   bestehender zuständiger Search-/Coverage-Plan bindet die konkrete
   LegalAction oder klassifiziert sie mit sichtbarer Why-not-Evidence; kein
   generischer Development- oder Choice-Resolver-Fallback.
+
+## Integrationsergebnis
+
+- Implementierungsstand `9c20871b1` wurde per Fast-Forward lokal nach `main`
+  integriert.
+- Der Arbeits-Worktree
+  `C:\Projekte\NETGRID_RUNNER_PERSISTENT_ENGINE_DEVELOPMENT` wurde aus Git und
+  aus dem Dateisystem entfernt; verbliebene lokale Dependency-Verzeichnisse
+  wurden nach expliziter Pfad- und Inhaltsprüfung bereinigt.
+- Der vollständig gemergte Branch
+  `codex/runner-persistent-engine-development` wurde gelöscht.
+- Worktree-Pfad, Git-Worktree-Eintrag und Branch-Abwesenheit wurden jeweils
+  separat verifiziert.
 
 ## Paketfolge
 
