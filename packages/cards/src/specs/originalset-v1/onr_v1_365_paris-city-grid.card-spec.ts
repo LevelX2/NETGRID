@@ -59,10 +59,6 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "remote_upgrade_tax",
-      },
-      {
         kind: "strategic_role",
         role: "enabler",
       },
@@ -83,11 +79,6 @@ export const cardSpec = {
         confidence: "high",
         rationale:
           "Recurring trace-credit pool on this fort strengthens trace/tag strategies.",
-      },
-      {
-        kind: "remote_role",
-        role: "run_tax",
-        threatLevel: "medium",
       },
       {
         kind: "value_interpretation",

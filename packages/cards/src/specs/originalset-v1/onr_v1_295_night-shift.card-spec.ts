@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Gain 2 and draw one card.",
+    rulesText: "Gain [2] and draw one card.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

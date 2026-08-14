@@ -62,17 +62,12 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
-      },
-      {
-        kind: "plan_role",
-        role: "safe_probe_run",
+        role: "protect_rig",
       },
       {
         kind: "target_preference",
         purpose: "prevent_resource_trash_during_corp_turn",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: ["best_cards_for_current_plan"],
       },
     ],
     capabilities: [],

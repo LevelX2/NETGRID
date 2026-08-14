@@ -85,13 +85,12 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "recover_rig",
+        role: "draw_for_answers",
       },
       {
         kind: "target_preference",
         purpose: "top_five_program_choice",
         preferences: ["program_repairs_missing_coverage"],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
     capabilities: [],

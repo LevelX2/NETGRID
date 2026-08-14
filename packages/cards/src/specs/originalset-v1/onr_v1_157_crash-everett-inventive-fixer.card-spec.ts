@@ -75,7 +75,6 @@ export const cardSpec = {
           "missing_current_coverage",
           "central_or_remote_plan_enabler",
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
     capabilities: [],

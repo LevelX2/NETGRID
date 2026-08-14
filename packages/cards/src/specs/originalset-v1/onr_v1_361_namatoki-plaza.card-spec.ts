@@ -84,10 +84,6 @@ export const cardSpec = {
         role: "support_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.remote_scoring",
         support: "supports",
@@ -100,11 +96,6 @@ export const cardSpec = {
         confidence: "medium",
         rationale:
           "Additional agenda/node capacity supports remote construction, but it is not itself protection.",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
       },
       {
         kind: "remote_role",

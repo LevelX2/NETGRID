@@ -817,6 +817,18 @@ function deriveGenericTypedHintOverlay(
     }
   }
   for (const window of engine.fortRunWindows ?? []) {
+    if (window.kind === "corp_trace_bits_during_runs_on_this_fort") {
+      overlay.effects.push({
+        kind: "trace_credit",
+        scope: "fort",
+        timing: "during_run",
+        resource: "credits",
+        target: "trace.corp_credit_support",
+        amount: window.amount,
+        repeatable: true,
+      });
+      overlay.functionSignals.push("trace.corp_credit_support");
+    }
     if (window.kind === "block_stealth_bits_during_runs_on_this_fort") {
       overlay.effects.push({
         kind: "run_tax",
@@ -6070,6 +6082,8 @@ function hasClosedTargetPreferenceOwner(
     engine.successfulRunFollowups !== undefined ||
     engine.runnerUtilityLongtail !== undefined ||
     engine.runnerEventLongtail !== undefined ||
+    engine.remainingReplacementLongtail?.kind ===
+      "hidden_draw_keep_or_top_replacement" ||
     engine.corpUtility !== undefined ||
     engine.lifecycle?.on_score?.some(
       (effect) => effect.kind === "trash_corp_installed_cards_in_source_server",
@@ -6092,6 +6106,7 @@ function hasClosedTargetPreferenceOwner(
               "free_rez_installed_ice_with_counters",
               "remove_same_fort_advancement_counters_for_run_credits",
               "search_stack_install",
+              "look_top_stack_take_matching",
             ].includes(effect.kind),
       ),
     ) === true
@@ -6125,6 +6140,32 @@ function deriveClosedExtendedTargetProfile(
           ),
         }),
   };
+  const lookTopStack = engine.abilities
+    ?.flatMap((ability) => ability.effects ?? [])
+    .find((effect) => effect.kind === "look_top_stack_take_matching");
+  if (lookTopStack?.kind === "look_top_stack_take_matching")
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "activated_ability",
+      targetType:
+        lookTopStack.allowedTypes.length === 1 &&
+        lookTopStack.allowedTypes[0] === "program"
+          ? "program"
+          : "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.remainingReplacementLongtail?.kind ===
+    "hidden_draw_keep_or_top_replacement"
+  )
+    return {
+      ...planningFields,
+      kind: "replacement_target",
+      timing: "replacement_window",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
   if (
     engine.lifecycle?.on_score?.some(
       (effect) => effect.kind === "trash_corp_installed_cards_in_source_server",
@@ -8514,13 +8555,15 @@ function derivedFunctionSignals(
           signals.add("advance.corp_counter_bank");
       }
   }
-  if (engine.fortRunWindows !== undefined)
-    for (const signal of [
-      "condition.corp_installed_or_advanced_this_fort_last_turn",
-      "run.corp_server_lock",
-      "tax.remote",
-    ])
-      signals.add(signal);
+  for (const window of engine.fortRunWindows ?? []) {
+    if (window.kind === "server_run_start_restriction") {
+      signals.add("condition.corp_installed_or_advanced_this_fort_last_turn");
+      signals.add("run.corp_server_lock");
+      signals.add("tax.remote");
+    }
+    if (window.kind === "corp_trace_bits_during_runs_on_this_fort")
+      signals.add("trace.corp_credit_support");
+  }
   if (engine.variableRez !== undefined) {
     signals.add("corp_ice.rez_paid_scaling");
     signals.add("ice.strength_modifier");

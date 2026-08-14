@@ -424,6 +424,35 @@ describe("CardRegistry", () => {
     });
   });
 
+  it("keeps the random production sample text and planning annotations precise", () => {
+    const nightShift = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_295_night-shift" as CardDefinitionId,
+    )!;
+    const aujourdOui = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_151_aujourdoui" as CardDefinitionId,
+    )!;
+    const crashEverett = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_157_crash-everett-inventive-fixer" as CardDefinitionId,
+    )!;
+
+    expect(nightShift.text.rulesText).toBe("Gain [2] and draw one card.");
+    expect(aujourdOui.planningAnnotations?.card).not.toContainEqual(
+      expect.objectContaining({
+        kind: "target_preference",
+        avoid: expect.arrayContaining(["hidden_info_dependent_choice"]),
+      }),
+    );
+    expect(crashEverett.planningAnnotations?.card).not.toContainEqual(
+      expect.objectContaining({
+        kind: "target_preference",
+        avoid: expect.arrayContaining(["hidden_info_dependent_choice"]),
+      }),
+    );
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

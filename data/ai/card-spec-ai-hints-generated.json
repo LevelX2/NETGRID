@@ -1982,14 +1982,11 @@
           }
         ],
         "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
           "corp_ice.end_run",
           "corp_ice.mobile_position_change",
           "corp_ice.multi_end_run",
           "ice.etr",
-          "ice.future_pressure",
-          "run.corp_server_lock",
-          "tax.remote"
+          "ice.future_pressure"
         ],
         "tacticSignals": [
           "corp_ice.end_run",
@@ -7806,13 +7803,7 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "corp_ice.end_run",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
         "tacticSignals": ["corp.remote_protection", "corp_ice.end_run"],
         "actionTacticSignals": [
           "corp.remote_protection",
@@ -7893,12 +7884,9 @@
           }
         ],
         "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
           "corp_ice.brain_damage",
           "corp_ice.end_run",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
+          "ice.etr"
         ],
         "tacticSignals": [
           "corp.remote_protection",
@@ -8745,13 +8733,10 @@
           }
         ],
         "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
           "corp_ice.end_run",
           "corp_ice.program_trash",
           "ice.etr",
-          "ice.future_pressure",
-          "run.corp_server_lock",
-          "tax.remote"
+          "ice.future_pressure"
         ],
         "tacticSignals": [
           "corp.remote_protection",
@@ -9122,12 +9107,9 @@
           }
         ],
         "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
           "corp_ice.end_run",
           "corp_ice.net_damage",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
+          "ice.etr"
         ],
         "tacticSignals": [
           "corp.remote_protection",
@@ -9351,13 +9333,7 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "corp_ice.end_run",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
         "tacticSignals": ["corp.remote_protection", "corp_ice.end_run"],
         "actionTacticSignals": [
           "corp.remote_protection",
@@ -9734,13 +9710,7 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "corp_ice.end_run",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
         "tacticSignals": ["corp.remote_protection", "corp_ice.end_run"],
         "actionTacticSignals": [
           "corp.remote_protection",
@@ -9795,13 +9765,7 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "corp_ice.end_run",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
         "tacticSignals": ["corp.remote_protection", "corp_ice.end_run"],
         "actionTacticSignals": [
           "corp.remote_protection",
@@ -9872,13 +9836,7 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "corp_ice.end_run",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
         "tacticSignals": ["corp.remote_protection", "corp_ice.end_run"],
         "actionTacticSignals": [
           "corp.remote_protection",
@@ -11337,11 +11295,6 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
         "conditions": [{ "kind": "requires_remote_server" }],
         "costProfile": { "credits": 0 },
         "quality": {
@@ -11906,13 +11859,7 @@
             "repeatable": true
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_pay_or_end_run",
-          "run.corp_server_lock",
-          "tax.remote",
-          "tax.runner_credit"
-        ],
+        "functionSignals": ["run.corp_pay_or_end_run", "tax.runner_credit"],
         "actionTacticSignals": [
           "effect:remote_protection",
           "effect:run_tax",
@@ -17181,7 +17128,7 @@
     {
       "cardId": "onr_proteus_141_get-ready-to-rumble",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:09373bfdfc531d79",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:29a7eb31aff65d55",
       "hint": {
         "cardId": "onr_proteus_141_get-ready-to-rumble",
         "side": "runner",
@@ -17193,7 +17140,7 @@
           "hidden_zone_tool",
           "random_discard_pressure"
         ],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": ["pressure_hq"],
         "valueHints": {},
         "effects": [
           {
@@ -18296,21 +18243,20 @@
     {
       "cardId": "onr_proteus_153_time-to-collect",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2d0ab5c5389493b1",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:44b2209b36856b4f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:18351f7269396ed6",
       "hint": {
         "cardId": "onr_proteus_153_time-to-collect",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["hidden_zone_tool", "resource", "trash_prevention"],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": ["protect_rig"],
         "valueHints": {},
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "prevent_resource_trash_during_corp_turn",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
+            "preferences": ["best_cards_for_current_plan"],
             "kind": "replacement_target",
             "timing": "on_use",
             "targetType": "card",
@@ -28256,14 +28202,14 @@
     {
       "cardId": "onr_v1_151_aujourdoui",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a8363a623b6b3876",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:0bb8a81777c9070b",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d310381c633233e0",
       "hint": {
         "cardId": "onr_v1_151_aujourdoui",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "recover_rig"],
+        "planRoles": ["build_rig", "draw_for_answers"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -28300,6 +28246,15 @@
           }
         ],
         "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "top_five_program_choice",
+            "preferences": ["program_repairs_missing_coverage"],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "program",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          },
           {
             "zone": "stack_top",
             "targetCardType": "program",
@@ -28789,7 +28744,7 @@
     {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f0531771d4683c3d",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:fd7a758939adaff5",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:0fc4b965303f0751",
       "hint": {
         "cardId": "onr_v1_157_crash-everett-inventive-fixer",
         "side": "runner",
@@ -28798,6 +28753,20 @@
         "roles": [],
         "planRoles": ["build_rig"],
         "valueHints": {},
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "filter_stack_for_current_setup_need",
+            "preferences": [
+              "missing_current_coverage",
+              "central_or_remote_plan_enabler"
+            ],
+            "kind": "replacement_target",
+            "timing": "replacement_window",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "effects": [
           {
             "kind": "global_modifier",
@@ -29556,6 +29525,16 @@
         ],
         "targetProfiles": [
           {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "top_four_prep_or_resource_choice",
+            "preferences": [],
+            "avoid": ["hidden_info_dependent_choice"],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          },
+          {
             "zone": "stack_top",
             "lookCount": 4,
             "showToOpponent": true,
@@ -30021,6 +30000,16 @@
           }
         ],
         "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "top_five_hardware_choice",
+            "preferences": [],
+            "avoid": ["hidden_info_dependent_choice"],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          },
           {
             "zone": "stack_top",
             "targetCardType": "hardware",
@@ -44987,11 +44976,6 @@
         "roles": [],
         "planRoles": ["build_scoring_remote", "protect_rnd", "protect_hq"],
         "valueHints": { "remoteRootValue": 3 },
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
         "conditions": [{ "kind": "requires_remote_server" }],
         "costProfile": { "credits": 0 },
         "quality": {
@@ -45766,13 +45750,7 @@
             "finite": true
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "ice.corp_fort_defense",
-          "run.corp_server_lock",
-          "tax.ice",
-          "tax.remote"
-        ],
+        "functionSignals": ["ice.corp_fort_defense", "tax.ice"],
         "actionTacticSignals": [
           "effect:future_encounter_effect",
           "effect_scope:run_path",
@@ -45851,11 +45829,6 @@
             "targetType": "ice_position",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
-        ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
         ],
         "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": [
@@ -45989,7 +45962,7 @@
     {
       "cardId": "onr_v1_361_namatoki-plaza",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d632aeed2fe1f051",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:220f1506dcf68ad2",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45161659b3e4507d",
       "hint": {
         "cardId": "onr_v1_361_namatoki-plaza",
         "side": "corp",
@@ -45999,7 +45972,6 @@
         "planRoles": ["remote_upgrade_support", "build_scoring_remote"],
         "valueHints": { "remoteRootValue": 2 },
         "strategicRole": ["support_tool"],
-        "strategyAnchors": ["corp.remote_scoring"],
         "lineSupport": ["corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -46011,11 +45983,7 @@
             "rationale": "Additional agenda/node capacity supports remote construction, but it is not itself protection."
           }
         ],
-        "tacticSignals": ["corp.remote_protection"],
-        "actionTacticSignals": [
-          "corp.remote_protection",
-          "remote_role:remote_capacity"
-        ],
+        "actionTacticSignals": ["remote_role:remote_capacity"],
         "costProfile": { "credits": 3 },
         "riskTags": ["hidden_root"],
         "quality": {
@@ -46141,9 +46109,6 @@
           }
         ],
         "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote",
           "economy.rez_discount",
           "ice.corp_rez_discount",
           "remote.scoring_protection"
@@ -46217,11 +46182,6 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
         "actionTacticSignals": ["remote_role:run_tax"],
         "conditions": [{ "kind": "requires_remote_server" }],
         "costProfile": { "credits": 0 },
@@ -46251,14 +46211,14 @@
     {
       "cardId": "onr_v1_365_paris-city-grid",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:238ea9897f55807d",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ca46598c3f1736d8",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:351b467a49c154ae",
       "hint": {
         "cardId": "onr_v1_365_paris-city-grid",
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_upgrade_tax"],
+        "planRoles": [],
         "valueHints": { "economy": 1, "remoteRootValue": 2 },
         "strategicRole": ["enabler"],
         "strategyAnchors": ["corp.tag_trace_punish"],
@@ -46273,12 +46233,23 @@
             "rationale": "Recurring trace-credit pool on this fort strengthens trace/tag strategies."
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
+        "effects": [
+          {
+            "kind": "trace_credit",
+            "scope": "fort",
+            "timing": "during_run",
+            "resource": "credits",
+            "target": "trace.corp_credit_support",
+            "amount": 3,
+            "repeatable": true
+          }
         ],
-        "actionTacticSignals": ["remote_role:run_tax"],
+        "functionSignals": ["trace.corp_credit_support"],
+        "actionTacticSignals": [
+          "effect:trace_credit",
+          "effect_scope:fort",
+          "effect_timing:during_run"
+        ],
         "conditions": [{ "kind": "requires_remote_server" }],
         "costProfile": { "credits": 2 },
         "quality": {
@@ -46290,11 +46261,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "run_tax",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "requiredMechanics": [
           "corp_trace_bits_during_runs_on_this_fort",
           "fortRunWindows",
@@ -46418,11 +46384,6 @@
             "confidence": "medium",
             "rationale": "Random end-the-run chance after passing rezzed ICE protects a remote but remains probabilistic."
           }
-        ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
         ],
         "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": [
@@ -46570,11 +46531,6 @@
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
         "actionTacticSignals": ["remote_role:run_tax"],
         "conditions": [{ "kind": "requires_remote_server" }],
         "costProfile": { "credits": 0 },
@@ -46721,11 +46677,6 @@
         "roles": [],
         "planRoles": ["build_scoring_remote", "bait_runner"],
         "valueHints": { "economy": 2, "remoteRootValue": 2 },
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card", "remote_role:run_tax"],
         "conditions": [{ "kind": "requires_remote_server" }],
@@ -46856,9 +46807,6 @@
           }
         ],
         "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote",
           "run.corp_stealth_credit_lockout",
           "tax.runner_credit"
         ],
