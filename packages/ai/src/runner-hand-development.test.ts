@@ -247,6 +247,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       availability: "missing_credits",
       fundingNeed: {
         installOrPlayCost: 5,
+        targetCredits: 5,
         missingCredits: 3,
         reason: "cannot_pay",
       },

@@ -38,6 +38,8 @@ import {
   type RunnerPersistentEngineConsumptionBlocker,
   type RunnerPersistentEngineKind,
   type RunnerPersistentEngineReadiness,
+  type RunnerPersistentDeckReplacementAssessment,
+  type RunnerPersistentDeckReplacementStatus,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
@@ -62,6 +64,8 @@ export {
   type RunnerPersistentEngineConsumptionBlocker,
   type RunnerPersistentEngineKind,
   type RunnerPersistentEngineReadiness,
+  type RunnerPersistentDeckReplacementAssessment,
+  type RunnerPersistentDeckReplacementStatus,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
@@ -89,6 +93,7 @@ import {
   capabilityDeltaForPersistentInstall,
   clampPriority,
   duplicateRoleForPersistentInstall,
+  desiredCreditReserveForPersistentEngine,
   fitPriority,
   handBufferPenaltyForPersistentInstall,
   hostableIcebreakerAvailableAfterInstall,
@@ -106,10 +111,12 @@ import {
   marginalUtilityScoreForPersistentInstall,
   memoryAvailableFor,
   memoryBlocked,
+  minimumCreditFloorForPersistentInstall,
   muPressurePenaltyForPersistentInstall,
   needPriority,
   opportunityPenaltyForPersistentInstall,
   persistentCoverageAlreadyPresent,
+  persistentDeckReplacementAssessment,
   persistentFunctionalProfileForCard,
   persistentInstallEvidence,
   persistentEngineAssessmentForInstall,
@@ -166,7 +173,11 @@ export function redactedRunnerHandDevelopmentFacts(
         `fit:${evaluation.strategicFit}`,
         `priority:${evaluation.priority}`,
         ...(evaluation.fundingNeed
-          ? [`missing_credits:${evaluation.fundingNeed.missingCredits}`]
+          ? [
+              `missing_credits:${evaluation.fundingNeed.missingCredits}`,
+              `target_credits:${evaluation.fundingNeed.targetCredits}`,
+              `funding_reason:${evaluation.fundingNeed.reason}`,
+            ]
           : []),
         `defer:${evaluation.deferReason}`,
         ...(evaluation.persistentInstallEvaluation
@@ -245,7 +256,12 @@ function evaluateHandCard(
     currentNeed,
     persistentInstallEvaluation,
   );
-  const fundingNeed = fundingNeedForCard(params.input, context, availability);
+  const fundingNeed = fundingNeedForCard(
+    params.input,
+    context,
+    availability,
+    persistentInstallEvaluation,
+  );
   const liquidityTiming = liquidityTimingForCard(context, developmentRole);
   const deferReason = deferReasonForCard(
     availability,
@@ -253,6 +269,7 @@ function evaluateHandCard(
     currentNeed,
     liquidityTiming,
     persistentInstallEvaluation,
+    fundingNeed,
   );
   const priority = priorityForCard({
     availability,
@@ -744,11 +761,18 @@ function evaluateRunnerPersistentInstall(
     context.card,
     context.signals.text,
   );
-  const installedProfiles = (params.input.playerView.own.rig ?? [])
+  const installedPersistentCards = (params.input.playerView.own.rig ?? [])
     .filter((card) => card.known !== false)
-    .map((card) =>
-      persistentFunctionalProfileForCard(card, signalsForCard(card, []).text),
-    );
+    .map((card) => ({
+      card,
+      profile: persistentFunctionalProfileForCard(
+        card,
+        signalsForCard(card, []).text,
+      ),
+    }));
+  const installedProfiles = installedPersistentCards.map(
+    ({ profile: installedProfile }) => installedProfile,
+  );
   const existingFunctionalCoverage = sortedUnique(
     installedProfiles.flatMap((installed) => installed.functionalCoverage),
   );
@@ -771,6 +795,11 @@ function evaluateRunnerPersistentInstall(
     profile,
     installedSameDefinitionCount,
     installedSameFunctionalGroupCount,
+  });
+  const replacementAssessment = persistentDeckReplacementAssessment({
+    candidateCard: context.card,
+    candidateProfile: profile,
+    installed: installedPersistentCards,
   });
   const installedSameRandomBreakProfileCount =
     profile.randomBreakOrDamageProfileId
@@ -818,6 +847,16 @@ function evaluateRunnerPersistentInstall(
     0,
     context.installOrPlayCost ?? actionCreditCost(action) ?? 0,
   );
+  const engineNeedsProtectedReserve =
+    engineAssessment.readiness === "ready_now" ||
+    engineAssessment.readiness === "setup";
+  const protectedCreditReserve = engineNeedsProtectedReserve
+    ? desiredCreditReserveForPersistentEngine(params.input)
+    : undefined;
+  const safeInstallTargetCredits =
+    protectedCreditReserve !== undefined
+      ? installCost + protectedCreditReserve
+      : undefined;
   const creditsAfterInstall = params.input.playerView.own.credits - installCost;
   const handAfterInstall = Math.max(
     0,
@@ -860,7 +899,8 @@ function evaluateRunnerPersistentInstall(
     ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
   });
   const displacementPenalty =
-    action.payload?.runnerProgramTrashBeforeInstall === true ? -1200 : 0;
+    (action.payload?.runnerProgramTrashBeforeInstall === true ? -1200 : 0) +
+    (replacementAssessment.status === "blocked_unvalued_loss" ? -1600 : 0);
   const finalInstallFit =
     marginalUtilityScore +
     opportunityPenalty +
@@ -880,9 +920,14 @@ function evaluateRunnerPersistentInstall(
     handAfterInstall,
     ...(memoryCost !== undefined ? { memoryCost } : {}),
     ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
+    ...(protectedCreditReserve !== undefined ? { protectedCreditReserve } : {}),
+    ...(safeInstallTargetCredits !== undefined
+      ? { safeInstallTargetCredits }
+      : {}),
     installedSameDefinitionCount,
     installedSameFunctionalGroupCount,
     engineAssessment,
+    replacementAssessment,
     existingFunctionalCoverage,
     newFunctionalCoverage,
     capabilityDelta,
@@ -898,6 +943,7 @@ function evaluateRunnerPersistentInstall(
     evidence: persistentInstallEvidence({
       profile,
       engineAssessment,
+      replacementAssessment,
       capabilityDelta,
       stackabilityClass,
       duplicateRole,
@@ -908,6 +954,12 @@ function evaluateRunnerPersistentInstall(
       creditsAfterInstall,
       handAfterInstall,
       ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
+      ...(protectedCreditReserve !== undefined
+        ? { protectedCreditReserve }
+        : {}),
+      ...(safeInstallTargetCredits !== undefined
+        ? { safeInstallTargetCredits }
+        : {}),
       marginalUtilityScore,
       opportunityPenalty,
       reservePenalty,
@@ -952,17 +1004,38 @@ function fundingNeedForCard(
   input: AiDecisionInput,
   context: CardContext,
   availability: RunnerHandDevelopmentAvailability,
+  persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
 ): RunnerHandDevelopmentFundingNeed | undefined {
-  if (availability !== "missing_credits") return undefined;
   const installOrPlayCost = context.installOrPlayCost;
   if (installOrPlayCost === undefined) return undefined;
+  const safeInstallTargetCredits =
+    persistentInstallEvaluation?.safeInstallTargetCredits;
+  const hardFloorTargetCredits =
+    persistentInstallEvaluation !== undefined &&
+    persistentInstallEvaluation.reservePenalty <= -900
+      ? installOrPlayCost + minimumCreditFloorForPersistentInstall(input)
+      : undefined;
+  const targetCredits = Math.max(
+    installOrPlayCost,
+    safeInstallTargetCredits ?? 0,
+    hardFloorTargetCredits ?? 0,
+  );
+  if (
+    availability !== "missing_credits" &&
+    input.playerView.own.credits >= targetCredits
+  ) {
+    return undefined;
+  }
   return {
     installOrPlayCost,
-    missingCredits: Math.max(
-      0,
-      installOrPlayCost - input.playerView.own.credits,
-    ),
-    reason: "cannot_pay",
+    targetCredits,
+    missingCredits: Math.max(0, targetCredits - input.playerView.own.credits),
+    reason:
+      availability === "missing_credits"
+        ? "cannot_pay"
+        : desiredCreditReserveForPersistentEngine(input) >= 6
+          ? "would_break_run_reserve"
+          : "would_break_floor",
   };
 }
 
@@ -972,9 +1045,24 @@ function deferReasonForCard(
   currentNeed: RunnerHandDevelopmentCurrentNeed,
   liquidityTiming: RunnerHandDevelopmentLiquidityTiming,
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
+  fundingNeed?: RunnerHandDevelopmentFundingNeed,
 ): RunnerHandDevelopmentDeferReason {
   if (persistentInstallEvaluation?.duplicateRole === "redundant_duplicate") {
     return "duplicate";
+  }
+  if (
+    persistentInstallEvaluation?.replacementAssessment.status ===
+    "blocked_unvalued_loss"
+  ) {
+    return "replacement_conflict";
+  }
+  if (
+    availability === "legal_now" &&
+    fundingNeed !== undefined &&
+    fundingNeed.reason !== "cannot_pay" &&
+    liquidityTiming !== "immediate"
+  ) {
+    return "preserve_credit_floor";
   }
   if (
     persistentInstallEvaluation &&
@@ -1077,6 +1165,8 @@ function redactedEvidenceForCard(params: {
       : []),
     ...(params.fundingNeed
       ? [
+          `funding_install_or_play_cost:${params.fundingNeed.installOrPlayCost}`,
+          `funding_target_credits:${params.fundingNeed.targetCredits}`,
           `funding_missing_credits:${params.fundingNeed.missingCredits}`,
           `funding_reason:${params.fundingNeed.reason}`,
         ]
@@ -1087,6 +1177,9 @@ function redactedEvidenceForCard(params: {
           `stackability_class:${persistent.stackabilityClass}`,
           `capability_delta:${persistent.capabilityDelta}`,
           `duplicate_role:${persistent.duplicateRole}`,
+          `persistent_engine_kind:${persistent.engineAssessment.kind}`,
+          `persistent_engine_readiness:${persistent.engineAssessment.readiness}`,
+          `deck_replacement_status:${persistent.replacementAssessment.status}`,
           `installed_same_definition_count:${persistent.installedSameDefinitionCount}`,
           `installed_same_functional_group_count:${persistent.installedSameFunctionalGroupCount}`,
           `marginal_utility_score:${persistent.marginalUtilityScore}`,

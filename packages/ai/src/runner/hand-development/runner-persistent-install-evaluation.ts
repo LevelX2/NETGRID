@@ -42,6 +42,7 @@ import type {
   RunnerPersistentEngineCapability,
   RunnerPersistentEngineConsumptionBlocker,
   RunnerPersistentEngineKind,
+  RunnerPersistentDeckReplacementAssessment,
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development-types";
@@ -218,6 +219,19 @@ export function persistentFunctionalProfileForCard(
     runnerHintProvidesSearch(hint) ||
     runnerHintProvidesTopTrashRecovery(hint) ||
     looksLikeDrawOrSearch(text);
+  const exclusiveHardwareDeck = Boolean(
+    card.type === "hardware" &&
+      (hint?.effects?.some(
+        (effect) =>
+          effect.kind === "hardware_trait" &&
+          effect.timing === "persistent" &&
+          effect.target === "deck_exclusive",
+      ) === true ||
+        hint?.functionSignals?.includes("setup.deck_exclusive") === true ||
+        hint?.requiredMechanics?.includes("deck_unique_replacement") === true ||
+        card.subtypes?.some((subtype) => subtype.toLowerCase() === "deck") ===
+          true),
+  );
   const persistentEngine = persistentEngineProfileForCard(card);
   const nonAdditiveUtilityFamilies = sortedUnique([
     ...nonAdditiveUtilityFamiliesForPersistentCard(card, text),
@@ -258,6 +272,7 @@ export function persistentFunctionalProfileForCard(
     ...(persistentEngine.coverage
       ? { persistentEngineCoverage: persistentEngine.coverage }
       : {}),
+    exclusiveHardwareDeck,
     functionalCoverage,
     primaryGroups,
     nonAdditiveUtilityFamilies,
@@ -283,6 +298,109 @@ export function persistentFunctionalProfileForCard(
     searchSupport,
     actionGatedUtility,
     absoluteNonStackable,
+  };
+}
+
+export function persistentDeckReplacementAssessment(params: {
+  candidateCard: VisibleCard;
+  candidateProfile: PersistentFunctionalProfile;
+  installed: readonly {
+    card: VisibleCard;
+    profile: PersistentFunctionalProfile;
+  }[];
+}): RunnerPersistentDeckReplacementAssessment {
+  const sameDefinitionInstalled = params.installed.some(
+    ({ card }) =>
+      params.candidateCard.definitionId !== undefined &&
+      card.definitionId === params.candidateCard.definitionId,
+  );
+  const conflicting = params.installed.filter(
+    ({ card, profile }) =>
+      profile.exclusiveHardwareDeck &&
+      card.definitionId !== params.candidateCard.definitionId,
+  );
+  const conflictingDefinitionIds = sortedUnique(
+    conflicting
+      .map(({ card }) => card.definitionId)
+      .filter(
+        (definitionId): definitionId is string => definitionId !== undefined,
+      ),
+  );
+  const unassessedDefinitionIds = sortedUnique(
+    conflicting
+      .filter(({ profile }) => profile.functionalCoverage.length === 0)
+      .map(({ card }) => card.definitionId)
+      .filter(
+        (definitionId): definitionId is string => definitionId !== undefined,
+      ),
+  );
+  let status: RunnerPersistentDeckReplacementAssessment["status"];
+  let admitted: boolean;
+  let gainedFunctionalCoverage: string[] = [];
+  let lostFunctionalCoverage: string[] = [];
+  if (!params.candidateProfile.exclusiveHardwareDeck) {
+    status = "not_applicable";
+    admitted = true;
+  } else if (sameDefinitionInstalled) {
+    status = "already_satisfied";
+    admitted = false;
+  } else if (conflicting.length === 0) {
+    status = "no_conflict";
+    admitted = true;
+  } else if (unassessedDefinitionIds.length > 0) {
+    status = "blocked_unvalued_loss";
+    admitted = false;
+  } else {
+    const conflictingCards = new Set(
+      conflicting.map(({ card }) => card.instanceId),
+    );
+    const coverageBefore = sortedUnique(
+      params.installed.flatMap(({ profile }) => profile.functionalCoverage),
+    );
+    const coverageAfter = sortedUnique([
+      ...params.installed
+        .filter(({ card }) => !conflictingCards.has(card.instanceId))
+        .flatMap(({ profile }) => profile.functionalCoverage),
+      ...params.candidateProfile.functionalCoverage,
+    ]);
+    gainedFunctionalCoverage = coverageAfter.filter(
+      (coverage) => !coverageBefore.includes(coverage),
+    );
+    lostFunctionalCoverage = coverageBefore.filter(
+      (coverage) => !coverageAfter.includes(coverage),
+    );
+    if (
+      gainedFunctionalCoverage.length > 0 &&
+      lostFunctionalCoverage.length === 0
+    ) {
+      status = "positive_upgrade";
+      admitted = true;
+    } else if (
+      gainedFunctionalCoverage.length === 0 &&
+      lostFunctionalCoverage.length === 0
+    ) {
+      status = "already_satisfied";
+      admitted = false;
+    } else {
+      status = "blocked_unvalued_loss";
+      admitted = false;
+    }
+  }
+  return {
+    status,
+    admitted,
+    conflictingDefinitionIds,
+    unassessedDefinitionIds,
+    gainedFunctionalCoverage,
+    lostFunctionalCoverage,
+    evidence: [
+      `deck_replacement_status:${status}`,
+      `deck_replacement_admitted:${admitted}`,
+      `deck_replacement_conflicts:${conflictingDefinitionIds.join("|") || "none"}`,
+      `deck_replacement_unassessed:${unassessedDefinitionIds.join("|") || "none"}`,
+      `deck_replacement_gained_coverage:${gainedFunctionalCoverage.join("|") || "none"}`,
+      `deck_replacement_lost_coverage:${lostFunctionalCoverage.join("|") || "none"}`,
+    ],
   };
 }
 
@@ -1144,20 +1262,33 @@ export function reservePenaltyForPersistentInstall(params: {
   creditsAfterInstall: number;
 }): number {
   if (params.installCost <= 0) return 0;
-  const riskyContext = runnerHasRiskyInstalledBreaker(params.params.input);
-  const minimumCreditFloor = riskyContext ? 3 : 2;
+  const minimumCreditFloor = minimumCreditFloorForPersistentInstall(
+    params.params.input,
+  );
   const visibleRemoteScoreThreat = runnerVisibleRemoteScoreThreat(
     params.params.input,
   );
-  const desiredCreditReserve = visibleRemoteScoreThreat
-    ? 6
-    : riskyContext
-      ? 5
-      : 4;
+  const desiredCreditReserve = desiredCreditReserveForPersistentEngine(
+    params.params.input,
+  );
   if (params.creditsAfterInstall < minimumCreditFloor) return -900;
   if (visibleRemoteScoreThreat && params.creditsAfterInstall < 6) return -1300;
   if (params.creditsAfterInstall < desiredCreditReserve) return -420;
   return 0;
+}
+
+export function desiredCreditReserveForPersistentEngine(
+  input: AiDecisionInput,
+): number {
+  if (runnerVisibleRemoteScoreThreat(input)) return 6;
+  return runnerHasRiskyInstalledBreaker(input) ? 5 : 4;
+}
+
+export function minimumCreditFloorForPersistentInstall(
+  input: AiDecisionInput,
+): number {
+  if (runnerVisibleRemoteScoreThreat(input)) return 6;
+  return runnerHasRiskyInstalledBreaker(input) ? 3 : 2;
 }
 
 export function handBufferPenaltyForPersistentInstall(params: {
@@ -1210,6 +1341,7 @@ export function muPressurePenaltyForPersistentInstall(params: {
 export function persistentInstallEvidence(params: {
   profile: PersistentFunctionalProfile;
   engineAssessment: RunnerPersistentEngineAssessment;
+  replacementAssessment: RunnerPersistentDeckReplacementAssessment;
   capabilityDelta: RunnerPersistentInstallCapabilityDelta;
   stackabilityClass: RunnerPersistentInstallStackabilityClass;
   duplicateRole: RunnerPersistentInstallDuplicateRole;
@@ -1220,6 +1352,8 @@ export function persistentInstallEvidence(params: {
   creditsAfterInstall: number;
   handAfterInstall: number;
   memoryAfterInstall?: number;
+  protectedCreditReserve?: number;
+  safeInstallTargetCredits?: number;
   marginalUtilityScore: number;
   opportunityPenalty: number;
   reservePenalty: number;
@@ -1249,13 +1383,14 @@ export function persistentInstallEvidence(params: {
       : undefined;
   return [
     `persistent_install_role:${params.role}`,
-    ...params.engineAssessment.evidence,
     `persistent_functional_coverage:${params.profile.functionalCoverage.join("|") || "none"}`,
     `non_additive_utility_families:${params.profile.nonAdditiveUtilityFamilies.join("|") || "none"}`,
     `new_functional_coverage:${params.newFunctionalCoverage.join("|") || "none"}`,
     `stackability_class:${params.stackabilityClass}`,
     `capability_delta:${params.capabilityDelta}`,
     `duplicate_role:${params.duplicateRole}`,
+    ...params.engineAssessment.evidence,
+    ...params.replacementAssessment.evidence,
     ...(params.profile.randomBreakOrDamageProfileId
       ? [
           `random_break_or_damage_profile:${params.profile.randomBreakOrDamageProfileId}`,
@@ -1276,6 +1411,12 @@ export function persistentInstallEvidence(params: {
     `hand_after_install:${params.handAfterInstall}`,
     ...(params.memoryAfterInstall !== undefined
       ? [`memory_after_install:${params.memoryAfterInstall}`]
+      : []),
+    ...(params.protectedCreditReserve !== undefined
+      ? [`protected_credit_reserve:${params.protectedCreditReserve}`]
+      : []),
+    ...(params.safeInstallTargetCredits !== undefined
+      ? [`safe_install_target_credits:${params.safeInstallTargetCredits}`]
       : []),
     `marginal_utility_score:${params.marginalUtilityScore}`,
     `opportunity_penalty:${params.opportunityPenalty}`,
@@ -1612,6 +1753,7 @@ export function persistentInstallRouteBlocked(
 ): boolean {
   return (
     evaluation.engineAssessment.readiness === "blocked" ||
+    evaluation.replacementAssessment.status === "blocked_unvalued_loss" ||
     evaluation.displacementPenalty < 0 ||
     evaluation.muPressurePenalty < 0 ||
     evaluation.reservePenalty <= -900 ||

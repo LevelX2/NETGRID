@@ -11377,6 +11377,107 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps protected engine funding resident until the exact install target is reached", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction(
+      "engine-funding-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const install = legalAction(
+      "install-saloon-engine",
+      "runner",
+      "install_card",
+      "Install Silicon Saloon Franchise",
+      { credits: 8, clicks: 1 },
+      {
+        source: "saloon-engine-card",
+        payload: {
+          cardId: "saloon-engine-card",
+          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+        },
+      },
+    );
+    let currentEvaluation = protectedEngineHandEvaluation(10, install.actionId);
+    const context = liveContext({
+      evaluateRunnerHandDevelopment: () => [currentEvaluation],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 2,
+        desiredCreditReserve: 4,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    });
+    const input = aiInput("runner", [credit, install]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("saloon-engine-card", "runner", "resource", {
+        definitionId: "onr_v1_179_silicon-saloon-franchise",
+        installCost: 8,
+      }),
+    ];
+
+    expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) =>
+          instance.moduleId === "runner.develop_board_and_hand" &&
+          instance.dedupeKey === "card:saloon-engine-card",
+      ),
+    ).toMatchObject({
+      phase: "fund",
+      moduleState: {
+        signal: {
+          fundingGap: 2,
+          evidenceCodes: expect.arrayContaining([
+            "development_funding_target_credits:12",
+          ]),
+        },
+      },
+    });
+
+    const second = structuredClone(input);
+    second.playerView.stateVersion = 2;
+    second.decisionId = "protected-engine-funding:2:runner";
+    second.playerView.own.credits = 11;
+    second.playerView.own.clicks = 3;
+    for (const action of second.legalActions) action.expiresAtStateVersion = 2;
+    second.playerView.legalActions = second.legalActions;
+    currentEvaluation = protectedEngineHandEvaluation(11, install.actionId);
+    expect(context.chooseSemanticRuntimeAction(second, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(second)?.instances.find(
+        (instance) => instance.dedupeKey === "card:saloon-engine-card",
+      ),
+    ).toMatchObject({ phase: "fund" });
+
+    const ready = structuredClone(second);
+    ready.playerView.stateVersion = 3;
+    ready.decisionId = "protected-engine-funding:3:runner";
+    ready.playerView.own.credits = 12;
+    ready.playerView.own.clicks = 2;
+    for (const action of ready.legalActions) action.expiresAtStateVersion = 3;
+    ready.playerView.legalActions = ready.legalActions;
+    currentEvaluation = protectedEngineHandEvaluation(12, install.actionId);
+    expect(context.chooseSemanticRuntimeAction(ready, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+    });
+  });
+
   it("binds a same-turn access event to a productive central pressure plan", () => {
     resetResidentPlanPortfolioMemory();
     const prepareAccess = legalAction(
@@ -16725,6 +16826,11 @@ function handEvaluation(params: {
   creditsAfterInstall?: number;
   availability?: "legal_now" | "missing_credits";
   missingCredits?: number;
+  targetCredits?: number;
+  fundingReason?:
+    | "cannot_pay"
+    | "would_break_floor"
+    | "would_break_run_reserve";
   currentNeed?: "acute" | "useful_now" | "setup" | "later" | "none";
   developmentRole?:
     | "economy_engine"
@@ -16738,7 +16844,7 @@ function handEvaluation(params: {
   strategicFit?: "strong" | "medium" | "weak" | "blocked";
 }) {
   return {
-    schemaVersion: "runner-hand-development-evaluation-v2",
+    schemaVersion: "runner-hand-development-evaluation-v3",
     cardInstanceId: params.cardInstanceId,
     definitionId: params.definitionId,
     cardType: params.cardType,
@@ -16754,8 +16860,9 @@ function handEvaluation(params: {
       ? {
           fundingNeed: {
             installOrPlayCost: params.installCost ?? 0,
+            targetCredits: params.targetCredits ?? params.installCost ?? 0,
             missingCredits: params.missingCredits,
-            reason: "cannot_pay" as const,
+            reason: params.fundingReason ?? ("cannot_pay" as const),
           },
         }
       : {}),
@@ -16782,9 +16889,18 @@ function handEvaluation(params: {
               alreadySatisfied: false,
               evidence: [],
             },
+            replacementAssessment: {
+              status: "not_applicable",
+              admitted: true,
+              conflictingDefinitionIds: [],
+              unassessedDefinitionIds: [],
+              gainedFunctionalCoverage: [],
+              lostFunctionalCoverage: [],
+              evidence: [],
+            },
             existingFunctionalCoverage: [],
             newFunctionalCoverage: [],
-            capabilityDelta: "new_capability",
+            capabilityDelta: "new_coverage",
             stackabilityClass: "unknown",
             duplicateRole: params.duplicateRole,
             marginalUtilityScore: 0,
@@ -16800,6 +16916,36 @@ function handEvaluation(params: {
       : {}),
     evidence: [],
   };
+}
+
+function protectedEngineHandEvaluation(
+  currentCredits: number,
+  legalActionId: string,
+) {
+  const fundingGap = Math.max(0, 12 - currentCredits);
+  return handEvaluation({
+    cardInstanceId: "saloon-engine-card",
+    definitionId: "onr_v1_179_silicon-saloon-franchise",
+    legalActionId,
+    priority: 900,
+    developmentRole: "economy_engine",
+    strategicFit: "strong",
+    currentNeed: "useful_now",
+    cardType: "resource",
+    installCost: 8,
+    creditsAfterInstall: currentCredits - 8,
+    duplicateRole: "none",
+    finalInstallFit: 530,
+    availability: "legal_now",
+    deferReason: fundingGap > 0 ? "preserve_credit_floor" : "none",
+    ...(fundingGap > 0
+      ? {
+          missingCredits: fundingGap,
+          targetCredits: 12,
+          fundingReason: "would_break_floor" as const,
+        }
+      : {}),
+  });
 }
 
 function runTargetEvaluation(params: {

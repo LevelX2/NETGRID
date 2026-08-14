@@ -4,7 +4,7 @@ import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
-  "runner-hand-development-evaluation-v2" as const;
+  "runner-hand-development-evaluation-v3" as const;
 export const RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION =
   "runner-persistent-install-evaluation-v2" as const;
 
@@ -47,6 +47,7 @@ export type RunnerHandDevelopmentDeferReason =
   | "no_current_need"
   | "duplicate"
   | "timing"
+  | "replacement_conflict"
   | "preserve_credit_floor"
   | "stronger_override";
 
@@ -57,6 +58,7 @@ export type RunnerHandDevelopmentLiquidityTiming =
 
 export type RunnerHandDevelopmentFundingNeed = {
   installOrPlayCost: number;
+  targetCredits: number;
   missingCredits: number;
   reason: "cannot_pay" | "would_break_floor" | "would_break_run_reserve";
 };
@@ -127,6 +129,23 @@ export type RunnerPersistentEngineAssessment = {
   evidence: string[];
 };
 
+export type RunnerPersistentDeckReplacementStatus =
+  | "not_applicable"
+  | "no_conflict"
+  | "already_satisfied"
+  | "positive_upgrade"
+  | "blocked_unvalued_loss";
+
+export type RunnerPersistentDeckReplacementAssessment = {
+  status: RunnerPersistentDeckReplacementStatus;
+  admitted: boolean;
+  conflictingDefinitionIds: string[];
+  unassessedDefinitionIds: string[];
+  gainedFunctionalCoverage: string[];
+  lostFunctionalCoverage: string[];
+  evidence: string[];
+};
+
 export type RunnerPersistentInstallEvaluation = {
   schemaVersion: typeof RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION;
   actionId: string;
@@ -138,9 +157,12 @@ export type RunnerPersistentInstallEvaluation = {
   handAfterInstall: number;
   memoryCost?: number;
   memoryAfterInstall?: number;
+  protectedCreditReserve?: number;
+  safeInstallTargetCredits?: number;
   installedSameDefinitionCount: number;
   installedSameFunctionalGroupCount: number;
   engineAssessment: RunnerPersistentEngineAssessment;
+  replacementAssessment: RunnerPersistentDeckReplacementAssessment;
   existingFunctionalCoverage: string[];
   newFunctionalCoverage: string[];
   capabilityDelta: RunnerPersistentInstallCapabilityDelta;

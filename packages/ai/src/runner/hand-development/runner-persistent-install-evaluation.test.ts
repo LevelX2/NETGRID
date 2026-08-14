@@ -1249,11 +1249,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         planRoles: [],
         aiSupportStatus: "ai_supported",
         costProfile: { clicks: 1, credits: 0 },
-        requiredMechanics: [
-          "activated",
-          "take_click_ability",
-          mechanic,
-        ],
+        requiredMechanics: ["activated", "take_click_ability", mechanic],
         actionCapabilitySemantics: [
           {
             capabilityKey: "limited_credit_and_draw",
@@ -1295,7 +1291,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     },
   );
 
-  it("captures the missing desired-reserve funding demand for a payable expensive engine", () => {
+  it("creates a desired-reserve funding demand for a payable expensive engine", () => {
     const saloon = visibleCard("saloon-reserve-candidate", {
       definitionId: "onr_v1_179_silicon-saloon-franchise",
       title: "Silicon Saloon Franchise",
@@ -1324,13 +1320,109 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
     expect(evaluation).toMatchObject({
       availability: "legal_now",
-      deferReason: "none",
+      deferReason: "preserve_credit_floor",
+      fundingNeed: {
+        installOrPlayCost: 8,
+        targetCredits: 12,
+        missingCredits: 2,
+        reason: "would_break_floor",
+      },
     });
-    expect(evaluation.fundingNeed).toBeUndefined();
     expect(evaluation.persistentInstallEvaluation).toMatchObject({
       installCost: 8,
       creditsAfterInstall: 2,
+      protectedCreditReserve: 4,
+      safeInstallTargetCredits: 12,
       reservePenalty: -420,
+    });
+  });
+
+  it("raises the engine target to five credits with an installed risky breaker", () => {
+    const saloon = visibleCard("saloon-risk-reserve", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+      installCost: 8,
+    });
+    const riskyBreaker = visibleCard("installed-risky-breaker", {
+      definitionId: "onr_v1_007_blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      rulesText:
+        "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 12,
+          hand: [saloon, visibleCard("buffer", { type: "event" })],
+          rig: [riskyBreaker],
+          legalActions: [installAction("install-saloon-risk", saloon, 8)],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.economy_setup_before_pressure"],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "preserve_credit_floor",
+      fundingNeed: {
+        targetCredits: 13,
+        missingCredits: 1,
+        reason: "would_break_floor",
+      },
+      persistentInstallEvaluation: {
+        protectedCreditReserve: 5,
+        safeInstallTargetCredits: 13,
+      },
+    });
+  });
+
+  it("raises the engine target to six credits for a visible remote score threat", () => {
+    const saloon = visibleCard("saloon-remote-reserve", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      type: "resource",
+      installCost: 8,
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 13,
+          hand: [saloon, visibleCard("buffer", { type: "event" })],
+          legalActions: [installAction("install-saloon-remote", saloon, 8)],
+          servers: [
+            {
+              id: "remote_1",
+              label: "Remote 1",
+              ice: [],
+              root: [
+                visibleCard("visible-remote-agenda", {
+                  type: "agenda",
+                  advancementRequirement: 3,
+                }),
+              ],
+            },
+          ],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.economy_setup_before_pressure"],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "preserve_credit_floor",
+      fundingNeed: {
+        targetCredits: 14,
+        missingCredits: 1,
+        reason: "would_break_run_reserve",
+      },
+      persistentInstallEvaluation: {
+        protectedCreditReserve: 6,
+        safeInstallTargetCredits: 14,
+      },
     });
   });
 
@@ -1383,4 +1475,198 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       evaluation.persistentInstallEvaluation?.newFunctionalCoverage,
     ).toContain("persistent_engine:successful_run_followup");
   });
+
+  it("admits an exclusive deck replacement that strictly adds coverage", () => {
+    const installedDefinitionId = "test-exclusive-memory-deck";
+    AI_HINTS_BY_CARD.set(
+      installedDefinitionId,
+      exclusiveDeckHint(installedDefinitionId, false),
+    );
+    try {
+      const installedDeck = visibleCard("installed-memory-deck", {
+        definitionId: installedDefinitionId,
+        type: "hardware",
+        subtypes: ["deck"],
+        rulesText: "Provides +1 MU.",
+      });
+      const creche = visibleCard("creche-positive-replacement", {
+        definitionId: "onr_v1_123_bodyweight-data-creche",
+        type: "hardware",
+        subtypes: ["deck"],
+        installCost: 3,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 10,
+            hand: [creche, visibleCard("buffer", { type: "event" })],
+            rig: [installedDeck],
+            legalActions: [installAction("install-creche-upgrade", creche, 3)],
+          }),
+          strategicIntent: strategicIntent({
+            setupEngine: ["runner.rig_first"],
+            pressureVectors: ["runner.central_probe_pressure"],
+          }),
+        }),
+        creche.instanceId,
+      );
+
+      expect(evaluation).toMatchObject({
+        deferReason: "none",
+        persistentInstallEvaluation: {
+          displacementPenalty: 0,
+          replacementAssessment: {
+            status: "positive_upgrade",
+            admitted: true,
+            conflictingDefinitionIds: [installedDefinitionId],
+            gainedFunctionalCoverage: [
+              "persistent_engine:successful_run_followup",
+            ],
+            lostFunctionalCoverage: [],
+          },
+        },
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(installedDefinitionId);
+    }
+  });
+
+  it("blocks an exclusive deck replacement that would lose unique coverage", () => {
+    const installedDefinitionId = "test-exclusive-hand-buffer-deck";
+    AI_HINTS_BY_CARD.set(
+      installedDefinitionId,
+      exclusiveDeckHint(installedDefinitionId, true),
+    );
+    try {
+      const installedDeck = visibleCard("installed-hand-buffer-deck", {
+        definitionId: installedDefinitionId,
+        type: "hardware",
+        subtypes: ["deck"],
+        rulesText: "Provides +1 MU and increases maximum hand size by 2.",
+      });
+      const creche = visibleCard("creche-negative-replacement", {
+        definitionId: "onr_v1_123_bodyweight-data-creche",
+        type: "hardware",
+        subtypes: ["deck"],
+        installCost: 3,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 10,
+            hand: [creche, visibleCard("buffer", { type: "event" })],
+            rig: [installedDeck],
+            legalActions: [
+              installAction("install-creche-regression", creche, 3),
+            ],
+          }),
+          strategicIntent: strategicIntent({
+            setupEngine: ["runner.rig_first"],
+            pressureVectors: ["runner.central_probe_pressure"],
+          }),
+        }),
+        creche.instanceId,
+      );
+
+      expect(evaluation).toMatchObject({
+        deferReason: "replacement_conflict",
+        persistentInstallEvaluation: {
+          displacementPenalty: -1600,
+          replacementAssessment: {
+            status: "blocked_unvalued_loss",
+            admitted: false,
+            conflictingDefinitionIds: [installedDefinitionId],
+            gainedFunctionalCoverage: [
+              "persistent_engine:successful_run_followup",
+            ],
+            lostFunctionalCoverage: ["hand_size"],
+          },
+        },
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(installedDefinitionId);
+    }
+  });
+
+  it("fails closed when the installed exclusive deck has no assessable coverage", () => {
+    const installedDeck = visibleCard("installed-unassessed-deck", {
+      definitionId: "test-unassessed-exclusive-deck",
+      type: "hardware",
+      subtypes: ["deck"],
+    });
+    const creche = visibleCard("creche-unassessed-replacement", {
+      definitionId: "onr_v1_123_bodyweight-data-creche",
+      type: "hardware",
+      subtypes: ["deck"],
+      installCost: 3,
+    });
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 10,
+          hand: [creche, visibleCard("buffer", { type: "event" })],
+          rig: [installedDeck],
+          legalActions: [
+            installAction("install-creche-unknown-loss", creche, 3),
+          ],
+        }),
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.rig_first"],
+          pressureVectors: ["runner.central_probe_pressure"],
+        }),
+      }),
+      creche.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      deferReason: "replacement_conflict",
+      persistentInstallEvaluation: {
+        replacementAssessment: {
+          status: "blocked_unvalued_loss",
+          admitted: false,
+          conflictingDefinitionIds: ["test-unassessed-exclusive-deck"],
+          unassessedDefinitionIds: ["test-unassessed-exclusive-deck"],
+        },
+      },
+    });
+  });
 });
+
+function exclusiveDeckHint(cardId: string, handSize: boolean) {
+  return {
+    cardId,
+    side: "runner" as const,
+    cardType: "hardware",
+    roles: ["hardware", "deck", "memory"],
+    planRoles: ["runner_install_hardware"],
+    aiSupportStatus: "ai_supported" as const,
+    effects: [
+      {
+        kind: "hardware_trait" as const,
+        scope: "hardware" as const,
+        timing: "persistent" as const,
+        target: "deck_exclusive",
+      },
+      {
+        kind: "global_modifier" as const,
+        scope: "runner" as const,
+        timing: "persistent" as const,
+        resource: "memory" as const,
+        amount: 1,
+      },
+      ...(handSize
+        ? [
+            {
+              kind: "global_modifier" as const,
+              scope: "runner" as const,
+              timing: "persistent" as const,
+              resource: "cards" as const,
+              target: "hand_size",
+              amount: 2,
+            },
+          ]
+        : []),
+    ],
+    requiredMechanics: ["deck_unique_replacement", "install_hardware"],
+  };
+}

@@ -556,6 +556,8 @@ export type {
   RunnerPersistentEngineConsumptionBlocker,
   RunnerPersistentEngineKind,
   RunnerPersistentEngineReadiness,
+  RunnerPersistentDeckReplacementAssessment,
+  RunnerPersistentDeckReplacementStatus,
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development";

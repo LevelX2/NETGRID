@@ -39,6 +39,7 @@ export type PersistentFunctionalProfile = {
   persistentEngineRepeatable: boolean;
   persistentEngineConsumptionBlockers: RunnerPersistentEngineConsumptionBlocker[];
   persistentEngineCoverage?: string;
+  exclusiveHardwareDeck: boolean;
   functionalCoverage: string[];
   primaryGroups: string[];
   nonAdditiveUtilityFamilies: string[];

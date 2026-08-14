@@ -1,6 +1,6 @@
 # Runner Persistent Engine Development
 
-Status: in Umsetzung – RPED-00 und RPED-01 abgeschlossen, RPED-02 aktiv
+Status: in Umsetzung – RPED-00 bis RPED-02 abgeschlossen, RPED-03 aktiv
 Quelle: Nutzerauftrag vom 2026-08-14 und Review-Rückmeldung aus `pasted-text.txt`
 
 ## Zielprüfung
@@ -104,7 +104,7 @@ prepared
 Genau ein Zustand beziehungsweise Paket ist aktiv. Ein Paketwechsel erfolgt
 erst nach Done-Gate und Commit.
 
-Aktueller Zustand: `reserve_funding_and_replacement`.
+Aktueller Zustand: `focused_verification`.
 
 ## Diagnoseergebnis RPED-00
 
@@ -170,6 +170,44 @@ Paketchecks:
   bereits vorhandene Typfehler in
   `runtime/sneak-preview-coverage-choice-real-engine.test.ts`. Keine Meldung
   betrifft die in RPED-01 geänderten Typen oder Dateien.
+
+## Umsetzungsergebnis RPED-02
+
+- `RunnerHandDevelopmentFundingNeed` führt jetzt verbindliche
+  `targetCredits`. Für normale blockierte Karten entsprechen sie weiterhin
+  der Bezahlbarkeit; für erkannte persistente Engines umfassen sie zusätzlich
+  die gewünschte Reserve.
+- Die Engine-Reserve beträgt 4 Credits normal, 5 bei einem installierten
+  riskanten Breaker und 6 bei sichtbarer Remote-Score-Bedrohung. Die bisherigen
+  harten Mindestpuffer 2/3/6 bleiben für alle anderen persistenten
+  Installationen unverändert und erhalten ebenfalls einen expliziten
+  Funding-Vertrag.
+- Bei 10 Credits und 8 Installationskosten liefert Saloon jetzt Ziel 12,
+  Gap 2 und `would_break_floor`. Der vorhandene
+  `runner.develop_board_and_hand:<cardInstanceId>` bleibt in Phase `fund`,
+  bindet exakt die Funding-Aktion und wechselt erst bei 12 Credits auf die
+  unveränderte Install-Action.
+- Die Credit-Bank-Cash-out-Admission prüft nun dasselbe Zielcredit-Feld. Ein
+  Cash-out darf eine bezahlbare Engine deshalb gezielt auf den geschützten
+  Installationsstand bringen, bleibt aber unter dem Bank-Planowner.
+- Hardware-Deck-Exklusivität wird aus strukturiertem `hardware_trait`,
+  `setup.deck_exclusive`, `deck_unique_replacement` oder dem sichtbaren
+  strukturierten Deck-Subtype erkannt.
+- Ersetzungen folgen einer konservativen Dominanzregel: zulässig ist nur eine
+  strikt neue Funktionsdeckung ohne Verlust vorhandener einzigartiger
+  Deck-Funktionen. Verlust oder nicht bewertbare Deck-Semantik ergibt
+  `blocked_unvalued_loss`, `replacement_conflict` und keine Action-Route.
+
+Paketchecks:
+
+- Hand-Development, Persistent-Install, Cash-out und angrenzender
+  Stakeout-Vertrag: 66/66 grün;
+- residente Zielcredit-Fortsetzung: 1/1 fokussierter Runtime-Test grün;
+- AI-Typecheck nach Behebung aller paketbezogenen Meldungen erneut
+  ausgeführt; verbleibend sind ausschließlich die bereits dokumentierten vier
+  fehlenden Migration-Review-JSONs und der unveränderte Sneak-Preview-
+  Testtypfehler;
+- `git diff --check`: grün.
 
 ## Paketfolge
 

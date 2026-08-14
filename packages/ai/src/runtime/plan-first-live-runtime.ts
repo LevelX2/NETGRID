@@ -4514,7 +4514,8 @@ function buildRunnerDomain(
       const waitingForReserve =
         evaluation.availability === "legal_now" &&
         evaluation.deferReason === "preserve_credit_floor" &&
-        evaluation.persistentInstallEvaluation !== undefined;
+        evaluation.fundingNeed !== undefined &&
+        evaluation.fundingNeed.reason !== "cannot_pay";
       if (
         (!executableNow && !waitingForCredits && !waitingForReserve) ||
         !evaluation.definitionId
@@ -4759,8 +4760,7 @@ function buildRunnerDomain(
         evaluation.persistentInstallEvaluation?.duplicateRole ===
         "redundant_duplicate";
       const reserveProtectedTargetCredits = waitingForReserve
-        ? evaluation.persistentInstallEvaluation!.installCost +
-          economy.minimumCreditFloor
+        ? evaluation.fundingNeed!.targetCredits
         : undefined;
       const fundingGap =
         evaluation.fundingNeed?.missingCredits ??
@@ -6179,7 +6179,7 @@ function runnerDevelopmentFundingRoute(
   explicitTargetCredits?: number,
 ): { actionIds: string[]; evidenceCodes: string[] } {
   const targetCredits =
-    explicitTargetCredits ?? evaluation.fundingNeed?.installOrPlayCost;
+    explicitTargetCredits ?? evaluation.fundingNeed?.targetCredits;
   if (targetCredits === undefined) {
     return {
       actionIds: [],
@@ -16949,8 +16949,10 @@ function runnerDevelopmentCashOutTargetCanMaterialize(
   evaluation: RunnerHandDevelopmentEvaluation,
 ): boolean {
   return (
-    evaluation.availability === "missing_credits" &&
-    evaluation.deferReason === "missing_credits" &&
+    ((evaluation.availability === "missing_credits" &&
+      evaluation.deferReason === "missing_credits") ||
+      (evaluation.availability === "legal_now" &&
+        evaluation.deferReason === "preserve_credit_floor")) &&
     evaluation.fundingNeed !== undefined &&
     evaluation.definitionId !== undefined &&
     !runnerDefinitionRequiresTargetedBypassPlan(evaluation.definitionId) &&
@@ -16997,8 +16999,12 @@ function runnerMatureCreditBankDevelopmentFundingRoute(params: {
   )) {
     const fundingNeed = evaluation.fundingNeed;
     if (
-      evaluation.availability !== "missing_credits" ||
-      evaluation.deferReason !== "missing_credits" ||
+      !(
+        (evaluation.availability === "missing_credits" &&
+          evaluation.deferReason === "missing_credits") ||
+        (evaluation.availability === "legal_now" &&
+          evaluation.deferReason === "preserve_credit_floor")
+      ) ||
       !evaluation.evidence.includes("duplicate_installed:false") ||
       evaluation.currentNeed === "none" ||
       evaluation.currentNeed === "later" ||

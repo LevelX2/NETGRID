@@ -2804,6 +2804,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         priority: 650,
         fundingNeed: {
           installOrPlayCost: 4,
+          targetCredits: 4,
           missingCredits: 4,
           reason: "cannot_pay",
         },
@@ -2861,6 +2862,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         priority: 920,
         fundingNeed: {
           installOrPlayCost: 11,
+          targetCredits: 11,
           missingCredits: 10,
           reason: "cannot_pay",
         },
@@ -2928,6 +2930,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         cardInstanceId: "runner-useful-missing-credit",
         fundingNeed: {
           installOrPlayCost: 6,
+          targetCredits: 6,
           missingCredits: 1,
           reason: "cannot_pay",
         },
@@ -3091,6 +3094,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           priority: 800,
           fundingNeed: {
             installOrPlayCost: 6,
+            targetCredits: 6,
             missingCredits: 2,
             reason: "cannot_pay",
           },
@@ -3132,6 +3136,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
           priority: 650,
           fundingNeed: {
             installOrPlayCost: 4,
+            targetCredits: 4,
             missingCredits: 2,
             reason: "cannot_pay",
           },
