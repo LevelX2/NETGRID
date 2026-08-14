@@ -3,6 +3,7 @@ import type { DeckDefinition } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
+import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
 import { simulateAiGame } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
@@ -10,6 +11,76 @@ const RUNNER_DECK_ID = "standard_runner_last_call_at_rd";
 const RUNNER_DECK_HASH = "standard-deck:76a00e66";
 
 describe("Last Call at R&D exact choice-window regressions", () => {
+  it("does not invent Coverage ownership for Jack 'n' Joe when the Cheap Bag Seed 2 Stack has no matching answer", () => {
+    const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    let coverageGapAtFailureWindow:
+      | {
+          deckHasAnswer?: boolean;
+          drawForAnswerActionIds?: string[];
+        }
+      | undefined;
+    const summary = simulateStandardGame({
+      seed: "last-call-panel-cheap-bag-batch-01-game-02",
+      corpDeckId: "standard_corp_cheap_bag_tricks",
+      captures,
+      capturePredicate: (snapshot) =>
+        snapshot.input.playerView.stateVersion === 153,
+      onCapture: (snapshot) => {
+        if (snapshot.input.playerView.stateVersion !== 153) return;
+        const coverage = residentPlanPortfolioSnapshot(
+          snapshot.input,
+        )?.instances.find(
+          (instance) => instance.moduleId === "runner.rig_and_coverage",
+        );
+        coverageGapAtFailureWindow = (
+          coverage?.moduleState as
+            | { gap?: typeof coverageGapAtFailureWindow }
+            | undefined
+        )?.gap;
+      },
+    });
+
+    assertRegularReplay(summary);
+    const capture = captures.find(
+      (entry) => entry.input.playerView.stateVersion === 153,
+    );
+    expect(capture).toBeDefined();
+    assertSemanticObjectSideSafe(capture?.input, "cheapBagJackInput");
+    const jack = capture?.input.legalActions.find((action) =>
+      action.actionId.startsWith(
+        "runner.play_event.runner_onr_v1_095_jack-n-joe_3.",
+      ),
+    );
+    expect(jack).toMatchObject({
+      type: "play_event",
+      source: "runner_onr_v1_095_jack-n-joe_3",
+      abilityRef: {
+        sourceCardInstanceId: "runner_onr_v1_095_jack-n-joe_3",
+        sourceAbilityId: "onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+      },
+    });
+    expect(coverageGapAtFailureWindow).toMatchObject({
+      deckHasAnswer: false,
+      drawForAnswerActionIds: [],
+    });
+    const otherConcretePlan = summary.actionSequence.find(
+      (entry) => entry.stateVersionBefore === 153,
+    );
+    expect(otherConcretePlan).toMatchObject({
+      side: "runner",
+      selectedActionId: "runner.gain_credit",
+      actionType: "gain_credit",
+      planKind: "runner.develop_board_and_hand",
+      fallbackUsed: false,
+    });
+    expect(otherConcretePlan?.evidence).toContain(
+      "plan_step_capability:fund_onr_v1_174_rigged-investments",
+    );
+    expect(otherConcretePlan?.debugFacts).toContain(
+      "runtime_why_not:alternative:play_event:explicitly_nonproductive:runner.develop_board_and_hand:runner_card_development_rejected_no_concrete_plan_purpose",
+    );
+  }, 90_000);
+
   it("keeps the Fast Advance Seed 9 run-start ordering bound to its exact central-pressure start-run route", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
@@ -265,6 +336,7 @@ function simulateStandardGame(params: {
   capturePredicate?: (
     snapshot: AiSimulationDecisionCheckpointCapture,
   ) => boolean;
+  onCapture?: (snapshot: AiSimulationDecisionCheckpointCapture) => void;
 }) {
   const runner = standardDeck(RUNNER_DECK_ID);
   const runnerForSimulation =
@@ -294,6 +366,7 @@ function simulateStandardGame(params: {
           testOnlyDecisionCheckpointCapture: {
             actionIndices: Array.from({ length: 480 }, (_, index) => index),
             capture: (snapshot: AiSimulationDecisionCheckpointCapture) => {
+              params.onCapture?.(snapshot);
               if (params.capturePredicate!(snapshot))
                 params.captures!.push(snapshot);
             },

@@ -15186,6 +15186,70 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("binds Jack 'n' Joe to coverage only while a matching visible deck role remains", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = costIneffectiveWallRunAction();
+    const jack = legalAction(
+      "jack-draw-for-wall-answer",
+      "runner",
+      "play_event",
+      "Play Jack 'n' Joe",
+      { credits: 0, clicks: 1 },
+      {
+        source: "jack-card",
+        payload: {
+          cardId: "jack-card",
+          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+          drawCardsAmount: 3,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+          cardImplementationAbilityKey: "abilities_on_play_draw_cards",
+        },
+      },
+    );
+    const input = costIneffectiveWallInput([
+      jack,
+      run,
+      costIneffectiveCoverageCreditAction(),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("jack-card", "runner", "event", {
+        definitionId: "onr_v1_095_jack-n-joe",
+        title: "Jack 'n' Joe",
+      }),
+      visibleCard("coverage-draw-buffer-1", "runner", "event"),
+      visibleCard("coverage-draw-buffer-2", "runner", "event"),
+    ];
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_deck"),
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: jack.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.rig_and_coverage" },
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_capability:draw_for_answer_breaker_wall",
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "draw_for_answer",
+      gap: {
+        deckHasAnswer: true,
+        drawForAnswerActionIds: [jack.actionId],
+      },
+    });
+  });
+
   it("retains quantified parent funding when no better breaker route is known", () => {
     resetResidentPlanPortfolioMemory();
     const run = costIneffectiveWallRunAction();

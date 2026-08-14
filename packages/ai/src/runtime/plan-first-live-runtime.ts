@@ -705,7 +705,7 @@ function bindSelectedPlanActionOrigin(
     ) === true;
   const canOpenRunnerRunStartOrder = selectedAction?.type === "start_run";
   if (!canOpenRunnerDrawReplacement && !canOpenRunnerRunStartOrder) return;
-  if (
+  const invalidCurrentPlanAction =
     !rootPlanInstanceId ||
     !executorInstanceId ||
     !selectedAction ||
@@ -721,8 +721,9 @@ function bindSelectedPlanActionOrigin(
         instance.instanceId === executorInstanceId &&
         instance.executionState === "executor" &&
         instance.side === "runner",
-    )
-  ) {
+    );
+  if (invalidCurrentPlanAction) {
+    if (canOpenRunnerRunStartOrder && !canOpenRunnerDrawReplacement) return;
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -18597,7 +18598,9 @@ function coverageSupportActionIds(
   const searchEngineSetupActionIds = new Set(
     searchEngineSetupCandidates.map((candidate) => candidate.actionId),
   );
-  const cardDrawForAnswerCandidates = candidates.filter(
+  const cardDrawForAnswerCandidates = (
+    deckHasStackAnswer ? candidates : []
+  ).filter(
     (candidate) =>
       !matchingSearchActionIds.has(candidate.actionId) &&
       !searchEngineSetupActionIds.has(candidate.actionId) &&
