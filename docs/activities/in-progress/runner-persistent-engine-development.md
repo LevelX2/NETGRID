@@ -252,19 +252,25 @@ Vergleichsvertrag:
   Seiten und Schwierigkeit `hard`;
 - Vergleichsbasis ist die vorherige Reihe mit bereits verdoppelten Saloon- und
   Crèche-Kopien, nicht die ältere Ein-Kopien-Reihe.
+- Weil `main` vor der Integration um breite CardSpec-/Engine-Änderungen
+  vorgerückt war, wurde die zunächst erzeugte Arbeitsbranch-Reihe verworfen
+  und derselbe 3×10-Vertrag nach dem konfliktfreien Main-Abgleich genau einmal
+  als finale Endevidence wiederholt. Nur diese 30 post-sync Spiele gehen in
+  die folgende Auswertung ein.
 
 | Paarung | Saloon gesehen | Saloon Install/Aktivierung vorher → neu | Crèche gesehen | Crèche Install/Bonus-Run vorher → neu |
 | --- | ---: | ---: | ---: | ---: |
-| Universal Fast Advance | 7/10 | 2/10 → 1/6 | 5/10 | 2/6 → 3/2 |
-| Cheap Bag of Tricks | 7/10 | 2/5 → 1/1 | 9/10 | 3/20 → 3/15 |
+| Universal Fast Advance | 7/10 → 6/10 | 2/10 → 1/6 | 5/10 | 2/6 → 3/2 |
+| Cheap Bag of Tricks | 7/10 → 6/10 | 2/5 → 2/3 | 9/10 → 10/10 | 3/20 → 7/28 |
 | Siren Fortress | 8/10 | 2/12 → 2/11 | 5/10 | 1/3 → 2/4 |
-| Gesamt | 22/30 | 6/27 → 4/18 | 19/30 | 6/29 → 8/21 |
+| Gesamt | 22/30 → 20/30 | 6/27 → 5/20 | 19/30 → 20/30 | 6/29 → 12/34 |
 
 Die Stichprobe bestätigt den fachlichen Mechanismus, aber keine pauschale
-Nutzungssteigerung beider Karten: Crèche wurde in zwei zusätzlichen Spielen
-installiert; Saloon wurde bei identischer Sichtung in zwei Spielen weniger
-installiert. Wenn Saloon installiert war, wurde die Karte weiterhin aktiv
-genutzt. Die geringere Installationszahl ist mit dem bewusst strengeren
+Nutzungssteigerung beider Karten: Crèche wurde in sechs zusätzlichen Spielen
+installiert und erzeugte fünf zusätzliche Bonus-Runs. Saloon wurde bei zwei
+weniger Sichtungen in einem Spiel weniger installiert; die Installrate pro
+Sichtung bleibt damit nahezu stabil. Wenn Saloon installiert war, wurde die
+Karte weiterhin aktiv genutzt. Das Ergebnis ist mit dem bewusst strengeren
 Reserve-Gate vereinbar und darf bei nur 30 horizon-zensierten Spielen nicht als
 Stärkegewinn oder -verlust interpretiert werden.
 
@@ -272,10 +278,10 @@ Technische Hard-Gate-Signatur der neuen 30 Spiele:
 
 - 0 Replayfehler, 0 Fallbacks und redaktionell side-sichere lokale Reports;
 - ein unveränderter `window_origin_missing`-Abbruch in Fast-Advance Seed 9;
-- ein unveränderter Action-Limit-Horizont in Cheap-Bag Seed 7;
-- zwei neu erreichte, fachfremde `missing_plan_module_coverage`-Abbrüche für
-  Jack ’n’ Joe in Cheap-Bag Seeds 2 und 9. Kontrollläufe derselben Seeds auf
-  aktuellem `main` enden regulär; der geänderte Development-Verlauf erreicht
+- 0 Action-Limit-Partien gegenüber 2 in der Vergleichsbasis;
+- ein neu erreichter, fachfremder `missing_plan_module_coverage`-Abbruch für
+  Jack ’n’ Joe in Cheap-Bag Seed 2. Der Kontrolllauf desselben Seeds auf
+  aktuellem `main` endet regulär; der geänderte Development-Verlauf erreicht
   die schon vorhandene unbesetzte One-shot-Search-Route erst später. Dieser
   Owner-Fund ist ein separater Follow-up und wird weder per Fallback noch durch
   Erweiterung des Engine-Pakets kaschiert.
@@ -290,13 +296,16 @@ für diese Zustandswerte keinen kompatiblen Vorher-/Nachher-Zähler.
 Abschlusschecks:
 
 - fokussierte Last-Call-, Engine- und Ownership-Teilmenge: 35/35 grün;
-- vollständige AI-Shards ausgeführt: alle drei Shards bleiben durch die auf
-  `main` dokumentierten breiten Baselinefehler rot, vor allem ungültige
-  Decision-Checkpoint-StateHashes und CardSpec-/Golden-Artefakte;
+- vollständige AI-Shards vor und nach dem Main-Abgleich ausgeführt: auf dem
+  finalen Stand bleiben alle drei Shards mit 130 fehlschlagenden Tests durch
+  die auf `main` dokumentierten breiten Baselinefehler rot, vor allem
+  ungültige Decision-Checkpoint-StateHashes und CardSpec-/Golden-Artefakte;
 - fünf themennah auffällige breite Tests wurden auf Branch und aktuellem
   `main` einzeln ausgeführt und scheitern identisch;
 - alle neu geänderten fokussierten Tests sowie die drei verpflichtenden
-  `check:ai`-Gates sind grün.
+  `check:ai`-Gates sind auch nach dem Main-Abgleich grün;
+- der finale AI-Typecheck meldet weiterhin ausschließlich die vier fehlenden
+  Migration-Review-JSONs und den unveränderten Sneak-Preview-Testtypfehler.
 
 Follow-up-Fund:
 
