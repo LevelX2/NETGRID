@@ -3997,13 +3997,17 @@ function deriveExtendedRequiredMechanics(
       "temporary_program_install_run",
     ])
       mechanics.add(token);
-  if (engine.successfulRunFollowups !== undefined)
-    for (const token of [
-      "successful_run_trigger",
-      "shuffle_grip_into_stack",
-      "draw_cards",
-    ])
-      mechanics.add(token);
+  for (const followup of engine.successfulRunFollowups ?? []) {
+    mechanics.add("successful_run_trigger");
+    if (followup.kind === "optional_make_run_after_successful_run")
+      mechanics.add("make_run");
+    if (
+      followup.kind ===
+      "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count"
+    )
+      for (const token of ["shuffle_grip_into_stack", "draw_cards"])
+        mechanics.add(token);
+  }
 
   for (const access of engine.accessEffects ?? []) {
     mechanics.add("access_effect");
@@ -4600,8 +4604,21 @@ function deriveRoles(
     if (engine.agendaAccessReplacement?.kind === "install_as_runner_program")
       for (const role of ["access_replacement", "runner_program"])
         roles.add(role);
-    if (engine.successfulRunFollowups !== undefined)
+    if (
+      engine.successfulRunFollowups?.some(
+        (followup) =>
+          followup.kind ===
+          "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
+      )
+    )
       roles.add("remote_support");
+    if (
+      engine.successfulRunFollowups?.some(
+        (followup) =>
+          followup.kind === "optional_make_run_after_successful_run",
+      )
+    )
+      roles.add("run_support");
     if (
       engine.corpUtility?.kind ===
       "runner_memory_limit_modifier_until_end_of_turn"
@@ -5030,8 +5047,10 @@ function deriveClosedExtendedRiskTags(
       risks.add(risk);
   if (utility === "run_start_lose_runner_credits_per_tag")
     for (const risk of ["run_cost_modifier", "tag_synergy"]) risks.add(risk);
-  if (engine.successfulRunFollowups !== undefined)
-    for (const risk of ["hidden_zone", "successful_run"]) risks.add(risk);
+  for (const followup of engine.successfulRunFollowups ?? []) {
+    risks.add("successful_run");
+    if (followup.visibility === "hidden_info_barrier") risks.add("hidden_zone");
+  }
   if (engine.characteristics.subtypes.includes("region"))
     for (const risk of ["run_cost_modifier", "region"]) risks.add(risk);
 
@@ -8118,7 +8137,15 @@ function appendClosedRunnerLongtailEffects(
       repeatable: true,
     });
 
-  for (const followup of engine.successfulRunFollowups ?? [])
+  for (const followup of engine.successfulRunFollowups ?? []) {
+    if (followup.kind === "optional_make_run_after_successful_run")
+      effects.push({
+        kind: "future_run_effect",
+        scope: "runner",
+        timing: "after_successful_run",
+        target: "make_run",
+        repeatable: true,
+      });
     if (
       followup.kind ===
       "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count"
@@ -8149,6 +8176,7 @@ function appendClosedRunnerLongtailEffects(
           repeatable: true,
         },
       );
+  }
 
   const event = engine.runnerEventLongtail;
   if (event?.kind === "trash_grip_search_stack_to_grip_equal_count")
@@ -8797,8 +8825,15 @@ function derivedFunctionSignals(
       "tax.runner_persistent",
     ])
       signals.add(signal);
-  if (engine.successfulRunFollowups !== undefined)
-    signals.add("run.successful_run_grip_reset");
+  for (const followup of engine.successfulRunFollowups ?? []) {
+    if (followup.kind === "optional_make_run_after_successful_run")
+      signals.add("run.make_run");
+    if (
+      followup.kind ===
+      "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count"
+    )
+      signals.add("run.successful_run_grip_reset");
+  }
   for (const access of engine.accessEffects ?? [])
     for (const effect of access.effects) {
       if (

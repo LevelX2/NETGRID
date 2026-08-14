@@ -1774,7 +1774,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["program", "remote_support"],
+        "roles": ["program"],
         "planRoles": [],
         "valueHints": {},
         "targetProfiles": [
@@ -1789,19 +1789,9 @@
             "serverScope": "source_fort"
           }
         ],
-        "functionSignals": ["run.successful_run_grip_reset"],
-        "tacticSignals": ["run.successful_run_grip_reset"],
-        "conditions": [
-          {
-            "kind": "requires_successful_run"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0,
-          "memory": 1
-        },
-        "riskTags": ["hidden_zone", "successful_run"],
+        "conditions": [{ "kind": "requires_successful_run" }],
+        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "riskTags": ["successful_run", "hidden_zone"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1810,12 +1800,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": [
-          "draw_cards",
-          "install_program",
-          "shuffle_grip_into_stack",
-          "successful_run_trigger"
-        ]
+        "requiredMechanics": ["install_program", "successful_run_trigger"]
       }
     },
     {
@@ -2921,7 +2906,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["program", "remote_support"],
+        "roles": ["program"],
         "planRoles": [],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
@@ -2937,19 +2922,9 @@
             "serverScope": "source_fort"
           }
         ],
-        "functionSignals": ["run.successful_run_grip_reset"],
-        "tacticSignals": ["run.successful_run_grip_reset"],
-        "conditions": [
-          {
-            "kind": "requires_successful_run"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0,
-          "memory": 1
-        },
-        "riskTags": ["hidden_zone", "successful_run"],
+        "conditions": [{ "kind": "requires_successful_run" }],
+        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "riskTags": ["successful_run"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2958,12 +2933,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": [
-          "draw_cards",
-          "install_program",
-          "shuffle_grip_into_stack",
-          "successful_run_trigger"
-        ]
+        "requiredMechanics": ["install_program", "successful_run_trigger"]
       }
     },
     {
@@ -8246,10 +8216,17 @@
         "side": "runner",
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
-        "roles": ["hardware", "remote_support", "deck", "memory"],
+        "roles": ["hardware", "run_support", "deck", "memory"],
         "planRoles": ["runner_install_hardware"],
         "valueHints": {},
         "effects": [
+          {
+            "kind": "future_run_effect",
+            "scope": "runner",
+            "timing": "after_successful_run",
+            "target": "make_run",
+            "repeatable": true
+          },
           {
             "kind": "hardware_trait",
             "scope": "hardware",
@@ -8265,36 +8242,25 @@
           }
         ],
         "functionSignals": [
-          "run.successful_run_grip_reset",
+          "run.make_run",
           "setup.deck_exclusive",
           "setup.memory"
         ],
-        "tacticSignals": ["run.successful_run_grip_reset"],
         "actionTacticSignals": [
+          "effect:future_run_effect",
           "effect:global_modifier",
           "effect:hardware_trait",
           "effect_scope:hardware",
           "effect_scope:runner",
+          "effect_timing:after_successful_run",
           "effect_timing:persistent"
         ],
         "conditions": [
-          {
-            "kind": "requires_installed_ice"
-          },
-          {
-            "kind": "requires_successful_run"
-          }
+          { "kind": "requires_installed_ice" },
+          { "kind": "requires_successful_run" }
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 3
-        },
-        "riskTags": [
-          "install_runner",
-          "hidden_zone",
-          "successful_run",
-          "deck_unique"
-        ],
+        "costProfile": { "clicks": 1, "credits": 3 },
+        "riskTags": ["install_runner", "successful_run", "deck_unique"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8305,10 +8271,9 @@
         ],
         "requiredMechanics": [
           "deck_unique_replacement",
-          "draw_cards",
           "install_hardware",
+          "make_run",
           "memory_modifier",
-          "shuffle_grip_into_stack",
           "subtype_deck",
           "successful_run_trigger"
         ]
