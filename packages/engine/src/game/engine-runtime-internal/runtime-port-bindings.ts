@@ -387,6 +387,7 @@ export let returnRunnerInstalledCardToGrip: RuntimePortGroups["lifecycleRuntime"
 export let returnRunnerInstalledProgramsToGripForAccess: RuntimePortGroups["lifecycleRuntime"]["returnRunnerInstalledProgramsToGripForAccess"];
 export let trashCorpInstalledCardToArchives: RuntimePortGroups["lifecycleRuntime"]["trashCorpInstalledCardToArchives"];
 export let cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay: RuntimePortGroups["lifecycleRuntime"]["cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay"];
+export let resolveFortCapacityCleanupChoice: RuntimePortGroups["lifecycleRuntime"]["resolveFortCapacityCleanupChoice"];
 export let drawRunnerCard: RuntimePortGroups["lifecycleRuntime"]["drawRunnerCard"];
 export let activeCrashEverettSourceId: RuntimePortGroups["lifecycleRuntime"]["activeCrashEverettSourceId"];
 export let startCrashEverettDrawChoice: RuntimePortGroups["lifecycleRuntime"]["startCrashEverettDrawChoice"];
@@ -1118,6 +1119,8 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.lifecycleRuntime.trashCorpInstalledCardToArchives;
   cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay =
     ports.lifecycleRuntime.cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay;
+  resolveFortCapacityCleanupChoice =
+    ports.lifecycleRuntime.resolveFortCapacityCleanupChoice;
   drawRunnerCard = ports.lifecycleRuntime.drawRunnerCard;
   activeCrashEverettSourceId =
     ports.lifecycleRuntime.activeCrashEverettSourceId;

@@ -46012,7 +46012,7 @@
     },
     {
       "cardId": "onr_v1_361_namatoki-plaza",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e3edd722e842589e",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d632aeed2fe1f051",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:220f1506dcf68ad2",
       "hint": {
         "cardId": "onr_v1_361_namatoki-plaza",
@@ -46919,7 +46919,7 @@
     {
       "cardId": "onr_v1_374_washington-d-c-city-grid",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:491359410f6b432d",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:74ba3e13574ca24f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:614113372daa212b",
       "hint": {
         "cardId": "onr_v1_374_washington-d-c-city-grid",
         "side": "corp",
@@ -46957,17 +46957,15 @@
           "score.undefined_difficulty_discount"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
           "remote.agenda_difficulty_discount",
           "score.agenda_difficulty_discount",
           "score.undefined_difficulty_discount"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:global_modifier",
           "effect_scope:remote",
           "effect_timing:persistent",
-          "remote_role:scoring_protection"
+          "remote_role:score_acceleration"
         ],
         "conditions": [{ "kind": "requires_installed_ice" }],
         "costProfile": { "credits": 7 },
@@ -46982,7 +46980,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "remoteRole": {
-          "kind": "scoring_protection",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote"
         },

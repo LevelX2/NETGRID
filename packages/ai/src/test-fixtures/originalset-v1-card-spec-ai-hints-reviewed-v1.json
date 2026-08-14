@@ -29539,17 +29539,15 @@
           "score.undefined_difficulty_discount"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
           "remote.agenda_difficulty_discount",
           "score.agenda_difficulty_discount",
           "score.undefined_difficulty_discount"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:global_modifier",
           "effect_scope:remote",
           "effect_timing:persistent",
-          "remote_role:scoring_protection"
+          "remote_role:score_acceleration"
         ],
         "conditions": [
           {
@@ -29570,7 +29568,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "remoteRole": {
-          "kind": "scoring_protection",
+          "kind": "score_acceleration",
           "threatLevel": "medium",
           "serverScope": "remote"
         },

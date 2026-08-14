@@ -874,7 +874,7 @@ describe("compileProspectiveCapabilities", () => {
       {
         kind: "trash_agenda_or_node_if_fort_over_capacity",
         target: "agenda_or_node_inside_same_fort",
-        selection: "deterministic_lowest_instance_id",
+        selection: "corp_choice",
         visibility: "public",
       },
     ];

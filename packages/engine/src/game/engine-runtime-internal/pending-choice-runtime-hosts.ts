@@ -52,6 +52,7 @@ import {
   resumeEndTurnAfterTagPrevention,
   resumeRunnerDrawSequenceAfterTagPrevention,
   resumeStartOfTurnAfterTagPrevention,
+  resolveFortCapacityCleanupChoice,
   trashCorpInstalledCardToArchives,
 } from "./runtime-port-bindings";
 import {
@@ -747,6 +748,7 @@ export function createPendingChoiceRuntimeHosts(
       state,
       lifecycle: {
         trashCorpInstalledCardToArchives,
+        resolveFortCapacityCleanupChoice,
       },
       setup: {
         resolveSetupMulliganChoice,

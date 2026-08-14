@@ -1318,10 +1318,49 @@ Status: umgesetzt und durch fokussierte Gates verifiziert.
   Originalset-Fixture wurde für Karten 341–360 aus dem aktuellen Hint-
   Artefakt synchronisiert.
 
+## Block 019 – Karten 361 bis 374 und Abschluss des Originalsets
+
+Status: umgesetzt und durch fokussierte Gates verifiziert. Mit Karte 374 ist
+der inhaltliche CardSpec-Durchgang durch das Originalset 001–374 vollständig.
+
+### Namatoki Plaza – Corp-Wahl beim Kapazitäts-Cleanup
+
+- `trash_agenda_or_node_if_fort_over_capacity` deklariert keine technische
+  Lowest-Instance-ID-Auswahl mehr, sondern eine echte Corp-Choice.
+- Verlässt Namatoki Plaza das Spiel und wird das Fort dadurch überbelegt,
+  bindet der Lifecycle-Owner alle Agendas und Nodes dieses Forts. Bei
+  Mehrdeutigkeit öffnet er eine source-bound, actor-private Corp-Choice;
+  ohne Überbelegung entsteht kein Zwischenfenster.
+- Die Folgeaktion revalidiert Fort, Kapazität und die vollständige gebundene
+  Kandidatenmenge. Erst danach wird das gewählte Ziel öffentlich in die
+  Archives getrasht und als aufgelöster Effekt protokolliert.
+- Die Regression wählt wahlweise Agenda oder Node, prüft den jeweils anderen
+  Verbleib im Fort, Runner-Redaction sowie deterministisches Replay und
+  StateHash. Der generische Einzielpfad bleibt automatisch; im heutigen
+  gültigen Fortmodell entsteht Überbelegung nach Verlust des einzelnen
+  Zusatzslots allerdings regulär erst bei mindestens zwei Hauptkarten.
+
+### Tokyo-Chiba und Washington, D.C.
+
+- Tokyo-Chiba Infightings kanonischer Region-Text enthält wieder den
+  fehlenden Abschlusssatz `Trash older ones.`. Die zentrale Region-Runtime
+  bleibt unverändert, weil Rez-on-install, Bezahlbarkeit und Ersatz älterer
+  Regionen bereits generisch gelten.
+- Washington, D.C., City Grid bleibt mechanisch unverändert. Die
+  Planning-Semantik beschreibt den Difficulty-Rabatt nun als vorhandene
+  `score_acceleration` statt als Remote-Protection; das präzise
+  `score.agenda_difficulty_discount`-Funktionssignal und der
+  Remote-Scoring-Support bleiben erhalten.
+- New Galveston, Olivia Salazar, Omni Kismet, Paris, Red Herrings, Rio de
+  Janeiro, Roving Submarine, Singapore, Tesseract Fort Construction, Turbeau
+  Delacroix und Twenty-Four-Hour Surveillance bleiben nach der Prüfung
+  unverändert. Insbesondere werden Region-Grundregeln nicht redundant in
+  einzelne CardSpecs kopiert.
+
 ## Bekannte offene Punkte
 
-- Der Audit ist fortlaufend; weitere Kartenblöcke sind noch nicht geprüft.
-- Als nächster regulärer Nutzerblock folgen die Karten 361 bis 380.
+- Der inhaltliche CardSpec-Durchgang durch das Originalset 001–374 ist
+  vollständig. Es gibt keinen weiteren regulären Originalset-Kartenblock.
 - Worktree und Arbeitsbranch bleiben bis zur ausdrücklichen Abschlussanweisung
   bestehen.
 
@@ -1528,3 +1567,11 @@ gemeinsamen Multi-Trash-Vertrag, Bizarre-Startzugordering sowie Dr. Dreffs
 transientes nicht installiertes ICE und Jenny Jetts modifizierte kanonische
 Innermost-Installation. Hint-Artefakt und reviewed Originalset-Einträge für
 Karten 341–360 sind gezielt synchronisiert.
+
+Für Block 019 sind Shared-, Cards- und Engine-Typecheck, CardSpec-AI-Hint-
+Generator und -Check sowie 55 fokussierte CardSpec-, Choice-,
+Kartenintegrations- und AI-Artefakttests grün. Die Evidence umfasst
+Namatokis frei wählbare Agenda-/Node-Ziele, Redaction, Replay und StateHash,
+Tokyo-Chibas vollständigen kanonischen Region-Text sowie Washingtons
+Score-Acceleration-Projektion. Hint-Artefakt und reviewed Originalset-
+Einträge für Karten 361, 371 und 374 sind gezielt synchronisiert.

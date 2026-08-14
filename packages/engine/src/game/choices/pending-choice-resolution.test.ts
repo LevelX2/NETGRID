@@ -38,6 +38,25 @@ describe("pending choice resolution", () => {
     expect(resolveSetupMulliganChoice.mock.calls[0]?.[0]).toBe(state);
   });
 
+  it("dispatches fort-capacity cleanup choices through the lifecycle owner", () => {
+    const state = stateWithChoice(
+      "fort_cleanup_choice",
+      "card_implementation.fort_capacity_cleanup",
+    );
+    const resolveFortCapacityCleanupChoice = vi.fn();
+
+    resolvePendingChoice(
+      pendingChoiceHost(state, {
+        lifecycle: { resolveFortCapacityCleanupChoice },
+      }),
+      choiceAction("fort_cleanup_choice"),
+      playerChoice("fort_cleanup_choice", ["target_1"]),
+    );
+
+    expect(resolveFortCapacityCleanupChoice).toHaveBeenCalledOnce();
+    expect(resolveFortCapacityCleanupChoice.mock.calls[0]?.[0]).toBe(state);
+  });
+
   it("dispatches Shell Traders start-of-turn choices through the runner callback", () => {
     const state = stateWithChoice(
       "shell_choice",
@@ -291,6 +310,9 @@ function pendingChoiceHost(
     lifecycle: {
       trashCorpInstalledCardToArchives: unexpected(
         "trashCorpInstalledCardToArchives",
+      ),
+      resolveFortCapacityCleanupChoice: unexpected(
+        "resolveFortCapacityCleanupChoice",
       ),
       ...overrides.lifecycle,
     },

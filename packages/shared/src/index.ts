@@ -901,6 +901,14 @@ export type ChoiceRequest = {
 
 export type ChoiceContinuation =
   | {
+      family: "corp_fort_capacity_cleanup";
+      originActionId: string;
+      sourceCardDefinitionId: CardDefinitionId;
+      serverId: Exclude<ServerId, "new_remote">;
+      candidateCardInstanceIds: CardInstanceId[];
+      createdAtStateVersion: number;
+    }
+  | {
       family: "corp_advancement_counter";
       originActionId: string;
       createdAtStateVersion: number;

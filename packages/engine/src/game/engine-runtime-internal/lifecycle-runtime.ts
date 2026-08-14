@@ -468,8 +468,70 @@ export function createLifecycleRuntime(
     const capacity = deps.corpRootAgendaOrNodeCapacityInServer(state, server);
     const mainIds = deps.corpRootMainCardIdsInServer(state, server);
     if (mainIds.length <= capacity) return;
-    const targetId = mainIds[0];
-    if (!targetId) return;
+    if (mainIds.length === 1) {
+      trashFortCapacityCleanupTarget(
+        state,
+        server,
+        capacity,
+        mainIds.length,
+        sourceDefinitionId,
+        mainIds[0]!,
+        legalAction,
+      );
+      return;
+    }
+    if (!legalAction)
+      throw new Error(
+        "Mehrdeutiger Fort-Kapazitaets-Cleanup braucht eine ausloesende LegalAction.",
+      );
+    if (state.pendingChoice)
+      throw new Error(
+        "Fort-Kapazitaets-Cleanup kann keine zweite Choice oeffnen.",
+      );
+    const choiceStateVersion = state.stateVersion + 1;
+    state.pendingChoice = {
+      choiceId: `corp_fort_capacity_cleanup_${server.id}_${choiceStateVersion}`,
+      side: "corp",
+      source: "card_implementation.fort_capacity_cleanup",
+      sourceCardDefinitionId: sourceDefinitionId,
+      continuation: {
+        family: "corp_fort_capacity_cleanup",
+        originActionId: legalAction.actionId,
+        sourceCardDefinitionId: sourceDefinitionId,
+        serverId: server.id,
+        candidateCardInstanceIds: mainIds.slice(),
+        createdAtStateVersion: choiceStateVersion,
+      },
+      prompt: `Welche Agenda oder welchen Node in ${server.label} trashen?`,
+      kind: "select_cards",
+      options: mainIds.map((cardId, index) => ({
+        id: `fort_capacity_cleanup_${index + 1}`,
+        label: deps.definitionFor(state, cardId).title,
+        publicLabel: "Installierte Agenda oder Node",
+        value: cardId,
+      })),
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: choiceStateVersion,
+      visibility: "hidden_info_barrier",
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      namatokiCleanupChoiceOpened: true,
+      fortCapacityAfter: capacity,
+      fortAgendaNodeCountBeforeCleanup: mainIds.length,
+    };
+  }
+
+  function trashFortCapacityCleanupTarget(
+    state: GameState,
+    server: CorpServer,
+    capacity: number,
+    mainCardCount: number,
+    sourceDefinitionId: CardDefinitionId,
+    targetId: CardInstanceId,
+    legalAction?: LegalAction,
+  ): void {
     const targetDefinition = deps.definitionFor(state, targetId);
     if (legalAction) {
       const effectIndex = legalAction.resolvedEffects?.length ?? 0;
@@ -494,10 +556,63 @@ export function createLifecycleRuntime(
         namatokiCleanupTrash: true,
         namatokiCleanupTrashedCardDefinitionId: targetDefinition.id,
         fortCapacityAfter: capacity,
-        fortAgendaNodeCountBeforeCleanup: mainIds.length,
+        fortAgendaNodeCountBeforeCleanup: mainCardCount,
       };
     }
     trashCorpInstalledCardToArchives(state, targetId, legalAction);
+  }
+
+  function resolveFortCapacityCleanupChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    const continuation = choice?.continuation;
+    if (
+      !choice ||
+      choice.source !== "card_implementation.fort_capacity_cleanup" ||
+      choice.side !== "corp" ||
+      continuation?.family !== "corp_fort_capacity_cleanup" ||
+      continuation.createdAtStateVersion !== choice.stateVersion ||
+      continuation.originActionId.length === 0 ||
+      choice.sourceCardDefinitionId !== continuation.sourceCardDefinitionId
+    )
+      throw new Error("Es ist keine gueltige Fort-Kapazitaets-Choice offen.");
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === continuation.serverId,
+    );
+    if (!server) throw new Error("Das gebundene Fort existiert nicht mehr.");
+    const capacity = deps.corpRootAgendaOrNodeCapacityInServer(state, server);
+    const currentMainIds = deps.corpRootMainCardIdsInServer(state, server);
+    if (currentMainIds.length <= capacity)
+      throw new Error("Das gebundene Fort ist nicht mehr ueber Kapazitaet.");
+    if (
+      currentMainIds.length !== continuation.candidateCardInstanceIds.length ||
+      currentMainIds.some(
+        (cardId, index) =>
+          cardId !== continuation.candidateCardInstanceIds[index],
+      )
+    )
+      throw new Error("Die gebundene Fort-Kapazitaetsauswahl ist veraltet.");
+    const selectedOptionId =
+      deps.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    const selectedOption = choice.options.find(
+      (option) => option.id === selectedOptionId,
+    );
+    const targetId = String(selectedOption?.value ?? "") as CardInstanceId;
+    if (!continuation.candidateCardInstanceIds.includes(targetId))
+      throw new Error("Die gewaehlte Karte gehoert nicht zur Cleanup-Auswahl.");
+    delete state.pendingChoice;
+    trashFortCapacityCleanupTarget(
+      state,
+      server,
+      capacity,
+      currentMainIds.length,
+      continuation.sourceCardDefinitionId,
+      targetId,
+      legalAction,
+    );
   }
 
   function drawRunnerCardIntoGrip(
@@ -1080,6 +1195,7 @@ export function createLifecycleRuntime(
     returnRunnerInstalledProgramsToGripForAccess,
     trashCorpInstalledCardToArchives,
     cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay,
+    resolveFortCapacityCleanupChoice,
     drawRunnerCard,
     activeCrashEverettSourceId,
     startCrashEverettDrawChoice,

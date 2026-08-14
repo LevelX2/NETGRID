@@ -13,6 +13,7 @@ export type PendingChoiceResolutionHost = {
   state: GameState;
   lifecycle: {
     trashCorpInstalledCardToArchives: HostFn<void>;
+    resolveFortCapacityCleanupChoice: HostFn<void>;
   };
   setup: {
     resolveSetupMulliganChoice: HostFn<void>;
@@ -314,6 +315,16 @@ export function resolvePendingChoice(
   const choiceId = String(legalAction.payload?.choiceId ?? "");
   if (!state.pendingChoice || state.pendingChoice.choiceId !== choiceId)
     throw new Error("Diese Choice ist nicht offen.");
+  if (
+    state.pendingChoice.source === "card_implementation.fort_capacity_cleanup"
+  ) {
+    host.lifecycle.resolveFortCapacityCleanupChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
   if (state.pendingChoice.source === "setup.mulligan") {
     resolveSetupMulliganChoice(state, legalAction, playerAction);
     return;
