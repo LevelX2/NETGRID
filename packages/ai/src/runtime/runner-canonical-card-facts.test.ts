@@ -6,11 +6,43 @@ import {
   runnerInstalledDebtFinancingLiability,
   runnerNoRunRecurringEconomyProfile,
   runnerNoRunRecurringEconomyProfileFromPlanningCard,
+  runnerRunStartTrashSourceProfile,
+  runnerRunStartTrashSourceProfileFromPlanningCard,
   runnerStartOfTurnCreditProfile,
   runnerStartOfTurnCreditProfileFromPlanningCard,
 } from "./runner-canonical-card-facts";
 
 describe("Runner canonical card facts", () => {
+  it("accepts run-start ordering only for a complete pure self-trash lifecycle", () => {
+    expect(
+      runnerRunStartTrashSourceProfile("onr_v1_184_top-runners-conference"),
+    ).toEqual({ sourceEffect: "trash_source" });
+    expect(
+      runnerRunStartTrashSourceProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          engine: {
+            characteristics: { numeric: {} },
+            lifecycle: {
+              on_runner_run_start: [
+                {
+                  effects: [
+                    { kind: "trash_source" },
+                    {
+                      kind: "gain_credits",
+                      recipient: "controller",
+                      amount: 1,
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      } as never),
+    ).toBeUndefined();
+  });
+
   it("projects no-run recurring economy from the canonical lifecycle", () => {
     expect(
       runnerNoRunRecurringEconomyProfile("onr_v1_184_top-runners-conference"),

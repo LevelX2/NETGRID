@@ -160,6 +160,11 @@ export type ResidentSelectedActionOrigin = Readonly<{
         eligibleArchiveCardInstanceIds: string[];
         selectedArchiveCardInstanceIds: string[];
       }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_run_start_order";
+        sourceStepId: string;
+        sourceActionType: "start_run";
+      }>
   );
 
 export type ReconcileResidentPlanPortfolioParams = {
@@ -541,6 +546,10 @@ export function assertResidentPlanPortfolio(
     const originPolicyValid =
       selectedActionOrigin.immediateChoicePolicy ===
         "trash_lowest_visible_drawn_card" ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_run_start_order" &&
+        selectedActionOrigin.sourceStepId.trim().length > 0 &&
+        selectedActionOrigin.sourceActionType === "start_run") ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "select_bound_corp_archives_cards_to_hq" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&

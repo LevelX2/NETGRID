@@ -51,6 +51,7 @@ import {
   selectedRunnerTargetedBypassHideChoiceOptionId,
 } from "./runner-targeted-bypass-choice";
 import { selectedRunnerStartOfTurnOrderChoiceOptionId } from "./runner-start-of-turn-order-choice";
+import { selectedRunnerRunStartOrderChoiceOptionId } from "./runner-run-start-order-choice";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -619,6 +620,26 @@ export function selectedChoicesForDecision(
       );
     }
     return resolved([selectedOptionId], "runner_start_of_turn_order");
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("runner_run_start.order:")
+  ) {
+    const selectedOptionId = selectedRunnerRunStartOrderChoiceOptionId(
+      input,
+      action,
+      choice,
+      selectableOptions,
+    );
+    if (!selectedOptionId) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Resolve Runner run-start ordering only from the exact current rule window and a complete canonical pure self-trash source profile.",
+      );
+    }
+    return resolved([selectedOptionId], "runner_run_start_order");
   }
   if (
     choice.kind === "select_cards" &&

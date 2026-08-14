@@ -500,6 +500,7 @@ export function choosePlanFirstLiveAction(
     return (
       resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpArchivesToHqChoice(schedulerContext, previous) ??
+      resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
       resolveEngineWindow(schedulerContext)
     );
   };
@@ -702,7 +703,8 @@ function bindSelectedPlanActionOrigin(
     selectedCandidate?.functionalEffects?.some(
       (effect) => effect.kind === "draw",
     ) === true;
-  if (!canOpenRunnerDrawReplacement) return;
+  const canOpenRunnerRunStartOrder = selectedAction?.type === "start_run";
+  if (!canOpenRunnerDrawReplacement && !canOpenRunnerRunStartOrder) return;
   if (
     !rootPlanInstanceId ||
     !executorInstanceId ||
@@ -732,13 +734,23 @@ function bindSelectedPlanActionOrigin(
         "Persist a possible immediate Runner draw-replacement choice only with the exact selected current draw action, root plan and leaf executor.",
     });
   }
-  result.portfolio.selectedActionOrigin = {
-    rootPlanInstanceId,
-    executorInstanceId,
-    selectedActionId: selectedAction.actionId,
-    selectedAtStateVersion: input.playerView.stateVersion,
-    immediateChoicePolicy: "trash_lowest_visible_drawn_card",
-  };
+  result.portfolio.selectedActionOrigin = canOpenRunnerDrawReplacement
+    ? {
+        rootPlanInstanceId,
+        executorInstanceId,
+        selectedActionId: selectedAction.actionId,
+        selectedAtStateVersion: input.playerView.stateVersion,
+        immediateChoicePolicy: "trash_lowest_visible_drawn_card",
+      }
+    : {
+        rootPlanInstanceId,
+        executorInstanceId,
+        selectedActionId: selectedAction.actionId,
+        selectedAtStateVersion: input.playerView.stateVersion,
+        immediateChoicePolicy: "resolve_runner_run_start_order",
+        sourceStepId: result.route.step.stepId,
+        sourceActionType: "start_run",
+      };
 }
 
 function applyTurnPlannerCutoverSelection(
@@ -15201,6 +15213,101 @@ function resolvePlanBoundCorpArchivesToHqChoice(
       rootPlanInstanceId: origin.rootPlanInstanceId,
       leafPlanInstanceId: origin.executorInstanceId,
       side: "corp",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
+function resolvePlanBoundRunnerRunStartOrderChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "runner" ||
+    choice?.kind !== "select_cards" ||
+    !choice.source.startsWith("runner_run_start.order:")
+  ) {
+    return undefined;
+  }
+  const origin = previous?.selectedActionOrigin;
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === origin?.executorInstanceId &&
+      instance.executionState === "executor",
+  );
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const sourceRunId = /^runner_run_start\.order:([^:\s]+)$/.exec(
+    choice.source,
+  )?.[1];
+  const originIsRunStartOrder =
+    origin?.immediateChoicePolicy === "resolve_runner_run_start_order";
+  const exactBinding =
+    originIsRunStartOrder &&
+    choice.side === "runner" &&
+    choice.choiceId ===
+      `runner_run_start_order_${context.input.playerView.stateVersion}` &&
+    sourceRunId !== undefined &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    previous !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion === context.input.playerView.stateVersion - 1 &&
+    origin.selectedAtStateVersion === previous.stateVersion &&
+    origin.sourceActionType === "start_run" &&
+    origin.selectedActionId.startsWith("runner.start_run.") &&
+    origin.sourceStepId.trim().length > 0 &&
+    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
+    previous.executorInstanceId === origin.executorInstanceId &&
+    root?.side === "runner" &&
+    executor?.side === "runner" &&
+    action !== undefined &&
+    action.side === "runner" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !action || !previous || !origin) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition:
+        "Resolve Runner run-start ordering only from the immediately preceding plan-owned start-run route, exact root and executor, active run and complete current Engine choice contract.",
+    });
+  }
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_runner_run_start_order_choice",
+    origin: {
+      rootPlanInstanceId: origin.rootPlanInstanceId,
+      leafPlanInstanceId: origin.executorInstanceId,
+      side: "runner",
       windowKind: "mandatory_choice",
       windowId: choice.choiceId,
       stateVersion: context.input.playerView.stateVersion,

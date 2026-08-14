@@ -31,6 +31,10 @@ export type RunnerStartOfTurnCreditProfile = Readonly<{
   sourceEffect: "lose_credits" | "gain_credits" | "take_hosted_credits";
 }>;
 
+export type RunnerRunStartTrashSourceProfile = Readonly<{
+  sourceEffect: "trash_source";
+}>;
+
 export function runnerInstalledDebtFinancingLiability(
   definitionIds: readonly (string | undefined)[],
 ): RunnerDebtFinancingLiability {
@@ -258,6 +262,33 @@ export function runnerStartOfTurnCreditProfileFromPlanningCard(
     return undefined;
   }
   return creditEffects[0]!;
+}
+
+/**
+ * Canonical profile for the Engine run-start ordering window.  It is accepted
+ * only when the complete lifecycle consequence is one self-trash, so ordering
+ * it among other equally profiled sources cannot make a strategic choice.
+ */
+export function runnerRunStartTrashSourceProfile(
+  definitionId: string | undefined,
+): RunnerRunStartTrashSourceProfile | undefined {
+  if (!definitionId) return undefined;
+  return runnerRunStartTrashSourceProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerRunStartTrashSourceProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerRunStartTrashSourceProfile | undefined {
+  const planning = card?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const effects = (
+    planning.engine.lifecycle?.on_runner_run_start ?? []
+  ).flatMap((ability) => ability.effects);
+  return effects.length === 1 && effects[0]?.kind === "trash_source"
+    ? { sourceEffect: "trash_source" }
+    : undefined;
 }
 
 function positiveSafeInteger(value: unknown): value is number {
