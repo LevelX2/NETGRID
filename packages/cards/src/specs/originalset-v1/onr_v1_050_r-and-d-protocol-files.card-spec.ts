@@ -93,10 +93,6 @@ export const cardSpec = {
         role: "enabler",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.rnd_pressure",
-      },
-      {
         kind: "line_support",
         lineKey: "runner.rnd_pressure",
         support: "supports",

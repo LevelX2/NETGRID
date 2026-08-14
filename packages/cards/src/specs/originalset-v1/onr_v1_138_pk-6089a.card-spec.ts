@@ -83,9 +83,24 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "build_rig",
+      },
+      {
+        kind: "plan_role",
+        role: "trace_bid_support",
+      },
+      {
+        kind: "line_support",
+        lineKey: "runner.rig_first",
+        support: "supports",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "deck_replacement_conflict",
+        severity: "medium",
+        rationale:
+          "Als Deck ersetzt PK-6089a ein bereits installiertes Deck; seine Bits sind ausschließlich für Link-Erhöhungen nutzbar.",
       },
     ],
     capabilities: [],

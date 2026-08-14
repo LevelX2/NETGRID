@@ -34,6 +34,7 @@ import type {
   CardScoredAgendaImplementation,
   CardSelfRezAdditionalCostImplementation,
   CardSelfRezCostModifierImplementation,
+  CardSelfRezWindowImplementation,
   CardSelfStealCostImplementation,
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
@@ -78,6 +79,7 @@ export type CardMechanicalDefinition = {
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
   selfRezCostModifiers?: readonly CardSelfRezCostModifierImplementation[];
   selfRezAdditionalCosts?: readonly CardSelfRezAdditionalCostImplementation[];
+  selfRezWindows?: readonly CardSelfRezWindowImplementation[];
   iceEncounter?: CardIceEncounterImplementation;
   icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
   hostedProgramCapacity?: HostedProgramCapacityImplementation;
@@ -260,6 +262,7 @@ type CanonicalMechanicalFamilies = Omit<
     | "printedSubroutines"
     | "selfRezCostModifiers"
     | "selfRezAdditionalCosts"
+    | "selfRezWindows"
     | "iceEncounter"
     | "hostedProgramCapacity"
     | "hostedProgramModifiers"

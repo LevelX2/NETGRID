@@ -234,6 +234,7 @@ export function rezCard(
     legalAction,
     variableIceState,
   );
+  if (legalAction?.payload?.traceWindowSelfRez === true) return;
   if (options?.runContinuation === "none") return;
   if (rootRez) {
     host.run.handleRunRootRezPostRez(cardId, legalAction);

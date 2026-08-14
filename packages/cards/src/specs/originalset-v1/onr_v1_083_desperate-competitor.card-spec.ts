@@ -65,6 +65,19 @@ export const cardSpec = {
       },
     ],
   },
+  planningAnnotations: {
+    schemaVersion: "card-planning-annotations-v1",
+    card: [
+      { kind: "plan_role", role: "score_now" },
+      { kind: "strategic_role", role: "payoff_anchor" },
+      {
+        kind: "line_support",
+        lineKey: "score_closeout",
+        support: "supports",
+      },
+    ],
+    capabilities: [],
+  },
   printings: [
     {
       schemaVersion: "printing-spec-v1",

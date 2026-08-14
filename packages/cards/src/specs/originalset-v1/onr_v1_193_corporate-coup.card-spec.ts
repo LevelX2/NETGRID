@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 15 from the bank on Corporate Coup when you score it.\n[A]: Take 3 from Corporate Coup, if it has any bits.",
+      "Put [15] from the bank on Corporate Coup when you score it.\nA: Take [3] from Corporate Coup, if it has any bits.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(

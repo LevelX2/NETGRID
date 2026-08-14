@@ -615,10 +615,12 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig"],
+        "planRoles": ["build_rig", "pressure_hq"],
         "valueHints": {
           "economy": 1
         },
+        "strategicRole": ["enabler"],
+        "lineSupport": ["runner.hq_pressure"],
         "actionCapacityProfiles": [
           {
             "class": "action_cost",
@@ -3048,24 +3050,13 @@
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
-            "purpose": "place_strength_reduction_counter",
+            "purpose": "place_strength_reduction_counter_on_fully_broken_ice",
             "preferences": [
               "current_encounter_ice",
               "high_strength_ice",
               "relevant_server_ice"
             ],
             "avoid": ["irrelevant_server_ice", "already_cheap_to_break"],
-            "kind": "use_target",
-            "timing": "after_successful_run",
-            "targetType": "installed_ice",
-            "hiddenInfoPolicy": "visible_or_known_only",
-            "serverScope": "source_fort"
-          },
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "place_strength_reduction_counter_on_fully_broken_ice",
-            "preferences": ["current_encounter_ice"],
-            "avoid": ["hidden_info_dependent_choice"],
             "kind": "use_target",
             "timing": "after_successful_run",
             "targetType": "installed_ice",
@@ -3385,7 +3376,6 @@
         "planRoles": ["pressure_rnd", "information"],
         "valueHints": {},
         "strategicRole": ["enabler"],
-        "strategyAnchors": ["runner.rnd_pressure"],
         "lineSupport": ["runner.rnd_pressure"],
         "actionCapabilitySemantics": [
           {
@@ -5548,8 +5538,10 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["score_now"],
         "valueHints": {},
+        "strategicRole": ["payoff_anchor"],
+        "lineSupport": ["score_closeout"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_gain_runner_event_agenda_point",
@@ -6070,11 +6062,25 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "recover_rig"],
+        "planRoles": ["recover_cards"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_search_trash_to_grip"
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "card",
+            "purpose": "generic_heap_recovery",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state"
+            ],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "costProfile": {
@@ -6105,8 +6111,10 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["score_now"],
         "valueHints": {},
+        "strategicRole": ["payoff_anchor"],
+        "lineSupport": ["score_closeout"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_gain_runner_event_agenda_point_if_liberated_agenda_subtype"
@@ -6140,7 +6148,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["safe_probe_run"],
+        "planRoles": ["information"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -6151,12 +6159,28 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "multi_expose",
-            "preferences": [],
-            "avoid": [],
+            "preferences": [
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "current_run_path_relevance"
+            ],
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "hiddenInfoPolicy": "public_or_controller_known_only"
+            "hiddenInfoPolicy": "legal_targets_only"
+          },
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "multi_expose_card_selection",
+            "preferences": [
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "current_run_path_relevance"
+            ],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "card",
+            "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
         "costProfile": {
@@ -6928,6 +6952,18 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_trash_cards_from_grip_for_credits"
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "card",
+            "purpose": "convert_expendable_grip_cards_to_credits",
+            "preferences": ["lowest_near_term_value"],
+            "avoid": ["next_turn_required_card"],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "tacticSignals": ["economy.card"],
@@ -9227,8 +9263,13 @@
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware", "deck", "memory", "link"],
-        "planRoles": ["runner_install_hardware"],
+        "planRoles": [
+          "build_rig",
+          "trace_bid_support",
+          "runner_install_hardware"
+        ],
         "valueHints": {},
+        "lineSupport": ["runner.rig_first"],
         "effects": [
           {
             "kind": "hardware_trait",
@@ -9275,9 +9316,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
@@ -9296,7 +9335,12 @@
           "clicks": 1,
           "credits": 4
         },
-        "riskTags": ["install_runner", "deck_unique", "restricted_credits"],
+        "riskTags": [
+          "deck_replacement_conflict",
+          "install_runner",
+          "deck_unique",
+          "restricted_credits"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -24691,16 +24735,19 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["asset"],
-        "planRoles": ["remote_asset_pressure"],
+        "planRoles": ["board_recycling"],
         "valueHints": {
           "remoteRootValue": 1
         },
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
-            "purpose": "return_lowest_near_term_value_installed_card",
-            "preferences": ["lowest_near_term_value"],
-            "avoid": ["hidden_info_dependent_choice"],
+            "purpose": "protect_or_reuse_installed_corp_card",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "lowest_near_term_value"
+            ],
             "kind": "use_target",
             "timing": "activated_ability",
             "targetType": "card",

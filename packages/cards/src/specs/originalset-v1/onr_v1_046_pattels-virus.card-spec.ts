@@ -68,24 +68,24 @@ export const cardSpec = {
         kind: "plan_role",
         role: "safe_probe_run",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "place_strength_reduction_counter",
-        preferences: [
-          "current_encounter_ice",
-          "high_strength_ice",
-          "relevant_server_ice",
+        capabilityKey: capabilityKey("virus_counter"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "place_strength_reduction_counter_on_fully_broken_ice",
+            preferences: [
+              "current_encounter_ice",
+              "high_strength_ice",
+              "relevant_server_ice",
+            ],
+            avoid: ["irrelevant_server_ice", "already_cheap_to_break"],
+          },
         ],
-        avoid: ["irrelevant_server_ice", "already_cheap_to_break"],
-      },
-      {
-        kind: "target_preference",
-        purpose: "place_strength_reduction_counter_on_fully_broken_ice",
-        preferences: ["current_encounter_ice"],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

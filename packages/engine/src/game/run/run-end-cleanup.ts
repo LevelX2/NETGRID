@@ -441,11 +441,11 @@ export function applyBadPublicityRunAftermath(
   const aftermath = run.badPublicityRunAftermath;
   if (!aftermath) return false;
   let badPublicityAdded = 0;
-  if (aftermath.kind === "successful_run_draw_event") {
+  if (aftermath.kind === "successful_run_counted_subtypes") {
     if (!successful) return false;
     let tagsAdded = tagContinuation
       ? Math.max(0, host.state.runner.tags - tagContinuation.runnerTagsBefore)
-      : 2;
+      : aftermath.runnerTagsOnSuccess;
     if (!resumeAfterTag) {
       if (!legalAction)
         throw new Error("Run-end Add-Tag braucht eine LegalAction.");
@@ -485,9 +485,12 @@ export function applyBadPublicityRunAftermath(
       tagsAdded = Math.max(0, host.state.runner.tags - runnerTagsBefore);
     }
     badPublicityAdded =
-      Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) +
-      Math.max(0, Math.floor(run.rezzedBlackOpsCount ?? 0)) +
-      Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0));
+      Math.max(0, Math.floor(run.encounteredBlackIceCount ?? 0)) *
+        aftermath.badPublicityPerEncounteredIceSubtype.amount +
+      Math.max(0, Math.floor(run.rezzedBlackOpsCount ?? 0)) *
+        aftermath.badPublicityPerRezzedCardSubtype.amount +
+      Math.max(0, Math.floor(run.liberatedBlackOpsAgendaCount ?? 0)) *
+        aftermath.badPublicityPerLiberatedAgendaSubtype.amount;
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -508,10 +511,9 @@ export function applyBadPublicityRunAftermath(
       };
     }
   } else {
-    badPublicityAdded = Math.max(
-      0,
-      Math.floor(run.trashedAdvertisementCount ?? 0),
-    );
+    badPublicityAdded =
+      Math.max(0, Math.floor(run.trashedAdvertisementCount ?? 0)) *
+      aftermath.badPublicityPerTrashedCardSubtype.amount;
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),

@@ -324,4 +324,109 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
   });
+
+  it("keeps Batch 4 roles and anchors aligned with the actual card effects", () => {
+    expect(
+      hint("onr_classic_006_bolter-swarm").strategyAnchors ?? [],
+    ).not.toContain("corp.economy_rez_reserve");
+    expect(hint("onr_classic_015_vortex").strategyAnchors).toEqual([
+      "corp.ice_tax_glacier",
+    ]);
+    expect(
+      hint("onr_v1_050_r-and-d-protocol-files").strategyAnchors ?? [],
+    ).not.toContain("runner.rnd_pressure");
+    expect(hint("onr_proteus_048_data-sifters").planRoles ?? []).not.toContain(
+      "build_scoring_remote",
+    );
+    expect(
+      hint("onr_proteus_048_data-sifters").strategyAnchors ?? [],
+    ).not.toContain("corp.tag_trace_punish");
+    expect(
+      hint("onr_proteus_068_pattel-antibody").planRoles ?? [],
+    ).not.toContain("build_scoring_remote");
+    expect(hint("onr_v1_138_pk-6089a").planRoles).toEqual(
+      expect.arrayContaining(["build_rig", "trace_bid_support"]),
+    );
+    expect(hint("onr_v1_138_pk-6089a").tacticSignals ?? []).not.toContain(
+      "economy.card",
+    );
+    expect(hint("onr_proteus_110_hijack").planRoles).toContain("build_rig");
+    expect(hint("onr_proteus_110_hijack").planRoles).not.toContain(
+      "recover_economy",
+    );
+  });
+
+  it("binds Batch 4 choices to controller-known mechanical owners", () => {
+    expect(hint("onr_v1_046_pattels-virus").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "place_strength_reduction_counter_on_fully_broken_ice",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "visible_or_known_only",
+      }),
+    );
+    expect(hint("onr_v1_089_gideons-pawnshop").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "generic_heap_recovery",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_v1_103_organ-donor").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "convert_expendable_grip_cards_to_credits",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_v1_316_cowboy-sysop").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "protect_or_reuse_installed_corp_card",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(
+      hint("onr_proteus_106_disgruntled-ice-technician").targetProfiles ?? [],
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ purpose: "derez_fully_broken_ice" }),
+      ]),
+    );
+    expect(hint("onr_proteus_110_hijack").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "install_best_legal_target",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+  });
+
+  it("models Batch 4 run payoff and closeout semantics without unconditional priority", () => {
+    expect(
+      hint("onr_proteus_113_live-news-feed").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "maximize_live_news_feed_aftermath",
+        targetType: "server",
+      }),
+    );
+    expect(hint("onr_proteus_113_live-news-feed").riskTags).toContain(
+      "self_tag",
+    );
+    expect(
+      hint("onr_proteus_125_subliminal-corruption").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "maximize_advertisement_trash_during_run",
+        targetType: "server",
+      }),
+    );
+    for (const cardId of [
+      "onr_v1_083_desperate-competitor",
+      "onr_v1_090_hot-tip-for-wns",
+    ]) {
+      expect(hint(cardId).planRoles).toContain("score_now");
+      expect(hint(cardId).lineSupport).toContain("score_closeout");
+      expect(hint(cardId).strategyAnchors).toBeUndefined();
+    }
+  });
 });

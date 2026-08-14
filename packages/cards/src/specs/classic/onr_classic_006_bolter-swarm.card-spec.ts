@@ -93,10 +93,6 @@ export const cardSpec = {
       },
       {
         kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
-        kind: "strategy_anchor",
         strategyKey: "corp.ice_tax_glacier",
       },
       {

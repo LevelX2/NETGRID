@@ -57,7 +57,22 @@ export const cardSpec = {
             target: {
               kind: "chosen_server",
             },
-            badPublicityRunAftermath: "successful_run_draw_event",
+            badPublicityRunAftermath: {
+              kind: "successful_run_counted_subtypes",
+              runnerTagsOnSuccess: 2,
+              badPublicityPerEncounteredIceSubtype: {
+                subtype: "black_ice",
+                amount: 1,
+              },
+              badPublicityPerRezzedCardSubtype: {
+                subtype: "black_ops",
+                amount: 1,
+              },
+              badPublicityPerLiberatedAgendaSubtype: {
+                subtype: "black_ops",
+                amount: 1,
+              },
+            },
             visibility: "public",
           },
         ],
@@ -70,6 +85,25 @@ export const cardSpec = {
       {
         kind: "plan_role",
         role: "run_pressure",
+      },
+      {
+        kind: "strategic_role",
+        role: "punish_payoff",
+      },
+      {
+        kind: "target_preference",
+        purpose: "maximize_live_news_feed_aftermath",
+        preferences: [
+          "current_run_path_relevance",
+          "high_expected_corp_rez_count",
+        ],
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "self_tag",
+        severity: "high",
+        rationale:
+          "Ein erfolgreicher Run gibt dem Runner zwei Tags, bevor die Bad-Publicity-Auszahlung bewertet wird.",
       },
     ],
     capabilities: [],

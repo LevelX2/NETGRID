@@ -72,7 +72,21 @@ export const cardSpec = {
         use: "economy.card",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_on_play_trash_cards_from_grip_for_credits",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "convert_expendable_grip_cards_to_credits",
+            preferences: ["lowest_near_term_value"],
+            avoid: ["next_turn_required_card"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

@@ -165,7 +165,7 @@ export function startRunForCardImplementation(
       ...(options.badPublicityRunAftermath !== undefined
         ? {
             badPublicityRunAftermath: {
-              kind: options.badPublicityRunAftermath,
+              ...options.badPublicityRunAftermath,
               sourceCardId:
                 sourceCardId ?? ("card_implementation" as CardInstanceId),
               sourceDefinitionId: sourceDefinitionId ?? "card_implementation",

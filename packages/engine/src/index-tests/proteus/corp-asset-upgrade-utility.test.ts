@@ -643,6 +643,12 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     openCorpTraceBidWindow(state, ldlId);
     state.corp.credits = 0;
 
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "rez_card" && action.source === ldlId,
+      ),
+    ).toBe(false);
+
     state = apply(
       state,
       "corp",
@@ -667,13 +673,58 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     });
 
     const noTrace = baseState("pro014-ldl-no-trace");
-    const noTraceLdl = addCorpRoot(noTrace, LDL, "ldl_2", "remote_1", true);
+    const noTraceLdl = addCorpRoot(noTrace, LDL, "ldl_2", "remote_1", false);
     noTrace.cardInstances[noTraceLdl]!.advancementCounters = 1;
     expect(
       getLegalActions(noTrace, "corp").some(
-        (action) => action.source === noTraceLdl,
+        (action) =>
+          action.source === noTraceLdl &&
+          action.payload?.traceWindowSelfRez === true,
       ),
     ).toBe(false);
+  });
+
+  it("rezzes LDL through a canonical trace-window LegalAction before using its ability", () => {
+    const before = baseState("pro014-ldl-self-rez");
+    const ldlId = addCorpRoot(before, LDL, "ldl_self_rez", "remote_1", false);
+    before.cardInstances[ldlId]!.advancementCounters = 1;
+    before.corp.credits = 0;
+    openCorpTraceBidWindow(before, ldlId);
+
+    const rezAction = mustAction(
+      before,
+      "corp",
+      (action) => action.type === "rez_card" && action.source === ldlId,
+    );
+    expect(rezAction.payload).toMatchObject({
+      cardId: ldlId,
+      rootRez: true,
+      traceWindowSelfRez: true,
+    });
+
+    let state = applyLegal(before, "corp", rezAction.actionId);
+    expect(state.cardInstances[ldlId]?.rezzed).toBe(true);
+    expect(state.trace?.traceId).toBe("pro014_trace");
+    expect(state.pendingChoice?.source).toBe("trace:pro014_trace");
+    expectReplayStable(before, state);
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: rezAction.actionId,
+      clientKnownStateVersion: rezAction.expiresAtStateVersion,
+      idempotencyKey: "ldl-stale-self-rez",
+    });
+    expect(stale.ok).toBe(false);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" && action.source === ldlId,
+    );
+    expect(state.cardInstances[ldlId]?.advancementCounters).toBe(0);
+    expect(state.trace?.corpTemporaryTraceCredits?.remaining).toBe(5);
   });
 
   it("keeps Panic Button in HQ and usable only during HQ runs", () => {

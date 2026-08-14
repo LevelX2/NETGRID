@@ -1285,13 +1285,30 @@ export type RunState = {
   traceAttemptedThisRun?: boolean;
   badPublicityRunAftermath?:
     | {
-        kind: "successful_run_draw_event";
+        kind: "successful_run_counted_subtypes";
+        runnerTagsOnSuccess: number;
+        badPublicityPerEncounteredIceSubtype: {
+          subtype: "black_ice";
+          amount: number;
+        };
+        badPublicityPerRezzedCardSubtype: {
+          subtype: "black_ops";
+          amount: number;
+        };
+        badPublicityPerLiberatedAgendaSubtype: {
+          subtype: "black_ops";
+          amount: number;
+        };
         sourceCardId: CardInstanceId;
         sourceDefinitionId: CardDefinitionId;
         sourceTitle: string;
       }
     | {
-        kind: "bad_publicity_run_replacement";
+        kind: "trashed_card_subtype_during_run";
+        badPublicityPerTrashedCardSubtype: {
+          subtype: "advertisement";
+          amount: number;
+        };
         sourceCardId: CardInstanceId;
         sourceDefinitionId: CardDefinitionId;
         sourceTitle: string;

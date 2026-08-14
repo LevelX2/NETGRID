@@ -82,26 +82,15 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "run_pressure",
+      },
+      {
+        kind: "strategic_role",
+        role: "ice_sabotage",
       },
       {
         kind: "strategy_anchor",
         strategyKey: "runner.run_event_tempo",
-      },
-      {
-        kind: "target_preference",
-        purpose: "derez_fully_broken_ice",
-        preferences: [
-          "current_encounter_ice",
-          "known_or_rezzed_ice",
-          "high_rez_cost_relief",
-          "blocks_relevant_run_path",
-        ],
-        avoid: [
-          "unknown_low_information_target",
-          "irrelevant_server_ice",
-          "hidden_info_dependent_choice",
-        ],
       },
     ],
     capabilities: [],

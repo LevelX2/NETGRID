@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "0 credits: Break wall subroutine.\n1 credit: +1 strength.\nWhenever you break a wall subroutine with Jackhammer, lose 1 credit, if you can, from a stealth card.",
+      "[0]: Break wall subroutine.\n[1]: +1 strength.\nWhenever you break a wall subroutine with Jackhammer, lose 1 credit, if you can, from a stealth card.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

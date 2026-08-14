@@ -59,7 +59,15 @@ function targetAnnotatedEntry(cardId: string) {
           entry.planning.planningAnnotations?.card?.filter(
             (annotation) => annotation.kind === "target_preference",
           ) ?? [],
-        capabilities: [],
+        capabilities:
+          entry.planning.planningAnnotations?.capabilities
+            ?.map((capability) => ({
+              ...capability,
+              annotations: capability.annotations.filter(
+                (annotation) => annotation.kind === "target_preference",
+              ),
+            }))
+            .filter((capability) => capability.annotations.length > 0) ?? [],
       },
     },
   };
@@ -629,9 +637,17 @@ describe("generic typed CardSpec AI translators", () => {
     const entries = cardSpecPlanningCards().filter(
       (entry) =>
         entry.definition.id.startsWith("onr_v1_") &&
-        entry.planning.planningAnnotations?.card?.some(
+        ((entry.planning.planningAnnotations?.card?.some(
           (annotation) => annotation.kind === "target_preference",
-        ),
+        ) ??
+          false) ||
+          (entry.planning.planningAnnotations?.capabilities?.some(
+            (capability) =>
+              capability.annotations.some(
+                (annotation) => annotation.kind === "target_preference",
+              ),
+          ) ??
+            false)),
     );
     expect(
       entries.reduce(
@@ -639,10 +655,14 @@ describe("generic typed CardSpec AI translators", () => {
           count +
           (entry.planning.planningAnnotations?.card?.filter(
             (annotation) => annotation.kind === "target_preference",
-          ).length ?? 0),
+          ).length ?? 0) +
+          (entry.planning.planningAnnotations?.capabilities
+            ?.flatMap((capability) => capability.annotations)
+            .filter((annotation) => annotation.kind === "target_preference")
+            .length ?? 0),
         0,
       ),
-    ).toBe(65);
+    ).toBe(68);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
@@ -715,7 +735,7 @@ describe("generic typed CardSpec AI translators", () => {
       deriveCardSpecAiHint(
         targetAnnotatedEntry("onr_v1_046_pattels-virus"),
       ).targetProfiles?.filter((profile) => "schemaVersion" in profile),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
   });
 
   it("rejects near-matching target families without the exact typed owner kind", () => {

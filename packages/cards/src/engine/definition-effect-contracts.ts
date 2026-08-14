@@ -639,11 +639,34 @@ export type MakeRunEffectImplementation = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?:
-    | "successful_run_draw_event"
-    | "bad_publicity_run_replacement";
+  badPublicityRunAftermath?: CardBadPublicityRunAftermathImplementation;
   visibility: EventVisibilityClass;
 };
+
+export type CardBadPublicityRunAftermathImplementation =
+  | {
+      kind: "successful_run_counted_subtypes";
+      runnerTagsOnSuccess: number;
+      badPublicityPerEncounteredIceSubtype: {
+        subtype: "black_ice";
+        amount: number;
+      };
+      badPublicityPerRezzedCardSubtype: {
+        subtype: "black_ops";
+        amount: number;
+      };
+      badPublicityPerLiberatedAgendaSubtype: {
+        subtype: "black_ops";
+        amount: number;
+      };
+    }
+  | {
+      kind: "trashed_card_subtype_during_run";
+      badPublicityPerTrashedCardSubtype: {
+        subtype: "advertisement";
+        amount: number;
+      };
+    };
 
 export type EndRunEffectImplementation = {
   kind: "end_run";

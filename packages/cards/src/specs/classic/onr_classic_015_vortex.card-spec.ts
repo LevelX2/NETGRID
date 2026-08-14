@@ -79,15 +79,7 @@ export const cardSpec = {
       },
       {
         kind: "strategy_anchor",
-        strategyKey: "corp.central_stabilize",
-      },
-      {
-        kind: "strategy_anchor",
         strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
       },
       {
         kind: "line_support",
@@ -125,7 +117,6 @@ export const cardSpec = {
           "protects_central_access_pressure",
           "adds_relevant_encounter_tax",
         ],
-        avoid: ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
       },
       {
         kind: "risk_interpretation",

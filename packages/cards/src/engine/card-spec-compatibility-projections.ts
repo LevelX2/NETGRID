@@ -53,6 +53,7 @@ export type CardSpecCardImplementation = {
   | "scoredAgenda"
   | "selfRezAdditionalCosts"
   | "selfRezCostModifiers"
+  | "selfRezWindows"
   | "selfStealCosts"
   | "successfulRunFollowups"
   | "tagPreventionSources"
@@ -219,6 +220,7 @@ const CARD_SPEC_IMPLEMENTATION_FAMILY_LIST = [
   "scoredAgenda",
   "selfRezAdditionalCosts",
   "selfRezCostModifiers",
+  "selfRezWindows",
   "selfStealCosts",
   "successfulRunFollowups",
   "tagPreventionSources",

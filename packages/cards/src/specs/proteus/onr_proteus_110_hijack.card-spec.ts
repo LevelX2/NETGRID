@@ -59,21 +59,18 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        role: "build_rig",
       },
       {
         kind: "target_preference",
         purpose: "install_best_legal_target",
         preferences: [
+          "program_repairs_missing_coverage",
+          "program_affordable_after_install",
           "high_install_cost_or_memory",
           "central_or_remote_plan_enabler",
         ],
-        avoid: ["hidden_info_dependent_choice"],
+        avoid: ["unaffordable_after_install"],
       },
       {
         kind: "value_interpretation",

@@ -24,6 +24,7 @@ import {
 import {
   buildCorpApproachActions,
   buildCorpRunRootRezWindowActions,
+  buildCorpTraceSelfRezActions,
   isCorpRunRootRezWindowOpen,
   type RunRezWindowHost,
 } from "./run/run-rez-window";
@@ -190,6 +191,7 @@ function buildLegalActionsUnchecked(
     state.pendingChoice.side === "corp"
   )
     return [
+      ...buildCorpTraceSelfRezActions(host.hosts.runRezWindowHost()),
       ...buildCorpTraceCardImplementationActions(
         host.hosts.runCardImplementationActionHost(),
       ).legalActions,

@@ -54,13 +54,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_pressure",
-      },
-      {
-        kind: "target_preference",
-        purpose: "return_lowest_near_term_value_installed_card",
-        preferences: ["lowest_near_term_value"],
-        avoid: ["hidden_info_dependent_choice"],
+        role: "board_recycling",
       },
       {
         kind: "value_interpretation",
@@ -68,7 +62,24 @@ export const cardSpec = {
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "corp_utility_move_installed_corp_card_to_hq",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "protect_or_reuse_installed_corp_card",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "lowest_near_term_value",
+            ],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

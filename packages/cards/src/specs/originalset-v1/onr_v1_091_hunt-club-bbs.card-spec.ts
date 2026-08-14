@@ -67,13 +67,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "information",
       },
       {
         kind: "target_preference",
         purpose: "multi_expose",
-        preferences: [],
-        avoid: [],
+        preferences: [
+          "protects_agenda_remote",
+          "protects_central_access_pressure",
+          "current_run_path_relevance",
+        ],
       },
     ],
     capabilities: [],

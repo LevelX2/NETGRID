@@ -74,6 +74,7 @@ export const PROSPECTIVE_CLASS_BY_FAMILY = {
   scoredAgenda: "requires_engine_quote",
   selfRezAdditionalCosts: "statically_compilable",
   selfRezCostModifiers: "statically_compilable",
+  selfRezWindows: "requires_engine_quote",
   selfStealCosts: "statically_compilable",
   successfulRunFollowups: "requires_engine_quote",
   tagPreventionSources: "requires_engine_quote",
@@ -410,6 +411,7 @@ function transitionFor(
       return scoreTransition(spec);
     case "selfRezAdditionalCosts":
     case "selfRezCostModifiers":
+    case "selfRezWindows":
     case "variableRez":
     case "corpRootRezCreditOutcome":
       return { kind: "rez", sourceState: "rezzed", cost: playCost };

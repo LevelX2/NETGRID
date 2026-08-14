@@ -730,11 +730,7 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["punish_payoff", "tax_tool"],
-        "strategyAnchors": [
-          "corp.damage_kill",
-          "corp.economy_rez_reserve",
-          "corp.ice_tax_glacier"
-        ],
+        "strategyAnchors": ["corp.damage_kill", "corp.ice_tax_glacier"],
         "lineSupport": ["corp.damage_kill", "corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -1732,11 +1728,7 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool", "defensive_tool"],
-        "strategyAnchors": [
-          "corp.central_stabilize",
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
-        ],
+        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -1765,7 +1757,6 @@
               "protects_central_access_pressure",
               "adds_relevant_encounter_tax"
             ],
-            "avoid": ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
             "kind": "use_target",
             "timing": "subroutine_resolution",
             "targetType": "server",

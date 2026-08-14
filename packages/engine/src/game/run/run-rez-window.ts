@@ -133,6 +133,46 @@ export function buildCanonicalPaidIceRezActions(
   ];
 }
 
+export function buildCorpTraceSelfRezActions(
+  host: RunRezWindowHost,
+): LegalAction[] {
+  if (!host.state.trace) return [];
+  const actions: LegalAction[] = [];
+  for (const server of host.state.corp.servers
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))) {
+    for (const cardId of server.root.slice().sort()) {
+      const instance = host.state.cardInstances[cardId];
+      if (!instance || instance.rezzed || instance.controller !== "corp")
+        continue;
+      const definition = host.cards.definitionFor(cardId);
+      if (definition.type !== "asset" && definition.type !== "upgrade")
+        continue;
+      const permitsTraceRez = cardImplementationForDefinitionId(
+        definition.id,
+      )?.selfRezWindows?.some((window) => window.kind === "trace_attempt");
+      if (!permitsTraceRez) continue;
+      const rezQuote = quoteCorpRootRezCost(host.state, cardId);
+      if (!rezQuote.canPay) continue;
+      actions.push(
+        buildLegalAction(
+          host.state,
+          "corp",
+          "rez_card",
+          `${definition.title} während des Trace rezzen`,
+          cardId,
+          costQuoteToLegalActionCosts(rezQuote),
+          {
+            ...costQuotePublicPayload(rezQuote),
+            traceWindowSelfRez: true,
+          },
+        ),
+      );
+    }
+  }
+  return actions;
+}
+
 export function buildCorpRunRootRezActions(
   host: RunRezWindowHost,
 ): LegalAction[] {

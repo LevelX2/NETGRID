@@ -14,6 +14,10 @@ export const cardSpec = {
       "You may advance LDL Traffic Analyzers before and after you rez it. You may rez LDL Traffic Analyzers during a trace attempt. LDL Traffic Analyzers advancement counter: Gain [5]. Use this ability only during a trace attempt. When the trace attempt ends, return to the bank any of the [5] you did not spend.",
     capabilityText: [
       {
+        capabilityKey: capabilityKey("self_rez_during_trace_attempt"),
+        actionLabel: "LDL Traffic Analyzers während des Trace rezzen",
+      },
+      {
         capabilityKey: capabilityKey(
           "trace_window_spend_advancement_for_trace_credits",
         ),
@@ -52,6 +56,14 @@ export const cardSpec = {
     advanceable: {
       while: "installed_before_and_after_rez",
     },
+    selfRezWindows: [
+      {
+        capabilityKey: capabilityKey("self_rez_during_trace_attempt"),
+        addressability: ["plan", "action", "quote", "debug"],
+        kind: "trace_attempt",
+        visibility: "public",
+      },
+    ],
     abilities: [
       {
         capabilityKey: capabilityKey(

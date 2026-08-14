@@ -9,7 +9,10 @@ import type {
   ServerId,
   Side,
 } from "@netgrid/shared";
-import type { CardTraceSuccessEffectImplementation } from "./definition-types";
+import type {
+  CardBadPublicityRunAftermathImplementation,
+  CardTraceSuccessEffectImplementation,
+} from "./definition-types";
 
 export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
@@ -337,9 +340,7 @@ export type CardEffectMakeRunOptions = {
   eventApproachIceExposeBeforeRez?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: number;
-  badPublicityRunAftermath?:
-    | "successful_run_draw_event"
-    | "bad_publicity_run_replacement";
+  badPublicityRunAftermath?: CardBadPublicityRunAftermathImplementation;
   activeSequence?: MultiServerSuccessSequenceState;
 };
 

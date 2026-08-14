@@ -496,7 +496,22 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     const before = structuredClone(state);
 
     state = playRunnerEvent(state, sourceId, "hq");
-    expect(state.run?.badPublicityRunAftermath?.kind).toBe("successful_run_draw_event");
+    expect(state.run?.badPublicityRunAftermath).toMatchObject({
+      kind: "successful_run_counted_subtypes",
+      runnerTagsOnSuccess: 2,
+      badPublicityPerEncounteredIceSubtype: {
+        subtype: "black_ice",
+        amount: 1,
+      },
+      badPublicityPerRezzedCardSubtype: {
+        subtype: "black_ops",
+        amount: 1,
+      },
+      badPublicityPerLiberatedAgendaSubtype: {
+        subtype: "black_ops",
+        amount: 1,
+      },
+    });
     state = takeRunnerAction(state, (action) => action.type === "continue_run");
     expect(state.run?.encounteredBlackIceCount).toBe(1);
     expect(state.run?.encounteredIceId).toBe(blackIceId);
@@ -577,7 +592,13 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     const before = structuredClone(state);
 
     state = playRunnerEvent(state, sourceId, "remote_1");
-    expect(state.run?.badPublicityRunAftermath?.kind).toBe("bad_publicity_run_replacement");
+    expect(state.run?.badPublicityRunAftermath).toMatchObject({
+      kind: "trashed_card_subtype_during_run",
+      badPublicityPerTrashedCardSubtype: {
+        subtype: "advertisement",
+        amount: 1,
+      },
+    });
     state = trashAccessedCard(state);
 
     expect(state.corp.badPublicity).toBe(1);

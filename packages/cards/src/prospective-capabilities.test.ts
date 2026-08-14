@@ -53,6 +53,7 @@ const EXPECTED_FAMILIES = [
   "scoredAgenda",
   "selfRezAdditionalCosts",
   "selfRezCostModifiers",
+  "selfRezWindows",
   "selfStealCosts",
   "successfulRunFollowups",
   "tagPreventionSources",
@@ -122,7 +123,7 @@ function descriptorValue(entry: ProspectiveCapability, pathSuffix: string) {
 }
 
 describe("compileProspectiveCapabilities", () => {
-  it("locks the exhaustive 48-family CS01 classification", () => {
+  it("locks the exhaustive 49-family CS01 classification", () => {
     expect(Object.keys(PROSPECTIVE_CLASS_BY_FAMILY).sort()).toEqual(
       [...EXPECTED_FAMILIES].sort(),
     );
@@ -135,7 +136,7 @@ describe("compileProspectiveCapabilities", () => {
       Object.values(PROSPECTIVE_CLASS_BY_FAMILY).filter(
         (value) => value === "requires_engine_quote",
       ),
-    ).toHaveLength(31);
+    ).toHaveLength(32);
     expect(PROSPECTIVE_CLASS_BY_FAMILY.regionBaseline).toBe("unknown");
   });
 

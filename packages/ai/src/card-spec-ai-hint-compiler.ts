@@ -71,6 +71,7 @@ const CARD_SPEC_HINT_ENGINE_FIELDS = new Set([
   "scoredAgenda",
   "selfRezAdditionalCosts",
   "selfRezCostModifiers",
+  "selfRezWindows",
   "selfStealCosts",
   "successfulRunFollowups",
   "tagPreventionSources",
@@ -3916,6 +3917,8 @@ function deriveExtendedRequiredMechanics(
     mechanics.add("sleepy_noisy_rez_discount");
   if (engine.selfRezAdditionalCosts !== undefined)
     mechanics.add("agenda_point_rez_cost");
+  if (engine.selfRezWindows?.some((window) => window.kind === "trace_attempt"))
+    mechanics.add("trace_window_self_rez");
   for (const window of engine.fortRunWindows ?? [])
     if (window.kind === "move_self_to_outermost_position_on_other_fort")
       mechanics.add("start_run_ice_move");
@@ -4248,6 +4251,7 @@ function usesExtendedMechanicalSemantics(
     engine.runnerUtilityLongtail !== undefined ||
     engine.selfRezAdditionalCosts !== undefined ||
     engine.selfRezCostModifiers !== undefined ||
+    engine.selfRezWindows !== undefined ||
     engine.selfStealCosts !== undefined ||
     engine.successfulRunFollowups !== undefined ||
     engine.tagPreventionSources !== undefined ||
@@ -6010,6 +6014,9 @@ function deriveTargetProfiles(
   );
   if (onPlay !== undefined) {
     const target = capabilityPreferences.get(onPlay.capabilityKey);
+    const onPlayEffectKinds = new Set(
+      (onPlay.effects ?? []).map((effect) => effect.kind),
+    );
     const trashesRecentlyInstalledResource = onPlay.effects?.some(
       (effect) =>
         effect.kind === "trace" &&
@@ -6048,7 +6055,44 @@ function deriveTargetProfiles(
           hiddenInfoPolicy: "legal_targets_only",
         },
       ];
-    if (target !== undefined)
+    if (
+      target !== undefined &&
+      (onPlayEffectKinds.has("search_trash_to_grip") ||
+        onPlayEffectKinds.has("trash_cards_from_grip_for_credits"))
+    )
+      return [
+        {
+          schemaVersion: "target-profile-v1",
+          kind: "use_target",
+          timing: "on_play",
+          targetType: "card",
+          purpose: target.purpose,
+          ...(target.preferences === undefined
+            ? {}
+            : {
+                preferences: closedPlanningValues(
+                  target.preferences,
+                  KNOWN_HINT_TARGET_PROFILE_PREFERENCES,
+                  "target_preference",
+                ),
+              }),
+          ...(target.avoid === undefined
+            ? {}
+            : {
+                avoid: closedPlanningValues(
+                  target.avoid,
+                  KNOWN_HINT_TARGET_PROFILE_AVOIDS,
+                  "target_avoid",
+                ),
+              }),
+          hiddenInfoPolicy: "public_or_controller_known_only",
+        },
+      ];
+    if (
+      target !== undefined &&
+      (onPlayEffectKinds.has("search_stack_install") ||
+        onPlayEffectKinds.has("choose_stack_or_trash_program_install"))
+    )
       return [
         {
           schemaVersion: "target-profile-v1",
@@ -6127,7 +6171,35 @@ function deriveTargetProfiles(
       ];
     }
   }
+  const ownedCapabilityPreference = [...capabilityPreferences.entries()].find(
+    ([capabilityKey]) =>
+      mechanicalOwnerHasCapabilityKey(entry.planning.engine, capabilityKey),
+  )?.[1];
+  if (ownedCapabilityPreference !== undefined)
+    return [
+      deriveClosedExtendedTargetProfile(entry, ownedCapabilityPreference),
+    ];
+  if (capabilityPreferences.size > 0)
+    throw new Error(
+      `card_spec_target_preference_without_supported_mechanical_owner: ${entry.definition.id}`,
+    );
   return [];
+}
+
+function mechanicalOwnerHasCapabilityKey(
+  value: unknown,
+  capabilityKey: string,
+): boolean {
+  if (Array.isArray(value))
+    return value.some((entry) =>
+      mechanicalOwnerHasCapabilityKey(entry, capabilityKey),
+    );
+  if (value === null || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  if (record.capabilityKey === capabilityKey) return true;
+  return Object.values(record).some((entry) =>
+    mechanicalOwnerHasCapabilityKey(entry, capabilityKey),
+  );
 }
 
 function hasClosedTargetPreferenceOwner(
@@ -6164,8 +6236,7 @@ function hasClosedTargetPreferenceOwner(
     engine.abilities?.some((ability) =>
       ability.effects?.some((effect) =>
         effect.kind === "make_run"
-          ? effect.eventApproachIceExposeBeforeRez === true ||
-            effect.runnerCreditGainOnCorpRez !== undefined
+          ? true
           : [
               "copy_same_fort_ice_subroutine_for_run",
               "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity",
@@ -6175,6 +6246,8 @@ function hasClosedTargetPreferenceOwner(
               "search_stack_install",
               "look_top_stack_take_matching",
               "look_top_stack_take_one_arrange_rest",
+              "search_trash_to_grip",
+              "trash_cards_from_grip_for_credits",
               "trash_unrezzed_ice",
             ].includes(effect.kind),
       ),
@@ -6228,6 +6301,22 @@ function deriveClosedExtendedTargetProfile(
     engine.abilities?.some((ability) =>
       ability.effects?.some(
         (effect) => effect.kind === "look_top_stack_take_one_arrange_rest",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) =>
+          effect.kind === "search_trash_to_grip" ||
+          effect.kind === "trash_cards_from_grip_for_credits",
       ),
     )
   )
@@ -6608,7 +6697,7 @@ function deriveClosedExtendedTargetProfile(
       kind: "install_target",
       timing: "on_play",
       targetType: "card",
-      hiddenInfoPolicy: "legal_targets_only",
+      hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (
     engine.runnerEventLongtail?.kind ===
@@ -9642,7 +9731,8 @@ function derivedActionStrategyEvidence(
       taggedRunReplacement !== undefined ||
       taggedFortTrash !== undefined ||
       makeRun?.successfulRunRunnerTagGain !== undefined ||
-      makeRun?.badPublicityRunAftermath === "successful_run_draw_event")
+      makeRun?.badPublicityRunAftermath?.kind ===
+        "successful_run_counted_subtypes")
   ) {
     expectedAnchor = "tag.source";
     expectedRole = "anchor_evidence";

@@ -26,6 +26,11 @@ import type {
   CardTraceSuccessEffectImplementation,
 } from "./definition-effect-contracts";
 
+export type CardSelfRezWindowImplementation = AddressableCapabilityContract & {
+  kind: "trace_attempt";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
 export type CardLifecycleImplementation = {
   // These lifecycle hooks are deliberately narrow CardImplementation entry
   // points. They are not a general trigger registry with priorities or choices.

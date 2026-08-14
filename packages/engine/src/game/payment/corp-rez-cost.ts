@@ -1855,13 +1855,25 @@ export function assertCorpRootRezCostQuoteValid(
   const runWindow = legalAction.payload.rezInterruptJackOutEligible === true;
   const runnerPaidWindow =
     legalAction.payload.runnerActionPaidWindowRez === true;
-  const timingIsValid = runnerPaidWindow
-    ? !runWindow && state.timingPoint === "runner_action.main"
-    : runWindow
-      ? Boolean(state.run) &&
-        (state.timingPoint === "run.approach_ice" ||
-          state.timingPoint === "run.movement_rez_window")
-      : state.timingPoint === "corp_action.main";
+  const traceWindow = legalAction.payload.traceWindowSelfRez === true;
+  const traceWindowIsValid =
+    traceWindow &&
+    state.trace !== undefined &&
+    state.pendingChoice?.side === "corp" &&
+    state.pendingChoice.source.startsWith(`trace:${state.trace.traceId}`) &&
+    cardImplementationForDefinitionId(
+      instance.definitionId,
+    )?.selfRezWindows?.some((window) => window.kind === "trace_attempt") ===
+      true;
+  const timingIsValid = traceWindow
+    ? !runWindow && !runnerPaidWindow && traceWindowIsValid
+    : runnerPaidWindow
+      ? !runWindow && state.timingPoint === "runner_action.main"
+      : runWindow
+        ? Boolean(state.run) &&
+          (state.timingPoint === "run.approach_ice" ||
+            state.timingPoint === "run.movement_rez_window")
+        : state.timingPoint === "corp_action.main";
   if (!timingIsValid)
     throw new Error(
       "Root-Rez-Aktion ist in diesem Fenster nicht mehr gueltig.",

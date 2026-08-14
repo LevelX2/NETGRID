@@ -63,20 +63,24 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
-      },
-      {
-        kind: "plan_role",
-        role: "recover_rig",
-      },
-      {
-        kind: "target_preference",
-        purpose: "generic_heap_recovery",
-        preferences: [],
-        avoid: [],
+        role: "recover_cards",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("abilities_on_play_search_trash_to_grip"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "generic_heap_recovery",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+            ],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

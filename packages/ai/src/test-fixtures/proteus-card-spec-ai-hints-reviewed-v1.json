@@ -3804,10 +3804,9 @@
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_scoring_remote"],
+        "planRoles": [],
         "valueHints": {},
         "strategicRole": ["enabler"],
-        "strategyAnchors": ["corp.tag_trace_punish"],
         "lineSupport": ["corp.tag_trace_punish"],
         "strategySupportPairs": [
           {
@@ -5127,7 +5126,9 @@
           "gain_temporary_trace_credits",
           "install_remote",
           "rez_card",
+          "selfRezWindows",
           "source_has_advancement_counters",
+          "trace_attempt",
           "trash_on_access"
         ]
       }
@@ -5598,7 +5599,7 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["hidden_zone"],
-        "planRoles": ["build_scoring_remote"],
+        "planRoles": [],
         "valueHints": {
           "remoteRootValue": 1
         },
@@ -8589,8 +8590,9 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": ["event", "derez", "fully_broken_ice", "run_event"],
-        "planRoles": ["safe_probe_run"],
+        "planRoles": ["run_pressure"],
         "valueHints": {},
+        "strategicRole": ["ice_sabotage"],
         "strategyAnchors": ["runner.run_event_tempo"],
         "actionCapabilitySemantics": [
           {
@@ -8646,25 +8648,6 @@
           }
         ],
         "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "derez_fully_broken_ice",
-            "preferences": [
-              "current_encounter_ice",
-              "known_or_rezzed_ice",
-              "high_rez_cost_relief",
-              "blocks_relevant_run_path"
-            ],
-            "avoid": [
-              "unknown_low_information_target",
-              "irrelevant_server_ice",
-              "hidden_info_dependent_choice"
-            ],
-            "kind": "use_target",
-            "timing": "encounter_resolution",
-            "targetType": "installed_ice",
-            "hiddenInfoPolicy": "visible_or_known_only"
-          },
           {
             "schemaVersion": "target-profile-v1",
             "kind": "use_target",
@@ -8980,7 +8963,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": ["event"],
-        "planRoles": ["recover_economy"],
+        "planRoles": ["build_rig"],
         "valueHints": {
           "economy": 1
         },
@@ -8989,18 +8972,18 @@
             "schemaVersion": "target-profile-v1",
             "purpose": "install_best_legal_target",
             "preferences": [
+              "program_repairs_missing_coverage",
+              "program_affordable_after_install",
               "high_install_cost_or_memory",
               "central_or_remote_plan_enabler"
             ],
-            "avoid": ["hidden_info_dependent_choice"],
+            "avoid": ["unaffordable_after_install"],
             "kind": "install_target",
             "timing": "on_play",
             "targetType": "card",
-            "hiddenInfoPolicy": "legal_targets_only"
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card"],
         "costProfile": {
           "clicks": 1,
           "credits": 1
@@ -9163,6 +9146,7 @@
         "roles": ["event", "run_pressure"],
         "planRoles": ["run_pressure"],
         "valueHints": {},
+        "strategicRole": ["punish_payoff"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_run_with_bad_publicity_aftermath",
@@ -9191,6 +9175,18 @@
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
+            "purpose": "maximize_live_news_feed_aftermath",
+            "preferences": [
+              "current_run_path_relevance",
+              "high_expected_corp_rez_count"
+            ],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "server",
+            "hiddenInfoPolicy": "legal_targets_only"
+          },
+          {
+            "schemaVersion": "target-profile-v1",
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
@@ -9217,7 +9213,7 @@
           "clicks": 1,
           "credits": 0
         },
-        "riskTags": ["run"],
+        "riskTags": ["self_tag", "run"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9976,8 +9972,9 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": ["event", "run_pressure"],
-        "planRoles": ["pressure_rnd"],
+        "planRoles": ["run_pressure"],
         "valueHints": {},
+        "strategicRole": ["punish_payoff"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_run_with_advertisement_bad_publicity",
@@ -10004,6 +10001,15 @@
           }
         ],
         "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "maximize_advertisement_trash_during_run",
+            "preferences": ["current_run_path_relevance"],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "server",
+            "hiddenInfoPolicy": "legal_targets_only"
+          },
           {
             "schemaVersion": "target-profile-v1",
             "kind": "use_target",

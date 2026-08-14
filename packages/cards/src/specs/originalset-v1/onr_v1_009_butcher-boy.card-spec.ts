@@ -68,6 +68,19 @@ export const cardSpec = {
         role: "build_rig",
       },
       {
+        kind: "plan_role",
+        role: "pressure_hq",
+      },
+      {
+        kind: "strategic_role",
+        role: "enabler",
+      },
+      {
+        kind: "line_support",
+        lineKey: "runner.hq_pressure",
+        support: "supports",
+      },
+      {
         kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",
@@ -76,6 +89,8 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
+        rationale:
+          "Die wiederkehrende Auszahlung entsteht erst aus mehreren erfolgreichen HQ-Runs und ist Teil einer persistenten Virus-Drucklinie.",
       },
     ],
     capabilities: [],

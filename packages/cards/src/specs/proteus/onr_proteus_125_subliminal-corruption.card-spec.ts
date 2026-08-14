@@ -57,7 +57,13 @@ export const cardSpec = {
             target: {
               kind: "chosen_server",
             },
-            badPublicityRunAftermath: "bad_publicity_run_replacement",
+            badPublicityRunAftermath: {
+              kind: "trashed_card_subtype_during_run",
+              badPublicityPerTrashedCardSubtype: {
+                subtype: "advertisement",
+                amount: 1,
+              },
+            },
             visibility: "public",
           },
         ],
@@ -69,7 +75,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "pressure_rnd",
+        role: "run_pressure",
+      },
+      {
+        kind: "strategic_role",
+        role: "punish_payoff",
+      },
+      {
+        kind: "target_preference",
+        purpose: "maximize_advertisement_trash_during_run",
+        preferences: ["current_run_path_relevance"],
       },
     ],
     capabilities: [],
