@@ -102,9 +102,9 @@ describe("deck validation and snapshots", () => {
     const localCuration = standardDeckCurationData.localDeckLibrary;
     const projectCuration = standardDeckCurationData.projectSnapshots;
 
-    expect(entries).toHaveLength(44);
+    expect(entries).toHaveLength(45);
     expect(new Set(entries.map((entry) => entry.standardDeckId)).size).toBe(entries.length);
-    expect(localCuration.counts).toEqual({ standard: 44, internal_ai: 2, retire: 1, test_fixture: 10 });
+    expect(localCuration.counts).toEqual({ standard: 45, internal_ai: 2, retire: 1, test_fixture: 10 });
     expect(projectCuration.counts).toEqual({ test_fixture: 10, internal_ai: 11 });
     expect(localCuration.entries.filter((entry) => entry.classification === "standard")).toHaveLength(entries.length);
     expect(projectCuration.entries.every((entry) => entry.classification !== "standard")).toBe(true);

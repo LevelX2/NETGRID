@@ -9,7 +9,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 44,
+        "standard": 45,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -326,6 +326,14 @@
         "classification": "standard",
         "reason": "curated_user_deck",
         "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11"
+      },
+      {
+        "sourceDeckId": "local_runner_last_call_at_rd",
+        "name": "Last Call at R&D",
+        "side": "runner",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_runner_last_call_at_rd"
       },
       {
         "sourceDeckId": "local_runner_lucidrine_shell_traders",
