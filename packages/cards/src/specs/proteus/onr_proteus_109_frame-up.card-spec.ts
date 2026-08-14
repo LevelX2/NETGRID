@@ -71,8 +71,18 @@ export const cardSpec = {
         role: "pressure_rnd",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "plan_role",
+        role: "pressure_hq",
+      },
+      {
+        kind: "line_support",
+        lineKey: "runner.hq_pressure",
+        support: "supports",
+      },
+      {
+        kind: "line_support",
+        lineKey: "runner.rnd_pressure",
+        support: "supports",
       },
     ],
     capabilities: [],

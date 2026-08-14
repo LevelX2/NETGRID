@@ -437,6 +437,14 @@ describe("CardRegistry", () => {
       ROOT_REGISTRY,
       "onr_v1_157_crash-everett-inventive-fixer" as CardDefinitionId,
     )!;
+    const encryptionBreakthrough = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_200_encryption-breakthrough" as CardDefinitionId,
+    )!;
+    const chesterMix = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_352_chester-mix" as CardDefinitionId,
+    )!;
 
     expect(nightShift.text.rulesText).toBe("Gain [2] and draw one card.");
     expect(aujourdOui.planningAnnotations?.card).not.toContainEqual(
@@ -450,6 +458,10 @@ describe("CardRegistry", () => {
         kind: "target_preference",
         avoid: expect.arrayContaining(["hidden_info_dependent_choice"]),
       }),
+    );
+    expect(encryptionBreakthrough.text.rulesText).toContain("gain [1]");
+    expect(chesterMix.text.rulesText).toBe(
+      "The cost to install ice on this fort is reduced by [2].",
     );
   });
 

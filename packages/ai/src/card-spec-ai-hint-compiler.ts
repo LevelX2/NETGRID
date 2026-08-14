@@ -5037,6 +5037,15 @@ function deriveClosedExtendedRiskTags(
   if (engine.selfRezAdditionalCosts !== undefined)
     risks.add("agenda_point_cost");
   if (engine.fortRunWindows !== undefined) risks.add("start_run_reposition");
+  if (
+    engine.iceEncounter?.kind === "roll_die_strength_or_derez_auto_pass"
+  )
+    for (const risk of [
+      "deterministic_random",
+      "self_derez",
+      "automatic_pass_failure",
+    ])
+      risks.add(risk);
 
   const utility = engine.corpUtility?.kind;
   if (utility === "runner_memory_limit_modifier_until_end_of_turn")
@@ -6107,6 +6116,7 @@ function hasClosedTargetPreferenceOwner(
               "remove_same_fort_advancement_counters_for_run_credits",
               "search_stack_install",
               "look_top_stack_take_matching",
+              "trash_unrezzed_ice",
             ].includes(effect.kind),
       ),
     ) === true
@@ -6153,6 +6163,18 @@ function deriveClosedExtendedTargetProfile(
         lookTopStack.allowedTypes[0] === "program"
           ? "program"
           : "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some((effect) => effect.kind === "trash_unrezzed_ice"),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "installed_ice",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (

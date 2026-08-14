@@ -74,10 +74,6 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "build_scoring_remote",
-      },
-      {
         kind: "strategic_role",
         role: "enabler",
       },

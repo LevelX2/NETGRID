@@ -131,4 +131,105 @@ describe("random production-card sample semantic corrections", () => {
       hiddenInfoPolicy: "public_or_controller_known_only",
     });
   });
+
+  it("keeps information and ordinary ICE cards below strategy-anchor level", () => {
+    const clerk = hint("onr_classic_046_executive-file-clerk");
+    expect(clerk.strategyAnchors ?? []).not.toContain("runner.hq_pressure");
+    expect(clerk.targetProfiles).toBeUndefined();
+
+    for (const cardId of [
+      "onr_proteus_035_roadblock",
+      "onr_proteus_037_scaffolding",
+      "onr_proteus_042_tumblers",
+      "onr_v1_352_chester-mix",
+    ]) {
+      expect(hint(cardId).strategyAnchors ?? [], cardId).not.toContain(
+        "corp.ice_tax_glacier",
+      );
+    }
+    expect(hint("onr_proteus_035_roadblock").riskTags).toEqual(
+      expect.arrayContaining([
+        "deterministic_random",
+        "self_derez",
+        "automatic_pass_failure",
+      ]),
+    );
+    expect(hint("onr_v1_352_chester-mix").strategySupportPairs).toContainEqual(
+      expect.objectContaining({
+        strategyId: "corp.ice_tax_glacier",
+        roleDetail: "ice_install_discount_fort_builder",
+      }),
+    );
+  });
+
+  it("keeps run-history and HQ denial semantics aligned with their effects", () => {
+    const manhunt = hint("onr_proteus_050_manhunt");
+    expect(manhunt.planRoles ?? []).not.toContain("build_scoring_remote");
+    expect(manhunt.strategySupportPairs).toContainEqual(
+      expect.objectContaining({
+        strategyId: "corp.tag_trace_punish",
+        roleDetail: "scaling_trace_margin_tag_source",
+      }),
+    );
+
+    const frameUp = hint("onr_proteus_109_frame-up");
+    expect(frameUp.planRoles).toEqual(
+      expect.arrayContaining(["pressure_hq", "pressure_rnd"]),
+    );
+    expect(frameUp.strategyAnchors ?? []).not.toContain(
+      "runner.run_event_tempo",
+    );
+
+    const creditSubversion = hint("onr_proteus_136_credit-subversion");
+    expect(creditSubversion.planRoles).toContain("pressure_hq");
+    expect(creditSubversion.planRoles).not.toContain("safe_probe_run");
+    expect(creditSubversion.tacticSignals ?? []).not.toContain("economy.card");
+    expect(creditSubversion.strategyAnchors ?? []).not.toContain(
+      "runner.hq_pressure",
+    );
+  });
+
+  it("uses side-safe target semantics only for real ICE choices", () => {
+    expect(hint("onr_v1_068_startup-immolator").targetProfiles).toBeUndefined();
+
+    expect(
+      hint("onr_v1_109_security-code-worm-chip").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "unrezzed_ice_trash",
+        preferences: ["relevant_server_ice", "blocks_relevant_run_path"],
+      }),
+    );
+
+    expect(hint("onr_proteus_060_herman-revista").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "rearrange_fort_ice",
+        preferences: [
+          "blocks_relevant_run_path",
+          "adds_relevant_encounter_tax",
+          "protects_agenda_remote",
+        ],
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+
+    const omni = hint("onr_v1_364_omni-kismet-ph-d");
+    expect(omni.remoteRole).toEqual({
+      kind: "ice_modifier",
+      threatLevel: "medium",
+      serverScope: "remote",
+    });
+    expect(omni.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "swap_unrezzed_fort_ice_with_hq_ice",
+        preferences: [
+          "relevant_server_ice",
+          "blocks_relevant_run_path",
+          "adds_relevant_encounter_tax",
+          "protects_agenda_remote",
+        ],
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+  });
 });

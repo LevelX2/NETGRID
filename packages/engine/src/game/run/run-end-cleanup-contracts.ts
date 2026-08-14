@@ -66,6 +66,7 @@ export type PostRunBridgeResult = {
 
 export type RunDurationCleanupResult = {
   handled: boolean;
+  suspended?: boolean;
   derezCardIds?: CardInstanceId[];
   removedRunMarkers?: string[];
   placedCounters?: number;
@@ -194,6 +195,10 @@ export type RunEndCleanupHost = {
   };
   cleanup: {
     cleanupEmptyRemotes: () => void;
-    trashRunnerInstalledProgram?: (cardId: CardInstanceId) => void;
+    resolveRunnerInstalledProgramTrash: (
+      cardId: CardInstanceId,
+      source: string,
+      legalAction: LegalAction,
+    ) => { suspended: boolean };
   };
 };

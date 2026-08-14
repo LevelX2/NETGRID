@@ -20,11 +20,13 @@ import { credits } from "../state/economy-mutation";
 import {
   addRunnerTagsWithPrevention,
   createDamageImminentEvent,
+  createRunnerInstalledTrashImminentEvent,
   doDamage,
   openDamageResolutionWindow,
   openEventModificationWindow,
   openReplacementWindow,
   resolveDamageImminentEvent,
+  resolveRunnerInstalledTrashImminentEvent,
   setDamagePayload,
 } from "../damage/damage-core";
 import { buildLegalAction as action } from "../turn/action-builders";
@@ -1078,8 +1080,33 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       cleanup: {
         cleanupEmptyRemotes: () => host.zones.cleanupEmptyRemotes(state),
-        trashRunnerInstalledProgram: (cardId) =>
-          host.zones.trashRunnerInstalledProgram(state, cardId),
+        resolveRunnerInstalledProgramTrash: (
+          cardId,
+          source,
+          legalAction,
+        ) => {
+          if (
+            host.choices.openRunnerInstalledTrashPreventionWindow(
+              state,
+              legalAction,
+              [cardId],
+              source,
+            )
+          )
+            return { suspended: true };
+          const event = createRunnerInstalledTrashImminentEvent(
+            state,
+            [cardId],
+            source,
+          );
+          resolveRunnerInstalledTrashImminentEvent(
+            state,
+            event,
+            legalAction,
+            [],
+          );
+          return { suspended: false };
+        },
       },
     };
   }

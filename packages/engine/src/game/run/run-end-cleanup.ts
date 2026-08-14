@@ -181,16 +181,18 @@ export function handleRunEndCleanup(
     ? applyRunCreditSpendCapShortfall(host, run, legalAction)
     : { handled: false, lostCredits: 0, shortfall: 0 };
   const runEndTrash = run
-    ? applyRunEndTrashUsedBreakers(host, run, legalAction)
+    ? applyRunEndTrashUsedBreakers(
+        host,
+        run,
+        legalAction,
+        sequenceRun.deferActionDebtConsumption === true,
+      )
     : { handled: false };
-  resetBreakerStrength(host.state);
-  delete host.state.run;
-  host.state.phase = "runner_action_phase";
-  host.state.timingPoint = "runner_action.main";
-  host.state.activeSide = "runner";
-  if (!sequenceRun.deferActionDebtConsumption)
-    host.runner.consumeFutureActionDebt();
-  host.cleanup.cleanupEmptyRemotes();
+  if (!runEndTrash.handled)
+    finalizeRunEndCleanup(
+      host,
+      sequenceRun.deferActionDebtConsumption === true,
+    );
   return {
     handled: true,
     runWasSuccessful: successful,
@@ -272,51 +274,131 @@ export function recordRunEndTrashBreakerUsage(
   if (!host.ice.icebreakerHasSpecial(breakerId, "run_end_trash_source_if_used"))
     return;
   const usedBreakerIds = run.runEndTrashUsedBreakerIdsThisRun ?? [];
-  if (!usedBreakerIds.includes(breakerId))
-    run.runEndTrashUsedBreakerIdsThisRun = [
-      ...usedBreakerIds,
-      breakerId,
-    ].sort();
+  run.runEndTrashUsedBreakerIdsThisRun = [...usedBreakerIds, breakerId];
 }
 
 export function applyRunEndTrashUsedBreakers(
   host: RunEndCleanupHost,
   run: ActiveRun,
   legalAction?: LegalAction,
+  deferActionDebtConsumption = false,
 ): RunDurationCleanupResult {
-  const usedBreakerIds = [
-    ...new Set(run.runEndTrashUsedBreakerIdsThisRun ?? []),
-  ]
-    .filter((breakerId) => host.state.runner.rig.programs.includes(breakerId))
-    .filter((breakerId) =>
-      host.ice.icebreakerHasSpecial(breakerId, "run_end_trash_source_if_used"),
-    )
-    .sort();
+  const usedBreakerIds = run.runEndTrashUsedBreakerIdsThisRun ?? [];
   if (usedBreakerIds.length === 0) return { handled: false };
-  if (!host.cleanup.trashRunnerInstalledProgram)
-    throw new Error("Run-End-Programmtrash-Callback fehlt.");
-
-  const trashedDefinitionIds: CardDefinitionId[] = [];
-  for (const breakerId of usedBreakerIds) {
-    trashedDefinitionIds.push(host.cards.definitionFor(breakerId).id);
-    host.cleanup.trashRunnerInstalledProgram(breakerId);
-  }
-  const trashedCardDefinitionId = trashedDefinitionIds[0];
-  if (!trashedCardDefinitionId) return { handled: false };
-
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      v1922RunnerProgramAbility: "run_end_trash_used_breaker",
-      trashedCount: trashedDefinitionIds.length,
-      trashedCardDefinitionId,
-      publicRevealDefinitionIds: trashedDefinitionIds.join(","),
-    };
-  }
-
-  return {
-    handled: true,
+  if (!legalAction)
+    throw new Error(
+      "Run-End-Programmtrash benötigt eine LegalAction für Prevention und Replay.",
+    );
+  host.state.pendingRunEndTrashContinuation ??= {
+    runId: run.runId,
+    deferActionDebtConsumption,
+    remainingSourceCardIds: [...usedBreakerIds],
+    effectCount: usedBreakerIds.length,
+    preventedOrReplacedCount: 0,
+    trashedDefinitionIds: [],
   };
+  return continueRunEndTrashUsedBreakers(host, legalAction);
+}
+
+export function resumeRunEndTrashUsedBreakers(
+  host: RunEndCleanupHost,
+  legalAction: LegalAction,
+): RunDurationCleanupResult {
+  if (host.state.pendingChoice || host.state.eventModificationWindow)
+    throw new Error("Das Run-End-Programmtrash-Fenster ist noch offen.");
+  const result = continueRunEndTrashUsedBreakers(host, legalAction);
+  if (!result.suspended) {
+    const continuation = host.state.pendingRunEndTrashContinuation;
+    if (continuation)
+      throw new Error("Run-End-Programmtrash-Fortsetzung wurde nicht beendet.");
+  }
+  return result;
+}
+
+function continueRunEndTrashUsedBreakers(
+  host: RunEndCleanupHost,
+  legalAction: LegalAction,
+): RunDurationCleanupResult {
+  const continuation = host.state.pendingRunEndTrashContinuation;
+  const run = host.state.run;
+  if (!continuation || !run || continuation.runId !== run.runId)
+    throw new Error("Run-End-Programmtrash-Fortsetzung passt nicht zum Run.");
+
+  recordCompletedRunEndTrashEffect(host, continuation);
+  while (continuation.remainingSourceCardIds.length > 0) {
+    const breakerId = continuation.remainingSourceCardIds.shift();
+    if (!breakerId) break;
+    if (!host.state.runner.rig.programs.includes(breakerId)) continue;
+    if (
+      !host.ice.icebreakerHasSpecial(
+        breakerId,
+        "run_end_trash_source_if_used",
+      )
+    )
+      continue;
+    const definitionId = host.cards.definitionFor(breakerId).id;
+    continuation.activeSourceCardId = breakerId;
+    continuation.activeSourceDefinitionId = definitionId;
+    const resolution = host.cleanup.resolveRunnerInstalledProgramTrash(
+      breakerId,
+      `run_end_trash_source_if_used:${breakerId}`,
+      legalAction,
+    );
+    if (resolution.suspended) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922RunnerProgramAbility: "run_end_trash_used_breaker",
+        runEndTrashEffectCount: continuation.effectCount,
+        runEndTrashEffectsRemaining:
+          continuation.remainingSourceCardIds.length + 1,
+      };
+      return { handled: true, suspended: true };
+    }
+    recordCompletedRunEndTrashEffect(host, continuation);
+  }
+
+  const trashedDefinitionIds = continuation.trashedDefinitionIds;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerProgramAbility: "run_end_trash_used_breaker",
+    runEndTrashEffectCount: continuation.effectCount,
+    runEndTrashPreventedOrReplacedCount:
+      continuation.preventedOrReplacedCount,
+    trashedCount: trashedDefinitionIds.length,
+    trashedCardDefinitionId: trashedDefinitionIds[0] ?? "",
+    publicRevealDefinitionIds: trashedDefinitionIds.join(","),
+  };
+  const deferred = continuation.deferActionDebtConsumption;
+  delete host.state.pendingRunEndTrashContinuation;
+  finalizeRunEndCleanup(host, deferred);
+  return { handled: true };
+}
+
+function recordCompletedRunEndTrashEffect(
+  host: RunEndCleanupHost,
+  continuation: NonNullable<GameState["pendingRunEndTrashContinuation"]>,
+): void {
+  const sourceCardId = continuation.activeSourceCardId;
+  const sourceDefinitionId = continuation.activeSourceDefinitionId;
+  if (!sourceCardId || !sourceDefinitionId) return;
+  if ((host.state.runner.heap ?? []).includes(sourceCardId))
+    continuation.trashedDefinitionIds.push(sourceDefinitionId);
+  else continuation.preventedOrReplacedCount += 1;
+  delete continuation.activeSourceCardId;
+  delete continuation.activeSourceDefinitionId;
+}
+
+function finalizeRunEndCleanup(
+  host: RunEndCleanupHost,
+  deferActionDebtConsumption: boolean,
+): void {
+  resetBreakerStrength(host.state);
+  delete host.state.run;
+  host.state.phase = "runner_action_phase";
+  host.state.timingPoint = "runner_action.main";
+  host.state.activeSide = "runner";
+  if (!deferActionDebtConsumption) host.runner.consumeFutureActionDebt();
+  host.cleanup.cleanupEmptyRemotes();
 }
 
 export function applyRunCreditSpendCapShortfall(

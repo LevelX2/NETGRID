@@ -69,8 +69,8 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "unrezzed_ice_trash",
-        preferences: [],
-        avoid: [],
+        preferences: ["relevant_server_ice", "blocks_relevant_run_path"],
+        avoid: ["irrelevant_server_ice"],
       },
     ],
     capabilities: [],
