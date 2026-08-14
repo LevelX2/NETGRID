@@ -1,6 +1,6 @@
 # Runner Persistent Engine Development
 
-Status: in Umsetzung  
+Status: in Umsetzung – RPED-00 abgeschlossen, RPED-01 aktiv
 Quelle: Nutzerauftrag vom 2026-08-14 und Review-Rückmeldung aus `pasted-text.txt`
 
 ## Zielprüfung
@@ -103,6 +103,39 @@ prepared
 
 Genau ein Zustand beziehungsweise Paket ist aktiv. Ein Paketwechsel erfolgt
 erst nach Done-Gate und Commit.
+
+Aktueller Zustand: `semantic_engine_support`.
+
+## Diagnoseergebnis RPED-00
+
+Der 10-Seed-Scan gegen Universal Fast Advance hat die Review-Hypothesen
+präzisiert:
+
+- Saloon wurde in Seed 1 bei 46 Credits nicht als fehlende kombinierte Engine,
+  sondern wegen Überschneidung einzelner Funktionsgruppen mit vier
+  installierten Karten als `redundant_duplicate` bewertet. Ergebnis:
+  `currentNeed:none`, `finalInstallFit:-740`, kein eigener Development-Plan.
+- In Seed 5 wurde Saloon bei 8 Credits korrekt als Funding-Plan erkannt, aber
+  nur auf das bestehende harte Ziel 10 Credits (8 Kosten plus Mindestpuffer 2)
+  finanziert. Die gewünschte normale Reserve 4 ist kein Funding-Ziel.
+- In Seed 7 erreichte die Economy-Linie 13 Credits, die Installation war nach
+  Verbrauch der Zugaktionen aber nicht mehr möglich. Später konnte die
+  fehlerhafte Funktionsgruppen-Redundanz den Plan wieder entfernen. Das
+  bestätigt Semantik plus Fortsetzung als Ursache, nicht einen fehlenden
+  globalen Prioritätsbonus.
+- Data Crèche wurde als `memory_support` installiert oder gegen einen stärkeren
+  Runplan zurückgestellt. Ihr strukturierter erfolgreicher-Run-Folgeeffekt
+  erscheint nicht in der Persistent-Install-Funktionsdeckung.
+- Bestehendes Reserve-Funding funktioniert bereits für den harten Mindestpuffer
+  und hält `runner.develop_board_and_hand:<cardInstanceId>` als `fund`-Phase.
+  Es wird erweitert, nicht ersetzt.
+- Seed 9 traf den bereits bekannten unabhängigen Fehler
+  `window_origin_missing`; dieser bleibt getrennt und erweitert den aktuellen
+  Scope nicht.
+
+Die fokussierten Diagnose-Regressionen bilden diese drei konkreten Lücken ab:
+falsche kombinierte Funktionsredundanz, fehlender gewünschter Reservebedarf und
+fehlende erfolgreiche-Run-Folgekapazität.
 
 ## Paketfolge
 

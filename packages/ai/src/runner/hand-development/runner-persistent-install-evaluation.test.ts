@@ -1021,4 +1021,147 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       deferReason: "timing",
     });
   });
+
+  it("captures the current false duplicate classification for a combined economy and draw engine", () => {
+    const saloon = visibleCard("saloon-candidate", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      title: "Silicon Saloon Franchise",
+      type: "resource",
+      installCost: 8,
+      rulesText: "A: Gain 1 credit and draw one card.",
+    });
+    const installedEconomy = visibleCard("installed-economy", {
+      definitionId: "test-installed-economy",
+      title: "Installed Economy",
+      type: "resource",
+      rulesText: "A: Gain 1 credit.",
+    });
+    const installedDraw = visibleCard("installed-draw", {
+      definitionId: "test-installed-draw",
+      title: "Installed Draw",
+      type: "resource",
+      rulesText: "A: Draw one card.",
+    });
+    const installedActionEconomy = visibleCard("installed-action-economy", {
+      definitionId: "test-installed-action-economy",
+      title: "Installed Action Economy",
+      type: "resource",
+      rulesText: "Action economy: gain 1 credit.",
+    });
+    const input = runnerInput({
+      credits: 46,
+      hand: [
+        saloon,
+        visibleCard("buffer-1", { type: "event" }),
+        visibleCard("buffer-2", { type: "event" }),
+        visibleCard("buffer-3", { type: "event" }),
+      ],
+      rig: [installedEconomy, installedDraw, installedActionEconomy],
+      legalActions: [installAction("install-saloon", saloon, 8)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: [
+            "runner.economy_setup_before_pressure",
+            "runner.draw_or_search_setup",
+          ],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "economy_engine",
+      deferReason: "duplicate",
+      persistentInstallEvaluation: {
+        installedSameDefinitionCount: 0,
+        capabilityDelta: "backup_only",
+        duplicateRole: "redundant_duplicate",
+      },
+    });
+    expect(
+      evaluation.persistentInstallEvaluation
+        ?.installedSameFunctionalGroupCount,
+    ).toBeGreaterThan(0);
+  });
+
+  it("captures the missing desired-reserve funding demand for a payable expensive engine", () => {
+    const saloon = visibleCard("saloon-reserve-candidate", {
+      definitionId: "onr_v1_179_silicon-saloon-franchise",
+      title: "Silicon Saloon Franchise",
+      type: "resource",
+      installCost: 8,
+      rulesText: "A: Gain 1 credit and draw one card.",
+    });
+    const input = runnerInput({
+      credits: 10,
+      hand: [saloon, visibleCard("buffer", { type: "event" })],
+      legalActions: [installAction("install-saloon", saloon, 8)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: [
+            "runner.economy_setup_before_pressure",
+            "runner.draw_or_search_setup",
+          ],
+        }),
+      }),
+      saloon.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      availability: "legal_now",
+      deferReason: "none",
+    });
+    expect(evaluation.fundingNeed).toBeUndefined();
+    expect(evaluation.persistentInstallEvaluation).toMatchObject({
+      installCost: 8,
+      creditsAfterInstall: 2,
+      reservePenalty: -420,
+    });
+  });
+
+  it("captures Data Creche as memory-only despite its structured successful-run followup", () => {
+    const creche = visibleCard("creche-candidate", {
+      definitionId: "onr_v1_123_bodyweight-data-creche",
+      title: "Bodyweight Data Creche",
+      type: "hardware",
+      subtypes: ["deck"],
+      installCost: 3,
+      rulesText:
+        "Provides +1 MU. Once per turn, right after making a successful run, you can choose to make another run without taking an action.",
+    });
+    const input = runnerInput({
+      credits: 10,
+      hand: [creche, visibleCard("buffer", { type: "event" })],
+      legalActions: [installAction("install-creche", creche, 3)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          setupEngine: ["runner.rig_first"],
+          pressureVectors: ["runner.central_probe_pressure"],
+        }),
+      }),
+      creche.instanceId,
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "memory_support",
+      persistentInstallEvaluation: {
+        newFunctionalCoverage: ["memory"],
+      },
+    });
+    expect(
+      evaluation.persistentInstallEvaluation?.existingFunctionalCoverage,
+    ).not.toContain("successful_run_followup");
+  });
 });
