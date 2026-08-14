@@ -19,6 +19,7 @@ import { discardKeepScore } from "../../runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
+import { persistentEngineProfileForCard } from "./runner-persistent-install-evaluation";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -1022,7 +1023,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     });
   });
 
-  it("captures the current false duplicate classification for a combined economy and draw engine", () => {
+  it("recognizes a combined economy and draw engine without false duplicate overlap", () => {
     const saloon = visibleCard("saloon-candidate", {
       definitionId: "onr_v1_179_silicon-saloon-franchise",
       title: "Silicon Saloon Franchise",
@@ -1075,18 +1076,224 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
     expect(evaluation).toMatchObject({
       developmentRole: "economy_engine",
-      deferReason: "duplicate",
+      deferReason: "none",
       persistentInstallEvaluation: {
         installedSameDefinitionCount: 0,
-        capabilityDelta: "backup_only",
-        duplicateRole: "redundant_duplicate",
+        installedSameFunctionalGroupCount: 0,
+        capabilityDelta: "new_coverage",
+        duplicateRole: "none",
+        engineAssessment: {
+          kind: "multi_output_action_engine",
+          readiness: "ready_now",
+          outputCapabilities: ["cards", "credits"],
+          repeatable: true,
+          consumptionBlockers: [],
+          deckCompatible: true,
+          alreadySatisfied: false,
+        },
       },
     });
     expect(
-      evaluation.persistentInstallEvaluation
-        ?.installedSameFunctionalGroupCount,
-    ).toBeGreaterThan(0);
+      evaluation.persistentInstallEvaluation?.newFunctionalCoverage,
+    ).toContain("persistent_engine:multi_output_action:cards+credits");
   });
+
+  it("recognizes the same combined engine semantics without a known card id", () => {
+    const definitionId = "test-generic-combined-action-engine";
+    AI_HINTS_BY_CARD.set(definitionId, {
+      cardId: definitionId,
+      side: "runner",
+      cardType: "resource",
+      roles: ["economy", "draw"],
+      planRoles: ["recover_economy", "draw_for_answers"],
+      aiSupportStatus: "ai_supported",
+      costProfile: { clicks: 1, credits: 5 },
+      requiredMechanics: ["activated", "take_click_ability"],
+      actionCapabilitySemantics: [
+        {
+          capabilityKey: "combined_credit_and_draw",
+          effects: [
+            {
+              kind: "action_economy",
+              scope: "runner",
+              timing: "action",
+              resource: "credits",
+              amount: 1,
+            },
+            {
+              kind: "draw",
+              scope: "runner",
+              timing: "action",
+              resource: "cards",
+              amount: 1,
+            },
+          ],
+        },
+      ],
+    });
+    try {
+      const engine = visibleCard("generic-engine", {
+        definitionId,
+        type: "resource",
+        installCost: 5,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 12,
+            hand: [engine],
+            legalActions: [installAction("install-generic-engine", engine, 5)],
+          }),
+          strategicIntent: strategicIntent({
+            setupEngine: ["runner.economy_setup_before_pressure"],
+          }),
+        }),
+        engine.instanceId,
+      );
+
+      expect(
+        evaluation.persistentInstallEvaluation?.engineAssessment,
+      ).toMatchObject({
+        kind: "multi_output_action_engine",
+        readiness: "ready_now",
+        outputCapabilities: ["cards", "credits"],
+        repeatable: true,
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(definitionId);
+    }
+  });
+
+  it("does not treat a consuming multi-output ability as a persistent engine", () => {
+    const definitionId = "test-consuming-combined-action";
+    AI_HINTS_BY_CARD.set(definitionId, {
+      cardId: definitionId,
+      side: "runner",
+      cardType: "resource",
+      roles: ["economy", "draw", "self_trash"],
+      planRoles: [],
+      aiSupportStatus: "ai_supported",
+      costProfile: { clicks: 1, credits: 0 },
+      riskTags: ["self_trash"],
+      requiredMechanics: ["activated", "take_click_ability", "trash_source"],
+      actionCapabilitySemantics: [
+        {
+          capabilityKey: "trash_for_credit_and_draw",
+          effects: [
+            {
+              kind: "action_economy",
+              scope: "runner",
+              timing: "action",
+              resource: "credits",
+              amount: 2,
+            },
+            {
+              kind: "draw",
+              scope: "runner",
+              timing: "action",
+              resource: "cards",
+              amount: 1,
+            },
+          ],
+        },
+      ],
+    });
+    try {
+      const consumable = visibleCard("consuming-engine", {
+        definitionId,
+        type: "resource",
+        installCost: 0,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: runnerInput({
+            credits: 5,
+            hand: [consumable],
+            legalActions: [
+              installAction("install-consuming-engine", consumable, 0),
+            ],
+          }),
+        }),
+        consumable.instanceId,
+      );
+
+      expect(
+        evaluation.persistentInstallEvaluation?.engineAssessment,
+      ).toMatchObject({
+        kind: "none",
+        readiness: "not_applicable",
+        repeatable: false,
+        consumptionBlockers: expect.arrayContaining([
+          "mechanic:trash_source",
+          "risk:self_trash",
+          "role:self_trash",
+        ]),
+      });
+    } finally {
+      AI_HINTS_BY_CARD.delete(definitionId);
+    }
+  });
+
+  it.each([
+    ["source_counter_cost", "mechanic:source_counter_cost"],
+    ["once_per_game", "mechanic:once_per_game"],
+  ])(
+    "excludes a multi-output ability constrained by %s",
+    (mechanic, expectedBlocker) => {
+      const definitionId = `test-limited-combined-action-${mechanic}`;
+      AI_HINTS_BY_CARD.set(definitionId, {
+        cardId: definitionId,
+        side: "runner",
+        cardType: "resource",
+        roles: ["economy", "draw"],
+        planRoles: [],
+        aiSupportStatus: "ai_supported",
+        costProfile: { clicks: 1, credits: 0 },
+        requiredMechanics: [
+          "activated",
+          "take_click_ability",
+          mechanic,
+        ],
+        actionCapabilitySemantics: [
+          {
+            capabilityKey: "limited_credit_and_draw",
+            effects: [
+              {
+                kind: "action_economy",
+                scope: "runner",
+                timing: "action",
+                resource: "credits",
+                amount: 2,
+              },
+              {
+                kind: "draw",
+                scope: "runner",
+                timing: "action",
+                resource: "cards",
+                amount: 1,
+              },
+            ],
+          },
+        ],
+      });
+      try {
+        expect(
+          persistentEngineProfileForCard(
+            visibleCard(`limited-${mechanic}`, {
+              definitionId,
+              type: "resource",
+            }),
+          ),
+        ).toMatchObject({
+          kind: "none",
+          repeatable: false,
+          consumptionBlockers: [expectedBlocker],
+        });
+      } finally {
+        AI_HINTS_BY_CARD.delete(definitionId);
+      }
+    },
+  );
 
   it("captures the missing desired-reserve funding demand for a payable expensive engine", () => {
     const saloon = visibleCard("saloon-reserve-candidate", {
@@ -1127,7 +1334,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     });
   });
 
-  it("captures Data Creche as memory-only despite its structured successful-run followup", () => {
+  it("recognizes Data Creche as a conditional successful-run followup engine", () => {
     const creche = visibleCard("creche-candidate", {
       definitionId: "onr_v1_123_bodyweight-data-creche",
       title: "Bodyweight Data Creche",
@@ -1157,11 +1364,23 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     expect(evaluation).toMatchObject({
       developmentRole: "memory_support",
       persistentInstallEvaluation: {
-        newFunctionalCoverage: ["memory"],
+        newFunctionalCoverage: [
+          "memory",
+          "persistent_engine:successful_run_followup",
+        ],
+        engineAssessment: {
+          kind: "successful_run_followup_engine",
+          readiness: "ready_now",
+          outputCapabilities: ["conditional_run"],
+          repeatable: true,
+          consumptionBlockers: [],
+          deckCompatible: true,
+          alreadySatisfied: false,
+        },
       },
     });
     expect(
-      evaluation.persistentInstallEvaluation?.existingFunctionalCoverage,
-    ).not.toContain("successful_run_followup");
+      evaluation.persistentInstallEvaluation?.newFunctionalCoverage,
+    ).toContain("persistent_engine:successful_run_followup");
   });
 });

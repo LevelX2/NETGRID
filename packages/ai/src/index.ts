@@ -551,6 +551,11 @@ export type {
   RunnerHandDevelopmentStrategicFit,
   RunnerPersistentInstallCapabilityDelta,
   RunnerPersistentInstallDuplicateRole,
+  RunnerPersistentEngineAssessment,
+  RunnerPersistentEngineCapability,
+  RunnerPersistentEngineConsumptionBlocker,
+  RunnerPersistentEngineKind,
+  RunnerPersistentEngineReadiness,
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development";

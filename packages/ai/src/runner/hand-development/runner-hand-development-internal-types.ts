@@ -2,6 +2,11 @@ import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import type { BreakerCoverageKind } from "../../deck-capabilities";
 import type { AiHintStructuredEffect } from "../../hint-ontology";
+import type {
+  RunnerPersistentEngineCapability,
+  RunnerPersistentEngineConsumptionBlocker,
+  RunnerPersistentEngineKind,
+} from "./runner-hand-development-types";
 
 export type CardSignals = {
   text: string;
@@ -29,6 +34,11 @@ export type CardContext = {
 };
 
 export type PersistentFunctionalProfile = {
+  persistentEngineKind: RunnerPersistentEngineKind;
+  persistentEngineCapabilities: RunnerPersistentEngineCapability[];
+  persistentEngineRepeatable: boolean;
+  persistentEngineConsumptionBlockers: RunnerPersistentEngineConsumptionBlocker[];
+  persistentEngineCoverage?: string;
   functionalCoverage: string[];
   primaryGroups: string[];
   nonAdditiveUtilityFamilies: string[];

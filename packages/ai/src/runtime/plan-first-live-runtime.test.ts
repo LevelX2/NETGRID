@@ -16762,7 +16762,7 @@ function handEvaluation(params: {
     ...(params.duplicateRole
       ? {
           persistentInstallEvaluation: {
-            schemaVersion: "runner-persistent-install-evaluation-v1",
+            schemaVersion: "runner-persistent-install-evaluation-v2",
             actionId: params.legalActionId,
             cardId: params.cardInstanceId,
             cardType: params.cardType ?? "program",
@@ -16772,6 +16772,16 @@ function handEvaluation(params: {
             memoryCost: params.memoryCost ?? 0,
             installedSameDefinitionCount: 0,
             installedSameFunctionalGroupCount: 0,
+            engineAssessment: {
+              kind: "none",
+              readiness: "not_applicable",
+              outputCapabilities: [],
+              repeatable: false,
+              consumptionBlockers: [],
+              deckCompatible: false,
+              alreadySatisfied: false,
+              evidence: [],
+            },
             existingFunctionalCoverage: [],
             newFunctionalCoverage: [],
             capabilityDelta: "new_capability",

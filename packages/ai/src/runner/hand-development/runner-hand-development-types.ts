@@ -6,7 +6,7 @@ import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
   "runner-hand-development-evaluation-v2" as const;
 export const RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION =
-  "runner-persistent-install-evaluation-v1" as const;
+  "runner-persistent-install-evaluation-v2" as const;
 
 export type RunnerHandDevelopmentAvailability =
   | "legal_now"
@@ -92,6 +92,41 @@ export type RunnerPersistentInstallDuplicateRole =
   | "redundant_duplicate"
   | "emergency_redundancy";
 
+export type RunnerPersistentEngineKind =
+  | "none"
+  | "multi_output_action_engine"
+  | "successful_run_followup_engine";
+
+export type RunnerPersistentEngineReadiness =
+  | "not_applicable"
+  | "blocked"
+  | "setup"
+  | "ready_now"
+  | "already_satisfied";
+
+export type RunnerPersistentEngineCapability =
+  | "cards"
+  | "conditional_run"
+  | "credits";
+
+export type RunnerPersistentEngineConsumptionBlocker =
+  | "mechanic:once_per_game"
+  | "mechanic:source_counter_cost"
+  | "mechanic:trash_source"
+  | "risk:self_trash"
+  | "role:self_trash";
+
+export type RunnerPersistentEngineAssessment = {
+  kind: RunnerPersistentEngineKind;
+  readiness: RunnerPersistentEngineReadiness;
+  outputCapabilities: RunnerPersistentEngineCapability[];
+  repeatable: boolean;
+  consumptionBlockers: RunnerPersistentEngineConsumptionBlocker[];
+  deckCompatible: boolean;
+  alreadySatisfied: boolean;
+  evidence: string[];
+};
+
 export type RunnerPersistentInstallEvaluation = {
   schemaVersion: typeof RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION;
   actionId: string;
@@ -105,6 +140,7 @@ export type RunnerPersistentInstallEvaluation = {
   memoryAfterInstall?: number;
   installedSameDefinitionCount: number;
   installedSameFunctionalGroupCount: number;
+  engineAssessment: RunnerPersistentEngineAssessment;
   existingFunctionalCoverage: string[];
   newFunctionalCoverage: string[];
   capabilityDelta: RunnerPersistentInstallCapabilityDelta;

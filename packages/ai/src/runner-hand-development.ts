@@ -33,6 +33,11 @@ import {
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
   type RunnerPersistentInstallDuplicateRole,
+  type RunnerPersistentEngineAssessment,
+  type RunnerPersistentEngineCapability,
+  type RunnerPersistentEngineConsumptionBlocker,
+  type RunnerPersistentEngineKind,
+  type RunnerPersistentEngineReadiness,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
@@ -52,6 +57,11 @@ export {
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
   type RunnerPersistentInstallDuplicateRole,
+  type RunnerPersistentEngineAssessment,
+  type RunnerPersistentEngineCapability,
+  type RunnerPersistentEngineConsumptionBlocker,
+  type RunnerPersistentEngineKind,
+  type RunnerPersistentEngineReadiness,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
@@ -102,6 +112,7 @@ import {
   persistentCoverageAlreadyPresent,
   persistentFunctionalProfileForCard,
   persistentInstallEvidence,
+  persistentEngineAssessmentForInstall,
   persistentInstallRouteBlocked,
   persistentProfilesOverlap,
   reservePenaltyForPersistentInstall,
@@ -690,6 +701,9 @@ function currentNeedAdjustedByPersistentInstall(
   evaluation: RunnerPersistentInstallEvaluation | undefined,
 ): RunnerHandDevelopmentCurrentNeed {
   if (!evaluation) return currentNeed;
+  if (evaluation.engineAssessment.readiness === "blocked") {
+    return currentNeed === "acute" ? "later" : "none";
+  }
   if (evaluation.finalInstallFit <= -650) {
     if (persistentInstallRouteBlocked(evaluation)) return currentNeed;
     return currentNeed === "acute" ? "later" : "none";
@@ -704,6 +718,13 @@ function currentNeedAdjustedByPersistentInstall(
     return "useful_now";
   }
   if (currentNeed === "later" && evaluation.finalInstallFit >= 500) {
+    return "setup";
+  }
+  if (
+    currentNeed === "none" &&
+    evaluation.engineAssessment.readiness === "ready_now" &&
+    evaluation.finalInstallFit > 0
+  ) {
     return "setup";
   }
   return currentNeed;
@@ -745,6 +766,12 @@ function evaluateRunnerPersistentInstall(
   const installedSameFunctionalGroupCount = installedProfiles.filter(
     (installed) => persistentProfilesOverlap(profile, installed),
   ).length;
+  const engineAssessment = persistentEngineAssessmentForInstall({
+    params,
+    profile,
+    installedSameDefinitionCount,
+    installedSameFunctionalGroupCount,
+  });
   const installedSameRandomBreakProfileCount =
     profile.randomBreakOrDamageProfileId
       ? installedProfiles.filter(
@@ -855,6 +882,7 @@ function evaluateRunnerPersistentInstall(
     ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
     installedSameDefinitionCount,
     installedSameFunctionalGroupCount,
+    engineAssessment,
     existingFunctionalCoverage,
     newFunctionalCoverage,
     capabilityDelta,
@@ -869,6 +897,7 @@ function evaluateRunnerPersistentInstall(
     finalInstallFit,
     evidence: persistentInstallEvidence({
       profile,
+      engineAssessment,
       capabilityDelta,
       stackabilityClass,
       duplicateRole,

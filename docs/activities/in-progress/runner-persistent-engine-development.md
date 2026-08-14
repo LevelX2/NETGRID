@@ -1,6 +1,6 @@
 # Runner Persistent Engine Development
 
-Status: in Umsetzung – RPED-00 abgeschlossen, RPED-01 aktiv
+Status: in Umsetzung – RPED-00 und RPED-01 abgeschlossen, RPED-02 aktiv
 Quelle: Nutzerauftrag vom 2026-08-14 und Review-Rückmeldung aus `pasted-text.txt`
 
 ## Zielprüfung
@@ -104,7 +104,7 @@ prepared
 Genau ein Zustand beziehungsweise Paket ist aktiv. Ein Paketwechsel erfolgt
 erst nach Done-Gate und Commit.
 
-Aktueller Zustand: `semantic_engine_support`.
+Aktueller Zustand: `reserve_funding_and_replacement`.
 
 ## Diagnoseergebnis RPED-00
 
@@ -136,6 +136,40 @@ präzisiert:
 Die fokussierten Diagnose-Regressionen bilden diese drei konkreten Lücken ab:
 falsche kombinierte Funktionsredundanz, fehlender gewünschter Reservebedarf und
 fehlende erfolgreiche-Run-Folgekapazität.
+
+## Umsetzungsergebnis RPED-01
+
+- Die Persistent-Install-Evaluation besitzt jetzt einen versionierten,
+  typisierten `engineAssessment` mit Engine-Art, Readiness, Outputs,
+  Wiederholbarkeit, Konsumptionsblockern, Deck-Kompatibilität und
+  Already-satisfied-Status.
+- `multi_output_action_engine` wird ausschließlich aus einer einzelnen
+  strukturierten `actionCapabilitySemantics` mit mindestens zwei produktiven
+  Outputs, Action-Timing, Click-Ability-Mechanik und ohne terminalen Verbrauch
+  abgeleitet. Self-Trash, `source_counter_cost` und Once-per-game sind durch
+  Gegenfälle ausgeschlossen.
+- Kombinierte Engines erhalten eine atomare Funktionsdeckung. Dadurch ist
+  Saloon nicht länger fälschlich redundant zu getrennten Economy-, Draw- oder
+  Search-Karten; eine zweite gleichartige Engine bleibt nicht-additiv.
+- `successful_run_followup_engine` verlangt den strukturierten
+  `future_run_effect` nach erfolgreichem Run, das Ziel `make_run`,
+  Wiederholbarkeit und die `requires_successful_run`-Bedingung. Die Semantik
+  erscheint in Readiness und Evidence, erzeugt aber weder allgemeine Action
+  Capacity noch einen neuen Planowner.
+- Readiness ist an bestehende Bedarf-/Admission-Pfade angebunden: fachlich
+  blockierte Folge-Engines werden nicht als aktueller Bedarf zugelassen;
+  `ready_now` kann nur innerhalb der bestehenden Persistent-Install-Bewertung
+  Setup-Bedarf sichtbar machen.
+
+Paketchecks:
+
+- `runner-persistent-install-evaluation.test.ts`: 25/25 grün;
+- `git diff --check`: grün;
+- AI-Typecheck ausgeführt, aber durch unveränderte Main-Baseline blockiert:
+  vier nicht vorhandene `docs/reviews/cards/*-migration-report.json` sowie der
+  bereits vorhandene Typfehler in
+  `runtime/sneak-preview-coverage-choice-real-engine.test.ts`. Keine Meldung
+  betrifft die in RPED-01 geänderten Typen oder Dateien.
 
 ## Paketfolge
 

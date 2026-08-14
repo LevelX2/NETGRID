@@ -38,6 +38,10 @@ import type {
   RunnerHandDevelopmentStrategicFit,
   RunnerPersistentInstallCapabilityDelta,
   RunnerPersistentInstallDuplicateRole,
+  RunnerPersistentEngineAssessment,
+  RunnerPersistentEngineCapability,
+  RunnerPersistentEngineConsumptionBlocker,
+  RunnerPersistentEngineKind,
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development-types";
@@ -214,14 +218,18 @@ export function persistentFunctionalProfileForCard(
     runnerHintProvidesSearch(hint) ||
     runnerHintProvidesTopTrashRecovery(hint) ||
     looksLikeDrawOrSearch(text);
-  const nonAdditiveUtilityFamilies =
-    nonAdditiveUtilityFamiliesForPersistentCard(card, text);
+  const persistentEngine = persistentEngineProfileForCard(card);
+  const nonAdditiveUtilityFamilies = sortedUnique([
+    ...nonAdditiveUtilityFamiliesForPersistentCard(card, text),
+    ...(persistentEngine.coverage ? [persistentEngine.coverage] : []),
+  ]);
   const actionGatedUtility =
     nonAdditiveUtilityFamilies.length > 0 || actionEconomy;
   const absoluteNonStackable =
     runnerHandTextHasAbsoluteLinkSignal(text) &&
     !runnerHandTextHasTemporaryCounterSignal(text);
   const functionalCoverage = sortedUnique([
+    ...(persistentEngine.coverage ? [persistentEngine.coverage] : []),
     ...breakerCoverage.map((coverage) => `breaker:${coverage}`),
     ...nonAdditiveUtilityFamilies,
     ...(memorySupport ? ["memory"] : []),
@@ -237,11 +245,19 @@ export function persistentFunctionalProfileForCard(
     ...(searchSupport ? ["search_support"] : []),
     ...(absoluteNonStackable ? ["absolute_link"] : []),
   ]);
-  const primaryGroups =
-    functionalCoverage.length > 0
+  const primaryGroups = persistentEngine.coverage
+    ? [persistentEngine.coverage]
+    : functionalCoverage.length > 0
       ? functionalCoverage
       : [`type:${card.type ?? "unknown"}`];
   return {
+    persistentEngineKind: persistentEngine.kind,
+    persistentEngineCapabilities: persistentEngine.outputCapabilities,
+    persistentEngineRepeatable: persistentEngine.repeatable,
+    persistentEngineConsumptionBlockers: persistentEngine.consumptionBlockers,
+    ...(persistentEngine.coverage
+      ? { persistentEngineCoverage: persistentEngine.coverage }
+      : {}),
     functionalCoverage,
     primaryGroups,
     nonAdditiveUtilityFamilies,
@@ -267,6 +283,184 @@ export function persistentFunctionalProfileForCard(
     searchSupport,
     actionGatedUtility,
     absoluteNonStackable,
+  };
+}
+
+type PersistentEngineProfile = {
+  kind: RunnerPersistentEngineKind;
+  outputCapabilities: RunnerPersistentEngineCapability[];
+  repeatable: boolean;
+  consumptionBlockers: RunnerPersistentEngineConsumptionBlocker[];
+  coverage?: string;
+};
+
+export function persistentEngineProfileForCard(
+  card: VisibleCard,
+): PersistentEngineProfile {
+  if (
+    !["program", "hardware", "resource"].includes(card.type ?? "") ||
+    !card.definitionId
+  ) {
+    return emptyPersistentEngineProfile();
+  }
+  const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  if (!hint) return emptyPersistentEngineProfile();
+  const consumptionBlockers = sortedUnique([
+    ...(hint.roles.some((role) => role === "self_trash")
+      ? ["role:self_trash"]
+      : []),
+    ...(hint.riskTags?.some((risk) =>
+      ["self_trash", "trash_source"].includes(risk),
+    )
+      ? ["risk:self_trash"]
+      : []),
+    ...(hint.requiredMechanics?.includes("trash_source")
+      ? ["mechanic:trash_source"]
+      : []),
+    ...(hint.requiredMechanics?.includes("source_counter_cost")
+      ? ["mechanic:source_counter_cost"]
+      : []),
+    ...(hint.requiredMechanics?.some((mechanic) =>
+      ["once_per_game", "once_per_game_limit"].includes(mechanic),
+    )
+      ? ["mechanic:once_per_game"]
+      : []),
+  ]) as RunnerPersistentEngineConsumptionBlocker[];
+  const repeatableActionCapability = hint.actionCapabilitySemantics
+    ?.map((capability) => ({
+      outputCapabilities: sortedUnique(
+        (capability.effects ?? [])
+          .filter((effect) => effect.timing === "action")
+          .map(persistentActionOutputCapability)
+          .filter(
+            (output): output is RunnerPersistentEngineCapability =>
+              output !== undefined,
+          ),
+      ) as RunnerPersistentEngineCapability[],
+    }))
+    .find(
+      ({ outputCapabilities }) =>
+        outputCapabilities.length >= 2 &&
+        (hint.costProfile?.clicks ?? 0) >= 1 &&
+        hint.requiredMechanics?.includes("activated") === true &&
+        hint.requiredMechanics.includes("take_click_ability"),
+    );
+  if (repeatableActionCapability && consumptionBlockers.length === 0) {
+    const outputCapabilities = repeatableActionCapability.outputCapabilities;
+    return {
+      kind: "multi_output_action_engine",
+      outputCapabilities,
+      repeatable: true,
+      consumptionBlockers,
+      coverage: `persistent_engine:multi_output_action:${outputCapabilities.join("+")}`,
+    };
+  }
+  const successfulRunFollowup = hint.effects?.find(
+    (effect) =>
+      effect.kind === "future_run_effect" &&
+      effect.timing === "after_successful_run" &&
+      effect.target === "make_run" &&
+      effect.repeatable === true &&
+      hint.conditions?.some(
+        (condition) => condition.kind === "requires_successful_run",
+      ) === true,
+  );
+  if (successfulRunFollowup && consumptionBlockers.length === 0) {
+    return {
+      kind: "successful_run_followup_engine",
+      outputCapabilities: ["conditional_run"],
+      repeatable: true,
+      consumptionBlockers,
+      coverage: "persistent_engine:successful_run_followup",
+    };
+  }
+  return {
+    ...emptyPersistentEngineProfile(),
+    consumptionBlockers,
+  };
+}
+
+function emptyPersistentEngineProfile(): PersistentEngineProfile {
+  return {
+    kind: "none",
+    outputCapabilities: [],
+    repeatable: false,
+    consumptionBlockers: [],
+  };
+}
+
+function persistentActionOutputCapability(effect: {
+  kind: string;
+  resource?: string;
+}): RunnerPersistentEngineCapability | undefined {
+  if (
+    effect.resource === "credits" ||
+    effect.kind === "economy" ||
+    effect.kind === "action_economy"
+  ) {
+    return "credits";
+  }
+  if (effect.resource === "cards" || effect.kind === "draw") return "cards";
+  return undefined;
+}
+
+export function persistentEngineAssessmentForInstall(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  installedSameDefinitionCount: number;
+  installedSameFunctionalGroupCount: number;
+}): RunnerPersistentEngineAssessment {
+  const { profile } = params;
+  const alreadySatisfied =
+    profile.persistentEngineKind !== "none" &&
+    (params.installedSameDefinitionCount > 0 ||
+      params.installedSameFunctionalGroupCount > 0);
+  const setupEngine = new Set(params.params.strategicIntent?.setupEngine ?? []);
+  const deckCompatible =
+    profile.persistentEngineKind === "multi_output_action_engine"
+      ? setupEngine.has("runner.economy_setup_before_pressure") ||
+        setupEngine.has("runner.draw_or_search_setup") ||
+        setupEngine.has("runner.search_breaker_setup")
+      : profile.persistentEngineKind === "successful_run_followup_engine"
+        ? intentHasPressure(params.params.strategicIntent) ||
+          params.params.strategicIntent?.executionStyle ===
+            "runner.run_event_tempo"
+        : false;
+  const readiness =
+    profile.persistentEngineKind === "none"
+      ? "not_applicable"
+      : profile.persistentEngineConsumptionBlockers.length > 0 ||
+          !profile.persistentEngineRepeatable
+        ? "blocked"
+        : alreadySatisfied
+          ? "already_satisfied"
+          : profile.persistentEngineKind === "successful_run_followup_engine" &&
+              !deckCompatible
+            ? "blocked"
+            : profile.persistentEngineKind ===
+                  "successful_run_followup_engine" &&
+                runnerNeedsCoverageFromHand(params.params.deckCapabilities)
+              ? "setup"
+              : deckCompatible
+                ? "ready_now"
+                : "setup";
+  return {
+    kind: profile.persistentEngineKind,
+    readiness,
+    outputCapabilities: profile.persistentEngineCapabilities,
+    repeatable: profile.persistentEngineRepeatable,
+    consumptionBlockers: profile.persistentEngineConsumptionBlockers,
+    deckCompatible,
+    alreadySatisfied,
+    evidence: [
+      `persistent_engine_kind:${profile.persistentEngineKind}`,
+      `persistent_engine_readiness:${readiness}`,
+      `persistent_engine_outputs:${profile.persistentEngineCapabilities.join("|") || "none"}`,
+      `persistent_engine_repeatable:${profile.persistentEngineRepeatable}`,
+      `persistent_engine_consumption_blockers:${profile.persistentEngineConsumptionBlockers.join("|") || "none"}`,
+      `persistent_engine_deck_compatible:${deckCompatible}`,
+      `persistent_engine_already_satisfied:${alreadySatisfied}`,
+    ],
   };
 }
 
@@ -609,6 +803,7 @@ export function stackabilityClassForPersistentInstall(
   if (hasInstalledNonAdditiveUtilityOverlap(profile, installedProfiles)) {
     return "absolute_non_stackable";
   }
+  if (profile.persistentEngineKind !== "none") return "synergy_support";
   if (
     persistentInstallImprovesRandomBreakProbability(profile, installedProfiles)
   ) {
@@ -1014,6 +1209,7 @@ export function muPressurePenaltyForPersistentInstall(params: {
 
 export function persistentInstallEvidence(params: {
   profile: PersistentFunctionalProfile;
+  engineAssessment: RunnerPersistentEngineAssessment;
   capabilityDelta: RunnerPersistentInstallCapabilityDelta;
   stackabilityClass: RunnerPersistentInstallStackabilityClass;
   duplicateRole: RunnerPersistentInstallDuplicateRole;
@@ -1053,6 +1249,7 @@ export function persistentInstallEvidence(params: {
       : undefined;
   return [
     `persistent_install_role:${params.role}`,
+    ...params.engineAssessment.evidence,
     `persistent_functional_coverage:${params.profile.functionalCoverage.join("|") || "none"}`,
     `non_additive_utility_families:${params.profile.nonAdditiveUtilityFamilies.join("|") || "none"}`,
     `new_functional_coverage:${params.newFunctionalCoverage.join("|") || "none"}`,
@@ -1414,6 +1611,7 @@ export function persistentInstallRouteBlocked(
   evaluation: RunnerPersistentInstallEvaluation,
 ): boolean {
   return (
+    evaluation.engineAssessment.readiness === "blocked" ||
     evaluation.displacementPenalty < 0 ||
     evaluation.muPressurePenalty < 0 ||
     evaluation.reservePenalty <= -900 ||
