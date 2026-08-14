@@ -74,10 +74,7 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      {
-        kind: "plan_role",
-        role: "build_scoring_remote",
-      },
+      { kind: "plan_role", role: "resource_denial" },
       {
         kind: "strategic_role",
         role: "enabler",
@@ -85,10 +82,6 @@ export const cardSpec = {
       {
         kind: "strategic_role",
         role: "support_tool",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.tag_trace_punish",
       },
       {
         kind: "line_support",
@@ -137,6 +130,15 @@ export const cardSpec = {
             roleDetail: "anchor_evidence_trace_source",
             evidenceAnchor: "trace.source",
             confidence: "high",
+          },
+          {
+            kind: "target_preference",
+            purpose: "trash_recently_installed_runner_resource",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+            ],
+            avoid: ["unknown_low_information_target"],
           },
         ],
       },

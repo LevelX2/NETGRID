@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Runner must pay 5, in addition to any other costs, to steal agendas accessed from this fort, even on the run during which Runner trashes Red Herrings.",
+      "Runner must pay [5], in addition to any other costs, to steal agendas accessed from this fort, even on the run during which Runner trashes Red Herrings.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -522,7 +522,7 @@ export function buildCorpMainActions(
           [{ clicks: 1, credits: fixedPlayCostCredits(definition) }],
           {
             cardId: id,
-            ...deterministicOnPlayResourcePayload(definition, "corp"),
+            ...deterministicOnPlayResourcePayload(definition, "corp", state),
             ...operationCapabilityBinding?.payload,
           },
           operationCapabilityBinding

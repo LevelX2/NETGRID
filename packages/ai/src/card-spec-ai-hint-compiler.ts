@@ -5037,9 +5037,7 @@ function deriveClosedExtendedRiskTags(
   if (engine.selfRezAdditionalCosts !== undefined)
     risks.add("agenda_point_cost");
   if (engine.fortRunWindows !== undefined) risks.add("start_run_reposition");
-  if (
-    engine.iceEncounter?.kind === "roll_die_strength_or_derez_auto_pass"
-  )
+  if (engine.iceEncounter?.kind === "roll_die_strength_or_derez_auto_pass")
     for (const risk of [
       "deterministic_random",
       "self_derez",
@@ -5833,6 +5831,28 @@ function deriveTargetProfiles(
       (annotation) => annotation.kind === "target_preference",
     ) ?? [];
   const preference = preferences[0];
+  const exposesInstalledCards =
+    entry.planning.engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "expose_installed_cards",
+      ),
+    ) === true;
+  if (preferences.length > 0 && exposesInstalledCards)
+    return preferences.flatMap((targetPreference) => {
+      const serverProfile = deriveClosedExtendedTargetProfile(
+        entry,
+        targetPreference,
+      );
+      return [
+        { ...serverProfile, hiddenInfoPolicy: "legal_targets_only" as const },
+        {
+          ...serverProfile,
+          purpose: `${targetPreference.purpose}_card_selection`,
+          targetType: "card" as const,
+          hiddenInfoPolicy: "legal_targets_only" as const,
+        },
+      ];
+    });
   if (
     preferences.length > 0 &&
     (usesClosedExtendedMechanicalProfile(entry) ||
@@ -5990,6 +6010,44 @@ function deriveTargetProfiles(
   );
   if (onPlay !== undefined) {
     const target = capabilityPreferences.get(onPlay.capabilityKey);
+    const trashesRecentlyInstalledResource = onPlay.effects?.some(
+      (effect) =>
+        effect.kind === "trace" &&
+        effect.onSuccess.some(
+          (outcome) =>
+            outcome.kind === "trash_runner_resource_and_add_tag" &&
+            outcome.target === "runner_resource_installed_last_turn",
+        ),
+    );
+    if (target !== undefined && trashesRecentlyInstalledResource)
+      return [
+        {
+          schemaVersion: "target-profile-v1",
+          kind: "use_target",
+          timing: "on_play",
+          targetType: "resource",
+          purpose: target.purpose,
+          ...(target.preferences === undefined
+            ? {}
+            : {
+                preferences: closedPlanningValues(
+                  target.preferences,
+                  KNOWN_HINT_TARGET_PROFILE_PREFERENCES,
+                  "target_preference",
+                ),
+              }),
+          ...(target.avoid === undefined
+            ? {}
+            : {
+                avoid: closedPlanningValues(
+                  target.avoid,
+                  KNOWN_HINT_TARGET_PROFILE_AVOIDS,
+                  "target_avoid",
+                ),
+              }),
+          hiddenInfoPolicy: "legal_targets_only",
+        },
+      ];
     if (target !== undefined)
       return [
         {
@@ -6116,6 +6174,7 @@ function hasClosedTargetPreferenceOwner(
               "remove_same_fort_advancement_counters_for_run_credits",
               "search_stack_install",
               "look_top_stack_take_matching",
+              "look_top_stack_take_one_arrange_rest",
               "trash_unrezzed_ice",
             ].includes(effect.kind),
       ),
@@ -6163,6 +6222,20 @@ function deriveClosedExtendedTargetProfile(
         lookTopStack.allowedTypes[0] === "program"
           ? "program"
           : "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "look_top_stack_take_one_arrange_rest",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "card",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (

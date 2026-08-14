@@ -74,6 +74,10 @@ export const cardSpec = {
         role: "payoff_anchor",
       },
       {
+        kind: "strategy_anchor",
+        strategyKey: "corp.overadvance_value",
+      },
+      {
         kind: "line_support",
         lineKey: "corp.action_tempo",
         support: "supports",

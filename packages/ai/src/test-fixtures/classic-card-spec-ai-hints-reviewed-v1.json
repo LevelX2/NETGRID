@@ -2190,7 +2190,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["asset", "remote_support"],
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
-        "valueHints": { "remoteRootValue": 3 },
+        "valueHints": {
+          "remoteRootValue": 3
+        },
         "strategicRole": ["defensive_tool"],
         "strategyAnchors": ["corp.central_stabilize"],
         "lineSupport": ["corp.central_stabilize"],
@@ -2248,8 +2250,14 @@
           "effect_timing:after_successful_run",
           "punish.payoff"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": ["successful_run", "hidden_zone"],
         "quality": {
           "hintReviewed": true,

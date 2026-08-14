@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "1: Break code gate subroutine. 2: +1 strength. Put a +1 strength counter on Dupré after each run during which it was used to break a subroutine. All strength counters on Dupré are lost if you use Dupré on a fort other than the one you last used it on.",
+      "[1]: Break code gate subroutine. [2]: +1 strength. Put a +1 strength counter on Dupré after each run during which it was used to break a subroutine. All strength counters on Dupré are lost if you use Dupré on a fort other than the one you last used it on.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

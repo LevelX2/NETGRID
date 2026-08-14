@@ -721,6 +721,7 @@ export function buildRunnerMainActions(
       const deterministicResourcePayload = deterministicOnPlayResourcePayload(
         definition,
         "runner",
+        state,
       );
       const eventCapabilityBinding = runnerEventCapabilityBinding(
         host,

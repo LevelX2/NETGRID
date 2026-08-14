@@ -65,6 +65,10 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
+        kind: "plan_role",
+        role: "draw_for_answers",
+      },
+      {
         kind: "line_support",
         lineKey: "runner.search.breaker",
         support: "supports",
@@ -72,8 +76,10 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "top_five_choice_and_reorder",
-        preferences: [],
-        avoid: [],
+        preferences: [
+          "best_cards_for_current_plan",
+          "best_cards_for_current_state",
+        ],
       },
     ],
     capabilities: [],

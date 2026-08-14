@@ -82,6 +82,8 @@ export const KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS = [
   "self_tag",
   "self_damage",
   "temporary_resource",
+  "credits_for_bad_publicity",
+  "agenda_point_for_multi_server_run_sequence",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_TIMINGS = [
@@ -401,6 +403,7 @@ export const KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES = [
   "hosted_program",
   "server",
   "card",
+  "resource",
   "accessed_card",
   "mode_choice",
   "subroutine",

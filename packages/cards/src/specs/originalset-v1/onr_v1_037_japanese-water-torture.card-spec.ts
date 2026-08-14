@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "0: Break wall subroutine.\nX: +X strength, and forgo your next X actions.",
+      "[0]: Break wall subroutine.\n[X]: +X strength, and forgo your next X actions.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -87,6 +87,13 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "coverage.breaker",
         use: "coverage.breaker",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "variable_future_action_debt",
+        severity: "high",
+        rationale:
+          "Each chosen point of pump strength also forgoes one future action.",
       },
     ],
     capabilities: [],

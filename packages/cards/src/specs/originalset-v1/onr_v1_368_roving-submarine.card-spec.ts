@@ -72,7 +72,11 @@ export const cardSpec = {
       },
       { kind: "strategic_role", role: "defensive_tool" },
       { kind: "plan_role", role: "remote_upgrade_agenda_support" },
-      { kind: "remote_role", role: "run_tax", threatLevel: "medium" },
+      {
+        kind: "remote_role",
+        role: "scoring_protection",
+        threatLevel: "medium",
+      },
       {
         kind: "strategy_support",
         strategyKey: "corp.remote_scoring",

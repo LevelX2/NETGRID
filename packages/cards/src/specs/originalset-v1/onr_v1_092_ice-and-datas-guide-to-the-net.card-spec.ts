@@ -66,17 +66,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "safe_probe_run",
-      },
-      {
-        kind: "plan_role",
-        role: "build_rig",
-      },
-      {
-        kind: "target_preference",
-        purpose: "outermost_ice_report",
-        preferences: [],
-        avoid: [],
+        role: "information",
       },
     ],
     capabilities: [],

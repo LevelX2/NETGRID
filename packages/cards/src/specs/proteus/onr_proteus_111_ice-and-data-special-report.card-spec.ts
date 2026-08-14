@@ -70,13 +70,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "information",
       },
       {
         kind: "target_preference",
         purpose: "server_recon",
-        preferences: ["relevant_server_ice"],
-        avoid: [],
+        preferences: [
+          "best_cards_for_current_plan",
+          "best_cards_for_current_state",
+          "central_or_remote_plan_enabler",
+        ],
       },
     ],
     capabilities: [],

@@ -88,11 +88,6 @@ export const cardSpec = {
           "Research agenda difficulty discount supports remote scoring.",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",

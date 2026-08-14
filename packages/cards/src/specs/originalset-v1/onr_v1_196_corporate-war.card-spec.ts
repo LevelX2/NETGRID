@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "If you have 12 or more bits in your pool when you score Corporate War, gain 12; otherwise, lose all bits.",
+      "If you have [12] or more bits in your pool when you score Corporate War, gain [12]; otherwise, lose all bits.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

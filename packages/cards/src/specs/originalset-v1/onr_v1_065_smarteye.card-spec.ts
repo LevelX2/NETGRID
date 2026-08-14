@@ -65,16 +65,6 @@ export const cardSpec = {
         kind: "plan_role",
         role: "information",
       },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
-      },
-      {
-        kind: "target_preference",
-        purpose: "expose_approached_unrezzed_ice",
-        preferences: ["current_encounter_ice"],
-        avoid: ["hidden_info_dependent_choice"],
-      },
     ],
     capabilities: [],
   },

@@ -72,6 +72,17 @@ export const cardSpec = {
         signal: "economy.card",
         use: "economy.card",
       },
+      {
+        kind: "strategic_exchange",
+        exchange: "credits_for_bad_publicity",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "bad_publicity_loss_condition",
+        severity: "high",
+        rationale:
+          "Scoring adds Bad Publicity and loses immediately at seven or more, even if a victory condition is reached simultaneously.",
+      },
     ],
     capabilities: [],
   },

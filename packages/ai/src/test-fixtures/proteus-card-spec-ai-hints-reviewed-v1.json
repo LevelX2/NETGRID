@@ -102,9 +102,13 @@
         "roles": ["agenda", "score_plan", "agenda_1pt", "no_ability_agenda"],
         "planRoles": ["corp_score_agenda", "score_next_turn"],
         "valueHints": {},
+        "strategicExchangeKinds": ["credits_for_bad_publicity"],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "riskTags": ["hidden_until_score_or_access"],
+        "riskTags": [
+          "bad_publicity_loss_condition",
+          "hidden_until_score_or_access"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -518,6 +522,7 @@
         "planRoles": ["corp_score_agenda", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["win_condition", "payoff_anchor"],
+        "strategyAnchors": ["corp.overadvance_value"],
         "lineSupport": ["corp.action_tempo", "corp.overadvance_value"],
         "strategySupportPairs": [
           {
@@ -1402,7 +1407,7 @@
         "roles": ["ice", "etr_ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
+        "lineSupport": ["corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -4405,10 +4410,9 @@
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_scoring_remote"],
+        "planRoles": ["resource_denial"],
         "valueHints": {},
         "strategicRole": ["enabler", "support_tool"],
-        "strategyAnchors": ["corp.tag_trace_punish"],
         "lineSupport": ["corp.tag_trace_punish"],
         "strategySupportPairs": [
           {
@@ -4494,6 +4498,21 @@
                 "confidence": "high"
               }
             ]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "resource",
+            "purpose": "trash_recently_installed_runner_resource",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state"
+            ],
+            "avoid": ["unknown_low_information_target"],
+            "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
         "effects": [
@@ -5580,7 +5599,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["hidden_zone"],
         "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "valueHints": {
+          "remoteRootValue": 1
+        },
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["corp.ambush_bluff"],
         "lineSupport": ["corp.ambush_bluff"],
@@ -5609,10 +5630,16 @@
         ],
         "actionTacticSignals": ["access.punish", "punish.payoff"],
         "conditions": [
-          { "kind": "requires_accessed_card" },
-          { "kind": "requires_rnd_top" }
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
         ],
-        "costProfile": { "credits": 0 },
+        "costProfile": {
+          "credits": 0
+        },
         "riskTags": [
           "hidden_info_barrier",
           "access_window",
@@ -5916,13 +5943,11 @@
           "score.research_difficulty_discount"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
           "remote.agenda_difficulty_discount",
           "score.agenda_difficulty_discount",
           "score.research_difficulty_discount"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:global_modifier",
           "effect_scope:remote",
           "effect_timing:persistent"
@@ -6352,8 +6377,16 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 1,
+          "memory": 1
+        },
         "riskTags": ["successful_run"],
         "quality": {
           "hintReviewed": true,
@@ -8991,7 +9024,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig"],
+        "planRoles": ["information"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -9002,12 +9035,28 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "server_recon",
-            "preferences": ["relevant_server_ice"],
-            "avoid": [],
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "central_or_remote_plan_enabler"
+            ],
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
-            "hiddenInfoPolicy": "public_or_controller_known_only"
+            "hiddenInfoPolicy": "legal_targets_only"
+          },
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "server_recon_card_selection",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "central_or_remote_plan_enabler"
+            ],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "card",
+            "hiddenInfoPolicy": "legal_targets_only"
           }
         ],
         "costProfile": {
@@ -9193,9 +9242,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": ["recover_economy"],
-        "valueHints": {
-          "economy": 1
-        },
+        "valueHints": {},
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_gain_credits_from_runner_trash_history"
@@ -9303,9 +9350,13 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["pressure_rnd"],
+        "planRoles": ["multi_server_run_sequence"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
+        "strategicRole": ["payoff_anchor"],
+        "lineSupport": ["runner.run_event_tempo"],
+        "strategicExchangeKinds": [
+          "agenda_point_for_multi_server_run_sequence"
+        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_run_each_fort_sequence"
@@ -9315,6 +9366,7 @@
           "clicks": 1,
           "credits": 1
         },
+        "riskTags": ["future_action_debt_on_failed_run_sequence"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -10824,8 +10876,15 @@
         "lineSupport": ["runner.hq_pressure"],
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["successful_run", "hidden_zone"],
         "quality": {
           "hintReviewed": true,
@@ -10870,8 +10929,15 @@
         ],
         "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": ["corp.remote_protection"],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": ["successful_run", "hidden_zone"],
         "quality": {
           "hintReviewed": true,
@@ -11271,7 +11337,7 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["hidden_zone_tool", "resource", "multiaccess"],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": ["build_rig", "pressure_hq"],
         "valueHints": {},
         "strategicRole": ["payoff_anchor"],
         "strategyAnchors": ["runner.hq_pressure", "runner.interface_closeout"],

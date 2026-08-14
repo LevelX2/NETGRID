@@ -653,10 +653,27 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     };
     const fastBefore = state.runner.credits;
     const fast = playEventAction(state, "onr_proteus_114_on-the-fast-track");
+    expect(fast.action.payload).toMatchObject({ gainCreditsAmount: 8 });
     state = fast.state;
     expect(state.runner.credits).toBe(fastBefore - fast.creditCost + 8);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       gainedCredits: 8,
+    });
+
+    const transactionsState = runnerMain("proteus-pro008-fast-track-tx");
+    transactionsState.runnerTurnFlags = {
+      ...(transactionsState.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      trashedTransactionsThisTurn: true,
+    };
+    const transactionsFast = playEventAction(
+      transactionsState,
+      "onr_proteus_114_on-the-fast-track",
+    );
+    expect(transactionsFast.action.payload).toMatchObject({
+      gainCreditsAmount: 6,
     });
 
     state = runnerMain("proteus-pro008-prearranged-drop");

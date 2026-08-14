@@ -36,6 +36,9 @@ export const cardSpec = {
         agendaPoints: null,
       },
       playCost: null,
+      memoryLimitBonus: 2,
+      maxHandSizeBonus: 2,
+      recurringCredits: 2,
       strength: {
         kind: "not_applicable",
       },

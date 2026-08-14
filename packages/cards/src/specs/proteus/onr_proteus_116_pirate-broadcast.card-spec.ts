@@ -65,11 +65,22 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "pressure_rnd",
+        role: "multi_server_run_sequence",
+      },
+      { kind: "strategic_role", role: "payoff_anchor" },
+      {
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "strategic_exchange",
+        exchange: "agenda_point_for_multi_server_run_sequence",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "future_action_debt_on_failed_run_sequence",
+        severity: "high",
       },
     ],
     capabilities: [],

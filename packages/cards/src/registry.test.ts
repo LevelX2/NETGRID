@@ -74,6 +74,35 @@ function registryFor(
 }
 
 describe("CardRegistry", () => {
+  it("projects typed public hardware characteristics without duplicating runtime contracts", () => {
+    expect(
+      publicCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_proteus_134_cortical-cybermodem" as CardDefinitionId,
+      ),
+    ).toMatchObject({
+      memoryLimitBonus: 2,
+      maxHandSizeBonus: 2,
+      recurringCredits: 2,
+    });
+    expect(
+      engineCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_proteus_134_cortical-cybermodem" as CardDefinitionId,
+      )?.engine.characteristics,
+    ).toMatchObject({
+      memoryLimitBonus: 2,
+      maxHandSizeBonus: 2,
+      recurringCredits: 2,
+    });
+    expect(
+      publicCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_classic_052_zetatech-portastation" as CardDefinitionId,
+      ),
+    ).toMatchObject({ recurringCredits: 1 });
+  });
+
   it("builds deterministic cached projections and all scoped lookups", () => {
     const active = capabilitySpec();
     active.publication = {

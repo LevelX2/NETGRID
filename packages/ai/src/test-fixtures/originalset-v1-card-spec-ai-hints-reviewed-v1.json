@@ -1789,8 +1789,16 @@
             "serverScope": "source_fort"
           }
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0,
+          "memory": 1
+        },
         "riskTags": ["successful_run", "hidden_zone"],
         "quality": {
           "hintReviewed": true,
@@ -2451,7 +2459,7 @@
           "credits": 7,
           "memory": 1
         },
-        "riskTags": ["encounter"],
+        "riskTags": ["variable_future_action_debt", "encounter"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2922,8 +2930,16 @@
             "serverScope": "source_fort"
           }
         ],
-        "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0,
+          "memory": 1
+        },
         "riskTags": ["successful_run"],
         "quality": {
           "hintReviewed": true,
@@ -4442,7 +4458,6 @@
         "roles": [],
         "planRoles": ["build_rig", "information"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
         "costProfile": {
           "clicks": 1,
           "credits": 2,
@@ -6172,7 +6187,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["safe_probe_run", "build_rig"],
+        "planRoles": ["information"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -6207,12 +6222,26 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["draw_for_answers"],
         "valueHints": {},
         "lineSupport": ["runner.search.breaker"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_look_top_stack_take_one_arrange_rest"
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "top_five_choice_and_reorder",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state"
+            ],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "costProfile": {
@@ -8256,10 +8285,17 @@
           "effect_timing:persistent"
         ],
         "conditions": [
-          { "kind": "requires_installed_ice" },
-          { "kind": "requires_successful_run" }
+          {
+            "kind": "requires_installed_ice"
+          },
+          {
+            "kind": "requires_successful_run"
+          }
         ],
-        "costProfile": { "clicks": 1, "credits": 3 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 3
+        },
         "riskTags": ["install_runner", "successful_run", "deck_unique"],
         "quality": {
           "hintReviewed": true,
@@ -25735,8 +25771,6 @@
     },
     {
       "cardId": "onr_v1_329_investment-firm",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6b7661813626ccdd",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e59d5db3d49e222f",
       "hint": {
         "cardId": "onr_v1_329_investment-firm",
         "side": "corp",

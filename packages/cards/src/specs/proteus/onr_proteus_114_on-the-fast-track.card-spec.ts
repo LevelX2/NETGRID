@@ -75,11 +75,6 @@ export const cardSpec = {
         signal: "economy.card",
         use: "economy.card",
       },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
-      },
     ],
     capabilities: [],
   },

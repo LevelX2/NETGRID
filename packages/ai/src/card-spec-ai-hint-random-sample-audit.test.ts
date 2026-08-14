@@ -12,6 +12,96 @@ function hint(cardId: string) {
 }
 
 describe("random production-card sample semantic corrections", () => {
+  it("keeps Batch 3 target profiles attached only to real, side-safe choices", () => {
+    expect(
+      hint("onr_proteus_053_underworld-mole").targetProfiles,
+    ).toContainEqual({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "resource",
+      purpose: "trash_recently_installed_runner_resource",
+      preferences: [
+        "best_cards_for_current_plan",
+        "best_cards_for_current_state",
+      ],
+      avoid: ["unknown_low_information_target"],
+      hiddenInfoPolicy: "legal_targets_only",
+    });
+    expect(hint("onr_v1_065_smarteye").targetProfiles).toBeUndefined();
+    expect(
+      hint("onr_v1_092_ice-and-datas-guide-to-the-net").targetProfiles,
+    ).toBeUndefined();
+
+    const specialReport = hint("onr_proteus_111_ice-and-data-special-report");
+    expect(specialReport.targetProfiles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          purpose: "server_recon",
+          timing: "on_play",
+          targetType: "server",
+          hiddenInfoPolicy: "legal_targets_only",
+        }),
+        expect.objectContaining({
+          purpose: "server_recon_card_selection",
+          timing: "on_play",
+          targetType: "card",
+          hiddenInfoPolicy: "legal_targets_only",
+        }),
+      ]),
+    );
+
+    expect(
+      hint("onr_v1_093_if-you-want-it-done-right").targetProfiles,
+    ).toContainEqual({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "card",
+      purpose: "top_five_choice_and_reorder",
+      preferences: [
+        "best_cards_for_current_plan",
+        "best_cards_for_current_state",
+      ],
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    });
+  });
+
+  it("calibrates Batch 3 roles, anchors, remote roles, and risks", () => {
+    expect(hint("onr_proteus_053_underworld-mole").planRoles).not.toContain(
+      "build_scoring_remote",
+    );
+    expect(
+      hint("onr_proteus_053_underworld-mole").strategyAnchors ?? [],
+    ).not.toContain("corp.tag_trace_punish");
+    expect(hint("onr_v1_065_smarteye").strategyAnchors ?? []).not.toContain(
+      "runner.run_event_tempo",
+    );
+    expect(hint("onr_v1_368_roving-submarine").remoteRole).toEqual({
+      kind: "scoring_protection",
+      threatLevel: "medium",
+      serverScope: "remote",
+    });
+    expect(
+      hint("onr_proteus_072_research-bunker").tacticSignals ?? [],
+    ).not.toContain("corp.remote_protection");
+    expect(hint("onr_proteus_007_project-venice").strategyAnchors).toContain(
+      "corp.overadvance_value",
+    );
+    expect(
+      hint("onr_proteus_017_credit-blocks").strategyAnchors ?? [],
+    ).not.toContain("corp.ice_tax_glacier");
+    expect(hint("onr_proteus_116_pirate-broadcast").riskTags).toContain(
+      "future_action_debt_on_failed_run_sequence",
+    );
+    expect(
+      hint("onr_proteus_116_pirate-broadcast").strategyAnchors ?? [],
+    ).not.toContain("runner.run_event_tempo");
+    expect(hint("onr_v1_037_japanese-water-torture").riskTags).toContain(
+      "variable_future_action_debt",
+    );
+  });
+
   it("classifies Aujourd'Oui as controller-known program search, not recovery", () => {
     const aujourdOui = hint("onr_v1_151_aujourdoui");
 
@@ -201,7 +291,9 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
 
-    expect(hint("onr_proteus_060_herman-revista").targetProfiles).toContainEqual(
+    expect(
+      hint("onr_proteus_060_herman-revista").targetProfiles,
+    ).toContainEqual(
       expect.objectContaining({
         purpose: "rearrange_fort_ice",
         preferences: [
