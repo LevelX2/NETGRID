@@ -1,6 +1,6 @@
 # Runner Persistent Engine Development
 
-Status: in Umsetzung – RPED-00 bis RPED-03 abgeschlossen, RPED-04 aktiv
+Status: in Umsetzung – RPED-00 bis RPED-04 abgeschlossen, finale Integration aktiv
 Quelle: Nutzerauftrag vom 2026-08-14 und Review-Rückmeldung aus `pasted-text.txt`
 
 ## Zielprüfung
@@ -104,7 +104,7 @@ prepared
 Genau ein Zustand beziehungsweise Paket ist aktiv. Ein Paketwechsel erfolgt
 erst nach Done-Gate und Commit.
 
-Aktueller Zustand: `simulation_comparison`.
+Aktueller Zustand: `final_integration`.
 
 ## Diagnoseergebnis RPED-00
 
@@ -239,6 +239,72 @@ Paketchecks:
 - AI-Typecheck erneut ausgeführt; verbleibend sind ausschließlich die bereits
   dokumentierten vier fehlenden Migration-Review-JSONs und der unveränderte
   Sneak-Preview-Testtypfehler.
+
+## Vergleichsergebnis RPED-04
+
+Vergleichsvertrag:
+
+- `Last Call at R&D` gegen `Universal Fast Advance`, `Cheap Bag of Tricks` und
+  `Siren Fortress`;
+- je Paarung exakt dieselben zehn Seeds wie in der vorherigen Reihe, insgesamt
+  30 neue Spiele;
+- unveränderte Deck-Fingerprints, 480 Aktionen, `current_candidate` auf beiden
+  Seiten und Schwierigkeit `hard`;
+- Vergleichsbasis ist die vorherige Reihe mit bereits verdoppelten Saloon- und
+  Crèche-Kopien, nicht die ältere Ein-Kopien-Reihe.
+
+| Paarung | Saloon gesehen | Saloon Install/Aktivierung vorher → neu | Crèche gesehen | Crèche Install/Bonus-Run vorher → neu |
+| --- | ---: | ---: | ---: | ---: |
+| Universal Fast Advance | 7/10 | 2/10 → 1/6 | 5/10 | 2/6 → 3/2 |
+| Cheap Bag of Tricks | 7/10 | 2/5 → 1/1 | 9/10 | 3/20 → 3/15 |
+| Siren Fortress | 8/10 | 2/12 → 2/11 | 5/10 | 1/3 → 2/4 |
+| Gesamt | 22/30 | 6/27 → 4/18 | 19/30 | 6/29 → 8/21 |
+
+Die Stichprobe bestätigt den fachlichen Mechanismus, aber keine pauschale
+Nutzungssteigerung beider Karten: Crèche wurde in zwei zusätzlichen Spielen
+installiert; Saloon wurde bei identischer Sichtung in zwei Spielen weniger
+installiert. Wenn Saloon installiert war, wurde die Karte weiterhin aktiv
+genutzt. Die geringere Installationszahl ist mit dem bewusst strengeren
+Reserve-Gate vereinbar und darf bei nur 30 horizon-zensierten Spielen nicht als
+Stärkegewinn oder -verlust interpretiert werden.
+
+Technische Hard-Gate-Signatur der neuen 30 Spiele:
+
+- 0 Replayfehler, 0 Fallbacks und redaktionell side-sichere lokale Reports;
+- ein unveränderter `window_origin_missing`-Abbruch in Fast-Advance Seed 9;
+- ein unveränderter Action-Limit-Horizont in Cheap-Bag Seed 7;
+- zwei neu erreichte, fachfremde `missing_plan_module_coverage`-Abbrüche für
+  Jack ’n’ Joe in Cheap-Bag Seeds 2 und 9. Kontrollläufe derselben Seeds auf
+  aktuellem `main` enden regulär; der geänderte Development-Verlauf erreicht
+  die schon vorhandene unbesetzte One-shot-Search-Route erst später. Dieser
+  Owner-Fund ist ein separater Follow-up und wird weder per Fallback noch durch
+  Erweiterung des Engine-Pakets kaschiert.
+
+Wegen der Laufzeitabbrüche und des Action Limits sind Outcome-, Aktionslängen-
+und Aktivierungsdeltas horizon-zensiert. Die Reihe liefert daher
+Nutzungsevidence, keine belastbare Spielstärkeaussage. Reservewerte 4/5/6,
+Breaker-/MU-/Handpuffer-Gegenfälle und produktive Run-Preemption sind durch die
+exakten fokussierten Regressionen gesichert; der lokale 3×10-Collector besitzt
+für diese Zustandswerte keinen kompatiblen Vorher-/Nachher-Zähler.
+
+Abschlusschecks:
+
+- fokussierte Last-Call-, Engine- und Ownership-Teilmenge: 35/35 grün;
+- vollständige AI-Shards ausgeführt: alle drei Shards bleiben durch die auf
+  `main` dokumentierten breiten Baselinefehler rot, vor allem ungültige
+  Decision-Checkpoint-StateHashes und CardSpec-/Golden-Artefakte;
+- fünf themennah auffällige breite Tests wurden auf Branch und aktuellem
+  `main` einzeln ausgeführt und scheitern identisch;
+- alle neu geänderten fokussierten Tests sowie die drei verpflichtenden
+  `check:ai`-Gates sind grün.
+
+Follow-up-Fund:
+
+- Jack ’n’ Joe benötigt für legal sichtbare One-shot-Search-Aktionen eine
+  vollständige, plan-first-konforme Owner-Route. Removal Condition: Ein
+  bestehender zuständiger Search-/Coverage-Plan bindet die konkrete
+  LegalAction oder klassifiziert sie mit sichtbarer Why-not-Evidence; kein
+  generischer Development- oder Choice-Resolver-Fallback.
 
 ## Paketfolge
 
