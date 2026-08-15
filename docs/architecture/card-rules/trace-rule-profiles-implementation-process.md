@@ -1,6 +1,6 @@
 # Trace-Regelprofile – Umsetzungsprozess
 
-Status: P2 abgeschlossen, P3 bereit
+Status: P3 abgeschlossen, P4 bereit
 
 Quelle: Nutzerauftrag vom 2026-08-15
 
@@ -189,6 +189,20 @@ Done: Ownership-, Hidden-Info-, Seed-Reproduktions-, Legalitäts- und
 Stakes-Tests sind grün; `actionId`/Executor/Step bleiben unverändert.
 
 Commit: `feat(ai): assess and vary trace bids replayably`
+
+Ergebnis: Die side-sichere Bewertung verwendet ausschließlich PlayerView,
+strukturierte Trace-Folgen, sichtbaren Link und Creditkapazitäten, Reserve,
+effektives Limit und die aktive Tie-Regel. Low-/Normal-/High-/Terminal-Stakes
+begrenzen einen konservativen, normalen, aggressiven oder polarisierten Bias.
+Mehrere wirtschaftlich plausible Kandidaten werden erst nach der
+Plan-/Step-Bindung durch einen atomaren Engine-Command gewichtet gezogen;
+Requote, RandomDrawRecord, privates Receipt und Replay-StateHash sind
+abgesichert. Die nachgelagerte Quellenwahl bevorzugt generisch spezialisierte
+Trace-/Link-Credits. Der private Decision Trace enthält Bewertung, Kandidaten,
+Auswahl und RNG-Nachweis. 84 fokussierte Engine-/AI-Tests sowie Shared-,
+Engine- und Server-Typechecks sind grün. Der AI-Typecheck erreicht nur die
+unabhängige Baseline-Lücke der vier lokal fehlenden generierten
+CardSpec-Migrationsreports; neue Typfehler liegen nicht vor.
 
 ### P4 – Regression und Variantenvergleich
 

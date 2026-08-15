@@ -1,5 +1,9 @@
 import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
-import type { AiDecisionInput, CardDefinitionId } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  CardDefinitionId,
+  TraceRulesProfile,
+} from "@netgrid/shared";
 
 export type LatestTraceContext = {
   sourceDefinitionId?: string;
@@ -10,10 +14,37 @@ export type LatestTraceContext = {
   runnerBid?: number;
   runnerStrength?: number;
   postBidTraceLinkBonus?: number;
+  traceRulesProfile?: TraceRulesProfile;
+  effectiveTraceLimit?: number;
 };
 
 export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerLink = visibleRunnerLinkAtCorpBid(input);
+  const visibleTrace = input.playerView.trace;
+  if (visibleTrace) {
+    return {
+      sourceDefinitionId: visibleTrace.sourceDefinitionId,
+      traceLimit: visibleTrace.printedTrace,
+      effectiveTraceLimit: visibleTrace.effectiveTraceLimit,
+      traceRulesProfile: visibleTrace.profile,
+      runnerLink: visibleTrace.runnerLink ?? visibleRunnerLink,
+      ...(visibleTrace.corpBid !== undefined
+        ? { corpBid: visibleTrace.corpBid }
+        : {}),
+      ...(visibleTrace.corpStrength !== undefined
+        ? { traceValue: visibleTrace.corpStrength }
+        : {}),
+      ...(visibleTrace.runnerBid !== undefined
+        ? { runnerBid: visibleTrace.runnerBid }
+        : {}),
+      ...(visibleTrace.runnerStrength !== undefined
+        ? { runnerStrength: visibleTrace.runnerStrength }
+        : {}),
+      ...(visibleTrace.postRevealLinkBonus !== undefined
+        ? { postBidTraceLinkBonus: visibleTrace.postRevealLinkBonus }
+        : {}),
+    };
+  }
   for (const event of input.eventTail.slice().reverse()) {
     const traceLimit = event.publicPayload.traceLimit;
     const traceValue = event.publicPayload.traceValue;

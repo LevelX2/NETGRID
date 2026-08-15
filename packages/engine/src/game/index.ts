@@ -12,6 +12,11 @@ export {
   quoteRandomizedTurnPlanSelection,
   turnPlanCandidateFingerprint,
 } from "./randomized-turn-plan-selection";
+export {
+  applyRandomizedTraceBidSelection,
+  quoteRandomizedTraceBidSelection,
+  traceBidCandidateFingerprint,
+} from "./randomized-trace-bid-selection";
 export { applyGameAction } from "./apply-game-action";
 export { legalActionsFor } from "./legal-actions";
 export {
