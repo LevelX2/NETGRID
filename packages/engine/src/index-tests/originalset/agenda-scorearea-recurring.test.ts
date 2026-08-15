@@ -1140,7 +1140,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     traceState = applyChoice(traceState, "corp", "bid_1");
     expect(traceState.trace).toMatchObject({
       status: "base_link",
-      traceValue: 1,
+      traceValue: 5,
       runnerLink: 0,
     });
     traceState = applyChoice(

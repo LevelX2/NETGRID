@@ -730,12 +730,12 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       expect(state.trace).toMatchObject({
         status: "base_link",
         runnerLink: 0,
-        traceValue: 0,
+        traceValue: 3,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "corp_bid",
         runnerLink: 0,
-        traceValue: 0,
+        traceValue: 3,
       });
       state = applyChoice(
         state,
@@ -751,7 +751,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         status: "runner_bid",
         runnerLink: 4,
         baseLinkValue: 4,
-        traceValue: 0,
+        traceValue: 3,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "base_link",
@@ -1920,6 +1920,7 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
       createGameAfterSetup({
         seed: "spotcheck-trace-post-bid-link",
         baseline: CURRENT_RULES_BASELINE,
+        traceRulesProfile: "classic_blind",
         runnerDeck: {
           id: "spotcheck_trace_post_bid_runner",
           name: "Spotcheck Trace Post-Bid Runner",

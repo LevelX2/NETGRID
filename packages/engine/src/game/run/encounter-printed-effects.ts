@@ -481,14 +481,20 @@ export function startTraceFromPrintedSubroutine(
     status: "corp_bid",
     successEffect,
   };
-  state.pendingChoice = host.callbacks.traceBidChoice(
-    "corp",
-    traceId,
-    rules.resolutionMode === "hidden_commit_reveal"
-      ? `Verdecktes Korp-Gebot wählen (Trace-Limit ${effectiveBaseTraceLimit})`
-      : `Offenes Korp-Payment wählen (Basisstärke ${traceLimit})`,
-    corpBidMax,
-  );
+  state.pendingChoice = {
+    ...host.callbacks.traceBidChoice(
+      "corp",
+      traceId,
+      rules.resolutionMode === "hidden_commit_reveal"
+        ? `Verdecktes Korp-Gebot wählen (Trace-Limit ${effectiveBaseTraceLimit})`
+        : `Offenes Korp-Payment wählen (Basisstärke ${traceLimit})`,
+      corpBidMax,
+    ),
+    visibility:
+      rules.resolutionMode === "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
+  };
   state.activeSide = "corp";
   state.timingPoint = "run.encounter_ice";
   if (legalAction) {

@@ -286,7 +286,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 1,
-      traceValue: 1,
+      traceValue: 6,
       runnerLink: 0,
     });
 
@@ -449,7 +449,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       corpCreditBid: 4,
       hackerTrackerCountersSpent: 2,
       effectiveTraceLimit: 7,
-      traceValue: 6,
+      traceValue: 11,
     });
 
     state = applyChoice(state, "runner", "bid_0");

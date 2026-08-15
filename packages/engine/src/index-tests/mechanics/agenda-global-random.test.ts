@@ -2651,7 +2651,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("applies Rabbit only to Corp ICE trace bid limits", () => {
+  it("tracks Rabbit's reduced ICE trace limit without capping Modern payment", () => {
     const runnerDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.traceTags.runner,
       id: "spotcheck_rabbit_trace_runner",
@@ -2693,10 +2693,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.pendingChoice?.side).toBe("corp");
-    const expectedCorpBidMax = Math.min(
-      state.corp.credits,
-      Math.max(0, (state.trace?.traceLimit ?? 0) - 1),
-    );
+    const expectedCorpBidMax = state.corp.credits;
     expect(
       state.pendingChoice?.options.some(
         (option) => option.id === `bid_${expectedCorpBidMax}`,
@@ -2706,9 +2703,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       state.pendingChoice?.options.some(
         (option) => option.id === `bid_${state.corp.credits}`,
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(state.trace).toMatchObject({
       sourceDefinitionId: "onr_v1_221_asp",
+      effectiveTraceLimit: 4,
       corpBidMax: expectedCorpBidMax,
       rabbitTraceLimitReduction: 1,
     });

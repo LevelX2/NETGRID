@@ -3398,7 +3398,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       traceSuccessful: false,
       corpBid: 0,
       runnerBid: 6,
-      traceValue: 0,
+      traceValue: 6,
       runnerStrength: 6,
     });
     expect(state.eventLog.at(-1)?.publicPayload).not.toMatchObject({

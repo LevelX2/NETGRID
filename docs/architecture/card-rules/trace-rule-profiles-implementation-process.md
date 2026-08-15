@@ -1,6 +1,6 @@
 # Trace-Regelprofile – Umsetzungsprozess
 
-Status: P3 abgeschlossen, P4 bereit
+Status: P4 abgeschlossen, P5 bereit
 
 Quelle: Nutzerauftrag vom 2026-08-15
 
@@ -214,6 +214,34 @@ Done: fokussierte Suiten und relevante Typechecks sind grün; Vergleich zeigt
 keine offensichtlich destruktive Varianz.
 
 Commit: `test(trace): cover profiles ai and scenario balance`
+
+Ergebnis: Profilbedingt veraltete Modern-Erwartungen in den führenden
+Trace-/CardSpec-Regressionen sind auf Basisstärke, unbegrenztes Payment und
+Runner-Ties synchronisiert. Ein zusätzlicher Encounter-Test belegt, dass ein
+reduziertes effektives Limit plus ausdrücklich wirksame Trace-Counter nur in
+Classic den Corp-Bid deckelt. Dabei wurde ein echter generischer Altfehler
+gefunden und behoben: Gedruckte ICE-Traces erhielten in Blind-Profilen noch
+eine als `public` klassifizierte Corp-Choice; sie tragen jetzt autoritativ die
+`hidden_info_barrier`-Visibility. Der Post-Reveal-Test für Signpost und The
+Springboard läuft ausdrücklich unter Classic Blind.
+
+Der reproduzierbare Vergleich verwendet für alle Profile identische zwölf
+Seeds in je drei Low-/Tag-/Terminal-Szenarien und den realen Plan-first- und
+Engine-RNG-Pfad. Resultat (36 Versuche je Profil): Modern 33,3 % Erfolg bei
+0,000/3,333 durchschnittlichem Corp-/Runner-Einsatz; Classic Blind 75,0 % bei
+3,444/2,167; Classic Blind Corp-Ties 77,8 % bei 3,167/2,639. Corp-0-/Max-Bids
+liegen bei Modern 100,0/0,0 %, Classic 16,7/58,3 % und Corp-Ties 13,9/36,1 %.
+Die Corp-Bid-Varianzen betragen 0,000, 3,525 und 3,417. Terminale Blind-Bids
+fallen nie destruktiv unter 3 und variieren nicht stärker als Low-Stakes-Bids.
+Die kleine Stichprobe ist ein Plausibilitätscheck, keine Balancefreigabe; der
+Tie-Wechsel erhöht die Erfolgsquote hier um 2,8 Prozentpunkte und zeigt keinen
+offensichtlichen Varianzfehler.
+
+Vierzehn relevante Engine-Dateien mit 207 Tests, der vollständige
+Hidden-Access-/Link-Regressionssatz mit 56 Tests und vier AI-Dateien mit 82
+Tests sind grün. Engine-Typecheck ist grün. Der AI-Typecheck endet weiterhin
+ausschließlich an denselben vier fehlenden generierten
+CardSpec-Migrationsreports.
 
 ### P5 – Führende Dokumentation und Code-Review
 

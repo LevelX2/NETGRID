@@ -404,10 +404,10 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       successEffect: { type: "add_tags_by_trace_margin_over_runner_link" },
     });
     state = resolveTraceWithMaximumCorpBid(state);
-    expect(state.runner.tags).toBe(6);
+    expect(state.runner.tags).toBe(22);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
-      tagsAdded: 6,
+      tagsAdded: 22,
       runnerLink: 0,
     });
 
