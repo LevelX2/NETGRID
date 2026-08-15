@@ -596,8 +596,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       getPlayerView(state, "runner")
         .servers.flatMap((server) => server.root)
         .some(
-          (card) =>
-            card.known && card.definitionId === GOVERNMENT_CONTRACT,
+          (card) => card.known && card.definitionId === GOVERNMENT_CONTRACT,
         ),
     ).toBe(true);
   });

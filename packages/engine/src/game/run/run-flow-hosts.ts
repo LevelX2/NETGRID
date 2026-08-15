@@ -506,21 +506,49 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         spendHostedPaymentCredits: (cardId, amount) =>
           spendHostedPaymentCredits(state, cardId, amount),
         rezCostForCard: (cardId) => host.payment.rezCostForCard(state, cardId),
-        spendCorpCredits: (amount) =>
-          host.payment.spendCorpRunTemporaryCreditsForCurrentRunCost(
-            state,
-            amount,
-          ),
       },
       breaker: {
         breakAbilityForLegalAction: (legalAction) =>
           host.effects.breakAbilityForLegalAction(state, legalAction),
+        resumePaidBreakerAction: (legalAction) =>
+          host.callbacks.resumePaidRunnerBreakerAction(state, legalAction),
       },
-      effects: {
-        executeEffectCommands: (commands) =>
-          host.effects.executeEffectCommands(state, commands),
-        trashRunnerInstalledProgram: (cardId) =>
-          host.zones.trashRunnerInstalledProgram(state, cardId),
+      rez: {
+        rezRootCardAtReactionWindow: (cardId, legalAction) =>
+          host.callbacks.rezRootCardAtReactionWindow(
+            state,
+            cardId,
+            legalAction,
+          ),
+      },
+      trash: {
+        resolveRunnerInstalledProgramTrash: (cardId, source, legalAction) => {
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            cardId,
+          };
+          if (
+            host.choices.openRunnerInstalledTrashPreventionWindow(
+              state,
+              legalAction,
+              [cardId],
+              source,
+            )
+          )
+            return { suspended: true };
+          const event = createRunnerInstalledTrashImminentEvent(
+            state,
+            [cardId],
+            source,
+          );
+          resolveRunnerInstalledTrashImminentEvent(
+            state,
+            event,
+            legalAction,
+            [],
+          );
+          return { suspended: false };
+        },
       },
       tags: {
         addRunnerTagsWithPrevention: (legalAction, amount, source) =>
@@ -1080,11 +1108,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       cleanup: {
         cleanupEmptyRemotes: () => host.zones.cleanupEmptyRemotes(state),
-        resolveRunnerInstalledProgramTrash: (
-          cardId,
-          source,
-          legalAction,
-        ) => {
+        resolveRunnerInstalledProgramTrash: (cardId, source, legalAction) => {
           if (
             host.choices.openRunnerInstalledTrashPreventionWindow(
               state,

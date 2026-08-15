@@ -67,16 +67,8 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      {
-        kind: "plan_role",
-        role: "build_rig",
-      },
-      {
-        kind: "target_preference",
-        purpose: "same_turn_rezzed_black_ice_derez_or_bad_publicity",
-        preferences: [],
-        avoid: [],
-      },
+      { kind: "plan_role", role: "ice_control" },
+      { kind: "plan_role", role: "bad_publicity_pressure" },
     ],
     capabilities: [],
   },

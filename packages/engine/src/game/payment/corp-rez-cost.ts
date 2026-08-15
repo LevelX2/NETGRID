@@ -1857,6 +1857,7 @@ export function assertCorpRootRezCostQuoteValid(
     legalAction.payload.runnerActionPaidWindowRez === true;
   const traceWindow = legalAction.payload.traceWindowSelfRez === true;
   const exposeWindow = legalAction.payload.exposeAttemptSelfRez === true;
+  const aardvarkWindow = legalAction.payload.aardvarkReactionSelfRez === true;
   const traceWindowIsValid =
     traceWindow &&
     state.trace !== undefined &&
@@ -1866,8 +1867,9 @@ export function assertCorpRootRezCostQuoteValid(
       instance.definitionId,
     )?.selfRezWindows?.some((window) => window.kind === "trace_attempt") ===
       true;
-  const exposeUtility =
-    cardImplementationForDefinitionId(instance.definitionId)?.corpUtility;
+  const exposeUtility = cardImplementationForDefinitionId(
+    instance.definitionId,
+  )?.corpUtility;
   const exposeWindowIsValid =
     exposeWindow &&
     state.pendingChoice?.side === "corp" &&
@@ -1875,20 +1877,46 @@ export function assertCorpRootRezCostQuoteValid(
     state.pendingChoice.options.some((option) => option.value === cardId) &&
     exposeUtility?.kind === "expose_prevention" &&
     exposeUtility.mayRezAtWindow === true;
-  const timingIsValid = exposeWindow
-    ? !runWindow && !runnerPaidWindow && !traceWindow && exposeWindowIsValid
-    : traceWindow
-      ? !runWindow && !runnerPaidWindow && !exposeWindow && traceWindowIsValid
-      : runnerPaidWindow
+  const aardvarkWindowIsValid =
+    aardvarkWindow &&
+    state.pendingChoice?.side === "corp" &&
+    state.pendingChoice.source.startsWith("v199.aardvark:") &&
+    state.pendingAardvarkBreakerContinuation?.aardvarkId === cardId &&
+    cardImplementationForDefinitionId(
+      instance.definitionId,
+    )?.fortRunWindows?.some(
+      (window) => window.kind === "aardvark_worm_lock_and_reaction",
+    ) === true;
+  const timingIsValid = aardvarkWindow
+    ? !runWindow &&
+      !runnerPaidWindow &&
+      !traceWindow &&
+      !exposeWindow &&
+      aardvarkWindowIsValid
+    : exposeWindow
+      ? !runWindow &&
+        !runnerPaidWindow &&
+        !traceWindow &&
+        !aardvarkWindow &&
+        exposeWindowIsValid
+      : traceWindow
         ? !runWindow &&
+          !runnerPaidWindow &&
           !exposeWindow &&
-          state.timingPoint === "runner_action.main"
-        : runWindow
-          ? !exposeWindow &&
-            Boolean(state.run) &&
-            (state.timingPoint === "run.approach_ice" ||
-              state.timingPoint === "run.movement_rez_window")
-          : state.timingPoint === "corp_action.main";
+          !aardvarkWindow &&
+          traceWindowIsValid
+        : runnerPaidWindow
+          ? !runWindow &&
+            !exposeWindow &&
+            !aardvarkWindow &&
+            state.timingPoint === "runner_action.main"
+          : runWindow
+            ? !exposeWindow &&
+              !aardvarkWindow &&
+              Boolean(state.run) &&
+              (state.timingPoint === "run.approach_ice" ||
+                state.timingPoint === "run.movement_rez_window")
+            : state.timingPoint === "corp_action.main";
   if (!timingIsValid)
     throw new Error(
       "Root-Rez-Aktion ist in diesem Fenster nicht mehr gueltig.",

@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 import type { RuntimeIcebreakerAbility } from "../../ability-engine/icebreaker-abilities";
 import {
   handleRunnerBreakerActionExecution,
+  resumePaidRunnerBreakerAction,
   type RunnerBreakerActionExecutionHost,
 } from "./runner-breaker-action-execution";
 
@@ -164,7 +165,10 @@ function hostFor(
       assertCurrentSubroutineMatchesLegalAction: () =>
         ({ id: "sub_0", type: "end_the_run" }) as SubroutineDefinition,
       assertBreakSubroutineCostQuoteValid: () => calls.push("assertCost"),
-      resolveMultiBreakSubroutinesAction: () => calls.push("multiBreak"),
+      resolveMultiBreakSubroutinesAction: () => {
+        calls.push("multiBreak");
+        return { paid: true, resolved: true, suspended: false };
+      },
       resolveBlinkBreakSubroutineAction: () => calls.push("blink"),
     },
     payment: {
@@ -383,6 +387,49 @@ describe("runner-breaker-action-execution", () => {
     );
 
     expect(calls).toEqual([`spend:1:${BREAKER_ID}`, "aardvark:pump_breaker"]);
+  });
+
+  it("resumes the exact paid pump without charging again", () => {
+    const calls: string[] = [];
+    const action = legalAction("pump_breaker", { breakerId: BREAKER_ID }, 1);
+
+    resumePaidRunnerBreakerAction(
+      hostFor(state(), calls, {
+        breaker: { pumpAmountForLegalAction: () => 3 },
+        fort: { shouldOpenAardvarkInterception: () => true },
+      }),
+      action,
+    );
+
+    expect(calls).toEqual(["effect:change_breaker_strength:3"]);
+  });
+
+  it("preserves a paid multi-break suspension", () => {
+    const calls: string[] = [];
+    const action = legalAction("break_subroutine", {
+      breakerId: BREAKER_ID,
+      subroutineIndexes: "0,1",
+    });
+
+    handleRunnerBreakerActionExecution(
+      hostFor(state(), calls, {
+        breaker: {
+          breakAbilityForLegalAction: () =>
+            ({
+              type: "break_subroutine",
+              count: 2,
+            }) as RuntimeIcebreakerAbility,
+          resolveMultiBreakSubroutinesAction: () => ({
+            paid: true,
+            resolved: false,
+            suspended: true,
+          }),
+        },
+      }),
+      action,
+    );
+
+    expect(calls).toEqual([]);
   });
 
   it("executes a basic break through validation, payment and effects", () => {

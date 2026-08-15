@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay 1.",
+      "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay [1].",
   },
   rules: {
     schemaVersion: "card-rules-v1",

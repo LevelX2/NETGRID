@@ -80,7 +80,11 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "net_damage_prevention",
+      },
+      {
+        kind: "plan_role",
+        role: "core_damage_prevention",
       },
     ],
     capabilities: [],

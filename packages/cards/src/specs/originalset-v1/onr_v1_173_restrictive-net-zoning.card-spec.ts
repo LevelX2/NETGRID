@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 2, in addition to the normal cost, to install ice on that fort.",
+      "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay [2], in addition to the normal cost, to install ice on that fort.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -75,8 +75,11 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "chosen_fort_ice_tax",
-        preferences: ["fort_with_expected_future_ice_installation"],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "high_expected_corp_rez_count",
+          "server_relevant_to_current_plan",
+        ],
+        avoid: ["irrelevant_server_ice"],
       },
     ],
     capabilities: [],

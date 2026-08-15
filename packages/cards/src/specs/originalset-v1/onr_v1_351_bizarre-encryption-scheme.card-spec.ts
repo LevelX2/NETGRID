@@ -20,6 +20,11 @@ export const cardSpec = {
         source: "card_text",
         reference: "onr_v1_351_bizarre-encryption-scheme",
       },
+      {
+        source: "project_ruling",
+        reference:
+          "docs/source/Netrunner Errata 1.70.md#Bizarre Encryption Scheme",
+      },
     ],
   },
   engine: {

@@ -269,6 +269,8 @@ function hostFor(calls: string[]): RunFlowHost {
       virusCounterImplementationForCard: () => undefined,
       resolveTestSpinRunEnd: () => ({ handled: false }),
       rezIceWithoutRunContinuation: () => undefined,
+      rezRootCardAtReactionWindow: () => undefined,
+      resumePaidRunnerBreakerAction: () => undefined,
     },
   };
 }

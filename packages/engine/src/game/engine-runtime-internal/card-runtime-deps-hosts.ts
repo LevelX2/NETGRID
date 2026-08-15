@@ -754,7 +754,11 @@ export function createCardRuntimeDepsHosts(
     state: GameState,
     breakerId: CardInstanceId,
     legalAction: LegalAction,
-  ): void {
+    options: {
+      costAlreadyPaid?: boolean;
+      skipAardvarkInterception?: boolean;
+    } = {},
+  ): { paid: boolean; resolved: boolean; suspended: boolean } {
     const run = mustRun(state);
     const iceId = String(legalAction.payload?.iceId ?? "");
     if (run.phase !== "encounter_ice" || !run.encounteredIceId)
@@ -893,13 +897,31 @@ export function createCardRuntimeDepsHosts(
     ).totalCost;
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
       throw new Error("Multi-Break-Kosten sind nicht mehr gueltig.");
-    const payment = spendRunnerRunCredits(
-      runDurationPaymentHost(state),
-      expectedCost,
-      breakerId,
-      legalAction,
-    );
-    if (payment.handled && payment.paid === false) return;
+    if (!options.costAlreadyPaid) {
+      const payment = spendRunnerRunCredits(
+        runDurationPaymentHost(state),
+        expectedCost,
+        breakerId,
+        legalAction,
+      );
+      if (payment.handled && payment.paid === false)
+        return { paid: false, resolved: false, suspended: false };
+    }
+    if (
+      !options.skipAardvarkInterception &&
+      shouldOpenAardvarkInterception(
+        deps.fortRunSideFamiliesHostForState(state),
+        breakerId,
+      )
+    ) {
+      startAardvarkInterceptionChoice(
+        deps.fortRunSideFamiliesHostForState(state),
+        breakerId,
+        "break_subroutine",
+        legalAction,
+      );
+      return { paid: true, resolved: false, suspended: true };
+    }
     deps.executeEffectCommands(
       state,
       subroutineIndexes.map((subroutineIndex) => ({
@@ -922,6 +944,7 @@ export function createCardRuntimeDepsHosts(
       breakerId,
       legalAction,
     );
+    return { paid: true, resolved: true, suspended: false };
   }
 
   function assertBreakSubroutineCostQuoteValid(

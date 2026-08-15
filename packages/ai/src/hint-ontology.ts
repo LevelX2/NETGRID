@@ -457,6 +457,7 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "current_run_path_relevance",
   "high_run_denial_payoff",
   "high_rez_cost_relief",
+  "high_rez_cost_tax",
   "high_expected_corp_rez_count",
   "high_value_accessed_card",
   "current_access_only",

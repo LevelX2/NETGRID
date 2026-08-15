@@ -782,9 +782,8 @@ describe("generic typed CardSpec AI translators", () => {
       ).targetProfiles?.filter((profile) => "schemaVersion" in profile),
     ).toHaveLength(1);
     expect(
-      deriveCardSpecAiHint(
-        targetAnnotatedEntry("onr_v1_044_netspace-inverter"),
-      ).targetProfiles,
+      deriveCardSpecAiHint(targetAnnotatedEntry("onr_v1_044_netspace-inverter"))
+        .targetProfiles,
     ).toBeUndefined();
   });
 

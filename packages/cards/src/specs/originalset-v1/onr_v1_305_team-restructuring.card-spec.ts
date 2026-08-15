@@ -71,10 +71,6 @@ export const cardSpec = {
         role: "scoring_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.fast_advance",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.fast_advance",
         support: "supports",
@@ -89,14 +85,18 @@ export const cardSpec = {
           "Operations Semantic Review v2: distributed_advancement / fast_advance.",
       },
       {
+        kind: "plan_role",
+        role: "advance_score_window_support",
+      },
+      {
         kind: "target_preference",
-        purpose: "advance_high_value_corp_card",
+        purpose: "advance_up_to_two_distinct_corp_cards",
         preferences: [
-          "prefer_option_that_protects_agenda_or_remote_pressure",
-          "best_cards_for_current_plan",
-          "central_or_remote_plan_enabler",
+          "advancement_target_in_current_plan",
+          "advanceable_ambush_with_access_payoff",
+          "protects_agenda_remote",
         ],
-        avoid: ["hidden_info_dependent_choice"],
+        avoid: ["nonconverting_advancement_target"],
       },
     ],
     capabilities: [],

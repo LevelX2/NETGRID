@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "0: Jack out before an upgrade or node takes effect. Use this ability only immediately after the Corp has rezzed that upgrade or node.",
+      "[0]: Jack out before an upgrade or node takes effect. Use this ability only immediately after the Corp has rezzed that upgrade or node.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -59,10 +59,8 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
-      },
+      { kind: "plan_role", role: "run_safety" },
+      { kind: "plan_role", role: "rez_interrupt_jack_out" },
     ],
     capabilities: [],
   },

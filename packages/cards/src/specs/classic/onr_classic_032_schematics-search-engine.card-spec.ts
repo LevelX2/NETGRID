@@ -56,27 +56,11 @@ export const cardSpec = {
         kind: "plan_role",
         role: "information_gain",
       },
-      {
-        kind: "strategic_role",
-        role: "payoff_anchor",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.hq_pressure",
-      },
+      { kind: "plan_role", role: "global_expose_followup_support" },
       {
         kind: "line_support",
         lineKey: "runner.hq_pressure",
         support: "supports",
-      },
-      {
-        kind: "target_preference",
-        purpose: "expose_installed_corp_cards_after_hq_access",
-        preferences: [
-          "current_run_path_relevance",
-          "use_choice_option_with_visible_board_payoff",
-        ],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "risk_interpretation",
