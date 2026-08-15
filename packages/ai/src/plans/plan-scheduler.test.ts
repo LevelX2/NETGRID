@@ -951,7 +951,7 @@ describe("shared plan scheduler", () => {
     ["runner", RUNNER_PLAN_PRIORITY_POLICY],
     ["corp", CORP_PLAN_PRIORITY_POLICY],
   ] as const)(
-    "accepts early %s EndTurn only when the completion plan proves the exact remaining action set nonproductive",
+    "rejects early %s EndTurn even when every normal action is explicitly nonproductive",
     (side, policy) => {
       const credit = candidate("credit", side);
       const endTurn = standardEndTurnCandidate(side);
@@ -975,33 +975,18 @@ describe("shared plan scheduler", () => {
         -10_000,
         "turn_flow.end_turn",
       );
-      const baseMaterialize = completion.materialize;
-      completion.materialize = (
-        instance,
-        planAssessment,
-        materializationContext,
-      ) => ({
-        ...baseMaterialize(instance, planAssessment, materializationContext),
-        earlyEndTurnJustification: {
-          kind: "forgo_exhausted_voluntary_capacity",
-          capacityKind:
-            "all_current_voluntary_actions_explicitly_nonproductive",
-          explicitlyNonproductiveActionIds: [credit.actionId],
-        },
-      });
-
-      const result = runPlanScheduler({
-        context: schedulerContext,
-        registry: createSidePlanRegistry({
-          side,
-          priorityPolicy: policy,
-          modules: [economy, completion],
+      expect(() =>
+        runPlanScheduler({
+          context: schedulerContext,
+          registry: createSidePlanRegistry({
+            side,
+            priorityPolicy: policy,
+            modules: [economy, completion],
+          }),
+          resolveEngineWindow: () => undefined,
         }),
-        resolveEngineWindow: () => undefined,
-      });
-
-      expect(result.lane === "plan" && result.route.head.actionId).toBe(
-        endTurn.actionId,
+      ).toThrow(
+        expect.objectContaining({ code: "end_turn_with_usable_capacity" }),
       );
     },
   );
