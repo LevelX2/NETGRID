@@ -86,10 +86,6 @@ export const cardSpec = {
         role: "build_rig",
       },
       {
-        kind: "plan_role",
-        role: "recover_rig",
-      },
-      {
         kind: "strategic_role",
         role: "enabler",
       },
@@ -98,14 +94,25 @@ export const cardSpec = {
         lineKey: "runner.search.breaker",
         support: "supports",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "program_search_to_hand",
-        preferences: ["program_repairs_missing_coverage"],
-        avoid: ["hidden_info_dependent_choice"],
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_search_stack_to_grip",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "program_search_to_hand",
+            preferences: [
+              "program_repairs_missing_coverage",
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+            ],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

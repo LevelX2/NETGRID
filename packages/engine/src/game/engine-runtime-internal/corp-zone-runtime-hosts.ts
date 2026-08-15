@@ -19,6 +19,13 @@ import type {
   Side,
 } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
+import {
+  costQuotePublicPayload,
+  costQuoteToLegalActionCosts,
+  quoteCorpRootRezCost,
+} from "../payment";
+import { rezCard as executeRezCard } from "../rez/rez-card";
+import { buildLegalAction } from "../turn/action-builders";
 
 export function createCorpZoneRuntimeHosts(
   deps: RuntimeDeps,
@@ -328,6 +335,14 @@ export function createCorpZoneRuntimeHosts(
       .filter((cardId) => {
         const utility = deps.corpUtilityImplementationForCard(state, cardId);
         if (utility?.kind !== "expose_prevention") return false;
+        const instance = state.cardInstances[cardId];
+        if (!instance || instance.controller !== "corp") return false;
+        if (!instance.rezzed) {
+          return (
+            utility.mayRezAtWindow === true &&
+            quoteCorpRootRezCost(state, cardId).canPay
+          );
+        }
         const cost = utility.cost.kind === "credit" ? utility.cost.amount : 0;
         return state.corp.credits >= cost;
       })
@@ -341,12 +356,20 @@ export function createCorpZoneRuntimeHosts(
         kind: "select_option",
         options: [
           { id: "pass", label: "Expose nicht verhindern" },
-          ...preventionOptions.map((cardId) => ({
-            id: `department_${cardId}`,
-            label: `${deps.definitionFor(state, cardId).title}: Expose verhindern`,
-            publicLabel: "Expose Prevention",
-            value: cardId,
-          })),
+          ...preventionOptions.map((cardId) => {
+            const instance = state.cardInstances[cardId];
+            const title = deps.definitionFor(state, cardId).title;
+            return {
+              id: `department_${cardId}`,
+              label: instance?.rezzed
+                ? `${title}: Expose verhindern`
+                : `${title} rezzen`,
+              publicLabel: instance?.rezzed
+                ? "Expose Prevention"
+                : "Expose-Fenster-Rez",
+              value: cardId,
+            };
+          }),
         ],
         minSelections: 1,
         maxSelections: 1,
@@ -1062,15 +1085,55 @@ export function createCorpZoneRuntimeHosts(
     const utility = deps.corpUtilityImplementationForCard(state, sourceCardId);
     if (!source || utility?.kind !== "expose_prevention")
       throw new Error("Die Expose-Prevention-Quelle ist nicht mehr legal.");
+    if (!source.rezzed) {
+      if (utility.mayRezAtWindow !== true)
+        throw new Error(
+          "Die Expose-Prevention-Quelle darf in diesem Fenster nicht gerezzt werden.",
+        );
+      const quote = quoteCorpRootRezCost(state, sourceCardId);
+      if (!quote.canPay)
+        throw new Error("Die Korp kann die Sonder-Rez-Kosten nicht bezahlen.");
+      const rezAction = buildLegalAction(
+        state,
+        "corp",
+        "rez_card",
+        `${deps.definitionFor(state, sourceCardId).title} im Expose-Fenster rezzen`,
+        sourceCardId,
+        costQuoteToLegalActionCosts(quote),
+        {
+          ...costQuotePublicPayload(quote),
+          exposeAttemptSelfRez: true,
+        },
+      );
+      executeRezCard(deps.rezCardHost(state), sourceCardId, true, rezAction, {
+        runContinuation: "none",
+      });
+      if (state.pendingChoice !== choice)
+        throw new Error(
+          "Der Sonder-Rez-Lifecycle hat eine unerwartete Choice geoeffnet.",
+        );
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...rezAction.payload,
+        exposePreventionDecision: "rez",
+        sourceCardId,
+        sourceDefinitionId: source.definitionId,
+      };
+      exposeInstalledCorpCardForImplementation(
+        state,
+        legalAction,
+        exposeSourceCardId,
+        exposeSourceDefinitionId,
+        targetCardId,
+        scopeText === "inside_data_fort" ? "inside_data_fort" : "any_installed",
+      );
+      return;
+    }
     const cost = utility.cost.kind === "credit" ? utility.cost.amount : 0;
     if (state.corp.credits < cost)
       throw new Error("Die Korp kann Expose Prevention nicht bezahlen.");
     deps.spendCredits(state, "corp", cost);
-    state.cardInstances[sourceCardId] = {
-      ...source,
-      faceup: true,
-      rezzed: true,
-    };
     delete state.pendingChoice;
     state.activeSide = "runner";
     legalAction.payload = {

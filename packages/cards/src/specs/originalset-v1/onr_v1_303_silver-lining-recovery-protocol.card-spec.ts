@@ -64,9 +64,8 @@ export const cardSpec = {
         use: "economy.card",
       },
       {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
+        kind: "plan_role",
+        role: "recover_economy",
       },
     ],
     capabilities: [],

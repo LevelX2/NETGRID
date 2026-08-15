@@ -1611,7 +1611,7 @@
     {
       "cardId": "onr_classic_008_deadeye",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b3e1a74a67cabbd6",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e79d894cf6d88538",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b178a6ae65917872",
       "hint": {
         "cardId": "onr_classic_008_deadeye",
         "side": "corp",
@@ -1620,7 +1620,6 @@
         "roles": ["ice", "etr_ice", "sentry_ice", "program_trash_ice"],
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.economy_rez_reserve", "corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -1630,7 +1629,7 @@
               "high_install_cost_or_memory",
               "central_or_remote_plan_enabler"
             ],
-            "avoid": ["hidden_info_dependent_choice", "low_value_program"],
+            "avoid": ["low_value_program"],
             "kind": "use_target",
             "timing": "subroutine_resolution",
             "targetType": "program",
@@ -1798,7 +1797,7 @@
     {
       "cardId": "onr_classic_010_entrapment",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6f48d2260dcf68d2",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4af1a0f6c2a0c3c2",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:363593514a06cd6d",
       "hint": {
         "cardId": "onr_classic_010_entrapment",
         "side": "corp",
@@ -1808,11 +1807,6 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool", "defensive_tool"],
-        "strategyAnchors": [
-          "corp.central_stabilize",
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
-        ],
         "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -1839,9 +1833,10 @@
             "preferences": [
               "protects_agenda_remote",
               "protects_central_access_pressure",
-              "adds_relevant_encounter_tax"
+              "adds_relevant_encounter_tax",
+              "high_run_denial_payoff"
             ],
-            "avoid": ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "use_target",
             "timing": "subroutine_resolution",
             "targetType": "server",
@@ -2570,7 +2565,7 @@
     {
       "cardId": "onr_classic_017_corporate-shuffle",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6fc0f71b740b2ff7",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7c7fdb3cfbd63f98",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:977557948a156e88",
       "hint": {
         "cardId": "onr_classic_017_corporate-shuffle",
         "side": "corp",
@@ -2584,10 +2579,7 @@
             "schemaVersion": "target-profile-v1",
             "purpose": "choose_hq_card_shuffle_into_rnd",
             "preferences": ["lowest_near_term_value", "protect_agenda_density"],
-            "avoid": [
-              "hidden_info_dependent_choice",
-              "next_turn_required_card"
-            ],
+            "avoid": ["next_turn_required_card"],
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "card",
@@ -4438,7 +4430,7 @@
     {
       "cardId": "onr_classic_037_finders-keepers",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2cca6b35d9f1fdf9",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9ec1694e573b378a",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:6d4b6dd62aac4e7a",
       "hint": {
         "cardId": "onr_classic_037_finders-keepers",
         "side": "runner",
@@ -4446,7 +4438,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["event", "economy", "deterministic_random"],
         "planRoles": ["find_economy"],
-        "valueHints": { "economy": 4 },
+        "valueHints": { "economy": 3 },
         "effects": [
           {
             "kind": "economy",
@@ -4468,14 +4460,15 @@
         ],
         "conditions": [{ "kind": "requires_runner_action" }],
         "costProfile": {
-          "opportunityCost": "low",
-          "reserveRisk": "low",
+          "opportunityCost": "medium",
+          "reserveRisk": "high",
           "clicks": 1,
           "credits": 7
         },
         "riskTags": [
           "opportunity_cost",
           "reserve_risk",
+          "random_economy",
           "deterministic_random"
         ],
         "quality": {
@@ -5243,7 +5236,7 @@
     {
       "cardId": "onr_classic_044_crash-space",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:0647a220630e64a4",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f82f5b8cca478700",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4fa04f94dc42d710",
       "hint": {
         "cardId": "onr_classic_044_crash-space",
         "side": "runner",
@@ -5253,15 +5246,6 @@
         "planRoles": ["find_economy"],
         "valueHints": { "economy": 2 },
         "strategicRole": ["support_tool"],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
-            "confidence": "medium"
-          }
-        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trash_source_action",
@@ -5555,15 +5539,21 @@
     },
     {
       "cardId": "onr_classic_047_little-black-box",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:164735eee40dd67a",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b751fb342050e570",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f95693129f8af6de",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9dc32413055d99df",
       "hint": {
         "cardId": "onr_classic_047_little-black-box",
         "side": "runner",
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware", "deck", "damage_prevention", "memory", "link"],
-        "planRoles": ["rig_setup", "runner_install_hardware"],
+        "planRoles": [
+          "rig_setup",
+          "survive_net_damage",
+          "survive_core_damage",
+          "trace_bid_support",
+          "runner_install_hardware"
+        ],
         "valueHints": {},
         "strategicRole": ["support_tool"],
         "effects": [
@@ -5632,9 +5622,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:damage_prevention",
           "effect:finite_economy_pool",
           "effect:global_modifier",
@@ -7049,7 +7037,7 @@
     {
       "cardId": "onr_proteus_010_world-domination",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6d065e9bc3267a67",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:91c0f398140af754",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2948199c0b42d3d0",
       "hint": {
         "cardId": "onr_proteus_010_world-domination",
         "side": "corp",
@@ -7059,6 +7047,7 @@
         "planRoles": ["corp_score_agenda", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["win_condition"],
+        "strategyAnchors": ["corp.remote_scoring"],
         "lineSupport": ["corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -7089,6 +7078,10 @@
         "conditions": [
           { "kind": "requires_score_window" },
           { "kind": "requires_scored_agenda" }
+        ],
+        "riskTags": [
+          "high_advancement_requirement",
+          "remote_protection_dependency"
         ],
         "quality": {
           "hintReviewed": true,
@@ -7306,7 +7299,7 @@
     {
       "cardId": "onr_proteus_013_caryatid",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5bd5dbdb96961bef",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1c20ed2221f0f526",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1fc9dfbf452ef373",
       "hint": {
         "cardId": "onr_proteus_013_caryatid",
         "side": "corp",
@@ -7315,20 +7308,16 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "choose_ice_type_or_mode_from_legal_options",
             "preferences": [
-              "use_choice_option_with_visible_board_payoff",
-              "prefer_option_relevant_to_current_run_path",
-              "prefer_option_that_protects_agenda_or_remote_pressure"
+              "type_missing_in_current_rig",
+              "type_blocking_relevant_run_path",
+              "prefer_option_relevant_to_current_run_path"
             ],
-            "avoid": [
-              "hidden_info_dependent_choice",
-              "option_with_no_visible_current_payoff"
-            ],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "mode_choice",
             "timing": "encounter_resolution",
             "targetType": "mode_choice",
@@ -9526,7 +9515,7 @@
     {
       "cardId": "onr_proteus_040_sumo-2008",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:01cb94a3a04e7fdf",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1c20ed2221f0f526",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2d4c926f7422930b",
       "hint": {
         "cardId": "onr_proteus_040_sumo-2008",
         "side": "corp",
@@ -9535,20 +9524,16 @@
         "roles": ["ice", "etr_ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "choose_ice_type_or_mode_from_legal_options",
             "preferences": [
-              "use_choice_option_with_visible_board_payoff",
-              "prefer_option_relevant_to_current_run_path",
-              "prefer_option_that_protects_agenda_or_remote_pressure"
+              "type_missing_in_current_rig",
+              "type_blocking_relevant_run_path",
+              "prefer_option_relevant_to_current_run_path"
             ],
-            "avoid": [
-              "hidden_info_dependent_choice",
-              "option_with_no_visible_current_payoff"
-            ],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "mode_choice",
             "timing": "encounter_resolution",
             "targetType": "mode_choice",
@@ -10896,7 +10881,7 @@
     },
     {
       "cardId": "onr_proteus_056_department-of-misinformation",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:f0b9182c008a7b58",
+      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:84e0a0798c6bf5a5",
       "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:266caeeec79bbb3a",
       "hint": {
         "cardId": "onr_proteus_056_department-of-misinformation",
@@ -11333,7 +11318,7 @@
     {
       "cardId": "onr_proteus_063_lisa-blight",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3dab85c6d0fd2132",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:12f272c3a4ccca0f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4493f534417c0748",
       "hint": {
         "cardId": "onr_proteus_063_lisa-blight",
         "side": "corp",
@@ -11343,7 +11328,6 @@
         "planRoles": ["build_scoring_remote"],
         "valueHints": { "remoteRootValue": 1 },
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -11362,8 +11346,15 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "repeat_subroutine_on_fort_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
+            "preferences": [
+              "repeat_high_damage_subroutine",
+              "repeat_program_trash_subroutine",
+              "repeat_hardware_trash_subroutine",
+              "repeat_dangerous_tag_subroutine",
+              "repeat_end_the_run_subroutine",
+              "adds_relevant_encounter_tax"
+            ],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "use_target",
             "timing": "on_use",
             "targetType": "installed_ice",
@@ -11371,7 +11362,11 @@
           }
         ],
         "costProfile": { "credits": 0 },
-        "riskTags": ["hidden_root"],
+        "riskTags": [
+          "random_hq_discard",
+          "hq_plan_component_loss",
+          "hidden_root"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -12047,15 +12042,15 @@
     {
       "cardId": "onr_proteus_073_simon-francisco",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3da4f4f7e0745fb3",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a4335555799bd3b9",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:eeccf5413978a5cd",
       "hint": {
         "cardId": "onr_proteus_073_simon-francisco",
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
-        "roles": ["remote_support", "upgrade", "hidden_zone"],
-        "planRoles": ["build_scoring_remote"],
-        "valueHints": { "remoteRootValue": 1 },
+        "roles": ["hidden_zone"],
+        "planRoles": [],
+        "valueHints": {},
         "strategicRole": ["defensive_tool"],
         "strategyAnchors": ["corp.central_stabilize"],
         "lineSupport": ["corp.central_stabilize"],
@@ -12092,7 +12087,6 @@
         ],
         "costProfile": { "credits": 3 },
         "riskTags": [
-          "hidden_root",
           "hidden_info_barrier",
           "access_window",
           "hidden_zone_barrier"
@@ -12114,7 +12108,6 @@
           "on_access",
           "reduce_current_access_queue",
           "rez_card",
-          "trash_cost",
           "trash_on_access"
         ]
       }
@@ -15070,15 +15063,16 @@
     {
       "cardId": "onr_proteus_112_identity-donor",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:27b91d17b87e3273",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7e0bad33d6dde17f",
       "hint": {
         "cardId": "onr_proteus_112_identity-donor",
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig"],
+        "planRoles": ["survive_meat_damage", "emergency_damage_replacement"],
         "valueHints": {},
+        "lineSupport": ["runner.survival_defense"],
         "effects": [
           {
             "kind": "meat_damage_prevention",
@@ -17717,15 +17711,15 @@
     {
       "cardId": "onr_proteus_148_runner-sensei",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:73a52dd2ab0f2416",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:43603d011590574d",
       "hint": {
         "cardId": "onr_proteus_148_runner-sensei",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "planRoles": ["trace_bid_support", "avoid_traces"],
+        "valueHints": {},
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trace_base_link_four",
@@ -17783,9 +17777,7 @@
           "trace.base_link",
           "trace.link_boost"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:base_link",
           "effect:link",
           "effect_scope:runner",
@@ -19858,7 +19850,7 @@
     {
       "cardId": "onr_v1_023_evil-twin",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:67f2e024ddca61e0",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:81ffcd8f914b5d23",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4f030177463bf23b",
       "hint": {
         "cardId": "onr_v1_023_evil-twin",
         "side": "runner",
@@ -19870,7 +19862,13 @@
           "breaker_killer",
           "damage_prevention"
         ],
-        "planRoles": ["build_rig", "safe_probe_run", "break_ice"],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run",
+          "survive_net_damage",
+          "survive_core_damage",
+          "break_ice"
+        ],
         "valueHints": {},
         "strategicRole": ["defensive_tool"],
         "lineSupport": ["runner.survival_defense"],
@@ -21107,28 +21105,16 @@
     {
       "cardId": "onr_v1_044_netspace-inverter",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:9ef2bb1326d2c8d7",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:0ca9421b2f64052f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b1ab86e2673eaab6",
       "hint": {
         "cardId": "onr_v1_044_netspace-inverter",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program"],
-        "planRoles": [],
+        "planRoles": ["ice_order_control"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "reverse_fort_ice_order",
-            "avoid": ["hidden_info_dependent_choice"],
-            "kind": "use_target",
-            "timing": "after_successful_run",
-            "targetType": "server",
-            "hiddenInfoPolicy": "legal_targets_only",
-            "serverScope": "source_fort"
-          }
-        ],
+        "lineSupport": ["runner.run_event_tempo"],
         "conditions": [{ "kind": "requires_successful_run" }],
         "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
         "riskTags": ["successful_run"],
@@ -24785,6 +24771,18 @@
             "functionSignals": ["setup.search"]
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "generic_stack_search",
+            "preferences": [],
+            "avoid": [],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "program",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "effects": [
           {
             "kind": "search",
@@ -25752,6 +25750,21 @@
             "functionSignals": ["setup.search"]
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "program_search",
+            "preferences": [
+              "program_repairs_missing_coverage",
+              "program_preserves_run_goal"
+            ],
+            "avoid": [],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "program",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "effects": [
           {
             "kind": "search",
@@ -26536,14 +26549,14 @@
     {
       "cardId": "onr_v1_126_drifter-mobile-environment",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6a9ad79699fe19aa",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f68a3cc55f241c31",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7f1c28f2bdf8f6c6",
       "hint": {
         "cardId": "onr_v1_126_drifter-mobile-environment",
         "side": "runner",
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware"],
-        "planRoles": ["build_rig"],
+        "planRoles": ["build_rig", "avoid_tags"],
         "valueHints": {},
         "effects": [
           {
@@ -26574,9 +26587,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -29946,7 +29957,7 @@
     {
       "cardId": "onr_v1_174_rigged-investments",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:657f8ff831a59d64",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:98c21b16a3368aaa",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7cd226ccf3aa3010",
       "hint": {
         "cardId": "onr_v1_174_rigged-investments",
         "side": "runner",
@@ -30009,6 +30020,11 @@
           { "kind": "requires_credit_pool" }
         ],
         "costProfile": { "clicks": 1, "credits": 4 },
+        "riskTags": [
+          "slow_payback",
+          "resource_trash_before_break_even",
+          "liquidity_delay"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -30030,7 +30046,7 @@
     {
       "cardId": "onr_v1_175_ronin-around",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:564125e641da8912",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:13b157d7fc7629e3",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9c3e8b6737166343",
       "hint": {
         "cardId": "onr_v1_175_ronin-around",
         "side": "runner",
@@ -30101,12 +30117,32 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "top_five_hardware_choice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "central_or_remote_plan_enabler"
+            ],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "use_target",
             "timing": "activated_ability",
             "targetType": "card",
             "hiddenInfoPolicy": "public_or_controller_known_only"
+          },
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "expose_relevant_installed_corp_card",
+            "preferences": [
+              "unknown_or_unrezzed_corp_card",
+              "server_relevant_to_current_plan"
+            ],
+            "avoid": [
+              "already_known_or_rezzed_card",
+              "low_information_value_target"
+            ],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "card",
+            "hiddenInfoPolicy": "legal_targets_only"
           },
           {
             "zone": "stack_top",
@@ -30232,14 +30268,14 @@
     {
       "cardId": "onr_v1_177_the-short-circuit",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5ee6b01064dc6704",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b2ef99872a189d13",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8ad87c2185add30d",
       "hint": {
         "cardId": "onr_v1_177_the-short-circuit",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "recover_rig"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "strategicRole": ["enabler"],
         "lineSupport": ["runner.search.breaker"],
@@ -30257,6 +30293,21 @@
               }
             ],
             "functionSignals": ["setup.search"]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "program_search_to_hand",
+            "preferences": [
+              "program_repairs_missing_coverage",
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state"
+            ],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "program",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -33635,7 +33686,7 @@
     {
       "cardId": "onr_v1_216_security-purge",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:726f11f61d4455aa",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:428c0ba5276f9921",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:937fa5e0b668325c",
       "hint": {
         "cardId": "onr_v1_216_security-purge",
         "side": "corp",
@@ -33669,7 +33720,7 @@
               "protects_central_access_pressure",
               "central_or_remote_plan_enabler"
             ],
-            "avoid": ["unaffordable_after_install"],
+            "avoid": ["irrelevant_server_ice", "low_impact_ice"],
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
@@ -41176,15 +41227,15 @@
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d7792569b37cdfed",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:955c26667a7a650a",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:39a2d95b02a295ef",
       "hint": {
         "cardId": "onr_v1_303_silver-lining-recovery-protocol",
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
         "roles": ["operation"],
-        "planRoles": [],
-        "valueHints": { "economy": 1 },
+        "planRoles": ["recover_economy"],
+        "valueHints": {},
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
         "costProfile": { "clicks": 1, "credits": 0 },
@@ -41587,7 +41638,7 @@
     {
       "cardId": "onr_v1_308_acme-savings-and-loan",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ce295e14ffec6608",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2f5595c3c26dd28f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f8e223657acd3669",
       "hint": {
         "cardId": "onr_v1_308_acme-savings-and-loan",
         "side": "corp",
@@ -41600,6 +41651,11 @@
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card", "remote_role:asset_economy"],
         "costProfile": { "credits": 0 },
+        "riskTags": [
+          "loss_condition",
+          "agenda_point_rez_cost",
+          "recurring_debt_and_exit_cost"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -43773,15 +43829,16 @@
     {
       "cardId": "onr_v1_335_remote-facility",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3d259b350eeccb71",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:63e0d89bd601b00f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:77cecd3c036120e8",
       "hint": {
         "cardId": "onr_v1_335_remote-facility",
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_asset_modifier"],
+        "planRoles": ["corp_action_tempo"],
         "valueHints": { "remoteRootValue": 1 },
+        "lineSupport": ["corp.action_tempo"],
         "actionCapacityProfiles": [
           {
             "class": "immediate_gain",
@@ -43810,7 +43867,6 @@
             "repeatable": true
           }
         ],
-        "actionTacticSignals": ["remote_role:remote_capacity"],
         "costProfile": { "credits": 5 },
         "quality": {
           "hintReviewed": true,
@@ -43820,11 +43876,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "remote_capacity",
-          "threatLevel": "medium",
-          "serverScope": "server"
-        },
         "requiredMechanics": [
           "gain_actions",
           "install_remote",
@@ -46836,7 +46887,7 @@
     {
       "cardId": "onr_v1_371_tokyo-chiba-infighting",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:dfe0ff61eabeccd5",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e11338242fcefbc0",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:42628695357a7eb1",
       "hint": {
         "cardId": "onr_v1_371_tokyo-chiba-infighting",
         "side": "corp",
@@ -46846,7 +46897,7 @@
         "planRoles": ["build_scoring_remote", "bait_runner"],
         "valueHints": { "economy": 2, "remoteRootValue": 2 },
         "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card", "remote_role:run_tax"],
+        "actionTacticSignals": ["economy.card"],
         "conditions": [{ "kind": "requires_remote_server" }],
         "costProfile": { "credits": 0 },
         "quality": {
@@ -46857,11 +46908,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "run_tax",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "requiredMechanics": [
           "fortRunWindows",
           "gain_credits_after_unsuccessful_run_on_same_fort",

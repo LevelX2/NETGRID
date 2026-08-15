@@ -64,12 +64,6 @@ export const cardSpec = {
         use: "draw.card",
       },
       {
-        kind: "target_preference",
-        purpose: "choose_hq_card_shuffle_into_rnd",
-        preferences: ["lowest_near_term_value", "protect_agenda_density"],
-        avoid: ["hidden_info_dependent_choice", "next_turn_required_card"],
-      },
-      {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
@@ -80,7 +74,19 @@ export const cardSpec = {
         severity: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("draw_five_then_shuffle_hq_card"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_hq_card_shuffle_into_rnd",
+            preferences: ["lowest_near_term_value", "protect_agenda_density"],
+            avoid: ["next_turn_required_card"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

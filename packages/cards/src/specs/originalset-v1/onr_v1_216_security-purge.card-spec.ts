@@ -87,7 +87,7 @@ export const cardSpec = {
               "protects_central_access_pressure",
               "central_or_remote_plan_enabler",
             ],
-            avoid: ["unaffordable_after_install"],
+            avoid: ["irrelevant_server_ice", "low_impact_ice"],
           },
         ],
       },

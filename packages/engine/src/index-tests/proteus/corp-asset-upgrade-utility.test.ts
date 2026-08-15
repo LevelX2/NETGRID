@@ -476,12 +476,130 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     expect(useTargetOptionId).toMatch(/^card_hidden_/);
     state = applyChoice(state, "runner", useTargetOptionId ?? "");
     state = applyChoice(state, "corp", "department_department_2");
+    expect(state.cardInstances["department_2" as CardInstanceId]?.rezzed).toBe(
+      true,
+    );
+    expect(state.corp.credits).toBe(20);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("corp.expose_prevention"),
+    });
+    state = applyChoice(state, "corp", "department_department_2");
     expect(state.cardInstances[useTarget]?.faceup).toBe(false);
     expect(state.cardInstances["department_2" as CardInstanceId]?.rezzed).toBe(
       true,
     );
     expect(state.corp.credits).toBe(19);
     expect(state.pendingChoice).toBeUndefined();
+    expectReplayStable(useBefore, state);
+
+    const rezThenPassBefore = baseState("pro014-department-rez-then-pass");
+    const rezThenPassTarget = addCorpRoot(
+      rezThenPassBefore,
+      GOVERNMENT_CONTRACT,
+      "target_asset_3",
+      "remote_1",
+      false,
+    );
+    addCorpRoot(
+      rezThenPassBefore,
+      DEPARTMENT,
+      "department_3",
+      "remote_1",
+      false,
+    );
+    addRunnerProgram(rezThenPassBefore, MOUSE, "mouse_3");
+    state = apply(
+      rezThenPassBefore,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === "mouse_3",
+    );
+    const rezThenPassTargetOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === rezThenPassTarget,
+    )?.id;
+    state = applyChoice(state, "runner", rezThenPassTargetOptionId ?? "");
+    state = applyChoice(state, "corp", "department_department_3");
+    state = applyChoice(state, "corp", "pass");
+    expect(state.cardInstances["department_3" as CardInstanceId]?.rezzed).toBe(
+      true,
+    );
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(
+      getPlayerView(state, "runner")
+        .servers.flatMap((server) => server.root)
+        .some(
+          (card) => card.known && card.definitionId === GOVERNMENT_CONTRACT,
+        ),
+    ).toBe(true);
+
+    const rezzedBefore = baseState("pro014-department-already-rezzed");
+    const rezzedTarget = addCorpRoot(
+      rezzedBefore,
+      GOVERNMENT_CONTRACT,
+      "target_asset_4",
+      "remote_1",
+      false,
+    );
+    addCorpRoot(rezzedBefore, DEPARTMENT, "department_4", "remote_1", true);
+    addRunnerProgram(rezzedBefore, MOUSE, "mouse_4");
+    state = apply(
+      rezzedBefore,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === "mouse_4",
+    );
+    const rezzedTargetOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === rezzedTarget,
+    )?.id;
+    state = applyChoice(state, "runner", rezzedTargetOptionId ?? "");
+    state = applyChoice(state, "corp", "department_department_4");
+    expect(state.corp.credits).toBe(19);
+    expect(state.cardInstances[rezzedTarget]?.faceup).toBe(false);
+    expect(state.pendingChoice).toBeUndefined();
+
+    const unaffordableBefore = baseState("pro014-department-unaffordable");
+    unaffordableBefore.corp.credits = 0;
+    const unaffordableTarget = addCorpRoot(
+      unaffordableBefore,
+      GOVERNMENT_CONTRACT,
+      "target_asset_5",
+      "remote_1",
+      false,
+    );
+    addCorpRoot(
+      unaffordableBefore,
+      DEPARTMENT,
+      "department_5",
+      "remote_1",
+      true,
+    );
+    addRunnerProgram(unaffordableBefore, MOUSE, "mouse_5");
+    state = apply(
+      unaffordableBefore,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === "mouse_5",
+    );
+    const unaffordableTargetOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === unaffordableTarget,
+    )?.id;
+    state = applyChoice(state, "runner", unaffordableTargetOptionId ?? "");
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("expose_installed_card_review"),
+    });
+    expect(
+      getPlayerView(state, "runner")
+        .servers.flatMap((server) => server.root)
+        .some(
+          (card) =>
+            card.known && card.definitionId === GOVERNMENT_CONTRACT,
+        ),
+    ).toBe(true);
   });
 
   it("offers Cybertech as a corp meat-damage boost without auto-consuming counters", () => {

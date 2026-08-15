@@ -63,7 +63,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "survive_meat_damage",
+      },
+      {
+        kind: "plan_role",
+        role: "emergency_damage_replacement",
+      },
+      {
+        kind: "line_support",
+        lineKey: "runner.survival_defense",
+        support: "supports",
       },
     ],
     capabilities: [],

@@ -954,7 +954,6 @@
         "roles": ["ice", "etr_ice", "sentry_ice", "program_trash_ice"],
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.economy_rez_reserve", "corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -964,7 +963,7 @@
               "high_install_cost_or_memory",
               "central_or_remote_plan_enabler"
             ],
-            "avoid": ["hidden_info_dependent_choice", "low_value_program"],
+            "avoid": ["low_value_program"],
             "kind": "use_target",
             "timing": "subroutine_resolution",
             "targetType": "program",
@@ -1154,11 +1153,6 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool", "defensive_tool"],
-        "strategyAnchors": [
-          "corp.central_stabilize",
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
-        ],
         "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -1185,9 +1179,10 @@
             "preferences": [
               "protects_agenda_remote",
               "protects_central_access_pressure",
-              "adds_relevant_encounter_tax"
+              "adds_relevant_encounter_tax",
+              "high_run_denial_payoff"
             ],
-            "avoid": ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "use_target",
             "timing": "subroutine_resolution",
             "targetType": "server",
@@ -1975,10 +1970,7 @@
             "schemaVersion": "target-profile-v1",
             "purpose": "choose_hq_card_shuffle_into_rnd",
             "preferences": ["lowest_near_term_value", "protect_agenda_density"],
-            "avoid": [
-              "hidden_info_dependent_choice",
-              "next_turn_required_card"
-            ],
+            "avoid": ["next_turn_required_card"],
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "card",
@@ -3930,7 +3922,7 @@
         "roles": ["event", "economy", "deterministic_random"],
         "planRoles": ["find_economy"],
         "valueHints": {
-          "economy": 4
+          "economy": 3
         },
         "effects": [
           {
@@ -3957,14 +3949,15 @@
           }
         ],
         "costProfile": {
-          "opportunityCost": "low",
-          "reserveRisk": "low",
+          "opportunityCost": "medium",
+          "reserveRisk": "high",
           "clicks": 1,
           "credits": 7
         },
         "riskTags": [
           "opportunity_cost",
           "reserve_risk",
+          "random_economy",
           "deterministic_random"
         ],
         "quality": {
@@ -4758,15 +4751,6 @@
           "economy": 2
         },
         "strategicRole": ["support_tool"],
-        "actionStrategySupportPairs": [
-          {
-            "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
-            "confidence": "medium"
-          }
-        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trash_source_action",
@@ -5089,7 +5073,13 @@
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware", "deck", "damage_prevention", "memory", "link"],
-        "planRoles": ["rig_setup", "runner_install_hardware"],
+        "planRoles": [
+          "rig_setup",
+          "survive_net_damage",
+          "survive_core_damage",
+          "trace_bid_support",
+          "runner_install_hardware"
+        ],
         "valueHints": {},
         "strategicRole": ["support_tool"],
         "effects": [
@@ -5158,9 +5148,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:damage_prevention",
           "effect:finite_economy_pool",
           "effect:global_modifier",

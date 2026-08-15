@@ -1580,7 +1580,13 @@
           "breaker_killer",
           "damage_prevention"
         ],
-        "planRoles": ["build_rig", "safe_probe_run", "break_ice"],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run",
+          "survive_net_damage",
+          "survive_core_damage",
+          "break_ice"
+        ],
         "valueHints": {},
         "strategicRole": ["defensive_tool"],
         "lineSupport": ["runner.survival_defense"],
@@ -2917,21 +2923,9 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program"],
-        "planRoles": [],
+        "planRoles": ["ice_order_control"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "reverse_fort_ice_order",
-            "avoid": ["hidden_info_dependent_choice"],
-            "kind": "use_target",
-            "timing": "after_successful_run",
-            "targetType": "server",
-            "hiddenInfoPolicy": "legal_targets_only",
-            "serverScope": "source_fort"
-          }
-        ],
+        "lineSupport": ["runner.run_event_tempo"],
         "conditions": [
           {
             "kind": "requires_successful_run"
@@ -6791,6 +6785,18 @@
             "functionSignals": ["setup.search"]
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "generic_stack_search",
+            "preferences": [],
+            "avoid": [],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "program",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "effects": [
           {
             "kind": "search",
@@ -7664,6 +7670,21 @@
             "functionSignals": ["setup.search"]
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "program_search",
+            "preferences": [
+              "program_repairs_missing_coverage",
+              "program_preserves_run_goal"
+            ],
+            "avoid": [],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "program",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "effects": [
           {
             "kind": "search",
@@ -8499,7 +8520,7 @@
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware"],
-        "planRoles": ["build_rig"],
+        "planRoles": ["build_rig", "avoid_tags"],
         "valueHints": {},
         "effects": [
           {
@@ -8530,9 +8551,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -11845,6 +11864,11 @@
           "clicks": 1,
           "credits": 4
         },
+        "riskTags": [
+          "slow_payback",
+          "resource_trash_before_break_even",
+          "liquidity_delay"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -11932,6 +11956,36 @@
           }
         ],
         "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "top_five_hardware_choice",
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "central_or_remote_plan_enabler"
+            ],
+            "avoid": ["insufficient_post_payment_reserve"],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          },
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "expose_relevant_installed_corp_card",
+            "preferences": [
+              "unknown_or_unrezzed_corp_card",
+              "server_relevant_to_current_plan"
+            ],
+            "avoid": [
+              "already_known_or_rezzed_card",
+              "low_information_value_target"
+            ],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "card",
+            "hiddenInfoPolicy": "legal_targets_only"
+          },
           {
             "zone": "stack_top",
             "targetCardType": "hardware",
@@ -12065,7 +12119,7 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "recover_rig"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "strategicRole": ["enabler"],
         "lineSupport": ["runner.search.breaker"],
@@ -12083,6 +12137,21 @@
               }
             ],
             "functionSignals": ["setup.search"]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "program_search_to_hand",
+            "preferences": [
+              "program_repairs_missing_coverage",
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state"
+            ],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "program",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -15533,7 +15602,7 @@
               "protects_central_access_pressure",
               "central_or_remote_plan_enabler"
             ],
-            "avoid": ["unaffordable_after_install"],
+            "avoid": ["irrelevant_server_ice", "low_impact_ice"],
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
@@ -23548,18 +23617,14 @@
     },
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d7792569b37cdfed",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:955c26667a7a650a",
       "hint": {
         "cardId": "onr_v1_303_silver-lining-recovery-protocol",
         "side": "corp",
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
         "roles": ["operation"],
-        "planRoles": [],
-        "valueHints": {
-          "economy": 1
-        },
+        "planRoles": ["recover_economy"],
+        "valueHints": {},
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
         "costProfile": {
@@ -23984,8 +24049,6 @@
     },
     {
       "cardId": "onr_v1_308_acme-savings-and-loan",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:ce295e14ffec6608",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2f5595c3c26dd28f",
       "hint": {
         "cardId": "onr_v1_308_acme-savings-and-loan",
         "side": "corp",
@@ -24003,6 +24066,11 @@
         "costProfile": {
           "credits": 0
         },
+        "riskTags": [
+          "loss_condition",
+          "agenda_point_rez_cost",
+          "recurring_debt_and_exit_cost"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -25526,8 +25594,6 @@
     },
     {
       "cardId": "onr_v1_326_holovid-campaign",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:43fb39cb54736a2f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1b8bfad203c8ecee",
       "hint": {
         "cardId": "onr_v1_326_holovid-campaign",
         "side": "corp",
@@ -26272,18 +26338,17 @@
     },
     {
       "cardId": "onr_v1_335_remote-facility",
-      "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:3d259b350eeccb71",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:63e0d89bd601b00f",
       "hint": {
         "cardId": "onr_v1_335_remote-facility",
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_asset_modifier"],
+        "planRoles": ["corp_action_tempo"],
         "valueHints": {
           "remoteRootValue": 1
         },
+        "lineSupport": ["corp.action_tempo"],
         "actionCapacityProfiles": [
           {
             "class": "immediate_gain",
@@ -26312,7 +26377,6 @@
             "repeatable": true
           }
         ],
-        "actionTacticSignals": ["remote_role:remote_capacity"],
         "costProfile": {
           "credits": 5
         },
@@ -26324,11 +26388,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "remote_capacity",
-          "threatLevel": "medium",
-          "serverScope": "server"
-        },
         "requiredMechanics": [
           "gain_actions",
           "install_remote",
@@ -29424,13 +29483,8 @@
           "economy": 2,
           "remoteRootValue": 2
         },
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
         "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card", "remote_role:run_tax"],
+        "actionTacticSignals": ["economy.card"],
         "conditions": [
           {
             "kind": "requires_remote_server"
@@ -29447,11 +29501,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "run_tax",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "requiredMechanics": [
           "fortRunWindows",
           "gain_credits_after_unsuccessful_run_on_same_fort",

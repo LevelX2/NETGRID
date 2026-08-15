@@ -36,6 +36,9 @@ export const cardSpec = {
         agendaPoints: null,
       },
       playCost: null,
+      memoryLimitBonus: 1,
+      maxHandSizeBonus: 1,
+      recurringCredits: 1,
       strength: {
         kind: "not_applicable",
       },
@@ -112,9 +115,16 @@ export const cardSpec = {
         role: "support_tool",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "survive_net_damage",
+      },
+      {
+        kind: "plan_role",
+        role: "survive_core_damage",
+      },
+      {
+        kind: "plan_role",
+        role: "trace_bid_support",
       },
       {
         kind: "risk_interpretation",
