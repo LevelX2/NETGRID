@@ -68,9 +68,7 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
         sourceDefinitionId.length > 0
           ? { sourceDefinitionId }
           : {}),
-        ...(typeof traceLimit === "number"
-          ? { traceLimit }
-          : {}),
+        ...(typeof traceLimit === "number" ? { traceLimit } : {}),
         ...(typeof traceValue === "number" ? { traceValue } : {}),
         ...(typeof runnerLink === "number"
           ? { runnerLink }

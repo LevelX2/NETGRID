@@ -6279,216 +6279,337 @@ export default function Page() {
         }}
       >
         <CatalogCardPresentationsProvider value={catalogCardPresentationsById}>
-        <CardImagePreferenceContext.Provider
-          value={{ preferGermanCardImages, showSetBadges }}
-        >
-          <CardTooltipSettingsContext.Provider
-            value={{
-              hoverOpenDelayMs: cardTooltipHoverDelayMs,
-              mode: cardTooltipMode,
-            }}
+          <CardImagePreferenceContext.Provider
+            value={{ preferGermanCardImages, showSetBadges }}
           >
-            <main className="app" data-theme={colorScheme}>
-              <header className="topbar">
-                <div className="topbarStatusGroup">
-                  <AppBrand
-                    appName={APP_NAME}
-                    iconSrc={APP_ICON_SRC}
-                    wordmarkSrc={APP_WORDMARK_SRC}
-                  />
-                  <div className="topbarMeta">
-                    <span className="topbarVersion">{APP_STATUS_LABEL}</span>
-                    <ConnectionBadge text={statusText} state={connection} />
+            <CardTooltipSettingsContext.Provider
+              value={{
+                hoverOpenDelayMs: cardTooltipHoverDelayMs,
+                mode: cardTooltipMode,
+              }}
+            >
+              <main className="app" data-theme={colorScheme}>
+                <header className="topbar">
+                  <div className="topbarStatusGroup">
+                    <AppBrand
+                      appName={APP_NAME}
+                      iconSrc={APP_ICON_SRC}
+                      wordmarkSrc={APP_WORDMARK_SRC}
+                    />
+                    <div className="topbarMeta">
+                      <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+                      <ConnectionBadge text={statusText} state={connection} />
+                    </div>
                   </div>
-                </div>
-              </header>
-              <div className="setup v07Entry" data-testid="setup-screen">
-                <nav className="entryTabs" aria-label="Startbereiche">
-                  <button
-                    className={`entryTab ${entryTab === "play" ? "active" : ""}`}
-                    onClick={() => setEntryTab("play")}
-                    type="button"
-                    aria-current={entryTab === "play" ? "page" : undefined}
-                  >
-                    <Play size={16} />
-                    Spiel
-                  </button>
-                  <button
-                    className={`entryTab ${entryTab === "games" ? "active" : ""}`}
-                    onClick={() => setEntryTab("games")}
-                    type="button"
-                    aria-current={entryTab === "games" ? "page" : undefined}
-                  >
-                    <Gamepad2 size={16} />
-                    Spiele
-                  </button>
-                  <button
-                    className={`entryTab ${entryTab === "catalog" ? "active" : ""}`}
-                    onClick={() => setEntryTab("catalog")}
-                    type="button"
-                    aria-current={entryTab === "catalog" ? "page" : undefined}
-                  >
-                    <ListFilter size={16} />
-                    Katalog
-                  </button>
-                  <button
-                    className={`entryTab ${entryTab === "decks" ? "active" : ""}`}
-                    onClick={() => setEntryTab("decks")}
-                    type="button"
-                    aria-current={entryTab === "decks" ? "page" : undefined}
-                  >
-                    <Layers3 size={16} />
-                    Deck-Editor
-                  </button>
-                  <button
-                    className={`entryTab ${entryTab === "recent" ? "active" : ""}`}
-                    onClick={() => setEntryTab("recent")}
-                    type="button"
-                    aria-current={entryTab === "recent" ? "page" : undefined}
-                  >
-                    <Award size={16} />
-                    Meine Spiele
-                  </button>
-                  <button
-                    className={`entryTab ${entryTab === "options" ? "active" : ""}`}
-                    onClick={() => setEntryTab("options")}
-                    type="button"
-                    aria-current={entryTab === "options" ? "page" : undefined}
-                  >
-                    <SlidersHorizontal size={16} />
-                    Optionen
-                  </button>
-                  <button
-                    className={`entryTab ${entryTab === "account" ? "active" : ""}`}
-                    onClick={() => setEntryTab("account")}
-                    type="button"
-                    aria-current={entryTab === "account" ? "page" : undefined}
-                  >
-                    <User size={16} />
-                    {accountSession.account ? "Profil" : "Account"}
-                  </button>
-                </nav>
-                {session && lobby ? (
-                  <StartLobbyPanel
-                    lobby={lobby}
-                    joinUrl={session.joinUrl}
-                    chatText={lobbyChatText}
-                    connection={connection}
-                    onReady={setReady}
-                    onCancel={cancelCountdown}
-                    onCancelMatch={cancelMatchLifecycle}
-                    onLeaveMatch={leaveMatchLifecycle}
-                    onRecreate={recreateMatch}
-                    onDiscardLocal={leaveMatch}
-                    onReturnToSetup={returnToSetupFromLobby}
-                    onChatText={setLobbyChatText}
-                    onSendChat={sendLobbyChat}
-                    onCopyJoinLink={copyJoinLink}
-                  />
-                ) : null}
-                <div
-                  className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}
-                >
-                  {notice ? (
-                    <p className="notice entryNotice">{notice}</p>
+                </header>
+                <div className="setup v07Entry" data-testid="setup-screen">
+                  <nav className="entryTabs" aria-label="Startbereiche">
+                    <button
+                      className={`entryTab ${entryTab === "play" ? "active" : ""}`}
+                      onClick={() => setEntryTab("play")}
+                      type="button"
+                      aria-current={entryTab === "play" ? "page" : undefined}
+                    >
+                      <Play size={16} />
+                      Spiel
+                    </button>
+                    <button
+                      className={`entryTab ${entryTab === "games" ? "active" : ""}`}
+                      onClick={() => setEntryTab("games")}
+                      type="button"
+                      aria-current={entryTab === "games" ? "page" : undefined}
+                    >
+                      <Gamepad2 size={16} />
+                      Spiele
+                    </button>
+                    <button
+                      className={`entryTab ${entryTab === "catalog" ? "active" : ""}`}
+                      onClick={() => setEntryTab("catalog")}
+                      type="button"
+                      aria-current={entryTab === "catalog" ? "page" : undefined}
+                    >
+                      <ListFilter size={16} />
+                      Katalog
+                    </button>
+                    <button
+                      className={`entryTab ${entryTab === "decks" ? "active" : ""}`}
+                      onClick={() => setEntryTab("decks")}
+                      type="button"
+                      aria-current={entryTab === "decks" ? "page" : undefined}
+                    >
+                      <Layers3 size={16} />
+                      Deck-Editor
+                    </button>
+                    <button
+                      className={`entryTab ${entryTab === "recent" ? "active" : ""}`}
+                      onClick={() => setEntryTab("recent")}
+                      type="button"
+                      aria-current={entryTab === "recent" ? "page" : undefined}
+                    >
+                      <Award size={16} />
+                      Meine Spiele
+                    </button>
+                    <button
+                      className={`entryTab ${entryTab === "options" ? "active" : ""}`}
+                      onClick={() => setEntryTab("options")}
+                      type="button"
+                      aria-current={entryTab === "options" ? "page" : undefined}
+                    >
+                      <SlidersHorizontal size={16} />
+                      Optionen
+                    </button>
+                    <button
+                      className={`entryTab ${entryTab === "account" ? "active" : ""}`}
+                      onClick={() => setEntryTab("account")}
+                      type="button"
+                      aria-current={entryTab === "account" ? "page" : undefined}
+                    >
+                      <User size={16} />
+                      {accountSession.account ? "Profil" : "Account"}
+                    </button>
+                  </nav>
+                  {session && lobby ? (
+                    <StartLobbyPanel
+                      lobby={lobby}
+                      joinUrl={session.joinUrl}
+                      chatText={lobbyChatText}
+                      connection={connection}
+                      onReady={setReady}
+                      onCancel={cancelCountdown}
+                      onCancelMatch={cancelMatchLifecycle}
+                      onLeaveMatch={leaveMatchLifecycle}
+                      onRecreate={recreateMatch}
+                      onDiscardLocal={leaveMatch}
+                      onReturnToSetup={returnToSetupFromLobby}
+                      onChatText={setLobbyChatText}
+                      onSendChat={sendLobbyChat}
+                      onCopyJoinLink={copyJoinLink}
+                    />
                   ) : null}
-                  {entryTab === "play" && !startLobbyBlocksSetup ? (
-                    <section className="setupPanel">
-                      <div
-                        className={`tabs ${hasRecoveryStartTab ? "threeTabs" : ""}`}
-                      >
-                        <button
-                          className={`tab ${activeStartTab === "host" ? "active" : ""}`}
-                          onClick={() => selectStartTab("host")}
+                  <div
+                    className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}
+                  >
+                    {notice ? (
+                      <p className="notice entryNotice">{notice}</p>
+                    ) : null}
+                    {entryTab === "play" && !startLobbyBlocksSetup ? (
+                      <section className="setupPanel">
+                        <div
+                          className={`tabs ${hasRecoveryStartTab ? "threeTabs" : ""}`}
                         >
-                          Match erstellen
-                        </button>
-                        <button
-                          className={`tab ${activeStartTab === "join" ? "active" : ""}`}
-                          onClick={() => selectStartTab("join")}
-                        >
-                          Beitreten
-                        </button>
-                        {hasRecoveryStartTab ? (
                           <button
-                            className={`tab ${activeStartTab === "resume" ? "active" : ""}`}
-                            onClick={() => selectStartTab("resume")}
+                            className={`tab ${activeStartTab === "host" ? "active" : ""}`}
+                            onClick={() => selectStartTab("host")}
                           >
-                            {showingSessionRecovery
-                              ? "Wieder verbinden"
-                              : "Fortsetzen"}
+                            Match erstellen
                           </button>
-                        ) : null}
-                      </div>
+                          <button
+                            className={`tab ${activeStartTab === "join" ? "active" : ""}`}
+                            onClick={() => selectStartTab("join")}
+                          >
+                            Beitreten
+                          </button>
+                          {hasRecoveryStartTab ? (
+                            <button
+                              className={`tab ${activeStartTab === "resume" ? "active" : ""}`}
+                              onClick={() => selectStartTab("resume")}
+                            >
+                              {showingSessionRecovery
+                                ? "Wieder verbinden"
+                                : "Fortsetzen"}
+                            </button>
+                          ) : null}
+                        </div>
 
-                      {activeStartTab === "resume" ? (
-                        <MatchResumePanel
-                          showingSessionRecovery={showingSessionRecovery}
-                          session={session}
-                          connection={connection}
-                          canReconnect={canReconnect}
-                          recentSession={recentSession}
-                          canResumeRecentSession={canResumeRecentSession}
-                          onReconnect={reconnect}
-                          onCopyReconnectLink={copyReconnectLink}
-                          onLeaveMatch={leaveMatch}
-                          onResumeRecentSession={resumeRecentSession}
-                          onReconnectFromRecentSession={
-                            reconnectFromRecentSession
-                          }
-                          onDiscardRecentSession={discardRecentSession}
-                        />
-                      ) : activeStartTab === "host" ? (
-                        <>
-                          <MatchHostConsole
-                            playMode={playMode}
-                            matchFormat={effectiveStartMatchFormat}
-                            seriesGamesPlanned={seriesGamesPlanned}
-                            matchCardPool={matchCardPool}
-                            traceRulesProfile={traceRulesProfile}
+                        {activeStartTab === "resume" ? (
+                          <MatchResumePanel
+                            showingSessionRecovery={showingSessionRecovery}
+                            session={session}
+                            connection={connection}
+                            canReconnect={canReconnect}
+                            recentSession={recentSession}
+                            canResumeRecentSession={canResumeRecentSession}
+                            onReconnect={reconnect}
+                            onCopyReconnectLink={copyReconnectLink}
+                            onLeaveMatch={leaveMatch}
+                            onResumeRecentSession={resumeRecentSession}
+                            onReconnectFromRecentSession={
+                              reconnectFromRecentSession
+                            }
+                            onDiscardRecentSession={discardRecentSession}
+                          />
+                        ) : activeStartTab === "host" ? (
+                          <>
+                            <MatchHostConsole
+                              playMode={playMode}
+                              matchFormat={effectiveStartMatchFormat}
+                              seriesGamesPlanned={seriesGamesPlanned}
+                              matchCardPool={matchCardPool}
+                              traceRulesProfile={traceRulesProfile}
+                              displayName={displayName}
+                              identityKind={
+                                accountSession.account ? "account" : "guest"
+                              }
+                              isHumanVsAi={isHumanVsAi}
+                              humanAiSideSelection={humanAiSideSelection}
+                              gameMode={gameMode}
+                              runnerDifficulty={runnerDifficulty}
+                              corpDifficulty={corpDifficulty}
+                              aiDeckPolicyUsesPrimaryDeckSlots={
+                                aiDeckPolicyUsesPrimaryDeckSlots
+                              }
+                              runnerSnapshots={runnerDeckSlotSnapshots}
+                              corpSnapshots={corpDeckSlotSnapshots}
+                              localDecks={matchStartLocalDecks}
+                              standardDeckCatalogState={
+                                standardDeckCatalogState
+                              }
+                              standardDeckCatalogBlocksStart={
+                                standardDeckCatalogBlocksStart
+                              }
+                              runnerDeckSource={runnerDeckSource}
+                              corpDeckSource={corpDeckSource}
+                              selectedRunnerSnapshotId={
+                                selectedRunnerSnapshotId
+                              }
+                              selectedCorpSnapshotId={selectedCorpSnapshotId}
+                              selectedRunnerLocalDeckId={
+                                selectedRunnerLocalDeckId
+                              }
+                              selectedCorpLocalDeckId={selectedCorpLocalDeckId}
+                              isHumanVsHuman={isHumanVsHuman}
+                              testSetupMode={testSetupMode}
+                              startSummary={startSummary}
+                              hasAiOpponent={hasAiOpponent}
+                              humanSideSelection={humanSideSelection}
+                              countdownSeconds={countdownSeconds}
+                              isPublic={isPublic}
+                              playerClockMode={playerClockMode}
+                              playerClockMinutes={playerClockMinutes}
+                              playerClockGraceSeconds={playerClockGraceSeconds}
+                              playerClockDetailControlsDisabled={
+                                playerClockDetailControlsDisabled
+                              }
+                              seed={seed}
+                              aiTraceStartMode={aiTraceStartMode}
+                              aiDeckPolicy={aiDeckPolicy}
+                              participantBRunnerDeckSource={
+                                participantBRunnerDeckSource
+                              }
+                              participantBCorpDeckSource={
+                                participantBCorpDeckSource
+                              }
+                              selectedParticipantBRunnerSnapshotId={
+                                selectedParticipantBRunnerSnapshotId
+                              }
+                              selectedParticipantBCorpSnapshotId={
+                                selectedParticipantBCorpSnapshotId
+                              }
+                              selectedParticipantBRunnerLocalDeckId={
+                                selectedParticipantBRunnerLocalDeckId
+                              }
+                              selectedParticipantBCorpLocalDeckId={
+                                selectedParticipantBCorpLocalDeckId
+                              }
+                              aiSlotDisabled={aiSlotDisabled}
+                              visibleDeckMetadataEntries={
+                                visibleDeckMetadataEntries
+                              }
+                              onPlayMode={updatePlayMode}
+                              onMatchFormat={setMatchFormat}
+                              onSeriesGamesPlanned={setSeriesGamesPlanned}
+                              onMatchCardPool={setMatchCardPool}
+                              onTraceRulesProfile={setTraceRulesProfile}
+                              onDisplayName={updateDisplayName}
+                              onHumanAiSideSelection={setHumanAiSideSelection}
+                              onRunnerDifficulty={setRunnerDifficulty}
+                              onCorpDifficulty={setCorpDifficulty}
+                              onRunnerDeckSource={setRunnerDeckSource}
+                              onCorpDeckSource={setCorpDeckSource}
+                              onSelectedRunnerSnapshotId={
+                                setSelectedRunnerSnapshotId
+                              }
+                              onSelectedCorpSnapshotId={
+                                setSelectedCorpSnapshotId
+                              }
+                              onSelectedRunnerLocalDeckId={
+                                setSelectedRunnerLocalDeckId
+                              }
+                              onSelectedCorpLocalDeckId={
+                                setSelectedCorpLocalDeckId
+                              }
+                              onReloadStandardDeckCatalog={
+                                reloadStandardDeckCatalog
+                              }
+                              onCreateMatch={createMatch}
+                              onHumanSideSelection={setHumanSideSelection}
+                              onCountdownSeconds={setCountdownSeconds}
+                              onIsPublic={setIsPublic}
+                              onPlayerClockMode={setPlayerClockMode}
+                              onPlayerClockMinutes={setPlayerClockMinutes}
+                              onPlayerClockGraceSeconds={
+                                setPlayerClockGraceSeconds
+                              }
+                              onSeed={setSeed}
+                              onAiTraceStartMode={setAiTraceStartMode}
+                              onTestSetupMode={setTestSetupMode}
+                              onAiDeckPolicy={setAiDeckPolicy}
+                              onParticipantBRunnerDeckSource={
+                                setParticipantBRunnerDeckSource
+                              }
+                              onParticipantBCorpDeckSource={
+                                setParticipantBCorpDeckSource
+                              }
+                              onSelectedParticipantBRunnerSnapshotId={
+                                setSelectedParticipantBRunnerSnapshotId
+                              }
+                              onSelectedParticipantBCorpSnapshotId={
+                                setSelectedParticipantBCorpSnapshotId
+                              }
+                              onSelectedParticipantBRunnerLocalDeckId={
+                                setSelectedParticipantBRunnerLocalDeckId
+                              }
+                              onSelectedParticipantBCorpLocalDeckId={
+                                setSelectedParticipantBCorpLocalDeckId
+                              }
+                            />
+                            {accountSession.account ? (
+                              <div className="accountMatchStartPreferences">
+                                <span>
+                                  {accountMatchStartPreferencesLoadedFor ===
+                                  accountSession.account.accountId
+                                    ? "Deine Matchstart-Vorbelegung wird privat im Account gespeichert."
+                                    : "Account-Vorbelegung wird geladen …"}
+                                </span>
+                                <button
+                                  className="button subtle"
+                                  type="button"
+                                  disabled={
+                                    accountMatchStartPreferencesResetting ||
+                                    accountMatchStartPreferencesLoadedFor !==
+                                      accountSession.account.accountId
+                                  }
+                                  onClick={() =>
+                                    void resetSavedAccountMatchStartPreferences()
+                                  }
+                                >
+                                  Vorbelegungen zurücksetzen
+                                </button>
+                              </div>
+                            ) : null}
+                          </>
+                        ) : (
+                          <MatchJoinConsole
+                            joinMatchIdTrimmed={joinMatchIdTrimmed}
+                            joinTokenTrimmed={joinTokenTrimmed}
+                            joinLinkInput={joinLinkInput}
                             displayName={displayName}
                             identityKind={
                               accountSession.account ? "account" : "guest"
                             }
-                            isHumanVsAi={isHumanVsAi}
-                            humanAiSideSelection={humanAiSideSelection}
-                            gameMode={gameMode}
-                            runnerDifficulty={runnerDifficulty}
-                            corpDifficulty={corpDifficulty}
-                            aiDeckPolicyUsesPrimaryDeckSlots={
-                              aiDeckPolicyUsesPrimaryDeckSlots
-                            }
                             runnerSnapshots={runnerDeckSlotSnapshots}
                             corpSnapshots={corpDeckSlotSnapshots}
                             localDecks={matchStartLocalDecks}
-                            standardDeckCatalogState={standardDeckCatalogState}
-                            standardDeckCatalogBlocksStart={
-                              standardDeckCatalogBlocksStart
-                            }
-                            runnerDeckSource={runnerDeckSource}
-                            corpDeckSource={corpDeckSource}
-                            selectedRunnerSnapshotId={selectedRunnerSnapshotId}
-                            selectedCorpSnapshotId={selectedCorpSnapshotId}
-                            selectedRunnerLocalDeckId={
-                              selectedRunnerLocalDeckId
-                            }
-                            selectedCorpLocalDeckId={selectedCorpLocalDeckId}
-                            isHumanVsHuman={isHumanVsHuman}
-                            testSetupMode={testSetupMode}
-                            startSummary={startSummary}
-                            hasAiOpponent={hasAiOpponent}
-                            humanSideSelection={humanSideSelection}
-                            countdownSeconds={countdownSeconds}
-                            isPublic={isPublic}
-                            playerClockMode={playerClockMode}
-                            playerClockMinutes={playerClockMinutes}
-                            playerClockGraceSeconds={playerClockGraceSeconds}
-                            playerClockDetailControlsDisabled={
-                              playerClockDetailControlsDisabled
-                            }
-                            seed={seed}
-                            aiTraceStartMode={aiTraceStartMode}
-                            aiDeckPolicy={aiDeckPolicy}
                             participantBRunnerDeckSource={
                               participantBRunnerDeckSource
                             }
@@ -6507,47 +6628,11 @@ export default function Page() {
                             selectedParticipantBCorpLocalDeckId={
                               selectedParticipantBCorpLocalDeckId
                             }
-                            aiSlotDisabled={aiSlotDisabled}
-                            visibleDeckMetadataEntries={
-                              visibleDeckMetadataEntries
-                            }
-                            onPlayMode={updatePlayMode}
-                            onMatchFormat={setMatchFormat}
-                            onSeriesGamesPlanned={setSeriesGamesPlanned}
-                            onMatchCardPool={setMatchCardPool}
-                            onTraceRulesProfile={setTraceRulesProfile}
+                            joinMatchId={joinMatchId}
+                            joinToken={joinToken}
+                            canSubmitJoin={canSubmitJoin}
+                            onJoinLinkInput={updateJoinLinkInput}
                             onDisplayName={updateDisplayName}
-                            onHumanAiSideSelection={setHumanAiSideSelection}
-                            onRunnerDifficulty={setRunnerDifficulty}
-                            onCorpDifficulty={setCorpDifficulty}
-                            onRunnerDeckSource={setRunnerDeckSource}
-                            onCorpDeckSource={setCorpDeckSource}
-                            onSelectedRunnerSnapshotId={
-                              setSelectedRunnerSnapshotId
-                            }
-                            onSelectedCorpSnapshotId={setSelectedCorpSnapshotId}
-                            onSelectedRunnerLocalDeckId={
-                              setSelectedRunnerLocalDeckId
-                            }
-                            onSelectedCorpLocalDeckId={
-                              setSelectedCorpLocalDeckId
-                            }
-                            onReloadStandardDeckCatalog={
-                              reloadStandardDeckCatalog
-                            }
-                            onCreateMatch={createMatch}
-                            onHumanSideSelection={setHumanSideSelection}
-                            onCountdownSeconds={setCountdownSeconds}
-                            onIsPublic={setIsPublic}
-                            onPlayerClockMode={setPlayerClockMode}
-                            onPlayerClockMinutes={setPlayerClockMinutes}
-                            onPlayerClockGraceSeconds={
-                              setPlayerClockGraceSeconds
-                            }
-                            onSeed={setSeed}
-                            onAiTraceStartMode={setAiTraceStartMode}
-                            onTestSetupMode={setTestSetupMode}
-                            onAiDeckPolicy={setAiDeckPolicy}
                             onParticipantBRunnerDeckSource={
                               setParticipantBRunnerDeckSource
                             }
@@ -6566,245 +6651,174 @@ export default function Page() {
                             onSelectedParticipantBCorpLocalDeckId={
                               setSelectedParticipantBCorpLocalDeckId
                             }
+                            onJoinMatchId={setJoinMatchId}
+                            onJoinToken={setJoinToken}
+                            onJoinMatch={joinMatch}
                           />
-                          {accountSession.account ? (
-                            <div className="accountMatchStartPreferences">
-                              <span>
-                                {accountMatchStartPreferencesLoadedFor ===
-                                accountSession.account.accountId
-                                  ? "Deine Matchstart-Vorbelegung wird privat im Account gespeichert."
-                                  : "Account-Vorbelegung wird geladen …"}
-                              </span>
-                              <button
-                                className="button subtle"
-                                type="button"
-                                disabled={
-                                  accountMatchStartPreferencesResetting ||
-                                  accountMatchStartPreferencesLoadedFor !==
-                                    accountSession.account.accountId
-                                }
-                                onClick={() =>
-                                  void resetSavedAccountMatchStartPreferences()
-                                }
-                              >
-                                Vorbelegungen zurücksetzen
-                              </button>
-                            </div>
-                          ) : null}
-                        </>
-                      ) : (
-                        <MatchJoinConsole
-                          joinMatchIdTrimmed={joinMatchIdTrimmed}
-                          joinTokenTrimmed={joinTokenTrimmed}
-                          joinLinkInput={joinLinkInput}
-                          displayName={displayName}
-                          identityKind={
-                            accountSession.account ? "account" : "guest"
-                          }
-                          runnerSnapshots={runnerDeckSlotSnapshots}
-                          corpSnapshots={corpDeckSlotSnapshots}
-                          localDecks={matchStartLocalDecks}
-                          participantBRunnerDeckSource={
-                            participantBRunnerDeckSource
-                          }
-                          participantBCorpDeckSource={
-                            participantBCorpDeckSource
-                          }
-                          selectedParticipantBRunnerSnapshotId={
-                            selectedParticipantBRunnerSnapshotId
-                          }
-                          selectedParticipantBCorpSnapshotId={
-                            selectedParticipantBCorpSnapshotId
-                          }
-                          selectedParticipantBRunnerLocalDeckId={
-                            selectedParticipantBRunnerLocalDeckId
-                          }
-                          selectedParticipantBCorpLocalDeckId={
-                            selectedParticipantBCorpLocalDeckId
-                          }
-                          joinMatchId={joinMatchId}
-                          joinToken={joinToken}
-                          canSubmitJoin={canSubmitJoin}
-                          onJoinLinkInput={updateJoinLinkInput}
-                          onDisplayName={updateDisplayName}
-                          onParticipantBRunnerDeckSource={
-                            setParticipantBRunnerDeckSource
-                          }
-                          onParticipantBCorpDeckSource={
-                            setParticipantBCorpDeckSource
-                          }
-                          onSelectedParticipantBRunnerSnapshotId={
-                            setSelectedParticipantBRunnerSnapshotId
-                          }
-                          onSelectedParticipantBCorpSnapshotId={
-                            setSelectedParticipantBCorpSnapshotId
-                          }
-                          onSelectedParticipantBRunnerLocalDeckId={
-                            setSelectedParticipantBRunnerLocalDeckId
-                          }
-                          onSelectedParticipantBCorpLocalDeckId={
-                            setSelectedParticipantBCorpLocalDeckId
-                          }
-                          onJoinMatchId={setJoinMatchId}
-                          onJoinToken={setJoinToken}
-                          onJoinMatch={joinMatch}
-                        />
-                      )}
-                    </section>
-                  ) : null}
-                  {entryTab === "games" ? (
-                    <PublicGamesPanel
-                      matches={openLanMatches}
-                      loading={openLanLoading}
-                      error={openLanError}
-                      updatedAt={openLanUpdatedAt}
-                      canJoinOpen={!session}
-                      rejoinableMatchIds={accountRejoinableMatchIds}
-                      rejoiningMatchId={accountRejoiningMatchId}
-                      onRefresh={() => void refreshOpenLanMatches()}
-                      onJoinOpen={selectOpenLanMatch}
-                      onRejoin={rejoinAccountPublicGame}
-                    />
-                  ) : null}
-                  {entryTab === "catalog" ? (
-                    <CatalogPanel {...catalogPanelProps} />
-                  ) : null}
-                  {entryTab === "decks" ? (
-                    <DeckEditorPanel
-                      localDecks={localDecks}
-                      selectedDeck={selectedDeck}
-                      selectedDeckDirty={selectedDeckDirty}
-                      storagePath={deckLibraryStoragePath}
-                      validation={deckValidation}
-                      validatedSnapshot={validatedSnapshot}
-                      playableCards={playableCatalogCards}
-                      cardDetailsById={catalogDetailsById}
-                      importText={deckImportText}
-                      exportText={deckExportText}
-                      onCreateEmpty={createEmptyDeck}
-                      onSelectDeck={setSelectedLocalDeckId}
-                      onUpdateDeck={updateSelectedDeck}
-                      onSave={saveSelectedDeck}
-                      onUpdateQuantity={updateDeckCardQuantity}
-                      onDuplicate={duplicateSelectedDeck}
-                      onDelete={deleteSelectedDeck}
-                      onValidate={validateSelectedDeck}
-                      onUseForMatch={useValidatedDeckForMatch}
-                      onExport={exportSelectedDeck}
-                      onImportText={setDeckImportText}
-                      onImport={importLocalDeck}
-                      standardDecks={
-                        accountSession.account ? standardDecks : []
-                      }
-                      standardDeckCatalogPhase={standardDeckCatalogState.phase}
-                      standardDeckCatalogRefreshing={
-                        standardDeckCatalogState.refreshing
-                      }
-                      standardCopyBusy={accountDeckBusy}
-                      {...(accountSession.account
-                        ? { onCopyStandard: copyStandardToAccount }
-                        : {})}
-                      onReloadStandardDecks={reloadStandardDeckCatalog}
-                    />
-                  ) : null}
-                  {entryTab === "recent" ? (
-                    <RecentGamesPanel
-                      results={recentGameResults}
-                      loading={recentGameResultsLoading}
-                      error={recentGameResultsError}
-                      updatedAt={recentGameResultsUpdatedAt}
-                      accountMode={Boolean(accountSession.account)}
-                      onRefresh={refreshRecentGameResults}
-                    />
-                  ) : null}
-                  {entryTab === "options" ? (
-                    <OptionsPanel
-                      actionCueAutoDismissMs={actionCueAutoDismissMs}
-                      actionCuesEnabled={actionCuesEnabled}
-                      automaticEffectCuesEnabled={automaticEffectCuesEnabled}
-                      autoCorpMandatoryDrawEnabled={
-                        autoCorpMandatoryDrawEnabled
-                      }
-                      autoDiscardEnabled={autoDiscardEnabled}
-                      autoEndTurnEnabled={autoEndTurnEnabled}
-                      topbarStickyEnabled={topbarStickyEnabled}
-                      cyberspaceBackgroundEnabled={cyberspaceBackgroundEnabled}
-                      resourceStripMode={resourceStripMode}
-                      actionPanelMode={actionPanelMode}
-                      aiDecisionDebugOverlayEnabled={
-                        aiDecisionDebugOverlayEnabled
-                      }
-                      exposedCardHighlightEnabled={exposedCardHighlightEnabled}
-                      audioEnabled={audioEnabled}
-                      audioVolume={audioVolume}
-                      cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
-                      cardTooltipMode={cardTooltipMode}
-                      cardTooltipScalePercent={cardTooltipScalePercent}
-                      cardHandScalePercent={cardHandScalePercent}
-                      cardArchiveScalePercent={cardArchiveScalePercent}
-                      cardZoneScalePercent={cardZoneScalePercent}
-                      cardBoardScalePercent={cardBoardScalePercent}
-                      cardRigScalePercent={cardRigScalePercent}
-                      cardSpecialZoneScalePercent={cardSpecialZoneScalePercent}
-                      cardDisplayMode={cardDisplayMode}
-                      preferGermanCardImages={preferGermanCardImages}
-                      showSetBadges={showSetBadges}
-                      chronicleDetailMode={chronicleDetailMode}
-                      colorScheme={colorScheme}
-                      cuePosition={cuePosition}
-                      aiPacingMode={localAiPacingMode}
-                      onActionCueAutoDismissMs={setActionCueAutoDismissMs}
-                      onActionCuesEnabled={setActionCuesEnabled}
-                      onAutomaticEffectCuesEnabled={
-                        setAutomaticEffectCuesEnabled
-                      }
-                      onAutoCorpMandatoryDrawEnabled={
-                        setAutoCorpMandatoryDrawEnabled
-                      }
-                      onAutoDiscardEnabled={setAutoDiscardEnabled}
-                      onAutoEndTurnEnabled={setAutoEndTurnEnabled}
-                      onTopbarStickyEnabled={setTopbarStickyEnabled}
-                      onCyberspaceBackgroundEnabled={
-                        setCyberspaceBackgroundEnabled
-                      }
-                      onResourceStripMode={setResourceStripMode}
-                      onActionPanelMode={setActionPanelMode}
-                      onAiDecisionDebugOverlayEnabled={
-                        setAiDecisionDebugOverlayEnabled
-                      }
-                      onExposedCardHighlightEnabled={
-                        setExposedCardHighlightEnabled
-                      }
-                      onAudioEnabled={updateAudioEnabled}
-                      onAudioVolume={setAudioVolume}
-                      onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
-                      onCardTooltipMode={setCardTooltipMode}
-                      onCardTooltipScalePercent={setCardTooltipScalePercent}
-                      onCardHandScalePercent={setCardHandScalePercent}
-                      onCardArchiveScalePercent={setCardArchiveScalePercent}
-                      onCardZoneScalePercent={setCardZoneScalePercent}
-                      onCardBoardScalePercent={setCardBoardScalePercent}
-                      onCardRigScalePercent={setCardRigScalePercent}
-                      onCardSpecialZoneScalePercent={
-                        setCardSpecialZoneScalePercent
-                      }
-                      onCardDisplayMode={setCardDisplayMode}
-                      onPreferGermanCardImages={setPreferGermanCardImages}
-                      onShowSetBadges={setShowSetBadges}
-                      onChronicleDetailMode={setChronicleDetailMode}
-                      onColorScheme={setColorScheme}
-                      onCuePosition={setCuePosition}
-                      onAiPacingMode={updateLocalAiPacingMode}
-                    />
-                  ) : null}
-                  {entryTab === "account" ? (
-                    <AccountPanel accountSession={accountSession} />
-                  ) : null}
+                        )}
+                      </section>
+                    ) : null}
+                    {entryTab === "games" ? (
+                      <PublicGamesPanel
+                        matches={openLanMatches}
+                        loading={openLanLoading}
+                        error={openLanError}
+                        updatedAt={openLanUpdatedAt}
+                        canJoinOpen={!session}
+                        rejoinableMatchIds={accountRejoinableMatchIds}
+                        rejoiningMatchId={accountRejoiningMatchId}
+                        onRefresh={() => void refreshOpenLanMatches()}
+                        onJoinOpen={selectOpenLanMatch}
+                        onRejoin={rejoinAccountPublicGame}
+                      />
+                    ) : null}
+                    {entryTab === "catalog" ? (
+                      <CatalogPanel {...catalogPanelProps} />
+                    ) : null}
+                    {entryTab === "decks" ? (
+                      <DeckEditorPanel
+                        localDecks={localDecks}
+                        selectedDeck={selectedDeck}
+                        selectedDeckDirty={selectedDeckDirty}
+                        storagePath={deckLibraryStoragePath}
+                        validation={deckValidation}
+                        validatedSnapshot={validatedSnapshot}
+                        playableCards={playableCatalogCards}
+                        cardDetailsById={catalogDetailsById}
+                        importText={deckImportText}
+                        exportText={deckExportText}
+                        onCreateEmpty={createEmptyDeck}
+                        onSelectDeck={setSelectedLocalDeckId}
+                        onUpdateDeck={updateSelectedDeck}
+                        onSave={saveSelectedDeck}
+                        onUpdateQuantity={updateDeckCardQuantity}
+                        onDuplicate={duplicateSelectedDeck}
+                        onDelete={deleteSelectedDeck}
+                        onValidate={validateSelectedDeck}
+                        onUseForMatch={useValidatedDeckForMatch}
+                        onExport={exportSelectedDeck}
+                        onImportText={setDeckImportText}
+                        onImport={importLocalDeck}
+                        standardDecks={
+                          accountSession.account ? standardDecks : []
+                        }
+                        standardDeckCatalogPhase={
+                          standardDeckCatalogState.phase
+                        }
+                        standardDeckCatalogRefreshing={
+                          standardDeckCatalogState.refreshing
+                        }
+                        standardCopyBusy={accountDeckBusy}
+                        {...(accountSession.account
+                          ? { onCopyStandard: copyStandardToAccount }
+                          : {})}
+                        onReloadStandardDecks={reloadStandardDeckCatalog}
+                      />
+                    ) : null}
+                    {entryTab === "recent" ? (
+                      <RecentGamesPanel
+                        results={recentGameResults}
+                        loading={recentGameResultsLoading}
+                        error={recentGameResultsError}
+                        updatedAt={recentGameResultsUpdatedAt}
+                        accountMode={Boolean(accountSession.account)}
+                        onRefresh={refreshRecentGameResults}
+                      />
+                    ) : null}
+                    {entryTab === "options" ? (
+                      <OptionsPanel
+                        actionCueAutoDismissMs={actionCueAutoDismissMs}
+                        actionCuesEnabled={actionCuesEnabled}
+                        automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+                        autoCorpMandatoryDrawEnabled={
+                          autoCorpMandatoryDrawEnabled
+                        }
+                        autoDiscardEnabled={autoDiscardEnabled}
+                        autoEndTurnEnabled={autoEndTurnEnabled}
+                        topbarStickyEnabled={topbarStickyEnabled}
+                        cyberspaceBackgroundEnabled={
+                          cyberspaceBackgroundEnabled
+                        }
+                        resourceStripMode={resourceStripMode}
+                        actionPanelMode={actionPanelMode}
+                        aiDecisionDebugOverlayEnabled={
+                          aiDecisionDebugOverlayEnabled
+                        }
+                        exposedCardHighlightEnabled={
+                          exposedCardHighlightEnabled
+                        }
+                        audioEnabled={audioEnabled}
+                        audioVolume={audioVolume}
+                        cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
+                        cardTooltipMode={cardTooltipMode}
+                        cardTooltipScalePercent={cardTooltipScalePercent}
+                        cardHandScalePercent={cardHandScalePercent}
+                        cardArchiveScalePercent={cardArchiveScalePercent}
+                        cardZoneScalePercent={cardZoneScalePercent}
+                        cardBoardScalePercent={cardBoardScalePercent}
+                        cardRigScalePercent={cardRigScalePercent}
+                        cardSpecialZoneScalePercent={
+                          cardSpecialZoneScalePercent
+                        }
+                        cardDisplayMode={cardDisplayMode}
+                        preferGermanCardImages={preferGermanCardImages}
+                        showSetBadges={showSetBadges}
+                        chronicleDetailMode={chronicleDetailMode}
+                        colorScheme={colorScheme}
+                        cuePosition={cuePosition}
+                        aiPacingMode={localAiPacingMode}
+                        onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                        onActionCuesEnabled={setActionCuesEnabled}
+                        onAutomaticEffectCuesEnabled={
+                          setAutomaticEffectCuesEnabled
+                        }
+                        onAutoCorpMandatoryDrawEnabled={
+                          setAutoCorpMandatoryDrawEnabled
+                        }
+                        onAutoDiscardEnabled={setAutoDiscardEnabled}
+                        onAutoEndTurnEnabled={setAutoEndTurnEnabled}
+                        onTopbarStickyEnabled={setTopbarStickyEnabled}
+                        onCyberspaceBackgroundEnabled={
+                          setCyberspaceBackgroundEnabled
+                        }
+                        onResourceStripMode={setResourceStripMode}
+                        onActionPanelMode={setActionPanelMode}
+                        onAiDecisionDebugOverlayEnabled={
+                          setAiDecisionDebugOverlayEnabled
+                        }
+                        onExposedCardHighlightEnabled={
+                          setExposedCardHighlightEnabled
+                        }
+                        onAudioEnabled={updateAudioEnabled}
+                        onAudioVolume={setAudioVolume}
+                        onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
+                        onCardTooltipMode={setCardTooltipMode}
+                        onCardTooltipScalePercent={setCardTooltipScalePercent}
+                        onCardHandScalePercent={setCardHandScalePercent}
+                        onCardArchiveScalePercent={setCardArchiveScalePercent}
+                        onCardZoneScalePercent={setCardZoneScalePercent}
+                        onCardBoardScalePercent={setCardBoardScalePercent}
+                        onCardRigScalePercent={setCardRigScalePercent}
+                        onCardSpecialZoneScalePercent={
+                          setCardSpecialZoneScalePercent
+                        }
+                        onCardDisplayMode={setCardDisplayMode}
+                        onPreferGermanCardImages={setPreferGermanCardImages}
+                        onShowSetBadges={setShowSetBadges}
+                        onChronicleDetailMode={setChronicleDetailMode}
+                        onColorScheme={setColorScheme}
+                        onCuePosition={setCuePosition}
+                        onAiPacingMode={updateLocalAiPacingMode}
+                      />
+                    ) : null}
+                    {entryTab === "account" ? (
+                      <AccountPanel accountSession={accountSession} />
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            </main>
-          </CardTooltipSettingsContext.Provider>
-        </CardImagePreferenceContext.Provider>
+              </main>
+            </CardTooltipSettingsContext.Provider>
+          </CardImagePreferenceContext.Provider>
         </CatalogCardPresentationsProvider>
       </CardScaleSettingsContext.Provider>
     );
@@ -6823,498 +6837,531 @@ export default function Page() {
       }}
     >
       <CatalogCardPresentationsProvider value={catalogCardPresentationsById}>
-      <CardImagePreferenceContext.Provider
-        value={{ preferGermanCardImages, showSetBadges }}
-      >
-        <CardTooltipSettingsContext.Provider
-          value={{
-            hoverOpenDelayMs: cardTooltipHoverDelayMs,
-            mode: cardTooltipMode,
-          }}
+        <CardImagePreferenceContext.Provider
+          value={{ preferGermanCardImages, showSetBadges }}
         >
-          <main className={activeMatchClassName} data-theme={colorScheme}>
-            {matchStartLogoMatchId ? (
-              <div
-                className="matchStartLogoOverlay"
-                role="status"
-                aria-label="Match startet"
-                data-testid="match-start-logo-overlay"
-              >
-                <div className="matchStartLogoLockup">
-                  <img
-                    className="matchStartLogoIcon"
-                    src={APP_ICON_SRC}
-                    alt=""
-                  />
-                  <img
-                    className="matchStartLogoWordmark"
-                    src={APP_WORDMARK_SRC}
-                    alt=""
-                  />
-                </div>
-              </div>
-            ) : null}
-            <ActiveMatchTopbar
-              topbarRef={topbarRef}
-              appName={APP_NAME}
-              appStatusLabel={APP_STATUS_LABEL}
-              appIconSrc={APP_ICON_SRC}
-              appWordmarkSrc={APP_WORDMARK_SRC}
-              statusText={statusText}
-              connection={connection}
-              workspace={activeMatchWorkspace}
-              activeMatchIsGame={activeMatchIsGame}
-              undoPanelOpen={undoPanelOpen}
-              pendingUndo={payload.pendingUndo}
-              canReconnect={canReconnect}
-              matchDetailsOpen={matchDetailsOpen}
-              canStartNextSeriesGame={canStartNextSeriesGame}
-              seriesTransitioning={seriesTransitioning}
-              canReturnToStart={canReturnToStart}
-              canForfeit={canForfeit}
-              canCancelSimulation={canCancelSimulation}
-              rightRailCollapsed={rightRailCollapsed}
-              canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
-              humanAiAdvice={humanAiAdvice}
-              humanAiAdviceError={aiDecisionDebugPreviewError}
-              humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
-              onWorkspace={setActiveMatchWorkspace}
-              onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
-              onReconnect={reconnect}
-              onToggleMatchDetails={() => setMatchDetailsOpen((open) => !open)}
-              onStartNextSeriesGame={startNextSeriesGame}
-              onLeaveMatch={leaveMatch}
-              onRequestForfeitMatch={requestForfeitMatch}
-              onRequestCancelSimulation={requestCancelSimulation}
-              onToggleRightRail={() =>
-                setRightRailCollapsed((current) => !current)
-              }
-              onRequestHumanAiAdvice={() =>
-                void requestHumanAiDecisionPreview()
-              }
-              onCloseHumanAiAdvice={() => {
-                setAiDecisionDebugPreview(null);
-                setAiDecisionDebugPreviewError("");
-                setAiDecisionDebugPreviewLoading(false);
-              }}
-            />
-
-            {matchDetailsOpen ? (
-              <div
-                className="matchStrip"
-                id="match-details-strip"
-                aria-label="Status zum aktiven Spiel"
-              >
-                <span title={payload.matchStatus}>
-                  <strong>Status</strong> {payload.matchStatus}
-                </span>
-                <span className="matchStripMatchId" title={payload.matchId}>
-                  <strong>Match</strong> {payload.matchId}
-                </span>
-                <span>
-                  <strong>Gegenüber</strong>{" "}
-                  {opponentDisplayName ??
-                    sideLabel(payload.opponentStatus.side)}
-                </span>
-                {activeView.deckMetadata ? (
-                  <span title={activeView.deckMetadata.own.deckName}>
-                    <strong>Eigenes Deck</strong>{" "}
-                    {activeView.deckMetadata.own.deckName}
-                  </span>
-                ) : null}
-                {activeView.deckMetadata && humanOpponentIsAi ? (
-                  <span title={activeView.deckMetadata.opponent.deckName}>
-                    <strong>KI-Deck</strong>{" "}
-                    {activeView.deckMetadata.opponent.deckName}
-                  </span>
-                ) : null}
-                <span>
-                  <strong>Version</strong> {payload.matchVersion}
-                </span>
-                <span>
-                  <strong>State</strong> {activeView.stateVersion}
-                </span>
-                {notice ? (
-                  <span className="matchStripNotice">{notice}</span>
-                ) : null}
-              </div>
-            ) : notice ? (
-              <div className="matchNotice" role="status" aria-live="polite">
-                {notice}
-              </div>
-            ) : null}
-            <UndoPanel
-              open={undoPanelOpen}
-              pendingUndo={payload.pendingUndo}
-              undoNotice={undoNotice}
-              latestEventId={latestEventId}
-              connection={connection}
-              onRequest={requestUndo}
-              onResolve={resolveUndo}
-            />
-            {activeMatchIsGame ? (
-              <DamageImpactOverlay
-                cue={standaloneDamageImpact}
-                queued={damageImpactQueue.length}
-                onDismiss={() => setCurrentDamageImpact(null)}
-              />
-            ) : null}
-            {activeMatchIsGame &&
-            !matchEnded &&
-            !currentDamageImpact &&
-            !showAccessReveal &&
-            !showSuccessfulRunOutcome ? (
-              <OpponentActionOverlay
-                cue={currentActionCue}
-                queued={actionCueQueue.length}
-                position={cuePosition}
-                cardDetailsById={catalogDetailsById}
-                displayMode={cardDisplayMode}
-                canAdvanceAi={Boolean(
-                  aiTurnPresentation?.canAdvanceAi && connection === "online",
-                )}
-                renderTitle={(cue) => {
-                  const titleCard = cue.cardDefinitionId
-                    ? (catalogDetailsById[cue.cardDefinitionId] ?? null)
-                    : null;
-                  return (
-                    <OpponentCueTitle
-                      cue={cue}
-                      card={titleCard}
-                      previewCard={
-                        titleCard
-                          ? visibleCardFromCatalogDetail(titleCard)
-                          : null
-                      }
-                      displayMode={cardDisplayMode}
-                      onFocusCard={focusCard}
+          <CardTooltipSettingsContext.Provider
+            value={{
+              hoverOpenDelayMs: cardTooltipHoverDelayMs,
+              mode: cardTooltipMode,
+            }}
+          >
+            <main className={activeMatchClassName} data-theme={colorScheme}>
+              {matchStartLogoMatchId ? (
+                <div
+                  className="matchStartLogoOverlay"
+                  role="status"
+                  aria-label="Match startet"
+                  data-testid="match-start-logo-overlay"
+                >
+                  <div className="matchStartLogoLockup">
+                    <img
+                      className="matchStartLogoIcon"
+                      src={APP_ICON_SRC}
+                      alt=""
                     />
-                  );
-                }}
-                onPosition={setCuePosition}
-                onDismiss={() => setCurrentActionCue(null)}
-                onAdvanceAi={() => {
-                  setCurrentActionCue(actionCueAfterAiAdvanceRequest);
-                  advanceAi(
-                    aiAdvanceRequestMode(localAiPacingMode, isAiVsAiMatch),
-                  );
+                    <img
+                      className="matchStartLogoWordmark"
+                      src={APP_WORDMARK_SRC}
+                      alt=""
+                    />
+                  </div>
+                </div>
+              ) : null}
+              <ActiveMatchTopbar
+                topbarRef={topbarRef}
+                appName={APP_NAME}
+                appStatusLabel={APP_STATUS_LABEL}
+                appIconSrc={APP_ICON_SRC}
+                appWordmarkSrc={APP_WORDMARK_SRC}
+                statusText={statusText}
+                connection={connection}
+                workspace={activeMatchWorkspace}
+                activeMatchIsGame={activeMatchIsGame}
+                undoPanelOpen={undoPanelOpen}
+                pendingUndo={payload.pendingUndo}
+                canReconnect={canReconnect}
+                matchDetailsOpen={matchDetailsOpen}
+                canStartNextSeriesGame={canStartNextSeriesGame}
+                seriesTransitioning={seriesTransitioning}
+                canReturnToStart={canReturnToStart}
+                canForfeit={canForfeit}
+                canCancelSimulation={canCancelSimulation}
+                rightRailCollapsed={rightRailCollapsed}
+                canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
+                humanAiAdvice={humanAiAdvice}
+                humanAiAdviceError={aiDecisionDebugPreviewError}
+                humanAiAdviceLoading={aiDecisionDebugPreviewLoading}
+                onWorkspace={setActiveMatchWorkspace}
+                onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
+                onReconnect={reconnect}
+                onToggleMatchDetails={() =>
+                  setMatchDetailsOpen((open) => !open)
+                }
+                onStartNextSeriesGame={startNextSeriesGame}
+                onLeaveMatch={leaveMatch}
+                onRequestForfeitMatch={requestForfeitMatch}
+                onRequestCancelSimulation={requestCancelSimulation}
+                onToggleRightRail={() =>
+                  setRightRailCollapsed((current) => !current)
+                }
+                onRequestHumanAiAdvice={() =>
+                  void requestHumanAiDecisionPreview()
+                }
+                onCloseHumanAiAdvice={() => {
+                  setAiDecisionDebugPreview(null);
+                  setAiDecisionDebugPreviewError("");
+                  setAiDecisionDebugPreviewLoading(false);
                 }}
               />
-            ) : null}
-            {activeMatchIsGame && !matchEnded && activeView?.run ? (
-              <RunTimelineOverlay
-                view={activeView}
-                legalActions={payload.legalActions}
-                runActions={runActions}
-                cardDetailsById={catalogDetailsById}
-                actionDisabled={
-                  Boolean(payload.winner) || connection !== "online"
-                }
-                highlighted={activeCueHighlight?.kind === "run"}
-                corpRunAutoPassActive={
-                  Boolean(currentCorpRunAutoPassKey) &&
-                  corpRunAutoPassKey === currentCorpRunAutoPassKey
-                }
-                onAction={submitAction}
-                onChoiceOption={submitChoiceOption}
-                onCorpRunAutoPassEnabled={(enabled) => {
-                  setCorpRunAutoPassKey(
-                    enabled ? currentCorpRunAutoPassKey : null,
-                  );
-                  corpRunAutoPassSubmittedKeyRef.current = null;
-                }}
+
+              {matchDetailsOpen ? (
+                <div
+                  className="matchStrip"
+                  id="match-details-strip"
+                  aria-label="Status zum aktiven Spiel"
+                >
+                  <span title={payload.matchStatus}>
+                    <strong>Status</strong> {payload.matchStatus}
+                  </span>
+                  <span className="matchStripMatchId" title={payload.matchId}>
+                    <strong>Match</strong> {payload.matchId}
+                  </span>
+                  <span>
+                    <strong>Gegenüber</strong>{" "}
+                    {opponentDisplayName ??
+                      sideLabel(payload.opponentStatus.side)}
+                  </span>
+                  {activeView.deckMetadata ? (
+                    <span title={activeView.deckMetadata.own.deckName}>
+                      <strong>Eigenes Deck</strong>{" "}
+                      {activeView.deckMetadata.own.deckName}
+                    </span>
+                  ) : null}
+                  {activeView.deckMetadata && humanOpponentIsAi ? (
+                    <span title={activeView.deckMetadata.opponent.deckName}>
+                      <strong>KI-Deck</strong>{" "}
+                      {activeView.deckMetadata.opponent.deckName}
+                    </span>
+                  ) : null}
+                  <span>
+                    <strong>Version</strong> {payload.matchVersion}
+                  </span>
+                  <span>
+                    <strong>State</strong> {activeView.stateVersion}
+                  </span>
+                  {notice ? (
+                    <span className="matchStripNotice">{notice}</span>
+                  ) : null}
+                </div>
+              ) : notice ? (
+                <div className="matchNotice" role="status" aria-live="polite">
+                  {notice}
+                </div>
+              ) : null}
+              <UndoPanel
+                open={undoPanelOpen}
+                pendingUndo={payload.pendingUndo}
+                undoNotice={undoNotice}
+                latestEventId={latestEventId}
+                connection={connection}
+                onRequest={requestUndo}
+                onResolve={resolveUndo}
               />
-            ) : null}
-            {showFloatingActionPanel && activeView ? (
-              <FloatingActionPanelOverlay
-                position={actionPanelOverlayPosition}
-                onPosition={setActionPanelOverlayPosition}
-                onDock={() => setActionPanelMode("docked")}
-              >
-                <LegalActionsPanel
+              {activeMatchIsGame ? (
+                <DamageImpactOverlay
+                  cue={standaloneDamageImpact}
+                  queued={damageImpactQueue.length}
+                  onDismiss={() => setCurrentDamageImpact(null)}
+                />
+              ) : null}
+              {activeMatchIsGame &&
+              !matchEnded &&
+              !currentDamageImpact &&
+              !showAccessReveal &&
+              !showSuccessfulRunOutcome ? (
+                <OpponentActionOverlay
+                  cue={currentActionCue}
+                  queued={actionCueQueue.length}
+                  position={cuePosition}
+                  cardDetailsById={catalogDetailsById}
+                  displayMode={cardDisplayMode}
+                  canAdvanceAi={Boolean(
+                    aiTurnPresentation?.canAdvanceAi && connection === "online",
+                  )}
+                  renderTitle={(cue) => {
+                    const titleCard = cue.cardDefinitionId
+                      ? (catalogDetailsById[cue.cardDefinitionId] ?? null)
+                      : null;
+                    return (
+                      <OpponentCueTitle
+                        cue={cue}
+                        card={titleCard}
+                        previewCard={
+                          titleCard
+                            ? visibleCardFromCatalogDetail(titleCard)
+                            : null
+                        }
+                        displayMode={cardDisplayMode}
+                        onFocusCard={focusCard}
+                      />
+                    );
+                  }}
+                  onPosition={setCuePosition}
+                  onDismiss={() => setCurrentActionCue(null)}
+                  onAdvanceAi={() => {
+                    setCurrentActionCue(actionCueAfterAiAdvanceRequest);
+                    advanceAi(
+                      aiAdvanceRequestMode(localAiPacingMode, isAiVsAiMatch),
+                    );
+                  }}
+                />
+              ) : null}
+              {activeMatchIsGame && !matchEnded && activeView?.run ? (
+                <RunTimelineOverlay
                   view={activeView}
-                  primaryActions={floatingPanelPrimaryActions}
-                  contextualActions={floatingPanelContextualActions}
-                  selectedContext={selectedPanelContext}
-                  hasHiddenContextActions={floatingPanelHasHiddenContextActions}
-                  cardContextActive={selectedActionContext?.kind === "card"}
-                  hiddenContextHint={hiddenContextHint}
-                  actionCapacities={actionSlotCapacities}
-                  priorityWindowHoldEnabled={priorityWindowHoldEnabled}
-                  {...(aiTurnPresentation?.activeAiSide
-                    ? { activeAiSide: aiTurnPresentation.activeAiSide }
-                    : {})}
-                  disabled={Boolean(payload.winner) || connection !== "online"}
-                  highlighted={hasDecisionCue}
-                  selectedDiscardOptionIds={selectedDiscardOptionIds}
-                  selectedFieldCardChoiceOptionIds={
-                    selectedFieldCardChoiceOptionIds
+                  legalActions={payload.legalActions}
+                  runActions={runActions}
+                  cardDetailsById={catalogDetailsById}
+                  actionDisabled={
+                    Boolean(payload.winner) || connection !== "online"
+                  }
+                  highlighted={activeCueHighlight?.kind === "run"}
+                  corpRunAutoPassActive={
+                    Boolean(currentCorpRunAutoPassKey) &&
+                    corpRunAutoPassKey === currentCorpRunAutoPassKey
                   }
                   onAction={submitAction}
                   onChoiceOption={submitChoiceOption}
-                  onChoiceOptions={submitChoiceOptions}
-                  onDiscardChoiceToggle={toggleDiscardOption}
-                  onFieldCardChoiceClear={clearFieldCardChoiceSelection}
-                  onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
-                  enrichCard={enrichCard}
-                  connection={connection}
-                  onClearContext={() => setSelectedActionContext(null)}
+                  onCorpRunAutoPassEnabled={(enabled) => {
+                    setCorpRunAutoPassKey(
+                      enabled ? currentCorpRunAutoPassKey : null,
+                    );
+                    corpRunAutoPassSubmittedKeyRef.current = null;
+                  }}
                 />
-              </FloatingActionPanelOverlay>
-            ) : null}
-            {showAiDecisionDebugOverlay ? (
-              <FloatingAiDecisionDebugOverlay
-                position={aiDecisionDebugOverlayPosition}
-                status={aiDecisionDebugTrace ? "live" : aiDecisionDebugStatus}
-                error={aiDecisionDebugError}
-                trace={aiDecisionDebugTrace}
-                turnPlanTrace={aiDecisionDebugTurnPlanTrace}
-                traceCount={aiDecisionDebugTrace ? 1 : 0}
-                onPosition={setAiDecisionDebugOverlayPosition}
-                onClose={() => setAiDecisionDebugOverlayEnabled(false)}
-              />
-            ) : null}
-            {activeMatchIsGame ? (
-              <ScoredAgendaOverlay
-                side="corp"
-                cards={scoreAreaCardsBySide("corp")}
-                agendaPoints={agendaPointsBySide("corp")}
-                agendaPointsToWin={effectiveAgendaTarget}
-                open={Boolean(scoreAreaOverlays.corp)}
-                position={scoreAreaOverlayPositions.corp}
-                cardDisplayMode={cardDisplayMode}
-                enrichCard={enrichCard}
-                cardActionsFor={cardActionsFor}
-                actionDisabled={
-                  Boolean(payload.winner) || connection !== "online"
-                }
-                selectedContext={selectedActionContext}
-                onAction={submitAction}
-                onFocus={focusCard}
-                onActionContextSelect={selectActionCard}
-                onClose={() =>
-                  setScoreAreaOverlays((value) => ({ ...value, corp: false }))
-                }
-                onPosition={(position) =>
-                  setScoreAreaOverlayPositions((value) => ({
-                    ...value,
-                    corp: position,
-                  }))
-                }
-              />
-            ) : null}
-            {activeMatchIsGame ? (
-              <ScoredAgendaOverlay
-                side="runner"
-                cards={scoreAreaCardsBySide("runner")}
-                agendaPoints={agendaPointsBySide("runner")}
-                agendaPointsToWin={effectiveAgendaTarget}
-                open={Boolean(scoreAreaOverlays.runner)}
-                position={scoreAreaOverlayPositions.runner}
-                cardDisplayMode={cardDisplayMode}
-                enrichCard={enrichCard}
-                cardActionsFor={cardActionsFor}
-                actionDisabled={
-                  Boolean(payload.winner) || connection !== "online"
-                }
-                selectedContext={selectedActionContext}
-                onAction={submitAction}
-                onFocus={focusCard}
-                onActionContextSelect={selectActionCard}
-                onClose={() =>
-                  setScoreAreaOverlays((value) => ({ ...value, runner: false }))
-                }
-                onPosition={(position) =>
-                  setScoreAreaOverlayPositions((value) => ({
-                    ...value,
-                    runner: position,
-                  }))
-                }
-              />
-            ) : null}
-
-            {activeMatchIsGame && activeView ? (
-              <ActiveMatchResourceStrip
-                view={activeView}
-                agendaPointsToWin={effectiveAgendaTarget}
-                actionCapacities={actionSlotCapacities}
-                ariaHidden={!resourceStripVisible}
-                topOffsetPx={topbarStickyEnabled ? topbarHeightPx : 0}
-                observerMode={isAiVsAiMatch}
-              />
-            ) : null}
-
-            {activeMatchIsGame ? (
-              <div
-                className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
-                data-testid="active-game"
-              >
-                <aside className="column panel sidePanel" ref={statusPanelsRef}>
-                  <OpponentPanel
-                    view={activeView}
-                    scoreAreaCards={scoreAreaCardsBySide(
-                      opponentSide(activeView.side),
-                    )}
-                    scoreAreaOpen={
-                      scoreAreaOverlays[opponentSide(activeView.side)]
-                    }
-                    agendaPointsToWin={effectiveAgendaTarget}
-                    scoreAreaHighlighted={zoneHighlighted(
-                      activeCueHighlight,
-                      opponentSide(activeView.side),
-                      "scoreArea",
-                    )}
-                    onToggleScoreArea={() =>
-                      toggleScoreAreaOverlay(opponentSide(activeView.side))
-                    }
-                    {...(payload.opponentStatus.displayName
-                      ? { displayName: payload.opponentStatus.displayName }
-                      : {})}
-                  />
-                  {showAiPacingFallbackControls ? (
-                    <AiPacingControls
-                      presentation={aiTurnPresentation}
-                      mode={localAiPacingMode}
-                      connection={connection}
-                      observerMode={isAiVsAiMatch}
-                      onMode={updateLocalAiPacingMode}
-                      onAdvance={() => {
-                        if (isAiVsAiMatch) updateLocalAiPacingMode("manual");
-                        advanceAi(
-                          aiAdvanceRequestMode(
-                            localAiPacingMode,
-                            isAiVsAiMatch,
-                          ),
-                        );
-                      }}
-                    />
-                  ) : null}
-                  {actionPanelMode === "floating" ? (
-                    <ActionPanelDockPlaceholder
-                      runActive={Boolean(activeView.run)}
-                      floatingVisible={showFloatingActionPanel}
-                      onDock={() => setActionPanelMode("docked")}
-                    />
-                  ) : (
-                    <LegalActionsPanel
-                      view={activeView}
-                      primaryActions={legalActionSplit.primaryActions}
-                      contextualActions={selectedPanelContextActions}
-                      selectedContext={selectedPanelContext}
-                      hasHiddenContextActions={
-                        legalActionSplit.contextualActions.length > 0 &&
-                        selectedActionContext?.kind !== "card"
-                      }
-                      cardContextActive={selectedActionContext?.kind === "card"}
-                      hiddenContextHint={hiddenContextHint}
-                      actionCapacities={actionSlotCapacities}
-                      priorityWindowHoldEnabled={priorityWindowHoldEnabled}
-                      {...(aiTurnPresentation?.activeAiSide
-                        ? { activeAiSide: aiTurnPresentation.activeAiSide }
-                        : {})}
-                      disabled={
-                        Boolean(payload.winner) || connection !== "online"
-                      }
-                      highlighted={hasDecisionCue}
-                      selectedDiscardOptionIds={selectedDiscardOptionIds}
-                      selectedFieldCardChoiceOptionIds={
-                        selectedFieldCardChoiceOptionIds
-                      }
-                      onAction={submitAction}
-                      onChoiceOption={submitChoiceOption}
-                      onChoiceOptions={submitChoiceOptions}
-                      onDiscardChoiceToggle={toggleDiscardOption}
-                      onFieldCardChoiceClear={clearFieldCardChoiceSelection}
-                      onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
-                      onFloatPanel={() => setActionPanelMode("floating")}
-                      enrichCard={enrichCard}
-                      connection={connection}
-                      onClearContext={() => setSelectedActionContext(null)}
-                    />
-                  )}
-                  <PlayerPanel
-                    view={activeView}
-                    title={
-                      isAiVsAiMatch
-                        ? `Runner-KI · ${sideLabel(activeView.side)}`
-                        : `Du · ${sideLabel(activeView.side)}`
-                    }
-                    scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
-                    scoreAreaOpen={scoreAreaOverlays[activeView.side]}
-                    agendaPointsToWin={effectiveAgendaTarget}
-                    scoreAreaHighlighted={zoneHighlighted(
-                      activeCueHighlight,
-                      activeView.side,
-                      "scoreArea",
-                    )}
-                    onToggleScoreArea={() =>
-                      toggleScoreAreaOverlay(activeView.side)
-                    }
-                  />
-                  <SpecialZonesStrip
-                    view={activeView}
-                    cardDetailsById={catalogDetailsById}
-                    displayMode={cardDisplayMode}
-                    compact
-                    onFocus={focusCard}
-                  />
-                </aside>
-
-                <section
-                  className="board boardPanel"
-                  data-testid="active-board"
+              ) : null}
+              {showFloatingActionPanel && activeView ? (
+                <FloatingActionPanelOverlay
+                  position={actionPanelOverlayPosition}
+                  onPosition={setActionPanelOverlayPosition}
+                  onDock={() => setActionPanelMode("docked")}
                 >
-                  {matchClockDisplay || payload.playerClock ? (
-                    <div className="clockCluster" aria-label="Uhrenbereich">
-                      {matchClockDisplay ? (
-                        <div
-                          className="matchClockStrip"
-                          aria-label="Uhr für dieses Match"
-                          data-testid="match-clock"
-                        >
-                          <span className="matchClockIcon" aria-hidden="true">
-                            <Clock size={15} />
-                          </span>
-                          <span>
-                            <strong>Match</strong>{" "}
-                            {matchClockDisplay.matchElapsed}
-                          </span>
-                          <span>
-                            <strong>{matchClockDisplay.scopeLabel}</strong>{" "}
-                            {matchClockDisplay.decisionElapsed}
-                          </span>
-                          {matchClockDisplay.graceLabel ? (
-                            <small>{matchClockDisplay.graceLabel}</small>
-                          ) : null}
-                        </div>
-                      ) : null}
-                      {payload.playerClock ? (
-                        <PlayerClockStrip
-                          snapshot={payload.playerClock}
-                          nowMs={matchClockNowMs}
-                        />
-                      ) : null}
-                    </div>
-                  ) : null}
-                  {activeView.side === "corp" ? (
-                    <section
-                      className="opponentRunnerBoardStrip"
-                      aria-label="Runner-Bereich"
-                    >
-                      <RunnerOpponentZonesStrip
+                  <LegalActionsPanel
+                    view={activeView}
+                    primaryActions={floatingPanelPrimaryActions}
+                    contextualActions={floatingPanelContextualActions}
+                    selectedContext={selectedPanelContext}
+                    hasHiddenContextActions={
+                      floatingPanelHasHiddenContextActions
+                    }
+                    cardContextActive={selectedActionContext?.kind === "card"}
+                    hiddenContextHint={hiddenContextHint}
+                    actionCapacities={actionSlotCapacities}
+                    priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+                    {...(aiTurnPresentation?.activeAiSide
+                      ? { activeAiSide: aiTurnPresentation.activeAiSide }
+                      : {})}
+                    disabled={
+                      Boolean(payload.winner) || connection !== "online"
+                    }
+                    highlighted={hasDecisionCue}
+                    selectedDiscardOptionIds={selectedDiscardOptionIds}
+                    selectedFieldCardChoiceOptionIds={
+                      selectedFieldCardChoiceOptionIds
+                    }
+                    onAction={submitAction}
+                    onChoiceOption={submitChoiceOption}
+                    onChoiceOptions={submitChoiceOptions}
+                    onDiscardChoiceToggle={toggleDiscardOption}
+                    onFieldCardChoiceClear={clearFieldCardChoiceSelection}
+                    onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
+                    enrichCard={enrichCard}
+                    connection={connection}
+                    onClearContext={() => setSelectedActionContext(null)}
+                  />
+                </FloatingActionPanelOverlay>
+              ) : null}
+              {showAiDecisionDebugOverlay ? (
+                <FloatingAiDecisionDebugOverlay
+                  position={aiDecisionDebugOverlayPosition}
+                  status={aiDecisionDebugTrace ? "live" : aiDecisionDebugStatus}
+                  error={aiDecisionDebugError}
+                  trace={aiDecisionDebugTrace}
+                  turnPlanTrace={aiDecisionDebugTurnPlanTrace}
+                  traceCount={aiDecisionDebugTrace ? 1 : 0}
+                  onPosition={setAiDecisionDebugOverlayPosition}
+                  onClose={() => setAiDecisionDebugOverlayEnabled(false)}
+                />
+              ) : null}
+              {activeMatchIsGame ? (
+                <ScoredAgendaOverlay
+                  side="corp"
+                  cards={scoreAreaCardsBySide("corp")}
+                  agendaPoints={agendaPointsBySide("corp")}
+                  agendaPointsToWin={effectiveAgendaTarget}
+                  open={Boolean(scoreAreaOverlays.corp)}
+                  position={scoreAreaOverlayPositions.corp}
+                  cardDisplayMode={cardDisplayMode}
+                  enrichCard={enrichCard}
+                  cardActionsFor={cardActionsFor}
+                  actionDisabled={
+                    Boolean(payload.winner) || connection !== "online"
+                  }
+                  selectedContext={selectedActionContext}
+                  onAction={submitAction}
+                  onFocus={focusCard}
+                  onActionContextSelect={selectActionCard}
+                  onClose={() =>
+                    setScoreAreaOverlays((value) => ({ ...value, corp: false }))
+                  }
+                  onPosition={(position) =>
+                    setScoreAreaOverlayPositions((value) => ({
+                      ...value,
+                      corp: position,
+                    }))
+                  }
+                />
+              ) : null}
+              {activeMatchIsGame ? (
+                <ScoredAgendaOverlay
+                  side="runner"
+                  cards={scoreAreaCardsBySide("runner")}
+                  agendaPoints={agendaPointsBySide("runner")}
+                  agendaPointsToWin={effectiveAgendaTarget}
+                  open={Boolean(scoreAreaOverlays.runner)}
+                  position={scoreAreaOverlayPositions.runner}
+                  cardDisplayMode={cardDisplayMode}
+                  enrichCard={enrichCard}
+                  cardActionsFor={cardActionsFor}
+                  actionDisabled={
+                    Boolean(payload.winner) || connection !== "online"
+                  }
+                  selectedContext={selectedActionContext}
+                  onAction={submitAction}
+                  onFocus={focusCard}
+                  onActionContextSelect={selectActionCard}
+                  onClose={() =>
+                    setScoreAreaOverlays((value) => ({
+                      ...value,
+                      runner: false,
+                    }))
+                  }
+                  onPosition={(position) =>
+                    setScoreAreaOverlayPositions((value) => ({
+                      ...value,
+                      runner: position,
+                    }))
+                  }
+                />
+              ) : null}
+
+              {activeMatchIsGame && activeView ? (
+                <ActiveMatchResourceStrip
+                  view={activeView}
+                  agendaPointsToWin={effectiveAgendaTarget}
+                  actionCapacities={actionSlotCapacities}
+                  ariaHidden={!resourceStripVisible}
+                  topOffsetPx={topbarStickyEnabled ? topbarHeightPx : 0}
+                  observerMode={isAiVsAiMatch}
+                />
+              ) : null}
+
+              {activeMatchIsGame ? (
+                <div
+                  className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
+                  data-testid="active-game"
+                >
+                  <aside
+                    className="column panel sidePanel"
+                    ref={statusPanelsRef}
+                  >
+                    <OpponentPanel
+                      view={activeView}
+                      scoreAreaCards={scoreAreaCardsBySide(
+                        opponentSide(activeView.side),
+                      )}
+                      scoreAreaOpen={
+                        scoreAreaOverlays[opponentSide(activeView.side)]
+                      }
+                      agendaPointsToWin={effectiveAgendaTarget}
+                      scoreAreaHighlighted={zoneHighlighted(
+                        activeCueHighlight,
+                        opponentSide(activeView.side),
+                        "scoreArea",
+                      )}
+                      onToggleScoreArea={() =>
+                        toggleScoreAreaOverlay(opponentSide(activeView.side))
+                      }
+                      {...(payload.opponentStatus.displayName
+                        ? { displayName: payload.opponentStatus.displayName }
+                        : {})}
+                    />
+                    {showAiPacingFallbackControls ? (
+                      <AiPacingControls
+                        presentation={aiTurnPresentation}
+                        mode={localAiPacingMode}
+                        connection={connection}
+                        observerMode={isAiVsAiMatch}
+                        onMode={updateLocalAiPacingMode}
+                        onAdvance={() => {
+                          if (isAiVsAiMatch) updateLocalAiPacingMode("manual");
+                          advanceAi(
+                            aiAdvanceRequestMode(
+                              localAiPacingMode,
+                              isAiVsAiMatch,
+                            ),
+                          );
+                        }}
+                      />
+                    ) : null}
+                    {actionPanelMode === "floating" ? (
+                      <ActionPanelDockPlaceholder
+                        runActive={Boolean(activeView.run)}
+                        floatingVisible={showFloatingActionPanel}
+                        onDock={() => setActionPanelMode("docked")}
+                      />
+                    ) : (
+                      <LegalActionsPanel
                         view={activeView}
-                        cardDetailsById={catalogDetailsById}
-                        displayMode={cardDisplayMode}
-                        selectedContext={selectedActionContext}
-                        contextualActions={legalActionSplit.contextualActions}
-                        actionDisabled={
+                        primaryActions={legalActionSplit.primaryActions}
+                        contextualActions={selectedPanelContextActions}
+                        selectedContext={selectedPanelContext}
+                        hasHiddenContextActions={
+                          legalActionSplit.contextualActions.length > 0 &&
+                          selectedActionContext?.kind !== "card"
+                        }
+                        cardContextActive={
+                          selectedActionContext?.kind === "card"
+                        }
+                        hiddenContextHint={hiddenContextHint}
+                        actionCapacities={actionSlotCapacities}
+                        priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+                        {...(aiTurnPresentation?.activeAiSide
+                          ? { activeAiSide: aiTurnPresentation.activeAiSide }
+                          : {})}
+                        disabled={
                           Boolean(payload.winner) || connection !== "online"
                         }
-                        highlightedZone={activeCueHighlight}
-                        onFocus={focusCard}
-                        onActionContext={selectActionCard}
+                        highlighted={hasDecisionCue}
+                        selectedDiscardOptionIds={selectedDiscardOptionIds}
+                        selectedFieldCardChoiceOptionIds={
+                          selectedFieldCardChoiceOptionIds
+                        }
                         onAction={submitAction}
+                        onChoiceOption={submitChoiceOption}
+                        onChoiceOptions={submitChoiceOptions}
+                        onDiscardChoiceToggle={toggleDiscardOption}
+                        onFieldCardChoiceClear={clearFieldCardChoiceSelection}
+                        onPriorityWindowHoldEnabled={
+                          setPriorityWindowHoldEnabled
+                        }
+                        onFloatPanel={() => setActionPanelMode("floating")}
+                        enrichCard={enrichCard}
+                        connection={connection}
+                        onClearContext={() => setSelectedActionContext(null)}
                       />
+                    )}
+                    <PlayerPanel
+                      view={activeView}
+                      title={
+                        isAiVsAiMatch
+                          ? `Runner-KI · ${sideLabel(activeView.side)}`
+                          : `Du · ${sideLabel(activeView.side)}`
+                      }
+                      scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
+                      scoreAreaOpen={scoreAreaOverlays[activeView.side]}
+                      agendaPointsToWin={effectiveAgendaTarget}
+                      scoreAreaHighlighted={zoneHighlighted(
+                        activeCueHighlight,
+                        activeView.side,
+                        "scoreArea",
+                      )}
+                      onToggleScoreArea={() =>
+                        toggleScoreAreaOverlay(activeView.side)
+                      }
+                    />
+                    <SpecialZonesStrip
+                      view={activeView}
+                      cardDetailsById={catalogDetailsById}
+                      displayMode={cardDisplayMode}
+                      compact
+                      onFocus={focusCard}
+                    />
+                  </aside>
+
+                  <section
+                    className="board boardPanel"
+                    data-testid="active-board"
+                  >
+                    {matchClockDisplay || payload.playerClock ? (
+                      <div className="clockCluster" aria-label="Uhrenbereich">
+                        {matchClockDisplay ? (
+                          <div
+                            className="matchClockStrip"
+                            aria-label="Uhr für dieses Match"
+                            data-testid="match-clock"
+                          >
+                            <span className="matchClockIcon" aria-hidden="true">
+                              <Clock size={15} />
+                            </span>
+                            <span>
+                              <strong>Match</strong>{" "}
+                              {matchClockDisplay.matchElapsed}
+                            </span>
+                            <span>
+                              <strong>{matchClockDisplay.scopeLabel}</strong>{" "}
+                              {matchClockDisplay.decisionElapsed}
+                            </span>
+                            {matchClockDisplay.graceLabel ? (
+                              <small>{matchClockDisplay.graceLabel}</small>
+                            ) : null}
+                          </div>
+                        ) : null}
+                        {payload.playerClock ? (
+                          <PlayerClockStrip
+                            snapshot={payload.playerClock}
+                            nowMs={matchClockNowMs}
+                          />
+                        ) : null}
+                      </div>
+                    ) : null}
+                    {activeView.side === "corp" ? (
+                      <section
+                        className="opponentRunnerBoardStrip"
+                        aria-label="Runner-Bereich"
+                      >
+                        <RunnerOpponentZonesStrip
+                          view={activeView}
+                          cardDetailsById={catalogDetailsById}
+                          displayMode={cardDisplayMode}
+                          selectedContext={selectedActionContext}
+                          contextualActions={legalActionSplit.contextualActions}
+                          actionDisabled={
+                            Boolean(payload.winner) || connection !== "online"
+                          }
+                          highlightedZone={activeCueHighlight}
+                          onFocus={focusCard}
+                          onActionContext={selectActionCard}
+                          onAction={submitAction}
+                        />
+                        <RunnerRigStrip
+                          view={activeView}
+                          cardDetailsById={catalogDetailsById}
+                          displayMode={cardDisplayMode}
+                          selectedContext={selectedActionContext}
+                          contextualActions={legalActionSplit.contextualActions}
+                          actionDisabled={
+                            Boolean(payload.winner) || connection !== "online"
+                          }
+                          highlightedZone={activeCueHighlight}
+                          fieldChoiceCardProps={fieldChoiceCardProps}
+                          onFocus={focusCard}
+                          onActionContext={selectActionCard}
+                          onAction={submitAction}
+                        />
+                      </section>
+                    ) : (
                       <RunnerRigStrip
                         view={activeView}
                         cardDetailsById={catalogDetailsById}
@@ -7324,458 +7371,452 @@ export default function Page() {
                         actionDisabled={
                           Boolean(payload.winner) || connection !== "online"
                         }
-                        highlightedZone={activeCueHighlight}
                         fieldChoiceCardProps={fieldChoiceCardProps}
                         onFocus={focusCard}
                         onActionContext={selectActionCard}
                         onAction={submitAction}
                       />
-                    </section>
-                  ) : (
-                    <RunnerRigStrip
-                      view={activeView}
-                      cardDetailsById={catalogDetailsById}
-                      displayMode={cardDisplayMode}
-                      selectedContext={selectedActionContext}
-                      contextualActions={legalActionSplit.contextualActions}
-                      actionDisabled={
-                        Boolean(payload.winner) || connection !== "online"
-                      }
-                      fieldChoiceCardProps={fieldChoiceCardProps}
-                      onFocus={focusCard}
-                      onActionContext={selectActionCard}
-                      onAction={submitAction}
-                    />
-                  )}
-                  {payload.winner ? (
-                    <div className="runBar">
-                      <Sparkles size={18} />
-                      <span className="winner">
-                        {payload.winner === "runner"
-                          ? "Runner"
-                          : payload.winner === "corp"
-                            ? "Korp"
-                            : "Draw"}{" "}
-                        gewinnt.
-                      </span>
-                    </div>
-                  ) : null}
-                  <ActiveServerGrid
-                    view={activeView}
-                    actionDisabled={
-                      Boolean(payload.winner) || connection !== "online"
-                    }
-                    activeHighlight={activeCueHighlight}
-                    activeRunTargetIds={activeRunTargetIds}
-                    activeRunIceId={activeRunIceId}
-                    viewedApproachIceId={viewedApproachIceId}
-                    viewedInstalledExposeCardId={viewedInstalledExposeCardId}
-                    exposedCardHighlightIds={new Set(exposedCardHighlightIds)}
-                    selectedActionContext={selectedActionContext}
-                    selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
-                    boardLaneStyle={boardLaneStyle}
-                    handCardsStyle={handCardsStyle}
-                    zoneCardsStyle={zoneCardsStyle}
-                    cardDisplayMode={cardDisplayMode}
-                    boardZoneCollapsedFor={boardZoneCollapsedFor}
-                    toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
-                    runActionForServer={runActionForServer}
-                    cardActionsFor={cardActionsFor}
-                    enrichCard={enrichCard}
-                    scoreAreaCardsBySide={scoreAreaCardsBySide}
-                    discardOptionForCard={discardOptionForCard}
-                    toggleDiscardOption={toggleDiscardOption}
-                    fieldChoiceCardProps={fieldChoiceCardProps}
-                    onAction={submitAction}
-                    onFocus={focusCard}
-                    onActionContextSelect={selectActionCard}
-                    onSelectActionContext={setSelectedActionContext}
-                  />
-                  <section className="section panel boardSection zoneBoardSection">
-                    <ActiveRunnerZoneBoard
+                    )}
+                    {payload.winner ? (
+                      <div className="runBar">
+                        <Sparkles size={18} />
+                        <span className="winner">
+                          {payload.winner === "runner"
+                            ? "Runner"
+                            : payload.winner === "corp"
+                              ? "Korp"
+                              : "Draw"}{" "}
+                          gewinnt.
+                        </span>
+                      </div>
+                    ) : null}
+                    <ActiveServerGrid
                       view={activeView}
                       actionDisabled={
                         Boolean(payload.winner) || connection !== "online"
                       }
                       activeHighlight={activeCueHighlight}
+                      activeRunTargetIds={activeRunTargetIds}
+                      activeRunIceId={activeRunIceId}
+                      viewedApproachIceId={viewedApproachIceId}
+                      viewedInstalledExposeCardId={viewedInstalledExposeCardId}
+                      exposedCardHighlightIds={new Set(exposedCardHighlightIds)}
                       selectedActionContext={selectedActionContext}
                       selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
-                      ownRigGroups={ownRigGroups}
-                      ownRigCardsStyle={ownRigCardsStyle}
+                      boardLaneStyle={boardLaneStyle}
                       handCardsStyle={handCardsStyle}
                       zoneCardsStyle={zoneCardsStyle}
                       cardDisplayMode={cardDisplayMode}
                       boardZoneCollapsedFor={boardZoneCollapsedFor}
                       toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
+                      runActionForServer={runActionForServer}
                       cardActionsFor={cardActionsFor}
                       enrichCard={enrichCard}
+                      scoreAreaCardsBySide={scoreAreaCardsBySide}
                       discardOptionForCard={discardOptionForCard}
                       toggleDiscardOption={toggleDiscardOption}
                       fieldChoiceCardProps={fieldChoiceCardProps}
-                      paymentSupportPreselection={paymentSupportPreselection}
                       onAction={submitAction}
                       onFocus={focusCard}
                       onActionContextSelect={selectActionCard}
-                      onTogglePaymentSupportAbility={
-                        togglePaymentSupportAbility
-                      }
+                      onSelectActionContext={setSelectedActionContext}
                     />
+                    <section className="section panel boardSection zoneBoardSection">
+                      <ActiveRunnerZoneBoard
+                        view={activeView}
+                        actionDisabled={
+                          Boolean(payload.winner) || connection !== "online"
+                        }
+                        activeHighlight={activeCueHighlight}
+                        selectedActionContext={selectedActionContext}
+                        selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
+                        ownRigGroups={ownRigGroups}
+                        ownRigCardsStyle={ownRigCardsStyle}
+                        handCardsStyle={handCardsStyle}
+                        zoneCardsStyle={zoneCardsStyle}
+                        cardDisplayMode={cardDisplayMode}
+                        boardZoneCollapsedFor={boardZoneCollapsedFor}
+                        toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
+                        cardActionsFor={cardActionsFor}
+                        enrichCard={enrichCard}
+                        discardOptionForCard={discardOptionForCard}
+                        toggleDiscardOption={toggleDiscardOption}
+                        fieldChoiceCardProps={fieldChoiceCardProps}
+                        paymentSupportPreselection={paymentSupportPreselection}
+                        onAction={submitAction}
+                        onFocus={focusCard}
+                        onActionContextSelect={selectActionCard}
+                        onTogglePaymentSupportAbility={
+                          togglePaymentSupportAbility
+                        }
+                      />
+                    </section>
                   </section>
-                </section>
 
-                <aside className="log panel rightRail">
-                  {!rightRailCollapsed ? (
-                    <>
-                      <CardPreviewPanel
-                        card={enrichedPreviewCard}
-                        displayMode={cardDisplayMode}
-                        onDisplayMode={setCardDisplayMode}
-                        collapsed={cardPreviewCollapsed}
-                        onCollapsed={updateCardPreviewCollapsed}
-                        {...(previewHiddenSide
-                          ? { hiddenSide: previewHiddenSide }
-                          : {})}
-                      />
-                      <ChroniclePanel
-                        events={payload.eventTail}
-                        turnContextEvents={payload.playerView.publicEvents}
-                        side={payload.side}
-                        cardDetailsById={catalogDetailsById}
-                        cardPresentationsById={catalogCardPresentationsById}
-                        displayMode={cardDisplayMode}
-                        detailMode={chronicleDetailMode}
-                        preferGermanCardImages={preferGermanCardImages}
-                        onFocusCard={focusCard}
-                      />
-                      <section className="section">
-                        <button
-                          className="button wide"
-                          onClick={() =>
-                            setDiagnosticsOpen((current) => !current)
-                          }
-                        >
-                          <PanelRightOpen size={15} />
-                          Diagnostics
-                        </button>
-                      </section>
-                      <DiagnosticsDrawer
-                        open={diagnosticsOpen}
-                        payload={payload}
-                        connection={connection}
-                      />
-                    </>
-                  ) : null}
-                </aside>
-              </div>
-            ) : (
-              <ActiveMatchWorkspaceArea
-                workspace={activeMatchWorkspace}
-                catalogPanelProps={catalogPanelProps}
-                deckEditorPanelProps={{
-                  localDecks,
-                  selectedDeck,
-                  selectedDeckDirty,
-                  storagePath: deckLibraryStoragePath,
-                  validation: deckValidation,
-                  validatedSnapshot,
-                  playableCards: playableCatalogCards,
-                  cardDetailsById: catalogDetailsById,
-                  importText: deckImportText,
-                  exportText: deckExportText,
-                  onCreateEmpty: createEmptyDeck,
-                  onSelectDeck: setSelectedLocalDeckId,
-                  onUpdateDeck: updateSelectedDeck,
-                  onSave: saveSelectedDeck,
-                  onUpdateQuantity: updateDeckCardQuantity,
-                  onDuplicate: duplicateSelectedDeck,
-                  onDelete: deleteSelectedDeck,
-                  onValidate: validateSelectedDeck,
-                  onUseForMatch: useValidatedDeckForNextMatch,
-                  useForMatchLabel: "Für nächsten Start vormerken",
-                  onExport: exportSelectedDeck,
-                  onImportText: setDeckImportText,
-                  onImport: importLocalDeck,
-                  standardDecks: accountSession.account ? standardDecks : [],
-                  standardDeckCatalogPhase: standardDeckCatalogState.phase,
-                  standardDeckCatalogRefreshing:
-                    standardDeckCatalogState.refreshing,
-                  standardCopyBusy: accountDeckBusy,
-                  ...(accountSession.account
-                    ? { onCopyStandard: copyStandardToAccount }
-                    : {}),
-                  onReloadStandardDecks: reloadStandardDeckCatalog,
-                }}
-                publicGamesPanelProps={{
-                  matches: openLanMatches,
-                  loading: openLanLoading,
-                  error: openLanError,
-                  updatedAt: openLanUpdatedAt,
-                  canJoinOpen: false,
-                  rejoinableMatchIds: accountRejoinableMatchIds,
-                  rejoiningMatchId: accountRejoiningMatchId,
-                  onRefresh: () => void refreshOpenLanMatches(),
-                  onJoinOpen: selectOpenLanMatch,
-                  onRejoin: rejoinAccountPublicGame,
-                }}
-                recentGamesPanelProps={{
-                  results: recentGameResults,
-                  loading: recentGameResultsLoading,
-                  error: recentGameResultsError,
-                  updatedAt: recentGameResultsUpdatedAt,
-                  accountMode: Boolean(accountSession.account),
-                  onRefresh: refreshRecentGameResults,
-                }}
-                optionsPanelProps={{
-                  actionCueAutoDismissMs,
-                  actionCuesEnabled,
-                  automaticEffectCuesEnabled,
-                  autoCorpMandatoryDrawEnabled,
-                  autoDiscardEnabled,
-                  autoEndTurnEnabled,
-                  topbarStickyEnabled,
-                  cyberspaceBackgroundEnabled,
-                  resourceStripMode,
-                  actionPanelMode,
-                  aiDecisionDebugOverlayEnabled,
-                  exposedCardHighlightEnabled,
-                  audioEnabled,
-                  audioVolume,
-                  cardTooltipHoverDelayMs,
-                  cardTooltipMode,
-                  cardTooltipScalePercent,
-                  cardHandScalePercent,
-                  cardArchiveScalePercent,
-                  cardZoneScalePercent,
-                  cardBoardScalePercent,
-                  cardRigScalePercent,
-                  cardSpecialZoneScalePercent,
-                  cardDisplayMode,
-                  preferGermanCardImages,
-                  showSetBadges,
-                  chronicleDetailMode,
-                  colorScheme,
-                  cuePosition,
-                  aiPacingMode: localAiPacingMode,
-                  session,
-                  onActionCueAutoDismissMs: setActionCueAutoDismissMs,
-                  onActionCuesEnabled: setActionCuesEnabled,
-                  onAutomaticEffectCuesEnabled: setAutomaticEffectCuesEnabled,
-                  onAutoCorpMandatoryDrawEnabled:
-                    setAutoCorpMandatoryDrawEnabled,
-                  onAutoDiscardEnabled: setAutoDiscardEnabled,
-                  onAutoEndTurnEnabled: setAutoEndTurnEnabled,
-                  onTopbarStickyEnabled: setTopbarStickyEnabled,
-                  onCyberspaceBackgroundEnabled: setCyberspaceBackgroundEnabled,
-                  onResourceStripMode: setResourceStripMode,
-                  onActionPanelMode: setActionPanelMode,
-                  onAiDecisionDebugOverlayEnabled:
-                    setAiDecisionDebugOverlayEnabled,
-                  onExposedCardHighlightEnabled: setExposedCardHighlightEnabled,
-                  onAudioEnabled: updateAudioEnabled,
-                  onAudioVolume: setAudioVolume,
-                  onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
-                  onCardTooltipMode: setCardTooltipMode,
-                  onCardTooltipScalePercent: setCardTooltipScalePercent,
-                  onCardHandScalePercent: setCardHandScalePercent,
-                  onCardArchiveScalePercent: setCardArchiveScalePercent,
-                  onCardZoneScalePercent: setCardZoneScalePercent,
-                  onCardBoardScalePercent: setCardBoardScalePercent,
-                  onCardRigScalePercent: setCardRigScalePercent,
-                  onCardSpecialZoneScalePercent: setCardSpecialZoneScalePercent,
-                  onCardDisplayMode: setCardDisplayMode,
-                  onPreferGermanCardImages: setPreferGermanCardImages,
-                  onShowSetBadges: setShowSetBadges,
-                  onChronicleDetailMode: setChronicleDetailMode,
-                  onColorScheme: setColorScheme,
-                  onCuePosition: setCuePosition,
-                  onAiPacingMode: updateLocalAiPacingMode,
-                  onCopyReconnectLink: copyReconnectLink,
-                  onDiscardLocalSession: discardLocalActiveSession,
-                }}
-              />
-            )}
-            {activeMatchIsGame && showResultModal && resultSummary ? (
-              <GameOverModal
-                result={resultSummary}
-                side={session.side}
-                playerName={isAiVsAiMatch ? "Runner-KI" : session.displayName}
-                observerMode={isAiVsAiMatch}
-                onDismiss={() => {
-                  if (resultKey) setDismissedResultKey(resultKey);
-                }}
-                onNewMatch={leaveMatch}
-                {...(payload?.isPublic
-                  ? {
-                      onReplay: () =>
-                        router.push(
-                          `/replays?matchId=${encodeURIComponent(session.matchId)}`,
-                        ),
-                    }
-                  : {})}
-                nextSeriesPending={seriesTransitioning}
-                retentionProtected={payload?.retentionProtected === true}
-                onRetentionProtection={setRetentionProtection}
-                {...(isAiVsAiMatch
-                  ? { opponentName: "Korp-KI" }
-                  : opponentDisplayName
-                    ? { opponentName: opponentDisplayName }
-                    : {})}
-                {...(canStartNextSeriesGame
-                  ? { onNextSeriesGame: startNextSeriesGame }
-                  : {})}
-              />
-            ) : null}
-            {activeMatchIsGame &&
-            showSuccessfulRunOutcome &&
-            successfulRunOutcome ? (
-              <SuccessfulRunOutcomeModal
-                outcome={successfulRunOutcome}
-                displayMode={cardDisplayMode}
-                onDismiss={() =>
-                  setDismissedSuccessfulRunOutcomeEventId(
-                    successfulRunOutcome.eventId,
-                  )
-                }
-                {...(successfulRunOutcomeCard
-                  ? {
-                      card: visibleCardFromCatalogDetail(
-                        successfulRunOutcomeCard,
-                      ),
-                    }
-                  : {})}
-              />
-            ) : null}
-            {activeMatchIsGame &&
-            !showSuccessfulRunOutcome &&
-            showAccessReveal &&
-            accessReveal &&
-            !standaloneDamageImpact ? (
-              <AccessRevealModal
-                reveal={accessReveal}
-                displayMode={cardDisplayMode}
-                disabled={matchEnded || connection !== "online"}
-                damageImpact={accessDamageImpact}
-                onAction={(action) => {
-                  const breach = payload?.playerView.run?.breach;
-                  const continueAccess = shouldKeepAccessRevealOpen(
-                    action,
-                    accessReveal.hasMoreAccesses,
-                  );
-                  const submitted = submitAction(action);
-                  if (submitted && continueAccess && breach && payload) {
-                    pendingAccessContinuationRef.current = {
-                      accessEventId: accessReveal.eventId,
-                      breachId: breach.breachId,
-                      fromStateVersion: payload.playerView.stateVersion,
-                      nextAccessSubmitted: false,
-                    };
-                  }
-                  return submitted;
-                }}
-                onChoiceOption={submitChoiceOption}
-                onDamageDismiss={() => setCurrentDamageImpact(null)}
-                onDismiss={() =>
-                  dismissAccessPresentation(accessReveal.eventId)
-                }
-              />
-            ) : null}
-            {activeMatchIsGame && showExposeReview && exposeReview ? (
-              <ExposeReviewModal
-                review={exposeReview}
-                displayMode={cardDisplayMode}
-                onDismiss={() =>
-                  setDismissedExposeReviewEventId(exposeReview.eventId)
-                }
-              />
-            ) : null}
-            {optionsDialogOpen ? (
-              <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
-                <OptionsPanel
-                  actionCueAutoDismissMs={actionCueAutoDismissMs}
-                  actionCuesEnabled={actionCuesEnabled}
-                  automaticEffectCuesEnabled={automaticEffectCuesEnabled}
-                  autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
-                  autoDiscardEnabled={autoDiscardEnabled}
-                  autoEndTurnEnabled={autoEndTurnEnabled}
-                  topbarStickyEnabled={topbarStickyEnabled}
-                  cyberspaceBackgroundEnabled={cyberspaceBackgroundEnabled}
-                  resourceStripMode={resourceStripMode}
-                  actionPanelMode={actionPanelMode}
-                  aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
-                  exposedCardHighlightEnabled={exposedCardHighlightEnabled}
-                  audioEnabled={audioEnabled}
-                  audioVolume={audioVolume}
-                  cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
-                  cardTooltipMode={cardTooltipMode}
-                  cardTooltipScalePercent={cardTooltipScalePercent}
-                  cardHandScalePercent={cardHandScalePercent}
-                  cardArchiveScalePercent={cardArchiveScalePercent}
-                  cardZoneScalePercent={cardZoneScalePercent}
-                  cardBoardScalePercent={cardBoardScalePercent}
-                  cardRigScalePercent={cardRigScalePercent}
-                  cardSpecialZoneScalePercent={cardSpecialZoneScalePercent}
-                  cardDisplayMode={cardDisplayMode}
-                  preferGermanCardImages={preferGermanCardImages}
-                  showSetBadges={showSetBadges}
-                  chronicleDetailMode={chronicleDetailMode}
-                  colorScheme={colorScheme}
-                  cuePosition={cuePosition}
-                  aiPacingMode={localAiPacingMode}
-                  modal
-                  session={session}
-                  onActionCueAutoDismissMs={setActionCueAutoDismissMs}
-                  onActionCuesEnabled={setActionCuesEnabled}
-                  onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
-                  onAutoCorpMandatoryDrawEnabled={
-                    setAutoCorpMandatoryDrawEnabled
-                  }
-                  onAutoDiscardEnabled={setAutoDiscardEnabled}
-                  onAutoEndTurnEnabled={setAutoEndTurnEnabled}
-                  onTopbarStickyEnabled={setTopbarStickyEnabled}
-                  onCyberspaceBackgroundEnabled={setCyberspaceBackgroundEnabled}
-                  onResourceStripMode={setResourceStripMode}
-                  onActionPanelMode={setActionPanelMode}
-                  onAiDecisionDebugOverlayEnabled={
-                    setAiDecisionDebugOverlayEnabled
-                  }
-                  onExposedCardHighlightEnabled={setExposedCardHighlightEnabled}
-                  onAudioEnabled={updateAudioEnabled}
-                  onAudioVolume={setAudioVolume}
-                  onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
-                  onCardTooltipMode={setCardTooltipMode}
-                  onCardTooltipScalePercent={setCardTooltipScalePercent}
-                  onCardHandScalePercent={setCardHandScalePercent}
-                  onCardArchiveScalePercent={setCardArchiveScalePercent}
-                  onCardZoneScalePercent={setCardZoneScalePercent}
-                  onCardBoardScalePercent={setCardBoardScalePercent}
-                  onCardRigScalePercent={setCardRigScalePercent}
-                  onCardSpecialZoneScalePercent={setCardSpecialZoneScalePercent}
-                  onCardDisplayMode={setCardDisplayMode}
-                  onPreferGermanCardImages={setPreferGermanCardImages}
-                  onShowSetBadges={setShowSetBadges}
-                  onChronicleDetailMode={setChronicleDetailMode}
-                  onColorScheme={setColorScheme}
-                  onCuePosition={setCuePosition}
-                  onAiPacingMode={updateLocalAiPacingMode}
-                  onCopyReconnectLink={copyReconnectLink}
-                  onDiscardLocalSession={discardLocalActiveSession}
+                  <aside className="log panel rightRail">
+                    {!rightRailCollapsed ? (
+                      <>
+                        <CardPreviewPanel
+                          card={enrichedPreviewCard}
+                          displayMode={cardDisplayMode}
+                          onDisplayMode={setCardDisplayMode}
+                          collapsed={cardPreviewCollapsed}
+                          onCollapsed={updateCardPreviewCollapsed}
+                          {...(previewHiddenSide
+                            ? { hiddenSide: previewHiddenSide }
+                            : {})}
+                        />
+                        <ChroniclePanel
+                          events={payload.eventTail}
+                          turnContextEvents={payload.playerView.publicEvents}
+                          side={payload.side}
+                          cardDetailsById={catalogDetailsById}
+                          cardPresentationsById={catalogCardPresentationsById}
+                          displayMode={cardDisplayMode}
+                          detailMode={chronicleDetailMode}
+                          preferGermanCardImages={preferGermanCardImages}
+                          onFocusCard={focusCard}
+                        />
+                        <section className="section">
+                          <button
+                            className="button wide"
+                            onClick={() =>
+                              setDiagnosticsOpen((current) => !current)
+                            }
+                          >
+                            <PanelRightOpen size={15} />
+                            Diagnostics
+                          </button>
+                        </section>
+                        <DiagnosticsDrawer
+                          open={diagnosticsOpen}
+                          payload={payload}
+                          connection={connection}
+                        />
+                      </>
+                    ) : null}
+                  </aside>
+                </div>
+              ) : (
+                <ActiveMatchWorkspaceArea
+                  workspace={activeMatchWorkspace}
+                  catalogPanelProps={catalogPanelProps}
+                  deckEditorPanelProps={{
+                    localDecks,
+                    selectedDeck,
+                    selectedDeckDirty,
+                    storagePath: deckLibraryStoragePath,
+                    validation: deckValidation,
+                    validatedSnapshot,
+                    playableCards: playableCatalogCards,
+                    cardDetailsById: catalogDetailsById,
+                    importText: deckImportText,
+                    exportText: deckExportText,
+                    onCreateEmpty: createEmptyDeck,
+                    onSelectDeck: setSelectedLocalDeckId,
+                    onUpdateDeck: updateSelectedDeck,
+                    onSave: saveSelectedDeck,
+                    onUpdateQuantity: updateDeckCardQuantity,
+                    onDuplicate: duplicateSelectedDeck,
+                    onDelete: deleteSelectedDeck,
+                    onValidate: validateSelectedDeck,
+                    onUseForMatch: useValidatedDeckForNextMatch,
+                    useForMatchLabel: "Für nächsten Start vormerken",
+                    onExport: exportSelectedDeck,
+                    onImportText: setDeckImportText,
+                    onImport: importLocalDeck,
+                    standardDecks: accountSession.account ? standardDecks : [],
+                    standardDeckCatalogPhase: standardDeckCatalogState.phase,
+                    standardDeckCatalogRefreshing:
+                      standardDeckCatalogState.refreshing,
+                    standardCopyBusy: accountDeckBusy,
+                    ...(accountSession.account
+                      ? { onCopyStandard: copyStandardToAccount }
+                      : {}),
+                    onReloadStandardDecks: reloadStandardDeckCatalog,
+                  }}
+                  publicGamesPanelProps={{
+                    matches: openLanMatches,
+                    loading: openLanLoading,
+                    error: openLanError,
+                    updatedAt: openLanUpdatedAt,
+                    canJoinOpen: false,
+                    rejoinableMatchIds: accountRejoinableMatchIds,
+                    rejoiningMatchId: accountRejoiningMatchId,
+                    onRefresh: () => void refreshOpenLanMatches(),
+                    onJoinOpen: selectOpenLanMatch,
+                    onRejoin: rejoinAccountPublicGame,
+                  }}
+                  recentGamesPanelProps={{
+                    results: recentGameResults,
+                    loading: recentGameResultsLoading,
+                    error: recentGameResultsError,
+                    updatedAt: recentGameResultsUpdatedAt,
+                    accountMode: Boolean(accountSession.account),
+                    onRefresh: refreshRecentGameResults,
+                  }}
+                  optionsPanelProps={{
+                    actionCueAutoDismissMs,
+                    actionCuesEnabled,
+                    automaticEffectCuesEnabled,
+                    autoCorpMandatoryDrawEnabled,
+                    autoDiscardEnabled,
+                    autoEndTurnEnabled,
+                    topbarStickyEnabled,
+                    cyberspaceBackgroundEnabled,
+                    resourceStripMode,
+                    actionPanelMode,
+                    aiDecisionDebugOverlayEnabled,
+                    exposedCardHighlightEnabled,
+                    audioEnabled,
+                    audioVolume,
+                    cardTooltipHoverDelayMs,
+                    cardTooltipMode,
+                    cardTooltipScalePercent,
+                    cardHandScalePercent,
+                    cardArchiveScalePercent,
+                    cardZoneScalePercent,
+                    cardBoardScalePercent,
+                    cardRigScalePercent,
+                    cardSpecialZoneScalePercent,
+                    cardDisplayMode,
+                    preferGermanCardImages,
+                    showSetBadges,
+                    chronicleDetailMode,
+                    colorScheme,
+                    cuePosition,
+                    aiPacingMode: localAiPacingMode,
+                    session,
+                    onActionCueAutoDismissMs: setActionCueAutoDismissMs,
+                    onActionCuesEnabled: setActionCuesEnabled,
+                    onAutomaticEffectCuesEnabled: setAutomaticEffectCuesEnabled,
+                    onAutoCorpMandatoryDrawEnabled:
+                      setAutoCorpMandatoryDrawEnabled,
+                    onAutoDiscardEnabled: setAutoDiscardEnabled,
+                    onAutoEndTurnEnabled: setAutoEndTurnEnabled,
+                    onTopbarStickyEnabled: setTopbarStickyEnabled,
+                    onCyberspaceBackgroundEnabled:
+                      setCyberspaceBackgroundEnabled,
+                    onResourceStripMode: setResourceStripMode,
+                    onActionPanelMode: setActionPanelMode,
+                    onAiDecisionDebugOverlayEnabled:
+                      setAiDecisionDebugOverlayEnabled,
+                    onExposedCardHighlightEnabled:
+                      setExposedCardHighlightEnabled,
+                    onAudioEnabled: updateAudioEnabled,
+                    onAudioVolume: setAudioVolume,
+                    onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
+                    onCardTooltipMode: setCardTooltipMode,
+                    onCardTooltipScalePercent: setCardTooltipScalePercent,
+                    onCardHandScalePercent: setCardHandScalePercent,
+                    onCardArchiveScalePercent: setCardArchiveScalePercent,
+                    onCardZoneScalePercent: setCardZoneScalePercent,
+                    onCardBoardScalePercent: setCardBoardScalePercent,
+                    onCardRigScalePercent: setCardRigScalePercent,
+                    onCardSpecialZoneScalePercent:
+                      setCardSpecialZoneScalePercent,
+                    onCardDisplayMode: setCardDisplayMode,
+                    onPreferGermanCardImages: setPreferGermanCardImages,
+                    onShowSetBadges: setShowSetBadges,
+                    onChronicleDetailMode: setChronicleDetailMode,
+                    onColorScheme: setColorScheme,
+                    onCuePosition: setCuePosition,
+                    onAiPacingMode: updateLocalAiPacingMode,
+                    onCopyReconnectLink: copyReconnectLink,
+                    onDiscardLocalSession: discardLocalActiveSession,
+                  }}
                 />
-              </OptionsDialog>
-            ) : null}
-            {confirmationDialog ? (
-              <ConfirmationDialog
-                request={confirmationDialog}
-                onCancel={() => setConfirmationDialog(null)}
-                onConfirm={() => {
-                  const request = confirmationDialog;
-                  setConfirmationDialog(null);
-                  void request.onConfirm();
-                }}
-              />
-            ) : null}
-          </main>
-        </CardTooltipSettingsContext.Provider>
-      </CardImagePreferenceContext.Provider>
+              )}
+              {activeMatchIsGame && showResultModal && resultSummary ? (
+                <GameOverModal
+                  result={resultSummary}
+                  side={session.side}
+                  playerName={isAiVsAiMatch ? "Runner-KI" : session.displayName}
+                  observerMode={isAiVsAiMatch}
+                  onDismiss={() => {
+                    if (resultKey) setDismissedResultKey(resultKey);
+                  }}
+                  onNewMatch={leaveMatch}
+                  {...(payload?.isPublic
+                    ? {
+                        onReplay: () =>
+                          router.push(
+                            `/replays?matchId=${encodeURIComponent(session.matchId)}`,
+                          ),
+                      }
+                    : {})}
+                  nextSeriesPending={seriesTransitioning}
+                  retentionProtected={payload?.retentionProtected === true}
+                  onRetentionProtection={setRetentionProtection}
+                  {...(isAiVsAiMatch
+                    ? { opponentName: "Korp-KI" }
+                    : opponentDisplayName
+                      ? { opponentName: opponentDisplayName }
+                      : {})}
+                  {...(canStartNextSeriesGame
+                    ? { onNextSeriesGame: startNextSeriesGame }
+                    : {})}
+                />
+              ) : null}
+              {activeMatchIsGame &&
+              showSuccessfulRunOutcome &&
+              successfulRunOutcome ? (
+                <SuccessfulRunOutcomeModal
+                  outcome={successfulRunOutcome}
+                  displayMode={cardDisplayMode}
+                  onDismiss={() =>
+                    setDismissedSuccessfulRunOutcomeEventId(
+                      successfulRunOutcome.eventId,
+                    )
+                  }
+                  {...(successfulRunOutcomeCard
+                    ? {
+                        card: visibleCardFromCatalogDetail(
+                          successfulRunOutcomeCard,
+                        ),
+                      }
+                    : {})}
+                />
+              ) : null}
+              {activeMatchIsGame &&
+              !showSuccessfulRunOutcome &&
+              showAccessReveal &&
+              accessReveal &&
+              !standaloneDamageImpact ? (
+                <AccessRevealModal
+                  reveal={accessReveal}
+                  displayMode={cardDisplayMode}
+                  disabled={matchEnded || connection !== "online"}
+                  damageImpact={accessDamageImpact}
+                  onAction={(action) => {
+                    const breach = payload?.playerView.run?.breach;
+                    const continueAccess = shouldKeepAccessRevealOpen(
+                      action,
+                      accessReveal.hasMoreAccesses,
+                    );
+                    const submitted = submitAction(action);
+                    if (submitted && continueAccess && breach && payload) {
+                      pendingAccessContinuationRef.current = {
+                        accessEventId: accessReveal.eventId,
+                        breachId: breach.breachId,
+                        fromStateVersion: payload.playerView.stateVersion,
+                        nextAccessSubmitted: false,
+                      };
+                    }
+                    return submitted;
+                  }}
+                  onChoiceOption={submitChoiceOption}
+                  onDamageDismiss={() => setCurrentDamageImpact(null)}
+                  onDismiss={() =>
+                    dismissAccessPresentation(accessReveal.eventId)
+                  }
+                />
+              ) : null}
+              {activeMatchIsGame && showExposeReview && exposeReview ? (
+                <ExposeReviewModal
+                  review={exposeReview}
+                  displayMode={cardDisplayMode}
+                  onDismiss={() =>
+                    setDismissedExposeReviewEventId(exposeReview.eventId)
+                  }
+                />
+              ) : null}
+              {optionsDialogOpen ? (
+                <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
+                  <OptionsPanel
+                    actionCueAutoDismissMs={actionCueAutoDismissMs}
+                    actionCuesEnabled={actionCuesEnabled}
+                    automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+                    autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
+                    autoDiscardEnabled={autoDiscardEnabled}
+                    autoEndTurnEnabled={autoEndTurnEnabled}
+                    topbarStickyEnabled={topbarStickyEnabled}
+                    cyberspaceBackgroundEnabled={cyberspaceBackgroundEnabled}
+                    resourceStripMode={resourceStripMode}
+                    actionPanelMode={actionPanelMode}
+                    aiDecisionDebugOverlayEnabled={
+                      aiDecisionDebugOverlayEnabled
+                    }
+                    exposedCardHighlightEnabled={exposedCardHighlightEnabled}
+                    audioEnabled={audioEnabled}
+                    audioVolume={audioVolume}
+                    cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
+                    cardTooltipMode={cardTooltipMode}
+                    cardTooltipScalePercent={cardTooltipScalePercent}
+                    cardHandScalePercent={cardHandScalePercent}
+                    cardArchiveScalePercent={cardArchiveScalePercent}
+                    cardZoneScalePercent={cardZoneScalePercent}
+                    cardBoardScalePercent={cardBoardScalePercent}
+                    cardRigScalePercent={cardRigScalePercent}
+                    cardSpecialZoneScalePercent={cardSpecialZoneScalePercent}
+                    cardDisplayMode={cardDisplayMode}
+                    preferGermanCardImages={preferGermanCardImages}
+                    showSetBadges={showSetBadges}
+                    chronicleDetailMode={chronicleDetailMode}
+                    colorScheme={colorScheme}
+                    cuePosition={cuePosition}
+                    aiPacingMode={localAiPacingMode}
+                    modal
+                    session={session}
+                    onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                    onActionCuesEnabled={setActionCuesEnabled}
+                    onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+                    onAutoCorpMandatoryDrawEnabled={
+                      setAutoCorpMandatoryDrawEnabled
+                    }
+                    onAutoDiscardEnabled={setAutoDiscardEnabled}
+                    onAutoEndTurnEnabled={setAutoEndTurnEnabled}
+                    onTopbarStickyEnabled={setTopbarStickyEnabled}
+                    onCyberspaceBackgroundEnabled={
+                      setCyberspaceBackgroundEnabled
+                    }
+                    onResourceStripMode={setResourceStripMode}
+                    onActionPanelMode={setActionPanelMode}
+                    onAiDecisionDebugOverlayEnabled={
+                      setAiDecisionDebugOverlayEnabled
+                    }
+                    onExposedCardHighlightEnabled={
+                      setExposedCardHighlightEnabled
+                    }
+                    onAudioEnabled={updateAudioEnabled}
+                    onAudioVolume={setAudioVolume}
+                    onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
+                    onCardTooltipMode={setCardTooltipMode}
+                    onCardTooltipScalePercent={setCardTooltipScalePercent}
+                    onCardHandScalePercent={setCardHandScalePercent}
+                    onCardArchiveScalePercent={setCardArchiveScalePercent}
+                    onCardZoneScalePercent={setCardZoneScalePercent}
+                    onCardBoardScalePercent={setCardBoardScalePercent}
+                    onCardRigScalePercent={setCardRigScalePercent}
+                    onCardSpecialZoneScalePercent={
+                      setCardSpecialZoneScalePercent
+                    }
+                    onCardDisplayMode={setCardDisplayMode}
+                    onPreferGermanCardImages={setPreferGermanCardImages}
+                    onShowSetBadges={setShowSetBadges}
+                    onChronicleDetailMode={setChronicleDetailMode}
+                    onColorScheme={setColorScheme}
+                    onCuePosition={setCuePosition}
+                    onAiPacingMode={updateLocalAiPacingMode}
+                    onCopyReconnectLink={copyReconnectLink}
+                    onDiscardLocalSession={discardLocalActiveSession}
+                  />
+                </OptionsDialog>
+              ) : null}
+              {confirmationDialog ? (
+                <ConfirmationDialog
+                  request={confirmationDialog}
+                  onCancel={() => setConfirmationDialog(null)}
+                  onConfirm={() => {
+                    const request = confirmationDialog;
+                    setConfirmationDialog(null);
+                    void request.onConfirm();
+                  }}
+                />
+              ) : null}
+            </main>
+          </CardTooltipSettingsContext.Provider>
+        </CardImagePreferenceContext.Provider>
       </CatalogCardPresentationsProvider>
     </CardScaleSettingsContext.Provider>
   );

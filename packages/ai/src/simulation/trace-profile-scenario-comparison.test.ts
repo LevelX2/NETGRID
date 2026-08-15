@@ -269,9 +269,7 @@ function traceState(
   state.activeSide = "corp";
   state.corp.credits = scenario.corpCredits;
   state.runner.credits = scenario.runnerCredits;
-  const runnerGripOverflow = state.runner.grip.slice(
-    scenario.runnerGripCount,
-  );
+  const runnerGripOverflow = state.runner.grip.slice(scenario.runnerGripCount);
   state.runner.grip = state.runner.grip.slice(0, scenario.runnerGripCount);
   state.runner.stack.push(...runnerGripOverflow);
   for (const instanceId of runnerGripOverflow) {

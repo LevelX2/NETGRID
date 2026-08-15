@@ -4116,8 +4116,7 @@ function buildRunnerDomain(
                 );
                 const lacksDifferentialPayoff =
                   directlyAvailableBasicRun &&
-                  actionCandidate?.semanticActionType ===
-                    "play.runner_event" &&
+                  actionCandidate?.semanticActionType === "play.runner_event" &&
                   !runnerCardRunHasVisibleDifferentialPayoff(
                     input,
                     actionCandidate,
@@ -6220,7 +6219,10 @@ function runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
   runTargets: readonly RunnerRunTargetEvaluation[],
   coverageGaps: RunnerPlanDomain["coverageGaps"],
 ): boolean {
-  if (evaluation.developmentRole !== "access_payoff" || !evaluation.definitionId) {
+  if (
+    evaluation.developmentRole !== "access_payoff" ||
+    !evaluation.definitionId
+  ) {
     return false;
   }
   const serverId = candidate

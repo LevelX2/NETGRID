@@ -152,12 +152,7 @@ export function quoteRandomizedTraceBidSelection(
   };
 }
 
-const TRACE_BID_STAKES = new Set([
-  "low",
-  "normal",
-  "high",
-  "terminal",
-]);
+const TRACE_BID_STAKES = new Set(["low", "normal", "high", "terminal"]);
 const TRACE_BID_BEHAVIORAL_BIASES = new Set([
   "conservative",
   "normal",
