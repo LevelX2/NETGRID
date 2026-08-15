@@ -73,8 +73,9 @@ describe("PlayerView projection", () => {
         state.cardInstances[state.corp.identity]!.definitionId,
       traceRulesProfile: "classic_blind",
       traceLimit: 3,
-      effectiveTraceLimit: 3,
+      effectiveTraceLimit: 4,
       corpBidMax: 3,
+      rabbitTraceLimitReduction: 1,
       status: "runner_bid",
       successEffect: { type: "add_tag", amount: 1 },
       corpBid: 2,
@@ -95,12 +96,14 @@ describe("PlayerView projection", () => {
     expect(runnerView.trace).toMatchObject({
       profile: "classic_blind",
       printedTrace: 3,
-      effectiveTraceLimit: 3,
+      effectiveTraceLimit: 2,
       runnerLink: 1,
       bidsRevealed: false,
     });
     expect(runnerView.trace).not.toHaveProperty("corpBid");
     expect(runnerView.trace).not.toHaveProperty("corpStrength");
+    expect(runnerView.trace).not.toHaveProperty("corpBidMax");
+    expect(corpView.trace?.effectiveTraceLimit).toBe(4);
 
     state.trace = {
       ...state.trace,

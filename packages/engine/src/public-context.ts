@@ -499,13 +499,17 @@ export function publicContextForAction(
     const hiddenTraceCommit =
       blindTrace &&
       typeof legalAction.payload?.traceId === "string" &&
+      legalAction.payload?.traceStarted !== true &&
+      (legalAction.payload?.traceStep === "corp_bid" ||
+        legalAction.payload?.traceStep === "runner_bid") &&
+      legalAction.payload?.corpTracePaymentChoiceOpened !== true &&
+      legalAction.payload?.traceLinkPaymentChoiceOpened !== true &&
       !traceBidsRevealed;
     if (typeof legalAction.payload?.traceId === "string") {
       context.traceRulesProfile = traceRulesProfile;
       context.traceBidsRevealed = traceBidsRevealed;
       if (hiddenTraceCommit) {
-        context.traceBidCommittedSide =
-          state.trace?.corpBid !== undefined ? "corp" : legalAction.side;
+        context.traceBidCommittedSide = legalAction.side;
       }
     }
     const hiddenTracePayloadFields = new Set([
@@ -531,6 +535,9 @@ export function publicContextForAction(
       "temporaryTraceCreditsSpent",
       "temporaryTraceCreditsRemaining",
       "temporaryTraceCreditsSourceDefinitionId",
+      "traceLimitAndValueBoost",
+      "effectiveTraceLimit",
+      "corpBidMax",
     ]);
     for (const key of [
       "eventModificationWindowId",
@@ -670,6 +677,7 @@ export function publicContextForAction(
       "fortTraceBitPoolServerId",
       "recurringTraceCreditPoolSpent",
       "hackerTrackerCountersSpent",
+      "traceLimitAndValueBoost",
       "hackerTrackerCountersAdded",
       "temporaryTraceCreditsSpent",
       "temporaryTraceCreditsRemaining",
@@ -800,6 +808,12 @@ export function publicContextForAction(
       state.trace?.traceRulesProfile ??
       state.traceRulesProfile ??
       "modern_open";
+    const blindTraceStart = context.traceRulesProfile !== "modern_open";
+    if (blindTraceStart) {
+      delete context.corpBidMax;
+      delete context.fortTraceBitPoolServerId;
+      delete context.temporaryTraceCreditsSourceDefinitionId;
+    }
     context.traceId = legalAction.payload.traceId;
     context.sourceCardId = legalAction.payload.sourceCardId;
     context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
@@ -807,17 +821,21 @@ export function publicContextForAction(
       context.traceLimit = legalAction.payload.traceLimit;
     if (typeof legalAction.payload.effectiveTraceLimit === "number")
       context.effectiveTraceLimit = legalAction.payload.effectiveTraceLimit;
-    if (typeof legalAction.payload.corpBidMax === "number")
+    if (!blindTraceStart && typeof legalAction.payload.corpBidMax === "number")
       context.corpBidMax = legalAction.payload.corpBidMax;
     if (typeof legalAction.payload.rabbitTraceLimitReduction === "number")
       context.rabbitTraceLimitReduction =
         legalAction.payload.rabbitTraceLimitReduction;
-    if (typeof legalAction.payload.temporaryTraceCreditsAvailable === "number")
+    if (
+      !blindTraceStart &&
+      typeof legalAction.payload.temporaryTraceCreditsAvailable === "number"
+    )
       context.temporaryTraceCreditsAvailable =
         legalAction.payload.temporaryTraceCreditsAvailable;
     if (
+      !blindTraceStart &&
       typeof legalAction.payload.temporaryTraceCreditsSourceDefinitionId ===
-      "string"
+        "string"
     )
       context.temporaryTraceCreditsSourceDefinitionId =
         legalAction.payload.temporaryTraceCreditsSourceDefinitionId;
@@ -1532,7 +1550,6 @@ export function publicContextForAction(
     "obligationDebtActive",
     "creditGainDiverted",
     "traceHostedCreditsAdded",
-    "traceLimitAndValueBoost",
     "cryingCountersAfter",
     "linkModifierAmount",
     "runSpendingCap",

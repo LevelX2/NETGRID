@@ -88,15 +88,31 @@ describe("Blind Trace bid assessment", () => {
   });
 
   it("accounts for structured Tag, run-lock, Link, low-credit and specialized-credit situations", () => {
-    const tag = assess(
-      decisionInput({
-        profile: "classic_blind",
-        side: "corp",
-        sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
-        printedTrace: 5,
-        bidMax: 5,
-      }),
-    );
+    const tagInput = decisionInput({
+      profile: "classic_blind",
+      side: "corp",
+      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      printedTrace: 5,
+      bidMax: 5,
+    });
+    const tag = assess(tagInput);
+    const punishInput = decisionInput({
+      profile: "classic_blind",
+      side: "corp",
+      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      printedTrace: 5,
+      bidMax: 5,
+    });
+    punishInput.playerView.own.gripOrHq.push({
+      instanceId: "visible_punish",
+      definitionId: "onr_v1_302_scorched-earth",
+      title: "Scorched Earth",
+      type: "operation",
+      known: true,
+      owner: "corp",
+      controller: "corp",
+    });
+    const punish = assess(punishInput);
     const runLock = assess(
       decisionInput({
         profile: "classic_blind",
@@ -140,6 +156,10 @@ describe("Blind Trace bid assessment", () => {
     );
 
     expect(tag.assessment.outcomeValue).toBeGreaterThan(3);
+    expect(punish.assessment.outcomeValue).toBeGreaterThan(
+      tag.assessment.outcomeValue,
+    );
+    expect(punish.assessment.stakes).toBe("high");
     expect(runLock.assessment).toMatchObject({
       stakes: "normal",
       behavioralBias: "aggressive",

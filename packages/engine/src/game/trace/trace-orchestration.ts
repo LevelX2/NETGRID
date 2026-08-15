@@ -931,7 +931,7 @@ function runnerTraceBidPrompt(input: {
       : []),
   ].join(" + ");
   return rules.resolutionMode === "hidden_commit_reveal"
-    ? `Verdecktes Runner-Gebot wählen (Link ${input.runnerLink}; Korp-Limit ${input.trace.effectiveTraceLimit ?? input.trace.traceLimit}; ${available} verfügbar)`
+    ? `Verdecktes Runner-Gebot wählen (Link ${input.runnerLink}; öffentliches Korp-Limit ${Math.max(0, input.trace.traceLimit - (input.trace.rabbitTraceLimitReduction ?? 0))}; ${available} verfügbar)`
     : `Runner Link-Payment wählen (Trace-Stärke ${input.traceValue}, Link ${input.runnerLink}; ${available} verfügbar)`;
 }
 

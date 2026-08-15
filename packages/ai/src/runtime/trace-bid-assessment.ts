@@ -10,6 +10,7 @@ import type {
 } from "@netgrid/shared";
 
 import type { LatestTraceContext } from "./trace-context";
+import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -212,28 +213,67 @@ function traceOutcomeValue(
 ): number {
   const effect = visibleTraceSuccessEffect(input, traceContext);
   if (!effect) return 3;
-  switch (effect.type) {
-    case "none":
-      return 1;
-    case "add_tag":
-      return 4 + Math.max(0, effect.amount - 1) * 2;
-    case "net_damage":
-      return 4 + Math.max(0, effect.amount) * 2;
-    case "add_tags_by_trace_margin_over_runner_link":
-      return 6;
-    case "add_counter":
-      return 4 + Math.max(0, effect.amount);
-    case "add_tag_and_counter":
-      return 6 + Math.max(0, effect.tagAmount + effect.amount);
-    case "end_run_and_run_lock":
-      return 8;
-    case "end_run_trash_program_and_run_lock":
-      return 11;
-    case "end_run_trash_hardware_and_unpreventable_meat_damage":
-      return 13 + Math.max(0, effect.amount);
-    case "trash_runner_resource_and_add_tag":
-      return 9;
-  }
+  const baseValue = (() => {
+    switch (effect.type) {
+      case "none":
+        return 1;
+      case "add_tag":
+        return 4 + Math.max(0, effect.amount - 1) * 2;
+      case "net_damage":
+        return 4 + Math.max(0, effect.amount) * 2;
+      case "add_tags_by_trace_margin_over_runner_link":
+        return 6;
+      case "add_counter":
+        return 4 + Math.max(0, effect.amount);
+      case "add_tag_and_counter":
+        return 6 + Math.max(0, effect.tagAmount + effect.amount);
+      case "end_run_and_run_lock":
+        return 8;
+      case "end_run_trash_program_and_run_lock":
+        return 11;
+      case "end_run_trash_hardware_and_unpreventable_meat_damage":
+        return 13 + Math.max(0, effect.amount);
+      case "trash_runner_resource_and_add_tag":
+        return 9;
+    }
+  })();
+  return effectCreatesTag(effect) && visibleTagPunishFollowup(input)
+    ? baseValue + 4
+    : baseValue;
+}
+
+function effectCreatesTag(effect: TraceSuccessEffect): boolean {
+  return (
+    effect.type === "add_tag" ||
+    effect.type === "add_tags_by_trace_margin_over_runner_link" ||
+    effect.type === "add_tag_and_counter" ||
+    effect.type === "trash_runner_resource_and_add_tag"
+  );
+}
+
+function visibleTagPunishFollowup(input: AiDecisionInput): boolean {
+  const visibleCorpCards =
+    input.side === "corp"
+      ? [
+          ...input.playerView.own.gripOrHq,
+          ...input.playerView.own.scoreArea,
+          ...input.playerView.servers.flatMap((server) => [
+            ...server.ice,
+            ...server.root,
+          ]),
+        ]
+      : [
+          ...input.playerView.opponent.scoreArea,
+          ...input.playerView.servers.flatMap((server) => [
+            ...server.ice,
+            ...server.root,
+          ]),
+        ];
+  return visibleCorpCards.some(
+    (card) =>
+      card.known !== false &&
+      classifyTagPunishPayoffFromOntology(card.definitionId)?.payoff === true,
+  );
 }
 
 function visibleTraceSuccessEffect(

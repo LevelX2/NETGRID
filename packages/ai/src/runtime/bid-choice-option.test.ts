@@ -180,10 +180,11 @@ describe("selectedBidChoiceOptionId", () => {
           traceValue: 4,
           traceLimit: 4,
           runnerLink: 0,
+          traceRulesProfile: "modern_open",
           sourceDefinitionId: "onr_v1_246_fragmentation-storm",
         },
       ),
-    ).toBe("bid_5");
+    ).toBe("bid_4");
   });
 });
 

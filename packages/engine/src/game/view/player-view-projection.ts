@@ -220,6 +220,7 @@ export function buildPlayerViewProjection(
     : undefined;
   const trace = state.trace;
   const traceRulesProfile = normalizeTraceRulesProfile(state.traceRulesProfile);
+  const traceBidsRevealed = trace?.bidsRevealed === true;
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
@@ -229,12 +230,16 @@ export function buildPlayerViewProjection(
         printedTrace: trace.traceLimit,
         effectiveTraceLimit: Math.max(
           0,
-          Math.floor(trace.effectiveTraceLimit ?? trace.traceLimit),
+          Math.floor(
+            side === "corp" || traceBidsRevealed
+              ? (trace.effectiveTraceLimit ?? trace.traceLimit)
+              : trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0),
+          ),
         ),
-        ...(typeof trace.corpBidMax === "number"
+        ...(side === "corp" && typeof trace.corpBidMax === "number"
           ? { corpBidMax: trace.corpBidMax }
           : {}),
-        bidsRevealed: trace.bidsRevealed === true,
+        bidsRevealed: traceBidsRevealed,
         corpBidCommitted: trace.corpBid !== undefined,
         runnerBidCommitted: trace.runnerBid !== undefined,
         ...(trace.corpBid !== undefined &&
