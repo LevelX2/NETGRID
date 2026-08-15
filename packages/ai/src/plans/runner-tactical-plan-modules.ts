@@ -1159,24 +1159,36 @@ function pressureCandidates(
             (signal.sourceDefinitionIds ?? []).includes(
               candidate.sourceDefinitionId,
             ))) &&
+      (signal.runActionExclusions?.[candidate.actionId]?.length ?? 0) === 0 &&
       signal.reachable &&
       signal.marginalValue > 0,
   );
   const directRunAvailable = runCandidates.some(
     (candidate) => candidate.semanticActionType === "run.start",
   );
-  return runCandidates.map((candidate) => ({
-    candidate,
-    stepValue:
-      signal.marginalValue +
-      runnerCardRunRoutePreference(
-        context,
-        candidate,
-        signal.serverId,
-        directRunAvailable,
-      ) +
-      (signal.runActionValues?.[candidate.actionId] ?? 0),
-  }));
+  return runCandidates
+    .filter(
+      (candidate) =>
+        candidate.semanticActionType !== "play.runner_event" ||
+        !directRunAvailable ||
+        runnerCardRunHasVisibleDifferentialPayoff(
+          context.input,
+          candidate,
+          signal.serverId,
+        ),
+    )
+    .map((candidate) => ({
+      candidate,
+      stepValue:
+        signal.marginalValue +
+        runnerCardRunRoutePreference(
+          context,
+          candidate,
+          signal.serverId,
+          directRunAvailable,
+        ) +
+        (signal.runActionValues?.[candidate.actionId] ?? 0),
+    }));
 }
 
 function runnerCardRunRoutePreference(
@@ -1188,7 +1200,11 @@ function runnerCardRunRoutePreference(
   if (candidate.semanticActionType !== "play.runner_event") return 0;
   if (
     !directRunAvailable ||
-    runnerCardRunHasVisibleDifferentialPayoff(context, candidate, serverId)
+    runnerCardRunHasVisibleDifferentialPayoff(
+      context.input,
+      candidate,
+      serverId,
+    )
   ) {
     return 5;
   }
@@ -1201,14 +1217,12 @@ function runnerCardRunRoutePreference(
   return -1 - knownCreditCost;
 }
 
-function runnerCardRunHasVisibleDifferentialPayoff(
-  context: PlanSchedulerContext,
+export function runnerCardRunHasVisibleDifferentialPayoff(
+  input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
   serverId: RunnerPressureSignal["serverId"],
 ): boolean {
-  const server = context.input.playerView.servers.find(
-    (entry) => entry.id === serverId,
-  );
+  const server = input.playerView.servers.find((entry) => entry.id === serverId);
   if (!server) return false;
   if (candidate.conditions.some((condition) => condition.status === "absent")) {
     return false;
@@ -1230,10 +1244,19 @@ function runnerCardRunHasVisibleDifferentialPayoff(
     return false;
   }
   return (candidate.effectTargets ?? []).some((target) => {
-    if (target === "make_run" || target === "ends_run_after_effect") {
+    if (
+      target === "make_run" ||
+      target === "make_chosen_server_run" ||
+      (target.startsWith("make_") && target.endsWith("_run")) ||
+      target === "ends_run_after_effect" ||
+      target === "run.successful_run_self_tag"
+    ) {
       return false;
     }
-    if (target === "derez") {
+    if (
+      target === "derez" ||
+      target.includes("trash_rezzed_ice_on_fort")
+    ) {
       return server.ice.some((ice) => ice.rezzed === true);
     }
     if (target === "bypass_first_ice") return server.ice.length > 0;

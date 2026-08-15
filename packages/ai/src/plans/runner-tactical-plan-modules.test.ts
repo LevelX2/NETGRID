@@ -348,7 +348,7 @@ describe("Runner tactical plan modules", () => {
 
     expect(
       materialized.candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual([technician.actionId, basic.actionId]);
+    ).toEqual([basic.actionId]);
     expect(
       bindBestCurrentPlanRoute({
         side: "runner",
@@ -381,6 +381,81 @@ describe("Runner tactical plan modules", () => {
         ...payoffMaterialized,
       }).head.actionId,
     ).toBe(technician.actionId);
+  });
+
+  it("does not replace access with Demolition Run when no rezzed ICE can be trashed", () => {
+    const basic = run("run-hq-basic", "hq");
+    const demolition = {
+      ...run("run-hq-demolition", "hq"),
+      actionType: "play_event",
+      semanticActionType: "play.runner_event",
+      sourceKind: "card" as const,
+      sourceDefinitionId: "onr_proteus_105_demolition-run",
+      costProfile: {
+        clickCost: 1,
+        creditCost: 4,
+        costKnownStatus: "known" as const,
+        additionalCosts: [],
+      },
+      effectTargets: [
+        "make_chosen_server_run",
+        "trash_rezzed_ice_on_fort_and_tag_runner",
+        "trash_rezzed_ice_on_fort",
+        "run.successful_run_self_tag",
+      ],
+    };
+    const module = tacticalModule("runner.pressure_central");
+    const runnerContext = context([demolition, basic], {
+      centralPressure: [
+        {
+          pressureId: "hq-pressure",
+          serverId: "hq",
+          purpose: "access",
+          strategyLineIds: ["runner.access_agendas"],
+          priorityClass: "P4",
+          reachable: true,
+          marginalValue: 200,
+          evidenceCode: "open_hq_access",
+          sourceDefinitionIds: [demolition.sourceDefinitionId],
+          runActionIds: [demolition.actionId, basic.actionId],
+          runActionValues: {
+            [demolition.actionId]: 10,
+            [basic.actionId]: 0,
+          },
+        },
+      ],
+    });
+    runnerContext.input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+    ];
+    const instance = instantiatePlanProposal(
+      module.discover(runnerContext)[0]!,
+      10,
+    );
+
+    expect(
+      module
+        .materialize(instance, {} as never, runnerContext)
+        .candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([basic.actionId]);
+
+    runnerContext.input.playerView.servers[0]!.ice = [
+      {
+        instanceId: "hq-ice",
+        title: "HQ ICE",
+        known: true,
+        rezzed: true,
+      },
+    ];
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "runner",
+        stateVersion: 10,
+        timingPoint: "runner.action",
+        planInstanceId: instance.instanceId,
+        ...module.materialize(instance, {} as never, runnerContext),
+      }).head.actionId,
+    ).toBe(demolition.actionId);
   });
 
   it("keeps a card run when its differential ICE payoff is visibly applicable", () => {

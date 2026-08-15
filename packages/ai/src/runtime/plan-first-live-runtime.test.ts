@@ -973,6 +973,140 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("does not fund Blackmail while HQ still lacks exact breaker coverage", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const draw = legalAction(
+      "draw-for-wall-breaker",
+      "runner",
+      "draw_card",
+      "Draw 1",
+      { credits: 0, clicks: 1 },
+    );
+    const run = legalAction(
+      "run-hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const input = aiInput("runner", [credit, draw, run]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("blackmail-card", "runner", "event", {
+        definitionId: "onr_proteus_102_blackmail",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq", [
+        visibleCard("hq-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+          strength: 2,
+          subtypes: ["wall"],
+          effectiveRunQuote: {
+            iceInstanceId: "hq-data-wall",
+            iceDefinitionId: "onr_v1_237_data-wall",
+            effectiveStrength: 2,
+            subroutines: [{ id: "data-wall-etr", type: "end_the_run" }],
+          },
+        }),
+      ]),
+      server("rd"),
+      server("archives"),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "hq"),
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      score: 240,
+      evidence: ["missing_coverage:breaker_wall"],
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [
+            {
+              cardId: "onr_v1_053_ramming-piston",
+              title: "Ramming Piston",
+              coverage: ["wall"],
+              installCost: 4,
+              baseStrength: 5,
+              breakCost: 1,
+              pumpCost: 0,
+              risks: [],
+              restrictions: [],
+              quantityKnownInDeck: 2,
+              locations: ["in_deck"],
+              confidence: "high",
+              evidence: ["match_bae516_known_wall_answer"],
+            },
+          ],
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "blackmail-card",
+          definitionId: "onr_proteus_102_blackmail",
+          legalActionId: "play-blackmail-not-yet-legal",
+          priority: 1_000,
+          availability: "missing_credits",
+          deferReason: "missing_credits",
+          missingCredits: 2,
+          installCost: 12,
+          targetCredits: 12,
+          fundingReason: "cannot_pay",
+          developmentRole: "access_payoff",
+          strategicFit: "strong",
+          currentNeed: "acute",
+        }),
+      ],
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 6,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "runner.develop_board_and_hand" &&
+          JSON.stringify(instance.moduleState).includes("blackmail-card"),
+      ),
+    ).toBe(false);
+    expect(residentPlanPortfolioSnapshot(input)?.instances).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.pressure_central:central%3Ahq",
+          openNeedIds: ["coverage:breaker_wall"],
+        }),
+        expect.objectContaining({
+          parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          parentNeedId: "coverage:breaker_wall",
+        }),
+      ]),
+    );
+  });
+
   it("abandons access-payoff setup when new visible path evidence makes the central permanently unreachable", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
@@ -9398,7 +9532,7 @@ describe("authoritative plan-first live runtime", () => {
 
     expect(() =>
       liveContext().chooseSemanticRuntimeAction(input, {}),
-    ).toThrowError("end_turn_with_usable_capacity");
+    ).toThrowError("missing_plan_module_coverage");
   });
 
   it("selects the standard turn completion instead of an unsafe card-scoped EndTurn", () => {
@@ -15184,6 +15318,20 @@ describe("authoritative plan-first live runtime", () => {
         answerInHand: false,
       },
     });
+    expect(residentPlanPortfolioSnapshot(input)?.instances).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.pressure_central:central%3Ahq",
+          openNeedIds: ["coverage:breaker_wall:efficiency:hq"],
+        }),
+        expect.objectContaining({
+          instanceId:
+            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Ahq",
+          parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          parentNeedId: "coverage:breaker_wall:efficiency:hq",
+        }),
+      ]),
+    );
   });
 
   it("binds Jack 'n' Joe to coverage only while a matching visible deck role remains", () => {

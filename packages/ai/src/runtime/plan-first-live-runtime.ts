@@ -107,6 +107,7 @@ import {
 } from "../plans/runner-core-plan-modules";
 import {
   createRunnerTacticalPlanModules,
+  runnerCardRunHasVisibleDifferentialPayoff,
   type RunnerDevelopmentSignal,
   type RunnerPlanDomain,
   type RunnerRemoteContestSignal,
@@ -2601,7 +2602,12 @@ export function runnerActionDispositions(
   const activeCentralRunActionIds = new Set(
     domain.centralPressure
       .filter((signal) => signal.reachable && signal.marginalValue > 0)
-      .flatMap((signal) => signal.runActionIds ?? []),
+      .flatMap((signal) =>
+        (signal.runActionIds ?? []).filter(
+          (actionId) =>
+            (signal.runActionExclusions?.[actionId]?.length ?? 0) === 0,
+        ),
+      ),
   );
   for (const action of input.legalActions) {
     if (
@@ -2805,7 +2811,7 @@ export function runnerActionDispositions(
     if (
       accessPayoffCandidate !== undefined &&
       !centralPreparationActionIds.has(accessPayoffCandidate.actionId) &&
-      runnerAccessPayoffInstallLacksBoundAccessRoute(
+      runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
         evaluation,
         accessPayoffCandidate,
         runTargets,
@@ -3908,6 +3914,25 @@ function buildRunnerDomain(
             (candidate) =>
               candidate.targetServerId === evaluation.targetServerId,
           );
+          const directlyAvailableBasicRun = sameServerEvaluations.some(
+            (candidateEvaluation) => {
+              const actionCandidate = candidates.find(
+                (entry) => entry.actionId === candidateEvaluation.actionId,
+              );
+              return (
+                actionCandidate?.semanticActionType === "run.start" &&
+                actionCandidate.sourceKind === "basic_action" &&
+                candidateEvaluation.pathPassability === "reachable" &&
+                (candidateEvaluation.recommendation === "run_now" ||
+                  candidateEvaluation.recommendation === "run_if_free")
+              );
+            },
+          );
+          const coverageSupport = coverageGaps.find(
+            (gap) =>
+              gap.requesterModuleId === "runner.pressure_central" &&
+              gap.targetServerId === evaluation.targetServerId,
+          );
           const hqSuccessWindowRoute = sameServerEvaluations.flatMap(
             (candidateEvaluation) => {
               const action = input.legalActions.find(
@@ -4027,7 +4052,11 @@ function buildRunnerDomain(
                                 ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
                                 : (evaluation.evidence[0] ??
                                   "runner_run_target"),
-            ...(fundingSupport ? { supportNeedId: fundingSupport.needId } : {}),
+            ...(coverageSupport
+              ? { supportNeedId: coverageSupport.gapId }
+              : fundingSupport
+                ? { supportNeedId: fundingSupport.needId }
+                : {}),
             runActionIds: pressureCadence.routeAvailable
               ? witnessedRunActionIds(
                   candidates,
@@ -4079,6 +4108,18 @@ function buildRunnerDomain(
             ),
             runActionExclusions: Object.fromEntries(
               sameServerEvaluations.flatMap((candidate) => {
+                const actionCandidate = candidates.find(
+                  (entry) => entry.actionId === candidate.actionId,
+                );
+                const lacksDifferentialPayoff =
+                  directlyAvailableBasicRun &&
+                  actionCandidate?.semanticActionType ===
+                    "play.runner_event" &&
+                  !runnerCardRunHasVisibleDifferentialPayoff(
+                    input,
+                    actionCandidate,
+                    evaluation.targetServerId as "hq" | "rd" | "archives",
+                  );
                 const candidateRouteAdmissible =
                   !forgoUnsafeRunCapacity &&
                   !knownNoPayoff &&
@@ -4088,6 +4129,7 @@ function buildRunnerDomain(
                   !safetyBlocked &&
                   candidate.prerunReserveQuote?.status !== "blocked" &&
                   candidate.pathPassability === "reachable" &&
+                  !lacksDifferentialPayoff &&
                   (candidate.recommendation === "run_now" ||
                     candidate.recommendation === "run_if_free") &&
                   (candidate.score > 0 || terminalCentralAccess);
@@ -4102,6 +4144,11 @@ function buildRunnerDomain(
                       `run_route_excluded:path:${candidate.pathPassability}`,
                       `run_route_excluded:recommendation:${candidate.recommendation}`,
                       `run_route_excluded:score:${candidate.score}`,
+                      ...(lacksDifferentialPayoff
+                        ? [
+                            "run_route_excluded:no_visible_differential_payoff_over_basic_run",
+                          ]
+                        : []),
                       ...(!pressureCadence.routeAvailable
                         ? [pressureCadence.evidenceCode]
                         : []),
@@ -4599,8 +4646,7 @@ function buildRunnerDomain(
         return [];
       }
       if (
-        candidate !== undefined &&
-        runnerAccessPayoffInstallLacksBoundAccessRoute(
+        runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
           evaluation,
           candidate,
           runTargets,
@@ -5907,8 +5953,22 @@ function runnerCentralPayoffServerForDefinition(
     ...(hint?.tacticSignals ?? []),
     ...(hint?.actionTacticSignals ?? []),
   ]);
-  if (signals.has("access.rnd_multiaccess")) return "rd";
-  if (signals.has("access.hq_multiaccess")) return "hq";
+  const planRoles = new Set(hint?.planRoles ?? []);
+  if (
+    signals.has("access.rnd_multiaccess") ||
+    signals.has("run.rd") ||
+    signals.has("run.rnd") ||
+    planRoles.has("pressure_rnd")
+  ) {
+    return "rd";
+  }
+  if (
+    signals.has("access.hq_multiaccess") ||
+    signals.has("run.hq") ||
+    planRoles.has("pressure_hq")
+  ) {
+    return "hq";
+  }
   return undefined;
 }
 
@@ -6151,19 +6211,18 @@ function runnerCentralPayoffServer(
   return undefined;
 }
 
-function runnerAccessPayoffInstallLacksBoundAccessRoute(
+function runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
   evaluation: RunnerHandDevelopmentEvaluation,
-  candidate: ActionSemanticCandidate,
+  candidate: ActionSemanticCandidate | undefined,
   runTargets: readonly RunnerRunTargetEvaluation[],
   coverageGaps: RunnerPlanDomain["coverageGaps"],
 ): boolean {
-  if (
-    evaluation.developmentRole !== "access_payoff" ||
-    candidate.semanticActionType !== "install.card"
-  ) {
+  if (evaluation.developmentRole !== "access_payoff" || !evaluation.definitionId) {
     return false;
   }
-  const serverId = runnerCentralPayoffServer(candidate);
+  const serverId = candidate
+    ? runnerCentralPayoffServer(candidate)
+    : runnerCentralPayoffServerForDefinition(evaluation.definitionId);
   if (!serverId) return false;
   const targetEvaluations = runTargets.filter(
     (target) =>
@@ -17964,7 +18023,8 @@ function uniqueCoverageGaps(
       requiredRole: role,
       targetServerId: evaluation.targetServerId,
       requesterModuleId,
-      ...(terminalRemotePatternThreat
+      ...(terminalRemotePatternThreat ||
+      requesterModuleId === "runner.pressure_central"
         ? {
             requesterPlanInstanceId: planInstanceIdForProposal({
               moduleId: requesterModuleId,
