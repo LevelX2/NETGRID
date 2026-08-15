@@ -2871,11 +2871,12 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["asset", "unique"],
-        "planRoles": ["protect_hq", "protect_rnd"],
+        "planRoles": ["corp_draw_filter_engine", "corp_hand_plan_filter"],
         "valueHints": {
           "remoteRootValue": 3
         },
         "strategicRole": ["engine_anchor"],
+        "strategyAnchors": ["corp.draw_engine"],
         "lineSupport": ["corp.draw_engine"],
         "strategySupportPairs": [
           {
@@ -2889,6 +2890,18 @@
             ],
             "confidence": "high",
             "rationale": "Recurring extra draw plus controller-only bottom-deck filtering is a draw/filter engine, not central stabilization; trigger is not limited to start-of-turn draw."
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "bottom_lowest_value_drawn_card",
+            "preferences": ["lowest_near_term_value"],
+            "avoid": ["next_turn_required_card"],
+            "kind": "replacement_target",
+            "timing": "replacement_window",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -3781,13 +3794,12 @@
         ],
         "costProfile": {
           "opportunityCost": "high",
-          "reserveRisk": "high",
           "clicks": 1,
           "credits": 0
         },
         "riskTags": [
           "opportunity_cost",
-          "reserve_risk",
+          "loss_condition",
           "agenda_transfer",
           "conditional_play",
           "tag_self",
@@ -3980,6 +3992,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": [
           "event",
+          "access_replacement",
           "rd_pressure",
           "rd_access_replacement",
           "agenda_pressure"
@@ -4028,7 +4041,7 @@
             "kind": "access_replacement",
             "scope": "rnd",
             "timing": "successful_run",
-            "target": "reveal_until_agenda_store_in_hq",
+            "target": "reveal_rd_until_agenda_store_in_hq",
             "finite": true
           },
           {
@@ -4081,9 +4094,9 @@
           "reserve_risk",
           "run",
           "run_success_dependency",
+          "access_replacement",
           "hidden_zone",
-          "rd_reveal",
-          "access_replacement"
+          "rd_reveal"
         ],
         "quality": {
           "hintReviewed": true,
@@ -5433,10 +5446,8 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["resource", "rd_run_reward"],
-        "planRoles": ["pressure_rnd"],
+        "planRoles": ["rnd_recon"],
         "valueHints": {},
-        "strategicRole": ["enabler"],
-        "strategyAnchors": ["runner.rnd_pressure"],
         "lineSupport": ["runner.rnd_pressure"],
         "actionCapabilitySemantics": [
           {
@@ -5451,18 +5462,6 @@
               }
             ],
             "functionSignals": ["risk.self_trash"]
-          }
-        ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "private_rnd_top_three_information",
-            "preferences": ["use_choice_option_with_visible_board_payoff"],
-            "avoid": ["hidden_info_dependent_choice"],
-            "kind": "use_target",
-            "timing": "on_use",
-            "targetType": "card",
-            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -5812,7 +5811,7 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["resource", "connection", "economy", "link"],
-        "planRoles": ["rig_setup", "increase_link"],
+        "planRoles": ["rig_setup", "trace_defense", "increase_link"],
         "valueHints": {
           "economy": 1
         },
@@ -5849,9 +5848,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",

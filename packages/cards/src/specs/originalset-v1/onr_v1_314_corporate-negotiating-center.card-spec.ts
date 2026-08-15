@@ -13,7 +13,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "At the start of each of your turns, gain 1 for each agenda card stored in HQ that you show to Runner.",
+      "At the start of each of your turns, gain [1] for each agenda card stored in HQ that you show to Runner.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -76,6 +76,22 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
+      },
+      {
+        kind: "strategic_exchange",
+        exchange: "credits_for_hq_agenda_information",
+      },
+      {
+        kind: "target_preference",
+        purpose: "show_hq_agendas_for_needed_credits",
+        preferences: [
+          "already_public_or_low_information_value_agenda",
+          "minimum_cards_for_current_credit_need",
+        ],
+        avoid: [
+          "unrevealed_matchpoint_agenda_under_hq_pressure",
+          "reveal_beyond_current_credit_need",
+        ],
       },
       {
         kind: "value_interpretation",

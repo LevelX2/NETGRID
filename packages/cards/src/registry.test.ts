@@ -414,6 +414,7 @@ describe("CardRegistry", () => {
     ]);
     expect(weatherPipe.planningAnnotations!.card).toEqual([
       { kind: "plan_role", role: "pressure_hq" },
+      { kind: "plan_role", role: "hq_credit_denial" },
     ]);
   });
 
@@ -521,6 +522,30 @@ describe("CardRegistry", () => {
     expect(text("onr_v1_097_livewires-contacts")).toBe("Gain [3].");
     expect(text("onr_v1_208_on-call-solo-team")).toMatch(/^A:/);
     expect(text("onr_v1_213_private-cybernet-police")).toMatch(/^A:/);
+  });
+
+  it("preserves Batch 6 source symbols in canonical card text", () => {
+    const text = (cardId: string) =>
+      cardSpecForDefinitionId(ROOT_REGISTRY, cardId as CardDefinitionId)!.text
+        .rulesText;
+
+    expect(text("onr_v1_058_seeya")).toMatch(/^A, \[1\]:/);
+    expect(text("onr_v1_183_technician-lover")).toMatch(/^A:/);
+    expect(text("onr_v1_203_hostile-takeover")).toBe(
+      "Gain [5] when you score Hostile Takeover.",
+    );
+    expect(text("onr_v1_118_weather-to-finance-pipe")).toContain(
+      "the Corp loses [4]",
+    );
+    expect(text("onr_v1_179_silicon-saloon-franchise")).toMatch(
+      /^A: Gain \[1\]/,
+    );
+    expect(text("onr_v1_164_hells-run")).toMatch(/^Put \[1\]/);
+    expect(text("onr_v1_207_netwatch-operations-office")).toMatch(/^A:/);
+    expect(text("onr_v1_317_data-masons")).toContain("reduced by [2]");
+    expect(text("onr_v1_314_corporate-negotiating-center")).toContain(
+      "gain [1]",
+    );
   });
 
   it("rejects duplicate capability identities within one CardSpec", () => {

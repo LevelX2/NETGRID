@@ -96,7 +96,22 @@ export const cardSpec = {
         use: "coverage.breaker",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("break_wall_with_stealth_tradeoff"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "spend_least_needed_stealth_credit_source",
+            preferences: [
+              "least_needed_stealth_credit_source",
+              "preserve_current_run_credit_reserve",
+            ],
+            avoid: ["only_remaining_relevant_stealth_source"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

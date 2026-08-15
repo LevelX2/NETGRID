@@ -116,7 +116,15 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "trace_defense",
+      },
+      {
+        kind: "plan_role",
+        role: "memory_support",
+      },
+      {
+        kind: "plan_role",
+        role: "deck_replacement_constraint",
       },
     ],
     capabilities: [],

@@ -63,11 +63,15 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "score_now",
+        role: "overadvance_for_bonus_points",
       },
       {
         kind: "strategic_role",
         role: "win_condition",
+      },
+      {
+        kind: "strategy_anchor",
+        strategyKey: "corp.overadvance_value",
       },
       {
         kind: "line_support",

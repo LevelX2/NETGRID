@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 4 credits.",
+      "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses [4].",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -70,6 +70,10 @@ export const cardSpec = {
       {
         kind: "plan_role",
         role: "pressure_hq",
+      },
+      {
+        kind: "plan_role",
+        role: "hq_credit_denial",
       },
     ],
     capabilities: [],

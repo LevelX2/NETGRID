@@ -3849,13 +3849,26 @@ function deriveExtendedRequiredMechanics(
       if (
         effect.kind === "make_run" &&
         effect.successfulRunAccessReplacement !== undefined
-      )
-        for (const token of [
-          "successful_run_access_replacement",
-          "reveal_cards_until_agenda",
-          "move_card_to_hq",
-        ])
-          mechanics.add(token);
+      ) {
+        mechanics.add("successful_run_access_replacement");
+        const replacement = effect.successfulRunAccessReplacement;
+        if (replacement === "reveal_rd_until_agenda_store_in_hq")
+          for (const token of ["reveal_cards_until_agenda", "move_card_to_hq"])
+            mechanics.add(token);
+        if (replacement === "corp_lose_credits")
+          mechanics.add("corp_credit_loss");
+        if (replacement === "runner_spend_corp_lose_credits")
+          mechanics.add("runner_spend_corp_credit_loss");
+        if (replacement === "private_look_top_rd")
+          mechanics.add("private_rnd_top_look");
+        if (replacement === "archives_faceup_to_rd")
+          mechanics.add("archives_faceup_to_rd");
+        if (replacement === "trash_rezzed_ice_on_fort_and_tag_runner")
+          for (const token of ["trash_rezzed_ice", "add_tags"])
+            mechanics.add(token);
+        if (replacement === "runner_gain_agenda_point")
+          mechanics.add("runner_gain_agenda_point");
+      }
       if (
         effect.kind === "make_run" &&
         effect.corpRezCostSurcharge !== undefined
@@ -4801,21 +4814,37 @@ function deriveRoles(
         ability.effects?.some((effect) => effect.kind === "make_run"),
       )
     ) {
-      if (
-        engine.abilities.some((ability) =>
-          ability.effects?.some(
-            (effect) =>
-              effect.kind === "make_run" &&
-              effect.successfulRunAccessReplacement !== undefined,
-          ),
-        )
-      )
-        for (const role of [
-          "rd_pressure",
-          "rd_access_replacement",
-          "agenda_pressure",
-        ])
-          roles.add(role);
+      for (const ability of engine.abilities)
+        for (const effect of ability.effects ?? []) {
+          if (
+            effect.kind !== "make_run" ||
+            effect.successfulRunAccessReplacement === undefined
+          )
+            continue;
+          roles.add("access_replacement");
+          if (effect.target.kind === "central_server")
+            roles.add(
+              effect.target.server === "rd"
+                ? "rd_pressure"
+                : `${effect.target.server}_pressure`,
+            );
+          const replacement = effect.successfulRunAccessReplacement;
+          if (replacement === "reveal_rd_until_agenda_store_in_hq")
+            for (const role of ["rd_access_replacement", "agenda_pressure"])
+              roles.add(role);
+          if (
+            replacement === "corp_lose_credits" ||
+            replacement === "runner_spend_corp_lose_credits"
+          )
+            roles.add("corp_credit_denial");
+          if (replacement === "private_look_top_rd") roles.add("topdeck_info");
+          if (replacement === "archives_faceup_to_rd")
+            roles.add("archives_recovery");
+          if (replacement === "trash_rezzed_ice_on_fort_and_tag_runner")
+            roles.add("ice_trash");
+          if (replacement === "runner_gain_agenda_point")
+            roles.add("agenda_pressure");
+        }
       if (
         engine.abilities.some((ability) =>
           ability.effects?.some(
@@ -5186,9 +5215,15 @@ function deriveClosedExtendedRiskTags(
     }
     for (const effect of ability.effects ?? []) {
       if (effect.kind === "make_run") risks.add("run_success_dependency");
-      if (effect.kind === "make_run" && effect.successfulRunAccessReplacement)
-        for (const risk of ["hidden_zone", "rd_reveal", "access_replacement"])
-          risks.add(risk);
+      if (effect.kind === "make_run" && effect.successfulRunAccessReplacement) {
+        risks.add("access_replacement");
+        if (
+          effect.successfulRunAccessReplacement === "private_look_top_rd" ||
+          effect.successfulRunAccessReplacement ===
+            "reveal_rd_until_agenda_store_in_hq"
+        )
+          for (const risk of ["hidden_zone", "rd_reveal"]) risks.add(risk);
+      }
       if (effect.kind === "make_run" && effect.corpRezCostSurcharge)
         risks.add("run_cost_modifier");
       if (effect.kind === "remove_tags") risks.add("tag_clear_timing");
@@ -5695,11 +5730,18 @@ function deriveConditions(
       conditions.push({ kind: "requires_runner_action" });
     for (const ability of engine.abilities ?? [])
       for (const effect of ability.effects ?? []) {
-        if (effect.kind === "make_run" && effect.successfulRunAccessReplacement)
-          conditions.push(
-            { kind: "requires_rnd_pressure" },
-            { kind: "requires_successful_run" },
-          );
+        if (
+          effect.kind === "make_run" &&
+          effect.successfulRunAccessReplacement
+        ) {
+          if (effect.target.kind === "central_server") {
+            if (effect.target.server === "rd")
+              conditions.push({ kind: "requires_rnd_pressure" });
+            if (effect.target.server === "hq")
+              conditions.push({ kind: "requires_hq_pressure" });
+          }
+          conditions.push({ kind: "requires_successful_run" });
+        }
         if (effect.kind === "make_run" && effect.corpRezCostSurcharge)
           conditions.push({ kind: "requires_during_run" });
         if (effect.kind === "private_look")
@@ -6137,10 +6179,15 @@ function deriveTargetProfiles(
                 kind: "use_target" as const,
                 targetType: "installed_ice" as const,
               }
-            : {
-                kind: "install_target" as const,
-                targetType: "card" as const,
-              };
+            : scoredAgenda.kind === "score_rez_installed_ice_at_no_cost"
+              ? {
+                  kind: "use_target" as const,
+                  targetType: "installed_ice" as const,
+                }
+              : {
+                  kind: "install_target" as const,
+                  targetType: "card" as const,
+                };
       return [
         {
           schemaVersion: "target-profile-v1",
@@ -6209,6 +6256,7 @@ function hasClosedTargetPreferenceOwner(
 ): boolean {
   return (
     engine.variableRez?.kind === "alternate_subtype" ||
+    engine.variableRez?.kind === "x_strength" ||
     engine.fortRunWindows !== undefined ||
     engine.icebreakerAbilities !== undefined ||
     engine.icebreakerSubtypeChange !== undefined ||
@@ -6226,6 +6274,11 @@ function hasClosedTargetPreferenceOwner(
     engine.hiddenReplacementLongtail?.kind ===
       "conceal_and_reorder_installed_ice" ||
     engine.corpUtility !== undefined ||
+    engine.lifecycle?.start_of_corp_turn?.some((trigger) =>
+      trigger.effects.some(
+        (effect) => effect.kind === "show_hq_agendas_for_credits",
+      ),
+    ) === true ||
     engine.lifecycle?.on_score?.some(
       (effect) => effect.kind === "trash_corp_installed_cards_in_source_server",
     ) === true ||
@@ -6243,6 +6296,7 @@ function hasClosedTargetPreferenceOwner(
               "copy_same_fort_ice_subroutine_for_run",
               "corp_choice_derez_last_rezzed_black_ice_or_bad_publicity",
               "expose_installed_cards",
+              "expose_installed_card",
               "free_rez_installed_ice_with_counters",
               "remove_same_fort_advancement_counters_for_run_credits",
               "search_stack_install",
@@ -6413,6 +6467,14 @@ function deriveClosedExtendedTargetProfile(
       targetType: "mode_choice",
       hiddenInfoPolicy: "legal_options_only",
     };
+  if (engine.variableRez?.kind === "x_strength")
+    return {
+      ...planningFields,
+      kind: "mode_choice",
+      timing: "corp_rez_window",
+      targetType: "mode_choice",
+      hiddenInfoPolicy: "legal_options_only",
+    };
   if (
     engine.fortRunWindows?.some(
       (window) =>
@@ -6530,7 +6592,21 @@ function deriveClosedExtendedTargetProfile(
       ...planningFields,
       kind: "use_target",
       timing: "start_of_run",
-      targetType: "installed_ice",
+      targetType: "server",
+      hiddenInfoPolicy: "legal_targets_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "expose_installed_card",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "activated_ability",
+      targetType: "card",
       hiddenInfoPolicy: "legal_targets_only",
     };
   if (
@@ -6652,6 +6728,28 @@ function deriveClosedExtendedTargetProfile(
       ...planningFields,
       kind: "use_target",
       timing: "on_play",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (engine.corpUtility?.kind === "corp_draw_extra_then_bottom_one")
+    return {
+      ...planningFields,
+      kind: "replacement_target",
+      timing: "replacement_window",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.lifecycle?.start_of_corp_turn?.some((trigger) =>
+      trigger.effects.some(
+        (effect) => effect.kind === "show_hq_agendas_for_credits",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "start_of_turn",
       targetType: "card",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
@@ -6807,6 +6905,22 @@ function deriveClosedExtendedTargetProfile(
   if (
     engine.abilities?.some((ability) =>
       ability.effects?.some((effect) => effect.kind === "private_look"),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_use",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.icebreakerAbilities?.some(
+      (ability) =>
+        ability.kind === "break_subroutine" &&
+        ability.onSuccessfulBreak?.some(
+          (effect) => effect.kind === "lose_bits_from_stealth_sources",
+        ),
     )
   )
     return {
@@ -7780,24 +7894,88 @@ function deriveClosedExtendedHintEffects(
               : "make_chosen_server_run",
           finite: true,
         });
-        if (effect.successfulRunAccessReplacement !== undefined)
-          effects.push(
-            {
-              kind: "access_replacement",
-              scope: "rnd",
-              timing: "successful_run",
-              target: "reveal_until_agenda_store_in_hq",
-              finite: true,
-            },
-            {
+        if (effect.successfulRunAccessReplacement !== undefined) {
+          const replacement = effect.successfulRunAccessReplacement;
+          const replacementScope =
+            effect.target.kind === "central_server"
+              ? effect.target.server === "rd"
+                ? "rnd"
+                : effect.target.server
+              : "server";
+          effects.push({
+            kind: "access_replacement",
+            scope: replacementScope,
+            timing: "successful_run",
+            target: replacement,
+            finite: true,
+          });
+          if (replacement === "reveal_rd_until_agenda_store_in_hq")
+            effects.push({
               kind: "topdeck_info",
               scope: "rnd",
               timing: "successful_run",
               resource: "cards",
               target: "reveal_until_agenda",
               finite: true,
-            },
-          );
+            });
+          if (replacement === "private_look_top_rd")
+            effects.push({
+              kind: "topdeck_info",
+              scope: "rnd",
+              timing: "successful_run",
+              resource: "cards",
+              target: "private_look_top_rd",
+              amount: requiredFiniteNumber(
+                effect.successfulRunPrivateLookCount,
+                "successfulRunPrivateLookCount",
+              ),
+              finite: true,
+            });
+          if (replacement === "corp_lose_credits")
+            effects.push({
+              kind: "economy",
+              scope: "corp",
+              timing: "successful_run",
+              resource: "credits",
+              target: "economy.corp_credit_loss",
+              amount: requiredFiniteNumber(
+                effect.successfulRunCreditLoss,
+                "successfulRunCreditLoss",
+              ),
+              finite: true,
+            });
+          if (replacement === "archives_faceup_to_rd")
+            effects.push({
+              kind: "card_recovery",
+              scope: "archives",
+              timing: "successful_run",
+              resource: "cards",
+              target: "archives_faceup_to_rd",
+              amount: requiredFiniteNumber(
+                effect.successfulRunArchivesMoveCount,
+                "successfulRunArchivesMoveCount",
+              ),
+              finite: true,
+            });
+          if (replacement === "trash_rezzed_ice_on_fort_and_tag_runner")
+            effects.push({
+              kind: "ice_trash",
+              scope: "fort",
+              timing: "successful_run",
+              target: "trash_rezzed_ice_on_fort",
+              finite: true,
+            });
+          if (replacement === "runner_gain_agenda_point")
+            effects.push({
+              kind: "scored_agenda_action",
+              scope: "runner",
+              timing: "successful_run",
+              resource: "agenda_points",
+              target: "runner_gain_agenda_point",
+              amount: 1,
+              finite: true,
+            });
+        }
         if (effect.corpRezCostSurcharge !== undefined)
           effects.push({
             kind: "run_tax",
@@ -9235,17 +9413,32 @@ function derivedFunctionSignals(
       pumpAbility.duration === "current_turn"
     )
       signals.add("breaker.scaling_strength");
-    if (
-      engine.abilities?.some((ability) =>
-        ability.effects?.some(
-          (effect) =>
-            effect.kind === "make_run" &&
-            effect.successfulRunAccessReplacement !== undefined,
-        ),
-      )
-    )
-      for (const signal of ["info.rnd_topdeck", "run.event_tempo"])
-        signals.add(signal);
+    for (const ability of engine.abilities ?? [])
+      for (const effect of ability.effects ?? []) {
+        if (
+          effect.kind !== "make_run" ||
+          effect.successfulRunAccessReplacement === undefined
+        )
+          continue;
+        signals.add("run.event_tempo");
+        const replacement = effect.successfulRunAccessReplacement;
+        if (
+          replacement === "private_look_top_rd" ||
+          replacement === "reveal_rd_until_agenda_store_in_hq"
+        )
+          signals.add("info.rnd_topdeck");
+        if (
+          replacement === "corp_lose_credits" ||
+          replacement === "runner_spend_corp_lose_credits"
+        )
+          signals.add("economy.corp_credit_denial");
+        if (replacement === "archives_faceup_to_rd")
+          signals.add("archives.corp_recovery");
+        if (replacement === "trash_rezzed_ice_on_fort_and_tag_runner")
+          signals.add("ice.trash_rezzed");
+        if (replacement === "runner_gain_agenda_point")
+          signals.add("score.conditional_agenda_point");
+      }
     if (
       engine.abilities?.some((ability) =>
         ability.effects?.some(
@@ -9713,7 +9906,7 @@ function derivedActionStrategyEvidence(
         >["evidenceAnchor"]
       >
     | undefined;
-  let expectedRole: "anchor_evidence" | "payoff_anchor" | undefined;
+  let expectedRole: "anchor_evidence" | "payoff_anchor" | "enabler" | undefined;
   let expectedStrategies: ReadonlySet<string> | undefined;
   const nodeEffects = Array.isArray(node.effects)
     ? node.effects.filter(isRecord)
@@ -9776,6 +9969,12 @@ function derivedActionStrategyEvidence(
     if (evidenceAnchor === "tag.payoff") {
       expectedAnchor = evidenceAnchor;
       expectedRole = "payoff_anchor";
+    } else if (
+      evidenceAnchor === "tag.additional_source" &&
+      addTags !== undefined
+    ) {
+      expectedAnchor = evidenceAnchor;
+      expectedRole = "enabler";
     } else if (evidenceAnchor === "tag.source" && addTags !== undefined) {
       expectedAnchor = evidenceAnchor;
       expectedRole = "anchor_evidence";

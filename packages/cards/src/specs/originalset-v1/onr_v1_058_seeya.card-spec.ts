@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "A, 1: Expose an installed card.",
+    rulesText: "A, [1]: Expose an installed card.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(
@@ -87,13 +87,28 @@ export const cardSpec = {
         kind: "plan_role",
         role: "contest_remote",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "expose_installed_card",
-        avoid: ["hidden_info_dependent_choice"],
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_expose_installed_card",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "expose_installed_card",
+            preferences: [
+              "unknown_or_unrezzed_corp_card",
+              "server_relevant_to_current_plan",
+            ],
+            avoid: [
+              "already_known_or_rezzed_card",
+              "low_information_value_target",
+            ],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

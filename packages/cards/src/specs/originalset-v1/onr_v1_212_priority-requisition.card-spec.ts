@@ -77,6 +77,10 @@ export const cardSpec = {
         role: "scoring_tool",
       },
       {
+        kind: "strategy_anchor",
+        strategyKey: "corp.ice_tax_glacier",
+      },
+      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -104,18 +108,28 @@ export const cardSpec = {
         rationale:
           "Agenda Semantic Review v1 maps Priority Requisition to corp.remote_scoring as scoring_tool/free_rez_remote_defense.",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "rez_best_defensive_ice",
-        preferences: [
-          "high_rez_cost_relief",
-          "blocks_relevant_run_path",
-          "protects_agenda_remote",
+        capabilityKey: capabilityKey(
+          "scored_agenda_score_rez_installed_ice_at_no_cost",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "rez_best_defensive_ice",
+            preferences: [
+              "high_rez_cost_relief",
+              "blocks_relevant_run_path",
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "high_run_denial_payoff",
+            ],
+            avoid: ["low_impact_ice", "irrelevant_server_ice"],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

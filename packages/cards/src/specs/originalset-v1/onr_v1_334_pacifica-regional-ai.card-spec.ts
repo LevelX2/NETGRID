@@ -91,11 +91,15 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_modifier",
+        role: "advancement_to_action_engine",
       },
       {
         kind: "strategic_role",
         role: "engine_anchor",
+      },
+      {
+        kind: "strategy_anchor",
+        strategyKey: "corp.fast_advance",
       },
       {
         kind: "line_support",

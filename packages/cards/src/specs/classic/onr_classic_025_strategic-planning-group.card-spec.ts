@@ -60,15 +60,19 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "protect_hq",
+        role: "corp_draw_filter_engine",
       },
       {
         kind: "plan_role",
-        role: "protect_rnd",
+        role: "corp_hand_plan_filter",
       },
       {
         kind: "strategic_role",
         role: "engine_anchor",
+      },
+      {
+        kind: "strategy_anchor",
+        strategyKey: "corp.draw_engine",
       },
       {
         kind: "line_support",
@@ -95,7 +99,19 @@ export const cardSpec = {
         rating: "high",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("start_turn_draw_extra_then_bottom_one"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "bottom_lowest_value_drawn_card",
+            preferences: ["lowest_near_term_value"],
+            avoid: ["next_turn_required_card"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

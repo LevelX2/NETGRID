@@ -65,7 +65,11 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "survive_net_damage",
+      },
+      {
+        kind: "plan_role",
+        role: "survive_core_damage",
       },
     ],
     capabilities: [],

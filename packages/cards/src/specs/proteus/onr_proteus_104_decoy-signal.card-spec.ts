@@ -69,17 +69,12 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "pressure_rnd",
+        role: "run_recon",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
-      },
-      {
-        kind: "target_preference",
-        purpose: "expose_ice_on_relevant_run_path",
-        preferences: ["relevant_server_ice", "blocks_relevant_run_path"],
-        avoid: ["hidden_info_dependent_choice"],
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
       },
     ],
     capabilities: [],

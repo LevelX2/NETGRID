@@ -91,9 +91,9 @@ export const cardSpec = {
           {
             kind: "strategy_support",
             strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
+            role: "enabler",
+            roleDetail: "enabler_tag_additional_source",
+            evidenceAnchor: "tag.additional_source",
             confidence: "high",
           },
         ],

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 1 from the bank on Hell's Run when it is installed. Use this bit only to pay for increasing your link. If you use the bit, replace it from the bank at the start of your next turn.",
+      "Put [1] from the bank on Hell's Run when it is installed. Use this bit only to pay for increasing your link. If you use the bit, replace it from the bank at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -75,11 +75,6 @@ export const cardSpec = {
       {
         kind: "plan_role",
         role: "trace_defense",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
       },
     ],
     capabilities: [],

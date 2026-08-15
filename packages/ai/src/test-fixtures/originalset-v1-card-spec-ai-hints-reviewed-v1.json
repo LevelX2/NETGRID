@@ -3367,9 +3367,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": [
           "program",
+          "access_replacement",
           "rd_pressure",
-          "rd_access_replacement",
-          "agenda_pressure"
+          "topdeck_info"
         ],
         "planRoles": ["pressure_rnd", "information"],
         "valueHints": {},
@@ -3402,7 +3402,7 @@
             "kind": "access_replacement",
             "scope": "rnd",
             "timing": "successful_run",
-            "target": "reveal_until_agenda_store_in_hq",
+            "target": "private_look_top_rd",
             "finite": true
           },
           {
@@ -3410,7 +3410,8 @@
             "scope": "rnd",
             "timing": "successful_run",
             "resource": "cards",
-            "target": "reveal_until_agenda",
+            "target": "private_look_top_rd",
+            "amount": 5,
             "finite": true
           },
           {
@@ -3452,9 +3453,9 @@
         "riskTags": [
           "run",
           "run_success_dependency",
+          "access_replacement",
           "hidden_zone",
-          "rd_reveal",
-          "access_replacement"
+          "rd_reveal"
         ],
         "quality": {
           "hintReviewed": true,
@@ -3467,8 +3468,7 @@
         "requiredMechanics": [
           "activated_ability",
           "install_program",
-          "move_card_to_hq",
-          "reveal_cards_until_agenda",
+          "private_rnd_top_look",
           "start_run",
           "successful_run_access_replacement"
         ]
@@ -3893,6 +3893,22 @@
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
+            "purpose": "expose_installed_card",
+            "preferences": [
+              "unknown_or_unrezzed_corp_card",
+              "server_relevant_to_current_plan"
+            ],
+            "avoid": [
+              "already_known_or_rezzed_card",
+              "low_information_value_target"
+            ],
+            "kind": "use_target",
+            "timing": "activated_ability",
+            "targetType": "card",
+            "hiddenInfoPolicy": "legal_targets_only"
+          },
+          {
+            "schemaVersion": "target-profile-v1",
             "kind": "use_target",
             "timing": "activated_ability",
             "targetType": "card",
@@ -4148,7 +4164,7 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program", "damage_prevention"],
-        "planRoles": [],
+        "planRoles": ["build_rig", "survive_net_damage"],
         "valueHints": {},
         "effects": [
           {
@@ -5630,9 +5646,9 @@
         "roles": [
           "event",
           "economy",
-          "rd_pressure",
-          "rd_access_replacement",
-          "agenda_pressure"
+          "access_replacement",
+          "hq_pressure",
+          "corp_credit_denial"
         ],
         "planRoles": ["pressure_hq"],
         "valueHints": {},
@@ -5688,17 +5704,18 @@
           },
           {
             "kind": "access_replacement",
-            "scope": "rnd",
+            "scope": "hq",
             "timing": "successful_run",
-            "target": "reveal_until_agenda_store_in_hq",
+            "target": "corp_lose_credits",
             "finite": true
           },
           {
-            "kind": "topdeck_info",
-            "scope": "rnd",
+            "kind": "economy",
+            "scope": "corp",
             "timing": "successful_run",
-            "resource": "cards",
-            "target": "reveal_until_agenda",
+            "resource": "credits",
+            "target": "economy.corp_credit_loss",
+            "amount": 1,
             "finite": true
           },
           {
@@ -5728,7 +5745,7 @@
           }
         ],
         "functionSignals": [
-          "info.rnd_topdeck",
+          "economy.corp_credit_denial",
           "run.event_tempo",
           "run.make_run",
           "run.hq",
@@ -5743,9 +5760,8 @@
           "effect:economy",
           "effect:future_run_effect",
           "effect:tag",
-          "effect:topdeck_info",
+          "effect_scope:corp",
           "effect_scope:hq",
-          "effect_scope:rnd",
           "effect_scope:runner",
           "effect_timing:action",
           "effect_timing:successful_run",
@@ -5753,7 +5769,7 @@
         ],
         "conditions": [
           {
-            "kind": "requires_rnd_pressure"
+            "kind": "requires_hq_pressure"
           },
           {
             "kind": "requires_successful_run"
@@ -5763,13 +5779,7 @@
           "clicks": 1,
           "credits": 1
         },
-        "riskTags": [
-          "run",
-          "run_success_dependency",
-          "hidden_zone",
-          "rd_reveal",
-          "access_replacement"
-        ],
+        "riskTags": ["run", "run_success_dependency", "access_replacement"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -5779,9 +5789,8 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "move_card_to_hq",
+          "corp_credit_loss",
           "play_event",
-          "reveal_cards_until_agenda",
           "start_run",
           "subtype_sabotage",
           "successful_run_access_replacement"
@@ -7054,9 +7063,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": [
           "event",
-          "rd_pressure",
-          "rd_access_replacement",
-          "agenda_pressure"
+          "access_replacement",
+          "hq_pressure",
+          "corp_credit_denial"
         ],
         "planRoles": ["pressure_hq", "run_pressure"],
         "valueHints": {},
@@ -7087,17 +7096,9 @@
           },
           {
             "kind": "access_replacement",
-            "scope": "rnd",
+            "scope": "hq",
             "timing": "successful_run",
-            "target": "reveal_until_agenda_store_in_hq",
-            "finite": true
-          },
-          {
-            "kind": "topdeck_info",
-            "scope": "rnd",
-            "timing": "successful_run",
-            "resource": "cards",
-            "target": "reveal_until_agenda",
+            "target": "runner_spend_corp_lose_credits",
             "finite": true
           },
           {
@@ -7109,7 +7110,7 @@
           }
         ],
         "functionSignals": [
-          "info.rnd_topdeck",
+          "economy.corp_credit_denial",
           "run.event_tempo",
           "run.make_run",
           "run.hq"
@@ -7118,15 +7119,13 @@
           "access.payoff",
           "effect:access_replacement",
           "effect:future_run_effect",
-          "effect:topdeck_info",
           "effect_scope:hq",
-          "effect_scope:rnd",
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
           {
-            "kind": "requires_rnd_pressure"
+            "kind": "requires_hq_pressure"
           },
           {
             "kind": "requires_successful_run"
@@ -7136,13 +7135,7 @@
           "clicks": 1,
           "credits": 0
         },
-        "riskTags": [
-          "run",
-          "run_success_dependency",
-          "hidden_zone",
-          "rd_reveal",
-          "access_replacement"
-        ],
+        "riskTags": ["run", "run_success_dependency", "access_replacement"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7152,9 +7145,8 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "move_card_to_hq",
           "play_event",
-          "reveal_cards_until_agenda",
+          "runner_spend_corp_credit_loss",
           "start_run",
           "subtype_sabotage",
           "successful_run_access_replacement"
@@ -7854,11 +7846,11 @@
         "aiSupportStatus": "ai_supported",
         "roles": [
           "event",
-          "rd_pressure",
-          "rd_access_replacement",
-          "agenda_pressure"
+          "access_replacement",
+          "hq_pressure",
+          "corp_credit_denial"
         ],
-        "planRoles": ["pressure_hq"],
+        "planRoles": ["pressure_hq", "hq_credit_denial"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -7885,17 +7877,18 @@
           },
           {
             "kind": "access_replacement",
-            "scope": "rnd",
+            "scope": "hq",
             "timing": "successful_run",
-            "target": "reveal_until_agenda_store_in_hq",
+            "target": "corp_lose_credits",
             "finite": true
           },
           {
-            "kind": "topdeck_info",
-            "scope": "rnd",
+            "kind": "economy",
+            "scope": "corp",
             "timing": "successful_run",
-            "resource": "cards",
-            "target": "reveal_until_agenda",
+            "resource": "credits",
+            "target": "economy.corp_credit_loss",
+            "amount": 4,
             "finite": true
           },
           {
@@ -7907,7 +7900,7 @@
           }
         ],
         "functionSignals": [
-          "info.rnd_topdeck",
+          "economy.corp_credit_denial",
           "run.event_tempo",
           "run.make_run",
           "run.hq"
@@ -7915,16 +7908,16 @@
         "actionTacticSignals": [
           "access.payoff",
           "effect:access_replacement",
+          "effect:economy",
           "effect:future_run_effect",
-          "effect:topdeck_info",
+          "effect_scope:corp",
           "effect_scope:hq",
-          "effect_scope:rnd",
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
           {
-            "kind": "requires_rnd_pressure"
+            "kind": "requires_hq_pressure"
           },
           {
             "kind": "requires_successful_run"
@@ -7934,13 +7927,7 @@
           "clicks": 1,
           "credits": 0
         },
-        "riskTags": [
-          "run",
-          "run_success_dependency",
-          "hidden_zone",
-          "rd_reveal",
-          "access_replacement"
-        ],
+        "riskTags": ["run", "run_success_dependency", "access_replacement"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7950,9 +7937,8 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "requiredMechanics": [
-          "move_card_to_hq",
+          "corp_credit_loss",
           "play_event",
-          "reveal_cards_until_agenda",
           "start_run",
           "subtype_sabotage",
           "successful_run_access_replacement"
@@ -9671,9 +9657,9 @@
         "aiSupportStatus": "ai_supported",
         "roles": [
           "hardware",
-          "rd_pressure",
-          "rd_access_replacement",
-          "agenda_pressure"
+          "access_replacement",
+          "archives_pressure",
+          "archives_recovery"
         ],
         "planRoles": ["build_rig", "run_pressure"],
         "valueHints": {},
@@ -9702,17 +9688,18 @@
           },
           {
             "kind": "access_replacement",
-            "scope": "rnd",
+            "scope": "archives",
             "timing": "successful_run",
-            "target": "reveal_until_agenda_store_in_hq",
+            "target": "archives_faceup_to_rd",
             "finite": true
           },
           {
-            "kind": "topdeck_info",
-            "scope": "rnd",
+            "kind": "card_recovery",
+            "scope": "archives",
             "timing": "successful_run",
             "resource": "cards",
-            "target": "reveal_until_agenda",
+            "target": "archives_faceup_to_rd",
+            "amount": 2,
             "finite": true
           },
           {
@@ -9724,25 +9711,22 @@
           }
         ],
         "functionSignals": [
-          "info.rnd_topdeck",
+          "archives.corp_recovery",
           "run.event_tempo",
           "run.make_run",
           "run.archives"
         ],
+        "tacticSignals": ["archives.corp_recovery"],
         "actionTacticSignals": [
           "access.payoff",
           "effect:access_replacement",
+          "effect:card_recovery",
           "effect:future_run_effect",
-          "effect:topdeck_info",
           "effect_scope:archives",
-          "effect_scope:rnd",
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
         "conditions": [
-          {
-            "kind": "requires_rnd_pressure"
-          },
           {
             "kind": "requires_successful_run"
           }
@@ -9755,8 +9739,6 @@
           "run",
           "install_runner",
           "run_success_dependency",
-          "hidden_zone",
-          "rd_reveal",
           "access_replacement"
         ],
         "quality": {
@@ -9769,9 +9751,8 @@
         ],
         "requiredMechanics": [
           "activated_ability",
+          "archives_faceup_to_rd",
           "install_hardware",
-          "move_card_to_hq",
-          "reveal_cards_until_agenda",
           "start_run",
           "successful_run_access_replacement"
         ]
@@ -11177,9 +11158,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -15117,6 +15096,7 @@
         ],
         "valueHints": {},
         "strategicRole": ["payoff_anchor", "scoring_tool"],
+        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -15134,6 +15114,24 @@
             "evidence": ["ice.corp_defense_support", "score.remote_defense"],
             "confidence": "medium",
             "rationale": "Agenda Semantic Review v1 maps Priority Requisition to corp.remote_scoring as scoring_tool/free_rez_remote_defense."
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "use_target",
+            "timing": "on_score",
+            "targetType": "installed_ice",
+            "purpose": "rez_best_defensive_ice",
+            "preferences": [
+              "high_rez_cost_relief",
+              "blocks_relevant_run_path",
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "high_run_denial_payoff"
+            ],
+            "avoid": ["low_impact_ice", "irrelevant_server_ice"],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -15360,9 +15358,14 @@
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_scoring_remote", "score_next_turn", "score_now"],
+        "planRoles": [
+          "build_scoring_remote",
+          "score_next_turn",
+          "overadvance_for_bonus_points"
+        ],
         "valueHints": {},
         "strategicRole": ["win_condition"],
+        "strategyAnchors": ["corp.overadvance_value"],
         "lineSupport": ["corp.overadvance_value"],
         "strategySupportPairs": [
           {
@@ -21948,9 +21951,9 @@
         "actionStrategySupportPairs": [
           {
             "strategyId": "corp.tag_trace_punish",
-            "role": "anchor_evidence",
-            "roleDetail": "anchor_evidence_tag_source",
-            "evidence": ["tactic_signal_anchor:tag.source"],
+            "role": "enabler",
+            "roleDetail": "enabler_tag_additional_source",
+            "evidence": ["tactic_signal_anchor:tag.additional_source"],
             "confidence": "high"
           }
         ],
@@ -21977,9 +21980,9 @@
             "strategySupportPairs": [
               {
                 "strategyId": "corp.tag_trace_punish",
-                "role": "anchor_evidence",
-                "roleDetail": "anchor_evidence_tag_source",
-                "evidence": ["tactic_signal_anchor:tag.source"],
+                "role": "enabler",
+                "roleDetail": "enabler_tag_additional_source",
+                "evidence": ["tactic_signal_anchor:tag.additional_source"],
                 "confidence": "high"
               }
             ]
@@ -22941,7 +22944,7 @@
         "cardType": "operation",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["corp_action_burst"],
         "valueHints": {},
         "strategicRole": ["enabler"],
         "lineSupport": ["corp.fast_advance"],
@@ -22954,8 +22957,8 @@
               "action.corp_burst",
               "score.fast_advance_action_support"
             ],
-            "confidence": "high",
-            "rationale": "Immediate action capacity can complete an otherwise click-blocked same-turn score-conversion path; legality and the gained amount remain Engine/LegalAction facts."
+            "confidence": "medium",
+            "rationale": "Immediate action capacity supports Fast Advance only when a concrete same-turn score conversion is already bound; otherwise it is general action tempo."
           }
         ],
         "actionStrategySupportPairs": [
@@ -22967,8 +22970,8 @@
               "action.corp_burst",
               "score.fast_advance_action_support"
             ],
-            "confidence": "high",
-            "rationale": "Immediate action capacity can complete an otherwise click-blocked same-turn score-conversion path; legality and the gained amount remain Engine/LegalAction facts."
+            "confidence": "medium",
+            "rationale": "Immediate action capacity supports Fast Advance only when a concrete same-turn score conversion is already bound; otherwise it is general action tempo."
           }
         ],
         "actionCapabilitySemantics": [
@@ -22999,7 +23002,7 @@
           "hintReviewed": true,
           "needsHumanReview": false,
           "strategyCovered": true,
-          "confidence": "high"
+          "confidence": "medium"
         },
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -24645,6 +24648,25 @@
           "remoteRootValue": 2
         },
         "strategyAnchors": ["corp.asset_economy"],
+        "strategicExchangeKinds": ["credits_for_hq_agenda_information"],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "show_hq_agendas_for_needed_credits",
+            "preferences": [
+              "already_public_or_low_information_value_agenda",
+              "minimum_cards_for_current_credit_need"
+            ],
+            "avoid": [
+              "unrevealed_matchpoint_agenda_under_hq_pressure",
+              "reveal_beyond_current_credit_need"
+            ],
+            "kind": "use_target",
+            "timing": "start_of_turn",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "actionTacticSignals": ["remote_role:asset_economy"],
         "costProfile": {
           "credits": 0
@@ -26167,11 +26189,12 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_asset_modifier"],
+        "planRoles": ["advancement_to_action_engine"],
         "valueHints": {
           "remoteRootValue": 1
         },
         "strategicRole": ["engine_anchor"],
+        "strategyAnchors": ["corp.fast_advance"],
         "lineSupport": ["corp.fast_advance"],
         "strategySupportPairs": [
           {

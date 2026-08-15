@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "[A]: Trace 2 - If trace is successful, give Runner a tag.",
+    rulesText: "A: Trace 2 - If trace is successful, give Runner a tag.",
     capabilityText: [
       {
         capabilityKey: capabilityKey("abilities_activated_corp_main_trace"),

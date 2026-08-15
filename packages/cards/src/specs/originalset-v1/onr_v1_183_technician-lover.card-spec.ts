@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "[A]: Look at the top card of R&D.",
+    rulesText: "A: Look at the top card of R&D.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(

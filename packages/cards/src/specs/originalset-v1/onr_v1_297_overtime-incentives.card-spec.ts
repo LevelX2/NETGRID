@@ -63,6 +63,10 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
+        kind: "plan_role",
+        role: "corp_action_burst",
+      },
+      {
         kind: "strategic_role",
         role: "enabler",
       },
@@ -76,9 +80,9 @@ export const cardSpec = {
         strategyKey: "corp.fast_advance",
         role: "enabler",
         roleDetail: "extra_action_burst",
-        confidence: "high",
+        confidence: "medium",
         rationale:
-          "Immediate action capacity can complete an otherwise click-blocked same-turn score-conversion path; legality and the gained amount remain Engine/LegalAction facts.",
+          "Immediate action capacity supports Fast Advance only when a concrete same-turn score conversion is already bound; otherwise it is general action tempo.",
       },
     ],
     capabilities: [],

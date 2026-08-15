@@ -45,6 +45,7 @@ export const KNOWN_STRATEGY_SUPPORT_EVIDENCE_ANCHORS = [
   "corp_ice.runner_action_loss",
   "damage.corp_tagged_meat_payoff",
   "tag.payoff",
+  "tag.additional_source",
   "tag.source",
   "trace.source",
 ] as const;

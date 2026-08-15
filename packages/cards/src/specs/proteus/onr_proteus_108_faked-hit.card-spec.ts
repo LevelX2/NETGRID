@@ -74,11 +74,18 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "bad_publicity_closeout",
       },
       {
         kind: "strategic_exchange",
         exchange: "self_damage",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "unpreventable_core_damage",
+        severity: "high",
+        rationale:
+          "The Runner takes two unpreventable Core damage and must survive before the Bad Publicity closeout matters.",
       },
     ],
     capabilities: [],

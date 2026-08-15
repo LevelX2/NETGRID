@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Walls cost 2 less to rez and get +1 strength while Data Masons is rezzed.",
+      "Cost to rez walls is reduced by [2]. All walls have +1 strength.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

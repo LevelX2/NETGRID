@@ -78,8 +78,11 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      { kind: "strategy_anchor", strategyKey: "corp.damage_kill" },
-      { kind: "strategy_anchor", strategyKey: "corp.ice_tax_glacier" },
+      {
+        kind: "line_support",
+        lineKey: "corp.damage_kill",
+        support: "supports",
+      },
       {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
@@ -96,10 +99,35 @@ export const cardSpec = {
       },
       {
         kind: "strategy_support",
+        strategyKey: "corp.damage_kill",
+        role: "support_tool",
+        roleDetail: "net_damage_ice",
+        confidence: "low",
+        rationale:
+          "Two Net damage supports a damage line, but a single expensive ICE is not itself a damage-kill anchor.",
+      },
+      {
+        kind: "strategy_support",
         strategyKey: "corp.ice_tax_glacier",
         role: "tax_tool",
         roleDetail: "rez_paid_scaling_ice",
         confidence: "medium",
+      },
+    ],
+    capabilities: [
+      {
+        capabilityKey: variableRezX,
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_effective_rez_strength_x",
+            preferences: [
+              "use_choice_option_with_visible_board_payoff",
+              "prefer_option_relevant_to_current_run_path",
+            ],
+            avoid: ["option_with_no_visible_current_payoff"],
+          },
+        ],
       },
     ],
   },

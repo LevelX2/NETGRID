@@ -96,14 +96,26 @@ export const cardSpec = {
         rationale: "Operations Semantic Review v2: ice_rez / temporary_rez.",
       },
       {
+        kind: "strategic_exchange",
+        exchange: "temporary_resource",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "temporary_rez_liability",
+        severity: "high",
+        rationale:
+          "The selected X buys time but the rezzed ICE is trashed when its final Kludge counter is removed.",
+      },
+      {
         kind: "target_preference",
         purpose: "temporarily_rez_relevant_ice",
         preferences: [
-          "current_run_path_relevance",
           "protects_agenda_remote",
+          "protects_central_access_pressure",
+          "high_rez_cost_relief",
           "high_run_denial_payoff",
         ],
-        avoid: ["irrelevant_server_ice", "hidden_info_dependent_choice"],
+        avoid: ["irrelevant_server_ice", "low_impact_ice"],
       },
     ],
     capabilities: [],

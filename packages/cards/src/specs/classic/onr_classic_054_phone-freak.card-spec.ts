@@ -68,13 +68,12 @@ export const cardSpec = {
         role: "rig_setup",
       },
       {
-        kind: "strategic_role",
-        role: "support_tool",
+        kind: "plan_role",
+        role: "trace_defense",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "strategic_role",
+        role: "support_tool",
       },
       {
         kind: "value_interpretation",

@@ -68,19 +68,11 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_scoring_remote",
+        role: "ambush_advancement_support",
       },
       {
         kind: "strategic_role",
         role: "enabler",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.fast_advance",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
       },
       {
         kind: "line_support",
@@ -100,8 +92,14 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "place_advancement_counters_in_fort",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "advanceable_ambush_with_access_payoff",
+          "advancement_target_in_current_plan",
+        ],
+        avoid: [
+          "nonconverting_advancement_target",
+          "insufficient_post_payment_reserve",
+        ],
       },
       {
         kind: "value_interpretation",

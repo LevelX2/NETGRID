@@ -535,4 +535,162 @@ describe("random production-card sample semantic corrections", () => {
       "corp.remote_protection",
     );
   });
+
+  it("projects Batch 6 access replacements by their actual successful-run effect", () => {
+    const weather = hint("onr_v1_118_weather-to-finance-pipe");
+    expect(weather.roles).toEqual(
+      expect.arrayContaining(["hq_pressure", "corp_credit_denial"]),
+    );
+    expect(weather.roles).not.toContain("rd_pressure");
+    expect(weather.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "economy",
+        scope: "corp",
+        timing: "successful_run",
+        resource: "credits",
+        target: "economy.corp_credit_loss",
+        amount: 4,
+      }),
+    );
+    expect(weather.functionSignals).toContain("economy.corp_credit_denial");
+    expect(weather.functionSignals).not.toContain("info.rnd_topdeck");
+    expect(weather.conditions).toContainEqual({ kind: "requires_hq_pressure" });
+    expect(weather.conditions).not.toContainEqual({
+      kind: "requires_rnd_pressure",
+    });
+
+    expect(
+      hint("onr_classic_038_gypsytm-schedule-analyzer").effects,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "topdeck_info",
+        target: "reveal_until_agenda",
+      }),
+    );
+    expect(hint("onr_proteus_102_blackmail").effects).toContainEqual(
+      expect.objectContaining({
+        kind: "scored_agenda_action",
+        target: "runner_gain_agenda_point",
+      }),
+    );
+    expect(hint("onr_proteus_105_demolition-run").effects).toContainEqual(
+      expect.objectContaining({
+        kind: "ice_trash",
+        target: "trash_rezzed_ice_on_fort",
+      }),
+    );
+    expect(hint("onr_v1_050_r-and-d-protocol-files").effects).toContainEqual(
+      expect.objectContaining({
+        kind: "topdeck_info",
+        target: "private_look_top_rd",
+        amount: 5,
+      }),
+    );
+    expect(hint("onr_v1_142_record-reconstructor").effects).toContainEqual(
+      expect.objectContaining({
+        kind: "card_recovery",
+        target: "archives_faceup_to_rd",
+        amount: 2,
+      }),
+    );
+    expect(hint("onr_v1_105_priority-wreck").effects).toContainEqual(
+      expect.objectContaining({
+        kind: "access_replacement",
+        target: "runner_spend_corp_lose_credits",
+      }),
+    );
+  });
+
+  it("binds Batch 6 private choices without treating controller-known cards as unknown", () => {
+    expect(hint("onr_v1_058_seeya").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "expose_installed_card",
+        targetType: "card",
+        hiddenInfoPolicy: "legal_targets_only",
+      }),
+    );
+    expect(
+      hint("onr_v1_212_priority-requisition").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "rez_best_defensive_ice",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(
+      hint("onr_classic_025_strategic-planning-group").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "bottom_lowest_value_drawn_card",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_proteus_020_digiconda").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "choose_effective_rez_strength_x",
+        targetType: "mode_choice",
+        hiddenInfoPolicy: "legal_options_only",
+      }),
+    );
+    expect(hint("onr_proteus_100_wrecking-ball").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "spend_least_needed_stealth_credit_source",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(
+      hint("onr_v1_314_corporate-negotiating-center").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "show_hq_agendas_for_needed_credits",
+        timing: "start_of_turn",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_proteus_104_decoy-signal").targetProfiles).toEqual([
+      expect.objectContaining({ targetType: "server" }),
+    ]);
+  });
+
+  it("keeps Batch 6 strategy roles and restricted resources calibrated", () => {
+    expect(hint("onr_v1_334_pacifica-regional-ai").strategyAnchors).toContain(
+      "corp.fast_advance",
+    );
+    expect(
+      hint("onr_classic_025_strategic-planning-group").strategyAnchors,
+    ).toContain("corp.draw_engine");
+    expect(hint("onr_v1_214_project-babylon").strategyAnchors).toContain(
+      "corp.overadvance_value",
+    );
+    expect(hint("onr_proteus_020_digiconda").strategyAnchors).toBeUndefined();
+    expect(
+      hint("onr_proteus_062_lesley-major").strategyAnchors,
+    ).toBeUndefined();
+    expect(hint("onr_classic_050_sandbox-dig").strategyAnchors).toBeUndefined();
+    expect(
+      hint("onr_proteus_104_decoy-signal").strategyAnchors,
+    ).toBeUndefined();
+    expect(hint("onr_v1_164_hells-run").tacticSignals ?? []).not.toContain(
+      "economy.card",
+    );
+    expect(
+      hint("onr_classic_054_phone-freak").tacticSignals ?? [],
+    ).not.toContain("economy.card");
+    expect(
+      hint("onr_proteus_077_weapons-depot").tacticSignals ?? [],
+    ).not.toContain("corp.remote_protection");
+    expect(
+      hint("onr_v1_287_datapool-by-zetatech").actionStrategySupportPairs,
+    ).toContainEqual(
+      expect.objectContaining({
+        role: "enabler",
+        roleDetail: "enabler_tag_additional_source",
+        evidence: ["tactic_signal_anchor:tag.additional_source"],
+      }),
+    );
+  });
 });

@@ -78,26 +78,12 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "pressure_rnd",
-      },
-      {
-        kind: "strategic_role",
-        role: "enabler",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.rnd_pressure",
+        role: "rnd_recon",
       },
       {
         kind: "line_support",
         lineKey: "runner.rnd_pressure",
         support: "supports",
-      },
-      {
-        kind: "target_preference",
-        purpose: "private_rnd_top_three_information",
-        preferences: ["use_choice_option_with_visible_board_payoff"],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "risk_interpretation",

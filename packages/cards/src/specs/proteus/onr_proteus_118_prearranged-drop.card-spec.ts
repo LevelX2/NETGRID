@@ -65,7 +65,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "same_turn_agenda_access_payoff",
       },
       {
         kind: "tactic_interpretation",
@@ -76,6 +76,13 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "low",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "same_turn_agenda_access_whiff",
+        severity: "high",
+        rationale:
+          "The six-credit payout expires unless an agenda is accessed in the same turn.",
       },
     ],
     capabilities: [],

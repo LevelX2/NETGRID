@@ -86,8 +86,10 @@ export const cardSpec = {
       },
       {
         kind: "risk_interpretation",
-        risk: "reserve_risk",
+        risk: "loss_condition",
         severity: "high",
+        rationale:
+          "Transferred agenda points can immediately put the Corp at the winning threshold.",
       },
     ],
     capabilities: [],

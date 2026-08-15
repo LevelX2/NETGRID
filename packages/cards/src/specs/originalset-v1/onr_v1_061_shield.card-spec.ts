@@ -61,6 +61,14 @@ export const cardSpec = {
       },
     ],
   },
+  planningAnnotations: {
+    schemaVersion: "card-planning-annotations-v1",
+    card: [
+      { kind: "plan_role", role: "build_rig" },
+      { kind: "plan_role", role: "survive_net_damage" },
+    ],
+    capabilities: [],
+  },
   printings: [
     {
       schemaVersion: "printing-spec-v1",

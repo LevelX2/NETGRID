@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Gain 5 credits when scored.",
+    rulesText: "Gain [5] when you score Hostile Takeover.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

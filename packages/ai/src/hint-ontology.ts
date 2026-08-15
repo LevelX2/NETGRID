@@ -85,6 +85,8 @@ export const KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS = [
   "credits_for_bad_publicity",
   "agenda_point_for_multi_server_run_sequence",
   "ongoing_economy_for_board_development",
+  "damage_now_for_future_action_bank",
+  "credits_for_hq_agenda_information",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_TIMINGS = [
@@ -383,6 +385,7 @@ export const KNOWN_HINT_TARGET_PROFILE_TIMINGS = [
   "activated_ability",
   "corp_rez_window",
   "start_of_run",
+  "start_of_turn",
   "during_ice_encounter",
   "encounter_resolution",
   "subroutine_resolution",
@@ -468,6 +471,14 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "prefer_already_public_or_low_information_value_code_gates",
   "prefer_already_public_or_low_information_value_walls",
   "redundant_or_spent_installed_card",
+  "unknown_or_unrezzed_corp_card",
+  "server_relevant_to_current_plan",
+  "advanceable_ambush_with_access_payoff",
+  "advancement_target_in_current_plan",
+  "already_public_or_low_information_value_agenda",
+  "minimum_cards_for_current_credit_need",
+  "least_needed_stealth_credit_source",
+  "preserve_current_run_credit_reserve",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -490,6 +501,13 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "no_subsidiary_fort_target",
   "avoid_revealing_high_value_hidden_ice_without_need",
   "critical_rig_or_survival_card",
+  "already_known_or_rezzed_card",
+  "low_information_value_target",
+  "nonconverting_advancement_target",
+  "insufficient_post_payment_reserve",
+  "unrevealed_matchpoint_agenda_under_hq_pressure",
+  "reveal_beyond_current_credit_need",
+  "only_remaining_relevant_stealth_source",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [

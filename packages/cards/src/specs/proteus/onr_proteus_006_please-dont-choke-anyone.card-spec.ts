@@ -82,6 +82,10 @@ export const cardSpec = {
         rationale:
           "Successful damage can be converted into a counter bank for extra actions, making the card an action-tempo enabler.",
       },
+      {
+        kind: "strategic_exchange",
+        exchange: "damage_now_for_future_action_bank",
+      },
     ],
     capabilities: [],
   },
