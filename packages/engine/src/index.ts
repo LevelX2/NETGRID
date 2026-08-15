@@ -51,6 +51,20 @@ export {
   type TraceSuccessEffectCardImplementationQuote,
 } from "./game/trace/success-effect-quote";
 
+export {
+  isBlindTraceProfile,
+  isTraceRulesProfile,
+  normalizeTraceRulesProfile,
+  traceComparisonIsSuccessful,
+  traceCorpBaseStrength,
+  traceRulesDefinition,
+  traceRulesDefinitionForState,
+  traceRulesDefinitionForTrace,
+  type TraceRulesDefinition,
+} from "./game/trace/trace-rules-profile";
+
+export type { TraceRulesProfile } from "@netgrid/shared";
+
 export { cardImplementationForDefinitionId } from "./card-implementations/registry";
 
 export { icebreakerAbilitiesForDefinition } from "./ability-engine/icebreaker-abilities";

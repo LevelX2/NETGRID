@@ -1,6 +1,6 @@
 # Trace-Regelprofile – Umsetzungsprozess
 
-Status: P0 abgeschlossen, P1 bereit
+Status: P1 abgeschlossen, P2 bereit
 
 Quelle: Nutzerauftrag vom 2026-08-15
 
@@ -148,6 +148,11 @@ Done: Engine-Regeltests für alle drei Profile, Limits, Tie-Regeln und Reveal
 sind grün; StateHash/Replay bleibt deterministisch.
 
 Commit: `feat(engine): add authoritative trace rule profiles`
+
+Ergebnis: Profilvertrag, Default, GameState-/MatchSettings-Persistenz,
+profilgesteuerte Basisstärke, Corp-Limit, Tie-Regel und Hidden-Commit-/Reveal-
+Phasen sind implementiert. Vier fokussierte Engine-Dateien mit 25 Tests sowie
+Shared-, Engine- und Server-Typecheck sind grün.
 
 ### P2 – Setup, Sichtbarkeit und generische Ressourcen
 

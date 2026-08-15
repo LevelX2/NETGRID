@@ -1097,6 +1097,13 @@ export type PlayerController = {
 
 export type AiDifficulty = "easy" | "normal" | "hard";
 
+export type TraceRulesProfile =
+  | "modern_open"
+  | "classic_blind"
+  | "classic_blind_corp_ties";
+
+export const DEFAULT_TRACE_RULES_PROFILE: TraceRulesProfile = "modern_open";
+
 export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
@@ -1108,6 +1115,7 @@ export type CreateGameConfig = {
   runnerDeckMetadata?: DeckPublicMetadata;
   corpDeckMetadata?: DeckPublicMetadata;
   agendaPointsToWin?: number;
+  traceRulesProfile?: TraceRulesProfile;
   setupMode?: "explicit" | "completed";
   controllers?: {
     runner: PlayerController;
@@ -1617,6 +1625,7 @@ export type TraceState = {
   traceId: string;
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
+  traceRulesProfile?: TraceRulesProfile;
   subroutineIndex?: number;
   traceLimit: number;
   effectiveTraceLimit?: number;
@@ -1638,6 +1647,7 @@ export type TraceState = {
   returnTimingPoint?: TimingPointId;
   returnActiveSide?: Side;
   corpBid?: number;
+  bidsRevealed?: boolean;
   traceValue?: number;
   runnerLink?: number;
   baseLinkSourceId?: CardInstanceId;
@@ -1901,6 +1911,7 @@ export type RunnerDelayedEffectInstance = {
 export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
+  traceRulesProfile?: TraceRulesProfile;
   stateVersion: number;
   turnSerial?: number;
   seed: string;

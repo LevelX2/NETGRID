@@ -14,6 +14,7 @@ import type {
   ServerId,
   TraceState,
 } from "@netgrid/shared";
+import { traceRulesDefinitionForTrace } from "../trace/trace-rules-profile";
 
 export type CorpTracePaymentSourceKind =
   | "temporary_trace_credit"
@@ -517,7 +518,11 @@ export function quoteCorpTraceBidPayment(
     0,
     trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0),
   );
-  const requiredTraceCounters = Math.max(0, bid - effectiveBaseTraceLimit);
+  const requiredTraceCounters =
+    traceRulesDefinitionForTrace(trace).corpBidLimitMode ===
+    "effective_trace_limit"
+      ? Math.max(0, bid - effectiveBaseTraceLimit)
+      : 0;
   if (requiredTraceCounters > corpTraceCounterPoolAvailable) {
     return {
       side: "corp",

@@ -16,9 +16,19 @@ import { CARD_IMPLEMENTATIONS } from "../card-implementations/registry";
 import { runnerMemoryCheckpointChoiceStateIsValid } from "./checkpoints/runner-memory-checkpoint";
 import { corpServerIdsAreCanonicalAndUnique } from "./state/remote-server-id";
 import { parseCanonicalCapabilityId } from "@netgrid/cards/engine";
+import {
+  isTraceRulesProfile,
+  normalizeTraceRulesProfile,
+  traceRulesDefinitionForTrace,
+} from "./trace/trace-rules-profile";
 
 export function validateGameState(state: GameState): ValidationResult {
   const errors: string[] = [];
+  if (
+    state.traceRulesProfile !== undefined &&
+    !isTraceRulesProfile(state.traceRulesProfile)
+  )
+    errors.push("Trace rules profile is invalid.");
   const placements = new Map<CardInstanceId, string>();
   const addPlacement = (id: CardInstanceId, zone: string) => {
     if (placements.has(id))
@@ -399,6 +409,12 @@ export function validateGameState(state: GameState): ValidationResult {
     }
   }
   if (state.trace) {
+    const traceRules = traceRulesDefinitionForTrace(state.trace);
+    if (
+      normalizeTraceRulesProfile(state.trace.traceRulesProfile) !==
+      normalizeTraceRulesProfile(state.traceRulesProfile)
+    )
+      errors.push("Active trace rules profile differs from the match profile.");
     if (!state.cardInstances[state.trace.sourceCardInstanceId])
       errors.push("Trace references missing source card.");
     if (!Number.isInteger(state.trace.traceLimit) || state.trace.traceLimit < 0)
@@ -412,6 +428,7 @@ export function validateGameState(state: GameState): ValidationResult {
     if (
       state.trace.traceValue !== undefined &&
       state.trace.effectiveTraceLimit !== undefined &&
+      traceRules.corpBidLimitMode === "effective_trace_limit" &&
       state.trace.traceValue > state.trace.effectiveTraceLimit
     )
       errors.push("Trace value exceeds the effective trace limit.");

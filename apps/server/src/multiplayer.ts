@@ -27,6 +27,7 @@ import {
   getPlayerView,
   hashState,
   isHiddenInfoBarrierEvent,
+  normalizeTraceRulesProfile,
   replayEvents,
   quoteCorpPunishRoute,
   quoteRandomizedIceInstallSelection,
@@ -86,6 +87,7 @@ import {
   type RulesBaseline,
   type ReplayableEngineAction,
   type Side,
+  type TraceRulesProfile,
   type Winner,
 } from "@netgrid/shared";
 import {
@@ -169,6 +171,7 @@ export type MatchSettings = {
   seriesGamesPlanned?: number;
   cardPool?: MatchCardPool;
   playerClock?: ApiPlayerClockConfig;
+  traceRulesProfile?: TraceRulesProfile;
 };
 
 const RULE_AGENDA_POINTS_TO_WIN = 7;
@@ -218,6 +221,7 @@ export type MatchStartLobbyState = {
   matchFormat: MatchFormat;
   seriesGamesPlanned?: number;
   cardPool: MatchCardPool;
+  traceRulesProfile: TraceRulesProfile;
   sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
     runnerPlayer: SeriesPlayerSlot;
@@ -1209,6 +1213,9 @@ export class MultiplayerService {
           )
         : undefined;
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
+    const traceRulesProfile = normalizeTraceRulesProfile(
+      input.settings?.traceRulesProfile,
+    );
     const playerClockConfig =
       mode === "ai_vs_ai"
         ? { mode: "none" as const }
@@ -1255,6 +1262,7 @@ export class MultiplayerService {
             matchFormat,
             ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
             cardPool,
+            traceRulesProfile,
             ...(playerClockConfig.mode === "player_clock"
               ? { playerClock: playerClockConfig }
               : {}),
@@ -1337,6 +1345,7 @@ export class MultiplayerService {
           matchFormat,
           ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
           cardPool,
+          traceRulesProfile,
           sideAssignmentMode,
           sideAssignment: { runnerPlayer, corpPlayer },
           chatMessages: [],
@@ -1400,6 +1409,7 @@ export class MultiplayerService {
       matchFormat,
       ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
       cardPool,
+      traceRulesProfile,
       ...(playerClockConfig.mode === "player_clock"
         ? { playerClock: playerClockConfig }
         : {}),
@@ -1415,6 +1425,7 @@ export class MultiplayerService {
       seed,
       baseline,
       agendaPointsToWin: settings.agendaPointsToWin,
+      traceRulesProfile,
       controllers,
       runnerDeck: deckSetup.runnerDeck,
       corpDeck: deckSetup.corpDeck,
@@ -5101,6 +5112,9 @@ export class MultiplayerService {
         ? { seriesGamesPlanned: record.match.series.gamesPlanned }
         : {}),
       cardPool,
+      traceRulesProfile: normalizeTraceRulesProfile(
+        record.match.settings.traceRulesProfile,
+      ),
       sideAssignmentMode: record.startLobby?.sideAssignmentMode ?? "fixed",
       sideAssignment: { runnerPlayer, corpPlayer },
       chatMessages: record.startLobby?.chatMessages ?? [],
@@ -5536,6 +5550,7 @@ export class MultiplayerService {
       seed: record.match.seed ?? record.match.matchId,
       baseline,
       agendaPointsToWin: lobby.agendaPointsToWin,
+      traceRulesProfile: lobby.traceRulesProfile,
       controllers,
       runnerDeck: deckSetup.runnerDeck,
       corpDeck: deckSetup.corpDeck,
@@ -5550,6 +5565,7 @@ export class MultiplayerService {
       agendaPointsToWin: lobby.agendaPointsToWin,
       matchFormat: lobby.matchFormat,
       cardPool: lobby.cardPool,
+      traceRulesProfile: lobby.traceRulesProfile,
     };
     record.eventLog = gameState.eventLog.map((event) =>
       toEventRecord(record.match.matchId, event, false),

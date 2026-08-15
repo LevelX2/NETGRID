@@ -6,19 +6,27 @@
  * Keine PublicPayload-Vertragsaenderung.
  * Kein Import aus index.ts.
  */
-import type { CardInstanceId, GameState, TraceState } from "@netgrid/shared";
+import type {
+  CardInstanceId,
+  GameState,
+  TraceRulesProfile,
+  TraceState,
+} from "@netgrid/shared";
+import { normalizeTraceRulesProfile } from "./trace-rules-profile";
 
 export type CurrentTrace = NonNullable<GameState["trace"]>;
 export type TracePhase = CurrentTrace["status"];
 
 export type TraceWindowDescriptor = {
   traceId: string;
+  traceRulesProfile: TraceRulesProfile;
   phase: TracePhase;
   sourceCardInstanceId: CardInstanceId;
   traceLimit: number;
   effectiveTraceLimit?: number;
   hasCorpBid: boolean;
   hasRunnerBid: boolean;
+  bidsRevealed: boolean;
   corpBid?: number;
   traceValue?: number;
   runnerLink?: number;
@@ -104,6 +112,7 @@ export function describeCurrentTraceWindow(
   if (!trace) return undefined;
   return {
     traceId: trace.traceId,
+    traceRulesProfile: normalizeTraceRulesProfile(trace.traceRulesProfile),
     phase: trace.status,
     sourceCardInstanceId: trace.sourceCardInstanceId,
     traceLimit: trace.traceLimit,
@@ -112,6 +121,7 @@ export function describeCurrentTraceWindow(
       : { effectiveTraceLimit: trace.effectiveTraceLimit }),
     hasCorpBid: trace.corpBid !== undefined,
     hasRunnerBid: trace.runnerBid !== undefined,
+    bidsRevealed: trace.bidsRevealed === true,
     ...(trace.corpBid !== undefined ? { corpBid: trace.corpBid } : {}),
     ...(trace.traceValue !== undefined ? { traceValue: trace.traceValue } : {}),
     ...(trace.runnerLink !== undefined ? { runnerLink: trace.runnerLink } : {}),

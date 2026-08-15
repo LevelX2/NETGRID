@@ -3,6 +3,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../card-definitions";
 // No run/action/access/payment logic belongs here; GameState types stay in @netgrid/shared.
 import {
   CURRENT_RULES_BASELINE,
+  DEFAULT_TRACE_RULES_PROFILE,
   DEMO_DECKS,
   type CardDefinition,
   type CardInstance,
@@ -113,6 +114,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
   const state: GameState = {
     matchId: config.matchId ?? "local-demo-match",
     baseline: config.baseline ?? CURRENT_RULES_BASELINE,
+    traceRulesProfile: config.traceRulesProfile ?? DEFAULT_TRACE_RULES_PROFILE,
     stateVersion: 0,
     seed,
     randomCounter: random.counter,
@@ -227,6 +229,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     stateHashAfter: initialHash,
     publicPayload: {
       baseline: state.baseline,
+      traceRulesProfile: state.traceRulesProfile,
       runnerDeckId: runnerDeckDefinition.id,
       corpDeckId: corpDeckDefinition.id,
       runnerDeck: runnerDeckMetadata,
