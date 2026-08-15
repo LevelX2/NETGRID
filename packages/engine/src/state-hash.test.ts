@@ -41,6 +41,51 @@ describe("mechanical StateHash baseline", () => {
     );
   });
 
+  it("keeps an explicit Modern Trace profile hash-compatible while hashing Blind profiles and reveal state", () => {
+    const legacy = {
+      baseline: CURRENT_RULES_BASELINE,
+      eventLog: [],
+      stateVersion: 1,
+      cardInstances: {},
+      trace: {
+        traceId: "trace_hash",
+        sourceCardInstanceId: "source",
+        sourceDefinitionId: "source_definition",
+        traceLimit: 3,
+        status: "runner_bid",
+        successEffect: { type: "add_tag", amount: 1 },
+      },
+    } as unknown as GameState;
+    const modern = {
+      ...legacy,
+      traceRulesProfile: "modern_open" as const,
+      trace: {
+        ...legacy.trace!,
+        traceRulesProfile: "modern_open" as const,
+        bidsRevealed: true,
+      },
+    };
+    const blindHidden = {
+      ...modern,
+      traceRulesProfile: "classic_blind" as const,
+      trace: {
+        ...modern.trace,
+        traceRulesProfile: "classic_blind" as const,
+        bidsRevealed: false,
+      },
+    };
+    const blindRevealed = {
+      ...blindHidden,
+      trace: { ...blindHidden.trace, bidsRevealed: true },
+    };
+
+    expect(hashStateSnapshot(modern)).toBe(hashStateSnapshot(legacy));
+    expect(hashStateSnapshot(blindHidden)).not.toBe(hashStateSnapshot(legacy));
+    expect(hashStateSnapshot(blindRevealed)).not.toBe(
+      hashStateSnapshot(blindHidden),
+    );
+  });
+
   it("keeps adversarial Corp and Runner snapshot IDs unambiguous", () => {
     const state = (corp: string, runner: string) =>
       ({
