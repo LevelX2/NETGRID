@@ -18,6 +18,7 @@ import type {
   MatchStartPlayerClockMinutes,
   MatchStartPlayerClockMode,
 } from "../../app/match-start-storage";
+import type { TraceRulesProfile } from "@netgrid/shared";
 
 export function accountMatchStartPreferencesFromUi(input: {
   playMode: PlayMode;
@@ -26,6 +27,7 @@ export function accountMatchStartPreferencesFromUi(input: {
   matchFormat: MatchFormatSelection;
   seriesGamesPlanned: MatchStartSeriesGames;
   matchCardPool: MatchCardPoolSelection;
+  traceRulesProfile: TraceRulesProfile;
   runnerDifficulty: "easy" | "normal" | "hard";
   corpDifficulty: "easy" | "normal" | "hard";
   aiDeckPolicy:
@@ -66,6 +68,7 @@ export function accountMatchStartPreferencesFromUi(input: {
     matchFormat: input.matchFormat,
     seriesGamesPlanned: input.seriesGamesPlanned,
     matchCardPool: input.matchCardPool,
+    traceRulesProfile: input.traceRulesProfile,
     runnerDifficulty: input.runnerDifficulty,
     corpDifficulty: input.corpDifficulty,
     aiDeckPolicy: input.aiDeckPolicy,

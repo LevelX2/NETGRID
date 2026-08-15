@@ -574,10 +574,12 @@ function sanitizePlayerView(
   return {
     side: view.side,
     stateVersion: view.stateVersion,
+    traceRulesProfile: view.traceRulesProfile ?? "modern_open",
     ...(view.turnSerial !== undefined ? { turnSerial: view.turnSerial } : {}),
     timingPoint: view.timingPoint,
     activeSide: view.activeSide,
     phase: view.phase,
+    ...(view.trace ? { trace: { ...view.trace } } : {}),
     own: {
       identity: sanitizeVisibleCard(view.own.identity),
       credits: view.own.credits,

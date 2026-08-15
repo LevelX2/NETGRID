@@ -1,7 +1,11 @@
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { AiDifficulty, ApiMatchCardPool } from "@netgrid/shared";
+import type {
+  AiDifficulty,
+  ApiMatchCardPool,
+  TraceRulesProfile,
+} from "@netgrid/shared";
 import {
   AccountDeckError,
   AccountDeckService,
@@ -30,6 +34,7 @@ export type AccountMatchStartPreferences = Readonly<{
   matchFormat: "rules_match" | "two_game_side_swap";
   seriesGamesPlanned: 2 | 3 | 4 | 5 | 6;
   matchCardPool: ApiMatchCardPool;
+  traceRulesProfile?: TraceRulesProfile;
   runnerDifficulty: AiDifficulty;
   corpDifficulty: AiDifficulty;
   aiDeckPolicy:
@@ -282,6 +287,8 @@ export function parseAccountMatchStartPreferences(
     !isMatchFormat(record.matchFormat) ||
     !isSeriesGamesPlanned(record.seriesGamesPlanned) ||
     !isMatchCardPool(record.matchCardPool) ||
+    (record.traceRulesProfile !== undefined &&
+      !isTraceRulesProfile(record.traceRulesProfile)) ||
     !isAiDifficulty(record.runnerDifficulty) ||
     !isAiDifficulty(record.corpDifficulty) ||
     !isAiDeckPolicy(record.aiDeckPolicy) ||
@@ -304,6 +311,9 @@ export function parseAccountMatchStartPreferences(
     matchFormat: record.matchFormat,
     seriesGamesPlanned: record.seriesGamesPlanned,
     matchCardPool: record.matchCardPool,
+    traceRulesProfile: isTraceRulesProfile(record.traceRulesProfile)
+      ? record.traceRulesProfile
+      : "modern_open",
     runnerDifficulty: record.runnerDifficulty,
     corpDifficulty: record.corpDifficulty,
     aiDeckPolicy: record.aiDeckPolicy,
@@ -406,6 +416,14 @@ function isPlayMode(
     value === "human_vs_human" ||
     value === "human_vs_ai" ||
     value === "ai_vs_ai"
+  );
+}
+
+function isTraceRulesProfile(value: unknown): value is TraceRulesProfile {
+  return (
+    value === "modern_open" ||
+    value === "classic_blind" ||
+    value === "classic_blind_corp_ties"
   );
 }
 

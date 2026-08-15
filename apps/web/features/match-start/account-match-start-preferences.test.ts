@@ -10,6 +10,7 @@ describe("account match-start preference projection", () => {
       matchFormat: "two_game_side_swap",
       seriesGamesPlanned: 3,
       matchCardPool: "originalset_proteus",
+      traceRulesProfile: "modern_open",
       runnerDifficulty: "hard",
       corpDifficulty: "normal",
       aiDeckPolicy: "selected",
@@ -33,11 +34,12 @@ describe("account match-start preference projection", () => {
     });
 
     expect(preferences).toMatchObject({
+      traceRulesProfile: "modern_open",
       runnerDeck: { kind: "account", cloudDeckId: "cloud_runner" },
       corpDeck: { kind: "standard", standardDeckId: "standard_corp" },
     });
     expect(JSON.stringify(preferences)).not.toMatch(
-      /seed|participantB|sessionToken|trace|testSetup/i,
+      /seed|participantB|sessionToken|testSetup/i,
     );
   });
 });

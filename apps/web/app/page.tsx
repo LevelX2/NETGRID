@@ -69,6 +69,7 @@ import type {
   PlayerView,
   PublicGameEvent,
   Side,
+  TraceRulesProfile,
   VisibleCard,
   VisibleRunnerPaymentSupportAbility,
   Winner,
@@ -596,6 +597,8 @@ export default function Page() {
     useState<MatchStartSeriesGames>(2);
   const [matchCardPool, setMatchCardPool] =
     useState<MatchCardPool>("originalset");
+  const [traceRulesProfile, setTraceRulesProfile] =
+    useState<TraceRulesProfile>("modern_open");
   const [playerClockMode, setPlayerClockMode] =
     useState<MatchStartPlayerClockMode>("none");
   const [playerClockMinutes, setPlayerClockMinutes] =
@@ -1797,6 +1800,7 @@ export default function Page() {
             : "rules_match",
         seriesGamesPlanned,
         matchCardPool,
+        traceRulesProfile,
         playerClockMode,
         playerClockMinutes,
         playerClockGraceSeconds,
@@ -1828,6 +1832,7 @@ export default function Page() {
     matchFormat,
     seriesGamesPlanned,
     matchCardPool,
+    traceRulesProfile,
     playerClockMode,
     playerClockMinutes,
     playerClockGraceSeconds,
@@ -2041,6 +2046,7 @@ export default function Page() {
       matchFormat,
       seriesGamesPlanned,
       matchCardPool,
+      traceRulesProfile,
       runnerDifficulty,
       corpDifficulty,
       aiDeckPolicy,
@@ -2069,6 +2075,7 @@ export default function Page() {
     setMatchFormat("rules_match");
     setSeriesGamesPlanned(2);
     setMatchCardPool("originalset");
+    setTraceRulesProfile("modern_open");
     setRunnerDifficulty("normal");
     setCorpDifficulty("normal");
     setAiDeckPolicy("selected");
@@ -2161,6 +2168,7 @@ export default function Page() {
     setMatchFormat(preferences.matchFormat);
     setSeriesGamesPlanned(preferences.seriesGamesPlanned);
     setMatchCardPool(preferences.matchCardPool);
+    setTraceRulesProfile(preferences.traceRulesProfile ?? "modern_open");
     setRunnerDifficulty(preferences.runnerDifficulty);
     setCorpDifficulty(preferences.corpDifficulty);
     setAiDeckPolicy(preferences.aiDeckPolicy);
@@ -2332,6 +2340,8 @@ export default function Page() {
     if (stored.seriesGamesPlanned)
       setSeriesGamesPlanned(stored.seriesGamesPlanned);
     if (stored.matchCardPool) setMatchCardPool(stored.matchCardPool);
+    if (stored.traceRulesProfile)
+      setTraceRulesProfile(stored.traceRulesProfile);
     if (stored.runnerDifficulty) setRunnerDifficulty(stored.runnerDifficulty);
     if (stored.corpDifficulty) setCorpDifficulty(stored.corpDifficulty);
     if (stored.aiDeckPolicy) setAiDeckPolicy(stored.aiDeckPolicy);
@@ -4049,6 +4059,7 @@ export default function Page() {
             ? { seriesGamesPlanned }
             : {}),
           cardPool: matchCardPool,
+          traceRulesProfile,
           agendaPointsToWin: effectiveAgendaTarget,
           playerClock:
             gameMode !== "ai_vs_ai" && playerClockMode === "player_clock"
@@ -6434,6 +6445,7 @@ export default function Page() {
                             matchFormat={effectiveStartMatchFormat}
                             seriesGamesPlanned={seriesGamesPlanned}
                             matchCardPool={matchCardPool}
+                            traceRulesProfile={traceRulesProfile}
                             displayName={displayName}
                             identityKind={
                               accountSession.account ? "account" : "guest"
@@ -6503,6 +6515,7 @@ export default function Page() {
                             onMatchFormat={setMatchFormat}
                             onSeriesGamesPlanned={setSeriesGamesPlanned}
                             onMatchCardPool={setMatchCardPool}
+                            onTraceRulesProfile={setTraceRulesProfile}
                             onDisplayName={updateDisplayName}
                             onHumanAiSideSelection={setHumanAiSideSelection}
                             onRunnerDifficulty={setRunnerDifficulty}

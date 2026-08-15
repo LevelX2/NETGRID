@@ -1,6 +1,6 @@
 # Trace-Regelprofile – Umsetzungsprozess
 
-Status: P1 abgeschlossen, P2 bereit
+Status: P2 abgeschlossen, P3 bereit
 
 Quelle: Nutzerauftrag vom 2026-08-15
 
@@ -166,6 +166,14 @@ Done: Server-/Web-/Engine-Fokustests belegen Default, Persistenz, Source-Wahl,
 Hidden Info, Reveal und Post-Reveal.
 
 Commit: `feat(trace): wire profiles through setup and hidden views`
+
+Ergebnis: HTTP-/Match-/Lobby-Vertrag, lokale und Account-Präferenzen sowie die
+Start-UI verwenden dasselbe Profil. PlayerViews projizieren Trace-Zustand
+side-sicher; Blind-Gebote und Zahlungsquellen bleiben in PublicEvents bis zum
+gemeinsamen Reveal redigiert. Die vorhandenen generischen Payment- und
+Post-Reveal-Fenster bleiben erhalten. 43 fokussierte Engine-/Server-Tests,
+drei gezielte Webtests sowie Shared-, Engine-, Server- und Web-Typecheck sind
+grün.
 
 ### P3 – Plan-first KI, Behavioral Variance und Diagnostik
 

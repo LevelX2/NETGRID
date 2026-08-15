@@ -179,6 +179,7 @@ function inputFor(
     playerView: {
       side: spec.side,
       stateVersion: 1,
+      traceRulesProfile: "modern_open",
       timingPoint:
         spec.side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: spec.side,

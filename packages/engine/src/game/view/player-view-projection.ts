@@ -37,6 +37,10 @@ import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-b
 import { visibleServerStatuses } from "./server-status-view";
 import { visibleRunnerTraceSupportQuote } from "./visible-runner-trace-support-quote";
 import { visibleCorpIcePostRezRunQuote } from "./visible-post-rez-run-quote";
+import {
+  normalizeTraceRulesProfile,
+  traceCorpBaseStrength,
+} from "../trace/trace-rules-profile";
 
 export function buildPlayerViewProjection(
   state: GameState,
@@ -214,14 +218,63 @@ export function buildPlayerViewProjection(
         successful: state.run.successful,
       }
     : undefined;
+  const trace = state.trace;
+  const traceRulesProfile = normalizeTraceRulesProfile(state.traceRulesProfile);
+  const visibleTrace = trace
+    ? {
+        traceId: trace.traceId,
+        profile: normalizeTraceRulesProfile(trace.traceRulesProfile),
+        phase: trace.status,
+        printedTrace: trace.traceLimit,
+        effectiveTraceLimit: Math.max(
+          0,
+          Math.floor(trace.effectiveTraceLimit ?? trace.traceLimit),
+        ),
+        ...(typeof trace.corpBidMax === "number"
+          ? { corpBidMax: trace.corpBidMax }
+          : {}),
+        bidsRevealed: trace.bidsRevealed === true,
+        corpBidCommitted: trace.corpBid !== undefined,
+        runnerBidCommitted: trace.runnerBid !== undefined,
+        ...(trace.corpBid !== undefined &&
+        (side === "corp" || trace.bidsRevealed === true)
+          ? {
+              corpBid: trace.corpBid,
+              corpStrength:
+                trace.traceValue ??
+                traceCorpBaseStrength(trace) + trace.corpBid,
+            }
+          : {}),
+        ...(typeof trace.runnerLink === "number"
+          ? { runnerLink: trace.runnerLink }
+          : {}),
+        ...(trace.runnerBid !== undefined &&
+        (side === "runner" || trace.bidsRevealed === true)
+          ? { runnerBid: trace.runnerBid }
+          : {}),
+        ...(typeof trace.runnerStrength === "number" &&
+        trace.bidsRevealed === true
+          ? { runnerStrength: trace.runnerStrength }
+          : {}),
+        ...(typeof trace.postBidLinkBonus === "number" &&
+        trace.bidsRevealed === true
+          ? { postRevealLinkBonus: trace.postBidLinkBonus }
+          : {}),
+        ...(typeof trace.successful === "boolean" && trace.bidsRevealed === true
+          ? { successful: trace.successful }
+          : {}),
+      }
+    : undefined;
 
   return {
     side,
     stateVersion: state.stateVersion,
     turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
+    traceRulesProfile,
     timingPoint: state.timingPoint,
     activeSide: state.activeSide,
     phase: state.phase,
+    ...(visibleTrace ? { trace: visibleTrace } : {}),
     own: runnerSide
       ? {
           identity: visibleOwnCard(state, state.runner.identity),

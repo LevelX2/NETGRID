@@ -3421,13 +3421,34 @@ export type VisibleCard = {
   effectiveStealCostQuote?: VisibleAgendaStealCostQuote;
 };
 
+export type VisibleTraceState = {
+  traceId: string;
+  profile: TraceRulesProfile;
+  phase: TraceState["status"];
+  printedTrace: number;
+  effectiveTraceLimit: number;
+  corpBidMax?: number;
+  bidsRevealed: boolean;
+  corpBidCommitted: boolean;
+  runnerBidCommitted: boolean;
+  corpBid?: number;
+  corpStrength?: number;
+  runnerLink?: number;
+  runnerBid?: number;
+  runnerStrength?: number;
+  postRevealLinkBonus?: number;
+  successful?: boolean;
+};
+
 export type PlayerView = {
   side: Side;
   stateVersion: number;
   turnSerial?: number;
+  traceRulesProfile?: TraceRulesProfile;
   timingPoint: TimingPointId;
   activeSide: Side;
   phase: Phase;
+  trace?: VisibleTraceState;
   own: {
     identity: VisibleCard;
     credits: number;

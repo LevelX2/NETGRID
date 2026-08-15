@@ -61,6 +61,62 @@ const TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID =
   >;
 
 describe("PlayerView projection", () => {
+  it("keeps an unrevealed Blind Corp bid out of the Runner PlayerView", () => {
+    const state = createGameAfterSetup({
+      seed: "blind-trace-player-view",
+      traceRulesProfile: "classic_blind",
+    });
+    state.trace = {
+      traceId: "trace_hidden_view",
+      sourceCardInstanceId: state.corp.identity,
+      sourceDefinitionId:
+        state.cardInstances[state.corp.identity]!.definitionId,
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      effectiveTraceLimit: 3,
+      corpBidMax: 3,
+      status: "runner_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+      corpBid: 2,
+      traceValue: 2,
+      runnerLink: 1,
+      bidsRevealed: false,
+    };
+
+    const corpView = getPlayerView(state, "corp");
+    const runnerView = getPlayerView(state, "runner");
+
+    expect(corpView.trace).toMatchObject({
+      profile: "classic_blind",
+      corpBid: 2,
+      corpStrength: 2,
+      bidsRevealed: false,
+    });
+    expect(runnerView.trace).toMatchObject({
+      profile: "classic_blind",
+      printedTrace: 3,
+      effectiveTraceLimit: 3,
+      runnerLink: 1,
+      bidsRevealed: false,
+    });
+    expect(runnerView.trace).not.toHaveProperty("corpBid");
+    expect(runnerView.trace).not.toHaveProperty("corpStrength");
+
+    state.trace = {
+      ...state.trace,
+      runnerBid: 1,
+      runnerStrength: 2,
+      bidsRevealed: true,
+    };
+    expect(getPlayerView(state, "runner").trace).toMatchObject({
+      corpBid: 2,
+      corpStrength: 2,
+      runnerBid: 1,
+      runnerStrength: 2,
+      bidsRevealed: true,
+    });
+  });
+
   it("matches free prevention runtime capacity including use and cancellation", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "free-prevention-view-capacity" }),

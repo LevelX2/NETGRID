@@ -32,6 +32,7 @@ import {
 import { MatchStartAdvancedOptions } from "./MatchStartAdvancedOptions";
 import { MatchStartChoiceSections } from "./MatchStartChoiceSections";
 import { StandardDeckCatalogStatus } from "./StandardDeckCatalogStatus";
+import type { TraceRulesProfile } from "@netgrid/shared";
 
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy =
@@ -53,6 +54,7 @@ export function MatchHostConsole({
   matchFormat,
   seriesGamesPlanned,
   matchCardPool,
+  traceRulesProfile,
   displayName,
   identityKind,
   isHumanVsAi,
@@ -98,6 +100,7 @@ export function MatchHostConsole({
   onMatchFormat,
   onSeriesGamesPlanned,
   onMatchCardPool,
+  onTraceRulesProfile,
   onDisplayName,
   onHumanAiSideSelection,
   onRunnerDifficulty,
@@ -131,6 +134,7 @@ export function MatchHostConsole({
   matchFormat: MatchFormatSelection;
   seriesGamesPlanned: MatchStartSeriesGames;
   matchCardPool: MatchCardPoolSelection;
+  traceRulesProfile: TraceRulesProfile;
   displayName: string;
   identityKind: "account" | "guest";
   isHumanVsAi: boolean;
@@ -179,6 +183,7 @@ export function MatchHostConsole({
   onMatchFormat(format: MatchFormatSelection): void;
   onSeriesGamesPlanned(games: MatchStartSeriesGames): void;
   onMatchCardPool(cardPool: MatchCardPoolSelection): void;
+  onTraceRulesProfile(profile: TraceRulesProfile): void;
   onDisplayName(value: string): void;
   onHumanAiSideSelection(selection: HumanAiSideSelection): void;
   onRunnerDifficulty(difficulty: AiDifficulty): void;
@@ -382,6 +387,7 @@ export function MatchHostConsole({
         isAiVsAiSeries={isAiVsAiSeries}
         hasAiOpponent={hasAiOpponent}
         matchCardPool={matchCardPool}
+        traceRulesProfile={traceRulesProfile}
         humanAiSideSelection={humanAiSideSelection}
         countdownSeconds={countdownSeconds}
         isPublic={isPublic}
@@ -413,6 +419,7 @@ export function MatchHostConsole({
         aiSlotDisabled={aiSlotDisabled}
         onCountdownSeconds={onCountdownSeconds}
         onIsPublic={onIsPublic}
+        onTraceRulesProfile={onTraceRulesProfile}
         onPlayerClockMode={onPlayerClockMode}
         onPlayerClockMinutes={onPlayerClockMinutes}
         onPlayerClockGraceSeconds={onPlayerClockGraceSeconds}

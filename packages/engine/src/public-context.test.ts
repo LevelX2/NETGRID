@@ -7,6 +7,87 @@ import {
 } from "./public-context";
 
 describe("publicContextForAction", () => {
+  it("redacts Blind Trace bids and payment sources until both sides commit", () => {
+    const state = {
+      traceRulesProfile: "classic_blind",
+      trace: {
+        traceRulesProfile: "classic_blind",
+        corpBid: 2,
+        bidsRevealed: false,
+      },
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "corp",
+      type: "resolve_choice",
+      payload: {
+        traceId: "trace_hidden",
+        traceStep: "corp_bid",
+        traceLimit: 3,
+        effectiveTraceLimit: 3,
+        corpBid: 2,
+        traceValue: 2,
+        corpCreditBid: 1,
+        recurringTraceCreditPoolSpent: 1,
+        temporaryTraceCreditsSourceDefinitionId: "secret_trace_pool",
+      },
+    } as unknown as LegalAction;
+
+    const context = publicContextForAction(state, action, traceTestDeps());
+
+    expect(context).toMatchObject({
+      traceRulesProfile: "classic_blind",
+      traceBidsRevealed: false,
+      traceBidCommittedSide: "corp",
+      traceId: "trace_hidden",
+      traceLimit: 3,
+    });
+    expect(context).not.toHaveProperty("corpBid");
+    expect(context).not.toHaveProperty("traceValue");
+    expect(context).not.toHaveProperty("corpCreditBid");
+    expect(context).not.toHaveProperty("recurringTraceCreditPoolSpent");
+    expect(JSON.stringify(context)).not.toContain("secret_trace_pool");
+  });
+
+  it("publishes both Blind Trace bids after the common reveal", () => {
+    const state = {
+      traceRulesProfile: "classic_blind_corp_ties",
+      trace: {
+        traceRulesProfile: "classic_blind_corp_ties",
+        corpBid: 2,
+        runnerBid: 1,
+        runnerStrength: 2,
+        bidsRevealed: true,
+      },
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "resolve_choice",
+      payload: {
+        traceId: "trace_revealed",
+        traceStep: "runner_bid",
+        corpBid: 2,
+        traceValue: 2,
+        runnerBid: 1,
+        runnerStrength: 2,
+        traceBidsRevealed: true,
+      },
+    } as unknown as LegalAction;
+
+    expect(
+      publicContextForAction(state, action, traceTestDeps()),
+    ).toMatchObject({
+      traceRulesProfile: "classic_blind_corp_ties",
+      traceBidsRevealed: true,
+      corpBid: 2,
+      traceValue: 2,
+      runnerBid: 1,
+      runnerStrength: 2,
+    });
+  });
   it("publishes the aggregate Runner agenda total after a steal", () => {
     const state = {
       corp: { servers: [], scoreArea: [] },
@@ -419,3 +500,18 @@ describe("publicContextForAction", () => {
     expect(JSON.stringify(context)).not.toContain("secret_upgrade_instance");
   });
 });
+
+function traceTestDeps() {
+  return {
+    agendaPointsForScoredCard: () => 0,
+    cardCounter: () => 0,
+    cardStrengthModifier: () => 0,
+    creditCostForAction: () => 0,
+    definitionFor: () => {
+      throw new Error("not needed");
+    },
+    pumpAmountForLegalAction: () => 0,
+    runnerHqAccessBonus: () => 0,
+    v1915InstalledAccessBonus: () => 0,
+  };
+}

@@ -136,6 +136,13 @@ export function StartLobbyPanel({
             <span>{matchFormatLabel(start.matchFormat, start.seriesGamesPlanned)}</span>
             <span title="Agenda-Punkte, die für den Spielsieg erreicht werden müssen.">Zielwert {start.agendaPointsToWin} Agenda-Punkte</span>
             <span title="Spielerzeit-Einstellung für dieses Match.">{matchStartPlayerClockLabel(lobby.playerClock)}</span>
+            <span title="Autoritatives Trace-Regelprofil für die gesamte Partie.">
+              {start.traceRulesProfile === "modern_open"
+                ? "Trace: Modern"
+                : start.traceRulesProfile === "classic_blind"
+                  ? "Trace: Classic Blind"
+                  : "Trace: Classic Blind · Korp gewinnt Gleichstand"}
+            </span>
             <span>Countdown {start.countdownSeconds}s</span>
           </div>
           <div className="lobbyParticipants">

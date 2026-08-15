@@ -114,6 +114,52 @@ function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   );
 }
 
+describe("trace rule profile setup", () => {
+  it("persists an explicit profile into match settings, GameState and PlayerView", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "trace-profile-setup",
+    });
+
+    const created = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      humanSide: "runner",
+      seed: "trace-profile-setup",
+      settings: { traceRulesProfile: "classic_blind_corp_ties" },
+    });
+    const stored = await storage.load(created.matchId);
+
+    expect(stored?.match.settings.traceRulesProfile).toBe(
+      "classic_blind_corp_ties",
+    );
+    expect(stored?.gameState.traceRulesProfile).toBe("classic_blind_corp_ties");
+    expect(created.playerView.traceRulesProfile).toBe(
+      "classic_blind_corp_ties",
+    );
+  });
+
+  it("defaults old or omitted setup to Modern and exposes it in a start lobby", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "trace-profile-default",
+    });
+
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "trace-profile-default",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6",
+      },
+    });
+
+    expect(created.lobby?.traceRulesProfile).toBe("modern_open");
+    const stored = await storage.load(created.matchId);
+    expect(stored?.match.settings.traceRulesProfile).toBe("modern_open");
+  });
+});
+
 describe("recent match results", () => {
   it("exports a terminal full-information gamebook without technical or secret data", async () => {
     const storage = new InMemoryMatchStorage();
@@ -1538,8 +1584,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           historicalAudit: "ai-decision-historical-audit-v1",
           beliefCapture: "netgrid-ai-belief-capture-v1",
           ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
-          checkpointCapture:
-            "netgrid-ai-decision-checkpoint-capture-v1",
+          checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v1",
         },
         match: {
           matchId: active.matchId,
@@ -1585,14 +1630,13 @@ describe("Backend 0.5 private storage maintenance", () => {
         signature: expect.any(String),
         deckSnapshotId: before.match.deckSetup.corpSnapshotId,
         identityDefinitionId: before.match.deckSetup.corp.identityCardId,
-        cardPoolSnapshotId:
-          before.match.deckSetup.corp.cardPoolSnapshotId,
+        cardPoolSnapshotId: before.match.deckSetup.corp.cardPoolSnapshotId,
         formatProfileId: before.match.deckSetup.corp.formatProfileId,
         deckHash: before.match.deckSetup.corp.deckHash,
       });
-      expect(activeBundle.ownDeckSnapshot?.definitionCounts?.length).toBeGreaterThan(
-        0,
-      );
+      expect(
+        activeBundle.ownDeckSnapshot?.definitionCounts?.length,
+      ).toBeGreaterThan(0);
       expect(
         activeBundle.ownDeckSnapshot?.definitionCounts?.reduce(
           (total, entry) => total + entry.quantity,
@@ -1752,14 +1796,11 @@ describe("Backend 0.5 private storage maintenance", () => {
         },
       });
       expect(
-        decisionContext.ownDeckSnapshot?.zoneBalance
-          ?.remainingPossibleDefinitionCounts?.reduce(
-            (total, entry) => total + entry.quantity,
-            0,
-          ),
-      ).toBe(
-        decisionContext.ownDeckSnapshot?.zoneBalance?.hiddenDeckCount,
-      );
+        decisionContext.ownDeckSnapshot?.zoneBalance?.remainingPossibleDefinitionCounts?.reduce(
+          (total, entry) => total + entry.quantity,
+          0,
+        ),
+      ).toBe(decisionContext.ownDeckSnapshot?.zoneBalance?.hiddenDeckCount);
       expect(decisionContext.surroundingEvents?.length).toBeGreaterThan(0);
       expect(decisionContext.provenance?.persisted).toContain(
         "historicalDecisionAudit",
@@ -1787,9 +1828,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(after?.gameState.stateVersion).toBe(before.gameState.stateVersion);
       expect(hashState(after.gameState)).toBe(hashState(before.gameState));
 
-      const deckBindingDatabase = new DatabaseSync(
-        join(dir, "netgrid.sqlite"),
-      );
+      const deckBindingDatabase = new DatabaseSync(join(dir, "netgrid.sqlite"));
       const persistedDeckRow = deckBindingDatabase
         .prepare(
           "SELECT private_deck_snapshots_json AS privateDeckSnapshotsJson FROM private_deck_snapshots WHERE match_id = ?",
@@ -1802,8 +1841,9 @@ describe("Backend 0.5 private storage maintenance", () => {
       const mismatchedDeckSnapshots = JSON.parse(
         persistedDeckRow.privateDeckSnapshotsJson,
       ) as NonNullable<StoredMatch["privateDeckSnapshots"]>;
-      mismatchedDeckSnapshots.participants[assignment.corpPlayer].corp.deckHash =
-        "sha256:maintenance-binding-mismatch";
+      mismatchedDeckSnapshots.participants[
+        assignment.corpPlayer
+      ].corp.deckHash = "sha256:maintenance-binding-mismatch";
       deckBindingDatabase
         .prepare(
           "UPDATE private_deck_snapshots SET private_deck_snapshots_json = ? WHERE match_id = ?",
@@ -1825,9 +1865,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       });
 
       deckBindingDatabase
-        .prepare(
-          "DELETE FROM private_deck_snapshots WHERE match_id = ?",
-        )
+        .prepare("DELETE FROM private_deck_snapshots WHERE match_id = ?")
         .run(active.matchId);
       const missingDeckResponse = await maintenance.request(
         `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?side=corp&includeOwnDeckSnapshot=true&includeEvents=false&includeDecisionTraces=false`,

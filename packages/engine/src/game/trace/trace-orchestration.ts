@@ -809,6 +809,11 @@ function finishTraceRunnerBid(
   );
   const tracePaymentPayload =
     runnerTracePaymentPublicPayload(tracePaymentReceipt);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceRulesProfile: traceRulesDefinitionForTrace(trace).profile,
+    traceBidsRevealed: true,
+  };
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   const postBidTraceBase = {
     ...traceWithoutPaymentSelection,

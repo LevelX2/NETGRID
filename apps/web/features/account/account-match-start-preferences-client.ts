@@ -1,4 +1,5 @@
 import { accountRequest, type AccountFetch } from "./account-client";
+import type { TraceRulesProfile } from "@netgrid/shared";
 
 export const ACCOUNT_MATCH_START_PREFERENCES_SCHEMA_VERSION =
   "netgrid-account-match-start-preferences-v1" as const;
@@ -20,6 +21,7 @@ export type AccountMatchStartPreferences = {
     | "originalset_classic"
     | "originalset_proteus"
     | "originalset_classic_proteus";
+  traceRulesProfile?: TraceRulesProfile;
   runnerDifficulty: "easy" | "normal" | "hard";
   corpDifficulty: "easy" | "normal" | "hard";
   aiDeckPolicy:

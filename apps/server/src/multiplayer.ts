@@ -5406,6 +5406,7 @@ export class MultiplayerService {
         ? { seriesGamesPlanned: lobby.seriesGamesPlanned }
         : {}),
       cardPool: lobby.cardPool,
+      traceRulesProfile: normalizeTraceRulesProfile(lobby.traceRulesProfile),
       ...(lobby.sideAssignmentMode
         ? { sideAssignmentMode: lobby.sideAssignmentMode }
         : {}),

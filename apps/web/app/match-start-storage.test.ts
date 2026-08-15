@@ -13,6 +13,7 @@ const settings: MatchStartStorageSettings = {
   matchFormat: "two_game_side_swap",
   seriesGamesPlanned: 5,
   matchCardPool: "originalset_classic_proteus",
+  traceRulesProfile: "modern_open",
   runnerDifficulty: "normal",
   corpDifficulty: "hard",
   aiDeckPolicy: "selected",
