@@ -429,4 +429,110 @@ describe("random production-card sample semantic corrections", () => {
       expect(hint(cardId).strategyAnchors).toBeUndefined();
     }
   });
+
+  it("keeps Batch 5 support cards from becoming strategy anchors", () => {
+    expect(hint("onr_classic_007_brain-drain").strategyAnchors).toBeUndefined();
+    expect(
+      hint("onr_proteus_075_stereogram-antibody").strategyAnchors,
+    ).toBeUndefined();
+    expect(
+      hint("onr_proteus_075_stereogram-antibody").planRoles ?? [],
+    ).not.toContain("build_scoring_remote");
+    expect(
+      hint("onr_proteus_043_twisty-passages").strategyAnchors,
+    ).toBeUndefined();
+    expect(hint("onr_proteus_043_twisty-passages").lineSupport).toContain(
+      "corp.ice_tax_glacier",
+    );
+    expect(hint("onr_proteus_043_twisty-passages").riskTags).toContain(
+      "self_bounce_or_maintenance_cost",
+    );
+    expect(hint("onr_v1_363_olivia-salazar").strategyAnchors).toBeUndefined();
+
+    expect(
+      hint("onr_proteus_003_corporate-headhunters").strategyAnchors,
+    ).toEqual(
+      expect.arrayContaining(["corp.damage_kill", "corp.tag_trace_punish"]),
+    );
+  });
+
+  it("binds Batch 5 target guidance only to real controller-known choices", () => {
+    expect(hint("onr_v1_100_misc-for-sale").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "convert_expendable_installed_cards_to_credits",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_v1_294_new-blood").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "conceal_and_reorder_installed_ice",
+        targetType: "ice_position",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_v1_077_anonymous-tip").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "black_ice_derez",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "visible_or_known_only",
+      }),
+    );
+    expect(
+      hint("onr_v1_059_self-modifying-code").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "install_program_that_answers_current_ice_or_setup_gap",
+        targetType: "program",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_v1_059_self-modifying-code").planRoles).not.toContain(
+      "recover_rig",
+    );
+    expect(hint("onr_v1_363_olivia-salazar").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "temporarily_rez_ice_on_fort",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+        serverScope: "source_fort",
+      }),
+    );
+    expect(hint("onr_classic_033_superglue").targetProfiles).toBeUndefined();
+  });
+
+  it("keeps Batch 5 restricted economy and drawbacks explicit", () => {
+    const techtronica = hint("onr_v1_143_techtronica-utility-suit");
+    expect(techtronica.planRoles).toContain("trace_bid_support");
+    expect(techtronica.tacticSignals ?? []).not.toContain("economy.card");
+    expect(techtronica.riskTags).toContain("deck_replacement_conflict");
+
+    const retreat = hint("onr_v1_195_corporate-retreat");
+    expect(retreat.strategicExchangeKinds).toContain(
+      "ongoing_economy_for_board_development",
+    );
+    expect(retreat.riskTags).toContain("board_development_lock");
+
+    const arasaka = hint("onr_v1_078_arasaka-owns-you");
+    expect(arasaka.tacticSignals ?? []).not.toContain("economy.card");
+    expect(arasaka.riskTags).toEqual(
+      expect.arrayContaining([
+        "future_action_debt",
+        "future_agenda_point_forfeit",
+      ]),
+    );
+    expect(arasaka.actionCapacityProfiles).toContainEqual(
+      expect.objectContaining({ class: "action_debt", amount: 4 }),
+    );
+
+    expect(hint("onr_v1_330_krumz").planRoles).toContain(
+      "remote_asset_modifier",
+    );
+    expect(hint("onr_v1_330_krumz").planRoles).not.toContain(
+      "remote_asset_pressure",
+    );
+    expect(hint("onr_v1_049_pox").tacticSignals ?? []).not.toContain(
+      "corp.remote_protection",
+    );
+  });
 });

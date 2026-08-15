@@ -73,7 +73,24 @@ export const cardSpec = {
         use: "economy.card",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_on_play_trash_own_installed_cards_for_credits",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "convert_expendable_installed_cards_to_credits",
+            preferences: [
+              "redundant_or_spent_installed_card",
+              "lowest_near_term_value",
+            ],
+            avoid: ["critical_rig_or_survival_card", "next_turn_required_card"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

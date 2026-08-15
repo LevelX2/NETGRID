@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[A]: Do 1 meat damage. Use this ability only if Runner is tagged.",
+      "A: Do 1 meat damage. Use this ability only if Runner is tagged.",
     capabilityText: [
       {
         capabilityKey: capabilityKey("abilities_activated_corp_main_damage"),

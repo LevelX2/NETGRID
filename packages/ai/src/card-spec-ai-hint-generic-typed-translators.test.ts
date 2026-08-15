@@ -662,7 +662,7 @@ describe("generic typed CardSpec AI translators", () => {
             .length ?? 0),
         0,
       ),
-    ).toBe(68);
+    ).toBe(70);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
@@ -702,6 +702,14 @@ describe("generic typed CardSpec AI translators", () => {
         },
       ],
       [
+        "onr_v1_077_anonymous-tip",
+        { kind: "use_target", timing: "on_play", targetType: "installed_ice" },
+      ],
+      [
+        "onr_v1_100_misc-for-sale",
+        { kind: "use_target", timing: "on_play", targetType: "card" },
+      ],
+      [
         "onr_v1_131_microtech-backup-drive",
         {
           kind: "replacement_target",
@@ -712,6 +720,10 @@ describe("generic typed CardSpec AI translators", () => {
       [
         "onr_v1_289_edgerunner-inc-temps",
         { kind: "install_target", timing: "on_play", targetType: "card" },
+      ],
+      [
+        "onr_v1_294_new-blood",
+        { kind: "use_target", timing: "on_play", targetType: "ice_position" },
       ],
       [
         "onr_v1_298_planning-consultants",

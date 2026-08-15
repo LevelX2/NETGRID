@@ -494,6 +494,35 @@ describe("CardRegistry", () => {
     );
   });
 
+  it("preserves Batch 5 source symbols in canonical card text", () => {
+    const text = (cardId: string) =>
+      cardSpecForDefinitionId(ROOT_REGISTRY, cardId as CardDefinitionId)!.text
+        .rulesText;
+
+    expect(text("onr_v1_063_signpost")).toMatch(/^\[1\]:/);
+    expect(text("onr_v1_049_pox")).toContain("pay [1]");
+    expect(text("onr_v1_006_black-dahlia")).toBe(
+      "[2]: Break sentry subroutine.\n[2]: +1 strength.",
+    );
+    expect(text("onr_v1_143_techtronica-utility-suit")).toContain(
+      "Use these bits only",
+    );
+    expect(text("onr_v1_066_snowball")).toContain(
+      "[1]: Break sentry subroutine.\n[1]: +1 strength.",
+    );
+    expect(text("onr_v1_355_crystal-palace-station-grid")).toContain("pay [1]");
+    expect(text("onr_v1_072_wild-card")).toBe(
+      "[0]: Break sentry subroutine.\n[3]: +1 strength.",
+    );
+    expect(text("onr_v1_163_floating-runner-bbs")).toBe(
+      "Gain [1] at the start of each of your turns.",
+    );
+    expect(text("onr_v1_078_arasaka-owns-you")).toContain("Gain [10]");
+    expect(text("onr_v1_097_livewires-contacts")).toBe("Gain [3].");
+    expect(text("onr_v1_208_on-call-solo-team")).toMatch(/^A:/);
+    expect(text("onr_v1_213_private-cybernet-police")).toMatch(/^A:/);
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

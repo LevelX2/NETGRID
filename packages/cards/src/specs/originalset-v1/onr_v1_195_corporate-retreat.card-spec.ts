@@ -59,6 +59,17 @@ export const cardSpec = {
         signal: "economy.card",
         use: "economy.card",
       },
+      {
+        kind: "strategic_exchange",
+        exchange: "ongoing_economy_for_board_development",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "board_development_lock",
+        severity: "high",
+        rationale:
+          "The recurring credit action is permanently lost as soon as the Corp installs or rezzes any card.",
+      },
     ],
     capabilities: [],
   },

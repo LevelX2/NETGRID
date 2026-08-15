@@ -141,6 +141,7 @@
         "planRoles": ["corp_score_agenda", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["engine_anchor", "punish_payoff"],
+        "strategyAnchors": ["corp.damage_kill", "corp.tag_trace_punish"],
         "lineSupport": ["corp.damage_kill", "corp.tag_trace_punish"],
         "strategySupportPairs": [
           {
@@ -3478,7 +3479,8 @@
         "roles": ["ice", "etr_ice", "code_gate_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
+        "strategicRole": ["defensive_tool"],
+        "lineSupport": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -3487,13 +3489,7 @@
             "target": "corp_ice.end_run"
           }
         ],
-        "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "corp_ice.end_run",
-          "ice.etr",
-          "run.corp_server_lock",
-          "tax.remote"
-        ],
+        "functionSignals": ["corp_ice.end_run", "ice.etr"],
         "tacticSignals": ["corp.remote_protection", "corp_ice.end_run"],
         "actionTacticSignals": [
           "corp.remote_protection",
@@ -3515,7 +3511,7 @@
         "costProfile": {
           "credits": 3
         },
-        "riskTags": ["hidden_ice"],
+        "riskTags": ["self_bounce_or_maintenance_cost", "hidden_ice"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6116,27 +6112,11 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["ambush", "net_damage", "hidden_zone"],
-        "planRoles": ["build_scoring_remote"],
+        "planRoles": [],
         "valueHints": {
-          "remoteRootValue": 1,
           "damage": 1
         },
         "strategicRole": ["punish_payoff"],
-        "strategyAnchors": ["corp.ambush_bluff"],
-        "lineSupport": ["corp.ambush_bluff"],
-        "strategySupportPairs": [
-          {
-            "strategyId": "corp.ambush_bluff",
-            "role": "punish_payoff",
-            "roleDetail": "access_net_damage_payoff",
-            "evidence": [
-              "access.corp_archives_net_damage_ambush",
-              "access.punish"
-            ],
-            "confidence": "medium",
-            "rationale": "Archives selbst ist der Trigger; keine Archives-safe-exception. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
-          }
-        ],
         "effects": [
           {
             "kind": "damage",
@@ -6190,8 +6170,7 @@
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
-          "strategyCovered": true,
-          "confidence": "medium"
+          "strategyCovered": false
         },
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"

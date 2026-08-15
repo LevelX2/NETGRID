@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Provides +1 MU. Prevents up to 1 meat damage each turn. Put [5] from the bank on Techtronica Utility Suit when it is installed. Use these credits only to pay for increasing your link. If you use any of these credits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+      "Provides +1 MU. Prevents up to 1 meat damage each turn. Put [5] from the bank on Techtronica Utility Suit when it is installed. Use these bits only to pay for increasing your link. If you use any of these bits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -112,9 +112,15 @@ export const cardSpec = {
         role: "survive_meat_damage",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "trace_bid_support",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "deck_replacement_conflict",
+        severity: "high",
+        rationale:
+          "Installing this deck trashes any older deck and must preserve more rig value than it replaces.",
       },
     ],
     capabilities: [],

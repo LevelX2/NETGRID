@@ -71,6 +71,14 @@ export const cardSpec = {
         role: "punish_payoff",
       },
       {
+        kind: "strategy_anchor",
+        strategyKey: "corp.damage_kill",
+      },
+      {
+        kind: "strategy_anchor",
+        strategyKey: "corp.tag_trace_punish",
+      },
+      {
         kind: "line_support",
         lineKey: "corp.damage_kill",
         support: "supports",

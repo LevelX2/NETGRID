@@ -64,13 +64,29 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "target_preference",
-        purpose: "black_ice_derez",
-        preferences: [],
-        avoid: [],
+        kind: "plan_role",
+        role: "ice_sabotage",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_on_play_derez_rezzed_black_ice",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "black_ice_derez",
+            preferences: [
+              "high_rez_cost_relief",
+              "blocks_relevant_run_path",
+              "high_run_denial_payoff",
+            ],
+            avoid: ["low_impact_ice", "irrelevant_server_ice"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

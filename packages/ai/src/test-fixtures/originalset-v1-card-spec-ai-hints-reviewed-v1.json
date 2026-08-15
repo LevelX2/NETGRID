@@ -3329,9 +3329,7 @@
           "virus.corp_purgeable_counter",
           "virus.purge_tax"
         ],
-        "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:delayed_penalty",
           "effect:persistent_counter_effect",
           "effect_scope:corp",
@@ -3950,7 +3948,7 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "recover_rig"],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "strategicRole": ["engine_anchor"],
         "strategyAnchors": ["runner.search.breaker"],
@@ -4009,7 +4007,6 @@
               "program_repairs_missing_coverage",
               "program_affordable_after_install"
             ],
-            "avoid": ["hidden_info_dependent_choice"],
             "kind": "search_install_target",
             "timing": "activated_ability",
             "targetType": "program",
@@ -5109,11 +5106,27 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["ice_sabotage"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_derez_rezzed_black_ice"
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "black_ice_derez",
+            "preferences": [
+              "high_rez_cost_relief",
+              "blocks_relevant_run_path",
+              "high_run_denial_payoff"
+            ],
+            "avoid": ["low_impact_ice", "irrelevant_server_ice"],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "installed_ice",
+            "hiddenInfoPolicy": "visible_or_known_only"
           }
         ],
         "costProfile": {
@@ -5174,9 +5187,7 @@
           }
         ],
         "functionSignals": ["defense.damage_prevention"],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:flatline_prevention",
           "effect_scope:runner",
           "effect_timing:prevention_window"
@@ -5190,6 +5201,7 @@
           "clicks": 1,
           "credits": 0
         },
+        "riskTags": ["future_action_debt", "future_agenda_point_forfeit"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6819,6 +6831,24 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_trash_own_installed_cards_for_credits"
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "convert_expendable_installed_cards_to_credits",
+            "preferences": [
+              "redundant_or_spent_installed_card",
+              "lowest_near_term_value"
+            ],
+            "avoid": [
+              "critical_rig_or_survival_card",
+              "next_turn_required_card"
+            ],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "tacticSignals": ["economy.card"],
@@ -9758,6 +9788,7 @@
         "planRoles": [
           "build_rig",
           "survive_meat_damage",
+          "trace_bid_support",
           "runner_install_hardware"
         ],
         "valueHints": {},
@@ -9818,9 +9849,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:damage_prevention",
           "effect:finite_economy_pool",
           "effect:global_modifier",
@@ -9845,6 +9874,7 @@
           "credits": 6
         },
         "riskTags": [
+          "deck_replacement_conflict",
           "install_runner",
           "deck_unique",
           "restricted_credits",
@@ -13552,6 +13582,7 @@
         "roles": [],
         "planRoles": [],
         "valueHints": {},
+        "strategicExchangeKinds": ["ongoing_economy_for_board_development"],
         "effects": [
           {
             "kind": "action_economy",
@@ -13585,6 +13616,7 @@
             "kind": "requires_scored_agenda"
           }
         ],
+        "riskTags": ["board_development_lock"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -22650,6 +22682,23 @@
             "rationale": "Operations Semantic Review v2: ice_rearrange_conceal / glacier_support."
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "conceal_and_reorder_installed_ice",
+            "preferences": [
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "high_run_denial_payoff",
+              "adds_relevant_encounter_tax"
+            ],
+            "avoid": ["low_impact_ice", "irrelevant_server_ice"],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "ice_position",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ],
         "costProfile": {
           "clicks": 1,
           "credits": 0
@@ -25883,7 +25932,7 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["asset"],
-        "planRoles": ["remote_asset_pressure"],
+        "planRoles": ["remote_asset_modifier"],
         "valueHints": {
           "remoteRootValue": 1
         },
@@ -28773,11 +28822,6 @@
           "remoteRootValue": 1
         },
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": [
-          "corp.economy_rez_reserve",
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
-        ],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -28793,12 +28837,17 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "temporarily_rez_ice_on_fort",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
+            "preferences": [
+              "high_run_denial_payoff",
+              "adds_relevant_encounter_tax",
+              "current_run_path_relevance"
+            ],
+            "avoid": ["low_impact_ice", "already_cheap_to_break"],
             "kind": "use_target",
-            "timing": "start_of_run",
-            "targetType": "ice_position",
-            "hiddenInfoPolicy": "public_or_controller_known_only"
+            "timing": "corp_rez_window",
+            "targetType": "installed_ice",
+            "hiddenInfoPolicy": "public_or_controller_known_only",
+            "serverScope": "source_fort"
           }
         ],
         "effects": [
@@ -28812,9 +28861,6 @@
           }
         ],
         "functionSignals": [
-          "condition.corp_installed_or_advanced_this_fort_last_turn",
-          "run.corp_server_lock",
-          "tax.remote",
           "economy.rez_discount",
           "ice.corp_rez_discount",
           "remote.scoring_protection"

@@ -13,7 +13,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Runner must pay 1, in addition to the normal cost, to break each subroutine of each piece of ice encountered during runs on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+      "Runner must pay [1], in addition to the normal cost, to break each subroutine of each piece of ice encountered during runs on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

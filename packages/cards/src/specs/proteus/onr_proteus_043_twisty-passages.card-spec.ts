@@ -76,13 +76,25 @@ export const cardSpec = {
         role: "protect_remote",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
+        kind: "strategic_role",
+        role: "defensive_tool",
+      },
+      {
+        kind: "line_support",
+        lineKey: "corp.ice_tax_glacier",
+        support: "supports",
       },
       {
         kind: "tactic_interpretation",
         signal: "corp.remote_protection",
         use: "corp.remote_protection",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "self_bounce_or_maintenance_cost",
+        severity: "high",
+        rationale:
+          "After the Runner passes, the Corp must pay [1] or lose the installed ICE position by returning this card to HQ.",
       },
     ],
     capabilities: [],

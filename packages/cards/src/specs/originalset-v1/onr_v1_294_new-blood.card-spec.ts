@@ -74,7 +74,26 @@ export const cardSpec = {
           "Operations Semantic Review v2: ice_rearrange_conceal / glacier_support.",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "hidden_replacement_longtail_conceal_and_reorder_installed_ice",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "conceal_and_reorder_installed_ice",
+            preferences: [
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "high_run_denial_payoff",
+              "adds_relevant_encounter_tax",
+            ],
+            avoid: ["low_impact_ice", "irrelevant_server_ice"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

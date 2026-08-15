@@ -68,18 +68,6 @@ export const cardSpec = {
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -104,18 +92,30 @@ export const cardSpec = {
         threatLevel: "medium",
       },
       {
-        kind: "target_preference",
-        purpose: "temporarily_rez_ice_on_fort",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "fort_run_windows_discounted_rez_ice_on_this_fort_during_run_on_this_fort",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "temporarily_rez_ice_on_fort",
+            preferences: [
+              "high_run_denial_payoff",
+              "adds_relevant_encounter_tax",
+              "current_run_path_relevance",
+            ],
+            avoid: ["low_impact_ice", "already_cheap_to_break"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

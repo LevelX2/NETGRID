@@ -68,7 +68,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_pressure",
+        role: "remote_asset_modifier",
       },
       {
         kind: "strategic_role",

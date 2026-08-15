@@ -6223,6 +6223,8 @@ function hasClosedTargetPreferenceOwner(
     engine.runnerEventLongtail !== undefined ||
     engine.remainingReplacementLongtail?.kind ===
       "hidden_draw_keep_or_top_replacement" ||
+    engine.hiddenReplacementLongtail?.kind ===
+      "conceal_and_reorder_installed_ice" ||
     engine.corpUtility !== undefined ||
     engine.lifecycle?.on_score?.some(
       (effect) => effect.kind === "trash_corp_installed_cards_in_source_server",
@@ -6248,6 +6250,8 @@ function hasClosedTargetPreferenceOwner(
               "look_top_stack_take_one_arrange_rest",
               "search_trash_to_grip",
               "trash_cards_from_grip_for_credits",
+              "trash_own_installed_cards_for_credits",
+              "derez_rezzed_black_ice",
               "trash_unrezzed_ice",
             ].includes(effect.kind),
       ),
@@ -6329,6 +6333,45 @@ function deriveClosedExtendedTargetProfile(
     };
   if (
     engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "trash_own_installed_cards_for_credits",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "derez_rezzed_black_ice",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "installed_ice",
+      hiddenInfoPolicy: "visible_or_known_only",
+    };
+  if (
+    engine.hiddenReplacementLongtail?.kind ===
+    "conceal_and_reorder_installed_ice"
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "ice_position",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
       ability.effects?.some((effect) => effect.kind === "trash_unrezzed_ice"),
     )
   )
@@ -6382,6 +6425,19 @@ function deriveClosedExtendedTargetProfile(
       timing: "paid_or_triggered_reposition",
       targetType: "ice_position",
       hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.fortRunWindows?.some(
+      (window) => window.kind === "discounted_rez_ice_on_this_fort",
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "corp_rez_window",
+      targetType: "installed_ice",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+      serverScope: "source_fort",
     };
   if (
     engine.abilities?.some((ability) =>
@@ -9731,8 +9787,9 @@ function derivedActionStrategyEvidence(
       taggedRunReplacement !== undefined ||
       taggedFortTrash !== undefined ||
       makeRun?.successfulRunRunnerTagGain !== undefined ||
-      makeRun?.badPublicityRunAftermath?.kind ===
-        "successful_run_counted_subtypes")
+      (isRecord(makeRun?.badPublicityRunAftermath) &&
+        makeRun.badPublicityRunAftermath.kind ===
+          "successful_run_counted_subtypes"))
   ) {
     expectedAnchor = "tag.source";
     expectedRole = "anchor_evidence";

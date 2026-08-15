@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "1: +2 link. Use this ability only once during each trace attempt, and only after you and the Corp have revealed how much each of you spent.",
+      "[1]: +2 link. Use this ability only once during each trace attempt, and only after you and the Corp have revealed how much each of you spent.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(

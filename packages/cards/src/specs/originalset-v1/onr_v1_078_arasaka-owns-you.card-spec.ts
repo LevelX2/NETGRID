@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Do not play Arasaka Owns You as a normal action; instead, play it when you would suffer enough damage to flatline you. Prevent all of that damage, trash Arasaka Owns You, remove any brain damage you have suffered, and then refresh your hand to its maximum size. Gain 10 and remove all tags, at no cost. You forgo your next four actions, and you forfeit the next 3 agenda points you score.",
+      "Do not play Arasaka Owns You as a normal action; instead, play it when you would suffer enough damage to flatline you. Prevent all of that damage, trash Arasaka Owns You, remove any brain damage you have suffered, and then refresh your hand to its maximum size. Gain [10] and remove all tags, at no cost. You forgo your next four actions, and you forfeit the next 3 agenda points you score.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -81,9 +81,18 @@ export const cardSpec = {
         support: "supports",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "risk_interpretation",
+        risk: "future_action_debt",
+        severity: "high",
+        rationale:
+          "The flatline replacement costs the Runner its next four actions.",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "future_agenda_point_forfeit",
+        severity: "high",
+        rationale:
+          "The next three agenda points scored are forfeited after survival.",
       },
     ],
     capabilities: [],

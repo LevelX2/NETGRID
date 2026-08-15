@@ -84,6 +84,7 @@ export const KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS = [
   "temporary_resource",
   "credits_for_bad_publicity",
   "agenda_point_for_multi_server_run_sequence",
+  "ongoing_economy_for_board_development",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_TIMINGS = [
@@ -466,6 +467,7 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "prefer_reveal_when_credit_value_exceeds_information_cost",
   "prefer_already_public_or_low_information_value_code_gates",
   "prefer_already_public_or_low_information_value_walls",
+  "redundant_or_spent_installed_card",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -487,6 +489,7 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "no_rezzed_ice_target",
   "no_subsidiary_fort_target",
   "avoid_revealing_high_value_hidden_ice_without_need",
+  "critical_rig_or_survival_card",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [

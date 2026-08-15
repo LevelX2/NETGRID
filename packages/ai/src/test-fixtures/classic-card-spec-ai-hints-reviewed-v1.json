@@ -863,7 +863,6 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
-        "strategyAnchors": ["corp.damage_kill"],
         "lineSupport": ["corp.damage_kill"],
         "strategySupportPairs": [
           {
@@ -3562,29 +3561,8 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program", "derez", "fully_broken_ice"],
-        "planRoles": [],
+        "planRoles": ["ice_sabotage"],
         "valueHints": {},
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "derez_just_fully_broken_ice",
-            "preferences": [
-              "current_encounter_ice",
-              "known_or_rezzed_ice",
-              "high_rez_cost_relief",
-              "blocks_relevant_run_path"
-            ],
-            "avoid": [
-              "unknown_low_information_target",
-              "irrelevant_server_ice",
-              "hidden_info_dependent_choice"
-            ],
-            "kind": "use_target",
-            "timing": "encounter_resolution",
-            "targetType": "installed_ice",
-            "hiddenInfoPolicy": "visible_or_known_only"
-          }
-        ],
         "effects": [
           {
             "kind": "rez",

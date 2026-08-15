@@ -77,10 +77,6 @@ export const cardSpec = {
         role: "build_rig",
       },
       {
-        kind: "plan_role",
-        role: "recover_rig",
-      },
-      {
         kind: "strategic_role",
         role: "engine_anchor",
       },
@@ -93,18 +89,25 @@ export const cardSpec = {
         lineKey: "runner.search.breaker",
         support: "supports",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "install_program_that_answers_current_ice_or_setup_gap",
-        preferences: [
-          "program_breaks_current_ice",
-          "program_repairs_missing_coverage",
-          "program_affordable_after_install",
+        capabilityKey: capabilityKey(
+          "abilities_activated_during_run_trash_source",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "install_program_that_answers_current_ice_or_setup_gap",
+            preferences: [
+              "program_breaks_current_ice",
+              "program_repairs_missing_coverage",
+              "program_affordable_after_install",
+            ],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

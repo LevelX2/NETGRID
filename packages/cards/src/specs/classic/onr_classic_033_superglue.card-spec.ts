@@ -56,19 +56,8 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "target_preference",
-        purpose: "derez_just_fully_broken_ice",
-        preferences: [
-          "current_encounter_ice",
-          "known_or_rezzed_ice",
-          "high_rez_cost_relief",
-          "blocks_relevant_run_path",
-        ],
-        avoid: [
-          "unknown_low_information_target",
-          "irrelevant_server_ice",
-          "hidden_info_dependent_choice",
-        ],
+        kind: "plan_role",
+        role: "ice_sabotage",
       },
       {
         kind: "risk_interpretation",

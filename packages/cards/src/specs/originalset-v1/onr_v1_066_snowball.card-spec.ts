@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Snowball has +1 strength for each subroutine it has broken during a run, until the end of that run.\n1 credit: Break sentry subroutine.\n1 credit: +1 strength.",
+      "Snowball has +1 strength for each subroutine it has broken during a run, until the end of that run.\n[1]: Break sentry subroutine.\n[1]: +1 strength.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
