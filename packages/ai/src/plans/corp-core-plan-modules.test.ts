@@ -1305,6 +1305,26 @@ describe("Corp core plan modules", () => {
         { ...base, urgent: true, centralPressure: "terminal" },
       ]),
     ).toBe("P2");
+    expect(
+      corpGenericDefensePriorityClass([
+        {
+          ...base,
+          phase: "draw_for_ice",
+          urgent: true,
+          centralPressure: "terminal",
+        },
+      ]),
+    ).toBe("P2");
+    expect(
+      corpGenericDefensePriorityClass([
+        {
+          ...base,
+          phase: "draw_for_ice",
+          urgent: true,
+          centralPressure: "acute",
+        },
+      ]),
+    ).toBe("P6");
     expect(corpGenericDefensePriorityClass([base])).toBe("P6");
   });
 

@@ -161,6 +161,7 @@ describe("Corp defensive draw context", () => {
         draw,
         undefined,
         knownCentralAllocation("hq"),
+        { knowledge: "known", disposition: "effect_missing" },
       ),
     ).toMatchObject({
       serverId: "hq",
@@ -181,6 +182,7 @@ describe("Corp defensive draw context", () => {
         draw,
         undefined,
         knownCentralAllocation("hq"),
+        { knowledge: "known", disposition: "effect_missing" },
       ),
     ).toMatchObject({
       serverId: "hq",
@@ -213,6 +215,7 @@ describe("Corp defensive draw context", () => {
         draw,
         undefined,
         knownCentralAllocation("hq"),
+        { knowledge: "known", disposition: "effect_capable" },
       ),
     ).toBeUndefined();
   });
@@ -227,11 +230,73 @@ describe("Corp defensive draw context", () => {
         draw,
         undefined,
         knownCentralAllocation("rd"),
+        { knowledge: "known", disposition: "effect_missing" },
       ),
     ).toMatchObject({
       serverId: "rd",
       evidence: expect.arrayContaining(["central_defense_selected_server:rd"]),
     });
+  });
+
+  it("treats an existing terminal central layer with unchanged access probability as an urgent effect gap", () => {
+    const input = drawInput(5, 6, [
+      {
+        ...centralIce("rd-keeper"),
+        definitionId: "onr_v1_252_keeper",
+        title: "Keeper",
+        subtypes: ["code_gate"],
+        strength: 4,
+        rezzed: true,
+      },
+    ]);
+    input.playerView.opponent.credits = 8;
+    input.playerView.opponent.rig = [
+      corpCard("runner-codecracker", "program", {
+        owner: "runner",
+        side: "runner",
+        definitionId: "onr_v1_014_codecracker",
+        title: "Codecracker",
+        subtypes: ["icebreaker"],
+        rulesText:
+          "0 credits: Break code gate subroutine. 1 credit: +1 strength.",
+        strength: 0,
+        rezzed: true,
+      }),
+    ];
+
+    expect(
+      corpMissingConcreteDefenseDrawNeed(
+        input,
+        draw,
+        undefined,
+        knownCentralAllocation("rd", "terminal"),
+        { knowledge: "known", disposition: "effect_missing" },
+      ),
+    ).toMatchObject({
+      serverId: "rd",
+      urgent: true,
+      centralPressure: "terminal",
+      evidence: expect.arrayContaining([
+        "target_ice_count:1",
+        "current_central_protection_effect:access_probability_unchanged",
+        "central_defense_current_access_probability:1/1",
+        "central_defense_direct_install_disposition:effect_missing",
+      ]),
+    });
+  });
+
+  it("keeps an unknown direct-install assessment fail-closed", () => {
+    const input = drawInput(5, 3);
+
+    expect(
+      corpMissingConcreteDefenseDrawNeed(
+        input,
+        draw,
+        undefined,
+        knownCentralAllocation("rd", "terminal"),
+        { knowledge: "unknown" },
+      ),
+    ).toBeUndefined();
   });
 
   it("admits a targeted score-defense draw only from the exact unprotected effect need", () => {
@@ -827,9 +892,10 @@ function centralIce(instanceId: string): VisibleCard {
 
 function knownCentralAllocation(
   selectedServerId: "hq" | "rd",
+  threat: "none" | "material" | "acute" | "terminal" = "material",
 ): CorpCentralDefenseAllocation {
   const evidence = {
-    threat: "material" as const,
+    threat,
     expectedAgendaLoss: { numerator: 1, denominator: 5 },
     expectedTrashableLoss: { numerator: 0, denominator: 1 },
     accessibleCardCount: 1,

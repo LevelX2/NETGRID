@@ -1455,6 +1455,8 @@ export function corpGenericDefensePriorityClass(
           signal.phase === "resolve_install_targets" ||
           signal.phase === "resolve_run_redirect" ||
           signal.phase === "resolve_post_pass_ice_lifecycle" ||
+          (signal.phase === "draw_for_ice" &&
+            signal.centralPressure === "terminal") ||
           signal.phase === "activate_run_defense" ||
           (signal.phase === "rez_response" &&
             signal.rezWindowVerdict === "productive")),

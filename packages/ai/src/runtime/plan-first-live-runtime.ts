@@ -293,6 +293,7 @@ import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
   corpOptionalDrawAttemptedInEventTailThisTurn,
+  type CorpCentralDefenseDirectInstallRouteState,
 } from "./corp-economy/corp-defensive-draw";
 import {
   assessBestFundedCorpScoreProtection,
@@ -9581,6 +9582,12 @@ function buildCorpDomain(
       );
     },
   );
+  const selectedCentralDirectInstallRouteState =
+    corpSelectedCentralDirectInstallRouteState(
+      input,
+      candidates,
+      centralDefenseAllocation,
+    );
   const selectedScoreProtectionSignals: CorpDefenseSignal[] = [];
   for (const { project, scan } of scoreProtectionRouteScans) {
     if (
@@ -9774,6 +9781,7 @@ function buildCorpDomain(
         action,
         undefined,
         centralDefenseAllocation,
+        selectedCentralDirectInstallRouteState,
       );
       if (!need) return [];
       return [
@@ -9784,7 +9792,8 @@ function buildCorpDomain(
           phase: "draw_for_ice" as const,
           sourceDefinitionIds: [],
           actionIds: [candidate.actionId],
-          urgent: false,
+          urgent: need.urgent,
+          centralPressure: need.centralPressure,
           value: need.planValue,
           evidenceCode: `corp_missing_concrete_defense_draw:${need.serverId}`,
           drawAttemptState: {
@@ -13917,6 +13926,46 @@ function corpTerminalCentralRezReserveSignals(
       evidenceCode: `corp_terminal_central_rez_reserve_required:${serverId}:${reserveCandidate.ice.instanceId}:gap_${reserveCandidate.fundingGap}`,
     },
   ];
+}
+
+function corpSelectedCentralDirectInstallRouteState(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  centralDefenseAllocation: CorpCentralDefenseAllocation | undefined,
+): CorpCentralDefenseDirectInstallRouteState {
+  if (centralDefenseAllocation?.status !== "known") {
+    return { knowledge: "unknown" };
+  }
+  const selectedServerId = centralDefenseAllocation.selectedServerId;
+  const assessments = candidates.flatMap((candidate) => {
+    if (!candidateIsVisibleCorpIceInstall(input, candidate)) return [];
+    const serverId = candidateTargetIds(candidate).find(isCorpInstallServerId);
+    if (serverId !== selectedServerId) return [];
+    return [
+      corpGlobalDefenseInstallRouteAssessment(
+        input,
+        candidate,
+        serverId,
+        centralDefenseAllocation,
+        CORP_DEFENSE_DOMAIN_SIGNAL_FACTS,
+      ),
+    ];
+  });
+  if (
+    assessments.some(
+      (assessment) =>
+        assessment.knowledge === "known" &&
+        (assessment.disposition === "funding_only" ||
+          (assessment.disposition === "productive" &&
+            assessment.projection.effect !== "no_progress")),
+    )
+  ) {
+    return { knowledge: "known", disposition: "effect_capable" };
+  }
+  if (assessments.some((assessment) => assessment.knowledge === "unknown")) {
+    return { knowledge: "unknown" };
+  }
+  return { knowledge: "known", disposition: "effect_missing" };
 }
 
 function corpDefenseReserveNeeds(
