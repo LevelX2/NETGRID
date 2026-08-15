@@ -128,6 +128,15 @@ Erlaubte Detail-Felder:
 - Top-Alternativen mit Ranking, Score, Confidence, Reason-Codes und legaler Action-Referenz;
 - Timing- und Fallback-Hinweise.
 
+Für eine Engine-randomisierte Blind-Trace-Resolution darf die private
+Detailansicht zusätzlich Regelprofil, gedruckten Trace, effektives Limit,
+aktuellen Link, legale Bid-Range, rationale Range, Stakes, Behavioral Bias,
+gewichtete Kandidaten, ausgewählten Bid, Plan-Step und den zugehörigen
+`RandomDrawRecord`-Verweis enthalten. Noch verdeckte Gegengebote und konkrete
+gegnerische Payment-Quellen sind auch hier keine side-sicheren AI-Fakten; sie
+dürfen erst nach dem Engine-Reveal als Ergebnis erscheinen. Normale Replay-
+und Spielerflächen erhalten diese Bewertungs- und RNG-Details nicht.
+
 Die Detailansicht unterscheidet mindestens:
 
 - `visibleFact`: sichtbarer oder aus LegalActions ableitbarer Fakt;

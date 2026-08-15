@@ -1,420 +1,184 @@
-# Trace Open Bidding Alignment Plan
+# Trace-Regelprofilvertrag
 
-Status: Policy-Abgleich umgesetzt
-Stand: 2026-08-12
-Primärer Agent: card-enablement-ai-knowledge-agent
+Status: aktueller NETGRID-Regelvertrag
+Stand: 2026-08-15
 
-## Zielbild
+## Geltungsbereich
 
-NETGRID bleibt bei der modernen, offenen Trace-Logik:
+NETGRID unterstützt genau drei beim Matchstart wählbare Trace-Regelprofile.
+Das gewählte Profil ist Teil von `MatchSettings` und `GameState`, bleibt für
+die gesamte Partie stabil und wird über Persistenz, Runtime-Neustart, Replay,
+Simulation und AI-Decision-Checkpoints weitergereicht. UI- oder Client-State
+ist keine Regelquelle.
 
-- Die Korp wählt zuerst ein sichtbares Trace-Gebot.
-- Der Runner wählt danach sein Link-Gebot mit Kenntnis von Trace-Limit, Korp-Gebot, aktuellem Trace-Wert und eigenem Link.
-- `Trace N` setzt das Trace-Limit N. Die Korp darf 0 bis zum effektiven Limit ausgeben; der tatsächlich ausgegebene Betrag bildet den Trace-Wert.
-- Ein Trace ist erfolgreich, wenn `traceValue >= runnerStrength`.
-- Gleichstand reicht der Korp für einen erfolgreichen Trace.
-- Trace-Wert und Trace-Limit sind getrennte Größen; Modifier müssen ausdrücklich eine oder beide Größen verändern.
+`modern_open` bleibt der Default. Ein fehlendes Profil an der autoritativen
+Version-0-Erzeugungs- oder Normalisierungsgrenze wird als `modern_open`
+behandelt. Laufende Trace-Resolutionen raten kein Profil aus Events oder
+Anzeigetexten.
 
-Damit übernimmt NETGRID Trace-Limit, Trace-Wert und die Corp-freundliche Gleichstandsregel des Originalspiels, weicht aber weiterhin bewusst vom ursprünglichen blinden beziehungsweise gleichzeitig verdeckten Auktionsablauf ab. Die offene sequenzielle Bedienung bleibt für UI, KI, Chronik und Debugging verbindlich; eine verdeckte Originalablauf-Variante kann später als Spieloption folgen.
+Die Profile sind NETGRID-Regelprofile. Die beiden Classic-Varianten erweitern
+die lokale Spielauswahl; sie ändern keine externen Originalquellen unter
+`docs/source/`.
 
-Dieses Dokument war ursprünglich ein Planungsartefakt. Der P0-Regel- und Dokumentationsabgleich ist am 2026-05-17 umgesetzt worden; verbleibende P1/P2-Punkte bleiben als Folgearbeit beschrieben.
+## Profile
 
-## Umsetzungsergebnis 2026-05-17
+### Modern Open (`modern_open`)
 
-- Die offene sequenzielle Trace-Regel ist als verbindliche NETGRID-Regel bestätigt: Korp-Gebot zuerst, danach Runner-Gebot mit sichtbarer Trace-Stärke.
-- Der aktuelle Kernvertrag ist `traceValue = corpBid + traceValueModifiers` bei `0 <= corpBid <= effectiveTraceLimit` und `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`; erfolgreich ist `traceValue >= runnerStrength`.
-- Öffentlich sichtbare Korp-Gebote sind ein erlaubter Trace-Schritt und kein Hidden-Info-Leak.
-- Runner-`PendingChoice`-Daten bleiben runner-privat; Reconnect, KI, PublicEvents, Undo-Preview und Chronik dürfen keine privaten Choice-Rohdaten der falschen Seite enthalten.
-- Signpost und The Springboard sind nicht mehr offen: `spotcheck-2026-05-16-trace-link-post-bid-resolvers` hat beide Karten auf moderne post-bid Trace-Link-Choices gebracht.
-- DEV-007 bleibt als historische MVP-0.1-Abweichung erhalten, ist für Trace/Link aber durch V0.96 und V1.9.14 normalisiert.
+1. `Trace N` gibt der Corp die kostenlose Basisstärke N.
+2. Die Corp wählt offen ein zahlbares Payment. N ist kein künstliches
+   Payment-Limit.
+3. Der Runner sieht die resultierende Corp-Stärke und wählt anschließend sein
+   Link-Payment.
+4. `corpStrength = N + corpPayment + ausdrückliche Strength-Modifier`.
+5. `runnerStrength = currentLink + runnerPayment + postRevealLinkModifier`.
+6. Der Trace ist nur bei `corpStrength > runnerStrength` erfolgreich.
+   Gleichstand schützt den Runner.
 
-## Führende Quellen
+### Classic Blind (`classic_blind`)
 
-### Lokale NETGRID-Spezifikation
+1. `Trace N` ist das normale Corp-Bid-Limit, keine kostenlose Basisstärke.
+2. Corp und Runner committen ihre legalen Gebote und Payment-Quellen verdeckt
+   und unabhängig.
+3. Vor dem eigenen Commitment sieht keine Seite Gebot oder konkrete
+   Payment-Quellen der Gegenseite.
+4. Nach beiden Commitments werden die Gebote gemeinsam aufgedeckt.
+5. Danach laufen strukturierte Post-Reveal-Link-/Trace-Fenster.
+6. `corpStrength = corpBid + ausdrückliche Strength-Modifier`.
+7. `runnerStrength = currentLink + runnerBid + postRevealLinkModifier`.
+8. Der Trace ist nur bei `corpStrength > runnerStrength` erfolgreich.
+   Gleichstand schützt den Runner.
 
-- `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`
-- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements.md`
-- `docs/releases/mvp/mvp-0-96-trace-link-bidding/implementation-review.md`
-- `data/rules/mechanics-coverage-0.96.json`
-- `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md`
-- `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/final-review.md`
-- `data/rules/mechanics-coverage-1.9.14.json`
+### Classic Blind – Corp gewinnt Gleichstand
 
-### Originalquellen als Abgleichsmaterial
+Technischer Bezeichner: `classic_blind_corp_ties`.
 
-- `docs/source/Netrunner Errata 1.70.md`
-- `docs/source/Runnerspoiler 1.0.txt`
-- `docs/source/Corpspoiler 1.0.txt`
+Lifecycle, Basisstärke, Limit und Hidden-Commit-Vertrag sind identisch zu
+Classic Blind. Nur der Vergleich ändert sich: Der Trace ist bei
+`corpStrength >= runnerStrength` erfolgreich.
 
-### Aktuelle technische Anker
+Eine Variante mit kostenloser Basis N **und** Blind-Bid bis N sowie ein
+pauschales `+1` für die Corp existieren nicht.
 
-- `packages/engine/src/index.ts`
-- `packages/ai/src/index.ts`
-- `packages/shared/src/index.ts`
-- `apps/web/app/chronicle.ts`
-- `apps/server/src/multiplayer.test.ts`
-- `apps/web/app/chronicle.test.ts`
+## Gemeinsamer Lifecycle und Regelautorität
 
-## Aktueller Implementierungsstand
-
-### Engine
-
-Die Engine startet Trace-Fenster offen und sequenziell. Bei ICE-Subroutinen wird das Trace-Limit aus der Subroutine gelesen und ein Korp-Bid-Fenster für 0 bis zum effektiven Limit geöffnet. Der tatsächlich bezahlte Betrag bildet den sichtbaren Trace-Wert; danach wird das Runner-Bid-Fenster geöffnet.
-
-Der Kernvergleich ist aktuell:
+Alle Profile verwenden dieselbe Trace-State-Machine:
 
 ```text
-traceValue = corpBid + traceValueModifiers
-runnerStrength = runnerLink + runnerBid
-traceSuccessful = traceValue >= runnerStrength
+Trace start
+→ Corp bid/payment
+→ Runner bid/payment
+→ gemeinsamer Reveal, wenn Blind
+→ Post-Reveal-Link-/Trace-Fenster
+→ finaler Strength-Vergleich
+→ strukturierte Trace-Folge
 ```
 
-Das ist für die gewählte moderne Logik korrekt.
-
-### Chronik
-
-Die Chronik zeigt aktuell öffentlich, welches Korp-Gebot gewählt wurde. Unter der beschlossenen offenen Logik ist das kein Leak, sondern erwartetes Spielverhalten. Der Screenshot mit "Die Korp-KI hat im Trace 2 Credits geboten" ist deshalb regelkonform für NETGRID.
-
-### KI
-
-Die Korp-KI bietet innerhalb des effektiven Trace-Limits. Die Runner-KI muss bei ausreichenden Mitteln den sichtbaren Trace-Wert um mindestens 1 übertreffen; Gleichstand wehrt den Trace nicht ab.
-
-### Regeln und Kartentexte
-
-Die größte verbleibende Drift liegt nicht im Trace-Kern, sondern in Kartentexten und Spezialkarten, die besondere Trace-/Link-Budgetquellen mitbringen. Die frühere Signpost-/Springboard-Drift aus "nach dem Aufdecken der Gebote" ist durch moderne post-bid Link-Choices geschlossen.
-
-## Nicht-Ziele
-
-- Keine Rückkehr zu blindem oder gleichzeitig verdecktem Bieten.
-- Keine verdeckte Korp-Gebotsphase in der UI.
-- Keine Umsetzung in diesem Planungsschritt.
-- Keine Änderung an Originalquellen unter `docs/source/`.
-- Keine Freischaltung weiterer Karten ohne gültigen Release- und Gate-Bezug.
-- Keine Abschwächung der Hidden-Information-, LegalActions-, StateHash- oder Replay-Prinzipien.
-
-## Bewertung
-
-### Was bereits korrekt ist
-
-- Offene Korp-Gebote in der Chronik sind unter dem NETGRID-Zielmodell korrekt.
-- Runner-Entscheidung nach sichtbarem Korp-Gebot ist korrekt.
-- Gleichstand zugunsten der Korp ist korrekt.
-- `Trace N` als Korp-Gebotslimit ist korrekt.
-- Die angebotenen Korp-Gebote sind auf das effektive Trace-Limit und die tatsächlich zahlbaren Quellen begrenzt.
-
-### Was noch abzugleichen ist
-
-- Kartentexte mit Originalformulierungen wie "after both players reveal their bids" müssen weiter in NETGRID-Begriffe übersetzt werden, wenn sie in aktiven Anzeige- oder Katalogtexten auftauchen.
-- Base-Link-Karten sind aktuell teils vereinfacht oder inkonsistent gegenüber den Originalwerten.
-- Wiederkehrende Link-Bid-Credits sind noch nicht vollständig quellenübergreifend modelliert.
-- UI, Chronik und Entscheidungsflächen sollten das offene Modell deutlicher erklären, ohne technische Interna sichtbar zu machen.
-- KI-Entscheidungen sollten die zusätzlichen Link- und Trace-Budgetquellen berücksichtigen.
-
-## Prioritäten
-
-### P0 - Regelentscheidung und Sicherheitsrahmen
-
-Diese Punkte müssen vor weiteren Trace-/Link-Karten eindeutig feststehen.
-
-1. Moderne offene Trace-Regel als verbindlichen NETGRID-Policy-Eintrag dokumentieren.
-2. Alte oder stale Deviation-Einträge prüfen, insbesondere Einträge, die Trace noch als nicht implementiert beschreiben.
-3. Öffentliche Korp-Gebote ausdrücklich als erlaubte PublicEvents markieren.
-4. Reconnect-, Undo-, Replay- und KI-Payloads gegen unerwünschte Zusatzinformationen absichern.
-5. Tests erhalten oder ergänzen, die zeigen: Korp-Bid ist öffentlich, Runner-PendingChoice ist nur Runner-sichtbar.
-
-Abnahmekriterien:
-
-- Eine aktuelle Regelstelle benennt die offene Trace-Sequenz als gewollte NETGRID-Regel.
-- Es gibt keine aktuelle Dokumentationsstelle mehr, die für NETGRID blindes Trace-Bieten fordert.
-- Der Trace-Kern bleibt deterministisch und replayfähig.
-
-### P1 - Kartentext- und Mechanikabgleich
-
-Diese Punkte betreffen spielbare Karten und müssen vor breiterer Kartenfreischaltung geklärt werden.
-
-1. Signpost und The Springboard modernisieren.
-2. Base-Link-Karten systematisch gegen Originalwerte und lokale NETGRID-Vereinfachungen prüfen.
-3. Wiederkehrende Link-Bid-Credit-Quellen vollständig inventarisieren.
-4. Korp-Trace-Bid-Quellen wie Hacker Tracker Central, Krumz und Rabbit sprachlich und technisch eindeutig machen.
-5. Trace- und Link-Begriffe in UI, Katalog und Kartentexten vereinheitlichen.
-
-Abnahmekriterien:
-
-- Jede freigeschaltete Trace-/Link-Karte hat eine NETGRID-taugliche, moderne Regelformulierung.
-- Keine spielbare Karte verlangt ein verdecktes Reveal-Fenster.
-- Alle bid-relevanten Zusatzquellen erhöhen die angezeigte und validierte Obergrenze konsistent.
-
-### P2 - Bedienbarkeit, KI und Tests
-
-Diese Punkte verbessern Verständlichkeit und Robustheit.
-
-1. Entscheidungsfläche zeigt verständlicher, wie viel der Runner zum Abwehren braucht.
-2. "Unbegrenzt" wird durch eine konkrete Maximalangabe oder eine klare Kurzform ersetzt.
-3. Chronik erklärt offene Korp-Gebote als sichtbaren Trace-Schritt.
-4. KI nutzt Link-Booster und wiederkehrende Link-Credits bei Runner-Geboten.
-5. Szenario- und UI-Tests decken Data Raven, Rabbit, Hacker Tracker Central und Link-Booster ab.
-
-Abnahmekriterien:
-
-- Ein Spieler kann aus der UI erkennen, warum Gebote von 0 bis N angeboten werden.
-- Die KI erzeugt keine offensichtlich schlechten Runner-Gebote, obwohl verfügbare Link-Quellen vorhanden sind.
-- Regressionstests schützen die offene Sequenz.
-
-## Kartenmatrix
-
-| Karte                    | Aktueller Befund                                                                                                                   | Planbedarf                                                                                                         | Priorität     |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------- |
-| Data Raven               | Trace 5 nutzt den offenen Trace-Kern.                                                                                              | Kein Logikwechsel. UI soll klarer zeigen, dass 5 die Basis ist und Korp-Gebot addiert wird.                        | P2            |
-| Signpost                 | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`.                                                        | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +2 Link für diesen Trace`, einmal pro Trace.            | abgeschlossen |
-| The Springboard          | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`; statischer Base-Link wurde entfernt.                   | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +1 Link für diesen Trace`, einmal pro Trace.            | abgeschlossen |
-| Rabbit                   | Original reduziert Trace Limit bei ICE. Engine berücksichtigt eine Korp-Bid-Obergrenzenreduktion für ICE-Traces.                   | Text auf moderne Begriffe bringen: reduziert die Korp-Bid-Obergrenze bei ICE-Traces, nicht die Basis-Trace-Stärke. | P1            |
-| Hacker Tracker Central   | Original: Counter nach jedem Trace; Counter können Trace-Stärke und Trace Limit erhöhen. Engine nutzt Counter als Korp-Bid-Quelle. | Text und Tests auf moderne Gebotsquelle abstimmen. Quelle in Payload/Chronik nachvollziehbar machen.               | P1            |
-| Krumz                    | Engine unterstützt Krumz-Bits als Korp-Trace-Bid-Quelle.                                                                           | Quellenanzeige, Tests und Katalogtext prüfen.                                                                      | P1            |
-| Hell's Run               | Engine kennt diese Quelle für Runner-Trace-Link-Credits.                                                                           | Behalten und gegen weitere Quellen abgleichen.                                                                     | P1            |
-| Pandora's Deck           | Original und lokale Definition deuten wiederkehrende Link-Credits an. Engine nutzt sie noch nicht als Runner-Bid-Quelle.           | In Link-Credit-Inventar aufnehmen und Implementierungsbedarf prüfen.                                               | P1            |
-| Bodyweight Data Creche   | Lokale Definition enthält Link-Credit-Mechanik. Engine nutzt sie noch nicht als Runner-Bid-Quelle.                                 | In Link-Credit-Inventar aufnehmen und Text/Mechanik angleichen.                                                    | P1            |
-| PK-6089a                 | Lokale Fakten deuten wiederkehrende Link-Credits an, aktuelle Definition wirkt generischer.                                        | Originalwert, Release-Gate und gewünschte NETGRID-Fassung prüfen.                                                  | P1            |
-| Techtronica Utility Suit | Originaltext enthält Link-Credit-Bezug, aktuelle Definition fokussiert Schadenprävention.                                          | Prüfen, ob Link-Credits im aktuellen Release überhaupt freigeschaltet werden sollen.                               | P1            |
-| Baedeker's Net Map       | Base-Link-Karte.                                                                                                                   | Wert und Kosten gegen Zielmodell prüfen.                                                                           | P1            |
-| Bakdoor                  | Originalwert wirkt höher als aktuelle lokale Definition.                                                                           | Base-Link-Wert und Kostenmodell klären.                                                                            | P1            |
-| Access through Alpha     | Aktueller Workspace deutet bereits auf hohen Base-Link-Wert hin.                                                                   | Gegen Original, Gate und gewünschte Vereinfachung prüfen.                                                          | P1            |
-| Access to Arasaka        | Original enthält Base-Link und Link-Erhöhung. Aktuelle Definition wirkt vereinfacht.                                               | Wert, Zusatzfähigkeit und Kostenmodell klären.                                                                     | P1            |
-| Access to Kiribati       | Base-Link-Karte.                                                                                                                   | Wert und Kosten gegen Zielmodell prüfen.                                                                           | P1            |
-| Back Door to Hilliard    | Original enthält Base-Link und Link-Erhöhung.                                                                                      | Wert, Zusatzfähigkeit und Kostenmodell klären.                                                                     | P1            |
-| Back Door to Orbital Air | Original enthält Base-Link und Link-Erhöhung.                                                                                      | Wert, Zusatzfähigkeit und Kostenmodell klären.                                                                     | P1            |
-| Submarine Uplink         | Original enthält Base-Link, Link-Erhöhung und Jack-out-Folge.                                                                      | Prüfen, ob Zusatzfolge im aktuellen Release gebraucht wird oder bewusst verschoben bleibt.                         | P1            |
-| Microtech 'Trode Set     | Aktuell als +1 Link vereinfacht.                                                                                                   | Gegen Base-Link-Zielmodell prüfen.                                                                                 | P1            |
-| Crybaby                  | Engine berücksichtigt Counter-Reduktion auf Runner-Link.                                                                           | Tests und Anzeige beibehalten beziehungsweise ergänzen.                                                            | P2            |
-| Paris City Grid          | Trace-Quelle im Corp-Upgrade-/City-Grid-Umfeld.                                                                                    | Nur Terminologie prüfen, kein offenes Bietmodell ändern.                                                           | P2            |
-
-## Regelmodell für offene Link-Booster
-
-Für Karten wie Signpost und The Springboard sollte kein neues verdecktes Reveal-Fenster eingeführt werden. Stattdessen sollte die moderne Sequenz so erweitert werden:
-
-1. Korp wählt sichtbares Trace-Gebot.
-2. Engine berechnet vorläufige Trace-Stärke.
-3. Runner-Bid-Fenster enthält normale Credit-Gebote und verfügbare Link-Booster.
-4. Runner kann Link-Booster bezahlen oder einsetzen, solange sie für diesen Trace legal sind.
-5. Engine berechnet `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`.
-6. Trace-Erfolg ist `traceValue >= runnerStrength`.
-
-Vorteile:
-
-- Keine verdeckte Zusatzphase.
-- Passt zur gewählten offenen Android-Netrunner-nahen Bedienlogik.
-- LegalActions bleiben die einzige Quelle erlaubter Entscheidungen.
-- KI und UI können die benötigte Runner-Stärke transparent berechnen.
-
-Offene Detailentscheidung:
-
-- Link-Booster als eigene Choices vor dem finalen Runner-Bid modellieren oder als kombinierte Runner-Bid-Option mit Zusatzquellen.
-- Empfehlung: zunächst kombinierte Runner-Bid-Optionen, wenn das zur bestehenden `bid_amount`-Struktur passt; andernfalls eigenes, aber weiterhin Runner-sichtbares Modifier-Fenster.
-
-## Base-Link-Zielmodell
-
-Der aktuelle Code berechnet Runner-Link offenbar aus Identität plus statischen Quellen und wählt bei installierten Base-Link-Karten einen wirksamen Maximalwert. Das ist spielbar, aber nicht vollständig originalgetreu, weil mehrere Originalkarten Kosten für Base Link oder zusätzliche Link-Erhöhung nennen.
-
-Es gibt zwei realistische Zielmodelle.
-
-### Option A - Praktische NETGRID-Vereinfachung
-
-Base-Link-Karten liefern installierte, offene statische Linkwerte. Die Engine wählt automatisch den besten anwendbaren Wert. Kosten aus Originaltexten werden nicht oder nur als Installations-/Freischaltungsmodell übernommen.
-
-Vorteile:
-
-- Passt zur aktuellen Implementierung.
-- Sehr gut für KI und UI.
-- Weniger Zusatzentscheidungen pro Trace.
-
-Nachteile:
-
-- Muss als bewusste NETGRID-Regelabweichung dokumentiert werden.
-- Originalformulierungen müssen deutlich lokalisiert werden.
-
-### Option B - Näheres Originalmodell
-
-Base-Link-Karten werden als explizite Runner-Entscheidung im Trace-Fenster modelliert, gegebenenfalls mit Kosten pro Nutzung.
-
-Vorteile:
-
-- Näher am Original.
-- Kartentexte lassen sich genauer abbilden.
-
-Nachteile:
-
-- Mehr UI-Komplexität.
-- Mehr KI- und Testaufwand.
-- Höheres Risiko für Timing- und LegalActions-Drift.
-
-Empfehlung:
-
-Kurzfristig Option A beibehalten und sauber dokumentieren. Option B nur dann planen, wenn die Base-Link-Karten als eigenes Release-Thema priorisiert werden.
-
-## Sprach- und UI-Abgleich
-
-### Begriffe
-
-- `Trace N`: Trace-Limit N.
-- `Korp-Gebot`: sichtbarer bezahlter Trace-Wert innerhalb des effektiven Limits.
-- `Trace-Wert`: Korp-Gebot plus ausdrückliche Trace-Wert-Modifikatoren.
-- `Runner-Link`: statischer aktueller Link des Runners vor Runner-Gebot.
-- `Runner-Gebot`: bezahlte Zusatzstärke aus Credits und zulässigen Link-Bid-Quellen.
-- `Runner-Stärke`: Runner-Link plus Runner-Gebot plus temporäre Link-Booster.
-- `Korp-Bid-Obergrenze`: Minimum aus effektivem Trace-Limit und tatsächlich zahlbaren Credits beziehungsweise Zusatzquellen.
-- `Runner-Bid-Obergrenze`: maximal wählbares Runner-Gebot nach Credits und Zusatzquellen.
-
-### UI-Verbesserungen
-
-1. Im Runner-Entscheidungsbereich anzeigen:
-   - `Trace-Stärke: 7`
-   - `Dein Link: 0`
-   - `Zum Abwehren benötigt: 7`
-   - `Max. Gebot: 10`
-2. "Unbegrenzt" durch konkrete Obergrenze ersetzen, wenn die Engine sie kennt.
-3. Chroniktext optional ergänzen:
-   - `Die Korp-KI hat im offenen Trace 2 Credits geboten.`
-4. Tooltip oder Kurzinfo:
-   - `Korp-Gebote sind in NETGRID sichtbar, bevor der Runner bietet.`
-
-## Testbedarf
-
-### Engine
-
-- Data Raven: Trace-Limit 5, Korp-Gebot 2, Runner-Link 0, Runner-Gebot 2 => Trace erfolgreich.
-- Data Raven: Trace-Limit 5, Korp-Gebot 2, Runner-Link 0, Runner-Gebot 3 => Trace abgewehrt.
-- Gleichstand gewinnt die Korp.
-- Rabbit reduziert nur die Korp-Bid-Obergrenze bei ICE-Traces.
-- Hacker Tracker Central erhöht verfügbare Korp-Bid-Quellen und erhält nach Trace Counter.
-- Krumz-Bits werden korrekt als Korp-Bid-Quelle verbraucht.
-- Link-Booster können nur im Runner-Fenster nach sichtbarem Korp-Gebot genutzt werden.
-- Wiederkehrende Link-Credits werden korrekt einbezogen und verbraucht.
-
-### Server und Hidden Information
-
-- Korp-PendingChoice nur für Korp sichtbar.
-- Runner-PendingChoice nur für Runner sichtbar.
-- Öffentliches Event enthält Korp-Gebot, aber keine verdeckten Korp-Hand- oder Deckinformationen.
-- Reconnect-Payloads zeigen nur side-legale PendingChoices.
-- Undo-Preview leakt keine verdeckten Alternativen.
-
-### Web
-
-- Chronik zeigt Korp-Gebot absichtlich öffentlich.
-- Runner-Entscheidung zeigt benötigtes Gebot verständlich.
-- Buttons reichen nur legale Gebote ein.
-- Maximalwerte bleiben stabil, auch wenn Rabbit, Hacker Tracker Central oder Link-Credit-Quellen aktiv sind.
-
-### KI
-
-- Runner-KI bietet bei offenem Trace mindestens einen Punkt über den Trace-Wert, wenn möglich und strategisch sinnvoll.
-- Runner-KI berücksichtigt Link-Booster und wiederkehrende Link-Credits.
-- Korp-KI überschreitet nie die aktuelle Bid-Obergrenze.
-- KI-Reason-Codes nennen sichtbare moderne Trace-Entscheidungen.
-
-## Dokumentationsbedarf
-
-1. Erledigt: Die aktuelle Trace-Policy ist in diesem Artefakt und in `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md` festgehalten.
-2. Erledigt: `TRACE_LINK_BIDDING_0.96_SPEC.md` bleibt führendes Grundmodell und wird durch den V1.9.14-Status ergänzt.
-3. Erledigt: `docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md` ordnet DEV-007 als historische MVP-Abweichung ein und benennt die Trace-Normalisierung.
-4. Erledigt: Der Spotcheck-Job `trace-link-post-bid-resolvers` ist abgeschlossen und beschreibt moderne post-bid Trace-Link-Choices.
-5. Offen als Folgearbeit: Kartenkatalogtexte für weitere freigeschaltete Trace-/Link-Karten normalisieren.
-
-## Umsetzungsschnitt
-
-### Phase 0 - Dieses Planungsartefakt
-
-Ergebnis:
-
-- Detaillierter Plan liegt vor.
-- Keine Engine-, UI-, KI- oder Kartendefinitionsänderung.
-- P0-Policy-Abgleich wurde am 2026-05-17 dokumentarisch abgeschlossen.
-
-### Phase 1 - Regel- und Dokumentationsabgleich
-
-Betroffene Artefakte:
-
-- Trace-Policy oder Trace-Spezifikation
-- Deviation Registry
-- Spotcheck-Job für Signpost und The Springboard
-- Mechanics-Coverage-Hinweise
-
-Ergebnis:
-
-- Abgeschlossen am 2026-05-17.
-- Offenes Bieten ist projektweit eindeutig.
-- Blindes oder gleichzeitig verdecktes Bieten taucht nur noch als Originalreferenz oder bewusst verworfene Alternative auf.
-
-### Phase 2 - Signpost und The Springboard
-
-Betroffene Bereiche:
-
-- Engine-Choice-Modell
-- Shared-Kartendefinitionen
-- Runner-UI
-- KI
-- Engine- und Webtests
-
-Ergebnis:
-
-- Abgeschlossen durch `spotcheck-2026-05-16-trace-link-post-bid-resolvers`.
-- Beide Karten arbeiten im modernen post-bid Runner-Link-Fenster.
-- Keine Karte erzeugt ein verdecktes Reveal- oder Nach-Reveal-Fenster.
-
-### Phase 3 - Wiederkehrende Link-Credit-Quellen
-
-Betroffene Karten:
-
-- Hell's Run
-- Pandora's Deck
-- Bodyweight Data Creche
-- PK-6089a
-- Techtronica Utility Suit
-
-Ergebnis:
-
-- Alle freigeschalteten Quellen sind vollständig im Runner-Bid-Maximum und in der Zahlung enthalten.
-- Verbrauch und Anzeige sind deterministisch und nachvollziehbar.
-
-### Phase 4 - Base-Link-Karten
-
-Betroffene Karten:
-
-- Baedeker's Net Map
-- Bakdoor
-- Access through Alpha
-- Access to Arasaka
-- Access to Kiribati
-- Back Door to Hilliard
-- Back Door to Orbital Air
-- Submarine Uplink
-- Microtech 'Trode Set
-
-Ergebnis:
-
-- Base-Link-Werte, Kosten und Zusatzfähigkeiten sind entweder korrekt modelliert oder als NETGRID-Vereinfachung dokumentiert.
-- UI und Kartentexte widersprechen der Engine nicht.
-
-### Phase 5 - UI, KI und Regression
-
-Betroffene Bereiche:
-
-- Runner-Entscheidungsbereich
-- Chronik
-- Vorschau und Kartentexte
-- KI-Reason-Codes
-- End-to-end- und Szenariotests
-
-Ergebnis:
-
-- Spieler verstehen die offenen Trace-Zahlen ohne Regelwissen aus dem Originalspiel.
-- KI und Tests schützen die beschlossene Logik.
-
-## Offene Entscheidungen
-
-1. Soll Option A für Base-Link-Karten verbindlich werden, also automatische statische NETGRID-Vereinfachung?
-2. Welche wiederkehrenden Link-Credit-Quellen sind im aktuellen Release wirklich freigeschaltet?
-3. Wie ausführlich soll die UI die offene Trace-Regel erklären: nur konkrete Zahlen oder zusätzlich ein kurzer Tooltip?
-
-## Empfohlene nächste Entscheidung
-
-Als nächstes sollte zuerst Phase 1 umgesetzt werden. Danach ist die Projektregel eindeutig genug, um Signpost, The Springboard, wiederkehrende Link-Credits und Base-Link-Karten ohne erneutes Grundsatzrütteln umzusetzen.
+Die Engine erzeugt die aktuelle `LegalAction` und die gebundenen Choices,
+revalidiert StateVersion, Seite, Action-ID, Choice, Betrag und Quellen und ist
+die einzige Autorität für Zahlung und Ergebnis. Karten starten oder
+modifizieren den generischen Trace-Vertrag über strukturierte Semantik; es
+gibt keine Karten-ID-Schalter und keine zweite Trace-State-Machine.
+
+## Trace Limit, Strength und Payment-Quellen
+
+`printedTrace`, `effectiveTraceLimit`, `corpBidMax`, `corpBid` und
+`corpStrength` sind getrennte Größen.
+
+- In Blind-Profilen deckelt das effektive Trace-Limit das normale Corp-Gebot.
+- Ausdrücklich regelwirksame Trace-Counter können das effektive Limit und die
+  zahlbare Kapazität erweitern.
+- Rabbit reduziert bei ICE-Traces das effektive Limit. Diese Reduktion deckelt
+  Classic-Bids, aber nicht das offene Modern-Payment.
+- Variable und X-basierte Trace-Werte werden vor dem Bid als gedruckter und
+  effektiver Wert im Trace-State gebunden.
+- Spezialisierte Corp-Trace-, Fort-, Encounter- und temporäre Credits sowie
+  Runner-Link-/Trace-Pools bleiben Engine-gequotete Payment-Quellen.
+- Eine Quellen-Choice bestimmt nur, wie ein bereits gewähltes Gesamtgebot
+  bezahlt wird. Temporäre oder wiederaufladbare Pools folgen ihrem
+  strukturierten Lifecycle.
+
+Signpost, The Springboard und vergleichbare Fähigkeiten laufen nach dem
+Reveal und vor dem finalen Vergleich. Modern erreicht dasselbe Fenster nach
+dem sichtbaren sequenziellen Payment; Blind erreicht es erst nach dem
+gemeinsamen Reveal.
+
+## Hidden Information, Events und Replay
+
+Blind-Choices tragen `hidden_info_barrier`. Vor Reveal enthalten gegnerische
+PlayerViews und PublicEvents weder Bid noch konkrete Payment-Quellen oder
+daraus ableitbare Details. Insbesondere wird ein durch den verdeckten
+Counter-Einsatz intern erhöhtes Limit erst beim gemeinsamen Reveal sichtbar;
+vorher bleibt nur das vor dem Commitment öffentliche Basislimit verfügbar.
+Nach Reveal dürfen die öffentlichen Ergebnisfelder beide Gebote und finalen
+Stärken enthalten. Normale WebSocket-, Reconnect-, Chronik- und Replay-Flächen
+verwenden dieselbe side-sichere Projektion.
+
+Die private lokale Betreiber-/KI-Diagnostik bleibt von dieser Spielerfläche
+getrennt. Sie darf rationale Range, Stakes, Bias, gewichtete Kandidaten,
+Auswahl, Plan-Step und RNG-Nachweis zeigen, aber keine gegnerische Hidden Info
+als KI-Input verwenden oder in Spielerkanäle spiegeln.
+
+Jede tatsächliche AI-Bid-Varianz wird erst nach rationaler Kandidatenbildung
+über den autoritativen Match-RNG gezogen. Der Engine-Command bindet Match,
+StateVersion, Timing, Seite, dieselbe `resolve_choice`-Action, Choice,
+Plan-Step, Profil und legale Optionen. Requote geschieht vor dem Draw;
+`RandomDrawRecord`, privates Receipt und StateHash-Replay reproduzieren das
+Ergebnis. `Math.random()`, Zeitstempel und UI-Randomisierung sind verboten.
+
+Im `StateHash` ist das explizite Defaultprofil `modern_open` kanonisch
+gleichbedeutend mit einem historisch fehlenden Feld. Nicht-defaultige Profile
+und der Hidden-/Reveal-Zustand eines Blind-Traces bleiben ausdrücklich
+hashwirksam. Damit verhalten sich alte lokale Modern-Snapshots wie Modern,
+ohne die Replay-Identität der Blind-Varianten zu verwischen.
+
+## KI-Ownership und Bewertung
+
+Der auslösende Punish-, Defense-, Run- oder Scoreplan bleibt Owner. Die
+Trace-Resolution darf weder einen anderen strategischen Plan wählen noch eine
+globale Action-Chooser-Schicht bilden.
+
+Die side-sichere Bewertung berücksichtigt strukturierte Trace-Folge,
+sichtbaren Link, sichtbare Credit- und Zweckpools, effektives Limit, Tie-Regel,
+Reserve und Low-/Normal-/High-/Terminal-Stakes. Erst danach wird eine kleine
+konsequenzabhängige Tendenz (`conservative`, `normal`, `aggressive` oder
+`polarized`) auf wirtschaftlich plausible legale Kandidaten angewendet.
+Terminale Entscheidungen besitzen eine enge Verteilung; ein polarisierter
+Low-Stakes-Mix kann sowohl 0 als auch einen Randwert bevorzugen.
+
+Der Bias wird derzeit je Trace aus Stakes und Outcome-Wert bestimmt. Eine
+kurzfristig persistierte Stimmung wird bewusst nicht als zusätzlicher
+Match-/Personality-State eingeführt; die replaybare Kandidatenauswahl liefert
+die gewünschte kleine Varianz ohne neue Metaarchitektur.
+
+Im Modern-Profil reagiert der Runner auf die tatsächlich sichtbare
+Corp-Stärke und entscheidet weiterhin wirtschaftlich, ob die Verhinderung den
+Preis wert ist. Künstliche Blind-Varianz gibt es dort nicht.
+
+## UI
+
+Die erweiterte Spielanlage bietet eine Auswahl `Trace-Regel` mit verständlicher
+Kurzbeschreibung aller drei Profile. Lobby, gespeicherte Matchsettings und
+Accountpräferenz zeigen beziehungsweise halten denselben Wert. Default ist
+`Modern`.
+
+Während eines Blind-Bids zeigt die Spieler-UI nur den eigenen Commit und einen
+neutralen gegnerischen Wartezustand. Nach Reveal zeigt sie die offengelegten
+Gebote, Modifier, finalen Stärken und das Ergebnis. Rationale AI-Zielwerte und
+Gewichtungen bleiben privat.
+
+## Technische Anker
+
+- Profil- und Replaytypen: `packages/shared/src/index.ts`
+- Profilregeln: `packages/engine/src/game/trace/trace-rules-profile.ts`
+- Lifecycle: `packages/engine/src/game/trace/trace-orchestration.ts`
+- Gedruckte ICE-Traces: `packages/engine/src/game/run/encounter-printed-effects.ts`
+- Payment: `packages/engine/src/game/payment/`
+- PlayerView/PublicEvents: `packages/engine/src/game/view/`
+- AI-Bewertung: `packages/ai/src/runtime/trace-bid-assessment.ts`
+- Plan-first-Bindung: `packages/ai/src/runtime/plan-first-live-runtime.ts`
+- RNG/Requote/Replay: `packages/engine/src/game/randomized-trace-bid-selection.ts`
+- Match/UI: `apps/server/src/multiplayer.ts`, `apps/web/app/page.tsx`
+
+Die fokussierten Regel-, Hidden-Info-, Payment-, Post-Reveal-, Ownership-,
+Seed- und Szenariotests liegen bei diesen Modulen sowie unter
+`packages/ai/src/simulation/trace-profile-scenario-comparison.test.ts`.
