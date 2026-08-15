@@ -640,6 +640,8 @@ export function corpMissingConcreteDefenseDrawNeed(
     capacity.projectedDrawCount === 1 &&
     capacity.handCount <= capacity.maxHandSize + 1;
   if (!capacity.eligible && !boundedOverflowSearch) return undefined;
+  const followupCapacity = corpPostDrawDefenseFollowupCapacity(input, action);
+  if (!followupCapacity) return undefined;
   if (input.playerView.own.stackOrRdCount <= 1) return undefined;
   const deckDensity = buildCorpIceDensityProfile(input);
   if (
@@ -668,9 +670,36 @@ export function corpMissingConcreteDefenseDrawNeed(
       ...target.evidence,
       ...deckDensity.evidence,
       ...corpOptionalDrawCapacityEvidence(capacity),
+      `central_defense_draw_click_cost:${followupCapacity.drawClickCost}`,
+      `central_defense_post_draw_action_capacity:${followupCapacity.remainingActionCapacity}`,
+      "central_defense_required_followup_action_capacity:1",
       `central_defense_bounded_overflow_search:${boundedOverflowSearch}`,
     ],
   };
+}
+
+function corpPostDrawDefenseFollowupCapacity(
+  input: AiDecisionInput,
+  action: LegalAction,
+):
+  | {
+      drawClickCost: number;
+      remainingActionCapacity: number;
+    }
+  | undefined {
+  const currentClicks = input.playerView.own.clicks;
+  const drawClickCost = exactLegalActionClickCost(action);
+  if (
+    !nonNegativeSafeInteger(currentClicks) ||
+    drawClickCost === undefined ||
+    drawClickCost > currentClicks
+  ) {
+    return undefined;
+  }
+  const remainingActionCapacity = currentClicks - drawClickCost;
+  return remainingActionCapacity >= 1
+    ? { drawClickCost, remainingActionCapacity }
+    : undefined;
 }
 
 function corpMissingConcreteCentralDefenseTarget(

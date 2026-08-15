@@ -239,30 +239,7 @@ describe("Corp defensive draw context", () => {
   });
 
   it("treats an existing terminal central layer with unchanged access probability as an urgent effect gap", () => {
-    const input = drawInput(5, 6, [
-      {
-        ...centralIce("rd-keeper"),
-        definitionId: "onr_v1_252_keeper",
-        title: "Keeper",
-        subtypes: ["code_gate"],
-        strength: 4,
-        rezzed: true,
-      },
-    ]);
-    input.playerView.opponent.credits = 8;
-    input.playerView.opponent.rig = [
-      corpCard("runner-codecracker", "program", {
-        owner: "runner",
-        side: "runner",
-        definitionId: "onr_v1_014_codecracker",
-        title: "Codecracker",
-        subtypes: ["icebreaker"],
-        rulesText:
-          "0 credits: Break code gate subroutine. 1 credit: +1 strength.",
-        strength: 0,
-        rezzed: true,
-      }),
-    ];
+    const input = terminalRdEffectGapInput(3);
 
     expect(
       corpMissingConcreteDefenseDrawNeed(
@@ -281,8 +258,25 @@ describe("Corp defensive draw context", () => {
         "current_central_protection_effect:access_probability_unchanged",
         "central_defense_current_access_probability:1/1",
         "central_defense_direct_install_disposition:effect_missing",
+        "central_defense_draw_click_cost:1",
+        "central_defense_post_draw_action_capacity:2",
+        "central_defense_required_followup_action_capacity:1",
       ]),
     });
+  });
+
+  it("rejects a terminal central defense draw without post-draw action capacity", () => {
+    const input = terminalRdEffectGapInput(1);
+
+    expect(
+      corpMissingConcreteDefenseDrawNeed(
+        input,
+        draw,
+        undefined,
+        knownCentralAllocation("rd", "terminal"),
+        { knowledge: "known", disposition: "effect_missing" },
+      ),
+    ).toBeUndefined();
   });
 
   it("keeps an unknown direct-install assessment fail-closed", () => {
@@ -888,6 +882,35 @@ function centralIce(instanceId: string): VisibleCard {
     title: "Reinforced Wall",
     subtypes: ["Wall"],
   });
+}
+
+function terminalRdEffectGapInput(clicks: number): AiDecisionInput {
+  const input = drawInput(5, 6, [
+    {
+      ...centralIce("rd-keeper"),
+      definitionId: "onr_v1_252_keeper",
+      title: "Keeper",
+      subtypes: ["code_gate"],
+      strength: 4,
+      rezzed: true,
+    },
+  ]);
+  input.playerView.own.clicks = clicks;
+  input.playerView.opponent.credits = 8;
+  input.playerView.opponent.rig = [
+    corpCard("runner-codecracker", "program", {
+      owner: "runner",
+      side: "runner",
+      definitionId: "onr_v1_014_codecracker",
+      title: "Codecracker",
+      subtypes: ["icebreaker"],
+      rulesText:
+        "0 credits: Break code gate subroutine. 1 credit: +1 strength.",
+      strength: 0,
+      rezzed: true,
+    }),
+  ];
+  return input;
 }
 
 function knownCentralAllocation(
