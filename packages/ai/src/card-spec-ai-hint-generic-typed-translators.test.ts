@@ -82,6 +82,34 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("binds Batch 9 rez and targeted-bypass choices to their mechanical owners", () => {
+    const sandstorm = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_proteus_036_sandstorm"),
+    );
+    expect(sandstorm.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "choose_paid_end_the_run_subroutine_count",
+        kind: "mode_choice",
+        timing: "corp_rez_window",
+        targetType: "mode_choice",
+        hiddenInfoPolicy: "legal_options_only",
+      }),
+    );
+
+    const socialEngineering = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_v1_111_social-engineering"),
+    );
+    expect(socialEngineering.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "bypass_chosen_ice",
+        kind: "use_target",
+        timing: "on_play",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "visible_or_known_only",
+      }),
+    );
+  });
+
   it("keeps multiple actor-private choices bound to their own capability", () => {
     const ronin = deriveCardSpecAiHint(
       targetAnnotatedEntry("onr_v1_175_ronin-around"),

@@ -70,10 +70,6 @@ export const cardSpec = {
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -88,8 +84,31 @@ export const cardSpec = {
         rationale:
           "ICE Semantic Review v1: Sandstorm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten.",
       },
+      {
+        kind: "risk_interpretation",
+        risk: "credit_reserve_cost",
+        severity: "high",
+      },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("rez_with_paid_end_run_subroutines"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_paid_end_the_run_subroutine_count",
+            preferences: [
+              "high_run_denial_payoff",
+              "prefer_option_relevant_to_current_run_path",
+            ],
+            avoid: [
+              "insufficient_post_payment_reserve",
+              "option_with_no_visible_current_payoff",
+            ],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 3 credits on Cloak when it is installed. Use these credits only to pay for using icebreakers during runs, but not for noisy icebreakers. If you use any credits, replace them at the start of your next turn.",
+      "Put [3] from the bank on Cloak when it is installed. Use these bits only to pay for using icebreakers during runs, but not for noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -73,9 +73,8 @@ export const cardSpec = {
         role: "safe_probe_run",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "recurring_non_noisy_breaker_credits",
       },
       {
         kind: "value_interpretation",

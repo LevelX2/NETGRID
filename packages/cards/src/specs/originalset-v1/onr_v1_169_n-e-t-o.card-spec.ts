@@ -85,16 +85,27 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "recover_rig",
-      },
-      {
-        kind: "target_preference",
-        purpose: "top_four_prep_or_resource_choice",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        role: "draw_for_answers",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_look_top_stack_take_matching",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "top_four_prep_or_resource_choice",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+            ],
+            avoid: ["insufficient_post_payment_reserve"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

@@ -699,7 +699,11 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program"],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run",
+          "recurring_non_noisy_breaker_credits"
+        ],
         "valueHints": { "economy": 2 },
         "effects": [
           {
@@ -730,9 +734,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -1171,31 +1173,8 @@
           "universal_breaker",
           "self_trash"
         ],
-        "planRoles": ["break_ice"],
+        "planRoles": ["emergency_breaker", "break_ice"],
         "valueHints": {},
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "purpose": "dropp_emergency_subroutine_target",
-            "preferences": [
-              "prevent_high_damage_subroutine",
-              "prevent_program_trash_subroutine",
-              "prevent_hardware_trash_subroutine",
-              "prevent_dangerous_tag_subroutine",
-              "prevent_run_lock_subroutine"
-            ],
-            "avoid": [
-              "pure_end_the_run_subroutine",
-              "normal_breaker_available_without_run_end",
-              "access_goal_blocked_after_use",
-              "hidden_info_dependent_choice"
-            ],
-            "kind": "use_target",
-            "timing": "during_ice_encounter",
-            "targetType": "subroutine",
-            "hiddenInfoPolicy": "legal_targets_only"
-          }
-        ],
         "breakerProfile": {
           "coverage": ["universal"],
           "emergencyCoverage": true,
@@ -1221,8 +1200,13 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
-        "riskTags": ["encounter"],
+        "costProfile": {
+          "opportunityCost": "high",
+          "clicks": 1,
+          "credits": 3,
+          "memory": 1
+        },
+        "riskTags": ["run_ends_on_break", "opportunity_cost", "encounter"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1505,7 +1489,7 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["remote_scoring_denial", "fort_bound_virus_pressure"],
         "valueHints": {},
         "actionCapacityProfiles": [
           {
@@ -1548,9 +1532,7 @@
           "virus.corp_purgeable_counter",
           "virus.purge_tax"
         ],
-        "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:delayed_penalty",
           "effect:persistent_counter_effect",
           "effect_scope:corp",
@@ -1560,6 +1542,7 @@
         ],
         "conditions": [{ "kind": "requires_successful_run" }],
         "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
+        "riskTags": ["virus_purge_risk"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2028,7 +2011,11 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program"],
-        "planRoles": ["build_rig", "run_support"],
+        "planRoles": [
+          "build_rig",
+          "run_support",
+          "recurring_non_noisy_breaker_credits"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -2059,9 +2046,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -5060,7 +5045,7 @@
           "hq_pressure",
           "corp_credit_denial"
         ],
-        "planRoles": ["pressure_hq"],
+        "planRoles": ["pressure_hq", "conditional_hq_access_replacement"],
         "valueHints": {},
         "strategicRole": ["payoff_anchor"],
         "strategyAnchors": ["runner.hq_pressure"],
@@ -5182,7 +5167,13 @@
           { "kind": "requires_successful_run" }
         ],
         "costProfile": { "clicks": 1, "credits": 1 },
-        "riskTags": ["run", "run_success_dependency", "access_replacement"],
+        "riskTags": [
+          "normal_hq_access_replaced",
+          "corp_empty_credit_pool_whiff",
+          "run",
+          "run_success_dependency",
+          "access_replacement"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6777,6 +6768,22 @@
         "planRoles": ["run_pressure"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "bypass_chosen_ice",
+            "preferences": [
+              "known_or_rezzed_ice",
+              "blocks_relevant_run_path",
+              "high_break_cost_without_bonus"
+            ],
+            "avoid": ["insufficient_post_payment_reserve"],
+            "kind": "use_target",
+            "timing": "on_play",
+            "targetType": "installed_ice",
+            "hiddenInfoPolicy": "visible_or_known_only"
+          }
+        ],
         "effects": [
           {
             "kind": "future_run_effect",
@@ -6803,6 +6810,7 @@
           "effect_timing:during_run"
         ],
         "costProfile": { "clicks": 1, "credits": 1 },
+        "riskTags": ["credit_reserve_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7114,7 +7122,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": ["runner_action_bundle", "rig_development"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -7137,8 +7145,6 @@
             "actionTypes": ["install_card"]
           }
         ],
-        "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card"],
         "costProfile": { "clicks": 1, "credits": 0 },
         "quality": {
           "hintReviewed": true,
@@ -7271,7 +7277,12 @@
           "run_support",
           "recurring_credit"
         ],
-        "planRoles": ["run_pressure", "runner_install_hardware"],
+        "planRoles": [
+          "run_pressure",
+          "memory_support",
+          "icebreaker_credit_support",
+          "runner_install_hardware"
+        ],
         "valueHints": {},
         "strategicExchangeKinds": ["score_progress"],
         "effects": [
@@ -7319,9 +7330,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
@@ -7333,7 +7342,13 @@
         ],
         "conditions": [{ "kind": "requires_installed_ice" }],
         "costProfile": { "clicks": 1, "credits": 11 },
-        "riskTags": ["install_runner", "deck_unique", "restricted_credits"],
+        "riskTags": [
+          "future_agenda_point_forfeit",
+          "deck_replacement_conflict",
+          "install_runner",
+          "deck_unique",
+          "restricted_credits"
+        ],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8143,7 +8158,11 @@
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": [],
+        "planRoles": [
+          "build_rig",
+          "runner_hand_size_support",
+          "survive_damage"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -9165,7 +9184,7 @@
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware"],
-        "planRoles": [],
+        "planRoles": ["killer_credit_support", "sentry_breaker_support"],
         "valueHints": {},
         "effects": [
           {
@@ -9196,9 +9215,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -10457,7 +10474,7 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "recover_rig"],
+        "planRoles": ["build_rig", "draw_for_answers"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -10496,8 +10513,11 @@
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "top_four_prep_or_resource_choice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
+            "preferences": [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state"
+            ],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "use_target",
             "timing": "activated_ability",
             "targetType": "card",
@@ -13204,7 +13224,11 @@
         "cardType": "agenda",
         "aiSupportStatus": "ai_supported",
         "roles": ["agenda", "score_plan", "agenda_3pt", "no_ability_agenda"],
-        "planRoles": [],
+        "planRoles": [
+          "corp_score_agenda",
+          "corp_hand_size_support",
+          "hq_discard_buffer"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -13821,8 +13845,11 @@
           "no_ability_agenda",
           "economy"
         ],
-        "planRoles": [],
+        "planRoles": ["corp_score_agenda", "score_now"],
         "valueHints": {},
+        "strategicRole": ["win_condition"],
+        "strategyAnchors": ["corp.remote_scoring"],
+        "lineSupport": ["corp.remote_scoring"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_corp_main_gain_credits",
@@ -15534,7 +15561,12 @@
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
         "roles": ["ice", "damage_ice", "etr_ice", "sentry_ice"],
-        "planRoles": ["protect_hq", "protect_rnd"],
+        "planRoles": [
+          "protect_hq",
+          "protect_rnd",
+          "brain_damage_pressure",
+          "runner_hand_size_pressure"
+        ],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
         "lineSupport": ["corp.damage_kill"],
@@ -18020,7 +18052,12 @@
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
         "roles": ["ice", "damage_ice", "etr_ice"],
-        "planRoles": ["protect_hq", "protect_rnd"],
+        "planRoles": [
+          "protect_hq",
+          "protect_rnd",
+          "net_damage_pressure",
+          "end_the_run_defense"
+        ],
         "valueHints": {},
         "effects": [
           {
@@ -18191,7 +18228,8 @@
         "roles": ["ice", "etr_ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
+        "strategicRole": ["defensive_tool"],
+        "lineSupport": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -23285,6 +23323,22 @@
             "rationale": "Access program trash is a concrete ambush payoff; AI/Ambush subtypes remain card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "trash_installed_runner_programs",
+            "preferences": [
+              "currently_used_breaker",
+              "trash_prevention_high_value_program",
+              "high_install_cost_or_memory"
+            ],
+            "avoid": ["low_value_program"],
+            "kind": "use_target",
+            "timing": "on_access",
+            "targetType": "card",
+            "hiddenInfoPolicy": "legal_targets_only"
+          }
+        ],
         "effects": [
           {
             "kind": "ambush",
@@ -24386,7 +24440,7 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["remote_asset_modifier"],
+        "planRoles": ["corp_hand_size_support", "hq_discard_buffer"],
         "valueHints": { "remoteRootValue": 1 },
         "effects": [
           {

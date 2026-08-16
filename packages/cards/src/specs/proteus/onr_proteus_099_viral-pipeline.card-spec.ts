@@ -105,11 +105,17 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "multi_central_virus_pressure",
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "corp_action_denial",
+      },
+      { kind: "strategic_role", role: "engine_piece" },
+      {
+        kind: "risk_interpretation",
+        risk: "virus_purge_risk",
+        severity: "high",
       },
     ],
     capabilities: [],

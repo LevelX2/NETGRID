@@ -38,6 +38,7 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
+      maxHandSizeBonus: 2,
     },
     modifiers: [
       {
@@ -56,7 +57,11 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_modifier",
+        role: "corp_hand_size_support",
+      },
+      {
+        kind: "plan_role",
+        role: "hq_discard_buffer",
       },
       {
         kind: "value_interpretation",

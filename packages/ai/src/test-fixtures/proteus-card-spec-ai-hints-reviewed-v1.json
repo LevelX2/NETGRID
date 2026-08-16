@@ -2757,7 +2757,6 @@
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
-        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -2769,11 +2768,30 @@
             "rationale": "ICE Semantic Review v1: Sandstorm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
           }
         ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "choose_paid_end_the_run_subroutine_count",
+            "preferences": [
+              "high_run_denial_payoff",
+              "prefer_option_relevant_to_current_run_path"
+            ],
+            "avoid": [
+              "insufficient_post_payment_reserve",
+              "option_with_no_visible_current_payoff"
+            ],
+            "kind": "mode_choice",
+            "timing": "corp_rez_window",
+            "targetType": "mode_choice",
+            "hiddenInfoPolicy": "legal_options_only"
+          }
+        ],
         "functionSignals": [
           "corp_ice.rez_paid_scaling",
           "ice.strength_modifier"
         ],
         "costProfile": { "credits": 4 },
+        "riskTags": ["credit_reserve_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -2947,20 +2965,18 @@
         "roles": ["ice", "etr_ice", "code_gate_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
+        "strategicRole": ["defensive_tool"],
+        "lineSupport": ["corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
             "purpose": "choose_ice_type_or_mode_from_legal_options",
             "preferences": [
-              "use_choice_option_with_visible_board_payoff",
-              "prefer_option_relevant_to_current_run_path",
-              "prefer_option_that_protects_agenda_or_remote_pressure"
+              "type_missing_in_current_rig",
+              "type_blocking_relevant_run_path",
+              "prefer_option_relevant_to_current_run_path"
             ],
-            "avoid": [
-              "hidden_info_dependent_choice",
-              "option_with_no_visible_current_payoff"
-            ],
+            "avoid": ["insufficient_post_payment_reserve"],
             "kind": "mode_choice",
             "timing": "encounter_resolution",
             "targetType": "mode_choice",
@@ -4287,7 +4303,7 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["asset"],
-        "planRoles": ["build_scoring_remote"],
+        "planRoles": ["meat_damage_amplifier"],
         "valueHints": { "remoteRootValue": 1 },
         "strategicRole": ["enabler"],
         "lineSupport": ["corp.damage_kill"],
@@ -4930,13 +4946,11 @@
           "score.gray_ops_difficulty_discount"
         ],
         "tacticSignals": [
-          "corp.remote_protection",
           "remote.agenda_difficulty_discount",
           "score.agenda_difficulty_discount",
           "score.gray_ops_difficulty_discount"
         ],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:global_modifier",
           "effect_scope:remote",
           "effect_timing:persistent"
@@ -7097,8 +7111,9 @@
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": ["multi_central_virus_pressure", "corp_action_denial"],
         "valueHints": {},
+        "strategicRole": ["engine_piece"],
         "actionCapabilitySemantics": [
           { "capabilityKey": "convert_socket_set_to_pipe_counter" }
         ],
@@ -7166,6 +7181,7 @@
         ],
         "conditions": [{ "kind": "requires_successful_run" }],
         "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "riskTags": ["virus_purge_risk"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8621,7 +8637,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": ["event"],
-        "planRoles": ["build_rig"],
+        "planRoles": ["same_turn_agenda_access_payoff"],
         "valueHints": {},
         "strategicRole": ["payoff_anchor"],
         "strategyAnchors": ["runner.interface_closeout"],
@@ -8658,6 +8674,7 @@
           "effect_timing:on_access"
         ],
         "costProfile": { "clicks": 1, "credits": 2 },
+        "riskTags": ["same_turn_agenda_access_whiff"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -9144,7 +9161,7 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": ["event"],
-        "planRoles": ["pressure_rnd"],
+        "planRoles": ["temporary_program_search"],
         "valueHints": {},
         "strategicRole": ["enabler"],
         "strategyAnchors": ["runner.run_event_tempo", "runner.search.breaker"],
@@ -9156,18 +9173,19 @@
             "purpose": "temporary_program_install_run",
             "preferences": [
               "program_repairs_missing_coverage",
-              "program_preserves_run_goal"
+              "program_preserves_run_goal",
+              "program_affordable_after_install",
+              "low_mu_program"
             ],
-            "avoid": [],
+            "avoid": ["low_value_program", "insufficient_post_payment_reserve"],
             "kind": "search_install_target",
             "timing": "on_play",
             "targetType": "program",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "tacticSignals": ["damage.payoff"],
-        "actionTacticSignals": ["damage.payoff.runner"],
         "costProfile": { "clicks": 1, "credits": 1 },
+        "riskTags": ["credit_reserve_cost", "flatline_risk"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -10899,9 +10917,10 @@
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": ["ap_ice_bypass", "safe_probe_run"],
         "valueHints": {},
-        "strategyAnchors": ["runner.run_event_tempo"],
+        "strategicRole": ["survival_tool"],
+        "lineSupport": ["runner.run_event_tempo"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "during_run_trash_source_pass_ap_ice",
@@ -10944,7 +10963,7 @@
         ],
         "conditions": [{ "kind": "requires_encounter" }],
         "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["resource_trash_if_tagged"],
+        "riskTags": ["installed_card_trash_cost", "resource_trash_if_tagged"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,

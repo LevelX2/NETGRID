@@ -59,9 +59,11 @@ export const cardSpec = {
         kind: "plan_role",
         role: "protect_rnd",
       },
+      { kind: "strategic_role", role: "defensive_tool" },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
+        kind: "line_support",
+        lineKey: "corp.ice_tax_glacier",
+        support: "supports",
       },
       {
         kind: "tactic_interpretation",

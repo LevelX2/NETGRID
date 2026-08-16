@@ -77,6 +77,8 @@ export const cardSpec = {
         signal: "corp.remote_protection",
         use: "corp.remote_protection",
       },
+      { kind: "plan_role", role: "net_damage_pressure" },
+      { kind: "plan_role", role: "end_the_run_defense" },
     ],
     capabilities: [],
   },

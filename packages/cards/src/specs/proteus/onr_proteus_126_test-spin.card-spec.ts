@@ -59,10 +59,7 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      {
-        kind: "plan_role",
-        role: "pressure_rnd",
-      },
+      { kind: "plan_role", role: "temporary_program_search" },
       {
         kind: "strategic_role",
         role: "enabler",
@@ -89,18 +86,25 @@ export const cardSpec = {
         exchange: "temporary_resource",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "damage.payoff",
-        use: "damage.payoff.runner",
-      },
-      {
         kind: "target_preference",
         purpose: "temporary_program_install_run",
         preferences: [
           "program_repairs_missing_coverage",
           "program_preserves_run_goal",
+          "program_affordable_after_install",
+          "low_mu_program",
         ],
-        avoid: [],
+        avoid: ["low_value_program", "insufficient_post_payment_reserve"],
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "credit_reserve_cost",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "flatline_risk",
+        severity: "high",
       },
     ],
     capabilities: [],

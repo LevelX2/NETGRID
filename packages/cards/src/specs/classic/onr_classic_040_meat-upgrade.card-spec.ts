@@ -77,6 +77,8 @@ export const cardSpec = {
         kind: "plan_role",
         role: "draw_for_answers",
       },
+      { kind: "plan_role", role: "tag_clear" },
+      { kind: "plan_role", role: "tag_defense" },
       {
         kind: "strategic_role",
         role: "defensive_tool",

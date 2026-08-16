@@ -6278,6 +6278,7 @@ function hasClosedTargetPreferenceOwner(
   return (
     engine.variableRez?.kind === "alternate_subtype" ||
     engine.variableRez?.kind === "x_strength" ||
+    engine.variableRez?.kind === "paid_end_the_run_subroutines" ||
     engine.fortRunWindows !== undefined ||
     engine.icebreakerAbilities !== undefined ||
     engine.icebreakerSubtypeChange !== undefined ||
@@ -6294,6 +6295,8 @@ function hasClosedTargetPreferenceOwner(
       "hidden_draw_keep_or_top_replacement" ||
     engine.hiddenReplacementLongtail?.kind ===
       "conceal_and_reorder_installed_ice" ||
+    engine.hiddenReplacementLongtail?.kind ===
+      "secret_spend_guess_then_targeted_bypass_run" ||
     engine.corpUtility !== undefined ||
     engine.lifecycle?.start_of_corp_turn?.some((trigger) =>
       trigger.effects.some(
@@ -6459,6 +6462,17 @@ function deriveClosedExtendedTargetProfile(
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (
+    engine.hiddenReplacementLongtail?.kind ===
+    "secret_spend_guess_then_targeted_bypass_run"
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "installed_ice",
+      hiddenInfoPolicy: "visible_or_known_only",
+    };
+  if (
     engine.abilities?.some((ability) =>
       ability.effects?.some((effect) => effect.kind === "trash_unrezzed_ice"),
     )
@@ -6502,6 +6516,14 @@ function deriveClosedExtendedTargetProfile(
       hiddenInfoPolicy: "legal_options_only",
     };
   if (engine.variableRez?.kind === "x_strength")
+    return {
+      ...planningFields,
+      kind: "mode_choice",
+      timing: "corp_rez_window",
+      targetType: "mode_choice",
+      hiddenInfoPolicy: "legal_options_only",
+    };
+  if (engine.variableRez?.kind === "paid_end_the_run_subroutines")
     return {
       ...planningFields,
       kind: "mode_choice",

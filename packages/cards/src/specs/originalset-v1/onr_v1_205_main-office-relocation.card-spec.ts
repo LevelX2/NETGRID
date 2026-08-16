@@ -38,6 +38,7 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
+      maxHandSizeBonus: 2,
     },
     modifiers: [
       {
@@ -53,7 +54,11 @@ export const cardSpec = {
   },
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
-    card: [],
+    card: [
+      { kind: "plan_role", role: "corp_score_agenda" },
+      { kind: "plan_role", role: "corp_hand_size_support" },
+      { kind: "plan_role", role: "hq_discard_buffer" },
+    ],
     capabilities: [],
   },
   printings: [

@@ -3982,7 +3982,12 @@
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": ["draw", "event", "tag_removal"],
-        "planRoles": ["draw_for_answers", "recover_from_tags"],
+        "planRoles": [
+          "draw_for_answers",
+          "tag_clear",
+          "tag_defense",
+          "recover_from_tags"
+        ],
         "valueHints": {},
         "strategicRole": ["defensive_tool"],
         "lineSupport": ["runner.survival_defense"],

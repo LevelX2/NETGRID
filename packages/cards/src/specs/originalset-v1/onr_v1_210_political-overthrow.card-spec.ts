@@ -75,6 +75,15 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
+      { kind: "plan_role", role: "corp_score_agenda" },
+      { kind: "plan_role", role: "score_now" },
+      { kind: "strategic_role", role: "win_condition" },
+      { kind: "strategy_anchor", strategyKey: "corp.remote_scoring" },
+      {
+        kind: "line_support",
+        lineKey: "corp.remote_scoring",
+        support: "supports",
+      },
       {
         kind: "tactic_interpretation",
         signal: "economy.card",

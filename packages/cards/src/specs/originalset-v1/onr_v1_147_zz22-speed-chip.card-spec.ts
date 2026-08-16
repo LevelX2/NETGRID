@@ -69,11 +69,8 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
+      { kind: "plan_role", role: "killer_credit_support" },
+      { kind: "plan_role", role: "sentry_breaker_support" },
     ],
     capabilities: [],
   },

@@ -113,6 +113,21 @@ describe("CardRegistry", () => {
     });
   });
 
+  it("projects card-defined Corp hand-size modifiers", () => {
+    expect(
+      publicCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_v1_338_rustbelt-hq-branch" as CardDefinitionId,
+      ),
+    ).toMatchObject({ maxHandSizeBonus: 2 });
+    expect(
+      publicCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_v1_205_main-office-relocation" as CardDefinitionId,
+      ),
+    ).toMatchObject({ maxHandSizeBonus: 2 });
+  });
+
   it("builds deterministic cached projections and all scoped lookups", () => {
     const active = capabilitySpec();
     active.publication = {
