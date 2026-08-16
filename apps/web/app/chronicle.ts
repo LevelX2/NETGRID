@@ -714,8 +714,7 @@ export function formatChronicleEvent(
             : trashedCount > 0
               ? `${trashedCount} Programm${trashedCount === 1 ? "" : "e"}`
               : undefined;
-        const installed =
-          payloadBooleanValue(payload, "installed") === true;
+        const installed = payloadBooleanValue(payload, "installed") === true;
         const memoryUsedAfter = payloadNumberValue(payload, "memoryUsedAfter");
         const memoryLimitAfter = payloadNumberValue(
           payload,
@@ -1545,11 +1544,15 @@ export function formatChronicleEvent(
         );
         break;
       }
-      if (hiddenZoneAction === "p3_37_search_stack_to_grip") {
+      if (
+        hiddenZoneAction === "p3_37_search_stack_to_grip" ||
+        hiddenZoneAction === "p3_37_search_trash_to_grip"
+      ) {
+        const searchesHeap = hiddenZoneAction === "p3_37_search_trash_to_grip";
+        const revealedDefinitionId =
+          stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         const revealedTitle =
-          titleForDefinitionId(stringValue(payload.publicRevealDefinitionId)) ??
-          titleForDefinitionId(cardDefinitionId) ??
-          cardTitle;
+          titleForDefinitionId(revealedDefinitionId) ?? cardTitle;
         const isPublicReveal =
           stringValue(payload.publicRevealKind) === "reveal" ||
           Boolean(stringValue(payload.publicRevealDefinitionId)) ||
@@ -1563,20 +1566,36 @@ export function formatChronicleEvent(
         title = isPublicReveal
           ? phrase(
               subject,
-              `${searchSource ? `${searchSource} genutzt, ` : ""}${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`,
+              searchesHeap
+                ? `${searchSource ? `${searchSource} genutzt und ` : ""}${revealedTitle ?? "eine Karte"} aus dem Heap in den Grip genommen`
+                : `${searchSource ? `${searchSource} genutzt, ` : ""}${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`,
             )
           : phrase(
               subject,
-              `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack auf die Hand genommen`,
+              searchesHeap
+                ? `${cardCountText(numberValue(payload.selectedCount) ?? 1)} aus dem Heap in den Grip genommen`
+                : `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack auf die Hand genommen`,
             );
+        if (searchesHeap && revealedDefinitionId)
+          cardDefinitionId = revealedDefinitionId;
+        if (searchesHeap && revealedTitle) cardTitle = revealedTitle;
+        if (searchesHeap) {
+          cardText = undefined;
+          cardDetailLines = [];
+        }
         chips.push(
           ...(searchSource ? [searchSource] : []),
-          "Stack",
-          isPublicReveal ? "Vorgezeigt" : "Verdeckt",
-          "Hand",
-          ...(payload.shufflePerformed === true || payload.shuffled === true
-            ? ["Shuffle"]
-            : []),
+          searchesHeap ? "Heap" : "Stack",
+          ...(searchesHeap
+            ? ["Grip", ...(revealedTitle ? [revealedTitle] : [])]
+            : [
+                isPublicReveal ? "Vorgezeigt" : "Verdeckt",
+                "Hand",
+                ...(payload.shufflePerformed === true ||
+                payload.shuffled === true
+                  ? ["Shuffle"]
+                  : []),
+              ]),
         );
         break;
       }

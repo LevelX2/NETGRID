@@ -72,13 +72,33 @@ const TEST_CARD_PRESENTATIONS = {
     title: "Systematic Layoffs",
     type: "operation",
   },
-  "onr_v1_035_invisibility": {
+  onr_v1_035_invisibility: {
     title: "Invisibility",
     type: "program",
   },
   "onr_v1_040_loony-goon": {
     title: "Loony Goon",
     type: "program",
+  },
+  onr_v1_039_krash: {
+    title: "Krash",
+    type: "program",
+  },
+  "onr_v1_089_gideons-pawnshop": {
+    title: "Gideon’s Pawnshop",
+    type: "event",
+  },
+  "onr_v1_114_temple-microcode-outlet": {
+    title: "Temple Microcode Outlet",
+    type: "event",
+  },
+  "onr_v1_157_crash-everett-inventive-fixer": {
+    title: "Crash Everett, Inventive Fixer",
+    type: "resource",
+  },
+  "onr_v1_165_junkyard-bbs": {
+    title: "Junkyard BBS",
+    type: "resource",
   },
   "onr_proteus_111_ice-and-data-special-report": {
     title: "Ice and Data Special Report",
@@ -6756,6 +6776,44 @@ describe("formatChronicleEvent", () => {
       "Hand",
       "Shuffle",
     ]);
+  });
+
+  it("names the public heap card returned by Gideon’s Pawnshop", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_search_trash_to_grip",
+      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+      selectedCount: 1,
+      movedCardCount: 1,
+      searchedZone: "runner_heap",
+      searchDestination: "runner_grip",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "simple_decoder",
+      cardDefinitionId: "simple_decoder",
+      shufflePerformed: false,
+      aiReasonCode: "runner_heap_search_card",
+    });
+    const item = formatChronicleEvent(event, "corp");
+
+    expect(item.title).toBe(
+      "Die Runner-KI hat Gideon’s Pawnshop genutzt und Simple Decoder aus dem Heap in den Grip genommen.",
+    );
+    expect(item.category).toBe("card");
+    expect(item.importance).toBe("important");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.cardTitle).toBe("Simple Decoder");
+    expect(item.chips).toEqual([
+      "Runner",
+      "KI",
+      "Gideon’s Pawnshop",
+      "Heap",
+      "Grip",
+      "Simple Decoder",
+    ]);
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+    expect(shouldSuppressChronicleEventItem(event)).toBe(false);
   });
 
   it("names the public heap card returned by Junkyard BBS", () => {
