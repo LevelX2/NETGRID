@@ -162,7 +162,7 @@ gegnerische private Zonen.
 Das Bundle verwendet `netgrid-match-analysis-bundle-v2`. Es enthält die
 Schema-Versionen und im kompakten Decision-Index pro Abschnitt den Status
 `persisted`, `reconstructed` oder `unavailable`. Der Detailendpunkt verwendet
-`netgrid-decision-analysis-context-v3` und liefert für eine Entscheidung die
+`netgrid-decision-analysis-context-v4` und liefert für eine Entscheidung die
 vollständige Audit-Evidence. Aktuelle Engine-Rekonstruktion ist ausdrücklich
 kein Ersatz: ältere Traces ohne gespeicherten Auditvertrag melden für jeden
 betroffenen Abschnitt strukturiert `unavailable` mit
@@ -179,6 +179,18 @@ Decision-Trace gespeichert. Ältere Traces oder Planer ohne diesen
 Erzeugungsvertrag melden `provenance: unavailable` und
 `historical_turn_planning_audit_not_persisted`; sie werden nicht aus aktuellem
 Code nachkonstruiert.
+
+Zusätzlich normalisiert `deckConsumerAudit`
+(`netgrid-deck-consumer-audit-v1`) die drei am Entscheidungspunkt bereits im
+Checkpoint gespeicherten Deck-Consumer: `deckCapabilities`,
+`deckStrategyProfile` und `deckDoctrineDiagnostic`. Der Abschnitt prüft die
+Actor-, StateVersion-, Side- und Schema-Bindung und trägt bei vollständiger
+Evidenz `provenance: persisted_at_decision`. Fehlt ein Consumer oder passt
+seine Bindung nicht, bleibt der gesamte Abschnitt fail-closed mit
+`provenance: unavailable`, einer strukturierten Ursache sowie den fehlenden
+beziehungsweise ungültigen Consumern. Eine aktuelle Deckdatei oder eine
+Neuberechnung mit aktuellem KI-Code wird ausdrücklich nicht als Ersatz
+verwendet.
 
 Mit `side=runner|corp&includeOwnDeckSnapshot=true` liefert das Bundle außerdem
 den beim Matchstart serverprivat persistierten eigenen Decksnapshot als

@@ -986,9 +986,19 @@ function recordHasCanonicalRunnerCreditBank(
       effect.resource === "credits" &&
       effect.economyMode === "bank_cashout",
   );
+  const hasAutomaticInitialLoad = record.effects.some(
+    (effect) =>
+      effect.kind === "finite_economy_pool" &&
+      effect.scope === "runner" &&
+      effect.timing === "install" &&
+      effect.resource === "credits" &&
+      effect.target === "economy.hosted_credit_bank" &&
+      effect.economyMode === "fixed_pool" &&
+      effect.finite === true,
+  );
   return (
     record.side === "runner" &&
-    hasBuildOwner &&
+    (hasBuildOwner || hasAutomaticInitialLoad) &&
     (hasCashOutOwner || hasAutomaticCashOut)
   );
 }

@@ -70,6 +70,7 @@ import {
 import {
   InMemoryMatchStorage,
   MultiplayerService,
+  deckConsumerAuditFromCheckpointCapture,
   successfulRunCountForResult,
   turnPlanningAuditFromTrace,
   type ActionPersistenceLoadInput,
@@ -1033,6 +1034,67 @@ describe("Invite and lobby redaction harness", () => {
 });
 
 describe("Backend 0.5 private storage maintenance", () => {
+  it("projects all three persisted deck consumers and fails closed on gaps or actor mismatches", () => {
+    const checkpoint = {
+      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+      provenance: "persisted_at_decision",
+      actor: "runner",
+      stateVersion: 42,
+      input: {
+        side: "runner",
+        playerView: { side: "runner", stateVersion: 42 },
+        ownDeckCapabilities: {
+          schemaVersion: "deck-capability-profile-v1",
+          side: "runner",
+        },
+        ownDeckStrategyProfile: {
+          schemaVersion: "ai-deck-strategy-profile-v1",
+          side: "runner",
+        },
+        ownDeckDoctrineV2Diagnostic: {
+          schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+          side: "runner",
+        },
+      },
+    };
+
+    expect(deckConsumerAuditFromCheckpointCapture(checkpoint)).toEqual({
+      schemaVersion: "netgrid-deck-consumer-audit-v1",
+      provenance: "persisted_at_decision",
+      actor: "runner",
+      stateVersion: 42,
+      deckCapabilities: checkpoint.input.ownDeckCapabilities,
+      deckStrategyProfile: checkpoint.input.ownDeckStrategyProfile,
+      deckDoctrineDiagnostic: checkpoint.input.ownDeckDoctrineV2Diagnostic,
+      validation: {
+        inputMatchesActor: true,
+        consumerSidesMatchActor: true,
+        allConsumersPersisted: true,
+      },
+    });
+
+    const missingDoctrine = structuredClone(checkpoint);
+    delete (missingDoctrine.input as Partial<typeof missingDoctrine.input>)
+      .ownDeckDoctrineV2Diagnostic;
+    expect(deckConsumerAuditFromCheckpointCapture(missingDoctrine)).toEqual({
+      schemaVersion: "netgrid-deck-consumer-audit-v1",
+      provenance: "unavailable",
+      reason: "historical_deck_consumer_audit_not_persisted",
+      missingConsumers: ["deckDoctrineDiagnostic"],
+      invalidConsumers: [],
+    });
+
+    const mismatchedDoctrine = structuredClone(checkpoint);
+    mismatchedDoctrine.input.ownDeckDoctrineV2Diagnostic.side = "corp";
+    expect(deckConsumerAuditFromCheckpointCapture(mismatchedDoctrine)).toEqual({
+      schemaVersion: "netgrid-deck-consumer-audit-v1",
+      provenance: "unavailable",
+      reason: "historical_deck_consumer_audit_binding_mismatch",
+      missingConsumers: [],
+      invalidConsumers: ["deckDoctrineDiagnostic"],
+    });
+  });
+
   it("exposes only persisted TurnPlanner audits and never reconstructs old traces", () => {
     const planning = {
       schemaVersion: "ai-turn-planning-debug-v1",
@@ -1836,6 +1898,16 @@ describe("Backend 0.5 private storage maintenance", () => {
           reason?: string;
           planning?: Record<string, unknown>;
         };
+        deckConsumerAudit?: {
+          schemaVersion?: string;
+          provenance?: string;
+          actor?: string;
+          stateVersion?: number;
+          deckCapabilities?: { schemaVersion?: string; side?: string };
+          deckStrategyProfile?: { schemaVersion?: string; side?: string };
+          deckDoctrineDiagnostic?: { schemaVersion?: string; side?: string };
+          validation?: Record<string, boolean>;
+        };
         provenance?: { persisted?: string[]; reconstructed?: unknown[] };
         ownDeckSnapshot?: {
           side?: string;
@@ -1862,7 +1934,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       };
       expect(decisionResponse.status).toBe(200);
       expect(decisionContext).toMatchObject({
-        schemaVersion: "netgrid-decision-analysis-context-v3",
+        schemaVersion: "netgrid-decision-analysis-context-v4",
         decision: { decisionIndex: 1, side: "corp" },
       });
       expect(decisionContext.audit?.capture).toBe("persisted");
@@ -1902,6 +1974,29 @@ describe("Backend 0.5 private storage maintenance", () => {
         provenance: "unavailable",
         reason: "historical_turn_planning_audit_not_persisted",
       });
+      expect(decisionContext.deckConsumerAudit).toMatchObject({
+        schemaVersion: "netgrid-deck-consumer-audit-v1",
+        provenance: "persisted_at_decision",
+        actor: "corp",
+        stateVersion: decisionContext.decision?.stateVersion,
+        deckCapabilities: {
+          schemaVersion: "deck-capability-profile-v1",
+          side: "corp",
+        },
+        deckStrategyProfile: {
+          schemaVersion: "ai-deck-strategy-profile-v1",
+          side: "corp",
+        },
+        deckDoctrineDiagnostic: {
+          schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+          side: "corp",
+        },
+        validation: {
+          inputMatchesActor: true,
+          consumerSidesMatchActor: true,
+          allConsumersPersisted: true,
+        },
+      });
       expect(decisionContext.ownDeckSnapshot).toMatchObject({
         side: "corp",
         provenance: "persisted",
@@ -1927,6 +2022,9 @@ describe("Backend 0.5 private storage maintenance", () => {
       );
       expect(decisionContext.provenance?.persisted).toContain(
         "checkpointCapture",
+      );
+      expect(decisionContext.provenance?.persisted).toContain(
+        "deckConsumerAudit",
       );
       expect(decisionContext.provenance?.reconstructed).toContain(
         "ownDeckZoneBalance",
@@ -12668,7 +12766,7 @@ describe("MVP 0.2 multiplayer service", () => {
         failureDecisionIndex,
       );
       expect(decisionContext).toMatchObject({
-        schemaVersion: "netgrid-decision-analysis-context-v3",
+        schemaVersion: "netgrid-decision-analysis-context-v4",
         audit: {
           capture: "persisted",
           actor: "runner",

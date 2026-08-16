@@ -5061,7 +5061,7 @@ function buildRunnerDomain(
         const safetyAssessment =
           runnerFutureEncounterDamageJackOutAssessment(input) ??
           runnerKnownAccessDamageJackOutAssessment(input) ??
-          currentRunAbortAssessment(input);
+          currentRunAbortAssessment(input, activeRunRoot);
         const encounterMitigation = visibleEncounterMitigation(input);
         const exactPhaseActionIds = runnerExactRunWindowPhaseActionIds(
           input,
@@ -20132,6 +20132,7 @@ function visibleEncounterMitigation(
 
 function currentRunAbortAssessment(
   input: AiDecisionInput,
+  runOrigin: RunnerRunOrigin | undefined,
 ): { evidenceCode: string } | undefined {
   const run = input.playerView.run;
   if (!run || !input.legalActions.some((action) => action.type === "jack_out"))
@@ -20145,7 +20146,10 @@ function currentRunAbortAssessment(
     run.position?.kind === "server" &&
     run.attackedServerId.startsWith("remote_")
   ) {
-    if (runnerRemoteHasKnownNoCurrentPayoff(input, run.attackedServerId)) {
+    if (
+      runnerRemoteHasKnownNoCurrentPayoff(input, run.attackedServerId) &&
+      !runnerRunOriginCommittedPayoff(runOrigin)
+    ) {
       return {
         evidenceCode: `runner_current_run_known_no_payoff:${run.attackedServerId}`,
       };
@@ -20443,6 +20447,7 @@ function runnerRunWindowActionAssessment(
             : (runOrigin?.accessCommitment?.trashBudget ?? 0),
         })
       : undefined;
+  const committedParentPayoff = runnerRunOriginCommittedPayoff(runOrigin);
   return exclusion
     ? {
         admissible: false,
@@ -20474,6 +20479,9 @@ function runnerRunWindowActionAssessment(
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
           `runner_run_window_action:${action.type}`,
+          ...(committedParentPayoff
+            ? [`runner_run_parent_payoff_preserved:${committedParentPayoff}`]
+            : []),
           ...(accessTrashImpact?.evidenceCodes ?? []),
           ...(runOrigin?.informationBoundaryReassessment?.evidenceCodes ?? []),
         ],
@@ -20701,7 +20709,8 @@ function runnerRunWindowPlanStepExclusion(
 
   if (
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
-    currentActiveRunHasKnownNoPayoff(input)
+    currentActiveRunHasKnownNoPayoff(input) &&
+    !runnerRunOriginCommittedPayoff(runOrigin)
   ) {
     return {
       key: "run_plan_known_no_payoff",
@@ -20768,6 +20777,19 @@ function runnerRunWindowPlanStepExclusion(
       "run_plan_target_preserving_break_available:true",
     ].join("|"),
   };
+}
+
+function runnerRunOriginCommittedPayoff(
+  runOrigin: RunnerRunOrigin | undefined,
+): RunnerRunAccessCommitmentSignal["payoff"] | undefined {
+  const commitment = runOrigin?.accessCommitment;
+  if (!commitment || commitment.intendedAction === "decline") return undefined;
+  const committed =
+    commitment.payoff === "agenda" ||
+    commitment.payoff === "score_threat" ||
+    commitment.payoff === "trash_affordable" ||
+    commitment.payoff === "access_bonus";
+  return committed ? commitment.payoff : undefined;
 }
 
 function legalActionCreditCost(
