@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 2 from the bank on Vewy Vewy Quiet when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
+      "Put [2] from the bank on Vewy Vewy Quiet when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -73,9 +73,8 @@ export const cardSpec = {
         role: "run_support",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "recurring_non_noisy_breaker_credits",
       },
     ],
     capabilities: [],

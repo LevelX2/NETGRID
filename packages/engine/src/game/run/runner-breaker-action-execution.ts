@@ -65,7 +65,15 @@ export type RunnerBreakerActionExecutionHost = {
     resolveMultiBreakSubroutinesAction: (
       breakerId: CardInstanceId,
       legalAction: LegalAction,
-    ) => void;
+      options?: {
+        costAlreadyPaid?: boolean;
+        skipAardvarkInterception?: boolean;
+      },
+    ) => {
+      paid: boolean;
+      resolved: boolean;
+      suspended: boolean;
+    };
     resolveBlinkBreakSubroutineAction: (
       breakerId: CardInstanceId,
       subroutineIndex: number,
@@ -117,16 +125,47 @@ export type RunnerBreakerActionExecutionResult = {
   handled: boolean;
 };
 
+type RunnerBreakerActionExecutionOptions = {
+  costAlreadyPaid?: boolean;
+  skipAardvarkInterception?: boolean;
+  skipInitialUseTracking?: boolean;
+};
+
 export function handleRunnerBreakerActionExecution(
   host: RunnerBreakerActionExecutionHost,
   legalAction: LegalAction,
 ): RunnerBreakerActionExecutionResult {
+  return handleRunnerBreakerActionExecutionWithOptions(host, legalAction, {});
+}
+
+export function resumePaidRunnerBreakerAction(
+  host: RunnerBreakerActionExecutionHost,
+  legalAction: LegalAction,
+): void {
+  const result = handleRunnerBreakerActionExecutionWithOptions(
+    host,
+    legalAction,
+    {
+      costAlreadyPaid: true,
+      skipAardvarkInterception: true,
+      skipInitialUseTracking: true,
+    },
+  );
+  if (!result.handled)
+    throw new Error("Aardvark-Fortsetzung ist keine Breaker-Aktion.");
+}
+
+function handleRunnerBreakerActionExecutionWithOptions(
+  host: RunnerBreakerActionExecutionHost,
+  legalAction: LegalAction,
+  options: RunnerBreakerActionExecutionOptions,
+): RunnerBreakerActionExecutionResult {
   switch (legalAction.type) {
     case "pump_breaker":
-      executePumpBreakerAction(host, legalAction);
+      executePumpBreakerAction(host, legalAction, options);
       return { handled: true };
     case "break_subroutine":
-      executeBreakSubroutineAction(host, legalAction);
+      executeBreakSubroutineAction(host, legalAction, options);
       return { handled: true };
     default:
       return { handled: false };
@@ -136,6 +175,7 @@ export function handleRunnerBreakerActionExecution(
 function executePumpBreakerAction(
   host: RunnerBreakerActionExecutionHost,
   legalAction: LegalAction,
+  options: RunnerBreakerActionExecutionOptions,
 ): void {
   const breakerId =
     typeof legalAction.payload?.breakerId === "string"
@@ -153,15 +193,23 @@ function executePumpBreakerAction(
         "Variable Icebreaker-Pump-Kosten sind nicht mehr gueltig.",
       );
   }
-  const payment = host.payment.spendRunnerRunCredits(
-    legalAction.costs[0]?.credits ?? 1,
-    breakerId,
-    legalAction,
-  );
-  if (payment.handled && payment.paid === false) return;
-  if (breakerId) recordFortBoundBreakerUse(host, breakerId, pumpAbility, false);
-  if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
-  if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
+  if (!options.costAlreadyPaid) {
+    const payment = host.payment.spendRunnerRunCredits(
+      legalAction.costs[0]?.credits ?? 1,
+      breakerId,
+      legalAction,
+    );
+    if (payment.handled && payment.paid === false) return;
+  }
+  if (breakerId && !options.skipInitialUseTracking) {
+    recordFortBoundBreakerUse(host, breakerId, pumpAbility, false);
+    recordNoisyIcebreakerUse(host, breakerId, legalAction);
+  }
+  if (
+    breakerId &&
+    !options.skipAardvarkInterception &&
+    host.fort.shouldOpenAardvarkInterception(breakerId)
+  ) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,
       "pump_breaker",
@@ -258,6 +306,7 @@ function executePumpBreakerAction(
 function executeBreakSubroutineAction(
   host: RunnerBreakerActionExecutionHost,
   legalAction: LegalAction,
+  options: RunnerBreakerActionExecutionOptions,
 ): void {
   const breakerId =
     typeof legalAction.payload?.breakerId === "string"
@@ -269,7 +318,21 @@ function executeBreakSubroutineAction(
     (breakAbility?.breakAllMatchingSubroutines ||
       (breakAbility?.count ?? 1) > 1)
   ) {
-    host.breaker.resolveMultiBreakSubroutinesAction(breakerId, legalAction);
+    const multiBreak = host.breaker.resolveMultiBreakSubroutinesAction(
+      breakerId,
+      legalAction,
+      {
+        ...(options.costAlreadyPaid ? { costAlreadyPaid: true } : {}),
+        ...(options.skipAardvarkInterception
+          ? { skipAardvarkInterception: true }
+          : {}),
+      },
+    );
+    if (multiBreak.paid && !options.skipInitialUseTracking) {
+      recordNoisyIcebreakerUse(host, breakerId, legalAction);
+      recordFortBoundBreakerUse(host, breakerId, breakAbility, false);
+    }
+    if (!multiBreak.resolved || multiBreak.suspended) return;
     for (const subroutineIndex of String(
       legalAction.payload?.subroutineIndexes ?? "",
     )
@@ -277,7 +340,6 @@ function executeBreakSubroutineAction(
       .map((value) => Number(value))) {
       recordBrokenSubroutineBreaker(host, breakerId, subroutineIndex);
     }
-    recordNoisyIcebreakerUse(host, breakerId, legalAction);
     recordFortBoundBreakerUse(host, breakerId, breakAbility, true);
     recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
@@ -317,16 +379,23 @@ function executeBreakSubroutineAction(
     legalAction,
     currentSubroutine,
   );
-  const payment = host.payment.spendRunnerRunCredits(
-    legalAction.costs[0]?.credits ?? 1,
-    breakerId,
-    legalAction,
-  );
-  if (payment.handled && payment.paid === false) return;
-  if (breakerId)
+  if (!options.costAlreadyPaid) {
+    const payment = host.payment.spendRunnerRunCredits(
+      legalAction.costs[0]?.credits ?? 1,
+      breakerId,
+      legalAction,
+    );
+    if (payment.handled && payment.paid === false) return;
+  }
+  if (breakerId && !options.skipInitialUseTracking) {
     recordFortBoundBreakerUse(host, breakerId, breakAbility, false);
-  if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
-  if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
+    recordNoisyIcebreakerUse(host, breakerId, legalAction);
+  }
+  if (
+    breakerId &&
+    !options.skipAardvarkInterception &&
+    host.fort.shouldOpenAardvarkInterception(breakerId)
+  ) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,
       "break_subroutine",

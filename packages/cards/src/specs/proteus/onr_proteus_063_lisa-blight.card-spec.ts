@@ -86,10 +86,6 @@ export const cardSpec = {
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -105,18 +101,41 @@ export const cardSpec = {
           "Repeats an ICE subroutine and increases tax/ETR/damage depending on the ICE.",
       },
       {
-        kind: "target_preference",
-        purpose: "repeat_subroutine_on_fort_ice",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
       },
+      {
+        kind: "risk_interpretation",
+        risk: "random_hq_discard",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "hq_plan_component_loss",
+        severity: "high",
+      },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("during_run_discard_and_copy_subroutine"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "repeat_subroutine_on_fort_ice",
+            preferences: [
+              "repeat_high_damage_subroutine",
+              "repeat_program_trash_subroutine",
+              "repeat_hardware_trash_subroutine",
+              "repeat_dangerous_tag_subroutine",
+              "repeat_end_the_run_subroutine",
+              "adds_relevant_encounter_tax",
+            ],
+            avoid: ["insufficient_post_payment_reserve"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

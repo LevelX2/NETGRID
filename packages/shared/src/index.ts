@@ -1983,6 +1983,13 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
+  pendingAardvarkBreakerContinuation?: {
+    aardvarkId: CardInstanceId;
+    breakerId: CardInstanceId;
+    encounteredIceId: CardInstanceId;
+    originalLegalAction: LegalAction;
+    createdAtStateVersion: number;
+  };
   hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
   pendingAccessEffectDamageContinuation?: {

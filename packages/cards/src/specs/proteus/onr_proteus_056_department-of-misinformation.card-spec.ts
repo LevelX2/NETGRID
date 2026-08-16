@@ -51,6 +51,7 @@ export const cardSpec = {
         amount: 1,
       },
       timing: "during_expose_attempt",
+      mayRezAtWindow: true,
       visibility: "public",
     },
   },

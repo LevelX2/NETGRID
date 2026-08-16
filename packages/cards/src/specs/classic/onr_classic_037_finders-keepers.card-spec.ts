@@ -67,17 +67,22 @@ export const cardSpec = {
       {
         kind: "value_interpretation",
         axis: "economy",
-        rating: "very_high",
+        rating: "high",
       },
       {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
-        severity: "low",
+        severity: "medium",
       },
       {
         kind: "risk_interpretation",
         risk: "reserve_risk",
-        severity: "low",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "random_economy",
+        severity: "high",
       },
     ],
     capabilities: [],

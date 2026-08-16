@@ -10,8 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText:
-      "A, 1 credit: Remove a tag, at no cost.\n[T]: Avoid receiving a tag.",
+    rulesText: "A, [1]: Remove a tag, at no cost.\n[T]: Avoid receiving a tag.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(

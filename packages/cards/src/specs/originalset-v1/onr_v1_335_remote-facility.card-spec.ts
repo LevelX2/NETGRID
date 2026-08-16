@@ -69,12 +69,12 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_modifier",
+        role: "corp_action_tempo",
       },
       {
-        kind: "remote_role",
-        role: "remote_capacity",
-        threatLevel: "medium",
+        kind: "line_support",
+        lineKey: "corp.action_tempo",
+        support: "supports",
       },
       {
         kind: "value_interpretation",

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 12 credits from the bank on Rigged Investments when it is installed. At the start of each of your turns, take 1 credit from Rigged Investments. When all credits have been removed, trash Rigged Investments.",
+      "Put [12] from the bank on Rigged Investments when it is installed. At the start of each of your turns, take [1] from Rigged Investments. When all the bits have been removed, trash Rigged Investments.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -89,6 +89,21 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "medium",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "slow_payback",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "resource_trash_before_break_even",
+        severity: "medium",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "liquidity_delay",
+        severity: "high",
       },
     ],
     capabilities: [],

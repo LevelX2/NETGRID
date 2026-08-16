@@ -64,6 +64,10 @@ export const cardSpec = {
         role: "win_condition",
       },
       {
+        kind: "strategy_anchor",
+        strategyKey: "corp.remote_scoring",
+      },
+      {
         kind: "line_support",
         lineKey: "corp.remote_scoring",
         support: "supports",
@@ -77,6 +81,16 @@ export const cardSpec = {
         confidence: "medium",
         rationale:
           "Agenda Semantic Review v1 maps World Domination to corp.remote_scoring as win_condition/one_card_score_closeout.",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "high_advancement_requirement",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "remote_protection_dependency",
+        severity: "high",
       },
     ],
     capabilities: [],

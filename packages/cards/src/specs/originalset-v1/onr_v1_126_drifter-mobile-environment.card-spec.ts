@@ -75,9 +75,8 @@ export const cardSpec = {
         role: "build_rig",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "avoid_tags",
       },
     ],
     capabilities: [],

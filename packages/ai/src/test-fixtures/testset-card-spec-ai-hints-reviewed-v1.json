@@ -58,11 +58,7 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          {
-            "kind": "breaker",
-            "scope": "runner",
-            "timing": "persistent"
-          }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": ["breaker.wall"],
         "actionTacticSignals": [
@@ -70,11 +66,7 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 3,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -168,16 +160,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 3
-        },
+        "costProfile": { "credits": 3 },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -243,16 +229,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 2
-        },
+        "costProfile": { "credits": 2 },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -298,11 +278,7 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          {
-            "kind": "breaker",
-            "scope": "runner",
-            "timing": "persistent"
-          }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": ["breaker.code_gate"],
         "actionTacticSignals": [
@@ -310,11 +286,7 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 3,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -385,10 +357,7 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
+        "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["hidden_zone_change"],
         "quality": {
           "hintReviewed": true,
@@ -455,10 +424,7 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
+        "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["hidden_zone_change"],
         "quality": {
           "hintReviewed": true,
@@ -480,10 +446,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["asset_trash_target", "economy_asset"],
         "planRoles": ["bait_runner", "recover_economy"],
-        "valueHints": {
-          "economy": 3,
-          "remoteRootValue": 3
-        },
+        "valueHints": { "economy": 3, "remoteRootValue": 3 },
         "effects": [
           {
             "kind": "economy",
@@ -500,9 +463,7 @@
           "effect_scope:corp",
           "effect_timing:on_rez"
         ],
-        "costProfile": {
-          "credits": 1
-        },
+        "costProfile": { "credits": 1 },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -530,9 +491,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "event"],
         "planRoles": ["recover_economy"],
-        "valueHints": {
-          "economy": 3
-        },
+        "valueHints": { "economy": 3 },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "simple_economy_event_on_play",
@@ -579,10 +538,7 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
+        "costProfile": { "clicks": 1, "credits": 0 },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -603,9 +559,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "operation", "economy_operation"],
         "planRoles": ["recover_economy"],
-        "valueHints": {
-          "economy": 3
-        },
+        "valueHints": { "economy": 3 },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "simple_economy_operation_on_play",
@@ -653,10 +607,7 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
+        "costProfile": { "clicks": 1, "credits": 0 },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -694,11 +645,7 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          {
-            "kind": "breaker",
-            "scope": "runner",
-            "timing": "persistent"
-          }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": ["breaker.wall"],
         "actionTacticSignals": [
@@ -706,11 +653,7 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 2,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 2, "memory": 1 },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -754,11 +697,7 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          {
-            "kind": "breaker",
-            "scope": "runner",
-            "timing": "persistent"
-          }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": ["breaker.sentry"],
         "actionTacticSignals": [
@@ -766,11 +705,7 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 3,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -905,10 +840,7 @@
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
+        "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -969,16 +901,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 4
-        },
+        "costProfile": { "credits": 4 },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -1008,10 +934,7 @@
         "roles": ["memory", "setup"],
         "planRoles": [],
         "valueHints": {},
-        "costProfile": {
-          "clicks": 1,
-          "credits": 2
-        },
+        "costProfile": { "clicks": 1, "credits": 2 },
         "riskTags": ["install_runner"],
         "quality": {
           "hintReviewed": true,
@@ -1073,16 +996,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 3
-        },
+        "costProfile": { "credits": 3 },
         "riskTags": ["hidden_ice", "tag"],
         "quality": {
           "hintReviewed": true,
@@ -1144,11 +1061,7 @@
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "simple_tag_punishment_operation_on_play",
-            "conditions": [
-              {
-                "kind": "requires_runner_tagged"
-              }
-            ]
+            "conditions": [{ "kind": "requires_runner_tagged" }]
           }
         ],
         "effects": [
@@ -1173,15 +1086,8 @@
           "punish.payoff",
           "tag.payoff"
         ],
-        "conditions": [
-          {
-            "kind": "requires_runner_tagged"
-          }
-        ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 1
-        },
+        "conditions": [{ "kind": "requires_runner_tagged" }],
+        "costProfile": { "clicks": 1, "credits": 1 },
         "riskTags": ["tag"],
         "quality": {
           "hintReviewed": true,
@@ -1243,16 +1149,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 4
-        },
+        "costProfile": { "credits": 4 },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -1281,12 +1181,8 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["remote_support", "upgrade"],
         "planRoles": [],
-        "valueHints": {
-          "remoteRootValue": 1
-        },
-        "costProfile": {
-          "credits": 0
-        },
+        "valueHints": { "remoteRootValue": 1 },
+        "costProfile": { "credits": 0 },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -1330,11 +1226,7 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          {
-            "kind": "breaker",
-            "scope": "runner",
-            "timing": "persistent"
-          }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": ["breaker.sentry"],
         "actionTacticSignals": [
@@ -1342,11 +1234,7 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 4,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -1418,10 +1306,7 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 0
-        },
+        "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["hidden_zone_change"],
         "quality": {
           "hintReviewed": true,
@@ -1443,9 +1328,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "event"],
         "planRoles": ["recover_economy", "tempo"],
-        "valueHints": {
-          "economy": 3
-        },
+        "valueHints": { "economy": 3 },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "v08_burst_credit_event_on_play",
@@ -1492,10 +1375,7 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 1 },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1516,10 +1396,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["asset_trash_target", "economy_asset"],
         "planRoles": ["bait_runner", "recover_economy"],
-        "valueHints": {
-          "economy": 3,
-          "remoteRootValue": 3
-        },
+        "valueHints": { "economy": 3, "remoteRootValue": 3 },
         "effects": [
           {
             "kind": "economy",
@@ -1536,9 +1413,7 @@
           "effect_scope:corp",
           "effect_timing:on_rez"
         ],
-        "costProfile": {
-          "credits": 2
-        },
+        "costProfile": { "credits": 2 },
         "riskTags": ["hidden_root"],
         "quality": {
           "hintReviewed": true,
@@ -1566,9 +1441,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["economy", "operation", "economy_operation"],
         "planRoles": ["recover_economy", "tempo"],
-        "valueHints": {
-          "economy": 3
-        },
+        "valueHints": { "economy": 3 },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "v08_credit_surge_operation_on_play",
@@ -1616,10 +1489,7 @@
           "effect_scope:corp",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 1 },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -1684,10 +1554,7 @@
           "effect_scope:runner",
           "effect_timing:action"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 1 },
         "riskTags": ["hidden_zone_change"],
         "quality": {
           "hintReviewed": true,
@@ -1747,16 +1614,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 4
-        },
+        "costProfile": { "credits": 4 },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -1786,10 +1647,7 @@
         "roles": ["memory", "setup"],
         "planRoles": [],
         "valueHints": {},
-        "costProfile": {
-          "clicks": 1,
-          "credits": 2
-        },
+        "costProfile": { "clicks": 1, "credits": 2 },
         "riskTags": ["install_runner"],
         "quality": {
           "hintReviewed": true,
@@ -1815,9 +1673,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["event", "run_pressure", "economy"],
         "planRoles": ["recover_economy"],
-        "valueHints": {
-          "economy": 3
-        },
+        "valueHints": { "economy": 3 },
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "v08_overclock_run_event_on_play",
@@ -1896,10 +1752,7 @@
           "effect_timing:action",
           "effect_timing:successful_run"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 1 },
         "riskTags": ["run"],
         "quality": {
           "hintReviewed": true,
@@ -1938,11 +1791,7 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          {
-            "kind": "breaker",
-            "scope": "runner",
-            "timing": "persistent"
-          }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": ["breaker.code_gate"],
         "actionTacticSignals": [
@@ -1950,11 +1799,7 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 3,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -2027,11 +1872,7 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          {
-            "kind": "breaker",
-            "scope": "runner",
-            "timing": "persistent"
-          }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
         "functionSignals": ["breaker.wall"],
         "actionTacticSignals": [
@@ -2039,11 +1880,7 @@
           "effect_scope:runner",
           "effect_timing:persistent"
         ],
-        "costProfile": {
-          "clicks": 1,
-          "credits": 4,
-          "memory": 1
-        },
+        "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
         "riskTags": ["encounter"],
         "quality": {
           "hintReviewed": true,
@@ -2087,16 +1924,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 5
-        },
+        "costProfile": { "credits": 5 },
         "riskTags": ["hidden_ice"],
         "quality": {
           "hintReviewed": true,
@@ -2160,16 +1991,10 @@
           "effect_timing:encounter_resolution"
         ],
         "conditions": [
-          {
-            "kind": "requires_encounter"
-          },
-          {
-            "kind": "requires_unbroken_subroutine"
-          }
+          { "kind": "requires_encounter" },
+          { "kind": "requires_unbroken_subroutine" }
         ],
-        "costProfile": {
-          "credits": 4
-        },
+        "costProfile": { "credits": 4 },
         "riskTags": ["hidden_ice", "tag"],
         "quality": {
           "hintReviewed": true,

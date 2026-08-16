@@ -233,6 +233,7 @@ export type CardCorpUtilityImplementation = (
       kind: "expose_prevention";
       cost: { kind: "credit"; amount: number };
       timing: "during_expose_attempt";
+      mayRezAtWindow?: true;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {

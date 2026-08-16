@@ -78,18 +78,6 @@ export const cardSpec = {
         role: "defensive_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.central_stabilize",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -118,16 +106,6 @@ export const cardSpec = {
           "v2: Redirect kann einen Scoring-Remote verteidigen, bleibt aber fort-/zielabhängig.",
       },
       {
-        kind: "target_preference",
-        purpose: "redirect_run_to_best_data_fort",
-        preferences: [
-          "protects_agenda_remote",
-          "protects_central_access_pressure",
-          "adds_relevant_encounter_tax",
-        ],
-        avoid: ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
-      },
-      {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
@@ -138,7 +116,24 @@ export const cardSpec = {
         severity: "medium",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("subroutine_paid_deflect_to_data_fort"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "redirect_run_to_best_data_fort",
+            preferences: [
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "adds_relevant_encounter_tax",
+              "high_run_denial_payoff",
+            ],
+            avoid: ["insufficient_post_payment_reserve"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

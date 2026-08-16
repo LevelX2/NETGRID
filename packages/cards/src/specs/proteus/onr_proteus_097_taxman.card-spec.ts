@@ -64,16 +64,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "hq_credit_denial",
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "virus_pressure",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "risk_interpretation",
+        risk: "virus_purge_risk",
+        severity: "medium",
       },
     ],
     capabilities: [],

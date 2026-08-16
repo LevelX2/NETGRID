@@ -26,7 +26,34 @@ const activeDecks = catalog.decks.filter((deck) => deck.status === "active");
 const cardsById = createRuntimeCardsById();
 const findings: string[] = [];
 const analysisHashUpdates = new Map<string, string>();
+const analysisMetadataUpdates = new Map<
+  string,
+  {
+    sourceAnalysisHash: string;
+    primaryStrategyIds: string[];
+    secondaryStrategyIds: string[];
+  }
+>();
 const writeAnalysisHashes = process.argv.includes("--write-analysis-hashes");
+const writeAnalysisMetadata = process.argv.includes("--write-analysis");
+const reviewedAtArgument = process.argv.find((argument) =>
+  argument.startsWith("--reviewed-at="),
+);
+const reviewedAt = reviewedAtArgument?.slice("--reviewed-at=".length);
+
+if (writeAnalysisHashes && writeAnalysisMetadata) {
+  throw new Error(
+    "Use either --write-analysis-hashes or --write-analysis, not both.",
+  );
+}
+if (
+  writeAnalysisMetadata &&
+  (reviewedAt === undefined || !/^\d{4}-\d{2}-\d{2}$/.test(reviewedAt))
+) {
+  throw new Error(
+    "--write-analysis requires an explicit --reviewed-at=YYYY-MM-DD.",
+  );
+}
 
 for (const deck of activeDecks) {
   const profile = buildDeckStrategyProfile({
@@ -62,18 +89,27 @@ for (const deck of activeDecks) {
     );
     continue;
   }
-  if (
-    !sameStrings(guide.analysis.primaryStrategyIds, profile.primaryStrategies)
-  ) {
+  const primaryStrategiesStale = !sameStrings(
+    guide.analysis.primaryStrategyIds,
+    profile.primaryStrategies,
+  );
+  const secondaryStrategiesStale = !sameStrings(
+    guide.analysis.secondaryStrategyIds,
+    profile.secondaryStrategies,
+  );
+  if (primaryStrategiesStale && !writeAnalysisMetadata) {
     findings.push(`${deck.standardDeckId}: primary strategy list is stale`);
   }
-  if (
-    !sameStrings(
-      guide.analysis.secondaryStrategyIds,
-      profile.secondaryStrategies,
-    )
-  ) {
+  if (secondaryStrategiesStale && !writeAnalysisMetadata) {
     findings.push(`${deck.standardDeckId}: secondary strategy list is stale`);
+  }
+  if (
+    profile.primaryStrategies.length === 0 &&
+    guide.analysis.reviewStatus === "plausible"
+  ) {
+    findings.push(
+      `${deck.standardDeckId}: neutral strategy profile requires an observation status`,
+    );
   }
   for (const keyCard of guide.content.keyCards) {
     const card = cardsById[keyCard.cardId];
@@ -88,13 +124,28 @@ for (const deck of activeDecks) {
     }
   }
   if (refreshableAnalysisDrift) {
-    if (writeAnalysisHashes) {
+    if (writeAnalysisMetadata) {
+      analysisMetadataUpdates.set(deck.standardDeckId, {
+        sourceAnalysisHash: analysisHash,
+        primaryStrategyIds: profile.primaryStrategies,
+        secondaryStrategyIds: profile.secondaryStrategies,
+      });
+    } else if (writeAnalysisHashes) {
       analysisHashUpdates.set(deck.standardDeckId, analysisHash);
     } else {
       findings.push(
         `${deck.standardDeckId}: stale (standard_deck_guide_analysis_stale)`,
       );
     }
+  } else if (
+    writeAnalysisMetadata &&
+    (primaryStrategiesStale || secondaryStrategiesStale)
+  ) {
+    analysisMetadataUpdates.set(deck.standardDeckId, {
+      sourceAnalysisHash: analysisHash,
+      primaryStrategyIds: profile.primaryStrategies,
+      secondaryStrategyIds: profile.secondaryStrategies,
+    });
   }
 }
 
@@ -105,7 +156,33 @@ for (const guide of manifestGuides(manifest)) {
   }
 }
 
-if (findings.length === 0 && writeAnalysisHashes) {
+if (findings.length === 0 && writeAnalysisMetadata) {
+  if (
+    analysisMetadataUpdates.size > 0 ||
+    standardDeckGuideData.analyzedAt !== reviewedAt
+  ) {
+    const writable = structuredClone(
+      standardDeckGuideData,
+    ) as StandardDeckGuideManifest;
+    writable.analyzedAt = reviewedAt!;
+    for (const guide of writable.guides) {
+      const update = analysisMetadataUpdates.get(guide.standardDeckId);
+      if (!update) continue;
+      guide.sourceAnalysisHash = update.sourceAnalysisHash;
+      guide.reviewedAt = reviewedAt!;
+      guide.analysis.primaryStrategyIds = update.primaryStrategyIds;
+      guide.analysis.secondaryStrategyIds = update.secondaryStrategyIds;
+    }
+    writeFileSync(
+      new URL("../data/decks/standard-deck-guides-1.0.0.json", import.meta.url),
+      `${JSON.stringify(writable, null, 2)}\n`,
+      "utf8",
+    );
+  }
+  console.log(
+    `Standarddeck-Analysen aktualisiert: ${analysisMetadataUpdates.size}/${activeDecks.length}.`,
+  );
+} else if (findings.length === 0 && writeAnalysisHashes) {
   const writable = structuredClone(
     standardDeckGuideData,
   ) as StandardDeckGuideManifest;

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Remove a tag, at no cost. You may pay 1 when you play Open-Ended® Mileage Program to take it back into your hand instead of trashing it.",
+      "Remove a tag, at no cost. You may pay [1] when you play Open-Ended® Mileage Program to take it back into your hand instead of trashing it.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -68,6 +68,14 @@ export const cardSpec = {
         ],
       },
     ],
+  },
+  planningAnnotations: {
+    schemaVersion: "card-planning-annotations-v1",
+    card: [
+      { kind: "plan_role", role: "tag_clear" },
+      { kind: "plan_role", role: "tag_defense" },
+    ],
+    capabilities: [],
   },
   printings: [
     {

@@ -6,7 +6,6 @@ import type {
   ChoiceRequest,
   CorpServer,
   CounterType,
-  EffectCommand,
   GameState,
   LegalAction,
   PlayerAction,
@@ -57,16 +56,25 @@ export type FortRunSideFamiliesHost = {
     hostedPaymentCredits: (cardId: CardInstanceId) => number;
     spendHostedPaymentCredits: (cardId: CardInstanceId, amount: number) => void;
     rezCostForCard: (cardId: CardInstanceId) => number;
-    spendCorpCredits: (amount: number) => void;
   };
   breaker: {
     breakAbilityForLegalAction: (
       legalAction: LegalAction,
     ) => RuntimeIcebreakerAbility | undefined;
+    resumePaidBreakerAction: (legalAction: LegalAction) => void;
   };
-  effects: {
-    executeEffectCommands: (commands: EffectCommand[]) => void;
-    trashRunnerInstalledProgram: (cardId: CardInstanceId) => void;
+  rez: {
+    rezRootCardAtReactionWindow: (
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
+  };
+  trash: {
+    resolveRunnerInstalledProgramTrash: (
+      cardId: CardInstanceId,
+      source: string,
+      legalAction: LegalAction,
+    ) => { suspended: boolean };
   };
   tags: {
     addRunnerTagsWithPrevention: (
@@ -195,6 +203,8 @@ export function startAardvarkInterceptionChoice(
     });
   if (!aardvarkId)
     throw new Error("Aardvark ist auf diesem Server nicht verfügbar.");
+  if (host.state.pendingAardvarkBreakerContinuation)
+    throw new Error("Es ist bereits eine Aardvark-Fortsetzung gebunden.");
   const cost = Math.max(0, Math.floor(legalAction.costs[0]?.credits ?? 0));
   const subroutineIndex =
     legalAction.payload?.subroutineIndex === undefined
@@ -225,6 +235,13 @@ export function startAardvarkInterceptionChoice(
     stateVersion: host.state.stateVersion + 1,
     visibility: "private_to_side",
   };
+  host.state.pendingAardvarkBreakerContinuation = {
+    aardvarkId,
+    breakerId,
+    encounteredIceId: run.encounteredIceId,
+    originalLegalAction: cloneLegalAction(legalAction),
+    createdAtStateVersion: host.state.stateVersion + 1,
+  };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
@@ -251,6 +268,8 @@ export function resolveAardvarkInterceptionChoice(
   const choice = host.state.pendingChoice;
   if (!choice || !choice.source.startsWith("v199.aardvark"))
     throw new Error("Es ist keine Aardvark-Choice offen.");
+  const continuation = host.state.pendingAardvarkBreakerContinuation;
+  if (!continuation) throw new Error("Die Aardvark-Fortsetzung fehlt.");
   const [, aardvarkId, breakerId, iceId, actionType, subroutineIndexRaw] =
     choice.source.split(":");
   if (
@@ -267,6 +286,12 @@ export function resolveAardvarkInterceptionChoice(
   const run = mustRun(host.state);
   if (run.encounteredIceId !== iceId)
     throw new Error("Die Aardvark-Choice gehoert nicht mehr zu diesem ICE.");
+  if (
+    continuation.aardvarkId !== aardvarkId ||
+    continuation.breakerId !== breakerId ||
+    continuation.encounteredIceId !== iceId
+  )
+    throw new Error("Die Aardvark-Fortsetzung passt nicht zur Choice.");
   if (!isWormBreaker(host, breakerId as CardInstanceId))
     throw new Error("Aardvark kann nur einen Worm abfangen.");
 
@@ -275,15 +300,14 @@ export function resolveAardvarkInterceptionChoice(
     if (!isAardvarkSource(host, aardvarkId as CardInstanceId))
       throw new Error("Aardvark-Ziel ist ungueltig.");
     if (aardvark.rezzed) throw new Error("Aardvark ist bereits gerezzt.");
-    host.payment.spendCorpCredits(
-      host.payment.rezCostForCard(aardvarkId as CardInstanceId),
+    host.rez.rezRootCardAtReactionWindow(
+      aardvarkId as CardInstanceId,
+      legalAction,
     );
-    host.state.cardInstances[aardvarkId] = {
-      ...aardvark,
-      rezzed: true,
-      faceup: true,
-    };
-    host.effects.trashRunnerInstalledProgram(breakerId as CardInstanceId);
+    if (host.state.pendingChoice !== choice)
+      throw new Error(
+        "Der Aardvark-Rez-Lifecycle hat eine unerwartete Choice geoeffnet.",
+      );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       publicRevealDefinitionId: host.cards.definitionFor(
@@ -292,9 +316,20 @@ export function resolveAardvarkInterceptionChoice(
       hiddenZoneBarrier: true,
       hiddenZoneAction: "aardvark_rez_trash_worm",
       aardvarkRezzed: true,
-      aardvarkWormTrashed: true,
     };
     delete host.state.pendingChoice;
+    delete host.state.pendingAardvarkBreakerContinuation;
+    const trashResult = host.trash.resolveRunnerInstalledProgramTrash(
+      breakerId as CardInstanceId,
+      `aardvark:${aardvarkId}`,
+      legalAction,
+    );
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...(trashResult.suspended
+        ? { aardvarkWormTrashPending: true }
+        : { aardvarkWormTrashed: true }),
+    };
     return {
       handled: true,
       sourceCardId: aardvarkId as CardInstanceId,
@@ -304,27 +339,29 @@ export function resolveAardvarkInterceptionChoice(
       serverLabel: host.servers.publicServerLabel(run.attackedServerId),
       targetProgramId: breakerId as CardInstanceId,
       rezzedCardId: aardvarkId as CardInstanceId,
-      trashedCardIds: [breakerId as CardInstanceId],
+      ...(trashResult.suspended
+        ? {}
+        : { trashedCardIds: [breakerId as CardInstanceId] }),
       choiceResolved: true,
       stateChanged: true,
     };
   }
 
-  if (actionType === "pump_breaker") {
-    host.effects.executeEffectCommands([
-      {
-        type: "change_breaker_strength",
-        breakerId: breakerId as CardInstanceId,
-        amount: 1,
-      },
-    ]);
-  } else {
-    const subroutineIndex = Number(subroutineIndexRaw);
-    if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
+  if (actionType === "break_subroutine" && subroutineIndexRaw !== "none") {
+    const subroutineIndexes = String(
+      continuation.originalLegalAction.payload?.subroutineIndexes ??
+        subroutineIndexRaw,
+    )
+      .split(",")
+      .map((value) => Number(value));
+    if (
+      subroutineIndexes.length < 1 ||
+      subroutineIndexes.some(
+        (subroutineIndex) =>
+          !Number.isInteger(subroutineIndex) || subroutineIndex < 0,
+      )
+    )
       throw new Error("Die Aardvark-Subroutine ist ungueltig.");
-    host.effects.executeEffectCommands([
-      { type: "break_subroutine", subroutineIndex },
-    ]);
   }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -333,6 +370,8 @@ export function resolveAardvarkInterceptionChoice(
     aardvarkRezzed: false,
   };
   delete host.state.pendingChoice;
+  delete host.state.pendingAardvarkBreakerContinuation;
+  host.breaker.resumePaidBreakerAction(continuation.originalLegalAction);
   return {
     handled: true,
     sourceCardId: aardvarkId as CardInstanceId,
@@ -344,6 +383,16 @@ export function resolveAardvarkInterceptionChoice(
     choiceResolved: true,
     stateChanged: true,
   };
+}
+
+function cloneLegalAction(legalAction: LegalAction): LegalAction {
+  const cloned: LegalAction = {
+    ...legalAction,
+    costs: legalAction.costs.map((cost) => ({ ...cost })),
+  };
+  if (legalAction.payload) cloned.payload = { ...legalAction.payload };
+  else delete cloned.payload;
+  return cloned;
 }
 
 export function activityGatedFortRunSourceIds(

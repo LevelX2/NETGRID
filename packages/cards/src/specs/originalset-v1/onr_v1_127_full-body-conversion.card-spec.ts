@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Prevents all meat damage. For each 1 credit the Corp pays when meat damage is done, 1 meat damage is not prevented.",
+      "Prevents all meat damage. For each [1] the Corp pays when meat damage is done, 1 point of meat damage is not prevented by this card.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

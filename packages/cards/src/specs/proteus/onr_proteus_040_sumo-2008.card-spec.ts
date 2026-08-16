@@ -73,25 +73,24 @@ export const cardSpec = {
         kind: "plan_role",
         role: "protect_remote",
       },
+    ],
+    capabilities: [
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "target_preference",
-        purpose: "choose_ice_type_or_mode_from_legal_options",
-        preferences: [
-          "use_choice_option_with_visible_board_payoff",
-          "prefer_option_relevant_to_current_run_path",
-          "prefer_option_that_protects_agenda_or_remote_pressure",
-        ],
-        avoid: [
-          "hidden_info_dependent_choice",
-          "option_with_no_visible_current_payoff",
+        capabilityKey: capabilityKey("rez_as_sentry_or_wall"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_ice_type_or_mode_from_legal_options",
+            preferences: [
+              "type_missing_in_current_rig",
+              "type_blocking_relevant_run_path",
+              "prefer_option_relevant_to_current_run_path",
+            ],
+            avoid: ["insufficient_post_payment_reserve"],
+          },
         ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

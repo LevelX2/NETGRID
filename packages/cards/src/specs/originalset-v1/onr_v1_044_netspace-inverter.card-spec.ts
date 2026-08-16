@@ -57,13 +57,13 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "plan_role",
+        role: "ice_order_control",
       },
       {
-        kind: "target_preference",
-        purpose: "reverse_fort_ice_order",
-        avoid: ["hidden_info_dependent_choice"],
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
       },
     ],
     capabilities: [],

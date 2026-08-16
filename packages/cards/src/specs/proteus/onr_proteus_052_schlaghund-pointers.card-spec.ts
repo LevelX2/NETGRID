@@ -77,7 +77,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_scoring_remote",
+        role: "conditional_trace_tag_source",
       },
       {
         kind: "strategic_role",
@@ -101,6 +101,11 @@ export const cardSpec = {
         confidence: "medium",
         rationale:
           "Operations Semantic Review v2: paid_trace_tag_source. Review-v2-Rolle trace_tag_source wird als validierbare Hauptrolle enabler mit roleDetail gespeichert.",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "trace_play_cost_reserve",
+        severity: "medium",
       },
     ],
     capabilities: [

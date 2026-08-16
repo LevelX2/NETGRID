@@ -2609,6 +2609,8 @@ function deriveClosedMechanicalHintOverlay(
       corpUtility.cost.kind !== "credit" ||
       corpUtility.cost.amount !== 1 ||
       corpUtility.timing !== "during_expose_attempt" ||
+      (corpUtility.mayRezAtWindow !== undefined &&
+        corpUtility.mayRezAtWindow !== true) ||
       corpUtility.visibility !== "public"
     )
       throw new Error("card_spec_unknown_expose_prevention_shape");
@@ -6218,14 +6220,33 @@ function deriveTargetProfiles(
       ];
     }
   }
-  const ownedCapabilityPreference = [...capabilityPreferences.entries()].find(
-    ([capabilityKey]) =>
-      mechanicalOwnerHasCapabilityKey(entry.planning.engine, capabilityKey),
-  )?.[1];
-  if (ownedCapabilityPreference !== undefined)
-    return [
-      deriveClosedExtendedTargetProfile(entry, ownedCapabilityPreference),
-    ];
+  const ownedCapabilityPreferences = [
+    ...capabilityPreferences.entries(),
+  ].filter(([capabilityKey]) =>
+    mechanicalOwnerHasCapabilityKey(entry.planning.engine, capabilityKey),
+  );
+  if (ownedCapabilityPreferences.length > 0)
+    return ownedCapabilityPreferences.map(([capabilityKey, preference]) => {
+      const abilities = entry.planning.engine.abilities;
+      const scopedAbilities = abilities?.filter((ability) =>
+        mechanicalOwnerHasCapabilityKey(ability, capabilityKey),
+      );
+      return deriveClosedExtendedTargetProfile(
+        scopedAbilities !== undefined && scopedAbilities.length > 0
+          ? {
+              ...entry,
+              planning: {
+                ...entry.planning,
+                engine: {
+                  ...entry.planning.engine,
+                  abilities: scopedAbilities,
+                },
+              },
+            }
+          : entry,
+        preference,
+      );
+    });
   if (capabilityPreferences.size > 0)
     throw new Error(
       `card_spec_target_preference_without_supported_mechanical_owner: ${entry.definition.id}`,
@@ -6300,6 +6321,7 @@ function hasClosedTargetPreferenceOwner(
               "free_rez_installed_ice_with_counters",
               "remove_same_fort_advancement_counters_for_run_credits",
               "search_stack_install",
+              "search_stack_to_grip",
               "look_top_stack_take_matching",
               "look_top_stack_take_one_arrange_rest",
               "search_trash_to_grip",
@@ -6353,6 +6375,18 @@ function deriveClosedExtendedTargetProfile(
         lookTopStack.allowedTypes[0] === "program"
           ? "program"
           : "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some((effect) => effect.kind === "search_stack_to_grip"),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "activated_ability",
+      targetType: "program",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (

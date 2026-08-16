@@ -101,6 +101,16 @@ describe("CardRegistry", () => {
         "onr_classic_052_zetatech-portastation" as CardDefinitionId,
       ),
     ).toMatchObject({ recurringCredits: 1 });
+    expect(
+      publicCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_classic_047_little-black-box" as CardDefinitionId,
+      ),
+    ).toMatchObject({
+      memoryLimitBonus: 1,
+      maxHandSizeBonus: 1,
+      recurringCredits: 1,
+    });
   });
 
   it("builds deterministic cached projections and all scoped lookups", () => {

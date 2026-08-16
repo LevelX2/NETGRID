@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 12 from the bank on Holovid Campaign when you rez it. Take 1 from Holovid Campaign at the start of each of your turns. When all the bits have been removed, trash Holovid Campaign.",
+      "Put [12] from the bank on Holovid Campaign when you rez it. Take [1] from Holovid Campaign at the start of each of your turns. When all the bits have been removed, trash Holovid Campaign.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -58,11 +58,11 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_key_card",
+        role: "stack_search",
       },
       {
         kind: "plan_role",
-        role: "repair_setup",
+        role: "hand_rebuild",
       },
       {
         kind: "strategic_role",
@@ -83,12 +83,13 @@ export const cardSpec = {
         preferences: [
           "best_cards_for_current_plan",
           "best_cards_for_current_state",
+          "program_repairs_missing_coverage",
         ],
-        avoid: ["hidden_info_dependent_choice"],
+        avoid: ["low_value_program"],
       },
       {
         kind: "risk_interpretation",
-        risk: "opportunity_cost",
+        risk: "hand_trash_cost",
         severity: "high",
       },
       {

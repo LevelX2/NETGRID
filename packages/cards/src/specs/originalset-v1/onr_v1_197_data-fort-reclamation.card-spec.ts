@@ -72,6 +72,7 @@ export const cardSpec = {
         support: "supports",
       },
       { kind: "strategic_role", role: "engine_anchor" },
+      { kind: "strategy_anchor", strategyKey: "corp.remote_scoring" },
       { kind: "plan_role", role: "corp_score_agenda" },
       { kind: "plan_role", role: "corp_agenda_ability" },
       {
@@ -93,9 +94,13 @@ export const cardSpec = {
             kind: "target_preference",
             purpose: "create_remote_with_best_hq_cards",
             preferences: [
-              "prefer_option_that_protects_agenda_or_remote_pressure",
+              "best_cards_for_current_plan",
+              "protects_agenda_remote",
+              "relevant_server_ice",
+              "high_expected_corp_rez_count",
               "central_or_remote_plan_enabler",
             ],
+            avoid: ["low_impact_ice"],
           },
         ],
       },
