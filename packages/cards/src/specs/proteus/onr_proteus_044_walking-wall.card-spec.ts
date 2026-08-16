@@ -91,13 +91,13 @@ export const cardSpec = {
       },
       {
         kind: "target_preference",
-        purpose: "move_mobile_ice_to_relevant_server_position",
+        purpose: "move_mobile_ice_within_current_fort",
         preferences: [
-          "protects_agenda_remote",
-          "protects_central_access_pressure",
           "current_run_path_relevance",
+          "adds_relevant_encounter_tax",
+          "high_run_denial_payoff",
         ],
-        avoid: ["irrelevant_server_ice", "hidden_info_dependent_choice"],
+        avoid: ["avoid_revealing_high_value_hidden_ice_without_need"],
       },
     ],
     capabilities: [],

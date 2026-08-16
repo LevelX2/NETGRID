@@ -1,5 +1,9 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const distributeAdvancementCounters = capabilityKey(
+  "abilities_on_play_distribute_advancement_counters",
+);
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -45,9 +49,7 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey(
-          "abilities_on_play_distribute_advancement_counters",
-        ),
+        capabilityKey: distributeAdvancementCounters,
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",
@@ -88,18 +90,28 @@ export const cardSpec = {
         rationale:
           "Operations Semantic Review v2: advancement_counter_burst / fast_advance / overadvance_candidate.",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "advance_high_value_corp_card",
-        preferences: [
-          "prefer_option_that_protects_agenda_or_remote_pressure",
-          "best_cards_for_current_plan",
-          "central_or_remote_plan_enabler",
+        capabilityKey: distributeAdvancementCounters,
+        annotations: [
+          { kind: "plan_owner", owner: "corp.score_agenda" },
+          {
+            kind: "target_preference",
+            purpose: "advance_high_value_corp_card_distribution",
+            preferences: [
+              "advancement_target_in_current_plan",
+              "advanceable_ambush_with_access_payoff",
+              "best_cards_for_current_plan",
+            ],
+            avoid: [
+              "nonconverting_advancement_target",
+              "insufficient_post_payment_reserve",
+            ],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

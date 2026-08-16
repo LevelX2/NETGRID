@@ -687,38 +687,10 @@ describe("generic typed CardSpec AI translators", () => {
     );
   });
 
-  it("binds a successful-run fort target only to the typed force-rez followup", () => {
+  it("does not invent a target choice for a fort already bound by the successful run", () => {
     const entry = targetAnnotatedEntry("onr_v1_026_false-echo");
 
-    expect(deriveCardSpecAiHint(entry).targetProfiles).toContainEqual({
-      schemaVersion: "target-profile-v1",
-      kind: "use_target",
-      timing: "after_successful_run",
-      targetType: "server",
-      purpose: "force_rez_fort_ice",
-      avoid: ["hidden_info_dependent_choice"],
-      hiddenInfoPolicy: "legal_targets_only",
-      serverScope: "source_fort",
-    });
-
-    expect(() =>
-      deriveCardSpecAiHint({
-        ...entry,
-        planning: {
-          ...entry.planning,
-          engine: {
-            ...entry.planning.engine,
-            successfulRunFollowups: [
-              {
-                kind: "optional_make_run_after_successful_run",
-                target: "different_server",
-                visibility: "public",
-              },
-            ],
-          },
-        },
-      } as never),
-    ).toThrow("card_spec_target_preference_without_supported_mechanical_owner");
+    expect(deriveCardSpecAiHint(entry).targetProfiles).toBeUndefined();
   });
 
   it("projects Data Crèche as a successful-run bonus run without grip-reset semantics", () => {
@@ -779,7 +751,7 @@ describe("generic typed CardSpec AI translators", () => {
             .length ?? 0),
         0,
       ),
-    ).toBe(74);
+    ).toBe(73);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
@@ -1376,5 +1348,77 @@ describe("generic typed CardSpec AI translators", () => {
     expect(
       fullHint("onr_proteus_076_syd-meyer-superstores").strategyAnchors,
     ).toBeUndefined();
+  });
+
+  it("keeps Batch 14 choices on their actual target and information boundary", () => {
+    const fullHint = (cardId: string) => {
+      const entry = cardSpecPlanningCards().find(
+        (candidate) => candidate.definition.id === cardId,
+      );
+      if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
+      return deriveCardSpecAiHint(entry);
+    };
+
+    expect(fullHint("onr_v1_026_false-echo").targetProfiles).toBeUndefined();
+    expect(
+      fullHint("onr_proteus_085_disintegrator").targetProfiles,
+    ).toBeUndefined();
+
+    expect(fullHint("onr_v1_001_afreet").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        kind: "hosted_install_target",
+        targetType: "program",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(
+      fullHint("onr_v1_099_mantis-fixer-at-large").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "use_target",
+        timing: "on_play",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+
+    for (const cardId of [
+      "onr_proteus_044_walking-wall",
+      "onr_proteus_033_mobile-barricade",
+    ])
+      expect(fullHint(cardId).targetProfiles).toContainEqual(
+        expect.objectContaining({
+          purpose: "move_mobile_ice_within_current_fort",
+          targetType: "ice_position",
+          hiddenInfoPolicy: "public_or_controller_known_only",
+          preferences: expect.not.arrayContaining([
+            "protects_agenda_remote",
+            "protects_central_access_pressure",
+          ]),
+        }),
+      );
+
+    const projectConsultants = fullHint("onr_v1_300_project-consultants");
+    expect(projectConsultants.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "advance_high_value_corp_card_distribution",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(projectConsultants.actionPlanOwnerBindings).toContainEqual({
+      capabilityKey: "abilities_on_play_distribute_advancement_counters",
+      owner: "corp.score_agenda",
+    });
+
+    for (const cardId of [
+      "onr_proteus_069_pavit-bharat",
+      "onr_v1_289_edgerunner-inc-temps",
+      "onr_proteus_071_raymond-ellison",
+      "onr_proteus_128_airport-locker",
+    ])
+      expect(fullHint(cardId).targetProfiles?.[0]?.avoid ?? []).not.toContain(
+        "hidden_info_dependent_choice",
+      );
   });
 });

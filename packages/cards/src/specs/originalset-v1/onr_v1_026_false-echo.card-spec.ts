@@ -55,17 +55,6 @@ export const cardSpec = {
       },
     ],
   },
-  planningAnnotations: {
-    schemaVersion: "card-planning-annotations-v1",
-    card: [
-      {
-        kind: "target_preference",
-        purpose: "force_rez_fort_ice",
-        avoid: ["hidden_info_dependent_choice"],
-      },
-    ],
-    capabilities: [],
-  },
   printings: [
     {
       schemaVersion: "printing-spec-v1",

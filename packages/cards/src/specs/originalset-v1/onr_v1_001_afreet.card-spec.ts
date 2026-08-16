@@ -69,8 +69,26 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "choose_hosted_program",
-        preferences: ["low_mu_program"],
-        avoid: ["target_would_break_host_limit"],
+        preferences: [
+          "best_cards_for_current_plan",
+          "program_preserves_run_goal",
+          "program_repairs_missing_coverage",
+          "low_mu_program",
+        ],
+        avoid: [
+          "target_would_break_host_limit",
+          "critical_rig_or_survival_card",
+        ],
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "host_leaves_play_trashes_hosted_programs",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "hosted_icebreaker_strength_loss",
+        severity: "medium",
       },
     ],
     capabilities: [],

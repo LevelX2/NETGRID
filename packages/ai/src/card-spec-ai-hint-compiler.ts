@@ -6184,6 +6184,67 @@ function deriveTargetProfiles(
           hiddenInfoPolicy: "public_or_controller_known_only",
         },
       ];
+    if (target !== undefined && onPlayEffectKinds.has("search_stack_to_grip"))
+      return [
+        {
+          schemaVersion: "target-profile-v1",
+          kind: "use_target",
+          timing: "on_play",
+          targetType: "card",
+          purpose: target.purpose,
+          ...(target.preferences === undefined
+            ? {}
+            : {
+                preferences: closedPlanningValues(
+                  target.preferences,
+                  KNOWN_HINT_TARGET_PROFILE_PREFERENCES,
+                  "target_preference",
+                ),
+              }),
+          ...(target.avoid === undefined
+            ? {}
+            : {
+                avoid: closedPlanningValues(
+                  target.avoid,
+                  KNOWN_HINT_TARGET_PROFILE_AVOIDS,
+                  "target_avoid",
+                ),
+              }),
+          hiddenInfoPolicy: "public_or_controller_known_only",
+        },
+      ];
+    if (
+      target !== undefined &&
+      onPlayEffectKinds.has("distribute_advancement_counters")
+    )
+      return [
+        {
+          schemaVersion: "target-profile-v1",
+          kind: "use_target",
+          timing: "on_play",
+          targetType: "card",
+          purpose: target.purpose,
+          ...(target.preferences === undefined
+            ? {}
+            : {
+                preferences: closedPlanningValues(
+                  target.preferences,
+                  KNOWN_HINT_TARGET_PROFILE_PREFERENCES,
+                  "target_preference",
+                ),
+              }),
+          ...(target.avoid === undefined
+            ? {}
+            : {
+                avoid: closedPlanningValues(
+                  target.avoid,
+                  KNOWN_HINT_TARGET_PROFILE_AVOIDS,
+                  "target_avoid",
+                ),
+              }),
+          hiddenInfoPolicy: "public_or_controller_known_only",
+        },
+      ];
     if (
       target !== undefined &&
       (onPlayEffectKinds.has("search_stack_install") ||
@@ -7096,7 +7157,11 @@ function deriveClosedExtendedTargetProfile(
       ...planningFields,
       kind: "hosted_install_target",
       timing: "on_install",
-      targetType: "icebreaker",
+      targetType:
+        engine.hostedProgramCapacity.allowedProgramSubtypes?.length === 1 &&
+        engine.hostedProgramCapacity.allowedProgramSubtypes[0] === "icebreaker"
+          ? "icebreaker"
+          : "program",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (

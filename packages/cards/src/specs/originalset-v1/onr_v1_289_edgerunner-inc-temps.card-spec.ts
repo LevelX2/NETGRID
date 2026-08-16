@@ -64,7 +64,6 @@ export const cardSpec = {
           "best_cards_for_current_plan",
           "central_or_remote_plan_enabler",
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
     capabilities: [],

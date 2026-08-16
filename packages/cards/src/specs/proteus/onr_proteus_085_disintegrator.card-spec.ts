@@ -68,12 +68,6 @@ export const cardSpec = {
         kind: "strategy_anchor",
         strategyKey: "runner.run_event_tempo",
       },
-      {
-        kind: "target_preference",
-        purpose: "derez_fully_broken_ice",
-        preferences: ["current_encounter_ice"],
-        avoid: ["hidden_info_dependent_choice"],
-      },
     ],
     capabilities: [],
   },

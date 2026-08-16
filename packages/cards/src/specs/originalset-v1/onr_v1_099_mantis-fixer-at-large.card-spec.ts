@@ -1,5 +1,9 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const searchStackToGrip = capabilityKey(
+  "abilities_on_play_search_stack_to_grip",
+);
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -45,7 +49,7 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey("abilities_on_play_search_stack_to_grip"),
+        capabilityKey: searchStackToGrip,
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",
@@ -72,14 +76,22 @@ export const cardSpec = {
         kind: "plan_role",
         role: "recover_rig",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "generic_stack_search",
-        preferences: [],
-        avoid: [],
+        capabilityKey: searchStackToGrip,
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "generic_stack_search",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+            ],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

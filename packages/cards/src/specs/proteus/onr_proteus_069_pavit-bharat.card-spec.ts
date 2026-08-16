@@ -87,8 +87,12 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "replace_installed_fort_cards_from_hq",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "best_cards_for_current_plan",
+          "protects_agenda_remote",
+          "advanceable_ambush_with_access_payoff",
+        ],
+        avoid: ["next_turn_required_card"],
       },
       {
         kind: "value_interpretation",

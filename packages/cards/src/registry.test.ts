@@ -360,10 +360,14 @@ describe("CardRegistry", () => {
         use: "damage.payoff.runner",
       }),
     );
-    expect(mantis.planningAnnotations!.card).toContainEqual(
+    expect(mantis.planningAnnotations!.capabilities).toContainEqual(
       expect.objectContaining({
-        kind: "target_preference",
-        purpose: "generic_stack_search",
+        annotations: expect.arrayContaining([
+          expect.objectContaining({
+            kind: "target_preference",
+            purpose: "generic_stack_search",
+          }),
+        ]),
       }),
     );
   });

@@ -119,8 +119,11 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "remove_advancement_counters_for_temporary_credits",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "best_cards_for_current_state",
+          "minimum_cards_for_current_credit_need",
+        ],
+        avoid: ["next_turn_required_card", "insufficient_post_payment_reserve"],
       },
       {
         kind: "value_interpretation",
