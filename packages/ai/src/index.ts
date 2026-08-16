@@ -62,6 +62,10 @@ export {
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
 export {
+  assessTraceBidCandidates,
+  type TraceBidCandidateAssessment,
+} from "./runtime/trace-bid-assessment";
+export {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "./visible-run-analysis";

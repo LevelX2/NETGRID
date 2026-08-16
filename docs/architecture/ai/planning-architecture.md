@@ -3372,6 +3372,14 @@ R&D-Plan fordert 5 Credits an
 | Discard                    | Hand-/Agenda-Management oder Cleanup-Resolution                                           |
 | EndTurn                    | `corp.complete_turn`                                                                      |
 
+Trace-Bids bleiben auch in den auswählbaren Blind-Profilen reine Resolution
+des bereits ausgelösten Trace-Steps. Die side-sichere Bewertung darf Folge,
+Link, sichtbare Budgets, Reserve, effektives Limit und Tie-Regel bewerten und
+innerhalb rationaler legaler Kandidaten replaybar variieren. Sie ändert weder
+`actionId` noch Executor, Root, Route oder Step und darf keinen alternativen
+Punish-, Defense-, Run- oder Scoreplan wählen. Die Engine bindet und
+revalidiert den aktuellen `resolve_choice`-Step vor jedem RNG-Draw.
+
 ### 30.3 Coverage-Gate
 
 Die Implementierung ist erst vollständig umgestellt, wenn ein automatischer

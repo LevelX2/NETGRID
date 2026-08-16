@@ -1,6 +1,7 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
+import type { TraceRulesProfile } from "@netgrid/shared";
 
 import {
   aiDeckReadinessLabel,
@@ -39,6 +40,7 @@ export function MatchStartAdvancedOptions({
   isAiVsAiSeries,
   hasAiOpponent,
   matchCardPool,
+  traceRulesProfile,
   humanAiSideSelection,
   countdownSeconds,
   isPublic,
@@ -64,6 +66,7 @@ export function MatchStartAdvancedOptions({
   aiSlotDisabled,
   onCountdownSeconds,
   onIsPublic,
+  onTraceRulesProfile,
   onPlayerClockMode,
   onPlayerClockMinutes,
   onPlayerClockGraceSeconds,
@@ -86,6 +89,7 @@ export function MatchStartAdvancedOptions({
   isAiVsAiSeries: boolean;
   hasAiOpponent: boolean;
   matchCardPool: MatchCardPoolSelection;
+  traceRulesProfile: TraceRulesProfile;
   humanAiSideSelection: HumanAiSideSelection;
   countdownSeconds: 3 | 5 | 10;
   isPublic: boolean;
@@ -111,6 +115,7 @@ export function MatchStartAdvancedOptions({
   aiSlotDisabled: boolean;
   onCountdownSeconds(seconds: 3 | 5 | 10): void;
   onIsPublic(isPublic: boolean): void;
+  onTraceRulesProfile(profile: TraceRulesProfile): void;
   onPlayerClockMode(mode: MatchStartPlayerClockMode): void;
   onPlayerClockMinutes(minutes: MatchStartPlayerClockMinutes): void;
   onPlayerClockGraceSeconds(seconds: MatchStartPlayerClockGraceSeconds): void;
@@ -160,6 +165,33 @@ export function MatchStartAdvancedOptions({
             type="checkbox"
           />
           Öffentliches Spiel
+        </label>
+        <label className="traceRulesProfileField">
+          Trace-Regel
+          <select
+            value={traceRulesProfile}
+            onChange={(event) =>
+              onTraceRulesProfile(event.target.value as TraceRulesProfile)
+            }
+            data-testid="trace-rules-profile"
+          >
+            <option value="modern_open">
+              Modern · Basisstärke, offen, Runner gewinnt Gleichstand
+            </option>
+            <option value="classic_blind">
+              Classic Blind · verdeckt, Runner gewinnt Gleichstand
+            </option>
+            <option value="classic_blind_corp_ties">
+              Classic Blind · Korp gewinnt Gleichstand
+            </option>
+          </select>
+          <small>
+            {traceRulesProfile === "modern_open"
+              ? "Trace N ist Basisstärke. Die Korp zahlt offen; der Runner reagiert."
+              : traceRulesProfile === "classic_blind"
+                ? "N ist das maximale normale Korp-Gebot. Beide Gebote bleiben bis zum Reveal verdeckt."
+                : "Wie Classic Blind, aber ein Gleichstand ist ein erfolgreicher Trace."}
+          </small>
         </label>
         <label>
           Spielerzeit

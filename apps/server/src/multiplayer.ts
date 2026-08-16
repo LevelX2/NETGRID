@@ -22,15 +22,18 @@ import {
   applyAction,
   applyRandomizedIceInstallSelection,
   applyRandomizedTurnPlanSelection,
+  applyRandomizedTraceBidSelection,
   createGame,
   getLegalActions,
   getPlayerView,
   hashState,
   isHiddenInfoBarrierEvent,
+  normalizeTraceRulesProfile,
   replayEvents,
   quoteCorpPunishRoute,
   quoteRandomizedIceInstallSelection,
   quoteRandomizedTurnPlanSelection,
+  quoteRandomizedTraceBidSelection,
   CARD_DEFINITIONS_BY_ID,
 } from "@netgrid/engine";
 import {
@@ -75,6 +78,7 @@ import {
   type EngineError,
   type EngineRandomizedIceInstallSelectionCommand,
   type EngineRandomizedTurnPlanSelectionCommand,
+  type EngineRandomizedTraceBidSelectionCommand,
   type EngineResult,
   type GameEvent,
   type GameState,
@@ -86,6 +90,7 @@ import {
   type RulesBaseline,
   type ReplayableEngineAction,
   type Side,
+  type TraceRulesProfile,
   type Winner,
 } from "@netgrid/shared";
 import {
@@ -169,6 +174,7 @@ export type MatchSettings = {
   seriesGamesPlanned?: number;
   cardPool?: MatchCardPool;
   playerClock?: ApiPlayerClockConfig;
+  traceRulesProfile?: TraceRulesProfile;
 };
 
 const RULE_AGENDA_POINTS_TO_WIN = 7;
@@ -218,6 +224,7 @@ export type MatchStartLobbyState = {
   matchFormat: MatchFormat;
   seriesGamesPlanned?: number;
   cardPool: MatchCardPool;
+  traceRulesProfile: TraceRulesProfile;
   sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
     runnerPlayer: SeriesPlayerSlot;
@@ -930,6 +937,8 @@ type EngineRandomizedIceInstallSelectionApplier =
   typeof applyRandomizedIceInstallSelection;
 type EngineRandomizedTurnPlanSelectionApplier =
   typeof applyRandomizedTurnPlanSelection;
+type EngineRandomizedTraceBidSelectionApplier =
+  typeof applyRandomizedTraceBidSelection;
 type AiStepFailureCode =
   | "ai_no_action"
   | "ai_decision_failed"
@@ -987,6 +996,7 @@ export class MultiplayerService {
   private readonly applyEngineAction: EngineActionApplier;
   private readonly applyEngineRandomizedIceInstallSelection: EngineRandomizedIceInstallSelectionApplier;
   private readonly applyEngineRandomizedTurnPlanSelection: EngineRandomizedTurnPlanSelectionApplier;
+  private readonly applyEngineRandomizedTraceBidSelection: EngineRandomizedTraceBidSelectionApplier;
   private readonly persistenceObservers = new Set<MatchPersistenceObserver>();
   /**
    * Deliberately process-local: this binds a visible, prepared decision to the
@@ -1007,6 +1017,7 @@ export class MultiplayerService {
       applyAction?: EngineActionApplier;
       applyRandomizedIceInstallSelection?: EngineRandomizedIceInstallSelectionApplier;
       applyRandomizedTurnPlanSelection?: EngineRandomizedTurnPlanSelectionApplier;
+      applyRandomizedTraceBidSelection?: EngineRandomizedTraceBidSelectionApplier;
     } = {},
   ) {
     this.tokenSalt =
@@ -1033,6 +1044,9 @@ export class MultiplayerService {
     this.applyEngineRandomizedTurnPlanSelection =
       options.applyRandomizedTurnPlanSelection ??
       applyRandomizedTurnPlanSelection;
+    this.applyEngineRandomizedTraceBidSelection =
+      options.applyRandomizedTraceBidSelection ??
+      applyRandomizedTraceBidSelection;
   }
 
   addPersistenceObserver(observer: MatchPersistenceObserver): () => void {
@@ -1209,6 +1223,9 @@ export class MultiplayerService {
           )
         : undefined;
     const cardPool = normalizeMatchCardPool(input.settings?.cardPool);
+    const traceRulesProfile = normalizeTraceRulesProfile(
+      input.settings?.traceRulesProfile,
+    );
     const playerClockConfig =
       mode === "ai_vs_ai"
         ? { mode: "none" as const }
@@ -1255,6 +1272,7 @@ export class MultiplayerService {
             matchFormat,
             ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
             cardPool,
+            traceRulesProfile,
             ...(playerClockConfig.mode === "player_clock"
               ? { playerClock: playerClockConfig }
               : {}),
@@ -1337,6 +1355,7 @@ export class MultiplayerService {
           matchFormat,
           ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
           cardPool,
+          traceRulesProfile,
           sideAssignmentMode,
           sideAssignment: { runnerPlayer, corpPlayer },
           chatMessages: [],
@@ -1400,6 +1419,7 @@ export class MultiplayerService {
       matchFormat,
       ...(seriesGamesPlanned ? { seriesGamesPlanned } : {}),
       cardPool,
+      traceRulesProfile,
       ...(playerClockConfig.mode === "player_clock"
         ? { playerClock: playerClockConfig }
         : {}),
@@ -1415,6 +1435,7 @@ export class MultiplayerService {
       seed,
       baseline,
       agendaPointsToWin: settings.agendaPointsToWin,
+      traceRulesProfile,
       controllers,
       runnerDeck: deckSetup.runnerDeck,
       corpDeck: deckSetup.corpDeck,
@@ -3502,6 +3523,8 @@ export class MultiplayerService {
             quoteRandomizedIceInstallSelection(record.gameState!, request),
           quoteRandomizedTurnPlanSelection: (request) =>
             quoteRandomizedTurnPlanSelection(record.gameState!, request),
+          quoteRandomizedTraceBidSelection: (request) =>
+            quoteRandomizedTraceBidSelection(record.gameState!, request),
         });
         this.preparedAiDecisions.set(record.match.matchId, {
           stateVersion: record.gameState.stateVersion,
@@ -3525,7 +3548,9 @@ export class MultiplayerService {
       const legalAction =
         decision.selectionKind === "engine_randomized_turn_plan_selection"
           ? decision.engineCommand.quote.legalActions[0]
-          : legalActionForAiDecision(decision, legalActions);
+          : decision.selectionKind === "engine_randomized_trace_bid_selection"
+            ? decision.engineCommand.quote.legalAction
+            : legalActionForAiDecision(decision, legalActions);
       if (!legalAction)
         return {
           ok: false,
@@ -3589,6 +3614,20 @@ export class MultiplayerService {
                           weight: candidate.weight,
                         }),
                       ),
+                  },
+                }
+              : {}),
+            ...(decision.selectionKind ===
+            "engine_randomized_trace_bid_selection"
+              ? {
+                  engineTraceBidSelection: {
+                    status: "pending_engine_draw",
+                    ...decision.engineCommand.quote.assessment,
+                    weightedCandidates:
+                      decision.engineCommand.quote.candidates.map(
+                        (candidate) => ({ ...candidate }),
+                      ),
+                    rngPurpose: "engine.randomized_trace_bid_selection",
                   },
                 }
               : {}),
@@ -3759,10 +3798,13 @@ export class MultiplayerService {
           quoteRandomizedIceInstallSelection(record.gameState, request),
         quoteRandomizedTurnPlanSelection: (request) =>
           quoteRandomizedTurnPlanSelection(record.gameState, request),
+        quoteRandomizedTraceBidSelection: (request) =>
+          quoteRandomizedTraceBidSelection(record.gameState, request),
       });
       if (
         decision.selectionKind === "engine_randomized_ice_install_selection" ||
-        decision.selectionKind === "engine_randomized_turn_plan_selection"
+        decision.selectionKind === "engine_randomized_turn_plan_selection" ||
+        decision.selectionKind === "engine_randomized_trace_bid_selection"
       ) {
         return {
           ok: false,
@@ -5101,6 +5143,9 @@ export class MultiplayerService {
         ? { seriesGamesPlanned: record.match.series.gamesPlanned }
         : {}),
       cardPool,
+      traceRulesProfile: normalizeTraceRulesProfile(
+        record.match.settings.traceRulesProfile,
+      ),
       sideAssignmentMode: record.startLobby?.sideAssignmentMode ?? "fixed",
       sideAssignment: { runnerPlayer, corpPlayer },
       chatMessages: record.startLobby?.chatMessages ?? [],
@@ -5392,6 +5437,7 @@ export class MultiplayerService {
         ? { seriesGamesPlanned: lobby.seriesGamesPlanned }
         : {}),
       cardPool: lobby.cardPool,
+      traceRulesProfile: normalizeTraceRulesProfile(lobby.traceRulesProfile),
       ...(lobby.sideAssignmentMode
         ? { sideAssignmentMode: lobby.sideAssignmentMode }
         : {}),
@@ -5536,6 +5582,7 @@ export class MultiplayerService {
       seed: record.match.seed ?? record.match.matchId,
       baseline,
       agendaPointsToWin: lobby.agendaPointsToWin,
+      traceRulesProfile: lobby.traceRulesProfile,
       controllers,
       runnerDeck: deckSetup.runnerDeck,
       corpDeck: deckSetup.corpDeck,
@@ -5550,6 +5597,7 @@ export class MultiplayerService {
       agendaPointsToWin: lobby.agendaPointsToWin,
       matchFormat: lobby.matchFormat,
       cardPool: lobby.cardPool,
+      traceRulesProfile: lobby.traceRulesProfile,
     };
     record.eventLog = gameState.eventLog.map((event) =>
       toEventRecord(record.match.matchId, event, false),
@@ -5711,6 +5759,8 @@ export class MultiplayerService {
             quoteRandomizedIceInstallSelection(state, request),
           quoteRandomizedTurnPlanSelection: (request) =>
             quoteRandomizedTurnPlanSelection(state, request),
+          quoteRandomizedTraceBidSelection: (request) =>
+            quoteRandomizedTraceBidSelection(state, request),
         });
       } catch (error) {
         const diagnosticCode = this.captureAiDecisionFailureAttempt(
@@ -5733,12 +5783,14 @@ export class MultiplayerService {
     }
     const directLegalAction =
       decision.selectionKind === "engine_randomized_ice_install_selection" ||
-      decision.selectionKind === "engine_randomized_turn_plan_selection"
+      decision.selectionKind === "engine_randomized_turn_plan_selection" ||
+      decision.selectionKind === "engine_randomized_trace_bid_selection"
         ? undefined
         : legalActionForAiDecision(decision, legalActions);
     if (
       decision.selectionKind !== "engine_randomized_ice_install_selection" &&
       decision.selectionKind !== "engine_randomized_turn_plan_selection" &&
+      decision.selectionKind !== "engine_randomized_trace_bid_selection" &&
       !directLegalAction
     )
       return { ok: false, code: "ai_decision_action_not_legal" };
@@ -5775,6 +5827,28 @@ export class MultiplayerService {
       decision.selectionKind === "engine_randomized_turn_plan_selection"
     ) {
       const randomizedResult = this.applyEngineRandomizedTurnPlanSelection(
+        state,
+        {
+          ...decision.engineCommand,
+          idempotencyKey:
+            decision.engineCommand.idempotencyKey ??
+            `ai-${side}-${state.stateVersion}`,
+        },
+        { publicEventsMode: "latest" },
+      );
+      if (!randomizedResult.ok) {
+        return {
+          ok: false,
+          code: "ai_engine_action_rejected",
+          engineErrorCode: randomizedResult.error.code,
+        };
+      }
+      result = randomizedResult;
+      legalAction = randomizedResult.receipt.selectedLegalAction;
+    } else if (
+      decision.selectionKind === "engine_randomized_trace_bid_selection"
+    ) {
+      const randomizedResult = this.applyEngineRandomizedTraceBidSelection(
         state,
         {
           ...decision.engineCommand,
@@ -6458,6 +6532,9 @@ function legalActionForAiDecision(
   if (decision.selectionKind === "engine_randomized_turn_plan_selection") {
     return undefined;
   }
+  if (decision.selectionKind === "engine_randomized_trace_bid_selection") {
+    return undefined;
+  }
   return legalActions.find(
     (candidate) => candidate.actionId === decision.actionId,
   );
@@ -6556,7 +6633,9 @@ function replayStateHashChecks(record: StoredMatch): {
       ? applyRandomizedIceInstallSelection(replayState, replayAction)
       : isRandomizedTurnPlanSelectionCommand(replayAction)
         ? applyRandomizedTurnPlanSelection(replayState, replayAction)
-        : applyAction(replayState, replayAction);
+        : isRandomizedTraceBidSelectionCommand(replayAction)
+          ? applyRandomizedTraceBidSelection(replayState, replayAction)
+          : applyAction(replayState, replayAction);
     if (!result.ok) {
       byEventId[event.eventId] = {
         ok: false,
@@ -6681,6 +6760,15 @@ function replayActionFromEvent(
       if (!command.quote || typeof command.quote !== "object") return undefined;
       return command as EngineRandomizedTurnPlanSelectionCommand;
     }
+    if (
+      "kind" in action &&
+      action.kind === "engine_randomized_trace_bid_selection"
+    ) {
+      const command =
+        action as Partial<EngineRandomizedTraceBidSelectionCommand>;
+      if (!command.quote || typeof command.quote !== "object") return undefined;
+      return command as EngineRandomizedTraceBidSelectionCommand;
+    }
     const candidate = action as Partial<PlayerAction>;
     if (candidate.side !== "runner" && candidate.side !== "corp") continue;
     if (
@@ -6709,6 +6797,14 @@ function isRandomizedTurnPlanSelectionCommand(
 ): action is EngineRandomizedTurnPlanSelectionCommand {
   return (
     "kind" in action && action.kind === "engine_randomized_turn_plan_selection"
+  );
+}
+
+function isRandomizedTraceBidSelectionCommand(
+  action: ReplayableEngineAction,
+): action is EngineRandomizedTraceBidSelectionCommand {
+  return (
+    "kind" in action && action.kind === "engine_randomized_trace_bid_selection"
   );
 }
 
@@ -6850,6 +6946,37 @@ function aiDecisionTraceFor(
   const traceJson = safeDebug
     ? aiDecisionTraceJson(safeDebug, side, legalAction, mode)
     : minimalAiDecisionTraceJson(side, legalAction, mode);
+  const traceBidReceipt =
+    event.privatePayload?.[side]?.randomizedTraceBidSelectionReceipt;
+  if (traceBidReceipt && typeof traceBidReceipt === "object") {
+    const receipt = traceBidReceipt as Record<string, unknown>;
+    const selectedCandidate =
+      receipt.selectedCandidate && typeof receipt.selectedCandidate === "object"
+        ? (receipt.selectedCandidate as Record<string, unknown>)
+        : undefined;
+    const randomDraw =
+      receipt.randomDraw && typeof receipt.randomDraw === "object"
+        ? (receipt.randomDraw as Record<string, unknown>)
+        : undefined;
+    traceJson.traceBidDecision = {
+      ...(receipt.assessment && typeof receipt.assessment === "object"
+        ? (receipt.assessment as Record<string, unknown>)
+        : {}),
+      ...(selectedCandidate
+        ? {
+            selectedBid: selectedCandidate.bid,
+            selectedUtility: selectedCandidate.utility,
+            selectedWeight: selectedCandidate.weight,
+          }
+        : {}),
+      ...(randomDraw
+        ? {
+            rngDrawCounter: randomDraw.counter,
+            rngDrawPurpose: randomDraw.purpose,
+          }
+        : {}),
+    };
+  }
   const beliefState = beliefCaptureFor(record, state, side);
   traceJson.historicalAudit = historicalAuditFor(
     state,
@@ -7646,7 +7773,9 @@ function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
 function publicReplayRandomPurpose(purpose: string): string {
   return purpose.includes("engine.randomized_ice_install_selection")
     ? "engine_randomized_ice_install_selection"
-    : purpose;
+    : purpose.includes("engine.randomized_trace_bid_selection")
+      ? "engine_randomized_trace_bid_selection"
+      : purpose;
 }
 
 function replayExploitSuggestions(

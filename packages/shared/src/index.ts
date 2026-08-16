@@ -1097,6 +1097,13 @@ export type PlayerController = {
 
 export type AiDifficulty = "easy" | "normal" | "hard";
 
+export type TraceRulesProfile =
+  | "modern_open"
+  | "classic_blind"
+  | "classic_blind_corp_ties";
+
+export const DEFAULT_TRACE_RULES_PROFILE: TraceRulesProfile = "modern_open";
+
 export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
@@ -1108,6 +1115,7 @@ export type CreateGameConfig = {
   runnerDeckMetadata?: DeckPublicMetadata;
   corpDeckMetadata?: DeckPublicMetadata;
   agendaPointsToWin?: number;
+  traceRulesProfile?: TraceRulesProfile;
   setupMode?: "explicit" | "completed";
   controllers?: {
     runner: PlayerController;
@@ -1617,6 +1625,7 @@ export type TraceState = {
   traceId: string;
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
+  traceRulesProfile?: TraceRulesProfile;
   subroutineIndex?: number;
   traceLimit: number;
   effectiveTraceLimit?: number;
@@ -1638,6 +1647,7 @@ export type TraceState = {
   returnTimingPoint?: TimingPointId;
   returnActiveSide?: Side;
   corpBid?: number;
+  bidsRevealed?: boolean;
   traceValue?: number;
   runnerLink?: number;
   baseLinkSourceId?: CardInstanceId;
@@ -1901,6 +1911,7 @@ export type RunnerDelayedEffectInstance = {
 export type GameState = {
   matchId: string;
   baseline: RulesBaseline;
+  traceRulesProfile?: TraceRulesProfile;
   stateVersion: number;
   turnSerial?: number;
   seed: string;
@@ -2372,6 +2383,67 @@ export const ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION =
   "engine-randomized-ice-install-selection-v1" as const;
 export const ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION =
   "engine-randomized-turn-plan-selection-v1" as const;
+export const ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION =
+  "engine-randomized-trace-bid-selection-v1" as const;
+
+export type TraceBidStakes = "low" | "normal" | "high" | "terminal";
+export type TraceBidBehavioralBias =
+  | "conservative"
+  | "normal"
+  | "aggressive"
+  | "polarized";
+
+export type EngineRandomizedTraceBidCandidate = {
+  optionId: string;
+  bid: number;
+  weight: number;
+  utility: number;
+};
+
+export type EngineRandomizedTraceBidAssessment = {
+  traceId: string;
+  traceRulesProfile: TraceRulesProfile;
+  printedTrace: number;
+  effectiveTraceLimit: number;
+  currentLink: number;
+  rationalTarget: number;
+  rationalRange: [number, number];
+  stakes: TraceBidStakes;
+  behavioralBias: TraceBidBehavioralBias;
+  reserveTarget: number;
+  outcomeValue: number;
+};
+
+export type EngineRandomizedTraceBidSelectionRequest = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION;
+  matchId: string;
+  side: Side;
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  actionId: string;
+  choiceId: string;
+  planStepId: string;
+  assessment: EngineRandomizedTraceBidAssessment;
+  candidates: EngineRandomizedTraceBidCandidate[];
+};
+
+export type EngineRandomizedTraceBidSelectionQuote =
+  EngineRandomizedTraceBidSelectionRequest & {
+    visibility: "private_to_actor";
+    complete: true;
+    candidateFingerprint: string;
+    legalAction: LegalAction;
+  };
+
+export type EngineRandomizedTraceBidSelectionQuoteResult =
+  | { ok: true; quote: EngineRandomizedTraceBidSelectionQuote }
+  | { ok: false; error: EngineError };
+
+export type EngineRandomizedTraceBidSelectionCommand = {
+  kind: "engine_randomized_trace_bid_selection";
+  quote: EngineRandomizedTraceBidSelectionQuote;
+  idempotencyKey?: string;
+};
 
 export type EngineRandomizedTurnPlanCandidate = {
   familyKey: string;
@@ -2475,7 +2547,8 @@ export type EngineRandomizedIceInstallSelectionCommand = {
 export type ReplayableEngineAction =
   | PlayerAction
   | EngineRandomizedIceInstallSelectionCommand
-  | EngineRandomizedTurnPlanSelectionCommand;
+  | EngineRandomizedTurnPlanSelectionCommand
+  | EngineRandomizedTraceBidSelectionCommand;
 
 export type AiTurnPlanRandomDrawRecord = RandomDrawRecord & {
   domain: "ai_turn_plan_selection";
@@ -2507,6 +2580,24 @@ export type EngineRandomizedIceInstallSelectionReceipt = {
   planStepId: string;
   candidateFingerprint: string;
   selectedCandidate: EngineRandomizedIceInstallCandidate;
+  selectedLegalAction: LegalAction;
+  randomDraw: RandomDrawRecord;
+};
+
+export type EngineRandomizedTraceBidSelectionReceipt = {
+  schemaVersion: typeof ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION;
+  visibility: "private_to_actor";
+  matchId: string;
+  side: Side;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  timingPoint: TimingPointId;
+  actionId: string;
+  choiceId: string;
+  planStepId: string;
+  assessment: EngineRandomizedTraceBidAssessment;
+  candidateFingerprint: string;
+  selectedCandidate: EngineRandomizedTraceBidCandidate;
   selectedLegalAction: LegalAction;
   randomDraw: RandomDrawRecord;
 };
@@ -2546,6 +2637,12 @@ export type EngineRandomizedIceInstallSelectionResult =
 export type EngineRandomizedTurnPlanSelectionResult =
   | (Extract<EngineResult, { ok: true }> & {
       receipt: EngineRandomizedTurnPlanSelectionReceipt;
+    })
+  | Extract<EngineResult, { ok: false }>;
+
+export type EngineRandomizedTraceBidSelectionResult =
+  | (Extract<EngineResult, { ok: true }> & {
+      receipt: EngineRandomizedTraceBidSelectionReceipt;
     })
   | Extract<EngineResult, { ok: false }>;
 
@@ -3417,13 +3514,35 @@ export type VisibleCard = {
   effectiveStealCostQuote?: VisibleAgendaStealCostQuote;
 };
 
+export type VisibleTraceState = {
+  traceId: string;
+  sourceDefinitionId: CardDefinitionId;
+  profile: TraceRulesProfile;
+  phase: TraceState["status"];
+  printedTrace: number;
+  effectiveTraceLimit: number;
+  corpBidMax?: number;
+  bidsRevealed: boolean;
+  corpBidCommitted: boolean;
+  runnerBidCommitted: boolean;
+  corpBid?: number;
+  corpStrength?: number;
+  runnerLink?: number;
+  runnerBid?: number;
+  runnerStrength?: number;
+  postRevealLinkBonus?: number;
+  successful?: boolean;
+};
+
 export type PlayerView = {
   side: Side;
   stateVersion: number;
   turnSerial?: number;
+  traceRulesProfile?: TraceRulesProfile;
   timingPoint: TimingPointId;
   activeSide: Side;
   phase: Phase;
+  trace?: VisibleTraceState;
   own: {
     identity: VisibleCard;
     credits: number;
@@ -5697,6 +5816,12 @@ export type AiDecision = AiDecisionBase &
     | {
         selectionKind: "engine_randomized_turn_plan_selection";
         engineCommand: EngineRandomizedTurnPlanSelectionCommand;
+        actionId?: never;
+        selectedChoices?: never;
+      }
+    | {
+        selectionKind: "engine_randomized_trace_bid_selection";
+        engineCommand: EngineRandomizedTraceBidSelectionCommand;
         actionId?: never;
         selectedChoices?: never;
       }

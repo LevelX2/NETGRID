@@ -4,6 +4,8 @@ import type {
   EngineRandomizedIceInstallSelectionResult,
   EngineRandomizedTurnPlanSelectionCommand,
   EngineRandomizedTurnPlanSelectionResult,
+  EngineRandomizedTraceBidSelectionCommand,
+  EngineRandomizedTraceBidSelectionResult,
   GameEvent,
   GameState,
   PlayerAction,
@@ -14,6 +16,7 @@ import {
   isReplayCompatibilityActionPayload,
   isReplayRandomizedIceInstallSelectionCommand,
   isReplayRandomizedTurnPlanSelectionCommand,
+  isReplayRandomizedTraceBidSelectionCommand,
 } from "../compatibility/payload-compatibility";
 import { hashState } from "./hash";
 import { sanitizeEventPayloadForSurface } from "./view/surface-policy";
@@ -29,6 +32,10 @@ export type ReplayHost = {
       state: GameState,
       command: EngineRandomizedTurnPlanSelectionCommand,
     ) => EngineRandomizedTurnPlanSelectionResult;
+    applyRandomizedTraceBidSelection?: (
+      state: GameState,
+      command: EngineRandomizedTraceBidSelectionCommand,
+    ) => EngineRandomizedTraceBidSelectionResult;
   };
 };
 
@@ -88,6 +95,11 @@ export function buildReplayEvents(
       actionPayload !== null &&
       "kind" in actionPayload &&
       actionPayload.kind === "engine_randomized_turn_plan_selection";
+    const declaresRandomizedTraceBidCommand =
+      typeof actionPayload === "object" &&
+      actionPayload !== null &&
+      "kind" in actionPayload &&
+      actionPayload.kind === "engine_randomized_trace_bid_selection";
     const randomizedCommand = isReplayRandomizedIceInstallSelectionCommand(
       actionPayload,
     )
@@ -97,13 +109,23 @@ export function buildReplayEvents(
       isReplayRandomizedTurnPlanSelectionCommand(actionPayload)
         ? actionPayload
         : undefined;
+    const randomizedTraceBidCommand =
+      isReplayRandomizedTraceBidSelectionCommand(actionPayload)
+        ? actionPayload
+        : undefined;
     const playerAction =
       !declaresRandomizedIceCommand &&
       !declaresRandomizedTurnPlanCommand &&
+      !declaresRandomizedTraceBidCommand &&
       isReplayCompatibilityActionPayload(actionPayload)
         ? actionPayload
         : undefined;
-    if (!randomizedCommand && !randomizedTurnPlanCommand && !playerAction) {
+    if (
+      !randomizedCommand &&
+      !randomizedTurnPlanCommand &&
+      !randomizedTraceBidCommand &&
+      !playerAction
+    ) {
       errors.push(`Event ${event.eventId} has no replayable action.`);
       continue;
     }
@@ -120,6 +142,15 @@ export function buildReplayEvents(
       );
       continue;
     }
+    if (
+      randomizedTraceBidCommand &&
+      !host.actions.applyRandomizedTraceBidSelection
+    ) {
+      errors.push(
+        `Event ${event.eventId} has no Trace-Bid replay application.`,
+      );
+      continue;
+    }
     const result = randomizedCommand
       ? host.actions.applyRandomizedIceInstallSelection!(
           current,
@@ -130,7 +161,12 @@ export function buildReplayEvents(
             current,
             randomizedTurnPlanCommand,
           )
-        : host.actions.applyAction(current, playerAction!);
+        : randomizedTraceBidCommand
+          ? host.actions.applyRandomizedTraceBidSelection!(
+              current,
+              randomizedTraceBidCommand,
+            )
+          : host.actions.applyAction(current, playerAction!);
     if (!result.ok) {
       errors.push(`Replay failed at ${event.eventId}: ${result.error.code}`);
       break;

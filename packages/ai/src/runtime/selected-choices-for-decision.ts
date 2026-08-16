@@ -1006,6 +1006,92 @@ export function selectedChoicesForDecision(
       "post_bid_link",
     );
   }
+  if (choice.source.endsWith(":corp_payment")) {
+    const selectedOptionId = choice.options
+      .map((option) => {
+        if (typeof option.value !== "string") {
+          throw unresolvedChoiceFailure(
+            input,
+            action,
+            "The Engine-quoted Corp Trace payment allocation is not serialized.",
+          );
+        }
+        let allocation: unknown;
+        try {
+          allocation = JSON.parse(option.value);
+        } catch {
+          throw unresolvedChoiceFailure(
+            input,
+            action,
+            "The Engine-quoted Corp Trace payment allocation is malformed.",
+          );
+        }
+        if (!Array.isArray(allocation)) {
+          throw unresolvedChoiceFailure(
+            input,
+            action,
+            "The Engine-quoted Corp Trace payment allocation is not an array.",
+          );
+        }
+        const specializedTotal = allocation.reduce((sum, entry) => {
+          if (
+            !entry ||
+            typeof entry !== "object" ||
+            !Number.isSafeInteger((entry as { amount?: unknown }).amount) ||
+            Number((entry as { amount: number }).amount) < 0
+          ) {
+            throw unresolvedChoiceFailure(
+              input,
+              action,
+              "The Engine-quoted Corp Trace payment amount is invalid.",
+            );
+          }
+          const total = sum + Number((entry as { amount: number }).amount);
+          if (!Number.isSafeInteger(total)) {
+            throw unresolvedChoiceFailure(
+              input,
+              action,
+              "The Engine-quoted Corp Trace payment total is invalid.",
+            );
+          }
+          return total;
+        }, 0);
+        return { id: option.id, specializedTotal };
+      })
+      .sort(
+        (left, right) =>
+          right.specializedTotal - left.specializedTotal ||
+          left.id.localeCompare(right.id),
+      )[0]?.id;
+    if (!selectedOptionId) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "The Trace resolution must bind one current Engine-quoted Corp payment allocation.",
+      );
+    }
+    return resolved([selectedOptionId], "corp_trace_payment_sources");
+  }
+  if (choice.source.startsWith("trace_runner_bid_payment:")) {
+    const selectedOptionId = choice.options
+      .flatMap((option) =>
+        Number.isSafeInteger(option.value)
+          ? [{ id: option.id, amount: Number(option.value) }]
+          : [],
+      )
+      .sort(
+        (left, right) =>
+          right.amount - left.amount || left.id.localeCompare(right.id),
+      )[0]?.id;
+    if (!selectedOptionId) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "The Runner Trace payment source Choice has no current numeric allocation.",
+      );
+    }
+    return resolved([selectedOptionId], "runner_trace_payment_source");
+  }
   if (choice.source.startsWith("runner_draw.draw_tax:")) {
     const selectedOptionId =
       selectableOptions.find((option) => option.id === "pay_credit")?.id ??

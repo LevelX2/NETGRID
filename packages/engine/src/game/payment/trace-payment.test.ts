@@ -18,7 +18,10 @@ import {
 
 describe("trace payment pools", () => {
   it("requires an actual Hacker Tracker counter for each point above the trace limit", () => {
-    const trace = corpBidTrace({ traceLimit: 2 });
+    const trace = corpBidTrace({
+      traceLimit: 2,
+      traceRulesProfile: "classic_blind",
+    });
     const state = stateForTrace(trace, { corpCredits: 10 });
 
     expect(
@@ -38,6 +41,23 @@ describe("trace payment pools", () => {
         3,
       ),
     ).toMatchObject({ canPay: true, corpTraceCountersToPay: 1 });
+  });
+
+  it("does not apply the printed Trace N as a Modern Open bid limit", () => {
+    const trace = corpBidTrace({
+      traceLimit: 2,
+      traceRulesProfile: "modern_open",
+      corpBidMax: 10,
+    });
+    const state = stateForTrace(trace, { corpCredits: 10 });
+
+    expect(quoteCorpTraceBidPayment(corpDeps(), state, trace, 7)).toMatchObject(
+      {
+        canPay: true,
+        normalCreditsToPay: 7,
+        corpTraceCountersToPay: 0,
+      },
+    );
   });
 
   it("quotes and spends Corp trace pools through shared priority allocation", () => {

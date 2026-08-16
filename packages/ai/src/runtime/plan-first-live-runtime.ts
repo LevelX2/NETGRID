@@ -7,6 +7,7 @@ import {
   CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
+  ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
   type AiPlanFirstDecisionDebug,
@@ -137,6 +138,8 @@ import {
   type TransientPlanSignal,
 } from "../plans/transient-plan-signals";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { assessTraceBidCandidates } from "./trace-bid-assessment";
+import { latestTraceContext } from "./trace-context";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
 import {
@@ -4113,8 +4116,7 @@ function buildRunnerDomain(
                 );
                 const lacksDifferentialPayoff =
                   directlyAvailableBasicRun &&
-                  actionCandidate?.semanticActionType ===
-                    "play.runner_event" &&
+                  actionCandidate?.semanticActionType === "play.runner_event" &&
                   !runnerCardRunHasVisibleDifferentialPayoff(
                     input,
                     actionCandidate,
@@ -6217,7 +6219,10 @@ function runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
   runTargets: readonly RunnerRunTargetEvaluation[],
   coverageGaps: RunnerPlanDomain["coverageGaps"],
 ): boolean {
-  if (evaluation.developmentRole !== "access_payoff" || !evaluation.definitionId) {
+  if (
+    evaluation.developmentRole !== "access_payoff" ||
+    !evaluation.definitionId
+  ) {
     return false;
   }
   const serverId = candidate
@@ -16139,9 +16144,24 @@ function decisionFromScheduler(
     (candidate) => candidate.actionId === actionId,
   );
   if (!action) throw new Error("plan_first_selected_action_not_legal");
+  const pendingChoice = input.playerView.pendingChoice;
+  const traceBidAssessment = pendingChoice
+    ? assessTraceBidCandidates(input, pendingChoice, latestTraceContext(input))
+    : undefined;
   const selectedChoices = randomizedIceInstallNearTie
     ? undefined
-    : dependencies.selectedChoicesForDecision(input, action, result.portfolio);
+    : traceBidAssessment
+      ? traceBidAssessment.candidates.length === 1
+        ? {
+            choiceId: pendingChoice!.choiceId,
+            selectedOptionIds: [traceBidAssessment.selectedOptionId],
+          }
+        : undefined
+      : dependencies.selectedChoicesForDecision(
+          input,
+          action,
+          result.portfolio,
+        );
   const planId =
     result.lane === "plan"
       ? result.selectedAssessment.instanceId
@@ -16604,6 +16624,66 @@ function decisionFromScheduler(
     context,
     result,
   });
+  if (traceBidAssessment && traceBidAssessment.candidates.length >= 2) {
+    const matchId = input.matchId?.trim();
+    const quoteSelection = options.quoteRandomizedTraceBidSelection;
+    const planStepId =
+      result.lane === "plan"
+        ? result.route.step.stepId
+        : result.origin.windowId;
+    if (!matchId || !quoteSelection || !pendingChoice) {
+      throw new PlanResolutionFailure("invalid_support_graph", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map(
+          (legalAction) => legalAction.type,
+        ),
+        unresolvedActionIds: [action.actionId],
+        owner: "rules_contract",
+        planInstanceId: planId,
+        stepId: planStepId,
+        removalCondition:
+          "A Blind Trace resolution with multiple rational candidates requires the state-bound Engine Trace-Bid RNG quote.",
+      });
+    }
+    const quote = quoteSelection({
+      schemaVersion: ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION,
+      matchId,
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      actionId: action.actionId,
+      choiceId: pendingChoice.choiceId,
+      planStepId,
+      assessment: traceBidAssessment.assessment,
+      candidates: traceBidAssessment.candidates,
+    });
+    if (!quote.ok) {
+      throw new PlanResolutionFailure("invalid_support_graph", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map(
+          (legalAction) => legalAction.type,
+        ),
+        unresolvedActionIds: [action.actionId],
+        owner: "rules_contract",
+        planInstanceId: planId,
+        stepId: planStepId,
+        removalCondition:
+          "The Engine must revalidate the exact resolve_choice action, Choice and every weighted Trace bid before consuming randomness.",
+      });
+    }
+    return {
+      ...decisionBase,
+      selectionKind: "engine_randomized_trace_bid_selection",
+      engineCommand: {
+        kind: "engine_randomized_trace_bid_selection",
+        quote: quote.quote,
+      },
+    };
+  }
   if (randomizedAgendaSlice) {
     const matchId = input.matchId?.trim();
     const quoteSelection = options.quoteRandomizedTurnPlanSelection;

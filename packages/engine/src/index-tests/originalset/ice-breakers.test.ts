@@ -1178,7 +1178,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         JSON.stringify(traceState.eventLog.at(-1)?.publicPayload),
       ).not.toMatch(privatePayloadMarkers);
       traceState = applyChoice(traceState, "corp", "bid_0");
-      traceState = applyChoice(traceState, "runner", "bid_0");
+      traceState = applyChoice(traceState, "runner", "bid_5");
     }
     const traceReplay = replayEvents(
       traceInitial,

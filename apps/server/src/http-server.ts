@@ -2851,6 +2851,12 @@ async function routeHttp(
           nextSettings.seriesGamesPlanned = settings.seriesGamesPlanned;
         if (isMatchCardPool(settings.cardPool))
           nextSettings.cardPool = settings.cardPool;
+        if (
+          settings.traceRulesProfile === "modern_open" ||
+          settings.traceRulesProfile === "classic_blind" ||
+          settings.traceRulesProfile === "classic_blind_corp_ties"
+        )
+          nextSettings.traceRulesProfile = settings.traceRulesProfile;
         if (settings.playerClock && typeof settings.playerClock === "object") {
           const playerClock = settings.playerClock as Record<string, unknown>;
           nextSettings.playerClock = {

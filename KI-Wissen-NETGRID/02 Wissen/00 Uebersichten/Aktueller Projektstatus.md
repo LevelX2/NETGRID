@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-08-12
+Stand: 2026-08-15
 
 ## Produktstand
 
@@ -9,6 +9,16 @@ NETGRID ist eine private Version-0-Webanwendung für Netrunner mit deterministis
 Die sichtbare Produktversion ist `V0.9`. Daneben wird eine aus Git ermittelte Buildkennung angezeigt. Führend ist `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
 
 Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebotene `LegalActions` ein; die Engine revalidiert Zustand, Kosten, Ziel, Choice und Legalität vor der Ausführung. Hidden-Info-Schutz, Replay, StateHash und seedbasierter Zufall bleiben verbindliche Systemgrenzen.
+
+Beim Matchstart ist eines von drei autoritativ persistierten
+Trace-Regelprofilen wählbar: `modern_open` (Default, Basisstärke N, offene
+sequenzielle Payments, Runner gewinnt Gleichstand), `classic_blind` (N als
+Corp-Bid-Limit, verdeckte Commitments, Runner gewinnt Gleichstand) und
+`classic_blind_corp_ties`. Blind-Bids werden gemeinsam aufgedeckt; generische
+Payment-Quellen und Post-Reveal-Fenster bleiben erhalten. KI-Varianz läuft nur
+innerhalb rationaler legaler Kandidaten über den replaybaren Engine-RNG.
+Führend ist
+`docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md`.
 
 Innerhalb der privaten Anwendung sind öffentliche Matchlisten, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays umgesetzt.
 

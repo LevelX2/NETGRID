@@ -179,6 +179,7 @@ describe("game facade", () => {
       traceId: "arch-13.trace",
       sourceCardInstanceId: "runner-identity",
       sourceDefinitionId: "demo_runner_identity",
+      traceRulesProfile: "classic_blind_corp_ties",
       traceLimit: 4,
       status: "post_bid_link",
       successEffect: { type: "add_tag", amount: 1 },
@@ -210,11 +211,12 @@ describe("game facade", () => {
     expect(trace).toEqual(before);
   });
 
-  it("starts the trace value at zero and keeps ties Corp-favorable", () => {
+  it("starts a Classic Corp-ties trace at zero and keeps ties Corp-favorable", () => {
     const trace = {
       traceId: "arch-13.strict-success",
       sourceCardInstanceId: "runner-identity",
       sourceDefinitionId: "demo_runner_identity",
+      traceRulesProfile: "classic_blind_corp_ties",
       traceLimit: 5,
       status: "post_bid_link",
       successEffect: { type: "add_tag", amount: 1 },

@@ -1,4 +1,4 @@
-import type { Side } from "@netgrid/shared";
+import type { Side, TraceRulesProfile } from "@netgrid/shared";
 
 export type TraceBidOption = {
   id: string;
@@ -18,6 +18,7 @@ export type TraceBidEfficiencyInput = {
   traceValue?: number;
   runnerLink?: number;
   corpBid?: number;
+  traceRulesProfile?: TraceRulesProfile;
 };
 
 export type TraceBidEfficiencySelection = {
@@ -46,6 +47,7 @@ export type PostBidTraceLinkEfficiencyInput = {
   runnerBid?: number;
   runnerStrength?: number;
   postBidTraceLinkBonus?: number;
+  traceRulesProfile?: TraceRulesProfile;
 };
 
 export type PostBidTraceLinkEfficiencySelection = {
@@ -89,11 +91,16 @@ export function selectEfficientTraceBidOption(
     runnerBase,
     desiredOption.amount,
     corpTotal,
+    input.traceRulesProfile,
   );
   const sameOutcomeOptions = bidOptions.filter(
     (option) =>
-      runnerAvoidsTrace(runnerBase, option.amount, corpTotal) ===
-      desiredOutcome,
+      runnerAvoidsTrace(
+        runnerBase,
+        option.amount,
+        corpTotal,
+        input.traceRulesProfile,
+      ) === desiredOutcome,
   );
   const minimalSameOutcome = sameOutcomeOptions[0] ?? desiredOption;
   if (minimalSameOutcome.amount < desiredOption.amount) {
@@ -130,7 +137,9 @@ export function selectEfficientPostBidLinkOption(
 
   const corpTotal = Math.max(0, traceValue);
   const currentRunnerTotal = Math.max(0, runnerBase);
-  if (currentRunnerTotal > corpTotal) {
+  if (
+    runnerAvoidsTrace(0, currentRunnerTotal, corpTotal, input.traceRulesProfile)
+  ) {
     return postBidTraceLinkSelection(
       passOption ?? fallbackOption,
       passOption
@@ -147,7 +156,14 @@ export function selectEfficientPostBidLinkOption(
         ? [{ option, delta }]
         : [];
     })
-    .filter((candidate) => currentRunnerTotal + candidate.delta > corpTotal)
+    .filter((candidate) =>
+      runnerAvoidsTrace(
+        0,
+        currentRunnerTotal + candidate.delta,
+        corpTotal,
+        input.traceRulesProfile,
+      ),
+    )
     .sort(
       (left, right) =>
         left.delta - right.delta ||
@@ -192,8 +208,12 @@ function runnerAvoidsTrace(
   runnerBase: number,
   runnerBid: number,
   corpTotal: number,
+  profile: TraceRulesProfile | undefined,
 ): boolean {
-  return runnerBase + runnerBid > corpTotal;
+  const runnerStrength = runnerBase + runnerBid;
+  return profile === undefined || profile === "classic_blind_corp_ties"
+    ? runnerStrength > corpTotal
+    : runnerStrength >= corpTotal;
 }
 
 function currentRunnerTraceStrength(

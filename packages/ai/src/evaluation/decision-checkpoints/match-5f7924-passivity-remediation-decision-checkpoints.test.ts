@@ -1,6 +1,7 @@
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
+  applyRandomizedTraceBidSelection,
   applyRandomizedTurnPlanSelection,
   quoteCorpPunishRoute,
 } from "@netgrid/engine";
@@ -166,16 +167,21 @@ function applyDecision(state: GameState, decision: AiDecision): GameState {
             ...decision.engineCommand,
             idempotencyKey,
           })
-        : applyAction(state, {
-            matchId: state.matchId,
-            side: "corp",
-            actionId: decision.actionId,
-            clientKnownStateVersion: state.stateVersion,
-            ...(decision.selectedChoices
-              ? { selectedChoices: decision.selectedChoices }
-              : {}),
-            idempotencyKey,
-          });
+        : decision.selectionKind === "engine_randomized_trace_bid_selection"
+          ? applyRandomizedTraceBidSelection(state, {
+              ...decision.engineCommand,
+              idempotencyKey,
+            })
+          : applyAction(state, {
+              matchId: state.matchId,
+              side: "corp",
+              actionId: decision.actionId,
+              clientKnownStateVersion: state.stateVersion,
+              ...(decision.selectedChoices
+                ? { selectedChoices: decision.selectedChoices }
+                : {}),
+              idempotencyKey,
+            });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }

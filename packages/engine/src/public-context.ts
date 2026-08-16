@@ -486,6 +486,59 @@ export function publicContextForAction(
     if (legalAction.payload?.choiceVisibility === "public")
       context.choiceId = legalAction.payload?.choiceId;
     else context.redactedKind = "choice";
+    const traceRulesProfile =
+      state.trace?.traceRulesProfile ??
+      state.traceRulesProfile ??
+      "modern_open";
+    const blindTrace = traceRulesProfile !== "modern_open";
+    const traceBidsRevealed =
+      state.trace?.bidsRevealed === true ||
+      legalAction.payload?.traceBidsRevealed === true ||
+      typeof legalAction.payload?.runnerStrength === "number" ||
+      typeof legalAction.payload?.traceSuccessful === "boolean";
+    const hiddenTraceCommit =
+      blindTrace &&
+      typeof legalAction.payload?.traceId === "string" &&
+      legalAction.payload?.traceStarted !== true &&
+      (legalAction.payload?.traceStep === "corp_bid" ||
+        legalAction.payload?.traceStep === "runner_bid") &&
+      legalAction.payload?.corpTracePaymentChoiceOpened !== true &&
+      legalAction.payload?.traceLinkPaymentChoiceOpened !== true &&
+      !traceBidsRevealed;
+    if (typeof legalAction.payload?.traceId === "string") {
+      context.traceRulesProfile = traceRulesProfile;
+      context.traceBidsRevealed = traceBidsRevealed;
+      if (hiddenTraceCommit) {
+        context.traceBidCommittedSide = legalAction.side;
+      }
+    }
+    const hiddenTracePayloadFields = new Set([
+      "corpBid",
+      "traceValue",
+      "runnerBid",
+      "runnerStrength",
+      "traceBaseLinkSourceDefinitionId",
+      "traceBaseLinkCostPaid",
+      "baseLinkValue",
+      "traceLinkPaymentSourceDefinitionId",
+      "traceLinkPaymentAmount",
+      "traceLinkCreditsSpent",
+      "bonusTraceLinkCreditsSpent",
+      "runnerCreditsSpent",
+      "traceLinkCreditSourceDefinitionIds",
+      "corpCreditBid",
+      "fortTraceBitPoolSpent",
+      "fortTraceBitPoolRemaining",
+      "fortTraceBitPoolServerId",
+      "recurringTraceCreditPoolSpent",
+      "hackerTrackerCountersSpent",
+      "temporaryTraceCreditsSpent",
+      "temporaryTraceCreditsRemaining",
+      "temporaryTraceCreditsSourceDefinitionId",
+      "traceLimitAndValueBoost",
+      "effectiveTraceLimit",
+      "corpBidMax",
+    ]);
     for (const key of [
       "eventModificationWindowId",
       "eventModificationKind",
@@ -576,7 +629,11 @@ export function publicContextForAction(
       "successfulRunWithoutAccess",
     ]) {
       const value = legalAction.payload?.[key];
-      if (value !== undefined) context[key] = value;
+      if (
+        value !== undefined &&
+        !(hiddenTraceCommit && hiddenTracePayloadFields.has(key))
+      )
+        context[key] = value;
     }
     for (const key of [
       "traceId",
@@ -620,6 +677,7 @@ export function publicContextForAction(
       "fortTraceBitPoolServerId",
       "recurringTraceCreditPoolSpent",
       "hackerTrackerCountersSpent",
+      "traceLimitAndValueBoost",
       "hackerTrackerCountersAdded",
       "temporaryTraceCreditsSpent",
       "temporaryTraceCreditsRemaining",
@@ -639,7 +697,11 @@ export function publicContextForAction(
       "creditsGained",
     ]) {
       const value = legalAction.payload?.[key];
-      if (value !== undefined) context[key] = value;
+      if (
+        value !== undefined &&
+        !(hiddenTraceCommit && hiddenTracePayloadFields.has(key))
+      )
+        context[key] = value;
     }
     if (legalAction.payload?.runnerMemoryCheckpointResolved === true) {
       context.runnerMemoryCheckpointResolved = true;
@@ -742,6 +804,16 @@ export function publicContextForAction(
     if (typeof legalAction.payload.agendaAbility === "string")
       context.agendaAbility = legalAction.payload.agendaAbility;
     context.traceStarted = true;
+    context.traceRulesProfile =
+      state.trace?.traceRulesProfile ??
+      state.traceRulesProfile ??
+      "modern_open";
+    const blindTraceStart = context.traceRulesProfile !== "modern_open";
+    if (blindTraceStart) {
+      delete context.corpBidMax;
+      delete context.fortTraceBitPoolServerId;
+      delete context.temporaryTraceCreditsSourceDefinitionId;
+    }
     context.traceId = legalAction.payload.traceId;
     context.sourceCardId = legalAction.payload.sourceCardId;
     context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
@@ -749,17 +821,21 @@ export function publicContextForAction(
       context.traceLimit = legalAction.payload.traceLimit;
     if (typeof legalAction.payload.effectiveTraceLimit === "number")
       context.effectiveTraceLimit = legalAction.payload.effectiveTraceLimit;
-    if (typeof legalAction.payload.corpBidMax === "number")
+    if (!blindTraceStart && typeof legalAction.payload.corpBidMax === "number")
       context.corpBidMax = legalAction.payload.corpBidMax;
     if (typeof legalAction.payload.rabbitTraceLimitReduction === "number")
       context.rabbitTraceLimitReduction =
         legalAction.payload.rabbitTraceLimitReduction;
-    if (typeof legalAction.payload.temporaryTraceCreditsAvailable === "number")
+    if (
+      !blindTraceStart &&
+      typeof legalAction.payload.temporaryTraceCreditsAvailable === "number"
+    )
       context.temporaryTraceCreditsAvailable =
         legalAction.payload.temporaryTraceCreditsAvailable;
     if (
+      !blindTraceStart &&
       typeof legalAction.payload.temporaryTraceCreditsSourceDefinitionId ===
-      "string"
+        "string"
     )
       context.temporaryTraceCreditsSourceDefinitionId =
         legalAction.payload.temporaryTraceCreditsSourceDefinitionId;
@@ -1474,7 +1550,6 @@ export function publicContextForAction(
     "obligationDebtActive",
     "creditGainDiverted",
     "traceHostedCreditsAdded",
-    "traceLimitAndValueBoost",
     "cryingCountersAfter",
     "linkModifierAmount",
     "runSpendingCap",

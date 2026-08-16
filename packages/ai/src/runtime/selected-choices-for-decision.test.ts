@@ -1624,6 +1624,99 @@ describe("selectedChoicesForDecision", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("uses the Engine-quoted Corp Trace allocation with the most specialized credits", () => {
+    const input = inputWithChoice({
+      kind: "select_option",
+      source: "trace:trace_1:corp_payment",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        {
+          id: "normal_only",
+          label: "3 normale Credits",
+          value: JSON.stringify([]),
+        },
+        {
+          id: "mixed",
+          label: "2 Trace-Credits, 1 normaler Credit",
+          value: JSON.stringify([
+            { sourceCardInstanceId: "trace_pool", amount: 2 },
+          ]),
+        },
+        {
+          id: "specialized",
+          label: "3 Trace-Credits",
+          value: JSON.stringify([
+            { sourceCardInstanceId: "trace_pool", amount: 3 },
+          ]),
+        },
+      ],
+    });
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["specialized"],
+    });
+  });
+
+  it("uses the largest legal Runner Link-credit allocation before normal credits", () => {
+    const input = inputWithChoice(
+      {
+        kind: "select_option",
+        source: "trace_runner_bid_payment:trace_1:link_pool",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "link_0", label: "0 Link-Credits", value: 0 },
+          { id: "link_1", label: "1 Link-Credit", value: 1 },
+          { id: "link_2", label: "2 Link-Credits", value: 2 },
+        ],
+      },
+      { side: "runner" },
+    );
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["link_2"],
+    });
+  });
+
+  it("fails closed on a malformed Corp Trace payment allocation", () => {
+    const input = inputWithChoice({
+      kind: "select_option",
+      source: "trace:trace_1:corp_payment",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        {
+          id: "malformed",
+          label: "Ungültige Quellenquote",
+          value: "not-json",
+        },
+      ],
+    });
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
   it("completes Corporate Shuffle only from the exact executor hand-plan binding", () => {
     const input = corpCorporateShuffleChoiceInput();
     const action = resolveChoiceActionForInput(input);

@@ -45,9 +45,14 @@ export function selectedBidChoiceOptionId(
   ) {
     desired = maxBid;
   } else {
+    const runnerNeedsStrictlyMore =
+      traceContext.traceRulesProfile === "classic_blind_corp_ties" ||
+      traceContext.traceRulesProfile === undefined;
     const winningBid = Math.max(
       0,
-      (traceContext.traceValue ?? 0) - (traceContext.runnerLink ?? 0) + 1,
+      (traceContext.traceValue ?? 0) -
+        (traceContext.runnerLink ?? 0) +
+        (runnerNeedsStrictlyMore ? 1 : 0),
     );
     desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, winningBid);
   }
@@ -87,7 +92,12 @@ function runnerRunBudgetPreservingBidOption(
     !Number.isInteger(runnerLink) ||
     typeof traceValue !== "number" ||
     typeof runnerLink !== "number" ||
-    !runnerAvoidsTrace(runnerLink, selected.amount, traceValue)
+    !runnerAvoidsTrace(
+      runnerLink,
+      selected.amount,
+      traceValue,
+      traceContext.traceRulesProfile,
+    )
   ) {
     return undefined;
   }
@@ -107,7 +117,13 @@ function runnerRunBudgetPreservingBidOption(
   const reserve = runnerRunPlanReserveTarget(plan);
   const credits = input.playerView.own.credits;
   const minimumLosingBid = bidOptions.find(
-    (option) => !runnerAvoidsTrace(runnerLink, option.amount, traceValue),
+    (option) =>
+      !runnerAvoidsTrace(
+        runnerLink,
+        option.amount,
+        traceValue,
+        traceContext.traceRulesProfile,
+      ),
   );
   if (!minimumLosingBid) return undefined;
   const basicTagCleanupCost = tagAmount * 2;
@@ -251,8 +267,13 @@ function runnerAvoidsTrace(
   runnerLink: number,
   runnerBid: number,
   traceValue: number,
+  profile: LatestTraceContext["traceRulesProfile"],
 ): boolean {
-  return Math.max(0, runnerLink) + runnerBid > Math.max(0, traceValue);
+  const runnerStrength = Math.max(0, runnerLink) + runnerBid;
+  const corpStrength = Math.max(0, traceValue);
+  return profile === "classic_blind_corp_ties" || profile === undefined
+    ? runnerStrength > corpStrength
+    : runnerStrength >= corpStrength;
 }
 
 function corpDesiredBidAmount(

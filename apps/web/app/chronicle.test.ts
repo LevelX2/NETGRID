@@ -4679,12 +4679,7 @@ describe("formatChronicleEvent", () => {
       "2 Credits: +1 Stärke für diese Begegnung; Stärke danach 1.",
     );
     expect(pump.chips).toEqual(
-      expect.arrayContaining([
-        "Breaker",
-        "+1 Stärke",
-        "Stärke 1",
-        "2 Credits",
-      ]),
+      expect.arrayContaining(["Breaker", "+1 Stärke", "Stärke 1", "2 Credits"]),
     );
     expect(breakAction.title).toBe(
       "Die Runner-KI hat mit Krash Subroutine 1 auf Filter gebrochen.",
@@ -8894,6 +8889,24 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(
       expect.arrayContaining(["Access-Ambush", "Pattel Antibody", "3 Credits"]),
     );
+  });
+
+  it("describes a Blind Trace commitment without inventing or exposing a bid", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        traceId: "trace_hidden",
+        traceStep: "corp_bid",
+        traceRulesProfile: "classic_blind",
+        traceBidsRevealed: false,
+        traceBidCommittedSide: "corp",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe("Korp hat ein verdecktes Trace-Gebot committed.");
+    expect(item.description).toContain("gemeinsamen Reveal");
+    expect(JSON.stringify(item)).not.toMatch(/Korp-Gebot \d|Trace-Wert/);
   });
 });
 

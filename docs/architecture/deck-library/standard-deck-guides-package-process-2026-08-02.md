@@ -205,6 +205,21 @@ Paketnah:
 - Eigenständiger `check:standard-deck-guides`.
 - `git diff --check` vor jedem Commit.
 
+## Laufende Guide-Wartung
+
+Der aktuelle Pflegezustand aller aktiven Standarddecks wird mit
+`corepack pnpm check:standard-deck-guides` geprüft. Nach der redaktionellen
+Prüfung geänderter Strategieprofile werden Analyse-Hashes und
+Strategiezuordnungen mit einem ausdrücklich gesetzten Reviewdatum aktualisiert:
+
+`corepack pnpm check:standard-deck-guides -- --write-analysis --reviewed-at=YYYY-MM-DD`
+
+Der Schreibmodus ändert weder Guide-Texte noch `reviewStatus` automatisch.
+Neutrale Profile dürfen nicht als `plausible` bestätigt werden und müssen vor
+dem Schreiben redaktionell als Beobachtungs- oder schwacher Kandidat
+klassifiziert sein. Ohne explizites Reviewdatum scheitert der Schreibmodus
+fail-closed; ein inhaltlich leerer Wiederholungslauf verändert die Datei nicht.
+
 Final:
 
 - `corepack pnpm typecheck`

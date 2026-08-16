@@ -759,12 +759,12 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
     expect(state.trace).toMatchObject({
       sourceCardInstanceId: iceId,
       traceLimit: 5,
-      corpBidMax: 5,
+      corpBidMax: 11,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStarted: true,
       traceLimit: 5,
-      corpBidMax: 5,
+      corpBidMax: 11,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,

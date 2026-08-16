@@ -535,7 +535,7 @@ describe("encounter printed effects boundary", () => {
       suspended: true,
       traceId: "run_1.ice_1.2.trace",
       traceLimit: 4,
-      corpBidMax: 3,
+      corpBidMax: 8,
     });
     expect(state.trace).toMatchObject({
       traceId: "run_1.ice_1.2.trace",
@@ -544,7 +544,7 @@ describe("encounter printed effects boundary", () => {
       subroutineIndex: 2,
       traceLimit: 4,
       effectiveTraceLimit: 2,
-      corpBidMax: 3,
+      corpBidMax: 8,
       rabbitTraceLimitReduction: 2,
       encounterTemporaryTraceCreditSourceIceId: "ice_1",
       encounterTemporaryTraceCreditSourceDefinitionId: "onr_v1_001_test-ice",
@@ -563,10 +563,60 @@ describe("encounter printed effects boundary", () => {
       sourceDefinitionId: "onr_v1_001_test-ice",
       traceLimit: 4,
       effectiveTraceLimit: 2,
-      corpBidMax: 3,
+      corpBidMax: 8,
       rabbitTraceLimitReduction: 2,
       temporaryTraceCreditsAvailable: 2,
     });
+  });
+
+  it("uses the reduced effective limit plus explicit Trace counters as the Classic Corp bid cap", () => {
+    const state = makeState();
+    state.traceRulesProfile = "classic_blind";
+    const legalAction = { payload: {} } as LegalAction;
+
+    const result = startTraceFromPrintedSubroutine(
+      makeHost(state, legalAction, {
+        corpTraceCounterPoolTotal: () => 1,
+        recurringTraceCreditPoolTotal: () => 1,
+        rabbitTraceLimitReductionForIceTrace: () => 2,
+      }),
+      {
+        sourceCardInstanceId: "ice_1" as CardInstanceId,
+        subroutineIndex: 2,
+        subroutine: {
+          id: "trace_tag",
+          type: "initiate_trace",
+          traceLimit: 4,
+          traceSuccessEffect: { type: "add_tag", amount: 1 },
+        } as SubroutineDefinition,
+        legalAction,
+      },
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      suspended: true,
+      traceLimit: 4,
+      corpBidMax: 3,
+    });
+    expect(state.trace).toMatchObject({
+      traceRulesProfile: "classic_blind",
+      traceLimit: 4,
+      effectiveTraceLimit: 2,
+      corpBidMax: 3,
+      rabbitTraceLimitReduction: 2,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "bid_amount",
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "bid_0",
+      "bid_1",
+      "bid_2",
+      "bid_3",
+    ]);
   });
 
   it("applies printed Trace-success tag and counter followups without changing trace identifiers", () => {
@@ -623,7 +673,7 @@ describe("encounter printed effects boundary", () => {
       traceLimit: 3,
       sourceDefinitionId: "onr_v1_001_test-ice",
       corpBid: 1,
-      traceValue: 1,
+      traceValue: 4,
       runnerBid: 0,
       runnerStrength: 0,
       traceSuccessful: true,

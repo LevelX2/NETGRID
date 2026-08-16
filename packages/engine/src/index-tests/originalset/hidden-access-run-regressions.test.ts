@@ -1478,12 +1478,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     expect(state.trace).toMatchObject({
       status: "base_link",
-      traceValue: 1,
+      traceValue: 5,
       runnerLink: 0,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerLink: 0,
-      traceValue: 1,
+      traceValue: 5,
     });
     state = applyChoice(
       state,

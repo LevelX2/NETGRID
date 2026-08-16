@@ -3,6 +3,7 @@ import type {
   PlayerView,
   PublicGameEvent,
   Side,
+  TraceRulesProfile,
   Winner,
 } from "./index";
 
@@ -401,6 +402,7 @@ export type ApiMatchStartLobbyPayload = {
   matchFormat: ApiMatchFormat;
   seriesGamesPlanned?: number;
   cardPool: ApiMatchCardPool;
+  traceRulesProfile: TraceRulesProfile;
   sideAssignmentMode?: "fixed" | "random_pending";
   sideAssignment: {
     runnerPlayer: ApiSeriesPlayerSlot;

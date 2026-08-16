@@ -10,6 +10,10 @@
  */
 import type { GameState } from "@netgrid/shared";
 import { requireCurrentTrace, type CurrentTrace } from "./trace-state";
+import {
+  traceComparisonIsSuccessful,
+  traceCorpBaseStrength,
+} from "./trace-rules-profile";
 
 export type TraceResultDescriptor = {
   traceLimit: number;
@@ -28,7 +32,9 @@ export type TraceResultOptions = {
 };
 
 export function traceCorpValue(trace: CurrentTrace): number {
-  return trace.traceValue ?? trace.corpBid ?? 0;
+  return (
+    trace.traceValue ?? traceCorpBaseStrength(trace) + (trace.corpBid ?? 0)
+  );
 }
 
 export function traceRunnerStrength(
@@ -46,7 +52,11 @@ export function isTraceSuccessful(
 ): boolean {
   return (
     trace.successful ??
-    traceCorpValue(trace) >= traceRunnerStrength(trace, options)
+    traceComparisonIsSuccessful(
+      trace.traceRulesProfile,
+      traceCorpValue(trace),
+      traceRunnerStrength(trace, options),
+    )
   );
 }
 
@@ -66,7 +76,13 @@ export function describeTraceResultFromTrace(
     runnerBid: trace.runnerBid ?? 0,
     postBidLinkValue: trace.postBidLinkBonus ?? 0,
     runnerStrength,
-    successful: trace.successful ?? traceValue >= runnerStrength,
+    successful:
+      trace.successful ??
+      traceComparisonIsSuccessful(
+        trace.traceRulesProfile,
+        traceValue,
+        runnerStrength,
+      ),
   };
 }
 

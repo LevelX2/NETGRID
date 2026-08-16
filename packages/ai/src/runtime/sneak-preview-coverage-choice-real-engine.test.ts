@@ -8,6 +8,7 @@ import {
   type DeckDefinition,
   type GameState,
   type LegalAction,
+  type PlayerAction,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
@@ -311,7 +312,11 @@ function applyDecision(
   state: GameState,
   decision: ReturnType<typeof chooseRunnerAction>,
 ): GameState {
-  if (!decision.actionId) throw new Error("Runner AI returned no action ID.");
+  if (decision.selectionKind && decision.selectionKind !== "direct") {
+    throw new Error(
+      `Sneak Preview fixture expected a direct choice, got ${decision.selectionKind}.`,
+    );
+  }
   return applyActionById(
     state,
     "runner",
@@ -324,7 +329,7 @@ function applyActionById(
   state: GameState,
   side: "corp" | "runner",
   actionId: string,
-  selectedChoices?: { choiceId: string; selectedOptionIds: readonly string[] },
+  selectedChoices?: PlayerAction["selectedChoices"],
 ): GameState {
   const result = applyAction(state, {
     matchId: state.matchId,

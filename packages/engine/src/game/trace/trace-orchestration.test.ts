@@ -49,7 +49,8 @@ describe("trace orchestration", () => {
       sourceDefinitionId: sourceDefinition.id,
       traceLimit: 2,
       effectiveTraceLimit: 2,
-      corpBidMax: 2,
+      corpBidMax: 5,
+      traceRulesProfile: "modern_open",
       status: "corp_bid",
     });
     expect(state.pendingChoice).toMatchObject({
@@ -64,6 +65,9 @@ describe("trace orchestration", () => {
       "bid_0",
       "bid_1",
       "bid_2",
+      "bid_3",
+      "bid_4",
+      "bid_5",
     ]);
     expect(action.payload).toMatchObject({
       traceStarted: true,
@@ -98,7 +102,7 @@ describe("trace orchestration", () => {
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 2,
-      traceValue: 2,
+      traceValue: 4,
       runnerLink: 1,
     });
     expect(state.pendingChoice).toMatchObject({
@@ -112,10 +116,66 @@ describe("trace orchestration", () => {
       traceLimit: 2,
       corpBid: 2,
       corpCreditBid: 2,
-      traceValue: 2,
+      traceValue: 4,
       runnerLink: 1,
       traceBaseLinkChoiceOpened: false,
     });
+  });
+
+  it("keeps Classic bids hidden until the Runner commits", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+      },
+      traceRulesProfile: "classic_blind",
+    });
+    const host = testHost(state, {
+      [sourceDefinition.id]: sourceDefinition,
+    });
+    const startAction = actionFor("corp", "trigger_ability", {
+      cardId: sourceId,
+    });
+
+    startTraceFromOperation(host, sourceDefinition.id, 3, startAction);
+
+    expect(state.trace).toMatchObject({
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      corpBidMax: 3,
+      status: "corp_bid",
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+    });
+
+    const corpAction = actionFor("corp", "resolve_choice");
+    resolveTraceChoice(host, corpAction, playerChoice("bid_2"));
+
+    expect(state.trace).toMatchObject({
+      status: "runner_bid",
+      corpBid: 2,
+      traceValue: 2,
+      bidsRevealed: false,
+    });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.prompt).not.toContain("Trace-Stärke 2");
+
+    const runnerAction = actionFor("runner", "resolve_choice");
+    resolveTraceChoice(host, runnerAction, playerChoice("bid_1"));
+
+    expect(runnerAction.payload).toMatchObject({
+      corpBid: 2,
+      runnerBid: 1,
+      runnerStrength: 2,
+      traceSuccessful: false,
+    });
+    expect(state.trace).toBeUndefined();
   });
 
   it("resolves the Runner bid and completes operation trace success without a run", () => {
@@ -693,11 +753,13 @@ function instance(
 
 function minimalState(input: {
   cardInstances: Record<CardInstanceId, CardInstance>;
+  traceRulesProfile?: GameState["traceRulesProfile"];
   runnerHardware?: CardInstanceId[];
   runnerPrograms?: CardInstanceId[];
   runnerResources?: CardInstanceId[];
 }): GameState {
   return {
+    traceRulesProfile: input.traceRulesProfile ?? "modern_open",
     stateVersion: 1,
     randomCounter: 0,
     activeSide: "corp",

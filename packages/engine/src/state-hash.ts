@@ -1,4 +1,8 @@
-import type { GameState, StateHash } from "@netgrid/shared";
+import {
+  DEFAULT_TRACE_RULES_PROFILE,
+  type GameState,
+  type StateHash,
+} from "@netgrid/shared";
 import { cardSpecRuntimeDefinitionIds } from "@netgrid/cards/engine";
 import { createCurrentCardRegistryRulesContext } from "./card-registry-rules-context";
 
@@ -69,11 +73,48 @@ export function cardPoolSnapshotIdentityForState(state: GameState): string {
 
 export function stripEventLogForHash(state: GameState): unknown {
   const {
+    traceRulesProfile,
+    trace,
+    baseline,
+    eventLog: _eventLog,
+    ...stateWithoutTraceProfile
+  } = state;
+  const {
     cardTextSource: _cardTextSource,
     cardTextSnapshotId: _cardTextSnapshotId,
     ...mechanicalBaseline
-  } = state.baseline;
-  return { ...state, baseline: mechanicalBaseline, eventLog: [] };
+  } = baseline;
+  const normalizedProfile = traceRulesProfile ?? DEFAULT_TRACE_RULES_PROFILE;
+  const canonicalTrace = trace
+    ? canonicalTraceForHash(trace, normalizedProfile)
+    : undefined;
+  return {
+    ...stateWithoutTraceProfile,
+    ...(normalizedProfile !== DEFAULT_TRACE_RULES_PROFILE
+      ? { traceRulesProfile: normalizedProfile }
+      : {}),
+    ...(canonicalTrace ? { trace: canonicalTrace } : {}),
+    baseline: mechanicalBaseline,
+    eventLog: [],
+  };
+}
+
+function canonicalTraceForHash(
+  trace: NonNullable<GameState["trace"]>,
+  matchProfile: NonNullable<GameState["traceRulesProfile"]>,
+): unknown {
+  const { traceRulesProfile, bidsRevealed, ...traceWithoutDefaultProfile } =
+    trace;
+  const normalizedProfile = traceRulesProfile ?? matchProfile;
+  return {
+    ...traceWithoutDefaultProfile,
+    ...(normalizedProfile !== DEFAULT_TRACE_RULES_PROFILE
+      ? {
+          traceRulesProfile: normalizedProfile,
+          ...(bidsRevealed !== undefined ? { bidsRevealed } : {}),
+        }
+      : {}),
+  };
 }
 
 export function stableStringifyForHash(value: unknown): string {

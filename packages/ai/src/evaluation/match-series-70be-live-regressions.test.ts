@@ -1,6 +1,7 @@
 import {
   applyAction,
   applyRandomizedIceInstallSelection,
+  applyRandomizedTraceBidSelection,
   applyRandomizedTurnPlanSelection,
   createGameAfterSetup,
   getLegalActions,
@@ -315,16 +316,21 @@ function applyDecision(
             ...decision.engineCommand,
             idempotencyKey,
           })
-        : applyAction(state, {
-            matchId: state.matchId,
-            side,
-            actionId: decision.actionId,
-            clientKnownStateVersion: state.stateVersion,
-            ...(decision.selectedChoices
-              ? { selectedChoices: decision.selectedChoices }
-              : {}),
-            idempotencyKey,
-          });
+        : decision.selectionKind === "engine_randomized_trace_bid_selection"
+          ? applyRandomizedTraceBidSelection(state, {
+              ...decision.engineCommand,
+              idempotencyKey,
+            })
+          : applyAction(state, {
+              matchId: state.matchId,
+              side,
+              actionId: decision.actionId,
+              clientKnownStateVersion: state.stateVersion,
+              ...(decision.selectedChoices
+                ? { selectedChoices: decision.selectedChoices }
+                : {}),
+              idempotencyKey,
+            });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
 }

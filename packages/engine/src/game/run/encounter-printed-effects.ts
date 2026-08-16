@@ -13,6 +13,7 @@ import {
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { describeTraceResultFromTrace } from "../trace/trace-result";
+import { traceRulesDefinitionForState } from "../trace/trace-rules-profile";
 import { returnUnusedCorpTraceWindowCredits } from "../trace/temporary-trace-credit-lifecycle";
 import { credits } from "../state/economy-mutation";
 import {
@@ -447,14 +448,19 @@ export function startTraceFromPrintedSubroutine(
     traceLimit - rabbitTraceLimitReduction,
   );
   const corpTraceCounterPool = host.callbacks.corpTraceCounterPoolTotal();
-  const corpBidMax = Math.min(
-    baseCorpBidMax,
-    effectiveBaseTraceLimit + corpTraceCounterPool,
-  );
+  const rules = traceRulesDefinitionForState(state);
+  const corpBidMax =
+    rules.corpBidLimitMode === "payment_capacity"
+      ? baseCorpBidMax
+      : Math.min(
+          baseCorpBidMax,
+          effectiveBaseTraceLimit + corpTraceCounterPool,
+        );
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinition.id,
+    traceRulesProfile: rules.profile,
     subroutineIndex,
     traceLimit,
     effectiveTraceLimit: effectiveBaseTraceLimit,
@@ -475,12 +481,20 @@ export function startTraceFromPrintedSubroutine(
     status: "corp_bid",
     successEffect,
   };
-  state.pendingChoice = host.callbacks.traceBidChoice(
-    "corp",
-    traceId,
-    `Korp Trace-Wert wählen (Limit ${traceLimit})`,
-    corpBidMax,
-  );
+  state.pendingChoice = {
+    ...host.callbacks.traceBidChoice(
+      "corp",
+      traceId,
+      rules.resolutionMode === "hidden_commit_reveal"
+        ? `Verdecktes Korp-Gebot wählen (Trace-Limit ${effectiveBaseTraceLimit})`
+        : `Offenes Korp-Payment wählen (Basisstärke ${traceLimit})`,
+      corpBidMax,
+    ),
+    visibility:
+      rules.resolutionMode === "hidden_commit_reveal"
+        ? "hidden_info_barrier"
+        : "public",
+  };
   state.activeSide = "corp";
   state.timingPoint = "run.encounter_ice";
   if (legalAction) {
@@ -492,6 +506,7 @@ export function startTraceFromPrintedSubroutine(
       sourceDefinitionId: sourceDefinition.id,
       traceLimit,
       effectiveTraceLimit: effectiveBaseTraceLimit,
+      traceRulesProfile: rules.profile,
       corpBidMax,
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
       ...(fortTraceBitPoolSource

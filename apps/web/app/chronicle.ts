@@ -945,6 +945,22 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (
+        (payload.traceRulesProfile === "classic_blind" ||
+          payload.traceRulesProfile === "classic_blind_corp_ties") &&
+        payload.traceBidsRevealed === false
+      ) {
+        const committedSide =
+          payload.traceBidCommittedSide === "runner" ? "Runner" : "Korp";
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = `${committedSide} hat ein verdecktes Trace-Gebot committed`;
+        description =
+          "Gebot und Zahlungsquellen bleiben bis zum gemeinsamen Reveal verborgen.";
+        chips.push("Trace", "Verdecktes Gebot");
+        break;
+      }
       if (payload.traceStep === "corp_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const hackerTrackerCountersSpent =
@@ -1105,9 +1121,7 @@ export function formatChronicleEvent(
         if (resolved && tagsAdded > 0)
           title = `${title}; ${runnerTagGainOutcomeText(side, tagsAdded)}`;
         description =
-          resolved &&
-          traceValue !== undefined &&
-          runnerStrength !== undefined
+          resolved && traceValue !== undefined && runnerStrength !== undefined
             ? `Endstand: Trace ${traceValue} gegen Runner-Stärke ${runnerStrength}${linkBonus > 0 ? `; Post-Bid-Link: +${linkBonus}` : ""}.`
             : runnerLink !== undefined || runnerStrength !== undefined
               ? `Runner-Link: ${runnerLink ?? 0}${runnerStrength !== undefined ? `, Runner-Stärke: ${runnerStrength}` : ""}${openedNext ? "; weitere Link-Fähigkeiten verfügbar" : ""}.`
@@ -2313,9 +2327,7 @@ export function formatChronicleEvent(
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(traceLimit !== undefined
-            ? [`Limit ${traceLimit}`]
-            : []),
+          ...(traceLimit !== undefined ? [`Limit ${traceLimit}`] : []),
         );
         break;
       }
@@ -2640,9 +2652,7 @@ export function formatChronicleEvent(
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(traceLimit !== undefined
-            ? [`Limit ${traceLimit}`]
-            : []),
+          ...(traceLimit !== undefined ? [`Limit ${traceLimit}`] : []),
           actionType === "play_event" ? "Event" : "Operation",
         );
         break;
@@ -3516,9 +3526,7 @@ export function formatChronicleEvent(
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
-          ...(traceLimit !== undefined
-            ? [`Limit ${traceLimit}`]
-            : []),
+          ...(traceLimit !== undefined ? [`Limit ${traceLimit}`] : []),
         );
         break;
       }
