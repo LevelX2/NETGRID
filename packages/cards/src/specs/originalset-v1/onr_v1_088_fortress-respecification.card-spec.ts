@@ -67,14 +67,29 @@ export const cardSpec = {
         kind: "strategy_anchor",
         strategyKey: "runner.run_event_tempo",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "fort_reorder",
-        preferences: [],
-        avoid: [],
+        capabilityKey: capabilityKey(
+          "hidden_replacement_longtail_successful_run_fort_ice_reorder",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "reorder_bound_successful_run_fort_ice",
+            preferences: [
+              "order_known_rezzed_ice_for_future_break_cost",
+              "sequence_known_etr_damage_and_tax_for_followup_run",
+              "preserve_unknown_ice_as_unknown_positions",
+            ],
+            avoid: [
+              "infer_concealed_ice_identity",
+              "treat_bound_fort_as_free_target_choice",
+            ],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

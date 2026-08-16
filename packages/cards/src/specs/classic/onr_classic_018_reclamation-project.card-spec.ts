@@ -85,15 +85,6 @@ export const cardSpec = {
           "Operations Semantic Review v2: ice_recovery / glacier_support. Review-v2-Rolle recovery_enabler wird als validierbare Hauptrolle enabler mit roleDetail gespeichert.",
       },
       {
-        kind: "target_preference",
-        purpose: "recover_archives_ice_to_hq",
-        preferences: [
-          "protects_agenda_remote",
-          "protects_central_access_pressure",
-        ],
-        avoid: ["hidden_info_dependent_choice", "low_impact_ice"],
-      },
-      {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
@@ -104,7 +95,28 @@ export const cardSpec = {
         severity: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("return_archives_ice_to_hq"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_archives_ice_subset_for_hq_recovery",
+            preferences: [
+              "close_current_server_defense_gap",
+              "recover_ice_with_affordable_install_and_rez_route",
+              "prefer_already_known_ice_when_plan_value_is_equal",
+              "respect_hq_capacity_and_double_action_cost",
+            ],
+            avoid: [
+              "recover_all_ice_without_current_plan_use",
+              "unnecessary_private_ice_information_reveal",
+              "create_hq_overflow_without_cleanup_route",
+            ],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

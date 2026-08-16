@@ -111,9 +111,14 @@ export const cardSpec = {
       },
       {
         kind: "target_preference",
-        purpose: "install_theorem_proof_as_runner_program",
-        preferences: ["current_access_only"],
-        avoid: ["hidden_info_dependent_choice"],
+        purpose: "choose_theorem_proof_install_or_decline_exchange",
+        preferences: [
+          "compare_three_agenda_points_now_or_delayed",
+          "account_for_two_mu_and_later_score_action",
+          "account_for_program_trash_and_remove_from_game_risk",
+          "account_for_decline_score_at_next_runner_start_if_still_installed",
+        ],
+        avoid: ["treat_current_agenda_as_free_target_choice"],
       },
       {
         kind: "risk_interpretation",

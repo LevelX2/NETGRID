@@ -144,16 +144,6 @@ export const cardSpec = {
         use: "corp.remote_protection",
       },
       {
-        kind: "target_preference",
-        purpose: "double_relevant_ice_strength_until_end_of_turn",
-        preferences: [
-          "current_run_path_relevance",
-          "protects_agenda_remote",
-          "protects_central_access_pressure",
-        ],
-        avoid: ["hidden_info_dependent_choice", "irrelevant_server_ice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
@@ -169,7 +159,38 @@ export const cardSpec = {
         severity: "medium",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("corp_main_double_chosen_ice_strength"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_ice_for_one_shot_strength_double",
+            preferences: [
+              "maximize_effective_strength_gain_below_cap_ten",
+              "exploit_visible_breaker_coverage_and_runner_credit_gap",
+              "protect_current_high_value_server",
+            ],
+            avoid: ["irrelevant_server_ice", "strength_already_at_cap_ten"],
+          },
+        ],
+      },
+      {
+        capabilityKey: capabilityKey("during_run_double_chosen_ice_strength"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_current_run_ice_for_one_shot_strength_double",
+            preferences: [
+              "current_run_path_relevance",
+              "maximize_effective_strength_gain_below_cap_ten",
+              "exploit_visible_breaker_coverage_and_runner_credit_gap",
+            ],
+            avoid: ["irrelevant_server_ice", "strength_already_at_cap_ten"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

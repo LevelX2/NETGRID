@@ -77,21 +77,27 @@ export const cardSpec = {
         kind: "strategy_anchor",
         strategyKey: "corp.ice_tax_glacier",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "choose_ice_type_or_mode_from_legal_options",
-        preferences: [
-          "use_choice_option_with_visible_board_payoff",
-          "prefer_option_relevant_to_current_run_path",
-          "prefer_option_that_protects_agenda_or_remote_pressure",
-        ],
-        avoid: [
-          "hidden_info_dependent_choice",
-          "option_with_no_visible_current_payoff",
+        capabilityKey: capabilityKey("rez_as_sentry_or_wall"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_sentry_or_wall_rez_mode",
+            preferences: [
+              "exploit_visible_killer_or_fracter_coverage_gap",
+              "maximize_visible_break_cost_on_protected_server",
+              "pay_extra_credit_only_for_material_defensive_gain",
+            ],
+            avoid: [
+              "use_unknown_runner_hand_or_stack_information",
+              "pay_for_mode_without_visible_break_cost_gain",
+            ],
+          },
         ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

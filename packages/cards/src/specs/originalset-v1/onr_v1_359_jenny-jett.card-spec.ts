@@ -122,18 +122,34 @@ export const cardSpec = {
         threatLevel: "high",
       },
       {
-        kind: "target_preference",
-        purpose: "install_hq_ice_innermost_on_fort",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "fort_run_windows_install_hq_ice_innermost_after_successful_run_before_successful_run_finalizes_on_this_fort",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_hq_ice_for_immediate_innermost_install",
+            preferences: [
+              "immediate_etr_damage_tag_trash_or_tax_value",
+              "affordable_install_and_immediate_rez_route",
+              "exploit_visible_runner_breaker_coverage_gap",
+              "protect_current_fort_access_value",
+            ],
+            avoid: [
+              "unaffordable_or_effectless_ice",
+              "reveal_private_hq_ice_before_selected_install",
+            ],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

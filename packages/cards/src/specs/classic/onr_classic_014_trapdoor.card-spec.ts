@@ -115,18 +115,28 @@ export const cardSpec = {
         confidence: "high",
         rationale: "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur.",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "redirect_central_run_to_subsidiary_fort",
-        preferences: [
-          "protects_central_access_pressure",
-          "adds_relevant_encounter_tax",
-          "protects_agenda_remote",
+        capabilityKey: capabilityKey("subroutine_deflect_to_subsidiary_fort"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "redirect_central_run_to_safe_subsidiary_fort",
+            preferences: [
+              "prevent_more_valuable_current_central_access",
+              "add_known_encounter_tax_before_redirected_access",
+              "choose_low_value_redirect_access_destination",
+            ],
+            avoid: [
+              "redirect_to_scoring_or_ambush_remote_with_harmful_access",
+              "ignore_immediate_access_when_target_has_no_rezzed_ice",
+              "no_subsidiary_fort_target",
+            ],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice", "no_subsidiary_fort_target"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {
