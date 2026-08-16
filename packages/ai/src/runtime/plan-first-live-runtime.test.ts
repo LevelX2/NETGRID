@@ -791,6 +791,10 @@ describe("authoritative plan-first live runtime", () => {
       buildRunnerEconomyPosture: () => ({
         minimumCreditFloor: 3,
         desiredCreditReserve: 8,
+        creditReservePolicy: {
+          phase: "opening",
+          contestReserve: 0,
+        },
         fundingNeed: true,
         evidence: [],
       }),
@@ -3173,11 +3177,14 @@ describe("authoritative plan-first live runtime", () => {
         source: "short-term-contract",
         payload: {
           cardId: "short-term-contract",
-          sourceDefinitionId: "onr_v1_154_broker",
+          sourceDefinitionId: "onr_v1_178_short-term-contract",
           cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          cardImplementationAbilityKey: "withdraw_credits",
-          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+          cardImplementationAbilityKey:
+            "abilities_activated_runner_main_take_hosted_credits",
+          cardImplementationAbilityId:
+            "onr_v1_178_short-term-contract:abilities_activated_runner_main_take_hosted_credits",
           cardImplementationTakesHostedCredits: true,
+          cardImplementationHostedCreditCashOutMaxUses: 6,
           hostedCreditTakeAmount: 2,
           gainCreditsAmount: 2,
         },
@@ -3196,7 +3203,7 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.clicks = 3;
     input.playerView.own.rig = [
       visibleCard("short-term-contract", "runner", "resource", {
-        definitionId: "onr_v1_154_broker",
+        definitionId: "onr_v1_178_short-term-contract",
         title: "Short-Term Contract",
         counters: { bit: 12 },
       }),
@@ -3208,7 +3215,7 @@ describe("authoritative plan-first live runtime", () => {
           searchAccess: { tools: [] },
           economyBankTools: [
             {
-              cardId: "onr_v1_154_broker",
+              cardId: "onr_v1_178_short-term-contract",
               sourceCardInstanceId: "short-term-contract",
               title: "Short-Term Contract",
               ownerSide: "runner",
@@ -16819,6 +16826,10 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     buildRunnerEconomyPosture: () => ({
       minimumCreditFloor: 3,
       desiredCreditReserve: 5,
+      creditReservePolicy: {
+        phase: "opening",
+        contestReserve: 0,
+      },
       fundingNeed: true,
       evidence: ["test_visible_funding_need"],
     }),

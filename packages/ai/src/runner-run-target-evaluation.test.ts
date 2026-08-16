@@ -2958,6 +2958,144 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("keeps a free midgame R&D access live below the liquid reserve", () => {
+    const input = aiInput({
+      credits: 6,
+      stateVersion: 20,
+      servers: [server("rd")],
+      legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain")],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      phase: "midgame",
+      liquidCredits: 6,
+      desiredCreditReserve: 10,
+      belowReserveNow: true,
+    });
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathCost: 0,
+      creditsAfterRun: 6,
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_funding_need:none",
+        "run_target_protected_liquid_reserve:2",
+      ]),
+    );
+  });
+
+  it("funds an ordinary paid midgame R&D run before spending the liquid reserve", () => {
+    const fracter = visibleCard("runner-efficient-fracter", {
+      definitionId: "efficient_fracter",
+      title: "Efficient Fracter",
+      type: "program",
+      subtypes: ["icebreaker", "fracter"],
+      strength: 3,
+    });
+    const input = aiInput({
+      credits: 12,
+      stateVersion: 20,
+      rig: [fracter],
+      servers: [server("rd", { ice: [expensiveBarrierIce("rd-tax")] })],
+      legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      pathCost: 4,
+      creditsAfterRun: 8,
+      recommendation: "gain_credits_first",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_funding_need:post_run_floor_gap",
+        "run_target_post_run_floor_gap:2",
+        "run_target_protected_liquid_reserve:10",
+      ]),
+    );
+  });
+
+  it("treats bank credits as click-bounded assets, not as the liquid midgame reserve", () => {
+    const bank = visibleCard("runner-bank-source", {
+      definitionId: "onr_v1_154_broker",
+      title: "Broker",
+      type: "resource",
+      counters: { bit: 12 },
+    });
+    const input = aiInput({
+      credits: 6,
+      stateVersion: 20,
+      rig: [bank],
+      servers: [server("hq")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        bankPayoutAction("bank-payout", "Bank payout", {
+          cardId: bank.instanceId,
+          cardImplementationTakesHostedCredits: true,
+          cardImplementationHostedCreditCashOutMaxUses: 6,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
+        }),
+      ],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      phase: "midgame",
+      liquidCredits: 6,
+      convertibleBankCredits: 6,
+      economyTurnCreditCeiling: 12,
+      desiredCreditReserve: 10,
+      belowReserveNow: true,
+    });
+    expect(posture).toMatchObject({
+      fundingNeed: true,
+      recommendation: "cash_out_bank",
+    });
+  });
+
+  it("does not invent repeatable bank liquidity without an engine use ceiling", () => {
+    const bank = visibleCard("runner-bank-source", {
+      definitionId: "onr_v1_178_short-term-contract",
+      title: "Short-Term Contract",
+      type: "resource",
+      counters: { bit: 12 },
+    });
+    const input = aiInput({
+      credits: 6,
+      stateVersion: 20,
+      rig: [bank],
+      servers: [server("hq")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        bankPayoutAction("bank-payout", "Bank payout", {
+          cardId: bank.instanceId,
+          cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
+        }),
+      ],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      liquidCredits: 6,
+      convertibleBankCredits: 2,
+      economyTurnCreditCeiling: 8,
+      desiredCreditReserve: 10,
+      belowReserveNow: true,
+    });
+  });
+
   it("builds a remote-contest buffer before spending on central pressure", () => {
     const input = pressureReserveInput(12);
     input.playerView.servers.push(server("hq"));
@@ -3054,7 +3192,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       phase: "late_contest",
       remoteScoreThreat: "urgent",
       contestReserve: 8,
-      desiredCreditReserve: 8,
+      desiredCreditReserve: 12,
       belowReserveNow: true,
       canContestIfFunded: true,
     });
@@ -3067,7 +3205,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       expect.arrayContaining([
         "remote_score_threat:urgent",
         "contest_reserve:8",
-        "desired_credit_reserve:8",
+        "desired_credit_reserve:12",
       ]),
     );
   });
@@ -3162,7 +3300,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       remotePressureReserve: 17,
       rdPressureSpendTarget: 4,
       pressureRunwayTarget: 21,
-      availableCreditPool: 20,
+      economyTurnCreditCeiling: 20,
       desiredCreditReserve: 17,
       belowReserveNow: false,
     });
@@ -3205,7 +3343,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(posture.creditReservePolicy).toMatchObject({
       remotePressureReserve: 17,
       pressureRunwayTarget: 21,
-      availableCreditPool: 22,
+      economyTurnCreditCeiling: 22,
       belowReserveNow: false,
     });
     expect(rd).toMatchObject({
@@ -3234,6 +3372,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         bankPayoutAction("broker-payout", "Broker payout", {
           cardId: broker.instanceId,
           cardImplementationTakesHostedCredits: true,
+          cardImplementationHostedCreditCashOutMaxUses: 6,
           hostedCreditTakeAmount: 2,
           gainCreditsAmount: 2,
         }),
@@ -3246,10 +3385,12 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
 
     expect(posture.creditReservePolicy).toMatchObject({
+      liquidCredits: 9,
       convertibleBankCredits: 6,
-      availableCreditPool: 15,
+      economyTurnCreditCeiling: 15,
       remotePressureReserve: 17,
       pressureRunwayTarget: 21,
+      belowReserveNow: true,
     });
     expect(rd).toMatchObject({
       creditsAfterRun: 5,
@@ -3271,7 +3412,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       remotePressureReserve: 20,
       rdPressureSpendTarget: 0,
       pressureRunwayTarget: 20,
-      availableCreditPool: 20,
+      economyTurnCreditCeiling: 20,
     });
     expect(remote).toMatchObject({
       scoreThreat: true,

@@ -7186,23 +7186,40 @@ function runnerRunRequiredPostRunReserve(
   if (runnerRunCreditFloorOverrideAllowed(input, evaluation)) {
     return undefined;
   }
+  if (evaluation.recommendation !== "gain_credits_first") {
+    return undefined;
+  }
+  const remoteScoreThreat =
+    evaluation.accessTargetKind === "remote" &&
+    evaluation.accessPayoff === "score_threat";
   if (
-    evaluation.accessTargetKind !== "remote" ||
-    evaluation.accessPayoff !== "score_threat" ||
-    evaluation.recommendation !== "gain_credits_first" ||
-    evaluation.creditsAfterRun >= economy.creditReservePolicy.contestReserve
+    evaluation.creditsAfterRun >= input.playerView.own.credits &&
+    !remoteScoreThreat
   ) {
     return undefined;
   }
-  const requiredReserve = economy.creditReservePolicy.contestReserve;
+  const contestReserve = remoteScoreThreat
+    ? economy.creditReservePolicy.contestReserve
+    : 0;
+  const phaseReserve =
+    economy.creditReservePolicy.phase === "opening"
+      ? economy.minimumCreditFloor
+      : economy.desiredCreditReserve;
+  const requiredReserve = Math.max(phaseReserve, contestReserve);
   const reserveGap = requiredReserve - evaluation.creditsAfterRun;
+  if (reserveGap <= 0) return undefined;
+  if (!runnerRunHasExactUrgency(input, evaluation)) return requiredReserve;
+
   const remainingFundingClicks = Math.max(0, input.playerView.own.clicks - 1);
-  if (reserveGap <= 0 || remainingFundingClicks <= 0) return undefined;
+  if (remainingFundingClicks <= 0) return undefined;
   const demand = createRunnerCreditDemand({
     demandId: `run-reserve:${evaluation.actionId}`,
-    sourcePlanId: `runner.contest_remote:${evaluation.targetServerId}`,
+    sourcePlanId:
+      evaluation.accessTargetKind === "remote"
+        ? `runner.contest_remote:${evaluation.targetServerId}`
+        : `runner.pressure_central:${evaluation.targetServerId}`,
     purpose: "foreground_plan",
-    priority: "current_foreground_plan",
+    priority: "acute_hard_plan_blocker",
     hardness: "hard",
     deadline: "end_of_current_turn",
     currentCredits: input.playerView.own.credits,
@@ -7212,18 +7229,18 @@ function runnerRunRequiredPostRunReserve(
       `run_reserve_gap:${reserveGap}`,
     ],
   });
-  const routes = searchFundingRoutes({
+  const route = searchFundingRoutes({
     demand,
     candidates,
     remainingClicks: remainingFundingClicks,
     maxSteps: remainingFundingClicks,
     maxRoutes: 8,
-  });
-  const sameTurnReserveRouteExists = routes.routes.some(
-    (route) =>
-      route.status === "covered_guaranteed" && route.horizon === "same_turn",
+  }).routes.find(
+    (candidateRoute) =>
+      candidateRoute.status === "covered_guaranteed" &&
+      candidateRoute.horizon === "same_turn",
   );
-  return sameTurnReserveRouteExists ? requiredReserve : undefined;
+  return route ? requiredReserve : undefined;
 }
 
 function runnerRunHasExactUrgency(
@@ -17893,11 +17910,7 @@ function runnerCreditBankRunFundingRoute(params: {
       evaluation.recommendation === "gain_credits_first";
     if (!exactUrgentConvertibleTarget) continue;
     const conversionFundingGap =
-      terminalVisibleHazardFundingGap ??
-      Math.max(
-        admission.routeFundingGap,
-        Math.max(0, -evaluation.creditsAfterRun),
-      );
+      terminalVisibleHazardFundingGap ?? admission.concreteFundingGap;
     if (conversionFundingGap <= 0) continue;
     const demand = createRunnerCreditDemand({
       demandId: `run-support:${evaluation.actionId}`,

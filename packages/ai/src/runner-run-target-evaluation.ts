@@ -505,19 +505,17 @@ function evaluateRunnerRunTarget(
       ...(economyPosture.creditReservePolicy.remotePressureReserveActive ===
       true
         ? [
-            `remote_pressure_credit_pool_after_run:${creditsAfterRun + (economyPosture.creditReservePolicy.convertibleBankCredits ?? 0)}`,
+            `remote_pressure_liquid_credits_after_run:${creditsAfterRun}`,
             `rd_pressure_runway_ready:${
-              (economyPosture.creditReservePolicy.availableCreditPool ?? 0) >=
+              economyPosture.creditReservePolicy.liquidCredits >=
               (economyPosture.creditReservePolicy.pressureRunwayTarget ?? 0)
             }`,
             `rd_preserves_remote_pressure_reserve:${
               accessTargetKind !== "rd" ||
-              ((economyPosture.creditReservePolicy.availableCreditPool ?? 0) >=
+              (economyPosture.creditReservePolicy.liquidCredits >=
                 (economyPosture.creditReservePolicy.pressureRunwayTarget ??
                   0) &&
-                creditsAfterRun +
-                  (economyPosture.creditReservePolicy.convertibleBankCredits ??
-                    0) >=
+                creditsAfterRun >=
                   (economyPosture.creditReservePolicy.remotePressureReserve ??
                     0))
             }`,
@@ -551,6 +549,7 @@ function evaluateRunnerRunTarget(
       `run_target_funding_need:${targetFundingNeed.reason}`,
       `run_target_route_funding_gap:${targetFundingNeed.routeFundingGap}`,
       `run_target_post_run_floor_gap:${targetFundingNeed.postRunFloorGap}`,
+      `run_target_protected_liquid_reserve:${targetFundingNeed.protectedLiquidReserve}`,
       `global_economy_funding_need:${economyPosture.fundingNeed}`,
       ...(path.visibleIceRunHazards ?? [])
         .flatMap((hazard) => hazard.evidence)
@@ -1453,6 +1452,16 @@ function recommendationForRunTarget(params: {
     return "gain_credits_first";
   }
   if (
+    (params.targetFundingNeed.reason === "route_funding_gap" ||
+      (params.targetFundingNeed.reason === "post_run_floor_gap" &&
+        params.targetFundingNeed.protectedLiquidReserve >
+          params.economyPosture.minimumCreditFloor)) &&
+    !highValuePayoff(params.accessPayoff) &&
+    !params.scoreThreat
+  ) {
+    return "gain_credits_first";
+  }
+  if (
     params.targetKind === "rd" &&
     params.knownAccessState === "unknown" &&
     params.pathPassability === "reachable" &&
@@ -1479,6 +1488,7 @@ type RunnerRunTargetFundingNeed = {
   reason: "none" | "route_funding_gap" | "post_run_floor_gap";
   routeFundingGap: number;
   postRunFloorGap: number;
+  protectedLiquidReserve: number;
 };
 
 function runnerRunTargetFundingNeed(params: {
@@ -1487,9 +1497,17 @@ function runnerRunTargetFundingNeed(params: {
   economyPosture: RunnerEconomyPosture;
 }): RunnerRunTargetFundingNeed {
   const routeFundingGap = Math.max(0, params.routeQuote.fundingGap ?? 0);
+  const liquidCreditsSpent =
+    params.creditsAfterRun <
+    params.economyPosture.creditReservePolicy.currentCredits;
+  const protectedLiquidReserve = liquidCreditsSpent
+    ? params.economyPosture.creditReservePolicy.phase === "opening"
+      ? params.economyPosture.minimumCreditFloor
+      : params.economyPosture.desiredCreditReserve
+    : params.economyPosture.minimumCreditFloor;
   const postRunFloorGap = Math.max(
     0,
-    params.economyPosture.minimumCreditFloor - params.creditsAfterRun,
+    protectedLiquidReserve - params.creditsAfterRun,
   );
   return {
     reason:
@@ -1500,6 +1518,7 @@ function runnerRunTargetFundingNeed(params: {
           : "none",
     routeFundingGap,
     postRunFloorGap,
+    protectedLiquidReserve,
   };
 }
 
@@ -1595,11 +1614,9 @@ function runnerRdRunBurnsRemotePressureReserve(params: {
   ) {
     return false;
   }
-  const availableAfterRun =
-    params.creditsAfterRun + (policy.convertibleBankCredits ?? 0);
   return (
-    (policy.availableCreditPool ?? 0) < (policy.pressureRunwayTarget ?? 0) ||
-    availableAfterRun < (policy.remotePressureReserve ?? 0)
+    policy.liquidCredits < (policy.pressureRunwayTarget ?? 0) ||
+    params.creditsAfterRun < (policy.remotePressureReserve ?? 0)
   );
 }
 

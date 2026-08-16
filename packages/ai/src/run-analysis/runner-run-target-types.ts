@@ -223,8 +223,9 @@ export type RunnerCreditReservePolicy = {
   schemaVersion: 1;
   phase: RunnerCreditReservePhase;
   currentCredits: number;
-  convertibleBankCredits?: number;
-  availableCreditPool?: number;
+  liquidCredits: number;
+  convertibleBankCredits: number;
+  economyTurnCreditCeiling: number;
   minimumCreditFloor: number;
   breakerUseReserve: number;
   contestReserve: number;
@@ -273,11 +274,7 @@ export type RunnerCreditBasePlan = {
 
 export type RunnerPrerunReserveQuote = {
   purpose: "information" | "access" | "multiaccess" | "contest";
-  status:
-    | "not_required"
-    | "satisfied"
-    | "information_probe_only"
-    | "blocked";
+  status: "not_required" | "satisfied" | "information_probe_only" | "blocked";
   riskTolerance: "standard" | "matchpoint_with_stable_universal_coverage";
   knownPathCost: number;
   creditsAfterKnownPath: number;
