@@ -30380,7 +30380,7 @@
     {
       "cardId": "onr_v1_178_short-term-contract",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4ebb2d4e478b0fe2",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2704423cc0f42f38",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:66e4b8e24742b026",
       "hint": {
         "cardId": "onr_v1_178_short-term-contract",
         "side": "runner",
@@ -30393,6 +30393,13 @@
           "click_for_credits_when_safe"
         ],
         "valueHints": { "economy": 3 },
+        "actionPlanOwnerBindings": [
+          {
+            "capabilityKey": "abilities_activated_runner_main_take_hosted_credits",
+            "owner": "runner.credit_bank",
+            "route": "cash_out"
+          }
+        ],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_activated_runner_main_take_hosted_credits",
