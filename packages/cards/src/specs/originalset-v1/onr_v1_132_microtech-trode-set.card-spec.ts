@@ -61,6 +61,15 @@ export const cardSpec = {
         kind: "plan_role",
         role: "build_rig",
       },
+      {
+        kind: "plan_role",
+        role: "survive_net_damage",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "break_cost_penalty",
+        severity: "medium",
+      },
     ],
     capabilities: [],
   },

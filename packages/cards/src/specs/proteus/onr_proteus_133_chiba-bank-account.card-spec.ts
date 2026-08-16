@@ -78,7 +78,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "emergency_payment",
       },
       {
         kind: "tactic_interpretation",

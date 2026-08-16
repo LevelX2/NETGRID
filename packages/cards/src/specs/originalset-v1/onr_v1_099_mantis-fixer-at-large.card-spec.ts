@@ -74,7 +74,7 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "recover_rig",
+        role: "draw_for_answers",
       },
     ],
     capabilities: [

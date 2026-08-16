@@ -78,11 +78,6 @@ export const cardSpec = {
         lineKey: "runner.rnd_pressure",
         support: "supports",
       },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
-      },
     ],
     capabilities: [],
   },

@@ -96,6 +96,10 @@ export const cardSpec = {
         role: "engine_anchor",
       },
       {
+        kind: "strategy_anchor",
+        strategyKey: "corp.economy_rez_reserve",
+      },
+      {
         kind: "line_support",
         lineKey: "corp.economy_rez_reserve",
         support: "supports",
@@ -124,6 +128,11 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "temporary_credit_drawback",
+        severity: "medium",
       },
     ],
     capabilities: [],

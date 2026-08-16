@@ -103,6 +103,11 @@ export const cardSpec = {
         risk: "reserve_risk",
         severity: "medium",
       },
+      {
+        kind: "risk_interpretation",
+        risk: "loss_condition",
+        severity: "high",
+      },
     ],
     capabilities: [
       {

@@ -55,6 +55,11 @@ export const cardSpec = {
       },
     ],
   },
+  planningAnnotations: {
+    schemaVersion: "card-planning-annotations-v1",
+    card: [{ kind: "plan_role", role: "tax_corp_rez" }],
+    capabilities: [],
+  },
   printings: [
     {
       schemaVersion: "printing-spec-v1",

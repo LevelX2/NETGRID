@@ -1416,9 +1416,166 @@ describe("generic typed CardSpec AI translators", () => {
       "onr_v1_289_edgerunner-inc-temps",
       "onr_proteus_071_raymond-ellison",
       "onr_proteus_128_airport-locker",
-    ])
-      expect(fullHint(cardId).targetProfiles?.[0]?.avoid ?? []).not.toContain(
-        "hidden_info_dependent_choice",
+    ]) {
+      const profile = fullHint(cardId).targetProfiles?.[0];
+      expect(
+        profile !== undefined && "avoid" in profile ? profile.avoid : [],
+      ).not.toContain("hidden_info_dependent_choice");
+    }
+  });
+
+  it("keeps Batch 14 roles, restricted resources, and liabilities mechanically exact", () => {
+    const fullHint = (cardId: string) => {
+      const entry = cardSpecPlanningCards().find(
+        (candidate) => candidate.definition.id === cardId,
       );
+      if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
+      return deriveCardSpecAiHint(entry);
+    };
+
+    const weefle = fullHint("onr_proteus_127_weefle-initiation");
+    expect(weefle.planRoles).toContain("safe_probe_run");
+    expect(weefle.planRoles).not.toContain("pressure_rnd");
+    expect(weefle.functionSignals).toContain("defense.run_damage_prevention");
+    expect(weefle.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "damage_prevention",
+        target: "run.damage_prevention_pool",
+        amount: 7,
+      }),
+    );
+
+    const totalGenetic = fullHint("onr_v1_116_total-genetic-retrofit");
+    expect(totalGenetic.planRoles).toContain("recover_from_tags");
+    expect(totalGenetic.functionSignals).toEqual(
+      expect.arrayContaining([
+        "tag.removal",
+        "defense.tag_prevention",
+        "defense.next_tag_prevention",
+      ]),
+    );
+    expect(totalGenetic.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "tag_prevention",
+        target: "avoid_next_tag",
+        amount: 1,
+      }),
+    );
+
+    const marionette = fullHint("onr_proteus_029_marionette");
+    expect(marionette.strategyAnchors).toBeUndefined();
+    expect(marionette.functionSignals).toContain(
+      "corp_ice.self_bounce_or_maintenance_drawback",
+    );
+    expect(marionette.riskTags).toContain("self_bounce_or_maintenance_cost");
+    expect(marionette.riskTags).not.toContain("start_run_reposition");
+
+    const loan = fullHint("onr_v1_168_loan-from-chiba");
+    expect(loan.riskTags).toContain("loss_condition");
+    expect(loan.functionSignals).toEqual(
+      expect.arrayContaining([
+        "risk.debt_loss_condition",
+        "risk.lose_game_debt",
+      ]),
+    );
+
+    const omniscience = fullHint("onr_v1_333_omniscience-foundation");
+    expect(omniscience.actionStrategySupportPairs).toContainEqual(
+      expect.objectContaining({
+        role: "enabler",
+        evidence: ["tactic_signal_anchor:tag.additional_source"],
+      }),
+    );
+    expect(omniscience.actionStrategySupportPairs).not.toContainEqual(
+      expect.objectContaining({
+        evidence: ["tactic_signal_anchor:tag.source"],
+      }),
+    );
+
+    const falseEcho = fullHint("onr_v1_026_false-echo");
+    expect(falseEcho.planRoles).toContain("tax_corp_rez");
+    expect(falseEcho.functionSignals).toEqual(
+      expect.arrayContaining([
+        "economy.corp_credit_denial",
+        "ice.force_rez",
+        "info.ice_recon",
+      ]),
+    );
+    expect(falseEcho.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "rez",
+        target: "force_rez_bound_fort_ice_outermost_inward",
+      }),
+    );
+
+    const governmentContract = fullHint("onr_proteus_059_government-contract");
+    expect(governmentContract.strategyAnchors).toEqual([
+      "corp.economy_rez_reserve",
+    ]);
+    expect(governmentContract.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "finite_economy_pool",
+        target: "economy.corp_install_rez_credit",
+        economyMode: "restricted_credit",
+        amount: 3,
+      }),
+    );
+
+    const leland = fullHint("onr_v1_167_leland-corporate-bodyguard");
+    expect(leland.planRoles).toEqual(
+      expect.arrayContaining(["survive_meat_damage", "avoid_tags"]),
+    );
+    expect(leland.functionSignals).toContain("defense.meat_damage_prevention");
+    expect(leland.functionSignals).not.toContain(
+      "defense.brain_damage_prevention",
+    );
+
+    const chiba = fullHint("onr_proteus_133_chiba-bank-account");
+    expect(chiba.planRoles).toContain("emergency_payment");
+    expect(chiba.effects).toContainEqual(
+      expect.objectContaining({ timing: "payment_window", amount: 4 }),
+    );
+
+    const armageddon = fullHint("onr_proteus_078_armageddon");
+    expect(armageddon.planRoles).toContain("pressure_rnd");
+    expect(armageddon.functionSignals).toEqual(
+      expect.arrayContaining([
+        "access.rnd_replacement",
+        "virus.doom_counter",
+        "install.corp_random_trash",
+        "risk.random_outcome",
+      ]),
+    );
+    expect(armageddon.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "access_replacement",
+          target: "virus.doom_counter",
+        }),
+        expect.objectContaining({
+          kind: "persistent_counter_effect",
+          target: "install.corp_random_trash",
+        }),
+      ]),
+    );
+
+    const trode = fullHint("onr_v1_132_microtech-trode-set");
+    expect(trode.planRoles).toContain("survive_net_damage");
+    expect(trode.functionSignals).toEqual(
+      expect.arrayContaining([
+        "defense.net_damage_prevention",
+        "run.break_cost_penalty",
+        "subroutine.ap_ignore_non_trace_or_net_damage",
+      ]),
+    );
+
+    for (const cardId of [
+      "onr_proteus_044_walking-wall",
+      "onr_proteus_033_mobile-barricade",
+      "onr_classic_013_puzzle",
+      "onr_proteus_085_disintegrator",
+      "onr_proteus_071_raymond-ellison",
+    ])
+      expect(fullHint(cardId).strategyAnchors).toBeUndefined();
   });
 });

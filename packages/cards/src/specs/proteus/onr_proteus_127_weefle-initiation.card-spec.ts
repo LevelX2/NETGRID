@@ -66,7 +66,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "pressure_rnd",
+        role: "safe_probe_run",
       },
       {
         kind: "strategy_anchor",

@@ -1283,11 +1283,8 @@ function typedEffectTiming(
   if (ability.kind === "on_play") return "action";
   if (ability.timing === "access_start") return "on_access";
   if (ability.timing === "corp_start_run_window") return "start_of_run";
-  if (
-    ability.timing === "corp_encounter" ||
-    ability.timing === "runner_cost_penalty_support"
-  )
-    return "during_ice_encounter";
+  if (ability.timing === "corp_encounter") return "during_ice_encounter";
+  if (ability.timing === "runner_cost_penalty_support") return "payment_window";
   if (ability.timing === "during_run" || ability.timing === "corp_during_run")
     return "during_run";
   if (ability.timing === "trace_success_cancel_window") return "trace_success";
@@ -1402,6 +1399,22 @@ function appendGenericAbilityEffect(
       "economy.corp_counter_cashout",
     );
   }
+  if (effect.kind === "gain_temporary_corp_credits") {
+    overlay.effects.push({
+      kind: "finite_economy_pool",
+      scope: "corp",
+      timing,
+      resource: "credits",
+      target: "economy.corp_install_rez_credit",
+      amount: effect.amount,
+      economyMode: "restricted_credit",
+      finite: true,
+    });
+    overlay.functionSignals.push(
+      "economy.corp_install_rez_credit",
+      "risk.temporary_credit_drawback",
+    );
+  }
   if (effect.kind === "draw_cards") {
     overlay.effects.push({
       kind: "draw",
@@ -1476,6 +1489,30 @@ function appendGenericAbilityEffect(
       finite: true,
     });
     overlay.functionSignals.push("tag.source");
+  }
+  if (effect.kind === "remove_tags") {
+    overlay.effects.push({
+      kind: "tag_prevention",
+      scope: "runner",
+      timing,
+      resource: "tags",
+      target: "remove_tags",
+      ...(effect.mode === "all" ? {} : { amount: effect.amount }),
+      finite: true,
+    });
+    overlay.functionSignals.push("tag.removal");
+  }
+  if (effect.kind === "avoid_next_tag") {
+    overlay.effects.push({
+      kind: "tag_prevention",
+      scope: "runner",
+      timing,
+      resource: "tags",
+      target: "avoid_next_tag",
+      amount: effect.amount,
+      finite: true,
+    });
+    overlay.functionSignals.push("defense.next_tag_prevention");
   }
   if (effect.kind === "trash_source") {
     overlay.effects.push({
@@ -1926,6 +1963,18 @@ function appendMakeRunProjection(
       ? `run.${effect.target.server === "rd" ? "rnd" : effect.target.server}`
       : "run.any_server",
   );
+  if (effect.damagePreventionPool !== undefined) {
+    overlay.effects.push({
+      kind: "damage_prevention",
+      scope: "runner",
+      timing: "during_run",
+      resource: "damage",
+      target: "run.damage_prevention_pool",
+      amount: effect.damagePreventionPool,
+      finite: true,
+    });
+    overlay.functionSignals.push("defense.run_damage_prevention");
+  }
   if (
     effect.target.kind === "central_server" &&
     effect.accessServerOverride !== undefined &&
@@ -5112,7 +5161,18 @@ function deriveClosedExtendedRiskTags(
   }
   if (engine.selfRezAdditionalCosts !== undefined)
     risks.add("agenda_point_cost");
-  if (engine.fortRunWindows !== undefined) risks.add("start_run_reposition");
+  for (const window of engine.fortRunWindows ?? []) {
+    if (
+      window.kind === "move_self_to_different_position_on_same_fort" ||
+      window.kind === "move_self_to_outermost_position_on_other_fort"
+    )
+      risks.add("start_run_reposition");
+    if (
+      window.kind === "corp_return_passed_ice_to_hq" &&
+      window.mode === "required_pay_or_return"
+    )
+      risks.add("self_bounce_or_maintenance_cost");
+  }
   if (engine.iceEncounter?.kind === "roll_die_strength_or_derez_auto_pass")
     for (const risk of [
       "deterministic_random",
@@ -5144,8 +5204,16 @@ function deriveClosedExtendedRiskTags(
     for (const risk of ["run_cost_modifier", "tag_synergy"]) risks.add(risk);
   for (const followup of engine.successfulRunFollowups ?? []) {
     risks.add("successful_run");
+    if (followup.kind === "skip_rd_access_add_purgeable_runner_virus_counter")
+      risks.add("access_replacement");
     if (followup.visibility === "hidden_info_barrier") risks.add("hidden_zone");
   }
+  if (
+    engine.virusCounter?.onCorpInstall?.kind ===
+    "roll_per_counter_trash_installed_card_and_remove_counter_on_success"
+  )
+    for (const risk of ["deterministic_random", "random_effect"])
+      risks.add(risk);
   if (engine.characteristics.subtypes.includes("region"))
     for (const risk of ["run_cost_modifier", "region"]) risks.add(risk);
 
@@ -8084,6 +8152,16 @@ function deriveClosedExtendedHintEffects(
                 ),
               }),
         });
+      if (effect.kind === "avoid_next_tag")
+        effects.push({
+          kind: "tag_prevention",
+          scope: "runner",
+          timing: "persistent",
+          resource: "tags",
+          target: "avoid_next_tag",
+          amount: effect.amount,
+          finite: true,
+        });
       if (effect.kind === "private_look")
         effects.push({
           kind: effect.zone === "hq" ? "hq_info" : "topdeck_info",
@@ -8772,13 +8850,36 @@ function appendClosedRunnerLongtailEffects(
         target: "installed_corp_cards",
       },
     );
-  if (utility?.kind === "derez_fully_broken_passed_ice")
+  if (
+    utility?.kind === "derez_fully_broken_passed_ice" ||
+    utility?.kind === "derez_fully_broken_passed_ice_and_end_run"
+  )
     effects.push({
       kind: "rez",
       scope: "ice",
       timing: "encounter_resolution",
       target: "derez",
     });
+  if (utility?.kind === "access_point_subroutine_modifier")
+    effects.push(
+      {
+        kind: "damage_prevention",
+        scope: "runner",
+        timing: "encounter",
+        resource: "net_damage",
+        target: "ap_net_damage_reduction",
+        repeatable: true,
+      },
+      {
+        kind: "run_tax",
+        scope: "runner",
+        timing: "during_run",
+        resource: "credits",
+        target: "run.break_cost_penalty",
+        amount: 1,
+        repeatable: true,
+      },
+    );
   if (utility?.kind === "base_memory_equals_grip_count")
     effects.push({
       kind: "global_modifier",
@@ -8856,7 +8957,38 @@ function appendClosedRunnerLongtailEffects(
           repeatable: true,
         },
       );
+    if (followup.kind === "skip_rd_access_add_purgeable_runner_virus_counter")
+      effects.push({
+        kind: "access_replacement",
+        scope: "rnd",
+        timing: "successful_run",
+        resource: "counters",
+        target: "virus.doom_counter",
+        amount: followup.amount,
+        repeatable: true,
+      });
+    if (followup.kind === "force_rez_ice_outermost_inward_after_successful_run")
+      effects.push({
+        kind: "rez",
+        scope: "ice",
+        timing: "after_successful_run",
+        target: "force_rez_bound_fort_ice_outermost_inward",
+        repeatable: true,
+      });
   }
+
+  if (
+    engine.virusCounter?.onCorpInstall?.kind ===
+    "roll_per_counter_trash_installed_card_and_remove_counter_on_success"
+  )
+    effects.push({
+      kind: "persistent_counter_effect",
+      scope: "corp",
+      timing: "install",
+      resource: "counters",
+      target: "install.corp_random_trash",
+      repeatable: true,
+    });
 
   const event = engine.runnerEventLongtail;
   if (event?.kind === "trash_grip_search_stack_to_grip_equal_count")
@@ -9453,8 +9585,16 @@ function derivedFunctionSignals(
     ])
       signals.add(signal);
   for (const window of engine.fortRunWindows ?? []) {
-    if (window.kind === "move_self_to_outermost_position_on_other_fort")
+    if (
+      window.kind === "move_self_to_different_position_on_same_fort" ||
+      window.kind === "move_self_to_outermost_position_on_other_fort"
+    )
       signals.add("corp_ice.mobile_position_change");
+    if (
+      window.kind === "corp_return_passed_ice_to_hq" &&
+      window.mode === "required_pay_or_return"
+    )
+      signals.add("corp_ice.self_bounce_or_maintenance_drawback");
     if (
       window.kind === "runner_pay_or_end_run_after_passing_ice_on_this_fort"
     ) {
@@ -9522,7 +9662,27 @@ function derivedFunctionSignals(
       "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count"
     )
       signals.add("run.successful_run_grip_reset");
+    if (followup.kind === "skip_rd_access_add_purgeable_runner_virus_counter")
+      for (const signal of ["access.rnd_replacement", "virus.doom_counter"])
+        signals.add(signal);
+    if (followup.kind === "force_rez_ice_outermost_inward_after_successful_run")
+      for (const signal of [
+        "economy.corp_credit_denial",
+        "ice.force_rez",
+        "info.ice_recon",
+      ])
+        signals.add(signal);
   }
+  if (
+    engine.virusCounter?.onCorpInstall?.kind ===
+    "roll_per_counter_trash_installed_card_and_remove_counter_on_success"
+  )
+    for (const signal of [
+      "install.corp_random_trash",
+      "risk.random_outcome",
+      "virus.corp_purge_pressure",
+    ])
+      signals.add(signal);
   for (const access of engine.accessEffects ?? [])
     for (const effect of access.effects) {
       if (
@@ -9559,6 +9719,8 @@ function derivedFunctionSignals(
         ])
           signals.add(signal);
       if (effect.kind === "remove_tags") signals.add("tag.removal");
+      if (effect.kind === "avoid_next_tag")
+        signals.add("defense.next_tag_prevention");
     }
   const pumpAbility = engine.icebreakerAbilities?.find(
     (ability) => ability.kind === "increase_strength",
@@ -9598,8 +9760,18 @@ function derivedFunctionSignals(
       "info.hq_information",
     ])
       signals.add(signal);
-  if (runnerUtilityKind === "derez_fully_broken_passed_ice")
+  if (
+    runnerUtilityKind === "derez_fully_broken_passed_ice" ||
+    runnerUtilityKind === "derez_fully_broken_passed_ice_and_end_run"
+  )
     signals.add("ice.derez");
+  if (runnerUtilityKind === "access_point_subroutine_modifier")
+    for (const signal of [
+      "defense.net_damage_prevention",
+      "run.break_cost_penalty",
+      "subroutine.ap_ignore_non_trace_or_net_damage",
+    ])
+      signals.add(signal);
   if (runnerUtilityKind === "base_memory_equals_grip_count")
     signals.add("setup.memory");
   const runnerEventKind = engine.runnerEventLongtail?.kind;
@@ -9753,12 +9925,14 @@ function derivedFunctionSignals(
     }
     if (engine.damagePreventionSources !== undefined)
       for (const source of engine.damagePreventionSources)
-        for (const damageType of source.damageTypes)
-          signals.add(
-            damageType === "net"
-              ? "defense.net_damage_prevention"
-              : "defense.brain_damage_prevention",
-          );
+        for (const damageType of source.damageTypes) {
+          if (damageType === "net")
+            signals.add("defense.net_damage_prevention");
+          if (damageType === "meat")
+            signals.add("defense.meat_damage_prevention");
+          if (damageType === "core")
+            signals.add("defense.brain_damage_prevention");
+        }
     for (const source of engine.tagPreventionSources ?? []) {
       signals.add("defense.tag_prevention");
       if (source.cost.kind === "credit_and_forgo_next_action")
@@ -10280,11 +10454,11 @@ function derivedActionStrategyEvidence(
   ) {
     expectedAnchor = "tag.source";
     expectedRole = "anchor_evidence";
-  } else if (
-    kind === "encounter_tag" ||
-    kind === "runner_draw_tax_tag" ||
-    kind === "end_turn_tag_if_runner_received_tag"
-  ) {
+  } else if (kind === "end_turn_tag_if_runner_received_tag") {
+    expectedAnchor = "tag.additional_source";
+    expectedRole = "enabler";
+    expectedStrategies = new Set(["corp.tag_trace_punish"]);
+  } else if (kind === "encounter_tag" || kind === "runner_draw_tax_tag") {
     expectedAnchor = "tag.source";
     expectedRole = "anchor_evidence";
     expectedStrategies = new Set(["corp.tag_trace_punish"]);

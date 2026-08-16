@@ -62,11 +62,7 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        role: "ice_control",
       },
     ],
     capabilities: [],

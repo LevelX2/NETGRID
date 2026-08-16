@@ -99,6 +99,7 @@ export const KNOWN_HINT_EFFECT_TIMINGS = [
   "start_of_run",
   "during_run",
   "during_ice_encounter",
+  "payment_window",
   "on_access",
   "on_rez",
   "persistent",

@@ -56,7 +56,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "credit_swing",
       },
       {
         kind: "strategic_exchange",
@@ -71,6 +71,11 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "economy",
         rating: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "agenda_point_cost",
+        severity: "high",
       },
     ],
     capabilities: [],
