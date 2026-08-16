@@ -1,6 +1,6 @@
 # CardSpec-Zufallsreview Batch 14 – Umsetzungsprozess
 
-Status: in Arbeit  
+Status: abgeschlossen und zur lokalen Integration nach `main` verifiziert
 Quelle: Nutzerbericht „NETGRID – CardSpec-Zufallsreview Batch 14: Findings“, Stand 2026-08-16  
 Ausgangsbranch: `main` auf `00a3a635a`
 
@@ -106,3 +106,49 @@ Genau ein Paket ist aktiv. Jedes Paket endet mit fokussierter Prüfung, `git dif
 - Relevante Checks sind grün oder ein unabhängiger Baseline-Blocker ist exakt dokumentiert.
 - Der Arbeitsbranch ist lokal nach `main` integriert.
 - Worktree und Arbeitsbranch sind verifiziert entfernt.
+
+## Tatsächliche Disposition
+
+### Bestätigt und umgesetzt
+
+- Die sechs eindeutigen Quelltextkorrekturen wurden für Dwarf, Databroker, Codeslinger, Raptor, Wilson und Day Shift übernommen.
+- Fest gebundene Ziele besitzen bei False Echo und Disintegrator kein TargetProfile mehr. Mobile ICE verwenden eine Positionschoice innerhalb des Forts. Actor-private Such-, HQ-, Hosting- und Verteilungsentscheidungen wurden bei Afreet, Mantis, Pavit Bharat, Edgerunner Temps, Raymond Ellison, Project Consultants und Airport Locker auf ihre tatsächlichen Choice-Owner ausgerichtet.
+- Weefle Initiation ist nicht mehr als R&D-spezifisch klassifiziert. Der typisierte Run-Vertrag projiziert nun seinen sieben Punkte großen Damage-Prevention-Pool.
+- Omniscience Foundation ist Additional-Tag-Enabler statt initiale Tagquelle. Marionette, Walking Wall, Mobile Barricade und Puzzle verankern keine Glacier-Strategie mehr; Marionettes Maintenance-/Bounce-Risiko wird aus dem Fort-Run-Window abgeleitet.
+- Total Genetic Retrofit projiziert Tag-Clear und die zukünftige Vermeidung des nächsten Tags als getrennte Effekte. Leland projiziert Meat- statt fälschlich Brain-Damage-Prävention und zusätzlich Tag-Prevention. Microtech ’Trode Set projiziert AP-/Net-Damage-Schutz und den zusätzlichen Breakpreis.
+- False Echo projiziert den bereits gebundenen Force-Rez-Effekt als Corp-Credit-Denial und ICE-Recon. Armageddon projiziert R&D-Access-Replacement, Doom-Counter, probabilistischen Installations-Trash und Purge-Druck.
+- Government Contract besitzt konsistent einen echten Rez-Reserve-Anker und ausschließlich temporäre Install-/Rez-Credits. Raymond Ellison bleibt Support und trägt Counter-, Self-Trash- und Ablaufkosten. Chiba Bank Account ist ein reaktives Zahlungsfenster statt frei verfügbare Economy. Databroker und Loan from Chiba tragen ihre hohen Punkt- beziehungsweise Lose-game-Risiken ausdrücklich.
+- Deep Thoughts sachfremde Economy-Achse, Mantis’ falsche Recovery-Rolle und Disintegrators Run-Event-Anker wurden entfernt beziehungsweise ersetzt.
+
+### Bewusst nicht zusätzlich geändert
+
+- Marine Arcology benötigt keine Handannotation: Der typisierte Fähigkeitspreis enthält bereits zwei Aktionen, der Hint trennt Action-Economy und scored-agenda action. Eine zusätzliche Opportunity-Cost-Taxonomie wäre redundant.
+- Total Genetic Retrofit erhielt keinen manuellen Planning-Block; die wiederverwendbare Lösung liegt im generischen `remove_tags`-/`avoid_next_tag`-Compilervertrag.
+- Deep Thoughts R&D-Strategieanker bleibt erhalten, weil die installierte Karte tatsächlich eine wiederholbare R&D-Informationsengine aufbaut.
+- Weefle Initiations Run-Event-Tempo-Anker bleibt erhalten, weil die Karte selbst einen geschützten Run erzeugt; nur die unzulässige R&D-Bindung wurde entfernt.
+- Government Contract wurde nicht zu bloßem Support degradiert: Als wiederholt advancebare Quelle wandelt es Counter in einen klar abgegrenzten Install-/Rez-Reservepool um und erfüllt damit den vorhandenen Engine-Anchor-Vertrag.
+- Airport Lockers Breaker-Tutor-Anker bleibt erhalten. Die Auswahl wurde aber auf jedes nach aktuellem Plan wertvolle Programm erweitert, wie es der Kartentext erlaubt.
+
+## Commits
+
+- `dc093defc` – `docs(cards): plan batch 14 review fixes`
+- `a2194bca5` – `fix(cards): normalize batch 14 canonical credit text`
+- `d80a67d86` – `fix(cards): align batch 14 target semantics`
+- `8a87abcd0` – `fix(cards): refine batch 14 planning semantics`
+
+## Verifikation
+
+Grün:
+
+- CardSpec-/Registry-/Planning-/Compatibility-Tests: 4 Dateien, 88 Tests.
+- Fokussierte generische Hint-Compiler-Suite: 35 Tests.
+- `@netgrid/cards` Typecheck.
+- Generiertes CardSpec-Hint-Artefakt aktuell (`check:card-spec-ai-hints`).
+- AI-Hint-Metadatenvertrag, AI-Source-Structure und Source-Reachability.
+- `git diff --check`.
+
+Unabhängige Baseline-Blocker, nicht durch Batch 14 verursacht:
+
+- `@netgrid/ai` Typecheck: bestehende Optionalitätsstelle `modifier.appliesToRunner` sowie vier lokal fehlende Migration-Report-JSONs.
+- `check:ai-generic-card-id-guards`: sechs bereits vorhandene, von Batch 14 unberührte Card-ID-Verstöße in Resident-/Runtime-/Choice-Code.
+- Der bestehende Action-Strategy-Owner-Test erwartet noch 48 Originalset-Bindungen, während der aktuelle Main-Stand nach den vorangegangenen Bereinigungen 41 besitzt; das Batch-14-spezifische Additional-Tag-Binding ist separat fokussiert abgedeckt.
