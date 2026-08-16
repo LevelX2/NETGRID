@@ -292,7 +292,7 @@ function PublicGameCard({
             </p>
           ) : null}
         </div>
-        <code title={entry.matchId}>{shortMatchId(entry.matchId)}</code>
+        <code title={entry.matchId}>{entry.matchId}</code>
       </div>
       <div className="publicGameFooter">
         <span>Aktualisiert {formatTime(entry.updatedAt)}</span>
@@ -424,10 +424,6 @@ function winnerLabel(entry: PublicMatchEntry): string {
     return "Unentschieden";
   }
   return "beendet";
-}
-
-function shortMatchId(matchId: string): string {
-  return matchId.length > 16 ? `${matchId.slice(0, 16)}…` : matchId;
 }
 
 function formatTime(value: string): string {
