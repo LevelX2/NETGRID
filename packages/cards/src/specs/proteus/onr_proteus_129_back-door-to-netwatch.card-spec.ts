@@ -81,11 +81,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "trace_defense",
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "avoid_traces",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "one_shot_trace_cancel_source",
+        severity: "high",
       },
     ],
     capabilities: [],

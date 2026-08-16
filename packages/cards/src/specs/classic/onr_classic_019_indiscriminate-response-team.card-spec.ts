@@ -58,15 +58,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_scoring_remote",
-      },
-      {
-        kind: "plan_role",
-        role: "protect_hq",
-      },
-      {
-        kind: "plan_role",
-        role: "protect_rnd",
+        role: "runner_hand_disruption",
       },
       {
         kind: "strategic_role",
@@ -92,18 +84,8 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "draw.card",
-        use: "draw.card",
-      },
-      {
-        kind: "tactic_interpretation",
         signal: "punish.payoff",
         use: "punish.payoff",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "remote_root_value",
-        rating: "high",
       },
     ],
     capabilities: [],

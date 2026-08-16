@@ -65,17 +65,33 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_scoring_remote",
+        role: "protect_hq",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
+        kind: "plan_role",
+        role: "protect_rnd",
       },
       {
-        kind: "value_interpretation",
-        axis: "remote_root_value",
-        rating: "medium",
+        kind: "plan_role",
+        role: "protect_remote",
+      },
+      {
+        kind: "strategic_role",
+        role: "tax_tool",
+      },
+      {
+        kind: "line_support",
+        lineKey: "corp.ice_tax_glacier",
+        support: "supports",
+      },
+      {
+        kind: "strategy_support",
+        strategyKey: "corp.ice_tax_glacier",
+        role: "tax_tool",
+        roleDetail: "fort_bound_noisy_breaker_ability_tax",
+        confidence: "medium",
+        rationale:
+          "Taxes Noisy breaker ability use on the installed fort; placement may protect a central or a remote.",
       },
     ],
     capabilities: [],

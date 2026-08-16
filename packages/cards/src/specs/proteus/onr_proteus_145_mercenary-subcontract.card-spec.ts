@@ -65,14 +65,27 @@ export const cardSpec = {
         kind: "plan_role",
         role: "safe_probe_run",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "currently_accessed_card_trash",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        capabilityKey: capabilityKey(
+          "current_access_pay_and_trash_source_free_trash",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "currently_accessed_cards_free_trash",
+            preferences: [
+              "high_value_accessed_card",
+              "denies_corp_agenda_or_combo_piece",
+              "normally_untrashable_payoff",
+              "current_access_only",
+            ],
+            avoid: ["low_value_accessed_card", "access_goal_blocked_after_use"],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

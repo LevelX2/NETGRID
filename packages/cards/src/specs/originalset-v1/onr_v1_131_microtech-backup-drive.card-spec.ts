@@ -86,13 +86,30 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "target_preference",
-        purpose: "preserve_trashed_program_for_recovery",
-        preferences: ["program_repairs_missing_coverage"],
-        avoid: ["low_value_program"],
+        kind: "risk_interpretation",
+        risk: "host_leaves_play_trashes_hosted_programs",
+        severity: "high",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "runner_utility_longtail_replace_installed_program_trash_with_host_on_source",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "preserve_trashed_programs_for_ordered_recovery",
+            preferences: [
+              "best_cards_for_current_plan",
+              "program_repairs_missing_coverage",
+              "currently_used_breaker",
+            ],
+            avoid: ["low_value_program"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

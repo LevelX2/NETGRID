@@ -103,18 +103,30 @@ export const cardSpec = {
         use: "access.punish",
       },
       {
-        kind: "target_preference",
-        purpose: "trash_daemon",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "high",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "access_effects_on_access_trash_installed_runner_cards",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "trash_high_value_daemon",
+            preferences: [
+              "high_install_cost_or_memory",
+              "central_or_remote_plan_enabler",
+              "best_cards_for_current_plan",
+            ],
+            avoid: ["low_value_program"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

@@ -79,14 +79,6 @@ export const cardSpec = {
         strategyKey: "runner.hq_pressure",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.interface_closeout",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
-      },
-      {
         kind: "line_support",
         lineKey: "runner.hq_pressure",
         support: "supports",
@@ -94,6 +86,11 @@ export const cardSpec = {
       {
         kind: "line_support",
         lineKey: "runner.interface_closeout",
+        support: "supports",
+      },
+      {
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
         support: "supports",
       },
     ],
