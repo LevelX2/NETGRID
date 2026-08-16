@@ -104,18 +104,31 @@ export const cardSpec = {
         rationale: "Repeats an ICE subroutine; R&D trash is the cost risk.",
       },
       {
-        kind: "target_preference",
-        purpose: "repeat_subroutine_on_fort_ice",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("during_run_trash_rd_and_copy_subroutine"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "repeat_subroutine_on_fort_ice",
+            preferences: [
+              "repeat_high_damage_subroutine",
+              "repeat_program_trash_subroutine",
+              "repeat_hardware_trash_subroutine",
+              "repeat_dangerous_tag_subroutine",
+              "repeat_end_the_run_subroutine",
+              "adds_relevant_encounter_tax",
+            ],
+            avoid: ["insufficient_post_payment_reserve"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

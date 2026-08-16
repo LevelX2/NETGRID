@@ -109,18 +109,31 @@ export const cardSpec = {
         threatLevel: "medium",
       },
       {
-        kind: "target_preference",
-        purpose: "choose_hq_ice_for_temporary_encounter",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "fort_run_windows_temporary_hq_ice_encounter_after_successful_run_before_successful_run_finalizes_on_this_fort",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_hq_ice_for_temporary_encounter",
+            preferences: [
+              "blocks_relevant_run_path",
+              "adds_relevant_encounter_tax",
+              "high_run_denial_payoff",
+              "multi_subroutine_ice",
+            ],
+            avoid: ["low_impact_ice", "insufficient_post_payment_reserve"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

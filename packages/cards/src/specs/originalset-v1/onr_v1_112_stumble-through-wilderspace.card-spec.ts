@@ -80,7 +80,23 @@ export const cardSpec = {
         strategyKey: "runner.run_event_tempo",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("abilities_on_play_make_run"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_trace_heavy_run_server",
+            preferences: [
+              "server_relevant_to_current_plan",
+              "blocks_relevant_run_path",
+              "current_run_path_relevance",
+            ],
+            avoid: ["option_with_no_visible_current_payoff"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

@@ -90,8 +90,16 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "host_mu_one_icebreaker_for_spin_chip",
-        preferences: ["hosted_icebreaker_eligible", "installed_icebreaker"],
-        avoid: ["target_would_break_host_limit"],
+        preferences: [
+          "hosted_icebreaker_eligible",
+          "installed_icebreaker",
+          "program_repairs_missing_coverage",
+          "breaker_matching_common_problem_ice",
+        ],
+        avoid: [
+          "target_would_break_host_limit",
+          "critical_rig_or_survival_card",
+        ],
       },
     ],
     capabilities: [],

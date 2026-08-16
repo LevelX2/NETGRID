@@ -91,18 +91,31 @@ export const cardSpec = {
         threatLevel: "medium",
       },
       {
-        kind: "target_preference",
-        purpose: "swap_unrezzed_fort_ice_with_hq_ice",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "fort_run_windows_swap_unrezzed_fort_ice_with_hq_ice_during_run_on_this_fort",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "swap_unrezzed_fort_ice_with_hq_ice",
+            preferences: [
+              "relevant_server_ice",
+              "blocks_relevant_run_path",
+              "adds_relevant_encounter_tax",
+              "protects_agenda_remote",
+            ],
+            avoid: ["irrelevant_server_ice", "low_impact_ice"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

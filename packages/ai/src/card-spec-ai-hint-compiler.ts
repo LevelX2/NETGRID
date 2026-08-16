@@ -6567,6 +6567,21 @@ function deriveClosedExtendedTargetProfile(
       serverScope: "source_fort",
     };
   if (
+    engine.fortRunWindows?.some(
+      (window) =>
+        window.kind === "temporary_hq_ice_encounter_after_successful_run" ||
+        window.kind === "swap_unrezzed_fort_ice_with_hq_ice",
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_use",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+      serverScope: "source_fort",
+    };
+  if (
     engine.abilities?.some((ability) =>
       ability.effects?.some(
         (effect) => effect.kind === "free_rez_installed_ice_with_counters",
@@ -7149,7 +7164,7 @@ function deriveClosedExtendedTargetProfile(
       kind: "use_target",
       timing: "on_use",
       targetType: "card",
-      hiddenInfoPolicy: "public_or_controller_known_only",
+      hiddenInfoPolicy: "current_access_only",
     };
   if (engine.corpUtility?.kind === "trash_runner_resources_if_tagged")
     return {
@@ -9261,9 +9276,7 @@ function derivedFunctionSignals(
           outcome.kind === "unpreventable_meat_damage"
         ) {
           const damageType =
-            outcome.kind === "preventable_damage"
-              ? outcome.damageType
-              : "meat";
+            outcome.kind === "preventable_damage" ? outcome.damageType : "meat";
           signals.add("corp_ice.damage_source");
           signals.add(`corp_ice.${damageType}_damage`);
           signals.add("damage.payoff");

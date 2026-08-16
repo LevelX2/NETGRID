@@ -90,18 +90,28 @@ export const cardSpec = {
         rationale:
           "Operations Semantic Review v2: ice_rez / installment_liability.",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "choose_installment_rez_ice",
-        preferences: [
-          "current_run_path_relevance",
-          "protects_agenda_remote",
-          "high_rez_cost_relief",
+        capabilityKey: capabilityKey("on_play_free_rez_ice_with_term_counters"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_installment_rez_ice",
+            preferences: [
+              "current_run_path_relevance",
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "high_rez_cost_relief",
+            ],
+            avoid: [
+              "irrelevant_server_ice",
+              "insufficient_post_payment_reserve",
+            ],
+          },
         ],
-        avoid: ["irrelevant_server_ice", "hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

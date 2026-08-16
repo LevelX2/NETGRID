@@ -693,4 +693,58 @@ describe("random production-card sample semantic corrections", () => {
       }),
     );
   });
+
+  it("binds Batch 13 target profiles to real controller-known choices", () => {
+    expect(
+      hint("onr_v1_112_stumble-through-wilderspace").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "choose_trace_heavy_run_server",
+        timing: "on_play",
+        targetType: "server",
+        hiddenInfoPolicy: "legal_targets_only",
+      }),
+    );
+    expect(
+      hint("onr_proteus_145_mercenary-subcontract").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "currently_accessed_cards_free_trash",
+        targetType: "card",
+        hiddenInfoPolicy: "current_access_only",
+      }),
+    );
+    expect(hint("onr_v1_358_dr-dreff").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "choose_hq_ice_for_temporary_encounter",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(
+      hint("onr_v1_369_singapore-city-grid").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "swap_unrezzed_fort_ice_with_hq_ice",
+        targetType: "card",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(hint("onr_v1_353_chimera").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "trash_high_value_daemon",
+        targetType: "card",
+        hiddenInfoPolicy: "legal_targets_only",
+      }),
+    );
+    expect(
+      hint("onr_proteus_064_marcel-desoleil").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "repeat_subroutine_on_fort_ice",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+  });
 });
