@@ -63,6 +63,11 @@ function makeHost(legalAction: LegalAction) {
       "onr_v1_346_corprunners-shattered-remains",
       "Corprunner's Shattered Remains",
     ),
+    bizarre: definition(
+      "onr_v1_351_bizarre-encryption-scheme",
+      "Bizarre Encryption Scheme",
+      "upgrade",
+    ),
     daemon: definition("daemon", "Daemon", "program"),
   };
   const cardInstances: Record<string, CardInstance> = {
@@ -73,6 +78,10 @@ function makeHost(legalAction: LegalAction) {
     crybaby: instance("crybaby", definitions.crybaby!.id),
     turbeau: instance("turbeau", definitions.turbeau!.id),
     remains: instance("remains", definitions.remains!.id),
+    bizarre: instance("bizarre", definitions.bizarre!.id, {
+      side: "corp",
+      zone: "rd",
+    }),
     daemon: instance("daemon", definitions.daemon!.id, {
       side: "runner",
       zone: "rig",
@@ -269,7 +278,10 @@ function makeHost(legalAction: LegalAction) {
         cardDefinition.id === definitions.daemon!.id && subtype === "daemon",
       accessEffectsForDefinition: (definitionId) =>
         accessEffects[definitionId] ?? [],
-      hiddenReplacementLongtailKindForDefinition: () => undefined,
+      hiddenReplacementLongtailKindForDefinition: (definitionId) =>
+        definitionId === definitions.bizarre!.id
+          ? "delayed_agenda_access_replacement"
+          : undefined,
     },
     damage: {
       resolveDamageOperation: (type, amount, source) => {
@@ -384,6 +396,26 @@ function accessAction(cardId: string, serverId = "rd"): LegalAction {
 }
 
 describe("access effect handlers", () => {
+  it("does not activate Bizarre Encryption Scheme when accessed from R&D", () => {
+    const action = accessAction("bizarre");
+    const { host, state } = makeHost(action);
+    state.corp.rd = ["bizarre" as CardInstanceId];
+    state.run = {
+      ...state.run!,
+      accessedCardId: "bizarre" as CardInstanceId,
+      attackedServerId: "rd",
+    };
+
+    const result = handleAccessEffectsForCard(
+      host,
+      "bizarre" as CardInstanceId,
+    );
+
+    expect(result.handled).toBe(false);
+    expect(state.run.runDurationEffects).toBeUndefined();
+    expect(action.payload).toEqual({ serverId: "rd" });
+  });
+
   it("dispatches Setup damage through the damage callback", () => {
     const action = accessAction("setup", "remote_1");
     const { host, calls, state } = makeHost(action);

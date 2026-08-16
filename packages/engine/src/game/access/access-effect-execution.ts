@@ -242,12 +242,24 @@ export function resolveCardImplementationAccessEffects(
       "CardImplementation-Access-Effekt darf nur aus einem legalen Access-Fenster ausloesen.",
     );
   }
+  const accessZone = cardImplementationAccessZone(host, cardId);
   if (
     hiddenReplacementLongtail === "delayed_agenda_access_replacement" &&
-    host.state.run
+    host.state.run &&
+    accessZone === "installed"
   ) {
     const run = host.state.run;
     const serverId = run.breach?.serverId ?? run.attackedServerId;
+    const sourceZone = host.cards.mustInstance(cardId).zone;
+    if (
+      sourceZone.side !== "corp" ||
+      sourceZone.zone !== "serverRoot" ||
+      sourceZone.serverId !== serverId ||
+      !serverId.startsWith("remote_")
+    )
+      throw new Error(
+        "Der verzögerte Agenda-Access-Effekt stammt nicht aus dem angegriffenen Remote.",
+      );
     const existing = run.runDurationEffects ?? [];
     if (
       !existing.some(
@@ -273,7 +285,6 @@ export function resolveCardImplementationAccessEffects(
       delayedAgendaAccessReplacementActive: true,
     };
   }
-  const accessZone = cardImplementationAccessZone(host, cardId);
   for (const [effectIndex, effect] of accessEffects.entries()) {
     if ((effect.ignoreIfAccessedFrom ?? []).includes(accessZone)) {
       setAccessEffectBasePayload(legalAction, definition, accessZone, effect);

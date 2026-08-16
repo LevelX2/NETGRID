@@ -163,6 +163,42 @@ describe("R&D Express selfplay runtime regressions", () => {
     30_000,
   );
 
+  it("keeps the next R&D multiaccess target current after declining trash", () => {
+    const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    const summary = simulateStandardGame({
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "rd-express-corp-panel-08",
+      maxActions: 266,
+      captures,
+    });
+    const failingCapture = captures.find(
+      (capture) => capture.state.stateVersion === 265,
+    );
+    resetResidentPlanPortfolioMemory();
+    const failingDecision = failingCapture
+      ? chooseAiAction(failingCapture.input, {
+          persistTacticalPlanMemory: false,
+        })
+      : undefined;
+
+    expect(
+      summary.errors,
+      JSON.stringify(
+        {
+          captures: captures
+            .filter((capture) => capture.state.stateVersion >= 263)
+            .map(captureDiagnostic),
+          failingDecision,
+        },
+        undefined,
+        2,
+      ),
+    ).toEqual([]);
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.metrics.illegalActions).toBe(0);
+    expect(summary.replayOk).toBe(true);
+  }, 30_000);
+
   it("finishes the former Manhunt action-limit seed", () => {
     const summary = simulateStandardGame({
       corpDeckId: "standard_corp_manhunt_pressure_bureau",
