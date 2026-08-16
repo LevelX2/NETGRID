@@ -522,6 +522,14 @@ function currentNeedForCard(
   const intent = params.strategicIntent;
   const setupEngine = new Set(intent?.setupEngine ?? []);
   const credits = params.input.playerView.own.credits;
+  const removesCurrentTags = context.matchingCandidates.some(
+    (candidate) =>
+      candidate.tagEffectProfile?.kind === "remove_tags" &&
+      candidate.tagEffectProfile.acuteTagRemoval,
+  );
+  if (removesCurrentTags) {
+    return params.input.playerView.own.tags > 0 ? "acute" : "none";
+  }
   if (
     role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context) &&

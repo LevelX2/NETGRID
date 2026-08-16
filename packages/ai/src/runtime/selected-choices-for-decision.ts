@@ -488,6 +488,22 @@ export function selectedChoicesForDecision(
     );
   }
   if (
+    input.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.source === "card_implementation.vacuum_link_rewind"
+  ) {
+    return resolved(
+      selectedRunnerVacuumLinkRewindOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_runner_vacuum_link_rewind",
+    );
+  }
+  if (
     input.side === "corp" &&
     choice.kind === "select_cards" &&
     choice.source.startsWith("v1922.corp_archives_to_hq:")
@@ -668,6 +684,22 @@ export function selectedChoicesForDecision(
     );
   }
   if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("runner.program_install_memory:access:")
+  ) {
+    return resolved(
+      selectedRunnerAccessProgramInstallMemoryOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        dependencies.selectedRunnerProgramInstallTrashOptionIds,
+      ),
+      "runner_access_program_install_memory",
+    );
+  }
+  if (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("p3_56.pass_ice_program_trash") ||
       choice.source.startsWith("card_implementation.active_ice_program_trash"))
@@ -748,6 +780,39 @@ export function selectedChoicesForDecision(
         ),
       ],
       "corp_scored_agenda_start_draw",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("p3_54.delayed_success:")
+  ) {
+    return resolved(
+      selectedCorpDelayedSuccessOptionId(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_corp_delayed_success",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.source.startsWith("classic.satellite_monitors:")
+  ) {
+    return resolved(
+      [
+        selectedCorpSatelliteMonitorsStartOptionId(
+          input,
+          action,
+          choice,
+          selectableOptions,
+        ),
+      ],
+      "corp_satellite_monitors_start",
     );
   }
   if (
@@ -1571,6 +1636,170 @@ function selectedRunnerOptionalChoiceOptionId(
   return passOptionId;
 }
 
+function selectedRunnerAccessProgramInstallMemoryOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  selectProgramIds: SelectedChoicesForDecisionDependencies["selectedRunnerProgramInstallTrashOptionIds"],
+): string[] {
+  const sourceParts = choice.source.split(":");
+  const targetCardId = sourceParts[2];
+  const automaticFreedMemory = Number(sourceParts[3]);
+  const originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
+  const originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  const originalSourceMatch =
+    /^access\.agenda_install_as_runner_program:([^:]+):([0-9]+)$/.exec(
+      originalChoiceSource,
+    );
+  const installedProgramIds = new Set(
+    (input.playerView.own.rig ?? [])
+      .filter((card) => card.type === "program")
+      .map((card) => card.instanceId),
+  );
+  const exactOptions =
+    selectableOptions.length > 0 &&
+    selectableOptions.every(
+      (option) =>
+        typeof option.value === "string" &&
+        option.id === `card_${option.value}` &&
+        installedProgramIds.has(option.value),
+    );
+  const requirement = action.choiceRequirements?.[0];
+  const exactActionBinding =
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === selectableOptions.length &&
+    requirement.optionIds.every(
+      (optionId, index) => optionId === selectableOptions[index]?.id,
+    );
+  const exactWindow =
+    sourceParts.length === 6 &&
+    sourceParts[0] === "runner.program_install_memory" &&
+    sourceParts[1] === "access" &&
+    targetCardId !== undefined &&
+    Number.isInteger(automaticFreedMemory) &&
+    automaticFreedMemory >= 0 &&
+    originalChoiceId.startsWith(`runner.steal_agenda.${targetCardId}.`) &&
+    originalSourceMatch?.[1] === targetCardId &&
+    Number(originalSourceMatch[2]) > 0 &&
+    choice.side === "runner" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === selectableOptions.length &&
+    exactOptions;
+  if (!exactActionBinding || !exactWindow) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Complete accessed-agenda program installation only from the exact Engine continuation, current installed-program option set and matching resolve-choice action.",
+    );
+  }
+  const selectedOptionIds = selectProgramIds(input, choice, selectableOptions);
+  if (selectedOptionIds.length === 0) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The accessed-agenda memory continuation must select the minimal installed-program set that satisfies its encoded memory deficit.",
+    );
+  }
+  return selectedOptionIds;
+}
+
+function selectedRunnerVacuumLinkRewindOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      (instance.moduleId === "runner.convert_run_window" ||
+        instance.moduleId === "runner.pressure_central" ||
+        instance.moduleId === "runner.contest_remote") &&
+      instance.executionState === "executor",
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        vacuumLinkChoiceBinding?: {
+          choiceId?: unknown;
+          actionId?: unknown;
+          selectedOptionId?: unknown;
+          sourceCardInstanceId?: unknown;
+          sourceCardDefinitionId?: unknown;
+          observedAtStateVersion?: unknown;
+        };
+      }
+    | undefined;
+  const binding = executorState?.vacuumLinkChoiceBinding;
+  const resume = selectableOptions.find(
+    (option) =>
+      option.id === "resume_from_rezzed_ice_back" &&
+      option.value === "resume_from_rezzed_ice_back",
+  );
+  const jackOut = selectableOptions.find(
+    (option) => option.id === "jack_out" && option.value === "jack_out",
+  );
+  const [requirement] = action.choiceRequirements ?? [];
+  const exactChoiceId =
+    /^card_implementation\.vacuum_link_rewind:[^:]+:([0-9]+)$/.exec(
+      choice.choiceId,
+    )?.[1] === String(input.playerView.stateVersion);
+  const exactBinding =
+    portfolio?.side === "runner" &&
+    (executorState?.kind === "run_window" ||
+      executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest") &&
+    binding?.choiceId === choice.choiceId &&
+    binding.actionId === action.actionId &&
+    binding.selectedOptionId === resume?.id &&
+    binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
+    binding.sourceCardDefinitionId === choice.sourceCardDefinitionId &&
+    binding.observedAtStateVersion === input.playerView.stateVersion &&
+    executor !== undefined &&
+    exactChoiceId &&
+    choice.side === "runner" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.visibility === "public" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    selectableOptions.length === 2 &&
+    resume !== undefined &&
+    jackOut !== undefined &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === 2 &&
+    requirement.optionIds.includes(resume.id) &&
+    requirement.optionIds.includes(jackOut.id);
+  if (!exactBinding || !resume) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Complete Vacuum Link only from the exact resident Runner run-plan continuation and matching Engine choice payload.",
+    );
+  }
+  return [resume.id];
+}
+
 function validatedChoiceSelection(
   input: AiDecisionInput,
   action: LegalAction,
@@ -1681,6 +1910,153 @@ function selectedCorpScoredAgendaStartDrawChoiceOptionId(
     );
   }
   return rdCount >= 2 ? draw.id : skip.id;
+}
+
+function selectedCorpSatelliteMonitorsStartOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): string {
+  const sourceMatch = /^classic\.satellite_monitors:([^:]+):([0-9]+)$/.exec(
+    choice.source,
+  );
+  const sourceCardId = sourceMatch?.[1];
+  const sourceStateVersion = Number(sourceMatch?.[2]);
+  const sourceCard = sourceCardId
+    ? input.playerView.servers
+        .flatMap((server) => server.root)
+        .find(
+          (card) =>
+            card.instanceId === sourceCardId &&
+            card.known &&
+            card.definitionId === "onr_classic_021_satellite-monitors" &&
+            card.type === "asset" &&
+            card.rezzed === true,
+        )
+    : undefined;
+  const use = selectableOptions.find(
+    (option) => option.id === "use" && option.value === "use",
+  );
+  const decline = selectableOptions.find(
+    (option) => option.id === "decline" && option.value === "decline",
+  );
+  const requirement = action.choiceRequirements?.[0];
+  const exactActionBinding =
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === 2 &&
+    requirement.optionIds.includes("use") &&
+    requirement.optionIds.includes("decline");
+  const exactWindow =
+    sourceCard !== undefined &&
+    sourceStateVersion === input.playerView.stateVersion &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.side === "corp" &&
+    choice.visibility === "public" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    selectableOptions.length === 2 &&
+    use !== undefined &&
+    decline !== undefined;
+  if (!exactActionBinding || !exactWindow || !use) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Resolve Satellite Monitors only from its exact current public Corp start-of-turn card window, installed rezzed source and complete use-or-decline action binding.",
+    );
+  }
+  return use.id;
+}
+
+function selectedCorpDelayedSuccessOptionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "corp.defend_servers" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        delayedSuccessChoiceBinding?: {
+          choiceId?: unknown;
+          actionId?: unknown;
+          selectedOptionId?: unknown;
+          sourceCardInstanceId?: unknown;
+          serverId?: unknown;
+          observedAtStateVersion?: unknown;
+        };
+      }
+    | undefined;
+  const binding = moduleState?.delayedSuccessChoiceBinding;
+  const selectedOption = selectableOptions.find(
+    (option) => option.id === binding?.selectedOptionId,
+  );
+  const sourceMatch =
+    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:hq:([0-9]+)$/.exec(
+      choice.source,
+    );
+  const [requirement] = action.choiceRequirements ?? [];
+  const optionIds = selectableOptions.map((option) => option.id);
+  const exactBinding =
+    portfolio?.side === "corp" &&
+    executor !== undefined &&
+    moduleState?.kind === "defense" &&
+    binding?.choiceId === choice.choiceId &&
+    binding.actionId === action.actionId &&
+    binding.selectedOptionId === selectedOption?.id &&
+    binding.sourceCardInstanceId === sourceMatch?.[1] &&
+    binding.serverId === "hq" &&
+    binding.observedAtStateVersion === input.playerView.stateVersion &&
+    sourceMatch?.[2] === String(input.playerView.stateVersion) &&
+    choice.side === "corp" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    selectedOption !== undefined &&
+    typeof selectedOption.value === "string" &&
+    selectedOption.id === `ice_${selectedOption.value}` &&
+    input.playerView.own.gripOrHq.some(
+      (card) =>
+        card.instanceId === selectedOption.value &&
+        card.known &&
+        card.type === "ice",
+    ) &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !selectedOption) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding and visible HQ-ICE payload.",
+    );
+  }
+  return [selectedOption.id];
 }
 
 function selectedCorpAgendaPurgeInstallTargetOptionIds(

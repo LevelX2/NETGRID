@@ -19,6 +19,7 @@ import { discardKeepScore } from "./runtime/discard-keep-score";
 import { selectedSearchChoiceOptionIds } from "./runtime/search-choice-option";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
+import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -398,6 +399,66 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       "persistent_functional_coverage:damage_prevention",
     );
     expect(evaluation.priority).toBeLessThan(500);
+  });
+
+  it("treats an exact tag-removal action as acute only while tags exist", () => {
+    const mileage = visibleCard("mileage-1", {
+      definitionId: "onr_v1_102_open-ended-mileage-program",
+      title: "Open-Ended Mileage Program",
+      type: "event",
+      cost: 0,
+      rulesText: "Remove a tag, at no cost.",
+    });
+    const action = {
+      ...playEventAction("play-mileage", mileage, 0),
+      payload: {
+        cardId: mileage.instanceId,
+        cardImplementationEffectKind: "remove_tags",
+        cardImplementationTagMode: "amount",
+        cardImplementationTagAmount: 1,
+      },
+    } satisfies LegalAction;
+    const taggedInput = runnerInput({
+      credits: 4,
+      tags: 2,
+      hand: [mileage],
+      legalActions: [action],
+    });
+    const untaggedInput = runnerInput({
+      credits: 4,
+      hand: [mileage],
+      legalActions: [action],
+    });
+    const actionCandidates = buildActionSemanticCandidates({
+      legalActions: [action],
+      visibleSourceDefinitionsByInstanceId: {
+        [mileage.instanceId]: mileage.definitionId!,
+      },
+    });
+
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({ input: taggedInput, actionCandidates }),
+        mileage.instanceId,
+      ),
+    ).toMatchObject({
+      developmentRole: "defense_support",
+      availability: "legal_now",
+      currentNeed: "acute",
+      deferReason: "none",
+    });
+    expect(
+      findByInstance(
+        evaluateRunnerHandDevelopment({
+          input: untaggedInput,
+          actionCandidates,
+        }),
+        mileage.instanceId,
+      ),
+    ).toMatchObject({
+      currentNeed: "none",
+      deferReason: "no_current_need",
+    });
   });
 
   it("treats visible net-damage ICE as a setup need without inventing an acute damage window", () => {

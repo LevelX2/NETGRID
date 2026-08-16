@@ -120,6 +120,61 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
       ),
     ).toEqual(["trash_expendable"]);
   });
+
+  it("completes an accessed-agenda MU continuation with the minimal forced sacrifice", () => {
+    const codecracker = program("codecracker", 1);
+    const corrosion = program("corrosion", 1);
+    const loonyGoon = program("loony_goon", 1);
+    const rig = [codecracker, corrosion, loonyGoon];
+    const cardsById = new Map(rig.map((card) => [card.instanceId, card]));
+    const context = createRunnerProgramInstallTrashContext({
+      safeNonNegativeInteger: (value) => Math.max(0, value ?? 0),
+      visibleMemoryCost: (card) => card?.memoryCost ?? 0,
+      visibleCardsByInstanceId: () => cardsById,
+      visibleBreakerRoleCounts: () =>
+        new Map([
+          ["breaker_codecracker", 1],
+          ["breaker_corrosion", 1],
+          ["breaker_loony_goon", 1],
+        ]),
+      visibleBreakerRoles: (card) => [`breaker_${card.instanceId}`],
+      rolesForCardId: () => [],
+      isRunnerPressureRole: () => false,
+      isRunnerEconomyRole: () => false,
+      visibleCounterValue: () => 0,
+      visibleInstallCost: () => 0,
+    });
+    const input = {
+      side: "runner",
+      playerView: {
+        own: {
+          credits: 0,
+          gripOrHq: [],
+          rig,
+          memoryUsed: 3,
+          memoryLimit: 4,
+        },
+        opponent: { credits: 0 },
+        servers: [],
+      },
+    } as unknown as AiDecisionInput;
+    const options = rig.map((card) => ({
+      id: `card_${card.instanceId}`,
+      label: card.title ?? card.instanceId,
+      value: card.instanceId,
+    }));
+
+    expect(
+      context.selectedRunnerProgramInstallTrashOptionIds(
+        input,
+        {
+          source:
+            "runner.program_install_memory:access:theorem_proof:0:runner.steal_agenda.theorem_proof.theorem_proof:access.agenda_install_as_runner_program%3Atheorem_proof%3A2",
+        } as never,
+        options,
+      ),
+    ).toHaveLength(1);
+  });
 });
 
 function program(instanceId: string, memoryCost: number): VisibleCard {

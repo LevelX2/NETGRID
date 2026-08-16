@@ -18,6 +18,7 @@ import type {
 } from "./plan-kernel-types";
 import type {
   PlanMaterialization,
+  PlanActionDisposition,
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
@@ -156,6 +157,7 @@ export type RunnerDefenseSignals = {
   drawAllowed: boolean;
   handBufferActionIds?: string[];
   forgoUnsafeRunCapacity: boolean;
+  forgoExhaustedStandardCapacity?: boolean;
   discardChoiceBinding?: RunnerDiscardChoiceBinding;
   reactionReserveNeed?: {
     needId: "runner-defense-reaction-reserve";
@@ -537,7 +539,8 @@ type DefenseState = {
     | "build_hand_buffer"
     | "build_reaction_reserve"
     | "discard_window"
-    | "forgo_unsafe_run";
+    | "forgo_unsafe_run"
+    | "forgo_exhausted_options";
   signals: RunnerDefenseSignals;
 };
 type CreditBankState = {
@@ -1315,11 +1318,17 @@ function defenseModule(): PlanModule {
             context.actionCandidates,
             context.input.playerView.stateVersion,
             signals,
+            context.actionDispositions,
           );
       if (!phase) return [];
       const candidates = invalidReactionReserveContract
         ? []
-        : defenseCandidates(context.actionCandidates, phase, signals);
+        : defenseCandidates(
+            context.actionCandidates,
+            phase,
+            signals,
+            context.actionDispositions,
+          );
       return [
         proposal({
           moduleId: "runner.defense_and_recovery",
@@ -1353,6 +1362,7 @@ function defenseModule(): PlanModule {
             context.actionCandidates,
             current.phase,
             current.signals,
+            context.actionDispositions,
           )
         : [];
       const priorityClass = defensePriorityClass(current.signals);
@@ -1370,6 +1380,7 @@ function defenseModule(): PlanModule {
         context.actionCandidates,
         current.phase,
         current.signals,
+        context.actionDispositions,
       );
       return {
         step: {
@@ -1390,7 +1401,21 @@ function defenseModule(): PlanModule {
                   .map((candidate) => candidate.actionId),
               },
             }
-          : {}),
+          : current.phase === "forgo_exhausted_options"
+            ? {
+                earlyEndTurnJustification: {
+                  kind: "forgo_exhausted_runner_capacity" as const,
+                  capacityKind:
+                    "empty_stack_all_voluntary_routes_rejected" as const,
+                  explicitlyNonproductiveActionIds: context.actionCandidates
+                    .filter(
+                      (candidate) =>
+                        candidate.semanticActionType !== "turn_flow.end_turn",
+                    )
+                    .map((candidate) => candidate.actionId),
+                },
+              }
+            : {}),
       };
     },
   };
@@ -2134,6 +2159,7 @@ function defensePhase(
   actionCandidates: readonly ActionSemanticCandidate[],
   stateVersion: number,
   signals: RunnerDefenseSignals,
+  actionDispositions?: readonly PlanActionDisposition[],
 ): DefenseState["phase"] | undefined {
   const openPhases: DefenseState["phase"][] = [];
   if (signals.discardChoiceBinding) openPhases.push("discard_window");
@@ -2153,9 +2179,13 @@ function defensePhase(
   )
     openPhases.push("build_reaction_reserve");
   if (signals.forgoUnsafeRunCapacity) openPhases.push("forgo_unsafe_run");
+  if (signals.forgoExhaustedStandardCapacity)
+    openPhases.push("forgo_exhausted_options");
   return (
     openPhases.find(
-      (phase) => defenseCandidates(actionCandidates, phase, signals).length > 0,
+      (phase) =>
+        defenseCandidates(actionCandidates, phase, signals, actionDispositions)
+          .length > 0,
     ) ?? openPhases[0]
   );
 }
@@ -2164,10 +2194,27 @@ function defenseCandidates(
   actionCandidates: readonly ActionSemanticCandidate[],
   phase: DefenseState["phase"],
   signals: RunnerDefenseSignals,
+  actionDispositions?: readonly PlanActionDisposition[],
 ): PlanMaterialization["candidates"] {
   if (
     phase === "build_hand_buffer" &&
     (signals.handBufferActionIds?.length ?? 0) === 0
+  ) {
+    return [];
+  }
+  if (
+    phase === "forgo_exhausted_options" &&
+    !actionCandidates
+      .filter(
+        (candidate) => candidate.semanticActionType !== "turn_flow.end_turn",
+      )
+      .every((candidate) =>
+        (actionDispositions ?? []).some(
+          (entry) =>
+            entry.actionId === candidate.actionId &&
+            entry.disposition === "explicitly_nonproductive",
+        ),
+      )
   ) {
     return [];
   }
@@ -2179,7 +2226,7 @@ function defenseCandidates(
     .filter((candidate) => {
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
-      if (phase === "forgo_unsafe_run")
+      if (phase === "forgo_unsafe_run" || phase === "forgo_exhausted_options")
         return (
           candidate.semanticActionType === "turn_flow.end_turn" &&
           candidate.sourceKind === "game_rule"
@@ -2275,6 +2322,11 @@ function defenseCapability(
       capabilityId: "forgo_unsafe_restricted_run_capacity",
       semanticActionTypes: ["turn_flow.end_turn"],
     };
+  if (phase === "forgo_exhausted_options")
+    return {
+      capabilityId: "forgo_empty_stack_rejected_option_capacity",
+      semanticActionTypes: ["turn_flow.end_turn"],
+    };
   if (phase === "build_reaction_reserve")
     return {
       capabilityId: "build_damage_reaction_reserve",
@@ -2303,6 +2355,7 @@ function defensePhaseValue(
   if (phase === "clear_tags") return 80;
   if (phase === "clear_persistent_hazard_counter") return 90;
   if (phase === "forgo_unsafe_run") return 60;
+  if (phase === "forgo_exhausted_options") return 10;
   if (phase === "build_reaction_reserve") return 70;
   return 20 + Math.max(0, signals.minimumHandBuffer - signals.handSize) * 120;
 }

@@ -86,8 +86,15 @@ export function createRunnerProgramInstallTrashContext(
     );
     if (!assessment.memoryRequired) return [];
     if (assessment.requiredMemoryToFree <= 0) return [];
-    if (!assessment.canFreeRequiredMemory) return [];
-    return assessment.selectedCandidates
+    const selectedCandidates = choice.source.startsWith(
+      "runner.program_install_memory:",
+    )
+      ? selectedMinimalProgramSacrificeCandidates(
+          assessment.candidates,
+          assessment.requiredMemoryToFree,
+        )
+      : assessment.selectedCandidates;
+    return selectedCandidates
       .map((candidate) => candidate.option?.id)
       .filter((id): id is string => typeof id === "string");
   }
@@ -150,11 +157,21 @@ export function createRunnerProgramInstallTrashContext(
     selectableOptions: PendingChoiceOptions,
   ): RunnerProgramInstallTrashAssessment {
     const sourceParts = choice.source.split(":");
+    const engineMemoryContinuation =
+      choice.source.startsWith("runner.program_install_memory:") &&
+      sourceParts.length === 6
+        ? {
+            kind: sourceParts[1],
+            targetCardId: sourceParts[2] ?? "",
+            automaticFreedMemory: Number(sourceParts[3]),
+            originalChoiceSource: decodeURIComponent(sourceParts[5] ?? ""),
+          }
+        : undefined;
     const sourceCardId = choice.source.startsWith(
       "v1912.delayed_install_memory:",
     )
       ? (sourceParts[2] ?? "")
-      : (sourceParts[1] ?? "");
+      : (engineMemoryContinuation?.targetCardId ?? sourceParts[1] ?? "");
     const source = choice.source.startsWith("v1912.delayed_install_memory:")
       ? input.playerView.specialZones?.setAside.find(
           (card) => card.instanceId === sourceCardId,
@@ -162,10 +179,26 @@ export function createRunnerProgramInstallTrashContext(
       : input.playerView.own.gripOrHq.find(
           (card) => card.instanceId === sourceCardId,
         );
+    const accessMemoryMatch =
+      engineMemoryContinuation?.kind === "access"
+        ? /^access\.agenda_install_as_runner_program:([^:]+):([0-9]+)$/.exec(
+            engineMemoryContinuation.originalChoiceSource,
+          )
+        : undefined;
+    const automaticFreedMemory =
+      typeof engineMemoryContinuation?.automaticFreedMemory === "number" &&
+      Number.isInteger(engineMemoryContinuation.automaticFreedMemory)
+        ? engineMemoryContinuation.automaticFreedMemory
+        : 0;
+    const sourceMemoryCostOverride =
+      accessMemoryMatch?.[1] === sourceCardId
+        ? Math.max(0, Number(accessMemoryMatch[2]) - automaticFreedMemory)
+        : undefined;
     return runnerProgramInstallTrashAssessmentFromCards(
       input,
       source,
       selectableOptions,
+      sourceMemoryCostOverride,
     );
   }
 
@@ -194,6 +227,7 @@ export function createRunnerProgramInstallTrashContext(
     input: AiDecisionInput,
     source: VisibleCard | undefined,
     selectableOptions?: PendingChoiceOptions,
+    sourceMemoryCostOverride?: number,
   ): RunnerProgramInstallTrashAssessment {
     const memoryUsed = dependencies.safeNonNegativeInteger(
       input.playerView.own.memoryUsed,
@@ -201,7 +235,8 @@ export function createRunnerProgramInstallTrashContext(
     const memoryLimit = dependencies.safeNonNegativeInteger(
       input.playerView.own.memoryLimit,
     );
-    const sourceMemoryCost = dependencies.visibleMemoryCost(source);
+    const sourceMemoryCost =
+      sourceMemoryCostOverride ?? dependencies.visibleMemoryCost(source);
     const installedCards = dependencies.visibleCardsByInstanceId(
       input.playerView,
     );

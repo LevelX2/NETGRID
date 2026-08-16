@@ -947,6 +947,54 @@ describe("shared plan scheduler", () => {
     );
   });
 
+  it("accepts early Runner EndTurn for an empty Stack only after every voluntary route is owner-rejected", () => {
+    const credit = candidate("credit");
+    const endTurn = standardEndTurnCandidate();
+    const schedulerContext = context("runner", [credit, endTurn]);
+    schedulerContext.input.playerView.own.clicks = 2;
+    schedulerContext.input.playerView.own.stackOrRdCount = 0;
+    schedulerContext.actionDispositions = [
+      {
+        actionId: credit.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode:
+          "runner_basic_credit_rejected_visible_liquidity_demand_satisfied",
+      },
+    ];
+    const defense = module(
+      "runner",
+      "runner.defense_and_recovery",
+      "P5",
+      endTurn,
+      1,
+      "turn_flow.end_turn",
+    );
+    const baseMaterialize = defense.materialize;
+    defense.materialize = (instance, planAssessment, currentContext) => ({
+      ...baseMaterialize(instance, planAssessment, currentContext),
+      earlyEndTurnJustification: {
+        kind: "forgo_exhausted_runner_capacity",
+        capacityKind: "empty_stack_all_voluntary_routes_rejected",
+        explicitlyNonproductiveActionIds: [credit.actionId],
+      },
+    });
+
+    const result = runPlanScheduler({
+      context: schedulerContext,
+      registry: createSidePlanRegistry({
+        side: "runner",
+        priorityPolicy: RUNNER_PLAN_PRIORITY_POLICY,
+        modules: [defense],
+      }),
+      resolveEngineWindow: () => undefined,
+    });
+
+    expect(result.lane === "plan" && result.route.head.actionId).toBe(
+      endTurn.actionId,
+    );
+  });
+
   it.each([
     ["runner", RUNNER_PLAN_PRIORITY_POLICY],
     ["corp", CORP_PLAN_PRIORITY_POLICY],
