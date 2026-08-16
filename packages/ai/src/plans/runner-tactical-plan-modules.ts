@@ -49,9 +49,11 @@ export type RunnerPressureSignal = {
     installedCopyCount: number;
     selectedCopyOrdinal: number;
     installCost: number;
+    fundingTargetCredits: number;
     runFundingTargetCredits: number;
     totalFundingEnvelope: number;
     fundingGap: number;
+    reserveFundingOptional: boolean;
     horizon: "same_turn" | "bounded_multi_turn";
     milestone: "fund_install" | "install_payoff";
     blocker?: string;
@@ -606,6 +608,23 @@ function centralPressureModule(): PlanModule {
                 : `Execute ${current.signal.purpose} pressure on ${current.signal.serverId}.`,
         },
         candidates,
+        ...(current.signal.routePreparation === "develop_payoff"
+          ? {
+              continuation: {
+                continuationId: `${instance.instanceId}:access-payoff:${current.signal.serverId}`,
+                trigger: "action_applied" as const,
+                nextCapability: {
+                  capabilityId: `pressure_${current.signal.serverId}_access`,
+                  semanticActionTypes: ["run.start"],
+                },
+                target: {
+                  kind: "server" as const,
+                  id: current.signal.serverId,
+                },
+                purpose: `Convert the installed access payoff into pressure on ${current.signal.serverId}.`,
+              },
+            }
+          : {}),
       };
     },
   };

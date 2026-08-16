@@ -161,6 +161,7 @@ export type PlanSchedulerPlanningRouteCandidate = {
   step: PlanRouteStep;
   candidate: ActionSemanticCandidate;
   stepValue: number;
+  dependencyPlanInstanceIds?: string[];
   continuation?: SemanticContinuation;
 };
 
@@ -396,10 +397,27 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
   const candidates: PlanSchedulerPlanningRouteCandidate[] = [];
 
   for (const assessment of supportBindings.assessments) {
-    if (
-      assessment.readiness !== "executable_now" ||
-      supportBindings.ineligibleProviderInstanceIds.has(assessment.instanceId)
-    ) {
+    const prospectiveSupportBindings =
+      assessment.readiness === "executable_with_support"
+        ? supportBindings.providerBindings.filter(
+            (binding) => binding.parentInstanceId === assessment.instanceId,
+          )
+        : [];
+    const executableNow =
+      assessment.readiness === "executable_now" &&
+      !supportBindings.ineligibleProviderInstanceIds.has(assessment.instanceId);
+    const executableAfterExactSupport =
+      prospectiveSupportBindings.length === 1 &&
+      supportBindings.assessments.some(
+        (candidate) =>
+          candidate.instanceId ===
+            prospectiveSupportBindings[0]!.providerInstanceId &&
+          candidate.readiness === "executable_now" &&
+          !supportBindings.ineligibleProviderInstanceIds.has(
+            candidate.instanceId,
+          ),
+      );
+    if (!executableNow && !executableAfterExactSupport) {
       continue;
     }
     const instance = params.portfolio.instances.find(
@@ -444,6 +462,13 @@ export function enumerateCurrentPlanSchedulerRoutes(params: {
         step: structuredClone(materialized.step),
         candidate: structuredClone(entry.candidate),
         stepValue: entry.stepValue,
+        ...(executableAfterExactSupport
+          ? {
+              dependencyPlanInstanceIds: prospectiveSupportBindings.map(
+                (binding) => binding.providerInstanceId,
+              ),
+            }
+          : {}),
         ...(materialized.continuation
           ? { continuation: structuredClone(materialized.continuation) }
           : {}),
@@ -474,6 +499,11 @@ function currentPlanAssessmentState(params: {
 }): {
   assessments: ValidatedPlanAssessment[];
   ineligibleProviderInstanceIds: Set<string>;
+  providerBindings: Array<{
+    providerInstanceId: string;
+    parentInstanceId: string;
+    needId: string;
+  }>;
 } {
   const rawValidatedAssessments = params.portfolio.instances
     .filter((instance) => instance.viability === "ready")
@@ -512,6 +542,7 @@ function currentPlanAssessmentState(params: {
     ),
     ineligibleProviderInstanceIds:
       supportBindings.ineligibleProviderInstanceIds,
+    providerBindings: supportBindings.providerBindings,
   };
 }
 
@@ -522,6 +553,11 @@ function bindExactParentSupport(
 ): {
   assessments: ValidatedPlanAssessment[];
   ineligibleProviderInstanceIds: Set<string>;
+  providerBindings: Array<{
+    providerInstanceId: string;
+    parentInstanceId: string;
+    needId: string;
+  }>;
 } {
   const assessmentByInstanceId = new Map(
     assessments.map((assessment) => [assessment.instanceId, assessment]),
@@ -614,6 +650,18 @@ function bindExactParentSupport(
   return {
     assessments: decorated,
     ineligibleProviderInstanceIds,
+    providerBindings: [...exactBindings.entries()]
+      .map(([providerInstanceId, binding]) => ({
+        providerInstanceId,
+        parentInstanceId: binding.parent.instanceId,
+        needId: binding.needId,
+      }))
+      .sort(
+        (left, right) =>
+          left.parentInstanceId.localeCompare(right.parentInstanceId) ||
+          left.needId.localeCompare(right.needId) ||
+          left.providerInstanceId.localeCompare(right.providerInstanceId),
+      ),
   };
 }
 
