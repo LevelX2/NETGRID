@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "A, [T], 1 agenda point: Gain 10 credits.",
+    rulesText: "A, [T], 1 agenda point: Gain [10].",
   },
   rules: {
     schemaVersion: "card-rules-v1",

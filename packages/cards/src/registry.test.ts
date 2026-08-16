@@ -580,6 +580,29 @@ describe("CardRegistry", () => {
     );
   });
 
+  it("preserves Batch 14 credit symbols in canonical card text", () => {
+    const text = (cardId: string) =>
+      cardSpecForDefinitionId(ROOT_REGISTRY, cardId as CardDefinitionId)!.text
+        .rulesText;
+
+    expect(text("onr_v1_021_dwarf")).toBe(
+      "[1]: Break wall subroutine.\n[1]: +1 strength.",
+    );
+    expect(text("onr_v1_159_databroker")).toContain("Gain [10].");
+    expect(text("onr_v1_015_codeslinger")).toBe(
+      "[1]: Break sentry subroutine.",
+    );
+    expect(text("onr_v1_054_raptor")).toBe(
+      "[2]: Break sentry subroutine.\n[1]: +1 strength.",
+    );
+    expect(text("onr_v1_187_wilson-weeflerunner-apprentice")).toContain(
+      "cannot spend more than [3]",
+    );
+    expect(text("onr_v1_288_day-shift")).toBe(
+      "Draw two cards and gain [1].",
+    );
+  });
+
   it("preserves Mastiff's printed Trace 5 in canonical card text", () => {
     const mastiff = cardSpecForDefinitionId(
       ROOT_REGISTRY,

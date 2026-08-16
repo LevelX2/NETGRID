@@ -13,7 +13,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Each of your turns, you may choose to gain an action, which you may use only to make a run. You cannot spend more than 3 credits during that run to pay for using icebreakers or increasing your link. Use this ability only once per turn and only during your turn.\n[T]: Avoid receiving a tag.\n[T]: Prevent any amount of meat damage.",
+      "Each of your turns, you may choose to gain an action, which you may use only to make a run. You cannot spend more than [3] during that run to pay for using icebreakers or increasing your link. Use this ability only once per turn and only during your turn.\n[T]: Avoid receiving a tag.\n[T]: Prevent any amount of meat damage.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "1 credit: Break sentry subroutine.",
+    rulesText: "[1]: Break sentry subroutine.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
