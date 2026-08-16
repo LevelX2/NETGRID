@@ -3,7 +3,7 @@
   "catalogId": "netgrid-standard-decks-1.0.0",
   "version": "1.0.0",
   "status": "active",
-  "curatedAt": "2026-08-03",
+  "curatedAt": "2026-08-15",
   "decks": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -3606,8 +3606,8 @@
         "sourceDeckVersion": "0.6.0-local"
       }
     },
-      {
-        "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
+    {
+      "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
       "version": "1.0.0",
       "status": "active",
       "name": "Krashkurs: Clown-Kreditmaschine",
@@ -3699,125 +3699,125 @@
           "quantity": 2
         }
       ],
-        "source": {
-          "kind": "curated_local_deck",
-          "sourceDeckId": "local_runner_krashkurs_clown_kreditmaschine_2026_07_11",
-          "sourceDeckVersion": "1.0.0-local-baseline-2026-07-11"
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_krashkurs_clown_kreditmaschine_2026_07_11",
+        "sourceDeckVersion": "1.0.0-local-baseline-2026-07-11"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_last_call_at_rd",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Last Call at R&D",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_017_deep-thought",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_045_newsgroup-filter",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_054_raptor",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_074_worm",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_075_zetatech-software-installer",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_076_all-nighter",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_086_forged-activation-orders",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_123_bodyweight-data-creche",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_145_wutech-mem-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_165_junkyard-bbs",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_174_rigged-investments",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_177_the-short-circuit",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_178_short-term-contract",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_179_silicon-saloon-franchise",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_184_top-runners-conference",
+          "quantity": 3
         }
-      },
-      {
-        "standardDeckId": "standard_runner_last_call_at_rd",
-        "version": "1.0.0",
-        "status": "active",
-        "name": "Last Call at R&D",
-        "side": "runner",
-        "identityCardId": "runner_identity_001",
-        "cardPoolSnapshotId": "card-snapshot-0.8",
-        "cardPoolVersion": "private-local-onr-v1",
-        "formatProfileId": "netgrid_private_local_v1",
-        "formatProfileVersion": "1.3.0",
-        "cards": [
-          {
-            "cardId": "onr_v1_014_codecracker",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_017_deep-thought",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_045_newsgroup-filter",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_054_raptor",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_074_worm",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_075_zetatech-software-installer",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_076_all-nighter",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_079_bodyweight-synthetic-blood",
-            "quantity": 3
-          },
-          {
-            "cardId": "onr_v1_086_forged-activation-orders",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_094_inside-job",
-            "quantity": 3
-          },
-          {
-            "cardId": "onr_v1_095_jack-n-joe",
-            "quantity": 3
-          },
-          {
-            "cardId": "onr_v1_097_livewires-contacts",
-            "quantity": 3
-          },
-          {
-            "cardId": "onr_v1_108_score",
-            "quantity": 3
-          },
-          {
-            "cardId": "onr_v1_123_bodyweight-data-creche",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_139_r-and-d-interface",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_145_wutech-mem-chip",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_157_crash-everett-inventive-fixer",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_165_junkyard-bbs",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_174_rigged-investments",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_177_the-short-circuit",
-            "quantity": 1
-          },
-          {
-            "cardId": "onr_v1_178_short-term-contract",
-            "quantity": 3
-          },
-          {
-            "cardId": "onr_v1_179_silicon-saloon-franchise",
-            "quantity": 2
-          },
-          {
-            "cardId": "onr_v1_184_top-runners-conference",
-            "quantity": 3
-          }
-        ],
-        "source": {
-          "kind": "curated_local_deck",
-          "sourceDeckId": "local_runner_last_call_at_rd",
-          "sourceDeckVersion": "1.0.0-local-user-curated"
-        }
-      },
-      {
-        "standardDeckId": "standard_runner_lucidrine_shell_traders",
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_last_call_at_rd",
+        "sourceDeckVersion": "1.0.0-local-user-curated"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_lucidrine_shell_traders",
       "version": "1.0.0",
       "status": "active",
       "name": "Lucidrine Shell Traders",
@@ -4282,6 +4282,101 @@
         "kind": "curated_local_deck",
         "sourceDeckId": "local_proteus_runner_hidden_sabotage_2026_05_25",
         "sourceDeckVersion": "proteus-playtest-editable-2026-05-25"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_rd_express",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "R&D Express",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_035_invisibility",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_040_loony-goon",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_102_open-ended-mileage-program",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_124_corolla-speed-chip",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_178_short-term-contract",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_083_corrosion",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_122_rush-hour",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_124_stakeout",
+          "quantity": 3
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_rd_express_2026_08_15",
+        "sourceDeckVersion": "1.0.0-runner-ai-baseline"
       }
     },
     {

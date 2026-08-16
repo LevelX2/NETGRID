@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v1",
   "guideSetId": "netgrid-standard-deck-guides-1.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-08-14",
+  "analyzedAt": "2026-08-15",
   "guides": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -1843,8 +1843,8 @@
         ]
       }
     },
-      {
-        "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
+    {
+      "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:99165f80",
       "sourceAnalysisHash": "deck-analysis:1e68114a",
@@ -1891,80 +1891,77 @@
           "Fallen Temple Microcode Outlet und Disgruntled Ice Technician aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
         ]
-        }
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_last_call_at_rd",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:76a00e66",
+      "sourceAnalysisHash": "deck-analysis:56cd20ff",
+      "reviewedAt": "2026-08-14",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.run_event_tempo",
+          "runner.interface_closeout"
+        ],
+        "secondaryStrategyIds": ["runner.rig_first", "runner.search.breaker"],
+        "reviewStatus": "plausible"
       },
-      {
-        "standardDeckId": "standard_runner_last_call_at_rd",
-        "sourceDeckVersion": "1.0.0",
-        "sourceDeckHash": "standard-deck:76a00e66",
-        "sourceAnalysisHash": "deck-analysis:56cd20ff",
-        "reviewedAt": "2026-08-14",
-        "analysis": {
-          "primaryStrategyIds": [
-            "runner.rnd_pressure",
-            "runner.run_event_tempo",
-            "runner.interface_closeout"
-          ],
-          "secondaryStrategyIds": [
-            "runner.rig_first",
-            "runner.search.breaker"
-          ],
-          "reviewStatus": "plausible"
-        },
-        "content": {
-          "summary": "Last Call at R&D baut ein vollständiges Rig auf und verdichtet danach die R&D-Zugriffe mit Information, Multiaccess und einem kostenlosen zweiten Run.",
-          "deckIdea": "Dieses Deck bereitet erst Codecracker, Raptor und Worm vor und richtet dann die Saloon-Maschine ein: Silicon Saloon Franchise hält Karten und Credits in Bewegung, während Newsgroup Filter das teure Aufbaupaket mitfinanziert. Bodyweight™ Data Crèche macht aus dem ersten erfolgreichen Run des Zuges einen weiteren kostenlosen Run; auf R&D wird daraus zusammen mit Deep Thought und R&D Interface gezielter, wiederholter Zugriff. The Short Circuit sucht im richtigen Moment das fehlende Programm.",
-          "gamePlan": {
-            "opening": "Halte eine Hand mit Draw oder Economy und arbeite auf Breaker-Coverage hin. Zetatech Software Installer beschleunigt den frühen Programmeinsatz; The Short Circuit ist für das Programm reserviert, das die aktuelle ICE-Lücke schließt. Installiere die teuren Einzelkarten erst, wenn Credits und Speicher dafür vorhanden sind.",
+      "content": {
+        "summary": "Last Call at R&D baut ein vollständiges Rig auf und verdichtet danach die R&D-Zugriffe mit Information, Multiaccess und einem kostenlosen zweiten Run.",
+        "deckIdea": "Dieses Deck bereitet erst Codecracker, Raptor und Worm vor und richtet dann die Saloon-Maschine ein: Silicon Saloon Franchise hält Karten und Credits in Bewegung, während Newsgroup Filter das teure Aufbaupaket mitfinanziert. Bodyweight™ Data Crèche macht aus dem ersten erfolgreichen Run des Zuges einen weiteren kostenlosen Run; auf R&D wird daraus zusammen mit Deep Thought und R&D Interface gezielter, wiederholter Zugriff. The Short Circuit sucht im richtigen Moment das fehlende Programm.",
+        "gamePlan": {
+          "opening": "Halte eine Hand mit Draw oder Economy und arbeite auf Breaker-Coverage hin. Zetatech Software Installer beschleunigt den frühen Programmeinsatz; The Short Circuit ist für das Programm reserviert, das die aktuelle ICE-Lücke schließt. Installiere die teuren Einzelkarten erst, wenn Credits und Speicher dafür vorhanden sind.",
           "midgame": "Sobald die Breaker stehen, lege Data Crèche und bei Bedarf den WuTech Mem Chip. Beginne dann erfolgreiche R&D-Runs zu bündeln: Der erste kann den kostenlosen Folge-Run auslösen, Deep Thought sammelt dabei Zähler und R&D Interface erhöht den Wert jedes Zugriffs. Silicon Saloon Franchise ist ein Motor für ruhige Züge; die zweite Kopie erhöht vor allem die Chance, den Motor rechtzeitig zu finden.",
-            "endgame": "Nutze ein oder zwei R&D Interfaces als Abschluss und mache aus bekannter R&D-Information eine echte Agenda-Serie. Inside Job und All-Nighter öffnen das entscheidende Fenster, aber bezahle immer auch den Rückweg durch ICE, Tags oder Schaden mit ein. Ein erfolgreicher Crèche-Doppelrun ist stark – wiederhole ihn nicht blind, wenn sich die Lage verändert hat."
+          "endgame": "Nutze ein oder zwei R&D Interfaces als Abschluss und mache aus bekannter R&D-Information eine echte Agenda-Serie. Inside Job und All-Nighter öffnen das entscheidende Fenster, aber bezahle immer auch den Rückweg durch ICE, Tags oder Schaden mit ein. Ein erfolgreicher Crèche-Doppelrun ist stark – wiederhole ihn nicht blind, wenn sich die Lage verändert hat."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_179_silicon-saloon-franchise",
+            "title": "Silicon Saloon Franchise",
+            "role": "Langzeitmotor für einen Credit und eine Karte pro Aktion; zwei Kopien erhöhen die Verfügbarkeit, ohne dass beide installiert werden müssen."
           },
-          "keyCards": [
-            {
-              "cardId": "onr_v1_179_silicon-saloon-franchise",
-              "title": "Silicon Saloon Franchise",
-              "role": "Langzeitmotor für einen Credit und eine Karte pro Aktion; zwei Kopien erhöhen die Verfügbarkeit, ohne dass beide installiert werden müssen."
-            },
-            {
-              "cardId": "onr_v1_123_bodyweight-data-creche",
-              "title": "Bodyweight™ Data Crèche",
-              "role": "Liefert den kostenlosen Folge-Run nach einem erfolgreichen Run und zugleich den zusätzlichen Speicher für die volle Programmsuite."
-            },
-            {
-              "cardId": "onr_v1_017_deep-thought",
-              "title": "Deep Thought",
-              "role": "Macht wiederholte R&D-Runs zu Information: Nach drei Zählern zeigt es dir zu Beginn des Zuges die oberste R&D-Karte."
-            },
-            {
-              "cardId": "onr_v1_139_r-and-d-interface",
-              "title": "R&D Interface",
-              "role": "Verdichtet jeden R&D-Zugriff; die beiden Kopien skalieren gemeinsam und bilden den Abschlussmotor."
-            },
-            {
-              "cardId": "onr_v1_177_the-short-circuit",
-              "title": "The Short Circuit",
-              "role": "Sucht gezielt das fehlende Programm, damit die Breaker-Suite oder die Economy nicht zufällig zusammenfinden muss."
-            },
-            {
-              "cardId": "onr_v1_045_newsgroup-filter",
-              "title": "Newsgroup Filter",
-              "role": "Wandelt Aktionen zuverlässig in zwei Credits und finanziert damit insbesondere die teuren Hardware- und Programmzüge."
-            }
-          ],
-          "pilotingTips": [
-            "Spiele Silicon Saloon Franchise in der Regel nur einmal aus: Die zweite Deckkopie ist Konsistenz und Ersatz, keine zweite Engine.",
-            "Der Kernzug ist nicht einfach zweimal R&D, sondern ein erfolgreicher erster Run, der die Data Crèche öffnet, und ein zweiter Zugriff mit Interface oder Deep-Thought-Information.",
-            "Plane vor der Installation der ganzen Programmsuite den Speicher: Data Crèche und WuTech Mem Chip bringen zusammen genau den Platz für Filter, Deep Thought und die drei Breaker."
-          ],
-          "weaknesses": [
-            "Die zentrale Engine besteht aus mehreren teuren Karten und hat keinen Hardware-Tutor; die Doppelungen erhöhen zwar die Fundchance, schneller Druck kann das volle R&D-Paket aber weiterhin überholen.",
-            "Das Deck besitzt kaum Schutz gegen Tags und Schaden. Gegen solche Corporations müssen Credits und ein sicherer Zugriffszeitpunkt wichtiger sein als ein schöner Doppelrun.",
-            "Wird Deep Thought gepurgt oder ein wichtiges Engine-Stück zerstört, bleibt R&D Interface stark, aber die Informations- und Temposynergie ist kleiner."
-          ]
-        }
-      },
-      {
-        "standardDeckId": "standard_runner_lucidrine_shell_traders",
+          {
+            "cardId": "onr_v1_123_bodyweight-data-creche",
+            "title": "Bodyweight™ Data Crèche",
+            "role": "Liefert den kostenlosen Folge-Run nach einem erfolgreichen Run und zugleich den zusätzlichen Speicher für die volle Programmsuite."
+          },
+          {
+            "cardId": "onr_v1_017_deep-thought",
+            "title": "Deep Thought",
+            "role": "Macht wiederholte R&D-Runs zu Information: Nach drei Zählern zeigt es dir zu Beginn des Zuges die oberste R&D-Karte."
+          },
+          {
+            "cardId": "onr_v1_139_r-and-d-interface",
+            "title": "R&D Interface",
+            "role": "Verdichtet jeden R&D-Zugriff; die beiden Kopien skalieren gemeinsam und bilden den Abschlussmotor."
+          },
+          {
+            "cardId": "onr_v1_177_the-short-circuit",
+            "title": "The Short Circuit",
+            "role": "Sucht gezielt das fehlende Programm, damit die Breaker-Suite oder die Economy nicht zufällig zusammenfinden muss."
+          },
+          {
+            "cardId": "onr_v1_045_newsgroup-filter",
+            "title": "Newsgroup Filter",
+            "role": "Wandelt Aktionen zuverlässig in zwei Credits und finanziert damit insbesondere die teuren Hardware- und Programmzüge."
+          }
+        ],
+        "pilotingTips": [
+          "Spiele Silicon Saloon Franchise in der Regel nur einmal aus: Die zweite Deckkopie ist Konsistenz und Ersatz, keine zweite Engine.",
+          "Der Kernzug ist nicht einfach zweimal R&D, sondern ein erfolgreicher erster Run, der die Data Crèche öffnet, und ein zweiter Zugriff mit Interface oder Deep-Thought-Information.",
+          "Plane vor der Installation der ganzen Programmsuite den Speicher: Data Crèche und WuTech Mem Chip bringen zusammen genau den Platz für Filter, Deep Thought und die drei Breaker."
+        ],
+        "weaknesses": [
+          "Die zentrale Engine besteht aus mehreren teuren Karten und hat keinen Hardware-Tutor; die Doppelungen erhöhen zwar die Fundchance, schneller Druck kann das volle R&D-Paket aber weiterhin überholen.",
+          "Das Deck besitzt kaum Schutz gegen Tags und Schaden. Gegen solche Corporations müssen Credits und ein sicherer Zugriffszeitpunkt wichtiger sein als ein schöner Doppelrun.",
+          "Wird Deep Thought gepurgt oder ein wichtiges Engine-Stück zerstört, bleibt R&D Interface stark, aber die Informations- und Temposynergie ist kleiner."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_lucidrine_shell_traders",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:7214803a",
       "sourceAnalysisHash": "deck-analysis:6b6013eb",
@@ -2201,6 +2198,76 @@
         "weaknesses": [
           "Fallen Highlighter und Crumble aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
           "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
+        ]
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_rd_express",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:d445f601",
+      "sourceAnalysisHash": "deck-analysis:aae870f0",
+      "reviewedAt": "2026-08-15",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.run_event_tempo",
+          "runner.rnd_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "R&D Express baut mit redundanter Breaker-Coverage, schneller Suche und wiederkehrenden Run-Credits Druck auf R&D auf. Multiaccess über R&D Interface und Rush Hour bildet den Abschluss; HQ und akute Remotes bleiben klare Ausweichziele.",
+        "deckIdea": "R&D Express setzt auf eine einfache Werkzeugkette statt auf Spezialkombinationen. Stelle zuerst die fehlende ICE-Coverage her und nutze Temple Microcode Outlet als eindeutigen Suchweg. Sobald ein bezahlbarer R&D-Pfad besteht, verwandle R&D Interface und Rush Hour in mehrere Zugriffe. HQ ist die bewusste Ausweichlinie, wenn es deutlich günstiger oder wegen einer drohenden Same-Turn-Scorelinie exponiert ist; Inside Job hält zudem wichtige Remotes angreifbar.",
+        "gamePlan": {
+          "opening": "Behalte eine Hand mit einem Breaker oder Temple Microcode Outlet plus Economy oder Draw. Installiere nur die noch fehlende Breaker-Art und baue Credits bis zu einem konkreten nächsten Installations- oder Runziel auf. Invisibility und Corolla Speed Chip verbessern danach die wiederholbare Sentry-Coverage.",
+          "midgame": "Greife R&D wiederholt an, sobald Coverage und Kosten stimmen. Installiere R&D Interface erst für einen erreichbaren Server und halte Rush Hour für den bezahlbaren Multiaccess-Zug zurück. Wechsle zu HQ, wenn es wesentlich günstiger oder klar agendaexponiert ist, und nutze Inside Job für ein akutes Scoring- oder Economy-Remote.",
+          "endgame": "Bündele Credits in die Linie mit der höchsten unmittelbaren Agenda-Chance. Bei sichtbarer Same-Turn-Scoregefahr greife R&D, HQ oder das gefährliche Remote sofort an, statt auf einen späteren Run zu warten. Ohne produktiven Run und ohne konkrete Entwicklungsroute ziehst du Karten, statt blind weiter Credits zu nehmen."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_139_r-and-d-interface",
+            "title": "R&D Interface",
+            "role": "Der dauerhafte R&D-Multiaccess ist der zentrale Abschlussmotor des Decks."
+          },
+          {
+            "cardId": "onr_proteus_122_rush-hour",
+            "title": "Rush Hour",
+            "role": "Erzeugt den kurzfristigen R&D-Multiaccess, wenn der Runpfad bereits erreichbar und finanzierbar ist."
+          },
+          {
+            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "title": "Temple Microcode Outlet",
+            "role": "Sucht den konkret fehlenden Breaker und schließt damit klar benannte ICE-Coverage-Lücken."
+          },
+          {
+            "cardId": "onr_v1_087_forgotten-backup-chip",
+            "title": "Forgotten Backup Chip",
+            "role": "Holt einen getrashten Breaker zurück und federt die bewusst schlankere Zwei-Kopien-Suite ab."
+          },
+          {
+            "cardId": "onr_v1_094_inside-job",
+            "title": "Inside Job",
+            "role": "Bietet einen direkten Bypass für akute Remotes oder eine klar günstige Runroute."
+          },
+          {
+            "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+            "title": "Karl de Veres, Corporate Stooge",
+            "role": "Macht erfolgreiche Runs zugleich zu kleinen Economy-Fortschritten und stützt wiederholten Druck."
+          }
+        ],
+        "pilotingTips": [
+          "Behandle Economy als Finanzierung eines konkreten Breaker-, Interface- oder Runbedarfs; Short-Term Contract ist kein Selbstzweck.",
+          "Installiere je Breaker-Art zunächst nur eine Kopie. Zusätzliche Exemplare sind bewusst Ersatz für Verlust- oder Trashfälle.",
+          "Prüfe vor jedem Run Pfadkosten, Restreserve und Agenda-Chance gemeinsam; ein legaler R&D-Run ist nicht automatisch der beste Zug."
+        ],
+        "weaknesses": [
+          "Multiaccess ohne erreichbaren und bezahlbaren Zentralserver bindet Credits und Aktionen, ohne Druck zu erzeugen.",
+          "Tiefe oder teure ICE-Staffeln können den linearen Rig-Aufbau verzögern; nutze dann Temple, Draw oder eine echte HQ-/Remote-Ausweichlinie statt blind zu laufen."
         ]
       }
     },
