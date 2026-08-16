@@ -12,7 +12,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Black ice costs 2 less to rez while this asset is rezzed.",
+    rulesText: "Black ice costs [2] less to rez while this asset is rezzed.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

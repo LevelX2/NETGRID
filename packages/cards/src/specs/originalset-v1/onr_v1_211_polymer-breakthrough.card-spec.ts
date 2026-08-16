@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Gain 1 at the start of each of your turns.",
+    rulesText: "Gain [1] at the start of each of your turns.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
