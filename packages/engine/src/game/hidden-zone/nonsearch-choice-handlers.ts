@@ -122,7 +122,8 @@ export function startCorpArchivesToHqChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   if (!isCorpArchivesToHqSource(host, sourceCardId))
     throw new Error("Die Archives-Quelle ist nicht Off-Site Backups.");
   const utility = corpArchivesToHqUtility(host, sourceCardId);
@@ -181,7 +182,8 @@ export function startCorpHqCardToRdChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: CardInstanceId,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   if (
     !host.cards.hasCorpUtilityKind(
       sourceCardId,
@@ -218,7 +220,8 @@ export function startCorpHqRetainPaymentChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: string,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   if (host.state.corp.hq.length === 0)
     throw new Error("HQ enthaelt keine Karten fuer die Retain-Zahlung.");
   host.state.pendingChoice = {
@@ -279,7 +282,8 @@ export function startRunnerGripTrashForCreditsChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: string,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const options = host.state.runner.grip.map((cardId) => {
     const definition = host.cards.definitionFor(cardId);
     return { id: `card_${cardId}`, label: definition.title, value: cardId };
@@ -308,7 +312,8 @@ export function startCardImplementationTrashCardsFromGripForCreditsChoice(
     gainPerTrashed: number;
   },
 ): { publicPayload: HiddenZonePayload } {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const boundedMax = Math.max(0, Math.floor(input.max));
   const options = host.state.runner.grip.map((cardId) => {
     const definition = host.cards.definitionFor(cardId);
@@ -333,7 +338,10 @@ export function startCardImplementationTrashCardsFromGripForCreditsChoice(
     maxTrashCount: boundedMax,
     gainPerTrashed: input.gainPerTrashed,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -341,7 +349,8 @@ export function startRunnerInstalledTrashForCreditsChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: string,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const installed = runnerInstalledCardIds(host);
   if (installed.length === 0)
     throw new Error("Keine installierten Runner-Karten.");
@@ -372,7 +381,8 @@ export function startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
     gainPerTrashed: number;
   },
 ): { publicPayload: HiddenZonePayload } {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   if (input.max !== "any")
     throw new Error("Diese installierte-Karten-Auswahl unterstuetzt nur any.");
   const installed = runnerInstalledCardIds(host);
@@ -398,7 +408,10 @@ export function startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
     minTrashCount: input.min,
     gainPerTrashed: input.gainPerTrashed,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return { publicPayload: payload };
 }
 
@@ -406,7 +419,8 @@ export function startInstalledCardTrashForCreditsChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceResourceId: CardInstanceId,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   if (!host.state.runner.rig.resources.includes(sourceResourceId)) return;
   const eligible = runnerInstalledCardIds(host)
     .filter((cardId) => cardId !== sourceResourceId)
@@ -415,9 +429,8 @@ export function startInstalledCardTrashForCreditsChoice(
   host.state.pendingChoice = {
     choiceId: `runner_installed_resource_trash_for_credits_${host.state.stateVersion + 1}`,
     side: "runner",
-    source: `runner.installed_resource_trash_for_credits:${sourceResourceId}:${host.state.stateVersion + 1}`,
-    prompt:
-      "Eine andere installierte Karte trashen und 2 Credits nehmen?",
+    source: `runner.installed_resource_trash_for_credits:${sourceResourceId}:2:${host.state.stateVersion + 1}`,
+    prompt: "Eine andere installierte Karte trashen und 2 Credits nehmen?",
     kind: "select_option",
     options: [
       { id: "pass", label: "Nein" },
@@ -438,10 +451,13 @@ export function startSecretSpendGuessThenTargetedBypassRunHideChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
   sourceCardId: string,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   const maxAmount = Math.max(0, Math.floor(host.state.runner.credits));
   if (maxAmount < 2)
-    throw new Error("Die Secret-Spend-Guess-Faehigkeit benoetigt mindestens 2 Credits.");
+    throw new Error(
+      "Die Secret-Spend-Guess-Faehigkeit benoetigt mindestens 2 Credits.",
+    );
   host.state.pendingChoice = {
     choiceId: `secret_spend_guess_then_targeted_bypass_run_hide_${host.state.stateVersion + 1}`,
     side: "runner",
@@ -519,7 +535,10 @@ function resolveCorpArchivesToHqChoice(
         }
       : {}),
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return {
     handled: true,
     stateChanged: true,
@@ -532,7 +551,10 @@ function resolveCorpHqCardToRdChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("classic.corporate_shuffle_hq_to_rd"))
+  if (
+    !choice ||
+    !choice.source.startsWith("classic.corporate_shuffle_hq_to_rd")
+  )
     throw new Error("Es ist keine Corporate-Shuffle-HQ-Choice offen.");
   const [, sourceCardId] = choice.source.split(":");
   if (
@@ -543,7 +565,10 @@ function resolveCorpHqCardToRdChoice(
     )
   )
     throw new Error("Die Corporate-Shuffle-Choice gehoert nicht zur Karte.");
-  const selectedId = selectedChoiceCardIds(choice, requirePlayerAction(host))[0];
+  const selectedId = selectedChoiceCardIds(
+    choice,
+    requirePlayerAction(host),
+  )[0];
   if (!selectedId || !host.state.corp.hq.includes(selectedId))
     throw new Error("Die gewaehlte HQ-Karte ist ungueltig.");
   const sourceDefinitionId = host.cards.definitionFor(sourceCardId).id;
@@ -561,7 +586,10 @@ function resolveCorpHqCardToRdChoice(
     sourceDefinitionId,
     movedCount: 1,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return {
     handled: true,
     stateChanged: true,
@@ -574,10 +602,11 @@ function resolveCorpHqRetainPaymentChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !choice.source.startsWith("runner.successful_hq_run_corp_pay_to_retain_hq"))
-    throw new Error(
-      "Es ist keine HQ-Retain-Zahlungs-Choice offen.",
-    );
+  if (
+    !choice ||
+    !choice.source.startsWith("runner.successful_hq_run_corp_pay_to_retain_hq")
+  )
+    throw new Error("Es ist keine HQ-Retain-Zahlungs-Choice offen.");
   if (!host.callbacks.hasSuccessfulHqRunThisTurn())
     throw new Error(
       "Die HQ-Retain-Zahlung benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
@@ -616,7 +645,10 @@ function resolveCorpHqRetainPaymentChoice(
     paidCredits: cost,
     corpCreditsAfter: host.state.corp.credits,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return {
     handled: true,
     stateChanged: true,
@@ -653,7 +685,10 @@ function resolveRunnerGripTrashForCreditsChoice(
     gainedCredits,
     runnerCreditsAfter: host.state.runner.credits,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return {
     handled: true,
     stateChanged: true,
@@ -691,7 +726,10 @@ function resolveRunnerInstalledTrashForCreditsChoice(
     gainedCredits,
     runnerCreditsAfter: host.state.runner.credits,
   };
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...payload,
+  };
   return {
     handled: true,
     stateChanged: true,
@@ -723,11 +761,15 @@ function resolveInstalledResourceTrashForCreditsChoice(
   const selectedId =
     selectedChoiceIds(requirePlayerAction(host).selectedChoices)[0] ?? "pass";
   if (selectedId !== "pass") {
-    const option = choice.options.find((candidate) => candidate.id === selectedId);
+    const option = choice.options.find(
+      (candidate) => candidate.id === selectedId,
+    );
     const cardId = typeof option?.value === "string" ? option.value : "";
     if (!cardId) throw new Error("Die gewaehlte Karte ist ungueltig.");
     if (cardId === sourceResourceId)
-      throw new Error("Die ausloesende Ressource kann sich nicht selbst trashen.");
+      throw new Error(
+        "Die ausloesende Ressource kann sich nicht selbst trashen.",
+      );
     if (!runnerInstalledCardIds(host).includes(cardId))
       throw new Error("Die gewaehlte Karte ist nicht mehr installiert.");
     const trashedDefinition = host.cards.definitionFor(cardId);
@@ -766,12 +808,19 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
   host: HiddenZoneNonSearchChoiceHandlerHost,
 ): HiddenZoneNonSearchChoiceHandlerResult {
   const choice = host.state.pendingChoice;
-  if (!choice || !isSecretSpendGuessTargetedBypassRunChoiceSource(choice.source))
+  if (
+    !choice ||
+    !isSecretSpendGuessTargetedBypassRunChoiceSource(choice.source)
+  )
     throw new Error("Es ist keine Secret-Spend-Guess-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
   const sourceDefinitionId = host.cards.definitionFor(sourceCardId).id;
   const playerAction = requirePlayerAction(host);
-  if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:")) {
+  if (
+    choice.source.startsWith(
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:",
+    )
+  ) {
     const hiddenAmount = selectedBidAmount(choice, playerAction);
     if (hiddenAmount < 2 || hiddenAmount > host.state.runner.credits)
       throw new Error("Der Secret-Spend-Guess-Betrag ist nicht legal.");
@@ -786,13 +835,22 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
       secretSpendGuessRunStep: "runner_hidden_amount_selected",
       hiddenZoneBarrier: true,
     };
-    host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      ...payload,
+    };
     return { handled: true, stateChanged: true, resolvedPayload: payload };
   }
-  if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:")) {
+  if (
+    choice.source.startsWith(
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:",
+    )
+  ) {
     const secret = host.state.secretSpendGuessRunSecret;
     if (!secret || secret.sourceCardId !== sourceCardId)
-      throw new Error("Die Secret-Spend-Guess-Choice hat keinen geheimen Betrag.");
+      throw new Error(
+        "Die Secret-Spend-Guess-Choice hat keinen geheimen Betrag.",
+      );
     const guess = selectedBidAmount(choice, playerAction);
     const correct = guess === secret.hiddenAmount;
     if (correct) {
@@ -811,8 +869,15 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
         runnerCreditsAfter: host.state.runner.credits,
         hiddenZoneBarrier: true,
       };
-      host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
-      return { handled: true, stateChanged: true, paidCredits: secret.hiddenAmount };
+      host.legalAction.payload = {
+        ...(host.legalAction.payload ?? {}),
+        ...payload,
+      };
+      return {
+        handled: true,
+        stateChanged: true,
+        paidCredits: secret.hiddenAmount,
+      };
     }
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
@@ -825,9 +890,15 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
     startSecretSpendGuessTargetedBypassRunTargetChoice(host, sourceCardId);
     return { handled: true, stateChanged: true };
   }
-  if (choice.source.startsWith("hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:")) {
+  if (
+    choice.source.startsWith(
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.target:",
+    )
+  ) {
     const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-    const option = choice.options.find((candidate) => candidate.id === selectedId);
+    const option = choice.options.find(
+      (candidate) => candidate.id === selectedId,
+    );
     const value = typeof option?.value === "string" ? option.value : "";
     const [serverId = "", iceId = ""] = value.split("|") as [
       Exclude<ServerId, "new_remote">,
@@ -835,7 +906,9 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
     ];
     const server = host.servers.mustServer(serverId);
     if (!server.ice.includes(iceId))
-      throw new Error("Das Secret-Spend-Guess-ICE-Ziel ist nicht mehr installiert.");
+      throw new Error(
+        "Das Secret-Spend-Guess-ICE-Ziel ist nicht mehr installiert.",
+      );
     delete host.state.secretSpendGuessRunSecret;
     delete host.state.pendingChoice;
     const payload = {
@@ -847,7 +920,10 @@ function resolveSecretSpendGuessThenTargetedBypassRunChoice(
       serverId,
       chosenIcePosition: server.ice.indexOf(iceId),
     };
-    host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+    host.legalAction.payload = {
+      ...(host.legalAction.payload ?? {}),
+      ...payload,
+    };
     host.callbacks.startRunWithAutoPass(server.id, iceId);
     return {
       handled: true,
@@ -870,7 +946,7 @@ function startSecretSpendGuessTargetedBypassRunTargetChoice(
     host.state.activeSide = "runner";
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
-    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
+      sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
       secretSpendGuessRunGuessCorrect: false,
       secretSpendGuessRunNoIceTarget: true,
       hiddenZoneBarrier: true,
@@ -922,10 +998,10 @@ function secretSpendGuessChoice(
     options: Array.from({ length: maxAmount - 1 }, (_, index) => {
       const amount = index + 2;
       return {
-      id: `guess_${amount}`,
-      label: `${amount}`,
-      publicLabel: "Geratene Credits",
-      value: amount,
+        id: `guess_${amount}`,
+        label: `${amount}`,
+        publicLabel: "Geratene Credits",
+        value: amount,
       };
     }),
     minSelections: 1,
@@ -1059,7 +1135,9 @@ function selectedChoiceCardIds(
   playerAction: PlayerAction,
 ): CardInstanceId[] {
   return selectedChoiceIds(playerAction.selectedChoices).map((optionId) => {
-    const option = choice.options.find((candidate) => candidate.id === optionId);
+    const option = choice.options.find(
+      (candidate) => candidate.id === optionId,
+    );
     if (typeof option?.value !== "string")
       throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
     return option.value;
@@ -1084,8 +1162,11 @@ function selectedBidAmount(
 ): number {
   if (!choice) throw new Error("Es ist keine Bid-Choice offen.");
   const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
-  const selected = choice.options.find((option) => option.id === selectedOptionId);
-  const amount = typeof selected?.value === "number" ? selected.value : Number.NaN;
+  const selected = choice.options.find(
+    (option) => option.id === selectedOptionId,
+  );
+  const amount =
+    typeof selected?.value === "number" ? selected.value : Number.NaN;
   if (!Number.isInteger(amount) || amount < 0)
     throw new Error("Der Trace-Bid ist ungueltig.");
   return amount;

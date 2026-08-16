@@ -229,8 +229,14 @@ export type RunnerInstalledCardLiquidationChoiceSignal = {
   actionId: string;
   choiceId: string;
   sourceStateVersion: number;
-  selectedOptionId: "pass";
-  disposition: "decline_unpriced_conversion";
+  selectedOptionId: string;
+  selectedCardInstanceId?: string;
+  disposition: "liquidate_positive_value" | "decline_nonpositive_conversion";
+  quote: Readonly<{
+    gainCredits: number;
+    retainedCardValue: number;
+    netLiquidationValue: number;
+  }>;
   priorityClass: "P4";
   value: number;
   evidenceCodes: string[];
@@ -423,11 +429,12 @@ export function runnerInstalledCardLiquidationChoiceSignal(
     return undefined;
   }
   const sourceMatch =
-    /^runner\.installed_resource_trash_for_credits:([^:]+):([0-9]+)$/.exec(
+    /^runner\.installed_resource_trash_for_credits:([^:]+):([0-9]+):([0-9]+)$/.exec(
       choice.source,
     );
   const sourceResourceInstanceId = sourceMatch?.[1];
-  const sourceStateVersion = Number(sourceMatch?.[2]);
+  const gainCredits = Number(sourceMatch?.[2]);
+  const sourceStateVersion = Number(sourceMatch?.[3]);
   const rig = input.playerView.own.rig ?? [];
   const sourceResource = sourceResourceInstanceId
     ? rig.find(
@@ -485,6 +492,8 @@ export function runnerInstalledCardLiquidationChoiceSignal(
   if (
     !sourceResourceInstanceId ||
     !sourceResource?.definitionId ||
+    !Number.isInteger(gainCredits) ||
+    gainCredits <= 0 ||
     sourceStateVersion !== input.playerView.stateVersion ||
     !action ||
     !candidate ||
@@ -494,6 +503,40 @@ export function runnerInstalledCardLiquidationChoiceSignal(
   ) {
     return undefined;
   }
+  const quotedTargets = eligibleCards
+    .map((card) => {
+      const retainedCardValue = installedCardRetentionValue(input, card);
+      return {
+        card,
+        optionId: `card_${card.instanceId}`,
+        retainedCardValue,
+        netLiquidationValue: gainCredits - retainedCardValue,
+      };
+    })
+    .sort(
+      (left, right) =>
+        right.netLiquidationValue - left.netLiquidationValue ||
+        left.retainedCardValue - right.retainedCardValue ||
+        left.card.instanceId.localeCompare(right.card.instanceId),
+    );
+  const selectedTarget = quotedTargets.find(
+    (target) => target.netLiquidationValue > 0,
+  );
+  const quote = selectedTarget
+    ? {
+        gainCredits,
+        retainedCardValue: selectedTarget.retainedCardValue,
+        netLiquidationValue: selectedTarget.netLiquidationValue,
+      }
+    : {
+        gainCredits,
+        retainedCardValue: Math.min(
+          ...quotedTargets.map((target) => target.retainedCardValue),
+        ),
+        netLiquidationValue: Math.max(
+          ...quotedTargets.map((target) => target.netLiquidationValue),
+        ),
+      };
   return {
     conversionId: `installed-card-liquidation:${choice.choiceId}`,
     sourceResourceInstanceId,
@@ -501,15 +544,82 @@ export function runnerInstalledCardLiquidationChoiceSignal(
     actionId: action.actionId,
     choiceId: choice.choiceId,
     sourceStateVersion,
-    selectedOptionId: "pass",
-    disposition: "decline_unpriced_conversion",
+    selectedOptionId: selectedTarget?.optionId ?? "pass",
+    ...(selectedTarget
+      ? { selectedCardInstanceId: selectedTarget.card.instanceId }
+      : {}),
+    disposition: selectedTarget
+      ? "liquidate_positive_value"
+      : "decline_nonpositive_conversion",
+    quote,
     priorityClass: "P4",
     value: 1_000,
     evidenceCodes: [
       "runner_installed_card_liquidation_choice_owned_by_economy",
-      "runner_installed_card_liquidation_declined_without_exact_target_value_quote",
+      selectedTarget
+        ? `runner_installed_card_liquidation_positive_value:${selectedTarget.card.instanceId}:${selectedTarget.netLiquidationValue}`
+        : "runner_installed_card_liquidation_declined_nonpositive_value",
     ],
   };
+}
+
+function installedCardRetentionValue(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): number {
+  if (!card.known || !card.definitionId) return Number.MAX_SAFE_INTEGER;
+  const rig = input.playerView.own.rig ?? [];
+  const roles = rolesForDeckDoctrineCard(card.definitionId);
+  const duplicateCount = rig.filter(
+    (candidate) => candidate.definitionId === card.definitionId,
+  ).length;
+  const hostedCardCount = rig.filter(
+    (candidate) => candidate.hostedOn === card.instanceId,
+  ).length;
+  const counterCount = Object.values(card.counters ?? {}).reduce(
+    (sum, count) => sum + Math.max(0, count ?? 0),
+    0,
+  );
+  const memoryWouldOverflow =
+    (card.memoryLimitBonus ?? 0) > 0 &&
+    (input.playerView.own.memoryUsed ?? 0) >
+      Math.max(
+        0,
+        (input.playerView.own.memoryLimit ?? 0) - (card.memoryLimitBonus ?? 0),
+      );
+  const criticalRigRole = rolesMatch(roles, [
+    "breaker",
+    "coverage",
+    "damage_prevention",
+    "survive_meat_damage",
+    "tag_prevention",
+    "tag_clear",
+  ]);
+  const activeEngineRole = rolesMatch(roles, [
+    "economy",
+    "draw",
+    "search",
+    "link",
+    "trace",
+    "access",
+    "run",
+    "engine",
+  ]);
+  return Math.max(
+    0,
+    1 +
+      Math.max(0, card.installCost ?? card.cost ?? 0) +
+      (duplicateCount > 1 ? -1 : 0) +
+      (criticalRigRole ? 20 : 0) +
+      (activeEngineRole ? 5 : 0) +
+      ((card.memoryLimitBonus ?? 0) > 0 ? 8 : 0) +
+      ((card.maxHandSizeBonus ?? 0) > 0 ? 8 : 0) +
+      ((card.baseLink ?? 0) > 0 ? 5 : 0) +
+      (memoryWouldOverflow ? 30 : 0) +
+      hostedCardCount * 10 +
+      counterCount * 2 +
+      (card.lifecycleMarkers?.length ?? 0) * 4,
+  );
 }
 
 type EconomyState =

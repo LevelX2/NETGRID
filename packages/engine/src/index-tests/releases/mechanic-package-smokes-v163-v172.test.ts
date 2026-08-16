@@ -1010,6 +1010,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
         "runner.installed_resource_trash_for_credits",
       ),
     ).toBe(true);
+    expect(smithState.pendingChoice?.source).toContain(":2:");
     expect(smithState.pendingChoice?.prompt).toContain("2 Credits");
     const questOption =
       smithState.pendingChoice?.options.find(

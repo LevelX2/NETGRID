@@ -677,14 +677,14 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("passes an unquoted installed-card liquidation only through runner.economy", () => {
+  it("materializes the exact positively quoted installed-card liquidation", () => {
     const sourceResourceInstanceId = "liquidation-source";
     const sourceResourceDefinitionId = "generic-liquidation-resource";
     const targetInstanceId = "installed-target";
     const input = inputWithChoice(
       {
         kind: "select_option",
-        source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:7`,
+        source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:2:7`,
         minSelections: 1,
         maxSelections: 1,
         options: [
@@ -718,6 +718,14 @@ describe("selectedChoicesForDecision", () => {
     rememberRunnerInstalledCardLiquidationChoice(input, {
       sourceResourceInstanceId,
       sourceResourceDefinitionId,
+      selectedOptionId: `card_${targetInstanceId}`,
+      selectedCardInstanceId: targetInstanceId,
+      disposition: "liquidate_positive_value",
+      quote: {
+        gainCredits: 2,
+        retainedCardValue: 1,
+        netLiquidationValue: 1,
+      },
     });
 
     expect(
@@ -728,7 +736,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["pass"],
+      selectedOptionIds: [`card_${targetInstanceId}`],
     });
   });
 
@@ -2132,6 +2140,14 @@ function rememberRunnerInstalledCardLiquidationChoice(
   source: {
     sourceResourceInstanceId: string;
     sourceResourceDefinitionId: string;
+    selectedOptionId: string;
+    selectedCardInstanceId?: string;
+    disposition: "liquidate_positive_value" | "decline_nonpositive_conversion";
+    quote: {
+      gainCredits: number;
+      retainedCardValue: number;
+      netLiquidationValue: number;
+    };
   },
 ): void {
   rememberResidentPlanPortfolio(input, {
@@ -2156,8 +2172,12 @@ function rememberRunnerInstalledCardLiquidationChoice(
             actionId: "runner.resolve_choice",
             choiceId: "choice_multi",
             sourceStateVersion: input.playerView.stateVersion,
-            selectedOptionId: "pass",
-            disposition: "decline_unpriced_conversion",
+            selectedOptionId: source.selectedOptionId,
+            ...(source.selectedCardInstanceId
+              ? { selectedCardInstanceId: source.selectedCardInstanceId }
+              : {}),
+            disposition: source.disposition,
+            quote: source.quote,
           },
         },
       },

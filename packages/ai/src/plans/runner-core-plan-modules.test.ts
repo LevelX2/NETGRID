@@ -31,7 +31,7 @@ describe("Runner core plan modules", () => {
     ]);
   });
 
-  it("binds an optional installed-card liquidation conservatively to runner.economy", () => {
+  it("binds a positive installed-card liquidation to runner.economy", () => {
     const actionId = "runner.resolve_choice";
     const choiceId = "runner_liquidation_42";
     const sourceResourceInstanceId = "liquidation-source";
@@ -65,7 +65,7 @@ describe("Runner core plan modules", () => {
         pendingChoice: {
           choiceId,
           side: "runner",
-          source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:42`,
+          source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:2:42`,
           kind: "select_option",
           visibility: "public",
           stateVersion: 42,
@@ -109,14 +109,36 @@ describe("Runner core plan modules", () => {
       sourceResourceDefinitionId,
       actionId,
       choiceId,
-      selectedOptionId: "pass",
-      disposition: "decline_unpriced_conversion",
+      selectedOptionId: `card_${targetInstanceId}`,
+      selectedCardInstanceId: targetInstanceId,
+      disposition: "liquidate_positive_value",
+      quote: {
+        gainCredits: 2,
+        retainedCardValue: 1,
+        netLiquidationValue: 1,
+      },
       priorityClass: "P4",
       evidenceCodes: [
         "runner_installed_card_liquidation_choice_owned_by_economy",
-        "runner_installed_card_liquidation_declined_without_exact_target_value_quote",
+        `runner_installed_card_liquidation_positive_value:${targetInstanceId}:1`,
       ],
     });
+  });
+
+  it("declines liquidation of critical breaker coverage", () => {
+    const signal = runnerInstalledCardLiquidationChoiceSignal(
+      installedCardLiquidationInput({
+        targetDefinitionId: "simple_fracter",
+        targetType: "program",
+      }),
+      [candidate("runner.resolve_choice", "resolve_choice", "choice.resolve")],
+    );
+
+    expect(signal).toMatchObject({
+      selectedOptionId: "pass",
+      disposition: "decline_nonpositive_conversion",
+    });
+    expect(signal?.quote.netLiquidationValue).toBeLessThanOrEqual(0);
   });
 
   it("binds a Shell Traders pipeline to its exact source, target, and action", () => {
@@ -2123,6 +2145,77 @@ describe("Runner core plan modules", () => {
     ).toEqual({ admitted: false, reasonCode: "no_concrete_plan_purpose" });
   });
 });
+
+function installedCardLiquidationInput(params: {
+  targetDefinitionId: string;
+  targetType: "program" | "hardware" | "resource";
+}): AiDecisionInput {
+  const sourceResourceInstanceId = "liquidation-source";
+  const targetInstanceId = "installed-target";
+  return {
+    side: "runner",
+    legalActions: [
+      {
+        actionId: "runner.resolve_choice",
+        side: "runner",
+        type: "resolve_choice",
+        source: "game_rule",
+        timingPoint: "runner_action.main",
+        expiresAtStateVersion: 42,
+        costs: [],
+        targetRequirements: [],
+        choiceRequirements: [
+          {
+            choiceId: "runner_liquidation_42",
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["pass", `card_${targetInstanceId}`],
+          },
+        ],
+      },
+    ],
+    playerView: {
+      stateVersion: 42,
+      timingPoint: "runner_action.main",
+      pendingChoice: {
+        choiceId: "runner_liquidation_42",
+        side: "runner",
+        source: `runner.installed_resource_trash_for_credits:${sourceResourceInstanceId}:2:42`,
+        kind: "select_option",
+        visibility: "public",
+        stateVersion: 42,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          { id: "pass", label: "No" },
+          {
+            id: `card_${targetInstanceId}`,
+            label: "Target",
+            value: targetInstanceId,
+          },
+        ],
+      },
+      own: {
+        memoryUsed: params.targetType === "program" ? 1 : 0,
+        memoryLimit: 4,
+        rig: [
+          {
+            instanceId: sourceResourceInstanceId,
+            definitionId: "onr_v1_180_smiths-pawnshop",
+            known: true,
+            type: "resource",
+          },
+          {
+            instanceId: targetInstanceId,
+            definitionId: params.targetDefinitionId,
+            known: true,
+            type: params.targetType,
+          },
+        ],
+      },
+    },
+  } as unknown as AiDecisionInput;
+}
 
 function coreModule(
   moduleId: string,

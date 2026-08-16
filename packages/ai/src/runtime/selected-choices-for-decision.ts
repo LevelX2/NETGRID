@@ -1382,11 +1382,12 @@ function selectedRunnerInstalledCardLiquidationOptionId(
   currentPortfolio?: ResidentPlanPortfolio,
 ): string[] {
   const sourceMatch =
-    /^runner\.installed_resource_trash_for_credits:([^:]+):([0-9]+)$/.exec(
+    /^runner\.installed_resource_trash_for_credits:([^:]+):([0-9]+):([0-9]+)$/.exec(
       choice.source,
     );
   const sourceResourceInstanceId = sourceMatch?.[1];
-  const sourceStateVersion = Number(sourceMatch?.[2]);
+  const gainCredits = Number(sourceMatch?.[2]);
+  const sourceStateVersion = Number(sourceMatch?.[3]);
   const sourceResource = (input.playerView.own.rig ?? []).find(
     (card) =>
       card.instanceId === sourceResourceInstanceId &&
@@ -1437,12 +1438,21 @@ function selectedRunnerInstalledCardLiquidationOptionId(
           choiceId?: unknown;
           sourceStateVersion?: unknown;
           selectedOptionId?: unknown;
+          selectedCardInstanceId?: unknown;
           disposition?: unknown;
+          quote?: {
+            gainCredits?: unknown;
+            retainedCardValue?: unknown;
+            netLiquidationValue?: unknown;
+          };
         };
       }
     | undefined;
   const signal = moduleState?.signal;
-  const passOption = selectableOptions.find((option) => option.id === "pass");
+  const selectedOption = selectableOptions.find(
+    (option) => option.id === signal?.selectedOptionId,
+  );
+  const selectsCard = typeof signal?.selectedCardInstanceId === "string";
   const exactPlanBinding =
     exactChoiceAndAction &&
     portfolio?.side === "runner" &&
@@ -1455,18 +1465,27 @@ function selectedRunnerInstalledCardLiquidationOptionId(
     signal.actionId === action.actionId &&
     signal.choiceId === choice.choiceId &&
     signal.sourceStateVersion === input.playerView.stateVersion &&
-    signal.selectedOptionId === "pass" &&
-    signal.disposition === "decline_unpriced_conversion" &&
-    passOption !== undefined &&
-    passOption.value === undefined;
+    typeof signal.selectedOptionId === "string" &&
+    selectedOption !== undefined &&
+    signal.quote?.gainCredits === gainCredits &&
+    typeof signal.quote.retainedCardValue === "number" &&
+    typeof signal.quote.netLiquidationValue === "number" &&
+    (selectsCard
+      ? signal.disposition === "liquidate_positive_value" &&
+        signal.quote.netLiquidationValue > 0 &&
+        selectedOption.value === signal.selectedCardInstanceId
+      : signal.selectedOptionId === "pass" &&
+        signal.disposition === "decline_nonpositive_conversion" &&
+        signal.quote.netLiquidationValue <= 0 &&
+        selectedOption.value === undefined);
   if (!exactPlanBinding) {
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Materialize an optional installed-card liquidation only from the current runner.economy executor and its exact conservative pass binding.",
+      "Materialize an optional installed-card liquidation only from the current runner.economy executor and its exact target-value quote.",
     );
   }
-  return ["pass"];
+  return [signal.selectedOptionId as string];
 }
 
 function selectedCorpClassicDeflectorOptionId(
