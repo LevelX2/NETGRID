@@ -48,6 +48,7 @@ export type {
   CorpSequenceRezPaymentProjection,
 } from "./corp-rez-cost";
 export {
+  assertCommittedCorpTraceBidPaymentQuoteValid,
   assertCorpTraceBidPaymentQuoteValid,
   assertCorpTraceBidPaymentValid,
   assertPostBidLinkPaymentQuoteValid,
@@ -57,6 +58,7 @@ export {
   corpTracePaymentPublicPayload,
   corpTraceSpecializedPaymentSources,
   payPostBidLinkPaymentQuote,
+  payCommittedCorpTraceBidQuote,
   payCorpTraceBidQuote,
   payRunnerTraceBidQuote,
   postBidLinkPaymentPublicPayload,

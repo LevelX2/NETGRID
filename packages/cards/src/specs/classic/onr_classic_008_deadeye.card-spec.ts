@@ -76,26 +76,24 @@ export const cardSpec = {
         kind: "plan_role",
         role: "protect_rnd",
       },
+    ],
+    capabilities: [
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "target_preference",
-        purpose: "trash_high_value_installed_program",
-        preferences: [
-          "breaker_covers_current_server",
-          "high_install_cost_or_memory",
-          "central_or_remote_plan_enabler",
+        capabilityKey: capabilityKey("subroutine_trash_program"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "trash_high_value_installed_program",
+            preferences: [
+              "breaker_covers_current_server",
+              "high_install_cost_or_memory",
+              "central_or_remote_plan_enabler",
+            ],
+            avoid: ["low_value_program"],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice", "low_value_program"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

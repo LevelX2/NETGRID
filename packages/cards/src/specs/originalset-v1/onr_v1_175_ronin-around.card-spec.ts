@@ -123,14 +123,45 @@ export const cardSpec = {
         kind: "plan_role",
         role: "information",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "top_five_hardware_choice",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_look_top_stack_take_matching",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "top_five_hardware_choice",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "central_or_remote_plan_enabler",
+            ],
+            avoid: ["insufficient_post_payment_reserve"],
+          },
+        ],
+      },
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_expose_installed_card",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "expose_relevant_installed_corp_card",
+            preferences: [
+              "unknown_or_unrezzed_corp_card",
+              "server_relevant_to_current_plan",
+            ],
+            avoid: [
+              "already_known_or_rezzed_card",
+              "low_information_value_target",
+            ],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

@@ -124,7 +124,25 @@ export const cardSpec = {
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "access_effects_on_access_trash_installed_runner_cards",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "trash_installed_runner_programs",
+            preferences: [
+              "currently_used_breaker",
+              "trash_prevention_high_value_program",
+              "high_install_cost_or_memory",
+            ],
+            avoid: ["low_value_program"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

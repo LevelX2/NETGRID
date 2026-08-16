@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[1]: Break sentry subroutine. [1]: +1 strength The first time during each run that you break a sentry subroutine with MS-todon, lose all bits from all stealth cards, if you can, and the Corp gives you a tag.",
+      "[1]: Break sentry subroutine. [1]: +1 strength. The first time during each run that you break a sentry subroutine with MS-todon, lose all bits from all stealth cards, if you can, and the Corp gives you a tag.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -82,36 +82,22 @@ export const cardSpec = {
         use: "coverage.breaker",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
       },
       {
         kind: "risk_interpretation",
-        risk: "reserve_risk",
-        severity: "medium",
+        risk: "self_tag",
+        severity: "high",
       },
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey("break_sentry_with_tag_stealth_tradeoff"),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "high",
-          },
-        ],
+        kind: "risk_interpretation",
+        risk: "stealth_credit_pool_loss",
+        severity: "high",
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

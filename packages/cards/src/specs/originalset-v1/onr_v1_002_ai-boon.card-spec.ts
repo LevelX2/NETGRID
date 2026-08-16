@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "1: Break sentry subroutine. 1: +1 strength. At the start of each run, roll a die to determine AI Boon’s strength for that run.",
+      "[1]: Break sentry subroutine. [1]: +1 strength. At the start of each run, roll a die to determine AI Boon’s strength for that run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -80,6 +80,11 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "coverage.breaker",
         use: "coverage.breaker",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "random_run_strength",
+        severity: "high",
       },
     ],
     capabilities: [],

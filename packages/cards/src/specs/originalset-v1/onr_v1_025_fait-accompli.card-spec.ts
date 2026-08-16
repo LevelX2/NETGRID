@@ -61,10 +61,12 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
+      { kind: "plan_role", role: "remote_scoring_denial" },
+      { kind: "plan_role", role: "fort_bound_virus_pressure" },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
+        kind: "risk_interpretation",
+        risk: "virus_purge_risk",
+        severity: "medium",
       },
     ],
     capabilities: [],

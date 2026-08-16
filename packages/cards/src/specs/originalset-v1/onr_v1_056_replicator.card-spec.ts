@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "0: Break ice subroutine that traces. 1: +1 strength.",
+    rulesText: "[0]: Break ice subroutine that traces. [1]: +1 strength.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -81,7 +81,7 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "trace_bid_support",
+        role: "trace_subroutine_breaker",
       },
       {
         kind: "tactic_interpretation",

@@ -68,10 +68,6 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "build_scoring_remote",
-      },
-      {
         kind: "strategic_role",
         role: "defensive_tool",
       },
@@ -93,11 +89,6 @@ export const cardSpec = {
         confidence: "high",
         rationale:
           "Reduces central multiaccess from HQ/R&D and stabilizes central defense.",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "remote_root_value",
-        rating: "low",
       },
     ],
     capabilities: [],

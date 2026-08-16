@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "0 credits: Break all subroutines of a piece of ice, and end the run.\n1 credit: +1 strength.",
+      "[0]: Break all subroutines of a piece of ice, and end the run.\n[1]: +1 strength.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -19,6 +19,11 @@ export const cardSpec = {
       {
         source: "card_text",
         reference: "onr_v1_019_dropp",
+      },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Dropp-TM",
+        note: "Official errata adds the run-ending consequence to the zero-credit break ability.",
       },
     ],
   },
@@ -83,22 +88,16 @@ export const cardSpec = {
         signal: "coverage.breaker",
         use: "coverage.breaker",
       },
+      { kind: "plan_role", role: "emergency_breaker" },
       {
-        kind: "target_preference",
-        purpose: "dropp_emergency_subroutine_target",
-        preferences: [
-          "prevent_high_damage_subroutine",
-          "prevent_program_trash_subroutine",
-          "prevent_hardware_trash_subroutine",
-          "prevent_dangerous_tag_subroutine",
-          "prevent_run_lock_subroutine",
-        ],
-        avoid: [
-          "pure_end_the_run_subroutine",
-          "normal_breaker_available_without_run_end",
-          "access_goal_blocked_after_use",
-          "hidden_info_dependent_choice",
-        ],
+        kind: "risk_interpretation",
+        risk: "run_ends_on_break",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "opportunity_cost",
+        severity: "high",
       },
     ],
     capabilities: [],

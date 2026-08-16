@@ -334,7 +334,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
     );
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_352_chester-mix"]?.rulesText,
-    ).toContain("reduced by 2");
+    ).toContain("reduced by [2]");
     expect(
       CARD_DEFINITIONS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" "),
     ).toMatch(/trash_installed_runner_cards/);

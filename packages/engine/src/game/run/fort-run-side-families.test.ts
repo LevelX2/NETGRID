@@ -181,7 +181,10 @@ function definitions(): Record<string, CardDefinition> {
   };
 }
 
-function hostFor(state: GameState): FortRunSideFamiliesHost {
+function hostFor(
+  state: GameState,
+  options: { suspendTrash?: boolean } = {},
+): FortRunSideFamiliesHost {
   const defs = definitions();
   return {
     state,
@@ -254,9 +257,6 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
       },
       rezCostForCard: (cardId) =>
         defs[state.cardInstances[cardId]!.definitionId]!.rezCost ?? 0,
-      spendCorpCredits: (amount) => {
-        state.corp.credits -= amount;
-      },
     },
     breaker: {
       breakAbilityForLegalAction: () =>
@@ -274,18 +274,31 @@ function hostFor(state: GameState): FortRunSideFamiliesHost {
         }) as unknown as ReturnType<
           FortRunSideFamiliesHost["breaker"]["breakAbilityForLegalAction"]
         >,
-    },
-    effects: {
-      executeEffectCommands: (commands) => {
+      resumePaidBreakerAction: (legalAction) => {
         (
-          state as unknown as { lastEffectCommands?: unknown }
-        ).lastEffectCommands = commands;
+          state as unknown as { resumedBreakerAction?: LegalAction }
+        ).resumedBreakerAction = legalAction;
       },
-      trashRunnerInstalledProgram: (cardId) => {
+    },
+    rez: {
+      rezRootCardAtReactionWindow: (cardId) => {
+        state.corp.credits -=
+          defs[state.cardInstances[cardId]!.definitionId]!.rezCost ?? 0;
+        state.cardInstances[cardId] = {
+          ...state.cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+    },
+    trash: {
+      resolveRunnerInstalledProgramTrash: (cardId) => {
+        if (options.suspendTrash) return { suspended: true };
         state.runner.rig.programs = state.runner.rig.programs.filter(
           (candidate) => candidate !== cardId,
         );
         state.runner.heap.push(cardId);
+        return { suspended: false };
       },
     },
     tags: {
@@ -329,7 +342,7 @@ describe("fort run side families", () => {
       type: "pump_breaker",
       source: worm,
       costs: [{ credits: 1 }],
-      payload: { breakerId: worm },
+      payload: { breakerId: worm, pumpAmount: 3 },
     } as unknown as LegalAction;
 
     expect(runnerCanUseBreakerOnCurrentFort(host, worm)).toBe(true);
@@ -374,7 +387,7 @@ describe("fort run side families", () => {
       type: "pump_breaker",
       source: worm,
       costs: [{ credits: 1 }],
-      payload: { breakerId: worm },
+      payload: { breakerId: worm, pumpAmount: 3 },
     } as unknown as LegalAction;
 
     startAardvarkInterceptionChoice(host, worm, "pump_breaker", action);
@@ -385,7 +398,36 @@ describe("fort run side families", () => {
     } as unknown as PlayerAction);
 
     expect(state.cardInstances.aardvark_1?.rezzed).toBe(false);
+    expect(
+      (state as unknown as { resumedBreakerAction?: LegalAction })
+        .resumedBreakerAction?.payload,
+    ).toMatchObject({ breakerId: worm, pumpAmount: 3 });
     expect(shouldOpenAardvarkInterception(host, worm)).toBe(true);
+  });
+
+  it("defers the Worm trash to the normal prevention window", () => {
+    const state = makeState();
+    const host = hostFor(state, { suspendTrash: true });
+    const worm = "worm_1" as CardInstanceId;
+    const action = {
+      side: "runner",
+      type: "pump_breaker",
+      source: worm,
+      costs: [{ credits: 1 }],
+      payload: { breakerId: worm, pumpAmount: 3 },
+    } as unknown as LegalAction;
+
+    startAardvarkInterceptionChoice(host, worm, "pump_breaker", action);
+    resolveAardvarkInterceptionChoice(host, action, {
+      side: "corp",
+      actionId: "choice",
+      selectedChoices: { selectedOptionIds: ["rez_trash_worm"] },
+    } as unknown as PlayerAction);
+
+    expect(state.cardInstances.aardvark_1?.rezzed).toBe(true);
+    expect(state.runner.rig.programs).toContain(worm);
+    expect(state.runner.heap).not.toContain(worm);
+    expect(action.payload).toMatchObject({ aardvarkWormTrashPending: true });
   });
 
   it("keeps server run restrictions and server activity stable", () => {

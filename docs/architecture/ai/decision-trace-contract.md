@@ -130,7 +130,8 @@ Erlaubte Detail-Felder:
 
 Für eine Engine-randomisierte Blind-Trace-Resolution darf die private
 Detailansicht zusätzlich Regelprofil, gedruckten Trace, effektives Limit,
-aktuellen Link, legale Bid-Range, rationale Range, Stakes, Behavioral Bias,
+aktuellen Link, side-sicher sichtbare aggregierte gegnerische Bid-Kapazität,
+legale Bid-Range, rationale Range, Stakes, Behavioral Bias,
 gewichtete Kandidaten, ausgewählten Bid, Plan-Step und den zugehörigen
 `RandomDrawRecord`-Verweis enthalten. Noch verdeckte Gegengebote und konkrete
 gegnerische Payment-Quellen sind auch hier keine side-sicheren AI-Fakten; sie

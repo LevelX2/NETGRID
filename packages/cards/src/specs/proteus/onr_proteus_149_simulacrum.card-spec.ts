@@ -77,15 +77,22 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "ap_ice_bypass",
       },
       {
         kind: "plan_role",
         role: "safe_probe_run",
       },
+      { kind: "strategic_role", role: "survival_tool" },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "installed_card_trash_cost",
+        severity: "medium",
       },
     ],
     capabilities: [],

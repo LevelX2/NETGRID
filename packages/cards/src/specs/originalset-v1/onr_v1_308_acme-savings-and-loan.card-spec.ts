@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Rezzing ACME S&L costs 1 agenda point, in addition to the normal cost. When you rez ACME S&L, gain 12 credits and trash ACME S&L. For the remainder of the game, pay 1 credit at the end of each of your turns, or lose the game. You can remove this effect, and score 1 agenda point, by taking an action to pay 12 credits.",
+      "Rezzing ACME S&L costs 1 agenda point, in addition to the normal cost. When you rez ACME S&L, gain [12] and trash ACME S&L. For the remainder of the game, pay [1] at the end of each of your turns, or lose the game. You can remove this effect, and score 1 agenda point, by taking an action to pay [12].",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -88,6 +88,21 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "very_high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "loss_condition",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "agenda_point_rez_cost",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "recurring_debt_and_exit_cost",
+        severity: "high",
       },
     ],
     capabilities: [],

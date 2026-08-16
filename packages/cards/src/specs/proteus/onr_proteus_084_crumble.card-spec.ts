@@ -70,7 +70,7 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "hq_free_trash_access",
       },
       {
         kind: "strategic_role",
@@ -93,7 +93,7 @@ export const cardSpec = {
           "denies_corp_economy_or_combo_piece",
           "normally_untrashable_payoff",
         ],
-        avoid: ["low_value_accessed_card", "hidden_info_dependent_choice"],
+        avoid: ["low_value_accessed_card"],
       },
     ],
     capabilities: [],

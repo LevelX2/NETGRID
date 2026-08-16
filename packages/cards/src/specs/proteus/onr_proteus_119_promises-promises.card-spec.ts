@@ -66,7 +66,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "same_turn_agenda_access_payoff",
       },
       {
         kind: "strategic_role",
@@ -80,6 +80,11 @@ export const cardSpec = {
         kind: "line_support",
         lineKey: "runner.interface_closeout",
         support: "supports",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "same_turn_agenda_access_whiff",
+        severity: "high",
       },
     ],
     capabilities: [],

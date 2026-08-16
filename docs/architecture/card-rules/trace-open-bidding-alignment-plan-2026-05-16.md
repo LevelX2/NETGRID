@@ -109,6 +109,17 @@ PlayerViews und PublicEvents weder Bid noch konkrete Payment-Quellen oder
 daraus ableitbare Details. Insbesondere wird ein durch den verdeckten
 Counter-Einsatz intern erhöhtes Limit erst beim gemeinsamen Reveal sichtbar;
 vorher bleibt nur das vor dem Commitment öffentliche Basislimit verfügbar.
+Das konkrete Blind-Payment wird dabei nicht vorzeitig ausgeführt: Die Engine
+bindet das Gebot an ein vollständiges transientes Payment-Quote im laufenden
+`TraceState`, lässt Credits und sichtbare Counter bis zum gemeinsamen Reveal
+unverändert und bietet der bereits committen Seite keine konkurrierende
+LegalAction an. Beim Reveal werden Korp- und Runner-Quote zuerst fail-closed
+gegen den aktuellen Zustand revalidiert und anschließend innerhalb desselben
+atomaren Engine-Actions verbraucht. Erst dieses Reveal-Event veröffentlicht
+den regelwirksamen Ressourcenverbrauch. Die eigene PlayerView darf den eigenen
+Commit und dessen Quellen weiterhin anzeigen; die gegnerische Projektion
+enthält weder Commit noch Quellen.
+
 Nach Reveal dürfen die öffentlichen Ergebnisfelder beide Gebote und finalen
 Stärken enthalten. Normale WebSocket-, Reconnect-, Chronik- und Replay-Flächen
 verwenden dieselbe side-sichere Projektion.
@@ -144,6 +155,15 @@ konsequenzabhängige Tendenz (`conservative`, `normal`, `aggressive` oder
 `polarized`) auf wirtschaftlich plausible legale Kandidaten angewendet.
 Terminale Entscheidungen besitzen eine enge Verteilung; ein polarisierter
 Low-Stakes-Mix kann sowohl 0 als auch einen Randwert bevorzugen.
+
+Die gegnerische Blind-Bid-Kapazität kommt aus einer Engine-projizierten
+aggregierten Sichtquote. Sie addiert normale Credits und im aktuellen Trace
+tatsächlich verwendbare, öffentlich erkennbare Trace-/Link-Pools; verdeckte
+Ressourcen und die konkrete gegnerische Payment-Auswahl bleiben ausgeschlossen.
+Das effektive Classic-Limit deckelt die sichtbare Korp-Kapazität, während
+Modern weiterhin keinem künstlichen `Trace N`-Payment-Limit unterliegt. Die
+private Decision-Diagnostik führt den verwendeten aggregierten Kapazitätswert
+mit, ohne Quellenidentitäten der Gegenseite zu übernehmen.
 
 Der Bias wird derzeit je Trace aus Stakes und Outcome-Wert bestimmt. Eine
 kurzfristig persistierte Stimmung wird bewusst nicht als zusätzlicher

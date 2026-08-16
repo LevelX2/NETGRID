@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "For each card Runner draws, give Runner a tag unless Runner pays 1, in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
+      "For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

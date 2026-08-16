@@ -73,32 +73,10 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "build_scoring_remote",
-      },
-      {
         kind: "strategic_role",
-        role: "punish_payoff",
+        role: "rnd_access_punish",
       },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ambush_bluff",
-      },
-      {
-        kind: "line_support",
-        lineKey: "corp.ambush_bluff",
-        support: "supports",
-      },
-      {
-        kind: "strategy_support",
-        strategyKey: "corp.ambush_bluff",
-        role: "punish_payoff",
-        roleDetail: "access_net_damage_payoff",
-        evidenceProfile: "access_net_damage_payoff_rnd",
-        confidence: "medium",
-        rationale:
-          "R&D-Access-Net-Damage plus Reveal/Self-Shuffle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
-      },
+      { kind: "plan_role", role: "rnd_access_trap" },
       {
         kind: "tactic_interpretation",
         signal: "access.punish",
@@ -108,11 +86,6 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "damage.payoff",
         use: "damage.payoff.runner",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "remote_root_value",
-        rating: "low",
       },
     ],
     capabilities: [],

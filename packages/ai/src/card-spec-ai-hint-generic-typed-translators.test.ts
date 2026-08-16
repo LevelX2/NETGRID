@@ -82,6 +82,75 @@ const activated = (effects: unknown[]) => ({
 });
 
 describe("generic typed CardSpec AI translators", () => {
+  it("binds Batch 9 rez and targeted-bypass choices to their mechanical owners", () => {
+    const sandstorm = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_proteus_036_sandstorm"),
+    );
+    expect(sandstorm.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "choose_paid_end_the_run_subroutine_count",
+        kind: "mode_choice",
+        timing: "corp_rez_window",
+        targetType: "mode_choice",
+        hiddenInfoPolicy: "legal_options_only",
+      }),
+    );
+
+    const socialEngineering = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_v1_111_social-engineering"),
+    );
+    expect(socialEngineering.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "bypass_chosen_ice",
+        kind: "use_target",
+        timing: "on_play",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "visible_or_known_only",
+      }),
+    );
+  });
+
+  it("keeps multiple actor-private choices bound to their own capability", () => {
+    const ronin = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_v1_175_ronin-around"),
+    );
+
+    expect(ronin.targetProfiles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          purpose: "top_five_hardware_choice",
+          targetType: "card",
+          hiddenInfoPolicy: "public_or_controller_known_only",
+        }),
+        expect.objectContaining({
+          purpose: "expose_relevant_installed_corp_card",
+          targetType: "card",
+          hiddenInfoPolicy: "legal_targets_only",
+        }),
+      ]),
+    );
+  });
+
+  it("treats an own-stack program search as controller-known selection", () => {
+    const shortCircuit = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_v1_177_the-short-circuit"),
+    );
+
+    expect(shortCircuit.targetProfiles).toContainEqual({
+      schemaVersion: "target-profile-v1",
+      kind: "use_target",
+      timing: "activated_ability",
+      targetType: "program",
+      purpose: "program_search_to_hand",
+      preferences: [
+        "program_repairs_missing_coverage",
+        "best_cards_for_current_plan",
+        "best_cards_for_current_state",
+      ],
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    });
+  });
+
   it("binds Reconnaissance rez-credit planning to the chosen run server", () => {
     const reconnaissance = deriveCardSpecAiHint(
       targetAnnotatedEntry("onr_proteus_120_reconnaissance"),
@@ -678,14 +747,6 @@ describe("generic typed CardSpec AI translators", () => {
         },
       ],
       [
-        "onr_v1_044_netspace-inverter",
-        {
-          timing: "after_successful_run",
-          targetType: "server",
-          serverScope: "source_fort",
-        },
-      ],
-      [
         "onr_v1_046_pattels-virus",
         {
           timing: "after_successful_run",
@@ -748,6 +809,10 @@ describe("generic typed CardSpec AI translators", () => {
         targetAnnotatedEntry("onr_v1_046_pattels-virus"),
       ).targetProfiles?.filter((profile) => "schemaVersion" in profile),
     ).toHaveLength(1);
+    expect(
+      deriveCardSpecAiHint(targetAnnotatedEntry("onr_v1_044_netspace-inverter"))
+        .targetProfiles,
+    ).toBeUndefined();
   });
 
   it("rejects near-matching target families without the exact typed owner kind", () => {

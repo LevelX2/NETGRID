@@ -84,12 +84,29 @@ export const cardSpec = {
         role: "contest_remote",
       },
       {
-        kind: "target_preference",
-        purpose: "expose_installed_card",
-        avoid: ["hidden_info_dependent_choice"],
+        kind: "plan_role",
+        role: "expose_recon",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "abilities_activated_runner_main_expose_installed_card",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "expose_installed_card",
+            preferences: [
+              "unknown_or_unrezzed_corp_card",
+              "server_relevant_to_current_plan",
+              "current_run_path_relevance",
+            ],
+            avoid: ["already_known_or_rezzed_card"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

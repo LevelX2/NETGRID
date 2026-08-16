@@ -131,21 +131,7 @@ export const cardSpec = {
         severity: "medium",
       },
     ],
-    capabilities: [
-      {
-        capabilityKey: capabilityKey("trace_auto_success_add_tag"),
-        annotations: [
-          {
-            kind: "strategy_support",
-            strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
-            confidence: "medium",
-          },
-        ],
-      },
-    ],
+    capabilities: [],
   },
   printings: [
     {

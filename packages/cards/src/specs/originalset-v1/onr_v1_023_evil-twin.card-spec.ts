@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "3 credits: Break sentry subroutine.\n1 credit: +1 strength.\nPrevents up to 2 net and/or core damage total each turn.",
+      "[3]: Break sentry subroutine.\n[1]: +1 strength.\nPrevents up to 2 net and/or brain damage total each turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -101,6 +101,14 @@ export const cardSpec = {
       {
         kind: "plan_role",
         role: "safe_probe_run",
+      },
+      {
+        kind: "plan_role",
+        role: "survive_net_damage",
+      },
+      {
+        kind: "plan_role",
+        role: "survive_core_damage",
       },
       {
         kind: "strategic_role",

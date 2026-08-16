@@ -35,7 +35,10 @@ import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
 import { visibleServerStatuses } from "./server-status-view";
-import { visibleRunnerTraceSupportQuote } from "./visible-runner-trace-support-quote";
+import {
+  visibleRunnerTraceBidCapacity,
+  visibleRunnerTraceSupportQuote,
+} from "./visible-runner-trace-support-quote";
 import { visibleCorpIcePostRezRunQuote } from "./visible-post-rez-run-quote";
 import {
   normalizeTraceRulesProfile,
@@ -242,6 +245,47 @@ export function buildPlayerViewProjection(
         bidsRevealed: traceBidsRevealed,
         corpBidCommitted: trace.corpBid !== undefined,
         runnerBidCommitted: trace.runnerBid !== undefined,
+        visibleOpponentBidCapacity: runnerSide
+          ? Math.max(0, Math.floor(trace.corpBidMax ?? state.corp.credits))
+          : visibleRunnerTraceBidCapacity(state, "corp"),
+        ...(side === "corp" && trace.corpBidPaymentCommitment
+          ? {
+              ownCommittedPayment: {
+                amount: trace.corpBidPaymentCommitment.bid,
+                sources: trace.corpBidPaymentCommitment.breakdown.map(
+                  (entry) => ({
+                    kind: entry.kind,
+                    amount: entry.amount,
+                    ...(entry.sourceCardInstanceId
+                      ? { sourceCardInstanceId: entry.sourceCardInstanceId }
+                      : {}),
+                    ...(entry.sourceDefinitionId
+                      ? { sourceDefinitionId: entry.sourceDefinitionId }
+                      : {}),
+                  }),
+                ),
+              },
+            }
+          : {}),
+        ...(side === "runner" && trace.runnerBidPaymentCommitment
+          ? {
+              ownCommittedPayment: {
+                amount: trace.runnerBidPaymentCommitment.amount,
+                sources: trace.runnerBidPaymentCommitment.breakdown.map(
+                  (entry) => ({
+                    kind: entry.kind,
+                    amount: entry.amount,
+                    ...(entry.sourceCardInstanceId
+                      ? { sourceCardInstanceId: entry.sourceCardInstanceId }
+                      : {}),
+                    ...(entry.sourceDefinitionId
+                      ? { sourceDefinitionId: entry.sourceDefinitionId }
+                      : {}),
+                  }),
+                ),
+              },
+            }
+          : {}),
         ...(trace.corpBid !== undefined &&
         (side === "corp" || trace.bidsRevealed === true)
           ? {

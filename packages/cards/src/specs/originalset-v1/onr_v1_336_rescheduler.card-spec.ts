@@ -54,7 +54,17 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "hidden_information_pressure",
+        role: "corp_hand_refresh",
+      },
+      {
+        kind: "tactic_interpretation",
+        signal: "draw.card",
+        use: "draw.card",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "random_hand_reset",
+        severity: "medium",
       },
       {
         kind: "value_interpretation",

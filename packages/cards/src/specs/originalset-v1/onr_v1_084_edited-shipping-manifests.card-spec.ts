@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Make a run on HQ. If run is successful, and the Corp has any credits when you would access HQ, do not access cards from HQ; instead, the Corp loses 1 credit and gives you a tag, and you gain 10 credits.",
+      "Make a run on HQ. If run is successful, and the Corp has any credits when you would access HQ, do not access cards from HQ; instead, the Corp loses [1] and gives you a tag, and you gain [10].",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -90,6 +90,17 @@ export const cardSpec = {
       {
         kind: "strategic_exchange",
         exchange: "self_tag",
+      },
+      { kind: "plan_role", role: "conditional_hq_access_replacement" },
+      {
+        kind: "risk_interpretation",
+        risk: "normal_hq_access_replaced",
+        severity: "medium",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "corp_empty_credit_pool_whiff",
+        severity: "medium",
       },
       {
         kind: "tactic_interpretation",

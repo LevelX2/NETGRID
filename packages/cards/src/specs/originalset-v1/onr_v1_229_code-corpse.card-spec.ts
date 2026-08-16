@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+      "[Subroutine] Do 1 brain damage.\n[Subroutine] Do 1 brain damage.\n[Subroutine] End the run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -99,6 +99,8 @@ export const cardSpec = {
         signal: "damage.payoff",
         use: "damage.payoff.runner",
       },
+      { kind: "plan_role", role: "brain_damage_pressure" },
+      { kind: "plan_role", role: "runner_hand_size_pressure" },
       {
         kind: "tactic_interpretation",
         signal: "corp.remote_protection",

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "At the start of each run, Runner must pay 1, in addition to any other costs, or end the run.",
+      "At the start of each run, Runner must pay [1], in addition to any other costs, or end the run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

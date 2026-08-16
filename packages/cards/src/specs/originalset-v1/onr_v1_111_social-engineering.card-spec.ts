@@ -64,13 +64,30 @@ export const cardSpec = {
         strategyKey: "runner.run_event_tempo",
       },
       {
-        kind: "target_preference",
-        purpose: "bypass_chosen_ice",
-        preferences: [],
-        avoid: [],
+        kind: "risk_interpretation",
+        risk: "credit_reserve_cost",
+        severity: "high",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "hidden_replacement_longtail_secret_spend_guess_then_targeted_bypass_run",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "bypass_chosen_ice",
+            preferences: [
+              "known_or_rezzed_ice",
+              "blocks_relevant_run_path",
+              "high_break_cost_without_bonus",
+            ],
+            avoid: ["insufficient_post_payment_reserve"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

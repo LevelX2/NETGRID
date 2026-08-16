@@ -3,6 +3,7 @@ import {
   type CardDefinition,
   type CardInstanceId,
   type GameState,
+  type Side,
   type VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -15,6 +16,8 @@ import {
   restrictedHostedCreditSourceIds,
 } from "../run/run-duration-payment";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
+import { visibleRunnerRigCardForViewer } from "./card-view";
+import { runnerCostPenaltySupportCreditCapacity } from "../payment";
 
 function definitionFor(
   state: GameState,
@@ -130,6 +133,30 @@ export function visibleRunnerTraceSupportQuote(
     postBidLinkOptions: traceWindowOptions.postBidLinkOptions,
     traceSuccessCancelOptions: traceWindowOptions.traceSuccessCancelOptions,
   };
+}
+
+export function visibleRunnerTraceBidCapacity(
+  state: GameState,
+  viewer: Side,
+): number {
+  const quote = visibleRunnerTraceSupportQuote(state);
+  const visibleTraceCredits = quote.traceCreditSources.reduce(
+    (total, source) =>
+      viewer === "runner" ||
+      visibleRunnerRigCardForViewer(state, source.sourceCardInstanceId, viewer)
+        .known !== false
+        ? total + source.amount
+        : total,
+    0,
+  );
+  const visibleSupportCredits =
+    viewer === "runner" ? runnerCostPenaltySupportCreditCapacity(state) : 0;
+  return Math.max(
+    0,
+    Math.floor(
+      state.runner.credits + visibleTraceCredits + visibleSupportCredits,
+    ),
+  );
 }
 
 function visibleTraceWindowOptions(

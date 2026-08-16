@@ -841,11 +841,16 @@ export function createEncounterMovementRuntimeHosts(
             legalAction,
             subroutine,
           ),
-        resolveMultiBreakSubroutinesAction: (breakerId, legalAction) =>
+        resolveMultiBreakSubroutinesAction: (
+          breakerId,
+          legalAction,
+          options,
+        ) =>
           deps.resolveMultiBreakSubroutinesAction(
             state,
             breakerId,
             legalAction,
+            options,
           ),
         resolveBlinkBreakSubroutineAction: (
           breakerId,

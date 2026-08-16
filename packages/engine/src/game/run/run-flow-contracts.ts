@@ -464,6 +464,15 @@ export type RunFlowHost = {
       cardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
+    rezRootCardAtReactionWindow: (
+      state: GameState,
+      cardId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
+    resumePaidRunnerBreakerAction: (
+      state: GameState,
+      legalAction: LegalAction,
+    ) => void;
   };
 };
 

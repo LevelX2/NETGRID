@@ -1621,6 +1621,53 @@ export type BreachState = {
   }>;
 };
 
+export type TraceCorpPaymentSourceKind =
+  | "temporary_trace_credit"
+  | "fort_trace_bit_pool"
+  | "corp_credits"
+  | "corp_trace_bit_pool"
+  | "corp_trace_counter_pool";
+
+export type TraceRunnerPaymentSourceKind =
+  | "runner_credits"
+  | "runner_trace_link_credit";
+
+export type TraceCorpBidPaymentCommitment = {
+  side: "corp";
+  bid: number;
+  canPay: boolean;
+  breakdown: Array<{
+    kind: TraceCorpPaymentSourceKind;
+    amount: number;
+    sourceCardInstanceId?: CardInstanceId;
+    sourceDefinitionId?: CardDefinitionId;
+    serverId?: Exclude<ServerId, "new_remote">;
+  }>;
+  normalCreditsToPay: number;
+  temporaryTraceCreditsToPay: number;
+  fortTraceBitPoolToPay: number;
+  corpTraceBitsToPay: number;
+  corpTraceCountersToPay: number;
+};
+
+export type TraceRunnerBidPaymentCommitment = {
+  side: "runner";
+  purpose: "runner_trace_bid";
+  amount: number;
+  canPay: boolean;
+  breakdown: Array<{
+    kind: TraceRunnerPaymentSourceKind;
+    amount: number;
+    sourceCardInstanceId?: CardInstanceId;
+    sourceDefinitionId?: CardDefinitionId;
+    publicKind?: "runner_trace_link_bonus_credit";
+  }>;
+  traceLinkCreditsToPay: number;
+  bonusTraceLinkCreditsToPay: number;
+  normalCreditsToPay: number;
+  sourceDefinitionIds: CardDefinitionId[];
+};
+
 export type TraceState = {
   traceId: string;
   sourceCardInstanceId: CardInstanceId;
@@ -1671,6 +1718,10 @@ export type TraceState = {
   corpBidPaymentSelection?: {
     bid: number;
   };
+  /** Private, transient and authoritative until both Blind bids reveal. */
+  corpBidPaymentCommitment?: TraceCorpBidPaymentCommitment;
+  /** Private, transient and authoritative until both Blind bids reveal. */
+  runnerBidPaymentCommitment?: TraceRunnerBidPaymentCommitment;
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];
@@ -1932,6 +1983,13 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
+  pendingAardvarkBreakerContinuation?: {
+    aardvarkId: CardInstanceId;
+    breakerId: CardInstanceId;
+    encounteredIceId: CardInstanceId;
+    originalLegalAction: LegalAction;
+    createdAtStateVersion: number;
+  };
   hqInstallRezSequence?: HqInstallRezSequenceState;
   pendingAddTagContinuation?: PendingAddTagContinuation;
   pendingAccessEffectDamageContinuation?: {
@@ -2399,6 +2457,7 @@ export type EngineRandomizedTraceBidAssessment = {
   printedTrace: number;
   effectiveTraceLimit: number;
   currentLink: number;
+  visibleOpponentBidCapacity: number;
   rationalTarget: number;
   rationalRange: [number, number];
   stakes: TraceBidStakes;
@@ -3518,6 +3577,17 @@ export type VisibleTraceState = {
   bidsRevealed: boolean;
   corpBidCommitted: boolean;
   runnerBidCommitted: boolean;
+  /** Aggregate capacity derived only from information visible to this viewer. */
+  visibleOpponentBidCapacity: number;
+  ownCommittedPayment?: {
+    amount: number;
+    sources: Array<{
+      kind: TraceCorpPaymentSourceKind | TraceRunnerPaymentSourceKind;
+      amount: number;
+      sourceCardInstanceId?: CardInstanceId;
+      sourceDefinitionId?: CardDefinitionId;
+    }>;
+  };
   corpBid?: number;
   corpStrength?: number;
   runnerLink?: number;

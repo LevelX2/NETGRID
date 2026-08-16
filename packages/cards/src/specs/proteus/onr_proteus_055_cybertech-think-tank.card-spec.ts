@@ -61,7 +61,7 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_scoring_remote",
+        role: "meat_damage_amplifier",
       },
       {
         kind: "strategic_role",

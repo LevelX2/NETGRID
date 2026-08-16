@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Gain 2 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+      "Gain [2] after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -68,11 +68,6 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",
-      },
-      {
-        kind: "remote_role",
-        role: "run_tax",
-        threatLevel: "medium",
       },
       {
         kind: "value_interpretation",

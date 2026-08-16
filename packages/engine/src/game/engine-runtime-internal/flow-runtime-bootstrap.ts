@@ -50,8 +50,11 @@ import {
 } from "@netgrid/shared";
 import {
   assertCorpRezCostQuoteValid,
+  costQuotePublicPayload,
+  costQuoteToLegalActionCosts,
   corpServerIdForInstalledCard,
   quoteCorpIceInstallCost,
+  quoteCorpRootRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
   type CorpTracePaymentDependencies,
@@ -468,7 +471,10 @@ import {
   createRunAccessLegalActionHostComposition,
   type RunAccessLegalActionHostCompositionHost,
 } from "../run/run-access-legal-action-hosts";
-import { type RunnerBreakerActionExecutionHost } from "../run/runner-breaker-action-execution";
+import {
+  resumePaidRunnerBreakerAction,
+  type RunnerBreakerActionExecutionHost,
+} from "../run/runner-breaker-action-execution";
 import { type StartRunActionExecutionHost } from "../run/start-run-action-execution";
 import { type RezActionExecutionHost } from "../rez/rez-action-execution";
 import { type PlayCardExecutionHost } from "../play/play-card-execution";
@@ -1518,6 +1524,41 @@ export function configureFlowRuntimeBootstrap({
               false,
               legalAction,
               { runContinuation: "none" },
+            ),
+          rezRootCardAtReactionWindow: (state, cardId, legalAction) => {
+            const quote = quoteCorpRootRezCost(state, cardId);
+            if (!quote.canPay)
+              throw new Error(
+                "Die Korp kann die Aardvark-Rez-Kosten nicht bezahlen.",
+              );
+            const rezAction = action(
+              state,
+              "corp",
+              "rez_card",
+              `${definitionFor(state, cardId).title} im Reaktionsfenster rezzen`,
+              cardId,
+              costQuoteToLegalActionCosts(quote),
+              {
+                ...costQuotePublicPayload(quote),
+                aardvarkReactionSelfRez: true,
+              },
+            );
+            executeRezCard(
+              runtimePorts.rezCardHost(state),
+              cardId,
+              true,
+              rezAction,
+              { runContinuation: "none" },
+            );
+            legalAction.payload = {
+              ...(legalAction.payload ?? {}),
+              ...rezAction.payload,
+            };
+          },
+          resumePaidRunnerBreakerAction: (state, legalAction) =>
+            resumePaidRunnerBreakerAction(
+              runtimePorts.runnerBreakerActionExecutionHost(state),
+              legalAction,
             ),
           installedRevealHelperCount: (state) =>
             runtimePorts.v1915InstalledRevealHelperIds(state).length,

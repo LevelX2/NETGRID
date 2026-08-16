@@ -102,17 +102,11 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "trace_bid_support",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
+        kind: "plan_role",
+        role: "avoid_traces",
       },
     ],
     capabilities: [],

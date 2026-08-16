@@ -102,9 +102,9 @@ export const cardSpec = {
         preferences: [
           "protects_agenda_remote",
           "current_run_path_relevance",
-          "high_rez_cost_relief",
+          "high_rez_cost_tax",
         ],
-        avoid: ["hidden_info_dependent_choice", "irrelevant_server_ice"],
+        avoid: ["irrelevant_server_ice"],
       },
       {
         kind: "risk_interpretation",
