@@ -4410,6 +4410,8 @@ function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
   turn?: number;
   fromDecision?: number;
   toDecision?: number;
+  afterEventIndex?: number;
+  eventLimit?: number;
   includeEvents?: boolean;
   includeDecisionTraces?: boolean;
   includeBeliefState?: boolean;
@@ -4420,6 +4422,8 @@ function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
     turn?: number;
     fromDecision?: number;
     toDecision?: number;
+    afterEventIndex?: number;
+    eventLimit?: number;
     includeEvents?: boolean;
     includeDecisionTraces?: boolean;
     includeBeliefState?: boolean;
@@ -4431,6 +4435,8 @@ function maintenanceAnalysisFiltersFromSearch(searchParams: URLSearchParams): {
     ["turn", "turn"],
     ["fromDecision", "fromDecision"],
     ["toDecision", "toDecision"],
+    ["afterEventIndex", "afterEventIndex"],
+    ["eventLimit", "eventLimit"],
   ] as const) {
     const value = nonNegativeIntegerParam(searchParams.get(queryName));
     if (value !== undefined) filters[field] = value;

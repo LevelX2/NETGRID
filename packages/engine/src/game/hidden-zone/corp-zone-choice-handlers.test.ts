@@ -276,6 +276,12 @@ describe("corp zone choice handlers", () => {
     ]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: true,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: true,
+      hiddenZoneChangesRd: true,
       shownCardDefinitionIds: "agenda_alpha,agenda_beta",
       shownCount: 2,
       shuffledIntoRndCount: 2,

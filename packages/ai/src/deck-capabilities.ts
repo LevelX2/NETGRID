@@ -18,6 +18,7 @@ import type {
 } from "./hint-ontology";
 import type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts";
 import { runnerEffectsProvideMultiaccess } from "./runner-canonical-hint-semantics";
+import { exactBankCashOutPayout } from "./actions/action-economy-projection";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
   "deck-capability-profile-v1" as const;
@@ -904,10 +905,10 @@ function economyBankToolForRecord(
     )
     .map((action) => action.actionId)
     .sort();
-  const cashOutActionIds = (params.legalActions ?? [])
-    .filter((action) =>
-      actionMatchesBankCashOut(action, record, visibleInstance?.card),
-    )
+  const cashOutActions = (params.legalActions ?? []).filter((action) =>
+    actionMatchesBankCashOut(action, record, visibleInstance?.card),
+  );
+  const cashOutActionIds = cashOutActions
     .map((action) => action.actionId)
     .sort();
   const buildActionLegal = buildActionIds.length > 0;
@@ -921,6 +922,10 @@ function economyBankToolForRecord(
     currentBankAmounts.length > 0
       ? currentBankAmounts.reduce((sum, amount) => sum + amount, 0)
       : undefined;
+  const estimatedPayout = Math.max(
+    0,
+    ...cashOutActions.map((action) => exactBankCashOutPayout(action) ?? 0),
+  );
   const structuredBank =
     canonicalRunnerBank ||
     deckCapabilityTextHasStructuredBankRoleSignal(signals) ||
@@ -940,9 +945,7 @@ function economyBankToolForRecord(
     cashOutActionLegal,
     buildActionIds,
     cashOutActionIds,
-    ...(cashOutActionLegal && currentBankAmount !== undefined
-      ? { estimatedPayout: currentBankAmount }
-      : {}),
+    ...(cashOutActionLegal && estimatedPayout > 0 ? { estimatedPayout } : {}),
     confidence:
       canonicalRunnerBank ||
       deckCapabilityTextHasHighConfidenceBankSignal(`${text} ${signals}`)

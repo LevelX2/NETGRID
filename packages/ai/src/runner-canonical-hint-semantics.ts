@@ -91,7 +91,10 @@ export function runnerEffectsProvideBreakerCredits(
         effect.kind === "recurring_economy" &&
         effect.resource === "credits" &&
         (effect.target === "icebreaker" ||
-          effect.target === "non_noisy_icebreaker"),
+          effect.target === "non_noisy_icebreaker" ||
+          effect.target === "killer" ||
+          effect.target === "fracter" ||
+          effect.target === "decoder"),
     ) ?? false
   );
 }

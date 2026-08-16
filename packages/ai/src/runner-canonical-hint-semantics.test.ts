@@ -151,6 +151,17 @@ describe("canonical Runner hint semantics", () => {
         }),
       ]),
     ).toBe(false);
+    expect(
+      runnerEffectsProvideBreakerCredits([
+        effect({
+          kind: "recurring_economy",
+          timing: "persistent",
+          scope: "runner",
+          resource: "credits",
+          target: "killer",
+        }),
+      ]),
+    ).toBe(true);
   });
 
   it("shares exact damage- and tag-prevention predicates without broad role matches", () => {

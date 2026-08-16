@@ -1,5 +1,9 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const takeHostedCredits = capabilityKey(
+  "abilities_activated_runner_main_take_hosted_credits",
+);
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -14,9 +18,7 @@ export const cardSpec = {
       "Put [12] from the bank on Short-Term Contract when it is installed. When all the bits have been removed, trash Short-Term Contract. A: Take [2] from Short-Term Contract.",
     capabilityText: [
       {
-        capabilityKey: capabilityKey(
-          "abilities_activated_runner_main_take_hosted_credits",
-        ),
+        capabilityKey: takeHostedCredits,
         actionLabel: "Short-Term Contract: bis zu 2 gehostete Credits nehmen",
       },
     ],
@@ -60,9 +62,7 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey(
-          "abilities_activated_runner_main_take_hosted_credits",
-        ),
+        capabilityKey: takeHostedCredits,
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
         timing: "runner_main",
@@ -119,7 +119,18 @@ export const cardSpec = {
         rating: "high",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: takeHostedCredits,
+        annotations: [
+          {
+            kind: "plan_owner",
+            owner: "runner.credit_bank",
+            route: "cash_out",
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

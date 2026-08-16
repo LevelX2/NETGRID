@@ -17330,10 +17330,7 @@ function runnerCreditBankSignals(
   );
   return tools.flatMap((tool): RunnerCorePlanDomain["creditBanks"] => {
     const currentStoredCredits = Math.max(0, tool.currentBankAmount ?? 0);
-    const estimatedPayout = Math.max(
-      0,
-      tool.estimatedPayout ?? currentStoredCredits,
-    );
+    const estimatedPayout = Math.max(0, tool.estimatedPayout ?? 0);
     const exactBankOwnerCandidates = candidates.filter(
       (candidate) =>
         candidate.sourceDefinitionId === tool.cardId &&
@@ -17537,6 +17534,11 @@ function runnerCreditBankSignals(
     const urgentCreditFloor =
       input.playerView.own.credits <= 2 ||
       input.playerView.own.credits < economy.minimumCreditFloor;
+    const efficientLiquidityNeed =
+      cashOutActionLegal &&
+      estimatedPayout > 1 &&
+      currentStoredCredits > 0 &&
+      input.playerView.own.credits < economy.desiredCreditReserve;
     // The bank remains the sole action owner. Development plans contribute a
     // typed, visible funding route; they never execute the cashout themselves.
     // A mature bank may also replace a repeated basic-credit funding sequence
@@ -17546,19 +17548,28 @@ function runnerCreditBankSignals(
       estimatedPayout > 0 &&
       (convertibleRunFundingNeed ||
         convertibleDevelopmentFundingNeed ||
-        matureBankDevelopmentFundingNeed);
+        matureBankDevelopmentFundingNeed ||
+        efficientLiquidityNeed);
     if (shouldCashOut) {
+      const concreteFundingNeed =
+        convertibleRunFundingNeed ||
+        convertibleDevelopmentFundingNeed ||
+        matureBankDevelopmentFundingNeed;
       return [
         {
           bankId: tool.sourceCardInstanceId ?? tool.cardId,
           phase: "cash_out" as const,
           actionIds: cashOutActionIds,
           rejectedActionIds: buildActionIds,
-          priorityClass: "P2" as const,
+          priorityClass: concreteFundingNeed
+            ? ("P2" as const)
+            : ("P4" as const),
           currentStoredCredits,
           portfolioStoredCredits,
           estimatedPayout,
-          value: 1_200 + estimatedPayout,
+          value: concreteFundingNeed
+            ? 1_200 + estimatedPayout
+            : 700 + estimatedPayout,
           evidenceCodes: [
             ...(convertibleRunFundingRoute?.evidenceCodes ?? []),
             ...(convertibleRunFundingNeed
@@ -17568,6 +17579,9 @@ function runnerCreditBankSignals(
               ? ["runner_credit_bank_cashout_for_development_funding"]
               : []),
             ...(matureBankDevelopmentFundingRoute?.evidenceCodes ?? []),
+            ...(efficientLiquidityNeed && !concreteFundingNeed
+              ? ["runner_credit_bank_cashout_for_click_efficient_liquidity"]
+              : []),
             ...tool.evidence,
             ...(developmentCashOutAdmission.route?.evidenceCodes ?? []),
           ],
@@ -17575,8 +17589,12 @@ function runnerCreditBankSignals(
       ];
     }
 
+    const clickLimitedStoredLiquidity = Math.min(
+      currentStoredCredits,
+      estimatedPayout * Math.max(0, input.playerView.own.clicks),
+    );
     const combinedCreditAccess =
-      input.playerView.own.credits + currentStoredCredits;
+      input.playerView.own.credits + clickLimitedStoredLiquidity;
     const alreadyBuiltThisTurn = creditBankBuiltThisTurn(input, tool);
     const shouldBuild =
       buildActionLegal &&

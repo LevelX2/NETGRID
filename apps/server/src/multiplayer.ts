@@ -6946,6 +6946,13 @@ function aiDecisionTraceFor(
   const traceJson = safeDebug
     ? aiDecisionTraceJson(safeDebug, side, legalAction, mode)
     : minimalAiDecisionTraceJson(side, legalAction, mode);
+  traceJson.appliedDecision = {
+    actionId: legalAction.actionId,
+    actionType: legalAction.type,
+    ...(decision.selectedChoices
+      ? { selectedChoices: structuredClone(decision.selectedChoices) }
+      : {}),
+  };
   const traceBidReceipt =
     event.privatePayload?.[side]?.randomizedTraceBidSelectionReceipt;
   if (traceBidReceipt && typeof traceBidReceipt === "object") {

@@ -205,6 +205,32 @@ export function actionEconomyProjectionFor(
   };
 }
 
+/**
+ * Returns the exact liquid-credit payout quoted by a currently legal bank
+ * cash-out action. The stored pool is deliberately not a substitute: it may
+ * require several clicks to convert.
+ */
+export function exactBankCashOutPayout(
+  action: LegalAction,
+): number | undefined {
+  if (action.payload?.cardImplementationTakesHostedCredits !== true) {
+    return undefined;
+  }
+  return (
+    positiveNumber(action.payload.gainCreditsAmount) ??
+    positiveNumber(action.payload.hostedCreditTakeAmount)
+  );
+}
+
+export function exactBankCashOutTakeAmount(
+  action: LegalAction,
+): number | undefined {
+  if (action.payload?.cardImplementationTakesHostedCredits !== true) {
+    return undefined;
+  }
+  return positiveNumber(action.payload.hostedCreditTakeAmount);
+}
+
 export function rootRezCreditOutcomeProjectionStatus(
   candidate: ActionSemanticCandidate,
   action: LegalAction,

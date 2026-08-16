@@ -27,7 +27,7 @@ describe("capability-bound CardSpec plan owners", () => {
     );
   });
 
-  it("projects all four current bindings deterministically from exact capabilities", () => {
+  it("projects all current bindings deterministically from exact capabilities", () => {
     const broker = deriveCardSpecAiHint(entry("onr_v1_154_broker"));
     expect(broker.actionPlanOwnerBindings).toEqual([
       {
@@ -37,6 +37,16 @@ describe("capability-bound CardSpec plan owners", () => {
       },
       {
         capabilityKey: "withdraw_credits",
+        owner: "runner.credit_bank",
+        route: "cash_out",
+      },
+    ]);
+    expect(
+      deriveCardSpecAiHint(entry("onr_v1_178_short-term-contract"))
+        .actionPlanOwnerBindings,
+    ).toEqual([
+      {
+        capabilityKey: "abilities_activated_runner_main_take_hosted_credits",
         owner: "runner.credit_bank",
         route: "cash_out",
       },
