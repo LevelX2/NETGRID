@@ -595,6 +595,48 @@ describe("Corp same-turn score conversion", () => {
     ).toMatchObject({ actionId: "falsified", sourceCardId: "funded" });
   });
 
+  it("preserves a score-ready agenda by sourcing Falsified Transactions from an asset", () => {
+    const target = card("target", "agenda", { advancementRequirement: 3 });
+    const scoreReadySource = card("ready-source", "agenda", {
+      advancementRequirement: 3,
+      advancementCounters: 3,
+      agendaPoints: 2,
+    });
+    const fundedAsset = card("funded-asset", "asset", {
+      advancementCounters: 3,
+    });
+    const input = corpInput({
+      clicks: 2,
+      credits: 0,
+      hq: [target],
+      root: [scoreReadySource, fundedAsset],
+      actions: [
+        action("install", "install_card", target.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        action("falsified", "play_operation", "falsified", {
+          scoreConversionCapability: "move_advancement",
+          scoreConversionAdvancementMaximum: 3,
+          scoreConversionSourceMode: "chosen_card",
+          scoreConversionTargetMode: "chosen_installed_advanceable_card",
+          scoreConversionTiming: "immediate",
+        }),
+      ],
+    });
+
+    expect(
+      bestCorpSameTurnScoreConversionPath(input)?.steps.find(
+        (step) => step.kind === "move_advancement",
+      ),
+    ).toMatchObject({
+      actionId: "falsified",
+      sourceCardId: "funded-asset",
+      targetCardId: "target",
+      advancementAmount: 3,
+    });
+  });
+
   it("does not double-spend Pacifica counters for actions and transfer", () => {
     const agenda = card("agenda", "agenda", { advancementRequirement: 3 });
     const pacifica = card("pacifica", "asset", { advancementCounters: 3 });

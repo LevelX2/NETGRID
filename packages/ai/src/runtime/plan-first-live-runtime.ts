@@ -1377,7 +1377,15 @@ function bindSelectedCorpScoreChoiceContinuation(
   const moduleState = executor?.moduleState as
     | {
         kind?: unknown;
-        signal?: { agendaInstanceId?: unknown };
+        signal?: {
+          agendaInstanceId?: unknown;
+          advancementCounterChoiceBinding?: {
+            kind?: unknown;
+            sourceCardId?: unknown;
+            targetCardId?: unknown;
+            amount?: unknown;
+          };
+        };
         choiceContinuation?: unknown;
       }
     | undefined;
@@ -1393,11 +1401,23 @@ function bindSelectedCorpScoreChoiceContinuation(
     (selectedAction?.type === "score_agenda" &&
       selectedAction.source === targetCardId &&
       selectedAction.payload?.cardId === targetCardId);
+  const moveBinding = moduleState?.signal?.advancementCounterChoiceBinding;
+  const exactMoveBinding =
+    result.route.head.semanticActionType !==
+      "score_conversion.move_advancement" ||
+    (moveBinding?.kind === "move_advancement" &&
+      typeof moveBinding.sourceCardId === "string" &&
+      moveBinding.sourceCardId.length > 0 &&
+      moveBinding.targetCardId === targetCardId &&
+      typeof moveBinding.amount === "number" &&
+      Number.isInteger(moveBinding.amount) &&
+      moveBinding.amount > 0);
   if (
     !executor ||
     moduleState?.kind !== "score" ||
     !targetCardId ||
-    !exactScoreAction
+    !exactScoreAction ||
+    !exactMoveBinding
   ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
@@ -1415,6 +1435,12 @@ function bindSelectedCorpScoreChoiceContinuation(
     selectedActionId: result.route.head.actionId,
     selectedAtStateVersion: input.playerView.stateVersion,
     targetCardId,
+    ...(moveBinding?.kind === "move_advancement"
+      ? {
+          sourceCardId: moveBinding.sourceCardId,
+          amount: moveBinding.amount,
+        }
+      : {}),
   };
 }
 
@@ -11690,6 +11716,18 @@ function sameTurnScoreConversionProjectForCandidate(
         residentParent: false,
         realizedStrategySupportCount: candidate.strategySupport.length,
       }),
+      ...(step.kind === "move_advancement" &&
+      step.sourceCardId !== undefined &&
+      step.advancementAmount > 0
+        ? {
+            advancementCounterChoiceBinding: {
+              kind: "move_advancement" as const,
+              sourceCardId: step.sourceCardId,
+              targetCardId: step.targetCardId,
+              amount: step.advancementAmount,
+            },
+          }
+        : {}),
       ...(preventsTerminalSteal ? { preventsTerminalSteal: true } : {}),
       feasible: true,
       evidenceCode: preventsTerminalSteal

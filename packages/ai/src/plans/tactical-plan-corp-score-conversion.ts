@@ -31,6 +31,7 @@ export type CorpScoreConversionStep = {
   targetCardId: string;
   targetServerId: string;
   advancementAmount: number;
+  sourceOpportunityCost?: number;
   clickCost: number;
   creditCost: number;
   generatedClicks: number;
@@ -66,6 +67,7 @@ type ConversionCapability = {
   capabilityId: string;
   amount: number;
   sourceCardId?: string;
+  sourceOpportunityCost?: number;
   clickCost: number;
   creditCost: number;
   projected: boolean;
@@ -415,6 +417,7 @@ function conversionCapabilities(
           source?.advancementCounters ?? 0,
         );
         return sourceCardId &&
+          source &&
           sourceCardId !== target.card.instanceId &&
           amount > 0
           ? [
@@ -424,6 +427,10 @@ function conversionCapabilities(
                 capabilityId: action.actionId,
                 amount,
                 sourceCardId,
+                sourceOpportunityCost: advancementSourceOpportunityCost(
+                  source,
+                  amount,
+                ),
                 clickCost: actionCost(action, "clicks"),
                 creditCost: actionCost(action, "credits"),
                 projected: false,
@@ -442,16 +449,23 @@ function conversionCapabilities(
             card.instanceId !== target.card.instanceId &&
             (card.advancementCounters ?? 0) > 0,
         )
-        .map((source) => ({
-          kind: "move_advancement" as const,
-          action,
-          capabilityId: `${action.actionId}:${source.instanceId}`,
-          amount: Math.min(cap, source.advancementCounters ?? 0),
-          sourceCardId: source.instanceId,
-          clickCost: actionCost(action, "clicks"),
-          creditCost: actionCost(action, "credits"),
-          projected: false,
-        }));
+        .map((source) => {
+          const amount = Math.min(cap, source.advancementCounters ?? 0);
+          return {
+            kind: "move_advancement" as const,
+            action,
+            capabilityId: `${action.actionId}:${source.instanceId}`,
+            amount,
+            sourceCardId: source.instanceId,
+            sourceOpportunityCost: advancementSourceOpportunityCost(
+              source,
+              amount,
+            ),
+            clickCost: actionCost(action, "clicks"),
+            creditCost: actionCost(action, "credits"),
+            projected: false,
+          };
+        });
     },
   );
   if (!target.installAction) return legalCapabilities;
@@ -827,6 +841,9 @@ function conversionStep(
     targetCardId: target.card.instanceId,
     targetServerId: target.serverId,
     advancementAmount: amount,
+    ...(capability.sourceOpportunityCost !== undefined
+      ? { sourceOpportunityCost: capability.sourceOpportunityCost }
+      : {}),
     clickCost: capability.clickCost,
     creditCost: capability.creditCost,
     generatedClicks: 0,
@@ -1009,14 +1026,41 @@ function comparePaths(
     "rewardedOveradvance" in left && left.rewardedOveradvance ? 1 : 0;
   const rightRewarded =
     "rewardedOveradvance" in right && right.rewardedOveradvance ? 1 : 0;
+  const leftSourceOpportunityCost = left.steps.reduce(
+    (sum, step) => sum + (step.sourceOpportunityCost ?? 0),
+    0,
+  );
+  const rightSourceOpportunityCost = right.steps.reduce(
+    (sum, step) => sum + (step.sourceOpportunityCost ?? 0),
+    0,
+  );
   return (
     right.agendaPoints - left.agendaPoints ||
     left.steps.length - right.steps.length ||
     left.creditsRequired - right.creditsRequired ||
     leftNetClicks - rightNetClicks ||
+    leftSourceOpportunityCost - rightSourceOpportunityCost ||
     rightRewarded - leftRewarded ||
     leftOveradvance - rightOveradvance ||
     left.agendaCardId.localeCompare(right.agendaCardId) ||
     left.targetServerId.localeCompare(right.targetServerId)
+  );
+}
+
+function advancementSourceOpportunityCost(
+  source: VisibleCard,
+  amount: number,
+): number {
+  const countersBefore = Math.max(0, source.advancementCounters ?? 0);
+  const countersAfter = Math.max(0, countersBefore - amount);
+  if (!isVisibleAgenda(source)) return amount * 10;
+  const requirement = advancementRequirement(source) ?? Number.MAX_SAFE_INTEGER;
+  const losesScoreReadiness =
+    countersBefore >= requirement && countersAfter < requirement;
+  return (
+    500 +
+    amount * 100 +
+    Math.max(0, source.agendaPoints ?? 0) * 200 +
+    (losesScoreReadiness ? 10_000 : 0)
   );
 }

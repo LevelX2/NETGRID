@@ -1515,6 +1515,11 @@ describe("selectedChoicesForDecision", () => {
         maxSelections: 1,
         options: [
           {
+            id: "move_from_wrong_source",
+            label: "2 von der falschen Quelle auf Agenda",
+            value: "decoy_1|agenda_1|2",
+          },
+          {
             id: "move_to_vapor_decoy",
             label: "1 auf Decoy",
             value: "vapor_1|decoy_1|1",
@@ -1541,7 +1546,12 @@ describe("selectedChoicesForDecision", () => {
         ],
       },
     );
-    rememberResidentScoreChoiceContinuation(input, agenda.instanceId);
+    rememberResidentScoreChoiceContinuation(
+      input,
+      agenda.instanceId,
+      "corp_advancement_counter",
+      { sourceCardId: vapor.instanceId, amount: 2 },
+    );
     const decision = selectedChoicesForDecision(
       input,
       resolveChoiceAction(),
@@ -1987,6 +1997,7 @@ function rememberResidentScoreChoiceContinuation(
   family:
     | "corp_advancement_counter"
     | "corp_scored_agenda_on_score" = "corp_advancement_counter",
+  move?: { sourceCardId: string; amount: number },
 ): void {
   const priorInput = structuredClone(input);
   priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
@@ -2010,6 +2021,9 @@ function rememberResidentScoreChoiceContinuation(
             selectedActionId: "corp.score-conversion",
             selectedAtStateVersion: priorInput.playerView.stateVersion,
             targetCardId,
+            ...(move
+              ? { sourceCardId: move.sourceCardId, amount: move.amount }
+              : {}),
           },
         },
       },

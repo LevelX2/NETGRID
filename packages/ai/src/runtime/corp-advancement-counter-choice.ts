@@ -10,7 +10,16 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
   >["options"],
   plannedTargetCardId?: string,
   plannedDesiredAdvancementCounters?: number,
+  plannedMove?: {
+    sourceCardId: string;
+    targetCardId: string;
+    amount: number;
+  },
 ): string | undefined {
+  if (plannedMove) {
+    const exactValue = `${plannedMove.sourceCardId}|${plannedMove.targetCardId}|${plannedMove.amount}`;
+    return selectableOptions.find((option) => option.value === exactValue)?.id;
+  }
   return selectableOptions
     .map((option) => ({
       option,
