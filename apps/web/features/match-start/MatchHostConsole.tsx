@@ -43,6 +43,10 @@ type AiDeckPolicy =
 type AiTraceStartMode = "off" | "detailed";
 type DeckSlotSource = "snapshot" | "local" | "random_standard";
 
+// Firefox restores dynamic button-disabled state before React hydrates.
+// The spread keeps this Firefox-only attribute outside React's button typings.
+const FIREFOX_DISABLED_STATE_RESET_PROPS = { autoComplete: "off" } as const;
+
 type MatchStartLocalDeck = {
   deckId: string;
   name: string;
@@ -366,6 +370,7 @@ export function MatchHostConsole({
         className="button primary wide"
         onClick={onCreateMatch}
         data-testid="create-match"
+        {...FIREFOX_DISABLED_STATE_RESET_PROPS}
         disabled={standardDeckCatalogBlocksStart}
         title={
           standardDeckCatalogBlocksStart
