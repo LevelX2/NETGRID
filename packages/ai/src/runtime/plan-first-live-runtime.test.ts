@@ -3239,7 +3239,7 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
     });
     expect(
-      decision.decisionDebug?.planFirstDecision?.selectedPlan.evidenceCodes,
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.evidenceCodes,
     ).toEqual(
       expect.arrayContaining([
         "runner_credit_bank_cashout_for_click_efficient_liquidity",
