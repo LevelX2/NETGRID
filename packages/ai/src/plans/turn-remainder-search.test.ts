@@ -206,6 +206,7 @@ describe("deterministic remainder-turn search", () => {
     const twoStep = searchDeterministicRemainderTurnPlans({
       entryFrame: setup.frame,
       offers,
+      budget: { maximumDepth: 2 },
     });
     const selectedSingle = singleStep.lines.find(
       (line) => line.lineId === singleStep.selectedLineId,

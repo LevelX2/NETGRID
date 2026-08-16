@@ -3822,6 +3822,25 @@ function buildRunnerDomain(
         moduleId: "runner.pressure_central",
         dedupeKey: signal.pressureId,
       });
+      const fundingRoute = runnerExactFundingRouteContract(input, candidates, {
+        demandId: signal.supportNeedId,
+        sourcePlanId: parentPlanInstanceId,
+        purpose: "foreground_plan",
+        priority: "next_own_turn",
+        hardness: "soft",
+        deadline: "within_three_own_turns",
+        targetCredits: campaign.fundingTargetCredits,
+        remainingClicks,
+        allowIncrementalProgress: true,
+        allowStrategicExchange: false,
+        evidence: campaign.evidenceCodes,
+      });
+      if (
+        campaign.reserveFundingOptional &&
+        fundingRoute.routeActionIds.length === 0
+      ) {
+        return [];
+      }
       return [
         {
           kind: "parent_plan_support" as const,
@@ -3832,7 +3851,7 @@ function buildRunnerDomain(
             targetId: signal.serverId,
             reasonCode: "fund_bound_access_payoff_install",
           },
-          targetCredits: campaign.installCost,
+          targetCredits: campaign.fundingTargetCredits,
           currentCreditsAtRevalidation: currentCredits,
           gap: campaign.fundingGap,
           priorityClass: "P4" as const,
@@ -3840,22 +3859,28 @@ function buildRunnerDomain(
             stateVersion: input.playerView.stateVersion,
             status: "material_parent_open" as const,
           },
-          ...runnerExactFundingRouteContract(input, candidates, {
-            demandId: signal.supportNeedId,
-            sourcePlanId: parentPlanInstanceId,
-            purpose: "foreground_plan",
-            priority: "next_own_turn",
-            hardness: "soft",
-            deadline: "within_three_own_turns",
-            targetCredits: campaign.installCost,
-            remainingClicks,
-            allowIncrementalProgress: true,
-            allowStrategicExchange: false,
-            evidence: campaign.evidenceCodes,
-          }),
+          ...fundingRoute,
           evidenceCode: `runner_access_payoff_campaign_funding:${signal.serverId}`,
         },
       ];
+    });
+  const materialAccessPayoffSupportNeedIds = new Set(
+    accessPayoffFundingNeeds.map((need) => need.needId),
+  );
+  const effectiveAccessPayoffCampaignSignals =
+    accessPayoffCampaignSignals.map((signal) => {
+      if (
+        !signal.accessPayoffCampaign?.reserveFundingOptional ||
+        signal.supportNeedId === undefined ||
+        materialAccessPayoffSupportNeedIds.has(signal.supportNeedId)
+      ) {
+        return signal;
+      }
+      const { supportNeedId: _unusedSupportNeedId, ...withoutSupport } = signal;
+      return {
+        ...withoutSupport,
+        reachable: (signal.preparationActionIds?.length ?? 0) > 0,
+      };
     });
   const fundingNeeds = uniqueBy(
     [
@@ -4306,7 +4331,7 @@ function buildRunnerDomain(
           ];
         },
       ),
-      ...accessPayoffCampaignSignals,
+      ...effectiveAccessPayoffCampaignSignals,
       // A legal same-turn payoff changes the current phase of the already
       // discovered server-pressure plan. Keep it after the direct route
       // signals because uniqueBy intentionally retains the last phase for a
@@ -4649,7 +4674,7 @@ function buildRunnerDomain(
         return [];
       }
       if (
-        accessPayoffCampaignSignals.some(
+        effectiveAccessPayoffCampaignSignals.some(
           (signal) =>
             signal.accessPayoffCampaign?.payoffCardInstanceId ===
             evaluation.cardInstanceId,
@@ -5879,7 +5904,6 @@ function runnerCentralPressureDevelopmentSignals(
   const eligible = handDevelopment.flatMap((evaluation) => {
     if (
       evaluation.developmentRole !== "access_payoff" ||
-      evaluation.strategicFit !== "strong" ||
       !evaluation.definitionId ||
       runnerDefinitionRequiresTargetedBypassPlan(evaluation.definitionId)
     ) {
@@ -5892,6 +5916,16 @@ function runnerCentralPressureDevelopmentSignals(
             entry.sourceDefinitionId === evaluation.definitionId,
         )
       : undefined;
+    const supportsPrimaryStrategy = candidate?.strategySupport.some(
+      (support) => support.strategyId === strategicIntent.primaryWinIntent,
+    );
+    if (
+      evaluation.strategicFit !== "strong" &&
+      evaluation.strategicFit !== "medium" &&
+      !supportsPrimaryStrategy
+    ) {
+      return [];
+    }
     const serverId = candidate
       ? runnerCentralPayoffServer(candidate)
       : runnerCentralPayoffServerForDefinition(evaluation.definitionId);
@@ -5918,10 +5952,22 @@ function runnerCentralPressureDevelopmentSignals(
       (input.playerView.own.rig ?? []).filter(
         (card) => card.definitionId === evaluation.definitionId,
       ).length;
+    const openingReserveConversion =
+      evaluation.availability === "legal_now" &&
+      evaluation.deferReason === "preserve_credit_floor" &&
+      evaluation.fundingNeed?.reason === "would_break_floor" &&
+      economy.creditReservePolicy.phase === "opening" &&
+      economy.creditReservePolicy.remoteScoreThreat === "none" &&
+      target.pathPassability === "reachable" &&
+      target.pathCost === 0 &&
+      (target.recommendation === "run_now" ||
+        target.recommendation === "run_if_free") &&
+      input.playerView.own.clicks >= 2;
     const legalInstall =
       evaluation.availability === "legal_now" &&
       (evaluation.deferReason === "none" ||
-        (evaluation.deferReason === "duplicate" && installedCopyCount === 0)) &&
+        (evaluation.deferReason === "duplicate" && installedCopyCount === 0) ||
+        openingReserveConversion) &&
       candidate?.semanticActionType === "install.card";
     const waitingForInstallFunding =
       evaluation.availability === "missing_credits" &&
@@ -5946,6 +5992,7 @@ function runnerCentralPressureDevelopmentSignals(
         installedCopyCount,
         installCost: installCost!,
         marginalValue,
+        reserveFundingOptional: openingReserveConversion,
       },
     ];
   });
@@ -5966,9 +6013,20 @@ function runnerCentralPressureDevelopmentSignals(
     );
     const selected = ordered[0];
     if (!selected) return [];
-    const fundingGap = Math.max(
+    const installAffordabilityGap = Math.max(
       0,
       selected.installCost - input.playerView.own.credits,
+    );
+    const reserveFundingGap = selected.reserveFundingOptional
+      ? Math.max(0, selected.evaluation.fundingNeed?.missingCredits ?? 0)
+      : 0;
+    const fundingGap = Math.max(
+      installAffordabilityGap,
+      reserveFundingGap,
+    );
+    const fundingTargetCredits = Math.max(
+      selected.installCost,
+      input.playerView.own.credits + fundingGap,
     );
     const runFundingTargetCredits = Math.max(
       0,
@@ -5984,8 +6042,10 @@ function runnerCentralPressureDevelopmentSignals(
       `runner_access_payoff_campaign_card:${selected.evaluation.cardInstanceId}`,
       `runner_access_payoff_campaign_desired_copies:${selected.installedCopyCount + 1}`,
       `runner_access_payoff_campaign_install_cost:${selected.installCost}`,
+      `runner_access_payoff_campaign_funding_target_credits:${fundingTargetCredits}`,
       `runner_access_payoff_campaign_run_target_credits:${runFundingTargetCredits}`,
       `runner_access_payoff_campaign_funding_gap:${fundingGap}`,
+      `runner_access_payoff_campaign_reserve_funding_optional:${selected.reserveFundingOptional}`,
       `runner_access_payoff_campaign_milestone:${fundingGap > 0 ? "fund_install" : "install_payoff"}`,
     ];
     return [
@@ -6002,7 +6062,8 @@ function runnerCentralPressureDevelopmentSignals(
           ]),
         ],
         priorityClass: "P4" as const,
-        reachable: selected.candidate !== undefined,
+        reachable:
+          selected.candidate !== undefined && supportNeedId === undefined,
         marginalValue: selected.marginalValue,
         evidenceCode: `runner_access_payoff_campaign:${serverId}:${selected.evaluation.cardInstanceId}`,
         sourceDefinitionIds: [selected.evaluation.definitionId!],
@@ -6023,9 +6084,11 @@ function runnerCentralPressureDevelopmentSignals(
           installedCopyCount: selected.installedCopyCount,
           selectedCopyOrdinal: selected.installedCopyCount + 1,
           installCost: selected.installCost,
+          fundingTargetCredits,
           runFundingTargetCredits,
           totalFundingEnvelope: selected.installCost + runFundingTargetCredits,
           fundingGap,
+          reserveFundingOptional: selected.reserveFundingOptional,
           horizon: fundingGap > 0 ? "bounded_multi_turn" : "same_turn",
           milestone: fundingGap > 0 ? "fund_install" : "install_payoff",
           evidenceCodes,

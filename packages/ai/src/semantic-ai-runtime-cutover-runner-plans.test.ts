@@ -119,6 +119,38 @@ function versionedRunnerTurnInput(
   return input;
 }
 
+function rdExpressDeckSnapshot() {
+  return {
+    deckSnapshotId: "standard_runner_rd_express:1.1.0",
+    side: "runner" as const,
+    cards: [
+      { cardId: "onr_v1_014_codecracker", quantity: 2 },
+      { cardId: "onr_v1_040_loony-goon", quantity: 2 },
+      { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
+      { cardId: "onr_v1_089_gideons-pawnshop", quantity: 1 },
+      { cardId: "onr_v1_094_inside-job", quantity: 3 },
+      { cardId: "onr_v1_095_jack-n-joe", quantity: 3 },
+      { cardId: "onr_v1_097_livewires-contacts", quantity: 3 },
+      { cardId: "onr_v1_102_open-ended-mileage-program", quantity: 2 },
+      { cardId: "onr_v1_108_score", quantity: 2 },
+      { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 3 },
+      { cardId: "onr_v1_124_corolla-speed-chip", quantity: 1 },
+      { cardId: "onr_v1_129_hq-interface", quantity: 2 },
+      { cardId: "onr_v1_139_r-and-d-interface", quantity: 3 },
+      { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+      {
+        cardId: "onr_v1_166_karl-de-veres-corporate-stooge",
+        quantity: 1,
+      },
+      { cardId: "onr_v1_178_short-term-contract", quantity: 3 },
+      { cardId: "onr_proteus_083_corrosion", quantity: 2 },
+      { cardId: "onr_proteus_103_cruising-for-netwatch", quantity: 3 },
+      { cardId: "onr_proteus_122_rush-hour", quantity: 3 },
+      { cardId: "onr_proteus_124_stakeout", quantity: 3 },
+    ],
+  };
+}
+
 function expectMissingPlanModuleCoverage(
   decide: () => RunnerDecision,
   expectedLegalActionTypes: readonly string[],
@@ -1768,6 +1800,224 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       evidenceCodes: expect.arrayContaining([
         "continuation_action_id:install-interface",
       ]),
+    });
+  });
+
+  it("installs a ready R&D Interface before making the same-turn open R&D run", () => {
+    const input = versionedRunnerTurnInput(0, [
+      legalAction(
+        "install-interface",
+        "runner",
+        "install_card",
+        "Install R&D Interface",
+        { credits: 4, clicks: 1 },
+        {
+          source: "rnd-interface-card",
+          payload: {
+            cardId: "rnd-interface-card",
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          },
+        },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "rd" } },
+      ),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.opponent.deckCount = 40;
+    input.playerView.own.gripOrHq = [
+      visibleCard("rnd-interface-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        title: "R&D Interface",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    attachOwnDeckSnapshot(input, rdExpressDeckSnapshot());
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const decision = chooseRunnerAction(input);
+    const planning = decision.decisionDebug?.planFirstDecision?.turnPlanning;
+    const selectedLine = planning?.consideredLines?.find(
+      (line) => line.lineId === planning.selectedLine.lineId,
+    );
+    expect(decision.actionId).toBe("install-interface");
+    expect(decision.decisionDebug?.planKind).toBe("runner.pressure_central");
+    expect(selectedLine?.firstActionId).toBe("install-interface");
+    expect(selectedLine?.steps.map((step) => step.semanticActionType)).toEqual([
+      "install.card",
+      "run.start",
+    ]);
+    expect(selectedLine?.stopReason).toBe("observation_boundary");
+  });
+
+  it("plans the known Score, R&D Interface and open R&D pressure prefix before the access boundary", () => {
+    const input = versionedRunnerTurnInput(0, [
+      legalAction(
+        "play-score",
+        "runner",
+        "play_event",
+        "Play Score!",
+        { credits: 5, clicks: 1 },
+        {
+          source: "score-card",
+          payload: {
+            cardId: "score-card",
+            sourceDefinitionId: "onr_v1_108_score",
+            gainCreditsAmount: 9,
+            cardImplementationCapabilityBindingKind:
+              "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "onr_v1_108_score:abilities_on_play_gain_credits",
+            cardImplementationAbilityKey: "abilities_on_play_gain_credits",
+          },
+        },
+      ),
+      legalAction(
+        "install-interface",
+        "runner",
+        "install_card",
+        "Install R&D Interface",
+        { credits: 4, clicks: 1 },
+        {
+          source: "rnd-interface-card",
+          payload: {
+            cardId: "rnd-interface-card",
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+          },
+        },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction(
+        "play-jack",
+        "runner",
+        "play_event",
+        "Play Jack 'n' Joe",
+        { credits: 0, clicks: 1 },
+        {
+          source: "jack-card",
+          payload: {
+            cardId: "jack-card",
+            sourceDefinitionId: "onr_v1_095_jack-n-joe",
+            drawCardsAmount: 3,
+            cardImplementationCapabilityBindingKind:
+              "card_spec_capability_key",
+            cardImplementationAbilityId:
+              "onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+            cardImplementationAbilityKey: "abilities_on_play_draw_cards",
+          },
+        },
+      ),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.opponent.deckCount = 40;
+    input.playerView.own.gripOrHq = [
+      visibleCard("score-card", "runner", "event", {
+        definitionId: "onr_v1_108_score",
+        title: "Score!",
+      }),
+      visibleCard("rnd-interface-card", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        title: "R&D Interface",
+      }),
+      visibleCard("jack-card", "runner", "event", {
+        definitionId: "onr_v1_095_jack-n-joe",
+        title: "Jack 'n' Joe",
+      }),
+      visibleCard("short-term-card", "runner", "resource", {
+        definitionId: "onr_v1_178_short-term-contract",
+        title: "Short-Term Contract",
+      }),
+      visibleCard("cruising-card", "runner", "event", {
+        definitionId: "onr_proteus_103_cruising-for-netwatch",
+        title: "Cruising for Netwatch",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    attachOwnDeckSnapshot(input, rdExpressDeckSnapshot());
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    const decision = chooseRunnerAction(input);
+    const planning = decision.decisionDebug?.planFirstDecision?.turnPlanning;
+    const selectedLine = planning?.consideredLines?.find(
+      (line) => line.lineId === planning.selectedLine.lineId,
+    );
+    expect(decision.actionId).toBe("play-score");
+    expect(selectedLine?.firstActionId).toBe("play-score");
+    expect(selectedLine?.steps.map((step) => step.semanticActionType)).toEqual([
+      "economy.gain_credit",
+      "install.card",
+      "run.start",
+    ]);
+    expect(selectedLine?.stopReason).toBe("observation_boundary");
+    expect(planning?.boundary).toMatchObject({
+      optionalityMinimum: 1,
+      optionalityMaximum: 1,
+    });
+    expect(selectedLine?.evidenceCodes).toEqual(
+      expect.arrayContaining([
+        "runner_access_payoff_campaign:rd:rnd-interface-card",
+        "post_boundary_optional_action_capacity:1",
+      ]),
+    );
+    expect(planning?.candidateAudit).toEqual({
+      schemaVersion: "ai-turn-planning-candidate-audit-v1",
+      provenance: "persisted_at_decision",
+    });
+    const scoreHead = planning?.heads.find(
+      (head) => head.actionId === "play-score",
+    );
+    expect(
+      planning?.heads.find((head) => head.actionId === "install-interface"),
+    ).toMatchObject({
+      executorPlanInstanceId:
+        "plan:runner.pressure_central:central%3Ard",
+      selectedInLine: true,
+      rootEligible: false,
+      dependencyCandidateIds: [scoreHead?.candidateId],
+      assessment: {
+        effectivePriorityClass: "P4",
+        readiness: "executable_with_support",
+        withinClassValue: expect.any(Number),
+        stepValue: expect.any(Number),
+      },
+    });
+    expect(selectedLine?.steps.map((step) => step.actionId)).toEqual([
+      "play-score",
+      "install-interface",
+      "run-rd",
+    ]);
+    expect(selectedLine?.projectedEndState).toMatchObject({
+      creditMinimum: 5,
+      creditMaximum: 5,
+      unrestrictedActionMinimum: 1,
+      unrestrictedActionMaximum: 1,
+      pendingBoundaryKind: "opponent_response_window",
     });
   });
 

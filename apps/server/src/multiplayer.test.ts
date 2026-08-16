@@ -71,6 +71,7 @@ import {
   InMemoryMatchStorage,
   MultiplayerService,
   successfulRunCountForResult,
+  turnPlanningAuditFromTrace,
   type ActionPersistenceLoadInput,
   type EventRecord,
   type JoinMatchResult,
@@ -1032,6 +1033,51 @@ describe("Invite and lobby redaction harness", () => {
 });
 
 describe("Backend 0.5 private storage maintenance", () => {
+  it("exposes only persisted TurnPlanner audits and never reconstructs old traces", () => {
+    const planning = {
+      schemaVersion: "ai-turn-planning-debug-v1",
+      candidateAudit: {
+        schemaVersion: "ai-turn-planning-candidate-audit-v1",
+        provenance: "persisted_at_decision",
+      },
+      heads: [
+        {
+          candidateId: "head:interface",
+          actionId: "install-interface",
+          dependencyCandidateIds: ["head:score"],
+          assessment: { withinClassValue: 900 },
+        },
+      ],
+      consideredLines: [
+        {
+          lineId: "line:score-interface-run",
+          steps: [
+            { actionId: "play-score" },
+            { actionId: "install-interface" },
+            { actionId: "run-rd" },
+          ],
+          projectedEndState: { creditMinimum: 5 },
+        },
+      ],
+      pruneEvents: [],
+    };
+
+    expect(
+      turnPlanningAuditFromTrace({
+        planFirstDecision: { turnPlanning: planning },
+      }),
+    ).toEqual({
+      schemaVersion: "netgrid-turn-planning-audit-v1",
+      provenance: "persisted_at_decision",
+      planning,
+    });
+    expect(turnPlanningAuditFromTrace({})).toEqual({
+      schemaVersion: "netgrid-turn-planning-audit-v1",
+      provenance: "unavailable",
+      reason: "historical_turn_planning_audit_not_persisted",
+    });
+  });
+
   it("allows only loopback transport and never treats private LAN addresses as admin proof", () => {
     expect(isMaintenanceClientAddressAllowed("127.0.0.1")).toBe(true);
     expect(isMaintenanceClientAddressAllowed("::1")).toBe(true);
@@ -1784,6 +1830,12 @@ describe("Backend 0.5 private storage maintenance", () => {
           stateVersion?: number;
           lastEventIndex?: number;
         };
+        turnPlanningAudit?: {
+          schemaVersion?: string;
+          provenance?: string;
+          reason?: string;
+          planning?: Record<string, unknown>;
+        };
         provenance?: { persisted?: string[]; reconstructed?: unknown[] };
         ownDeckSnapshot?: {
           side?: string;
@@ -1810,7 +1862,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       };
       expect(decisionResponse.status).toBe(200);
       expect(decisionContext).toMatchObject({
-        schemaVersion: "netgrid-decision-analysis-context-v2",
+        schemaVersion: "netgrid-decision-analysis-context-v3",
         decision: { decisionIndex: 1, side: "corp" },
       });
       expect(decisionContext.audit?.capture).toBe("persisted");
@@ -1844,6 +1896,11 @@ describe("Backend 0.5 private storage maintenance", () => {
         invariantSignature: expect.any(String),
         stateVersion: decisionContext.decision?.stateVersion,
         lastEventIndex: expect.any(Number),
+      });
+      expect(decisionContext.turnPlanningAudit).toEqual({
+        schemaVersion: "netgrid-turn-planning-audit-v1",
+        provenance: "unavailable",
+        reason: "historical_turn_planning_audit_not_persisted",
       });
       expect(decisionContext.ownDeckSnapshot).toMatchObject({
         side: "corp",
@@ -12611,7 +12668,7 @@ describe("MVP 0.2 multiplayer service", () => {
         failureDecisionIndex,
       );
       expect(decisionContext).toMatchObject({
-        schemaVersion: "netgrid-decision-analysis-context-v2",
+        schemaVersion: "netgrid-decision-analysis-context-v3",
         audit: {
           capture: "persisted",
           actor: "runner",
