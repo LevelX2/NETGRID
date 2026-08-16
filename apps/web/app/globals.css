@@ -7437,8 +7437,8 @@ select {
 }
 
 .corpHqServer {
-  flex: 0 1 auto;
-  width: fit-content;
+  flex: 1 1 auto;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
 }
@@ -7453,7 +7453,7 @@ select {
 .corpHqServer .serverLayout,
 .corpHqServer .serverBody {
   min-width: 0;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
 }
 
@@ -7587,15 +7587,20 @@ select {
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
 }
 
 .corpHqHandPanel {
+  --corp-hq-hand-card-minimum-step: 32px;
   box-sizing: border-box;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   width: fit-content;
-  min-width: 0;
+  min-width: calc(
+    var(--cards-min-width, 108px) +
+      var(--corp-hq-hand-card-minimum-step) +
+      var(--corp-hq-hand-card-minimum-step) + 14px
+  );
   max-width: 100%;
   padding: 6px;
   border: 1px solid
@@ -7612,8 +7617,27 @@ select {
   padding-bottom: 2px;
 }
 
+.fixedZoneCards.handCardsRowWrapped {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.fixedZoneCards.corpHqHandCards.handCardsRowWrapped {
+  width: 100%;
+}
+
+.handCardsSubrow {
+  display: flex;
+  align-items: flex-start;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .corpHqServerLanes {
   flex: 0 0 auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .server.activeRunTarget {
@@ -16018,6 +16042,7 @@ select,
 
   .corpHqHandPanel {
     width: 100%;
+    min-width: 0;
     max-width: 100%;
   }
 
