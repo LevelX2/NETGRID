@@ -52,7 +52,7 @@ Commit: `fix(cards): align batch 12 canonical text`
   bestehenden geschlossenen Vokabular präzisieren;
 - Ownership- und Hidden-Info-Grenzen erhalten.
 
-Commit: `fix(ai): refine batch 12 choice semantics`
+Commit: `fix(ai): bind batch 12 card choices to their owners`
 
 ### Paket 4 – Rollen-, Damage- und Access-Semantik
 
@@ -63,6 +63,49 @@ Commit: `fix(ai): refine batch 12 choice semantics`
 - generiertes Hint-Artefakt deterministisch aktualisieren.
 
 Commit: `fix(cards): calibrate batch 12 planning semantics`
+
+## Ergebnis und Disposition
+
+- Die bestätigten Quelltextabweichungen wurden ohne Mechanikänderung
+  korrigiert. Pile Driver war bereits durch Batch 11 korrekt und erhielt
+  keinen redundanten Patch.
+- Tesseract und Syd besitzen jetzt TargetProfiles für ihre tatsächlichen
+  Server- beziehungsweise ICE-Choices. Gypsy Schedule Analyzer und I Spy
+  besitzen keine erfundene freie Zielwahl mehr.
+- Eigene bekannte Karten- und Boardinformation wird bei Library Search,
+  Planning Consultants, Corporate Detective Agency und Imp nicht mehr als
+  unzulässige gegnerische Hidden Information behandelt.
+- Chihuahua führte zu einem generischen Ursachenfix: Trace-Hints werden aus
+  dem konkreten Erfolgs-Outcome abgeleitet. Tag, Damage, Run-Ende, Run-Lock
+  und persistenter Counter werden nicht mehr pauschal gleichgesetzt.
+- Ein reiner Corp-Rezrabatt erzeugt keinen Runner-Tax mehr. Die zugehörige
+  Strategie-Evidence unterscheidet nun Installationsrabatt, Rezrabatt,
+  Strength-/Break-Tax, Steal-/Trash-Tax und Agenda-Difficulty.
+- Dieter Esslins Net-Damage-Access-Semantik war bereits durch den generischen
+  Access-Damage-Vertrag aus Batch 11 korrekt. Es entstand kein Kartenpatch.
+- Überbreite Mehrfachanker und sachfremde Rollen wurden proportional
+  zurückgenommen; Project Zurich erhielt dagegen den durch seinen echten
+  Overadvance-Payoff gerechtfertigten formalen Anker.
+
+## Verifikation
+
+Bestanden:
+
+- `@netgrid/cards` Typecheck;
+- Cards-Registry: 23/23 Tests;
+- generische Typed-Translator-Tests: 33/33 Tests;
+- AI-Hint-Artefakttests: 8/8 Tests;
+- fokussierte Virus-Test-Site-Kompatibilität: 2/2 Tests;
+- deterministischer `check:card-spec-ai-hints`;
+- `git diff --check`.
+
+Der vollständige AI-Typecheck bleibt unabhängig vom Batch an vier lokal nicht
+vorhandenen Migration-Report-JSON-Dateien unter `docs/reviews/cards/` hängen.
+Der breitere bestehende Kompatibilitätslauf enthält außerdem bereits
+abweichende Alt-Erwartungen für Data Masons, Digiconda und Roving Submarine
+sowie einen veralteten Strategy-Owner-Zählwert. Diese Baselinepunkte wurden
+nicht als Batch-12-Fix umgedeutet; die direkt geänderten Pfade sind fokussiert
+grün.
 
 ## Abnahme
 
