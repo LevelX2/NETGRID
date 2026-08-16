@@ -1985,6 +1985,40 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
         "post_boundary_optional_action_capacity:1",
       ]),
     );
+    expect(planning?.candidateAudit).toEqual({
+      schemaVersion: "ai-turn-planning-candidate-audit-v1",
+      provenance: "persisted_at_decision",
+    });
+    const scoreHead = planning?.heads.find(
+      (head) => head.actionId === "play-score",
+    );
+    expect(
+      planning?.heads.find((head) => head.actionId === "install-interface"),
+    ).toMatchObject({
+      executorPlanInstanceId:
+        "plan:runner.pressure_central:central%3Ard",
+      selectedInLine: true,
+      rootEligible: false,
+      dependencyCandidateIds: [scoreHead?.candidateId],
+      assessment: {
+        effectivePriorityClass: "P4",
+        readiness: "executable_with_support",
+        withinClassValue: expect.any(Number),
+        stepValue: expect.any(Number),
+      },
+    });
+    expect(selectedLine?.steps.map((step) => step.actionId)).toEqual([
+      "play-score",
+      "install-interface",
+      "run-rd",
+    ]);
+    expect(selectedLine?.projectedEndState).toMatchObject({
+      creditMinimum: 5,
+      creditMaximum: 5,
+      unrestrictedActionMinimum: 1,
+      unrestrictedActionMaximum: 1,
+      pendingBoundaryKind: "opponent_response_window",
+    });
   });
 
   it("allows a newly material P2 interrupt to preempt a retained Runner root with typed evidence", () => {

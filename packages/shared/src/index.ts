@@ -3944,6 +3944,10 @@ export type AiTurnPlanningDebug = {
   sideSafePlanningFingerprint: string;
   planningRulesFingerprint: string;
   turnKey: string;
+  candidateAudit?: {
+    schemaVersion: "ai-turn-planning-candidate-audit-v1";
+    provenance: "persisted_at_decision";
+  };
   heads: Array<{
     candidateId: string;
     moduleId: string;
@@ -3953,6 +3957,30 @@ export type AiTurnPlanningDebug = {
     semanticActionType: string;
     invocationKey: string;
     witnessValid: boolean;
+    selectedInLine?: boolean;
+    rootEligible?: boolean;
+    dependencyCandidateIds?: string[];
+    assessment?: {
+      requestedPriorityClass: string;
+      effectivePriorityClass: string;
+      readiness: string;
+      intentFit: string;
+      withinClassValue: number;
+      stepValue: number;
+      resourceGaps: Array<{
+        needId: string;
+        capability: string;
+        minimum: number;
+        available: number;
+        deadline: string;
+      }>;
+      blockers: Array<{
+        code: string;
+        owner: string;
+        removable: boolean;
+      }>;
+      evidenceCodes: string[];
+    };
   }>;
   selectedLine: {
     lineId: string;
@@ -4206,6 +4234,9 @@ export type AiTurnPlanningDebug = {
     rootPlanInstanceId: string;
     stepCount: number;
     scalarValue: number;
+    upperBoundValue?: number;
+    partitionKey?: string;
+    priorityClass?: string;
     stopReason:
       | "projected_turn_end"
       | "observation_boundary"
@@ -4219,13 +4250,25 @@ export type AiTurnPlanningDebug = {
       rootPlanInstanceId: string;
       nextMilestoneId: string;
       currentActionId?: string;
+      actionId?: string;
     }>;
+    projectedEndState?: {
+      creditMinimum: number;
+      creditMaximum: number;
+      unrestrictedActionMinimum: number;
+      unrestrictedActionMaximum: number;
+      handMinimum: number;
+      handMaximum: number;
+      pendingBoundaryKind?: string;
+    };
     evaluationValues: Record<string, number>;
     evidenceCodes: string[];
   }>;
   pruneEvents: Array<{
     candidateId: string;
     reasonCode: string;
+    partitionKey?: string;
+    prefixLineId?: string;
   }>;
   evidenceCodes: string[];
 };
@@ -4771,6 +4814,7 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
       "sideSafePlanningFingerprint",
       "planningRulesFingerprint",
       "turnKey",
+      "candidateAudit",
       "heads",
       "selectedLine",
       "commitment",
@@ -4794,6 +4838,8 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     typeof candidate.sideSafePlanningFingerprint !== "string" ||
     typeof candidate.planningRulesFingerprint !== "string" ||
     typeof candidate.turnKey !== "string" ||
+    (candidate.candidateAudit !== undefined &&
+      !isAiTurnPlanningCandidateAudit(candidate.candidateAudit)) ||
     !Array.isArray(candidate.heads) ||
     !candidate.heads.every(isAiTurnPlanningDebugHead) ||
     !isAiTurnPlanningDebugLine(candidate.selectedLine) ||
@@ -4816,15 +4862,23 @@ function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {
     (candidate.consideredLines !== undefined &&
       !isAiTurnPlanningConsideredLines(candidate.consideredLines)) ||
     !Array.isArray(candidate.pruneEvents) ||
-    !candidate.pruneEvents.every((entry) =>
-      recordHasExactStringFields(entry, ["candidateId", "reasonCode"]),
-    ) ||
+    !candidate.pruneEvents.every(isAiTurnPlanningPruneEvent) ||
     !Array.isArray(candidate.evidenceCodes) ||
     !candidate.evidenceCodes.every((entry) => typeof entry === "string")
   ) {
     return false;
   }
   return true;
+}
+
+function isAiTurnPlanningCandidateAudit(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, ["schemaVersion", "provenance"]) &&
+    candidate.schemaVersion === "ai-turn-planning-candidate-audit-v1" &&
+    candidate.provenance === "persisted_at_decision"
+  );
 }
 
 function isAiTurnPlanningCampaigns(value: unknown): boolean {
@@ -5071,9 +5125,13 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
         "rootPlanInstanceId",
         "stepCount",
         "scalarValue",
+        "upperBoundValue",
+        "partitionKey",
+        "priorityClass",
         "stopReason",
         "violatedObligationCount",
         "steps",
+        "projectedEndState",
         "evaluationValues",
         "evidenceCodes",
       ]) &&
@@ -5084,6 +5142,13 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
         (field) =>
           typeof line[field] === "number" && Number.isFinite(line[field]),
       ) &&
+      (line.upperBoundValue === undefined ||
+        (typeof line.upperBoundValue === "number" &&
+          Number.isFinite(line.upperBoundValue))) &&
+      (line.partitionKey === undefined ||
+        typeof line.partitionKey === "string") &&
+      (line.priorityClass === undefined ||
+        typeof line.priorityClass === "string") &&
       Array.isArray(line.steps) &&
       line.steps.every((entry) => {
         if (!entry || typeof entry !== "object" || Array.isArray(entry))
@@ -5096,6 +5161,7 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
             "rootPlanInstanceId",
             "nextMilestoneId",
             "currentActionId",
+            "actionId",
           ]) &&
           [
             "candidateId",
@@ -5104,9 +5170,12 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
             "nextMilestoneId",
           ].every((field) => typeof step[field] === "string") &&
           (step.currentActionId === undefined ||
-            typeof step.currentActionId === "string")
+            typeof step.currentActionId === "string") &&
+          (step.actionId === undefined || typeof step.actionId === "string")
         );
       }) &&
+      (line.projectedEndState === undefined ||
+        isAiTurnPlanningProjectedEndState(line.projectedEndState)) &&
       Boolean(
         line.evaluationValues &&
         typeof line.evaluationValues === "object" &&
@@ -5126,6 +5195,51 @@ function isAiTurnPlanningConsideredLines(value: unknown): boolean {
       ].includes(String(line.stopReason))
     );
   });
+}
+
+function isAiTurnPlanningProjectedEndState(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  const numericFields = [
+    "creditMinimum",
+    "creditMaximum",
+    "unrestrictedActionMinimum",
+    "unrestrictedActionMaximum",
+    "handMinimum",
+    "handMaximum",
+  ];
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      ...numericFields,
+      "pendingBoundaryKind",
+    ]) &&
+    numericFields.every(
+      (field) =>
+        typeof candidate[field] === "number" &&
+        Number.isFinite(candidate[field]),
+    ) &&
+    (candidate.pendingBoundaryKind === undefined ||
+      typeof candidate.pendingBoundaryKind === "string")
+  );
+}
+
+function isAiTurnPlanningPruneEvent(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "candidateId",
+      "reasonCode",
+      "partitionKey",
+      "prefixLineId",
+    ]) &&
+    typeof candidate.candidateId === "string" &&
+    typeof candidate.reasonCode === "string" &&
+    (candidate.partitionKey === undefined ||
+      typeof candidate.partitionKey === "string") &&
+    (candidate.prefixLineId === undefined ||
+      typeof candidate.prefixLineId === "string")
+  );
 }
 
 function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
@@ -5384,6 +5498,10 @@ function isAiTurnPlanningDebugHead(value: unknown): boolean {
       "semanticActionType",
       "invocationKey",
       "witnessValid",
+      "selectedInLine",
+      "rootEligible",
+      "dependencyCandidateIds",
+      "assessment",
     ]) &&
     [
       "candidateId",
@@ -5395,7 +5513,83 @@ function isAiTurnPlanningDebugHead(value: unknown): boolean {
     ].every((field) => typeof candidate[field] === "string") &&
     (candidate.executorPlanInstanceId === undefined ||
       typeof candidate.executorPlanInstanceId === "string") &&
-    typeof candidate.witnessValid === "boolean"
+    typeof candidate.witnessValid === "boolean" &&
+    (candidate.selectedInLine === undefined ||
+      typeof candidate.selectedInLine === "boolean") &&
+    (candidate.rootEligible === undefined ||
+      typeof candidate.rootEligible === "boolean") &&
+    (candidate.dependencyCandidateIds === undefined ||
+      (Array.isArray(candidate.dependencyCandidateIds) &&
+        candidate.dependencyCandidateIds.every(
+          (entry) => typeof entry === "string",
+        ))) &&
+    (candidate.assessment === undefined ||
+      isAiTurnPlanningHeadAssessment(candidate.assessment))
+  );
+}
+
+function isAiTurnPlanningHeadAssessment(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "requestedPriorityClass",
+      "effectivePriorityClass",
+      "readiness",
+      "intentFit",
+      "withinClassValue",
+      "stepValue",
+      "resourceGaps",
+      "blockers",
+      "evidenceCodes",
+    ]) &&
+    [
+      "requestedPriorityClass",
+      "effectivePriorityClass",
+      "readiness",
+      "intentFit",
+    ].every((field) => typeof candidate[field] === "string") &&
+    ["withinClassValue", "stepValue"].every(
+      (field) =>
+        typeof candidate[field] === "number" &&
+        Number.isFinite(candidate[field]),
+    ) &&
+    Array.isArray(candidate.resourceGaps) &&
+    candidate.resourceGaps.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const gap = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(gap, [
+          "needId",
+          "capability",
+          "minimum",
+          "available",
+          "deadline",
+        ]) &&
+        ["needId", "capability", "deadline"].every(
+          (field) => typeof gap[field] === "string",
+        ) &&
+        ["minimum", "available"].every(
+          (field) =>
+            typeof gap[field] === "number" && Number.isFinite(gap[field]),
+        )
+      );
+    }) &&
+    Array.isArray(candidate.blockers) &&
+    candidate.blockers.every((entry) => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry))
+        return false;
+      const blocker = entry as Record<string, unknown>;
+      return (
+        hasOnlyAiPlanFirstFields(blocker, ["code", "owner", "removable"]) &&
+        typeof blocker.code === "string" &&
+        typeof blocker.owner === "string" &&
+        typeof blocker.removable === "boolean"
+      );
+    }) &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
   );
 }
 

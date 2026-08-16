@@ -197,6 +197,7 @@ export function buildRunnerTurnPlannerShadow(params: {
     rulesContext,
     stateIdentity,
     heads,
+    records,
     coverage,
     search,
     selectedLine,
@@ -995,6 +996,7 @@ function debugForRunnerPlanner(params: {
   rulesContext: PlanningRulesContext;
   stateIdentity: PlanningStateIdentity;
   heads: TurnPlanningHeadCandidate[];
+  records: readonly RunnerPlanningHeadRecord[];
   coverage: RunnerTurnPlanningCoverageReport;
   search: ReturnType<typeof searchDeterministicRemainderTurnPlans>;
   selectedLine: TurnRemainderSearchLine | undefined;
@@ -1021,17 +1023,63 @@ function debugForRunnerPlanner(params: {
       params.stateIdentity.sideSafePlanningFingerprint,
     planningRulesFingerprint: params.rulesContext.fingerprint,
     turnKey: `runner:turn:${params.input.playerView.turnSerial ?? "unknown"}`,
-    heads: params.heads.map((head) => ({
-      candidateId: head.candidateId,
-      moduleId: head.moduleId,
-      rootPlanInstanceId: head.rootPlanInstanceId,
-      actionId: head.currentBinding.actionId,
-      semanticActionType: head.invocation.semanticActionType,
-      invocationKey: head.invocation.invocationKey,
-      witnessValid:
-        head.executableWitness.sideSafePlanningFingerprint ===
-        params.stateIdentity.sideSafePlanningFingerprint,
-    })),
+    candidateAudit: {
+      schemaVersion: "ai-turn-planning-candidate-audit-v1",
+      provenance: "persisted_at_decision",
+    },
+    heads: params.heads.map((head) => {
+      const record = params.records.find(
+        (entry) => entry.head.candidateId === head.candidateId,
+      );
+      const assessment = record?.route.assessment;
+      return {
+        candidateId: head.candidateId,
+        moduleId: head.moduleId,
+        rootPlanInstanceId: head.rootPlanInstanceId,
+        ...(record
+          ? { executorPlanInstanceId: record.route.instance.instanceId }
+          : {}),
+        actionId: head.currentBinding.actionId,
+        semanticActionType: head.invocation.semanticActionType,
+        invocationKey: head.invocation.invocationKey,
+        witnessValid:
+          head.executableWitness.sideSafePlanningFingerprint ===
+          params.stateIdentity.sideSafePlanningFingerprint,
+        selectedInLine:
+          selectedLine?.steps.some(
+            (step) => step.candidateId === head.candidateId,
+          ) === true,
+        rootEligible: (record?.dependencyCandidateIds.length ?? 0) === 0,
+        dependencyCandidateIds: [...(record?.dependencyCandidateIds ?? [])],
+        ...(assessment && record
+          ? {
+              assessment: {
+                requestedPriorityClass:
+                  assessment.priorityClaim.requestedClass,
+                effectivePriorityClass:
+                  assessment.priorityValidation.effectiveClass,
+                readiness: assessment.readiness,
+                intentFit: assessment.intentFit,
+                withinClassValue: assessment.withinClassValue,
+                stepValue: record.route.stepValue,
+                resourceGaps: assessment.resourceGaps.map((gap) => ({
+                  needId: gap.needId,
+                  capability: gap.capability,
+                  minimum: gap.minimum,
+                  available: gap.available,
+                  deadline: gap.deadline,
+                })),
+                blockers: assessment.blockers.map((blocker) => ({
+                  code: blocker.code,
+                  owner: blocker.owner,
+                  removable: blocker.removable,
+                })),
+                evidenceCodes: [...assessment.evidenceCodes],
+              },
+            }
+          : {}),
+      };
+    }),
     selectedLine: {
       lineId: selectedLine?.lineId ?? "runner-no-selected-line",
       stopReason: debugStopReason(selectedLine?.stopReason),
@@ -1153,6 +1201,9 @@ function debugForRunnerPlanner(params: {
       rootPlanInstanceId: line.rootPlanInstanceId,
       stepCount: line.steps.length,
       scalarValue: line.scalarValue,
+      upperBoundValue: line.upperBoundValue,
+      partitionKey: line.partitionKey,
+      priorityClass: line.priorityClass,
       stopReason: debugStopReason(line.stopReason),
       violatedObligationCount:
         line.priorityCoverage.violatedObligationIds.length,
@@ -1161,16 +1212,37 @@ function debugForRunnerPlanner(params: {
         semanticActionType: step.invocation.semanticActionType,
         rootPlanInstanceId: step.rootPlanInstanceId,
         nextMilestoneId: step.nextMilestoneId,
+        actionId:
+          params.heads.find((head) => head.candidateId === step.candidateId)
+            ?.currentBinding.actionId ?? "unavailable",
         ...(step.currentBinding
           ? { currentActionId: step.currentBinding.actionId }
           : {}),
       })),
+      projectedEndState: {
+        creditMinimum: line.projectedFrame.ownCredits.minimum,
+        creditMaximum: line.projectedFrame.ownCredits.maximum,
+        unrestrictedActionMinimum:
+          line.projectedFrame.actionCapacityLedger.unrestricted.minimum,
+        unrestrictedActionMaximum:
+          line.projectedFrame.actionCapacityLedger.unrestricted.maximum,
+        handMinimum: line.projectedFrame.ownHand.count.minimum,
+        handMaximum: line.projectedFrame.ownHand.count.maximum,
+        ...(line.projectedFrame.pendingBoundary
+          ? {
+              pendingBoundaryKind:
+                line.projectedFrame.pendingBoundary.boundaryKind,
+            }
+          : {}),
+      },
       evaluationValues: { ...line.evaluationValues },
       evidenceCodes: [...line.evidenceCodes],
     })),
     pruneEvents: params.search.pruneEvents.map((event) => ({
       candidateId: event.candidateId,
       reasonCode: event.reasonCode,
+      partitionKey: event.partitionKey,
+      ...(event.prefixLineId ? { prefixLineId: event.prefixLineId } : {}),
     })),
     evidenceCodes: [
       RUNNER_TURN_PLANNER_SHADOW_SCHEMA_VERSION,

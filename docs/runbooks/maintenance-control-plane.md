@@ -162,12 +162,23 @@ gegnerische private Zonen.
 Das Bundle verwendet `netgrid-match-analysis-bundle-v2`. Es enthält die
 Schema-Versionen und im kompakten Decision-Index pro Abschnitt den Status
 `persisted`, `reconstructed` oder `unavailable`. Der Detailendpunkt verwendet
-`netgrid-decision-analysis-context-v2` und liefert für eine Entscheidung die
+`netgrid-decision-analysis-context-v3` und liefert für eine Entscheidung die
 vollständige Audit-Evidence. Aktuelle Engine-Rekonstruktion ist ausdrücklich
 kein Ersatz: ältere Traces ohne gespeicherten Auditvertrag melden für jeden
 betroffenen Abschnitt strukturiert `unavailable` mit
 `historical_audit_not_persisted`; der Server erstellt keinen
 Rückwärtskompatibilitätsadapter.
+
+Für neue Runner-TurnPlanner-Entscheidungen enthält der Detailendpunkt außerdem
+`turnPlanningAudit` (`netgrid-turn-planning-audit-v1`). Persistiert werden die
+damaligen Kandidaten mit Plan-/Executor-Zuordnung, Bewertung, Abhängigkeiten
+und Zulassungsstatus sowie die geprüften Zuglinien mit allen Action-IDs,
+projizierten Endressourcen und Prune-Gründen. Diese Daten stammen ausschließlich
+aus der actor-sicheren Entscheidungsdiagnose und werden zusammen mit dem
+Decision-Trace gespeichert. Ältere Traces oder Planer ohne diesen
+Erzeugungsvertrag melden `provenance: unavailable` und
+`historical_turn_planning_audit_not_persisted`; sie werden nicht aus aktuellem
+Code nachkonstruiert.
 
 Mit `side=runner|corp&includeOwnDeckSnapshot=true` liefert das Bundle außerdem
 den beim Matchstart serverprivat persistierten eigenen Decksnapshot als

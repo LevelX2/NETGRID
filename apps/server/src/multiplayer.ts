@@ -4534,6 +4534,7 @@ export class MultiplayerService {
       unavailableSections: [] as string[],
     };
     const unavailableAudit = unavailableHistoricalAudit();
+    const turnPlanningAudit = turnPlanningAuditFromTrace(source.trace.detail);
     const beliefState = audit?.beliefState;
     const ownDeckSnapshot = source.ownDeckSnapshot;
     if (!audit) {
@@ -4545,6 +4546,8 @@ export class MultiplayerService {
       );
     }
     if (!beliefState) diagnostics.unavailableSections.push("beliefState");
+    if (turnPlanningAudit.provenance === "unavailable")
+      diagnostics.unavailableSections.push("turnPlanningAudit");
     if (!audit?.checkpointCapture)
       diagnostics.unavailableSections.push("checkpointCapture");
     if (ownDeckSnapshot.provenance === "unavailable")
@@ -4555,7 +4558,7 @@ export class MultiplayerService {
     )
       diagnostics.unavailableSections.push("ownDeckZoneBalance");
     return {
-      schemaVersion: "netgrid-decision-analysis-context-v2",
+      schemaVersion: "netgrid-decision-analysis-context-v3",
       decision: source.trace,
       aiTrace: source.trace,
       surroundingEvents: source.surroundingEvents,
@@ -4570,6 +4573,7 @@ export class MultiplayerService {
         provenance: "unavailable",
         reason: "historical_belief_capture_not_persisted",
       },
+      turnPlanningAudit,
       ownDeckSnapshot,
       provenance: {
         persisted: audit
@@ -4578,6 +4582,9 @@ export class MultiplayerService {
               "historicalDecisionAudit",
               ...(audit.checkpointCapture ? ["checkpointCapture"] : []),
               ...(beliefState ? ["beliefState"] : []),
+              ...(turnPlanningAudit.provenance === "persisted_at_decision"
+                ? ["turnPlanningAudit"]
+                : []),
               ...(ownDeckSnapshot.provenance === "persisted"
                 ? ["ownDeckSnapshot"]
                 : []),
@@ -4587,6 +4594,9 @@ export class MultiplayerService {
               "decisionTrace",
               ...(ownDeckSnapshot.provenance === "persisted"
                 ? ["ownDeckSnapshot"]
+                : []),
+              ...(turnPlanningAudit.provenance === "persisted_at_decision"
+                ? ["turnPlanningAudit"]
                 : []),
               "surroundingEvents",
             ],
@@ -7527,6 +7537,64 @@ export function historicalAuditFromTrace(
     candidate.runAndEncounterProjection !== undefined
     ? (candidate as AiDecisionHistoricalAudit)
     : undefined;
+}
+
+export function turnPlanningAuditFromTrace(
+  traceJson: Record<string, unknown>,
+):
+  | {
+      schemaVersion: "netgrid-turn-planning-audit-v1";
+      provenance: "persisted_at_decision";
+      planning: Record<string, unknown>;
+    }
+  | {
+      schemaVersion: "netgrid-turn-planning-audit-v1";
+      provenance: "unavailable";
+      reason: "historical_turn_planning_audit_not_persisted";
+    } {
+  const planFirstDecision = traceJson.planFirstDecision;
+  const turnPlanning =
+    planFirstDecision &&
+    typeof planFirstDecision === "object" &&
+    !Array.isArray(planFirstDecision)
+      ? (planFirstDecision as Record<string, unknown>).turnPlanning
+      : undefined;
+  const candidateAudit =
+    turnPlanning &&
+    typeof turnPlanning === "object" &&
+    !Array.isArray(turnPlanning)
+      ? (turnPlanning as Record<string, unknown>).candidateAudit
+      : undefined;
+  const planningRecord =
+    turnPlanning &&
+    typeof turnPlanning === "object" &&
+    !Array.isArray(turnPlanning)
+      ? (turnPlanning as Record<string, unknown>)
+      : undefined;
+  if (
+    planningRecord &&
+    candidateAudit &&
+    typeof candidateAudit === "object" &&
+    !Array.isArray(candidateAudit) &&
+    (candidateAudit as Record<string, unknown>).schemaVersion ===
+      "ai-turn-planning-candidate-audit-v1" &&
+    (candidateAudit as Record<string, unknown>).provenance ===
+      "persisted_at_decision" &&
+    Array.isArray(planningRecord.heads) &&
+    Array.isArray(planningRecord.consideredLines) &&
+    Array.isArray(planningRecord.pruneEvents)
+  ) {
+    return {
+      schemaVersion: "netgrid-turn-planning-audit-v1",
+      provenance: "persisted_at_decision",
+      planning: structuredClone(planningRecord),
+    };
+  }
+  return {
+    schemaVersion: "netgrid-turn-planning-audit-v1",
+    provenance: "unavailable",
+    reason: "historical_turn_planning_audit_not_persisted",
+  };
 }
 
 export function unavailableHistoricalAudit(): {
