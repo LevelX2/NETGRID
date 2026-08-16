@@ -2202,21 +2202,22 @@ function defenseCandidates(
   ) {
     return [];
   }
-  if (
-    phase === "forgo_exhausted_options" &&
-    !actionCandidates
-      .filter(
-        (candidate) => candidate.semanticActionType !== "turn_flow.end_turn",
-      )
-      .every((candidate) =>
+  if (phase === "forgo_exhausted_options") {
+    const voluntaryCandidates = actionCandidates.filter(
+      (candidate) => candidate.semanticActionType !== "turn_flow.end_turn",
+    );
+    if (
+      voluntaryCandidates.length === 0 ||
+      !voluntaryCandidates.every((candidate) =>
         (actionDispositions ?? []).some(
           (entry) =>
             entry.actionId === candidate.actionId &&
             entry.disposition === "explicitly_nonproductive",
         ),
       )
-  ) {
-    return [];
+    ) {
+      return [];
+    }
   }
   const reactionReserveActionIds = new Set(
     signals.reactionReserveNeed?.actionIds ?? [],
