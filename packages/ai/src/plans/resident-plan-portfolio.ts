@@ -165,6 +165,13 @@ export type ResidentSelectedActionOrigin = Readonly<{
         sourceStepId: string;
         sourceActionType: "start_run";
       }>
+    | Readonly<{
+        immediateChoicePolicy: "resolve_runner_vacuum_link_rewind";
+        sourceStepId: string;
+        sourceActionType: "continue_run";
+        sourceCardInstanceId: string;
+        sourceCardDefinitionId: string;
+      }>
   );
 
 export type ReconcileResidentPlanPortfolioParams = {
@@ -550,6 +557,13 @@ export function assertResidentPlanPortfolio(
         "resolve_runner_run_start_order" &&
         selectedActionOrigin.sourceStepId.trim().length > 0 &&
         selectedActionOrigin.sourceActionType === "start_run") ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+        "resolve_runner_vacuum_link_rewind" &&
+        selectedActionOrigin.sourceStepId.trim().length > 0 &&
+        selectedActionOrigin.sourceActionType === "continue_run" &&
+        selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&
+        selectedActionOrigin.sourceCardDefinitionId ===
+          "onr_v1_275_vacuum-link") ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "select_bound_corp_archives_cards_to_hq" &&
         selectedActionOrigin.sourceCardInstanceId.trim().length > 0 &&

@@ -186,6 +186,39 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
+  it("uses Satellite Monitors from its exact cost-free Corp start window", () => {
+    const input = satelliteMonitorsChoiceInput();
+
+    const decision = selectedChoicesForDecision(
+      input,
+      resolveChoiceActionForInput(input),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["use"],
+    });
+  });
+
+  it("fails closed when the Satellite Monitors source is not the exact rezzed card", () => {
+    const input = satelliteMonitorsChoiceInput();
+    input.playerView.servers[0]!.root[0]!.definitionId =
+      "onr_classic_022_wrong-card";
+
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "window_origin_missing",
+      }),
+    );
+  });
+
   it("resolves the Corp rez-or-trash ICE choice without an unbound choice window", () => {
     const decision = selectedChoicesForDecision(
       inputWithChoice(
@@ -1910,6 +1943,42 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
       scoreArea: [visibleCard("downsizing_source", "agenda")],
     },
   );
+}
+
+function satelliteMonitorsChoiceInput(): AiDecisionInput {
+  const input = inputWithChoice(
+    {
+      kind: "select_option",
+      source: "classic.satellite_monitors:satellite_monitors_1:7",
+      minSelections: 1,
+      maxSelections: 1,
+      options: [
+        { id: "use", label: "Würfelserie ausführen", value: "use" },
+        { id: "decline", label: "Nicht ausführen", value: "decline" },
+      ],
+    },
+    {
+      side: "corp",
+      servers: [
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [],
+          root: [
+            {
+              instanceId: "satellite_monitors_1",
+              definitionId: "onr_classic_021_satellite-monitors",
+              known: true,
+              type: "asset",
+              rezzed: true,
+            },
+          ],
+        },
+      ],
+    },
+  );
+  input.playerView.pendingChoice!.visibility = "public";
+  return input;
 }
 
 function rememberResidentScoreChoiceContinuation(

@@ -71,6 +71,11 @@ export type PlanEarlyEndTurnJustification =
       kind: "forgo_restricted_capacity";
       capacityKind: "zero_click_non_basic_run_only";
       explicitlyNonproductiveActionIds: string[];
+    }
+  | {
+      kind: "forgo_exhausted_runner_capacity";
+      capacityKind: "empty_stack_all_voluntary_routes_rejected";
+      explicitlyNonproductiveActionIds: string[];
     };
 
 export type PlanMaterialization = {
@@ -809,6 +814,32 @@ function assertEarlyEndTurnRoute(
     everyRestrictedRunIsExplicitlyNonproductive;
   if (restrictedCapacityForgoProven) return;
 
+  const exhaustedProofActionIds =
+    justification?.kind === "forgo_exhausted_runner_capacity"
+      ? sortedUnique(justification.explicitlyNonproductiveActionIds)
+      : [];
+  const exactExhaustedActionSet = sameStrings(
+    remainingActionIds,
+    exhaustedProofActionIds,
+  );
+  const exhaustedRunnerCapacityForgoProven =
+    justification?.kind === "forgo_exhausted_runner_capacity" &&
+    justification.capacityKind ===
+      "empty_stack_all_voluntary_routes_rejected" &&
+    context.input.side === "runner" &&
+    moduleId === "runner.defense_and_recovery" &&
+    context.input.playerView.own.stackOrRdCount === 0 &&
+    remainingActionIds.length > 0 &&
+    exactExhaustedActionSet &&
+    remainingActionIds.every((actionId) =>
+      (context.actionDispositions ?? []).some(
+        (entry) =>
+          entry.actionId === actionId &&
+          entry.disposition === "explicitly_nonproductive",
+      ),
+    );
+  if (exhaustedRunnerCapacityForgoProven) return;
+
   throw new PlanResolutionFailure("end_turn_with_usable_capacity", {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,
@@ -817,7 +848,7 @@ function assertEarlyEndTurnRoute(
     unresolvedActionIds: remainingActionIds,
     owner: "rules_contract",
     removalCondition:
-      "Bind early standard EndTurn to a structurally proven terminal win or an exact restricted-capacity forgo. Normal click capacity must be converted by a productive plan route.",
+      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo or an empty-Stack Runner turn whose voluntary routes were all owner-rejected. Normal click capacity must otherwise be converted by a productive plan route.",
     planInstanceId: route.planInstanceId,
     stepId: route.step.stepId,
     candidateCount: materialized.candidates.length,

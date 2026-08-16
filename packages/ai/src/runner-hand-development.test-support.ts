@@ -22,6 +22,7 @@ export function runnerInput(params: {
   rig?: VisibleCard[];
   memoryUsed?: number;
   memoryLimit?: number;
+  tags?: number;
   servers?: PlayerView["servers"];
 }): AiDecisionInput {
   const playerView: PlayerView = {
@@ -47,7 +48,7 @@ export function runnerInput(params: {
         ? { memoryLimit: params.memoryLimit }
         : {}),
       maxHandSize: 5,
-      tags: 0,
+      tags: params.tags ?? 0,
     },
     opponent: {
       identity: visibleIdentity("corp"),

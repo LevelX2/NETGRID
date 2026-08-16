@@ -2028,6 +2028,59 @@ describe("Runner core plan modules", () => {
     });
   });
 
+  it("offers empty-Stack turn completion only after all voluntary routes are owner-rejected", () => {
+    const defense = coreModule("runner.defense_and_recovery");
+    const credit = candidate("runner.gain_credit");
+    const endTurn = candidate(
+      "runner.end_turn",
+      "end_turn",
+      "turn_flow.end_turn",
+    );
+    endTurn.sourceKind = "game_rule";
+    const runnerContext = context([credit, endTurn], {
+      defense: { forgoExhaustedStandardCapacity: true },
+    });
+
+    expect(defense.discover(runnerContext)[0]).toMatchObject({
+      initialViability: "blocked",
+      phase: "forgo_exhausted_options",
+    });
+
+    runnerContext.actionDispositions = [
+      {
+        actionId: credit.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.economy",
+        evidenceCode: "runner_credit_has_no_bound_need",
+      },
+    ];
+    const [proposal] = defense.discover(runnerContext);
+    expect(proposal).toMatchObject({
+      initialViability: "ready",
+      phase: "forgo_exhausted_options",
+    });
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const assessment = defense.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+    const materialization = defense.materialize(
+      instance,
+      assessment as never,
+      runnerContext,
+    );
+    expect(materialization.candidates).toHaveLength(1);
+    expect(materialization.candidates[0]?.candidate.actionId).toBe(
+      endTurn.actionId,
+    );
+    expect(materialization.earlyEndTurnJustification).toEqual({
+      kind: "forgo_exhausted_runner_capacity",
+      capacityKind: "empty_stack_all_voluntary_routes_rejected",
+      explicitlyNonproductiveActionIds: [credit.actionId],
+    });
+  });
+
   it("admits card-specific development only with a concrete feasible purpose", () => {
     expect(
       runnerDevelopmentCardAdmission({

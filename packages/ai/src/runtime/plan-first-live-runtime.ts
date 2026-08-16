@@ -506,6 +506,8 @@ export function choosePlanFirstLiveAction(
       resolvePlanBoundRunnerHiddenDrawChoice(schedulerContext, previous) ??
       resolvePlanBoundCorpArchivesToHqChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
+      resolvePlanBoundRunnerVacuumLinkChoice(schedulerContext, previous) ??
+      resolvePlanBoundCorpDelayedSuccessChoice(schedulerContext, previous) ??
       resolveEngineWindow(schedulerContext)
     );
   };
@@ -709,7 +711,18 @@ function bindSelectedPlanActionOrigin(
       (effect) => effect.kind === "draw",
     ) === true;
   const canOpenRunnerRunStartOrder = selectedAction?.type === "start_run";
-  if (!canOpenRunnerDrawReplacement && !canOpenRunnerRunStartOrder) return;
+  const canOpenRunnerVacuumLinkRewind =
+    selectedAction?.type === "continue_run" &&
+    selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&
+    Number(selectedAction.payload?.unbrokenSubroutineCount) > 0 &&
+    input.playerView.run?.encounteredIce?.definitionId ===
+      "onr_v1_275_vacuum-link";
+  if (
+    !canOpenRunnerDrawReplacement &&
+    !canOpenRunnerRunStartOrder &&
+    !canOpenRunnerVacuumLinkRewind
+  )
+    return;
   const invalidCurrentPlanAction =
     !rootPlanInstanceId ||
     !executorInstanceId ||
@@ -728,7 +741,11 @@ function bindSelectedPlanActionOrigin(
         instance.side === "runner",
     );
   if (invalidCurrentPlanAction) {
-    if (canOpenRunnerRunStartOrder && !canOpenRunnerDrawReplacement) return;
+    if (
+      (canOpenRunnerRunStartOrder || canOpenRunnerVacuumLinkRewind) &&
+      !canOpenRunnerDrawReplacement
+    )
+      return;
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -748,15 +765,28 @@ function bindSelectedPlanActionOrigin(
         selectedAtStateVersion: input.playerView.stateVersion,
         immediateChoicePolicy: "trash_lowest_visible_drawn_card",
       }
-    : {
-        rootPlanInstanceId,
-        executorInstanceId,
-        selectedActionId: selectedAction.actionId,
-        selectedAtStateVersion: input.playerView.stateVersion,
-        immediateChoicePolicy: "resolve_runner_run_start_order",
-        sourceStepId: result.route.step.stepId,
-        sourceActionType: "start_run",
-      };
+    : canOpenRunnerVacuumLinkRewind
+      ? {
+          rootPlanInstanceId,
+          executorInstanceId,
+          selectedActionId: selectedAction.actionId,
+          selectedAtStateVersion: input.playerView.stateVersion,
+          immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
+          sourceStepId: result.route.step.stepId,
+          sourceActionType: "continue_run",
+          sourceCardInstanceId:
+            input.playerView.run!.encounteredIce!.instanceId,
+          sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+        }
+      : {
+          rootPlanInstanceId,
+          executorInstanceId,
+          selectedActionId: selectedAction.actionId,
+          selectedAtStateVersion: input.playerView.stateVersion,
+          immediateChoicePolicy: "resolve_runner_run_start_order",
+          sourceStepId: result.route.step.stepId,
+          sourceActionType: "start_run",
+        };
 }
 
 function applyTurnPlannerCutoverSelection(
@@ -3483,6 +3513,9 @@ function buildRunnerDomain(
     riskAdjustedHandBufferOpen &&
     !visiblySafePositiveRunAvailable &&
     !visibleImmediatePayoffRunAvailable;
+  const forgoExhaustedStandardCapacity =
+    input.playerView.own.stackOrRdCount === 0 &&
+    input.playerView.own.clicks > 0;
   const reactionReserveTargetCredits = 10;
   const reactionReserveActionIds = runnerExactFundingRouteContract(
     input,
@@ -3572,6 +3605,7 @@ function buildRunnerDomain(
       )
       .map((candidate) => candidate.actionId),
     forgoUnsafeRunCapacity,
+    forgoExhaustedStandardCapacity,
     ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
     ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
     handBufferPriorityClass:
@@ -4960,6 +4994,7 @@ function buildRunnerDomain(
       candidates,
       strategicIntent,
       coverageGaps,
+      handDevelopment,
     ),
   ];
   const hasRunWindowCandidate = candidates.some((candidate) =>
@@ -5638,10 +5673,34 @@ function runnerGenericDrawDevelopmentSignals(
   candidates: readonly ActionSemanticCandidate[],
   strategicIntent: RunnerStrategicIntentProfile,
   coverageGaps: RunnerCorePlanDomain["coverageGaps"],
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
 ): RunnerPlanDomain["developments"] {
   const handCapacityGap =
     input.playerView.own.maxHandSize - input.playerView.own.gripOrHq.length;
-  if (handCapacityGap <= 0 || input.playerView.own.stackOrRdCount <= 0) {
+  const knownHandDefinitionCounts = new Map<string, number>();
+  for (const card of input.playerView.own.gripOrHq) {
+    if (!card.known || !card.definitionId) continue;
+    knownHandDefinitionCounts.set(
+      card.definitionId,
+      (knownHandDefinitionCounts.get(card.definitionId) ?? 0) + 1,
+    );
+  }
+  const redundantKnownHandCopy = [...knownHandDefinitionCounts.values()].some(
+    (count) => count > 1,
+  );
+  const fullHandRotationAvailable =
+    handCapacityGap <= 0 &&
+    (redundantKnownHandCopy ||
+      handDevelopment.some(
+        (evaluation) =>
+          evaluation.deferReason === "duplicate" ||
+          evaluation.deferReason === "no_current_need" ||
+          evaluation.deferReason === "stronger_override",
+      ));
+  if (
+    (handCapacityGap <= 0 && !fullHandRotationAvailable) ||
+    input.playerView.own.stackOrRdCount <= 0
+  ) {
     return [];
   }
   const drawCandidates = candidates.filter(
@@ -5649,7 +5708,8 @@ function runnerGenericDrawDevelopmentSignals(
       (candidate.actionType === "draw_card" &&
         candidate.semanticActionType === "draw.card" &&
         candidate.sourceKind === "basic_action") ||
-      (candidate.sourceKind === "card" &&
+      (handCapacityGap > 0 &&
+        candidate.sourceKind === "card" &&
         candidate.tagEffectProfile?.acuteTagRemoval !== true &&
         candidate.economyProjection?.timing === "immediate" &&
         (candidate.economyProjection.netHandDelta ?? 0) > 0 &&
@@ -5678,7 +5738,9 @@ function runnerGenericDrawDevelopmentSignals(
       definitionId: "runner_option_development",
       targetKind: "capability",
       phase: "execute",
-      purposeCode: "increase_hand_option_density",
+      purposeCode: fullHandRotationAvailable
+        ? "rotate_functionally_dead_hand_card"
+        : "increase_hand_option_density",
       assignedDomainPlanIds: [],
       duplicateAlreadyInstalled: false,
       affordableOrSupportable: true,
@@ -5690,10 +5752,11 @@ function runnerGenericDrawDevelopmentSignals(
       actionIds: drawCandidates.map((candidate) => candidate.actionId),
       priorityClass: "P6",
       value:
-        10 +
-        Math.min(5, handCapacityGap) +
+        (fullHandRotationAvailable ? 18 : 10 + Math.min(5, handCapacityGap)) +
         (doctrineThroughputActive ? doctrineValue : 0),
-      evidenceCode: "runner_hand_capacity_accepts_immediate_option_development",
+      evidenceCode: fullHandRotationAvailable
+        ? "runner_full_hand_has_functionally_dead_rotation_target"
+        : "runner_hand_capacity_accepts_immediate_option_development",
       ...(doctrineThroughputActive
         ? {
             evidenceCodes: [
@@ -15430,6 +15493,335 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
   };
 }
 
+function resolvePlanBoundRunnerVacuumLinkChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "runner" ||
+    choice?.source !== "card_implementation.vacuum_link_rewind"
+  ) {
+    return undefined;
+  }
+  const origin = previous?.selectedActionOrigin;
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === previous.executorInstanceId &&
+      (instance.moduleId === "runner.convert_run_window" ||
+        instance.moduleId === "runner.pressure_central" ||
+        instance.moduleId === "runner.contest_remote") &&
+      instance.executionState === "executor",
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signal?: {
+          serverId?: unknown;
+          accessCommitment?: { intendedAction?: unknown };
+        };
+        vacuumLinkChoiceBinding?: {
+          choiceId: string;
+          actionId: string;
+          selectedOptionId: string;
+          sourceCardInstanceId: string;
+          sourceCardDefinitionId: string;
+          observedAtStateVersion: number;
+        };
+      }
+    | undefined;
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === previous.rootForegroundInstanceId,
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const choiceRunId =
+    /^card_implementation\.vacuum_link_rewind:([^:]+):([0-9]+)$/.exec(
+      choice.choiceId,
+    )?.[1];
+  const sourceCard = context.input.playerView.run?.encounteredIce;
+  const continuationEvents = (context.input.eventTail ?? []).filter(
+    (event) =>
+      previous !== undefined &&
+      event.stateVersionBefore >= previous.stateVersion &&
+      event.stateVersionAfter <= context.input.playerView.stateVersion,
+  );
+  const firstContinuationEvent = continuationEvents[0];
+  const lastContinuationEvent = continuationEvents.at(-1);
+  const exactContinuationChain =
+    previous !== undefined &&
+    continuationEvents.length >= 1 &&
+    continuationEvents.length <= 3 &&
+    firstContinuationEvent?.stateVersionBefore === previous.stateVersion &&
+    firstContinuationEvent.publicPayload?.actor === "runner" &&
+    firstContinuationEvent.publicPayload?.actionType ===
+      previous?.turnPlanExecutionLease?.actionType &&
+    lastContinuationEvent?.stateVersionAfter ===
+      context.input.playerView.stateVersion &&
+    lastContinuationEvent.publicPayload?.actor === "runner" &&
+    lastContinuationEvent.publicPayload?.actionType === "continue_run" &&
+    lastContinuationEvent.publicPayload?.resolvedEffects?.some(
+      (effect) =>
+        effect.kind === "resolve_subroutine" &&
+        effect.sourceDefinitionId === choice.sourceCardDefinitionId,
+    ) === true &&
+    continuationEvents
+      .slice(1, -1)
+      .every(
+        (event) =>
+          event.publicPayload?.actor === "corp" &&
+          (event.publicPayload?.actionType === "rez_ice" ||
+            event.publicPayload?.actionType === "decline_rez"),
+      );
+  const immediateOriginMatches =
+    origin?.immediateChoicePolicy === "resolve_runner_vacuum_link_rewind" &&
+    origin.selectedAtStateVersion === previous?.stateVersion &&
+    origin.sourceActionType === "continue_run" &&
+    origin.rootPlanInstanceId === previous?.rootForegroundInstanceId &&
+    origin.executorInstanceId === previous?.executorInstanceId;
+  const executionLease = previous?.turnPlanExecutionLease;
+  const turnPlanContinuationMatches =
+    previous?.turnPlanCommitment?.status === "active" &&
+    previous.turnPlanCommitment.sequenceRootPlanInstanceId ===
+      previous.rootForegroundInstanceId &&
+    executionLease !== undefined &&
+    executionLease.currentBinding.stateVersion === previous.stateVersion &&
+    (executionLease.actionType === "continue_run" ||
+      executionLease.actionType === "start_run");
+  const exactBinding =
+    (immediateOriginMatches ||
+      (turnPlanContinuationMatches && exactContinuationChain)) &&
+    choice.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "public" &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    sourceCard !== undefined &&
+    sourceCard.instanceId === choice.sourceCardInstanceId &&
+    sourceCard.definitionId === choice.sourceCardDefinitionId &&
+    typeof choiceRunId === "string" &&
+    choiceRunId.length > 0 &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    optionIds.length === 2 &&
+    optionIds.includes("resume_from_rezzed_ice_back") &&
+    optionIds.includes("jack_out") &&
+    previous !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion < context.input.playerView.stateVersion &&
+    context.input.playerView.stateVersion - previous.stateVersion <= 3 &&
+    root?.side === "runner" &&
+    executor !== undefined &&
+    (executor.parentInstanceId === root.instanceId ||
+      executor.instanceId === root.instanceId) &&
+    (executorState?.kind === "run_window" ||
+      executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest") &&
+    executorState.signal?.serverId ===
+      context.input.playerView.run?.attackedServerId &&
+    typeof executorState.signal?.accessCommitment?.intendedAction ===
+      "string" &&
+    action !== undefined &&
+    action.side === "runner" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding || !action || !previous || !executor || !executorState) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition:
+        "Resolve Vacuum Link only from an exact active Runner run-plan route, its bounded start/continue event chain and the complete current Engine choice contract.",
+    });
+  }
+  executorState.vacuumLinkChoiceBinding = {
+    choiceId: choice.choiceId,
+    actionId: action.actionId,
+    selectedOptionId: "resume_from_rezzed_ice_back",
+    sourceCardInstanceId: choice.sourceCardInstanceId!,
+    sourceCardDefinitionId: choice.sourceCardDefinitionId!,
+    observedAtStateVersion: context.input.playerView.stateVersion,
+  };
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_runner_vacuum_link_rewind_choice",
+    origin: {
+      rootPlanInstanceId: previous.rootForegroundInstanceId!,
+      leafPlanInstanceId: executor.instanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
+function resolvePlanBoundCorpDelayedSuccessChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "corp" ||
+    !choice?.source.startsWith("p3_54.delayed_success:")
+  ) {
+    return undefined;
+  }
+  const sourceMatch =
+    /^p3_54\.delayed_success:([^:]+):temporary_hq_ice_encounter_after_successful_run:([^:]+):([0-9]+)$/.exec(
+      choice.source,
+    );
+  const sourceCardId = sourceMatch?.[1];
+  const serverId = sourceMatch?.[2];
+  const sourceStateVersion = Number(sourceMatch?.[3]);
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === previous.executorInstanceId &&
+      instance.moduleId === "corp.defend_servers" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        signals?: CorpDefenseSignal[];
+        hqHoldCadence?: { turnKey?: unknown };
+        delayedSuccessChoiceBinding?: {
+          choiceId: string;
+          actionId: string;
+          selectedOptionId: string;
+          sourceCardInstanceId: string;
+          serverId: string;
+          observedAtStateVersion: number;
+        };
+      }
+    | undefined;
+  const sourceCard = sourceCardId
+    ? context.input.playerView.servers
+        .flatMap((server) => server.root)
+        .find(
+          (card) =>
+            card.instanceId === sourceCardId &&
+            card.known &&
+            card.definitionId === "onr_v1_358_dr-dreff" &&
+            card.rezzed === true,
+        )
+    : undefined;
+  const decline = choice.options.find(
+    (option) => option.id === "decline" && option.value === "decline",
+  );
+  const iceOptions = choice.options.filter(
+    (option) =>
+      option.id.startsWith("ice_") &&
+      typeof option.value === "string" &&
+      option.id === `ice_${option.value}` &&
+      context.input.playerView.own.gripOrHq.some(
+        (card) =>
+          card.instanceId === option.value && card.known && card.type === "ice",
+      ),
+  );
+  const selectedOption = iceOptions.length === 1 ? iceOptions[0] : undefined;
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const exactBinding =
+    sourceCard !== undefined &&
+    serverId === "hq" &&
+    sourceStateVersion === context.input.playerView.stateVersion &&
+    context.input.playerView.run?.attackedServerId === serverId &&
+    choice.side === "corp" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    decline !== undefined &&
+    selectedOption !== undefined &&
+    optionIds.length === 2 &&
+    previous !== undefined &&
+    previous.side === "corp" &&
+    previous.stateVersion < context.input.playerView.stateVersion &&
+    previous.rootForegroundInstanceId === executor?.instanceId &&
+    moduleState?.kind === "defense" &&
+    moduleState.hqHoldCadence?.turnKey === turnKey(context.input) &&
+    moduleState.signals?.some((signal) => signal.serverId === serverId) ===
+      true &&
+    action !== undefined &&
+    action.side === "corp" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (
+    !exactBinding ||
+    !action ||
+    !executor ||
+    !moduleState ||
+    !selectedOption
+  ) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition:
+        "Resolve Dr. Dreff only from the active corp.defend_servers executor, exact rezzed HQ source, active HQ run and one unambiguous visible HQ-ICE option.",
+    });
+  }
+  moduleState.delayedSuccessChoiceBinding = {
+    choiceId: choice.choiceId,
+    actionId: action.actionId,
+    selectedOptionId: selectedOption.id,
+    sourceCardInstanceId: sourceCard.instanceId,
+    serverId,
+    observedAtStateVersion: context.input.playerView.stateVersion,
+  };
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_corp_delayed_success_choice",
+    origin: {
+      rootPlanInstanceId: executor.instanceId,
+      leafPlanInstanceId: executor.instanceId,
+      side: "corp",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
 function resolveEngineWindow(
   context: PlanSchedulerContext,
 ): EngineWindowResolution | undefined {
@@ -18097,15 +18489,20 @@ function uniqueCoverageGaps(
       evaluation.targetKind === "remote"
         ? `remote:${evaluation.targetServerId}`
         : `central:${evaluation.targetServerId}`;
+    const bindToRequester =
+      terminalRemotePatternThreat ||
+      (requesterModuleId === "runner.pressure_central" &&
+        evaluation.score > 0 &&
+        evaluation.knownAccessState !== "known_no_current_payoff" &&
+        evaluation.accessPayoff !== "known_low_value");
     result.set(role, {
       gapId,
       needKind: costRecovery ? "cost_ineffective_coverage" : "missing_coverage",
       requiredRole: role,
       targetServerId: evaluation.targetServerId,
-      requesterModuleId,
-      ...(terminalRemotePatternThreat ||
-      requesterModuleId === "runner.pressure_central"
+      ...(bindToRequester
         ? {
+            requesterModuleId,
             requesterPlanInstanceId: planInstanceIdForProposal({
               moduleId: requesterModuleId,
               dedupeKey: requesterDedupeKey,
@@ -21555,6 +21952,9 @@ function corpResidentCentralDefenseHqHoldState(
       removalCondition:
         "Resident HQ-hold cadence must be one exact available receipt at the portfolio state or one consumed receipt with its exact R&D ICE-install selection.",
     });
+  }
+  if (cadence.turnKey !== turnKey(input)) {
+    return fresh(cadence.receiptId as string);
   }
   if (cadence.status === "available") {
     return fresh(cadence.receiptId as string);
