@@ -3206,32 +3206,35 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: "onr_v1_178_short-term-contract",
         title: "Short-Term Contract",
         counters: { bit: 12 },
+        counterDisplays: [
+          {
+            id: "stored_credits",
+            amount: 12,
+            displayKind: "stored_credits",
+            label: "Credits",
+            ariaLabel: "12 gespeicherte Credits",
+            counterType: "bit",
+            usageHint: "spendable",
+            creditPool: { kind: "stored_credit" },
+          },
+        ],
       }),
     ];
 
-    const decision = liveContext({
-      deckCapabilitiesForInput: () => ({
-        runner: {
-          searchAccess: { tools: [] },
-          economyBankTools: [
-            {
-              cardId: "onr_v1_178_short-term-contract",
-              sourceCardInstanceId: "short-term-contract",
-              title: "Short-Term Contract",
-              ownerSide: "runner",
-              status: "installed",
-              currentBankAmount: 12,
-              estimatedPayout: 2,
-              buildActionLegal: false,
-              cashOutActionLegal: true,
-              buildActionIds: [],
-              cashOutActionIds: [cash.actionId],
-              confidence: "high",
-              evidence: ["test_short_term_contract_installed"],
-            },
-          ],
-        },
+    const capabilities = buildDeckCapabilityProfileFromInput(input);
+    expect(capabilities.runner?.economyBankTools).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: "short-term-contract",
+        currentBankAmount: 12,
+        estimatedPayout: 2,
+        buildActionLegal: false,
+        cashOutActionLegal: true,
+        cashOutActionIds: [cash.actionId],
       }),
+    ]);
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => capabilities,
       buildRunnerEconomyPosture: () => ({
         minimumCreditFloor: 2,
         desiredCreditReserve: 5,

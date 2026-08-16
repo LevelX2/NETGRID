@@ -413,6 +413,69 @@ describe("DeckCapabilityProfile", () => {
     ]);
   });
 
+  it("recognizes an installed finite bank with an automatic initial load and canonical cashout", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard(
+        "short-term-contract-1",
+        "onr_v1_178_short-term-contract",
+        "runner",
+        "resource",
+        {
+          title: "Short-Term Contract",
+          counters: { bit: 6 },
+          counterDisplays: [
+            {
+              id: "stored_credits",
+              amount: 6,
+              displayKind: "stored_credits",
+              label: "Credits",
+              ariaLabel: "6 gespeicherte Credits",
+              counterType: "bit",
+              usageHint: "spendable",
+              creditPool: { kind: "stored_credit" },
+            },
+          ],
+        },
+      ),
+    ];
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "short-term-contract-cashout",
+          "runner",
+          "activated_card_ability",
+          "short-term-contract-1",
+          "Take 2 hosted credits",
+          {
+            cardImplementationTakesHostedCredits: true,
+            hostedCreditTakeAmount: 2,
+            gainCreditsAmount: 2,
+          },
+        ),
+      ],
+      deckSnapshot: runnerSnapshot([["onr_v1_178_short-term-contract", 3]]),
+    });
+
+    expect(profile.runner?.economyBankTools).toEqual([
+      expect.objectContaining({
+        cardId: "onr_v1_178_short-term-contract",
+        sourceCardInstanceId: "short-term-contract-1",
+        status: "installed",
+        currentBankAmount: 6,
+        portfolioStoredAmount: 6,
+        estimatedPayout: 2,
+        buildActionLegal: false,
+        cashOutActionLegal: true,
+        buildActionIds: [],
+        cashOutActionIds: ["short-term-contract-cashout"],
+        confidence: "high",
+      }),
+    ]);
+  });
+
   it("does not infer a Runner credit-bank contract from a deposit phrase", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
