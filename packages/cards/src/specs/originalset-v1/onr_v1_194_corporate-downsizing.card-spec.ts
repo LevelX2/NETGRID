@@ -77,31 +77,23 @@ export const cardSpec = {
         signal: "economy.card",
         use: "economy.card",
       },
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey(
-          "scored_agenda_shuffle_selected_hq_agendas_into_rd_gain_credits",
-        ),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "choose_hq_agenda_subset_for_reveal_credit_and_shuffle",
-            preferences: [
-              "meet_bound_credit_need_with_smallest_sufficient_subset",
-              "reduce_hq_agenda_exposure_under_current_hq_pressure",
-              "prefer_already_known_agenda_when_plan_value_is_equal",
-              "preserve_bound_or_immediately_scoreable_agenda",
-              "account_for_runner_matchpoint_and_rnd_pressure",
-            ],
-            avoid: [
-              "unnecessary_private_agenda_information_reveal",
-              "shuffle_agenda_required_by_current_score_route",
-            ],
-          },
+        kind: "target_preference",
+        purpose: "choose_hq_agenda_subset_for_reveal_credit_and_shuffle",
+        preferences: [
+          "minimum_cards_for_current_credit_need",
+          "protect_agenda_density",
+          "already_public_or_low_information_value_agenda",
+          "best_cards_for_current_plan",
+        ],
+        avoid: [
+          "unrevealed_matchpoint_agenda_under_hq_pressure",
+          "reveal_beyond_current_credit_need",
+          "next_turn_required_card",
         ],
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

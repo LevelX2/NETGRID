@@ -65,11 +65,7 @@ export const cardSpec = {
       },
       {
         kind: "strategic_role",
-        role: "payoff_anchor",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.hq_pressure",
+        role: "information_tool",
       },
       {
         kind: "line_support",

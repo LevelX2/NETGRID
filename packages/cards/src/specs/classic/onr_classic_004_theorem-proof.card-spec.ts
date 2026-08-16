@@ -110,15 +110,8 @@ export const cardSpec = {
           "Agenda Semantic Review v1 maps Theorem Proof to corp.remote_scoring as defensive_tool/agenda_steal_friction_tool.",
       },
       {
-        kind: "target_preference",
-        purpose: "choose_theorem_proof_install_or_decline_exchange",
-        preferences: [
-          "compare_three_agenda_points_now_or_delayed",
-          "account_for_two_mu_and_later_score_action",
-          "account_for_program_trash_and_remove_from_game_risk",
-          "account_for_decline_score_at_next_runner_start_if_still_installed",
-        ],
-        avoid: ["treat_current_agenda_as_free_target_choice"],
+        kind: "strategic_exchange",
+        exchange: "score_progress",
       },
       {
         kind: "risk_interpretation",

@@ -91,9 +91,22 @@ export const cardSpec = {
         role: "run_support",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "memory_support",
+      },
+      {
+        kind: "plan_role",
+        role: "recurring_non_noisy_breaker_credits",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "deck_replacement_conflict",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "opportunity_cost",
+        severity: "high",
       },
     ],
     capabilities: [],

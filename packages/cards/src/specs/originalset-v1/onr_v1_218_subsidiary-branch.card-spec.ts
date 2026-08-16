@@ -59,7 +59,11 @@ export const cardSpec = {
     card: [
       {
         kind: "strategic_role",
-        role: "engine_anchor",
+        role: "enabler",
+      },
+      {
+        kind: "plan_role",
+        role: "corp_action_tempo",
       },
       {
         kind: "line_support",
@@ -67,13 +71,9 @@ export const cardSpec = {
         support: "supports",
       },
       {
-        kind: "strategy_support",
-        strategyKey: "corp.action_tempo",
-        role: "engine_anchor",
-        roleDetail: "recurring_extra_action_engine",
-        confidence: "medium",
-        rationale:
-          "A recurring extra Corp action is a reusable action-tempo engine after the agenda is scored.",
+        kind: "risk_interpretation",
+        risk: "high_advancement_requirement",
+        severity: "medium",
       },
     ],
     capabilities: [],

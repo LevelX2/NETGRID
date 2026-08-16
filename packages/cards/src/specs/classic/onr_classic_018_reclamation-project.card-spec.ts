@@ -94,29 +94,22 @@ export const cardSpec = {
         risk: "reserve_risk",
         severity: "low",
       },
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey("return_archives_ice_to_hq"),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "choose_archives_ice_subset_for_hq_recovery",
-            preferences: [
-              "close_current_server_defense_gap",
-              "recover_ice_with_affordable_install_and_rez_route",
-              "prefer_already_known_ice_when_plan_value_is_equal",
-              "respect_hq_capacity_and_double_action_cost",
-            ],
-            avoid: [
-              "recover_all_ice_without_current_plan_use",
-              "unnecessary_private_ice_information_reveal",
-              "create_hq_overflow_without_cleanup_route",
-            ],
-          },
+        kind: "target_preference",
+        purpose: "choose_archives_ice_subset_for_hq_recovery",
+        preferences: [
+          "best_cards_for_current_plan",
+          "protects_agenda_remote",
+          "protects_central_access_pressure",
+          "known_or_rezzed_ice",
+        ],
+        avoid: [
+          "low_impact_ice",
+          "avoid_revealing_high_value_hidden_ice_without_need",
         ],
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

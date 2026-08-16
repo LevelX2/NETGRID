@@ -69,9 +69,17 @@ export const cardSpec = {
         role: "pressure_rnd",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "draw.card",
-        use: "draw.card",
+        kind: "plan_role",
+        role: "corp_forced_draw_pressure",
+      },
+      {
+        kind: "plan_role",
+        role: "rnd_deck_pressure",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "virus_purge_risk",
+        severity: "medium",
       },
     ],
     capabilities: [],

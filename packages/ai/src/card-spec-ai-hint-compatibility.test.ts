@@ -578,6 +578,29 @@ describe("CS06 effective AI hint compatibility", () => {
     );
   });
 
+  it("derives access-ambush damage semantics from the mechanical damage type", () => {
+    const vacantSoulkiller = requiredHint("onr_v1_346_vacant-soulkiller");
+
+    expect(vacantSoulkiller.roles).toEqual(
+      expect.arrayContaining(["ambush", "brain_damage"]),
+    );
+    expect(vacantSoulkiller.functionSignals).toContain(
+      "access.corp_brain_damage_ambush",
+    );
+    expect(vacantSoulkiller.functionSignals).not.toContain(
+      "access.corp_net_damage_ambush",
+    );
+    expect(vacantSoulkiller.effects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "damage",
+          resource: "brain_damage",
+          target: "access.corp_brain_damage_ambush",
+        }),
+      ]),
+    );
+  });
+
   it("keeps strategy-support interpretations and derived evidence exact", () => {
     expect(
       cases.flatMap(({ id }) =>

@@ -94,6 +94,11 @@ export const cardSpec = {
         signal: "coverage.breaker",
         use: "coverage.breaker",
       },
+      {
+        kind: "risk_interpretation",
+        risk: "random_self_trash_after_relevant_encounter",
+        severity: "high",
+      },
     ],
     capabilities: [],
   },

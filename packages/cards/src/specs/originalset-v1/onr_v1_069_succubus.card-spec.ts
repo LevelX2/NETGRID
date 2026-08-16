@@ -58,14 +58,13 @@ export const cardSpec = {
         kind: "target_preference",
         purpose: "choose_hosted_program",
         preferences: [
-          "maximize_total_hosted_mu_value_within_capacity_three",
-          "free_normal_mu_for_current_rig_route",
-          "preserve_required_breaker_coverage",
-          "prefer_replaceable_program_when_host_risk_is_equal",
+          "best_cards_for_current_plan",
+          "program_repairs_missing_coverage",
+          "high_install_cost_or_memory",
         ],
         avoid: [
           "target_would_break_host_limit",
-          "concentrate_irreplaceable_rig_on_single_host",
+          "critical_rig_or_survival_card",
         ],
       },
       {

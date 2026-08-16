@@ -81,9 +81,10 @@ export const cardSpec = {
         strategyKey: "corp.damage_kill",
         role: "punish_payoff",
         roleDetail: "brain_damage_ice",
+        evidenceProfile: "brain_damage_ice",
         confidence: "high",
         rationale:
-          "v2: Kartentext enthält Brain/Core damage und ETR, aber keinen Program-Trash; Damage-Kill bleibt, ICE-Tax aus Program-Trash entfällt.",
+          "v2: The mechanical Brain Damage subroutine and ETR are separate functions; the printed canonical text retains the source term brain damage.",
       },
       {
         kind: "tactic_interpretation",

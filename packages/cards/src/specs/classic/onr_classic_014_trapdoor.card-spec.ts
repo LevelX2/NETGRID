@@ -81,14 +81,6 @@ export const cardSpec = {
         strategyKey: "corp.central_stabilize",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.central_stabilize",
         support: "supports",
@@ -112,31 +104,22 @@ export const cardSpec = {
         strategyKey: "corp.ice_tax_glacier",
         role: "tax_tool",
         roleDetail: "run_redirect_tax_ice",
-        confidence: "high",
-        rationale: "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur.",
+        confidence: "low",
+        rationale:
+          "The redirect only adds tax when the chosen subsidiary fort actually presents useful known ICE before its newly opened access.",
       },
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey("subroutine_deflect_to_subsidiary_fort"),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "redirect_central_run_to_safe_subsidiary_fort",
-            preferences: [
-              "prevent_more_valuable_current_central_access",
-              "add_known_encounter_tax_before_redirected_access",
-              "choose_low_value_redirect_access_destination",
-            ],
-            avoid: [
-              "redirect_to_scoring_or_ambush_remote_with_harmful_access",
-              "ignore_immediate_access_when_target_has_no_rezzed_ice",
-              "no_subsidiary_fort_target",
-            ],
-          },
+        kind: "target_preference",
+        purpose: "redirect_central_run_to_safe_subsidiary_fort",
+        preferences: [
+          "reduces_current_run_payoff",
+          "adds_relevant_encounter_tax",
+          "known_or_rezzed_ice",
         ],
+        avoid: ["low_value_accessed_card", "no_subsidiary_fort_target"],
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

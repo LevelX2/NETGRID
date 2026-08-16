@@ -71,3 +71,22 @@ Commit: `fix(cards): calibrate batch 11 planning semantics`
 - fremde Änderungen im primären Checkout unverändert;
 - Worktree und Branch nach verifiziertem Merge entfernt.
 
+## Verifikationsdisposition
+
+- 27 Findings führten zu bestätigten Text-, Provenienz-, Choice-, Rollen-,
+  Risiko- oder Compilerkorrekturen.
+- Pile Drivers Verlust von Stealth-Credits wird bereits im generischen
+  Run-Quote- und Credit-Budget-Pfad pro Ability-Nutzung berücksichtigt. Neben
+  der Quelltextnotation entsteht deshalb kein zweiter Kostenpfad.
+- Mastermind besitzt bereits das typisierte `brain_damage_ice`-Evidenzprofil;
+  Iceberg projiziert seinen Net Damage bereits aus der mechanischen
+  Subroutine. Beide Vorschläge waren auf dem geprüften Stand schon erfüllt.
+- Bei Vacant Soulkiller wurde ein generischer Compilerfehler bestätigt:
+  Advancement-skalierender Access-Schaden wurde unabhängig von `damageType`
+  als Net-Damage-Ambush projiziert. Der Compiler erhält nun Net-, Meat- und
+  Brain/Core-Identität durchgängig in Rollen, Effekten, Funktionssignalen und
+  Strategieevidenz.
+- TargetProfiles bleiben dort auf Kartenebene, wo der aktuelle Compiler für
+  die zugrunde liegende Longtail-Choice keinen capability-nahen Owner besitzt.
+  Die Auswahlsemantik wurde präzisiert, ohne eine zweite Entscheidungsautorität
+  oder einen ungenutzten Compilervertrag einzuführen.

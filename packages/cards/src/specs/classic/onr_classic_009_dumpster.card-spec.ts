@@ -72,18 +72,6 @@ export const cardSpec = {
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.central_stabilize",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -96,6 +84,11 @@ export const cardSpec = {
         confidence: "high",
         rationale:
           "v2: Redirect zu Archives ist primär Runpath-/Tax-Kontrolle; central_stabilize wäre nur abhängig vom Installationsfort.",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "redirect_opens_archives_access",
+        severity: "medium",
       },
     ],
     capabilities: [],

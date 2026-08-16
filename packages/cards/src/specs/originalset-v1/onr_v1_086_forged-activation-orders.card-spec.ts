@@ -64,29 +64,18 @@ export const cardSpec = {
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
     card: [
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey(
-          "abilities_on_play_corp_choice_rez_or_trash_ice",
-        ),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "choose_publicly_assessable_ice_for_rez_or_trash_pressure",
-            preferences: [
-              "valuable_known_rezzed_ice_with_no_legal_rez_route",
-              "high_visible_rez_burden_relative_to_corp_credits",
-              "important_server_position_for_current_or_followup_run",
-            ],
-            avoid: [
-              "infer_unrezzed_ice_identity",
-              "cheap_irrelevant_or_intentionally_rezzable_decoy",
-            ],
-          },
+        kind: "target_preference",
+        purpose: "choose_publicly_assessable_ice_for_rez_or_trash_pressure",
+        preferences: [
+          "known_or_rezzed_ice",
+          "high_rez_cost_tax",
+          "server_relevant_to_current_plan",
         ],
+        avoid: ["hidden_info_dependent_choice", "irrelevant_server_ice"],
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

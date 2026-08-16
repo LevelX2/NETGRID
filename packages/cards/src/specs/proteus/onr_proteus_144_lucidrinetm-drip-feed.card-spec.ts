@@ -60,21 +60,16 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "gain_action_capacity",
       },
       {
         kind: "strategic_exchange",
         exchange: "self_damage",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "damage.payoff",
-        use: "damage.payoff.runner",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "risk_interpretation",
+        risk: "delayed_unpreventable_core_damage",
+        severity: "high",
       },
     ],
     capabilities: [],

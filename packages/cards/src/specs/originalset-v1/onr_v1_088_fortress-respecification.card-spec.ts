@@ -57,39 +57,29 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "contest_remote",
+        role: "ice_order_control",
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "future_run_support",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
       },
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey(
-          "hidden_replacement_longtail_successful_run_fort_ice_reorder",
-        ),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "reorder_bound_successful_run_fort_ice",
-            preferences: [
-              "order_known_rezzed_ice_for_future_break_cost",
-              "sequence_known_etr_damage_and_tax_for_followup_run",
-              "preserve_unknown_ice_as_unknown_positions",
-            ],
-            avoid: [
-              "infer_concealed_ice_identity",
-              "treat_bound_fort_as_free_target_choice",
-            ],
-          },
+        kind: "target_preference",
+        purpose: "reorder_bound_successful_run_fort_ice",
+        preferences: [
+          "known_or_rezzed_ice",
+          "high_break_cost_without_bonus",
+          "blocks_relevant_run_path",
         ],
+        avoid: ["hidden_info_dependent_choice"],
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

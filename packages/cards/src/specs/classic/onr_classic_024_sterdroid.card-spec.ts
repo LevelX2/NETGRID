@@ -121,10 +121,6 @@ export const cardSpec = {
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -139,16 +135,6 @@ export const cardSpec = {
           "Temporary targeted strength boost can increase break cost on a key ICE, but it is not inherently remote-scoring protection.",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "remote_root_value",
-        rating: "high",
-      },
-      {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",
@@ -158,39 +144,24 @@ export const cardSpec = {
         risk: "reserve_risk",
         severity: "medium",
       },
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey("corp_main_double_chosen_ice_strength"),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "choose_ice_for_one_shot_strength_double",
-            preferences: [
-              "maximize_effective_strength_gain_below_cap_ten",
-              "exploit_visible_breaker_coverage_and_runner_credit_gap",
-              "protect_current_high_value_server",
-            ],
-            avoid: ["irrelevant_server_ice", "strength_already_at_cap_ten"],
-          },
-        ],
+        kind: "risk_interpretation",
+        risk: "installed_card_trash_cost",
+        severity: "high",
       },
       {
-        capabilityKey: capabilityKey("during_run_double_chosen_ice_strength"),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "choose_current_run_ice_for_one_shot_strength_double",
-            preferences: [
-              "current_run_path_relevance",
-              "maximize_effective_strength_gain_below_cap_ten",
-              "exploit_visible_breaker_coverage_and_runner_credit_gap",
-            ],
-            avoid: ["irrelevant_server_ice", "strength_already_at_cap_ten"],
-          },
+        kind: "target_preference",
+        purpose: "choose_ice_for_one_shot_strength_double",
+        preferences: [
+          "current_run_path_relevance",
+          "high_strength_ice",
+          "high_break_cost_without_bonus",
+          "relevant_server_ice",
         ],
+        avoid: ["irrelevant_server_ice", "already_cheap_to_break"],
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

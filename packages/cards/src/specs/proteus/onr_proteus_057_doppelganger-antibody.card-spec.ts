@@ -116,11 +116,6 @@ export const cardSpec = {
       },
       {
         kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
-        kind: "tactic_interpretation",
         signal: "punish.payoff",
         use: "punish.payoff",
       },

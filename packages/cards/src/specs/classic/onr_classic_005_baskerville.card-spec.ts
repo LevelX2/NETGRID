@@ -122,18 +122,6 @@ export const cardSpec = {
         strategyKey: "corp.damage_kill",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "corp.tag_trace_punish",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.damage_kill",
         support: "supports",

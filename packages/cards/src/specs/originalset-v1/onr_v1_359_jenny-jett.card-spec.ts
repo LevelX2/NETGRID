@@ -126,30 +126,21 @@ export const cardSpec = {
         axis: "remote_root_value",
         rating: "medium",
       },
-    ],
-    capabilities: [
       {
-        capabilityKey: capabilityKey(
-          "fort_run_windows_install_hq_ice_innermost_after_successful_run_before_successful_run_finalizes_on_this_fort",
-        ),
-        annotations: [
-          {
-            kind: "target_preference",
-            purpose: "choose_hq_ice_for_immediate_innermost_install",
-            preferences: [
-              "immediate_etr_damage_tag_trash_or_tax_value",
-              "affordable_install_and_immediate_rez_route",
-              "exploit_visible_runner_breaker_coverage_gap",
-              "protect_current_fort_access_value",
-            ],
-            avoid: [
-              "unaffordable_or_effectless_ice",
-              "reveal_private_hq_ice_before_selected_install",
-            ],
-          },
+        kind: "target_preference",
+        purpose: "choose_hq_ice_for_immediate_innermost_install",
+        preferences: [
+          "blocks_relevant_run_path",
+          "high_break_cost_without_bonus",
+          "type_missing_in_current_rig",
+        ],
+        avoid: [
+          "unaffordable_after_install",
+          "option_with_no_visible_current_payoff",
         ],
       },
     ],
+    capabilities: [],
   },
   printings: [
     {

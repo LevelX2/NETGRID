@@ -75,12 +75,12 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "plan_role",
-        role: "recover_economy",
+        kind: "strategic_role",
+        role: "enabler",
       },
       {
-        kind: "strategic_role",
-        role: "engine_anchor",
+        kind: "plan_role",
+        role: "run_window_credit_reserve",
       },
       {
         kind: "line_support",
@@ -88,29 +88,24 @@ export const cardSpec = {
         support: "supports",
       },
       {
-        kind: "strategy_support",
-        strategyKey: "corp.economy_rez_reserve",
-        role: "engine_anchor",
-        roleDetail: "install_rez_reserve",
-        evidenceProfile: "install_rez_reserve_temporary",
-        confidence: "medium",
-        rationale:
-          "Temporary run-only credits support rez/trace reserve with explicit random discard and temporary-credit drawbacks. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "medium",
-      },
-      {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "random_hq_discard",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "temporary_credit_drawback",
+        severity: "medium",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "hq_plan_component_loss",
+        severity: "high",
       },
     ],
     capabilities: [],

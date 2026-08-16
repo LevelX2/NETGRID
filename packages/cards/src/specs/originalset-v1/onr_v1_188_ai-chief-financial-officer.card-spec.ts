@@ -63,7 +63,7 @@ export const cardSpec = {
       },
       {
         kind: "strategic_role",
-        role: "engine_anchor",
+        role: "enabler",
       },
       {
         kind: "line_support",
@@ -73,11 +73,21 @@ export const cardSpec = {
       {
         kind: "strategy_support",
         strategyKey: "corp.deck_recycle_engine",
-        role: "engine_anchor",
+        role: "enabler",
         roleDetail: "scored_zone_recycle_draw_engine",
         confidence: "medium",
         rationale:
-          "Action draw plus HQ/Archives-to-R&D shuffle forms a reusable deck recycle engine after scoring.",
+          "The scored agenda enables repeatable HQ/Archives recycling plus a five-card redraw, but no separate formal deck strategy is registered solely from this card.",
+      },
+      {
+        kind: "target_preference",
+        purpose: "activate_hq_archives_recycle_and_redraw",
+        preferences: [
+          "refresh_low_quality_or_agenda_flooded_hq",
+          "recover_high_value_archives_cards_into_rnd",
+          "respect_rnd_size_agenda_distribution_and_draw_need",
+        ],
+        avoid: ["shuffle_bound_hq_plan_without_replacement_value"],
       },
       {
         kind: "tactic_interpretation",

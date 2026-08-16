@@ -66,9 +66,21 @@ export const cardSpec = {
         role: "build_rig",
       },
       {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
+        kind: "plan_role",
+        role: "pressure_rnd",
+      },
+      {
+        kind: "plan_role",
+        role: "rnd_deck_denial",
+      },
+      {
+        kind: "plan_role",
+        role: "threshold_virus_pressure",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "virus_purge_risk",
+        severity: "medium",
       },
     ],
     capabilities: [],

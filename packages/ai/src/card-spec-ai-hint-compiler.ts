@@ -4527,17 +4527,14 @@ function deriveRoles(
       }
     }
   for (const access of entry.planning.engine.accessEffects ?? []) {
-    if (
-      access.effects.some(
-        (effect) =>
-          (effect.kind === "damage" ||
-            effect.kind === "damage_from_source_advancement_counters") &&
-          effect.damageType === "net",
-      )
-    ) {
-      roles.add("ambush");
-      roles.add("net_damage");
-    }
+    for (const effect of access.effects)
+      if (
+        effect.kind === "damage" ||
+        effect.kind === "damage_from_source_advancement_counters"
+      ) {
+        roles.add("ambush");
+        roles.add(hintDamageResource(effect.damageType));
+      }
     if (access.visibility === "hidden_info_barrier") roles.add("hidden_zone");
   }
   if (
@@ -7512,7 +7509,7 @@ function deriveHintEffects(
           resource: hintDamageResource(effect.damageType),
           amount:
             effect.kind === "damage" ? effect.amount : effect.minimumAmount,
-          target: "access.corp_net_damage_ambush",
+          target: accessDamageAmbushSignal(effect.damageType),
         });
   for (const window of engine.fortRunWindows ?? [])
     if (window.kind === "server_run_start_restriction")
@@ -8997,6 +8994,19 @@ function hintDamageResource(
   throw new Error(`card_spec_unknown_damage_type: ${String(damageType)}`);
 }
 
+function accessDamageAmbushSignal(
+  damageType: "net" | "meat" | "core" | "brain",
+):
+  | "access.corp_net_damage_ambush"
+  | "access.corp_meat_damage_ambush"
+  | "access.corp_brain_damage_ambush" {
+  if (damageType === "net") return "access.corp_net_damage_ambush";
+  if (damageType === "meat") return "access.corp_meat_damage_ambush";
+  if (damageType === "core" || damageType === "brain")
+    return "access.corp_brain_damage_ambush";
+  throw new Error(`card_spec_unknown_damage_type: ${String(damageType)}`);
+}
+
 function derivedFunctionSignals(
   entry: ReturnType<typeof cardSpecPlanningCards>[number],
 ): string[] {
@@ -9035,7 +9045,7 @@ function derivedFunctionSignals(
         effect.kind === "damage" ||
         effect.kind === "damage_from_source_advancement_counters"
       ) {
-        signals.add("access.corp_net_damage_ambush");
+        signals.add(accessDamageAmbushSignal(effect.damageType));
         if (effect.kind === "damage_from_source_advancement_counters")
           signals.add("advance.corp_counter_bank");
       }
@@ -9718,12 +9728,10 @@ function derivedTacticSignals(
       signals.add("access.rnd_reveal_requirement");
     for (const effect of access.effects) {
       if (
-        (effect.kind === "damage" ||
-          effect.kind === "damage_from_source_advancement_counters") &&
-        effect.damageType === "net"
-      ) {
-        signals.add("access.corp_net_damage_ambush");
-      }
+        effect.kind === "damage" ||
+        effect.kind === "damage_from_source_advancement_counters"
+      )
+        signals.add(accessDamageAmbushSignal(effect.damageType));
       if (effect.kind === "damage_from_source_advancement_counters")
         signals.add("advance.corp_counter_bank");
     }
@@ -9821,6 +9829,8 @@ function derivedTacticSignals(
       "access.corp_agenda_steal_replacement",
       "access.corp_delayed_agenda_score",
       "access.corp_hardware_trash",
+      "access.corp_brain_damage_ambush",
+      "access.corp_meat_damage_ambush",
       "access.corp_net_damage_ambush",
       "access.corp_program_trash",
       "access.corp_runner_agenda_program_install",
@@ -11443,16 +11453,15 @@ function derivedStrategyEvidence(
       evidence.add("ice.corp_strength_support");
     evidence.add("tax.ice");
   }
-  for (const access of engine.accessEffects ?? [])
-    if (
-      access.effects.some(
-        (effect) =>
-          (effect.kind === "damage" ||
-            effect.kind === "damage_from_source_advancement_counters") &&
-          effect.damageType === "net",
-      )
-    ) {
-      evidence.add("access.corp_net_damage_ambush");
+  for (const access of engine.accessEffects ?? []) {
+    const accessDamageEffects = access.effects.filter(
+      (effect) =>
+        effect.kind === "damage" ||
+        effect.kind === "damage_from_source_advancement_counters",
+    );
+    if (accessDamageEffects.length > 0) {
+      for (const effect of accessDamageEffects)
+        evidence.add(accessDamageAmbushSignal(effect.damageType));
       if (strategyId === "corp.ambush_bluff") evidence.add("access.punish");
       if (strategyId === "corp.damage_kill") evidence.add("damage.payoff");
     } else if (
@@ -11481,6 +11490,7 @@ function derivedStrategyEvidence(
       if (access.condition?.kind === "runner_tags_at_least")
         add("condition.runner_has_four_or_more_tags", "tag.payoff");
     }
+  }
   for (const ability of engine.abilities ?? [])
     if (
       ability.effects?.some(
