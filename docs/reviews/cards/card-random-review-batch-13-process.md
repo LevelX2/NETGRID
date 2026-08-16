@@ -80,3 +80,55 @@ Commit: `fix(cards): calibrate batch 13 planning semantics`
 - aktuelles `main` vor Integration konfliktbewusst einbinden;
 - lokaler Merge nach `main`, ohne fremde Änderungen zu verwerfen;
 - Worktree und Branch nach verifiziertem Merge entfernen.
+
+## Ergebnis und Disposition
+
+- Batch 13 enthielt keinen neuen Runtime- oder Legalitätsfehler. Die vier
+  bestätigten Abweichungen im kanonischen Text wurden ohne Mechanikänderung
+  korrigiert.
+- London City Grid und Street Enforcer werden nicht mehr künstlich an Remotes
+  gebunden. Fortgebundene Break- und Tag-Taxes besitzen keine
+  `requires_remote_server`-Bedingung und erzeugen nicht automatisch
+  `remote.scoring_protection`.
+- Terrorist Reprisal projiziert nun das enge Black-Ops-Zeitfenster und den
+  zufälligen HQ-Discard aus dem typisierten Engine-Vertrag. Indiscriminate
+  Response Team wird nicht mehr als eigener Corp-Draw missverstanden.
+- Precision Bribery besitzt kein Scheinziel mehr. Der globale
+  Fort-Erstellungs-Lock und seine Removal-Tax werden direkt aus dem Modifier
+  projiziert.
+- Code Viral Cache, Microtech Backup Drive, Mercenary Subcontract, Stumble
+  through Wilderspace, Rent-to-Own Contract, Dr. Dreff, Singapore City Grid,
+  Chimera, Eurocorpse Spin Chip und Marcel DeSoleil besitzen side-sichere,
+  capability-gebundene TargetProfiles für ihre tatsächlichen Choices.
+- Death Yo-Yo, Satellite Monitors, Stumble through Wilderspace und Executive
+  Wiretaps wurden von überbreiten direkten Strategieankern befreit. Unlisted
+  Research Lab erhielt dagegen den zu seiner wiederkehrenden Draw-Engine
+  passenden formalen Anker.
+- Self-Destructs Net-Damage-Ambush, Razor Wires typisierter Net Damage sowie
+  Eurocorpses recurring Breaker Credits waren bereits generisch ableitbar.
+  Dafür wurden keine redundanten Karten-Sonderverträge ergänzt; bei
+  Eurocorpse wurde die fehlende generische Program-Host-Projektion ergänzt.
+- Playful AI und Swiss Bank Account erhielten keine dekorative Modusheuristik.
+  Der Bericht beschreibt dort sinnvolle spätere Policy-Arbeit, aber keinen
+  fehlenden Rules-/Choice-Vertrag, den das aktuelle geschlossene
+  TargetProfile-Vokabular wirksam besitzen würde. Back Door to Netwatch und
+  Wired Switchboard wurden auf Trace-Defense und One-shot-Risiko bereinigt;
+  die konkrete Einsatzschwelle bleibt beim zuständigen Trace-Plan.
+
+## Verifikation
+
+Bestanden:
+
+- `@netgrid/cards` Typecheck;
+- Cards-Registry und Planning-Annotationen: 44/44 Tests;
+- fokussierte AI-Hint-, Typed-Translator-, Artefakt- und Ontologietests:
+  92/92 Tests;
+- deterministischer `check:card-spec-ai-hints`;
+- `git diff --check`.
+
+Der vollständige AI-Typecheck bleibt unabhängig vom Batch an vier lokal nicht
+vorhandenen Migration-Report-JSON-Dateien unter `docs/reviews/cards/` hängen.
+Die breiten Strategy-Owner-Tests enthalten außerdem bereits vor Batch 13
+veraltete globale Zählwerte und Zeugen aus früheren Semantikbereinigungen.
+Diese Baselinepunkte wurden nicht als Batch-13-Fix umgedeutet; die direkt
+geänderten Owner-, Target- und Ontologiepfade sind fokussiert grün.
