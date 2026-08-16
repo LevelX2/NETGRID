@@ -1525,8 +1525,12 @@ select {
 }
 
 .publicGameMain code {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   color: var(--muted);
   font-size: 11px;
+  text-align: right;
 }
 
 .publicGameCard.compact {
