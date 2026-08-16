@@ -1814,6 +1814,38 @@ describe("MVP 0.1 engine foundation", () => {
     expect(context.targets).not.toHaveProperty("cardId");
   });
 
+  it("does not infer hidden-zone semantics from opaque ability-id substrings", () => {
+    const opaqueOnly = buildPublicAbilitySchemaContext(
+      "resolve_choice",
+      {
+        hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      },
+      {},
+      "public",
+    );
+    const structuredMutation = buildPublicAbilitySchemaContext(
+      "resolve_choice",
+      {
+        hiddenZoneAction: "opaque_ability_id",
+        hiddenZoneMutationKind: "shuffle",
+        hiddenZoneAffectedCardCount: 2,
+        hiddenZoneContentsChanged: true,
+        hiddenZoneOrderChanged: true,
+        hiddenZoneChangesHq: true,
+        hiddenZoneChangesRd: true,
+      },
+      {},
+      "public",
+    );
+
+    expect(opaqueOnly).not.toHaveProperty("abilityFamily");
+    expect(opaqueOnly).not.toHaveProperty("effectKind");
+    expect(structuredMutation).toMatchObject({
+      abilityFamily: "hidden-zone",
+      effectKind: "hidden_zone",
+    });
+  });
+
   it("creates deterministic games for the same seed", () => {
     const first = createGameAfterSetup({ seed: "deterministic" });
     const second = createGameAfterSetup({ seed: "deterministic" });

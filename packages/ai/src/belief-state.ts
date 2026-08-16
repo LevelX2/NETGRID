@@ -8,7 +8,15 @@ import {
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import { decisionDerivedValue } from "./runtime/decision-derived-cache";
-import { rolesMatch } from "./runtime/role-match";
+
+type PublicHiddenZoneMutation = {
+  kind: "move" | "shuffle" | "reorder" | "swap";
+  affectedCardCount: number;
+  contentsChanged: boolean;
+  orderChanged: boolean;
+  changesHq: boolean;
+  changesRd: boolean;
+};
 
 export type BeliefKnowledgeKind =
   | "public_fact"
@@ -48,6 +56,7 @@ export type BeliefEventClassification = {
   installedPositionKey?: string;
   accessedArea?: string;
   installPlacement?: HqInstallPlacementMemory;
+  hiddenZoneMutation?: PublicHiddenZoneMutation;
   sourceEventIds: string[];
   invalidationReason?: string;
 };
@@ -452,6 +461,7 @@ function classifyBeliefEvent(
     event.publicPayload.installedPositionKey,
   );
   const accessedArea = stringValue(event.publicPayload.accessedArea);
+  const hiddenZoneMutation = publicHiddenZoneMutation(event.publicPayload);
   return {
     eventId: event.eventId,
     eventType: event.type,
@@ -464,6 +474,7 @@ function classifyBeliefEvent(
     ...(installedPositionKey ? { installedPositionKey } : {}),
     ...(accessedArea ? { accessedArea } : {}),
     ...(installPlacement ? { installPlacement } : {}),
+    ...(hiddenZoneMutation ? { hiddenZoneMutation } : {}),
     sourceEventIds: [event.eventId],
     ...(invalidationReasonForEvent(family, actionType, actor, serverId, event)
       ? {
@@ -1680,11 +1691,23 @@ function corpDrawsFromRd(event: BeliefEventClassification): boolean {
 }
 
 function hiddenZoneReorderChangesHq(event: BeliefEventClassification): boolean {
-  return event.serverId !== "rd";
+  return hiddenZoneMutationChangesZone(event.hiddenZoneMutation, "hq");
 }
 
 function hiddenZoneReorderChangesRd(event: BeliefEventClassification): boolean {
-  return event.serverId !== "hq";
+  return hiddenZoneMutationChangesZone(event.hiddenZoneMutation, "rd");
+}
+
+function hiddenZoneMutationChangesZone(
+  mutation: PublicHiddenZoneMutation | undefined,
+  zone: "hq" | "rd",
+): boolean {
+  return (
+    mutation !== undefined &&
+    mutation.affectedCardCount > 0 &&
+    (zone === "hq" ? mutation.changesHq : mutation.changesRd) &&
+    (mutation.contentsChanged || mutation.orderChanged)
+  );
 }
 
 function rdTopRemovedByRunnerAccess(event: BeliefEventClassification): boolean {
@@ -2544,8 +2567,9 @@ function eventFamily(
   actionType: string,
   event: PublicGameEvent,
 ): BeliefEventFamily {
-  const hiddenZoneAction = stringValue(event.publicPayload.hiddenZoneAction);
-  const hiddenZoneFamily = hiddenZoneActionEventFamily(hiddenZoneAction);
+  const hiddenZoneFamily = hiddenZoneMutationEventFamily(
+    publicHiddenZoneMutation(event.publicPayload),
+  );
   if (hiddenZoneFamily) return hiddenZoneFamily;
   if (actionType === "install_card") return "install";
   if (actionType === "rez_ice" || actionType === "rez_card") return "rez";
@@ -2575,6 +2599,7 @@ function eventFamily(
     if (event.publicPayload.discardResolved === true) return "discard";
     if (revealKind(event) === "expose") return "expose";
     if (revealKind(event) === "reveal") return "reveal";
+    if (structuredPrivateLookEvent(event)) return "reveal";
   }
 
   if (revealKind(event) === "reveal") return "reveal";
@@ -2582,15 +2607,53 @@ function eventFamily(
   return "other";
 }
 
-export function hiddenZoneActionEventFamily(
-  hiddenZoneAction: string | undefined,
+export function hiddenZoneMutationEventFamily(
+  mutation: PublicHiddenZoneMutation | undefined,
 ): BeliefEventFamily | undefined {
-  if (!hiddenZoneAction) return undefined;
-  if (rolesMatch([hiddenZoneAction], ["shuffle"])) return "shuffle";
-  if (rolesMatch([hiddenZoneAction], ["arrange", "reorder", "conceal"]))
-    return "arrange";
-  if (rolesMatch([hiddenZoneAction], ["private_look"])) return "reveal";
-  return undefined;
+  if (!mutation) return undefined;
+  if (mutation.kind === "shuffle") return "shuffle";
+  if (mutation.kind === "reorder") return "arrange";
+  return mutation.kind;
+}
+
+function structuredPrivateLookEvent(event: PublicGameEvent): boolean {
+  return (
+    (event.publicPayload.privateLookZone === "hq" ||
+      event.publicPayload.privateLookZone === "rd") &&
+    (Array.isArray(event.publicPayload.knownHqDefinitionIds) ||
+      Array.isArray(event.publicPayload.knownRndDefinitionIds) ||
+      typeof event.publicPayload.knownRndTopDefinitionId === "string")
+  );
+}
+
+function publicHiddenZoneMutation(
+  payload: Record<string, unknown>,
+): PublicHiddenZoneMutation | undefined {
+  const kind = payload.hiddenZoneMutationKind;
+  const affectedCardCount = payload.hiddenZoneAffectedCardCount;
+  if (
+    (kind !== "move" &&
+      kind !== "shuffle" &&
+      kind !== "reorder" &&
+      kind !== "swap") ||
+    typeof affectedCardCount !== "number" ||
+    !Number.isSafeInteger(affectedCardCount) ||
+    affectedCardCount < 0 ||
+    typeof payload.hiddenZoneContentsChanged !== "boolean" ||
+    typeof payload.hiddenZoneOrderChanged !== "boolean" ||
+    typeof payload.hiddenZoneChangesHq !== "boolean" ||
+    typeof payload.hiddenZoneChangesRd !== "boolean"
+  ) {
+    return undefined;
+  }
+  return {
+    kind,
+    affectedCardCount,
+    contentsChanged: payload.hiddenZoneContentsChanged,
+    orderChanged: payload.hiddenZoneOrderChanged,
+    changesHq: payload.hiddenZoneChangesHq,
+    changesRd: payload.hiddenZoneChangesRd,
+  };
 }
 
 function publicServerId(

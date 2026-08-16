@@ -583,6 +583,12 @@ function resolveCorpHqCardToRdChoice(
     ...shuffleResult.publicPayload,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
+    hiddenZoneMutationKind: "shuffle",
+    hiddenZoneAffectedCardCount: 1,
+    hiddenZoneContentsChanged: true,
+    hiddenZoneOrderChanged: true,
+    hiddenZoneChangesHq: true,
+    hiddenZoneChangesRd: true,
     sourceDefinitionId,
     movedCount: 1,
   };

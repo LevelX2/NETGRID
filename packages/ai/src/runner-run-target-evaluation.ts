@@ -1076,11 +1076,11 @@ function rdTopMayHaveChanged(event: PublicGameEvent): boolean {
     return event.publicPayload.serverId === "rd";
   }
   return (
-    event.publicPayload.hiddenZoneAction === "shuffle" ||
-    event.publicPayload.hiddenZoneAction === "arrange" ||
-    event.publicPayload.hiddenZoneAction === "reorder" ||
-    event.publicPayload.hiddenZoneAction === "conceal" ||
-    event.publicPayload.hiddenZoneAction === "swap"
+    event.publicPayload.hiddenZoneChangesRd === true &&
+    typeof event.publicPayload.hiddenZoneAffectedCardCount === "number" &&
+    event.publicPayload.hiddenZoneAffectedCardCount > 0 &&
+    (event.publicPayload.hiddenZoneContentsChanged === true ||
+      event.publicPayload.hiddenZoneOrderChanged === true)
   );
 }
 

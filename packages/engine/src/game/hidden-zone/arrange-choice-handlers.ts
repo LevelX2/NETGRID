@@ -671,6 +671,12 @@ function resolveCorpRdArrangeChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+    hiddenZoneMutationKind: "reorder",
+    hiddenZoneAffectedCardCount: selectedIds.length,
+    hiddenZoneContentsChanged: false,
+    hiddenZoneOrderChanged: selectedIds.length > 1,
+    hiddenZoneChangesHq: false,
+    hiddenZoneChangesRd: selectedIds.length > 1,
     arrangedCount: selectedIds.length,
   };
   return resolvedCorpRdResult(host, selectedIds);
@@ -712,6 +718,12 @@ function resolveCorpAssetRdTopReorderChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1917_corp_reorder_rd_top2",
+    hiddenZoneMutationKind: "reorder",
+    hiddenZoneAffectedCardCount: selectedIds.length,
+    hiddenZoneContentsChanged: false,
+    hiddenZoneOrderChanged: selectedIds.length > 1,
+    hiddenZoneChangesHq: false,
+    hiddenZoneChangesRd: selectedIds.length > 1,
     arrangedCount: selectedIds.length,
   };
   return resolvedCorpRdResult(host, selectedIds);
@@ -742,6 +754,12 @@ function resolveCorpRdTopReorderChoice(
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+    hiddenZoneMutationKind: "reorder",
+    hiddenZoneAffectedCardCount: selectedIds.length,
+    hiddenZoneContentsChanged: false,
+    hiddenZoneOrderChanged: selectedIds.length > 1,
+    hiddenZoneChangesHq: false,
+    hiddenZoneChangesRd: selectedIds.length > 1,
     arrangedCount: selectedIds.length,
   };
   return resolvedCorpRdResult(host, selectedIds);

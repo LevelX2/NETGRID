@@ -7,7 +7,7 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   beliefUncertaintyConsumerFacts,
-  hiddenZoneActionEventFamily,
+  hiddenZoneMutationEventFamily,
   normalizedBeliefUncertaintyValue,
   reconstructBeliefState,
 } from "./belief-state";
@@ -20,20 +20,31 @@ describe("belief-state hidden zone action classification", () => {
     expect(normalizedBeliefUncertaintyValue(150)).toBe(100);
   });
 
-  it("matches hidden-zone action markers by bounded terms", () => {
-    expect(hiddenZoneActionEventFamily("corp_rd_shuffle")).toBe("shuffle");
+  it("classifies explicit hidden-zone mutations", () => {
     expect(
-      hiddenZoneActionEventFamily("new_blood_conceal_reorder_installed_ice"),
+      hiddenZoneMutationEventFamily({
+        kind: "shuffle",
+        affectedCardCount: 4,
+        contentsChanged: false,
+        orderChanged: true,
+        changesHq: false,
+        changesRd: true,
+      }),
+    ).toBe("shuffle");
+    expect(
+      hiddenZoneMutationEventFamily({
+        kind: "reorder",
+        affectedCardCount: 2,
+        contentsChanged: false,
+        orderChanged: true,
+        changesHq: false,
+        changesRd: true,
+      }),
     ).toBe("arrange");
-    expect(hiddenZoneActionEventFamily("p3_33_private_look")).toBe("reveal");
   });
 
-  it("ignores hidden-zone action substring noise", () => {
-    expect(hiddenZoneActionEventFamily("reshuffleish_noise")).toBeUndefined();
-    expect(hiddenZoneActionEventFamily("concealment_noise")).toBeUndefined();
-    expect(
-      hiddenZoneActionEventFamily("private_lookish_noise"),
-    ).toBeUndefined();
+  it("does not classify opaque hidden-zone action IDs", () => {
+    expect(hiddenZoneMutationEventFamily(undefined)).toBeUndefined();
   });
 });
 
@@ -219,6 +230,12 @@ describe("belief-state R&D top freshness", () => {
       actionType: "resolve_choice",
       serverId: "rd",
       hiddenZoneAction: "corp_rd_shuffle",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 20,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: true,
     });
 
     const belief = reconstructBeliefState(
@@ -249,6 +266,12 @@ describe("belief-state R&D top freshness", () => {
       actionType: "resolve_choice",
       serverId: "hq",
       hiddenZoneAction: "hq_reorder",
+      hiddenZoneMutationKind: "reorder",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: true,
+      hiddenZoneChangesRd: false,
     });
     const beforeRdReorder = reconstructBeliefState(
       runnerInput([look, hqReorder]),
@@ -258,6 +281,12 @@ describe("belief-state R&D top freshness", () => {
       actionType: "resolve_choice",
       serverId: "rd",
       hiddenZoneAction: "rd_reorder",
+      hiddenZoneMutationKind: "reorder",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: true,
     });
     const afterRdReorder = reconstructBeliefState(
       runnerInput([look, hqReorder, rdReorder]),
@@ -835,7 +864,13 @@ describe("belief-state HQ hand memory retention", () => {
     const reorder = publicEvent("evt_reorder", "resolve_choice", 2, {
       actor: "corp",
       actionType: "resolve_choice",
-      hiddenZoneAction: "hq_shuffle",
+      hiddenZoneAction: "opaque_ability_id",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 2,
+      hiddenZoneContentsChanged: true,
+      hiddenZoneOrderChanged: true,
+      hiddenZoneChangesHq: true,
+      hiddenZoneChangesRd: false,
     });
 
     const belief = reconstructBeliefState(runnerInput([hqLook, reorder], 2));
@@ -854,6 +889,38 @@ describe("belief-state HQ hand memory retention", () => {
     expect(hqMemory?.invalidationReasons.join("|")).toContain(
       "shuffle_changed_hq_hand:evt_reorder",
     );
+  });
+
+  it("retains HQ memory when a shuffle-named ability moves no cards", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_237_data-wall",
+    ]);
+    const noOp = publicEvent("evt_noop", "resolve_choice", 2, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "scored_agenda_hq_agenda_shuffle_credits",
+      hiddenZoneMutationKind: "shuffle",
+      hiddenZoneAffectedCardCount: 0,
+      hiddenZoneContentsChanged: false,
+      hiddenZoneOrderChanged: false,
+      hiddenZoneChangesHq: false,
+      hiddenZoneChangesRd: false,
+    });
+
+    const belief = reconstructBeliefState(runnerInput([hqLook, noOp], 2));
+
+    expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      knownDefinitions: [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+      ],
+      knownCount: 2,
+      allCardsKnown: true,
+    });
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory.invalidationReasons.join("|"),
+    ).not.toContain("shuffle_changed_hq_hand");
   });
 
   it("treats a current single-card HQ access as complete despite stale candidates", () => {

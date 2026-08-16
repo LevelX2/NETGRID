@@ -549,6 +549,11 @@ export type PublicAbilityVisibility = {
  * Side-safe fields shared by Chronicle, replay, AI and server projections.
  * Event-specific fields remain possible, but common semantics must use these
  * names and types instead of introducing another parallel payload vocabulary.
+ *
+ * Hidden-zone mutation fields describe an actual side-safe state change.
+ * Opaque ability IDs remain useful diagnostics, but consumers must never infer
+ * a mutation from words contained in those IDs. The zone flags describe the
+ * zones actually changed; a no-op has all flags false and a zero card count.
  */
 export type PublicEventPayload = Record<string, unknown> & {
   actor?: Side;
@@ -563,6 +568,12 @@ export type PublicEventPayload = Record<string, unknown> & {
   targets?: Record<string, string | number | boolean>;
   visibility?: PublicAbilityVisibility;
   resolvedEffects?: ResolvedGameEffect[];
+  hiddenZoneMutationKind?: "move" | "shuffle" | "reorder" | "swap";
+  hiddenZoneAffectedCardCount?: number;
+  hiddenZoneContentsChanged?: boolean;
+  hiddenZoneOrderChanged?: boolean;
+  hiddenZoneChangesHq?: boolean;
+  hiddenZoneChangesRd?: boolean;
   /** Actor-safe canonical location of an installed Corp card. */
   serverId?: ServerId;
   installPlacement?: "ice" | "root";

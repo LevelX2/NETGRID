@@ -225,10 +225,10 @@ export function publicAbilityMetadata(
     | undefined;
   const abilityFamily = isAbilityFamily(family)
     ? family
-    : inferAbilityFamily(inferredAbilityId, combined);
+    : inferAbilityFamily(actionType, combined);
   const effectKind =
     stringValue(combined.effectKind) ??
-    inferEffectKind(actionType, inferredAbilityId, combined);
+    inferEffectKind(actionType, combined);
 
   return {
     ...(discriminator ? { abilityField: discriminator.field } : {}),
@@ -318,61 +318,110 @@ function isAdvancementCardTargetProjection(
 }
 
 function inferAbilityFamily(
-  abilityId: string | undefined,
+  actionType: ActionType,
   payload: Record<string, unknown>,
 ): PublicAbilityFamily | undefined {
-  const haystack = [
-    abilityId,
-    stringValue(payload.hiddenZoneAction),
-    stringValue(payload.actionType),
-  ]
-    .filter(Boolean)
-    .join(" ");
   if (
-    /hidden|stack|grip|hq|rd|archives|reveal|search|arrange|shuffle|reorder|swap/i.test(
-      haystack,
-    )
-  )
+    payload.hiddenZoneBarrier === true ||
+    stringValue(payload.hiddenZoneMutationKind) !== undefined ||
+    stringValue(payload.publicRevealKind) !== undefined ||
+    stringValue(payload.privateLookZone) !== undefined
+  ) {
     return "hidden-zone";
+  }
   if (
-    /prevent|avoid|replacement|damage|flatline|hardware-trash/i.test(haystack)
-  )
+    stringValue(payload.damageType) !== undefined ||
+    payload.damageResolved === true ||
+    typeof payload.preventedAmount === "number"
+  ) {
     return "damage-prevention";
-  if (/trace|tag|link/i.test(haystack)) return "trace-tags";
-  if (/run|access|breach|jack|ice|subroutine|rez|derez/i.test(haystack))
+  }
+  if (
+    payload.traceStarted === true ||
+    stringValue(payload.traceStep) !== undefined ||
+    typeof payload.tagsAdded === "number" ||
+    typeof payload.removedTags === "number"
+  ) {
+    return "trace-tags";
+  }
+  if (
+    actionType === "start_run" ||
+    actionType === "continue_run" ||
+    actionType === "jack_out" ||
+    actionType === "access_card" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "rez_ice"
+  ) {
     return "run-access";
-  if (/host|counter|recurring|virus|purge|shell/i.test(haystack))
+  }
+  if (
+    typeof payload.addedCounterAmount === "number" ||
+    typeof payload.removedCounterAmount === "number" ||
+    typeof payload.hostedCreditsAdded === "number" ||
+    typeof payload.hostedCreditsTaken === "number"
+  ) {
     return "hosting-counters";
-  if (/agenda|score|steal|forfeit|overadvance/i.test(haystack))
+  }
+  if (
+    actionType === "score_agenda" ||
+    actionType === "steal_agenda" ||
+    typeof payload.agendaPointsLost === "number" ||
+    typeof payload.agendaPointCostPaid === "number"
+  ) {
     return "agenda-scoring";
-  if (/cost|credit|pay|gain|loan|tax/i.test(haystack)) return "payment-costs";
-  if (/random|die|dice|roll/i.test(haystack)) return "random-effects";
+  }
+  if (
+    actionType === "gain_credit" ||
+    typeof payload.gainedCredits === "number" ||
+    typeof payload.creditsLost === "number" ||
+    typeof payload.paidCredits === "number"
+  ) {
+    return "payment-costs";
+  }
+  if (
+    typeof payload.randomRoll === "number" ||
+    typeof payload.dieRoll === "number" ||
+    typeof payload.randomCounterAfter === "number"
+  ) {
+    return "random-effects";
+  }
   return undefined;
 }
 
 function inferEffectKind(
   actionType: ActionType,
-  abilityId: string | undefined,
   payload: Record<string, unknown>,
 ): string | undefined {
   if (stringValue(payload.damageType) || payload.damageResolved === true)
     return "damage";
   if (payload.traceStarted === true || stringValue(payload.traceStep))
     return "trace";
-  if (payload.hiddenZoneBarrier === true) return "hidden_zone";
-  if (abilityId?.includes("reveal") || abilityId?.includes("search"))
+  if (
+    payload.hiddenZoneBarrier === true ||
+    stringValue(payload.hiddenZoneMutationKind) !== undefined
+  )
     return "hidden_zone";
-  if (abilityId?.includes("lose") || typeof payload.creditsLost === "number")
+  if (typeof payload.creditsLost === "number")
     return "lose_credits";
-  if (abilityId?.includes("gain") || actionType === "gain_credit")
+  if (
+    actionType === "gain_credit" ||
+    typeof payload.gainedCredits === "number" ||
+    typeof payload.gainCreditsAmount === "number"
+  )
     return "gain_credits";
-  if (abilityId?.includes("trash") || actionType === "trash_accessed_card")
+  if (actionType === "trash_accessed_card" || actionType === "trash_resource")
     return "trash_card";
-  if (abilityId?.includes("install") || actionType === "install_card")
-    return "install_card";
-  if (abilityId?.includes("run") || actionType === "start_run") return "run";
-  if (abilityId?.includes("counter")) return "counter_change";
-  if (abilityId?.includes("die") || abilityId?.includes("dice"))
+  if (actionType === "install_card") return "install_card";
+  if (actionType === "start_run") return "run";
+  if (
+    typeof payload.addedCounterAmount === "number" ||
+    typeof payload.removedCounterAmount === "number"
+  )
+    return "counter_change";
+  if (
+    typeof payload.randomRoll === "number" ||
+    typeof payload.dieRoll === "number"
+  )
     return "random";
   return undefined;
 }
