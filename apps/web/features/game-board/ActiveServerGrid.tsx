@@ -344,11 +344,13 @@ export function ActiveServerGrid({
                             <>
                               <div
                                 className={`corpHqHandPanel ${zoneHighlighted(activeHighlight, view.side, "hq") ? "cueHighlightSoft" : ""}`}
+                                style={handCardsStyle}
                               >
                                 <HandCardsRow
                                   className="corpHqHandCards"
                                   style={handCardsStyle}
                                   count={view.own.gripOrHq.length}
+                                  maxRows={2}
                                 >
                                   {view.own.gripOrHq.map((card) => {
                                     const displayCard = enrichCard(card);

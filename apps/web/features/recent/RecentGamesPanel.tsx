@@ -159,6 +159,7 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
           <small>Matchpunkte</small>
         </div>
       </div>
+      <MatchId matchId={result.matchId} />
       <div className="recentGameDetails">
         <span>
           <Award size={14} />
@@ -280,10 +281,34 @@ function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
                 </a>
               </>
             ) : null}
+            <MatchId matchId={game.matchId} className="recentSeriesMatchId" />
           </li>
         ))}
       </ol>
     </article>
+  );
+}
+
+function MatchId({
+  matchId,
+  className = "",
+}: {
+  matchId: string;
+  className?: string;
+}) {
+  const missing = matchId.trim().length === 0;
+  return (
+    <p
+      className={`recentMatchId ${missing ? "isMissing" : ""} ${className}`.trim()}
+      {...(missing ? { role: "status" as const } : {})}
+    >
+      <span>Match-ID:</span>
+      {missing ? (
+        <strong>fehlt – Ergebnisdaten unvollständig</strong>
+      ) : (
+        <code>{matchId}</code>
+      )}
+    </p>
   );
 }
 

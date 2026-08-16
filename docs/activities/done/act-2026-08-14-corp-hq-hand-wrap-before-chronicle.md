@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-08-14-corp-hq-hand-wrap-before-chronicle
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-14
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-16
+completedAt: 2026-08-16
+branch: codex/activities-worktree-20260816-130613
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/game-board/hand-card-layout.ts
+  - apps/web/features/game-board/hand-card-layout.test.ts
+  - apps/web/features/game-board/ZoneFrame.tsx
+  - apps/web/features/game-board/ActiveServerGrid.tsx
+  - apps/web/app/globals.css
+  - apps/web/app/archives-dual-stack-lane.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/archives-dual-stack-lane.test.ts features/game-board/hand-card-layout.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
+  - Playwright-Desktopprüfung bei 1280x1000 und 2100x1000 mit sechs HQ-Handkarten, zwei ICE und geöffneter Spielchronik
 ---
 
 # Korp-HQ vor der Spielchronik ohne Überlagerung halten
@@ -77,20 +87,20 @@ bricht die Hand als zusammenhängender Block in eine zweite Zeile um.
 
 ## Akzeptanzkriterien
 
-- [ ] Bei geöffneter Spielchronik überlagert kein Teil des eigenen Korp-HQ
+- [x] Bei geöffneter Spielchronik überlagert kein Teil des eigenen Korp-HQ
   die Chronik; insbesondere bleiben Chronik-Einträge sichtbar und bedienbar.
-- [ ] Solange die definierte Mindestfreibreite jeder Handkarte noch möglich
+- [x] Solange die definierte Mindestfreibreite jeder Handkarte noch möglich
   ist, bleibt die Korp-Hand einzeilig und vor dem HQ-Root beziehungsweise den
   ICE angeordnet.
-- [ ] Reicht der verfügbare Brettbereich dafür nicht aus, entsteht ein
+- [x] Reicht der verfügbare Brettbereich dafür nicht aus, entsteht ein
   zweizeiliger, zusammenhängender Handkartenblock; Hand und HQ-Server werden
   nicht in unabhängige Zonen aufgetrennt.
-- [ ] Karten bleiben mit Maus und Tastatur erreichbar; weder Überlappung noch
+- [x] Karten bleiben mit Maus und Tastatur erreichbar; weder Überlappung noch
   Umbruch verdecken Klick-, Fokus-, Tooltip- oder Auswahlflächen.
-- [ ] Die vorhandenen kleineren responsiven Layouts und das gegnerische,
+- [x] Die vorhandenen kleineren responsiven Layouts und das gegnerische,
   verdeckte Korp-HQ bleiben funktional unverändert, sofern sie nicht dieselbe
   Ursache teilen.
-- [ ] Ein fokussierter Check sowie eine visuelle Desktop-Prüfung mit
+- [x] Ein fokussierter Check sowie eine visuelle Desktop-Prüfung mit
   geöffneter Chronik und großer Korp-Hand sind dokumentiert.
 
 ## Umsetzungshinweise
@@ -109,4 +119,10 @@ bricht die Hand als zusammenhängender Block in eine zweite Zeile um.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Das eigene Korp-HQ nutzt nun die verfügbare Brettbreite. Seine Hand verdichtet
+sich bis zu einer gekapselten Mindeststaffel von 32 Pixeln und bricht danach
+als zusammenhängender Block in höchstens zwei Zeilen um. Im realen Desktopfall
+blieben bei 1280 Pixeln zwei Reihen mit je drei Karten und 34 Pixeln sichtbarer
+Staffelbreite 14 Pixel vor der geöffneten Chronik; bei 2100 Pixeln wechselte
+dieselbe Hand wieder in eine Zeile. Die vorhandenen Kartenbuttons und damit
+Maus-, Fokus- und Tooltipflächen bleiben unverändert.

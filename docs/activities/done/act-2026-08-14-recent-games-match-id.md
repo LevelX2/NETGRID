@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-08-14-recent-games-match-id
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-14
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-16
+completedAt: 2026-08-16
+branch: codex/activities-worktree-20260816-130613
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/recent/RecentGamesPanel.tsx
+  - apps/web/app/globals.css
+  - apps/web/app/recent-games-match-id.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/recent-games-match-id.test.ts app/replay-return-navigation.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Vollständige Match-ID in „Meine Spiele“ anzeigen
@@ -65,20 +71,20 @@ zuordnen.
 
 ## Akzeptanzkriterien
 
-- [ ] Ein einzelnes Ergebnis unter „Meine Spiele“ zeigt seine vollständige,
+- [x] Ein einzelnes Ergebnis unter „Meine Spiele“ zeigt seine vollständige,
   nicht nur verkürzte Match-ID direkt in der Oberfläche und mit eindeutiger
   Beschriftung.
-- [ ] Jedes einzelne Spiel einer angezeigten Matchserie zeigt ebenfalls seine
+- [x] Jedes einzelne Spiel einer angezeigten Matchserie zeigt ebenfalls seine
   eigene vollständige Match-ID; die Serien-ID bleibt davon unterscheidbar.
-- [ ] Die Anzeige ist bewusst klein und sekundär, bleibt aber ohne Hover oder
+- [x] Die Anzeige ist bewusst klein und sekundär, bleibt aber ohne Hover oder
   Wechsel in die Maintenance vollständig lesbar beziehungsweise kopierbar.
-- [ ] Lange Match-IDs verursachen weder horizontalen Overflow noch verdecken
+- [x] Lange Match-IDs verursachen weder horizontalen Overflow noch verdecken
   sie Ergebniswerte, Replay-Link oder Protokoll-Download auf schmalen
   Ansichten.
-- [ ] Die Anzeige gibt ausschließlich die bereits für das Ergebnis bestimmte
+- [x] Die Anzeige gibt ausschließlich die bereits für das Ergebnis bestimmte
   Match-ID aus und offenbart keine Tokens oder weiteren privaten
   Match-/Spielerdaten.
-- [ ] Ein fokussierter Regressionstest deckt Einzelspiel und Serien-Einzelspiel
+- [x] Ein fokussierter Regressionstest deckt Einzelspiel und Serien-Einzelspiel
   ab.
 
 ## Umsetzungshinweise
@@ -95,4 +101,9 @@ zuordnen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Einzelspiele und jedes Spiel einer Serie zeigen nun die vorhandene vollständige
+Match-ID mit eindeutiger Beschriftung direkt in „Meine Spiele“. Die kleine
+Code-Darstellung darf über zulässige Stellen umbrechen und spannt bei
+Serienspielen eine eigene Grid-Zeile auf. Eine leere erwartete Match-ID wird
+als unvollständiger Ergebnisdatensatz sichtbar ausgewiesen; es wird keine
+Ersatzkennung verwendet.

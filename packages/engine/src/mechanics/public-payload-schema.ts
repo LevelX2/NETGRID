@@ -7,6 +7,9 @@ import {
   type PublicEventPayload,
 } from "@netgrid/shared";
 
+const RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID =
+  "runner_program_trash_before_install";
+
 export type PublicAbilitySchemaContext = Pick<
   PublicEventPayload,
   | "abilityFamily"
@@ -260,6 +263,31 @@ export function buildPublicAbilitySchemaContext(
   const sourceDefinitionId = stringValue(combined.sourceDefinitionId);
   const amounts = publicAmounts(combined);
   const targets = publicTargets(combined);
+  if (
+    metadata.abilityId === RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID
+  ) {
+    for (const key of ["memoryUsedAfter", "memoryLimitAfter"] as const) {
+      const value = context[key];
+      if (typeof value === "number" && Number.isFinite(value))
+        amounts[key] = value;
+    }
+    for (const key of [
+      "installedProgramDefinitionId",
+      "trashedCardDefinitionIds",
+      "installed",
+      "installCancelled",
+      "installBlockedReason",
+      "installDeferredForMemory",
+    ] as const) {
+      const value = context[key];
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      )
+        targets[key] = value;
+    }
+  }
   const redactedKind = stringValue(combined.redactedKind);
   const hiddenZoneBarrier = combined.hiddenZoneBarrier === true;
 
