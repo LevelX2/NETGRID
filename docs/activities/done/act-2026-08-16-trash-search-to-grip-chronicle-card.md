@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-08-16-trash-search-to-grip-chronicle-card
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-16
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-16
+completedAt: 2026-08-16
+branch: codex/trash-search-to-grip-chronicle-card
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - packages/engine/src/index-tests/originalset/runner-events-hardware-programs-resources.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/runner-events-hardware-programs-resources.test.ts -t "keeps draw, stack-search and free-trash events hidden-info safe"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "card-implementation stack-to-hand searches|public heap card returned"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Aus dem Heap zurückgeholte Karte in der Spielchronik nennen
@@ -81,21 +89,21 @@ Playtest-Fund betrifft **Gideon’s Pawnshop**.
 
 ## Akzeptanzkriterien
 
-- [ ] Der reproduzierte Gideon’s-Pawnshop-Pfad erzeugt nach der Auswahl einen
+- [x] Der reproduzierte Gideon’s-Pawnshop-Pfad erzeugt nach der Auswahl einen
   sichtbaren Chronikeintrag, der **Gideon’s Pawnshop** und den Namen der
   tatsächlich aus dem Heap in den Grip genommenen Karte nennt.
-- [ ] Vor Abschluss der Auswahl behauptet kein Chronikeintrag, eine konkrete
+- [x] Vor Abschluss der Auswahl behauptet kein Chronikeintrag, eine konkrete
   Karte sei bereits zurückgeholt worden; es entsteht kein irreführender
   Doppeleintrag für denselben Ausgang.
-- [ ] Die Chronik bezieht den Kartennamen aus einem real projizierten,
+- [x] Die Chronik bezieht den Kartennamen aus einem real projizierten,
   strukturierten und side-sicheren PublicEvent; Live-Ansicht, Reconnect und
   Replay besitzen dieselbe Information.
-- [ ] Das öffentliche Ereignis enthält keine nicht gewählten Heap-Optionen,
+- [x] Das öffentliche Ereignis enthält keine nicht gewählten Heap-Optionen,
   keine Grip-/Stack-Inhalte und keine privaten Karteninstanz-IDs.
-- [ ] Ein Engine-/Public-Event-Test sichert den öffentlichen Bewegungsausgang;
+- [x] Ein Engine-/Public-Event-Test sichert den öffentlichen Bewegungsausgang;
   ein Web-Test sichert die deutsche Chronikmeldung einschließlich beider
   Kartennamen.
-- [ ] Andere Hidden-Zone-Suchen, insbesondere private Stack-Suchen ohne
+- [x] Andere Hidden-Zone-Suchen, insbesondere private Stack-Suchen ohne
   öffentliche Auswahl, bleiben redigiert und unverändert.
 
 ## Umsetzungshinweise
@@ -118,4 +126,16 @@ Playtest-Fund betrifft **Gideon’s Pawnshop**.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der gemeinsame Chronikpfad für `p3_37_search_stack_to_grip` behandelt nun auch
+`p3_37_search_trash_to_grip`. Nach der Gideon’s-Pawnshop-Auswahl nennt der
+Eintrag die Quellkarte und die öffentlich aus dem Heap zurückgeholte Karte;
+die Kartenreferenz des Chronikeintrags zeigt auf die zurückgeholte Karte. Der
+vorherige generische Choice-Eintrag wird dadurch nicht mehr unterdrückt.
+
+Der vorhandene Engine-Pfad musste nicht geändert werden: Sein projiziertes
+PublicEvent enthält bereits `sourceDefinitionId`, `cardDefinitionId`,
+`publicRevealDefinitionId`, Quell-/Zielzone und Bewegungsanzahl. Der erweiterte
+Engine-Test sichert diese öffentlichen Felder, die Abwesenheit privater
+Karteninstanz-IDs und dass vor der Choice-Auflösung noch keine Zielkarte im
+Ereignis erscheint. Die angrenzenden öffentlichen und privaten Stack-Suchen
+sowie Junkyard BBS bleiben durch vier fokussierte Chroniktests abgesichert.

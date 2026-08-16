@@ -912,16 +912,40 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
       (action) =>
         action.type === "play_event" && action.payload?.cardId === gideonId,
     );
+    const gideonSearchStartedPayload = gideon.eventLog.at(-1)?.publicPayload;
+    expect(gideonSearchStartedPayload).toMatchObject({
+      actionType: "play_event",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_search_trash_to_grip",
+      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+    });
+    expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(programId);
+    expect(JSON.stringify(gideonSearchStartedPayload)).not.toContain(
+      "simple_decoder",
+    );
     const optionId =
       gideon.pendingChoice?.options.find((option) => option.value === programId)
         ?.id ?? "";
     expect(optionId).not.toBe("");
     gideon = applyChoice(gideon, "runner", optionId);
     expect(gideon.runner.grip).toContain(programId);
-    expect(gideon.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const gideonPublicPayload = gideon.eventLog.at(-1)?.publicPayload;
+    expect(gideonPublicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_search_trash_to_grip",
+      sourceDefinitionId: "onr_v1_089_gideons-pawnshop",
+      cardDefinitionId: "simple_decoder",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "simple_decoder",
+      searchedZone: "runner_heap",
+      selectedCount: 1,
+      movedCardCount: 1,
+      searchDestination: "runner_grip",
+      shufflePerformed: false,
     });
-    expect(JSON.stringify(gideon.eventLog.at(-1)?.publicPayload)).not.toMatch(
+    expect(JSON.stringify(gideonPublicPayload)).not.toContain(programId);
+    expect(JSON.stringify(gideonPublicPayload)).not.toMatch(
       privatePayloadMarkers,
     );
     expect(
