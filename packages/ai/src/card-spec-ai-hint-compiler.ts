@@ -8285,44 +8285,55 @@ function deriveClosedExtendedHintEffects(
     });
   }
   if (engine.runnerCounterEffects !== undefined) {
-    const counterAmount = engine.printedSubroutines
-      ?.find((subroutine) => subroutine.kind === "trace")
-      ?.onSuccess?.find((effect) => effect.kind === "add_counter")?.amount;
-    if (counterAmount !== undefined)
+    for (const counter of engine.runnerCounterEffects) {
+      if (counter.runStart !== undefined) {
+        const amountPerCounter = requiredFiniteNumber(
+          counter.runStart.amountPerCounter,
+          "runner_counter_effect.run_start.amount_per_counter",
+        );
+        effects.push({
+          kind: "persistent_counter_effect",
+          scope: "runner",
+          timing: "start_of_run",
+          resource:
+            counter.runStart.damageType === "brain"
+              ? "brain_damage"
+              : "net_damage",
+          target: `runner_counter_${counter.counterType}_run_start_${counter.runStart.damageType}_damage`,
+          amount: amountPerCounter,
+          repeatable: true,
+        });
+      }
+      if (counter.startOfRunnerTurn !== undefined) {
+        const amountPerCounter = requiredFiniteNumber(
+          counter.startOfRunnerTurn.amountPerCounter,
+          "runner_counter_effect.start_of_runner_turn.amount_per_counter",
+        );
+        const consequence =
+          counter.startOfRunnerTurn.kind === "add_tags" ? "tags" : "credits";
+        effects.push({
+          kind: "persistent_counter_effect",
+          scope: "runner",
+          timing: "start_of_turn",
+          resource: consequence,
+          target: `runner_counter_${counter.counterType}_start_of_runner_turn_${consequence}`,
+          amount: amountPerCounter,
+          repeatable: true,
+        });
+      }
       effects.push({
         kind: "persistent_counter_effect",
         scope: "runner",
-        timing: "trace_success",
+        timing: "action",
         resource: "counters",
-        target: "baskerville_counter_run_start_net_damage",
-        amount: requiredFiniteNumber(
-          counterAmount,
-          "runner_counter_effect.trace_add_counter.amount",
-        ),
+        target: `runner_counter_${counter.counterType}_remove_for_${requiredFiniteNumber(
+          counter.removeCost,
+          "runner_counter_effect.remove_cost",
+        )}_credits`,
+        amount: 1,
         repeatable: true,
       });
-    else if (
-      engine.runnerCounterEffects.every(
-        (counter) =>
-          counter.startOfRunnerTurn?.kind === "lose_credits" &&
-          counter.startOfRunnerTurn.amountPerCounter > 0 &&
-          counter.removeCost > 0,
-      )
-    )
-      effects.push({
-        kind: "persistent_counter_effect",
-        scope: "runner",
-        timing: "persistent",
-        resource: "counters",
-      });
-    else
-      effects.push({
-        kind: "persistent_counter_effect",
-        scope: "runner",
-        timing: "persistent",
-        resource: "counters",
-        target: "runner_counter_effect",
-      });
+    }
   }
   for (const window of engine.fortRunWindows ?? [])
     if (window.kind === "move_self_to_outermost_position_on_other_fort")

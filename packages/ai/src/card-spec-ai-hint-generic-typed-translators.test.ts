@@ -431,6 +431,13 @@ describe("generic typed CardSpec AI translators", () => {
           target: "corp_ice.trace_tag_counter_counter",
           amount: 1,
         }),
+        expect.objectContaining({
+          kind: "persistent_counter_effect",
+          timing: "start_of_turn",
+          resource: "tags",
+          target: "runner_counter_trace_tag_counter_start_of_runner_turn_tags",
+          amount: 1,
+        }),
       ]),
     );
     expect(dataRaven.conditions).toEqual(
@@ -443,6 +450,47 @@ describe("generic typed CardSpec AI translators", () => {
       expect.arrayContaining([
         expect.objectContaining({ kind: "etr" }),
         expect.objectContaining({ kind: "run_lock", amount: 1 }),
+      ]),
+    );
+  });
+
+  it("derives each persistent Runner-counter consequence from its typed contract", () => {
+    const baskerville = actualHint("onr_classic_005_baskerville");
+    const cerberus = actualHint("onr_v1_227_cerberus");
+    const mastiff = actualHint("onr_v1_255_mastiff");
+
+    expect(baskerville.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "persistent_counter_effect",
+        timing: "start_of_run",
+        resource: "net_damage",
+        target: "runner_counter_baskerville_run_start_net_damage",
+        amount: 2,
+      }),
+    );
+    expect(cerberus.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "persistent_counter_effect",
+        timing: "start_of_run",
+        resource: "net_damage",
+        target: "runner_counter_cerberus_run_start_net_damage",
+        amount: 2,
+      }),
+    );
+    expect(mastiff.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "persistent_counter_effect",
+        timing: "start_of_run",
+        resource: "brain_damage",
+        target: "runner_counter_mastiff_run_start_brain_damage",
+        amount: 1,
+      }),
+    );
+    expect(mastiff.effects).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          target: "runner_counter_baskerville_run_start_net_damage",
+        }),
       ]),
     );
   });

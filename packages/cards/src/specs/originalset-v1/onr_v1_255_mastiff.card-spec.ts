@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "*Do 1 brain damage. *Do 1 Net damage. *For the remainder of the run, all ice is encountered at +1 strength. *-If trace is successful, give Runner a Mastiff counter. Each Mastiff counter does 1 brain damage at the start of each run. Runner may remove a Mastiff counter by taking an action to spend [4]. *End the run.",
+      "*Do 1 brain damage. *Do 1 Net damage. *For the remainder of the run, all ice is encountered at +1 strength. *Trace 5-If trace is successful, give Runner a Mastiff counter. Each Mastiff counter does 1 brain damage at the start of each run. Runner may remove a Mastiff counter by taking an action to spend [4]. *End the run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

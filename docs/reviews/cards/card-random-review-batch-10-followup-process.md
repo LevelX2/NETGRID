@@ -1,6 +1,6 @@
 # CardSpec-Zufallsreview Batch 10 – Nacharbeitsprozess
 
-Status: in Umsetzung
+Status: umgesetzt; lokale Integration nach `main` ausstehend
 
 Quelle: gezielte Nachprüfung der im ersten Batch-10-Durchgang ausgelassenen
 Findings zu Falsified-Transactions Expert, Smith's Pawnshop und Mastiff.
@@ -60,7 +60,8 @@ Done-Gate:
 - bestehende Place-/Move-Advancement-Ownership bleibt grün;
 - fokussierte AI-Tests, AI-Typecheck und `git diff --check` bestehen.
 
-Commit: `fix(ai): bind exact advancement transfer routes`
+Ergebnis: abgeschlossen in `08f3ebad6` (`fix(ai): bind exact advancement
+transfer choices`).
 
 ### Paket 2 – Smith's Pawnshop
 
@@ -77,7 +78,8 @@ Done-Gate:
 - Resolver ändert weder Action-ID noch Executor;
 - fokussierte AI-Tests, AI-Typecheck und `git diff --check` bestehen.
 
-Commit: `fix(ai): price installed card liquidation choices`
+Ergebnis: abgeschlossen in `6d795fa2d` (`fix(ai): price installed card
+liquidation choices`).
 
 ### Paket 3 – Mastiff und Runner-Counter-Hints
 
@@ -95,7 +97,21 @@ Done-Gate:
 - fokussierte Cards-/AI-Compiler-Tests, relevante Typechecks und
   `git diff --check` bestehen.
 
-Commit: `fix(cards): correct mastiff and runner counter semantics`
+Ergebnis: abgeschlossen (`fix(cards): correct mastiff and runner counter
+semantics`).
+
+## Verifikation
+
+- Paket 1: 103 fokussierte AI-Tests grün.
+- Paket 2: 127 fokussierte AI-Tests und 80 fokussierte Engine-Tests grün.
+- Paket 3: fokussierter Counter-Compiler-Test, 37 Artifact-/Ontology-Tests,
+  Cards-Typecheck und Hint-Artefakt-Synchronitätscheck grün.
+- `git diff --check` grün.
+- Der AI-Typecheck erreicht ausschließlich vier bereits im Ausgangsstand
+  fehlende generierte Migration-Report-JSONs unter `docs/reviews/cards/`.
+- Die vollständige Datei der generischen Typed-Translator-Tests enthält einen
+  unabhängigen Ausgangsstandfehler: Der fest codierte Originalset-
+  TargetPreference-Zähler erwartet 71, während der aktuelle Bestand 72 ist.
 
 ## Automatische Fehlerbehandlung
 

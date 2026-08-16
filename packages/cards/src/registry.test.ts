@@ -573,6 +573,20 @@ describe("CardRegistry", () => {
     );
   });
 
+  it("preserves Mastiff's printed Trace 5 in canonical card text", () => {
+    const mastiff = cardSpecForDefinitionId(
+      ROOT_REGISTRY,
+      "onr_v1_255_mastiff" as CardDefinitionId,
+    );
+
+    expect(mastiff?.text.rulesText).toContain("*Trace 5-If trace is successful");
+    expect(
+      mastiff?.engine.printedSubroutines?.find(
+        (subroutine) => subroutine.kind === "trace",
+      ),
+    ).toMatchObject({ traceLimit: 5 });
+  });
+
   it("rejects duplicate capability identities within one CardSpec", () => {
     const spec = capabilitySpec();
     (spec.engine as Record<string, unknown>).abilities = [

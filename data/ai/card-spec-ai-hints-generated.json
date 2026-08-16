@@ -1271,9 +1271,18 @@
           {
             "kind": "persistent_counter_effect",
             "scope": "runner",
-            "timing": "trace_success",
+            "timing": "start_of_run",
+            "resource": "net_damage",
+            "target": "runner_counter_baskerville_run_start_net_damage",
+            "amount": 2,
+            "repeatable": true
+          },
+          {
+            "kind": "persistent_counter_effect",
+            "scope": "runner",
+            "timing": "action",
             "resource": "counters",
-            "target": "baskerville_counter_run_start_net_damage",
+            "target": "runner_counter_baskerville_remove_for_3_credits",
             "amount": 1,
             "repeatable": true
           },
@@ -1333,9 +1342,11 @@
           "effect_scope:run_path",
           "effect_scope:runner",
           "effect_scope:trace",
+          "effect_timing:action",
           "effect_timing:during_run",
           "effect_timing:encounter",
           "effect_timing:encounter_resolution",
+          "effect_timing:start_of_run",
           "effect_timing:trace_success",
           "trace.source"
         ],
@@ -10931,8 +10942,20 @@
           {
             "kind": "persistent_counter_effect",
             "scope": "runner",
-            "timing": "persistent",
-            "resource": "counters"
+            "timing": "start_of_turn",
+            "resource": "credits",
+            "target": "runner_counter_doppelganger_start_of_runner_turn_credits",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "persistent_counter_effect",
+            "scope": "runner",
+            "timing": "action",
+            "resource": "counters",
+            "target": "runner_counter_doppelganger_remove_for_4_credits",
+            "amount": 1,
+            "repeatable": true
           },
           {
             "kind": "ambush",
@@ -10968,8 +10991,9 @@
           "effect:persistent_counter_effect",
           "effect_scope:accessed_card",
           "effect_scope:runner",
+          "effect_timing:action",
           "effect_timing:on_access",
-          "effect_timing:persistent",
+          "effect_timing:start_of_turn",
           "punish.payoff"
         ],
         "conditions": [
@@ -34683,9 +34707,18 @@
           {
             "kind": "persistent_counter_effect",
             "scope": "runner",
-            "timing": "trace_success",
+            "timing": "start_of_run",
+            "resource": "net_damage",
+            "target": "runner_counter_cerberus_run_start_net_damage",
+            "amount": 2,
+            "repeatable": true
+          },
+          {
+            "kind": "persistent_counter_effect",
+            "scope": "runner",
+            "timing": "action",
             "resource": "counters",
-            "target": "baskerville_counter_run_start_net_damage",
+            "target": "runner_counter_cerberus_remove_for_4_credits",
             "amount": 1,
             "repeatable": true
           },
@@ -34742,8 +34775,10 @@
           "effect_scope:run_path",
           "effect_scope:runner",
           "effect_scope:trace",
+          "effect_timing:action",
           "effect_timing:encounter",
           "effect_timing:encounter_resolution",
+          "effect_timing:start_of_run",
           "effect_timing:trace_success",
           "trace.source"
         ],
@@ -35548,9 +35583,18 @@
           {
             "kind": "persistent_counter_effect",
             "scope": "runner",
-            "timing": "trace_success",
+            "timing": "start_of_turn",
+            "resource": "tags",
+            "target": "runner_counter_trace_tag_counter_start_of_runner_turn_tags",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "persistent_counter_effect",
+            "scope": "runner",
+            "timing": "action",
             "resource": "counters",
-            "target": "baskerville_counter_run_start_net_damage",
+            "target": "runner_counter_trace_tag_counter_remove_for_1_credits",
             "amount": 1,
             "repeatable": true
           },
@@ -35604,8 +35648,10 @@
           "effect:trace",
           "effect_scope:runner",
           "effect_scope:trace",
+          "effect_timing:action",
           "effect_timing:encounter",
           "effect_timing:encounter_resolution",
+          "effect_timing:start_of_turn",
           "effect_timing:trace_success",
           "tag.source",
           "trace.source"
@@ -37318,9 +37364,18 @@
           {
             "kind": "persistent_counter_effect",
             "scope": "runner",
-            "timing": "trace_success",
+            "timing": "start_of_run",
+            "resource": "brain_damage",
+            "target": "runner_counter_mastiff_run_start_brain_damage",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "persistent_counter_effect",
+            "scope": "runner",
+            "timing": "action",
             "resource": "counters",
-            "target": "baskerville_counter_run_start_net_damage",
+            "target": "runner_counter_mastiff_remove_for_4_credits",
             "amount": 1,
             "repeatable": true
           },
@@ -37379,8 +37434,10 @@
           "effect_scope:run_path",
           "effect_scope:runner",
           "effect_scope:trace",
+          "effect_timing:action",
           "effect_timing:encounter",
           "effect_timing:encounter_resolution",
+          "effect_timing:start_of_run",
           "effect_timing:trace_success",
           "trace.source"
         ],
@@ -45599,9 +45656,11 @@
           {
             "kind": "persistent_counter_effect",
             "scope": "runner",
-            "timing": "persistent",
+            "timing": "action",
             "resource": "counters",
-            "target": "runner_counter_effect"
+            "target": "runner_counter_crying_remove_for_2_credits",
+            "amount": 1,
+            "repeatable": true
           },
           {
             "kind": "ambush",
@@ -45631,8 +45690,8 @@
           "effect:persistent_counter_effect",
           "effect_scope:accessed_card",
           "effect_scope:runner",
+          "effect_timing:action",
           "effect_timing:on_access",
-          "effect_timing:persistent",
           "remote.ambush"
         ],
         "conditions": [{ "kind": "requires_accessed_card" }],
