@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-08-16-runner-mu-install-trash-chronicle-outcome
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-08-16
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-08-16
+completedAt: 2026-08-16
+branch: codex/activities-worktree-20260816-130613
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/mechanics/public-payload-schema.ts
+  - packages/engine/src/index-tests/releases/card-release-smokes-v105k.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/public-context.test.ts src/game/events/build-event.test.ts src/index-tests/releases/card-release-smokes-v105k.test.ts
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "Runner MU-cleanup contract|real Engine-projected Loony Goon"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # MU-bedingten Programmtrash mit Installation in der Chronik verbinden
@@ -105,24 +115,24 @@ Choice-Schritt darf nicht als bereits abgeschlossene Installation erscheinen.
 
 ## Akzeptanzkriterien
 
-- [ ] Der reproduzierte Loony-Goon-/Invisibility-Pfad erzeugt nach der
+- [x] Der reproduzierte Loony-Goon-/Invisibility-Pfad erzeugt nach der
   Choice-Auflösung einen sichtbaren Chronikeintrag, der beide Kartennamen und
   den MU-bedingten Zusammenhang nennt.
-- [ ] Vor Auflösung der MU-Auswahl behauptet kein Chronikeintrag, Loony Goon
+- [x] Vor Auflösung der MU-Auswahl behauptet kein Chronikeintrag, Loony Goon
   sei bereits abschließend installiert worden.
-- [ ] Der abschließende Eintrag wird aus einem real projizierten öffentlichen
+- [x] Der abschließende Eintrag wird aus einem real projizierten öffentlichen
   Event erzeugt; die benötigte Semantik ist in Live-Ansicht, Reconnect und
   Replay identisch verfügbar.
-- [ ] Das öffentliche Event enthält weder private Choice-Kandidaten noch
+- [x] Das öffentliche Event enthält weder private Choice-Kandidaten noch
   verdeckte Grip-/Stack-Informationen. Der tatsächlich getrashte installierte
   Programmname bleibt als öffentliches Spielergebnis sichtbar.
-- [ ] Die Chronik konsumiert kanonische strukturierte Ability-/Effect-
+- [x] Die Chronik konsumiert kanonische strukturierte Ability-/Effect-
   Semantik und leitet den Vorgang nicht aus `actionId`, Choice-ID, Label oder
   privatem Ausführungsdiscriminator ab.
-- [ ] Ein Engine-/Public-Event-Regressionstest belegt die Projektion des
+- [x] Ein Engine-/Public-Event-Regressionstest belegt die Projektion des
   side-sicheren Ausgangs; ein Web-Test belegt die kombinierte deutsche
   Chronikmeldung und schützt gegen den generischen Choice-Fallback.
-- [ ] Bestehende normale Programminstallationen und andere MU-Choices bleiben
+- [x] Bestehende normale Programminstallationen und andere MU-Choices bleiben
   in Chronik und Regeln unverändert.
 
 ## Umsetzungshinweise
@@ -145,4 +155,18 @@ Choice-Schritt darf nicht als bereits abgeschlossene Installation erscheinen.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der öffentliche Ereignisvertrag kennzeichnet beide Phasen nun kanonisch mit
+`abilityId: runner_program_trash_before_install` und
+`effectKind: install_card`. Der offene Schritt projiziert ausschließlich die
+ausstehende MU-Freimachung; der Abschluss transportiert die installierte
+Programmdefinition, die tatsächlich getrashten installierten Programme sowie
+den MU-Endstand in den side-sicheren `targets` und `amounts`. Die Chronik
+formatiert daraus im reproduzierten Fall: „Loony Goon im Rig installiert und
+dafür Invisibility getrasht, um MU freizumachen.“ Private Choice-Optionen und
+Karteninstanz-IDs bleiben außerhalb des öffentlichen Payloads.
+
+Der vollständige bestehende `chronicle.test.ts`-Lauf hat zusätzlich 196 grüne
+und 18 bereits auf `main` reproduzierbare, unabhängige Baseline-Fehler bei
+fehlenden Kartenpräsentationen geliefert. Der neue kanonische Test und der
+reale Engine-Integrationsfall sind beide grün; die Baseline-Fehler wurden nicht
+in dieses Paket gezogen.

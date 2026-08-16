@@ -21,6 +21,9 @@ import {
 } from "./game/view/server-view";
 import { visibleCorpCard } from "./game/view/card-view";
 
+const RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID =
+  "runner_program_trash_before_install";
+
 export type PublicContextForActionDependencies = {
   agendaPointsForScoredCard: (
     state: GameState,
@@ -190,6 +193,19 @@ export function publicContextForAction(
         : legalAction.payload?.placement === "ice"
           ? "ICE"
           : "Remote";
+    if (
+      legalAction.side === "runner" &&
+      legalAction.payload?.runnerProgramTrashBeforeInstall === true
+    ) {
+      context.abilityId = RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID;
+      context.effectKind = "install_card";
+      if (definition) {
+        context.sourceDefinitionId = definition.id;
+        context.installedProgramDefinitionId = definition.id;
+      }
+      if (legalAction.payload.runnerProgramTrashChoiceOpened === true)
+        context.installDeferredForMemory = true;
+    }
     if (legalAction.payload?.hiddenRunnerResourceInstall === true) {
       // Hidden Runner resources expose only a stable slot identity at install
       // time; the actual card identity remains private until a reveal path runs.
@@ -465,6 +481,35 @@ export function publicContextForAction(
   }
   if (legalAction.type === "resolve_choice") {
     context.choiceKind = legalAction.payload?.choiceKind;
+    if (legalAction.payload?.runnerProgramTrashBeforeInstall === true) {
+      context.abilityId = RUNNER_PROGRAM_TRASH_BEFORE_INSTALL_ABILITY_ID;
+      context.effectKind = "install_card";
+      const installedProgramDefinitionId =
+        typeof legalAction.payload.sourceDefinitionId === "string"
+          ? legalAction.payload.sourceDefinitionId
+          : undefined;
+      if (installedProgramDefinitionId) {
+        context.sourceDefinitionId = installedProgramDefinitionId;
+        context.installedProgramDefinitionId = installedProgramDefinitionId;
+      }
+      for (const key of [
+        "installed",
+        "installCancelled",
+        "installBlockedReason",
+        "trashedCardDefinitionIds",
+        "trashedCount",
+        "memoryUsedAfter",
+        "memoryLimitAfter",
+      ]) {
+        const value = legalAction.payload[key];
+        if (
+          typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean"
+        )
+          context[key] = value;
+      }
+    }
     if (legalAction.payload?.discardResolved === true) {
       context.discardResolved = true;
       context.discardSide = legalAction.payload.discardSide;

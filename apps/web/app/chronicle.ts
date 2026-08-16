@@ -692,30 +692,35 @@ export function formatChronicleEvent(
         chips.push("Social Engineering", "Verdeckte Wahl");
         break;
       }
-      if (
-        payload.runnerProgramTrashBeforeInstall === true ||
-        payload.runnerProgramTrashBeforeInstallResolved === true
-      ) {
-        const installedDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+      if (abilityId === "runner_program_trash_before_install") {
+        const installedDefinitionId =
+          stringValueFromRecord(
+            payload.targets,
+            "installedProgramDefinitionId",
+          ) ?? sourceDefinitionId;
         const installedTitle =
           titleForDefinitionId(installedDefinitionId) ??
           sourceTitle ??
           cardTitle ??
           "das Programm";
         const trashedTitles = titlesForDefinitionIds(
-          stringValue(payload.trashedCardDefinitionIds),
+          stringValueFromRecord(payload.targets, "trashedCardDefinitionIds"),
         );
         const trashedCount =
-          numberValue(payload.trashedCount) ?? trashedTitles.length;
+          payloadNumberValue(payload, "trashedCount") ?? trashedTitles.length;
         const trashedText =
           trashedTitles.length > 0
             ? joinChronicleParts(trashedTitles)
             : trashedCount > 0
               ? `${trashedCount} Programm${trashedCount === 1 ? "" : "e"}`
               : undefined;
-        const installed = payload.installed === true;
-        const memoryUsedAfter = numberValue(payload.memoryUsedAfter);
-        const memoryLimitAfter = numberValue(payload.memoryLimitAfter);
+        const installed =
+          payloadBooleanValue(payload, "installed") === true;
+        const memoryUsedAfter = payloadNumberValue(payload, "memoryUsedAfter");
+        const memoryLimitAfter = payloadNumberValue(
+          payload,
+          "memoryLimitAfter",
+        );
         category = "card";
         importance = installed ? "important" : "normal";
         visibility = "public";
@@ -726,7 +731,7 @@ export function formatChronicleEvent(
               subject,
               `${installedTitle} im Rig installiert${
                 trashedText
-                  ? `; ${trashedText} ${trashedCount === 1 ? "wurde" : "wurden"} für MU getrasht`
+                  ? ` und dafür ${trashedText} getrasht, um MU freizumachen`
                   : ""
               }`,
             )
@@ -2472,6 +2477,33 @@ export function formatChronicleEvent(
       break;
     case "install_card":
       {
+        if (
+          abilityId === "runner_program_trash_before_install" &&
+          payloadBooleanValue(payload, "installDeferredForMemory") === true
+        ) {
+          const pendingDefinitionId =
+            stringValueFromRecord(
+              payload.targets,
+              "installedProgramDefinitionId",
+            ) ?? sourceDefinitionId;
+          const pendingTitle =
+            titleForDefinitionId(pendingDefinitionId) ??
+            sourceTitle ??
+            cardTitle ??
+            "das Programm";
+          category = "card";
+          visibility = "public";
+          cardDefinitionId = pendingDefinitionId ?? cardDefinitionId;
+          cardTitle = pendingTitle;
+          title = phrase(
+            subject,
+            `${pendingTitle} zur Installation ausgewählt; dafür muss zuerst MU freigemacht werden`,
+          );
+          description =
+            "Die Installation wird erst nach der Programmtrash-Auswahl abgeschlossen.";
+          chips.push(pendingTitle, "Install ausstehend", "MU freimachen");
+          break;
+        }
         const installEffect = mergedCardResolverEffect;
         const installSuffix = installEffect?.suffix
           ? ` und ${installEffect.suffix}`

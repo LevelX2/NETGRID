@@ -346,6 +346,23 @@ describe("V1.0.5K Card Release", () => {
       "runner",
       (action) => action.actionId === installAction.actionId,
     );
+    const pendingPublicPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(pendingPublicPayload).toMatchObject({
+      actionType: "install_card",
+      abilityId: "runner_program_trash_before_install",
+      effectKind: "install_card",
+      sourceDefinitionId: "onr_v1_015_codeslinger",
+      targets: {
+        installedProgramDefinitionId: "onr_v1_015_codeslinger",
+        installDeferredForMemory: true,
+      },
+    });
+    expect(pendingPublicPayload).not.toHaveProperty(
+      "runnerProgramTrashBeforeInstall",
+    );
+    expect(JSON.stringify(pendingPublicPayload)).not.toContain(
+      "selectedOptionIds",
+    );
     expect(state.runner.clicks).toBe(10);
     expect(state.runner.credits).toBe(40);
     expect(state.runner.grip).toContain(sourceId);
@@ -366,6 +383,29 @@ describe("V1.0.5K Card Release", () => {
     )?.id;
     if (!trashOptionId) throw new Error("Missing Raffles trash option");
     state = applyChoice(state, "runner", trashOptionId);
+
+    const resolvedPublicPayload = state.eventLog.at(-1)?.publicPayload;
+    expect(resolvedPublicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      abilityId: "runner_program_trash_before_install",
+      effectKind: "install_card",
+      sourceDefinitionId: "onr_v1_015_codeslinger",
+      amounts: {
+        trashedCount: 1,
+        memoryUsedAfter: 4,
+        memoryLimitAfter: 7,
+      },
+      targets: {
+        installedProgramDefinitionId: "onr_v1_015_codeslinger",
+        trashedCardDefinitionIds: "onr_v1_052_raffles",
+        installed: true,
+      },
+    });
+    expect(resolvedPublicPayload).not.toHaveProperty(
+      "runnerProgramTrashBeforeInstallResolved",
+    );
+    expect(JSON.stringify(resolvedPublicPayload)).not.toContain(rafflesId);
+    expect(JSON.stringify(resolvedPublicPayload)).not.toContain(sourceId);
 
     expect(state.runner.heap).toContain(rafflesId);
     expect(state.runner.rig.programs).toContain(sourceId);

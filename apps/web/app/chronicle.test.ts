@@ -72,6 +72,14 @@ const TEST_CARD_PRESENTATIONS = {
     title: "Systematic Layoffs",
     type: "operation",
   },
+  "onr_v1_035_invisibility": {
+    title: "Invisibility",
+    type: "program",
+  },
+  "onr_v1_040_loony-goon": {
+    title: "Loony Goon",
+    type: "program",
+  },
   "onr_proteus_111_ice-and-data-special-report": {
     title: "Ice and Data Special Report",
     type: "event",
@@ -2501,43 +2509,83 @@ describe("formatChronicleEvent", () => {
     expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
   });
 
-  it("shows Runner program trash-before-install choices with installed and trashed programs", () => {
+  it("shows the canonical Runner MU-cleanup contract as pending and then completed", () => {
+    const pending = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        aiReasonCode: "runner_program_install_memory_cleanup",
+        abilityId: "runner_program_trash_before_install",
+        effectKind: "install_card",
+        sourceDefinitionId: "onr_v1_040_loony-goon",
+        targets: {
+          installedProgramDefinitionId: "onr_v1_040_loony-goon",
+          installDeferredForMemory: true,
+        },
+      }),
+      "corp",
+    );
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
         actor: "runner",
         aiReasonCode: "runner_program_install_memory_cleanup",
-        sourceDefinitionId: "onr_proteus_090_highlighter",
-        runnerProgramTrashBeforeInstall: true,
-        runnerProgramTrashBeforeInstallResolved: true,
-        trashedCount: 1,
-        trashedCardDefinitionIds: "simple_fracter",
-        installed: true,
-        memoryUsedAfter: 4,
-        memoryLimitAfter: 4,
+        abilityId: "runner_program_trash_before_install",
+        effectKind: "install_card",
+        sourceDefinitionId: "onr_v1_040_loony-goon",
+        amounts: {
+          trashedCount: 1,
+          memoryUsedAfter: 4,
+          memoryLimitAfter: 4,
+        },
+        targets: {
+          installedProgramDefinitionId: "onr_v1_040_loony-goon",
+          trashedCardDefinitionIds: "onr_v1_035_invisibility",
+          installed: true,
+        },
       }),
       "corp",
     );
 
+    expect(pending.title).toBe(
+      "Die Runner-KI hat Loony Goon zur Installation ausgewählt; dafür muss zuerst MU freigemacht werden.",
+    );
+    expect(pending.title).not.toContain("im Rig installiert");
     expect(item.title).toBe(
-      "Die Runner-KI hat Highlighter im Rig installiert; Simple Fracter wurde für MU getrasht.",
+      "Die Runner-KI hat Loony Goon im Rig installiert und dafür Invisibility getrasht, um MU freizumachen.",
     );
     expect(item.description).toBe("MU nach Installation: 4/4.");
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
-    expect(item.cardDefinitionId).toBe("onr_proteus_090_highlighter");
-    expect(item.cardTitle).toBe("Highlighter");
+    expect(item.cardDefinitionId).toBe("onr_v1_040_loony-goon");
+    expect(item.cardTitle).toBe("Loony Goon");
     expect(item.chips).toEqual(
       expect.arrayContaining([
         "Runner",
         "KI",
-        "Highlighter",
+        "Loony Goon",
         "Programmtrash",
         "Installiert",
         "MU freigemacht",
-        "Simple Fracter",
+        "Invisibility",
       ]),
     );
     expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("formats the real Engine-projected Loony Goon and Invisibility outcome", () => {
+    const [pendingEvent, resolvedEvent] =
+      realRunnerProgramTrashBeforeInstallEvents();
+    const pending = formatChronicleEvent(pendingEvent, "corp");
+    const resolved = formatChronicleEvent(resolvedEvent, "corp");
+
+    expect(pending.title).toBe(
+      "Der Runner hat Loony Goon zur Installation ausgewählt; dafür muss zuerst MU freigemacht werden.",
+    );
+    expect(pending.title).not.toContain("im Rig installiert");
+    expect(resolved.title).toBe(
+      "Der Runner hat Loony Goon im Rig installiert und dafür Invisibility getrasht, um MU freizumachen.",
+    );
+    expect(resolved.description).toBe("MU nach Installation: 4/4.");
+    expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
   it("shows post-access MU-checkpoint program trash with its public title", () => {
@@ -8998,6 +9046,122 @@ function realCorporateShuffleEvents(): [PublicGameEvent, PublicGameEvent] {
   if (!spgEvent || !hqShuffleEvent)
     throw new Error("Corporate-Shuffle-Chronikereignisse fehlen.");
   return [spgEvent, hqShuffleEvent];
+}
+
+function realRunnerProgramTrashBeforeInstallEvents(): [
+  PublicGameEvent,
+  PublicGameEvent,
+] {
+  let state = createGameAfterSetup({
+    seed: "chronicle-real-runner-program-trash-before-install",
+    agendaPointsToWin: 99,
+  });
+  state.corp.maxHandSize = 100;
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "mandatory_draw",
+  );
+  state = applyEngineAction(
+    state,
+    "corp",
+    (action) => action.type === "end_turn",
+  );
+  state.runner.credits = 40;
+  state.runner.clicks = 10;
+
+  const runnerCardIds = [...state.runner.grip, ...state.runner.stack];
+  if (runnerCardIds.length < 5)
+    throw new Error("Runner-Programmkarten für den Chroniktest fehlen.");
+  const installedDefinitionIds = [
+    "onr_v1_035_invisibility",
+    "onr_v1_035_invisibility",
+    "onr_v1_014_codecracker",
+    "onr_v1_006_black-dahlia",
+  ];
+  const installedIds = runnerCardIds.slice(0, 4);
+  for (const [index, cardId] of installedIds.entries()) {
+    removeRunnerCardFromZones(state, cardId);
+    state.runner.rig.programs.push(cardId);
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      definitionId: installedDefinitionIds[index]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  state.runner.memoryUsed = 4;
+
+  const loonyGoonId = runnerCardIds[4]!;
+  removeRunnerCardFromZones(state, loonyGoonId);
+  state.runner.grip.unshift(loonyGoonId);
+  state.cardInstances[loonyGoonId] = {
+    ...state.cardInstances[loonyGoonId]!,
+    definitionId: "onr_v1_040_loony-goon",
+    zone: { side: "runner", zone: "grip" },
+    faceup: false,
+    rezzed: false,
+  };
+
+  state = applyEngineAction(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.cardId === loonyGoonId &&
+      action.payload.runnerProgramTrashBeforeInstall === true,
+  );
+  const pendingEvent = state.eventLog.at(-1);
+  const invisibilityId = installedIds[0]!;
+  const trashOptionId = state.pendingChoice?.options.find(
+    (option) => option.value === invisibilityId,
+  )?.id;
+  if (!pendingEvent || !trashOptionId)
+    throw new Error("MU-Programmtrash-Auswahl für den Chroniktest fehlt.");
+  state = applyEngineChoice(state, "runner", trashOptionId);
+  const resolvedEvent = state.eventLog.at(-1);
+  if (!resolvedEvent)
+    throw new Error("MU-Programmtrash-Ergebnis für den Chroniktest fehlt.");
+
+  return [pendingEvent, resolvedEvent];
+}
+
+function removeRunnerCardFromZones(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
+  state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
+  state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
+  state.runner.rig.programs = state.runner.rig.programs.filter(
+    (id) => id !== cardId,
+  );
+}
+
+function applyEngineChoice(
+  state: GameState,
+  side: Side,
+  selectedOptionId: string,
+): GameState {
+  const action = getLegalActions(state, side).find(
+    (candidate) => candidate.type === "resolve_choice",
+  );
+  if (!action || !state.pendingChoice)
+    throw new Error(`Engine-Choice für ${side} fehlt.`);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: {
+      choiceId: state.pendingChoice.choiceId,
+      selectedOptionIds: [selectedOptionId],
+    },
+    idempotencyKey: `chronicle-choice:${side}:${state.stateVersion}:${action.actionId}`,
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
 }
 
 function applyEngineAction(
