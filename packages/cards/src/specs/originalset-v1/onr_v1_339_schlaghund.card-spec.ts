@@ -119,6 +119,11 @@ export const cardSpec = {
         axis: "remote_root_value",
         rating: "very_high",
       },
+      {
+        kind: "risk_interpretation",
+        risk: "random_damage_payoff",
+        severity: "high",
+      },
     ],
     capabilities: [
       {
@@ -132,7 +137,7 @@ export const cardSpec = {
             role: "payoff_anchor",
             roleDetail: "payoff_anchor_tag_payoff",
             evidenceAnchor: "tag.payoff",
-            confidence: "high",
+            confidence: "medium",
           },
         ],
       },

@@ -63,8 +63,12 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "staged_program_or_hardware_install",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "best_cards_for_current_plan",
+          "program_repairs_missing_coverage",
+          "program_affordable_after_install",
+        ],
+        avoid: ["insufficient_post_payment_reserve"],
       },
     ],
     capabilities: [],

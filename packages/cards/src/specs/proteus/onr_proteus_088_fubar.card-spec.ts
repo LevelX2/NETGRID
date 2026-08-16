@@ -109,19 +109,27 @@ export const cardSpec = {
         use: "coverage.breaker",
       },
       {
-        kind: "target_preference",
-        purpose: "choose_fixed_breaker_coverage",
-        preferences: [
-          "type_missing_in_current_rig",
-          "type_blocking_relevant_run_path",
-        ],
-        avoid: [
-          "unknown_low_information_target",
-          "hidden_info_dependent_choice",
+        kind: "risk_interpretation",
+        risk: "stealth_credit_pool_loss",
+        severity: "high",
+      },
+    ],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("select_breaker_subtype_once"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_fixed_breaker_coverage",
+            preferences: [
+              "type_missing_in_current_rig",
+              "type_blocking_relevant_run_path",
+            ],
+            avoid: ["unknown_low_information_target"],
+          },
         ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

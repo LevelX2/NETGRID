@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "0: Base link 1. 1: +1 link. Use only one base link card for each trace attempt made against you.",
+      "[0]: Base link 1. [1]: +1 link. Use only one base link card for each trace attempt made against you.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(

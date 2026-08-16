@@ -61,9 +61,19 @@ export const cardSpec = {
         role: "action_tempo",
       },
       {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
+        kind: "line_support",
+        lineKey: "corp.action_tempo",
+        support: "supports",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "credit_reserve_cost",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "future_action_debt",
+        severity: "high",
       },
     ],
     capabilities: [],

@@ -68,14 +68,24 @@ export const cardSpec = {
         kind: "plan_role",
         role: "protect_rig",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "prevent_program_or_hardware_trash",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        capabilityKey: capabilityKey(
+          "trash_prevention_sources_prevent_installed_card_trash",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "prevent_program_or_hardware_trash",
+            preferences: [
+              "trash_prevention_high_value_program",
+              "best_cards_for_current_plan",
+            ],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

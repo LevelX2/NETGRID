@@ -118,7 +118,7 @@ export const cardSpec = {
       },
       {
         kind: "strategic_role",
-        role: "engine_anchor",
+        role: "support_tool",
       },
       {
         kind: "line_support",
@@ -128,11 +128,11 @@ export const cardSpec = {
       {
         kind: "strategy_support",
         strategyKey: "corp.asset_economy",
-        role: "engine_anchor",
-        roleDetail: "installed_economy_engine",
+        role: "support_tool",
+        roleDetail: "action_charged_credit_bank",
         confidence: "medium",
         rationale:
-          "Action-charged installed credit bank; `economy.corp_charge_bank` is redundant with the more precise action-charged-bank signal.",
+          "Action-charged credit bank supports an asset-economy line but is not independently a durable economy engine.",
       },
       {
         kind: "tactic_interpretation",

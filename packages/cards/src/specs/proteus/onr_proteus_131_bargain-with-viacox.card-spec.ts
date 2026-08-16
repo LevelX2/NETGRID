@@ -65,21 +65,18 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "random_persistent_action_capacity",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "strategic_role",
+        role: "support_tool",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "low",
+        kind: "risk_interpretation",
+        risk: "random_forced_action",
+        severity: "high",
+        rationale:
+          "Each turn grants exactly one forced random action; several outcomes can create an unwanted run or reveal and play a random Grip card.",
       },
     ],
     capabilities: [],

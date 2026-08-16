@@ -90,6 +90,10 @@ export const cardSpec = {
         role: "engine_anchor",
       },
       {
+        kind: "strategy_anchor",
+        strategyKey: "corp.draw_engine",
+      },
+      {
         kind: "line_support",
         lineKey: "corp.draw_engine",
         support: "supports",

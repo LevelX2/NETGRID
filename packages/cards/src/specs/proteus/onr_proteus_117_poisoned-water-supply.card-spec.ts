@@ -57,7 +57,12 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "bad_publicity_pressure",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "installed_connection_sacrifice",
+        severity: "high",
       },
     ],
     capabilities: [],

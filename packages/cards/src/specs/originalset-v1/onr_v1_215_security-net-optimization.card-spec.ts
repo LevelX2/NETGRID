@@ -97,17 +97,24 @@ export const cardSpec = {
         rationale:
           "Agenda Semantic Review v1 maps Security Net Optimization to corp.remote_scoring as defensive_tool/remote_defense_anchor.",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "strengthen_ice_on_most_relevant_fort",
-        preferences: [
-          "protects_agenda_remote",
-          "protects_central_access_pressure",
+        capabilityKey: capabilityKey(
+          "scored_agenda_choose_fort_ice_strength_bonus",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "strengthen_ice_on_most_relevant_fort",
+            preferences: [
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+            ],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

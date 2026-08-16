@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "All nodes and other upgrades installed inside this fort cost 2 to trash, in addition to the normal cost.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+      "All nodes and other upgrades installed inside this fort cost [2] to trash, in addition to the normal cost.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -84,11 +84,6 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "corp.remote_protection",
         use: "corp.remote_protection",
-      },
-      {
-        kind: "remote_role",
-        role: "run_tax",
-        threatLevel: "medium",
       },
       {
         kind: "value_interpretation",

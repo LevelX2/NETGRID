@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Play only if Runner is tagged. Give Runner 1 tag and gain 1.",
+    rulesText: "Play only if Runner is tagged. Give Runner 1 tag and gain [1].",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -107,9 +107,9 @@ export const cardSpec = {
           {
             kind: "strategy_support",
             strategyKey: "corp.tag_trace_punish",
-            role: "anchor_evidence",
-            roleDetail: "anchor_evidence_tag_source",
-            evidenceAnchor: "tag.source",
+            role: "enabler",
+            roleDetail: "enabler_tag_additional_source",
+            evidenceAnchor: "tag.additional_source",
             confidence: "high",
           },
         ],

@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "2 credits: Break wall subroutine.\n1 credit: +1 strength.\nWhenever you break a wall subroutine with Ramming Piston, lose a total of 2 credits from stealth cards.",
+      "[2]: Break wall subroutine.\n[1]: +1 strength.\nWhenever you break a wall subroutine with Ramming Piston, lose a total of [2] from stealth cards.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -90,6 +90,11 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "coverage.breaker",
         use: "coverage.breaker",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "stealth_credit_pool_loss",
+        severity: "high",
       },
     ],
     capabilities: [],

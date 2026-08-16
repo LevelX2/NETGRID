@@ -71,10 +71,6 @@ export const cardSpec = {
         role: "pressure_rnd",
       },
       {
-        kind: "plan_role",
-        role: "contest_remote",
-      },
-      {
         kind: "strategic_role",
         role: "payoff_anchor",
       },

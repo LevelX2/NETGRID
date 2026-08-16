@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[T]: Prevent one or more of your other installed programs from being trashed.\n1 credit: Prevent one or more of your other installed programs from being trashed, and bring Joan of Arc into your hand.",
+      "[T]: Prevent one or more of your other installed programs from being trashed.\n[1]: Prevent one or more of your other installed programs from being trashed, and bring Joan of Arc into your hand.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -85,14 +85,35 @@ export const cardSpec = {
         kind: "plan_role",
         role: "protect_rig",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "prevent_program_trash",
-        preferences: ["trash_prevention_high_value_program"],
-        avoid: ["low_value_program"],
+        capabilityKey: capabilityKey(
+          "trash_prevention_sources_prevent_installed_card_trash",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "prevent_program_trash",
+            preferences: ["trash_prevention_high_value_program"],
+            avoid: ["low_value_program"],
+          },
+        ],
+      },
+      {
+        capabilityKey: capabilityKey(
+          "trash_prevention_sources_prevent_installed_card_trash_a",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "prevent_program_trash",
+            preferences: ["trash_prevention_high_value_program"],
+            avoid: ["low_value_program"],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

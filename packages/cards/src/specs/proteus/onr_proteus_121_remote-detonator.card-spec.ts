@@ -70,11 +70,21 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "pressure_rnd",
+        role: "remote_ice_sabotage",
       },
       {
         kind: "strategic_exchange",
         exchange: "self_tag",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "self_tag",
+        severity: "high",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "credit_reserve_cost",
+        severity: "high",
       },
     ],
     capabilities: [],
