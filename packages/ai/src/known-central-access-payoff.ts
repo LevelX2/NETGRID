@@ -19,6 +19,7 @@ export type KnownCentralAccessPayoff = {
   knownNoCurrentPayoff: boolean;
   score: number;
   penalty: number;
+  bonus?: number;
   reasons: string[];
   evidence: string[];
 };
@@ -71,7 +72,11 @@ export function evaluateKnownCentralAccessPayoff(
   if (serverId !== "rd") return unknownCentralPayoff(serverId ?? "none");
   const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;
   if (!freshness || freshness.freshness === "invalidated")
-    return unknownCentralPayoff("rd", ["central_memory_payoff:invalidated"]);
+    return applyRdAgendaDistributionPressure(
+      input,
+      beliefState,
+      unknownCentralPayoff("rd", ["central_memory_payoff:invalidated"]),
+    );
   if (freshness.freshness === "fresh_after_top_removed") {
     return {
       payoff: "fresh",
@@ -88,10 +93,14 @@ export function evaluateKnownCentralAccessPayoff(
   }
   const definitionId = freshness.knownTopDefinitionId;
   if (freshness.freshness !== "stale_known_same_top") {
-    return unknownCentralPayoff("rd", [
-      `rnd_freshness:${freshness.freshness}`,
-      `rnd_known_top_definition:${definitionId ?? "unknown"}`,
-    ]);
+    return applyRdAgendaDistributionPressure(
+      input,
+      beliefState,
+      unknownCentralPayoff("rd", [
+        `rnd_freshness:${freshness.freshness}`,
+        `rnd_known_top_definition:${definitionId ?? "unknown"}`,
+      ]),
+    );
   }
 
   const type = definitionId ? cardDefinitionType(definitionId) : undefined;
@@ -254,6 +263,65 @@ export function evaluateKnownCentralAccessPayoff(
       "central_memory_payoff:known_low_value",
     ],
   };
+}
+
+function applyRdAgendaDistributionPressure(
+  input: AiDecisionInput,
+  beliefState: BeliefState,
+  payoff: KnownCentralAccessPayoff,
+): KnownCentralAccessPayoff {
+  const memory = beliefState.runnerOpponentModel?.hqHandMemory;
+  if (!memory || input.playerView.opponent.handCount <= 0) return payoff;
+  const hqPath = knownCentralPathCost(input, "hq");
+  const assessment = assessHqKnownness(input, memory, hqPath.creditsAfterPath);
+  const lowValueKnownness =
+    assessment.knownnessPayoff === "mostly_known_low_value" ||
+    assessment.knownnessPayoff === "partially_known_low_value";
+  const knownPayoffRemains =
+    assessment.knownAgendaCount > 0 ||
+    assessment.knownTrashPayoffCount > 0 ||
+    assessment.candidatePossibleAgendaCount > 0 ||
+    assessment.candidatePossibleTrashPayoffCount > 0;
+  if (!lowValueKnownness || knownPayoffRemains) return payoff;
+
+  const fastAdvanceSupportVisible = corpVisibleFastAdvanceSupport(input);
+  const knownnessBonus =
+    assessment.knownnessPayoff === "mostly_known_low_value" ? 260 : 160;
+  const fastAdvanceBonus = fastAdvanceSupportVisible ? 100 : 0;
+  const bonus = knownnessBonus + fastAdvanceBonus;
+  return {
+    ...payoff,
+    bonus: (payoff.bonus ?? 0) + bonus,
+    reasons: [
+      ...payoff.reasons,
+      "agenda_distribution_shift_from_known_low_value_hq_to_rd",
+      ...(fastAdvanceSupportVisible
+        ? ["visible_fast_advance_support_compresses_remote_score_window"]
+        : []),
+    ],
+    evidence: [
+      ...payoff.evidence,
+      "central_distribution_shift:hq_known_low_value_to_rd",
+      `rd_pressure_hq_known_fraction:${assessment.knownFraction}`,
+      `rd_pressure_hq_unknown_rest:${assessment.unknownRestCount}`,
+      `corp_visible_fast_advance_support:${fastAdvanceSupportVisible}`,
+      `rd_distribution_pressure_bonus:${bonus}`,
+      "rd_run_boosted_by_hq_knownness_distribution:true",
+    ],
+  };
+}
+
+function corpVisibleFastAdvanceSupport(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some((server) =>
+    [...server.ice, ...server.root].some((card) => {
+      if (card.known !== true || !card.definitionId) return false;
+      const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+      return (
+        hint?.functionSignals?.includes("score.fast_advance_support") ===
+          true || hint?.lineSupport?.includes("corp.fast_advance") === true
+      );
+    }),
+  );
 }
 
 function evaluateKnownRdAccessSequencePayoff(

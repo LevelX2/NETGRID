@@ -326,6 +326,34 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("classifies subtype-restricted recurring breaker credits as economy", () => {
+    const corolla = visibleCard("corolla-speed-chip-1", {
+      definitionId: "onr_v1_124_corolla-speed-chip",
+      title: "Corolla Speed Chip",
+      type: "hardware",
+      installCost: 1,
+    });
+    const input = runnerInput({
+      credits: 5,
+      hand: [corolla],
+      legalActions: [installAction("install-corolla", corolla, 1)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "corolla-speed-chip-1",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "economy_engine",
+      availability: "legal_now",
+      deferReason: "none",
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining(["breaker_recurring_economy"]),
+    );
+  });
+
   it("uses source identifiers and ignores label-only hand card titles", () => {
     const console = visibleCard("console-1", {
       definitionId: "test-console",

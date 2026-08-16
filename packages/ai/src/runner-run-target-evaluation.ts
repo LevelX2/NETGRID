@@ -1158,7 +1158,7 @@ function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
         : payoff.payoff === "unknown"
           ? "unknown"
           : "known_payoff",
-    scoreAdjustment: -payoff.penalty,
+    scoreAdjustment: (payoff.bonus ?? 0) - payoff.penalty,
     evidence: payoff.evidence,
   };
 }

@@ -1732,17 +1732,12 @@ describe("authoritative plan-first live runtime", () => {
       }),
     ];
     input.playerView.own.gripOrHq = [
-      visibleCard(
-        "runner_onr_v1_016_cyfermaster_2",
-        "runner",
-        "program",
-        {
-          definitionId: "onr_v1_016_cyfermaster",
-          title: "Cyfermaster",
-          installCost: 4,
-          subtypes: ["icebreaker"],
-        },
-      ),
+      visibleCard("runner_onr_v1_016_cyfermaster_2", "runner", "program", {
+        definitionId: "onr_v1_016_cyfermaster",
+        title: "Cyfermaster",
+        installCost: 4,
+        subtypes: ["icebreaker"],
+      }),
     ];
 
     const decision = liveContext({
@@ -3164,6 +3159,92 @@ describe("authoritative plan-first live runtime", () => {
       actionId: "broker-cash",
       fallbackUsed: false,
     });
+  });
+
+  it("uses a two-credit bank withdrawal instead of a one-credit basic action below reserve", () => {
+    resetResidentPlanPortfolioMemory();
+    const cash = legalAction(
+      "short-term-contract-cash",
+      "runner",
+      "activated_card_ability",
+      "Take 2 hosted credits",
+      { credits: 0, clicks: 1 },
+      {
+        source: "short-term-contract",
+        payload: {
+          cardId: "short-term-contract",
+          sourceDefinitionId: "onr_v1_154_broker",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey: "withdraw_credits",
+          cardImplementationAbilityId: "onr_v1_154_broker:withdraw_credits",
+          cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
+        },
+      },
+    );
+    const credit = legalAction(
+      "basic-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [cash, credit]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.rig = [
+      visibleCard("short-term-contract", "runner", "resource", {
+        definitionId: "onr_v1_154_broker",
+        title: "Short-Term Contract",
+        counters: { bit: 12 },
+      }),
+    ];
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          searchAccess: { tools: [] },
+          economyBankTools: [
+            {
+              cardId: "onr_v1_154_broker",
+              sourceCardInstanceId: "short-term-contract",
+              title: "Short-Term Contract",
+              ownerSide: "runner",
+              status: "installed",
+              currentBankAmount: 12,
+              estimatedPayout: 2,
+              buildActionLegal: false,
+              cashOutActionLegal: true,
+              buildActionIds: [],
+              cashOutActionIds: [cash.actionId],
+              confidence: "high",
+              evidence: ["test_short_term_contract_installed"],
+            },
+          ],
+        },
+      }),
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 2,
+        desiredCreditReserve: 5,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: cash.actionId,
+      reasonCode: "plan_first.runner.credit_bank",
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan.evidenceCodes,
+    ).toEqual(
+      expect.arrayContaining([
+        "runner_credit_bank_cashout_for_click_efficient_liquidity",
+      ]),
+    );
   });
 
   it("keeps same-definition Broker cadence and plan identity per card instance", () => {

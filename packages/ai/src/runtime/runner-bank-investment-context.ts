@@ -11,6 +11,7 @@ import type { RunnerHandFundingTarget } from "./runner-hand-funding-target";
 import { mergedPublicHistory } from "./public-event-history";
 import { rolesMatch } from "./role-match";
 import { runnerHqSuccessWindowSetupAssessment } from "./runner-start-run-score";
+import { exactBankCashOutPayout } from "../actions/action-economy-projection";
 
 const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
 const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
@@ -272,7 +273,19 @@ export function createRunnerBankInvestmentContext(
       concreteFundingNeed,
       criticalReserve,
     });
-    const combinedCreditAccess = input.playerView.own.credits + storedCredits;
+    const cashOutPayout = Math.max(
+      0,
+      ...input.legalActions
+        .filter((candidate) => isRunnerBankCashOutAction(input, candidate))
+        .filter((candidate) => candidate.source === action.source)
+        .map((candidate) => exactBankCashOutPayout(candidate) ?? 0),
+    );
+    const clickLimitedStoredLiquidity = Math.min(
+      storedCredits,
+      cashOutPayout * Math.max(0, input.playerView.own.clicks),
+    );
+    const combinedCreditAccess =
+      input.playerView.own.credits + clickLimitedStoredLiquidity;
     const overDesiredTarget =
       (storedCredits > 0 && storedCredits >= desiredBankTarget) ||
       (storedCredits >= RUNNER_BANK_FIRST_LOAD_TARGET &&
@@ -1015,7 +1028,7 @@ export function createRunnerBankInvestmentContext(
   function runnerBankLargestLegalCashOut(input: AiDecisionInput): number {
     const payouts = input.legalActions
       .filter((action) => isRunnerBankCashOutAction(input, action))
-      .map((action) => runnerBankStoredCredits(input, action));
+      .map((action) => exactBankCashOutPayout(action) ?? 0);
     return payouts.length > 0 ? Math.max(...payouts) : 0;
   }
 

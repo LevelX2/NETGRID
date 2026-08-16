@@ -299,6 +299,8 @@ describe("DeckCapabilityProfile", () => {
         "Use ability",
         {
           cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
         },
       ),
       legalAction(
@@ -309,6 +311,8 @@ describe("DeckCapabilityProfile", () => {
         "Use ability",
         {
           cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          gainCreditsAmount: 2,
         },
       ),
     ];
@@ -325,7 +329,7 @@ describe("DeckCapabilityProfile", () => {
         currentBankAmount: 12,
         currentBankAmounts: [12],
         portfolioStoredAmount: 12,
-        estimatedPayout: 12,
+        estimatedPayout: 2,
         buildActionIds: ["broker-1-build"],
         cashOutActionIds: ["broker-1-cash"],
       }),
@@ -334,7 +338,7 @@ describe("DeckCapabilityProfile", () => {
         currentBankAmount: 3,
         currentBankAmounts: [3],
         portfolioStoredAmount: 3,
-        estimatedPayout: 3,
+        estimatedPayout: 2,
         buildActionIds: ["broker-2-build"],
         cashOutActionIds: ["broker-2-cash"],
       }),
