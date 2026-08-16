@@ -160,6 +160,7 @@ function quote(state: GameState) {
       printedTrace: 3,
       effectiveTraceLimit: 3,
       currentLink: 0,
+      visibleOpponentBidCapacity: 5,
       rationalTarget: 1,
       rationalRange: [0, 3],
       stakes: "low",

@@ -61,6 +61,66 @@ const TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID =
   >;
 
 describe("PlayerView projection", () => {
+  it("projects only side-safe specialized opponent Trace capacity", () => {
+    const state = createGameAfterSetup({
+      seed: "visible-opponent-trace-capacity",
+      traceRulesProfile: "classic_blind",
+    });
+    state.runner.credits = 3;
+    state.corp.credits = 3;
+    const phoneFreakId = "visible_phone_freak" as CardInstanceId;
+    const hiddenSupportId = "hidden_chiba" as CardInstanceId;
+    state.cardInstances[phoneFreakId] = {
+      instanceId: phoneFreakId,
+      definitionId: "onr_classic_054_phone-freak",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+      counters: { bit: 3 },
+    };
+    state.cardInstances[hiddenSupportId] = {
+      instanceId: hiddenSupportId,
+      definitionId: "onr_proteus_133_chiba-bank-account",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.runner.rig.resources.push(phoneFreakId, hiddenSupportId);
+    state.trace = {
+      traceId: "trace_visible_capacity",
+      sourceCardInstanceId: state.corp.identity,
+      sourceDefinitionId:
+        state.cardInstances[state.corp.identity]!.definitionId,
+      traceRulesProfile: "classic_blind",
+      traceLimit: 5,
+      effectiveTraceLimit: 5,
+      corpBidMax: 5,
+      status: "corp_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+      bidsRevealed: false,
+    };
+
+    expect(getPlayerView(state, "corp").trace).toMatchObject({
+      visibleOpponentBidCapacity: 6,
+    });
+    expect(getPlayerView(state, "runner").trace).toMatchObject({
+      visibleOpponentBidCapacity: 5,
+    });
+
+    state.cardInstances[phoneFreakId]!.counters = { bit: 1 };
+    expect(getPlayerView(state, "corp").trace?.visibleOpponentBidCapacity).toBe(
+      4,
+    );
+  });
+
   it("keeps an unrevealed Blind Corp bid out of the Runner PlayerView", () => {
     const state = createGameAfterSetup({
       seed: "blind-trace-player-view",
@@ -99,6 +159,7 @@ describe("PlayerView projection", () => {
       effectiveTraceLimit: 2,
       runnerLink: 1,
       bidsRevealed: false,
+      visibleOpponentBidCapacity: 3,
     });
     expect(runnerView.trace).not.toHaveProperty("corpBid");
     expect(runnerView.trace).not.toHaveProperty("corpStrength");
@@ -117,6 +178,56 @@ describe("PlayerView projection", () => {
       runnerBid: 1,
       runnerStrength: 2,
       bidsRevealed: true,
+    });
+  });
+
+  it("keeps a transient Blind Runner payment commitment private", () => {
+    const state = createGameAfterSetup({
+      seed: "blind-runner-payment-commitment-view",
+      traceRulesProfile: "classic_blind",
+    });
+    state.runner.credits = 8;
+    state.trace = {
+      traceId: "trace_hidden_runner_payment",
+      sourceCardInstanceId: state.corp.identity,
+      sourceDefinitionId:
+        state.cardInstances[state.corp.identity]!.definitionId,
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      effectiveTraceLimit: 3,
+      corpBidMax: 3,
+      status: "runner_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+      corpBid: 1,
+      traceValue: 1,
+      runnerLink: 0,
+      runnerBid: 3,
+      bidsRevealed: false,
+      runnerBidPaymentCommitment: {
+        side: "runner",
+        purpose: "runner_trace_bid",
+        amount: 3,
+        canPay: true,
+        breakdown: [{ kind: "runner_credits", amount: 3 }],
+        traceLinkCreditsToPay: 0,
+        bonusTraceLinkCreditsToPay: 0,
+        normalCreditsToPay: 3,
+        sourceDefinitionIds: [],
+      },
+    };
+
+    const corpView = getPlayerView(state, "corp");
+    const runnerView = getPlayerView(state, "runner");
+
+    expect(corpView.opponent.credits).toBe(8);
+    expect(corpView.trace).not.toHaveProperty("runnerBid");
+    expect(corpView.trace).not.toHaveProperty("ownCommittedPayment");
+    expect(runnerView.trace).toMatchObject({
+      runnerBid: 3,
+      ownCommittedPayment: {
+        amount: 3,
+        sources: [{ kind: "runner_credits", amount: 3 }],
+      },
     });
   });
 
