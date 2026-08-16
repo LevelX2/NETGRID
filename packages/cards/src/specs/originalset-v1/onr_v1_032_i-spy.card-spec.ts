@@ -77,11 +77,6 @@ export const cardSpec = {
         kind: "plan_role",
         role: "pressure_remote",
       },
-      {
-        kind: "target_preference",
-        purpose: "place_persistent_fort_expose",
-        avoid: ["hidden_info_dependent_choice"],
-      },
     ],
     capabilities: [],
   },

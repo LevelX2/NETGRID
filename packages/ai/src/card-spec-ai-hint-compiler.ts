@@ -5924,9 +5924,9 @@ function deriveTargetProfiles(
     return [
       {
         schemaVersion: "target-profile-v1",
-        kind: "use_target",
-        timing: "corp_rez_window",
-        targetType: "installed_ice",
+        kind: "install_target",
+        timing: "on_install",
+        targetType: "server",
         purpose: preference.purpose,
         ...(preference.preferences === undefined
           ? {}
@@ -5937,10 +5937,16 @@ function deriveTargetProfiles(
                 "target_preference",
               ),
             }),
-        avoid: ["hidden_info_dependent_choice"],
-        hiddenInfoPolicy: "legal_targets_only",
-        serverScope: "source_fort",
-        activeRunConstraint: "same_fort_upcoming_ice_when_active",
+        ...(preference.avoid === undefined
+          ? {}
+          : {
+              avoid: closedPlanningValues(
+                preference.avoid,
+                KNOWN_HINT_TARGET_PROFILE_AVOIDS,
+                "target_avoid",
+              ),
+            }),
+        hiddenInfoPolicy: "public_or_controller_known_only",
       },
     ];
   if (preference?.kind === "target_preference" && requiredSubtype !== undefined)
@@ -6327,6 +6333,7 @@ function hasClosedTargetPreferenceOwner(
               "search_trash_to_grip",
               "trash_cards_from_grip_for_credits",
               "trash_own_installed_cards_for_credits",
+              "trash_own_rezzed_ice_for_credits",
               "derez_rezzed_black_ice",
               "trash_unrezzed_ice",
             ].includes(effect.kind),
@@ -7154,6 +7161,20 @@ function deriveClosedExtendedTargetProfile(
       timing: "on_use",
       targetType: "card",
       hiddenInfoPolicy: "visible_or_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "trash_own_rezzed_ice_for_credits",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "activated_ability",
+      targetType: "installed_ice",
+      hiddenInfoPolicy: "public_or_controller_known_only",
     };
   throw new Error(
     `card_spec_target_preference_without_supported_mechanical_owner: ${entry.definition.id}`,

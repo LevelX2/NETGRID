@@ -99,6 +99,19 @@ export const cardSpec = {
         axis: "remote_root_value",
         rating: "medium",
       },
+      {
+        kind: "target_preference",
+        purpose: "trash_rezzed_ice_for_credit_cashout",
+        preferences: [
+          "redundant_or_spent_installed_card",
+          "lowest_near_term_value",
+          "best_cards_for_current_state",
+        ],
+        avoid: [
+          "option_with_no_visible_current_payoff",
+          "next_turn_required_card",
+        ],
+      },
     ],
     capabilities: [],
   },

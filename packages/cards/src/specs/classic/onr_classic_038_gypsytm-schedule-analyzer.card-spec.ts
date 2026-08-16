@@ -95,12 +95,6 @@ export const cardSpec = {
         support: "supports",
       },
       {
-        kind: "target_preference",
-        purpose: "replace_rnd_access_with_reveal_until_agenda",
-        preferences: ["high_value_accessed_card"],
-        avoid: ["hidden_info_dependent_choice"],
-      },
-      {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "medium",

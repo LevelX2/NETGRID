@@ -103,10 +103,9 @@ export const cardSpec = {
         kind: "target_preference",
         purpose: "choose_hq_or_rnd_for_conditional_multiaccess_run",
         preferences: [
-          "protects_central_access_pressure",
+          "server_relevant_to_current_plan",
           "current_run_path_relevance",
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "risk_interpretation",
