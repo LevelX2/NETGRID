@@ -400,6 +400,8 @@ export type StorageMaintenanceMatchAnalysisFilters = {
   turn?: number;
   fromDecision?: number;
   toDecision?: number;
+  afterEventIndex?: number;
+  eventLimit?: number;
   includeEvents?: boolean;
   includeDecisionTraces?: boolean;
   includeBeliefState?: boolean;
@@ -440,6 +442,8 @@ export type StorageMaintenanceMatchAnalysisBundle = {
     turn?: number;
     fromDecision?: number;
     toDecision?: number;
+    afterEventIndex?: number;
+    eventLimit?: number;
   };
   events?: StorageMaintenanceMatchAnalysisEvent[];
   decisions: StorageMaintenanceAiDecisionTraceIndexEntry[];
@@ -453,6 +457,9 @@ export type StorageMaintenanceMatchAnalysisBundle = {
     firstStateVersion?: number;
     lastStateVersion?: number;
     terminalStateIncluded: boolean;
+    eventLimit: number;
+    hasMoreEvents: boolean;
+    nextAfterEventIndex?: number;
   };
   terminal: {
     isTerminal: boolean;
@@ -1038,17 +1045,20 @@ export class SqliteMatchStorage implements MultiplayerStorage {
                state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter,
                public_payload_json AS publicPayloadJson, hidden_info_barrier AS hiddenInfoBarrier
              FROM events WHERE match_id = ?
+               AND (? IS NULL OR event_index > ?)
                AND (? IS NULL OR state_version_after >= ? - 2)
                AND (? IS NULL OR state_version_before <= ? + 2)
              ORDER BY event_index ASC LIMIT ?`,
             )
             .all(
               matchId,
+              normalized.afterEventIndex ?? null,
+              normalized.afterEventIndex ?? null,
               firstStateVersion ?? null,
               firstStateVersion ?? null,
               eventUpperStateVersion ?? null,
               eventUpperStateVersion ?? null,
-              MATCH_ANALYSIS_EVENT_LIMIT + 1,
+              normalized.eventLimit + 1,
             ) as Array<{
             eventId: string;
             eventIndex: number;
@@ -1065,8 +1075,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     const warnings: string[] = [];
     const unavailableSections: string[] = [];
+    const hasMoreEvents =
+      (materialized.eventRows?.length ?? 0) > normalized.eventLimit;
     const events = materialized.eventRows
-      ?.slice(0, MATCH_ANALYSIS_EVENT_LIMIT)
+      ?.slice(0, normalized.eventLimit)
       .map((row) => ({
         eventId: row.eventId,
         eventIndex: Number(row.eventIndex),
@@ -1079,9 +1091,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         >,
         hiddenInfoBarrier: row.hiddenInfoBarrier === 1,
       }));
-    if ((materialized.eventRows?.length ?? 0) > MATCH_ANALYSIS_EVENT_LIMIT)
+    if (hasMoreEvents)
       warnings.push(
-        `Events wurden auf ${MATCH_ANALYSIS_EVENT_LIMIT} Einträge begrenzt.`,
+        `Events wurden auf ${normalized.eventLimit} Einträge begrenzt; die nächste Seite kann mit afterEventIndex geladen werden.`,
       );
 
     const decisionRecords = materialized.decisionRows
@@ -1176,6 +1188,11 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       ...(ownDeckSnapshot ? { ownDeckSnapshot } : {}),
       eventCoverage: {
         returnedEventCount: events?.length ?? 0,
+        eventLimit: normalized.eventLimit,
+        hasMoreEvents,
+        ...(hasMoreEvents && events?.at(-1)
+          ? { nextAfterEventIndex: events.at(-1)!.eventIndex }
+          : {}),
         ...(events?.[0]
           ? {
               firstEventIndex: events[0].eventIndex,
@@ -3672,10 +3689,37 @@ function compactBeliefTimeline(
     const hq = recordValue(capture.hqHandMemory);
     const ledger = recordValue(hq?.ledger);
     const rnd = recordValue(capture.rndTopFreshness);
+    const hqHandCount = nonNegativeNumber(hq?.handCount);
+    const hqKnownCount = nonNegativeNumber(hq?.knownCount);
+    const hqCandidateKnownCount = Array.isArray(ledger?.candidateGroups)
+      ? ledger.candidateGroups.reduce((sum, value) => {
+          const group = recordValue(value);
+          return (
+            sum +
+            Math.max(
+              0,
+              nonNegativeNumber(group?.candidateCount) -
+                nonNegativeNumber(group?.departureCount),
+            )
+          );
+        }, 0)
+      : 0;
+    const hqUnknownRestCount = nonNegativeNumber(ledger?.unknownRestCount);
+    const hqConstrainedKnownCount = Math.min(
+      hqHandCount,
+      hqKnownCount + hqCandidateKnownCount,
+    );
+    const hqUnknownCount = Math.max(0, hqHandCount - hqConstrainedKnownCount);
     const summary: Record<string, number> = {
-      hqHandCount: nonNegativeNumber(hq?.handCount),
-      hqKnownCount: nonNegativeNumber(hq?.knownCount),
-      hqUnknownRestCount: nonNegativeNumber(ledger?.unknownRestCount),
+      hqHandCount,
+      hqKnownCount,
+      hqCandidateKnownCount,
+      hqUnknownCount,
+      hqKnownFraction:
+        hqHandCount > 0
+          ? Math.round((hqConstrainedKnownCount / hqHandCount) * 1000) / 1000
+          : 0,
+      hqUnknownRestCount,
       hqCandidateGroupCount: Array.isArray(ledger?.candidateGroups)
         ? ledger.candidateGroups.length
         : 0,
@@ -3716,6 +3760,23 @@ function compactBeliefTimeline(
       invariantSignature: signature,
       lastEventIndex: capture.lastEventIndex,
       provenance: "persisted",
+      hqKnowledge: {
+        handCount: hqHandCount,
+        safeKnownCount: hqKnownCount,
+        candidateKnownCount: hqCandidateKnownCount,
+        unknownRestCount: hqUnknownRestCount,
+        unknownCount: hqUnknownCount,
+        knownFraction:
+          hqHandCount > 0
+            ? Math.round((hqConstrainedKnownCount / hqHandCount) * 1000) / 1000
+            : 0,
+        allCardsKnown: hq?.allCardsKnown === true,
+        invalidationReasons: Array.isArray(hq?.invalidationReasons)
+          ? hq.invalidationReasons.filter(
+              (value): value is string => typeof value === "string",
+            )
+          : [],
+      },
       summary: {
         ...summary,
         rndTopFreshness:
@@ -3758,6 +3819,7 @@ function nonNegativeNumber(value: unknown): number {
 function normalizeMatchAnalysisFilters(
   filters: StorageMaintenanceMatchAnalysisFilters,
 ): StorageMaintenanceMatchAnalysisFilters & {
+  eventLimit: number;
   includeEvents: boolean;
   includeDecisionTraces: boolean;
   includeBeliefState: boolean;
@@ -3772,6 +3834,15 @@ function normalizeMatchAnalysisFilters(
   const turn = normalizeOptionalInteger(filters.turn);
   const fromDecision = normalizeOptionalInteger(filters.fromDecision);
   const toDecision = normalizeOptionalInteger(filters.toDecision);
+  const afterEventIndex = normalizeOptionalInteger(filters.afterEventIndex);
+  const requestedEventLimit = normalizeOptionalInteger(filters.eventLimit);
+  const eventLimit = Math.max(
+    1,
+    Math.min(
+      MATCH_ANALYSIS_EVENT_LIMIT,
+      requestedEventLimit ?? MATCH_ANALYSIS_EVENT_LIMIT,
+    ),
+  );
   return {
     ...(filters.side === "runner" || filters.side === "corp"
       ? { side: filters.side }
@@ -3781,6 +3852,8 @@ function normalizeMatchAnalysisFilters(
     ...(toDecision === undefined
       ? {}
       : { toDecision: Math.max(toDecision, fromDecision ?? 0) }),
+    ...(afterEventIndex === undefined ? {} : { afterEventIndex }),
+    eventLimit,
     includeEvents: filters.includeEvents !== false,
     includeDecisionTraces: filters.includeDecisionTraces !== false,
     includeBeliefState: filters.includeBeliefState === true,
@@ -3795,10 +3868,7 @@ function projectOwnDeckSnapshotFromStoredJson(params: {
   state?: GameState;
   includeZoneBalance?: boolean;
 }): StorageMaintenanceOwnDeckSnapshot {
-  const persisted = JSON.parse(params.recordJson) as Pick<
-    StoredMatch,
-    "match"
-  >;
+  const persisted = JSON.parse(params.recordJson) as Pick<StoredMatch, "match">;
   const privateDeckSnapshots = params.privateDeckSnapshotsJson
     ? (JSON.parse(
         params.privateDeckSnapshotsJson,
@@ -3825,6 +3895,12 @@ function analysisScope(
     ...(filters.toDecision === undefined
       ? {}
       : { toDecision: filters.toDecision }),
+    ...(filters.afterEventIndex === undefined
+      ? {}
+      : { afterEventIndex: filters.afterEventIndex }),
+    ...(filters.eventLimit === undefined
+      ? {}
+      : { eventLimit: filters.eventLimit }),
   };
 }
 

@@ -1529,6 +1529,8 @@ describe("Backend 0.5 private storage maintenance", () => {
           side?: string;
           fromDecision?: number;
           toDecision?: number;
+          afterEventIndex?: number;
+          eventLimit?: number;
         };
         events?: Array<{ eventId: string }>;
         traces?: Array<{ detail: Record<string, unknown> }>;
@@ -1542,6 +1544,9 @@ describe("Backend 0.5 private storage maintenance", () => {
         eventCoverage?: {
           returnedEventCount?: number;
           terminalStateIncluded?: boolean;
+          eventLimit?: number;
+          hasMoreEvents?: boolean;
+          nextAfterEventIndex?: number;
         };
         terminal?: { isTerminal?: boolean; status?: string };
         beliefStates?: Array<{
@@ -1549,6 +1554,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           provenance?: string;
           invariantSignature?: string;
           summary?: Record<string, unknown>;
+          hqKnowledge?: Record<string, unknown>;
           delta?: Record<string, unknown>;
         }>;
         decisions?: Array<{
@@ -1596,6 +1602,8 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(activeBundle.eventCoverage).toMatchObject({
         returnedEventCount: activeBundle.events?.length,
         terminalStateIncluded: false,
+        eventLimit: 500,
+        hasMoreEvents: false,
       });
       expect(activeBundle.terminal).toMatchObject({
         isTerminal: false,
@@ -1615,12 +1623,27 @@ describe("Backend 0.5 private storage maintenance", () => {
         }),
       ]);
       expect(activeBundle.traces).toHaveLength(1);
+      expect(activeBundle.traces?.[0]?.detail).toMatchObject({
+        appliedDecision: {
+          actionId: expect.any(String),
+          actionType: expect.any(String),
+        },
+      });
       expect(activeBundle.beliefStates).toEqual([
         expect.objectContaining({
           decisionIndex: 1,
           provenance: "persisted",
           invariantSignature: expect.any(String),
           summary: expect.any(Object),
+          hqKnowledge: expect.objectContaining({
+            handCount: expect.any(Number),
+            safeKnownCount: expect.any(Number),
+            candidateKnownCount: expect.any(Number),
+            unknownCount: expect.any(Number),
+            knownFraction: expect.any(Number),
+            allCardsKnown: expect.any(Boolean),
+            invalidationReasons: expect.any(Array),
+          }),
           delta: expect.any(Object),
         }),
       ]);
@@ -1669,6 +1692,42 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(JSON.stringify(activeBundle.ownDeckSnapshot)).not.toMatch(
         /instanceId|stackPosition|order|shuffle/i,
       );
+
+      const firstEventPageResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?includeDecisionTraces=false&eventLimit=1`,
+      );
+      const firstEventPage = (await firstEventPageResponse.json()) as {
+        scope?: { eventLimit?: number; afterEventIndex?: number };
+        events?: Array<{ eventIndex: number }>;
+        eventCoverage?: {
+          eventLimit?: number;
+          hasMoreEvents?: boolean;
+          nextAfterEventIndex?: number;
+        };
+      };
+      expect(firstEventPageResponse.status).toBe(200);
+      expect(firstEventPage.events).toHaveLength(1);
+      expect(firstEventPage.scope).toMatchObject({ eventLimit: 1 });
+      expect(firstEventPage.eventCoverage).toMatchObject({
+        eventLimit: 1,
+        hasMoreEvents: true,
+        nextAfterEventIndex: firstEventPage.events?.[0]?.eventIndex,
+      });
+      const secondEventPageResponse = await maintenance.request(
+        `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?includeDecisionTraces=false&eventLimit=1&afterEventIndex=${firstEventPage.eventCoverage?.nextAfterEventIndex ?? -1}`,
+      );
+      const secondEventPage = (await secondEventPageResponse.json()) as {
+        scope?: { eventLimit?: number; afterEventIndex?: number };
+        events?: Array<{ eventIndex: number }>;
+      };
+      expect(secondEventPageResponse.status).toBe(200);
+      expect(secondEventPage.events?.[0]?.eventIndex).toBeGreaterThan(
+        firstEventPage.events?.[0]?.eventIndex ?? -1,
+      );
+      expect(secondEventPage.scope).toMatchObject({
+        eventLimit: 1,
+        afterEventIndex: firstEventPage.events?.[0]?.eventIndex,
+      });
 
       const defaultBundleResponse = await maintenance.request(
         `/api/storage/maintenance/analysis/matches/${encodeURIComponent(active.matchId)}/bundle?turn=1&side=corp&fromDecision=1&toDecision=1&includeEvents=false`,
@@ -1964,6 +2023,8 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(finishedBundle.traces).toBeUndefined();
       expect(finishedBundle.eventCoverage).toEqual({
         returnedEventCount: 0,
+        eventLimit: 500,
+        hasMoreEvents: false,
         terminalStateIncluded: false,
       });
       expect(finishedBundle.terminal).toMatchObject({
