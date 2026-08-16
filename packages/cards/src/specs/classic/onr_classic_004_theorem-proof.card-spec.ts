@@ -26,6 +26,11 @@ export const cardSpec = {
         source: "card_text",
         reference: "onr_classic_004_theorem-proof",
       },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Theorem Proof",
+        note: "If the Runner declines installation and Theorem Proof remains in the same fort until the start of the next Runner turn, the Runner scores it.",
+      },
     ],
   },
   engine: {

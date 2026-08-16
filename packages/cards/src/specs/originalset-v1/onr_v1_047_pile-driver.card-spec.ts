@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "3: Break up to four wall subroutines on a single piece of ice. 1: +1 strength. Whenever you use Pile Driver’s break-walls subroutine, lose a total of 3 from stealth cards.",
+      "[3]: Break up to four wall subroutines on a single piece of ice. [1]: +1 strength. Whenever you use Pile Driver’s break-walls subroutine, lose a total of [3] from stealth cards.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

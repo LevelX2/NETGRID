@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Cost to install ice is reduced by 1.",
+    rulesText: "Cost to install ice is reduced by [1].",
   },
   rules: {
     schemaVersion: "card-rules-v1",

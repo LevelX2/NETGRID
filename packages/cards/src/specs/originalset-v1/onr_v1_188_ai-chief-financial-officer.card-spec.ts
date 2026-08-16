@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[A]: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.",
+      "A: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

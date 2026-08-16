@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+    rulesText: "[Subroutine] Do 1 brain damage.\n[Subroutine] End the run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
