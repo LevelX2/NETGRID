@@ -90,8 +90,9 @@ export const cardSpec = {
         role: "punish_payoff",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
+        kind: "line_support",
+        lineKey: "corp.ice_tax_glacier",
+        support: "supports",
       },
       {
         kind: "line_support",
@@ -114,9 +115,11 @@ export const cardSpec = {
         use: "damage.payoff.runner",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
+        kind: "risk_interpretation",
+        risk: "optional_ice_return_to_hq_removes_server_defense",
+        severity: "high",
+        rationale:
+          "The one-credit return also abandons the installed and rezzed board position before later runs.",
       },
     ],
     capabilities: [],

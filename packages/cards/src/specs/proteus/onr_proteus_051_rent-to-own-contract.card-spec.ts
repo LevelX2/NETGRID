@@ -90,6 +90,13 @@ export const cardSpec = {
         rationale:
           "Operations Semantic Review v2: ice_rez / installment_liability.",
       },
+      {
+        kind: "risk_interpretation",
+        risk: "term_counter_installment_liability",
+        severity: "high",
+        rationale:
+          "Each initial Term counter creates a future two-credit payment; missed payments grow the liability.",
+      },
     ],
     capabilities: [
       {

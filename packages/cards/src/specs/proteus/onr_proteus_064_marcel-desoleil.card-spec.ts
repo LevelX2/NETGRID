@@ -108,6 +108,11 @@ export const cardSpec = {
         axis: "remote_root_value",
         rating: "low",
       },
+      {
+        kind: "risk_interpretation",
+        risk: "rd_top_two_card_sacrifice",
+        severity: "high",
+      },
     ],
     capabilities: [
       {

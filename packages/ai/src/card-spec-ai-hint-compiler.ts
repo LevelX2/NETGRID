@@ -512,6 +512,21 @@ function deriveGenericTypedHintOverlay(
     appendScoredAgendaActivatedAbilityMarker(overlay, entry, ability);
   }
 
+  for (const modifier of engine.modifiers ?? [])
+    if (modifier.kind === "new_data_fort_creation_lock") {
+      overlay.effects.push({
+        kind: "global_modifier",
+        scope: "corp",
+        timing: "persistent",
+        target: "remote.new_fort_creation_lock",
+        repeatable: true,
+      });
+      overlay.functionSignals.push(
+        "remote.new_fort_creation_lock",
+        "tax.corp_remote_creation_removal",
+      );
+    }
+
   for (const subroutine of engine.printedSubroutines ?? []) {
     if (subroutine.kind === "trace") {
       overlay.effects.push({
@@ -676,6 +691,11 @@ function deriveGenericTypedHintOverlay(
   }
 
   for (const modifier of engine.modifiers ?? []) {
+    if (
+      modifier.kind === "break_ability_use_cost" &&
+      modifier.appliesToRunner.subtype === "noisy"
+    )
+      overlay.functionSignals.push("tax.noisy_breaker_ability");
     if (modifier.kind === "install_cost") {
       if (!Number.isInteger(modifier.amount) || modifier.amount <= 0)
         throw new Error("card_spec_unknown_install_cost_modifier_shape");
@@ -1393,6 +1413,18 @@ function appendGenericAbilityEffect(
       finite: true,
     });
     overlay.functionSignals.push("setup.draw");
+  }
+  if (effect.kind === "corp_random_discard_from_hq") {
+    overlay.effects.push({
+      kind: "random_discard",
+      scope: "hq",
+      timing,
+      resource: "cards",
+      target: "corp.random_discard_from_hq",
+      amount: effect.count,
+      finite: true,
+    });
+    overlay.functionSignals.push("corp.random_discard_pressure");
   }
   if (effect.kind === "gain_runner_event_agenda_point") {
     overlay.effects.push({
@@ -2132,6 +2164,13 @@ function appendTypedCondition(
           : condition.subtype === "gray_ops"
             ? "requires_liberated_gray_ops_agenda"
             : "requires_liberated_agenda_this_turn",
+    });
+  if (
+    condition.kind === "corp_scored_agenda_subtype_last_turn" &&
+    condition.subtype === "black_ops"
+  )
+    conditions.push({
+      kind: "requires_corp_scored_black_ops_agenda_last_turn",
     });
   if (condition.kind === "runner_made_successful_hq_and_rd_runs_this_turn")
     conditions.push({ kind: "requires_successful_run" });
@@ -5556,9 +5595,18 @@ function deriveConditions(
     if (access.sourceZones.includes("rd"))
       conditions.push({ kind: "requires_rnd_top" });
   }
-  if (engine.fortRunWindows !== undefined)
-    conditions.push({ kind: "requires_remote_server" });
-  if (engine.modifiers !== undefined)
+  if (
+    engine.modifiers?.some((modifier) =>
+      [
+        "install_cost",
+        "rez_cost",
+        "ice_strength",
+        "additional_subroutine",
+        "break_subroutine_cost",
+        "break_ability_use_cost",
+      ].includes(modifier.kind),
+    )
+  )
     conditions.push({ kind: "requires_installed_ice" });
   if ((engine.printedSubroutines?.length ?? 0) > 0)
     conditions.push(
@@ -5618,7 +5666,6 @@ function deriveConditions(
       conditions.push(
         { kind: "requires_during_run" },
         { kind: "requires_runner_tagged" },
-        { kind: "requires_remote_server" },
       );
     if (engine.successfulRunFollowups !== undefined)
       conditions.push({ kind: "requires_successful_run" });
@@ -5629,10 +5676,7 @@ function deriveConditions(
           modifier.kind === "break_ability_use_cost",
       )
     )
-      conditions.push(
-        { kind: "requires_during_run" },
-        { kind: "requires_remote_server" },
-      );
+      conditions.push({ kind: "requires_during_run" });
     if (
       engine.abilities?.some((ability) =>
         ability.effects?.some(
@@ -6305,6 +6349,8 @@ function hasClosedTargetPreferenceOwner(
       "conceal_and_reorder_installed_ice" ||
     engine.hiddenReplacementLongtail?.kind ===
       "secret_spend_guess_then_targeted_bypass_run" ||
+    engine.hiddenReplacementLongtail?.kind ===
+      "purge_replacement_with_runner_virus_counter_cleanup" ||
     engine.corpUtility !== undefined ||
     engine.lifecycle?.start_of_corp_turn?.some((trigger) =>
       trigger.effects.some(
@@ -6480,6 +6526,17 @@ function deriveClosedExtendedTargetProfile(
       timing: "on_play",
       targetType: "installed_ice",
       hiddenInfoPolicy: "visible_or_known_only",
+    };
+  if (
+    engine.hiddenReplacementLongtail?.kind ===
+    "purge_replacement_with_runner_virus_counter_cleanup"
+  )
+    return {
+      ...planningFields,
+      kind: "replacement_target",
+      timing: "replacement_window",
+      targetType: "counter",
+      hiddenInfoPolicy: "public_or_controller_known_only",
     };
   if (
     engine.abilities?.some((ability) =>
@@ -8520,12 +8577,6 @@ function appendClosedCorpUtilityEffects(
         target: "tag.payoff",
         repeatable: true,
       },
-      {
-        kind: "remote_protection",
-        scope: "remote",
-        timing: "persistent",
-        target: "remote.scoring_protection",
-      },
     );
 }
 
@@ -8897,23 +8948,15 @@ function appendClosedHardwareEffects(
       modifier.kind === "break_subroutine_cost" ||
       modifier.kind === "break_ability_use_cost"
     )
-      effects.push(
-        {
-          kind: "run_tax",
-          scope: "runner",
-          timing: "during_run",
-          resource: "credits",
-          target: "run.break_cost_penalty",
-          amount: modifier.amount,
-          repeatable: true,
-        },
-        {
-          kind: "remote_protection",
-          scope: "remote",
-          timing: "persistent",
-          target: "remote.scoring_protection",
-        },
-      );
+      effects.push({
+        kind: "run_tax",
+        scope: modifier.sameServerAsSource ? "fort" : "runner",
+        timing: "during_run",
+        resource: "credits",
+        target: "run.break_cost_penalty",
+        amount: modifier.amount,
+        repeatable: true,
+      });
   }
   for (const source of engine.restrictedHostedCreditSource === undefined
     ? []
@@ -9628,6 +9671,8 @@ function derivedFunctionSignals(
     if (engine.hardwareDeck === true) signals.add("setup.deck_exclusive");
     if (engine.modifiers?.some((modifier) => modifier.kind === "memory_units"))
       signals.add("setup.memory");
+    if (engine.hostedProgramCapacity !== undefined)
+      signals.add("setup.program_host");
     if (engine.modifiers?.some((modifier) => modifier.kind === "hand_size"))
       signals.add("setup.hand_size");
     if (engine.restrictedHostedCreditSource !== undefined) {

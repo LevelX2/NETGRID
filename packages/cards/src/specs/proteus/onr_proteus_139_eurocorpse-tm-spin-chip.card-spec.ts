@@ -83,11 +83,6 @@ export const cardSpec = {
         role: "safe_probe_run",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
         kind: "target_preference",
         purpose: "host_mu_one_icebreaker_for_spin_chip",
         preferences: [
@@ -100,6 +95,11 @@ export const cardSpec = {
           "target_would_break_host_limit",
           "critical_rig_or_survival_card",
         ],
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "host_leaves_play_trashes_hosted_programs",
+        severity: "high",
       },
     ],
     capabilities: [],

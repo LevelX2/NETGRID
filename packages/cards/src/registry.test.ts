@@ -442,6 +442,7 @@ describe("CardRegistry", () => {
     );
     expect(reprisal.planningAnnotations!.card).toEqual([
       { kind: "plan_role", role: "pressure_hq" },
+      { kind: "plan_role", role: "random_discard_pressure" },
     ]);
     expect(weatherPipe.planningAnnotations!.card).toEqual([
       { kind: "plan_role", role: "pressure_hq" },
@@ -585,7 +586,9 @@ describe("CardRegistry", () => {
       "onr_v1_255_mastiff" as CardDefinitionId,
     );
 
-    expect(mastiff?.text.rulesText).toContain("*Trace 5-If trace is successful");
+    expect(mastiff?.text.rulesText).toContain(
+      "*Trace 5-If trace is successful",
+    );
     expect(
       mastiff?.engine.printedSubroutines?.find(
         (subroutine) => subroutine.kind === "trace",

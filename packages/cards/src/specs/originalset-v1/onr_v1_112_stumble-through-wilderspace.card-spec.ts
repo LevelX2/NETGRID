@@ -76,8 +76,9 @@ export const cardSpec = {
         role: "trace_bid_support",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
       },
     ],
     capabilities: [

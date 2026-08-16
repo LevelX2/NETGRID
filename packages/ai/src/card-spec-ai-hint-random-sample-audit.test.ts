@@ -746,5 +746,69 @@ describe("random production-card sample semantic corrections", () => {
         hiddenInfoPolicy: "public_or_controller_known_only",
       }),
     );
+    expect(hint("onr_v1_155_code-viral-cache").targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "preserve_two_high_value_virus_counters",
+        targetType: "counter",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(
+      hint("onr_proteus_146_precision-bribery").targetProfiles,
+    ).toBeUndefined();
+  });
+
+  it("keeps Batch 13 fort, hand, tag, draw, and access semantics proportional", () => {
+    const london = hint("onr_classic_020_london-city-grid");
+    expect(london.functionSignals).toContain("tax.noisy_breaker_ability");
+    expect(london.conditions ?? []).not.toContainEqual({
+      kind: "requires_remote_server",
+    });
+    expect(london.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "run_tax",
+        scope: "fort",
+        target: "run.break_cost_penalty",
+      }),
+    );
+
+    const reprisal = hint("onr_v1_115_terrorist-reprisal");
+    expect(reprisal.conditions).toContainEqual({
+      kind: "requires_corp_scored_black_ops_agenda_last_turn",
+    });
+    expect(reprisal.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "random_discard",
+        scope: "hq",
+        amount: 5,
+      }),
+    );
+
+    expect(
+      hint("onr_classic_019_indiscriminate-response-team").tacticSignals ?? [],
+    ).not.toContain("draw.card");
+    expect(
+      hint("onr_proteus_019_death-yo-yo").strategyAnchors ?? [],
+    ).not.toContain("corp.ice_tax_glacier");
+    expect(
+      hint("onr_classic_003_unlisted-research-lab").strategyAnchors,
+    ).toContain("corp.draw_engine");
+    expect(
+      hint("onr_classic_021_satellite-monitors").strategyAnchors,
+    ).toBeUndefined();
+    expect(hint("onr_proteus_067_panic-button").planRoles).toEqual(
+      expect.arrayContaining(["protect_hq", "corp_repeatable_draw"]),
+    );
+    expect(hint("onr_v1_085_executive-wiretaps").strategyAnchors).toEqual([
+      "runner.hq_pressure",
+    ]);
+    expect(
+      hint("onr_proteus_139_eurocorpse-tm-spin-chip").functionSignals,
+    ).toEqual(
+      expect.arrayContaining([
+        "setup.program_host",
+        "economy.recurring_breaker_credit",
+      ]),
+    );
   });
 });
