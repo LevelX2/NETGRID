@@ -546,6 +546,42 @@ export type AiDecisionHistoricalAudit = {
       };
 };
 
+export type DeckConsumerAuditName =
+  | "deckCapabilities"
+  | "deckStrategyProfile"
+  | "deckDoctrineDiagnostic";
+
+export type DeckConsumerAudit =
+  | {
+      schemaVersion: "netgrid-deck-consumer-audit-v1";
+      provenance: "persisted_at_decision";
+      actor: Side;
+      stateVersion: number;
+      deckCapabilities: NonNullable<
+        AiDecisionInputWithDeckCapabilities["ownDeckCapabilities"]
+      >;
+      deckStrategyProfile: NonNullable<
+        AiDecisionInputWithDeckCapabilities["ownDeckStrategyProfile"]
+      >;
+      deckDoctrineDiagnostic: NonNullable<
+        AiDecisionInputWithDeckCapabilities["ownDeckDoctrineV2Diagnostic"]
+      >;
+      validation: {
+        inputMatchesActor: true;
+        consumerSidesMatchActor: true;
+        allConsumersPersisted: true;
+      };
+    }
+  | {
+      schemaVersion: "netgrid-deck-consumer-audit-v1";
+      provenance: "unavailable";
+      reason:
+        | "historical_deck_consumer_audit_not_persisted"
+        | "historical_deck_consumer_audit_binding_mismatch";
+      missingConsumers: DeckConsumerAuditName[];
+      invalidConsumers: DeckConsumerAuditName[];
+    };
+
 export type AiDecisionBeliefCapture = {
   schemaVersion: "netgrid-ai-belief-capture-v1";
   provenance: "persisted";
@@ -4535,6 +4571,9 @@ export class MultiplayerService {
     };
     const unavailableAudit = unavailableHistoricalAudit();
     const turnPlanningAudit = turnPlanningAuditFromTrace(source.trace.detail);
+    const deckConsumerAudit = deckConsumerAuditFromCheckpointCapture(
+      audit?.checkpointCapture,
+    );
     const beliefState = audit?.beliefState;
     const ownDeckSnapshot = source.ownDeckSnapshot;
     if (!audit) {
@@ -4548,6 +4587,8 @@ export class MultiplayerService {
     if (!beliefState) diagnostics.unavailableSections.push("beliefState");
     if (turnPlanningAudit.provenance === "unavailable")
       diagnostics.unavailableSections.push("turnPlanningAudit");
+    if (deckConsumerAudit.provenance === "unavailable")
+      diagnostics.unavailableSections.push("deckConsumerAudit");
     if (!audit?.checkpointCapture)
       diagnostics.unavailableSections.push("checkpointCapture");
     if (ownDeckSnapshot.provenance === "unavailable")
@@ -4558,7 +4599,7 @@ export class MultiplayerService {
     )
       diagnostics.unavailableSections.push("ownDeckZoneBalance");
     return {
-      schemaVersion: "netgrid-decision-analysis-context-v3",
+      schemaVersion: "netgrid-decision-analysis-context-v4",
       decision: source.trace,
       aiTrace: source.trace,
       surroundingEvents: source.surroundingEvents,
@@ -4574,6 +4615,7 @@ export class MultiplayerService {
         reason: "historical_belief_capture_not_persisted",
       },
       turnPlanningAudit,
+      deckConsumerAudit,
       ownDeckSnapshot,
       provenance: {
         persisted: audit
@@ -4584,6 +4626,9 @@ export class MultiplayerService {
               ...(beliefState ? ["beliefState"] : []),
               ...(turnPlanningAudit.provenance === "persisted_at_decision"
                 ? ["turnPlanningAudit"]
+                : []),
+              ...(deckConsumerAudit.provenance === "persisted_at_decision"
+                ? ["deckConsumerAudit"]
                 : []),
               ...(ownDeckSnapshot.provenance === "persisted"
                 ? ["ownDeckSnapshot"]
@@ -4597,6 +4642,9 @@ export class MultiplayerService {
                 : []),
               ...(turnPlanningAudit.provenance === "persisted_at_decision"
                 ? ["turnPlanningAudit"]
+                : []),
+              ...(deckConsumerAudit.provenance === "persisted_at_decision"
+                ? ["deckConsumerAudit"]
                 : []),
               "surroundingEvents",
             ],
@@ -7595,6 +7643,125 @@ export function turnPlanningAuditFromTrace(
     provenance: "unavailable",
     reason: "historical_turn_planning_audit_not_persisted",
   };
+}
+
+export function deckConsumerAuditFromCheckpointCapture(
+  checkpointCapture: unknown,
+): DeckConsumerAudit {
+  const consumerNames: DeckConsumerAuditName[] = [
+    "deckCapabilities",
+    "deckStrategyProfile",
+    "deckDoctrineDiagnostic",
+  ];
+  const checkpoint = historicalObject(checkpointCapture);
+  const input = historicalObject(checkpoint?.input);
+  const actor = checkpoint?.actor;
+  const stateVersion = checkpoint?.stateVersion;
+  if (
+    checkpoint?.schemaVersion !== "netgrid-ai-decision-checkpoint-capture-v1" ||
+    checkpoint.provenance !== "persisted_at_decision" ||
+    (actor !== "runner" && actor !== "corp") ||
+    typeof stateVersion !== "number" ||
+    !Number.isFinite(stateVersion) ||
+    !input
+  ) {
+    return unavailableDeckConsumerAudit(
+      "historical_deck_consumer_audit_not_persisted",
+      consumerNames,
+      [],
+    );
+  }
+
+  const consumers = {
+    deckCapabilities: historicalObject(input.ownDeckCapabilities),
+    deckStrategyProfile: historicalObject(input.ownDeckStrategyProfile),
+    deckDoctrineDiagnostic: historicalObject(input.ownDeckDoctrineV2Diagnostic),
+  };
+  const missingConsumers = consumerNames.filter(
+    (name) => consumers[name] === undefined,
+  );
+  if (missingConsumers.length > 0) {
+    return unavailableDeckConsumerAudit(
+      "historical_deck_consumer_audit_not_persisted",
+      missingConsumers,
+      [],
+    );
+  }
+
+  const playerView = historicalObject(input.playerView);
+  const inputBindingValid =
+    input.side === actor &&
+    playerView?.side === actor &&
+    playerView.stateVersion === stateVersion;
+  const expectedSchemas = {
+    deckCapabilities: "deck-capability-profile-v1",
+    deckStrategyProfile: "ai-deck-strategy-profile-v1",
+    deckDoctrineDiagnostic: "deck-doctrine-v2-diagnostic-v1",
+  } as const;
+  const invalidConsumers = consumerNames.filter((name) => {
+    const consumer = consumers[name]!;
+    return (
+      !inputBindingValid ||
+      consumer.schemaVersion !== expectedSchemas[name] ||
+      consumer.side !== actor
+    );
+  });
+  if (invalidConsumers.length > 0) {
+    return unavailableDeckConsumerAudit(
+      "historical_deck_consumer_audit_binding_mismatch",
+      [],
+      invalidConsumers,
+    );
+  }
+
+  return {
+    schemaVersion: "netgrid-deck-consumer-audit-v1",
+    provenance: "persisted_at_decision",
+    actor,
+    stateVersion,
+    deckCapabilities: structuredClone(
+      consumers.deckCapabilities,
+    ) as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckCapabilities"]
+    >,
+    deckStrategyProfile: structuredClone(
+      consumers.deckStrategyProfile,
+    ) as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckStrategyProfile"]
+    >,
+    deckDoctrineDiagnostic: structuredClone(
+      consumers.deckDoctrineDiagnostic,
+    ) as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckDoctrineV2Diagnostic"]
+    >,
+    validation: {
+      inputMatchesActor: true,
+      consumerSidesMatchActor: true,
+      allConsumersPersisted: true,
+    },
+  };
+}
+
+function unavailableDeckConsumerAudit(
+  reason:
+    | "historical_deck_consumer_audit_not_persisted"
+    | "historical_deck_consumer_audit_binding_mismatch",
+  missingConsumers: DeckConsumerAuditName[],
+  invalidConsumers: DeckConsumerAuditName[],
+): Extract<DeckConsumerAudit, { provenance: "unavailable" }> {
+  return {
+    schemaVersion: "netgrid-deck-consumer-audit-v1",
+    provenance: "unavailable",
+    reason,
+    missingConsumers,
+    invalidConsumers,
+  };
+}
+
+function historicalObject(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 export function unavailableHistoricalAudit(): {
