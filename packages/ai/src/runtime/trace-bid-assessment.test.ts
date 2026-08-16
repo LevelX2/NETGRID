@@ -246,6 +246,77 @@ describe("Blind Trace bid assessment", () => {
     expect(highHiddenBid.playerView.trace?.corpBid).toBeUndefined();
     expect(assess(highHiddenBid)).toEqual(assess(lowHiddenBid));
   });
+
+  it("uses side-safe specialized opponent capacity for both Blind bidders", () => {
+    const corpNormalOnly = decisionInput({
+      profile: "classic_blind",
+      side: "corp",
+      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      printedTrace: 6,
+      bidMax: 6,
+      opponentCredits: 3,
+      visibleOpponentBidCapacity: 3,
+    });
+    const corpWithVisibleRunnerPool = decisionInput({
+      profile: "classic_blind",
+      side: "corp",
+      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      printedTrace: 6,
+      bidMax: 6,
+      opponentCredits: 3,
+      visibleOpponentBidCapacity: 6,
+    });
+    const runnerNormalOnly = decisionInput({
+      profile: "classic_blind",
+      side: "runner",
+      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      printedTrace: 5,
+      bidMax: 6,
+      opponentCredits: 3,
+      visibleOpponentBidCapacity: 3,
+    });
+    const runnerWithVisibleCorpPool = decisionInput({
+      profile: "classic_blind",
+      side: "runner",
+      sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+      printedTrace: 5,
+      bidMax: 6,
+      opponentCredits: 3,
+      visibleOpponentBidCapacity: 5,
+    });
+
+    expect(assess(corpWithVisibleRunnerPool).candidates).not.toEqual(
+      assess(corpNormalOnly).candidates,
+    );
+    expect(assess(runnerWithVisibleCorpPool).candidates).not.toEqual(
+      assess(runnerNormalOnly).candidates,
+    );
+
+    corpWithVisibleRunnerPool.playerView.opponent.rig = [
+      {
+        instanceId: "concealed_trace_support_slot",
+        known: false,
+        concealed: true,
+        hiddenRunnerResource: true,
+        type: "resource",
+        owner: "runner",
+        controller: "runner",
+      },
+    ];
+    expect(assess(corpWithVisibleRunnerPool)).toEqual(
+      assess(
+        decisionInput({
+          profile: "classic_blind",
+          side: "corp",
+          sourceDefinitionId: "onr_v1_236_data-raven" as CardDefinitionId,
+          printedTrace: 6,
+          bidMax: 6,
+          opponentCredits: 3,
+          visibleOpponentBidCapacity: 6,
+        }),
+      ),
+    );
+  });
 });
 
 function assess(input: AiDecisionInput) {
@@ -275,9 +346,15 @@ function decisionInput(input: {
   runnerLink?: number;
   runnerGripCount?: number;
   hiddenCorpBid?: number;
+  opponentCredits?: number;
+  visibleOpponentBidCapacity?: number;
 }): AiDecisionInput {
   const state = traceState(input);
   const playerView = getPlayerView(state, input.side);
+  if (input.visibleOpponentBidCapacity !== undefined && playerView.trace) {
+    playerView.trace.visibleOpponentBidCapacity =
+      input.visibleOpponentBidCapacity;
+  }
   return {
     matchId: state.matchId,
     side: input.side,
@@ -303,6 +380,8 @@ function traceState(input: {
   runnerLink?: number;
   runnerGripCount?: number;
   hiddenCorpBid?: number;
+  opponentCredits?: number;
+  visibleOpponentBidCapacity?: number;
 }): GameState {
   const state = createGame({
     seed: `trace-assessment:${input.profile}:${input.side}`,
@@ -313,10 +392,10 @@ function traceState(input: {
   state.activeSide = input.side;
   if (input.side === "corp") {
     state.corp.credits = input.ownCredits ?? 5;
-    state.runner.credits = 5;
+    state.runner.credits = input.opponentCredits ?? 5;
   } else {
     state.runner.credits = input.ownCredits ?? 5;
-    state.corp.credits = 5;
+    state.corp.credits = input.opponentCredits ?? 5;
   }
   if (input.runnerGripCount !== undefined) {
     state.runner.grip = state.runner.grip.slice(0, input.runnerGripCount);

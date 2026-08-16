@@ -20,6 +20,7 @@ import type {
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
 import type {
   CorpTracePaymentDependencies,
+  CorpTraceSpecializedPaymentSource,
   RunnerTracePaymentDependencies,
 } from "../payment";
 
@@ -154,28 +155,110 @@ describe("trace orchestration", () => {
     const corpAction = actionFor("corp", "resolve_choice");
     resolveTraceChoice(host, corpAction, playerChoice("bid_2"));
 
+    expect(state.corp.credits).toBe(5);
     expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 2,
       traceValue: 2,
       bidsRevealed: false,
+      corpBidPaymentCommitment: {
+        side: "corp",
+        bid: 2,
+        normalCreditsToPay: 2,
+      },
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
       visibility: "hidden_info_barrier",
     });
     expect(state.pendingChoice?.prompt).not.toContain("Trace-Stärke 2");
+    expect(corpAction.payload).not.toHaveProperty("corpCreditBid");
 
     const runnerAction = actionFor("runner", "resolve_choice");
     resolveTraceChoice(host, runnerAction, playerChoice("bid_1"));
 
+    expect(state.corp.credits).toBe(3);
+    expect(state.runner.credits).toBe(4);
     expect(runnerAction.payload).toMatchObject({
       corpBid: 2,
+      corpCreditBid: 2,
       runnerBid: 1,
       runnerStrength: 2,
       traceSuccessful: false,
     });
     expect(state.trace).toBeUndefined();
+  });
+
+  it("keeps a specialized Blind Corp payment pool unchanged until reveal", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const poolId = "krumz_pool" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const poolDefinition = definition("onr_v1_330_krumz", "asset");
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [poolId]: instance(poolId, poolDefinition.id, "corp"),
+      },
+      traceRulesProfile: "classic_blind",
+    });
+    state.corp.credits = 3;
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "corp_bid", {
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      effectiveTraceLimit: 3,
+      corpBidMax: 3,
+    });
+    state.pendingChoice = bidChoice(state, "corp", state.trace.traceId, 3);
+    const pools = new Map<CardInstanceId, number>([[poolId, 1]]);
+    const host = testHost(
+      state,
+      {
+        [sourceDefinition.id]: sourceDefinition,
+        [poolDefinition.id]: poolDefinition,
+      },
+      testCalls(),
+      {
+        corpSpecializedSources: [
+          {
+            kind: "corp_trace_bit_pool",
+            sourceCardInstanceId: poolId,
+            sourceDefinitionId: poolDefinition.id,
+            available: 1,
+          },
+        ],
+        corpHostedCredits: pools,
+      },
+    );
+
+    resolveTraceChoice(
+      host,
+      actionFor("corp", "resolve_choice"),
+      playerChoice("bid_3"),
+    );
+    const allocationOption = state.pendingChoice?.options.find((option) =>
+      String(option.value).includes('"amount":1'),
+    );
+    if (!allocationOption) throw new Error("Krumz allocation option missing.");
+    resolveTraceChoice(
+      host,
+      actionFor("corp", "resolve_choice"),
+      playerChoice(allocationOption.id),
+    );
+
+    expect(state.corp.credits).toBe(3);
+    expect(pools.get(poolId)).toBe(1);
+    expect(state.trace?.corpBidPaymentCommitment?.breakdown).toContainEqual(
+      expect.objectContaining({ sourceCardInstanceId: poolId, amount: 1 }),
+    );
+
+    resolveTraceChoice(
+      host,
+      actionFor("runner", "resolve_choice"),
+      playerChoice("bid_0"),
+    );
+
+    expect(state.corp.credits).toBe(1);
+    expect(pools.get(poolId)).toBe(0);
   });
 
   it("resolves the Runner bid and completes operation trace success without a run", () => {
@@ -445,6 +528,9 @@ describe("trace orchestration", () => {
       sourceIndex: 1,
       allocations: [{ sourceCardInstanceId: linkAId, amount: 3 }],
     });
+    expect(state.runner.credits).toBe(5);
+    expect(hostedCredits.get(linkAId)).toBe(5);
+    expect(hostedCredits.get(linkBId)).toBe(2);
     expect(state.pendingChoice).toMatchObject({
       source: `trace_runner_bid_payment:trace_1:${linkBId}`,
       prompt:
@@ -902,6 +988,8 @@ function testHost(
     rezzedCorpRootCardIds?: CardInstanceId[];
     runnerTraceLinkCreditSourceIds?: CardInstanceId[];
     hostedCredits?: Map<CardInstanceId, number>;
+    corpSpecializedSources?: CorpTraceSpecializedPaymentSource[];
+    corpHostedCredits?: Map<CardInstanceId, number>;
   } = {},
 ): TraceOrchestrationHost {
   const definitionFor = (cardId: CardInstanceId) => {
@@ -923,11 +1011,48 @@ function testHost(
     spendCorpCredits: (targetState, amount) => {
       targetState.corp.credits -= amount;
     },
-    corpTraceBitPoolTotal: () => 0,
+    corpTraceBitPoolTotal: () =>
+      (options.corpSpecializedSources ?? [])
+        .filter((source) => source.kind === "corp_trace_bit_pool")
+        .reduce(
+          (sum, source) =>
+            sum +
+            (options.corpHostedCredits?.get(source.sourceCardInstanceId) ?? 0),
+          0,
+        ),
     spendCorpTraceBitPool: () => 0,
-    corpTraceCounterPoolTotal: () => 0,
+    corpTraceCounterPoolTotal: () =>
+      (options.corpSpecializedSources ?? [])
+        .filter((source) => source.kind === "corp_trace_counter_pool")
+        .reduce(
+          (sum, source) =>
+            sum +
+            (options.corpHostedCredits?.get(source.sourceCardInstanceId) ?? 0),
+          0,
+        ),
     spendCorpTraceCounterPool: () => 0,
-    cardCounter: () => 0,
+    corpTraceBitPoolSources: () =>
+      (options.corpSpecializedSources ?? []).filter(
+        (source) => source.kind === "corp_trace_bit_pool",
+      ),
+    corpTraceCounterPoolSources: () =>
+      (options.corpSpecializedSources ?? []).filter(
+        (source) => source.kind === "corp_trace_counter_pool",
+      ),
+    spendCorpTraceBitPoolSource: (_targetState, cardId, amount) => {
+      const available = options.corpHostedCredits?.get(cardId) ?? 0;
+      const spent = Math.min(available, amount);
+      options.corpHostedCredits?.set(cardId, available - spent);
+      return spent;
+    },
+    spendCorpTraceCounterPoolSource: (_targetState, cardId, amount) => {
+      const available = options.corpHostedCredits?.get(cardId) ?? 0;
+      const spent = Math.min(available, amount);
+      options.corpHostedCredits?.set(cardId, available - spent);
+      return spent;
+    },
+    cardCounter: (_targetState, cardId) =>
+      options.corpHostedCredits?.get(cardId) ?? 0,
   };
   const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
     runnerTraceLinkCreditSources: () =>

@@ -6,8 +6,10 @@ import type {
   TraceState,
 } from "@netgrid/shared";
 import {
+  assertCommittedCorpTraceBidPaymentQuoteValid,
   corpTracePaymentPublicPayload,
   payCorpTraceBidQuote,
+  payCommittedCorpTraceBidQuote,
   payRunnerTraceBidQuote,
   quoteCorpTraceBidPayment,
   quoteRunnerTraceBidPayment,
@@ -154,6 +156,72 @@ describe("trace payment pools", () => {
     );
   });
 
+  it("reserves a Blind Corp quote without mutation and pays it only at reveal", () => {
+    const trace = corpBidTrace({
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      corpBidMax: 3,
+    });
+    const state = stateForTrace(trace, { corpCredits: 8 });
+    const deps = corpDeps();
+    const quote = quoteCorpTraceBidPayment(deps, state, trace, 3);
+
+    trace.status = "runner_bid";
+    trace.corpBid = 3;
+    trace.bidsRevealed = false;
+    trace.corpBidPaymentCommitment = quote;
+
+    expect(state.corp.credits).toBe(8);
+    expect(
+      assertCommittedCorpTraceBidPaymentQuoteValid(deps, state, trace, quote),
+    ).toEqual(quote);
+
+    const receipt = payCommittedCorpTraceBidQuote(deps, state, trace, quote);
+
+    expect(receipt.corpCreditsSpent).toBe(3);
+    expect(state.corp.credits).toBe(5);
+  });
+
+  it("fails closed when a reserved Blind payment source is no longer available", () => {
+    const sourceId = "reserved_trace_pool" as CardInstanceId;
+    const trace = corpBidTrace({
+      traceRulesProfile: "classic_blind",
+      traceLimit: 3,
+      corpBidMax: 3,
+    });
+    const state = stateForTrace(trace, { corpCredits: 0 });
+    let available = 3;
+    const deps = corpDeps({
+      corpTraceBitPoolTotal: () => available,
+      corpTraceBitPoolSources: () => [
+        {
+          kind: "corp_trace_bit_pool",
+          sourceCardInstanceId: sourceId,
+          sourceDefinitionId: "trace_pool" as CardDefinitionId,
+          available,
+        },
+      ],
+      corpTraceCounterPoolSources: () => [],
+      spendCorpTraceBitPoolSource: (_state, _sourceId, amount) => amount,
+    });
+    const quote = quoteCorpTraceBidPayment(deps, state, trace, 3, [
+      {
+        kind: "corp_trace_bit_pool",
+        sourceCardInstanceId: sourceId,
+        amount: 3,
+      },
+    ]);
+    trace.status = "runner_bid";
+    trace.corpBid = 3;
+    trace.corpBidPaymentCommitment = quote;
+    available = 2;
+
+    expect(() =>
+      payCommittedCorpTraceBidQuote(deps, state, trace, quote),
+    ).toThrow(/nicht bezahlen|nicht mehr gueltig/);
+    expect(state.corp.credits).toBe(0);
+  });
+
   it("binds and spends the Corp-selected specialized trace source", () => {
     const krumzId = "krumz_1" as CardInstanceId;
     const trackerId = "tracker_1" as CardInstanceId;
@@ -268,6 +336,9 @@ describe("trace payment pools", () => {
     expect(quote.breakdown[1]).toMatchObject({
       publicKind: "runner_trace_link_bonus_credit",
     });
+    expect(state.runner.credits).toBe(2);
+    expect(hostedCredits.get(pkId)).toBe(1);
+    expect(hostedCredits.get(hellsId)).toBe(1);
 
     const receipt = payRunnerTraceBidQuote(deps, state, quote);
     const payload = runnerTracePaymentPublicPayload(receipt);

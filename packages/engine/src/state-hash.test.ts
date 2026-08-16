@@ -78,10 +78,31 @@ describe("mechanical StateHash baseline", () => {
       ...blindHidden,
       trace: { ...blindHidden.trace, bidsRevealed: true },
     };
+    const blindCommitted = {
+      ...blindHidden,
+      trace: {
+        ...blindHidden.trace,
+        corpBid: 2,
+        corpBidPaymentCommitment: {
+          side: "corp" as const,
+          bid: 2,
+          canPay: true,
+          breakdown: [{ kind: "corp_credits" as const, amount: 2 }],
+          normalCreditsToPay: 2,
+          temporaryTraceCreditsToPay: 0,
+          fortTraceBitPoolToPay: 0,
+          corpTraceBitsToPay: 0,
+          corpTraceCountersToPay: 0,
+        },
+      },
+    };
 
     expect(hashStateSnapshot(modern)).toBe(hashStateSnapshot(legacy));
     expect(hashStateSnapshot(blindHidden)).not.toBe(hashStateSnapshot(legacy));
     expect(hashStateSnapshot(blindRevealed)).not.toBe(
+      hashStateSnapshot(blindHidden),
+    );
+    expect(hashStateSnapshot(blindCommitted)).not.toBe(
       hashStateSnapshot(blindHidden),
     );
   });

@@ -1973,14 +1973,40 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.trace?.status).toBe("corp_bid");
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_2");
     expect(state.trace).toMatchObject({
       status: "runner_bid",
-      traceValue: 0,
+      traceValue: 2,
       runnerLink: 0,
+      corpBidPaymentCommitment: {
+        bid: 2,
+        normalCreditsToPay: 2,
+      },
     });
+    expect(state.corp.credits).toBe(10);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(getPlayerView(state, "corp").trace).toMatchObject({
+      corpBid: 2,
+      ownCommittedPayment: {
+        amount: 2,
+        sources: [{ kind: "corp_credits", amount: 2 }],
+      },
+    });
+    const runnerBeforeReveal = getPlayerView(state, "runner");
+    expect(runnerBeforeReveal.opponent.credits).toBe(10);
+    expect(runnerBeforeReveal.trace).not.toHaveProperty("corpBid");
+    expect(runnerBeforeReveal.trace).not.toHaveProperty("ownCommittedPayment");
+    expect(
+      JSON.stringify(runnerBeforeReveal.publicEvents.at(-1)?.publicPayload),
+    ).not.toMatch(/corpCreditBid|corpBid|traceValue|PaymentCommitment/);
     state = applyChoice(state, "runner", "bid_0");
+    expect(state.corp.credits).toBe(8);
     expect(state.trace?.status).toBe("post_bid_link");
+    expect(getPlayerView(state, "runner").trace).toMatchObject({
+      corpBid: 2,
+      runnerBid: 0,
+      bidsRevealed: true,
+    });
     expect(state.pendingChoice?.source).toContain("trace_post_bid_link:");
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
       expect.arrayContaining([
