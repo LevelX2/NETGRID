@@ -127,6 +127,8 @@ export function quoteRandomizedTraceBidSelection(
     ) ||
     !Number.isSafeInteger(assessment.currentLink) ||
     assessment.currentLink < 0 ||
+    !Number.isSafeInteger(assessment.visibleOpponentBidCapacity) ||
+    assessment.visibleOpponentBidCapacity < 0 ||
     !Number.isFinite(assessment.outcomeValue) ||
     assessment.outcomeValue < 0 ||
     !Number.isSafeInteger(assessment.reserveTarget) ||

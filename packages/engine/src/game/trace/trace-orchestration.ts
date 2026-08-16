@@ -22,11 +22,14 @@ import { selectedChoiceIds } from "../choices/choice-validation";
 import { credits } from "../state/economy-mutation";
 import {
   assertPostBidLinkPaymentValid,
+  assertCommittedCorpTraceBidPaymentQuoteValid,
   assertCorpTraceBidPaymentValid,
+  assertRunnerTraceBidPaymentQuoteValid,
   assertRunnerTraceBidPaymentValid,
   corpTracePaymentPublicPayload,
   corpTraceSpecializedPaymentSources,
   payCorpTraceBidQuote,
+  payCommittedCorpTraceBidQuote,
   payPostBidLinkPaymentQuote,
   payRunnerTraceBidQuote,
   postBidLinkPaymentPublicPayload,
@@ -356,22 +359,27 @@ function resolveTraceCorpBid(
         trace,
         bid,
       );
-  const tracePaymentReceipt = payCorpTraceBidQuote(
-    host.payment.corpTracePaymentDeps,
-    state,
-    trace,
-    tracePaymentQuote,
-  );
-  const tracePaymentPayload = corpTracePaymentPublicPayload(
-    trace,
-    tracePaymentQuote,
-    tracePaymentReceipt,
-  );
   const rules = traceRulesDefinitionForTrace(trace);
+  const blindCommit = rules.resolutionMode === "hidden_commit_reveal";
+  const tracePaymentReceipt = blindCommit
+    ? undefined
+    : payCorpTraceBidQuote(
+        host.payment.corpTracePaymentDeps,
+        state,
+        trace,
+        tracePaymentQuote,
+      );
+  const tracePaymentPayload = tracePaymentReceipt
+    ? corpTracePaymentPublicPayload(
+        trace,
+        tracePaymentQuote,
+        tracePaymentReceipt,
+      )
+    : {};
   const traceValue = traceCorpBaseStrength(trace) + bid;
   const effectiveTraceLimit =
     Math.max(0, trace.traceLimit - (trace.rabbitTraceLimitReduction ?? 0)) +
-    tracePaymentReceipt.corpTraceCountersSpent;
+    tracePaymentQuote.corpTraceCountersToPay;
   const runnerLink = calculateRunnerLink(host);
   const cryingCounterCount = host.counters.cardCounter(
     state.runner.identity,
@@ -385,6 +393,7 @@ function resolveTraceCorpBid(
     ...traceWithoutCorpPaymentSelection,
     status: "base_link" as const,
     corpBid: bid,
+    ...(blindCommit ? { corpBidPaymentCommitment: tracePaymentQuote } : {}),
     traceValue,
     bidsRevealed: rules.corpBidVisibility === "immediate",
     effectiveTraceLimit,
@@ -793,25 +802,66 @@ function finishTraceRunnerBid(
   tracePaymentQuote: RunnerTracePaymentQuote,
 ): void {
   const { state } = host;
+  const rules = traceRulesDefinitionForTrace(trace);
+  const blindReveal = rules.resolutionMode === "hidden_commit_reveal";
+  if (tracePaymentQuote.purpose !== "runner_trace_bid")
+    throw new Error(
+      "Die Runner-Trace-Zahlungsquote ist nicht fuer Runner-Bids.",
+    );
+  const runnerBidPaymentCommitment = {
+    ...tracePaymentQuote,
+    purpose: "runner_trace_bid" as const,
+  };
+  const committedTrace = blindReveal
+    ? {
+        ...trace,
+        runnerBid: bid,
+        runnerBidPaymentCommitment,
+      }
+    : trace;
+  if (blindReveal) {
+    state.trace = committedTrace;
+    const corpCommitment = committedTrace.corpBidPaymentCommitment;
+    if (!corpCommitment)
+      throw new Error("Der verdeckte Korp-Trace-Payment-Commit fehlt.");
+    assertCommittedCorpTraceBidPaymentQuoteValid(
+      host.payment.corpTracePaymentDeps,
+      state,
+      committedTrace,
+      corpCommitment,
+    );
+    assertRunnerTraceBidPaymentQuoteValid(
+      host.payment.runnerTracePaymentDeps,
+      state,
+      tracePaymentQuote,
+    );
+  }
   const {
     runnerBidPaymentSelection: _runnerBidPaymentSelection,
+    runnerBidPaymentCommitment: _runnerBidPaymentCommitment,
+    corpBidPaymentCommitment: _corpBidPaymentCommitment,
     ...traceWithoutPaymentSelection
-  } = trace;
+  } = committedTrace;
   closeRunnerCostPenaltySupportWindowForPayment(
     state,
     legalAction,
     tracePaymentQuote.normalCreditsToPay,
   );
+  const corpPayment = blindReveal
+    ? revealCommittedCorpTracePayment(host, committedTrace)
+    : undefined;
   const tracePaymentReceipt = payRunnerTraceBidQuote(
     host.payment.runnerTracePaymentDeps,
     state,
     tracePaymentQuote,
   );
-  const tracePaymentPayload =
-    runnerTracePaymentPublicPayload(tracePaymentReceipt);
+  const tracePaymentPayload = {
+    ...(corpPayment?.publicPayload ?? {}),
+    ...runnerTracePaymentPublicPayload(tracePaymentReceipt),
+  };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    traceRulesProfile: traceRulesDefinitionForTrace(trace).profile,
+    traceRulesProfile: rules.profile,
     traceBidsRevealed: true,
   };
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
@@ -910,6 +960,25 @@ function finishTraceRunnerBid(
     extraPayload: tracePaymentPayload,
     deletePendingChoice: true,
   });
+}
+
+function revealCommittedCorpTracePayment(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+): {
+  publicPayload: NonNullable<LegalAction["payload"]>;
+} {
+  const quote = trace.corpBidPaymentCommitment;
+  if (!quote) throw new Error("Der verdeckte Korp-Trace-Payment-Commit fehlt.");
+  const receipt = payCommittedCorpTraceBidQuote(
+    host.payment.corpTracePaymentDeps,
+    host.state,
+    trace,
+    quote,
+  );
+  return {
+    publicPayload: corpTracePaymentPublicPayload(trace, quote, receipt),
+  };
 }
 
 function runnerTraceBidPrompt(input: {

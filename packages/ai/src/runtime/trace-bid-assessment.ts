@@ -133,6 +133,7 @@ export function assessTraceBidCandidates(
       printedTrace: trace.printedTrace,
       effectiveTraceLimit: trace.effectiveTraceLimit,
       currentLink,
+      visibleOpponentBidCapacity: trace.visibleOpponentBidCapacity,
       rationalTarget,
       rationalRange,
       stakes,
@@ -178,7 +179,7 @@ function corpSuccessProbability(input: {
 }): number {
   const visibleRunnerBidCapacity = Math.max(
     0,
-    Math.floor(input.input.playerView.opponent.credits),
+    Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
   );
   const tieAdjustment = input.profile === "classic_blind_corp_ties" ? 0 : -1;
   const maximumDefeatedRunnerBid =
@@ -197,7 +198,10 @@ function runnerPreventionProbability(input: {
 }): number {
   const visibleCorpCapacity = Math.min(
     Math.max(0, Math.floor(input.effectiveTraceLimit)),
-    Math.max(0, Math.floor(input.input.playerView.opponent.credits)),
+    Math.max(
+      0,
+      Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
+    ),
   );
   const runnerStrength = input.currentLink + input.bid;
   const maximumPreventedCorpBid =

@@ -12,20 +12,16 @@ import type {
   GameState,
   LegalAction,
   ServerId,
+  TraceCorpBidPaymentCommitment,
+  TraceCorpPaymentSourceKind,
+  TraceRunnerPaymentSourceKind,
   TraceState,
 } from "@netgrid/shared";
 import { traceRulesDefinitionForTrace } from "../trace/trace-rules-profile";
 
-export type CorpTracePaymentSourceKind =
-  | "temporary_trace_credit"
-  | "fort_trace_bit_pool"
-  | "corp_credits"
-  | "corp_trace_bit_pool"
-  | "corp_trace_counter_pool";
+export type CorpTracePaymentSourceKind = TraceCorpPaymentSourceKind;
 
-export type RunnerTracePaymentSourceKind =
-  | "runner_credits"
-  | "runner_trace_link_credit";
+export type RunnerTracePaymentSourceKind = TraceRunnerPaymentSourceKind;
 
 export type RunnerTracePaymentPublicKind = "runner_trace_link_bonus_credit";
 
@@ -61,17 +57,7 @@ export type RunnerTracePaymentBreakdown = {
   publicKind?: RunnerTracePaymentPublicKind;
 };
 
-export type CorpTracePaymentQuote = {
-  side: "corp";
-  bid: number;
-  canPay: boolean;
-  breakdown: CorpTracePaymentBreakdown[];
-  normalCreditsToPay: number;
-  temporaryTraceCreditsToPay: number;
-  fortTraceBitPoolToPay: number;
-  corpTraceBitsToPay: number;
-  corpTraceCountersToPay: number;
-};
+export type CorpTracePaymentQuote = TraceCorpBidPaymentCommitment;
 
 export type CorpTracePaymentReceipt = {
   temporaryTraceCreditsSpent: number;
@@ -988,6 +974,44 @@ export function assertCorpTraceBidPaymentQuoteValid(
 ): CorpTracePaymentQuote {
   if (state.trace !== trace || trace.status !== "corp_bid")
     throw new Error("Es ist kein Korp-Trace-Bid offen.");
+  return assertCorpTraceBidPaymentQuoteMatchesCurrent(
+    deps,
+    state,
+    trace,
+    quote,
+  );
+}
+
+export function assertCommittedCorpTraceBidPaymentQuoteValid(
+  deps: CorpTracePaymentDependencies,
+  state: GameState,
+  trace: TraceState,
+  quote: CorpTracePaymentQuote,
+): CorpTracePaymentQuote {
+  if (
+    state.trace !== trace ||
+    traceRulesDefinitionForTrace(trace).resolutionMode !==
+      "hidden_commit_reveal" ||
+    trace.status !== "runner_bid" ||
+    trace.corpBidPaymentCommitment !== quote ||
+    trace.corpBid !== quote.bid ||
+    trace.bidsRevealed === true
+  )
+    throw new Error("Der verdeckte Korp-Trace-Payment-Commit ist ungueltig.");
+  return assertCorpTraceBidPaymentQuoteMatchesCurrent(
+    deps,
+    state,
+    trace,
+    quote,
+  );
+}
+
+function assertCorpTraceBidPaymentQuoteMatchesCurrent(
+  deps: CorpTracePaymentDependencies,
+  state: GameState,
+  trace: TraceState,
+  quote: CorpTracePaymentQuote,
+): CorpTracePaymentQuote {
   if (!isValidBidAmount(quote.bid))
     throw new Error("Der Trace-Bid ist ungueltig.");
   if (typeof trace.corpBidMax === "number" && quote.bid > trace.corpBidMax)
@@ -1058,6 +1082,30 @@ export function payCorpTraceBidQuote(
     trace,
     quote,
   );
+  return payValidatedCorpTraceBidQuote(deps, state, trace, validQuote);
+}
+
+export function payCommittedCorpTraceBidQuote(
+  deps: CorpTracePaymentDependencies,
+  state: GameState,
+  trace: TraceState,
+  quote: CorpTracePaymentQuote,
+): CorpTracePaymentReceipt {
+  const validQuote = assertCommittedCorpTraceBidPaymentQuoteValid(
+    deps,
+    state,
+    trace,
+    quote,
+  );
+  return payValidatedCorpTraceBidQuote(deps, state, trace, validQuote);
+}
+
+function payValidatedCorpTraceBidQuote(
+  deps: CorpTracePaymentDependencies,
+  state: GameState,
+  trace: TraceState,
+  validQuote: CorpTracePaymentQuote,
+): CorpTracePaymentReceipt {
   let remainingTemporaryTracePayment = validQuote.temporaryTraceCreditsToPay;
   let implementationTemporaryTraceCreditsSpent = 0;
   if (trace.corpTemporaryTraceCredits && remainingTemporaryTracePayment > 0) {
