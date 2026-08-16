@@ -75,7 +75,7 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "pressure_remote",
+        role: "information_tool",
       },
     ],
     capabilities: [],

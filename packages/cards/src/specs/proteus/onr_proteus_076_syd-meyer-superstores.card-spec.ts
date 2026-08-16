@@ -74,15 +74,16 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "recover_economy",
+        role: "find_economy",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.asset_economy",
+        kind: "strategic_role",
+        role: "support_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.economy_rez_reserve",
+        kind: "line_support",
+        lineKey: "corp.asset_economy",
+        support: "supports",
       },
       {
         kind: "tactic_interpretation",
@@ -98,6 +99,15 @@ export const cardSpec = {
         kind: "value_interpretation",
         axis: "remote_root_value",
         rating: "medium",
+      },
+      {
+        kind: "strategic_exchange",
+        exchange: "board_or_hand_sacrifice",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "installed_card_trash_cost",
+        severity: "high",
       },
       {
         kind: "target_preference",

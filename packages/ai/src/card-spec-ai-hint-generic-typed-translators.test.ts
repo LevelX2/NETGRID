@@ -1312,4 +1312,69 @@ describe("generic typed CardSpec AI translators", () => {
         .targetProfiles,
     ).toBeUndefined();
   });
+
+  it("derives Batch 12 trace outcomes and rez discounts without false tax semantics", () => {
+    const chihuahua = actualHint("onr_proteus_014_chihuahua");
+    expect(chihuahua.functionSignals).toEqual(
+      expect.arrayContaining([
+        "corp_ice.trace_source",
+        "trace.source",
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff",
+      ]),
+    );
+    expect(chihuahua.functionSignals).not.toContain("tax.runner_persistent");
+
+    const skalderviken = actualHint(
+      "onr_v1_341_skalderviken-sa-beta-test-site",
+    );
+    expect(skalderviken.functionSignals).toContain("economy.rez_discount");
+    expect(skalderviken.tacticSignals).toContain("ice.corp_rez_discount");
+    expect(skalderviken.tacticSignals).not.toContain("tax.ice");
+
+    const dataRaven = actualHint("onr_v1_236_data-raven");
+    expect(dataRaven.functionSignals).toEqual(
+      expect.arrayContaining([
+        "corp_ice.tag_source",
+        "tag.source",
+        "tax.runner_persistent",
+      ]),
+    );
+  });
+
+  it("keeps Batch 12 strategy ownership proportional to each card", () => {
+    const fullHint = (cardId: string) => {
+      const entry = cardSpecPlanningCards().find(
+        (candidate) => candidate.definition.id === cardId,
+      );
+      if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
+      return deriveCardSpecAiHint(entry);
+    };
+
+    expect(fullHint("onr_proteus_008_project-zurich").strategyAnchors).toEqual([
+      "corp.overadvance_value",
+    ]);
+    expect(fullHint("onr_classic_039_library-search").strategyAnchors).toEqual([
+      "runner.interface_closeout",
+    ]);
+    expect(fullHint("onr_v1_081_custodial-position").strategyAnchors).toEqual([
+      "runner.interface_closeout",
+    ]);
+    expect(
+      fullHint("onr_v1_367_rio-de-janeiro-city-grid").strategyAnchors,
+    ).toBeUndefined();
+    expect(fullHint("onr_v1_105_priority-wreck").planRoles).toContain(
+      "hq_credit_denial",
+    );
+    expect(fullHint("onr_v1_142_record-reconstructor").planRoles).not.toContain(
+      "build_rig",
+    );
+    expect(fullHint("onr_v1_032_i-spy").planRoles).toContain(
+      "information_tool",
+    );
+    expect(
+      fullHint("onr_proteus_076_syd-meyer-superstores").strategyAnchors,
+    ).toBeUndefined();
+  });
 });

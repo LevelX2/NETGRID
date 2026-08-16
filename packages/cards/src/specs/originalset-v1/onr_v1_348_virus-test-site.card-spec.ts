@@ -118,12 +118,12 @@ export const cardSpec = {
       {
         kind: "tactic_interpretation",
         signal: "access.punish",
-        use: "damage.payoff.runner",
+        use: "access.punish",
       },
       {
         kind: "tactic_interpretation",
         signal: "remote.ambush",
-        use: "damage.payoff.runner",
+        use: "remote.ambush",
       },
       {
         kind: "tactic_interpretation",

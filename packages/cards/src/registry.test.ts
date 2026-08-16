@@ -423,7 +423,13 @@ describe("CardRegistry", () => {
     expect(totalRetrofit.engine.abilities?.[0]).not.toHaveProperty("condition");
     expect(synchronizedAttack.planningAnnotations!.card).toEqual([
       { kind: "plan_role", role: "pressure_hq" },
-      { kind: "strategic_role", role: "payoff_anchor" },
+      { kind: "plan_role", role: "hq_credit_denial" },
+      { kind: "strategic_role", role: "support_tool" },
+      {
+        kind: "line_support",
+        lineKey: "runner.hq_pressure",
+        support: "supports",
+      },
     ]);
     expect(temple.planningAnnotations!.card).not.toContainEqual(
       expect.objectContaining({ kind: "plan_role", role: "draw_for_answers" }),

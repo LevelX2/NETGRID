@@ -1190,6 +1190,7 @@
             "roleDetail": "persistent_damage_counter_ice",
             "evidence": [
               "corp_ice.damage_source",
+              "corp_ice.end_run",
               "corp_ice.net_damage",
               "damage.corp_persistent_damage_counter",
               "damage.payoff"
@@ -1204,7 +1205,8 @@
             "evidence": [
               "corp_ice.damage_source",
               "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.net_damage",
+              "damage.corp_persistent_damage_counter"
             ],
             "confidence": "medium",
             "rationale": "v2: ETR plus Damage-Druck und noisy-rez discount unterstützen ICE-Tax/Glacier."
@@ -1411,6 +1413,8 @@
             "evidence": [
               "corp_ice.damage_source",
               "corp_ice.net_damage",
+              "corp_ice.next_ice_break_lock",
+              "corp_ice.run_lock",
               "damage.payoff"
             ],
             "confidence": "high",
@@ -4445,7 +4449,7 @@
     {
       "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4dac5538991c93dc",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9f01eb477b040243",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:395b86f55abb1889",
       "hint": {
         "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
         "side": "runner",
@@ -4460,9 +4464,8 @@
         ],
         "planRoles": ["pressure_rnd", "agenda_pressure"],
         "valueHints": {},
-        "strategicRole": ["payoff_anchor"],
-        "strategyAnchors": ["runner.rnd_pressure", "runner.run_event_tempo"],
-        "lineSupport": ["runner.rnd_pressure"],
+        "strategicRole": ["enabler"],
+        "lineSupport": ["runner.rnd_pressure", "runner.run_event_tempo"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_run_rd_store_revealed_agenda",
@@ -4563,7 +4566,7 @@
     {
       "cardId": "onr_classic_039_library-search",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:299e017799b1989b",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8848daac28cd3428",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c08583cab332e1be",
       "hint": {
         "cardId": "onr_classic_039_library-search",
         "side": "runner",
@@ -4579,16 +4582,12 @@
         "planRoles": ["pressure_hq", "pressure_rnd"],
         "valueHints": {},
         "strategicRole": ["payoff_anchor"],
-        "strategyAnchors": [
+        "strategyAnchors": ["runner.interface_closeout"],
+        "lineSupport": [
           "runner.hq_pressure",
           "runner.interface_closeout",
           "runner.rnd_pressure",
           "runner.run_event_tempo"
-        ],
-        "lineSupport": [
-          "runner.hq_pressure",
-          "runner.interface_closeout",
-          "runner.rnd_pressure"
         ],
         "actionStrategySupportPairs": [
           {
@@ -6826,7 +6825,7 @@
     {
       "cardId": "onr_proteus_008_project-zurich",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:057f8ef21f68831e",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ac796130f2b36214",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e6f3baa320872c97",
       "hint": {
         "cardId": "onr_proteus_008_project-zurich",
         "side": "corp",
@@ -6836,6 +6835,7 @@
         "planRoles": ["corp_score_agenda", "score_next_turn"],
         "valueHints": {},
         "strategicRole": ["payoff_anchor"],
+        "strategyAnchors": ["corp.overadvance_value"],
         "lineSupport": ["corp.overadvance_value"],
         "strategySupportPairs": [
           {
@@ -6875,6 +6875,7 @@
           { "kind": "requires_score_window" },
           { "kind": "requires_scored_agenda" }
         ],
+        "riskTags": ["high_advancement_requirement"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -7318,14 +7319,14 @@
     {
       "cardId": "onr_proteus_014_chihuahua",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a6e9248efdc99172",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:78f0df8984262b95",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:5518052e25b4dcba",
       "hint": {
         "cardId": "onr_proteus_014_chihuahua",
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
         "roles": ["ice", "sentry_ice", "damage", "ap_ice"],
-        "planRoles": ["protect_hq", "protect_rnd"],
+        "planRoles": ["protect_hq", "protect_rnd", "net_damage_pressure"],
         "valueHints": {},
         "effects": [
           {
@@ -7361,9 +7362,10 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
           "corp_ice.trace_source",
           "damage.payoff",
-          "tax.runner_persistent",
           "trace.source",
           "corp_ice.rez_economy",
           "economy.generic"
@@ -7372,7 +7374,6 @@
           "corp_ice.trace_source",
           "damage.payoff",
           "economy.card",
-          "tax.runner_persistent",
           "trace.source",
           "corp_ice.rez_economy"
         ],
@@ -7677,7 +7678,7 @@
     {
       "cardId": "onr_proteus_018_datacomb",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5850aeac5f64d550",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d45dcad3ea154947",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:5b59a5db7d7bfba7",
       "hint": {
         "cardId": "onr_proteus_018_datacomb",
         "side": "corp",
@@ -7686,7 +7687,8 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
+        "strategicRole": ["defensive_tool"],
+        "lineSupport": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -7696,9 +7698,8 @@
           }
         ],
         "functionSignals": ["corp_ice.end_run", "ice.etr"],
-        "tacticSignals": ["corp.remote_protection", "corp_ice.end_run"],
+        "tacticSignals": ["corp_ice.end_run"],
         "actionTacticSignals": [
-          "corp.remote_protection",
           "effect:etr",
           "effect_scope:run_path",
           "effect_timing:encounter_resolution"
@@ -7709,7 +7710,7 @@
           { "kind": "requires_unbroken_subroutine" }
         ],
         "costProfile": { "credits": 4 },
-        "riskTags": ["hidden_ice"],
+        "riskTags": ["self_bounce_or_maintenance_cost", "hidden_ice"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -8261,7 +8262,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
@@ -8350,8 +8351,8 @@
           "corp_ice.trace_source",
           "ice.etr",
           "ice.strength_modifier",
-          "trace.source",
-          "run.lock"
+          "run.lock",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp_ice.conditional_end_run",
@@ -12188,16 +12189,18 @@
     {
       "cardId": "onr_proteus_076_syd-meyer-superstores",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:4299426fbdfbbef3",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:b28101ace9286bb8",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:39196feeeaa33e72",
       "hint": {
         "cardId": "onr_proteus_076_syd-meyer-superstores",
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["recover_economy"],
+        "planRoles": ["find_economy"],
         "valueHints": { "economy": 2, "remoteRootValue": 2 },
-        "strategyAnchors": ["corp.asset_economy", "corp.economy_rez_reserve"],
+        "strategicRole": ["support_tool"],
+        "lineSupport": ["corp.asset_economy"],
+        "strategicExchangeKinds": ["board_or_hand_sacrifice"],
         "actionCapabilitySemantics": [
           { "capabilityKey": "corp_main_trash_rezzed_ice_for_credits" }
         ],
@@ -12223,6 +12226,7 @@
         "tacticSignals": ["economy.card"],
         "actionTacticSignals": ["economy.card"],
         "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["installed_card_trash_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -20313,14 +20317,14 @@
     {
       "cardId": "onr_v1_032_i-spy",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d5601ff34a347037",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:523bc64e23ac86e2",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a60b8121439c3745",
       "hint": {
         "cardId": "onr_v1_032_i-spy",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program"],
-        "planRoles": ["information", "pressure_remote"],
+        "planRoles": ["information", "information_tool"],
         "valueHints": {},
         "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
         "quality": {
@@ -23386,7 +23390,7 @@
     {
       "cardId": "onr_v1_081_custodial-position",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6bf38227707301eb",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:6692815c0d9b2228",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:458aad34ab7ec9e8",
       "hint": {
         "cardId": "onr_v1_081_custodial-position",
         "side": "runner",
@@ -23396,12 +23400,12 @@
         "planRoles": ["pressure_rnd"],
         "valueHints": {},
         "strategicRole": ["payoff_anchor"],
-        "strategyAnchors": [
+        "strategyAnchors": ["runner.interface_closeout"],
+        "lineSupport": [
           "runner.interface_closeout",
           "runner.rnd_pressure",
           "runner.run_event_tempo"
         ],
-        "lineSupport": ["runner.interface_closeout", "runner.rnd_pressure"],
         "actionStrategySupportPairs": [
           {
             "strategyId": "runner.interface_closeout",
@@ -25021,7 +25025,7 @@
     {
       "cardId": "onr_v1_105_priority-wreck",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:5610eea465a85800",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:402c3797d71690ab",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:6bcc8edfe0a0835b",
       "hint": {
         "cardId": "onr_v1_105_priority-wreck",
         "side": "runner",
@@ -25033,9 +25037,9 @@
           "hq_pressure",
           "corp_credit_denial"
         ],
-        "planRoles": ["pressure_hq", "run_pressure"],
+        "planRoles": ["pressure_hq", "run_pressure", "hq_credit_denial"],
         "valueHints": {},
-        "strategicRole": ["payoff_anchor"],
+        "strategicRole": ["support_tool"],
         "lineSupport": ["runner.hq_pressure"],
         "actionCapabilitySemantics": [
           {
@@ -25690,16 +25694,17 @@
     {
       "cardId": "onr_v1_113_synchronized-attack-on-hq",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:38487b555dcd3191",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:31b90a6b04acf1c7",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:2c5ae2eafb2d4eee",
       "hint": {
         "cardId": "onr_v1_113_synchronized-attack-on-hq",
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["pressure_hq"],
+        "planRoles": ["pressure_hq", "hq_credit_denial"],
         "valueHints": {},
-        "strategicRole": ["payoff_anchor"],
+        "strategicRole": ["support_tool"],
+        "lineSupport": ["runner.hq_pressure"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "abilities_on_play_corp_discard_hq_with_retain_payment",
@@ -27662,7 +27667,7 @@
     {
       "cardId": "onr_v1_142_record-reconstructor",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:d7f45ea5e71df591",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:7062e990ba51b2d4",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ee6e9505b0de3779",
       "hint": {
         "cardId": "onr_v1_142_record-reconstructor",
         "side": "runner",
@@ -27674,7 +27679,7 @@
           "archives_pressure",
           "archives_recovery"
         ],
-        "planRoles": ["build_rig", "run_pressure"],
+        "planRoles": ["pressure_rnd", "run_pressure"],
         "valueHints": {},
         "actionCapabilitySemantics": [
           {
@@ -27740,8 +27745,13 @@
           "effect_timing:successful_run"
         ],
         "conditions": [{ "kind": "requires_successful_run" }],
-        "costProfile": { "clicks": 1, "credits": 0 },
+        "costProfile": {
+          "opportunityCost": "medium",
+          "clicks": 1,
+          "credits": 0
+        },
         "riskTags": [
+          "opportunity_cost",
           "run",
           "install_runner",
           "run_success_dependency",
@@ -31220,7 +31230,10 @@
             "strategyId": "corp.fast_advance",
             "role": "enabler",
             "roleDetail": "black_ops_difficulty_enabler",
-            "evidence": ["tax.ice"],
+            "evidence": [
+              "score.agenda_difficulty_discount",
+              "score.black_ops_difficulty_discount"
+            ],
             "confidence": "medium",
             "rationale": "Agenda Semantic Review v1 maps Artificial Security Directors to corp.fast_advance as enabler/black_ops_difficulty_enabler."
           }
@@ -32314,7 +32327,10 @@
             "strategyId": "corp.fast_advance",
             "role": "enabler",
             "roleDetail": "gray_ops_difficulty_enabler",
-            "evidence": ["tax.ice"],
+            "evidence": [
+              "score.agenda_difficulty_discount",
+              "score.gray_ops_difficulty_discount"
+            ],
             "confidence": "medium",
             "rationale": "Agenda Semantic Review v1 maps Executive Extraction to corp.fast_advance as enabler/gray_ops_difficulty_enabler."
           }
@@ -32387,7 +32403,10 @@
             "strategyId": "corp.fast_advance",
             "role": "enabler",
             "roleDetail": "research_difficulty_enabler",
-            "evidence": ["tax.ice"],
+            "evidence": [
+              "score.agenda_difficulty_discount",
+              "score.research_difficulty_discount"
+            ],
             "confidence": "medium",
             "rationale": "Agenda Semantic Review v1 maps Genetics-Visionary Acquisition to corp.fast_advance as enabler/research_difficulty_enabler."
           }
@@ -34187,7 +34206,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["defend_server"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
@@ -34198,9 +34217,12 @@
             "role": "tax_tool",
             "roleDetail": "run_lock_ice",
             "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.trace_source",
+              "corp_ice.conditional_end_run",
+              "ice.etr",
+              "corp_ice.run_lock",
+              "run.lock",
+              "trace.source"
             ],
             "confidence": "high",
             "rationale": "ICE Semantic Review v1: Asp bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
@@ -34254,17 +34276,17 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
           "ice.etr",
-          "run.lock"
+          "run.lock",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp.remote_protection",
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "ice.etr",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -34461,6 +34483,8 @@
             "evidence": [
               "corp_ice.damage_source",
               "corp_ice.net_damage",
+              "corp_ice.next_ice_break_lock",
+              "corp_ice.run_lock",
               "damage.payoff"
             ],
             "confidence": "high",
@@ -34671,6 +34695,7 @@
             "roleDetail": "persistent_damage_counter_ice",
             "evidence": [
               "corp_ice.damage_source",
+              "corp_ice.end_run",
               "corp_ice.net_damage",
               "damage.corp_persistent_damage_counter",
               "damage.payoff"
@@ -34836,8 +34861,7 @@
             "roleDetail": "meat_damage_ice",
             "evidence": [
               "corp_ice.damage_source",
-              "corp_ice.net_damage",
-              "damage.corp_persistent_damage_counter",
+              "corp_ice.meat_damage",
               "damage.payoff"
             ],
             "confidence": "high",
@@ -34848,9 +34872,10 @@
             "role": "tax_tool",
             "roleDetail": "trace_success_hardware_trash_etr_ice",
             "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.trace_source",
+              "corp_ice.conditional_end_run",
+              "ice.etr",
+              "trace.source"
             ],
             "confidence": "medium",
             "rationale": "v2: ETR/Hardware-Trash hängen am Trace-Erfolg; conditional_end_run ist präziser als end_run."
@@ -34896,18 +34921,20 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.damage_source",
+          "corp_ice.meat_damage",
           "corp_ice.trace_source",
           "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
           "ice.etr",
+          "trace.source",
           "access.corp_hardware_trash"
         ],
         "tacticSignals": [
           "corp.remote_protection",
           "corp_ice.trace_source",
           "damage.payoff",
-          "tax.runner_persistent",
+          "ice.etr",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -35377,6 +35404,8 @@
             "evidence": [
               "corp_ice.damage_source",
               "corp_ice.net_damage",
+              "corp_ice.next_ice_break_lock",
+              "corp_ice.run_lock",
               "damage.payoff"
             ],
             "confidence": "medium",
@@ -35543,7 +35572,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "build_scoring_remote"],
         "valueHints": {},
         "strategicRole": ["engine_anchor"],
@@ -35628,19 +35657,20 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.tag_source",
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
-          "damage.payoff",
           "defense.corp_run_end_counter",
+          "tag.source",
           "tax.runner_persistent",
           "trace.source",
-          "tag.source",
           "trace.counter"
         ],
         "tacticSignals": [
           "corp_ice.trace_source",
           "damage.corp_persistent_damage_counter",
           "defense.corp_run_end_counter",
+          "tag.source",
           "tax.runner_persistent",
           "trace.source"
         ],
@@ -35860,7 +35890,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["defend_server"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
@@ -35871,9 +35901,12 @@
             "role": "tax_tool",
             "roleDetail": "run_lock_ice",
             "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.trace_source",
+              "corp_ice.conditional_end_run",
+              "ice.etr",
+              "corp_ice.run_lock",
+              "run.lock",
+              "trace.source"
             ],
             "confidence": "high",
             "rationale": "v2: Trace-success ETR plus Run-Lock; no unconditional end_run signal."
@@ -35927,17 +35960,17 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
           "ice.etr",
-          "run.lock"
+          "run.lock",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp.remote_protection",
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "ice.etr",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -35990,7 +36023,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["defend_server"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
@@ -36001,9 +36034,12 @@
             "role": "tax_tool",
             "roleDetail": "run_lock_ice",
             "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.trace_source",
+              "corp_ice.conditional_end_run",
+              "ice.etr",
+              "corp_ice.run_lock",
+              "run.lock",
+              "trace.source"
             ],
             "confidence": "high",
             "rationale": "ICE Semantic Review v1: Fang 2.0 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
@@ -36057,17 +36093,17 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
           "ice.etr",
-          "run.lock"
+          "run.lock",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp.remote_protection",
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "ice.etr",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -36199,7 +36235,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
         "actionStrategySupportPairs": [
@@ -36244,15 +36280,14 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.tag_source",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
-          "tag.source"
+          "tag.source",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "tag.source",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -36404,7 +36439,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["defend_server", "program_pressure"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
@@ -36415,9 +36450,12 @@
             "role": "tax_tool",
             "roleDetail": "run_lock_ice",
             "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.trace_source",
+              "corp_ice.conditional_end_run",
+              "ice.etr",
+              "corp_ice.run_lock",
+              "run.lock",
+              "trace.source"
             ],
             "confidence": "high",
             "rationale": "ICE Semantic Review v1: Fragmentation Storm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
@@ -36478,18 +36516,18 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
           "ice.etr",
-          "access.corp_program_trash",
-          "run.lock"
+          "run.lock",
+          "trace.source",
+          "access.corp_program_trash"
         ],
         "tacticSignals": [
           "corp.remote_protection",
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "ice.etr",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -36639,8 +36677,7 @@
             "roleDetail": "meat_damage_ice",
             "evidence": [
               "corp_ice.damage_source",
-              "corp_ice.net_damage",
-              "damage.corp_persistent_damage_counter",
+              "corp_ice.meat_damage",
               "damage.payoff"
             ],
             "confidence": "high",
@@ -36651,9 +36688,10 @@
             "role": "tax_tool",
             "roleDetail": "trace_success_hardware_trash_etr_ice",
             "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.trace_source",
+              "corp_ice.conditional_end_run",
+              "ice.etr",
+              "trace.source"
             ],
             "confidence": "medium",
             "rationale": "v2: ETR/Hardware-Trash hängen am Trace-Erfolg; conditional_end_run ist präziser als end_run."
@@ -36699,18 +36737,20 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.damage_source",
+          "corp_ice.meat_damage",
           "corp_ice.trace_source",
           "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
           "ice.etr",
+          "trace.source",
           "access.corp_hardware_trash"
         ],
         "tacticSignals": [
           "corp.remote_protection",
           "corp_ice.trace_source",
           "damage.payoff",
-          "tax.runner_persistent",
+          "ice.etr",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -36769,7 +36809,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
         "actionStrategySupportPairs": [
@@ -36814,15 +36854,14 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.tag_source",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
-          "tag.source"
+          "tag.source",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "tag.source",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -36947,7 +36986,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage", "ap_ice"],
+        "roles": ["ice", "sentry_ice", "ap_ice"],
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
@@ -36958,11 +36997,7 @@
             "strategyId": "corp.ice_tax_glacier",
             "role": "tax_tool",
             "roleDetail": "jackout_tax_or_lock_ice",
-            "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
-            ],
+            "evidence": ["corp_ice.jack_out_lock", "run.lock"],
             "confidence": "medium",
             "rationale": "ICE Semantic Review v1: Jack Attack bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
           }
@@ -37002,15 +37037,14 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.tag_source",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
-          "tag.source"
+          "tag.source",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "tag.source",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -37310,7 +37344,9 @@
             "role": "punish_payoff",
             "roleDetail": "persistent_brain_damage_counter_ice",
             "evidence": [
+              "corp_ice.brain_damage",
               "corp_ice.damage_source",
+              "corp_ice.end_run",
               "corp_ice.net_damage",
               "damage.corp_persistent_damage_counter",
               "damage.payoff"
@@ -37323,9 +37359,13 @@
             "role": "tax_tool",
             "roleDetail": "future_strength_buff_tax_ice",
             "evidence": [
+              "corp_ice.brain_damage",
               "corp_ice.damage_source",
+              "corp_ice.encounter_tax",
               "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.net_damage",
+              "damage.corp_persistent_damage_counter",
+              "tax.ice"
             ],
             "confidence": "medium",
             "rationale": "v2: Die Karte stärkt alle weiteren ICE im Run und ist damit auch Glacier-/Tax-Support."
@@ -37771,7 +37811,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["defend_server", "tag_pressure"],
         "valueHints": {},
         "strategicRole": ["enabler"],
@@ -37829,15 +37869,14 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.tag_source",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
-          "tag.source"
+          "tag.source",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "tag.source",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -38073,7 +38112,7 @@
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
-        "roles": ["ice", "sentry_ice", "damage"],
+        "roles": ["ice", "sentry_ice"],
         "planRoles": ["defend_server"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
@@ -38084,9 +38123,12 @@
             "role": "tax_tool",
             "roleDetail": "run_lock_ice",
             "evidence": [
-              "corp_ice.damage_source",
-              "corp_ice.end_run",
-              "corp_ice.net_damage"
+              "corp_ice.trace_source",
+              "corp_ice.conditional_end_run",
+              "ice.etr",
+              "corp_ice.run_lock",
+              "run.lock",
+              "trace.source"
             ],
             "confidence": "high",
             "rationale": "ICE Semantic Review v1: Rex bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
@@ -38140,17 +38182,17 @@
           }
         ],
         "functionSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
           "corp_ice.trace_source",
-          "damage.payoff",
-          "tax.runner_persistent",
-          "trace.source",
           "ice.etr",
-          "run.lock"
+          "run.lock",
+          "trace.source"
         ],
         "tacticSignals": [
           "corp.remote_protection",
           "corp_ice.trace_source",
-          "tax.runner_persistent",
+          "ice.etr",
           "trace.source"
         ],
         "actionTacticSignals": [
@@ -42817,7 +42859,7 @@
           }
         ],
         "functionSignals": ["economy.rez_discount"],
-        "tacticSignals": ["ice.corp_rez_discount", "tax.ice"],
+        "tacticSignals": ["ice.corp_rez_discount"],
         "actionTacticSignals": [
           "effect:rez_discount",
           "effect_scope:ice",
@@ -43142,7 +43184,7 @@
             "strategyId": "corp.ice_tax_glacier",
             "role": "enabler",
             "roleDetail": "ice_buildout_install_discount",
-            "evidence": ["tax.ice"],
+            "evidence": ["setup.install_discount"],
             "confidence": "medium",
             "rationale": "Static ICE install discount supports ICE buildout/tax; it is not a rez discount and should not create a separate economy_rez_reserve anchor by itself."
           }
@@ -44409,7 +44451,7 @@
     {
       "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a923aeb325c07b47",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:a9e817b5a6781b41",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:95aeecd7d4b1c22b",
       "hint": {
         "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
         "side": "corp",
@@ -44418,14 +44460,14 @@
         "roles": ["ice_modifier", "economy_asset", "remote_support"],
         "planRoles": [],
         "valueHints": { "economy": 1, "remoteRootValue": 2 },
-        "strategicRole": ["tax_tool"],
+        "strategicRole": ["support_tool"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
             "strategyId": "corp.ice_tax_glacier",
-            "role": "tax_tool",
-            "roleDetail": "ice_tax_support",
-            "evidence": ["ice.corp_rez_discount", "tax.ice"],
+            "role": "support_tool",
+            "roleDetail": "black_ice_rez_discount_support",
+            "evidence": ["ice.corp_rez_discount"],
             "confidence": "medium",
             "rationale": "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
           }
@@ -44440,7 +44482,7 @@
           }
         ],
         "functionSignals": ["economy.rez_discount"],
-        "tacticSignals": ["ice.corp_rez_discount", "tax.ice"],
+        "tacticSignals": ["ice.corp_rez_discount"],
         "actionTacticSignals": [
           "effect:rez_discount",
           "effect_scope:ice",
@@ -45194,7 +45236,7 @@
     {
       "cardId": "onr_v1_348_virus-test-site",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:e4d728fbdf06237f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:47c4776798b7475b",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:120533729d686d26",
       "hint": {
         "cardId": "onr_v1_348_virus-test-site",
         "side": "corp",
@@ -45281,12 +45323,14 @@
           "remote.ambush"
         ],
         "actionTacticSignals": [
+          "access.punish",
           "damage.payoff.runner",
           "effect:ambush",
           "effect:damage",
           "effect_scope:accessed_card",
           "effect_scope:runner",
-          "effect_timing:on_access"
+          "effect_timing:on_access",
+          "remote.ambush"
         ],
         "conditions": [
           { "kind": "requires_accessed_card" },
@@ -45500,7 +45544,7 @@
             "strategyId": "corp.ice_tax_glacier",
             "role": "support_tool",
             "roleDetail": "ice_install_discount_fort_builder",
-            "evidence": ["tax.ice"],
+            "evidence": ["setup.install_discount"],
             "confidence": "medium",
             "rationale": "Discounts ICE installation on this fort; supports building a glacier/tax server."
           }
@@ -46671,7 +46715,7 @@
             "strategyId": "corp.remote_scoring",
             "role": "defensive_tool",
             "roleDetail": "agenda_steal_tax",
-            "evidence": ["tax.ice"],
+            "evidence": ["access.agenda_steal_tax", "tax.remote"],
             "confidence": "high",
             "rationale": "Agenda steal tax is direct scoring-remote defense."
           }
@@ -46740,7 +46784,7 @@
     {
       "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6717e456b645197a",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9d83a37c8b718100",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:d41016014778ed95",
       "hint": {
         "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
         "side": "corp",
@@ -46748,9 +46792,8 @@
         "aiSupportStatus": "ai_supported",
         "roles": [],
         "planRoles": [],
-        "valueHints": { "remoteRootValue": 2 },
+        "valueHints": {},
         "strategicRole": ["defensive_tool"],
-        "strategyAnchors": ["corp.remote_scoring"],
         "lineSupport": ["corp.remote_scoring"],
         "strategySupportPairs": [
           {
@@ -46762,13 +46805,9 @@
             "rationale": "Random end-the-run chance after passing rezzed ICE protects a remote but remains probabilistic."
           }
         ],
-        "tacticSignals": ["corp.remote_protection"],
-        "actionTacticSignals": [
-          "corp.remote_protection",
-          "remote_role:scoring_protection"
-        ],
         "conditions": [{ "kind": "requires_remote_server" }],
         "costProfile": { "credits": 1 },
+        "riskTags": ["random_outcome"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -46778,11 +46817,6 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "remoteRole": {
-          "kind": "scoring_protection",
-          "threatLevel": "medium",
-          "serverScope": "remote"
-        },
         "requiredMechanics": [
           "fortRunWindows",
           "install_remote",
@@ -47235,7 +47269,10 @@
             "strategyId": "corp.remote_scoring",
             "role": "scoring_tool",
             "roleDetail": "agenda_difficulty_discount",
-            "evidence": ["tax.ice"],
+            "evidence": [
+              "score.agenda_difficulty_discount",
+              "score.undefined_difficulty_discount"
+            ],
             "confidence": "high",
             "rationale": "Agenda difficulty discount in this remote opens scoring windows."
           }

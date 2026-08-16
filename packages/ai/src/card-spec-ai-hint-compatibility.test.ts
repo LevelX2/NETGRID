@@ -423,12 +423,14 @@ const signalCases: Record<
       "remote.ambush",
     ],
     actionTacticSignals: [
+      "access.punish",
       "damage.payoff.runner",
       "effect:ambush",
       "effect:damage",
       "effect_scope:accessed_card",
       "effect_scope:runner",
       "effect_timing:on_access",
+      "remote.ambush",
     ],
     conditions: [
       "requires_accessed_card",

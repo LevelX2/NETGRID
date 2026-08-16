@@ -76,13 +76,18 @@ export const cardSpec = {
         role: "protect_remote",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.ice_tax_glacier",
+        kind: "strategic_role",
+        role: "defensive_tool",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
+        kind: "line_support",
+        lineKey: "corp.ice_tax_glacier",
+        support: "supports",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "self_bounce_or_maintenance_cost",
+        severity: "medium",
       },
     ],
     capabilities: [],
