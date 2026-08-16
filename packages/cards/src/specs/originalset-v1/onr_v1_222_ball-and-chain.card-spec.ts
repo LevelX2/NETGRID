@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "[Subroutine] For the remainder of the run, Runner must pay 2 when encountering a piece of ice, in addition to any other costs, or end the run.",
+      "[Subroutine] For the remainder of the run, Runner must pay [2] when encountering a piece of ice, in addition to any other costs, or end the run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

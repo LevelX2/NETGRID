@@ -58,10 +58,11 @@ export const cardSpec = {
         kind: "target_preference",
         purpose: "order_rnd_top_cards_for_near_term_plan",
         preferences: [
+          "best_cards_for_current_plan",
+          "best_cards_for_current_state",
           "central_or_remote_plan_enabler",
           "protect_agenda_density",
         ],
-        avoid: [],
       },
     ],
     capabilities: [],

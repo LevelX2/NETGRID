@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      'Code gates cost 1 less to rez while Encoder, Inc. is rezzed. All code gates have an additional "End the run" subroutine after all other subroutines.',
+      'Code gates cost [1] less to rez while Encoder, Inc. is rezzed. All code gates have an additional "End the run" subroutine after all other subroutines.',
   },
   rules: {
     schemaVersion: "card-rules-v1",

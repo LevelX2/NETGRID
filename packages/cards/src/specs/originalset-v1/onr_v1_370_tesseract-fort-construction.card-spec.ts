@@ -86,10 +86,6 @@ export const cardSpec = {
         strategyKey: "corp.ice_tax_glacier",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.ice_tax_glacier",
         support: "supports",
@@ -129,8 +125,13 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "add_etr_subroutine_to_fort_ice",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "protects_agenda_remote",
+          "protects_central_access_pressure",
+          "server_relevant_to_current_plan",
+          "adds_relevant_encounter_tax",
+        ],
+        avoid: ["option_with_no_visible_current_payoff"],
       },
       {
         kind: "value_interpretation",

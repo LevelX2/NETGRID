@@ -12,7 +12,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "Black ice costs 2 less to rez while this asset is rezzed.",
+    rulesText: "Black ice costs [2] less to rez while this asset is rezzed.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -61,7 +61,7 @@ export const cardSpec = {
     card: [
       {
         kind: "strategic_role",
-        role: "tax_tool",
+        role: "support_tool",
       },
       {
         kind: "line_support",
@@ -71,8 +71,8 @@ export const cardSpec = {
       {
         kind: "strategy_support",
         strategyKey: "corp.ice_tax_glacier",
-        role: "tax_tool",
-        roleDetail: "ice_tax_support",
+        role: "support_tool",
+        roleDetail: "black_ice_rez_discount_support",
         confidence: "medium",
         rationale:
           "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",

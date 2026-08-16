@@ -4693,7 +4693,12 @@ function deriveRoles(
       if (
         subroutine.kind === "damage" ||
         subroutine.kind === "random_damage" ||
-        subroutine.kind === "trace"
+        (subroutine.kind === "trace" &&
+          subroutine.onSuccess.some(
+            (outcome) =>
+              outcome.kind === "preventable_damage" ||
+              outcome.kind === "unpreventable_meat_damage",
+          ))
       )
         roles.add("damage");
       if (subroutine.kind === "random_damage") roles.add("core_damage_ice");
@@ -5924,9 +5929,9 @@ function deriveTargetProfiles(
     return [
       {
         schemaVersion: "target-profile-v1",
-        kind: "use_target",
-        timing: "corp_rez_window",
-        targetType: "installed_ice",
+        kind: "install_target",
+        timing: "on_install",
+        targetType: "server",
         purpose: preference.purpose,
         ...(preference.preferences === undefined
           ? {}
@@ -5937,10 +5942,16 @@ function deriveTargetProfiles(
                 "target_preference",
               ),
             }),
-        avoid: ["hidden_info_dependent_choice"],
-        hiddenInfoPolicy: "legal_targets_only",
-        serverScope: "source_fort",
-        activeRunConstraint: "same_fort_upcoming_ice_when_active",
+        ...(preference.avoid === undefined
+          ? {}
+          : {
+              avoid: closedPlanningValues(
+                preference.avoid,
+                KNOWN_HINT_TARGET_PROFILE_AVOIDS,
+                "target_avoid",
+              ),
+            }),
+        hiddenInfoPolicy: "public_or_controller_known_only",
       },
     ];
   if (preference?.kind === "target_preference" && requiredSubtype !== undefined)
@@ -6327,6 +6338,7 @@ function hasClosedTargetPreferenceOwner(
               "search_trash_to_grip",
               "trash_cards_from_grip_for_credits",
               "trash_own_installed_cards_for_credits",
+              "trash_own_rezzed_ice_for_credits",
               "derez_rezzed_black_ice",
               "trash_unrezzed_ice",
             ].includes(effect.kind),
@@ -7154,6 +7166,20 @@ function deriveClosedExtendedTargetProfile(
       timing: "on_use",
       targetType: "card",
       hiddenInfoPolicy: "visible_or_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "trash_own_rezzed_ice_for_credits",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "activated_ability",
+      targetType: "installed_ice",
+      hiddenInfoPolicy: "public_or_controller_known_only",
     };
   throw new Error(
     `card_spec_target_preference_without_supported_mechanical_owner: ${entry.definition.id}`,
@@ -9013,20 +9039,6 @@ function derivedFunctionSignals(
   const engine = entry.planning.engine;
   const signals = new Set<string>();
   const relativeDynamicDamage = engine.relativeIce?.dynamicDamageSubroutine;
-  const variableRunLockTrace = engine.printedSubroutines?.find(
-    (subroutine) =>
-      subroutine.kind === "trace" &&
-      engine.variableRez?.kind === "x_strength" &&
-      engine.variableRez.traceLimitFromValue === true &&
-      subroutine.traceLimit === 0 &&
-      subroutine.onSuccess.some((effect) => effect.kind === "end_run") &&
-      subroutine.onSuccess.some(
-        (effect) =>
-          effect.kind === "runner_run_lock_until_action_paid" &&
-          effect.amount === 2 &&
-          effect.visibility === "public",
-      ),
-  );
   if (engine.corpRootRezCreditOutcome !== undefined) {
     signals.add("economy.corp_credit_burst");
     signals.add("economy.generic");
@@ -9241,21 +9253,39 @@ function derivedFunctionSignals(
       signals.add(signal);
   for (const subroutine of engine.printedSubroutines ?? []) {
     if (subroutine.kind === "trace") {
-      const traceSignals =
-        subroutine === variableRunLockTrace
-          ? [
-              "corp_ice.conditional_end_run",
-              "corp_ice.run_lock",
-              "corp_ice.trace_source",
-              "ice.etr",
-            ]
-          : [
-              "corp_ice.trace_source",
-              "damage.payoff",
-              "tax.runner_persistent",
-              "trace.source",
-            ];
-      for (const signal of traceSignals) signals.add(signal);
+      signals.add("corp_ice.trace_source");
+      signals.add("trace.source");
+      for (const outcome of subroutine.onSuccess) {
+        if (
+          outcome.kind === "preventable_damage" ||
+          outcome.kind === "unpreventable_meat_damage"
+        ) {
+          const damageType =
+            outcome.kind === "preventable_damage"
+              ? outcome.damageType
+              : "meat";
+          signals.add("corp_ice.damage_source");
+          signals.add(`corp_ice.${damageType}_damage`);
+          signals.add("damage.payoff");
+        }
+        if (
+          outcome.kind === "add_tags" ||
+          outcome.kind === "add_tags_by_trace_margin_over_runner_link"
+        ) {
+          signals.add("corp_ice.tag_source");
+          signals.add("tag.source");
+        }
+        if (outcome.kind === "end_run") {
+          signals.add("corp_ice.conditional_end_run");
+          signals.add("ice.etr");
+        }
+        if (outcome.kind === "runner_run_lock_until_action_paid") {
+          signals.add("corp_ice.run_lock");
+          signals.add("run.lock");
+        }
+        if (outcome.kind === "add_counter")
+          signals.add("tax.runner_persistent");
+      }
     }
     if (subroutine.kind === "prohibit_break_next_ice")
       for (const signal of [
@@ -9702,10 +9732,7 @@ function derivedTacticSignals(
     if (modifier.kind === "rez_cost") signals.add("ice.corp_rez_discount");
     if (modifier.kind === "ice_strength" && entry.definition.side === "corp")
       signals.add("ice.corp_strength_support");
-    if (
-      modifier.kind === "rez_cost" ||
-      (modifier.kind === "ice_strength" && entry.definition.side === "corp")
-    )
+    if (modifier.kind === "ice_strength" && entry.definition.side === "corp")
       signals.add("tax.ice");
     if (modifier.kind === "access_count")
       signals.add(
@@ -11050,30 +11077,57 @@ function derivedStrategyEvidence(
   strategyId?: string,
 ): string[] {
   const printed = engine.printedSubroutines ?? [];
-  const hasTrace = printed.some((subroutine) => subroutine.kind === "trace");
+  const traces = printed.filter((subroutine) => subroutine.kind === "trace");
+  const traceDamageTypes = new Set(
+    traces.flatMap((trace) =>
+      trace.onSuccess.flatMap((outcome) =>
+        outcome.kind === "preventable_damage"
+          ? [outcome.damageType]
+          : outcome.kind === "unpreventable_meat_damage"
+            ? ["meat" as const]
+            : [],
+      ),
+    ),
+  );
+  const hasTraceEndRun = traces.some((trace) =>
+    trace.onSuccess.some((outcome) => outcome.kind === "end_run"),
+  );
+  const hasTraceRunLock = traces.some((trace) =>
+    trace.onSuccess.some(
+      (outcome) => outcome.kind === "runner_run_lock_until_action_paid",
+    ),
+  );
   const hasBreakLock = printed.some(
     (subroutine) => subroutine.kind === "prohibit_break_next_ice",
   );
   const hasDeflect = printed.some(
     (subroutine) => subroutine.kind === "deflect_run",
   );
-  if (strategyId === "corp.damage_kill" && hasTrace)
+  const hasRunDurationJackOutLock = printed.some(
+    (subroutine) => subroutine.kind === "run_duration_cannot_jack_out",
+  );
+  if (strategyId === "corp.damage_kill" && traceDamageTypes.size > 0)
     return [
       "corp_ice.damage_source",
-      "corp_ice.net_damage",
-      "damage.corp_persistent_damage_counter",
+      ...[...traceDamageTypes].map(
+        (damageType) => `corp_ice.${damageType}_damage`,
+      ),
       "damage.payoff",
     ];
-  if (strategyId === "corp.ice_tax_glacier" && hasTrace)
+  if (
+    strategyId === "corp.ice_tax_glacier" &&
+    (hasTraceEndRun || hasTraceRunLock)
+  )
     return [
-      "corp_ice.damage_source",
-      "corp_ice.end_run",
-      "corp_ice.net_damage",
+      "corp_ice.trace_source",
+      ...(hasTraceEndRun ? ["corp_ice.conditional_end_run", "ice.etr"] : []),
+      ...(hasTraceRunLock ? ["corp_ice.run_lock", "run.lock"] : []),
+      "trace.source",
     ];
-  if (strategyId === "corp.damage_kill" && hasBreakLock)
-    return ["corp_ice.damage_source", "corp_ice.net_damage", "damage.payoff"];
   if (strategyId === "corp.ice_tax_glacier" && hasBreakLock)
     return ["corp_ice.next_ice_break_lock", "corp_ice.run_lock"];
+  if (strategyId === "corp.ice_tax_glacier" && hasRunDurationJackOutLock)
+    return ["corp_ice.jack_out_lock", "run.lock"];
   if (hasDeflect) {
     if (strategyId === "corp.ice_tax_glacier")
       return ["corp_ice.encounter_tax", "run.corp_redirect"];
@@ -11448,10 +11502,36 @@ function derivedStrategyEvidence(
     )
       add("run.successful_run_grip_reset");
   for (const modifier of engine.modifiers ?? []) {
+    if (modifier.kind === "install_cost")
+      evidence.add(
+        modifier.operation === "reduce"
+          ? "setup.install_discount"
+          : "tax.corp_ice_install",
+      );
     if (modifier.kind === "rez_cost") evidence.add("ice.corp_rez_discount");
-    if (modifier.kind === "ice_strength")
+    if (modifier.kind === "ice_strength") {
       evidence.add("ice.corp_strength_support");
-    evidence.add("tax.ice");
+      evidence.add("tax.ice");
+    }
+    if (modifier.kind === "additional_subroutine") evidence.add("tax.ice");
+    if (
+      modifier.kind === "break_ability_use_cost" ||
+      modifier.kind === "break_subroutine_cost"
+    )
+      evidence.add("tax.ice");
+    if (modifier.kind === "steal_cost") {
+      evidence.add("access.agenda_steal_tax");
+      evidence.add("tax.remote");
+    }
+    if (modifier.kind === "trash_cost") evidence.add("access.trash_tax");
+    if (modifier.kind === "agenda_difficulty") {
+      const operation =
+        modifier.operation === "reduce" ? "discount" : "increase";
+      evidence.add(`score.agenda_difficulty_${operation}`);
+      evidence.add(
+        `score.${modifier.appliesTo.subtype}_difficulty_${operation}`,
+      );
+    }
   }
   for (const access of engine.accessEffects ?? []) {
     const accessDamageEffects = access.effects.filter(

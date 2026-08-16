@@ -10,7 +10,7 @@ export const cardSpec = {
   },
   text: {
     schemaVersion: "canonical-card-text-v1",
-    rulesText: "3 credits: Avoid receiving a tag.",
+    rulesText: "[3]: Avoid receiving a tag.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

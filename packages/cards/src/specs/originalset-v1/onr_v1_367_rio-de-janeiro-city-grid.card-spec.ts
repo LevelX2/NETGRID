@@ -62,10 +62,6 @@ export const cardSpec = {
         role: "defensive_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "corp.remote_scoring",
-      },
-      {
         kind: "line_support",
         lineKey: "corp.remote_scoring",
         support: "supports",
@@ -80,19 +76,9 @@ export const cardSpec = {
           "Random end-the-run chance after passing rezzed ICE protects a remote but remains probabilistic.",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "remote_role",
-        role: "scoring_protection",
-        threatLevel: "medium",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "remote_root_value",
-        rating: "medium",
+        kind: "risk_interpretation",
+        risk: "random_outcome",
+        severity: "medium",
       },
     ],
     capabilities: [],

@@ -81,6 +81,10 @@ export const cardSpec = {
         role: "protect_rnd",
       },
       {
+        kind: "plan_role",
+        role: "net_damage_pressure",
+      },
+      {
         kind: "tactic_interpretation",
         signal: "damage.payoff",
         use: "damage.payoff.runner",

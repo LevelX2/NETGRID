@@ -75,8 +75,12 @@ export const cardSpec = {
         role: "run_pressure",
       },
       {
+        kind: "plan_role",
+        role: "hq_credit_denial",
+      },
+      {
         kind: "strategic_role",
-        role: "payoff_anchor",
+        role: "support_tool",
       },
       {
         kind: "line_support",

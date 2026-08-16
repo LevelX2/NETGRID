@@ -79,15 +79,7 @@ export const cardSpec = {
       },
       {
         kind: "strategic_role",
-        role: "payoff_anchor",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.rnd_pressure",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
+        role: "enabler",
       },
       {
         kind: "line_support",
@@ -95,10 +87,9 @@ export const cardSpec = {
         support: "supports",
       },
       {
-        kind: "target_preference",
-        purpose: "replace_rnd_access_with_reveal_until_agenda",
-        preferences: ["high_value_accessed_card"],
-        avoid: ["hidden_info_dependent_choice"],
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
       },
       {
         kind: "risk_interpretation",

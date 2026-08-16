@@ -93,8 +93,14 @@ export const cardSpec = {
       {
         kind: "target_preference",
         purpose: "trash_tagged_runner_resources",
-        preferences: ["use_choice_option_with_visible_board_payoff"],
-        avoid: ["hidden_info_dependent_choice"],
+        preferences: [
+          "best_cards_for_current_state",
+          "use_choice_option_with_visible_board_payoff",
+        ],
+        avoid: [
+          "unknown_low_information_target",
+          "option_with_no_visible_current_payoff",
+        ],
       },
     ],
     capabilities: [

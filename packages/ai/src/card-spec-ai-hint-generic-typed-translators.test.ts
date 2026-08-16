@@ -779,21 +779,13 @@ describe("generic typed CardSpec AI translators", () => {
             .length ?? 0),
         0,
       ),
-    ).toBe(73);
+    ).toBe(72);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
       ).not.toThrow();
 
     const witnesses = [
-      [
-        "onr_v1_032_i-spy",
-        {
-          timing: "after_successful_run",
-          targetType: "server",
-          serverScope: "source_fort",
-        },
-      ],
       [
         "onr_v1_046_pattels-virus",
         {
@@ -877,13 +869,16 @@ describe("generic typed CardSpec AI translators", () => {
     };
 
     expect(
-      forged("onr_v1_032_i-spy", {
-        runnerUtilityLongtail: {
-          kind: "trace_link_end_run_after_encounter",
-          visibility: "public",
-        },
-      }),
-    ).toThrow("card_spec_target_preference_without_supported_mechanical_owner");
+      forged("onr_proteus_076_syd-meyer-superstores", {
+        abilities: [
+          {
+            ...targetAnnotatedEntry("onr_proteus_076_syd-meyer-superstores")
+              .planning.engine.abilities?.[0],
+            effects: [{ kind: "trash_own_rezzed_ice_for_credits_like" }],
+          },
+        ],
+      })().targetProfiles,
+    ).toBeUndefined();
     expect(
       forged("onr_v1_075_zetatech-software-installer", {
         restrictedHostedCreditSource: {
@@ -1275,5 +1270,111 @@ describe("generic typed CardSpec AI translators", () => {
     );
 
     expect(hint.costProfile).toEqual({ clicks: 1 });
+  });
+
+  it("binds Batch 12 target semantics to the real choice owners", () => {
+    const tesseract = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_v1_370_tesseract-fort-construction"),
+    );
+    expect(tesseract.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "add_etr_subroutine_to_fort_ice",
+        kind: "install_target",
+        timing: "on_install",
+        targetType: "server",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+    expect(tesseract.targetProfiles).not.toContainEqual(
+      expect.objectContaining({ targetType: "installed_ice" }),
+    );
+
+    const syd = deriveCardSpecAiHint(
+      targetAnnotatedEntry("onr_proteus_076_syd-meyer-superstores"),
+    );
+    expect(syd.targetProfiles).toContainEqual(
+      expect.objectContaining({
+        purpose: "trash_rezzed_ice_for_credit_cashout",
+        kind: "use_target",
+        timing: "activated_ability",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "public_or_controller_known_only",
+      }),
+    );
+
+    expect(
+      deriveCardSpecAiHint(
+        targetAnnotatedEntry("onr_classic_038_gypsytm-schedule-analyzer"),
+      ).targetProfiles,
+    ).toBeUndefined();
+    expect(
+      deriveCardSpecAiHint(targetAnnotatedEntry("onr_v1_032_i-spy"))
+        .targetProfiles,
+    ).toBeUndefined();
+  });
+
+  it("derives Batch 12 trace outcomes and rez discounts without false tax semantics", () => {
+    const chihuahua = actualHint("onr_proteus_014_chihuahua");
+    expect(chihuahua.functionSignals).toEqual(
+      expect.arrayContaining([
+        "corp_ice.trace_source",
+        "trace.source",
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff",
+      ]),
+    );
+    expect(chihuahua.functionSignals).not.toContain("tax.runner_persistent");
+
+    const skalderviken = actualHint(
+      "onr_v1_341_skalderviken-sa-beta-test-site",
+    );
+    expect(skalderviken.functionSignals).toContain("economy.rez_discount");
+    expect(skalderviken.tacticSignals).toContain("ice.corp_rez_discount");
+    expect(skalderviken.tacticSignals).not.toContain("tax.ice");
+
+    const dataRaven = actualHint("onr_v1_236_data-raven");
+    expect(dataRaven.functionSignals).toEqual(
+      expect.arrayContaining([
+        "corp_ice.tag_source",
+        "tag.source",
+        "tax.runner_persistent",
+      ]),
+    );
+  });
+
+  it("keeps Batch 12 strategy ownership proportional to each card", () => {
+    const fullHint = (cardId: string) => {
+      const entry = cardSpecPlanningCards().find(
+        (candidate) => candidate.definition.id === cardId,
+      );
+      if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
+      return deriveCardSpecAiHint(entry);
+    };
+
+    expect(fullHint("onr_proteus_008_project-zurich").strategyAnchors).toEqual([
+      "corp.overadvance_value",
+    ]);
+    expect(fullHint("onr_classic_039_library-search").strategyAnchors).toEqual([
+      "runner.interface_closeout",
+    ]);
+    expect(fullHint("onr_v1_081_custodial-position").strategyAnchors).toEqual([
+      "runner.interface_closeout",
+    ]);
+    expect(
+      fullHint("onr_v1_367_rio-de-janeiro-city-grid").strategyAnchors,
+    ).toBeUndefined();
+    expect(fullHint("onr_v1_105_priority-wreck").planRoles).toContain(
+      "hq_credit_denial",
+    );
+    expect(fullHint("onr_v1_142_record-reconstructor").planRoles).not.toContain(
+      "build_rig",
+    );
+    expect(fullHint("onr_v1_032_i-spy").planRoles).toContain(
+      "information_tool",
+    );
+    expect(
+      fullHint("onr_proteus_076_syd-meyer-superstores").strategyAnchors,
+    ).toBeUndefined();
   });
 });

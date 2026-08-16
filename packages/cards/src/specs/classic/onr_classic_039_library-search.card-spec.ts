@@ -70,19 +70,7 @@ export const cardSpec = {
       },
       {
         kind: "strategy_anchor",
-        strategyKey: "runner.hq_pressure",
-      },
-      {
-        kind: "strategy_anchor",
         strategyKey: "runner.interface_closeout",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.rnd_pressure",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.run_event_tempo",
       },
       {
         kind: "line_support",
@@ -100,13 +88,17 @@ export const cardSpec = {
         support: "supports",
       },
       {
+        kind: "line_support",
+        lineKey: "runner.run_event_tempo",
+        support: "supports",
+      },
+      {
         kind: "target_preference",
         purpose: "choose_hq_or_rnd_for_conditional_multiaccess_run",
         preferences: [
-          "protects_central_access_pressure",
+          "server_relevant_to_current_plan",
           "current_run_path_relevance",
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
       {
         kind: "risk_interpretation",
