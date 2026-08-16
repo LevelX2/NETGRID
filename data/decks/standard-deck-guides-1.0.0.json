@@ -2148,15 +2148,15 @@
     },
     {
       "standardDeckId": "standard_runner_rd_express",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:d445f601",
-      "sourceAnalysisHash": "deck-analysis:aae870f0",
-      "reviewedAt": "2026-08-15",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:0cb00588",
+      "sourceAnalysisHash": "deck-analysis:3c64cbdb",
+      "reviewedAt": "2026-08-16",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
-          "runner.run_event_tempo",
-          "runner.rnd_pressure"
+          "runner.rnd_pressure",
+          "runner.run_event_tempo"
         ],
         "secondaryStrategyIds": [
           "runner.hq_pressure",
@@ -2166,10 +2166,10 @@
         "reviewStatus": "plausible"
       },
       "content": {
-        "summary": "R&D Express baut mit redundanter Breaker-Coverage, schneller Suche und wiederkehrenden Run-Credits Druck auf R&D auf. Multiaccess über R&D Interface und Rush Hour bildet den Abschluss; HQ und akute Remotes bleiben klare Ausweichziele.",
-        "deckIdea": "R&D Express setzt auf eine einfache Werkzeugkette statt auf Spezialkombinationen. Stelle zuerst die fehlende ICE-Coverage her und nutze Temple Microcode Outlet als eindeutigen Suchweg. Sobald ein bezahlbarer R&D-Pfad besteht, verwandle R&D Interface und Rush Hour in mehrere Zugriffe. HQ ist die bewusste Ausweichlinie, wenn es deutlich günstiger oder wegen einer drohenden Same-Turn-Scorelinie exponiert ist; Inside Job hält zudem wichtige Remotes angreifbar.",
+        "summary": "R&D Express baut mit redundanter Breaker-Coverage, schneller Suche, zusätzlicher MU und allgemein nutzbaren wiederkehrenden Run-Credits Druck auf R&D auf. Multiaccess über R&D Interface und Rush Hour bildet den Abschluss; HQ und akute Remotes bleiben klare Ausweichziele.",
+        "deckIdea": "R&D Express setzt auf eine einfache Werkzeugkette statt auf Spezialkombinationen. Stelle zuerst die fehlende ICE-Coverage her und nutze Temple Microcode Outlet als eindeutigen Suchweg. Zetatech Mem Chip schafft Platz für das vollständige Rig, Vewy Vewy Quiet finanziert alle drei nicht-noisy Breaker und Corolla Speed Chip verbilligt zusätzlich Loony-Goon-Einsätze. Gideon’s Pawnshop holt bei Bedarf gezielt einen verlorenen Breaker, ein verbrauchtes Short-Term Contract oder einen anderen zentralen Baustein zurück. Sobald ein bezahlbarer R&D-Pfad besteht, verwandle R&D Interface und Rush Hour in mehrere Zugriffe. HQ ist die bewusste Ausweichlinie, wenn es deutlich günstiger oder wegen einer drohenden Same-Turn-Scorelinie exponiert ist; Inside Job hält zudem wichtige Remotes angreifbar.",
         "gamePlan": {
-          "opening": "Behalte eine Hand mit einem Breaker oder Temple Microcode Outlet plus Economy oder Draw. Installiere nur die noch fehlende Breaker-Art und baue Credits bis zu einem konkreten nächsten Installations- oder Runziel auf. Invisibility und Corolla Speed Chip verbessern danach die wiederholbare Sentry-Coverage.",
+          "opening": "Behalte eine Hand mit einem Breaker oder Temple Microcode Outlet plus Economy oder Draw. Installiere nur die noch fehlende Breaker-Art und baue Credits bis zu einem konkreten nächsten Installations- oder Runziel auf. Zetatech Mem Chip schafft bei Bedarf Rig-Platz; Vewy Vewy Quiet folgt, wenn seine zwei wiederkehrenden Credits in absehbaren Runs genutzt werden können.",
           "midgame": "Greife R&D wiederholt an, sobald Coverage und Kosten stimmen. Installiere R&D Interface erst für einen erreichbaren Server und halte Rush Hour für den bezahlbaren Multiaccess-Zug zurück. Wechsle zu HQ, wenn es wesentlich günstiger oder klar agendaexponiert ist, und nutze Inside Job für ein akutes Scoring- oder Economy-Remote.",
           "endgame": "Bündele Credits in die Linie mit der höchsten unmittelbaren Agenda-Chance. Bei sichtbarer Same-Turn-Scoregefahr greife R&D, HQ oder das gefährliche Remote sofort an, statt auf einen späteren Run zu warten. Ohne produktiven Run und ohne konkrete Entwicklungsroute ziehst du Karten, statt blind weiter Credits zu nehmen."
         },
@@ -2190,24 +2190,25 @@
             "role": "Sucht den konkret fehlenden Breaker und schließt damit klar benannte ICE-Coverage-Lücken."
           },
           {
-            "cardId": "onr_v1_087_forgotten-backup-chip",
-            "title": "Forgotten Backup Chip",
-            "role": "Holt einen getrashten Breaker zurück und federt die bewusst schlankere Zwei-Kopien-Suite ab."
+            "cardId": "onr_v1_089_gideons-pawnshop",
+            "title": "Gideon’s Pawnshop",
+            "role": "Holt gezielt einen beliebigen zentralen Baustein aus dem Trash zurück, darunter Breaker und verbrauchte Short-Term Contracts."
           },
           {
-            "cardId": "onr_v1_094_inside-job",
-            "title": "Inside Job",
-            "role": "Bietet einen direkten Bypass für akute Remotes oder eine klar günstige Runroute."
+            "cardId": "onr_v1_071_vewy-vewy-quiet",
+            "title": "Vewy Vewy Quiet",
+            "role": "Liefert zwei wiederkehrende Credits für jeden Breaker der vollständig nicht-noisy aufgebauten Suite."
           },
           {
-            "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
-            "title": "Karl de Veres, Corporate Stooge",
-            "role": "Macht erfolgreiche Runs zugleich zu kleinen Economy-Fortschritten und stützt wiederholten Druck."
+            "cardId": "onr_v1_146_zetatech-mem-chip",
+            "title": "Zetatech Mem Chip",
+            "role": "Schafft mit +2 MU den nötigen Platz für vollständige Coverage und wiederkehrende Breaker-Economy."
           }
         ],
         "pilotingTips": [
           "Behandle Economy als Finanzierung eines konkreten Breaker-, Interface- oder Runbedarfs; Short-Term Contract ist kein Selbstzweck.",
           "Installiere je Breaker-Art zunächst nur eine Kopie. Zusätzliche Exemplare sind bewusst Ersatz für Verlust- oder Trashfälle.",
+          "Installiere Vewy Vewy Quiet erst, wenn die zusätzliche MU vorhanden ist oder die wiederkehrenden Credits den nächsten Run konkret verbilligen.",
           "Prüfe vor jedem Run Pfadkosten, Restreserve und Agenda-Chance gemeinsam; ein legaler R&D-Run ist nicht automatisch der beste Zug."
         ],
         "weaknesses": [

@@ -3,7 +3,7 @@
   "catalogId": "netgrid-standard-decks-1.0.0",
   "version": "1.0.0",
   "status": "active",
-  "curatedAt": "2026-08-15",
+  "curatedAt": "2026-08-16",
   "decks": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -4286,7 +4286,7 @@
     },
     {
       "standardDeckId": "standard_runner_rd_express",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "R&D Express",
       "side": "runner",
@@ -4301,15 +4301,15 @@
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_035_invisibility",
-          "quantity": 2
-        },
-        {
           "cardId": "onr_v1_040_loony-goon",
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_089_gideons-pawnshop",
           "quantity": 1
         },
         {
@@ -4338,7 +4338,7 @@
         },
         {
           "cardId": "onr_v1_124_corolla-speed-chip",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_129_hq-interface",
@@ -4349,12 +4349,16 @@
           "quantity": 3
         },
         {
+          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_178_short-term-contract",
-          "quantity": 2
+          "quantity": 3
         },
         {
           "cardId": "onr_proteus_083_corrosion",
@@ -4376,7 +4380,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_runner_rd_express_2026_08_15",
-        "sourceDeckVersion": "1.0.0-runner-ai-baseline"
+        "sourceDeckVersion": "1.1.0-runner-ai-baseline"
       }
     },
     {
