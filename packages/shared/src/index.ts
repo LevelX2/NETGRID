@@ -2429,6 +2429,13 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
      */
     cardImplementationLifecycleLeavePlayPaymentAmount?: number;
     cardImplementationLifecycleLeavePlayPaymentStatus?: "payable" | "unpayable";
+    /**
+     * Engine-certified number of times the currently quoted hosted-credit
+     * cash-out payout can still resolve unchanged from the visible source pool
+     * this turn. Other click, credit and timing costs remain separate
+     * LegalAction facts.
+     */
+    cardImplementationHostedCreditCashOutMaxUses?: number;
   };
 
 export type PlayerAction = {

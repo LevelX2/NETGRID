@@ -170,6 +170,7 @@ export type ActionEconomyProjection = {
   netHandDelta: number;
   payoutMode?: "fixed" | "all_available";
   sourcePool?: "finite" | "renewable" | "unknown";
+  maxCurrentTurnUses?: number;
   repeatable: boolean | "unknown";
   reliability: "guaranteed" | "conditional" | "unknown";
   source: ActionEconomyProjectionSource;

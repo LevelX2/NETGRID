@@ -48,6 +48,36 @@ describe("funding routes", () => {
     ]);
   });
 
+  it("repeats a finite cashout only up to its structured current-turn limit", () => {
+    const candidates = [
+      liquidCandidate("short-term-contract-cashout", 2, {
+        maxCurrentTurnUses: 2,
+        repeatable: true,
+      }),
+    ];
+    const covered = searchFundingRoutes({
+      demand: runnerDemand({ currentCredits: 0, targetCredits: 4 }),
+      candidates,
+      remainingClicks: 3,
+    });
+    const uncovered = searchFundingRoutes({
+      demand: runnerDemand({ currentCredits: 0, targetCredits: 6 }),
+      candidates,
+      remainingClicks: 3,
+    });
+
+    expect(covered.bestRoute).toMatchObject({
+      status: "covered_guaranteed",
+      projectedCredits: 4,
+      totalClickCost: 2,
+    });
+    expect(covered.bestRoute.steps.map((step) => step.actionId)).toEqual([
+      "short-term-contract-cashout",
+      "short-term-contract-cashout",
+    ]);
+    expect(uncovered.bestRoute.status).toBe("uncovered");
+  });
+
   it("prefers Corporate Coup +3 over longer BBS +2 and basic +1 routes", () => {
     const result = searchFundingRoutes({
       demand: corpDemand({ currentCredits: 0, targetCredits: 3 }),
@@ -273,6 +303,7 @@ function liquidCandidate(
     creditCost?: number;
     creditRestriction?: "general" | "restricted";
     netGain?: number;
+    maxCurrentTurnUses?: number;
     reliability?: "guaranteed" | "conditional" | "unknown";
     repeatable?: boolean;
     sourceDefinitionId?: string;
@@ -292,6 +323,9 @@ function liquidCandidate(
       netLiquidCreditGain: options.netGain ?? grossGain - creditCost,
       creditCost,
       creditRestriction: options.creditRestriction ?? "general",
+      ...(options.maxCurrentTurnUses !== undefined
+        ? { maxCurrentTurnUses: options.maxCurrentTurnUses }
+        : {}),
       repeatable: options.repeatable ?? false,
       reliability: options.reliability ?? "guaranteed",
     }),

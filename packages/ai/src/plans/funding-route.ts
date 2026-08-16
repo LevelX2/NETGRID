@@ -99,7 +99,7 @@ type RouteOption = {
   creditCost: number;
   reliability: FundingRouteReliability;
   maximumTurnOffset: 0 | 1 | 2 | 3;
-  repeatable: boolean;
+  maximumUses: number;
 };
 
 type SearchState = {
@@ -109,7 +109,7 @@ type SearchState = {
   remainingClicks: number;
   reliability: FundingRouteReliability;
   maximumTurnOffset: 0 | 1 | 2 | 3;
-  usedOptionIds: Set<string>;
+  optionUseCounts: Map<string, number>;
 };
 
 export function searchFundingRoutes(
@@ -123,7 +123,7 @@ export function searchFundingRoutes(
       remainingClicks: wholeNonNegative(params.remainingClicks),
       reliability: "guaranteed",
       maximumTurnOffset: 0,
-      usedOptionIds: new Set(),
+      optionUseCounts: new Map(),
     });
     return result(params.demand, [funded]);
   }
@@ -149,7 +149,7 @@ export function searchFundingRoutes(
       remainingClicks,
       reliability: "guaranteed",
       maximumTurnOffset: 0,
-      usedOptionIds: new Set(),
+      optionUseCounts: new Map(),
     },
   ];
   const covered: FundingRoute[] = [];
@@ -159,9 +159,8 @@ export function searchFundingRoutes(
     const state = queue.shift()!;
     if (state.steps.length >= maxSteps) continue;
     for (const option of options) {
-      if (!option.repeatable && state.usedOptionIds.has(option.optionId)) {
-        continue;
-      }
+      const optionUseCount = state.optionUseCounts.get(option.optionId) ?? 0;
+      if (optionUseCount >= option.maximumUses) continue;
       if (option.currentTurnClickCost > state.remainingClicks) continue;
       if (option.creditCost > state.generalCredits) continue;
       if (!deadlineAllows(params.demand.deadline, option.maximumTurnOffset)) {
@@ -182,10 +181,10 @@ export function searchFundingRoutes(
           state.maximumTurnOffset,
           option.maximumTurnOffset,
         ) as 0 | 1 | 2 | 3,
-        usedOptionIds: new Set([
-          ...state.usedOptionIds,
-          ...(!option.repeatable ? [option.optionId] : []),
-        ]),
+        optionUseCounts: new Map(state.optionUseCounts).set(
+          option.optionId,
+          optionUseCount + 1,
+        ),
       };
       const stateKey = searchStateKey(next);
       if (visited.has(stateKey)) continue;
@@ -302,7 +301,9 @@ function currentFundingOption(
     creditCost: projection.creditCost,
     reliability,
     maximumTurnOffset: 0,
-    repeatable: projection.repeatable === true,
+    maximumUses:
+      projection.maxCurrentTurnUses ??
+      (projection.repeatable === true ? Number.MAX_SAFE_INTEGER : 1),
   };
 }
 
@@ -390,7 +391,7 @@ function futureFundingOption(
     creditCost: setupCreditCost,
     reliability,
     maximumTurnOffset: projection.earliestOwnTurnOffset,
-    repeatable: false,
+    maximumUses: 1,
   };
 }
 
@@ -549,7 +550,10 @@ function searchStateKey(state: SearchState): string {
     state.remainingClicks,
     state.reliability,
     state.maximumTurnOffset,
-    [...state.usedOptionIds].sort().join(","),
+    [...state.optionUseCounts.entries()]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([optionId, count]) => `${optionId}:${count}`)
+      .join(","),
     state.steps.map((step) => step.stepId).join(","),
   ].join("|");
 }

@@ -91,6 +91,26 @@ describe("action economy projection", () => {
     });
   });
 
+  it("keeps an engine-certified hosted-credit cashout repeatable only within its finite pool", () => {
+    const cashout = project(
+      legalAction("short-term-cashout", "activated_card_ability", {
+        payload: {
+          gainCreditsAmount: 2,
+          cardImplementationTakesHostedCredits: true,
+          hostedCreditTakeAmount: 2,
+          cardImplementationHostedCreditCashOutMaxUses: 6,
+        },
+      }),
+    );
+
+    expect(cashout).toMatchObject({
+      kind: "immediate_liquid",
+      grossLiquidCreditGain: 2,
+      maxCurrentTurnUses: 6,
+      repeatable: true,
+    });
+  });
+
   it("uses the net hand delta for a played +2 credit and draw-one action", () => {
     const projection = project(
       legalAction("mixed-operation", "play_operation", {

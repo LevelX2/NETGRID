@@ -60,6 +60,12 @@ export function activatedAbilityPayload(
     configuredHostedCreditTakeAmount,
     availableHostedCredits,
   );
+  const hostedCreditCashOutMaxUses = hostedCreditCashOutMaxUsesFromState(
+    ability,
+    hostedCreditTakeEffect,
+    configuredHostedCreditTakeAmount,
+    availableHostedCredits,
+  );
   const directCreditGain = ability.effects.reduce(
     (sum, effect) =>
       effect.kind === "gain_credits" &&
@@ -130,6 +136,12 @@ export function activatedAbilityPayload(
       ? {
           cardImplementationTakesHostedCredits: true,
           ...(hostedCreditTakeAmount > 0 ? { hostedCreditTakeAmount } : {}),
+          ...(hostedCreditCashOutMaxUses !== undefined
+            ? {
+                cardImplementationHostedCreditCashOutMaxUses:
+                  hostedCreditCashOutMaxUses,
+              }
+            : {}),
           ...(hostedCreditTakeEffect.mode !== undefined
             ? { hostedCreditTakeMode: hostedCreditTakeEffect.mode }
             : {}),
@@ -257,6 +269,24 @@ function effectiveHostedCreditTakeAmount(
   if (effect.mode === "all") return availableAmount ?? configuredAmount;
   if (availableAmount === undefined) return configuredAmount;
   return Math.min(configuredAmount, availableAmount);
+}
+
+function hostedCreditCashOutMaxUsesFromState(
+  ability: ActivatedCardAbilityImplementation,
+  effect:
+    | Extract<CardEffectImplementation, { kind: "take_hosted_credits" }>
+    | undefined,
+  configuredAmount: number,
+  availableAmount: number | undefined,
+): number | undefined {
+  if (!effect || availableAmount === undefined || availableAmount <= 0) {
+    return undefined;
+  }
+  if (ability.limit !== undefined || effect.mode === "all") return 1;
+  if (!Number.isSafeInteger(configuredAmount) || configuredAmount <= 0) {
+    return undefined;
+  }
+  return Math.max(1, Math.floor(availableAmount / configuredAmount));
 }
 
 function makeRunLegalActionProjectionPayload(

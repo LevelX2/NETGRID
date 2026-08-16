@@ -80,6 +80,59 @@ describe("activatedAbilityPayload advancement semantics", () => {
       gainCreditsAmount: 12,
       hostedCreditTakeAmount: 12,
       hostedCreditTakeMode: "all",
+      cardImplementationHostedCreditCashOutMaxUses: 1,
+    });
+  });
+
+  it("publishes the finite current-state use ceiling for repeatable hosted-credit cashout", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "runner_main",
+      costs: [{ kind: "action", amount: 1 }],
+      effects: [
+        {
+          kind: "take_hosted_credits",
+          source: "source",
+          recipient: "controller",
+          amount: 2,
+          visibility: "public",
+        },
+      ],
+    };
+    const fullState = {
+      cardInstances: {
+        source: { counters: { bit: 12 } },
+      },
+    } as unknown as GameState;
+    const partialState = {
+      cardInstances: {
+        source: { counters: { bit: 3 } },
+      },
+    } as unknown as GameState;
+
+    expect(
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        fullState,
+      ),
+    ).toMatchObject({
+      gainCreditsAmount: 2,
+      hostedCreditTakeAmount: 2,
+      cardImplementationHostedCreditCashOutMaxUses: 6,
+    });
+    expect(
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        partialState,
+      ),
+    ).toMatchObject({
+      gainCreditsAmount: 2,
+      hostedCreditTakeAmount: 2,
+      cardImplementationHostedCreditCashOutMaxUses: 1,
     });
   });
 

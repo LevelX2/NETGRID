@@ -124,6 +124,9 @@ export function actionEconomyProjectionFor(
     action.payload?.cardImplementationTakesHostedCredits === true
       ? "finite"
       : undefined;
+  const maxCurrentTurnUses = exactPositiveInteger(
+    action.payload?.cardImplementationHostedCreditCashOutMaxUses,
+  );
   const evidence = [
     `kind:${kind}`,
     `click_cost:${clickCost}`,
@@ -146,6 +149,9 @@ export function actionEconomyProjectionFor(
       : []),
     ...(payoutMode !== undefined ? [`payout_mode:${payoutMode}`] : []),
     ...(sourcePool !== undefined ? [`source_pool:${sourcePool}`] : []),
+    ...(maxCurrentTurnUses !== undefined
+      ? [`max_current_turn_uses:${maxCurrentTurnUses}`]
+      : []),
     ...(rootRezAction
       ? [`root_rez_credit_outcome:${rootRezOutcome.status}`]
       : []),
@@ -190,10 +196,13 @@ export function actionEconomyProjectionFor(
     netHandDelta,
     ...(payoutMode !== undefined ? { payoutMode } : {}),
     ...(sourcePool !== undefined ? { sourcePool } : {}),
+    ...(maxCurrentTurnUses !== undefined ? { maxCurrentTurnUses } : {}),
     repeatable:
-      isBasicCreditAction(action) || isBasicDrawAction(action)
-        ? true
-        : "unknown",
+      maxCurrentTurnUses !== undefined
+        ? maxCurrentTurnUses > 1
+        : isBasicCreditAction(action) || isBasicDrawAction(action)
+          ? true
+          : "unknown",
     reliability,
     source:
       rootRezOutcome.status === "missing" ||
@@ -369,6 +378,12 @@ function isBasicDrawAction(action: LegalAction): boolean {
 
 function positiveNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : undefined;
+}
+
+function exactPositiveInteger(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0
     ? value
     : undefined;
 }
