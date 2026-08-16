@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Play only if you made a successful run on HQ this turn. If the Corp forgoes actions to lose Virus counters, two counters of your choice are not removed. The Corp may trash Code Viral Cache by taking an action to pay 5.",
+      "Play only if you made a successful run on HQ this turn. If the Corp forgoes actions to lose Virus counters, two counters of your choice are not removed. The Corp may trash Code Viral Cache by taking an action to pay [5].",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -82,7 +82,25 @@ export const cardSpec = {
         role: "protect_virus_counters",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey(
+          "hidden_replacement_longtail_purge_replacement_with_runner_virus_counter_cleanup",
+        ),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "preserve_two_high_value_virus_counters",
+            preferences: [
+              "virus_counter_enables_current_plan",
+              "virus_counter_near_activation_threshold",
+              "virus_counter_high_access_or_damage_payoff",
+            ],
+            avoid: ["replaceable_or_inactive_virus_counter"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

@@ -91,17 +91,34 @@ export const cardSpec = {
           "Operations Semantic Review v2: ice_rez / installment_liability.",
       },
       {
-        kind: "target_preference",
-        purpose: "choose_installment_rez_ice",
-        preferences: [
-          "current_run_path_relevance",
-          "protects_agenda_remote",
-          "high_rez_cost_relief",
-        ],
-        avoid: ["irrelevant_server_ice", "hidden_info_dependent_choice"],
+        kind: "risk_interpretation",
+        risk: "term_counter_installment_liability",
+        severity: "high",
+        rationale:
+          "Each initial Term counter creates a future two-credit payment; missed payments grow the liability.",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: capabilityKey("on_play_free_rez_ice_with_term_counters"),
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_installment_rez_ice",
+            preferences: [
+              "current_run_path_relevance",
+              "protects_agenda_remote",
+              "protects_central_access_pressure",
+              "high_rez_cost_relief",
+            ],
+            avoid: [
+              "irrelevant_server_ice",
+              "insufficient_post_payment_reserve",
+            ],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

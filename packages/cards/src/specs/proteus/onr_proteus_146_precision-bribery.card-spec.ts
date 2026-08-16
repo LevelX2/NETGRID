@@ -60,35 +60,20 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
+        role: "remote_creation_lock",
       },
       {
         kind: "plan_role",
-        role: "safe_probe_run",
+        role: "corp_remote_tempo_denial",
       },
       {
         kind: "strategic_role",
         role: "tax_tool",
       },
       {
-        kind: "strategy_anchor",
-        strategyKey: "runner.remote_contest",
-      },
-      {
         kind: "line_support",
         lineKey: "runner.remote_contest",
         support: "supports",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
-      },
-      {
-        kind: "target_preference",
-        purpose: "lock_fort_creation_with_near_term_value",
-        preferences: ["protects_agenda_remote", "current_run_path_relevance"],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
     capabilities: [],

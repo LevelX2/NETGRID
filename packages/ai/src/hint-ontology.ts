@@ -73,6 +73,7 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "prevention_replacement",
   "survival_payoff",
   "delayed_penalty",
+  "random_discard",
 ] as const;
 
 export const KNOWN_HINT_STRATEGIC_EXCHANGE_KINDS = [
@@ -252,6 +253,7 @@ export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_liberated_agenda_this_turn",
   "requires_liberated_gray_ops_agenda",
   "requires_liberated_black_ops_agenda",
+  "requires_corp_scored_black_ops_agenda_last_turn",
   "requires_accessed_card",
   "requires_remote_server",
   "requires_hq_pressure",
@@ -411,6 +413,7 @@ export const KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES = [
   "accessed_card",
   "mode_choice",
   "subroutine",
+  "counter",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
@@ -485,6 +488,9 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "minimum_cards_for_current_credit_need",
   "least_needed_stealth_credit_source",
   "preserve_current_run_credit_reserve",
+  "virus_counter_enables_current_plan",
+  "virus_counter_near_activation_threshold",
+  "virus_counter_high_access_or_damage_payoff",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -514,6 +520,7 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "unrevealed_matchpoint_agenda_under_hq_pressure",
   "reveal_beyond_current_credit_need",
   "only_remaining_relevant_stealth_source",
+  "replaceable_or_inactive_virus_counter",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [
