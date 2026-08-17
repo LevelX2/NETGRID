@@ -1680,6 +1680,10 @@ function runnerContext(
     input,
     activeRunRootPlan(previous, input),
   );
+  const runRiskReassessment = runnerRunRiskContractReassessment(
+    input,
+    activeRunRoot,
+  );
   const runWindowActionAssessments = runnerRunWindowActionAssessments(
     input,
     candidates,
@@ -1687,6 +1691,7 @@ function runnerContext(
     economy,
     dependencies,
     activeRunRoot,
+    runRiskReassessment,
   );
   const discardChoiceBinding = runnerDiscardChoicePlanBinding({
     input,
@@ -1705,6 +1710,7 @@ function runnerContext(
     runTargets,
     runWindowActionAssessments,
     activeRunRoot,
+    runRiskReassessment,
     previous,
     discardChoiceBinding,
   );
@@ -3278,6 +3284,7 @@ function buildRunnerDomain(
     RunnerPlanDomain["runWindows"][number]["actionAssessments"]
   >,
   activeRunRoot: ActiveRunnerRunRoot | undefined,
+  runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
   previous: ResidentPlanPortfolio | undefined,
   discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
 ): RunnerPlanDomain {
@@ -5076,21 +5083,25 @@ function buildRunnerDomain(
   );
   const runWindows = hasRunWindowCandidate
     ? (() => {
-        const runRiskReassessment = runnerRunRiskContractReassessment(
-          input,
-          activeRunRoot,
-        );
         const safetyAssessment =
           runnerFutureEncounterDamageJackOutAssessment(input) ??
           runnerKnownAccessDamageJackOutAssessment(input) ??
           currentRunAbortAssessment(input, activeRunRoot, runRiskReassessment);
         const encounterMitigation = visibleEncounterMitigation(input);
+        const fullPathEncounterRequiresBreak =
+          runnerFullPathCommitmentRequiresEncounterBreak(
+            input,
+            runWindowActionAssessments,
+            activeRunRoot,
+            runRiskReassessment,
+          );
         const exactPhaseActionIds = runnerExactRunWindowPhaseActionIds(
           input,
           candidates,
           runWindowActionAssessments,
           safetyAssessment !== undefined,
           currentEncounterHasUnbrokenResolvableDeflector(input) ||
+            fullPathEncounterRequiresBreak ||
             activeRunRoot?.informationBoundaryReassessment?.decision ===
               "convert_to_access" ||
             activeRunRoot?.informationBoundaryReassessment?.decision ===
@@ -20396,6 +20407,7 @@ function runnerRunWindowActionAssessments(
   economy: RunnerEconomyPosture,
   dependencies: PlanFirstLiveDependencies,
   runOrigin: RunnerRunOrigin | undefined,
+  runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
 ): NonNullable<RunnerPlanDomain["runWindows"][number]["actionAssessments"]> {
   const assessments: NonNullable<
     RunnerPlanDomain["runWindows"][number]["actionAssessments"]
@@ -20423,6 +20435,7 @@ function runnerRunWindowActionAssessments(
       economy,
       dependencies,
       runOrigin,
+      runRiskReassessment,
     );
   }
   return assessments;
@@ -20436,6 +20449,7 @@ function runnerRunWindowActionAssessment(
   economy: RunnerEconomyPosture,
   dependencies: PlanFirstLiveDependencies,
   runOrigin: RunnerRunOrigin | undefined,
+  runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
 ): RunnerRunWindowActionAssessment {
   const additionalAccessAssessment =
     assessRunnerAdditionalAccessRunWindowAction({
@@ -20616,13 +20630,27 @@ function runnerRunWindowActionAssessment(
     action.type === "pump_breaker" || action.type === "break_subroutine"
       ? dependencies.runnerEncounterActionExclusion(input, action)
       : undefined;
+  const fullPathCommitmentPreserved = runnerFullPathCommitmentIsPreserved(
+    input,
+    runOrigin,
+    runRiskReassessment,
+  );
+  const overriddenEncounterExclusion =
+    fullPathCommitmentPreserved &&
+    encounterExclusion &&
+    runnerFullPathCommitmentCanOverrideEncounterExclusion(encounterExclusion)
+      ? encounterExclusion
+      : undefined;
+  const effectiveEncounterExclusion = overriddenEncounterExclusion
+    ? undefined
+    : encounterExclusion;
   const planStepExclusion = runnerRunWindowPlanStepExclusion(
     input,
     action,
     dependencies,
     runOrigin,
   );
-  const exclusion = encounterExclusion ?? planStepExclusion;
+  const exclusion = effectiveEncounterExclusion ?? planStepExclusion;
   const programPreservationPayment = runnerProgramPreservationPaymentValue(
     input,
     action,
@@ -20684,6 +20712,18 @@ function runnerRunWindowActionAssessment(
           `runner_run_window_action:${action.type}`,
           ...(committedParentPayoff
             ? [`runner_run_parent_payoff_preserved:${committedParentPayoff}`]
+            : []),
+          ...(fullPathCommitmentPreserved
+            ? ["runner_full_path_commitment_preserved"]
+            : []),
+          ...(overriddenEncounterExclusion
+            ? [
+                `runner_full_path_commitment_overrode_encounter_exclusion:${overriddenEncounterExclusion.key}`,
+                ...overriddenEncounterExclusion.reason
+                  .split("|")
+                  .map((entry) => entry.trim())
+                  .filter(Boolean),
+              ]
             : []),
           ...(accessTrashImpact?.evidenceCodes ?? []),
           ...(runOrigin?.informationBoundaryReassessment?.evidenceCodes ?? []),
@@ -20993,6 +21033,56 @@ function runnerRunOriginCommittedPayoff(
     commitment.payoff === "trash_affordable" ||
     commitment.payoff === "access_bonus";
   return committed ? commitment.payoff : undefined;
+}
+
+function runnerFullPathCommitmentIsPreserved(
+  input: AiDecisionInput,
+  runOrigin: RunnerRunOrigin | undefined,
+  reassessment: RunnerRunRiskReassessmentSignal | undefined,
+): boolean {
+  const run = input.playerView.run;
+  const contract = runOrigin?.runRiskContract;
+  return (
+    run !== undefined &&
+    contract !== undefined &&
+    contract.serverId === run.attackedServerId &&
+    contract.runCommitment === "full_path" &&
+    contract.reserveQuote.unknownIceCount === 0 &&
+    reassessment?.decision === "preserve_continuation" &&
+    reassessment.currentReserveQuote?.unknownIceCount === 0
+  );
+}
+
+function runnerFullPathCommitmentCanOverrideEncounterExclusion(
+  exclusion: SemanticRuntimeExclusion,
+): boolean {
+  return (
+    exclusion.key === "encounter_remote_payoff_reserve_would_break" ||
+    exclusion.key === "encounter_reserve_would_break"
+  );
+}
+
+function runnerFullPathCommitmentRequiresEncounterBreak(
+  input: AiDecisionInput,
+  assessments: Readonly<Record<string, { admissible: boolean }>>,
+  runOrigin: RunnerRunOrigin | undefined,
+  reassessment: RunnerRunRiskReassessmentSignal | undefined,
+): boolean {
+  if (!runnerFullPathCommitmentIsPreserved(input, runOrigin, reassessment)) {
+    return false;
+  }
+  const encounterWouldEndRun = input.legalActions.some(
+    (action) =>
+      action.type === "continue_run" &&
+      action.payload?.encounterContinue === true &&
+      action.payload?.encounterWillEndRun === true,
+  );
+  if (!encounterWouldEndRun) return false;
+  return input.legalActions.some(
+    (action) =>
+      (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+      assessments[action.actionId]?.admissible === true,
+  );
 }
 
 function legalActionCreditCost(

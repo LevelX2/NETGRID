@@ -7,12 +7,18 @@ import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
 export type RunnerEncounterViabilityAssessment = {
   canLeadToBreak: boolean;
   evidence: string[];
+  constraint?: RunnerEncounterActionConstraint;
 };
 
 export type RunnerEncounterBreakAccessAssessment = {
   canPreserveAccessPath: boolean;
   evidence: string[];
+  constraint?: RunnerEncounterActionConstraint;
 };
+
+export type RunnerEncounterActionConstraint =
+  | "remote_payoff_reserve"
+  | "turn_reserve";
 
 export type RunnerEncounterActionExclusionDependencies = {
   randomBreakOrDamageBreakExclusion: (
@@ -58,17 +64,19 @@ export function runnerEncounterActionExclusion(
   if (action.type === "pump_breaker") {
     const assessment = dependencies.pumpViabilityAssessment(input, action);
     if (assessment.canLeadToBreak) return undefined;
-    const evidence = new Set(assessment.evidence);
-    const remotePayoffBlocked = evidence.has(
-      "encounter_remote_payoff_blocked:true",
-    );
     return {
-      key: remotePayoffBlocked
-        ? "encounter_remote_payoff_unaffordable"
-        : "pump_cannot_lead_to_useful_break",
-      label: remotePayoffBlocked
-        ? "Encounter-Kosten machen Remote-Ziel unbezahlbar"
-        : "Pumpen ohne Zugriffspfad",
+      key:
+        assessment.constraint === "remote_payoff_reserve"
+          ? "encounter_remote_payoff_reserve_would_break"
+          : assessment.constraint === "turn_reserve"
+            ? "encounter_reserve_would_break"
+            : "pump_cannot_lead_to_useful_break",
+      label:
+        assessment.constraint === "remote_payoff_reserve"
+          ? "Encounter-Kosten unterschreiten die gebundene Remote-Reserve"
+          : assessment.constraint === "turn_reserve"
+            ? "Encounter-Kosten unterschreiten die Zugreserve"
+            : "Pumpen ohne Zugriffspfad",
       reason: sortedUnique([
         "encounter_action:pump_breaker",
         ...assessment.evidence,
@@ -91,17 +99,15 @@ export function runnerEncounterActionExclusion(
     }
     const assessment = dependencies.breakAccessPathAssessment(input, action);
     if (assessment.canPreserveAccessPath) return undefined;
-    const evidence = new Set(assessment.evidence);
-    const remotePayoffBlocked = evidence.has(
-      "encounter_remote_payoff_blocked:true",
-    );
     return {
-      key: remotePayoffBlocked
-        ? "encounter_remote_payoff_unaffordable"
-        : "break_cannot_preserve_access_path",
-      label: remotePayoffBlocked
-        ? "Break macht Remote-Ziel unbezahlbar"
-        : "Break ohne Zugriffspfad",
+      key:
+        assessment.constraint === "remote_payoff_reserve"
+          ? "encounter_remote_payoff_reserve_would_break"
+          : "break_cannot_preserve_access_path",
+      label:
+        assessment.constraint === "remote_payoff_reserve"
+          ? "Break unterschreitet die gebundene Remote-Reserve"
+          : "Break ohne Zugriffspfad",
       reason: sortedUnique([
         "encounter_action:break_subroutine",
         ...assessment.evidence,

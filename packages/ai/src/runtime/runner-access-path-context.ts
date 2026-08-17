@@ -19,6 +19,10 @@ import {
   runnerEncounterPaymentForAction,
   spendRunnerEncounterActionCost,
 } from "./runner-encounter-credit-budget";
+import type {
+  RunnerEncounterActionConstraint,
+  RunnerEncounterBreakAccessAssessment,
+} from "./runner-encounter-action-exclusion";
 
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
@@ -51,14 +55,18 @@ export function createRunnerAccessPathContext(
   breakAccessPathAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => { canPreserveAccessPath: boolean; evidence: string[] };
+  ) => RunnerEncounterBreakAccessAssessment;
   encounterRemotePayoffAfterBreakAssessment: (
     input: AiDecisionInput,
     server: VisibleServer,
     targetSubroutines: VisibleEncounterSubroutine[],
     creditsAfterAccessPath: number,
     remainingCurrentEndRunAfterBreak: number,
-  ) => { blocksBreak: boolean; evidence: string[] };
+  ) => {
+    blocksBreak: boolean;
+    evidence: string[];
+    constraint?: RunnerEncounterActionConstraint;
+  };
 } {
   const encounterRemotePayoffAfterBreakAssessment = (
     input: AiDecisionInput,
@@ -66,7 +74,11 @@ export function createRunnerAccessPathContext(
     targetSubroutines: VisibleEncounterSubroutine[],
     creditsAfterAccessPath: number,
     remainingCurrentEndRunAfterBreak: number,
-  ): { blocksBreak: boolean; evidence: string[] } => {
+  ): {
+    blocksBreak: boolean;
+    evidence: string[];
+    constraint?: RunnerEncounterActionConstraint;
+  } => {
     if (!dependencies.isRemoteServerTarget(server.id))
       return { blocksBreak: false, evidence: [] };
     if (targetSubroutines.length <= 0)
@@ -163,13 +175,16 @@ export function createRunnerAccessPathContext(
             ]
           : []),
       ],
+      ...(trashProjection.declineReason === "reserve_would_break"
+        ? { constraint: "remote_payoff_reserve" as const }
+        : {}),
     };
   };
 
   const breakAccessPathAssessment = (
     input: AiDecisionInput,
     action: LegalAction,
-  ): { canPreserveAccessPath: boolean; evidence: string[] } => {
+  ): RunnerEncounterBreakAccessAssessment => {
     const run = input.playerView.run;
     if (run?.position?.kind !== "ice")
       return { canPreserveAccessPath: true, evidence: [] };
@@ -242,6 +257,9 @@ export function createRunnerAccessPathContext(
         return {
           canPreserveAccessPath: false,
           evidence: remotePayoff.evidence,
+          ...(remotePayoff.constraint
+            ? { constraint: remotePayoff.constraint }
+            : {}),
         };
       return {
         canPreserveAccessPath: true,
@@ -273,6 +291,9 @@ export function createRunnerAccessPathContext(
             ...remotePayoff.evidence,
             dependencies.knownIcePathReason(pathAssessment, server.id),
           ],
+          ...(remotePayoff.constraint
+            ? { constraint: remotePayoff.constraint }
+            : {}),
         };
       return {
         canPreserveAccessPath: true,
@@ -299,6 +320,9 @@ export function createRunnerAccessPathContext(
         return {
           canPreserveAccessPath: false,
           evidence: remotePayoff.evidence,
+          ...(remotePayoff.constraint
+            ? { constraint: remotePayoff.constraint }
+            : {}),
         };
       }
       return {

@@ -24,6 +24,10 @@ import {
   type VisibleEncounterSubroutine,
 } from "./encounter-subroutine";
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
+import type {
+  RunnerEncounterActionConstraint,
+  RunnerEncounterViabilityAssessment,
+} from "./runner-encounter-action-exclusion";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
 type MutableEncounterCreditBudget = Omit<
@@ -59,7 +63,11 @@ export type RunnerPumpViabilityContextDependencies = {
     targetSubroutines: VisibleEncounterSubroutine[],
     creditsAfterAccessPath: number,
     remainingCurrentEndRunAfterBreak: number,
-  ) => { blocksBreak: boolean; evidence: string[] };
+  ) => {
+    blocksBreak: boolean;
+    evidence: string[];
+    constraint?: RunnerEncounterActionConstraint;
+  };
   runnerCreditReserveTarget: (input: AiDecisionInput) => number;
 };
 
@@ -69,12 +77,12 @@ export function createRunnerPumpViabilityContext(
   pumpViabilityAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => { canLeadToBreak: boolean; evidence: string[] };
+  ) => RunnerEncounterViabilityAssessment;
 } {
   const pumpViabilityAssessment = (
     input: AiDecisionInput,
     action: LegalAction,
-  ): { canLeadToBreak: boolean; evidence: string[] } => {
+  ): RunnerEncounterViabilityAssessment => {
     const breaker = dependencies.findVisibleCard(input, action.source);
     const encounteredIce = input.playerView.run?.encounteredIce;
     if (!breaker?.definitionId || !encounteredIce?.definitionId)
@@ -216,22 +224,21 @@ export function createRunnerPumpViabilityContext(
         (encounterContinue?.payload?.encounterWillEndRun === true &&
           isEndRunSubroutine(subroutine)),
     );
-    const estimatedBreakCost =
-      requiredBreakSubroutines?.length
-        ? creditsToBreakVisibleSubroutinesWithBreaker(
+    const estimatedBreakCost = requiredBreakSubroutines?.length
+      ? creditsToBreakVisibleSubroutinesWithBreaker(
+          breaker,
+          encounteredIce,
+          requiredBreakSubroutines,
+          (breaker.strength ?? 0) + requiredPumps * pumpAmount,
+        )?.cost
+      : requiredBreakCount > 0
+        ? creditsToBreakEndTheRunSubroutinesWithBreaker(
             breaker,
             encounteredIce,
-            requiredBreakSubroutines,
+            requiredBreakCount,
             (breaker.strength ?? 0) + requiredPumps * pumpAmount,
           )?.cost
-        : requiredBreakCount > 0
-          ? creditsToBreakEndTheRunSubroutinesWithBreaker(
-              breaker,
-              encounteredIce,
-              requiredBreakCount,
-              (breaker.strength ?? 0) + requiredPumps * pumpAmount,
-            )?.cost
-          : dependencies.estimatedEncounterBreakCost(input, action);
+        : dependencies.estimatedEncounterBreakCost(input, action);
     if (
       estimatedBreakCost === undefined ||
       !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)
@@ -251,6 +258,27 @@ export function createRunnerPumpViabilityContext(
       estimatedBreakCost,
     );
     const creditsAfterPumpAndBreak = breakPayment.budget.credits;
+    const pumpAndBreakCost = totalPumpCost + estimatedBreakCost;
+    if (
+      runEffect.hasRunRemainderEffect &&
+      !runEffect.mustBreak &&
+      !runEffect.futurePathBlocked &&
+      endTheRunCount === 0 &&
+      accessRedirectCount === 0 &&
+      !hasImmediateThreat &&
+      runEffect.futureCostDelta <= pumpAndBreakCost
+    ) {
+      return {
+        canLeadToBreak: false,
+        evidence: [
+          "pump_break_cost_not_better_than_unbroken_effect:true",
+          `pump_and_break_cost:${pumpAndBreakCost}`,
+          `unbroken_effect_future_cost:${runEffect.futureCostDelta}`,
+          `pump_required_count:${requiredPumps}`,
+          ...runEffect.evidence,
+        ],
+      };
+    }
     const run = input.playerView.run;
     const server =
       run?.position?.kind === "ice"
@@ -299,6 +327,9 @@ export function createRunnerPumpViabilityContext(
             `pump_credits_after_break:${creditsAfterPumpAndBreak}`,
             `pump_required_count:${requiredPumps}`,
           ],
+          ...(remotePayoff.constraint
+            ? { constraint: remotePayoff.constraint }
+            : {}),
         };
     }
     const reserveTarget = dependencies.runnerCreditReserveTarget(input);
@@ -315,6 +346,7 @@ export function createRunnerPumpViabilityContext(
           `pump_credits_after_break:${creditsAfterPumpAndBreak}`,
           `pump_reserve_target:${reserveTarget}`,
         ],
+        constraint: "turn_reserve",
       };
     }
 

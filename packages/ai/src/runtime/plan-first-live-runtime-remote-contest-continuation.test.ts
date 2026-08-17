@@ -228,6 +228,225 @@ describe("plan-first Remote contest continuation", () => {
     });
   });
 
+  it("keeps the admitted full-path Remote run bound through a known Filter instead of reapplying the turn reserve", () => {
+    resetResidentPlanPortfolioMemory();
+    const startRun = legalAction(
+      "run-remote-1-known-filter",
+      "runner",
+      "start_run",
+      "Run Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const target = {
+      ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      knownAccessState: "known_payoff" as const,
+      accessPayoff: "trash_affordable" as const,
+      runCommitment: "full_path" as const,
+      unknownUnrezzedIceCount: 0,
+      prerunReserveQuote: {
+        purpose: "contest" as const,
+        status: "not_required" as const,
+        riskTolerance: "standard" as const,
+        knownPathCost: 0,
+        creditsAfterKnownPath: 1,
+        unknownIceCount: 0,
+        unknownIcePositions: [],
+        corpRezCredits: 12,
+        visibleCoverage: "full" as const,
+        requiredCredits: 0,
+        creditGap: 0,
+        requiredHandBuffer: 0,
+        handBufferGap: 0,
+        evidence: ["match_979f6c9b9feeb640_full_known_path"],
+      },
+      recommendation: "run_now" as const,
+      pathCost: 0,
+      creditsAfterRun: 1,
+      score: 300,
+      evidence: [
+        "remote_memory_payoff:known",
+        "access_decision_projection_known_root:onr_v1_312_chicago-branch",
+        "known_remote_root_general_trash_cost:1",
+      ],
+    };
+    const context = liveContext({
+      evaluateRunnerRunTargets: (params: {
+        input: { legalActions: Array<{ type: string }> };
+      }) =>
+        params.input.legalActions.some((action) => action.type === "start_run")
+          ? [target]
+          : [],
+      runnerEncounterActionExclusion: (
+        _input: unknown,
+        action: { type: string },
+      ) =>
+        action.type === "break_subroutine"
+          ? {
+              key: "encounter_remote_payoff_reserve_would_break",
+              label: "Break macht Remote-Ziel unbezahlbar",
+              reason: [
+                "encounter_action:break_subroutine",
+                "encounter_remote_payoff_blocked:true",
+                "encounter_remote_trash_decline_reason:reserve_would_break",
+              ].join("|"),
+            }
+          : undefined,
+    });
+    const chicagoBranch = visibleCard("chicago-branch", "corp", "asset", {
+      definitionId: "onr_v1_312_chicago-branch",
+      title: "Chicago Branch",
+      rezzed: true,
+      trashCost: 1,
+    });
+    const filter = withEffectiveRunQuote(
+      visibleCard("known-filter", "corp", "ice", {
+        definitionId: "onr_v1_244_filter",
+        title: "Filter",
+        subtypes: ["code_gate"],
+        rezzed: true,
+        strength: 0,
+      }),
+      {
+        effectiveStrength: 0,
+        subroutines: [
+          {
+            id: "known-filter-end-the-run",
+            type: "end_the_run",
+            sourceDefinitionId: "onr_v1_244_filter",
+            sourceTitle: "Filter",
+          },
+        ],
+      },
+    );
+    const startInput = aiInput("runner", [startRun]);
+    startInput.playerView.own.credits = 1;
+    startInput.playerView.opponent.credits = 12;
+    startInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [filter], [chicagoBranch]),
+    ];
+
+    expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
+      actionId: startRun.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+    });
+    const root = residentPlanPortfolioSnapshot(startInput)?.instances.find(
+      (instance) => instance.moduleId === "runner.contest_remote",
+    );
+    expect(root).toMatchObject({
+      moduleState: {
+        signal: {
+          runRiskContract: { runCommitment: "full_path" },
+          accessCommitment: {
+            payoff: "trash_affordable",
+            intendedAction: "trash",
+          },
+        },
+      },
+    });
+
+    const breakFilter = legalAction(
+      "break-known-filter",
+      "runner",
+      "break_subroutine",
+      "Codecracker: Subroutine brechen",
+      { credits: 0, clicks: 0 },
+      {
+        source: "codecracker",
+        payload: {
+          breakerId: "codecracker",
+          iceId: filter.instanceId,
+          subroutineIndex: 0,
+        },
+      },
+    );
+    const resolveFilter = legalAction(
+      "resolve-known-filter",
+      "runner",
+      "continue_run",
+      "Subroutine auslösen (Run endet)",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        },
+      },
+    );
+    const encounterInput = aiInput("runner", [breakFilter, resolveFilter]);
+    encounterInput.playerView.stateVersion = 2;
+    encounterInput.playerView.timingPoint = "run.encounter_ice";
+    for (const action of encounterInput.legalActions) {
+      action.expiresAtStateVersion = 2;
+      action.timingPoint = "run.encounter_ice";
+    }
+    encounterInput.playerView.own.credits = 1;
+    encounterInput.playerView.own.rig = [
+      visibleCard("codecracker", "runner", "program", {
+        definitionId: "onr_v1_014_codecracker",
+        title: "Codecracker",
+        subtypes: ["icebreaker"],
+        strength: 0,
+      }),
+    ];
+    encounterInput.playerView.opponent.credits = 12;
+    encounterInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [filter], [chicagoBranch]),
+    ];
+    encounterInput.playerView.run = {
+      runId: "match-979-known-filter",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      encounteredIce: filter,
+      successful: false,
+    };
+
+    const decision = context.chooseSemanticRuntimeAction(encounterInput, {});
+    const leaf = residentPlanPortfolioSnapshot(encounterInput)?.instances.find(
+      (instance) => instance.moduleId === "runner.convert_run_window",
+    );
+
+    expect(decision).toMatchObject({
+      actionId: breakFilter.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: root?.instanceId,
+          leafExecutorInstanceId: leaf?.instanceId,
+          route: { actionId: breakFilter.actionId },
+        },
+      },
+    });
+    expect(leaf).toMatchObject({
+      parentInstanceId: root?.instanceId,
+      moduleState: {
+        signal: {
+          runRiskReassessment: { decision: "preserve_continuation" },
+          actionAssessments: {
+            [breakFilter.actionId]: {
+              admissible: true,
+              evidenceCodes: expect.arrayContaining([
+                "runner_full_path_commitment_preserved",
+                "runner_full_path_commitment_overrode_encounter_exclusion:encounter_remote_payoff_reserve_would_break",
+              ]),
+            },
+          },
+        },
+      },
+    });
+  });
+
   it("continues toward one unknown inner ICE while the admitted run-risk contract is still satisfied", () => {
     const { decision, leaf, root } = runRiskContractScenario({
       currentCredits: 4,

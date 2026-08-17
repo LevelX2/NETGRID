@@ -359,9 +359,148 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(decision.actionId).toBe(pump.actionId);
     expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
     expect(debugText).not.toContain("pump_required_count:5");
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.convert_run_window",
+    expect(decision.decisionDebug?.planKind).toBe("runner.convert_run_window");
+  });
+
+  it("accepts Canis Major's cheaper known future-path tax instead of overspending to break it", () => {
+    const loonyGoon = visibleCard("runner-loony-goon", "runner", "program", {
+      definitionId: "onr_v1_040_loony-goon",
+      title: "Loony Goon",
+      subtypes: ["icebreaker", "killer"],
+      strength: 0,
+    });
+    const codecracker = visibleCard("runner-codecracker", "runner", "program", {
+      definitionId: "onr_v1_014_codecracker",
+      title: "Codecracker",
+      subtypes: ["icebreaker"],
+      strength: 0,
+    });
+    const filter = (instanceId: string) =>
+      withEffectiveRunQuote(
+        visibleCard(instanceId, "corp", "ice", {
+          definitionId: "onr_v1_244_filter",
+          title: "Filter",
+          subtypes: ["code_gate"],
+          rezzed: true,
+          strength: 0,
+        }),
+        {
+          effectiveStrength: 0,
+          subroutines: [
+            {
+              id: `${instanceId}-end-the-run`,
+              type: "end_the_run",
+              sourceDefinitionId: "onr_v1_244_filter",
+              sourceTitle: "Filter",
+            },
+          ],
+        },
+      );
+    const innerFilter = filter("inner-filter");
+    const middleFilter = filter("middle-filter");
+    const chicagoBranch = visibleCard(
+      "remote-chicago-branch",
+      "corp",
+      "asset",
+      {
+        definitionId: "onr_v1_312_chicago-branch",
+        title: "Chicago Branch",
+        rezzed: true,
+        trashCost: 1,
+      },
     );
+    const canisMajor = withEffectiveRunQuote(
+      visibleCard("outer-canis-major", "corp", "ice", {
+        definitionId: "onr_v1_225_canis-major",
+        title: "Canis Major",
+        subtypes: ["sentry", "watchdog"],
+        rezzed: true,
+        strength: 4,
+      }),
+      {
+        effectiveStrength: 4,
+        subroutines: [
+          {
+            id: "outer-canis-major-future-strength",
+            type: "set_run_future_strength_bonus",
+            amount: 2,
+            sourceDefinitionId: "onr_v1_225_canis-major",
+            sourceTitle: "Canis Major",
+            unbrokenRunEffect: { increasesFutureIceStrength: 2 },
+          },
+        ],
+      },
+    );
+    const pump = legalAction(
+      "pump-loony-goon-for-canis",
+      "runner",
+      "pump_breaker",
+      "Loony Goon: Stärke +1",
+      { credits: 1 },
+      {
+        source: loonyGoon.instanceId,
+        visibility: "private_to_actor",
+        payload: {
+          breakerId: loonyGoon.instanceId,
+          iceId: canisMajor.instanceId,
+          pumpStrengthAmount: 1,
+        },
+      },
+    );
+    const resolveCanis = legalAction(
+      "resolve-canis-future-strength",
+      "runner",
+      "continue_run",
+      "Canis Major auflösen",
+      { credits: 0 },
+      {
+        visibility: "private_to_actor",
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+          sourceDefinitionId: "onr_v1_225_canis-major",
+        },
+      },
+    );
+    pump.timingPoint = "run.encounter_ice";
+    resolveCanis.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [pump, resolveCanis]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 10;
+    input.playerView.own.rig = [loonyGoon, codecracker];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [innerFilter, middleFilter, canisMajor],
+        [chicagoBranch],
+      ),
+    ];
+    input.playerView.run = {
+      runId: "match-979-canis-major",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 2 },
+      encounteredIce: canisMajor,
+      successful: false,
+    };
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision).toMatchObject({
+      actionId: resolveCanis.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+    });
+    expect(debugText).toContain(
+      "pump_break_cost_not_better_than_unbroken_effect:true",
+    );
+    expect(debugText).toContain("pump_and_break_cost:5");
+    expect(debugText).toContain("unbroken_effect_future_cost:4");
   });
 
   it("uses visible non-noisy run credits when deciding whether pumps can reach a break", () => {
