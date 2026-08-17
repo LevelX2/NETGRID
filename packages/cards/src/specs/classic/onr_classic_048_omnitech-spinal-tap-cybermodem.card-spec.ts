@@ -41,6 +41,8 @@ export const cardSpec = {
       strength: {
         kind: "not_applicable",
       },
+      memoryLimitBonus: 1,
+      recurringCredits: 2,
     },
     hardwareDeck: true,
     modifiers: [

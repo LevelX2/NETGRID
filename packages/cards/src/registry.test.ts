@@ -111,6 +111,25 @@ describe("CardRegistry", () => {
       maxHandSizeBonus: 1,
       recurringCredits: 1,
     });
+    expect(
+      publicCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_proteus_151_sunburst-cranial-interface" as CardDefinitionId,
+      ),
+    ).toMatchObject({
+      memoryLimitBonus: 1,
+      maxHandSizeBonus: 1,
+      recurringCredits: 1,
+    });
+    expect(
+      publicCardViewForDefinitionId(
+        ROOT_REGISTRY,
+        "onr_classic_048_omnitech-spinal-tap-cybermodem" as CardDefinitionId,
+      ),
+    ).toMatchObject({
+      memoryLimitBonus: 1,
+      recurringCredits: 2,
+    });
   });
 
   it("projects card-defined Corp hand-size modifiers", () => {
