@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "1 credit: Break wall subroutine.\n2 credits: +1 strength for the remainder of this run.",
+      "[1]: Break wall subroutine.\n[2]: +1 strength for the remainder of this run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

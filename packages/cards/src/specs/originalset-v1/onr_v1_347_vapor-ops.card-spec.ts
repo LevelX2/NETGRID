@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "You may advance Vapor Ops before and after you rez it.\nVapor Ops advancement counter: Gain 1.\n[A]: Move any number of advancement counters from Vapor Ops to another installed card that can be advanced.",
+      "You may advance Vapor Ops before and after you rez it.\nVapor Ops advancement counter: Gain [1].\nA: Move any number of advancement counters from Vapor Ops to another installed card that can be advanced.",
     capabilityText: [
       {
         capabilityKey: capabilityKey(

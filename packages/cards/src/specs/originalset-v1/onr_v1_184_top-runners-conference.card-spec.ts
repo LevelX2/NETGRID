@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Gain 2 credits at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
+      "Gain [2] at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
   },
   rules: {
     schemaVersion: "card-rules-v1",

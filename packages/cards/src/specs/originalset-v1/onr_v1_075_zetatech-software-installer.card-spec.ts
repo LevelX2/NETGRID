@@ -13,7 +13,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn.",
+      "Put [2] bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overwriting Software Installer itself. If you use any of these bits, replace them at the start of your next turn.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
