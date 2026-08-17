@@ -676,6 +676,56 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("keeps the reserve requirement active at zero Corp credits when visible run-time rez support exists", () => {
+    const input = aiInput({
+      credits: 0,
+      opponentCredits: 0,
+      servers: [
+        server("rd", {
+          ice: [
+            visibleCard("unknown-rd-ice", {
+              type: "ice",
+              known: false,
+              rezzed: false,
+            }),
+          ],
+          statuses: [
+            {
+              id: "rd-visible-rez-support",
+              kind: "during_run_ice_rez_support",
+              scope: "target_server",
+              costModel: "half_rez_cost_rounded_down",
+              target: "unrezzed_ice_on_this_fort",
+              limit: "once_per_run_per_source",
+              targetServerId: "rd",
+              sourceCardInstanceId: "rd-rez-support",
+              sourceTitle: "Visible rez support",
+              sourceSide: "corp",
+            },
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      recommendation: "gain_credits_first",
+      visibleDuringRunRezSupport: true,
+      unrezzedIceRiskCreditBuffer: 2,
+      unrezzedIceRiskUnderfunded: true,
+      prerunReserveQuote: {
+        status: "blocked",
+        corpRezCredits: 0,
+        requiredCredits: 2,
+        creditGap: 2,
+        requiredHandBuffer: 3,
+      },
+    });
+  });
+
   it("allows the explicit matchpoint corridor only with stable universal unknown-ICE coverage", () => {
     const protocolRun = activatedPrivateLookRun("matchpoint-protocol-rd");
     const input = aiInput({

@@ -19,6 +19,32 @@ import type {
 } from "./plan-scheduler";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-bypass-plan";
+import type { RunnerPrerunReserveQuote } from "../run-analysis/runner-run-target-types";
+
+export type RunnerRunRiskContractSignal = {
+  schemaVersion: "runner-run-risk-contract-v1";
+  serverId: string;
+  observedAtStateVersion: number;
+  runCommitment: "probe_only" | "full_path";
+  unrezzedIceRisk: number;
+  runnerCreditsAtEntry: number;
+  runnerHandCountAtEntry: number;
+  visibleDuringRunRezSupport: boolean;
+  reserveQuote: RunnerPrerunReserveQuote;
+  evidenceCodes: string[];
+};
+
+export type RunnerRunRiskReassessmentSignal = {
+  schemaVersion: "runner-run-risk-reassessment-v1";
+  serverId: string;
+  observedAtStateVersion: number;
+  decision: "preserve_continuation" | "prefer_jack_out";
+  currentUnrezzedIceRisk?: number;
+  baselineReserveQuote: RunnerPrerunReserveQuote;
+  currentReserveQuote?: RunnerPrerunReserveQuote;
+  evidenceCodes: string[];
+  failureCode?: "current_server_risk_model_missing";
+};
 
 export type RunnerPressureSignal = {
   pressureId: string;
@@ -41,6 +67,7 @@ export type RunnerPressureSignal = {
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
+  runRiskContract?: RunnerRunRiskContractSignal;
   informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
   accessPayoffCampaign?: {
     payoffCardInstanceId: string;
@@ -89,6 +116,7 @@ export type RunnerRemoteContestSignal = {
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
+  runRiskContract?: RunnerRunRiskContractSignal;
   informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
 };
 
@@ -217,6 +245,7 @@ export type RunnerRunWindowSignal = {
   purposeCode: string;
   evidenceCode: string;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
+  runRiskReassessment?: RunnerRunRiskReassessmentSignal;
   safetyIntent?: "jack_out";
   safetyEvidenceCode?: string;
   encounterIntent?: "mitigate_threat";

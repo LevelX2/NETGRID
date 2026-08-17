@@ -314,6 +314,7 @@ export type RunnerRunTargetEvaluation = {
   unrezzedIceRisk?: number;
   unrezzedIceRiskCreditBuffer?: number;
   unrezzedIceRiskUnderfunded?: boolean;
+  visibleDuringRunRezSupport?: boolean;
   prerunReserveQuote?: RunnerPrerunReserveQuote;
   visibleIceRunHazards?: VisibleIceRunHazard[];
   visibleIceHazardPenalty?: number;

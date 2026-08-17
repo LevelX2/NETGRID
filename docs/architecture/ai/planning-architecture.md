@@ -433,6 +433,15 @@ auslösenden Run-/Access-Plan und benötigen eine explizite planlokale
 Assessment. Sie bilden keinen konkurrierenden strategischen Plan und keine
 automatische Sonderlane.
 
+Ein Run mit unbekanntem verbleibendem ICE bindet die beim Start akzeptierte
+side-sichere Risiko- und Reservequote an seine Root-Planinstanz. Das gebundene
+`runner.convert_run_window`-Leaf quotiert denselben Vertrag an jedem
+Jack-out-Fenster mit dem verbleibenden ICE, aktuellem Credit- und Handpuffer
+sowie dem aktuell sichtbaren Corp-Rez-Potenzial neu. Erst eine materielle
+Verschlechterung gegenüber dem akzeptierten Startvertrag begründet eine
+Jack-out-Präferenz; ein unveränderter Grenzfall erzeugt weder einen neuen Plan
+noch eine zweite Entscheidungsautorität.
+
 ## 5. Nicht-Ziele
 
 - Die KI erzeugt keine LegalActions.
@@ -4807,6 +4816,14 @@ Rahmen nicht verändert. Beispiele:
 - privilegierte private KI-Debuganzeige ausdrücklich von normalen
   side-sicheren Datenwegen getrennt: Sie zeigt die vollständige Hand der
   aktiven KI sowie den kompletten Zugplan, nicht jedoch die Menschenhand.
+
+### 1.0 – 2026-08-17
+
+- Den side-sicheren Run-Risikovertrag als Root-Plan-Zustand präzisiert und die
+  Revalidierung im gebundenen `runner.convert_run_window`-Leaf festgelegt;
+  unveränderte Startannahmen bleiben zulässig, materielle Verschlechterungen
+  von Credit-/Handreserve oder sichtbarem Rez-Potenzial können Jack-out
+  priorisieren, ohne eine neue Entscheidungsautorität zu erzeugen.
 
 ### 0.9 – 2026-07-26
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { LegalActionPayload } from "@netgrid/shared";
+import type { LegalActionPayload, VisibleCard } from "@netgrid/shared";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
@@ -227,7 +227,328 @@ describe("plan-first Remote contest continuation", () => {
       },
     });
   });
+
+  it("continues toward one unknown inner ICE while the admitted run-risk contract is still satisfied", () => {
+    const { decision, leaf, root } = runRiskContractScenario({
+      currentCredits: 4,
+      currentGripCount: 3,
+    });
+
+    expect(decision).toMatchObject({
+      actionId: "continue-remote-1-risk-contract",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: root?.instanceId,
+          leafExecutorInstanceId: leaf?.instanceId,
+          route: { actionId: "continue-remote-1-risk-contract" },
+        },
+      },
+    });
+    expect(root).toMatchObject({
+      moduleId: "runner.contest_remote",
+      moduleState: {
+        signal: {
+          runRiskContract: {
+            runCommitment: "probe_only",
+            reserveQuote: {
+              requiredCredits: 4,
+              creditGap: 0,
+              requiredHandBuffer: 3,
+              handBufferGap: 0,
+            },
+          },
+        },
+      },
+    });
+    expect(leaf).toMatchObject({
+      moduleId: "runner.convert_run_window",
+      parentInstanceId: root?.instanceId,
+      moduleState: {
+        signal: {
+          runRiskReassessment: {
+            decision: "preserve_continuation",
+            baselineReserveQuote: { creditGap: 0, handBufferGap: 0 },
+            currentReserveQuote: { creditGap: 0, handBufferGap: 0 },
+          },
+        },
+      },
+    });
+  });
+
+  it("prefers jack-out in the same bound run-window leaf after material liquidity degradation", () => {
+    const { decision, leaf, root } = runRiskContractScenario({
+      currentCredits: 2,
+      currentGripCount: 3,
+    });
+
+    expect(decision).toMatchObject({
+      actionId: "jack-out-remote-1-risk-contract",
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: root?.instanceId,
+          leafExecutorInstanceId: leaf?.instanceId,
+          route: { actionId: "jack-out-remote-1-risk-contract" },
+        },
+      },
+    });
+    expect(root?.moduleId).toBe("runner.contest_remote");
+    expect(leaf).toMatchObject({
+      moduleId: "runner.convert_run_window",
+      parentInstanceId: root?.instanceId,
+      moduleState: {
+        signal: {
+          safetyIntent: "jack_out",
+          safetyEvidenceCode: "runner_run_risk_contract_degraded:remote_1",
+          runRiskReassessment: {
+            decision: "prefer_jack_out",
+            baselineReserveQuote: { creditGap: 0 },
+            currentReserveQuote: { creditGap: 1 },
+          },
+        },
+      },
+    });
+  });
+
+  it("prefers jack-out when the admitted hand buffer degrades before unknown ICE", () => {
+    const { decision, leaf, root } = runRiskContractScenario({
+      currentCredits: 4,
+      currentGripCount: 2,
+    });
+
+    expect(decision.actionId).toBe("jack-out-remote-1-risk-contract");
+    expect(root?.moduleId).toBe("runner.contest_remote");
+    expect(leaf).toMatchObject({
+      moduleId: "runner.convert_run_window",
+      parentInstanceId: root?.instanceId,
+      moduleState: {
+        signal: {
+          runRiskReassessment: {
+            decision: "prefer_jack_out",
+            currentReserveQuote: { handBufferGap: 1 },
+          },
+        },
+      },
+    });
+  });
+
+  it("keeps running after Corp rez exposure disappears, but not when visible free-rez support remains", () => {
+    const noRezExposure = runRiskContractScenario({
+      currentCredits: 2,
+      currentGripCount: 3,
+      currentCorpCredits: 0,
+    });
+    expect(noRezExposure.decision.actionId).toBe(
+      "continue-remote-1-risk-contract",
+    );
+    expect(noRezExposure.leaf).toMatchObject({
+      parentInstanceId: noRezExposure.root?.instanceId,
+      moduleState: {
+        signal: {
+          runRiskReassessment: {
+            decision: "preserve_continuation",
+            currentReserveQuote: {
+              status: "not_required",
+              creditGap: 0,
+              handBufferGap: 0,
+            },
+          },
+        },
+      },
+    });
+
+    const visibleFreeRezExposure = runRiskContractScenario({
+      currentCredits: 1,
+      currentGripCount: 3,
+      currentCorpCredits: 0,
+      currentVisibleRezSupport: true,
+    });
+    expect(visibleFreeRezExposure.decision.actionId).toBe(
+      "jack-out-remote-1-risk-contract",
+    );
+    expect(visibleFreeRezExposure.leaf).toMatchObject({
+      parentInstanceId: visibleFreeRezExposure.root?.instanceId,
+      moduleState: {
+        signal: {
+          runRiskReassessment: {
+            decision: "prefer_jack_out",
+            currentReserveQuote: {
+              status: "blocked",
+              creditGap: 1,
+              handBufferGap: 0,
+            },
+          },
+        },
+      },
+    });
+  });
 });
+
+function runRiskContractScenario(params: {
+  currentCredits: number;
+  currentGripCount: number;
+  currentCorpCredits?: number;
+  currentVisibleRezSupport?: boolean;
+}) {
+  resetResidentPlanPortfolioMemory();
+  const startRun = legalAction(
+    "run-remote-1-risk-contract",
+    "runner",
+    "start_run",
+    "Run Remote 1",
+    { credits: 0, clicks: 1 },
+    { payload: { serverId: "remote_1" } },
+  );
+  const target = {
+    ...safeRuntimeRunTarget(startRun.actionId, "remote_1"),
+    targetKind: "remote" as const,
+    accessTargetKind: "remote" as const,
+    knownAccessState: "known_payoff" as const,
+    accessPayoff: "trash_affordable" as const,
+    runCommitment: "probe_only" as const,
+    unknownUnrezzedIceCount: 1,
+    unrezzedIceRisk: 0.81,
+    unrezzedIceRiskCreditBuffer: 4,
+    visibleDuringRunRezSupport: false,
+    prerunReserveQuote: {
+      purpose: "contest" as const,
+      status: "satisfied" as const,
+      riskTolerance: "standard" as const,
+      knownPathCost: 0,
+      creditsAfterKnownPath: 4,
+      unknownIceCount: 1,
+      unknownIcePositions: [0],
+      corpRezCredits: 14,
+      visibleCoverage: "none" as const,
+      requiredCredits: 4,
+      creditGap: 0,
+      requiredHandBuffer: 3,
+      handBufferGap: 0,
+      evidence: ["test_run_risk_contract_satisfied"],
+    },
+    recommendation: "run_now" as const,
+    score: 300,
+    evidence: ["remote_memory_payoff:known"],
+  };
+  const context = liveContext({
+    evaluateRunnerRunTargets: (input: {
+      input: { legalActions: Array<{ type: string }> };
+    }) =>
+      input.input.legalActions.some((action) => action.type === "start_run")
+        ? [target]
+        : [],
+  });
+  const unknownInnerIce = {
+    instanceId: "remote-1-unknown-inner-ice",
+    owner: "corp",
+    controller: "corp",
+    known: false,
+  } as VisibleCard;
+  const valuableRemote = visibleCard(
+    "remote-1-investment-firm",
+    "corp",
+    "asset",
+    {
+      definitionId: "onr_v1_294_investment-firm",
+      title: "Investment Firm",
+      rezzed: true,
+      trashCost: 2,
+    },
+  );
+  const startInput = aiInput("runner", [startRun]);
+  startInput.playerView.own.credits = 4;
+  startInput.playerView.own.gripOrHq = testGrip(3, "start-risk-contract");
+  startInput.playerView.opponent.credits = 14;
+  startInput.playerView.servers = [
+    server("hq"),
+    server("rd"),
+    server("archives"),
+    server("remote_1", [unknownInnerIce], [valuableRemote]),
+  ];
+
+  expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
+    actionId: startRun.actionId,
+    reasonCode: "plan_first.runner.contest_remote",
+  });
+  const root = residentPlanPortfolioSnapshot(startInput)?.instances.find(
+    (instance) => instance.moduleId === "runner.contest_remote",
+  );
+
+  const continueRun = legalAction(
+    "continue-remote-1-risk-contract",
+    "runner",
+    "continue_run",
+    "Continue Remote 1 run",
+    { credits: 0, clicks: 0 },
+    { payload: { serverId: "remote_1" } },
+  );
+  const jackOut = legalAction(
+    "jack-out-remote-1-risk-contract",
+    "runner",
+    "jack_out",
+    "Jack out",
+    { credits: 0, clicks: 0 },
+  );
+  const continuationInput = aiInput("runner", [continueRun, jackOut]);
+  continuationInput.playerView.stateVersion = 2;
+  continuationInput.playerView.timingPoint = "run.jack_out_window";
+  for (const action of continuationInput.legalActions) {
+    action.expiresAtStateVersion = 2;
+    action.timingPoint = "run.jack_out_window";
+  }
+  continuationInput.playerView.own.credits = params.currentCredits;
+  continuationInput.playerView.own.gripOrHq = testGrip(
+    params.currentGripCount,
+    "current-risk-contract",
+  );
+  continuationInput.playerView.opponent.credits =
+    params.currentCorpCredits ?? 14;
+  const currentRemote = server("remote_1", [unknownInnerIce], [valuableRemote]);
+  if (params.currentVisibleRezSupport) {
+    currentRemote.statuses = [
+      {
+        id: "remote-1-visible-rez-support",
+        kind: "during_run_ice_rez_support",
+        scope: "target_server",
+        costModel: "half_rez_cost_rounded_down",
+        target: "unrezzed_ice_on_this_fort",
+        limit: "once_per_run_per_source",
+        targetServerId: "remote_1",
+        sourceCardInstanceId: "remote-1-rez-support",
+        sourceTitle: "Visible rez support",
+        sourceSide: "corp",
+      },
+    ];
+  }
+  continuationInput.playerView.servers = [
+    server("hq"),
+    server("rd"),
+    server("archives"),
+    currentRemote,
+  ];
+  continuationInput.playerView.run = {
+    runId: "remote-1-risk-contract-run",
+    attackedServerId: "remote_1",
+    phase: "movement",
+    position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+    successful: false,
+  };
+
+  const decision = context.chooseSemanticRuntimeAction(continuationInput, {});
+  const leaf = residentPlanPortfolioSnapshot(continuationInput)?.instances.find(
+    (instance) => instance.moduleId === "runner.convert_run_window",
+  );
+  return { decision, leaf, root };
+}
+
+function testGrip(count: number, prefix: string): VisibleCard[] {
+  return Array.from({ length: count }, (_, index) =>
+    visibleCard(`${prefix}-${index}`, "runner", "event"),
+  );
+}
 
 function encounterAction(
   actionId: string,

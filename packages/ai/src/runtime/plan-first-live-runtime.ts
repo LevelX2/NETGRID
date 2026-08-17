@@ -37,6 +37,8 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
+import { reconstructBeliefState } from "../belief-state";
+import { quoteRunnerRunRiskReserve } from "../run-analysis/runner-run-risk-reserve";
 import { runnerRunTargetHasOptionalBonusRunValue } from "../runner-run-target-guidance";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
 import {
@@ -117,6 +119,8 @@ import {
   type RunnerRunAccessCommitmentSignal,
   type RunnerInformationBoundaryReassessmentSignal,
   type RunnerPressureSignal,
+  type RunnerRunRiskContractSignal,
+  type RunnerRunRiskReassessmentSignal,
   type RunnerRunWindowActionAssessment,
 } from "../plans/runner-tactical-plan-modules";
 import {
@@ -399,6 +403,7 @@ type RunnerRunOrigin = {
   purpose?: "access" | "multiaccess" | "information" | "contest";
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
+  runRiskContract?: RunnerRunRiskContractSignal;
   informationBoundaryReassessment?: RunnerInformationBoundaryReassessmentSignal;
 };
 
@@ -4096,6 +4101,10 @@ function buildRunnerDomain(
               hqSuccessWindowRoute !== undefined);
           const purpose =
             executionMode === "contest" ? ("access" as const) : executionMode;
+          const runRiskContract = runRiskContractForEvaluation(
+            input,
+            evaluation,
+          );
           return {
             pressureId: `central:${evaluation.targetServerId}`,
             serverId: evaluation.targetServerId as "hq" | "rd" | "archives",
@@ -4269,6 +4278,7 @@ function buildRunnerDomain(
                 }
               : {}),
             accessCommitment: accessCommitmentForEvaluation(evaluation),
+            ...(runRiskContract ? { runRiskContract } : {}),
             ...(sourceDefinitionForEvaluation(evaluation, candidates)
               ? {
                   sourceDefinitionIds: [
@@ -4465,6 +4475,7 @@ function buildRunnerDomain(
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+        const runRiskContract = runRiskContractForEvaluation(input, evaluation);
         const directRunRouteReady =
           evaluation.prerunReserveQuote?.status !== "blocked" &&
           (purpose !== "information" ||
@@ -4524,6 +4535,7 @@ function buildRunnerDomain(
               }
             : {}),
           accessCommitment: accessCommitmentForEvaluation(evaluation),
+          ...(runRiskContract ? { runRiskContract } : {}),
         };
       }),
     ...runnerMatchpointRemoteFocusSignals(input, runTargets),
@@ -5063,10 +5075,14 @@ function buildRunnerDomain(
   );
   const runWindows = hasRunWindowCandidate
     ? (() => {
+        const runRiskReassessment = runnerRunRiskContractReassessment(
+          input,
+          activeRunRoot,
+        );
         const safetyAssessment =
           runnerFutureEncounterDamageJackOutAssessment(input) ??
           runnerKnownAccessDamageJackOutAssessment(input) ??
-          currentRunAbortAssessment(input, activeRunRoot);
+          currentRunAbortAssessment(input, activeRunRoot, runRiskReassessment);
         const encounterMitigation = visibleEncounterMitigation(input);
         const exactPhaseActionIds = runnerExactRunWindowPhaseActionIds(
           input,
@@ -5135,6 +5151,7 @@ function buildRunnerDomain(
             ...(accessWindowCommitment
               ? { accessCommitment: accessWindowCommitment }
               : {}),
+            ...(runRiskReassessment ? { runRiskReassessment } : {}),
             ...(safetyAssessment
               ? {
                   safetyIntent: "jack_out" as const,
@@ -7539,6 +7556,31 @@ function accessCommitmentForEvaluation(
   };
 }
 
+function runRiskContractForEvaluation(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): RunnerRunRiskContractSignal | undefined {
+  const reserveQuote = evaluation.prerunReserveQuote;
+  if (!reserveQuote) return undefined;
+  return {
+    schemaVersion: "runner-run-risk-contract-v1",
+    serverId: evaluation.targetServerId,
+    observedAtStateVersion: input.playerView.stateVersion,
+    runCommitment: evaluation.runCommitment,
+    unrezzedIceRisk: Math.max(0, evaluation.unrezzedIceRisk ?? 0),
+    runnerCreditsAtEntry: Math.max(0, input.playerView.own.credits),
+    runnerHandCountAtEntry: input.playerView.own.gripOrHq.length,
+    visibleDuringRunRezSupport: evaluation.visibleDuringRunRezSupport === true,
+    reserveQuote: structuredClone(reserveQuote),
+    evidenceCodes: [
+      "runner_run_risk_contract_bound",
+      `runner_run_risk_contract_server:${evaluation.targetServerId}`,
+      `runner_run_risk_contract_commitment:${evaluation.runCommitment}`,
+      `runner_run_risk_contract_reserve_status:${reserveQuote.status}`,
+    ],
+  };
+}
+
 function currentAccessWindowCommitment(
   input: AiDecisionInput,
   economy: RunnerEconomyPosture,
@@ -7668,6 +7710,8 @@ function runOriginFromModuleState(moduleState: unknown): RunnerRunOrigin {
   const informationBoundaryReassessment = (
     signal as { informationBoundaryReassessment?: unknown }
   ).informationBoundaryReassessment;
+  const runRiskContract = (signal as { runRiskContract?: unknown })
+    .runRiskContract;
   return {
     ...(purpose === "access" ||
     purpose === "multiaccess" ||
@@ -7686,6 +7730,9 @@ function runOriginFromModuleState(moduleState: unknown): RunnerRunOrigin {
             informationBoundaryReassessment,
           ),
         }
+      : {}),
+    ...(isRunnerRunRiskContract(runRiskContract)
+      ? { runRiskContract: structuredClone(runRiskContract) }
       : {}),
   };
 }
@@ -7857,6 +7904,30 @@ function isRunnerInformationBoundaryReassessment(
     Number.isFinite(candidate.fundingGap) &&
     typeof candidate.unavoidableHazardCount === "number" &&
     Number.isFinite(candidate.unavoidableHazardCount) &&
+    Array.isArray(candidate.evidenceCodes)
+  );
+}
+
+function isRunnerRunRiskContract(
+  value: unknown,
+): value is RunnerRunRiskContractSignal {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<RunnerRunRiskContractSignal>;
+  const quote = candidate.reserveQuote;
+  return (
+    candidate.schemaVersion === "runner-run-risk-contract-v1" &&
+    typeof candidate.serverId === "string" &&
+    typeof candidate.observedAtStateVersion === "number" &&
+    (candidate.runCommitment === "probe_only" ||
+      candidate.runCommitment === "full_path") &&
+    typeof candidate.unrezzedIceRisk === "number" &&
+    Number.isFinite(candidate.unrezzedIceRisk) &&
+    typeof candidate.visibleDuringRunRezSupport === "boolean" &&
+    quote !== undefined &&
+    typeof quote.requiredCredits === "number" &&
+    Number.isFinite(quote.requiredCredits) &&
+    typeof quote.requiredHandBuffer === "number" &&
+    Number.isFinite(quote.requiredHandBuffer) &&
     Array.isArray(candidate.evidenceCodes)
   );
 }
@@ -20148,9 +20219,116 @@ function visibleEncounterMitigation(
   return `runner_visible_encounter_requires_mitigation:${definitionId}`;
 }
 
+function runnerRunRiskContractReassessment(
+  input: AiDecisionInput,
+  runOrigin: RunnerRunOrigin | undefined,
+): RunnerRunRiskReassessmentSignal | undefined {
+  const run = input.playerView.run;
+  const contract = runOrigin?.runRiskContract;
+  if (!run || !contract || contract.serverId !== run.attackedServerId) {
+    return undefined;
+  }
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === run.attackedServerId,
+  );
+  if (!server) return undefined;
+  const currentRiskModel = reconstructBeliefState(
+    input,
+  ).runnerOpponentModel?.unrezzedIceRiskModel.find(
+    (entry) => entry.serverId === run.attackedServerId,
+  );
+  if (!currentRiskModel) {
+    return {
+      schemaVersion: "runner-run-risk-reassessment-v1",
+      serverId: run.attackedServerId,
+      observedAtStateVersion: input.playerView.stateVersion,
+      decision: "prefer_jack_out",
+      baselineReserveQuote: structuredClone(contract.reserveQuote),
+      evidenceCodes: [
+        "runner_run_risk_contract_reassessment_failed_closed",
+        "runner_run_risk_contract_current_server_risk_model_missing",
+      ],
+      failureCode: "current_server_risk_model_missing",
+    };
+  }
+  const remainingIce = currentRunRemainingIce(input);
+  const unknownIcePositions = remainingIce.flatMap((card, index) =>
+    card.known === false && card.rezzed !== true ? [index] : [],
+  );
+  const knownRezzedRemainingIce = remainingIce.filter(
+    (card) => card.known !== false && card.rezzed === true,
+  );
+  const generalCredits =
+    input.playerView.own.credits +
+    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0);
+  const knownPath = assessKnownRezzedIcePath(
+    knownRezzedRemainingIce,
+    input.playerView.own.rig ?? [],
+    runnerRunPathCreditBudgetWithVisiblePools(
+      generalCredits,
+      input.playerView.own.rig ?? [],
+    ),
+    server.root,
+    input.playerView.opponent.credits,
+  );
+  const corpRezCredits = Math.max(0, input.playerView.opponent.credits);
+  const visibleDuringRunRezSupport =
+    server.statuses?.some(
+      (status) => status.kind === "during_run_ice_rez_support",
+    ) === true;
+  const corpRezExposureActive =
+    corpRezCredits > 0 || visibleDuringRunRezSupport;
+  const currentRiskCreditBuffer =
+    unknownIcePositions.length > 0 && corpRezExposureActive
+      ? Math.max(1, Math.ceil(currentRiskModel.risk * 4))
+      : 0;
+  const creditsAfterKnownPath = Math.max(0, knownPath.creditsAfterPath);
+  const currentReserveQuote = quoteRunnerRunRiskReserve({
+    purpose: contract.reserveQuote.purpose,
+    riskTolerance: contract.reserveQuote.riskTolerance,
+    visibleCoverage: contract.reserveQuote.visibleCoverage,
+    knownPathCost: Math.max(0, generalCredits - creditsAfterKnownPath),
+    creditsAfterKnownPath,
+    unknownIceCount: unknownIcePositions.length,
+    unknownIcePositions,
+    corpRezCredits,
+    corpRezExposureActive,
+    riskCreditBuffer: currentRiskCreditBuffer,
+    runnerGripCount: input.playerView.own.gripOrHq.length,
+    informationProbeAllowed:
+      contract.reserveQuote.status === "information_probe_only",
+  });
+  const materialReserveDegradation =
+    currentReserveQuote.creditGap > contract.reserveQuote.creditGap ||
+    currentReserveQuote.handBufferGap > contract.reserveQuote.handBufferGap;
+  const decision = materialReserveDegradation
+    ? ("prefer_jack_out" as const)
+    : ("preserve_continuation" as const);
+  return {
+    schemaVersion: "runner-run-risk-reassessment-v1",
+    serverId: run.attackedServerId,
+    observedAtStateVersion: input.playerView.stateVersion,
+    decision,
+    currentUnrezzedIceRisk: currentRiskModel.risk,
+    baselineReserveQuote: structuredClone(contract.reserveQuote),
+    currentReserveQuote,
+    evidenceCodes: [
+      "runner_run_risk_contract_reassessed",
+      `runner_run_risk_contract_decision:${decision}`,
+      `runner_run_risk_contract_baseline_credit_gap:${contract.reserveQuote.creditGap}`,
+      `runner_run_risk_contract_current_credit_gap:${currentReserveQuote.creditGap}`,
+      `runner_run_risk_contract_baseline_hand_gap:${contract.reserveQuote.handBufferGap}`,
+      `runner_run_risk_contract_current_hand_gap:${currentReserveQuote.handBufferGap}`,
+      `runner_run_risk_contract_current_unknown_ice:${unknownIcePositions.length}`,
+      `runner_run_risk_contract_current_corp_rez_exposure:${corpRezExposureActive}`,
+    ],
+  };
+}
+
 function currentRunAbortAssessment(
   input: AiDecisionInput,
   runOrigin: RunnerRunOrigin | undefined,
+  runRiskReassessment?: RunnerRunRiskReassessmentSignal,
 ): { evidenceCode: string } | undefined {
   const run = input.playerView.run;
   if (!run || !input.legalActions.some((action) => action.type === "jack_out"))
@@ -20159,6 +20337,11 @@ function currentRunAbortAssessment(
     (entry) => entry.id === run.attackedServerId,
   );
   if (!server) return undefined;
+  if (runRiskReassessment?.decision === "prefer_jack_out") {
+    return {
+      evidenceCode: `runner_run_risk_contract_degraded:${run.attackedServerId}`,
+    };
+  }
   if (
     run.phase === "movement" &&
     run.position?.kind === "server" &&
