@@ -83,7 +83,17 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "remote_asset_modifier",
+        role: "corp_action_tempo",
+      },
+      {
+        kind: "line_support",
+        lineKey: "corp.action_tempo",
+        support: "supports",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "loss_condition",
+        severity: "high",
       },
       {
         kind: "value_interpretation",

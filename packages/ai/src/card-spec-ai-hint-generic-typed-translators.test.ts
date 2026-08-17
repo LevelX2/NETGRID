@@ -1632,4 +1632,87 @@ describe("generic typed CardSpec AI translators", () => {
         }),
       );
   });
+
+  it("projects Batch 15 run exchanges, liabilities, and breaker side effects generically", () => {
+    const fullHint = (cardId: string) => {
+      const entry = cardSpecPlanningCards().find(
+        (candidate) => candidate.definition.id === cardId,
+      );
+      if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
+      return deriveCardSpecAiHint(entry);
+    };
+
+    const submarine = actualHint("onr_v1_182_submarine-uplink");
+    expect(submarine.functionSignals).toEqual(
+      expect.arrayContaining([
+        "run.ends_run_after_effect",
+        "trace.ends_run_after_encounter",
+      ]),
+    );
+    expect(submarine.riskTags).toContain("run_ends_after_encounter");
+    expect(submarine.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "delayed_penalty",
+        target: "run.ends_after_current_encounter",
+      }),
+    );
+
+    const nevinyrral = fullHint("onr_v1_331_nevinyrral");
+    expect(nevinyrral.planRoles).toContain("corp_action_tempo");
+    expect(nevinyrral.riskTags).toContain("loss_condition");
+    expect(nevinyrral.functionSignals).toEqual(
+      expect.arrayContaining([
+        "action.corp_repeatable_extra_action",
+        "risk.loss_condition",
+      ]),
+    );
+
+    const deathFromAbove = fullHint("onr_proteus_137_death-from-above");
+    expect(deathFromAbove.tacticSignals ?? []).not.toContain(
+      "corp.remote_protection",
+    );
+    expect(deathFromAbove.strategyAnchors).toEqual(["runner.remote_trash"]);
+    expect(deathFromAbove.functionSignals).toEqual(
+      expect.arrayContaining([
+        "access.remote_root_wipe",
+        "run.remote_sabotage",
+      ]),
+    );
+    expect(deathFromAbove.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "access_replacement",
+        target: "remote.root_wipe",
+      }),
+    );
+
+    const blink = fullHint("onr_v1_007_blink");
+    expect(blink.planRoles).not.toContain("safe_probe_run");
+    expect(blink.roles).not.toContain("self_trash");
+    expect(blink.functionSignals).not.toContain("breaker.self_trash_risk");
+    expect(blink.functionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.random_failure",
+        "risk.random_outcome",
+        "risk.runner_net_damage",
+      ]),
+    );
+    expect(blink.riskTags).toEqual(
+      expect.arrayContaining(["random_outcome", "net_damage"]),
+    );
+
+    const bulldozer = fullHint("onr_proteus_082_bulldozer");
+    expect(bulldozer.riskTags).toContain("stealth_loss");
+    expect(bulldozer.functionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.stealth_payment_loss",
+        "breaker.next_sentry_free_break",
+      ]),
+    );
+    expect(bulldozer.effects).toContainEqual(
+      expect.objectContaining({
+        kind: "future_encounter_effect",
+        target: "breaker.next_sentry_free_break",
+      }),
+    );
+  });
 });

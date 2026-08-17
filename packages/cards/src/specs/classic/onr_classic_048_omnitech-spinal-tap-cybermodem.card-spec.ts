@@ -121,16 +121,6 @@ export const cardSpec = {
         exchange: "self_damage",
       },
       {
-        kind: "tactic_interpretation",
-        signal: "damage.payoff",
-        use: "damage.payoff.runner",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
-      {
         kind: "risk_interpretation",
         risk: "opportunity_cost",
         severity: "high",

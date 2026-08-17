@@ -97,11 +97,6 @@ export const cardSpec = {
         kind: "plan_role",
         role: "safe_probe_run",
       },
-      {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
-      },
     ],
     capabilities: [],
   },

@@ -68,9 +68,8 @@ export const cardSpec = {
     schemaVersion: "card-planning-annotations-v1",
     card: [
       {
-        kind: "tactic_interpretation",
-        signal: "economy.card",
-        use: "economy.card",
+        kind: "plan_role",
+        role: "build_rig",
       },
       {
         kind: "target_preference",
@@ -80,7 +79,7 @@ export const cardSpec = {
           "program_affordable_after_install",
           "high_install_cost_or_memory",
         ],
-        avoid: ["hidden_info_dependent_choice"],
+        avoid: ["target_would_break_host_limit"],
       },
     ],
     capabilities: [],

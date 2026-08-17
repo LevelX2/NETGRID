@@ -60,6 +60,10 @@ export const cardSpec = {
         support: "supports",
       },
       {
+        kind: "strategy_anchor",
+        strategyKey: "corp.damage_kill",
+      },
+      {
         kind: "strategy_support",
         strategyKey: "corp.damage_kill",
         role: "enabler",

@@ -5617,7 +5617,7 @@
     {
       "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:6d3b0ce9538fc0ad",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f17ee649337a72ad",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f2ed9cc740afa50b",
       "hint": {
         "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
         "side": "runner",
@@ -5712,14 +5712,10 @@
           "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
-          "damage.payoff",
-          "economy.card",
           "risk.brain_damage_self_inflicted",
           "risk.unpreventable_brain_damage"
         ],
         "actionTacticSignals": [
-          "damage.payoff.runner",
-          "economy.card",
           "effect:damage",
           "effect:finite_economy_pool",
           "effect:global_modifier",
@@ -8125,7 +8121,7 @@
     {
       "cardId": "onr_proteus_023_galatea",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:23607cf4cc69f880",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:432794bfc7ecd383",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c38a177f47cfb7c3",
       "hint": {
         "cardId": "onr_proteus_023_galatea",
         "side": "corp",
@@ -8134,7 +8130,8 @@
         "roles": ["ice", "etr_ice"],
         "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
         "valueHints": {},
-        "strategyAnchors": ["corp.ice_tax_glacier"],
+        "strategicRole": ["defensive_tool"],
+        "lineSupport": ["corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -12721,14 +12718,29 @@
           "strengthBonusVsChosenIce": false
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" },
+          {
+            "kind": "future_encounter_effect",
+            "scope": "run_path",
+            "timing": "during_ice_encounter",
+            "target": "breaker.next_sentry_free_break",
+            "amount": 1,
+            "finite": true
+          }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": [
+          "breaker.wall",
+          "breaker.stealth_payment_loss",
+          "breaker.next_sentry_free_break"
+        ],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
           "coverage.breaker",
           "effect:breaker",
+          "effect:future_encounter_effect",
+          "effect_scope:run_path",
           "effect_scope:runner",
+          "effect_timing:during_ice_encounter",
           "effect_timing:persistent"
         ],
         "conditions": [
@@ -12736,7 +12748,7 @@
           { "kind": "requires_encounter" }
         ],
         "costProfile": { "clicks": 1, "credits": 7, "memory": 1 },
-        "riskTags": ["encounter"],
+        "riskTags": ["encounter", "stealth_loss"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -13163,7 +13175,8 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.reconfigurable_type"
+          "breaker.reconfigurable_type",
+          "breaker.stealth_payment_loss"
         ],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
@@ -14110,7 +14123,7 @@
         "effects": [
           { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": ["breaker.wall", "breaker.stealth_payment_loss"],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
           "coverage.breaker",
@@ -14119,7 +14132,7 @@
           "effect_timing:persistent"
         ],
         "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
-        "riskTags": ["encounter"],
+        "riskTags": ["encounter", "stealth_loss"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -14548,14 +14561,14 @@
     {
       "cardId": "onr_proteus_105_demolition-run",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:aee407c41f6b9b20",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:9d9fa95d5907f171",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f1f3515549b6abf9",
       "hint": {
         "cardId": "onr_proteus_105_demolition-run",
         "side": "runner",
         "cardType": "event",
         "aiSupportStatus": "ai_supported",
         "roles": ["event", "access_replacement", "ice_trash"],
-        "planRoles": ["pressure_rnd"],
+        "planRoles": ["ice_sabotage"],
         "valueHints": {},
         "strategyAnchors": ["runner.run_event_tempo"],
         "strategicExchangeKinds": ["self_tag"],
@@ -16450,15 +16463,15 @@
     {
       "cardId": "onr_proteus_130_back-door-to-rivals",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:514b9a6d82e0cf91",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8366e13d5ddb0051",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4f803ae30a3f5687",
       "hint": {
         "cardId": "onr_proteus_130_back-door-to-rivals",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["recover_economy"],
-        "valueHints": { "economy": 1 },
+        "planRoles": ["trace_bid_support"],
+        "valueHints": {},
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "trace_base_link_two",
@@ -16516,9 +16529,7 @@
           "trace.base_link",
           "trace.link_boost"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:base_link",
           "effect:link",
           "effect_scope:runner",
@@ -16931,20 +16942,34 @@
     {
       "cardId": "onr_proteus_137_death-from-above",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:c251b12d32bf1029",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e125cf015d24e2dd",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:61b1f4a8841bd3d4",
       "hint": {
         "cardId": "onr_proteus_137_death-from-above",
         "side": "runner",
         "cardType": "resource",
         "aiSupportStatus": "ai_supported",
         "roles": ["resource"],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "planRoles": ["remote_scoring_denial"],
         "valueHints": {},
         "strategicRole": ["punish_payoff"],
-        "strategyAnchors": ["runner.remote_contest", "runner.remote_trash"],
+        "strategyAnchors": ["runner.remote_trash"],
         "lineSupport": ["runner.remote_contest", "runner.remote_trash"],
-        "tacticSignals": ["corp.remote_protection"],
-        "actionTacticSignals": ["corp.remote_protection"],
+        "effects": [
+          {
+            "kind": "access_replacement",
+            "scope": "remote",
+            "timing": "after_successful_run",
+            "target": "remote.root_wipe",
+            "finite": true
+          }
+        ],
+        "functionSignals": ["access.remote_root_wipe", "run.remote_sabotage"],
+        "actionTacticSignals": [
+          "access.payoff",
+          "effect:access_replacement",
+          "effect_scope:remote",
+          "effect_timing:after_successful_run"
+        ],
         "conditions": [{ "kind": "requires_successful_run" }],
         "costProfile": { "clicks": 1, "credits": 0 },
         "riskTags": ["successful_run", "hidden_zone"],
@@ -18107,7 +18132,7 @@
     {
       "cardId": "onr_proteus_151_sunburst-cranial-interface",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:8703f9fc51fd32c8",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:dbe734a51d79a629",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:45e80637566e82ab",
       "hint": {
         "cardId": "onr_proteus_151_sunburst-cranial-interface",
         "side": "runner",
@@ -18168,9 +18193,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hand_size_modifier",
@@ -18840,7 +18863,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["icebreaker", "program", "universal_breaker", "self_trash"],
+        "roles": ["icebreaker", "program", "universal_breaker"],
         "planRoles": ["build_rig", "safe_probe_run", "break_ice"],
         "valueHints": {},
         "strategicRole": ["emergency_tool"],
@@ -18859,7 +18882,6 @@
         "functionSignals": [
           "breaker.configurable_coverage",
           "breaker.emergency_coverage",
-          "breaker.self_trash_risk",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],
@@ -18947,14 +18969,14 @@
     {
       "cardId": "onr_v1_007_blink",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:a86b9f42efe122e6",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:15c669d1f64985b5",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e63d3d713b4ed87d",
       "hint": {
         "cardId": "onr_v1_007_blink",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["icebreaker", "program", "universal_breaker", "self_trash"],
-        "planRoles": ["build_rig", "safe_probe_run", "break_ice"],
+        "roles": ["icebreaker", "program", "universal_breaker"],
+        "planRoles": ["build_rig", "break_ice"],
         "valueHints": {},
         "breakerProfile": {
           "coverage": ["universal"],
@@ -18971,19 +18993,31 @@
           }
         },
         "effects": [
-          { "kind": "breaker", "scope": "runner", "timing": "persistent" }
+          { "kind": "breaker", "scope": "runner", "timing": "persistent" },
+          {
+            "kind": "damage",
+            "scope": "runner",
+            "timing": "during_ice_encounter",
+            "resource": "net_damage",
+            "target": "breaker.random_failure_damage",
+            "repeatable": true
+          }
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
           "breaker.emergency_coverage",
-          "breaker.self_trash_risk",
-          "breaker.universal"
+          "breaker.universal",
+          "breaker.random_failure",
+          "risk.random_outcome",
+          "risk.runner_net_damage"
         ],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
           "coverage.breaker",
           "effect:breaker",
+          "effect:damage",
           "effect_scope:runner",
+          "effect_timing:during_ice_encounter",
           "effect_timing:persistent"
         ],
         "conditions": [
@@ -18991,7 +19025,7 @@
           { "kind": "requires_encounter" }
         ],
         "costProfile": { "clicks": 1, "credits": 5, "memory": 1 },
-        "riskTags": ["encounter"],
+        "riskTags": ["encounter", "random_outcome", "net_damage"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -19691,19 +19725,14 @@
     {
       "cardId": "onr_v1_018_dogcatcher",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:fdc4fca8582cf614",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:cfd819469eda79fa",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:15c669d1f64985b5",
       "hint": {
         "cardId": "onr_v1_018_dogcatcher",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["icebreaker", "program", "efficient_breaker"],
-        "planRoles": [
-          "build_rig",
-          "contest_remote",
-          "safe_probe_run",
-          "break_ice"
-        ],
+        "planRoles": ["build_rig", "safe_probe_run", "break_ice"],
         "valueHints": {},
         "breakerProfile": {
           "coverage": ["unknown_special", "watchdog"],
@@ -19754,8 +19783,7 @@
           "icebreaker",
           "program",
           "efficient_breaker",
-          "universal_breaker",
-          "self_trash"
+          "universal_breaker"
         ],
         "planRoles": ["emergency_breaker", "break_ice"],
         "valueHints": {},
@@ -19774,7 +19802,6 @@
         "functionSignals": [
           "breaker.configurable_coverage",
           "breaker.emergency_coverage",
-          "breaker.self_trash_risk",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],
@@ -20446,7 +20473,7 @@
         "effects": [
           { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": ["breaker.wall", "breaker.stealth_payment_loss"],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
           "coverage.breaker",
@@ -20455,7 +20482,7 @@
           "effect_timing:persistent"
         ],
         "costProfile": { "clicks": 1, "credits": 2, "memory": 1 },
-        "riskTags": ["encounter"],
+        "riskTags": ["encounter", "stealth_loss"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -20725,7 +20752,7 @@
         "effects": [
           { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": ["breaker.wall", "breaker.stealth_payment_loss"],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
           "coverage.breaker",
@@ -20734,7 +20761,7 @@
           "effect_timing:persistent"
         ],
         "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
-        "riskTags": ["encounter"],
+        "riskTags": ["encounter", "stealth_loss"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -20878,7 +20905,7 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": ["icebreaker", "program", "universal_breaker", "self_trash"],
+        "roles": ["icebreaker", "program", "universal_breaker"],
         "planRoles": ["build_rig", "safe_probe_run", "break_ice"],
         "valueHints": {},
         "breakerProfile": {
@@ -20896,7 +20923,6 @@
         "functionSignals": [
           "breaker.configurable_coverage",
           "breaker.emergency_coverage",
-          "breaker.self_trash_risk",
           "breaker.universal"
         ],
         "tacticSignals": ["coverage.breaker"],
@@ -21112,17 +21138,16 @@
     {
       "cardId": "onr_v1_043_mystery-box",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:465597e3e9ecd26f",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:104f11a9a4f96195",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:f61450ae190c5ab2",
       "hint": {
         "cardId": "onr_v1_043_mystery-box",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": [],
-        "planRoles": ["build_rig", "information", "recover_rig"],
+        "planRoles": ["build_rig", "information"],
         "valueHints": {},
-        "strategicRole": ["engine_anchor"],
-        "strategyAnchors": ["runner.search.breaker"],
+        "strategicRole": ["support_tool"],
         "lineSupport": ["runner.search.breaker"],
         "actionCapabilitySemantics": [
           {
@@ -21236,6 +21261,7 @@
           "effect_timing:during_run"
         ],
         "costProfile": { "clicks": 1, "credits": 3, "memory": 1 },
+        "riskTags": ["top_five_program_whiff"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -21494,7 +21520,7 @@
         "effects": [
           { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": ["breaker.wall", "breaker.stealth_payment_loss"],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
           "coverage.breaker",
@@ -21503,7 +21529,7 @@
           "effect_timing:persistent"
         ],
         "costProfile": { "clicks": 1, "credits": 1, "memory": 1 },
-        "riskTags": ["encounter"],
+        "riskTags": ["encounter", "stealth_loss"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -21871,7 +21897,7 @@
         "effects": [
           { "kind": "breaker", "scope": "runner", "timing": "persistent" }
         ],
-        "functionSignals": ["breaker.wall"],
+        "functionSignals": ["breaker.wall", "breaker.stealth_payment_loss"],
         "tacticSignals": ["coverage.breaker"],
         "actionTacticSignals": [
           "coverage.breaker",
@@ -21880,7 +21906,7 @@
           "effect_timing:persistent"
         ],
         "costProfile": { "clicks": 1, "credits": 4, "memory": 1 },
-        "riskTags": ["stealth_credit_pool_loss", "encounter"],
+        "riskTags": ["stealth_credit_pool_loss", "encounter", "stealth_loss"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -23146,14 +23172,14 @@
     {
       "cardId": "onr_v1_075_zetatech-software-installer",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:652e81a2d44b4d16",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:1705f0c23cf85736",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:c8d3af6cf5b3a0d8",
       "hint": {
         "cardId": "onr_v1_075_zetatech-software-installer",
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
         "roles": ["program"],
-        "planRoles": [],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "targetProfiles": [
           {
@@ -23164,7 +23190,7 @@
               "program_affordable_after_install",
               "high_install_cost_or_memory"
             ],
-            "avoid": ["hidden_info_dependent_choice"],
+            "avoid": ["target_would_break_host_limit"],
             "kind": "install_target",
             "timing": "paid_action",
             "targetType": "program",
@@ -23200,9 +23226,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -26754,14 +26778,14 @@
     {
       "cardId": "onr_v1_124_corolla-speed-chip",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2a87cb3c7e0e3b00",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e8f64a28f57f4c6c",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
       "hint": {
         "cardId": "onr_v1_124_corolla-speed-chip",
         "side": "runner",
         "cardType": "hardware",
         "aiSupportStatus": "ai_supported",
         "roles": ["hardware"],
-        "planRoles": [],
+        "planRoles": ["build_rig"],
         "valueHints": {},
         "effects": [
           {
@@ -26792,9 +26816,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:recurring_economy",
           "effect_scope:runner",
@@ -27541,7 +27563,7 @@
     {
       "cardId": "onr_v1_137_parraline-5750",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:635dbbeb1e9127b7",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e8f64a28f57f4c6c",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:ebc06817281534a3",
       "hint": {
         "cardId": "onr_v1_137_parraline-5750",
         "side": "runner",
@@ -27554,7 +27576,7 @@
           "run_support",
           "recurring_credit"
         ],
-        "planRoles": ["runner_install_hardware"],
+        "planRoles": ["build_rig", "runner_install_hardware"],
         "valueHints": {},
         "effects": [
           {
@@ -27601,9 +27623,7 @@
           "economy.hosted_credit_bank",
           "economy.temporary_resource_bank"
         ],
-        "tacticSignals": ["economy.card"],
         "actionTacticSignals": [
-          "economy.card",
           "effect:finite_economy_pool",
           "effect:global_modifier",
           "effect:hardware_trait",
@@ -31168,21 +31188,33 @@
             "target": "trace.link_boost",
             "amount": 1,
             "finite": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "run_path",
+            "timing": "encounter_resolution",
+            "target": "run.ends_after_current_encounter",
+            "finite": true
           }
         ],
         "functionSignals": [
           "defense.trace_defense",
           "trace.base_link",
-          "trace.link_boost"
+          "trace.link_boost",
+          "run.ends_run_after_effect",
+          "trace.ends_run_after_encounter"
         ],
         "actionTacticSignals": [
           "effect:base_link",
+          "effect:delayed_penalty",
           "effect:link",
+          "effect_scope:run_path",
           "effect_scope:runner",
+          "effect_timing:encounter_resolution",
           "effect_timing:trace_window"
         ],
         "costProfile": { "clicks": 1, "credits": 0 },
-        "riskTags": ["credit_cost"],
+        "riskTags": ["run_ends_after_encounter", "credit_cost"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -31295,6 +31327,7 @@
         ],
         "conditions": [{ "kind": "requires_start_of_turn" }],
         "costProfile": { "clicks": 1, "credits": 0 },
+        "riskTags": ["run_ends_economy_source"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -31671,7 +31704,7 @@
     {
       "cardId": "onr_v1_190_bioweapons-engineering",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:b41fc19cde8a9468",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4fcebb577716c56b",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:4a964fb09129e624",
       "hint": {
         "cardId": "onr_v1_190_bioweapons-engineering",
         "side": "corp",
@@ -31681,6 +31714,7 @@
         "planRoles": [],
         "valueHints": {},
         "strategicRole": ["enabler"],
+        "strategyAnchors": ["corp.damage_kill"],
         "lineSupport": ["corp.damage_kill"],
         "strategySupportPairs": [
           {
@@ -37359,14 +37393,14 @@
     {
       "cardId": "onr_v1_251_jack-attack",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:dec2eb1a21746996",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:aac3a261f3d1c6ad",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:8201741e432f4cda",
       "hint": {
         "cardId": "onr_v1_251_jack-attack",
         "side": "corp",
         "cardType": "ice",
         "aiSupportStatus": "ai_supported",
         "roles": ["ice", "sentry_ice", "ap_ice"],
-        "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
+        "planRoles": ["defend_server", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
         "strategyAnchors": ["corp.tag_trace_punish"],
@@ -44240,15 +44274,16 @@
     {
       "cardId": "onr_v1_331_nevinyrral",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:547c9020e8bb3bc4",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:553b5347e77f7e8b",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:286f8e34f8f02da8",
       "hint": {
         "cardId": "onr_v1_331_nevinyrral",
         "side": "corp",
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["asset", "unique"],
-        "planRoles": ["remote_asset_modifier"],
+        "planRoles": ["corp_action_tempo"],
         "valueHints": { "remoteRootValue": 4 },
+        "lineSupport": ["corp.action_tempo"],
         "actionCapacityProfiles": [
           {
             "class": "immediate_gain",
@@ -44277,7 +44312,36 @@
             "repeatable": true
           }
         ],
+        "effects": [
+          {
+            "kind": "extra_action",
+            "scope": "corp",
+            "timing": "start_of_turn",
+            "resource": "actions",
+            "target": "corp.recurring_extra_action",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "delayed_penalty",
+            "scope": "corp",
+            "timing": "on_leave_play",
+            "target": "risk.loss_condition"
+          }
+        ],
+        "functionSignals": [
+          "action.corp_repeatable_extra_action",
+          "risk.loss_condition"
+        ],
+        "actionTacticSignals": [
+          "effect:delayed_penalty",
+          "effect:extra_action",
+          "effect_scope:corp",
+          "effect_timing:on_leave_play",
+          "effect_timing:start_of_turn"
+        ],
         "costProfile": { "credits": 3 },
+        "riskTags": ["loss_condition"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,

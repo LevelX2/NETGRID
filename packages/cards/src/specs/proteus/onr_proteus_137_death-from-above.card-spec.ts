@@ -66,19 +66,11 @@ export const cardSpec = {
     card: [
       {
         kind: "plan_role",
-        role: "build_rig",
-      },
-      {
-        kind: "plan_role",
-        role: "safe_probe_run",
+        role: "remote_scoring_denial",
       },
       {
         kind: "strategic_role",
         role: "punish_payoff",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.remote_contest",
       },
       {
         kind: "strategy_anchor",
@@ -93,11 +85,6 @@ export const cardSpec = {
         kind: "line_support",
         lineKey: "runner.remote_trash",
         support: "supports",
-      },
-      {
-        kind: "tactic_interpretation",
-        signal: "corp.remote_protection",
-        use: "corp.remote_protection",
       },
     ],
     capabilities: [],

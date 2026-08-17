@@ -79,10 +79,6 @@ export const cardSpec = {
       },
       {
         kind: "plan_role",
-        role: "contest_remote",
-      },
-      {
-        kind: "plan_role",
         role: "safe_probe_run",
       },
       {

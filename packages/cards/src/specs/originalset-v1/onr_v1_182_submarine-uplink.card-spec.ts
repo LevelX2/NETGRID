@@ -34,6 +34,11 @@ export const cardSpec = {
         source: "card_text",
         reference: "onr_v1_182_submarine-uplink",
       },
+      {
+        source: "project_ruling",
+        reference: "docs/source/Netrunner Errata 1.70.md#Submarine Uplink",
+        note: "Official errata replaces the original jack-out wording with ending the run after the current encounter.",
+      },
     ],
   },
   engine: {

@@ -1101,6 +1101,65 @@ function deriveGenericTypedHintOverlay(
     overlay.conditions.push({ kind: "requires_runner_tagged" });
     overlay.functionSignals.push("damage.payoff", "tag.payoff");
   }
+  if (uniqueDirect?.kind === "rezzed_leave_action_gain_asset") {
+    overlay.effects.push(
+      {
+        kind: "extra_action",
+        scope: "corp",
+        timing: "start_of_turn",
+        resource: "actions",
+        target: "corp.recurring_extra_action",
+        amount: uniqueDirect.actionGain,
+        repeatable: true,
+      },
+      {
+        kind: "delayed_penalty",
+        scope: "corp",
+        timing: "on_leave_play",
+        target: "risk.loss_condition",
+      },
+    );
+    overlay.functionSignals.push(
+      "action.corp_repeatable_extra_action",
+      "risk.loss_condition",
+    );
+  }
+
+  for (const followup of engine.successfulRunFollowups ?? [])
+    if (
+      followup.kind === "successful_run_before_access_effect" &&
+      followup.effect.kind === "trash_remote_fort"
+    ) {
+      overlay.effects.push({
+        kind: "access_replacement",
+        scope: "remote",
+        timing: "after_successful_run",
+        target: "remote.root_wipe",
+        finite: true,
+      });
+      overlay.conditions.push({ kind: "requires_successful_run" });
+      overlay.functionSignals.push(
+        "access.remote_root_wipe",
+        "run.remote_sabotage",
+      );
+    }
+
+  if (
+    engine.runnerUtilityLongtail?.kind ===
+    "trace_link_end_run_after_encounter"
+  ) {
+    overlay.effects.push({
+      kind: "delayed_penalty",
+      scope: "run_path",
+      timing: "encounter_resolution",
+      target: "run.ends_after_current_encounter",
+      finite: true,
+    });
+    overlay.functionSignals.push(
+      "run.ends_run_after_effect",
+      "trace.ends_run_after_encounter",
+    );
+  }
 
   for (const source of engine.damagePreventionSources ?? []) {
     if (source.damageTypes.length === 0)
@@ -1205,6 +1264,47 @@ function deriveGenericTypedHintOverlay(
         "economy.installment_credit",
         "economy.turn_start_credit",
       );
+    }
+  }
+
+  const breaker = engine.icebreakerAbilities?.find(
+    (ability) => ability.kind === "break_subroutine",
+  );
+  if (breaker?.kind === "break_subroutine") {
+    if (breaker.special?.kind === "blink_random_break_or_net_damage") {
+      overlay.effects.push({
+        kind: "damage",
+        scope: "runner",
+        timing: "during_ice_encounter",
+        resource: "net_damage",
+        target: "breaker.random_failure_damage",
+        repeatable: true,
+      });
+      overlay.functionSignals.push(
+        "breaker.random_failure",
+        "risk.random_outcome",
+        "risk.runner_net_damage",
+      );
+    }
+    if (
+      breaker.onSuccessfulBreak?.some(
+        (effect) => effect.kind === "lose_bits_from_stealth_sources",
+      )
+    )
+      overlay.functionSignals.push("breaker.stealth_payment_loss");
+    if (
+      breaker.special?.kind ===
+      "set_next_sentry_free_break_after_fully_breaking_wall"
+    ) {
+      overlay.effects.push({
+        kind: "future_encounter_effect",
+        scope: "run_path",
+        timing: "during_ice_encounter",
+        target: "breaker.next_sentry_free_break",
+        amount: 1,
+        finite: true,
+      });
+      overlay.functionSignals.push("breaker.next_sentry_free_break");
     }
   }
 
@@ -4821,8 +4921,12 @@ function deriveRoles(
     if (breakerRoleAbility?.kind === "break_subroutine") {
       if (breakerRoleAbility.matches.kind === "any") {
         roles.add("universal_breaker");
-        roles.add("self_trash");
       }
+      if (
+        breakerRoleAbility.special?.kind ===
+        "run_end_trash_source_if_used"
+      )
+        roles.add("self_trash");
       if (
         breakerRoleAbility.special?.kind ===
         "once_per_run_break_tag_and_all_stealth_loss"
@@ -5074,6 +5178,17 @@ function deriveRiskTags(
   if (entry.planning.engine.uniqueDirectLongtail?.kind === "tagged_meat_damage")
     risks.push("tag", "damage_window", "flatline_pressure");
   if (
+    entry.planning.engine.uniqueDirectLongtail?.kind ===
+    "rezzed_leave_action_gain_asset"
+  )
+    risks.push("loss_condition");
+  if (
+    entry.planning.engine.lifecycle?.on_runner_run_start?.some((trigger) =>
+      trigger.effects.some((effect) => effect.kind === "trash_source"),
+    )
+  )
+    risks.push("run_ends_economy_source");
+  if (
     entry.planning.engine.abilities?.some((ability) =>
       ability.effects?.some(
         (effect) => effect.kind === "choose_stack_or_trash_program_install",
@@ -5263,6 +5378,18 @@ function deriveClosedExtendedRiskTags(
     breaker.special?.kind === "run_end_trash_source_if_used"
   )
     risks.add("self_trash");
+  if (
+    breaker?.kind === "break_subroutine" &&
+    breaker.special?.kind === "blink_random_break_or_net_damage"
+  )
+    for (const risk of ["random_outcome", "net_damage"]) risks.add(risk);
+  if (
+    breaker?.kind === "break_subroutine" &&
+    breaker.onSuccessfulBreak?.some(
+      (effect) => effect.kind === "lose_bits_from_stealth_sources",
+    )
+  )
+    risks.add("stealth_loss");
 
   const runnerUtility = engine.runnerUtilityLongtail?.kind;
   if (runnerUtility === "hq_access_expose_all_installed_corp_cards")
@@ -5274,6 +5401,8 @@ function deriveClosedExtendedRiskTags(
       risks.add(risk);
   if (runnerUtility === "trace_attempts_auto_success_add_tag")
     for (const risk of ["trace_liability", "tag_self"]) risks.add(risk);
+  if (runnerUtility === "trace_link_end_run_after_encounter")
+    risks.add("run_ends_after_encounter");
   if (runnerUtility === "first_prep_credit_gain_bonus")
     risks.add("prep_dependency");
   if (runnerUtility === "start_turn_random_effect_table")
@@ -9795,10 +9924,14 @@ function derivedFunctionSignals(
   )
     for (const signal of [
       "breaker.emergency_coverage",
-      "breaker.self_trash_risk",
       "breaker.universal",
     ])
       signals.add(signal);
+  if (
+    breakerSignalAbility?.kind === "break_subroutine" &&
+    breakerSignalAbility.special?.kind === "run_end_trash_source_if_used"
+  )
+    signals.add("breaker.self_trash_risk");
   const runnerUtilityKind = engine.runnerUtilityLongtail?.kind;
   if (runnerUtilityKind === "hq_access_expose_all_installed_corp_cards")
     for (const signal of [

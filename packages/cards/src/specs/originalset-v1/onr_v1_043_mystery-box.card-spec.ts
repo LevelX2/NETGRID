@@ -87,21 +87,18 @@ export const cardSpec = {
         role: "information",
       },
       {
-        kind: "plan_role",
-        role: "recover_rig",
-      },
-      {
         kind: "strategic_role",
-        role: "engine_anchor",
-      },
-      {
-        kind: "strategy_anchor",
-        strategyKey: "runner.search.breaker",
+        role: "support_tool",
       },
       {
         kind: "line_support",
         lineKey: "runner.search.breaker",
         support: "supports",
+      },
+      {
+        kind: "risk_interpretation",
+        risk: "top_five_program_whiff",
+        severity: "medium",
       },
     ],
     capabilities: [
