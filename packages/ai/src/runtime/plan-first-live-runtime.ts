@@ -3872,8 +3872,8 @@ function buildRunnerDomain(
   const materialAccessPayoffSupportNeedIds = new Set(
     accessPayoffFundingNeeds.map((need) => need.needId),
   );
-  const effectiveAccessPayoffCampaignSignals =
-    accessPayoffCampaignSignals.map((signal) => {
+  const effectiveAccessPayoffCampaignSignals = accessPayoffCampaignSignals.map(
+    (signal) => {
       if (
         !signal.accessPayoffCampaign?.reserveFundingOptional ||
         signal.supportNeedId === undefined ||
@@ -3886,7 +3886,8 @@ function buildRunnerDomain(
         ...withoutSupport,
         reachable: (signal.preparationActionIds?.length ?? 0) > 0,
       };
-    });
+    },
+  );
   const fundingNeeds = uniqueBy(
     [
       ...runFundingNeeds,
@@ -6055,10 +6056,7 @@ function runnerCentralPressureDevelopmentSignals(
     const reserveFundingGap = selected.reserveFundingOptional
       ? Math.max(0, selected.evaluation.fundingNeed?.missingCredits ?? 0)
       : 0;
-    const fundingGap = Math.max(
-      installAffordabilityGap,
-      reserveFundingGap,
-    );
+    const fundingGap = Math.max(installAffordabilityGap, reserveFundingGap);
     const fundingTargetCredits = Math.max(
       selected.installCost,
       input.playerView.own.credits + fundingGap,
@@ -6878,7 +6876,10 @@ function runnerCentralPressureHasMaterialMarginalValue(
   if (
     hqSaturatedByVisibleAccessEvidence &&
     !runnerMatchpointCentralAccess &&
-    !evaluation.multiaccessAvailable &&
+    !(
+      evaluation.multiaccessAvailable &&
+      (evaluation.accessNoveltyRatio ?? 1) >= 0.5
+    ) &&
     evaluation.accessPayoff !== "agenda" &&
     evaluation.accessPayoff !== "score_threat"
   ) {
@@ -6889,7 +6890,8 @@ function runnerCentralPressureHasMaterialMarginalValue(
     (evaluation.recommendation === "run_now" &&
       evaluation.pathCost === 0 &&
       evaluation.score > 0) ||
-    evaluation.multiaccessAvailable ||
+    (evaluation.multiaccessAvailable &&
+      (evaluation.accessNoveltyRatio ?? 1) >= 0.5) ||
     runnerMatchpointCentralAccess ||
     evaluation.accessPayoff === "agenda" ||
     evaluation.accessPayoff === "score_threat"

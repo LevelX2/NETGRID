@@ -6,6 +6,7 @@ export type RemoteRootValueKind =
   | "recurring_economy"
   | "campaign_drip"
   | "persistent_engine"
+  | "score_acceleration"
   | "scoring_protection"
   | "ambush"
   | "non_economy_counter"
@@ -21,7 +22,11 @@ export type RemoteRootValueProjectionInput = {
     resource?: string;
     scope?: string;
     timing?: string;
+    target?: string;
   }[];
+  functionSignals?: readonly string[];
+  lineSupport?: readonly string[];
+  strategicRoles?: readonly string[];
   valueHints?: AiRuntimeValueHints;
 };
 
@@ -39,7 +44,12 @@ export function projectRemoteRootValue(
   const roles = input.roles ?? [];
   const effects = input.effects ?? [];
   const counters = input.visibleCard?.counters ?? {};
-  const valueScore = Math.max(0, input.valueHints?.remoteRootValue ?? 0);
+  const scoreAcceleration = hasStructuredScoreAcceleration(input);
+  const valueScore = Math.max(
+    0,
+    input.valueHints?.remoteRootValue ?? 0,
+    scoreAcceleration ? 4 : 0,
+  );
   const hasFiniteEconomyEffect = effects.some(
     (effect) =>
       (effect.kind === "economy" || effect.kind === "finite_economy_pool") &&
@@ -59,6 +69,7 @@ export function projectRemoteRootValue(
     hasRecurringCreditCounter: counters.recurring_credit !== undefined,
     hasFiniteEconomyEffect,
     hasRecurringEconomyEffect,
+    scoreAcceleration,
     roleText,
   });
   const finitePoolValueRemaining =
@@ -81,6 +92,7 @@ export function projectRemoteRootValue(
       `remote_root_value_has_recurring_credit_counter:${
         counters.recurring_credit !== undefined
       }`,
+      `remote_root_value_score_acceleration:${scoreAcceleration}`,
       ...roles.slice(0, 6).map((role) => `remote_root_value_role:${role}`),
     ],
   };
@@ -91,9 +103,11 @@ function remoteRootValueKind(params: {
   hasRecurringCreditCounter: boolean;
   hasFiniteEconomyEffect: boolean;
   hasRecurringEconomyEffect: boolean;
+  scoreAcceleration: boolean;
   roleText: string;
 }): RemoteRootValueKind {
   const roleTokens = tokensForRoleText(params.roleText);
+  if (params.scoreAcceleration) return "score_acceleration";
   if (
     params.hasBitCounter &&
     (params.hasFiniteEconomyEffect ||
@@ -121,6 +135,27 @@ function remoteRootValueKind(params: {
   }
   if (params.hasBitCounter) return "non_economy_counter";
   return "unknown";
+}
+
+function hasStructuredScoreAcceleration(
+  input: RemoteRootValueProjectionInput,
+): boolean {
+  const functionSignals = new Set(input.functionSignals ?? []);
+  const lineSupport = new Set(input.lineSupport ?? []);
+  const strategicRoles = new Set(input.strategicRoles ?? []);
+  return (
+    functionSignals.has("score.fast_advance_support") ||
+    functionSignals.has("advance.counter_manipulation") ||
+    lineSupport.has("corp.fast_advance") ||
+    strategicRoles.has("scoring_tool") ||
+    (input.effects ?? []).some(
+      (effect) =>
+        effect.kind === "score_acceleration" ||
+        (effect.kind === "advance" &&
+          effect.resource === "advancement_counters" &&
+          effect.target === "advance.counter_transfer"),
+    )
+  );
 }
 
 function tokensForRoleText(value: string): string[] {

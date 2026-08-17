@@ -1136,6 +1136,62 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(rd?.evidence).toContain("installed_run_payoff:rd:multiaccess");
   });
 
+  it("discounts repeated HQ multiaccess by the expected novel access share", () => {
+    const input = aiInput({
+      credits: 8,
+      opponentHandCount: 5,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+        visibleCard("rd-interface", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq(
+        [
+          "onr_v1_230_cortical-scanner",
+          "onr_v1_237_data-wall",
+          "onr_v1_281_accounts-receivable",
+        ],
+        { handCount: 5, unknownRestCount: 2 },
+      ),
+    });
+    const hq = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "hq",
+    );
+    const rd = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+
+    expect(evaluations[0]?.targetServerId).toBe("rd");
+    expect(hq).toMatchObject({
+      accessNoveltyRatio: 0.4,
+      accessPayoff: "unknown",
+    });
+    expect(rd).toMatchObject({
+      accessNoveltyRatio: 1,
+      accessPayoff: "access_bonus",
+    });
+    expect(hq?.score).toBeLessThan(rd?.score ?? Number.NEGATIVE_INFINITY);
+    expect(hq?.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_knownness_payoff:partially_known_low_value",
+        "central_access_novelty_ratio:0.4",
+      ]),
+    );
+  });
+
   it("lets a known R&D agenda beat installed HQ multiaccess pressure", () => {
     const input = aiInput({
       credits: 6,
@@ -1632,7 +1688,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("reduces but keeps the high-known HQ low-value penalty when HQ multiaccess is installed", () => {
+  it("does not let HQ multiaccess erase a high-known low-value penalty", () => {
     const baseParams = {
       credits: 6,
       servers: [server("hq")],
@@ -1686,13 +1742,15 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       multiaccessAvailable: false,
     });
     expect(withMultiaccess).toMatchObject({
-      accessPayoff: "access_bonus",
+      accessPayoff: "unknown",
       knownAccessState: "unknown",
+      accessNoveltyRatio: 0.2,
       multiaccessAvailable: true,
-      recommendation: "run_now",
+      recommendation: "run_if_free",
     });
     expect(multiPenalty).toBeGreaterThan(0);
-    expect(multiPenalty).toBeLessThan(noMultiPenalty);
+    expect(multiPenalty).toBe(noMultiPenalty);
+    expect(withMultiaccess.score).toBeGreaterThan(withoutMultiaccess.score);
     expect(withMultiaccess.evidence).toEqual(
       expect.arrayContaining([
         "hq_access_depth_estimate:2",
@@ -1884,7 +1942,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("projects All-Hands as HQ multiaccess and offsets a high-known low-value HQ penalty", () => {
+  it("projects All-Hands as HQ multiaccess without erasing known-card saturation", () => {
     const beliefState = beliefWithKnownHq(
       [
         "onr_v1_230_cortical-scanner",
@@ -1923,8 +1981,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(allHands).toMatchObject({
       actionId: "all-hands-hq",
       targetServerId: "hq",
-      accessPayoff: "access_bonus",
+      accessPayoff: "unknown",
       knownAccessState: "unknown",
+      accessNoveltyRatio: 0.2,
       multiaccessAvailable: true,
       runActionProjection: {
         sourceKind: "event",

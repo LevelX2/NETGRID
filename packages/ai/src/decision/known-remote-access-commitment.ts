@@ -386,6 +386,9 @@ function knownRemoteTrashTargetProfile(
     roles,
     ...(visibleCard ? { visibleCard } : {}),
     ...(hint?.effects ? { effects: hint.effects } : {}),
+    ...(hint?.functionSignals ? { functionSignals: hint.functionSignals } : {}),
+    ...(hint?.lineSupport ? { lineSupport: hint.lineSupport } : {}),
+    ...(hint?.strategicRole ? { strategicRoles: hint.strategicRole } : {}),
     ...(hint?.valueHints ? { valueHints: hint.valueHints } : {}),
   });
   const value = valueProjection.valueScore;
