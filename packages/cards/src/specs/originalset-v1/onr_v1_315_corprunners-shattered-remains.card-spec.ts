@@ -1,5 +1,9 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const trashRunnerHardwareOnAccess = capabilityKey(
+  "access_effects_on_access_trash_installed_runner_cards",
+);
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -52,9 +56,7 @@ export const cardSpec = {
     },
     accessEffects: [
       {
-        capabilityKey: capabilityKey(
-          "access_effects_on_access_trash_installed_runner_cards",
-        ),
+        capabilityKey: trashRunnerHardwareOnAccess,
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_access",
         sourceZones: ["installed"],
@@ -126,14 +128,24 @@ export const cardSpec = {
         axis: "remote_root_value",
         rating: "low",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "trash_runner_hardware_on_access",
-        preferences: ["use_choice_option_with_visible_board_payoff"],
-        avoid: ["hidden_info_dependent_choice"],
+        capabilityKey: trashRunnerHardwareOnAccess,
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "trash_visible_runner_hardware_on_access",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "use_choice_option_with_visible_board_payoff",
+            ],
+            avoid: ["option_with_no_visible_current_payoff"],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

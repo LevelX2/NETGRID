@@ -1,5 +1,9 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const revealAndInstallProgram = capabilityKey(
+  "abilities_activated_during_run_look_top_stack_show_to_corp_then_install_matching",
+);
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -14,9 +18,7 @@ export const cardSpec = {
       "[0]: Show the top five cards of your stack to the Corp. If any of those cards are programs, trash Mystery Box and then install one of those programs, at no cost. Shuffle your stack afterwards. Use this ability only during a run and only once each run.",
     capabilityText: [
       {
-        capabilityKey: capabilityKey(
-          "abilities_activated_during_run_look_top_stack_show_to_corp_then_install_matching",
-        ),
+        capabilityKey: revealAndInstallProgram,
         actionLabel: "Mystery Box: Stack-Spitze zeigen",
       },
     ],
@@ -50,9 +52,7 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey(
-          "abilities_activated_during_run_look_top_stack_show_to_corp_then_install_matching",
-        ),
+        capabilityKey: revealAndInstallProgram,
         addressability: ["plan", "action", "quote", "debug"],
         kind: "activated",
         timing: "during_run",
@@ -103,18 +103,24 @@ export const cardSpec = {
         lineKey: "runner.search.breaker",
         support: "supports",
       },
+    ],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "install_best_program_for_current_rig_need",
-        preferences: [
-          "program_repairs_missing_coverage",
-          "program_affordable_after_install",
-          "program_preserves_run_goal",
+        capabilityKey: revealAndInstallProgram,
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "install_best_revealed_program_for_current_plan",
+            preferences: [
+              "program_repairs_missing_coverage",
+              "best_cards_for_current_plan",
+              "program_preserves_run_goal",
+            ],
+            avoid: ["low_value_program", "target_would_break_host_limit"],
+          },
         ],
-        avoid: ["hidden_info_dependent_choice"],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

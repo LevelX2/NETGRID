@@ -96,12 +96,6 @@ export const cardSpec = {
         signal: "punish.payoff",
         use: "punish.payoff",
       },
-      {
-        kind: "target_preference",
-        purpose: "trash_tagged_runner_hardware",
-        preferences: ["use_choice_option_with_visible_board_payoff"],
-        avoid: ["hidden_info_dependent_choice"],
-      },
     ],
     capabilities: [
       {
@@ -109,6 +103,19 @@ export const cardSpec = {
           "corp_utility_installed_hardware_trash_by_counter",
         ),
         annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_x_visible_non_cybernetics_hardware_to_trash",
+            preferences: [
+              "best_cards_for_current_plan",
+              "best_cards_for_current_state",
+              "use_choice_option_with_visible_board_payoff",
+            ],
+            avoid: [
+              "option_with_no_visible_current_payoff",
+              "insufficient_post_payment_reserve",
+            ],
+          },
           {
             kind: "strategy_support",
             strategyKey: "corp.tag_trace_punish",

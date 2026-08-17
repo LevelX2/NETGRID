@@ -121,7 +121,7 @@ export const cardSpec = {
           "protects_central_access_pressure",
           "current_run_path_relevance",
         ],
-        avoid: ["hidden_info_dependent_choice", "irrelevant_server_ice"],
+        avoid: ["irrelevant_server_ice"],
       },
       {
         kind: "risk_interpretation",

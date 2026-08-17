@@ -83,12 +83,9 @@ export const cardSpec = {
         preferences: [
           "use_choice_option_with_visible_board_payoff",
           "prefer_option_relevant_to_current_run_path",
-          "prefer_option_that_protects_agenda_or_remote_pressure",
+          "type_with_known_problem_ice",
         ],
-        avoid: [
-          "hidden_info_dependent_choice",
-          "option_with_no_visible_current_payoff",
-        ],
+        avoid: ["option_with_no_visible_current_payoff"],
       },
     ],
     capabilities: [],

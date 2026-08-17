@@ -99,12 +99,6 @@ export const cardSpec = {
         signal: "corp.remote_protection",
         use: "corp.remote_protection",
       },
-      {
-        kind: "target_preference",
-        purpose: "successful_remote_run_before_access",
-        preferences: [],
-        avoid: ["hidden_info_dependent_choice"],
-      },
     ],
     capabilities: [],
   },

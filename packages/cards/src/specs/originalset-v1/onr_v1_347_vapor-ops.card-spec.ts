@@ -1,5 +1,9 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const moveAdvancementCounters = capabilityKey(
+  "abilities_activated_corp_main_move_advancement_counters",
+);
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -20,9 +24,7 @@ export const cardSpec = {
         actionLabel: "Vapor Ops: Advancement-Counter für 1 Credit ausgeben",
       },
       {
-        capabilityKey: capabilityKey(
-          "abilities_activated_corp_main_move_advancement_counters",
-        ),
+        capabilityKey: moveAdvancementCounters,
         actionLabel: "Vapor Ops: Advancement-Counter bewegen",
       },
     ],
@@ -160,7 +162,24 @@ export const cardSpec = {
         rating: "low",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: moveAdvancementCounters,
+        annotations: [
+          { kind: "plan_owner", owner: "corp.score_agenda" },
+          {
+            kind: "target_preference",
+            purpose: "move_advancement_counters_for_score_conversion",
+            preferences: [
+              "advancement_target_in_current_plan",
+              "advanceable_ambush_with_access_payoff",
+              "best_cards_for_current_plan",
+            ],
+            avoid: ["nonconverting_advancement_target"],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {

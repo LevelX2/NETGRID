@@ -1,5 +1,9 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const jettisonRezzedIce = capabilityKey(
+  "abilities_on_play_pay_rez_cost_to_trash_rezzed_ice",
+);
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -45,9 +49,7 @@ export const cardSpec = {
     },
     abilities: [
       {
-        capabilityKey: capabilityKey(
-          "abilities_on_play_pay_rez_cost_to_trash_rezzed_ice",
-        ),
+        capabilityKey: jettisonRezzedIce,
         addressability: ["plan", "action", "quote", "debug"],
         kind: "on_play",
         costs: "printed",
@@ -67,15 +69,27 @@ export const cardSpec = {
   },
   planningAnnotations: {
     schemaVersion: "card-planning-annotations-v1",
-    card: [
+    card: [],
+    capabilities: [
       {
-        kind: "target_preference",
-        purpose: "successful_hq_run_ice_trash",
-        preferences: [],
-        avoid: [],
+        capabilityKey: jettisonRezzedIce,
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "successful_hq_run_rezzed_ice_trash",
+            preferences: [
+              "blocks_relevant_run_path",
+              "relevant_server_ice",
+              "high_rez_cost_tax",
+            ],
+            avoid: [
+              "irrelevant_server_ice",
+              "insufficient_post_payment_reserve",
+            ],
+          },
+        ],
       },
     ],
-    capabilities: [],
   },
   printings: [
     {

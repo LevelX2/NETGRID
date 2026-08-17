@@ -751,7 +751,7 @@ describe("generic typed CardSpec AI translators", () => {
             .length ?? 0),
         0,
       ),
-    ).toBe(73);
+    ).toBe(74);
     for (const entry of entries)
       expect(() =>
         deriveCardSpecAiHint(targetAnnotatedEntry(entry.definition.id)),
@@ -1577,5 +1577,59 @@ describe("generic typed CardSpec AI translators", () => {
       "onr_proteus_071_raymond-ellison",
     ])
       expect(fullHint(cardId).strategyAnchors).toBeUndefined();
+  });
+
+  it("keeps Batch 15 choices on their mechanical owner and information boundary", () => {
+    const fullHint = (cardId: string) => {
+      const entry = cardSpecPlanningCards().find(
+        (candidate) => candidate.definition.id === cardId,
+      );
+      if (entry === undefined) throw new Error(`missing_test_card:${cardId}`);
+      return deriveCardSpecAiHint(entry);
+    };
+
+    expect(fullHint("onr_proteus_137_death-from-above").targetProfiles).toBeUndefined();
+    expect(
+      fullHint("onr_v1_080_core-command-jettison-ice").targetProfiles,
+    ).toContainEqual(
+      expect.objectContaining({
+        purpose: "successful_hq_run_rezzed_ice_trash",
+        targetType: "installed_ice",
+        hiddenInfoPolicy: "visible_or_known_only",
+      }),
+    );
+
+    for (const cardId of [
+      "onr_v1_292_management-shake-up",
+      "onr_v1_304_systematic-layoffs",
+    ]) {
+      const hint = fullHint(cardId);
+      expect(hint.targetProfiles).toContainEqual(
+        expect.objectContaining({
+          purpose: "advance_high_value_corp_card_distribution",
+          targetType: "card",
+          hiddenInfoPolicy: "public_or_controller_known_only",
+        }),
+      );
+      expect(hint.actionPlanOwnerBindings).toContainEqual({
+        capabilityKey: "abilities_on_play_distribute_advancement_counters",
+        owner: "corp.score_agenda",
+      });
+    }
+
+    expect(fullHint("onr_v1_347_vapor-ops").actionPlanOwnerBindings).toContainEqual({
+      capabilityKey: "abilities_activated_corp_main_move_advancement_counters",
+      owner: "corp.score_agenda",
+    });
+    for (const cardId of [
+      "onr_v1_315_corprunners-shattered-remains",
+      "onr_v1_299_power-grid-overload",
+    ])
+      expect(fullHint(cardId).targetProfiles).toContainEqual(
+        expect.objectContaining({
+          targetType: "card",
+          hiddenInfoPolicy: expect.not.stringContaining("hidden"),
+        }),
+      );
   });
 });

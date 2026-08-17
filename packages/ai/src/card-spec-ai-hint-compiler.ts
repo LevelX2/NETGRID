@@ -6564,6 +6564,27 @@ function deriveClosedExtendedTargetProfile(
           : "card",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
+  const revealTopStackAndInstall = engine.abilities
+    ?.flatMap((ability) => ability.effects ?? [])
+    .find(
+      (effect) =>
+        effect.kind === "look_top_stack_show_to_corp_then_install_matching",
+    );
+  if (
+    revealTopStackAndInstall?.kind ===
+    "look_top_stack_show_to_corp_then_install_matching"
+  )
+    return {
+      ...planningFields,
+      kind: "search_install_target",
+      timing: "activated_ability",
+      targetType:
+        revealTopStackAndInstall.allowedTypes.length === 1 &&
+        revealTopStackAndInstall.allowedTypes[0] === "program"
+          ? "program"
+          : "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
   if (
     engine.abilities?.some((ability) =>
       ability.effects?.some((effect) => effect.kind === "search_stack_to_grip"),
@@ -6617,6 +6638,20 @@ function deriveClosedExtendedTargetProfile(
       ...planningFields,
       kind: "use_target",
       timing: "on_play",
+      targetType: "card",
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "move_advancement_counters",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "activated_ability",
       targetType: "card",
       hiddenInfoPolicy: "public_or_controller_known_only",
     };
@@ -6678,6 +6713,20 @@ function deriveClosedExtendedTargetProfile(
       timing: "on_play",
       targetType: "installed_ice",
       hiddenInfoPolicy: "public_or_controller_known_only",
+    };
+  if (
+    engine.abilities?.some((ability) =>
+      ability.effects?.some(
+        (effect) => effect.kind === "pay_rez_cost_to_trash_rezzed_ice",
+      ),
+    )
+  )
+    return {
+      ...planningFields,
+      kind: "use_target",
+      timing: "on_play",
+      targetType: "installed_ice",
+      hiddenInfoPolicy: "visible_or_known_only",
     };
   if (
     engine.remainingReplacementLongtail?.kind ===

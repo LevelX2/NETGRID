@@ -1,5 +1,7 @@
 import { capabilityKey, cardDefinitionId, type CardSpec } from "../..";
 
+const rezWithXStrengthTrace = capabilityKey("rez_with_x_strength_trace");
+
 export const cardSpec = {
   schemaVersion: "card-spec-v1",
   identity: {
@@ -43,7 +45,7 @@ export const cardSpec = {
       },
     },
     variableRez: {
-      capabilityKey: capabilityKey("rez_with_x_strength_trace"),
+      capabilityKey: rezWithXStrengthTrace,
       addressability: ["plan", "action", "quote", "debug"],
       kind: "x_strength",
       additionalCostPerValue: 1,
@@ -111,7 +113,26 @@ export const cardSpec = {
           "ICE Semantic Review v1: Homing Missile bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten.",
       },
     ],
-    capabilities: [],
+    capabilities: [
+      {
+        capabilityKey: rezWithXStrengthTrace,
+        annotations: [
+          {
+            kind: "target_preference",
+            purpose: "choose_x_strength_trace_and_rez_reserve",
+            preferences: [
+              "high_run_denial_payoff",
+              "current_run_path_relevance",
+              "use_choice_option_with_visible_board_payoff",
+            ],
+            avoid: [
+              "option_with_no_visible_current_payoff",
+              "insufficient_post_payment_reserve",
+            ],
+          },
+        ],
+      },
+    ],
   },
   printings: [
     {
