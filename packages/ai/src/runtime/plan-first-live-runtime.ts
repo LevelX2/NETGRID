@@ -5046,6 +5046,11 @@ function buildRunnerDomain(
       strategicIntent,
       coverageGaps,
       handDevelopment,
+      fundingNeeds.some((need) =>
+        need.kind === "develop_liquidity"
+          ? need.gap > 0 && need.actionIds.length > 0
+          : need.gap > 0 && need.routeActionIds.length > 0,
+      ),
     ),
   ];
   const hasRunWindowCandidate = candidates.some((candidate) =>
@@ -5725,6 +5730,7 @@ function runnerGenericDrawDevelopmentSignals(
   strategicIntent: RunnerStrategicIntentProfile,
   coverageGaps: RunnerCorePlanDomain["coverageGaps"],
   handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
+  finiteFundingRouteOpen: boolean,
 ): RunnerPlanDomain["developments"] {
   const handCapacityGap =
     input.playerView.own.maxHandSize - input.playerView.own.gripOrHq.length;
@@ -5739,7 +5745,7 @@ function runnerGenericDrawDevelopmentSignals(
   const redundantKnownHandCopy = [...knownHandDefinitionCounts.values()].some(
     (count) => count > 1,
   );
-  const fullHandRotationAvailable =
+  const fullHandHasKnownRotationTarget =
     handCapacityGap <= 0 &&
     (redundantKnownHandCopy ||
       handDevelopment.some(
@@ -5748,6 +5754,10 @@ function runnerGenericDrawDevelopmentSignals(
           evaluation.deferReason === "no_current_need" ||
           evaluation.deferReason === "stronger_override",
       ));
+  const fullHandOptionReassessmentAvailable =
+    handCapacityGap <= 0 && !finiteFundingRouteOpen;
+  const fullHandRotationAvailable =
+    fullHandHasKnownRotationTarget || fullHandOptionReassessmentAvailable;
   if (
     (handCapacityGap <= 0 && !fullHandRotationAvailable) ||
     input.playerView.own.stackOrRdCount <= 0
@@ -5789,9 +5799,11 @@ function runnerGenericDrawDevelopmentSignals(
       definitionId: "runner_option_development",
       targetKind: "capability",
       phase: "execute",
-      purposeCode: fullHandRotationAvailable
+      purposeCode: fullHandHasKnownRotationTarget
         ? "rotate_functionally_dead_hand_card"
-        : "increase_hand_option_density",
+        : fullHandOptionReassessmentAvailable
+          ? "reassess_full_hand_without_funding_route"
+          : "increase_hand_option_density",
       assignedDomainPlanIds: [],
       duplicateAlreadyInstalled: false,
       affordableOrSupportable: true,
@@ -5803,11 +5815,17 @@ function runnerGenericDrawDevelopmentSignals(
       actionIds: drawCandidates.map((candidate) => candidate.actionId),
       priorityClass: "P6",
       value:
-        (fullHandRotationAvailable ? 18 : 10 + Math.min(5, handCapacityGap)) +
+        (fullHandHasKnownRotationTarget
+          ? 18
+          : fullHandOptionReassessmentAvailable
+            ? 8
+            : 10 + Math.min(5, handCapacityGap)) +
         (doctrineThroughputActive ? doctrineValue : 0),
-      evidenceCode: fullHandRotationAvailable
+      evidenceCode: fullHandHasKnownRotationTarget
         ? "runner_full_hand_has_functionally_dead_rotation_target"
-        : "runner_hand_capacity_accepts_immediate_option_development",
+        : fullHandOptionReassessmentAvailable
+          ? "runner_full_hand_reassessment_without_ready_funding_route"
+          : "runner_hand_capacity_accepts_immediate_option_development",
       ...(doctrineThroughputActive
         ? {
             evidenceCodes: [

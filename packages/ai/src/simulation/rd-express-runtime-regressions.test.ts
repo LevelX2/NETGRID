@@ -102,9 +102,22 @@ describe("R&D Express selfplay runtime regressions", () => {
       seed: "rd-express-corp-panel-09",
       maxActions: 235,
     },
+    {
+      label: "keeps the late Superserum Runner turn plan-covered",
+      corpDeckId:
+        "standard_classic_corp_superserum_control_grid_2026_07_01",
+      seed: "rd-express-corp-panel-10",
+      maxActions: 367,
+    },
+    {
+      label: "keeps the late CODE ROT Runner turn plan-covered",
+      corpDeckId: "standard_corp_code_rot_bitte_eintreten_2026_07_16",
+      seed: "rd-express-corp-panel-03",
+      maxActions: 169,
+    },
   ])(
     "$label",
-    ({ corpDeckId, seed, maxActions }) => {
+    ({ label, corpDeckId, seed, maxActions }) => {
       const captures: AiSimulationDecisionCheckpointCapture[] = [];
       const summary = simulateStandardGame({
         corpDeckId,
@@ -155,6 +168,42 @@ describe("R&D Express selfplay runtime regressions", () => {
                 "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
               actionId: codecrackerActionId,
               semanticActionType: "install.card",
+            }),
+          ]),
+        );
+      }
+
+      const expectedDrawStateVersion =
+        label === "keeps the late Superserum Runner turn plan-covered"
+          ? 366
+          : label === "keeps the late CODE ROT Runner turn plan-covered"
+            ? 168
+            : undefined;
+      if (expectedDrawStateVersion !== undefined) {
+        const checkpoint = captures.find(
+          (capture) =>
+            capture.state.stateVersion === expectedDrawStateVersion,
+        );
+        expect(checkpoint).toBeDefined();
+        resetResidentPlanPortfolioMemory();
+        const decision = chooseAiAction(checkpoint!.input, {
+          persistTacticalPlanMemory: false,
+        });
+        expect(decision).toMatchObject({
+          actionId: "runner.draw_card",
+          reasonCode: "plan_first.runner.develop_board_and_hand",
+          fallbackUsed: false,
+        });
+        expect(
+          decision.decisionDebug?.planFirstDecision?.turnPlanning?.heads,
+        ).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              moduleId: "runner.develop_board_and_hand",
+              rootPlanInstanceId:
+                "plan:runner.develop_board_and_hand:generic%3Adraw-options",
+              actionId: "runner.draw_card",
+              semanticActionType: "draw.card",
             }),
           ]),
         );
@@ -269,6 +318,10 @@ function captureDiagnostic(capture: AiSimulationDecisionCheckpointCapture) {
     timingPoint: capture.state.timingPoint,
     clicks: capture.input.playerView.own.clicks,
     credits: capture.input.playerView.own.credits,
+    stackOrRdCount: capture.input.playerView.own.stackOrRdCount,
+    agendaPoints: capture.input.playerView.own.agendaPoints,
+    maxHandSize: capture.input.playerView.own.maxHandSize,
+    tags: capture.input.playerView.own.tags,
     pendingChoice: capture.input.playerView.pendingChoice,
     eventTail: capture.input.eventTail?.slice(-4),
     grip: capture.input.playerView.own.gripOrHq.map((card) => ({
@@ -277,6 +330,12 @@ function captureDiagnostic(capture: AiSimulationDecisionCheckpointCapture) {
       type: card.type,
       subtypes: card.subtypes,
       rulesText: card.rulesText,
+    })),
+    rig: capture.input.playerView.own.rig?.map((card) => ({
+      instanceId: card.instanceId,
+      definitionId: card.definitionId,
+      type: card.type,
+      subtypes: card.subtypes,
     })),
     legalActions: capture.input.legalActions.map((action) => ({
       actionId: action.actionId,
