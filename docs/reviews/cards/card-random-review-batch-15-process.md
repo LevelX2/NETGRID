@@ -1,6 +1,6 @@
 # CardSpec-Zufallsreview Batch 15 – Umsetzungsprozess
 
-Status: umgesetzt und verifiziert; lokale Integration ausstehend
+Status: abgeschlossen, lokal nach `main` integriert
 Quelle: Nutzerbericht „NETGRID – CardSpec-Zufallsreview Batch 15: Findings“, Stand 2026-08-17  
 Ausgangsbranch: `main` auf `69ec609e9`
 
@@ -152,3 +152,12 @@ Genau ein Paket ist aktiv. Jedes Paket endet mit fokussierter Prüfung, `git dif
 3. `46c1cf73f` – `fix(cards): complete batch 15 public characteristics`
 4. `2bdaa0f38` – `fix(cards): align batch 15 target semantics`
 5. `ff95deac8` – `fix(cards): refine batch 15 planning semantics`
+6. `3a004e212` – `docs(cards): record batch 15 verification`
+
+## Integration und Cleanup
+
+- Weitergelaufenes `main` (`279db0128`) wurde konfliktfrei in den Arbeitsbranch integriert.
+- Die überlappende Compatibility-Projektion, der fokussierte AI-Test und das Generated-Hint-Gate wurden nach dem Abgleich erneut erfolgreich geprüft.
+- Arbeitsbranch wurde per Fast-forward nach `main` integriert; Integrations-HEAD: `bd116be77`.
+- Worktree `C:\Projekte\NETGRID_CARD_RANDOM_BATCH_15` und Branch `codex/card-random-batch-15` wurden anschließend verifiziert entfernt.
+- Kein Push durchgeführt.
