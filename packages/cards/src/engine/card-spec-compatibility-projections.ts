@@ -568,7 +568,7 @@ function projectBreakTags(
   return { breakTags: [...breakTags] };
 }
 
-function projectTraceSuccessEffect(
+export function projectTraceSuccessEffect(
   effects: Extract<
     NonNullable<CardMechanicalSpec["printedSubroutines"]>[number],
     { kind: "trace" }

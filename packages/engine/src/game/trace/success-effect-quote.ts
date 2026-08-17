@@ -1,3 +1,4 @@
+import { projectTraceSuccessEffect } from "@netgrid/cards/engine";
 import type { CardDefinitionId, TraceSuccessEffect } from "@netgrid/shared";
 
 import { printedSubroutinesForCardImplementation } from "../../ability-engine/printed-subroutine-implementations";
@@ -45,6 +46,16 @@ export function traceSuccessEffectCardImplementationQuotesForDefinition(
       traceLimit: subroutine.traceLimit,
       traceSuccessEffect: subroutine.traceSuccessEffect,
     });
+  }
+  for (const ability of implementation.abilities ?? []) {
+    for (const effect of ability.effects) {
+      if (effect.kind !== "trace" || effect.visibility !== "public") continue;
+      quotes.push({
+        sourceDefinitionId: definitionId,
+        traceLimit: effect.traceLimit,
+        traceSuccessEffect: projectTraceSuccessEffect(effect.onSuccess),
+      });
+    }
   }
   return quotes;
 }

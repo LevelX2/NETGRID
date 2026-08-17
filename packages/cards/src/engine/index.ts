@@ -47,7 +47,9 @@ import {
   hasCardSpecImplementation,
   projectCardSpecDefinition,
   projectCardSpecImplementation,
+  projectTraceSuccessEffect,
 } from "./card-spec-compatibility-projections";
+export { projectTraceSuccessEffect };
 export type {
   CardSpecCardImplementation,
   Cs06CardImplementation,

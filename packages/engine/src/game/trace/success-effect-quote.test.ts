@@ -19,9 +19,7 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
 
   it("quotes a public printed trace effect", () => {
     expect(
-      traceSuccessEffectCardImplementationQuotesForDefinition(
-        "onr_v1_264_rex",
-      ),
+      traceSuccessEffectCardImplementationQuotesForDefinition("onr_v1_264_rex"),
     ).toEqual([
       {
         sourceDefinitionId: "onr_v1_264_rex",
@@ -30,6 +28,20 @@ describe("traceSuccessEffectCardImplementationQuotesForDefinition", () => {
           type: "end_run_and_run_lock",
           amount: 2,
         },
+      },
+    ]);
+  });
+
+  it("quotes a public declarative operation trace effect", () => {
+    expect(
+      traceSuccessEffectCardImplementationQuotesForDefinition(
+        "onr_v1_284_chance-observation",
+      ),
+    ).toEqual([
+      {
+        sourceDefinitionId: "onr_v1_284_chance-observation",
+        traceLimit: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 },
       },
     ]);
   });
