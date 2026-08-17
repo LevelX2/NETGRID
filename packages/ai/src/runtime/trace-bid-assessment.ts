@@ -10,11 +10,21 @@ import type {
 } from "@netgrid/shared";
 
 import type { LatestTraceContext } from "./trace-context";
+import { reconstructBeliefState } from "../belief-state";
+import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >;
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
+
+type KnownTagPunishFollowup = {
+  payoffKnown: boolean;
+  lethalDamage: number;
+  dangerousCorpBidCapacity?: number;
+};
 
 export type TraceBidCandidateAssessment = {
   assessment: EngineRandomizedTraceBidAssessment;
@@ -53,8 +63,21 @@ export function assessTraceBidCandidates(
     0,
     Math.floor(trace.runnerLink ?? traceContext.runnerLink ?? 0),
   );
-  const outcomeValue = traceOutcomeValue(input, traceContext);
-  const stakes = classifyStakes(input, outcomeValue, traceContext);
+  const effect = visibleTraceSuccessEffect(input, traceContext);
+  const tagPunishFollowup = effectCreatesTag(effect)
+    ? knownTagPunishFollowup(input)
+    : { payoffKnown: false, lethalDamage: 0 };
+  const outcomeValue = traceOutcomeValue(
+    input,
+    traceContext,
+    tagPunishFollowup.payoffKnown,
+  );
+  const stakes = classifyStakes(
+    input,
+    outcomeValue,
+    traceContext,
+    tagPunishFollowup,
+  );
   const behavioralBias = behavioralBiasFor(stakes, outcomeValue);
   const reserveTarget = reserveTargetFor(input, stakes);
   const maxBid = options.at(-1)!.bid;
@@ -78,7 +101,20 @@ export function assessTraceBidCandidates(
       }),
     ),
   }));
-  const ranked = utilities
+  const minimumSafeBid = runnerMinimumSafeBid({
+    input,
+    profile,
+    currentLink,
+    effect,
+    tagPunishFollowup,
+  });
+  const safeUtilities =
+    minimumSafeBid === undefined
+      ? utilities
+      : utilities.filter((candidate) => candidate.bid >= minimumSafeBid);
+  const eligibleUtilities =
+    safeUtilities.length > 0 ? safeUtilities : utilities;
+  const ranked = eligibleUtilities
     .slice()
     .sort(
       (left, right) =>
@@ -88,7 +124,7 @@ export function assessTraceBidCandidates(
     );
   const rationalTarget = ranked[0]!.bid;
   const tolerance = stakesTolerance(stakes);
-  let rational = utilities.filter(
+  let rational = eligibleUtilities.filter(
     (candidate) => ranked[0]!.utility - candidate.utility <= tolerance,
   );
   if (rational.length === 1 && stakes !== "terminal") {
@@ -98,7 +134,7 @@ export function assessTraceBidCandidates(
     if (neighbor) rational = [...rational, neighbor];
   }
   if (behavioralBias === "polarized") {
-    for (const edge of [utilities[0], utilities.at(-1)]) {
+    for (const edge of [eligibleUtilities[0], eligibleUtilities.at(-1)]) {
       if (
         edge &&
         ranked[0]!.utility - edge.utility <= tolerance * 1.8 &&
@@ -214,6 +250,7 @@ function runnerPreventionProbability(input: {
 function traceOutcomeValue(
   input: AiDecisionInput,
   traceContext: LatestTraceContext,
+  tagPunishFollowupKnown: boolean,
 ): number {
   const effect = visibleTraceSuccessEffect(input, traceContext);
   if (!effect) return 3;
@@ -241,12 +278,15 @@ function traceOutcomeValue(
         return 9;
     }
   })();
-  return effectCreatesTag(effect) && visibleTagPunishFollowup(input)
+  return effectCreatesTag(effect) && tagPunishFollowupKnown
     ? baseValue + 4
     : baseValue;
 }
 
-function effectCreatesTag(effect: TraceSuccessEffect): boolean {
+function effectCreatesTag(
+  effect: TraceSuccessEffect | undefined,
+): effect is TraceSuccessEffect {
+  if (!effect) return false;
   return (
     effect.type === "add_tag" ||
     effect.type === "add_tags_by_trace_margin_over_runner_link" ||
@@ -255,7 +295,9 @@ function effectCreatesTag(effect: TraceSuccessEffect): boolean {
   );
 }
 
-function visibleTagPunishFollowup(input: AiDecisionInput): boolean {
+function knownTagPunishFollowup(
+  input: AiDecisionInput,
+): KnownTagPunishFollowup {
   const visibleCorpCards =
     input.side === "corp"
       ? [
@@ -273,11 +315,149 @@ function visibleTagPunishFollowup(input: AiDecisionInput): boolean {
             ...server.root,
           ]),
         ];
-  return visibleCorpCards.some(
-    (card) =>
-      card.known !== false &&
-      classifyTagPunishPayoffFromOntology(card.definitionId)?.payoff === true,
+  const knownDefinitionIds = new Set(
+    visibleCorpCards.flatMap((card) =>
+      card.known !== false && card.definitionId ? [card.definitionId] : [],
+    ),
   );
+  if (input.side === "runner") {
+    const safeHqDefinitions =
+      reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory.ledger
+        .safeDefinitions ?? [];
+    for (const known of safeHqDefinitions) {
+      if (known.count > 0) knownDefinitionIds.add(known.definitionId);
+    }
+  }
+
+  const payoffDefinitions = [...knownDefinitionIds].filter(
+    (definitionId) =>
+      classifyTagPunishPayoffFromOntology(definitionId)?.payoff === true,
+  );
+  if (payoffDefinitions.length === 0) {
+    return { payoffKnown: false, lethalDamage: 0 };
+  }
+
+  const runnerGrip =
+    input.side === "runner"
+      ? input.playerView.own.gripOrHq.length
+      : input.playerView.opponent.handCount;
+  const corpCredits =
+    input.side === "runner"
+      ? input.playerView.opponent.credits
+      : input.playerView.own.credits;
+  const corpClicks =
+    input.side === "runner"
+      ? input.playerView.opponent.clicks
+      : input.playerView.own.clicks;
+  const visibleCorpBidCapacity = Math.max(
+    0,
+    Math.floor(input.playerView.trace?.visibleOpponentBidCapacity ?? 0),
+  );
+  const runnerHasMeatDamagePrevention =
+    visibleRunnerMeatDamagePrevention(input);
+  const lethalProfiles = payoffDefinitions
+    .map((definitionId) =>
+      knownLethalTagPunishProfile(definitionId, runnerGrip),
+    )
+    .filter(
+      (
+        profile,
+      ): profile is {
+        damage: number;
+        creditCost: number;
+        clickCost: number;
+      } => profile !== undefined,
+    )
+    .filter(() => !runnerHasMeatDamagePrevention)
+    .map((profile) => {
+      const spareCreditClicks = Math.max(0, corpClicks - profile.clickCost);
+      return {
+        ...profile,
+        dangerousCorpBidCapacity: Math.min(
+          visibleCorpBidCapacity,
+          Math.floor(corpCredits + spareCreditClicks - profile.creditCost),
+        ),
+      };
+    })
+    .filter((profile) => profile.dangerousCorpBidCapacity >= 0)
+    .sort(
+      (left, right) =>
+        right.dangerousCorpBidCapacity - left.dangerousCorpBidCapacity ||
+        right.damage - left.damage,
+    );
+  const lethal = lethalProfiles[0];
+  return {
+    payoffKnown: true,
+    lethalDamage: lethal?.damage ?? 0,
+    ...(lethal
+      ? { dangerousCorpBidCapacity: lethal.dangerousCorpBidCapacity }
+      : {}),
+  };
+}
+
+function knownLethalTagPunishProfile(
+  definitionId: string,
+  runnerGrip: number,
+): { damage: number; creditCost: number; clickCost: number } | undefined {
+  if (runnerGrip <= 0) return undefined;
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  if (!hint) return undefined;
+  const damage = Math.max(
+    0,
+    ...(hint.effects ?? []).map((effect) =>
+      effect.kind === "damage" &&
+      effect.scope === "runner" &&
+      effect.timing === "action" &&
+      (effect.resource === "meat_damage" || effect.resource === "damage")
+        ? Math.max(0, Math.floor(effect.amount ?? 0))
+        : 0,
+    ),
+  );
+  const creditCost = exactNonNegativeInteger(hint.costProfile?.credits);
+  const clickCost = exactNonNegativeInteger(hint.costProfile?.clicks);
+  if (
+    damage < runnerGrip ||
+    creditCost === undefined ||
+    clickCost === undefined ||
+    clickCost <= 0
+  ) {
+    return undefined;
+  }
+  return { damage, creditCost, clickCost };
+}
+
+function visibleRunnerMeatDamagePrevention(input: AiDecisionInput): boolean {
+  const runnerCards =
+    input.side === "runner"
+      ? [...(input.playerView.own.rig ?? []), ...input.playerView.own.scoreArea]
+      : [
+          ...(input.playerView.opponent.rig ?? []),
+          ...input.playerView.opponent.scoreArea,
+        ];
+  return runnerCards.some((card) => {
+    if (card.known === false || !card.definitionId) return false;
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+    return hintHasMeatDamagePrevention(hint);
+  });
+}
+
+function hintHasMeatDamagePrevention(hint: AiCardHint | undefined): boolean {
+  return (
+    hint?.functionSignals?.includes("defense.meat_damage_prevention") ===
+      true ||
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "meat_damage_prevention" ||
+        (effect.kind === "prevention_replacement" &&
+          effect.target === "meat_damage"),
+    ) === true
+  );
+}
+
+function exactNonNegativeInteger(
+  value: number | undefined,
+): number | undefined {
+  return Number.isInteger(value) && (value ?? -1) >= 0 ? value : undefined;
 }
 
 function visibleTraceSuccessEffect(
@@ -306,6 +486,7 @@ function classifyStakes(
   input: AiDecisionInput,
   outcomeValue: number,
   traceContext: LatestTraceContext,
+  tagPunishFollowup: KnownTagPunishFollowup,
 ): TraceBidStakes {
   const effect = visibleTraceSuccessEffect(input, traceContext);
   const runnerGrip =
@@ -320,6 +501,13 @@ function classifyStakes(
     return "terminal";
   }
   if (
+    effectCreatesTag(effect) &&
+    tagPunishFollowup.lethalDamage >= runnerGrip &&
+    tagPunishFollowup.dangerousCorpBidCapacity !== undefined
+  ) {
+    return "terminal";
+  }
+  if (
     effect?.type === "end_run_trash_hardware_and_unpreventable_meat_damage" &&
     effect.amount >= runnerGrip &&
     runnerGrip > 0
@@ -329,6 +517,38 @@ function classifyStakes(
   if (outcomeValue >= 11 || input.playerView.own.tags > 0) return "high";
   if (outcomeValue >= 5) return "normal";
   return "low";
+}
+
+function runnerMinimumSafeBid(input: {
+  input: AiDecisionInput;
+  profile: TraceRulesProfile;
+  currentLink: number;
+  effect: TraceSuccessEffect | undefined;
+  tagPunishFollowup: KnownTagPunishFollowup;
+}): number | undefined {
+  if (input.input.side !== "runner") return undefined;
+  const runnerGrip = input.input.playerView.own.gripOrHq.length;
+  const visibleCorpCapacity = Math.min(
+    Math.max(0, Math.floor(input.input.playerView.trace!.effectiveTraceLimit)),
+    Math.max(
+      0,
+      Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
+    ),
+  );
+  const directLethal =
+    (input.effect?.type === "net_damage" ||
+      input.effect?.type ===
+        "end_run_trash_hardware_and_unpreventable_meat_damage") &&
+    input.effect.amount >= runnerGrip &&
+    runnerGrip > 0;
+  const dangerousCorpBidCapacity = directLethal
+    ? visibleCorpCapacity
+    : input.tagPunishFollowup.dangerousCorpBidCapacity;
+  if (dangerousCorpBidCapacity === undefined) return undefined;
+  const strengthNeeded =
+    dangerousCorpBidCapacity +
+    (input.profile === "classic_blind_corp_ties" ? 1 : 0);
+  return Math.max(0, strengthNeeded - input.currentLink);
 }
 
 function reserveTargetFor(
@@ -362,7 +582,7 @@ function stakesTolerance(stakes: TraceBidStakes): number {
     case "high":
       return 0.85;
     case "terminal":
-      return 0.2;
+      return 2;
   }
 }
 

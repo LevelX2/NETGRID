@@ -17,6 +17,7 @@ export type KnownCentralAccessPayoffKind =
 export type KnownCentralAccessPayoff = {
   payoff: KnownCentralAccessPayoffKind;
   knownNoCurrentPayoff: boolean;
+  accessNoveltyRatio: number;
   score: number;
   penalty: number;
   bonus?: number;
@@ -81,6 +82,7 @@ export function evaluateKnownCentralAccessPayoff(
     return {
       payoff: "fresh",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 160,
       penalty: 0,
       reasons: ["rnd_top_fresh_after_access_removed"],
@@ -129,6 +131,7 @@ export function evaluateKnownCentralAccessPayoff(
     return {
       payoff: "agenda",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 520,
       penalty: 0,
       reasons: ["known_rnd_top_agenda_pressure"],
@@ -144,6 +147,7 @@ export function evaluateKnownCentralAccessPayoff(
     return {
       payoff: "access_bonus",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: knownRdAccessNoveltyRatio(input, freshness),
       score: 120,
       penalty: 0,
       reasons: ["known_rnd_top_repeat_has_access_bonus"],
@@ -155,6 +159,7 @@ export function evaluateKnownCentralAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 700,
       reasons: [
@@ -180,6 +185,7 @@ export function evaluateKnownCentralAccessPayoff(
         return {
           payoff: "trash_unaffordable",
           knownNoCurrentPayoff: true,
+          accessNoveltyRatio: 0,
           score: 0,
           penalty: 700,
           reasons: [
@@ -204,6 +210,7 @@ export function evaluateKnownCentralAccessPayoff(
         return {
           payoff: "known_low_value",
           knownNoCurrentPayoff: true,
+          accessNoveltyRatio: 0,
           score: 0,
           penalty: 700,
           reasons: [
@@ -222,6 +229,7 @@ export function evaluateKnownCentralAccessPayoff(
       return {
         payoff: affordable ? "trash_affordable" : "trash_unaffordable",
         knownNoCurrentPayoff: !affordable,
+        accessNoveltyRatio: affordable ? 1 : 0,
         score: affordable ? 150 : 0,
         penalty: affordable ? 0 : 700,
         reasons: [
@@ -251,6 +259,7 @@ export function evaluateKnownCentralAccessPayoff(
   return {
     payoff: "known_low_value",
     knownNoCurrentPayoff: true,
+    accessNoveltyRatio: 0,
     score: 0,
     penalty: 640,
     reasons: [
@@ -352,6 +361,7 @@ function evaluateKnownRdAccessSequencePayoff(
     return {
       payoff: "agenda",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 520,
       penalty: 0,
       reasons: ["known_rnd_access_sequence_agenda_pressure"],
@@ -385,6 +395,7 @@ function evaluateKnownRdAccessSequencePayoff(
     return {
       payoff: "trash_affordable",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 150,
       penalty: 0,
       reasons: [
@@ -405,6 +416,7 @@ function evaluateKnownRdAccessSequencePayoff(
   return {
     payoff: "known_low_value",
     knownNoCurrentPayoff: true,
+    accessNoveltyRatio: 0,
     score: 0,
     penalty: 760,
     reasons: [
@@ -427,6 +439,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 900,
       reasons: ["hq_empty_no_access_payoff", "central_known_no_current_payoff"],
@@ -492,6 +505,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "agenda",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 520,
       penalty: 0,
       reasons: ["known_hq_agenda_pressure"],
@@ -533,6 +547,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "trash_affordable",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: 1,
       score: 120,
       penalty: 0,
       reasons: ["known_hq_trash_affordable_after_ice"],
@@ -552,6 +567,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 700,
       reasons: [
@@ -574,6 +590,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "trash_unaffordable",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 700,
       reasons: [
@@ -597,6 +614,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "known_low_value",
       knownNoCurrentPayoff: true,
+      accessNoveltyRatio: 0,
       score: 0,
       penalty: 640,
       reasons: ["known_hq_hand_low_value", "central_known_no_current_payoff"],
@@ -615,6 +633,7 @@ function evaluateKnownHqAccessPayoff(
     return {
       payoff: "unknown",
       knownNoCurrentPayoff: false,
+      accessNoveltyRatio: assessment.unknownFraction,
       score: 0,
       penalty: assessment.knownnessPenalty,
       reasons: [
@@ -720,12 +739,7 @@ function assessHqKnownness(
     candidateLowValueCount,
     accessDepthEstimate: support.accessDepthEstimate,
     unknownAccessChanceEstimate,
-    knownnessPenalty: hqKnownnessPenalty(
-      knownnessPayoff,
-      knownFraction,
-      unknownAccessChanceEstimate,
-      support.hasInstalledHqPayoffSupport,
-    ),
+    knownnessPenalty: hqKnownnessPenalty(knownnessPayoff, knownFraction),
     knownnessPayoff,
   };
 }
@@ -763,11 +777,7 @@ function hqKnownnessPayoff(params: {
   ) {
     return "mostly_known_low_value";
   }
-  if (
-    params.knownFraction >= 0.45 &&
-    lowValueFraction >= 0.4 &&
-    params.unknownAccessChanceEstimate < 0.55
-  ) {
+  if (params.knownFraction >= 0.5 && lowValueFraction >= 0.4) {
     return "partially_known_low_value";
   }
   if (
@@ -783,8 +793,6 @@ function hqKnownnessPayoff(params: {
 function hqKnownnessPenalty(
   payoff: HqKnownnessAssessment["knownnessPayoff"],
   knownFraction: number,
-  unknownAccessChanceEstimate: number,
-  hasInstalledHqPayoffSupport: boolean,
 ): number {
   if (
     payoff !== "mostly_known_low_value" &&
@@ -794,10 +802,9 @@ function hqKnownnessPenalty(
   }
   const base =
     payoff === "mostly_known_low_value"
-      ? 420 * knownFraction * (1 - unknownAccessChanceEstimate)
-      : 220 * knownFraction * (1 - unknownAccessChanceEstimate);
-  const supportMultiplier = hasInstalledHqPayoffSupport ? 0.8 : 1;
-  return Math.max(40, Math.round(base * supportMultiplier));
+      ? 500 * knownFraction
+      : 360 * knownFraction;
+  return Math.max(40, Math.round(base));
 }
 
 function expandHqSafeDefinitionIds(
@@ -1208,6 +1215,7 @@ function unknownCentralPayoff(
   return {
     payoff: "unknown",
     knownNoCurrentPayoff: false,
+    accessNoveltyRatio: 1,
     score: 0,
     penalty: 0,
     reasons: [],
@@ -1217,4 +1225,16 @@ function unknownCentralPayoff(
       ...extraEvidence,
     ],
   };
+}
+
+function knownRdAccessNoveltyRatio(
+  input: AiDecisionInput,
+  freshness: NonNullable<BeliefState["runnerOpponentModel"]>["rndTopFreshness"],
+): number {
+  const accessDepth = installedRdAccessDepthEstimate(input);
+  const knownDepth = Math.min(
+    accessDepth,
+    Math.max(1, freshness.knownSequenceDefinitionIds?.length ?? 0),
+  );
+  return round(Math.max(0, accessDepth - knownDepth) / accessDepth);
 }

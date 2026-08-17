@@ -3,11 +3,13 @@ import type {
   AiDecisionInput,
   CardDefinitionId,
   GameState,
+  PublicGameEvent,
   Side,
   TraceRulesProfile,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
+import { reconstructBeliefState } from "../belief-state";
 import { assessTraceBidCandidates } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
 
@@ -317,7 +319,74 @@ describe("Blind Trace bid assessment", () => {
       ),
     );
   });
+
+  it("keeps weighted variance above the safe bid floor for a known lethal tag follow-up", () => {
+    const input = decisionInput({
+      profile: "classic_blind",
+      side: "runner",
+      sourceDefinitionId: "onr_v1_284_chance-observation" as CardDefinitionId,
+      printedTrace: 5,
+      bidMax: 10,
+      ownCredits: 10,
+      opponentCredits: 6,
+      visibleOpponentBidCapacity: 5,
+      runnerGripCount: 5,
+    });
+    input.playerView.opponent.clicks = 2;
+    const hqLook = runnerHqLookEvent(
+      ["onr_v1_307_urban-renewal"] as CardDefinitionId[],
+      input.playerView.stateVersion,
+    );
+    input.playerView.publicEvents = [hqLook];
+    input.eventTail = [hqLook];
+
+    expect(
+      reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory.ledger
+        .safeDefinitions,
+    ).toEqual([
+      expect.objectContaining({
+        definitionId: "onr_v1_307_urban-renewal",
+        count: 1,
+      }),
+    ]);
+
+    const result = assess(input);
+
+    expect(result.assessment).toMatchObject({
+      stakes: "terminal",
+      visibleOpponentBidCapacity: 5,
+    });
+    expect(result.candidates.length).toBeGreaterThan(1);
+    expect(result.candidates.every((candidate) => candidate.bid >= 1)).toBe(
+      true,
+    );
+    expect(
+      new Set(result.candidates.map((candidate) => candidate.weight)).size,
+    ).toBeGreaterThan(1);
+  });
 });
+
+function runnerHqLookEvent(
+  definitionIds: CardDefinitionId[],
+  stateVersion: number,
+): PublicGameEvent {
+  return {
+    eventId: "runner-known-hq-payoff",
+    type: "resolve_choice",
+    stateVersionBefore: Math.max(0, stateVersion - 1),
+    stateVersionAfter: stateVersion,
+    stateHashAfter: "hash-runner-known-hq-payoff",
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "hq",
+      privateLookCount: definitionIds.length,
+      knownHqDefinitionIds: definitionIds,
+    },
+  };
+}
 
 function assess(input: AiDecisionInput) {
   const result = assessTraceBidCandidates(

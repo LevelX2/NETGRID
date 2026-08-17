@@ -238,6 +238,7 @@ function evaluateRunnerRunTarget(
   const accessPayoff = accessPayoffWithInstalledRunPayoff({
     basePayoff: payoff.accessPayoff,
     knownAccessState: payoff.knownAccessState,
+    accessNoveltyRatio: payoff.accessNoveltyRatio,
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
   });
@@ -394,6 +395,7 @@ function evaluateRunnerRunTarget(
       ? { accessPayoffContestable: payoff.accessPayoffContestable }
       : {}),
     knownAccessState: payoff.knownAccessState,
+    accessNoveltyRatio: payoff.accessNoveltyRatio,
     pathPassability,
     creditsAfterRun,
     economyPosture,
@@ -430,6 +432,8 @@ function evaluateRunnerRunTarget(
     recommendation,
     multiaccessAvailable,
     installedRunPayoffScore: combinedRunPayoff.scoreBonus,
+    installedImmediateAccessValue: combinedRunPayoff.immediateAccessValue,
+    accessNoveltyRatio: payoff.accessNoveltyRatio,
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
     visibleIceHazardPenalty,
     futureClicksLost,
@@ -451,6 +455,7 @@ function evaluateRunnerRunTarget(
       ? { accessPayoffContestable: payoff.accessPayoffContestable }
       : {}),
     knownAccessState: payoff.knownAccessState,
+    accessNoveltyRatio: payoff.accessNoveltyRatio,
     multiaccessAvailable,
     pathPassability,
     pathCost: routeQuote.guaranteedKnownCost,
@@ -495,6 +500,7 @@ function evaluateRunnerRunTarget(
         ? [`access_payoff_contestable:${payoff.accessPayoffContestable}`]
         : []),
       `known_access_state:${payoff.knownAccessState}`,
+      `central_access_novelty_ratio:${payoff.accessNoveltyRatio}`,
       `path_passability:${pathPassability}`,
       ...(path.missingCoverage?.length
         ? [`missing_coverage:${path.missingCoverage.join("|")}`]
@@ -910,6 +916,7 @@ function uniqueStrings(values: readonly string[]): string[] {
 function accessPayoffWithInstalledRunPayoff(params: {
   basePayoff: RunnerAccessPayoff;
   knownAccessState: RunnerKnownAccessState;
+  accessNoveltyRatio: number;
   installedRunPayoff: RunnerInstalledRunPayoff;
   scoreThreat: boolean;
 }): RunnerAccessPayoff {
@@ -921,7 +928,9 @@ function accessPayoffWithInstalledRunPayoff(params: {
   }
   if (
     params.basePayoff === "unknown" &&
-    params.installedRunPayoff.immediateAccessValue >= 50
+    params.installedRunPayoff.immediateAccessValue *
+      params.accessNoveltyRatio >=
+      50
   ) {
     return "access_bonus";
   }
@@ -936,6 +945,7 @@ function payoffForTarget(
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
+  accessNoveltyRatio: number;
   scoreAdjustment: number;
   evidence: string[];
 } {
@@ -960,6 +970,7 @@ function payoffForTarget(
   return {
     accessPayoff: "unknown",
     knownAccessState: "unknown",
+    accessNoveltyRatio: 1,
     scoreAdjustment: 0,
     evidence: [`${targetKind}_payoff:unknown`],
   };
@@ -1009,6 +1020,7 @@ function accessReplacementPayoffForTarget(
     return {
       accessPayoff: "known_low_value",
       knownAccessState: "known_no_current_payoff",
+      accessNoveltyRatio: 0,
       scoreAdjustment: -640,
       evidence: [...evidence, "central_access_replacement_redundant:true"],
     };
@@ -1016,6 +1028,7 @@ function accessReplacementPayoffForTarget(
   return {
     accessPayoff: "access_bonus",
     knownAccessState: "known_payoff",
+    accessNoveltyRatio: 1,
     scoreAdjustment: 0,
     evidence: [
       ...evidence,
@@ -1129,6 +1142,7 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable: boolean;
   knownAccessState: RunnerKnownAccessState;
+  accessNoveltyRatio: number;
   scoreAdjustment: number;
   evidence: string[];
 } {
@@ -1142,6 +1156,7 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
         : payoff.payoff === "unknown"
           ? "unknown"
           : "known_payoff",
+    accessNoveltyRatio: 1,
     scoreAdjustment: -payoff.penalty,
     evidence: payoff.evidence,
   };
@@ -1150,6 +1165,7 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
 function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
   knownAccessState: RunnerKnownAccessState;
+  accessNoveltyRatio: number;
   scoreAdjustment: number;
   evidence: string[];
 } {
@@ -1162,6 +1178,7 @@ function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
         : payoff.payoff === "unknown"
           ? "unknown"
           : "known_payoff",
+    accessNoveltyRatio: payoff.accessNoveltyRatio,
     scoreAdjustment: (payoff.bonus ?? 0) - payoff.penalty,
     evidence: payoff.evidence,
   };
@@ -1259,6 +1276,7 @@ function recommendationForRunTarget(params: {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
+  accessNoveltyRatio: number;
   pathPassability: RunnerPathPassability;
   creditsAfterRun: number;
   economyPosture: RunnerEconomyPosture;
@@ -1437,7 +1455,9 @@ function recommendationForRunTarget(params: {
     return "gain_credits_first";
   }
   if (
-    params.installedRunPayoff.immediateAccessValue >= 50 &&
+    params.installedRunPayoff.immediateAccessValue *
+      params.accessNoveltyRatio >=
+      50 &&
     params.pathPassability === "reachable"
   ) {
     return "run_now";
@@ -1496,6 +1516,8 @@ function scoreRunTargetEvaluation(params: {
   recommendation: RunnerRunTargetRecommendation;
   multiaccessAvailable: boolean;
   installedRunPayoffScore: number;
+  installedImmediateAccessValue: number;
+  accessNoveltyRatio: number;
   accessPayoffScoreAdjustment: number;
   visibleIceHazardPenalty: number;
   futureClicksLost: number;
@@ -1516,8 +1538,19 @@ function scoreRunTargetEvaluation(params: {
           params.accessPayoff !== "agenda"
         ? -480
         : 0;
-  const multiaccessBonus = params.multiaccessAvailable ? 80 : 0;
-  const installedRunPayoffBonus = params.installedRunPayoffScore;
+  const accessNoveltyRatio = Math.max(
+    0,
+    Math.min(1, params.accessNoveltyRatio),
+  );
+  const multiaccessBonus = params.multiaccessAvailable
+    ? 80 * accessNoveltyRatio
+    : 0;
+  const redundantInstalledAccessValue =
+    params.installedImmediateAccessValue * (1 - accessNoveltyRatio);
+  const installedRunPayoffBonus = Math.max(
+    0,
+    params.installedRunPayoffScore - redundantInstalledAccessValue,
+  );
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
   const recommendationScore = recommendationRank(params.recommendation) * 20;
   const visibleIceHazardPenalty = -Math.max(0, params.visibleIceHazardPenalty);

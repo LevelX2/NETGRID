@@ -303,6 +303,7 @@ export type RunnerRunTargetEvaluation = {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
+  accessNoveltyRatio?: number;
   multiaccessAvailable: boolean;
   pathPassability: RunnerPathPassability;
   pathCost: number;
