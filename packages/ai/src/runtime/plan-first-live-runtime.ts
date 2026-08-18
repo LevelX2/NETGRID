@@ -9613,6 +9613,19 @@ function arbitrateCorpHandConversionBeforeDraw(
     facts,
   );
   const assessments: CorpDrawAdmissionAssessment[] = [];
+  const knownAgendaInstanceIds = new Set(
+    input.playerView.own.gripOrHq
+      .filter((card) => card.known === true && card.type === "agenda")
+      .map((card) => card.instanceId),
+  );
+  const consequenceFacts = {
+    knownAgendaCount: knownAgendaInstanceIds.size,
+    safeDiscardCandidateCount:
+      facts.cleanupProjection.discardCandidateInstanceIds.filter(
+        (instanceId) => !knownAgendaInstanceIds.has(instanceId),
+      ).length,
+    remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+  };
   const assess = (params: {
     routeId: string;
     ownerModuleId: CorpDrawAdmissionAssessment["ownerModuleId"];
@@ -9622,6 +9635,7 @@ function arbitrateCorpHandConversionBeforeDraw(
     remainingAttempts: 0 | 1;
     parentProvidesExactSameTurnCapacityRelease?: boolean;
     allowFinalClickScoreMaterialReplacement?: boolean;
+    terminalNeedBeforeMandatoryDraw?: boolean;
   }) => {
     const candidate = candidates.find(
       (entry) => entry.actionId === params.actionId,
@@ -9637,6 +9651,11 @@ function arbitrateCorpHandConversionBeforeDraw(
       capacityReleaseRoutes: releaseRoutes,
       parentProvidesExactSameTurnCapacityRelease:
         params.parentProvidesExactSameTurnCapacityRelease ?? false,
+      consequenceFacts: {
+        ...consequenceFacts,
+        terminalNeedBeforeMandatoryDraw:
+          params.terminalNeedBeforeMandatoryDraw ?? false,
+      },
     });
     assessments.push(assessment);
     return assessment.disposition === "admitted";
@@ -9654,6 +9673,9 @@ function arbitrateCorpHandConversionBeforeDraw(
           remainingAttempts: signal.drawAttemptState.remainingAttempts,
           parentProvidesExactSameTurnCapacityRelease:
             signal.cleanupReplacementDraw === true,
+          terminalNeedBeforeMandatoryDraw:
+            signal.delegatedPriorityClass === "P1" ||
+            signal.delegatedPriorityClass === "P2",
         })
           ? [signal]
           : [];
@@ -9674,6 +9696,8 @@ function arbitrateCorpHandConversionBeforeDraw(
           purpose: "central_defense_answer_search",
           priorityClass: corpGenericDefensePriorityClass([signal]),
           remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
+          terminalNeedBeforeMandatoryDraw:
+            signal.urgent === true && signal.centralPressure === "terminal",
         }),
       );
       return [{ ...signal, actionIds: admittedActionIds }];
@@ -9697,6 +9721,8 @@ function arbitrateCorpHandConversionBeforeDraw(
         remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
         allowFinalClickScoreMaterialReplacement:
           signal.handPlanId === "draw-for-score-material",
+        terminalNeedBeforeMandatoryDraw:
+          priorityClass === "P1" || priorityClass === "P2",
       }),
     );
     return { ...signal, actionIds: admittedActionIds };

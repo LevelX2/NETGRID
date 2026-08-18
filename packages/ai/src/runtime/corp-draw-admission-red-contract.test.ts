@@ -22,9 +22,15 @@ describe("Corp draw admission turn-coherence red contract", () => {
         },
         capacityReleaseRoutes: [],
         parentProvidesExactSameTurnCapacityRelease: false,
+        consequenceFacts: {
+          knownAgendaCount: 4,
+          safeDiscardCandidateCount: 0,
+          remainingDeckCardsBeforeDraw: 20,
+          terminalNeedBeforeMandatoryDraw: false,
+        },
       }),
     ).toMatchObject({
-      disposition: "blocked_end_turn_overflow",
+      disposition: "blocked_cleanup_exposure",
       projectedHandAfterDraw: 6,
       projectedEndTurnOverflow: 1,
     });
