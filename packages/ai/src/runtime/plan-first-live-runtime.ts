@@ -181,6 +181,7 @@ import {
   corpImmediateEconomyGainFromHint,
   corpScoreConversionProfile,
 } from "./corp-canonical-card-facts";
+import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
 import { selectableChoiceOptions } from "./choice-option";
 import { discardOptionInstanceId } from "./discard-choice-option";
 import {
@@ -13977,7 +13978,11 @@ function corpEconomyDevelopmentCampaigns(
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpCorePlanDomain["economyNeeds"] {
   const signals: CorpCorePlanDomain["economyNeeds"] = [];
-  const addCampaign = (card: VisibleCard, phase: "install" | "rez"): void => {
+  const addCampaign = (
+    card: VisibleCard,
+    phase: "install" | "rez",
+    currentServerId?: string,
+  ): void => {
     if (
       !card.known ||
       !card.definitionId ||
@@ -14172,8 +14177,8 @@ function corpEconomyDevelopmentCampaigns(
     ) {
       return;
     }
-    const finitePoolCredits =
-      corpHostedCreditBankProfile(card.definitionId)?.poolCredits ?? 0;
+    const hostedCreditProfile = corpHostedCreditBankProfile(card.definitionId);
+    const finitePoolCredits = hostedCreditProfile?.poolCredits ?? 0;
     const automaticStartOfTurnCredits = Math.max(
       0,
       ...(hint.effects ?? [])
@@ -14200,52 +14205,82 @@ function corpEconomyDevelopmentCampaigns(
     ) {
       return;
     }
-    const horizonTurns = 3;
-    const projectedCredits =
-      cadence === "finite_pool"
-        ? finitePoolCredits
-        : automaticStartOfTurnCredits * horizonTurns;
-    const setupCreditCost =
-      (phase === "install" ? (definition.installCost ?? 0) : 0) +
-      (definition.rezCost ?? 0);
-    const projectedNetCredits = projectedCredits - setupCreditCost;
-    if (projectedNetCredits < 2) return;
-
+    const baselineHorizonTurns = 3;
     const expectedSemanticActionType =
       phase === "install" ? "install.card" : "corp_window.rez";
-    const actionIds = candidates
-      .filter(
-        (candidate) =>
-          candidate.sourceCardInstanceId === card.instanceId &&
-          candidate.sourceDefinitionId === card.definitionId &&
-          candidate.semanticActionType === expectedSemanticActionType,
-      )
-      .map((candidate) => candidate.actionId);
-    signals.push({
-      kind: "develop_campaign",
-      needId: `economy-campaign:${card.instanceId}`,
-      sourceInstanceId: card.instanceId,
-      sourceDefinitionId: card.definitionId,
-      phase,
-      actionIds,
-      cadence: {
-        kind: cadence,
-        maximumSetupExecutions: 1,
-      },
-      payback: {
-        projectedCredits,
+    const campaignCandidates = candidates.filter(
+      (candidate) =>
+        candidate.sourceCardInstanceId === card.instanceId &&
+        candidate.sourceDefinitionId === card.definitionId &&
+        candidate.semanticActionType === expectedSemanticActionType &&
+        candidate.costProfile.costKnownStatus === "known" &&
+        Number.isSafeInteger(candidate.costProfile.creditCost) &&
+        (candidate.costProfile.creditCost as number) >= 0 &&
+        Number.isSafeInteger(candidate.costProfile.clickCost) &&
+        candidate.costProfile.additionalCosts.length === 0,
+    );
+    for (const candidate of campaignCandidates) {
+      const targetServerId =
+        currentServerId ?? corpEconomyCampaignTargetServerId(input, candidate);
+      if (!targetServerId) continue;
+      const setupCreditCost =
+        (candidate.costProfile.creditCost as number) +
+        (phase === "install" ? (definition.rezCost ?? 0) : 0);
+      const payback = assessCorpEconomyAssetPayback({
+        input,
+        serverId: targetServerId,
+        cadence,
+        baselineHorizonTurns,
+        finitePoolCredits,
+        payoutCreditsPerExecution:
+          cadence === "finite_pool"
+            ? (hostedCreditProfile?.payoutCredits ?? 0)
+            : automaticStartOfTurnCredits,
+        payoutActionCost:
+          cadence === "finite_pool"
+            ? (hostedCreditProfile?.payoutActionCost ?? 0)
+            : 0,
         setupCreditCost,
-        projectedNetCredits,
-        horizonTurns,
-      },
-      completion: {
-        kind: "source_phase_reached",
-        expectedState:
-          phase === "install" ? "installed_unrezzed" : "installed_rezzed",
-      },
-      urgentForScore: false,
-      evidenceCode: `corp_visible_economy_campaign:${card.definitionId}:${phase}`,
-    });
+        setupActionCost: candidate.costProfile.clickCost as number,
+      });
+      if (!payback || payback.projectedNetCredits < 2) continue;
+      signals.push({
+        kind: "develop_campaign",
+        needId: `economy-campaign:${card.instanceId}:${phase}:${targetServerId}`,
+        sourceInstanceId: card.instanceId,
+        sourceDefinitionId: card.definitionId,
+        phase,
+        actionIds: [candidate.actionId],
+        cadence: {
+          kind: cadence,
+          maximumSetupExecutions: 1,
+        },
+        payback: {
+          projectedCredits: payback.projectedCredits,
+          setupCreditCost: payback.setupCreditCost,
+          projectedNetCredits: payback.projectedNetCredits,
+          horizonTurns: payback.riskAdjustedHorizonTurns,
+          unadjustedProjectedCredits: payback.unadjustedProjectedCredits,
+          projectedOpportunityCostCredits:
+            payback.projectedOpportunityCostCredits,
+        },
+        riskAdjustment: {
+          serverId: payback.serverId,
+          protectionState: payback.protectionState,
+          baselineHorizonTurns: payback.baselineHorizonTurns,
+          riskAdjustedHorizonTurns: payback.riskAdjustedHorizonTurns,
+          projectedPayoutExecutions: payback.projectedPayoutExecutions,
+          evidenceCodes: payback.evidenceCodes,
+        },
+        completion: {
+          kind: "source_phase_reached",
+          expectedState:
+            phase === "install" ? "installed_unrezzed" : "installed_rezzed",
+        },
+        urgentForScore: false,
+        evidenceCode: `corp_visible_economy_campaign:${phase}:${targetServerId}:${payback.protectionState}`,
+      });
+    }
   };
 
   for (const card of input.playerView.own.gripOrHq) {
@@ -14254,7 +14289,7 @@ function corpEconomyDevelopmentCampaigns(
   for (const server of input.playerView.servers) {
     if (!server.id.startsWith("remote_")) continue;
     for (const card of server.root) {
-      if (card.rezzed !== true) addCampaign(card, "rez");
+      if (card.rezzed !== true) addCampaign(card, "rez", server.id);
     }
   }
   const admitted: CorpCorePlanDomain["economyNeeds"] = [];
@@ -14277,6 +14312,22 @@ function corpEconomyDevelopmentCampaigns(
     if (actionIds.length > 0) admitted.push({ ...signal, actionIds });
   }
   return admitted;
+}
+
+function corpEconomyCampaignTargetServerId(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): string | undefined {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const payloadServerId = action?.payload?.serverId;
+  if (typeof payloadServerId === "string" && payloadServerId.length > 0) {
+    return payloadServerId;
+  }
+  return candidate.targetContext?.selectedTargets.find(
+    (target) => target.targetKind === "server" && target.targetId.length > 0,
+  )?.targetId;
 }
 
 function corpCounterCashoutProfile(

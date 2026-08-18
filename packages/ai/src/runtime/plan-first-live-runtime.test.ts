@@ -8792,6 +8792,120 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("rejects an unprotected finite-pool economy install whose bounded payback is exhausted by action costs", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-finite-pool-unprotected",
+      "corp",
+      "install_card",
+      "Install finite-pool economy asset",
+      { credits: 0, clicks: 1 },
+      {
+        source: "finite-pool-card",
+        payload: {
+          cardId: "finite-pool-card",
+          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const credit = legalAction(
+      "better-immediate-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("corp", [install, credit]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("finite-pool-card", "corp", "asset", {
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).not.toContain(
+      "economy-campaign:finite-pool-card",
+    );
+  });
+
+  it("keeps a finite-pool economy install productive behind a known non-contestable path", () => {
+    resetResidentPlanPortfolioMemory();
+    const install = legalAction(
+      "install-finite-pool-protected",
+      "corp",
+      "install_card",
+      "Install protected finite-pool economy asset",
+      { credits: 0, clicks: 1 },
+      {
+        source: "protected-finite-pool-card",
+        payload: {
+          cardId: "protected-finite-pool-card",
+          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const credit = legalAction(
+      "protected-alternative-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("corp", [install, credit]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("protected-finite-pool-card", "corp", "asset", {
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
+      }),
+    ];
+    input.playerView.opponent.credits = 10;
+    input.playerView.opponent.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        quotedFixtureIce({
+          instanceId: "protected-economy-wall",
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          strength: 2,
+          subtypes: ["wall"],
+        }),
+      ]),
+    ];
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    const portfolio = JSON.stringify(residentPlanPortfolioSnapshot(input));
+    expect(portfolio).toContain(
+      '"protectionState":"protected_not_contestable"',
+    );
+    expect(portfolio).toContain('"projectedCredits":8');
+    expect(portfolio).toContain('"projectedOpportunityCostCredits":5');
+    expect(portfolio).toContain('"projectedNetCredits":3');
+  });
+
   it("draws for score material when the score campaign has no agenda", () => {
     resetResidentPlanPortfolioMemory();
     const draw = legalAction("draw", "corp", "draw_card", "Draw a card", {

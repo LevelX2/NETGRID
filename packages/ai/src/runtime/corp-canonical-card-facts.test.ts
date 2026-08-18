@@ -51,7 +51,7 @@ describe("canonical Corp card facts", () => {
 
     expect(
       corpHostedCreditBankProfile("onr_v1_309_bbs-whispering-campaign"),
-    ).toEqual({ poolCredits: 16, payoutCredits: 2 });
+    ).toEqual({ poolCredits: 16, payoutCredits: 2, payoutActionCost: 1 });
     expect(
       corpHostedCreditBankProfile("onr_v1_165_junkyard-bbs"),
     ).toBeUndefined();

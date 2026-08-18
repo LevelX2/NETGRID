@@ -14,6 +14,7 @@ export type CorpConditionalScoreCreditProfile = Readonly<{
 export type CorpHostedCreditBankProfile = Readonly<{
   poolCredits: number;
   payoutCredits: number;
+  payoutActionCost: number;
 }>;
 
 export type CorpTaggedDamagePayoffProfile = Readonly<{
@@ -119,8 +120,30 @@ export function corpHostedCreditBankProfile(
       ),
     ),
   );
+  const payoutActionCost = Math.max(
+    0,
+    ...(planning.planning.engine.abilities ?? []).flatMap((ability) =>
+      ability.effects.some(
+        (effect) =>
+          effect.kind === "take_hosted_credits" &&
+          effect.recipient === "controller",
+      )
+        ? [
+            Array.isArray(ability.costs)
+              ? ability.costs.reduce(
+                  (sum: number, cost) =>
+                    cost.kind === "action" && positiveSafeInteger(cost.amount)
+                      ? sum + cost.amount
+                      : sum,
+                  0,
+                )
+              : 0,
+          ]
+        : [],
+    ),
+  );
   return poolCredits > 0 && payoutCredits > 0
-    ? { poolCredits, payoutCredits }
+    ? { poolCredits, payoutCredits, payoutActionCost }
     : undefined;
 }
 

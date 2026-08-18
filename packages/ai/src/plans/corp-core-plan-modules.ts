@@ -376,6 +376,20 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
     setupCreditCost: number;
     projectedNetCredits: number;
     horizonTurns: number;
+    unadjustedProjectedCredits?: number;
+    projectedOpportunityCostCredits?: number;
+  };
+  riskAdjustment?: {
+    serverId: string;
+    protectionState:
+      | "unprotected"
+      | "protected_contestable"
+      | "protected_not_contestable"
+      | "protection_unknown";
+    baselineHorizonTurns: number;
+    riskAdjustedHorizonTurns: number;
+    projectedPayoutExecutions: number;
+    evidenceCodes: string[];
   };
   completion: {
     kind: "source_phase_reached";

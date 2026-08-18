@@ -117,8 +117,8 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 | P05   | Bekannte Run-Event-Pfade und Verbrauchswert        | completed |
 | P06   | Persistente Corp-Scoring-Finanzierung              | completed |
 | P07   | Persistente Runner-Entwicklungsfinanzierung        | completed |
-| P08   | Risikojustierter Corp-Economy-Asset-Payback        | active    |
-| P09   | Current-State-Dokumentation und Gesamtverifikation | pending   |
+| P08   | Risikojustierter Corp-Economy-Asset-Payback        | completed |
+| P09   | Current-State-Dokumentation und Gesamtverifikation | active    |
 
 ## Paketdetails
 
@@ -250,6 +250,20 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 - Done-Gate: voller gehosteter Pool gilt nicht ohne Überlebensnachweis als
   garantierter Ertrag.
 - Commit: `fix(ai): risk-adjust corp economy asset payback`
+- Ergebnis: Der Payback wird pro exakt gebundener Servervariante aus
+  CardSpec-Auszahlungsmenge und -Aktionskosten, aktuellem Setupaufwand,
+  verbleibender Aktionskapazität und der bestehenden side-sicheren
+  Remote-Contestability abgeleitet. Ungeschützte oder sichtbar contestable
+  Assets erhalten nur das vor der nächsten Runner-Exposition realistisch
+  konvertierbare Fenster; ein nachweislich nicht contestable Fort behält den
+  begrenzten Dreizughorizont. Der vollständige gehostete Pool wird nicht mehr
+  als automatischer Ertrag angesetzt. Engine-zertifizierte sofortige
+  Rez-Cashouts bleiben ein getrennter unveränderter Pfad.
+- Verifikation: Corp-Core-, kanonische CardSpec-Fact- und neue
+  Paybacktests 149/149 grün; zwei vollständige Runtime-Gegenfälle für
+  ungeschützte Ablehnung und geschützte Zulassung grün; bestehender
+  Immediate-Rez-Cashout-Vertrag grün. Der AI-Typecheck enthält weiterhin nur
+  die sechs dokumentierten paketfremden Baselinefehler.
 
 ### P09 – Current-State-Dokumentation und Gesamtverifikation
 
