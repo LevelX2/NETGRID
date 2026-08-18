@@ -5380,6 +5380,7 @@ function buildRunnerDomain(
               currentNeed: evaluation.currentNeed,
               developmentRole: evaluation.developmentRole,
               duplicateAlreadyInstalled: duplicate,
+              assignedDomainPlanIds: assignedCoveragePlanIds,
             })
           : undefined;
       if (

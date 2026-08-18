@@ -1130,6 +1130,7 @@ export function runnerDevelopmentFundingMilestone(params: {
   currentNeed: RunnerHandDevelopmentCurrentNeed;
   developmentRole: RunnerHandDevelopmentRole;
   duplicateAlreadyInstalled: boolean;
+  assignedDomainPlanIds: readonly string[];
 }): RunnerDevelopmentFundingMilestone | undefined {
   if (
     !Number.isSafeInteger(params.targetCredits) ||
@@ -1138,6 +1139,7 @@ export function runnerDevelopmentFundingMilestone(params: {
     params.targetCredits < 0 ||
     params.currentCredits < 0 ||
     params.duplicateAlreadyInstalled ||
+    params.assignedDomainPlanIds.length > 0 ||
     params.developmentRole === "unknown" ||
     params.developmentRole === "run_event" ||
     params.developmentRole === "duplicate_or_low_value" ||

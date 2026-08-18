@@ -2155,6 +2155,7 @@ describe("Runner core plan modules", () => {
       currentNeed: "useful_now",
       developmentRole: "economy_engine",
       duplicateAlreadyInstalled: false,
+      assignedDomainPlanIds: [],
     });
     const progressed = runnerDevelopmentFundingMilestone({
       targetCredits: 12,
@@ -2164,6 +2165,7 @@ describe("Runner core plan modules", () => {
       currentNeed: "useful_now",
       developmentRole: "economy_engine",
       duplicateAlreadyInstalled: false,
+      assignedDomainPlanIds: [],
     });
 
     expect(first).toMatchObject({
@@ -2188,6 +2190,7 @@ describe("Runner core plan modules", () => {
       currentNeed: "useful_now" as const,
       developmentRole: "economy_engine" as const,
       duplicateAlreadyInstalled: false,
+      assignedDomainPlanIds: [] as const,
     };
 
     expect(
@@ -2204,6 +2207,14 @@ describe("Runner core plan modules", () => {
         ...base,
         targetCredits: 12,
         currentCredits: 3,
+      }),
+    ).toBeUndefined();
+    expect(
+      runnerDevelopmentFundingMilestone({
+        ...base,
+        targetCredits: 8,
+        currentCredits: 4,
+        assignedDomainPlanIds: ["runner.rig_and_coverage:breaker_wall@rd"],
       }),
     ).toBeUndefined();
   });
