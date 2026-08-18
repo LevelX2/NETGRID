@@ -411,9 +411,29 @@ function buildCardCapabilityRecords(
       visibleCards: [...current.visibleCards, visible.card],
     });
   }
-  return [...byId.values()].sort((left, right) =>
-    left.cardId.localeCompare(right.cardId),
+  return [...byId.values()]
+    .map((record) => reconcileKnownDeckRemainder(record))
+    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+}
+
+function reconcileKnownDeckRemainder(
+  record: CardCapabilityRecord,
+): CardCapabilityRecord {
+  const knownOutsideDeckCount = new Set(
+    record.visibleCards.map((card) => card.instanceId),
+  ).size;
+  const remainingPossibleInDeck = Math.max(
+    0,
+    record.quantityKnownInDeck - knownOutsideDeckCount,
   );
+  return {
+    ...record,
+    quantityKnownInDeck: remainingPossibleInDeck,
+    locations: sortedUnique([
+      ...record.locations.filter((location) => location !== "in_deck"),
+      ...(remainingPossibleInDeck > 0 ? (["in_deck"] as const) : []),
+    ]),
+  };
 }
 
 function recordFromDefinition(
@@ -491,6 +511,14 @@ function visibleCardRecords(
       ...playerView.own.scoreArea.map((card) => ({
         card,
         location: "scored" as const,
+      })),
+      ...(playerView.specialZones?.setAside ?? []).map((card) => ({
+        card,
+        location: "unavailable" as const,
+      })),
+      ...(playerView.specialZones?.removedFromGame ?? []).map((card) => ({
+        card,
+        location: "unavailable" as const,
       })),
     ];
   if (side === "corp") {
@@ -684,8 +712,7 @@ function buildBreakerCoverageMatrix(
         breakerHasLocation(breaker, "discarded"),
       );
       const inDeckKnown = matching.some(
-        (breaker) =>
-          breaker.quantityKnownInDeck > visibleKnownCopyCount(breaker),
+        (breaker) => breaker.quantityKnownInDeck > 0,
       );
       const searchableNow =
         inDeckKnown &&
@@ -729,19 +756,6 @@ function coverageBlockers(
   if (state.searchableNow) return ["needs_search_action"];
   if (state.inDeckKnown) return ["draw_only"];
   return [`missing_${coverage}_coverage`];
-}
-
-function visibleKnownCopyCount(breaker: BreakerCapability): number {
-  return breaker.locations.reduce((sum, location) => {
-    if (
-      location === "in_hand" ||
-      location === "installed" ||
-      location === "discarded"
-    ) {
-      return sum + 1;
-    }
-    return sum;
-  }, 0);
 }
 
 function buildSearchAccessProfile(

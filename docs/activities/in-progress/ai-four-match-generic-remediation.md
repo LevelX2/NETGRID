@@ -109,9 +109,9 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 
 | Paket | Titel | Status |
 | --- | --- | --- |
-| P00 | Prozessvertrag und Worktree | active |
-| P01 | Exakter Deckrestbestand für Suche | pending |
-| P02 | Corp-Draw samt Cleanup und Deckout | pending |
+| P00 | Prozessvertrag und Worktree | completed |
+| P01 | Exakter Deckrestbestand für Suche | completed |
+| P02 | Corp-Draw samt Cleanup und Deckout | active |
 | P03 | Corp-Discard als Batchentscheidung | pending |
 | P04 | Exakte Corp-ICE-Rez-Resource-Exchange-Quote | pending |
 | P05 | Bekannte Run-Event-Pfade und Verbrauchswert | pending |

@@ -1109,6 +1109,111 @@ describe("DeckCapabilityProfile", () => {
     );
   });
 
+  it("removes a breaker from the searchable deck remainder when every copy is known outside", () => {
+    const inputView = playerView("runner");
+    inputView.own.heapOrArchives = [
+      visibleCard(
+        "codecracker-1",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+      visibleCard(
+        "codecracker-2",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 2]]),
+    });
+
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      cardId: "onr_v1_014_codecracker",
+      quantityKnownInDeck: 0,
+      locations: ["discarded"],
+    });
+    expect(profile.runner?.breakerCoverageMatrix.code_gate).toMatchObject({
+      inDeckKnown: false,
+      inHeapOrArchives: true,
+      searchableNow: false,
+      drawOnly: false,
+      missing: true,
+    });
+  });
+
+  it("keeps the exact remaining breaker copy searchable across distinct visible zones", () => {
+    const inputView = playerView("runner");
+    inputView.own.gripOrHq = [
+      visibleCard(
+        "codecracker-1",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+    ];
+    inputView.own.heapOrArchives = [
+      visibleCard(
+        "codecracker-2",
+        "onr_v1_014_codecracker",
+        "runner",
+        "program",
+      ),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 3]]),
+    });
+
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      quantityKnownInDeck: 1,
+      locations: ["discarded", "in_deck", "in_hand"],
+    });
+    expect(profile.runner?.breakerCoverageMatrix.code_gate).toMatchObject({
+      inDeckKnown: true,
+      inHand: true,
+      drawOnly: false,
+      missing: false,
+    });
+  });
+
+  it("counts an instance only once when a side-safe view repeats it", () => {
+    const inputView = playerView("runner");
+    const breaker = visibleCard(
+      "codecracker-1",
+      "onr_v1_014_codecracker",
+      "runner",
+      "program",
+    );
+    inputView.own.heapOrArchives = [breaker];
+    inputView.specialZones = {
+      setAside: [breaker],
+      removedFromGame: [],
+      setAsideCount: 1,
+      removedFromGameCount: 0,
+    };
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+      deckSnapshot: runnerSnapshot([["onr_v1_014_codecracker", 2]]),
+    });
+
+    expect(profile.runner?.breakerInventory[0]).toMatchObject({
+      quantityKnownInDeck: 1,
+      locations: ["discarded", "in_deck", "unavailable"],
+    });
+  });
+
   it("redacts deck facts for debug output", () => {
     const profile = buildDeckCapabilityProfile({
       side: "runner",
