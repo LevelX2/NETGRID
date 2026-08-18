@@ -7106,6 +7106,16 @@ select {
   animation: cuePulse 1.1s ease-in-out 2;
 }
 
+/* Keep the action-panel cue within its own bounds. An outer outline overlaps
+   neighboring status panels in the compact board layout. */
+section[data-testid="legal-actions"].cueHighlight {
+  outline: none;
+  box-shadow:
+    inset 3px 0 0 color-mix(in srgb, var(--agenda), white 18%),
+    inset 0 0 0 1px color-mix(in srgb, var(--agenda), transparent 42%);
+  animation: none;
+}
+
 .cueHighlightSoft {
   padding: 4px;
   border-radius: 8px;
