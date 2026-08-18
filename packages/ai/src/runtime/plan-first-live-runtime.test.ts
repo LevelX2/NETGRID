@@ -267,6 +267,37 @@ function costIneffectiveCoverageCapabilities(
   };
 }
 
+function midgameUpgradeEconomyPosture() {
+  return {
+    minimumCreditFloor: 5,
+    desiredCreditReserve: 10,
+    creditReservePolicy: {
+      phase: "midgame" as const,
+      contestReserve: 0,
+    },
+    fundingNeed: false,
+    evidence: ["test_midgame_upgrade_reserve"],
+  };
+}
+
+function alternativeWallBreakerForUpgradeSelection(): BreakerCapability {
+  return {
+    cardId: "onr_v1_047_pile-driver",
+    title: "Pile Driver",
+    coverage: ["wall"],
+    installCost: 7,
+    baseStrength: 1,
+    breakCost: 1,
+    pumpCost: 1,
+    risks: [],
+    restrictions: [],
+    quantityKnownInDeck: 1,
+    locations: ["in_deck"],
+    confidence: "high",
+    evidence: ["test_alternative_wall_breaker"],
+  };
+}
+
 describe("authoritative plan-first live runtime", () => {
   it("admits an owned event-run head only when its current pressure route is executable", () => {
     const signal = {
@@ -15528,6 +15559,236 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision).toMatchObject({
       actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === temple.actionId,
+      ),
+    ).toMatchObject({
+      excluded: true,
+      whyNot: expect.arrayContaining([
+        expect.stringContaining(
+          "runner_program_search_has_no_bound_useful_target",
+        ),
+      ]),
+    });
+  });
+
+  it("binds a strongly amortizing breaker upgrade to sustained Central pressure", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple-for-wall-upgrade",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const credit = costIneffectiveCoverageCreditAction();
+    const input = costIneffectiveWallInput([temple, run, credit]);
+    input.playerView.stateVersion = 12;
+    input.playerView.turnSerial = 3;
+    input.playerView.own.credits = 20;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.memoryUsed = 1;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+    ];
+    for (const action of input.legalActions) action.expiresAtStateVersion = 12;
+    input.playerView.legalActions = input.legalActions;
+    const capabilities = costIneffectiveCoverageCapabilities("in_deck");
+    capabilities.runner!.breakerInventory.push(
+      alternativeWallBreakerForUpgradeSelection(),
+    );
+    capabilities.runner!.searchAccess = {
+      tools: [
+        {
+          cardId: "onr_v1_114_temple-microcode-outlet",
+          title: "Temple Microcode Outlet",
+          status: "in_hand",
+          canSearchPrograms: true,
+          canSearchBreakers: true,
+          legalNow: true,
+          confidence: "high",
+          evidence: ["test_tutor_visible"],
+        },
+      ],
+      canSearchProgramsNow: true,
+      canSearchBreakersNow: true,
+      evidence: ["test_tutor_visible"],
+    };
+    const blockedTarget = costIneffectiveWallTarget(run.actionId);
+    const target = {
+      ...blockedTarget,
+      pathPassability: "reachable" as const,
+      recommendation: "run_now" as const,
+      creditsAfterRun: 10,
+      score: 220,
+      runActionProjection: {
+        ...blockedTarget.runActionProjection,
+        sourceKind: "basic_action" as const,
+      },
+      routeQuote: {
+        ...blockedTarget.routeQuote,
+        reachability: "guaranteed_access" as const,
+        availableCredits: 20,
+        fundingGap: 0,
+      },
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => capabilities,
+      buildRunnerEconomyPosture: midgameUpgradeEconomyPosture,
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: temple.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:search_answer_breaker_wall",
+        "plan_priority_delegated_from:plan:runner.pressure_central:central%3Ahq",
+        "plan_assessment_evidence:coverage_upgrade:hq:onr_v1_053_ramming-piston",
+      ]),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "search_answer",
+      gap: {
+        needKind: "coverage_upgrade",
+        targetServerId: "hq",
+        requesterModuleId: "runner.pressure_central",
+        recoveryMode: "search_known_upgrade",
+        directSearchActionIds: [temple.actionId],
+        directSearchChoiceBindings: [
+          {
+            actionId: temple.actionId,
+            targetDefinitionId: "onr_v1_053_ramming-piston",
+          },
+        ],
+        upgradeQuote: {
+          schemaVersion: "runner-breaker-upgrade-economic-quote-v1",
+          targetDefinitionId: "onr_v1_053_ramming-piston",
+          currentKnownPathCost: 10,
+          savingsPerRun: expect.any(Number),
+          plannedRunHorizon: 2,
+          desiredCreditReserve: 10,
+        },
+      },
+    });
+  });
+
+  it("does not let Central-plan priority rescue a non-amortizing upgrade", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple-for-marginal-wall-upgrade",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const input = costIneffectiveWallInput([
+      temple,
+      run,
+      costIneffectiveCoverageCreditAction(),
+    ]);
+    input.playerView.stateVersion = 12;
+    input.playerView.turnSerial = 3;
+    input.playerView.own.credits = 20;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.memoryUsed = 1;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+      visibleCard("buffer-rdi-1", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+      visibleCard("buffer-rdi-2", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+      }),
+    ];
+    for (const action of input.legalActions) action.expiresAtStateVersion = 12;
+    input.playerView.legalActions = input.legalActions;
+    const capabilities = costIneffectiveCoverageCapabilities("in_deck");
+    capabilities.runner!.searchAccess = {
+      tools: [
+        {
+          cardId: "onr_v1_114_temple-microcode-outlet",
+          title: "Temple Microcode Outlet",
+          status: "in_hand",
+          canSearchPrograms: true,
+          canSearchBreakers: true,
+          legalNow: true,
+          confidence: "high",
+          evidence: ["test_tutor_visible"],
+        },
+      ],
+      canSearchProgramsNow: true,
+      canSearchBreakersNow: true,
+      evidence: ["test_tutor_visible"],
+    };
+    const blockedTarget = costIneffectiveWallTarget(run.actionId);
+    const target = {
+      ...blockedTarget,
+      pathPassability: "reachable" as const,
+      pathCost: 4,
+      recommendation: "run_now" as const,
+      creditsAfterRun: 16,
+      score: 220,
+      runActionProjection: {
+        ...blockedTarget.runActionProjection,
+        sourceKind: "basic_action" as const,
+      },
+      routeQuote: {
+        ...blockedTarget.routeQuote,
+        reachability: "guaranteed_access" as const,
+        knownCost: 4,
+        guaranteedKnownCost: 4,
+        availableCredits: 20,
+        fundingGap: 0,
+      },
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => capabilities,
+      buildRunnerEconomyPosture: midgameUpgradeEconomyPosture,
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
       fallbackUsed: false,
     });
     expect(

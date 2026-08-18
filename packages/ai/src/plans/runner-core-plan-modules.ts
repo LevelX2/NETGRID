@@ -105,7 +105,10 @@ export type RunnerFundingNeedSignal =
 
 export type RunnerCoverageGapSignal = {
   gapId: string;
-  needKind?: "missing_coverage" | "cost_ineffective_coverage";
+  needKind?:
+    | "missing_coverage"
+    | "cost_ineffective_coverage"
+    | "coverage_upgrade";
   requiredRole:
     | "breaker_wall"
     | "breaker_code_gate"
@@ -130,8 +133,27 @@ export type RunnerCoverageGapSignal = {
   recoveryMode?:
     | "install_visible_answer"
     | "search_known_alternative"
-    | "draw_for_known_role";
+    | "draw_for_known_role"
+    | "install_visible_upgrade"
+    | "search_known_upgrade";
   recoveryEvidenceCodes?: string[];
+  upgradeQuote?: {
+    schemaVersion: "runner-breaker-upgrade-economic-quote-v1";
+    targetDefinitionId: string;
+    currentKnownPathCost: number;
+    projectedKnownPathCost: number;
+    savingsPerRun: number;
+    plannedRunHorizon: number;
+    grossRunSavings: number;
+    upfrontCreditCost: number;
+    totalInvestment: number;
+    netValueBeforeSafetyMargin: number;
+    requiredNetSafetyMargin: number;
+    projectedLiquidCreditsAfterUpgradeAndRun: number;
+    desiredCreditReserve: number;
+    memoryAvailable: number;
+    candidateMemoryCost: number;
+  };
   fundingActionIds: string[];
   directSearchActionIds: string[];
   directSearchChoiceBindings?: Array<{

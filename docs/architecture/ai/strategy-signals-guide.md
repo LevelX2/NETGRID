@@ -1853,6 +1853,32 @@ Bedarf:
 - der Choice-Resolver vervollständigt ausschließlich das vorab gebundene Ziel
   und nimmt keine eigene Karten- oder Strategieauswahl vor.
 
+Eine bereits vorhandene Breaker-Coverage darf in der ersten Ausbaustufe nur
+als konservative Midgame-Feinoptimierung verbessert werden. Der Owner bleibt
+`runner.rig_and_coverage`; der konkrete HQ-/R&D-Druckplan liefert lediglich
+den gebundenen Bedarf. Vor der Planpriorisierung gilt eine harte
+Wirtschaftlichkeitszulassung:
+
+- Der vollständige Pfad muss aus bekanntem, gerezztem ICE bestehen und mit der
+  vorhandenen Coverage bereits erreichbar sein. Unbekanntes ICE erzeugt keine
+  angenommenen Einsparungen.
+- Die neue Breaker-Definition muss auf dem konkreten Pfad messbar günstiger
+  sein. Zwei geplante Zugriffe bilden den begrenzten
+  Amortisationshorizont; Suchkosten, Installationskosten, Klicks und eine
+  verbrauchte Suchkarte zählen als Investition. Unter mehreren zugelassenen
+  Varianten gewinnt zuerst der höhere Nettovorteil, dann der günstigere
+  konkrete Pfad und schließlich die niedrigere Investition.
+- Nach Suche, Installation und dem nächsten Zugriff muss die gewünschte
+  Credit-Reserve erhalten bleiben. Zusätzlich ist ein positiver
+  Sicherheitsabstand über die volle Investition hinaus erforderlich.
+- Es muss freie MU vorhanden sein. Automatischer Austausch oder Trash eines
+  vorhandenen Breakers gehört nicht zu dieser ersten Stufe.
+- Opening, akute Score-Threats, identische bereits installierte Definitionen,
+  nicht exakt bindbare Suchziele und nur knapp bessere Varianten werden
+  abgelehnt.
+- Die Priorität des anfordernden Zentraldruckplans darf eine wirtschaftlich
+  abgelehnte Upgrade-Route nicht wieder zulassen.
+
 ---
 
 ### 34.4 Expose-/Scouting-Preps

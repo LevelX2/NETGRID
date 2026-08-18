@@ -227,6 +227,10 @@ import {
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
 import { assessRunnerRecurringEconomyRunHorizon } from "./runner-recurring-economy-investment";
+import {
+  quoteRunnerBreakerUpgradeEconomics,
+  type RunnerBreakerUpgradeEconomicQuote,
+} from "./runner-breaker-upgrade-economics";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { rolesMatch } from "./role-match";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
@@ -3627,6 +3631,7 @@ function buildRunnerDomain(
     installedRoles,
     _deckCapabilities,
     strategicIntent,
+    economy,
   );
   const accessPayoffCampaignSignals = runnerCentralPressureDevelopmentSignals(
     input,
@@ -18973,6 +18978,7 @@ function uniqueCoverageGaps(
   installedRoles: ReadonlySet<string>,
   deckCapabilities: DeckCapabilityProfile,
   strategicIntent: RunnerStrategicIntentProfile,
+  economy: RunnerEconomyPosture,
 ): RunnerCorePlanDomain["coverageGaps"] {
   const result = new Map<
     string,
@@ -19017,38 +19023,61 @@ function uniqueCoverageGaps(
       role,
       deckCapabilities,
     );
-    if (outsideMissingCoverageScope && !costRecovery) {
+    const coverageUpgrade = costRecovery
+      ? undefined
+      : runnerBreakerCoverageUpgrade(
+          input,
+          candidates,
+          evaluation,
+          deckCapabilities,
+          economy,
+        );
+    const coverageDevelopment = costRecovery ?? coverageUpgrade;
+    if (outsideMissingCoverageScope && !coverageDevelopment) {
       continue;
     }
+    const requiredRole = coverageUpgrade?.requiredRole ?? role;
     const terminalRemoteCoverageThreat =
       runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
     const terminalRemotePatternThreat =
       terminalContestThreat?.kind === "opponent_matchpoint" &&
       terminalContestThreat.remoteServerIds.includes(evaluation.targetServerId);
-    if (installedRoles.has(role) && !costRecovery) continue;
+    if (installedRoles.has(requiredRole) && !coverageDevelopment) continue;
     const visibleAnswer =
-      costRecovery?.visibleAnswer ??
+      coverageDevelopment?.visibleAnswer ??
       runnerHandBreakerForCoverage(input.playerView, preciseCoverage);
     const answerInstallCost = visibleAnswer?.installCost;
     const fundingGap =
       answerInstallCost === undefined
         ? undefined
         : Math.max(0, answerInstallCost - input.playerView.own.credits);
-    const supportActions = coverageSupportActionIds(
+    const baseSupportActions = coverageSupportActionIds(
       input,
       candidates,
       deckCapabilities,
-      role,
-      costRecovery?.deckHasAlternative,
-      costRecovery?.targetDefinitionId,
+      requiredRole,
+      coverageDevelopment?.deckHasAlternative,
+      coverageDevelopment?.targetDefinitionId,
     );
+    const supportActions = coverageUpgrade
+      ? runnerBreakerUpgradeSupportActions(
+          baseSupportActions,
+          coverageUpgrade.searchActionId,
+        )
+      : baseSupportActions;
+    if (
+      coverageUpgrade?.recoveryMode === "search_known_upgrade" &&
+      supportActions.directSearchActionIds.length === 0
+    ) {
+      continue;
+    }
     const deckHasAnswer =
       visibleAnswer !== undefined ||
-      (costRecovery
-        ? costRecovery.deckHasAlternative
-        : runnerDeckHasCoverageAnswer(deckCapabilities, role)) ||
+      (coverageDevelopment
+        ? coverageDevelopment.deckHasAlternative
+        : runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole)) ||
       supportActions.directSearchActionIds.length > 0;
-    const installActionIds = costRecovery?.visibleAnswer
+    const installActionIds = coverageDevelopment?.visibleAnswer
       ? candidates
           .filter((candidate) => {
             const action = input.legalActions.find(
@@ -19057,14 +19086,16 @@ function uniqueCoverageGaps(
             return (
               candidate.semanticActionType === "install.card" &&
               runnerInstallSourceInstanceId(candidate, action) ===
-                costRecovery.visibleAnswer?.instanceId
+                coverageDevelopment.visibleAnswer?.instanceId
             );
           })
           .map((candidate) => candidate.actionId)
       : undefined;
-    const gapId = costRecovery
-      ? `coverage:${role}:efficiency:${evaluation.targetServerId}`
-      : `coverage:${role}`;
+    const gapId = coverageUpgrade
+      ? `coverage:${requiredRole}:upgrade:${evaluation.targetServerId}`
+      : costRecovery
+        ? `coverage:${requiredRole}:efficiency:${evaluation.targetServerId}`
+        : `coverage:${requiredRole}`;
     const requesterModuleId =
       evaluation.targetKind === "remote"
         ? ("runner.contest_remote" as const)
@@ -19074,15 +19105,20 @@ function uniqueCoverageGaps(
         ? `remote:${evaluation.targetServerId}`
         : `central:${evaluation.targetServerId}`;
     const bindToRequester =
+      coverageUpgrade !== undefined ||
       terminalRemotePatternThreat ||
       (requesterModuleId === "runner.pressure_central" &&
         evaluation.score > 0 &&
         evaluation.knownAccessState !== "known_no_current_payoff" &&
         evaluation.accessPayoff !== "known_low_value");
-    result.set(role, {
+    result.set(coverageUpgrade ? gapId : requiredRole, {
       gapId,
-      needKind: costRecovery ? "cost_ineffective_coverage" : "missing_coverage",
-      requiredRole: role,
+      needKind: coverageUpgrade
+        ? "coverage_upgrade"
+        : costRecovery
+          ? "cost_ineffective_coverage"
+          : "missing_coverage",
+      requiredRole,
       targetServerId: evaluation.targetServerId,
       ...(bindToRequester
         ? {
@@ -19097,28 +19133,37 @@ function uniqueCoverageGaps(
       priorityClass:
         evaluation.scoreThreat || terminalRemoteCoverageThreat
           ? "P2"
-          : visibleAnswer
-            ? "P4"
-            : "P5",
+          : coverageUpgrade
+            ? "P5"
+            : visibleAnswer
+              ? "P4"
+              : "P5",
       evidenceCode: terminalRemoteCoverageThreat
         ? `terminal_remote_coverage:${evaluation.targetServerId}`
-        : costRecovery
-          ? `cost_ineffective_coverage:${evaluation.targetServerId}:${evaluation.pathCost}`
-          : (evaluation.evidence[0] ?? `missing_${role}`),
+        : coverageUpgrade
+          ? `coverage_upgrade:${evaluation.targetServerId}:${coverageUpgrade.targetDefinitionId}`
+          : costRecovery
+            ? `cost_ineffective_coverage:${evaluation.targetServerId}:${evaluation.pathCost}`
+            : (evaluation.evidence[0] ?? `missing_${requiredRole}`),
       deckHasAnswer,
       answerInHand: visibleAnswer !== undefined,
       ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
       ...(installActionIds !== undefined ? { installActionIds } : {}),
       ...(fundingGap !== undefined ? { fundingGap } : {}),
-      ...(costRecovery
+      ...(coverageDevelopment
         ? {
             currentKnownPathCost: evaluation.pathCost,
             currentPathFundingGap: Math.max(
               0,
               evaluation.routeQuote?.fundingGap ?? 0,
             ),
-            recoveryMode: costRecovery.recoveryMode,
-            recoveryEvidenceCodes: costRecovery.evidenceCodes,
+            recoveryMode: coverageDevelopment.recoveryMode,
+            recoveryEvidenceCodes: coverageDevelopment.evidenceCodes,
+          }
+        : {}),
+      ...(coverageUpgrade
+        ? {
+            upgradeQuote: runnerBreakerUpgradeSignalQuote(coverageUpgrade),
           }
         : {}),
       fundingActionIds: runnerCoverageFundingActionIds(
@@ -19133,7 +19178,7 @@ function uniqueCoverageGaps(
         input,
         candidates,
         evaluation.targetServerId,
-        role,
+        requiredRole,
       ),
       ...supportActions,
     });
@@ -19225,6 +19270,401 @@ function uniqueCoverageGaps(
     }
   }
   return [...result.values()];
+}
+
+type RunnerBreakerCoverageUpgrade = Readonly<{
+  requiredRole: RunnerCoverageGapSignal["requiredRole"];
+  visibleAnswer?: VisibleCard;
+  deckHasAlternative: true;
+  targetDefinitionId: string;
+  searchActionId?: string;
+  recoveryMode: "install_visible_upgrade" | "search_known_upgrade";
+  economicQuote: RunnerBreakerUpgradeEconomicQuote;
+  evidenceCodes: string[];
+}>;
+
+function runnerBreakerCoverageUpgrade(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  evaluation: RunnerRunTargetEvaluation,
+  deckCapabilities: DeckCapabilityProfile,
+  economy: RunnerEconomyPosture,
+): RunnerBreakerCoverageUpgrade | undefined {
+  if (
+    evaluation.runActionProjection.sourceKind !== "basic_action" ||
+    evaluation.targetKind === "remote" ||
+    evaluation.targetServerId === "archives" ||
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.pathCost <= 0 ||
+    !Number.isSafeInteger(evaluation.pathCost) ||
+    evaluation.scoreThreat ||
+    evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.accessPayoff === "known_low_value" ||
+    evaluation.accessPayoffContestable === false ||
+    !runnerCentralPressureHasMaterialMarginalValue(input, evaluation) ||
+    !runnerCentralPressureCadence(
+      input,
+      evaluation.targetServerId as "hq" | "rd",
+    ).routeAvailable
+  ) {
+    return undefined;
+  }
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === evaluation.targetServerId,
+  );
+  if (
+    !server ||
+    server.ice.length === 0 ||
+    server.ice.some((ice) => !ice.known || ice.rezzed !== true)
+  ) {
+    return undefined;
+  }
+  const memoryUsed = input.playerView.own.memoryUsed;
+  const memoryLimit = input.playerView.own.memoryLimit;
+  if (
+    !Number.isSafeInteger(memoryUsed) ||
+    !Number.isSafeInteger(memoryLimit) ||
+    (memoryUsed ?? -1) < 0 ||
+    (memoryLimit ?? -1) < 0
+  ) {
+    return undefined;
+  }
+  const memoryAvailable = Math.max(
+    0,
+    (memoryLimit as number) - (memoryUsed as number),
+  );
+  const installedDefinitionIds = new Set(
+    (input.playerView.own.rig ?? []).flatMap((card) =>
+      card.definitionId ? [card.definitionId] : [],
+    ),
+  );
+  const upgradeCandidates = (deckCapabilities.runner?.breakerInventory ?? [])
+    .flatMap((breaker) => {
+      const visibleAnswer = input.playerView.own.gripOrHq.find(
+        (card) => card.known && card.definitionId === breaker.cardId,
+      );
+      const knownInDeck =
+        breaker.quantityKnownInDeck > 0 &&
+        breaker.locations.includes("in_deck");
+      if (
+        breaker.confidence !== "high" ||
+        installedDefinitionIds.has(breaker.cardId) ||
+        (!visibleAnswer && !knownInDeck) ||
+        breaker.risks.length > 0 ||
+        breaker.restrictions.length > 0
+      ) {
+        return [];
+      }
+      const projectedBreaker = runnerVisibleDeckBreaker(breaker);
+      const candidateMemoryCost = projectedBreaker?.memoryCost;
+      if (
+        !projectedBreaker ||
+        !Number.isSafeInteger(candidateMemoryCost) ||
+        (candidateMemoryCost ?? -1) < 0
+      ) {
+        return [];
+      }
+      const requiredRole = runnerBreakerUpgradeRequiredRole(breaker, server);
+      if (
+        !requiredRole ||
+        !runnerRolesCoverCoverageGap(
+          rolesForDeckDoctrineCard(breaker.cardId),
+          requiredRole,
+        )
+      ) {
+        return [];
+      }
+      const installRoute = visibleAnswer
+        ? runnerVisibleBreakerUpgradeInstallRoute(
+            input,
+            candidates,
+            visibleAnswer,
+          )
+        : undefined;
+      const searchRoute = visibleAnswer
+        ? undefined
+        : runnerBreakerUpgradeSearchRoute(
+            input,
+            candidates,
+            deckCapabilities,
+            requiredRole,
+            breaker.cardId,
+          );
+      if (visibleAnswer && !installRoute) return [];
+      if (!visibleAnswer && !searchRoute) return [];
+      const installCreditCost =
+        installRoute?.creditCost ?? projectedBreaker.installCost;
+      if (
+        !Number.isSafeInteger(installCreditCost) ||
+        (installCreditCost ?? -1) < 0
+      ) {
+        return [];
+      }
+      const path = assessKnownRezzedIcePath(
+        server.ice,
+        [...(input.playerView.own.rig ?? []), projectedBreaker],
+        Math.max(evaluation.pathCost, input.playerView.own.credits),
+        server.root,
+        input.playerView.opponent.credits,
+      );
+      const projectedPathCost = path.visibleBreakCost;
+      if (
+        !path.canReachAccess ||
+        !Number.isSafeInteger(projectedPathCost) ||
+        (projectedPathCost ?? -1) < 0
+      ) {
+        return [];
+      }
+      const economicQuote = quoteRunnerBreakerUpgradeEconomics({
+        phase: economy.creditReservePolicy.phase,
+        scoreThreat: evaluation.scoreThreat,
+        currentPathCost: evaluation.pathCost,
+        projectedPathCost: projectedPathCost as number,
+        plannedRunHorizon: 2,
+        installCreditCost: installCreditCost as number,
+        searchCreditCost: visibleAnswer ? 0 : (searchRoute?.creditCost ?? 0),
+        installActionClicks: installRoute?.clickCost ?? 1,
+        searchActionClicks: visibleAnswer ? 0 : (searchRoute?.clickCost ?? 0),
+        consumesSearchCard:
+          !visibleAnswer && searchRoute?.consumesCard === true,
+        currentCredits: input.playerView.own.credits,
+        desiredCreditReserve: economy.desiredCreditReserve,
+        memoryAvailable,
+        candidateMemoryCost: candidateMemoryCost as number,
+      });
+      if (!economicQuote.admitted) return [];
+      const answer = visibleAnswer
+        ? {
+            ...visibleAnswer,
+            installCost: installCreditCost as number,
+          }
+        : undefined;
+      return [
+        {
+          requiredRole,
+          ...(answer ? { visibleAnswer: answer } : {}),
+          deckHasAlternative: true as const,
+          targetDefinitionId: breaker.cardId,
+          ...(!answer && searchRoute
+            ? { searchActionId: searchRoute.actionId }
+            : {}),
+          recoveryMode: answer
+            ? ("install_visible_upgrade" as const)
+            : ("search_known_upgrade" as const),
+          economicQuote,
+          evidenceCodes: [
+            `coverage_upgrade_target:${evaluation.targetServerId}`,
+            `coverage_upgrade_breaker:${breaker.cardId}`,
+            `coverage_upgrade_required_role:${requiredRole}`,
+            "coverage_upgrade_no_replacement_required:true",
+            ...economicQuote.evidence,
+          ],
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        right.economicQuote.netValueBeforeSafetyMargin -
+          left.economicQuote.netValueBeforeSafetyMargin ||
+        left.economicQuote.projectedPathCost -
+          right.economicQuote.projectedPathCost ||
+        left.economicQuote.totalInvestment -
+          right.economicQuote.totalInvestment ||
+        left.targetDefinitionId.localeCompare(right.targetDefinitionId),
+    );
+  return upgradeCandidates[0];
+}
+
+function runnerBreakerUpgradeSearchRoute(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  deckCapabilities: DeckCapabilityProfile,
+  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+  targetDefinitionId: string,
+):
+  | {
+      actionId: string;
+      creditCost: number;
+      clickCost: number;
+      consumesCard: boolean;
+    }
+  | undefined {
+  const legalSearchToolDefinitionIds = new Set(
+    (deckCapabilities.runner?.searchAccess.tools ?? [])
+      .filter(
+        (tool) =>
+          tool.canSearchBreakers && tool.legalNow && tool.status !== "in_deck",
+      )
+      .map((tool) => tool.cardId),
+  );
+  const exactTargetSearchActionIds = new Set(
+    coverageSupportActionIds(
+      input,
+      candidates,
+      deckCapabilities,
+      requiredRole,
+      true,
+      targetDefinitionId,
+    ).directSearchActionIds,
+  );
+  return candidates
+    .flatMap((candidate) => {
+      const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+        input,
+        candidate,
+      );
+      const action = input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      if (
+        !sourceDefinitionId ||
+        !legalSearchToolDefinitionIds.has(sourceDefinitionId) ||
+        !exactTargetSearchActionIds.has(candidate.actionId) ||
+        !runnerCandidateExecutesProgramSearch(input, candidate) ||
+        !action ||
+        !runnerProgramSearchSourceCardInstanceId(input, candidate)
+      ) {
+        return [];
+      }
+      const clickCost = action.costs.reduce(
+        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+        0,
+      );
+      return [
+        {
+          actionId: candidate.actionId,
+          creditCost: legalActionCreditCost(action),
+          clickCost,
+          consumesCard: action.type === "play_event",
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        left.creditCost +
+          left.clickCost +
+          Number(left.consumesCard) -
+          (right.creditCost + right.clickCost + Number(right.consumesCard)) ||
+        left.actionId.localeCompare(right.actionId),
+    )[0];
+}
+
+function runnerVisibleBreakerUpgradeInstallRoute(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  card: VisibleCard,
+): { actionId: string; creditCost: number; clickCost: number } | undefined {
+  return candidates
+    .flatMap((candidate) => {
+      if (candidate.semanticActionType !== "install.card") return [];
+      const action = input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      if (
+        !action ||
+        runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
+        action.payload?.runnerProgramTrashBeforeInstall === true ||
+        candidate.actionId.endsWith(".runner_program_trash_before_install")
+      ) {
+        return [];
+      }
+      return [
+        {
+          actionId: candidate.actionId,
+          creditCost: legalActionCreditCost(action),
+          clickCost: action.costs.reduce(
+            (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+            0,
+          ),
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        left.creditCost +
+          left.clickCost -
+          (right.creditCost + right.clickCost) ||
+        left.actionId.localeCompare(right.actionId),
+    )[0];
+}
+
+function runnerBreakerUpgradeRequiredRole(
+  breaker: BreakerCapability,
+  server: AiDecisionInput["playerView"]["servers"][number],
+): RunnerCoverageGapSignal["requiredRole"] | undefined {
+  const subtypes = new Set(
+    server.ice.flatMap((ice) =>
+      (ice.subtypes ?? []).map((subtype) =>
+        subtype.toLowerCase().replaceAll("-", "_").replaceAll(" ", "_"),
+      ),
+    ),
+  );
+  for (const [coverage, role, subtype] of [
+    ["wall", "breaker_wall", "wall"],
+    ["code_gate", "breaker_code_gate", "code_gate"],
+    ["sentry", "breaker_sentry", "sentry"],
+    ["ap", "breaker_ap", "ap"],
+    ["trace", "breaker_trace", "trace"],
+  ] as const) {
+    if (breaker.coverage.includes(coverage) && subtypes.has(subtype)) {
+      return role;
+    }
+  }
+  if (breaker.coverage.includes("universal")) return "breaker_universal";
+  return undefined;
+}
+
+function runnerBreakerUpgradeSupportActions(
+  support: ReturnType<typeof coverageSupportActionIds>,
+  searchActionId: string | undefined,
+): ReturnType<typeof coverageSupportActionIds> {
+  const acceptedSearchActionIds = new Set(
+    searchActionId ? [searchActionId] : [],
+  );
+  const directSearchChoiceBindings = support.directSearchChoiceBindings?.filter(
+    (binding) => acceptedSearchActionIds.has(binding.actionId),
+  );
+  return {
+    directSearchActionIds: support.directSearchActionIds.filter((actionId) =>
+      acceptedSearchActionIds.has(actionId),
+    ),
+    ...(directSearchChoiceBindings ? { directSearchChoiceBindings } : {}),
+    rejectedSearchActionIds: [
+      ...new Set([
+        ...(support.rejectedSearchActionIds ?? []),
+        ...support.directSearchActionIds.filter(
+          (actionId) => !acceptedSearchActionIds.has(actionId),
+        ),
+        ...support.searchEngineSetupActionIds,
+      ]),
+    ],
+    searchEngineSetupActionIds: [],
+    drawForAnswerActionIds: [],
+  };
+}
+
+function runnerBreakerUpgradeSignalQuote(
+  upgrade: RunnerBreakerCoverageUpgrade,
+): NonNullable<RunnerCoverageGapSignal["upgradeQuote"]> {
+  const quote = upgrade.economicQuote;
+  return {
+    schemaVersion: quote.schemaVersion,
+    targetDefinitionId: upgrade.targetDefinitionId,
+    currentKnownPathCost: quote.currentPathCost,
+    projectedKnownPathCost: quote.projectedPathCost,
+    savingsPerRun: quote.savingsPerRun,
+    plannedRunHorizon: quote.plannedRunHorizon,
+    grossRunSavings: quote.grossRunSavings,
+    upfrontCreditCost: quote.upfrontCreditCost,
+    totalInvestment: quote.totalInvestment,
+    netValueBeforeSafetyMargin: quote.netValueBeforeSafetyMargin,
+    requiredNetSafetyMargin: quote.requiredNetSafetyMargin,
+    projectedLiquidCreditsAfterUpgradeAndRun:
+      quote.projectedLiquidCreditsAfterUpgradeAndRun,
+    desiredCreditReserve: quote.desiredCreditReserve,
+    memoryAvailable: quote.memoryAvailable,
+    candidateMemoryCost: quote.candidateMemoryCost,
+  };
 }
 
 type RunnerCostEffectiveCoverageRecovery = Readonly<{
