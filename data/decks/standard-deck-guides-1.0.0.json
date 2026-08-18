@@ -2263,6 +2263,78 @@
       }
     },
     {
+      "standardDeckId": "standard_runner_rd_express_v2",
+      "sourceDeckVersion": "2.0.0",
+      "sourceDeckHash": "standard-deck:cc6565ae",
+      "sourceAnalysisHash": "deck-analysis:5af362f2",
+      "reviewedAt": "2026-08-18",
+      "analysis": {
+        "primaryStrategyIds": [
+          "runner.interface_closeout",
+          "runner.rnd_pressure",
+          "runner.run_event_tempo"
+        ],
+        "secondaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "content": {
+        "summary": "R&D Express – Switchyard entwickelt den geradlinigen R&D-Druck von V1 mit drei gezielt wählbaren Breaker-Paaren weiter. Temple Microcode Outlet sucht nicht nur eine fehlende Coverage-Rolle, sondern den für den sichtbaren Runpfad wirtschaftlicheren Sidegrade. Armadillo ergänzt Tag-Clear-Unterstützung und eine einmalige Meat-Damage-Absicherung, ohne die R&D-Hauptlinie zu verändern.",
+        "deckIdea": "Switchyard behält die Werkzeugkette von R&D Express bei: vollständige nicht-noisy Coverage aufbauen, den nächsten bezahlbaren Zentralrun finanzieren und R&D Interface beziehungsweise Rush Hour in Multiaccess umsetzen. Jede Breaker-Rolle besitzt zwei unterschiedliche Kostenprofile. Codecracker ist der günstige lineare Decoder, während Skeleton Passkeys hohe Code-Gate-Stärke in großen Schritten überwindet. Corrosion ist bei niedriger Stärke und mehreren Wall-Subroutinen effizient, Boring Bit startet dagegen mit Stärke 5. Loony Goon bezahlt kleine Sentries fein abgestuft, Big Frackin’ Gun deckt mit Stärke 7 und einem Sammel-Break bis zu fünf Subroutinen starke oder dichte Sentries ab. Temple soll die vollständigen bekannten Installations- und Pfadkosten vergleichen. Armadillo ersetzt den dritten langfristigen Short-Term Contract und schützt eine aggressive Linie gegen sichtbaren Tag-/Meat-Damage-Druck.",
+        "gamePlan": {
+          "opening": "Behalte einen Breaker oder Temple Microcode Outlet zusammen mit Economy oder Draw. Fehlt eine Rolle, suche zunächst den günstig installierbaren soliden Einstieg; ist der relevante ICE-Pfad bereits sichtbar, vergleiche stattdessen die gesamten Installations-, Pump- und Breakkosten beider Sidegrades. Installiere Zetatech Mem Chip oder Vewy Vewy Quiet nur für einen konkret nutzbaren Rig- beziehungsweise Runbedarf.",
+          "midgame": "Greife R&D wiederholt an, sobald Coverage, Pfadkosten und Reserve stimmen. Nutze Skeleton Passkeys, Boring Bit oder Big Frackin’ Gun nur dann als gezielte Alternative, wenn ihr Kostenprofil auf dem bekannten Pfad tatsächlich besser ist. R&D Interface und Rush Hour bleiben die Hauptabschlüsse; HQ und Inside Job sind Ausweichlinien. Installiere Armadillo bei sichtbarem Tag-/Meat-Damage-Risiko rechtzeitig vor dem gefährlichen Run.",
+          "endgame": "Bündele Credits in den erreichbaren Server mit der höchsten unmittelbaren Agenda-Chance. Ein installiertes Interface verlangt keinen schlechten Run, aber einen bezahlbaren R&D-Pfad soll die KI nicht durch allgemeine Economy verdrängen. Armadillo und Open-Ended Mileage Program sichern akute Tags und Meat Damage ab; sie rechtfertigen keinen letzten-Klick-Run, dessen sichtbarer Risikovertrag bereits unzureichend ist."
+        },
+        "keyCards": [
+          {
+            "cardId": "onr_v1_139_r-and-d-interface",
+            "title": "R&D Interface",
+            "role": "Der dauerhafte R&D-Multiaccess bleibt der zentrale Abschlussmotor."
+          },
+          {
+            "cardId": "onr_proteus_122_rush-hour",
+            "title": "Rush Hour",
+            "role": "Verwandelt einen bereits erreichbaren und bezahlbaren R&D-Pfad in vier Zugriffe."
+          },
+          {
+            "cardId": "onr_v1_114_temple-microcode-outlet",
+            "title": "Temple Microcode Outlet",
+            "role": "Bindet die fehlende Coverage-Rolle an den wirtschaftlicheren der beiden verfügbaren Sidegrades."
+          },
+          {
+            "cardId": "onr_proteus_095_skeleton-passkeys",
+            "title": "Skeleton Passkeys",
+            "role": "Bietet gegenüber Codecracker das alternative Pump-Profil für starke Code Gates."
+          },
+          {
+            "cardId": "onr_proteus_079_big-frackin-gun",
+            "title": "Big Frackin' Gun",
+            "role": "Deckt starke oder subroutinenreiche Sentries mit hoher Basisstärke und Sammel-Break ab."
+          },
+          {
+            "cardId": "onr_v1_120_armadillo-armored-road-home",
+            "title": "“Armadillo” Armored Road Home",
+            "role": "Stützt Tag-Clear-Kosten und kann einmalig bis zu drei Meat Damage verhindern."
+          }
+        ],
+        "pilotingTips": [
+          "Vergleiche bei Temple nicht nur Installationskosten, sondern den vollständigen bekannten Pfad einschließlich Stärke und Subroutinen.",
+          "Installiere zunächst nur einen Breaker je Rolle. Der zweite Sidegrade ist eine echte Pfadoption und kein automatischer zusätzlicher Rig-Baustein.",
+          "Alle sechs Breaker sind nicht noisy; Vewy Vewy Quiet unterstützt daher jede gewählte Suite, Corolla Speed Chip beide Killer.",
+          "Behandle Armadillos Credits ausschließlich als Tag-Clear-Support und seine Prävention als begrenzte Absicherung, nicht als Freibrief für riskante Runs."
+        ],
+        "weaknesses": [
+          "Bei unbekanntem ICE fehlen belastbare Pfaddaten für die Sidegrade-Wahl; dann ist die günstige Baseline-Coverage häufig der bessere Einstieg.",
+          "Boring Bit und Big Frackin’ Gun können gegen kleine ICE mit wenigen Subroutinen deutlich teurer arbeiten als Corrosion beziehungsweise Loony Goon.",
+          "Die Deckänderung ersetzt keine KI-Verbesserung für Remote-Deadlines, Coverage-Continuation oder die Neubewertung eines laufenden Runs nach einem Tag."
+        ]
+      }
+    },
+    {
       "standardDeckId": "standard_runner_rnd_interface_dig",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:be046044",

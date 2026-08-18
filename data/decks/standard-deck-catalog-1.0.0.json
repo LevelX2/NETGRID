@@ -3,7 +3,7 @@
   "catalogId": "netgrid-standard-decks-1.0.0",
   "version": "1.0.0",
   "status": "active",
-  "curatedAt": "2026-08-16",
+  "curatedAt": "2026-08-18",
   "decks": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -4381,6 +4381,121 @@
         "kind": "curated_local_deck",
         "sourceDeckId": "local_runner_rd_express_2026_08_15",
         "sourceDeckVersion": "1.1.0-runner-ai-baseline"
+      }
+    },
+    {
+      "standardDeckId": "standard_runner_rd_express_v2",
+      "version": "2.0.0",
+      "status": "active",
+      "name": "R&D Express – Switchyard",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_040_loony-goon",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_071_vewy-vewy-quiet",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_102_open-ended-mileage-program",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_120_armadillo-armored-road-home",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_124_corolla-speed-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_178_short-term-contract",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_079_big-frackin-gun",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_081_boring-bit",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_083_corrosion",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_122_rush-hour",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_124_stakeout",
+          "quantity": 3
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_runner_rd_express_switchyard_2026_08_18",
+        "sourceDeckVersion": "2.0.0-runner-ai-adaptive"
       }
     },
     {

@@ -25,8 +25,8 @@ describe("deck strategy completeness gate", () => {
     cards: Array<{ cardId: string; quantity: number }>;
   }>;
 
-  it("classifies all 46 active standard decks and exposes under-equipped lists deterministically", () => {
-    expect(activeDecks).toHaveLength(46);
+  it("classifies all 47 active standard decks and exposes under-equipped lists deterministically", () => {
+    expect(activeDecks).toHaveLength(47);
     const neutralDeckNames: string[] = [];
 
     for (const deck of activeDecks) {
@@ -57,7 +57,6 @@ describe("deck strategy completeness gate", () => {
       "Ghost Circuit",
       "Inside Forgery Loop",
       "Krashkurs: Clown-Kreditmaschine",
-      "Proteus Runner - Hidden Backdoor Sabotage",
       "Rent-I-Con: Das Shellspiel",
     ]);
   });
