@@ -352,6 +352,16 @@ describe("AI decision debug sanitizing", () => {
               leaseId: "lease:corp.draw",
             },
             observationClass: "expected_progress",
+            continuation: {
+              status: "retained",
+              previousCommitmentId: "commitment:corp:turn:3",
+              previousOwnerRootPlanInstanceId:
+                "plan:corp.score_agenda:general",
+              intendedNextMilestoneId: "score-material-ready",
+              boundaryKind: "plan_internal_continuation",
+              nextCommitmentId: "commitment:corp:turn:4",
+              evidenceCodes: ["same_root_continuation_line_rematerialized"],
+            },
           },
           boundary: {
             kind: "private_observation",
@@ -534,6 +544,10 @@ describe("AI decision debug sanitizing", () => {
         schemaVersion: AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
         commitment: expect.objectContaining({
           commitmentId: "commitment:corp:turn:4",
+          continuation: expect.objectContaining({
+            status: "retained",
+            boundaryKind: "plan_internal_continuation",
+          }),
           phaseEntry: expect.objectContaining({ status: "validated" }),
           rematerialization: expect.objectContaining({
             status: "executable",

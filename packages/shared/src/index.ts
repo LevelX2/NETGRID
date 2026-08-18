@@ -5463,6 +5463,7 @@ function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
       "rematerialization",
       "observationClass",
       "replanReason",
+      "continuation",
     ]) &&
     typeof candidate.commitmentId === "string" &&
     [
@@ -5531,6 +5532,7 @@ function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
         "expected_progress",
         "expected_phase_transition",
         "expected_no_material_change",
+        "plan_internal_continuation_boundary",
         "scheduled_information_boundary",
         "material_cost_or_target_drift",
         "material_outcome_deviation",
@@ -5552,12 +5554,51 @@ function isAiTurnPlanningDebugCommitment(value: unknown): boolean {
         "material_choice_drift",
         "material_outcome_deviation",
         "scheduled_information_boundary",
+        "route_completed",
+        "route_unavailable",
         "urgent_interrupt",
         "phase_entry_invalid",
         "hard_plan_commitment_invalid",
         "campaign_requote_invalid",
         "commitment_contract_invalid",
-      ].includes(String(candidate.replanReason)))
+      ].includes(String(candidate.replanReason))) &&
+    (candidate.continuation === undefined ||
+      isAiTurnPlanningDebugContinuation(candidate.continuation))
+  );
+}
+
+function isAiTurnPlanningDebugContinuation(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "status",
+      "previousCommitmentId",
+      "previousOwnerRootPlanInstanceId",
+      "intendedNextMilestoneId",
+      "boundaryKind",
+      "nextCommitmentId",
+      "takeoverRootPlanInstanceId",
+      "evidenceCodes",
+    ]) &&
+    ["retained", "preempted", "released"].includes(String(candidate.status)) &&
+    [
+      "previousCommitmentId",
+      "previousOwnerRootPlanInstanceId",
+      "intendedNextMilestoneId",
+    ].every((field) => typeof candidate[field] === "string") &&
+    [
+      "plan_internal_continuation",
+      "route_completed",
+      "route_unavailable",
+      "urgent_interrupt",
+    ].includes(String(candidate.boundaryKind)) &&
+    ["nextCommitmentId", "takeoverRootPlanInstanceId"].every(
+      (field) =>
+        candidate[field] === undefined || typeof candidate[field] === "string",
+    ) &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
   );
 }
 
