@@ -15475,6 +15475,75 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("rejects a legal tutor when the only deck answer duplicates installed coverage", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple-for-duplicate-wall-breaker",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const credit = costIneffectiveCoverageCreditAction();
+    const input = costIneffectiveWallInput([temple, run, credit]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+    ];
+    const capabilities = costIneffectiveCoverageCapabilities("none");
+    capabilities.runner!.searchAccess = {
+      tools: [
+        {
+          cardId: "onr_v1_114_temple-microcode-outlet",
+          title: "Temple Microcode Outlet",
+          status: "in_hand",
+          canSearchPrograms: true,
+          canSearchBreakers: true,
+          legalNow: true,
+          confidence: "high",
+          evidence: ["test_tutor_visible"],
+        },
+      ],
+      canSearchProgramsNow: true,
+      canSearchBreakersNow: true,
+      evidence: ["test_tutor_visible"],
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () => capabilities,
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === temple.actionId,
+      ),
+    ).toMatchObject({
+      excluded: true,
+      whyNot: expect.arrayContaining([
+        expect.stringContaining(
+          "runner_program_search_has_no_bound_useful_target",
+        ),
+      ]),
+    });
+  });
+
   it("quotes a searched breaker across the complete known multi-ICE path", () => {
     resetResidentPlanPortfolioMemory();
     const temple = legalAction(

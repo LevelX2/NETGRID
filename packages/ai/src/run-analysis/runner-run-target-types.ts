@@ -11,6 +11,8 @@ import type { RunnerRunRouteQuote } from "./runner-run-route-quote";
 
 export const RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION =
   "runner-run-target-evaluation-v1" as const;
+export const RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION =
+  "runner-consumable-run-opportunity-v1" as const;
 export const RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION =
   "runner-economy-posture-v1" as const;
 export const RUNNER_CREDIT_BASE_PLAN_SCHEMA_VERSION =
@@ -36,6 +38,22 @@ export type RunnerInstalledRunPayoff = {
   riskPenalty: number;
   scoreBonus: number;
   multiaccessAvailable: boolean;
+  evidence: string[];
+};
+
+export type RunnerConsumableRunOpportunityQuote = {
+  schemaVersion: typeof RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION;
+  kind: "bypass_first_ice";
+  sourceDefinitionId: string;
+  gripCopyCount: number;
+  handAtCapacity: boolean;
+  baseOpportunityCost: number;
+  duplicateRelief: number;
+  handCapacityRelief: number;
+  immediatePayoffRelief: number;
+  opportunityCost: number;
+  rawRouteScore: number;
+  effectiveRouteScore: number;
   evidence: string[];
 };
 
@@ -328,6 +346,7 @@ export type RunnerRunTargetEvaluation = {
   installedRunPayoff: RunnerInstalledRunPayoff;
   runActionPayoff: RunnerInstalledRunPayoff;
   runActionProjection: RunActionProjection;
+  consumableRunOpportunityQuote?: RunnerConsumableRunOpportunityQuote;
   bypassedFirstIce?: boolean;
   riskyUniversalCoverage: boolean;
   randomBreakOrDamageRiskAssessment?: RandomBreakOrDamageRiskAssessment;
