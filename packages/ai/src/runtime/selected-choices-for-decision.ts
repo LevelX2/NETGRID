@@ -28,6 +28,7 @@ import {
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
 import {
+  isSearchChoice,
   selectedSearchChoiceOptionIds,
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
@@ -1020,6 +1021,9 @@ export function selectedChoicesForDecision(
       return resolved(exposeSelected, "runner_expose_installed_card");
     }
     const coverageBinding = runnerCoverageSearchChoiceBinding(input, choice);
+    const developmentBinding = coverageBinding
+      ? undefined
+      : runnerDevelopmentProgramSearchChoiceBinding(input, action, choice);
     const preferredServerId =
       coverageBinding?.serverId ?? runnerStrategicSearchTarget(input);
     const searchSelected = selectedSearchChoiceOptionIds(
@@ -1045,7 +1049,12 @@ export function selectedChoicesForDecision(
                   }
                 : {}),
             }
-          : {}),
+          : developmentBinding
+            ? {
+                preferredCardDefinitionId:
+                  developmentBinding.targetDefinitionId,
+              }
+            : {}),
         ...(preferredServerId ? { preferredServerId } : {}),
       },
     );
@@ -2511,6 +2520,84 @@ function runnerStrategicSearchTarget(
     (target.targetId === "hq" || target.targetId === "rd")
     ? target.targetId
     : undefined;
+}
+
+function runnerDevelopmentProgramSearchChoiceBinding(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+): { planInstanceId: string; targetDefinitionId: string } | undefined {
+  if (input.side !== "runner" || !isSearchChoice(choice)) return undefined;
+  const portfolio = residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand",
+  );
+  if (!executor) return undefined;
+  const moduleState = executor.moduleState as
+    | {
+        kind?: unknown;
+        signal?: {
+          phase?: unknown;
+          targetKind?: unknown;
+          actionIds?: unknown;
+          programSearchCommitment?: {
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            targetDefinitionId?: unknown;
+            plannedAtStateVersion?: unknown;
+            selectedActionId?: unknown;
+            selectedAtStateVersion?: unknown;
+          };
+        };
+      }
+    | undefined;
+  const signal = moduleState?.signal;
+  const commitment = signal?.programSearchCommitment;
+  const matchingTargetOptions =
+    typeof commitment?.targetDefinitionId === "string"
+      ? choice.options.filter(
+          (option) =>
+            option.selectable !== false &&
+            option.card?.definitionId === commitment.targetDefinitionId,
+        )
+      : [];
+  const exactBinding =
+    portfolio !== undefined &&
+    moduleState?.kind === "development" &&
+    signal?.phase === "execute" &&
+    signal.targetKind === "capability" &&
+    Array.isArray(signal.actionIds) &&
+    typeof commitment?.sourceCardInstanceId === "string" &&
+    typeof commitment.sourceDefinitionId === "string" &&
+    typeof commitment.targetDefinitionId === "string" &&
+    typeof commitment.selectedActionId === "string" &&
+    signal.actionIds.includes(commitment.selectedActionId) &&
+    commitment.plannedAtStateVersion === portfolio?.stateVersion &&
+    commitment.selectedAtStateVersion === portfolio?.stateVersion &&
+    input.playerView.stateVersion === portfolio.stateVersion + 1 &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.sourceCardInstanceId === commitment.sourceCardInstanceId &&
+    choice.sourceCardDefinitionId === commitment.sourceDefinitionId &&
+    choice.kind === "select_cards" &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    matchingTargetOptions.length > 0;
+  if (!exactBinding || !commitment || !portfolio) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The resident Runner development plan must preserve the exact strategic program-search source, selected action, state version and useful target definition.",
+    );
+  }
+  return {
+    planInstanceId: executor.instanceId,
+    targetDefinitionId: commitment.targetDefinitionId as string,
+  };
 }
 
 function runnerCoverageSearchChoiceBinding(

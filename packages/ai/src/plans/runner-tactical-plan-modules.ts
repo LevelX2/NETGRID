@@ -234,6 +234,19 @@ export type RunnerDevelopmentSignal = {
     targetCardInstanceId: string;
     targetDefinitionId: string;
   };
+  programSearchCommitment?: {
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    targetDefinitionId: string;
+    targetPurpose:
+      | "recurring_breaker_economy"
+      | "memory_support"
+      | "rd_pressure_support"
+      | "hq_pressure_support";
+    plannedAtStateVersion: number;
+    selectedActionId?: string;
+    selectedAtStateVersion?: number;
+  };
 };
 
 export type RunnerRunWindowSignal = {
@@ -1270,7 +1283,9 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
   candidate: ActionSemanticCandidate,
   serverId: RunnerPressureSignal["serverId"],
 ): boolean {
-  const server = input.playerView.servers.find((entry) => entry.id === serverId);
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
   if (!server) return false;
   if (candidate.conditions.some((condition) => condition.status === "absent")) {
     return false;
@@ -1301,10 +1316,7 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
     ) {
       return false;
     }
-    if (
-      target === "derez" ||
-      target.includes("trash_rezzed_ice_on_fort")
-    ) {
+    if (target === "derez" || target.includes("trash_rezzed_ice_on_fort")) {
       return server.ice.some((ice) => ice.rezzed === true);
     }
     if (target === "bypass_first_ice") return server.ice.length > 0;

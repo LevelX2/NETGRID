@@ -1824,6 +1824,21 @@ setup.stack_reorder
 
 Ein Strategieanker `runner.search.breaker` ist nur gerechtfertigt, wenn die Karte eng genug auf Programme/Breaker/Installationslinien wirkt.
 
+Produktive Programmsuche benötigt vor dem Ausspielen beziehungsweise
+Aktivieren der Suchquelle einen konkreten, vom zuständigen Plan gebundenen
+Bedarf:
+
+- `runner.rig_and_coverage` bindet einen tatsächlich fehlenden Breaker oder
+  eine belegte kostengünstigere Coverage-Alternative;
+- `runner.develop_board_and_hand` darf stattdessen ein noch fehlendes
+  Unterstützungsprogramm binden, etwa kompatible wiederkehrende
+  Breaker-Credits, benötigte MU oder ein Programm der aktiven Zentraldrucklinie;
+- eine andere Kartendefinition gilt nicht als neue Breaker-Coverage, wenn ihre
+  Funktion bereits sinnvoll in Grip oder Rig abgedeckt ist;
+- ohne exaktes nützliches Ziel ist die Suchaktion nicht produktiv;
+- der Choice-Resolver vervollständigt ausschließlich das vorab gebundene Ziel
+  und nimmt keine eigene Karten- oder Strategieauswahl vor.
+
 ---
 
 ### 34.4 Expose-/Scouting-Preps

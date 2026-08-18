@@ -2652,6 +2652,9 @@ describe("authoritative plan-first live runtime", () => {
     );
     const input = aiInput("runner", [direct, withTrash]);
     input.playerView.own.credits = 5;
+    input.playerView.own.memoryLimit = 5;
+    input.playerView.own.memoryUsed = 3;
+    input.playerView.own.rig = fullNonNoisyBreakerRig();
     input.playerView.own.gripOrHq = [
       visibleCard("smc", "runner", "program", {
         definitionId: "onr_v1_059_self-modifying-code",
@@ -2666,15 +2669,12 @@ describe("authoritative plan-first live runtime", () => {
             cardId: "onr_v1_059_self-modifying-code",
             quantity: 1,
           },
-          { cardId: "onr_v1_047_pile-driver", quantity: 1 },
+          { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
         ],
       },
     });
     const decision = liveContext({
-      runnerStrategicIntentForInput: () => ({
-        primaryWinIntent: "runner.access_agendas",
-        setupEngine: ["runner.search_breaker_setup"],
-      }),
+      runnerStrategicIntentForInput: recurringProgramSearchIntent,
     }).chooseSemanticRuntimeAction(input, {});
 
     expect([direct.actionId, withTrash.actionId]).toContain(decision.actionId);
@@ -14754,6 +14754,244 @@ describe("authoritative plan-first live runtime", () => {
     expect(legacyOverride).not.toHaveBeenCalled();
   });
 
+  it("does not search another breaker definition after all breaker classes are already covered", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [temple, credit]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.memoryUsed = 3;
+    input.playerView.own.rig = fullNonNoisyBreakerRig();
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "redundant-breaker-program-search",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 1 },
+        { cardId: "onr_v1_047_pile-driver", quantity: 1 },
+      ],
+    });
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: recurringProgramSearchIntent,
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "credit",
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === "play-temple",
+      )?.whyNot,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "runner_program_search_has_no_bound_useful_target",
+        ),
+      ]),
+    );
+  });
+
+  it("binds a useful recurring-breaker-economy program before playing the search", () => {
+    resetResidentPlanPortfolioMemory();
+    const temple = legalAction(
+      "play-temple",
+      "runner",
+      "play_event",
+      "Temple Microcode Outlet spielen",
+      { credits: 1, clicks: 1 },
+      {
+        source: "temple-card",
+        payload: {
+          cardId: "temple-card",
+          sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+          cardImplementationEffectKind: "search_stack_to_grip",
+          cardImplementationSearchFilter: "program",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [temple, credit]);
+    input.decisionId = "recurring-program-search:1";
+    input.playerView.stateVersion = 1;
+    input.playerView.own.credits = 5;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.memoryUsed = 3;
+    input.playerView.own.rig = fullNonNoisyBreakerRig();
+    input.playerView.own.gripOrHq = [
+      visibleCard("temple-card", "runner", "event", {
+        definitionId: "onr_v1_114_temple-microcode-outlet",
+      }),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "recurring-program-search",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_114_temple-microcode-outlet", quantity: 1 },
+        { cardId: "onr_v1_047_pile-driver", quantity: 1 },
+        { cardId: "onr_v1_071_vewy-vewy-quiet", quantity: 2 },
+      ],
+    });
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: recurringProgramSearchIntent,
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 0,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: "play-temple",
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor?.moduleId).toBe("runner.develop_board_and_hand");
+    expect(
+      (
+        executor?.moduleState as
+          | {
+              signal?: {
+                programSearchCommitment?: Record<string, unknown>;
+              };
+            }
+          | undefined
+      )?.signal?.programSearchCommitment,
+    ).toMatchObject({
+      sourceCardInstanceId: "temple-card",
+      sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+      targetDefinitionId: "onr_v1_071_vewy-vewy-quiet",
+      targetPurpose: "recurring_breaker_economy",
+      plannedAtStateVersion: 1,
+      selectedActionId: "play-temple",
+      selectedAtStateVersion: 1,
+    });
+
+    const resolve = legalAction(
+      "resolve-temple-search",
+      "runner",
+      "resolve_choice",
+      "Choose a program",
+      { credits: 0, clicks: 0 },
+    );
+    const choiceInput = aiInput("runner", [resolve]);
+    resolve.expiresAtStateVersion = 2;
+    choiceInput.decisionId = "recurring-program-search:2";
+    choiceInput.playerView.stateVersion = 2;
+    choiceInput.playerView.pendingChoice = {
+      choiceId: "recurring-program-search-choice",
+      side: "runner",
+      kind: "select_cards",
+      source:
+        "p3_37.search_stack_to_grip:temple-card:onr_v1_114_temple-microcode-outlet:program:reveal:shuffle:2",
+      sourceCardInstanceId: "temple-card",
+      sourceCardDefinitionId: "onr_v1_114_temple-microcode-outlet",
+      prompt: "Choose a program",
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 2,
+      visibility: "hidden_info_barrier",
+      options: [
+        {
+          id: "choose-pile-driver",
+          label: "Pile Driver",
+          card: visibleCard("pile-driver-option", "runner", "program", {
+            definitionId: "onr_v1_047_pile-driver",
+            subtypes: ["icebreaker", "fracter"],
+          }),
+        },
+        {
+          id: "choose-vewy",
+          label: "Vewy Vewy Quiet",
+          card: visibleCard("vewy-option", "runner", "program", {
+            definitionId: "onr_v1_071_vewy-vewy-quiet",
+            installCost: 4,
+            memoryCost: 1,
+          }),
+        },
+      ],
+    };
+    expect(
+      selectedChoicesForDecision(choiceInput, resolve, {
+        evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+        evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+        discardKeepScore: () => ({ total: 0 }),
+        selectedRunnerProgramInstallTrashOptionIds: () => [],
+        selectedRunnerForcedProgramTrashOptionIds: () => [],
+        selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+        extractAiFeatures: () => ({
+          credits: 4,
+          memoryRemaining: 1,
+          hasInstalledNonNoisyIcebreaker: true,
+          rigRoles: new Set([
+            "breaker_fracter",
+            "breaker_decoder",
+            "breaker_killer",
+          ]),
+          rigDefinitionIds: new Set([
+            "onr_proteus_083_corrosion",
+            "onr_v1_014_codecracker",
+            "onr_v1_040_loony-goon",
+          ]),
+        }),
+        rolesForCardId: (definitionId) =>
+          definitionId === "onr_v1_071_vewy-vewy-quiet"
+            ? ["recurring_non_noisy_breaker_credits"]
+            : ["breaker_fracter"],
+        effectsForCardId: () => [],
+      } as Parameters<typeof selectedChoicesForDecision>[2]),
+    ).toEqual({
+      choiceId: "recurring-program-search-choice",
+      selectedOptionIds: ["choose-vewy"],
+    });
+  });
+
   it("routes a universal breaker tutor through an exact coverage-search continuation", () => {
     resetResidentPlanPortfolioMemory();
     const temple = legalAction(
@@ -16742,6 +16980,44 @@ describe("authoritative plan-first live runtime", () => {
     ).toBeDefined();
   });
 });
+
+function recurringProgramSearchIntent() {
+  return {
+    primaryWinIntent: "runner.access_agendas",
+    setupEngine: ["runner.search_breaker_setup"],
+    engineLineIds: ["runner.engine.compatible_recurring_economy"],
+    engineProviders: [
+      {
+        providerId: "runner.provider:onr_v1_071_vewy-vewy-quiet",
+        cardId: "onr_v1_071_vewy-vewy-quiet",
+        copies: 2,
+        capabilities: ["runner.economy.recurring_breaker"],
+        supportCapabilities: [],
+        persistence: "persistent",
+        additivity: "additive_to_compatible_demand",
+        compatibleDemandIds: ["runner.demand.breaker_credit"],
+        evidence: ["test_recurring_breaker_economy_provider"],
+      },
+    ],
+  };
+}
+
+function fullNonNoisyBreakerRig() {
+  return [
+    visibleCard("corrosion-installed", "runner", "program", {
+      definitionId: "onr_proteus_083_corrosion",
+      subtypes: ["icebreaker", "fracter"],
+    }),
+    visibleCard("codecracker-installed", "runner", "program", {
+      definitionId: "onr_v1_014_codecracker",
+      subtypes: ["icebreaker", "decoder"],
+    }),
+    visibleCard("loony-goon-installed", "runner", "program", {
+      definitionId: "onr_v1_040_loony-goon",
+      subtypes: ["icebreaker", "killer"],
+    }),
+  ];
+}
 
 function universalCoverageSearchCapabilities(includeUniversalAnswer: boolean) {
   const coverageState = (
