@@ -183,6 +183,7 @@ import {
   selectedDiscardChoiceOptionIds,
   type DiscardChoiceKeepScore,
 } from "./discard-choice-selection";
+import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
 import {
   collectCorpActionDispositions,
   type CorpActionDispositionContributorFacts,
@@ -9208,7 +9209,7 @@ function corpDiscardWindowSignal(
       evidenceCodes: [
         "corp_discard_owned_by_hand_plan",
         "corp_discard_selection_bound_to_current_choice",
-        "corp_discard_ranked_by_generic_keep_value",
+        "corp_discard_ranked_by_plan_protection_and_batch_exposure",
       ],
     },
     value: 1_000,
@@ -9421,12 +9422,35 @@ function corpHandChoiceSelection(
       removalCondition: `Bind a Corp ${label} choice only when every selectable option maps to a known card in the exact current choice or HQ PlayerView.`,
     });
   }
-  const selectedOptionIds = selectedDiscardChoiceOptionIds(
-    scoringInput,
-    choice,
-    selectableOptions,
-    discardKeepScore,
-  );
+  const corpDiscardBatch =
+    kind === "discard"
+      ? selectedCorpDiscardChoiceOptionIds(
+          scoringInput,
+          choice,
+          selectableOptions,
+          discardKeepScore,
+        )
+      : undefined;
+  if (kind === "discard" && !corpDiscardBatch) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [resolveAction.actionId],
+      owner: "plan_module",
+      removalCondition:
+        "The Corp hand plan requires known agenda points for every agenda in the exact discard batch; unknown cleanup exposure must remain fail-closed.",
+    });
+  }
+  const selectedOptionIds =
+    corpDiscardBatch?.selectedOptionIds ??
+    selectedDiscardChoiceOptionIds(
+      scoringInput,
+      choice,
+      selectableOptions,
+      discardKeepScore,
+    );
   const selectedOptionIdSet = new Set(selectedOptionIds);
   const selectedCardInstanceIds = selectableOptions
     .filter((option) => selectedOptionIdSet.has(option.id))

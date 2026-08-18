@@ -112,8 +112,8 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 | P00   | Prozessvertrag und Worktree                        | completed |
 | P01   | Exakter Deckrestbestand für Suche                  | completed |
 | P02   | Corp-Draw samt Cleanup und Deckout                 | completed |
-| P03   | Corp-Discard als Batchentscheidung                 | active    |
-| P04   | Exakte Corp-ICE-Rez-Resource-Exchange-Quote        | pending   |
+| P03   | Corp-Discard als Batchentscheidung                 | completed |
+| P04   | Exakte Corp-ICE-Rez-Resource-Exchange-Quote        | active    |
 | P05   | Bekannte Run-Event-Pfade und Verbrauchswert        | pending   |
 | P06   | Persistente Corp-Scoring-Finanzierung              | pending   |
 | P07   | Persistente Runner-Entwicklungsfinanzierung        | pending   |
