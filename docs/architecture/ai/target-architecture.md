@@ -1,7 +1,7 @@
 # NETGRID KI-Zielbild – Metaebene v6
 
 Status: **führendes allgemeines KI-Konzept**  
-Stand: 2026-08-02
+Stand: 2026-08-18
 
 ## 1. Zweck und Verhältnis zu den Detailverträgen
 
@@ -108,6 +108,12 @@ deck- oder kartenabhängige Sequenzen gehören in ein admission-geprüftes
 Planmodul, während die Doctrine nur die generisch ableitbare strategische
 Unterstützung liefert.
 
+Der eigene Deckbestand ist ein exakter Fact-Vertrag: Decklisten-Snapshot und
+bekannte eigene Karten außerhalb des Decks bestimmen gemeinsam, welche
+Definitionen und Rollen noch im Deck verbleiben können. Suche, Draw für
+Coverage und strategische Programmsuche dürfen weder Zonenzahlen als
+Kartenmengen deuten noch bereits vollständig verbrauchte Antworten anbieten.
+
 ## 5. Fünf Planungsebenen
 
 ### 5.1 Deckstrategie
@@ -191,6 +197,13 @@ erforderlich bei:
 - nicht mehr legalem beziehungsweise mehrdeutigem aktuellen Step;
 - erreichtem Meilenstein, Zugwechsel oder Runtime-Neustart.
 
+Bei vollständig bekannten Runpfaden prüft der zuständige Runplan alle
+bekannten ICE-Constraints vor Verbrauch eines Run-Events und bindet die
+Fortsetzung an denselben Root. Ein späterer Jack-out ohne neue Information
+darf nicht erst nach dem Kartenverbrauch entstehen. Unbekanntes ICE, Reveal,
+Zufall, Damage oder eine andere materielle Beobachtung bleiben echte
+Neuplanungsgrenzen.
+
 Nach einem Runtime-Neustart wird kein altes Zugcommitment blind fortgesetzt.
 Das residente Portfolio wird wiederhergestellt und aus dem aktuellen Zustand
 neu geplant.
@@ -223,6 +236,15 @@ Scorefenster oder Rush zulassen
 Der Kampagnenwert rechtfertigt keine gefährliche Gegenwartsaktion. Sichtbare
 akute Pflichten und der tatsächliche Schutz-/Zugriffspfad bleiben vorrangig.
 
+Corp-Score und strategisch starke Runner-Entwicklung dürfen konkrete
+mehrzügige Credit-Meilensteine veröffentlichen. Der Parent besitzt Ziel,
+Wert, Deadline und Freigabebedingung; `corp.economy` beziehungsweise
+`runner.economy` führt nur den exakt gebundenen nächsten Funding-Step aus.
+Runner-Entwicklungsziele sind weich, auf drei eigene Züge und einen
+begrenzten Credit-Gap beschränkt. Schwache, redundante, unkonkrete oder zu
+weit entfernte Karten erzeugen keine Sparpflicht. P1 bis P3 dürfen solche
+weichen Reserven präemptieren.
+
 ## 9. Ownership und Parent-/Need-Beziehungen
 
 | Entscheidung | Fachlicher Owner |
@@ -254,6 +276,21 @@ materialisierbar ist. Handmanagement darf einen Überlauf lösen, aber nicht
 unter diesem Vorwand die Serverwahl für ICE oder die Zielwahl anderer Pläne
 übernehmen.
 
+Corp-Draw projiziert Handgröße, konkrete Cleanup-Optionen,
+Agendaexposition, verbleibende Mandatory-Draw-Horizonte und den erreichbaren
+Folgewert. Volle Hand ist deshalb weder pauschales Verbot noch Freigabe. Die
+anschließende Discard-Choice bewertet die gesamte Auswahl als Batch,
+einschließlich Agenda-Punktesumme, Runner-Siegdistanz,
+Archives-Erreichbarkeit und vorhandener Alternativabwürfe.
+
+Mehrzügige Economy-Assets erhalten keinen Wert aus ihrem vollständigen Pool
+allein. Ihre Paybackquote bindet die exakte Servervariante und berücksichtigt
+Auszahlungsdurchsatz, Setup- und Auszahlungsaktionen, Creditkosten sowie die
+bestehende side-sichere Remote-Contestability. Ungeschützte oder erreichbar
+contestable Assets dürfen nur den vor der nächsten Runner-Exposition
+realistisch konvertierbaren Wert ansetzen. Engine-zertifizierte sofortige
+Cashouts bleiben davon getrennt.
+
 ## 11. Defense, ICE und Scoring als Beispiel der generischen Richtung
 
 Unrezztes ICE ist nicht automatisch schlecht. Eine zweite oder dritte
@@ -268,6 +305,12 @@ Schichtverbot. Ebenso darf die KI nicht blind vierte oder fünfte Schichten
 stapeln, während frühere Schichten unfinanzierbar und wirkungslos bleiben.
 Bekannte exakte Schutzrouten bleiben nutzbar, auch wenn ein anderer
 Teilpfad unbekannt ist. Der unbekannte Pfad selbst bleibt fail-closed.
+
+Aktuell rezzbares bekanntes Corp-ICE liefert seine Resource-Exchange-Quote
+aus Engine- und CardImplementation-Fakten: effektive Rez-Kosten, sichtbare
+Runner-Breakroute, verbleibende Credits und Accesswirkung. Defense darf diese
+Quote konsumieren, aber weder fehlende Werte heuristisch nachbauen noch
+`unknown` als kostenlosen oder sicheren Tausch behandeln.
 
 Rush, sicherer Aufbau und kombinierte Linie – etwa Agenda plus Remote-ICE
 plus Central-ICE – konkurrieren als vollständige Varianten. Ungeschützte

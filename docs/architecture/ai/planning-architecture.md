@@ -2,7 +2,7 @@
 
 Status: **Produktiver Kern umgesetzt; Work in Progress für Modulverfeinerung**
 Dokumentversion: `1.2`
-Stand: 2026-08-02
+Stand: 2026-08-18
 Verantwortlicher Architekturprozess:
 `ai-plan-layer-target-concept-process-2026-07-23.md`
 
@@ -13,6 +13,23 @@ Führende Evidence:
 `docs/reviews/ai/ai-turn-and-campaign-planner-final-review-2026-07-30.md`.
 Das Dokument bleibt WIP für spätere Modulverfeinerungen; der produktive
 Cutover selbst ist kein offener Zielzustand mehr.
+
+Aktuelle produktive Verfeinerungen bleiben innerhalb dieses Ownersystems:
+
+- exakter eigener Deckrestbestand speist Suche und Coverage;
+- Corp-Draw und -Cleanup projizieren Hand-, Agenda- und Deckoutfolgen, die
+  Discard-Choice bewertet ihre vollständige Auswahl als Batch;
+- Run-Events werden nur auf einem vollständig bekannten tragfähigen Pfad
+  verbraucht; echte Beobachtungsgrenzen requoten;
+- Score- und Runner-Entwicklungsparents veröffentlichen typisierte,
+  präemptierbare Credit-Meilensteine, deren Economy-Leaf allein den nächsten
+  Funding-Step ausführt;
+- Corp-ICE-Resource-Exchange stammt aus Engine-Quotes und mehrzügiger
+  Corp-Asset-Payback aus servergebundener Contestability, Auszahlungsdurchsatz
+  und Aktionskosten.
+
+Diese Ergänzungen ändern weder Scheduler-, Resolver- noch
+Choice-Autoritätsgrenzen; `change-compass.md` bleibt unverändert gültig.
 
 ## 1. Zweck und Führungsanspruch
 

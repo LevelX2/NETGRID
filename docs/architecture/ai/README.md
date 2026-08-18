@@ -1,6 +1,6 @@
 # AI-Architektur
 
-Stand: 2026-08-12
+Stand: 2026-08-18
 
 Dieser Ordner enthält ausschließlich aktuell benötigte Architektur- und Referenzverträge der NETGRID-KI. Abgeschlossene Implementierungs-, Replay-, Remediation-, Audit-, Cutover- und Match-Prozessdokumente gehören nicht in den aktiven Architekturbestand. Git bleibt die Historie.
 

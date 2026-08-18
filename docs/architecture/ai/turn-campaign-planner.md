@@ -2,11 +2,11 @@
 
 Status: **Umgesetzt und mit ZK00 bis ZK14 abgenommen**
 
-Version: **0.6**
+Version: **0.7**
 
-Stand: 2026-08-02
+Stand: 2026-08-18
 
-Dokumentversion: `0.6`
+Dokumentversion: `0.7`
 
 Reviewstand:
 Das externe Konzeptfeedback vom 29.07.2026 ist punktweise gegen den
@@ -48,6 +48,23 @@ Das Dokument bleibt als Konzept- und Umsetzungsherleitung erhalten. Die
 bestätigten Festlegungen sind in den führenden Zielvertrag übernommen und
 paketweise produktiv implementiert. Der aktuelle Runtime- und Gate-Stand
 liegt im Abschlussreview.
+
+### Aktueller Verfeinerungsstand (2026-08-18)
+
+Die produktive Umsetzung bindet inzwischen auch folgende wiederkehrende
+Mehrschrittfolgen an den bestehenden Turn-/Kampagnenvertrag:
+
+- exakte Deckrestbestände statt bloßer Zonen- oder Rollenschätzungen;
+- vollständige Corp-Draw-, Cleanup- und Discardfolgen;
+- bekannte Full-Path-Prüfung vor Verbrauch eines Run-Events;
+- persistente, typisierte und durch P1-P3 präemptierbare Credit-Meilensteine
+  für Corp-Scoring und begrenzte strategische Runner-Entwicklung;
+- servervariantenbezogener Corp-Economy-Payback aus Contestability,
+  Auszahlungsdurchsatz und Action-Capacity-Kosten.
+
+Die fachlichen Parents wählen weiterhin Ziel und Strategie. Economy bleibt
+Support-Leaf, die Engine bleibt Kosten- und Regelautorität, und Resolver
+ergänzen nur die Payload eines bereits gewählten Steps.
 
 ### 1.1 Disposition des externen Reviews
 
