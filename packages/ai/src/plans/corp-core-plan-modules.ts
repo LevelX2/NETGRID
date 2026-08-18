@@ -56,6 +56,17 @@ export type CorpScorePhase =
   | "advance_agenda"
   | "score_agenda";
 
+export type CorpScoreFundingMilestone = Readonly<{
+  kind: "score_credit_milestone";
+  targetCredits: number;
+  observedCredits: number;
+  remainingGap: number;
+  priorityClass: CorpScorePriorityClass;
+  hardness: "soft" | "hard";
+  deadline: "current_turn" | "next_corp_turn" | "multi_turn";
+  releaseCondition: "parent_invalidated_or_higher_priority_preemption";
+}>;
+
 export type CorpScoreProjectSignal = {
   projectId: string;
   agendaDefinitionId?: string;
@@ -75,6 +86,13 @@ export type CorpScoreProjectSignal = {
     currentActionScope: "exact_install_only";
   };
   fundingGap?: number;
+  /**
+   * Published by corp.score_agenda for its exact current credit objective.
+   * Support leaves may advance it and lower-priority siblings may preserve it,
+   * but neither may derive a competing target or retain it after the parent is
+   * invalidated.
+   */
+  fundingMilestone?: CorpScoreFundingMilestone;
   conversion?: {
     remainingAdvancementClicks: number;
     remainingScoreCredits: number;
@@ -299,6 +317,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
   immediateDefenseConversion?: boolean;
   parentPlanInstanceId?: string;
   parentNeedId?: string;
+  scoreFundingMilestone?: CorpScoreFundingMilestone;
   incrementalDefenseReserve?: {
     targetCredits: number;
     serverId: string;
@@ -1097,6 +1116,136 @@ export function corpScorePriorityClass(
   return "P4";
 }
 
+export function corpScoreFundingMilestone(
+  signal: CorpScoreProjectSignal,
+  observedCredits: number,
+): CorpScoreFundingMilestone | undefined {
+  if (
+    !Number.isSafeInteger(observedCredits) ||
+    observedCredits < 0 ||
+    signal.phase === "select_agenda" ||
+    signal.evidenceCode.startsWith(
+      "corp_resident_score_parent_dominates_sibling_route:",
+    )
+  ) {
+    return undefined;
+  }
+  const fundingGap =
+    typeof signal.fundingGap === "number" &&
+    Number.isSafeInteger(signal.fundingGap) &&
+    signal.fundingGap > 0
+      ? signal.fundingGap
+      : 0;
+  const continuationTarget =
+    signal.continuationReserve &&
+    Number.isSafeInteger(
+      signal.continuationReserve.requiredCreditsBeforeNextCorpTurn,
+    ) &&
+    signal.continuationReserve.requiredCreditsBeforeNextCorpTurn >= 0
+      ? signal.continuationReserve.requiredCreditsBeforeNextCorpTurn
+      : 0;
+  const targetCredits = Math.max(
+    fundingGap > 0 ? observedCredits + fundingGap : 0,
+    continuationTarget,
+  );
+  if (targetCredits <= 0) return undefined;
+  const priorityClass = corpScorePriorityClass(signal);
+  return {
+    kind: "score_credit_milestone",
+    targetCredits,
+    observedCredits,
+    remainingGap: Math.max(0, targetCredits - observedCredits),
+    priorityClass,
+    hardness: priorityClass === "P4" ? "soft" : "hard",
+    deadline: signal.sameTurnCloseout
+      ? "current_turn"
+      : signal.continuationReserve
+        ? "next_corp_turn"
+        : "multi_turn",
+    releaseCondition: "parent_invalidated_or_higher_priority_preemption",
+  };
+}
+
+export type CorpScoreFundingSpendAssessment = Readonly<{
+  preservesMilestone: boolean;
+  protectedCredits: number;
+  availableCreditsAfterAction: number;
+  projectId?: string;
+}>;
+
+/**
+ * Lower-priority siblings consume the exact milestone published by the score
+ * parent. Equal- or higher-priority routes remain scheduler preemptions; this
+ * helper never promotes or owns such a route.
+ */
+export function assessCorpSpendAgainstScoreFundingMilestones(params: {
+  currentCredits: number;
+  actionCreditCost: number | undefined;
+  actionPriorityClass: PriorityClass;
+  scoreProjects: readonly CorpScoreProjectSignal[];
+}): CorpScoreFundingSpendAssessment {
+  const priorityRank: Record<PriorityClass, number> = {
+    P1: 1,
+    P2: 2,
+    P3: 3,
+    P4: 4,
+    P5: 5,
+    P6: 6,
+  };
+  const claim = params.scoreProjects
+    .flatMap((project) => {
+      const milestone = project.fundingMilestone;
+      if (
+        !milestone ||
+        milestone.kind !== "score_credit_milestone" ||
+        milestone.observedCredits !== params.currentCredits ||
+        !Number.isSafeInteger(milestone.targetCredits) ||
+        milestone.targetCredits <= 0 ||
+        priorityRank[milestone.priorityClass] >=
+          priorityRank[params.actionPriorityClass]
+      ) {
+        return [];
+      }
+      return [{ project, milestone }];
+    })
+    .sort(
+      (left, right) =>
+        priorityRank[left.milestone.priorityClass] -
+          priorityRank[right.milestone.priorityClass] ||
+        Number(right.milestone.hardness === "hard") -
+          Number(left.milestone.hardness === "hard") ||
+        right.milestone.targetCredits - left.milestone.targetCredits ||
+        left.project.projectId.localeCompare(right.project.projectId),
+    )[0];
+  if (!claim) {
+    return {
+      preservesMilestone: true,
+      protectedCredits: 0,
+      availableCreditsAfterAction: params.currentCredits,
+    };
+  }
+  const protectedCredits = Math.min(
+    claim.milestone.targetCredits,
+    claim.milestone.observedCredits,
+  );
+  const exactCost =
+    typeof params.actionCreditCost === "number" &&
+    Number.isSafeInteger(params.actionCreditCost) &&
+    params.actionCreditCost >= 0
+      ? params.actionCreditCost
+      : undefined;
+  const availableCreditsAfterAction =
+    exactCost === undefined
+      ? Number.NEGATIVE_INFINITY
+      : params.currentCredits - exactCost;
+  return {
+    preservesMilestone: availableCreditsAfterAction >= protectedCredits,
+    protectedCredits,
+    availableCreditsAfterAction,
+    projectId: claim.project.projectId,
+  };
+}
+
 function scoreAssessmentValue(signal: CorpScoreProjectSignal): number {
   const agendaPointValue = Math.max(1, signal.agendaPoints) * 20;
   const conversionValue = signal.conversion
@@ -1607,6 +1756,10 @@ function validatedEconomyNeeds(
           dedupeKey: parentProject.projectId,
         })
       : undefined;
+    const expectedMilestone = parentProject?.fundingMilestone;
+    const hasMilestoneContract =
+      expectedMilestone !== undefined ||
+      signal.scoreFundingMilestone !== undefined;
     const validFundingActions = new Set(
       context.actionCandidates
         .filter(immediateCorpLiquidCreditGain)
@@ -1625,6 +1778,18 @@ function validatedEconomyNeeds(
       signal.parentNeedId !== signal.needId ||
       !scorePriorityDelegated ||
       signal.delegatedPriorityClass !== corpScorePriorityClass(parentProject) ||
+      (hasMilestoneContract &&
+        (!expectedMilestone ||
+          signal.scoreFundingMilestone?.kind !== "score_credit_milestone" ||
+          signal.scoreFundingMilestone.targetCredits !==
+            expectedMilestone.targetCredits ||
+          signal.scoreFundingMilestone.observedCredits !==
+            expectedMilestone.observedCredits ||
+          signal.scoreFundingMilestone.remainingGap !==
+            expectedMilestone.remainingGap ||
+          signal.scoreFundingMilestone.priorityClass !==
+            expectedMilestone.priorityClass ||
+          signal.gap !== expectedMilestone.remainingGap)) ||
       signal.evidenceCode !== parentProject.evidenceCode ||
       !validFundingRouteBinding
     );
@@ -1910,8 +2075,9 @@ function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
   if (signal.needId.startsWith("punish-funding:")) {
     return 1_000 + signal.gap * 20;
   }
-  const readinessValue =
-    signal.delegatedPriorityClass || signal.parentPriorityClass
+  const readinessValue = signal.scoreFundingMilestone
+    ? 320
+    : signal.delegatedPriorityClass || signal.parentPriorityClass
       ? 300
       : signal.immediateDefenseConversion
         ? 180
@@ -3429,7 +3595,34 @@ function scoreResourceGaps(
       deadline: "multi_turn",
     });
   }
-  const fundingGap = signal.fundingGap;
+  const fundingGap = signal.fundingMilestone?.remainingGap ?? signal.fundingGap;
+  if (
+    signal.fundingMilestone &&
+    (signal.fundingMilestone.observedCredits !==
+      context.input.playerView.own.credits ||
+      signal.fundingMilestone.remainingGap !==
+        Math.max(
+          0,
+          signal.fundingMilestone.targetCredits -
+            signal.fundingMilestone.observedCredits,
+        ) ||
+      signal.fundingMilestone.priorityClass !== corpScorePriorityClass(signal))
+  ) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map((action) => action.type),
+      unresolvedActionIds: signal.actionIds ?? [],
+      owner: "support_graph",
+      planInstanceId: planInstanceIdForProposal({
+        moduleId: "corp.score_agenda",
+        dedupeKey: signal.projectId,
+      }),
+      removalCondition:
+        "Publish the score credit milestone from the exact current score parent and current Corp credit state.",
+    });
+  }
   const knownProtectionFundingGap =
     signal.protectionNeed?.baseline.knowledge === "known"
       ? (signal.protectionNeed.baseline.minimumAdditionalCreditsToSatisfy ?? 0)
@@ -5458,7 +5651,8 @@ export function assessCorpEconomyFundingRoute(
   const fullTargetCredits =
     signal.kind === "reserve"
       ? signal.targetCredits
-      : (signal.incrementalDefenseReserve?.targetCredits ??
+      : (signal.scoreFundingMilestone?.targetCredits ??
+        signal.incrementalDefenseReserve?.targetCredits ??
         currentCredits + signal.gap);
   const fullTargetDemand = demandForTarget(fullTargetCredits, [
     signal.evidenceCode,
@@ -5493,6 +5687,10 @@ export function assessCorpEconomyFundingRoute(
       true &&
     signal.delegatedPriorityClass !== undefined &&
     signal.urgentForScore === true &&
+    signal.scoreFundingMilestone?.remainingGap === signal.gap &&
+    signal.scoreFundingMilestone.observedCredits === currentCredits &&
+    signal.scoreFundingMilestone.targetCredits ===
+      currentCredits + signal.gap &&
     Number.isFinite(signal.gap) &&
     signal.gap > 0;
   const exactIncrementalAmbushFunding =

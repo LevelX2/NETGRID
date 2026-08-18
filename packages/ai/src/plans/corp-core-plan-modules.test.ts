@@ -19,6 +19,8 @@ import {
   corpDefensePortfolioHasExecutableRoute,
   corpDefensePlacementDispositions,
   corpEconomyActionIsOwned,
+  assessCorpSpendAgainstScoreFundingMilestones,
+  corpScoreFundingMilestone,
   corpGenericDefensePriorityClass,
   corpScorePriorityClass,
   createCorpCorePlanModules,
@@ -4663,6 +4665,8 @@ describe("Corp core plan modules", () => {
       "P1",
       "score_needs_exact_funding",
     );
+    project.fundingGap = 5;
+    project.fundingMilestone = corpScoreFundingMilestone(project, 1)!;
     const scoreFunding = {
       kind: "parent_funding" as const,
       needId: `score-support:${project.projectId}`,
@@ -4671,6 +4675,7 @@ describe("Corp core plan modules", () => {
       parentPlanInstanceId:
         "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_1",
       parentNeedId: `score-support:${project.projectId}`,
+      scoreFundingMilestone: project.fundingMilestone,
       delegatedPriorityClass: "P1" as const,
       urgentForScore: true,
       evidenceCode: project.evidenceCode,
@@ -4724,6 +4729,70 @@ describe("Corp core plan modules", () => {
         .materialize(instance, planAssessment, corpContext)
         .candidates.map((entry) => entry.candidate.actionId),
     ).toEqual(["basic-credit"]);
+  });
+
+  it("keeps a score funding target stable while guaranteed credit tranches shrink its gap", () => {
+    const first = {
+      ...scoreProject("stable-funding", "P4", "score_needs_funding"),
+      fundingGap: 3,
+    };
+    const firstMilestone = corpScoreFundingMilestone(first, 2);
+    const next = {
+      ...first,
+      fundingGap: 2,
+    };
+    const nextMilestone = corpScoreFundingMilestone(next, 3);
+
+    expect(firstMilestone).toMatchObject({
+      targetCredits: 5,
+      observedCredits: 2,
+      remainingGap: 3,
+      priorityClass: "P4",
+      hardness: "soft",
+      deadline: "multi_turn",
+    });
+    expect(nextMilestone).toMatchObject({
+      targetCredits: 5,
+      observedCredits: 3,
+      remainingGap: 2,
+    });
+  });
+
+  it("lets the score parent reserve funded progress only against lower-priority spending", () => {
+    const project = {
+      ...scoreProject("reserved-funding", "P4", "score_needs_funding"),
+      fundingGap: 2,
+    };
+    project.fundingMilestone = corpScoreFundingMilestone(project, 3)!;
+
+    expect(
+      assessCorpSpendAgainstScoreFundingMilestones({
+        currentCredits: 3,
+        actionCreditCost: 1,
+        actionPriorityClass: "P5",
+        scoreProjects: [project],
+      }),
+    ).toMatchObject({
+      preservesMilestone: false,
+      protectedCredits: 3,
+      projectId: project.projectId,
+    });
+    expect(
+      assessCorpSpendAgainstScoreFundingMilestones({
+        currentCredits: 3,
+        actionCreditCost: 1,
+        actionPriorityClass: "P3",
+        scoreProjects: [project],
+      }).preservesMilestone,
+    ).toBe(true);
+    expect(
+      assessCorpSpendAgainstScoreFundingMilestones({
+        currentCredits: 3,
+        actionCreditCost: 1,
+        actionPriorityClass: "P5",
+        scoreProjects: [],
+      }).preservesMilestone,
+    ).toBe(true);
   });
 
   it("advances an exactly bound funding-only defense child by one guaranteed tranche", () => {

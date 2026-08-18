@@ -65,12 +65,15 @@ import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import {
   CORP_PLAN_PRIORITY_POLICY,
   RUNNER_PLAN_PRIORITY_POLICY,
+  type PriorityClass,
 } from "../plans/plan-assessment";
 import {
   assessCorpEconomyFundingRoute,
+  assessCorpSpendAgainstScoreFundingMilestones,
   corpAgendaPurgeDefenseChoiceSignal,
   corpClassicDeflectorDefenseChoiceSignal,
   corpScorePriorityClass,
+  corpScoreFundingMilestone,
   corpScorePlanTarget,
   corpDefenseActionDispositions,
   corpDefensePortfolioHasExecutableRoute,
@@ -10419,6 +10422,14 @@ function buildCorpDomain(
       project.evidenceCode = `corp_score_protection_funding_gap:${project.serverId ?? "unbound"}:${scan.fundingGap}`;
     }
   }
+  for (const project of scoreProjects) {
+    const milestone = corpScoreFundingMilestone(
+      project,
+      input.playerView.own.credits,
+    );
+    if (milestone) project.fundingMilestone = milestone;
+    else delete project.fundingMilestone;
+  }
   const coherentScoreHandConversionAvailable =
     input.playerView.own.clicks >= 3 &&
     scoreProjects.some(
@@ -11272,7 +11283,7 @@ function buildCorpDomain(
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
       ...corpVisibleCardEconomyWithdrawals(input, candidates),
-      ...corpEconomyDevelopmentCampaigns(input, candidates),
+      ...corpEconomyDevelopmentCampaigns(input, candidates, scoreProjects),
     ],
     (signal) => signal.needId,
   );
@@ -13875,6 +13886,7 @@ function requireVisibleCardDefinition(
 function corpEconomyDevelopmentCampaigns(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpCorePlanDomain["economyNeeds"] {
   const signals: CorpCorePlanDomain["economyNeeds"] = [];
   const addCampaign = (card: VisibleCard, phase: "install" | "rez"): void => {
@@ -14157,7 +14169,26 @@ function corpEconomyDevelopmentCampaigns(
       if (card.rezzed !== true) addCampaign(card, "rez");
     }
   }
-  return uniqueBy(signals, (signal) => signal.needId);
+  const admitted: CorpCorePlanDomain["economyNeeds"] = [];
+  for (const signal of uniqueBy(signals, (entry) => entry.needId)) {
+    if (signal.kind !== "develop_campaign") {
+      admitted.push(signal);
+      continue;
+    }
+    const actionPriorityClass = corpEconomyPriorityClass(signal);
+    const actionIds = signal.actionIds.filter((actionId) => {
+      const candidate = candidates.find((entry) => entry.actionId === actionId);
+      if (!candidate) return false;
+      return assessCorpSpendAgainstScoreFundingMilestones({
+        currentCredits: input.playerView.own.credits,
+        actionCreditCost: candidate.costProfile.creditCost,
+        actionPriorityClass,
+        scoreProjects,
+      }).preservesMilestone;
+    });
+    if (actionIds.length > 0) admitted.push({ ...signal, actionIds });
+  }
+  return admitted;
 }
 
 function corpCounterCashoutProfile(
@@ -14639,7 +14670,8 @@ function corpRequiredEconomyNeeds(
       .map((ambush) => ambush.sourceInstanceId),
   );
   const scoreSupport = scoreProjects.flatMap((project) =>
-    (project.fundingGap ?? 0) > 0 &&
+    project.fundingMilestone !== undefined &&
+    project.fundingMilestone.remainingGap > 0 &&
     (project.feasible ||
       project.terminalScore ||
       project.conversion?.residentParent === true ||
@@ -14652,13 +14684,14 @@ function corpRequiredEconomyNeeds(
           {
             kind: "parent_funding" as const,
             needId: `score-support:${project.projectId}`,
-            gap: project.fundingGap!,
+            gap: project.fundingMilestone.remainingGap,
             actionIds: immediateFundingActionIds,
             parentPlanInstanceId: planInstanceIdForProposal({
               moduleId: "corp.score_agenda",
               dedupeKey: project.projectId,
             }),
             parentNeedId: `score-support:${project.projectId}`,
+            scoreFundingMilestone: project.fundingMilestone,
             delegatedPriorityClass: corpScorePriorityClass(project),
             urgentForScore: true,
             evidenceCode: project.evidenceCode,
@@ -22459,6 +22492,7 @@ function corpIceRezSupportOperationSignal(
       candidate,
       serverId,
       scoreProjects,
+      "P3",
     ).preservesReserve
   ) {
     return undefined;
@@ -24065,26 +24099,45 @@ function corpCardRoutePreservesScoreReserve(
   candidate: ActionSemanticCandidate,
   serverId: string,
   scoreProjects: readonly CorpScoreProjectSignal[],
+  actionPriorityClass: PriorityClass = "P5",
 ): Readonly<{
   preservesReserve: boolean;
   requiredCreditsAfterAction: number;
 }> {
-  const requiredCreditsAfterAction = Math.max(
+  const continuationFloor = Math.max(
     0,
     ...scoreProjects
-      .filter((project) => project.serverId === serverId)
+      .filter(
+        (project) =>
+          project.fundingMilestone === undefined &&
+          project.serverId === serverId,
+      )
       .map(
         (project) =>
           project.continuationReserve?.requiredCreditsBeforeNextCorpTurn ?? 0,
       ),
   );
-  const creditCost = candidate.costProfile.creditCost;
-  const preservesReserve =
+  const milestoneAssessment = assessCorpSpendAgainstScoreFundingMilestones({
+    currentCredits: input.playerView.own.credits,
+    actionCreditCost: candidate.costProfile.creditCost,
+    actionPriorityClass,
+    scoreProjects,
+  });
+  const creditCost =
     candidate.costProfile.costKnownStatus === "known" &&
     candidate.costProfile.additionalCosts.length === 0 &&
-    Number.isSafeInteger(creditCost) &&
+    Number.isSafeInteger(candidate.costProfile.creditCost) &&
+    candidate.costProfile.creditCost !== undefined &&
+    candidate.costProfile.creditCost >= 0
+      ? candidate.costProfile.creditCost
+      : undefined;
+  const requiredCreditsAfterAction = Math.max(
+    continuationFloor,
+    milestoneAssessment.protectedCredits,
+  );
+  const preservesReserve =
     creditCost !== undefined &&
-    creditCost >= 0 &&
+    milestoneAssessment.preservesMilestone &&
     input.playerView.own.credits - creditCost >= requiredCreditsAfterAction;
   return { preservesReserve, requiredCreditsAfterAction };
 }

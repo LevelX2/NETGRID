@@ -115,8 +115,8 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 | P03   | Corp-Discard als Batchentscheidung                 | completed |
 | P04   | Exakte Corp-ICE-Rez-Resource-Exchange-Quote        | completed |
 | P05   | Bekannte Run-Event-Pfade und Verbrauchswert        | completed |
-| P06   | Persistente Corp-Scoring-Finanzierung              | active    |
-| P07   | Persistente Runner-Entwicklungsfinanzierung        | pending   |
+| P06   | Persistente Corp-Scoring-Finanzierung              | completed |
+| P07   | Persistente Runner-Entwicklungsfinanzierung        | active    |
 | P08   | Risikojustierter Corp-Economy-Asset-Payback        | pending   |
 | P09   | Current-State-Dokumentation und Gesamtverifikation | pending   |
 

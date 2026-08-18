@@ -315,7 +315,9 @@ export function buildCorpTurnPlannerShadow(params: {
     selectedSearchHead !== undefined &&
     liveHead !== undefined &&
     liveHeadLine !== undefined &&
-    samePlanStepOwner(liveHead, selectedSearchHead) &&
+    (samePlanStepOwner(liveHead, selectedSearchHead) ||
+      (liveHeadOffer?.continuationScope === "same_root" &&
+        !["P1", "P2", "P3"].includes(selectedSearchHead.priorityClass))) &&
     liveHead.currentBinding.actionId !==
       selectedSearchHead.currentBinding.actionId;
   const selectedLine =

@@ -8667,7 +8667,28 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
       { source: "basic_action", payload: { gainCreditsAmount: 10 } },
     );
-    const input = aiInput("corp", [installTerminal, installP4, credit]);
+    const installCampaign = legalAction(
+      "install-campaign",
+      "corp",
+      "install_card",
+      "Install economy campaign",
+      { credits: 1, clicks: 1 },
+      {
+        source: "economy-campaign",
+        payload: {
+          cardId: "economy-campaign",
+          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          serverId: "new_remote",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [
+      installTerminal,
+      installP4,
+      installCampaign,
+      credit,
+    ]);
     for (const action of input.legalActions)
       action.expiresAtStateVersion = stateVersion;
     input.playerView.own.credits = 3;
@@ -8682,6 +8703,9 @@ describe("authoritative plan-first live runtime", () => {
         definitionId: agendaDefinitionId,
         advancementRequirement: 3,
         agendaPoints: 1,
+      }),
+      visibleCard("economy-campaign", "corp", "asset", {
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
       }),
     ];
     const quotedUnrezzedIce = (instanceId: string) =>
@@ -8762,6 +8786,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(portfolio).toContain(`"parentNeedId":"${fundingNeedId}"`);
     expect(portfolio).toContain(`"openNeedIds":["${fundingNeedId}"]`);
     expect(portfolio).toContain('"delegatedPriorityClass":"P4"');
+    expect(portfolio).not.toContain("economy-campaign:economy-campaign");
     expect(portfolio).toContain(
       '"evidenceCode":"corp_score_protection_funding_gap:remote_1:',
     );
