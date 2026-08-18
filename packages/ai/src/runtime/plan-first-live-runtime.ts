@@ -106,6 +106,7 @@ import {
   createRunnerCorePlanModules,
   runnerRolesCoverCoverageGap,
   runnerDevelopmentCardAdmission,
+  runnerDevelopmentFundingMilestone,
   runnerDefenseReactionReserveIsCurrentPhase,
   runnerExactBasicLiquidCreditCandidate,
   runnerTurnLiquidityCandidateIsMaterializable,
@@ -3518,6 +3519,7 @@ type RunnerFundingOwnershipDomain = Pick<
   | "resourceLifecycle"
   | "centralPressure"
   | "remoteContests"
+  | "developments"
 >;
 
 function runnerDelegatedFundingActionIds(
@@ -3562,11 +3564,18 @@ function runnerDelegatedFundingActionIds(
 function runnerFundingNeedHasMaterialParent(
   domain: Pick<
     RunnerPlanDomain,
-    "resourceLifecycle" | "centralPressure" | "remoteContests"
+    "resourceLifecycle" | "centralPressure" | "remoteContests" | "developments"
   >,
   need: Extract<RunnerFundingNeedSignal, { kind: "parent_plan_support" }>,
 ): boolean {
-  if (need.driver.kind === "development") return false;
+  if (need.driver.kind === "development") {
+    return domain.developments.some(
+      (signal) =>
+        signal.developmentId === need.driver.targetId &&
+        signal.supportNeedId === need.needId &&
+        signal.value > 0,
+    );
+  }
   if (need.driver.kind === "resource_lifecycle") {
     return (domain.resourceLifecycle ?? []).some(
       (signal) =>
@@ -4243,7 +4252,7 @@ function buildRunnerDomain(
       };
     },
   );
-  const fundingNeeds = uniqueBy(
+  const preDevelopmentFundingNeeds = uniqueBy(
     [
       ...runFundingNeeds,
       ...runLockFundingNeeds,
@@ -5033,12 +5042,13 @@ function buildRunnerDomain(
   );
   const delegatedFundingActionIds = runnerDelegatedFundingActionIds(
     {
-      fundingNeeds,
+      fundingNeeds: preDevelopmentFundingNeeds,
       coverageGaps,
       defense,
       resourceLifecycle,
       centralPressure,
       remoteContests,
+      developments: [],
     },
     candidates,
     input.playerView.stateVersion,
@@ -5317,33 +5327,6 @@ function buildRunnerDomain(
       const duplicate =
         evaluation.persistentInstallEvaluation?.duplicateRole ===
         "redundant_duplicate";
-      const reserveProtectedTargetCredits = waitingForReserve
-        ? evaluation.fundingNeed!.targetCredits
-        : undefined;
-      const fundingGap =
-        evaluation.fundingNeed?.missingCredits ??
-        (reserveProtectedTargetCredits !== undefined
-          ? Math.max(
-              0,
-              reserveProtectedTargetCredits - input.playerView.own.credits,
-            )
-          : 0);
-      const fundingRoute =
-        waitingForCredits || waitingForReserve
-          ? runnerDevelopmentFundingRoute(
-              input,
-              candidates.filter(
-                (entry) => !rejectedCreditBankActionIds.has(entry.actionId),
-              ),
-              evaluation,
-              reserveProtectedTargetCredits,
-            )
-          : undefined;
-      const fundingActionIds = new Set(fundingRoute?.actionIds ?? []);
-      const fundingCandidates =
-        waitingForCredits || waitingForReserve
-          ? candidates.filter((entry) => fundingActionIds.has(entry.actionId))
-          : [];
       const productiveRunNowAvailable = runTargets.some(
         (run) =>
           run.pathPassability === "reachable" &&
@@ -5380,16 +5363,68 @@ function buildRunnerDomain(
                 evaluation.currentNeed === "setup"
               ? Math.min(80, evaluation.priority)
               : Math.min(20, evaluation.priority);
+      const reserveProtectedTargetCredits = waitingForReserve
+        ? evaluation.fundingNeed!.targetCredits
+        : undefined;
+      const fundingTargetCredits =
+        reserveProtectedTargetCredits ?? evaluation.fundingNeed?.targetCredits;
+      const developmentFundingMilestone =
+        (waitingForCredits || waitingForReserve) &&
+        fundingTargetCredits !== undefined
+          ? runnerDevelopmentFundingMilestone({
+              targetCredits: fundingTargetCredits,
+              currentCredits: input.playerView.own.credits,
+              normalizedDevelopmentValue,
+              strategicFit: evaluation.strategicFit,
+              currentNeed: evaluation.currentNeed,
+              developmentRole: evaluation.developmentRole,
+              duplicateAlreadyInstalled: duplicate,
+            })
+          : undefined;
+      if (
+        (waitingForCredits || waitingForReserve) &&
+        developmentFundingMilestone === undefined
+      ) {
+        return [];
+      }
+      const supportNeedId = developmentFundingMilestone
+        ? `development-support:${evaluation.cardInstanceId}`
+        : undefined;
+      const parentPlanInstanceId = planInstanceIdForProposal({
+        moduleId: "runner.develop_board_and_hand",
+        dedupeKey: `card:${evaluation.cardInstanceId}`,
+      });
+      const fundingRoute =
+        developmentFundingMilestone && supportNeedId
+          ? runnerExactFundingRouteContract(
+              input,
+              candidates.filter(
+                (entry) => !rejectedCreditBankActionIds.has(entry.actionId),
+              ),
+              {
+                demandId: supportNeedId,
+                sourcePlanId: parentPlanInstanceId,
+                purpose: "foreground_plan",
+                priority: "current_foreground_plan",
+                hardness: developmentFundingMilestone.hardness,
+                deadline: developmentFundingMilestone.deadline,
+                targetCredits: developmentFundingMilestone.targetCredits,
+                remainingClicks,
+                allowIncrementalProgress: true,
+                allowStrategicExchange: false,
+                evidence: [
+                  `development_card:${evaluation.definitionId}`,
+                  `development_milestone_gap:${developmentFundingMilestone.remainingGap}`,
+                ],
+              },
+            )
+          : undefined;
       const actionIds = candidate
         ? executableCardActionCandidates.map((entry) => entry.actionId)
-        : fundingCandidates.map((entry) => entry.actionId);
+        : [];
       const semanticActionTypes = candidate
         ? [candidate.semanticActionType]
-        : [
-            ...new Set(
-              fundingCandidates.map((entry) => entry.semanticActionType),
-            ),
-          ];
+        : [];
       return [
         {
           developmentId: `card:${evaluation.cardInstanceId}`,
@@ -5417,13 +5452,21 @@ function buildRunnerDomain(
           assignedDomainPlanIds: assignedCoveragePlanIds,
           duplicateAlreadyInstalled: duplicate,
           affordableOrSupportable:
-            executableNow || fundingCandidates.length > 0,
+            executableNow || developmentFundingMilestone !== undefined,
           semanticActionTypes:
             semanticActionTypes.length > 0
               ? semanticActionTypes
               : ["economy.gain_credit"],
           actionIds,
-          ...(waitingForCredits || waitingForReserve ? { fundingGap } : {}),
+          ...(developmentFundingMilestone
+            ? {
+                fundingGap: developmentFundingMilestone.remainingGap,
+                supportNeedId: supportNeedId!,
+                developmentFundingMilestone,
+                fundingRouteActionIds: fundingRoute!.routeActionIds,
+                fundingRouteAssessment: fundingRoute!.routeAssessment,
+              }
+            : {}),
           priorityClass: developmentPriorityClass,
           value: normalizedDevelopmentValue,
           evidenceCode: evaluation.evidence[0] ?? "runner_hand_development",
@@ -5442,11 +5485,56 @@ function buildRunnerDomain(
                     recoverySearchCommitment,
                   }
                 : fundingRoute
-                  ? { evidenceCodes: fundingRoute.evidenceCodes }
+                  ? {
+                      evidenceCodes: fundingRoute.routeAssessment.evidenceCodes,
+                    }
                   : {}),
         },
       ];
     });
+  const developmentFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
+    cardDevelopments.flatMap((signal) => {
+      const milestone = signal.developmentFundingMilestone;
+      if (
+        !milestone ||
+        !signal.supportNeedId ||
+        !signal.fundingRouteActionIds ||
+        !signal.fundingRouteAssessment
+      ) {
+        return [];
+      }
+      return [
+        {
+          kind: "parent_plan_support" as const,
+          needId: signal.supportNeedId,
+          parentPlanInstanceId: planInstanceIdForProposal({
+            moduleId: "runner.develop_board_and_hand",
+            dedupeKey: signal.developmentId,
+          }),
+          driver: {
+            kind: "development" as const,
+            targetId: signal.developmentId,
+            reasonCode: "fund_bounded_strategic_install",
+          },
+          targetCredits: milestone.targetCredits,
+          currentCreditsAtRevalidation: milestone.observedCredits,
+          gap: milestone.remainingGap,
+          priorityClass: milestone.priorityClass,
+          developmentFundingMilestone: milestone,
+          revalidation: {
+            stateVersion: input.playerView.stateVersion,
+            status: "material_parent_open" as const,
+          },
+          routeActionIds: signal.fundingRouteActionIds,
+          routeAssessment: signal.fundingRouteAssessment,
+          evidenceCode: `runner_development_funding:${signal.developmentId}`,
+        },
+      ];
+    });
+  const fundingNeeds = uniqueBy(
+    [...preDevelopmentFundingNeeds, ...developmentFundingNeeds],
+    (need) => need.needId,
+  );
   const restrictedProgramInstallSequenceDevelopments =
     runnerRestrictedProgramInstallSequenceSignals(input, candidates, previous);
   const developments = [
@@ -6959,7 +7047,7 @@ function runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
   return !boundCoverageContinuation;
 }
 
-function runnerDevelopmentFundingRoute(
+function runnerSameTurnDevelopmentFundingRoute(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerHandDevelopmentEvaluation,
@@ -18410,7 +18498,7 @@ function runnerCreditBankSignals(
     const developmentCashOutFundingRoute =
       developmentCashOutTarget &&
       runnerDevelopmentCashOutTargetCanMaterialize(developmentCashOutTarget)
-        ? runnerDevelopmentFundingRoute(
+        ? runnerSameTurnDevelopmentFundingRoute(
             input,
             candidates,
             developmentCashOutTarget,

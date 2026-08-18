@@ -11,6 +11,8 @@ import type { PlanOutcomeReceipt } from "./resident-plan-portfolio";
 import {
   runnerDevelopmentCardAdmission,
   type RunnerCorePlanDomain,
+  type RunnerDevelopmentFundingMilestone,
+  type RunnerFundingRouteAssessment,
 } from "./runner-core-plan-modules";
 import type {
   PlanMaterialization,
@@ -217,6 +219,10 @@ export type RunnerDevelopmentSignal = {
   semanticActionTypes: string[];
   actionIds: string[];
   fundingGap?: number;
+  supportNeedId?: string;
+  developmentFundingMilestone?: RunnerDevelopmentFundingMilestone;
+  fundingRouteActionIds?: string[];
+  fundingRouteAssessment?: RunnerFundingRouteAssessment;
   priorityClass: "P3" | "P4" | "P5" | "P6";
   value: number;
   evidenceCode: string;
@@ -825,7 +831,7 @@ function developmentModule(): PlanModule {
               kind: signal.targetKind ?? "card",
               id: signal.definitionId,
             },
-            candidates.length > 0,
+            signal.supportNeedId !== undefined || candidates.length > 0,
             `${signal.evidenceCode}:${admission.reasonCode}`,
             undefined,
             {
@@ -845,13 +851,34 @@ function developmentModule(): PlanModule {
       }),
     assess: (instance, context, portfolio) => {
       const current = state<DevelopmentState>(instance);
-      return assessment(
+      const routeExists =
+        developmentCandidates(context, current.signal).length > 0;
+      const resourceGaps = exactRunnerParentSupportResourceGaps(
+        context,
+        instance,
+        current.signal.supportNeedId,
+      );
+      const result = assessment(
         instance,
         current.signal.priorityClass,
-        developmentCandidates(context, current.signal).length > 0,
+        routeExists,
         current.signal.value,
         portfolio.executorInstanceId,
+        undefined,
+        "visible_state_forced",
+        resourceGaps,
       );
+      if (!routeExists && current.signal.supportNeedId) {
+        result.blockers = [
+          {
+            code: "waiting_for_bound_funding_support",
+            owner: "plan_module",
+            removable: true,
+            resumeCondition: { code: current.signal.supportNeedId },
+          },
+        ];
+      }
+      return result;
     },
     materialize: (instance, _assessment, context) => {
       const current = state<DevelopmentState>(instance);
@@ -1176,7 +1203,12 @@ function exactRunnerParentSupportResourceGaps(
 ): ResourceGap[] {
   if (supportNeedId === undefined) return [];
   const exactNeeds = domain(context).fundingNeeds.filter(
-    (need) =>
+    (
+      need,
+    ): need is Extract<
+      RunnerCorePlanDomain["fundingNeeds"][number],
+      { kind: "parent_plan_support" }
+    > =>
       need.kind === "parent_plan_support" &&
       need.needId === supportNeedId &&
       need.parentPlanInstanceId === parent.instanceId &&
@@ -1191,7 +1223,8 @@ function exactRunnerParentSupportResourceGaps(
         capability: "credits",
         minimum: need.gap,
         available: 0,
-        deadline: "current_turn",
+        deadline:
+          need.driver.kind === "development" ? "multi_turn" : "current_turn",
       },
     ];
   }

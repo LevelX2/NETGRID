@@ -11724,25 +11724,38 @@ describe("authoritative plan-first live runtime", () => {
     );
     const planInstanceId =
       "plan:runner.develop_board_and_hand:card%3Asaloon-engine-card";
+    const fundingLeafInstanceId =
+      "plan:runner.economy:development-support%3Asaloon-engine-card";
     const expectedOwnedDecision = (
       actionId: string,
       phase: "fund" | "execute",
     ) => ({
       actionId,
-      reasonCode: "plan_first.runner.develop_board_and_hand",
+      reasonCode:
+        phase === "fund"
+          ? "plan_first.runner.economy"
+          : "plan_first.runner.develop_board_and_hand",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.develop_board_and_hand",
+        planKind:
+          phase === "fund" ? "runner.economy" : "runner.develop_board_and_hand",
         planFirstDecision: {
           rootPlanInstanceId: planInstanceId,
-          leafExecutorInstanceId: planInstanceId,
+          leafExecutorInstanceId:
+            phase === "fund" ? fundingLeafInstanceId : planInstanceId,
           selectedPlan: {
-            moduleId: "runner.develop_board_and_hand",
+            moduleId:
+              phase === "fund"
+                ? "runner.economy"
+                : "runner.develop_board_and_hand",
             executionState: "executor",
           },
           route: {
             actionId,
-            stepId: `${planInstanceId}:${phase}`,
+            stepId:
+              phase === "fund"
+                ? `${fundingLeafInstanceId}:fund:development-support:saloon-engine-card`
+                : `${planInstanceId}:execute`,
           },
         },
       },
@@ -11772,7 +11785,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
       rootForegroundInstanceId: planInstanceId,
-      executorInstanceId: planInstanceId,
+      executorInstanceId: fundingLeafInstanceId,
     });
     expect(
       residentPlanPortfolioSnapshot(input)?.instances.find(
@@ -11785,9 +11798,13 @@ describe("authoritative plan-first live runtime", () => {
       moduleState: {
         signal: {
           fundingGap: 2,
-          evidenceCodes: expect.arrayContaining([
-            "development_funding_target_credits:12",
-          ]),
+          supportNeedId: "development-support:saloon-engine-card",
+          developmentFundingMilestone: {
+            targetCredits: 12,
+            observedCredits: 10,
+            remainingGap: 2,
+            priorityClass: "P4",
+          },
         },
       },
     });
@@ -11805,7 +11822,7 @@ describe("authoritative plan-first live runtime", () => {
     );
     expect(residentPlanPortfolioSnapshot(second)).toMatchObject({
       rootForegroundInstanceId: planInstanceId,
-      executorInstanceId: planInstanceId,
+      executorInstanceId: fundingLeafInstanceId,
     });
     expect(
       residentPlanPortfolioSnapshot(second)?.instances.find(
@@ -11828,6 +11845,148 @@ describe("authoritative plan-first live runtime", () => {
       rootForegroundInstanceId: planInstanceId,
       executorInstanceId: planInstanceId,
     });
+  });
+
+  it("lets a terminal remote contest preempt bounded development saving", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction(
+      "development-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const run = legalAction(
+      "run-terminal-remote",
+      "runner",
+      "start_run",
+      "Run terminal remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const install = legalAction(
+      "install-saloon-engine",
+      "runner",
+      "install_card",
+      "Install Silicon Saloon Franchise",
+      { credits: 8, clicks: 1 },
+      {
+        source: "saloon-engine-card",
+        payload: {
+          cardId: "saloon-engine-card",
+          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+        },
+      },
+    );
+    const input = aiInput("runner", [credit, run, install]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 3;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.own.gripOrHq = [
+      visibleCard("saloon-engine-card", "runner", "resource", {
+        definitionId: "onr_v1_179_silicon-saloon-franchise",
+        installCost: 8,
+      }),
+    ];
+    const terminalRemote = server("remote_1");
+    terminalRemote.root = [
+      {
+        instanceId: "advanced-terminal-remote-card",
+        known: false,
+        advancementCounters: 2,
+      },
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      terminalRemote,
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        protectedEngineHandEvaluation(10, install.actionId),
+      ],
+      evaluateRunnerRunTargets: () => [
+        {
+          ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+          targetKind: "remote" as const,
+          accessTargetKind: "remote" as const,
+          scoreThreat: true,
+          recommendation: "run_now" as const,
+          score: 500,
+        },
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 2,
+        desiredCreditReserve: 4,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: run.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain("plan_priority_class:P2");
+  });
+
+  it("does not bind saving to an expensive weak development card", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction(
+      "weak-card-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [credit]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [
+      visibleCard("weak-expensive-card", "runner", "resource", {
+        definitionId: "test_weak_expensive_resource",
+        installCost: 10,
+      }),
+    ];
+
+    liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "weak-expensive-card",
+          definitionId: "test_weak_expensive_resource",
+          legalActionId: "install-weak-expensive-card",
+          priority: 1_000,
+          availability: "missing_credits",
+          deferReason: "missing_credits",
+          missingCredits: 8,
+          targetCredits: 10,
+          installCost: 10,
+          developmentRole: "economy_engine",
+          strategicFit: "weak",
+          currentNeed: "useful_now",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 2,
+        desiredCreditReserve: 4,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "runner.develop_board_and_hand" &&
+          instance.dedupeKey === "card:weak-expensive-card",
+      ),
+    ).toBe(false);
   });
 
   it("binds a same-turn access event to a productive central pressure plan", () => {

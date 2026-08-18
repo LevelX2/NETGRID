@@ -116,8 +116,8 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 | P04   | Exakte Corp-ICE-Rez-Resource-Exchange-Quote        | completed |
 | P05   | Bekannte Run-Event-Pfade und Verbrauchswert        | completed |
 | P06   | Persistente Corp-Scoring-Finanzierung              | completed |
-| P07   | Persistente Runner-Entwicklungsfinanzierung        | active    |
-| P08   | Risikojustierter Corp-Economy-Asset-Payback        | pending   |
+| P07   | Persistente Runner-Entwicklungsfinanzierung        | completed |
+| P08   | Risikojustierter Corp-Economy-Asset-Payback        | active    |
 | P09   | Current-State-Dokumentation und Gesamtverifikation | pending   |
 
 ## Paketdetails
@@ -223,6 +223,20 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 - Done-Gate: Fortschritt wird geschützt, ohne „teure Karte muss gespielt
   werden“-Zwang.
 - Commit: `fix(ai): retain bounded runner development funding`
+- Ergebnis: Strategisch starke, konkrete Installationen erhalten bei maximal
+  acht fehlenden Credits ein auf drei eigene Züge begrenztes weiches
+  Credit-Meilensteinziel. `runner.develop_board_and_hand` bleibt Parent;
+  ausschließlich die exakt gebundene `runner.economy`-Leaf führt den nächsten
+  garantierten Credit-Schritt aus. P1-P3-Pläne präemptieren; schwache,
+  redundante, unkonkrete und zu weit entfernte Ziele erzeugen keine
+  Sparpflicht.
+- Verifikation: Runner-Core-Modultests 52/52 grün; neue und direkt angrenzende
+  Runtimefälle 5/5 grün (stabiler Gap 3→2, Parent/Leaf-Ownership, Konversion,
+  P2-Remote-Preemption, schwaches teures Gegenbeispiel). Der vollständige
+  kombinierte Runtime-Test offenbart 16 bereits paketfremde Baselinefehler;
+  die isolierten ersten Gegenfälle reproduzieren unabhängig von P07. Der
+  AI-Typecheck enthält nur die bereits dokumentierten sechs Baselinefehler in
+  Hint-Compiler, fehlenden Golden-JSONs und Choice-Narrowing.
 
 ### P08 – Risikojustierter Corp-Economy-Asset-Payback
 

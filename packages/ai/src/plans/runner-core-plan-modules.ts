@@ -30,6 +30,11 @@ import type {
 } from "./funding-route";
 import type { ProjectedHandDisposition } from "./turn-projection";
 import type { RunnerCreditBankProspectivePlan } from "./runner-credit-bank-prospective-planning";
+import type {
+  RunnerHandDevelopmentCurrentNeed,
+  RunnerHandDevelopmentRole,
+  RunnerHandDevelopmentStrategicFit,
+} from "../runner/hand-development/runner-hand-development-types";
 
 export type RunnerFundingRouteAssessment = {
   stateVersion: number;
@@ -48,6 +53,18 @@ type RunnerFundingRouteContract = {
   routeAssessment: RunnerFundingRouteAssessment;
 };
 
+export type RunnerDevelopmentFundingMilestone = {
+  kind: "bounded_development_credit_milestone";
+  targetCredits: number;
+  observedCredits: number;
+  remainingGap: number;
+  priorityClass: "P4";
+  hardness: "soft";
+  deadline: "within_three_own_turns";
+  maximumOwnTurns: 3;
+  releaseCondition: "parent_invalidated_or_material_value_lost_or_urgent_preemption";
+};
+
 export type RunnerFundingNeedSignal =
   | (RunnerFundingRouteContract & {
       kind: "parent_plan_support";
@@ -62,6 +79,7 @@ export type RunnerFundingNeedSignal =
       currentCreditsAtRevalidation: number;
       gap: number;
       priorityClass: "P2" | "P4" | "P5";
+      developmentFundingMilestone?: RunnerDevelopmentFundingMilestone;
       revalidation: {
         stateVersion: number;
         status: "material_parent_open";
@@ -1104,6 +1122,59 @@ export function runnerDevelopmentCardAdmission(params: {
   };
 }
 
+export function runnerDevelopmentFundingMilestone(params: {
+  targetCredits: number;
+  currentCredits: number;
+  normalizedDevelopmentValue: number;
+  strategicFit: RunnerHandDevelopmentStrategicFit;
+  currentNeed: RunnerHandDevelopmentCurrentNeed;
+  developmentRole: RunnerHandDevelopmentRole;
+  duplicateAlreadyInstalled: boolean;
+}): RunnerDevelopmentFundingMilestone | undefined {
+  if (
+    !Number.isSafeInteger(params.targetCredits) ||
+    !Number.isSafeInteger(params.currentCredits) ||
+    !Number.isFinite(params.normalizedDevelopmentValue) ||
+    params.targetCredits < 0 ||
+    params.currentCredits < 0 ||
+    params.duplicateAlreadyInstalled ||
+    params.developmentRole === "unknown" ||
+    params.developmentRole === "run_event" ||
+    params.developmentRole === "duplicate_or_low_value" ||
+    params.strategicFit === "weak" ||
+    params.strategicFit === "blocked" ||
+    params.currentNeed === "later" ||
+    params.currentNeed === "none"
+  ) {
+    return undefined;
+  }
+  const remainingGap = Math.max(
+    0,
+    params.targetCredits - params.currentCredits,
+  );
+  const maximumBoundedGap = 8;
+  const minimumMaterialValue = 40 + remainingGap * 4;
+  if (
+    remainingGap <= 0 ||
+    remainingGap > maximumBoundedGap ||
+    params.normalizedDevelopmentValue < minimumMaterialValue
+  ) {
+    return undefined;
+  }
+  return {
+    kind: "bounded_development_credit_milestone",
+    targetCredits: params.targetCredits,
+    observedCredits: params.currentCredits,
+    remainingGap,
+    priorityClass: "P4",
+    hardness: "soft",
+    deadline: "within_three_own_turns",
+    maximumOwnTurns: 3,
+    releaseCondition:
+      "parent_invalidated_or_material_value_lost_or_urgent_preemption",
+  };
+}
+
 function isConcreteRunnerDevelopmentPurpose(
   purposeCode: string | undefined,
 ): purposeCode is string {
@@ -1868,6 +1939,25 @@ function validRunnerFundingNeedContract(
       need.revalidation.status === "portfolio_reserve_open"
     );
   }
+  if (need.driver.kind === "development") {
+    const milestone = need.developmentFundingMilestone;
+    if (
+      milestone?.kind !== "bounded_development_credit_milestone" ||
+      milestone.targetCredits !== need.targetCredits ||
+      milestone.observedCredits !== need.currentCreditsAtRevalidation ||
+      milestone.remainingGap !== need.gap ||
+      milestone.priorityClass !== "P4" ||
+      milestone.hardness !== "soft" ||
+      milestone.deadline !== "within_three_own_turns" ||
+      milestone.maximumOwnTurns !== 3 ||
+      milestone.releaseCondition !==
+        "parent_invalidated_or_material_value_lost_or_urgent_preemption"
+    ) {
+      return false;
+    }
+  } else if (need.developmentFundingMilestone !== undefined) {
+    return false;
+  }
   return (
     need.parentPlanInstanceId.length > 0 &&
     need.driver.targetId.length > 0 &&
@@ -1922,6 +2012,7 @@ function runnerFundingParentIsResidentAndMaterial(
         signal?: {
           supportNeedId?: unknown;
           marginalValue?: unknown;
+          value?: unknown;
         };
       }
     | undefined;
@@ -1935,8 +2026,10 @@ function runnerFundingParentIsResidentAndMaterial(
   return (
     waitsOnlyForThisFunding &&
     moduleState?.signal?.supportNeedId === need.needId &&
-    typeof moduleState.signal.marginalValue === "number" &&
-    moduleState.signal.marginalValue > 0
+    ((typeof moduleState.signal.marginalValue === "number" &&
+      moduleState.signal.marginalValue > 0) ||
+      (typeof moduleState.signal.value === "number" &&
+        moduleState.signal.value > 0))
   );
 }
 

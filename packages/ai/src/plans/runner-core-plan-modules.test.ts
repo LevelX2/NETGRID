@@ -7,6 +7,7 @@ import {
   runnerInstalledCardLiquidationChoiceSignal,
   runnerCoveragePlanHandDisposition,
   runnerDevelopmentCardAdmission,
+  runnerDevelopmentFundingMilestone,
   runnerFundingRouteCandidateIsMaterializable,
   runnerTurnLiquidityCandidateIsMaterializable,
   type RunnerCorePlanDomain,
@@ -2143,6 +2144,68 @@ describe("Runner core plan modules", () => {
         affordableOrSupportable: true,
       }),
     ).toEqual({ admitted: false, reasonCode: "no_concrete_plan_purpose" });
+  });
+
+  it("keeps a bounded strategic development target stable while its gap shrinks", () => {
+    const first = runnerDevelopmentFundingMilestone({
+      targetCredits: 12,
+      currentCredits: 9,
+      normalizedDevelopmentValue: 80,
+      strategicFit: "strong",
+      currentNeed: "useful_now",
+      developmentRole: "economy_engine",
+      duplicateAlreadyInstalled: false,
+    });
+    const progressed = runnerDevelopmentFundingMilestone({
+      targetCredits: 12,
+      currentCredits: 10,
+      normalizedDevelopmentValue: 80,
+      strategicFit: "strong",
+      currentNeed: "useful_now",
+      developmentRole: "economy_engine",
+      duplicateAlreadyInstalled: false,
+    });
+
+    expect(first).toMatchObject({
+      targetCredits: 12,
+      observedCredits: 9,
+      remainingGap: 3,
+      priorityClass: "P4",
+      hardness: "soft",
+      maximumOwnTurns: 3,
+    });
+    expect(progressed).toMatchObject({
+      targetCredits: 12,
+      observedCredits: 10,
+      remainingGap: 2,
+    });
+  });
+
+  it("does not create a bounded saving duty for weak or excessively distant development", () => {
+    const base = {
+      normalizedDevelopmentValue: 80,
+      strategicFit: "strong" as const,
+      currentNeed: "useful_now" as const,
+      developmentRole: "economy_engine" as const,
+      duplicateAlreadyInstalled: false,
+    };
+
+    expect(
+      runnerDevelopmentFundingMilestone({
+        ...base,
+        targetCredits: 8,
+        currentCredits: 2,
+        normalizedDevelopmentValue: 20,
+        strategicFit: "weak",
+      }),
+    ).toBeUndefined();
+    expect(
+      runnerDevelopmentFundingMilestone({
+        ...base,
+        targetCredits: 12,
+        currentCredits: 3,
+      }),
+    ).toBeUndefined();
   });
 });
 
