@@ -243,7 +243,10 @@ Wert, Deadline und Freigabebedingung; `corp.economy` beziehungsweise
 Runner-Entwicklungsziele sind weich, auf drei eigene Züge und einen
 begrenzten Credit-Gap beschränkt. Schwache, redundante, unkonkrete oder zu
 weit entfernte Karten erzeugen keine Sparpflicht. P1 bis P3 dürfen solche
-weichen Reserven präemptieren.
+weichen Reserven präemptieren. Ist eine Karte bereits einem Coverage- oder
+anderen Domainplan zugeordnet, bleibt auch ihre Finanzierung ausschließlich
+bei diesem Owner; ein paralleler generischer Entwicklungs-Support entsteht
+nicht.
 
 ## 9. Ownership und Parent-/Need-Beziehungen
 
