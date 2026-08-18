@@ -86,6 +86,10 @@ export function publicContextForAction(
       typeof legalAction.payload?.breakerId === "string"
         ? legalAction.payload.breakerId
         : undefined;
+    // A pump action already reveals its installed Icebreaker. Retain the
+    // public instance reference solely so UI projections can distinguish
+    // consecutive pumps of different copies without inferring game state.
+    if (breakerId) context.pumpBreakerId = breakerId;
     if (breakerId && state.cardInstances[breakerId]) {
       const definition = deps.definitionFor(state, breakerId);
       if (typeof definition.strength === "number") {

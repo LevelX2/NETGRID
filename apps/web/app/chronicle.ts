@@ -3064,11 +3064,43 @@ export function formatChronicleEvent(
     case "pump_breaker":
       category = "run";
       {
+        const pumpCount = numberValue(payload.pumpCount);
+        const pumpStrengthStart = numberValue(payload.pumpStrengthStart);
+        const pumpStrengthTotal = numberValue(payload.pumpStrengthTotal);
+        const pumpCreditCostTotal = numberValue(payload.pumpCreditCostTotal);
+        const breakerStrengthAfter = numberValue(payload.breakerStrengthAfter);
+        if (
+          payload.aiPumpPresentation === true &&
+          pumpCount !== undefined &&
+          pumpCount > 1 &&
+          pumpStrengthStart !== undefined &&
+          pumpStrengthTotal !== undefined &&
+          breakerStrengthAfter !== undefined
+        ) {
+          const pumpCountLabel = `${pumpCount}× gepumpt`;
+          const totalStrengthLabel = `+${pumpStrengthTotal} Stärke`;
+          const totalCostLabel =
+            pumpCreditCostTotal !== undefined
+              ? `${creditText(pumpCreditCostTotal)} insgesamt`
+              : undefined;
+          title = phrase(
+            subject,
+            `${cardTitle ?? "einen Icebreaker"} von Stärke ${pumpStrengthStart} auf ${breakerStrengthAfter} gepumpt (${pumpCountLabel}, ${totalStrengthLabel}${totalCostLabel ? `, ${totalCostLabel}` : ""})`,
+          );
+          description = `${pumpCountLabel}: ${totalStrengthLabel} für diese Begegnung${totalCostLabel ? `; ${totalCostLabel}` : ""}.`;
+          chips.push(
+            "Breaker",
+            pumpCountLabel,
+            totalStrengthLabel,
+            `Stärke ${pumpStrengthStart} → ${breakerStrengthAfter}`,
+            ...(totalCostLabel ? [totalCostLabel] : []),
+          );
+          break;
+        }
         const pumpStrengthAmount = numberValue(payload.pumpStrengthAmount) ?? 1;
         const pumpBreakerCreditCost = numberValue(
           payload.pumpBreakerCreditCost,
         );
-        const breakerStrengthAfter = numberValue(payload.breakerStrengthAfter);
         description = `${pumpBreakerCreditCost !== undefined ? `${creditText(pumpBreakerCreditCost)}: ` : ""}+${pumpStrengthAmount} Stärke für diese Begegnung${breakerStrengthAfter !== undefined ? `; Stärke danach ${breakerStrengthAfter}` : ""}.`;
         const pumpSummary = [
           `+${pumpStrengthAmount} Stärke`,

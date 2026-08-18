@@ -34,6 +34,52 @@ function deriveOpponentActionCues(input: CueDerivationInput) {
 }
 
 describe("deriveOpponentActionCues", () => {
+  it("presents a contiguous AI pump series in one action cue", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event("evt_pump_1", "pump_breaker", {
+          actor: "runner",
+          title: "Krash",
+          aiReasonCode: "runner.encounter.pump_breaker",
+          pumpBreakerId: "breaker_1",
+          pumpStrengthAmount: 1,
+          pumpBreakerCreditCost: 2,
+          breakerStrengthAfter: 1,
+        }),
+        event("evt_pump_2", "pump_breaker", {
+          actor: "runner",
+          title: "Krash",
+          aiReasonCode: "runner.encounter.pump_breaker",
+          pumpBreakerId: "breaker_1",
+          pumpStrengthAmount: 1,
+          pumpBreakerCreditCost: 2,
+          breakerStrengthAfter: 2,
+        }),
+        event("evt_pump_3", "pump_breaker", {
+          actor: "runner",
+          title: "Krash",
+          aiReasonCode: "runner.encounter.pump_breaker",
+          pumpBreakerId: "breaker_1",
+          pumpStrengthAmount: 1,
+          pumpBreakerCreditCost: 2,
+          breakerStrengthAfter: 3,
+        }),
+      ],
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      eventId: "evt_pump_1",
+      source: "ai",
+      title:
+        "Die Runner-KI hat Krash von Stärke 0 auf 3 gepumpt (3× gepumpt, +3 Stärke, 6 Credits insgesamt).",
+      description:
+        "3× gepumpt: +3 Stärke für diese Begegnung; 6 Credits insgesamt.",
+    });
+  });
+
   it("suppresses technical rez-pass cues but keeps an actual ICE rez decline visible", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "runner",

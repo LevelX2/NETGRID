@@ -15,6 +15,7 @@ import {
 } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
 import { publicAccessOwnsOutcomeEvent } from "./access-presentation";
+import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
 import { payloadHasAbility } from "./action-payload";
 
 export type OpponentActionCue = {
@@ -149,10 +150,11 @@ export function deriveOpponentActionCues(
 ): OpponentActionCue[] {
   const actionUsesByEventId = deriveTurnActionUses(input.events);
   const relevantEvents = eventsAfter(input.events, input.lastPresentedEventId);
+  const presentationEvents = coalesceAiPumpPresentationEvents(relevantEvents);
   const localAttention = hasLocalAttention(input.playerView, input.viewerSide);
   const visibleCards = visibleCardsByDefinition(input.playerView);
 
-  const cues = relevantEvents.flatMap((event) => {
+  const cues = presentationEvents.flatMap((event) => {
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
     if (

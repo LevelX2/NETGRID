@@ -19,6 +19,7 @@ import {
   type ChronicleContext,
   type ChronicleItem,
 } from "../../app/chronicle";
+import { coalesceAiPumpPresentationEvents } from "../../app/ai-pump-presentation";
 import type { PublicCardPresentationsById } from "../../app/public-card-presentation";
 import { localizedDeCardTitle } from "../../app/card-image-manifest";
 import {
@@ -258,6 +259,7 @@ export function ChroniclePanel({
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     () => new Set(),
   );
+  const presentationEvents = coalesceAiPumpPresentationEvents(events);
   const projectionPlan = chronicleEventProjectionPlan(turnContextEvents);
   const contextByEventId = chronicleContextByEventId(
     turnContextEvents,
@@ -269,7 +271,7 @@ export function ChroniclePanel({
   );
   const entries = orderChronicleEntriesForDisplay(
     chronicleEntriesWithRunGroups(
-      events,
+      presentationEvents,
       side,
       contextByEventId,
       cardDetailsById,

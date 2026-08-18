@@ -4767,6 +4767,39 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("describes a coalesced AI breaker pump presentation", () => {
+    const item = formatChronicleEvent(
+      makeEvent("pump_breaker", {
+        actor: "runner",
+        title: "Krash",
+        aiReasonCode: "runner.encounter.pump_breaker",
+        aiPumpPresentation: true,
+        pumpCount: 3,
+        pumpStrengthStart: 0,
+        pumpStrengthTotal: 3,
+        pumpCreditCostTotal: 6,
+        breakerStrengthAfter: 3,
+      }),
+      "corp",
+    );
+
+    expect(item.title).toBe(
+      "Die Runner-KI hat Krash von Stärke 0 auf 3 gepumpt (3× gepumpt, +3 Stärke, 6 Credits insgesamt).",
+    );
+    expect(item.description).toBe(
+      "3× gepumpt: +3 Stärke für diese Begegnung; 6 Credits insgesamt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Breaker",
+        "3× gepumpt",
+        "+3 Stärke",
+        "Stärke 0 → 3",
+        "6 Credits insgesamt",
+      ]),
+    );
+  });
+
   it("describes successful Blink die rolls on break actions", () => {
     const item = formatChronicleEvent(
       makeEvent("break_subroutine", {
