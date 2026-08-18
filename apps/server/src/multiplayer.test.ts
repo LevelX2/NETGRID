@@ -1382,6 +1382,42 @@ describe("Backend 0.5 private storage maintenance", () => {
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, {
       tokenSalt: "backend-05-ai-traces",
+      chooseAiAction: (input, options): AiDecision => {
+        const decision = chooseRuntimeAiAction(input, options);
+        if (!("actionId" in decision) || !decision.decisionDebug)
+          return decision;
+        const selectedAction = input.legalActions.find(
+          (action) => action.actionId === decision.actionId,
+        );
+        if (!selectedAction) return decision;
+        return {
+          ...decision,
+          decisionDebug: {
+            ...decision.decisionDebug,
+            actionAlternatives: [
+              {
+                rank: 1,
+                actionId: selectedAction.actionId,
+                actionType: selectedAction.type,
+                selected: true,
+                score: 205,
+                scoreBreakdown: [
+                  {
+                    key: "run_route_raw_score",
+                    label: "Run route raw score",
+                    value: 250,
+                  },
+                  {
+                    key: "consumable_run_opportunity_cost",
+                    label: "Consumable run opportunity cost",
+                    value: -45,
+                  },
+                ],
+              },
+            ],
+          },
+        };
+      },
     });
     const traced = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
@@ -1517,6 +1553,17 @@ describe("Backend 0.5 private storage maintenance", () => {
       selectedActionType: detail?.selectedActionType,
       debugSelectionMatchesApplied: true,
     });
+    expect(detail?.detail).toMatchObject({
+      actionAlternatives: [
+        {
+          score: 205,
+          scoreBreakdown: [
+            { key: "run_route_raw_score", value: 250 },
+            { key: "consumable_run_opportunity_cost", value: -45 },
+          ],
+        },
+      ],
+    });
     expect(
       await reopenedService.storageMaintenanceAiDecisionTraceIndex(
         untraced.matchId,
@@ -1568,7 +1615,22 @@ describe("Backend 0.5 private storage maintenance", () => {
         `/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`,
       );
       expect(detailResponse.status).toBe(200);
-      expect(JSON.stringify(await detailResponse.json())).not.toMatch(
+      const httpDetail = (await detailResponse.json()) as {
+        detail?: {
+          actionAlternatives?: Array<{
+            score?: number;
+            scoreBreakdown?: Array<{ key?: string; value?: number }>;
+          }>;
+        };
+      };
+      expect(httpDetail.detail?.actionAlternatives?.[0]).toMatchObject({
+        score: 205,
+        scoreBreakdown: [
+          { key: "run_route_raw_score", value: 250 },
+          { key: "consumable_run_opportunity_cost", value: -45 },
+        ],
+      });
+      expect(JSON.stringify(httpDetail)).not.toMatch(
         /<html|<div|sessionToken|reconnectToken|joinToken|cardInstances|privatePayload|decklist|AIInput/i,
       );
     } finally {

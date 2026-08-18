@@ -1783,6 +1783,20 @@ Regel:
 Keine Run-Prep nur mit Struktur-Signal bewerten, wenn der Kartentext einen konkreten Payoff enthält.
 ```
 
+Verbrauchbare Run-Preps mit strukturiertem ICE-Bypass werden innerhalb des
+zuständigen Central- oder Remote-Plans gegen die gleichzeitig verfügbare
+Basic-Run-Route bewertet. Ein tatsächlicher `run.bypass_first_ice`-Einsatz
+trägt einen moderaten Karten-Opportunitätswert. Dieser sinkt bei einer zweiten
+sichtbaren Handkopie, bei vollem Grip sowie bei konkret hohem unmittelbarem
+Payoff; ein belegtes Agenda-, Matchpoint- oder Score-Threat-Fenster kann ihn
+vollständig aufheben. Die Route bleibt damit nutzbar, wird aber nicht allein
+deshalb verbraucht, weil vor einem blinden Einzelzugriff irgendein ICE liegt.
+
+Die Regel hängt an der strukturierten Run-Projektion und dem tatsächlich
+umgangenen ICE, nicht an Kartennamen. Rohwert, Opportunitätswert und effektiver
+Routenwert werden gemeinsam diagnostiziert. Der Plan wählt die Route; ein
+Choice-Resolver darf diese Abwägung nicht wiederholen.
+
 ---
 
 ### 34.2 Economy-Preps

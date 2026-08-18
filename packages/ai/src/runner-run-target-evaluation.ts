@@ -73,6 +73,7 @@ import {
 } from "./run-analysis/runner-run-target-types";
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 import { quoteRunnerRunRiskReserve } from "./run-analysis/runner-run-risk-reserve";
+import { quoteRunnerConsumableRunOpportunity } from "./run-analysis/runner-consumable-run-opportunity";
 
 export * from "./run-analysis/runner-run-target-types";
 
@@ -421,7 +422,7 @@ function evaluateRunnerRunTarget(
       ? { randomBreakOrDamageRiskAssessment }
       : {}),
   });
-  const score = scoreRunTargetEvaluation({
+  const rawRouteScore = scoreRunTargetEvaluation({
     targetKind: accessTargetKind,
     accessPayoff,
     knownAccessState: payoff.knownAccessState,
@@ -442,6 +443,18 @@ function evaluateRunnerRunTarget(
       ? { randomBreakOrDamageRiskAssessment }
       : {}),
   });
+  const consumableRunOpportunityQuote = quoteRunnerConsumableRunOpportunity({
+    input: params.input,
+    projection,
+    bypassedFirstIce,
+    accessPayoff,
+    scoreThreat,
+    multiaccessAvailable,
+    runnerMatchpointCentralAccess,
+    rawRouteScore,
+  });
+  const score =
+    consumableRunOpportunityQuote?.effectiveRouteScore ?? rawRouteScore;
   const publicProjection = publicRunActionProjection(projection);
   return {
     schemaVersion: RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
@@ -482,6 +495,7 @@ function evaluateRunnerRunTarget(
     installedRunPayoff,
     runActionPayoff,
     runActionProjection: publicProjection,
+    ...(consumableRunOpportunityQuote ? { consumableRunOpportunityQuote } : {}),
     bypassedFirstIce,
     riskyUniversalCoverage,
     ...(randomBreakOrDamageRiskAssessment
@@ -615,6 +629,7 @@ function evaluateRunnerRunTarget(
       ...installedRunPayoff.evidence.slice(0, 8),
       ...runActionPayoff.evidence.slice(0, 8),
       ...projection.evidence.slice(0, 12),
+      ...(consumableRunOpportunityQuote?.evidence ?? []),
     ],
   };
 }

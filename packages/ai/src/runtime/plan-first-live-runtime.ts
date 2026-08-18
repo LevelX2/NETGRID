@@ -4393,39 +4393,68 @@ function buildRunnerDomain(
                 .filter(
                   (candidate) => candidate.pathPassability === "reachable",
                 )
-                .map((candidate) => [
-                  candidate.actionId,
-                  candidate.actionId === hqSuccessWindowRoute?.actionId
-                    ? 100
-                    : candidate.runActionProjection?.spendLimit !== undefined
-                      ? 10
-                      : 0,
-                ]),
+                .map((candidate) => {
+                  const routeSpecificPreference =
+                    candidate.actionId === hqSuccessWindowRoute?.actionId
+                      ? 100
+                      : candidate.runActionProjection?.spendLimit !== undefined
+                        ? 10
+                        : 0;
+                  return [
+                    candidate.actionId,
+                    candidate.score -
+                      evaluation.score +
+                      routeSpecificPreference,
+                  ];
+                }),
             ),
             runActionEvidence: Object.fromEntries(
               sameServerEvaluations.flatMap((candidate) => {
                 const spendLimit = candidate.runActionProjection?.spendLimit;
-                if (
-                  candidate.pathPassability !== "reachable" ||
-                  spendLimit === undefined
-                ) {
+                if (candidate.pathPassability !== "reachable") {
                   return [];
                 }
+                const opportunityQuote =
+                  candidate.consumableRunOpportunityQuote;
                 return [
                   [
                     candidate.actionId,
                     [
+                      `run_route_raw_score:${opportunityQuote?.rawRouteScore ?? candidate.score}`,
+                      `run_route_opportunity_cost:${opportunityQuote?.opportunityCost ?? 0}`,
+                      `run_route_effective_score:${candidate.score}`,
+                      `run_route_relative_value:${candidate.score - evaluation.score}`,
+                      ...(opportunityQuote?.evidence ?? []),
                       ...(candidate.actionId === hqSuccessWindowRoute?.actionId
                         ? [
                             "plan_route_preference:hq_success_window_setup",
                             ...hqSuccessWindowRoute.setup.evidence,
                           ]
                         : []),
-                      "plan_route_preference:bounded_card_run",
-                      `run_action_spending_cap_target_server:${evaluation.targetServerId}`,
-                      `run_action_spending_cap_limit:${spendLimit}`,
+                      ...(spendLimit !== undefined
+                        ? [
+                            "plan_route_preference:bounded_card_run",
+                            `run_action_spending_cap_target_server:${evaluation.targetServerId}`,
+                            `run_action_spending_cap_limit:${spendLimit}`,
+                          ]
+                        : []),
                     ],
                   ],
+                ];
+              }),
+            ),
+            runActionRouteDiagnostics: Object.fromEntries(
+              sameServerEvaluations.map((candidate) => {
+                const opportunityQuote =
+                  candidate.consumableRunOpportunityQuote;
+                return [
+                  candidate.actionId,
+                  {
+                    rawRouteScore:
+                      opportunityQuote?.rawRouteScore ?? candidate.score,
+                    opportunityCost: opportunityQuote?.opportunityCost ?? 0,
+                    effectiveRouteScore: candidate.score,
+                  },
                 ];
               }),
             ),
@@ -17222,18 +17251,80 @@ function decisionFromScheduler(
                 signal?: {
                   runActionEvidence?: Record<string, string[]>;
                   runActionExclusions?: Record<string, string[]>;
+                  runActionAssessments?: Record<
+                    string,
+                    {
+                      evidenceCodes?: string[];
+                    }
+                  >;
                 };
               }
             | undefined;
-          if (moduleState?.kind !== "central_pressure") return [];
-          return selected
-            ? (moduleState.signal?.runActionEvidence?.[alternative.actionId] ??
-                [])
-            : (moduleState.signal?.runActionExclusions?.[
+          if (moduleState?.kind === "central_pressure") {
+            return [
+              ...(moduleState.signal?.runActionEvidence?.[
                 alternative.actionId
-              ] ?? []);
+              ] ?? []),
+              ...(!selected
+                ? (moduleState.signal?.runActionExclusions?.[
+                    alternative.actionId
+                  ] ?? [])
+                : []),
+            ];
+          }
+          if (moduleState?.kind === "remote_contest") {
+            return (
+              moduleState.signal?.runActionAssessments?.[alternative.actionId]
+                ?.evidenceCodes ?? []
+            );
+          }
+          return [];
         },
       );
+      const planRouteDiagnostic = (result.portfolio?.instances ?? [])
+        .flatMap((instance) => {
+          const moduleState = instance.moduleState as
+            | {
+                kind?: unknown;
+                signal?: {
+                  runActionRouteDiagnostics?: Record<
+                    string,
+                    {
+                      rawRouteScore: number;
+                      opportunityCost: number;
+                      effectiveRouteScore: number;
+                    }
+                  >;
+                  runActionAssessments?: Record<
+                    string,
+                    {
+                      routeDiagnostic?: {
+                        rawRouteScore: number;
+                        opportunityCost: number;
+                        effectiveRouteScore: number;
+                      };
+                    }
+                  >;
+                };
+              }
+            | undefined;
+          const diagnostic =
+            moduleState?.kind === "central_pressure"
+              ? moduleState.signal?.runActionRouteDiagnostics?.[
+                  alternative.actionId
+                ]
+              : moduleState?.kind === "remote_contest"
+                ? moduleState.signal?.runActionAssessments?.[
+                    alternative.actionId
+                  ]?.routeDiagnostic
+                : undefined;
+          return diagnostic ? [diagnostic] : [];
+        })
+        .sort(
+          (left, right) =>
+            right.effectiveRouteScore - left.effectiveRouteScore ||
+            right.rawRouteScore - left.rawRouteScore,
+        )[0];
       return {
         rank: index + 1,
         actionId: alternative.actionId,
@@ -17241,6 +17332,23 @@ function decisionFromScheduler(
         label: alternative.label,
         source: String(alternative.source),
         selected,
+        ...(planRouteDiagnostic
+          ? {
+              score: planRouteDiagnostic.effectiveRouteScore,
+              scoreBreakdown: [
+                {
+                  key: "run_route_raw_score",
+                  label: "Run route before card opportunity cost",
+                  value: planRouteDiagnostic.rawRouteScore,
+                },
+                {
+                  key: "consumable_run_opportunity_cost",
+                  label: "Consumable run-card opportunity cost",
+                  value: -planRouteDiagnostic.opportunityCost,
+                },
+              ],
+            }
+          : {}),
         ...(encounterExclusion ||
         actionDisposition ||
         planActionAssessment?.admissible === false
@@ -20014,6 +20122,7 @@ function bindRunnerRemoteRunActionAssessments(
           ),
           ...evaluation.evidence,
         ];
+    const opportunityQuote = evaluation.consumableRunOpportunityQuote;
     return [
       evaluation.actionId,
       {
@@ -20022,6 +20131,11 @@ function bindRunnerRemoteRunActionAssessments(
           : ("explicitly_nonproductive" as const),
         stepValue: executable ? signal.marginalValue + evaluation.score : 0,
         evidenceCodes,
+        routeDiagnostic: {
+          rawRouteScore: opportunityQuote?.rawRouteScore ?? evaluation.score,
+          opportunityCost: opportunityQuote?.opportunityCost ?? 0,
+          effectiveRouteScore: evaluation.score,
+        },
       },
     ];
   });

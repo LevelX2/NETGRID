@@ -46,6 +46,12 @@ export type RunnerRunRiskReassessmentSignal = {
   failureCode?: "current_server_risk_model_missing";
 };
 
+export type RunnerRunActionRouteDiagnostic = {
+  rawRouteScore: number;
+  opportunityCost: number;
+  effectiveRouteScore: number;
+};
+
 export type RunnerPressureSignal = {
   pressureId: string;
   serverId: "hq" | "rd" | "archives";
@@ -59,6 +65,7 @@ export type RunnerPressureSignal = {
   runActionIds?: string[];
   runActionValues?: Record<string, number>;
   runActionEvidence?: Record<string, string[]>;
+  runActionRouteDiagnostics?: Record<string, RunnerRunActionRouteDiagnostic>;
   runActionExclusions?: Record<string, string[]>;
   preparationActionIds?: string[];
   rejectedPreparationActionIds?: string[];
@@ -104,6 +111,7 @@ export type RunnerRemoteContestSignal = {
       verdict: "executable" | "explicitly_nonproductive";
       stepValue: number;
       evidenceCodes: string[];
+      routeDiagnostic?: RunnerRunActionRouteDiagnostic;
     }
   >;
   preparationActionIds?: string[];

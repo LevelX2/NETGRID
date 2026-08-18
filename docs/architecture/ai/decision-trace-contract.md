@@ -126,7 +126,16 @@ Erlaubte Detail-Felder:
 - eigene Deck-Doctrine-Zusammenfassung ohne Deckliste;
 - Gegner-Modell als abstrakte, sanitisierte Labels oder Wahrscheinlichkeiten;
 - Top-Alternativen mit Ranking, Score, Confidence, Reason-Codes und legaler Action-Referenz;
+- bei planintern konkurrierenden Run-Routen den side-sicher berechneten
+  Routenrohwert, den Opportunitätswert einer verbrauchbaren Run-Karte und den
+  daraus resultierenden effektiven Routenwert;
 - Timing- und Fallback-Hinweise.
+
+Diese Run-Routenwerte werden in `actionAlternatives` als `score` und
+`scoreBreakdown` gespeichert. Damit sind sie über denselben lokalen
+Maintenance-Detailendpunkt abrufbar und bleiben auch historisch prüfbar. Es
+entsteht dafür weder eine zweite Tabelle noch ein nachträglicher
+Rekonstruktionspfad aus FullState oder Hidden-Zonen.
 
 Für eine Engine-randomisierte Blind-Trace-Resolution darf die private
 Detailansicht zusätzlich Regelprofil, gedruckten Trace, effektives Limit,

@@ -373,9 +373,11 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("quotes a run that bypasses the outermost ICE without pricing that ICE", () => {
     const insideJob = {
       ...runAction("inside-job-rd", "rd"),
-      source: "card",
+      type: "play_event",
+      source: "inside-job-instance",
       costs: [{ clicks: 1, credits: 2 }],
       payload: {
+        cardId: "inside-job-instance",
         serverId: "rd",
         sourceDefinitionId: "onr_v1_094_inside-job",
         bypassFirstIce: true,
@@ -385,6 +387,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       credits: 2,
       servers: [server("rd", { ice: [expensiveBarrierIce("rd-outer")] })],
       legalActions: [insideJob],
+      grip: [
+        visibleCard("inside-job-instance", {
+          definitionId: "onr_v1_094_inside-job",
+          title: "Inside Job",
+          type: "event",
+        }),
+      ],
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
@@ -394,12 +403,21 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       pathPassability: "reachable",
       pathCost: 0,
       creditsAfterRun: 0,
+      consumableRunOpportunityQuote: {
+        kind: "bypass_first_ice",
+        gripCopyCount: 1,
+        opportunityCost: 45,
+      },
     });
+    expect(evaluation?.score).toBe(
+      evaluation!.consumableRunOpportunityQuote!.rawRouteScore - 45,
+    );
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
         "run_action_projection_bypass_first_ice:true",
         "run_action_projection_bypassed_first_ice:true",
         "path_passability:reachable",
+        "consumable_run_opportunity_cost:45",
       ]),
     );
   });
