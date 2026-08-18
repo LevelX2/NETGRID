@@ -326,7 +326,6 @@ import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import {
   runnerRunLockReleaseProjection,
-  runnerRunLockReleaseScoreComponent,
 } from "./runner-run-lock-release-score";
 import {
   assessRunnerRunFundingAdmission,
@@ -2478,6 +2477,55 @@ function runnerInstallSourceInstanceId(
     : undefined;
 }
 
+type RunnerRunLockReleaseBoundRouteDisposition = {
+  executable: boolean;
+  ownerModuleId: "runner.pressure_central" | "runner.contest_remote";
+  evidenceCode: string;
+};
+
+function runnerRunLockReleaseBoundRouteDisposition(
+  domain: RunnerPlanDomain,
+  actionId: string,
+): RunnerRunLockReleaseBoundRouteDisposition {
+  const centralRoute = domain.centralPressure.find(
+    (signal) =>
+      signal.routePreparation === "release_run_lock" &&
+      signal.runActionIds?.includes(actionId) === true,
+  );
+  if (centralRoute) {
+    const executable =
+      centralRoute.reachable && centralRoute.marginalValue > 0;
+    return {
+      executable,
+      ownerModuleId: "runner.pressure_central",
+      evidenceCode: executable
+        ? `runner_run_lock_release_bound_route_executable:${centralRoute.serverId}`
+        : centralRoute.supportNeedId
+          ? `runner_run_lock_release_waits_for_bound_support:${centralRoute.serverId}:${centralRoute.supportNeedId}`
+          : `runner_run_lock_release_bound_route_not_executable:${centralRoute.serverId}:${centralRoute.evidenceCode}`,
+    };
+  }
+
+  for (const remoteRoute of domain.remoteContests) {
+    if (remoteRoute.routePreparation !== "release_run_lock") continue;
+    const assessment = remoteRoute.runActionAssessments[actionId];
+    if (!assessment) continue;
+    return {
+      executable: assessment.verdict === "executable",
+      ownerModuleId: "runner.contest_remote",
+      evidenceCode:
+        assessment.evidenceCodes[0] ??
+        `runner_remote_run_lock_release_bound_route_not_executable:${remoteRoute.serverId}`,
+    };
+  }
+
+  return {
+    executable: false,
+    ownerModuleId: "runner.pressure_central",
+    evidenceCode: "runner_run_lock_release_without_bound_run_plan",
+  };
+}
+
 export function runnerActionDispositions(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -3266,13 +3314,13 @@ export function runnerActionDispositions(
       action.type === "trigger_ability" &&
       (action.payload?.abilityId === "pay_to_remove_run_lock" ||
         action.payload?.v1920RunnerRunLockAbility === "pay_to_remove_run_lock");
-    if (runLockRelease && !runnerRunLockReleaseScoreComponent(input, action)) {
-      add(
-        action.actionId,
-        "runner.pressure_central",
-        "runner_run_lock_release_without_credible_followup",
-      );
-    }
+    if (!runLockRelease) continue;
+    const boundRoute = runnerRunLockReleaseBoundRouteDisposition(
+      domain,
+      action.actionId,
+    );
+    if (boundRoute.executable) continue;
+    add(action.actionId, boundRoute.ownerModuleId, boundRoute.evidenceCode);
   }
   for (const actionId of unboundOneShotSearchActionIds) {
     add(
