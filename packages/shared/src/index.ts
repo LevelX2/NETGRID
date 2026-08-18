@@ -3054,6 +3054,12 @@ export type VisibleCorpIceRezResourceExchangeQuote =
       projectedServerId: Exclude<ServerId, "new_remote">;
       expiresAtStateVersion: number;
       complete: false;
+      reason:
+        | "not_current_approached_ice"
+        | "effective_run_projection_unavailable"
+        | "no_hard_end_the_run_subroutine"
+        | "unsupported_encounter_cost_projection"
+        | "visible_runner_break_projection_unknown";
     }
   | {
       context: "installed";
@@ -3062,6 +3068,7 @@ export type VisibleCorpIceRezResourceExchangeQuote =
       projectedServerId: Exclude<ServerId, "new_remote">;
       expiresAtStateVersion: number;
       complete: true;
+      hardEndTheRunSubroutineCount: number;
       runnerBreak: {
         breakerCardId: CardInstanceId;
         breakerDefinitionId: CardDefinitionId;
@@ -3089,6 +3096,21 @@ export type VisibleCorpIceRezResourceExchangeQuote =
           denominator: number;
           evidenceSource: "engine_icebreaker_ability";
         }>;
+      };
+      runnerBreakUnavailable?: never;
+    }
+  | {
+      context: "installed";
+      cardId: CardInstanceId;
+      targetServerId: Exclude<ServerId, "new_remote">;
+      projectedServerId: Exclude<ServerId, "new_remote">;
+      expiresAtStateVersion: number;
+      complete: true;
+      hardEndTheRunSubroutineCount: number;
+      runnerBreak?: never;
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker";
+        evidenceSource: "engine_icebreaker_ability";
       };
     };
 

@@ -28,6 +28,7 @@ describe("visible Corp ICE rez resource exchange quote", () => {
       projectedServerId: "rd",
       expiresAtStateVersion: state.stateVersion,
       complete: true,
+      hardEndTheRunSubroutineCount: 1,
       runnerBreak: {
         breakerCardId: RENT_I_CON_ID,
         breakerDefinitionId: RENT_I_CON,
@@ -94,7 +95,32 @@ describe("visible Corp ICE rez resource exchange quote", () => {
 
     expect(
       visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
-    ).toMatchObject({ complete: false });
+    ).toMatchObject({
+      complete: false,
+      reason: "not_current_approached_ice",
+    });
+  });
+
+  it("certifies that a hard end-the-run encounter has no visible eligible breaker", () => {
+    const { state, visibleIce } = resourceExchangeState();
+    state.runner.rig.programs = [];
+    delete state.cardInstances[RENT_I_CON_ID];
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
+    ).toEqual({
+      context: "installed",
+      cardId: FILTER_ID,
+      targetServerId: "rd",
+      projectedServerId: "rd",
+      expiresAtStateVersion: state.stateVersion,
+      complete: true,
+      hardEndTheRunSubroutineCount: 1,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+        evidenceSource: "engine_icebreaker_ability",
+      },
+    });
   });
 
   it("uses eligible run-credit pools while ignoring an inactive concealed resource", () => {

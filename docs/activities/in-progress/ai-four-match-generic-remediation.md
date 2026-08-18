@@ -113,8 +113,8 @@ Bei einem Sicherheitsblocker: `active_package → blocked_reported`.
 | P01   | Exakter Deckrestbestand für Suche                  | completed |
 | P02   | Corp-Draw samt Cleanup und Deckout                 | completed |
 | P03   | Corp-Discard als Batchentscheidung                 | completed |
-| P04   | Exakte Corp-ICE-Rez-Resource-Exchange-Quote        | active    |
-| P05   | Bekannte Run-Event-Pfade und Verbrauchswert        | pending   |
+| P04   | Exakte Corp-ICE-Rez-Resource-Exchange-Quote        | completed |
+| P05   | Bekannte Run-Event-Pfade und Verbrauchswert        | active    |
 | P06   | Persistente Corp-Scoring-Finanzierung              | pending   |
 | P07   | Persistente Runner-Entwicklungsfinanzierung        | pending   |
 | P08   | Risikojustierter Corp-Economy-Asset-Payback        | pending   |

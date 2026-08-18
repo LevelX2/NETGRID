@@ -18,8 +18,8 @@ import {
 } from "../run/run-duration-payment";
 
 type CompleteRunnerBreak = Extract<
-  VisibleCorpIceRezResourceExchangeQuote,
-  { complete: true }
+  Extract<VisibleCorpIceRezResourceExchangeQuote, { complete: true }>,
+  { runnerBreak: unknown }
 >["runnerBreak"];
 
 type BreakRead =
@@ -66,17 +66,37 @@ export function visibleCorpIceRezResourceExchangeQuote(
     run.approachedIceId !== iceId ||
     server.ice[run.position.iceIndex] !== iceId
   ) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "not_current_approached_ice",
+    };
   }
   const projectedRunQuote = visibleEffectiveIceRunQuote(state, iceId, {
     ...visibleIce,
     known: true,
     rezzed: true,
   });
-  if (!projectedRunQuote) return { ...binding, complete: false };
+  if (!projectedRunQuote)
+    return {
+      ...binding,
+      complete: false,
+      reason: "effective_run_projection_unavailable",
+    };
   const endTheRunCount = hardEndTheRunSubroutineCount(projectedRunQuote);
-  if (endTheRunCount <= 0 || !hasOnlyDirectBreakCosts(projectedRunQuote)) {
-    return { ...binding, complete: false };
+  if (endTheRunCount <= 0) {
+    return {
+      ...binding,
+      complete: false,
+      reason: "no_hard_end_the_run_subroutine",
+    };
+  }
+  if (!hasOnlyDirectBreakCosts(projectedRunQuote)) {
+    return {
+      ...binding,
+      complete: false,
+      reason: "unsupported_encounter_cost_projection",
+    };
   }
   const runnerRig = [
     ...state.runner.rig.programs,
@@ -87,7 +107,11 @@ export function visibleCorpIceRezResourceExchangeQuote(
     (card) => !cardIsInactiveConcealedRunnerResource(card),
   );
   if (activeRunnerRig.some((card) => !validVisibleRunnerCard(card))) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
   }
   const reads = activeRunnerRig.map((breaker) =>
     quoteRunnerBreak({
@@ -104,17 +128,31 @@ export function visibleCorpIceRezResourceExchangeQuote(
     }),
   );
   if (reads.some((read) => read.kind === "unknown")) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
   }
   const choices = reads
     .flatMap((read) => (read.kind === "exact" ? [read.quote] : []))
     .sort(compareRunnerBreakQuotes);
   const best = choices[0];
   return best
-    ? { ...binding, complete: true, runnerBreak: best }
+    ? {
+        ...binding,
+        complete: true,
+        hardEndTheRunSubroutineCount: endTheRunCount,
+        runnerBreak: best,
+      }
     : {
         ...binding,
-        complete: false,
+        complete: true,
+        hardEndTheRunSubroutineCount: endTheRunCount,
+        runnerBreakUnavailable: {
+          reason: "no_visible_eligible_breaker",
+          evidenceSource: "engine_icebreaker_ability",
+        },
       };
 }
 

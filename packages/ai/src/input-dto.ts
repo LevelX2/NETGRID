@@ -1804,10 +1804,55 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
     projectedServerId: quote.projectedServerId,
     expiresAtStateVersion: quote.expiresAtStateVersion,
   };
+  if (!quote.complete) {
+    if (!validCorpIceRezResourceExchangeIncompleteReason(quote.reason)) {
+      return {
+        ...binding,
+        complete: false,
+        reason: "visible_runner_break_projection_unknown",
+      };
+    }
+    return {
+      ...binding,
+      complete: false,
+      reason: quote.reason,
+    };
+  }
   if (
-    !quote.complete ||
     quote.projectedServerId !== quote.targetServerId ||
     !isNonNegativeSafeInteger(quote.expiresAtStateVersion) ||
+    !isNonNegativeSafeInteger(quote.hardEndTheRunSubroutineCount) ||
+    quote.hardEndTheRunSubroutineCount <= 0
+  ) {
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
+  }
+  if ("runnerBreakUnavailable" in quote) {
+    if (
+      quote.runnerBreakUnavailable?.reason !== "no_visible_eligible_breaker" ||
+      quote.runnerBreakUnavailable.evidenceSource !==
+        "engine_icebreaker_ability"
+    ) {
+      return {
+        ...binding,
+        complete: false,
+        reason: "visible_runner_break_projection_unknown",
+      };
+    }
+    return {
+      ...binding,
+      complete: true,
+      hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+        evidenceSource: "engine_icebreaker_ability",
+      },
+    };
+  }
+  if (
     !isNonNegativeSafeInteger(quote.runnerBreak.requiredCredits) ||
     !isNonNegativeSafeInteger(quote.runnerBreak.pumpCredits) ||
     !isNonNegativeSafeInteger(quote.runnerBreak.breakCredits) ||
@@ -1841,11 +1886,16 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
         consequence.numerator > consequence.denominator,
     )
   ) {
-    return { ...binding, complete: false };
+    return {
+      ...binding,
+      complete: false,
+      reason: "visible_runner_break_projection_unknown",
+    };
   }
   return {
     ...binding,
     complete: true,
+    hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
     runnerBreak: {
       breakerCardId: quote.runnerBreak.breakerCardId,
       breakerDefinitionId: quote.runnerBreak.breakerDefinitionId,
@@ -1879,6 +1929,21 @@ function sanitizeInstalledCorpIceRezResourceExchangeQuote(
         : {}),
     },
   };
+}
+
+function validCorpIceRezResourceExchangeIncompleteReason(
+  value: unknown,
+): value is Extract<
+  VisibleCorpIceRezResourceExchangeQuote,
+  { complete: false }
+>["reason"] {
+  return (
+    value === "not_current_approached_ice" ||
+    value === "effective_run_projection_unavailable" ||
+    value === "no_hard_end_the_run_subroutine" ||
+    value === "unsupported_encounter_cost_projection" ||
+    value === "visible_runner_break_projection_unknown"
+  );
 }
 
 function sanitizeInstalledCorpRezCostQuote(

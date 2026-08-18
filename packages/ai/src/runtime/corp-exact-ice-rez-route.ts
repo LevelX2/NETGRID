@@ -28,6 +28,10 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     | "qualitative_encounter_defense";
   marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
   knownAccessPathTax?: number;
+  accessBlock?: Readonly<{
+    hardEndTheRunSubroutineCount: number;
+    reason: "no_visible_eligible_breaker" | "visible_break_route_unaffordable";
+  }>;
   resourceExchange?: Readonly<{
     runnerRequiredCredits: number;
     runnerPumpCredits: number;
@@ -170,6 +174,11 @@ export function projectExactCorpIceRezRoute(params: {
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     totalRezCredits,
   });
+  const accessBlock = readExactCurrentRunAccessBlock({
+    input,
+    sourceCard,
+    targetServerId,
+  });
   const marginalDefenseThreat = currentRunMarginalDefenseThreat(
     input,
     targetServerId,
@@ -177,6 +186,7 @@ export function projectExactCorpIceRezRoute(params: {
   if (
     !assessmentsKnown &&
     !resourceExchange &&
+    !accessBlock &&
     marginalDefenseThreat !== "visible_agenda_remote"
   )
     return undefined;
@@ -184,6 +194,7 @@ export function projectExactCorpIceRezRoute(params: {
   const freePersistentDefense =
     probabilityComparison === 0 &&
     !resourceExchange &&
+    !accessBlock &&
     isFreePersistentDefenseOnWorthwhileCurrentServer({
       input,
       candidate,
@@ -196,6 +207,7 @@ export function projectExactCorpIceRezRoute(params: {
     knownBefore !== undefined &&
     knownAfter !== undefined &&
     !resourceExchange &&
+    !accessBlock &&
     !freePersistentDefense
       ? readKnownCurrentRunAccessPathTax({
           input,
@@ -211,6 +223,7 @@ export function projectExactCorpIceRezRoute(params: {
       (!assessmentsKnown &&
         marginalDefenseThreat === "visible_agenda_remote")) &&
     !resourceExchange &&
+    !accessBlock &&
     !freePersistentDefense &&
     knownAccessPathTax === undefined &&
     isQualitativeEncounterDefenseOnCurrentRun({
@@ -221,6 +234,7 @@ export function projectExactCorpIceRezRoute(params: {
   if (
     probabilityComparison !== -1 &&
     !resourceExchange &&
+    !accessBlock &&
     !freePersistentDefense &&
     knownAccessPathTax === undefined &&
     !qualitativeEncounterDefense
@@ -237,17 +251,22 @@ export function projectExactCorpIceRezRoute(params: {
     ...(assessmentsKnown ? { before: knownBefore, after: knownAfter } : {}),
     routeKind: resourceExchange
       ? "exact_resource_exchange"
-      : freePersistentDefense
-        ? "free_persistent_defense"
-        : knownAccessPathTax !== undefined
-          ? "known_access_path_tax"
-          : qualitativeEncounterDefense
-            ? "qualitative_encounter_defense"
-            : "access_reduction",
+      : accessBlock
+        ? "access_reduction"
+        : freePersistentDefense
+          ? "free_persistent_defense"
+          : knownAccessPathTax !== undefined
+            ? "known_access_path_tax"
+            : qualitativeEncounterDefense
+              ? "qualitative_encounter_defense"
+              : "access_reduction",
     ...(resourceExchange ? { resourceExchange } : {}),
+    ...(accessBlock ? { accessBlock } : {}),
     ...(knownAccessPathTax !== undefined ? { knownAccessPathTax } : {}),
     effect:
-      assessmentsKnown && knownAfter.protectsScore ? "satisfied" : "progress",
+      accessBlock || (assessmentsKnown && knownAfter.protectsScore)
+        ? "satisfied"
+        : "progress",
     totalRezCredits,
   };
 }
@@ -323,6 +342,7 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
   }
   const runnerBreak = resourceExchangeQuote.runnerBreak;
   if (
+    !runnerBreak ||
     runnerBreak.requiredCredits !== 0 ||
     runnerBreak.canPayFromCurrentCredits !== true
   ) {
@@ -335,6 +355,45 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
   return (
     server?.root.some((card) => card.known && card.type === "agenda") === true
   );
+}
+
+function readExactCurrentRunAccessBlock(params: {
+  input: AiDecisionInput;
+  sourceCard: VisibleCard;
+  targetServerId: string;
+}): CorpExactIceRezRouteProjection["accessBlock"] | undefined {
+  const { input, sourceCard, targetServerId } = params;
+  const quote = sourceCard.effectiveRezResourceExchangeQuote;
+  if (
+    input.playerView.run?.attackedServerId !== targetServerId ||
+    quote?.context !== "installed" ||
+    quote.complete !== true ||
+    quote.cardId !== sourceCard.instanceId ||
+    quote.targetServerId !== targetServerId ||
+    quote.projectedServerId !== targetServerId ||
+    quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !nonNegativeSafeInteger(quote.hardEndTheRunSubroutineCount) ||
+    quote.hardEndTheRunSubroutineCount <= 0
+  ) {
+    return undefined;
+  }
+  if ("runnerBreakUnavailable" in quote) {
+    return quote.runnerBreakUnavailable?.reason ===
+      "no_visible_eligible_breaker" &&
+      quote.runnerBreakUnavailable.evidenceSource ===
+        "engine_icebreaker_ability"
+      ? {
+          hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
+          reason: "no_visible_eligible_breaker",
+        }
+      : undefined;
+  }
+  return quote.runnerBreak.canPayFromCurrentCredits === false
+    ? {
+        hardEndTheRunSubroutineCount: quote.hardEndTheRunSubroutineCount,
+        reason: "visible_break_route_unaffordable",
+      }
+    : undefined;
 }
 
 function readExactCurrentRunResourceExchange(params: {
@@ -365,6 +424,7 @@ function readExactCurrentRunResourceExchange(params: {
     quote.targetServerId !== targetServerId ||
     quote.projectedServerId !== targetServerId ||
     quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+    !quote.runnerBreak ||
     !nonNegativeSafeInteger(quote.runnerBreak.requiredCredits) ||
     !nonNegativeSafeInteger(quote.runnerBreak.pumpCredits) ||
     !nonNegativeSafeInteger(quote.runnerBreak.breakCredits) ||
@@ -415,7 +475,8 @@ function readExactCurrentRunResourceExchange(params: {
     input.playerView.servers
       .find((server) => server.id === targetServerId)
       ?.ice.filter(
-        (ice) => ice.instanceId !== sourceCard.instanceId && ice.rezzed === true,
+        (ice) =>
+          ice.instanceId !== sourceCard.instanceId && ice.rezzed === true,
       ).length ?? 0;
   const currentRezAction = input.legalActions.find(
     (action) => action.actionId === candidate.actionId,
@@ -426,8 +487,7 @@ function readExactCurrentRunResourceExchange(params: {
     input.playerView.run.phase === "approach_ice" &&
     input.playerView.run.position?.kind === "ice" &&
     input.playerView.run.position.serverId === targetServerId &&
-    input.playerView.servers
-      .find((server) => server.id === targetServerId)
+    input.playerView.servers.find((server) => server.id === targetServerId)
       ?.ice[input.playerView.run.position.iceIndex]?.instanceId ===
       sourceCard.instanceId &&
     currentRezAction?.payload?.temporaryDerezAfterRun !== true &&
@@ -731,6 +791,7 @@ export function exactCorpIceRezRoutesEqual(
     left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
+    exactAccessBlocksEqual(left.accessBlock, right.accessBlock) &&
     exactOptionalProtectionAssessmentsEqual(left.before, right.before) &&
     exactOptionalProtectionAssessmentsEqual(left.after, right.after) &&
     left.quote.context === right.quote.context &&
@@ -755,6 +816,20 @@ export function exactCorpIceRezRoutesEqual(
       left.quote.increaseSourceDefinitionIds,
       right.quote.increaseSourceDefinitionIds,
     )
+  );
+}
+
+function exactAccessBlocksEqual(
+  left: CorpExactIceRezRouteProjection["accessBlock"],
+  right: CorpExactIceRezRouteProjection["accessBlock"],
+): boolean {
+  return (
+    (left === undefined && right === undefined) ||
+    (left !== undefined &&
+      right !== undefined &&
+      left.hardEndTheRunSubroutineCount ===
+        right.hardEndTheRunSubroutineCount &&
+      left.reason === right.reason)
   );
 }
 

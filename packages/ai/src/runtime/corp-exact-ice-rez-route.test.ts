@@ -447,6 +447,74 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  it("uses the Engine-certified access block when no visible breaker can answer the approached ICE", () => {
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 6,
+      runnerPrograms: [],
+    });
+    fixture.input.playerView.servers
+      .find((server) => server.id === "rd")!
+      .ice.push({
+        instanceId: "known-later-ice-without-run-quote",
+        definitionId: "onr_v1_238_data-wall-2-0",
+        known: true,
+        type: "ice",
+        rezzed: true,
+      });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      hardEndTheRunSubroutineCount: 1,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        hardEndTheRunSubroutineCount: 1,
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+  });
+
+  it("uses the Engine-certified access block when the visible break route is unaffordable", () => {
+    const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
+      runnerCredits: 0,
+      runnerPrograms: ["onr_classic_027_early-worm"],
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        requiredCredits: 1,
+        canPayFromCurrentCredits: false,
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        reason: "visible_break_route_unaffordable",
+      },
+    });
+  });
+
   it("does not promote an equal paid exchange while the Runner keeps normal credits", () => {
     const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
       runnerCredits: 2,
@@ -551,10 +619,7 @@ describe("exact Corp ICE rez route", () => {
   it("resolves two Rent-I-Con break uses as separate run-end trash effects", () => {
     const fixture = engineIceRezWindow("onr_v1_239_endless-corridor", 0, {
       runnerCredits: 2,
-      runnerPrograms: [
-        "onr_classic_031_rent-i-con",
-        "onr_v1_038_joan-of-arc",
-      ],
+      runnerPrograms: ["onr_classic_031_rent-i-con", "onr_v1_038_joan-of-arc"],
     });
     let state = applyEngineAction(
       fixture.state,
@@ -586,7 +651,11 @@ describe("exact Corp ICE rez route", () => {
       rentIConId,
     ]);
 
-    for (let step = 0; step < 8 && state.run && !state.pendingChoice; step += 1) {
+    for (
+      let step = 0;
+      step < 8 && state.run && !state.pendingChoice;
+      step += 1
+    ) {
       const action = getLegalActions(state, "runner").find(
         (candidate) =>
           candidate.type === "continue_run" || candidate.type === "access_card",

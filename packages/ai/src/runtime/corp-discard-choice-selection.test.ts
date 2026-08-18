@@ -83,7 +83,7 @@ describe("selectedCorpDiscardChoiceOptionIds", () => {
       ...agenda("agenda-unknown", 2),
       agendaPoints: undefined,
       definitionId: "unknown-agenda-definition",
-    } as VisibleCard;
+    } as unknown as VisibleCard;
     const input = discardInput([unknownAgenda, operation("operation-1")], {
       count: 1,
     });
@@ -165,5 +165,5 @@ function discardInput(
         })),
       },
     },
-  } as AiDecisionInput;
+  } as unknown as AiDecisionInput;
 }

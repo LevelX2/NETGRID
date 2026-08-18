@@ -5020,6 +5020,14 @@ function validExactIceRezRoute(value: unknown): boolean {
               (consequence.numerator as number)
           );
         })));
+  const accessBlock = route.accessBlock as Record<string, unknown> | undefined;
+  const hasExactAccessBlock =
+    route.routeKind === "access_reduction" &&
+    accessBlock !== undefined &&
+    knownNonNegativeInteger(accessBlock.hardEndTheRunSubroutineCount) &&
+    (accessBlock.hardEndTheRunSubroutineCount as number) > 0 &&
+    (accessBlock.reason === "no_visible_eligible_breaker" ||
+      accessBlock.reason === "visible_break_route_unaffordable");
   const hasExactMarginalDefenseThreat =
     route.routeKind === "qualitative_encounter_defense" &&
     (route.marginalDefenseThreat === "visible_agenda_remote" ||
@@ -5037,6 +5045,7 @@ function validExactIceRezRoute(value: unknown): boolean {
     knownNonNegativeInteger(quote.finalCredits) &&
     (hasKnownHolisticAssessment ||
       hasExactResourceExchange ||
+      hasExactAccessBlock ||
       hasExactMarginalDefenseThreat) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
     knownNonNegativeInteger(route.totalRezCredits) &&
