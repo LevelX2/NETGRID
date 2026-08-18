@@ -422,6 +422,60 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("rejects a consumable bypass run when a later known ICE still blocks the full path", () => {
+    const insideJob = {
+      ...runAction("inside-job-rd-known-inner-blocker", "rd"),
+      type: "play_event",
+      source: "inside-job-inner-blocker-instance",
+      costs: [{ clicks: 1, credits: 2 }],
+      payload: {
+        cardId: "inside-job-inner-blocker-instance",
+        serverId: "rd",
+        sourceDefinitionId: "onr_v1_094_inside-job",
+        bypassFirstIce: true,
+      },
+    } satisfies LegalAction;
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("rd", {
+          // Server ICE is ordered innermost to outermost. Inside Job removes
+          // only the last entry; the known inner barrier remains in the quote.
+          ice: [
+            expensiveBarrierIce("rd-known-inner"),
+            expensiveBarrierIce("rd-bypassed-outer"),
+          ],
+        }),
+      ],
+      legalActions: [insideJob, gainCreditAction("gain-for-inner-blocker")],
+      grip: [
+        visibleCard("inside-job-inner-blocker-instance", {
+          definitionId: "onr_v1_094_inside-job",
+          title: "Inside Job",
+          type: "event",
+        }),
+      ],
+    });
+
+    const evaluation = evaluateRunnerRunTargets({ input }).find(
+      (candidate) => candidate.actionId === insideJob.actionId,
+    );
+
+    expect(evaluation).toMatchObject({
+      pathPassability: "blocked_missing_coverage",
+      runCommitment: "full_path",
+      recommendation: "find_breaker_first",
+      bypassedFirstIce: true,
+      consumableRunOpportunityQuote: { kind: "bypass_first_ice" },
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_projection_bypassed_first_ice:true",
+        "path_passability:blocked_missing_coverage",
+      ]),
+    );
+  });
+
   it("does not start a visible R&D trace run that cannot reach access and adds a run lock", () => {
     const input = aiInput({
       credits: 4,

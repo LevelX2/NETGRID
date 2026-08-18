@@ -72,7 +72,7 @@ describe("quoteRunnerConsumableRunOpportunity", () => {
     });
   });
 
-  it("applies only to a consumable route that actually bypasses ICE", () => {
+  it("applies a smaller preservation value to other card-backed event runs", () => {
     const input = inputWithGripCopies(1);
 
     expect(
@@ -90,7 +90,7 @@ describe("quoteRunnerConsumableRunOpportunity", () => {
     expect(
       quoteRunnerConsumableRunOpportunity({
         input,
-        projection: bypassProjection(),
+        projection: { ...bypassProjection(), bypassFirstIce: false },
         bypassedFirstIce: false,
         accessPayoff: "unknown",
         scoreThreat: false,
@@ -98,7 +98,12 @@ describe("quoteRunnerConsumableRunOpportunity", () => {
         runnerMatchpointCentralAccess: false,
         rawRouteScore: 200,
       }),
-    ).toBeUndefined();
+    ).toMatchObject({
+      kind: "card_backed_run",
+      baseOpportunityCost: 20,
+      opportunityCost: 20,
+      effectiveRouteScore: 180,
+    });
   });
 });
 

@@ -43,7 +43,7 @@ export type RunnerInstalledRunPayoff = {
 
 export type RunnerConsumableRunOpportunityQuote = {
   schemaVersion: typeof RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION;
-  kind: "bypass_first_ice";
+  kind: "bypass_first_ice" | "card_backed_run";
   sourceDefinitionId: string;
   gripCopyCount: number;
   handAtCapacity: boolean;

@@ -8,6 +8,7 @@ import {
 } from "./runner-run-target-types";
 
 const BYPASS_CARD_BASE_OPPORTUNITY_COST = 45;
+const CARD_BACKED_RUN_BASE_OPPORTUNITY_COST = 20;
 const BYPASS_CARD_DUPLICATE_RELIEF = 15;
 const BYPASS_CARD_HAND_CAPACITY_RELIEF = 15;
 const BYPASS_CARD_HIGH_YIELD_RELIEF = 20;
@@ -31,14 +32,17 @@ export function quoteRunnerConsumableRunOpportunity(
   params: QuoteRunnerConsumableRunOpportunityParams,
 ): RunnerConsumableRunOpportunityQuote | undefined {
   const sourceDefinitionId = params.projection.sourceCardId;
-  if (
-    params.projection.sourceKind !== "event" ||
-    !params.projection.bypassFirstIce ||
-    !params.bypassedFirstIce ||
-    !sourceDefinitionId
-  ) {
+  if (params.projection.sourceKind !== "event" || !sourceDefinitionId) {
     return undefined;
   }
+  const kind =
+    params.projection.bypassFirstIce && params.bypassedFirstIce
+      ? "bypass_first_ice"
+      : "card_backed_run";
+  const baseOpportunityCost =
+    kind === "bypass_first_ice"
+      ? BYPASS_CARD_BASE_OPPORTUNITY_COST
+      : CARD_BACKED_RUN_BASE_OPPORTUNITY_COST;
 
   const gripCopyCount = params.input.playerView.own.gripOrHq.filter(
     (card) => card.known !== false && card.definitionId === sourceDefinitionId,
@@ -60,13 +64,13 @@ export function quoteRunnerConsumableRunOpportunity(
     params.accessPayoff === "access_bonus" ||
     params.accessPayoff === "trash_affordable";
   const immediatePayoffRelief = exactImmediatePayoff
-    ? BYPASS_CARD_BASE_OPPORTUNITY_COST
+    ? baseOpportunityCost
     : highYieldAccess
-      ? BYPASS_CARD_HIGH_YIELD_RELIEF
+      ? Math.min(baseOpportunityCost, BYPASS_CARD_HIGH_YIELD_RELIEF)
       : 0;
   const opportunityCost = Math.max(
     0,
-    BYPASS_CARD_BASE_OPPORTUNITY_COST -
+    baseOpportunityCost -
       duplicateRelief -
       handCapacityRelief -
       immediatePayoffRelief,
@@ -75,11 +79,11 @@ export function quoteRunnerConsumableRunOpportunity(
 
   return {
     schemaVersion: RUNNER_CONSUMABLE_RUN_OPPORTUNITY_SCHEMA_VERSION,
-    kind: "bypass_first_ice",
+    kind,
     sourceDefinitionId,
     gripCopyCount,
     handAtCapacity,
-    baseOpportunityCost: BYPASS_CARD_BASE_OPPORTUNITY_COST,
+    baseOpportunityCost,
     duplicateRelief,
     handCapacityRelief,
     immediatePayoffRelief,
@@ -88,10 +92,10 @@ export function quoteRunnerConsumableRunOpportunity(
     effectiveRouteScore,
     evidence: [
       "consumable_run_route:true",
-      "consumable_run_route_kind:bypass_first_ice",
+      `consumable_run_route_kind:${kind}`,
       `consumable_run_grip_copy_count:${gripCopyCount}`,
       `consumable_run_hand_at_capacity:${handAtCapacity}`,
-      `consumable_run_base_opportunity_cost:${BYPASS_CARD_BASE_OPPORTUNITY_COST}`,
+      `consumable_run_base_opportunity_cost:${baseOpportunityCost}`,
       `consumable_run_duplicate_relief:${duplicateRelief}`,
       `consumable_run_hand_capacity_relief:${handCapacityRelief}`,
       `consumable_run_immediate_payoff_relief:${immediatePayoffRelief}`,
