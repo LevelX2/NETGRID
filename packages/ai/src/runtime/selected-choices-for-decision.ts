@@ -28,7 +28,6 @@ import {
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
 import {
-  isSearchChoice,
   selectedSearchChoiceOptionIds,
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
@@ -1023,7 +1022,7 @@ export function selectedChoicesForDecision(
     const coverageBinding = runnerCoverageSearchChoiceBinding(input, choice);
     const developmentBinding = coverageBinding
       ? undefined
-      : runnerDevelopmentProgramSearchChoiceBinding(input, action, choice);
+      : runnerDevelopmentSearchChoiceBinding(input, action, choice);
     const preferredServerId =
       coverageBinding?.serverId ?? runnerStrategicSearchTarget(input);
     const searchSelected = selectedSearchChoiceOptionIds(
@@ -1049,11 +1048,17 @@ export function selectedChoicesForDecision(
                   }
                 : {}),
             }
-          : developmentBinding
-            ? {
-                preferredCardDefinitionId:
-                  developmentBinding.targetDefinitionId,
-              }
+            : developmentBinding
+              ? {
+                  ...(developmentBinding.targetCardInstanceId
+                    ? {
+                        preferredCardInstanceId:
+                          developmentBinding.targetCardInstanceId,
+                      }
+                    : {}),
+                  preferredCardDefinitionId:
+                    developmentBinding.targetDefinitionId,
+                }
             : {}),
         ...(preferredServerId ? { preferredServerId } : {}),
       },
@@ -2522,12 +2527,18 @@ function runnerStrategicSearchTarget(
     : undefined;
 }
 
-function runnerDevelopmentProgramSearchChoiceBinding(
+function runnerDevelopmentSearchChoiceBinding(
   input: AiDecisionInput,
   action: LegalAction,
   choice: PendingChoice,
-): { planInstanceId: string; targetDefinitionId: string } | undefined {
-  if (input.side !== "runner" || !isSearchChoice(choice)) return undefined;
+):
+  | {
+      planInstanceId: string;
+      targetCardInstanceId?: string;
+      targetDefinitionId: string;
+    }
+  | undefined {
+  if (input.side !== "runner") return undefined;
   const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
@@ -2550,13 +2561,33 @@ function runnerDevelopmentProgramSearchChoiceBinding(
             selectedActionId?: unknown;
             selectedAtStateVersion?: unknown;
           };
+          recoverySearchCommitment?: {
+            sourceCardInstanceId?: unknown;
+            sourceDefinitionId?: unknown;
+            searchFilter?: unknown;
+            targetCardInstanceId?: unknown;
+            targetDefinitionId?: unknown;
+            plannedAtStateVersion?: unknown;
+            selectedActionId?: unknown;
+            selectedAtStateVersion?: unknown;
+          };
         };
       }
     | undefined;
   const signal = moduleState?.signal;
-  const commitment = signal?.programSearchCommitment;
+  const programCommitment = signal?.programSearchCommitment;
+  const recoveryCommitment = signal?.recoverySearchCommitment;
+  if (!programCommitment && !recoveryCommitment) return undefined;
+  const commitment = recoveryCommitment ?? programCommitment;
   const matchingTargetOptions =
-    typeof commitment?.targetDefinitionId === "string"
+    typeof recoveryCommitment?.targetCardInstanceId === "string"
+      ? choice.options.filter(
+          (option) =>
+            option.selectable !== false &&
+            option.card?.instanceId === recoveryCommitment.targetCardInstanceId &&
+            option.card.definitionId === recoveryCommitment.targetDefinitionId,
+        )
+      : typeof commitment?.targetDefinitionId === "string"
       ? choice.options.filter(
           (option) =>
             option.selectable !== false &&
@@ -2586,16 +2617,26 @@ function runnerDevelopmentProgramSearchChoiceBinding(
     action.side === "runner" &&
     action.type === "resolve_choice" &&
     action.expiresAtStateVersion === input.playerView.stateVersion &&
+    (programCommitment === undefined ||
+      choice.cardSearchPresentation?.selectableFilter === "program") &&
+    (recoveryCommitment === undefined ||
+      (choice.cardSearchPresentation?.sourceZone === "heap" &&
+        choice.cardSearchPresentation.destination === "grip" &&
+        choice.cardSearchPresentation.selectableFilter ===
+          recoveryCommitment.searchFilter)) &&
     matchingTargetOptions.length > 0;
   if (!exactBinding || !commitment || !portfolio) {
     throw unresolvedChoiceFailure(
       input,
       action,
-      "The resident Runner development plan must preserve the exact strategic program-search source, selected action, state version and useful target definition.",
+      "The resident Runner development plan must preserve the exact search purpose, source, selected action, state version and useful target.",
     );
   }
   return {
     planInstanceId: executor.instanceId,
+    ...(typeof recoveryCommitment?.targetCardInstanceId === "string"
+      ? { targetCardInstanceId: recoveryCommitment.targetCardInstanceId }
+      : {}),
     targetDefinitionId: commitment.targetDefinitionId as string,
   };
 }

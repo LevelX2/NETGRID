@@ -672,6 +672,7 @@ export function choosePlanFirstLiveAction(
   }
   bindSelectedCoverageSearchAction(input, result);
   bindSelectedRunnerProgramSearchAction(input, result, candidates);
+  bindSelectedRunnerRecoverySearchAction(input, result, candidates);
   bindSelectedRunnerEventInstallChoiceContinuation(input, result);
   bindSelectedRunnerTargetedBypassChoiceContinuation(input, result, candidates);
   bindSelectedCorpScoreChoiceContinuation(input, result);
@@ -1699,6 +1700,69 @@ function bindSelectedRunnerProgramSearchAction(
   commitment.selectedAtStateVersion = input.playerView.stateVersion;
 }
 
+function bindSelectedRunnerRecoverySearchAction(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  candidates: readonly ActionSemanticCandidate[],
+): void {
+  if (result.lane !== "plan") return;
+  const executor = result.portfolio.instances.find(
+    (instance) =>
+      instance.instanceId === result.portfolio.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand",
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+    | undefined;
+  const signal = moduleState?.signal;
+  const commitment = signal?.recoverySearchCommitment;
+  if (!executor || moduleState?.kind !== "development" || !commitment) return;
+  const candidate = candidates.find(
+    (entry) => entry.actionId === result.route.head.actionId,
+  );
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === result.route.head.actionId,
+  );
+  const exactBinding =
+    signal.phase === "execute" &&
+    signal.targetKind === "capability" &&
+    signal.actionIds.includes(result.route.head.actionId) &&
+    candidate !== undefined &&
+    action?.payload?.cardImplementationEffectKind ===
+      "search_trash_to_grip" &&
+    action.payload.cardImplementationSearchFilter === commitment.searchFilter &&
+    runnerProgramSearchSourceCardInstanceId(input, candidate) ===
+      commitment.sourceCardInstanceId &&
+    runnerCandidateSourceDefinitionId(input, candidate) ===
+      commitment.sourceDefinitionId &&
+    input.playerView.own.heapOrArchives.some(
+      (card) =>
+        card.known === true &&
+        card.instanceId === commitment.targetCardInstanceId &&
+        card.definitionId === commitment.targetDefinitionId &&
+        (commitment.searchFilter === "any_card" || card.type === "program"),
+    ) &&
+    commitment.plannedAtStateVersion === input.playerView.stateVersion &&
+    commitment.selectedActionId === undefined &&
+    commitment.selectedAtStateVersion === undefined;
+  if (!exactBinding) {
+    throw new PlanResolutionFailure("invalid_support_graph", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((legalAction) => legalAction.type),
+      unresolvedActionIds: [result.route.head.actionId],
+      owner: "support_graph",
+      planInstanceId: executor.instanceId,
+      stepId: result.route.head.stepId,
+      removalCondition:
+        "Select a Runner heap-recovery search only from its exact development-plan source, current LegalAction and prebound visible recovery target.",
+    });
+  }
+  commitment.selectedActionId = result.route.head.actionId;
+  commitment.selectedAtStateVersion = input.playerView.stateVersion;
+}
+
 function rememberCurrentStrategicIntent(
   input: AiDecisionInput,
   options: AiDecisionRuntimeOptions,
@@ -1777,6 +1841,7 @@ function runnerContext(
     runRiskReassessment,
     previous,
     discardChoiceBinding,
+    dependencies.discardKeepScore,
   );
   const actionDispositions = runnerActionDispositions(
     input,
@@ -3509,6 +3574,7 @@ function buildRunnerDomain(
   runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
   previous: ResidentPlanPortfolio | undefined,
   discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
+  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
 ): RunnerPlanDomain {
   const currentCredits = input.playerView.own.credits;
   const remainingClicks = input.playerView.own.clicks;
@@ -5129,6 +5195,20 @@ function buildRunnerDomain(
       const eventInstallChoiceCommitment = candidate
         ? runnerEventInstallChoiceCommitment(input, candidate, handDevelopment)
         : undefined;
+      const recoverySearchAction =
+        candidate !== undefined &&
+        runnerCandidateExecutesHeapRecovery(input, candidate);
+      const recoverySearchCommitment =
+        recoverySearchAction && discardKeepScore
+          ? runnerRecoverySearchCommitment(
+              input,
+              candidate,
+              discardKeepScore,
+            )
+          : undefined;
+      if (recoverySearchAction && !recoverySearchCommitment) {
+        return [];
+      }
       if (
         executableNow &&
         candidate &&
@@ -5255,7 +5335,7 @@ function buildRunnerDomain(
         {
           developmentId: `card:${evaluation.cardInstanceId}`,
           definitionId: evaluation.definitionId,
-          ...(restrictedProgramInstallCommitment
+          ...(restrictedProgramInstallCommitment || recoverySearchCommitment
             ? { targetKind: "capability" as const }
             : {}),
           phase: restrictedProgramInstallCommitment
@@ -5267,7 +5347,9 @@ function buildRunnerDomain(
             ? {
                 purposeCode: "open_committed_program_install_sequence",
               }
-            : evaluation.currentNeed !== "none" &&
+            : recoverySearchCommitment
+              ? { purposeCode: recoverySearchCommitment.targetPurpose }
+              : evaluation.currentNeed !== "none" &&
                 evaluation.currentNeed !== undefined
               ? {
                   purposeCode: `${evaluation.developmentRole}:${evaluation.currentNeed}`,
@@ -5293,7 +5375,14 @@ function buildRunnerDomain(
               }
             : eventInstallChoiceCommitment
               ? { eventInstallChoiceCommitment }
-              : fundingRoute
+              : recoverySearchCommitment
+                ? {
+                    evidenceCodes: [
+                      `runner_recovery_search_target:${recoverySearchCommitment.targetCardInstanceId}`,
+                    ],
+                    recoverySearchCommitment,
+                  }
+                : fundingRoute
                 ? { evidenceCodes: fundingRoute.evidenceCodes }
                 : {}),
         },
@@ -5814,6 +5903,127 @@ export function runnerCentralPressureHasExecutableEventRun(
           evaluation.knownAccessState !== "known_no_current_payoff",
       ),
   );
+}
+
+function runnerCandidateExecutesHeapRecovery(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  return (
+    (candidate.actionType === "play_event" ||
+      candidate.actionType === "activated_card_ability" ||
+      candidate.actionType === "trigger_ability") &&
+    action?.payload?.cardImplementationEffectKind ===
+      "search_trash_to_grip" &&
+    (action.payload.cardImplementationSearchFilter === "program" ||
+      action.payload.cardImplementationSearchFilter === "any_card")
+  );
+}
+
+function runnerRecoverySearchCommitment(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  discardKeepScore: NonNullable<PlanFirstLiveDependencies["discardKeepScore"]>,
+): NonNullable<RunnerDevelopmentSignal["recoverySearchCommitment"]> | undefined {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const searchFilter = action?.payload?.cardImplementationSearchFilter;
+  const sourceCardInstanceId = runnerProgramSearchSourceCardInstanceId(
+    input,
+    candidate,
+  );
+  const sourceDefinitionId = runnerCandidateSourceDefinitionId(input, candidate);
+  if (
+    action?.payload?.cardImplementationEffectKind !== "search_trash_to_grip" ||
+    (searchFilter !== "program" && searchFilter !== "any_card") ||
+    !sourceCardInstanceId ||
+    !sourceDefinitionId
+  ) {
+    return undefined;
+  }
+  const target = input.playerView.own.heapOrArchives
+    .filter(
+      (card) =>
+        card.known === true &&
+        typeof card.definitionId === "string" &&
+        (searchFilter === "any_card" || card.type === "program"),
+    )
+    .map((card) => ({
+      card,
+      score: discardKeepScore(runnerRecoveryScoringInput(input, card), card),
+    }))
+    .filter(
+      (entry) => Number.isFinite(entry.score.total) && entry.score.total > 0,
+    )
+    .sort(compareRunnerRecoverySearchTargets)[0]?.card;
+  if (!target?.definitionId) return undefined;
+  return {
+    sourceCardInstanceId,
+    sourceDefinitionId,
+    searchFilter,
+    targetCardInstanceId: target.instanceId,
+    targetDefinitionId: target.definitionId,
+    targetPurpose: "generic_heap_recovery",
+    plannedAtStateVersion: input.playerView.stateVersion,
+  };
+}
+
+function runnerRecoveryScoringInput(
+  input: AiDecisionInput,
+  target: VisibleCard,
+): AiDecisionInput {
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        gripOrHq: [...input.playerView.own.gripOrHq, target],
+        heapOrArchives: input.playerView.own.heapOrArchives.filter(
+          (card) => card.instanceId !== target.instanceId,
+        ),
+      },
+    },
+  };
+}
+
+function compareRunnerRecoverySearchTargets(
+  left: { card: VisibleCard; score: DiscardChoiceKeepScore },
+  right: { card: VisibleCard; score: DiscardChoiceKeepScore },
+): number {
+  return (
+    runnerRecoveryPlanDispositionRank(right.score.planDisposition) -
+      runnerRecoveryPlanDispositionRank(left.score.planDisposition) ||
+    right.score.total - left.score.total ||
+    (left.card.title ?? "").localeCompare(right.card.title ?? "", "de") ||
+    left.card.instanceId.localeCompare(right.card.instanceId)
+  );
+}
+
+function runnerRecoveryPlanDispositionRank(
+  disposition: DiscardChoiceKeepScore["planDisposition"],
+): number {
+  switch (disposition) {
+    case "current_plan_route":
+      return 5;
+    case "support_for_need":
+    case "campaign_hold":
+      return 4;
+    case "blocked_but_developable":
+      return 3;
+    case "redundant":
+      return 2;
+    case "currently_dead":
+    case "discard_candidate":
+      return 1;
+    case "assessment_unknown":
+    case undefined:
+      return 0;
+  }
 }
 
 function runnerTargetedBypassRemotePreparationSignals(

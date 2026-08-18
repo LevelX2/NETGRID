@@ -255,6 +255,17 @@ export type RunnerDevelopmentSignal = {
     selectedActionId?: string;
     selectedAtStateVersion?: number;
   };
+  recoverySearchCommitment?: {
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    searchFilter: "program" | "any_card";
+    targetCardInstanceId: string;
+    targetDefinitionId: string;
+    targetPurpose: "generic_heap_recovery";
+    plannedAtStateVersion: number;
+    selectedActionId?: string;
+    selectedAtStateVersion?: number;
+  };
 };
 
 export type RunnerRunWindowSignal = {
