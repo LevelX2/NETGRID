@@ -2218,17 +2218,13 @@ function coverageDrawCandidates(
   const directSearchIds = new Set(gap.directSearchActionIds);
   const searchSetupIds = new Set(gap.searchEngineSetupActionIds);
   const drawForAnswerIds = new Set(gap.drawForAnswerActionIds);
-  const drawAllowed = domain(context).defense.drawAllowed;
   return context.actionCandidates
     .filter((candidate) => {
       const isCoverageRoute =
         directSearchIds.has(candidate.actionId) ||
         searchSetupIds.has(candidate.actionId) ||
-        drawForAnswerIds.has(candidate.actionId) ||
-        (drawAllowed && candidate.semanticActionType === "draw.card");
-      const isDrawRoute =
-        drawForAnswerIds.has(candidate.actionId) ||
-        (drawAllowed && candidate.semanticActionType === "draw.card");
+        drawForAnswerIds.has(candidate.actionId);
+      const isDrawRoute = drawForAnswerIds.has(candidate.actionId);
       const displacedByGeneralHandDevelopment =
         context.actionDispositions?.some(
           (disposition) =>

@@ -57,6 +57,10 @@ import {
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
 import { runnerDiscardChoicePlanBinding } from "./runner-discard-choice-plan";
+import {
+  assessRunnerHandRotation,
+  type RunnerHandRotationAssessment,
+} from "./runner-hand-rotation-assessment";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import {
   CORP_PLAN_PRIORITY_POLICY,
@@ -3736,6 +3740,10 @@ function buildRunnerDomain(
       rolesForDeckDoctrineCard(card.definitionId ?? ""),
     ),
   );
+  const handRotationAssessment = assessRunnerHandRotation(
+    input,
+    handDevelopment,
+  );
   const coverageGaps = uniqueCoverageGaps(
     input,
     candidates,
@@ -3744,6 +3752,7 @@ function buildRunnerDomain(
     _deckCapabilities,
     strategicIntent,
     economy,
+    handRotationAssessment,
   );
   const accessPayoffCampaignSignals = runnerCentralPressureDevelopmentSignals(
     input,
@@ -5452,12 +5461,7 @@ function buildRunnerDomain(
       candidates,
       strategicIntent,
       coverageGaps,
-      handDevelopment,
-      fundingNeeds.some((need) =>
-        need.kind === "develop_liquidity"
-          ? need.gap > 0 && need.actionIds.length > 0
-          : need.gap > 0 && need.routeActionIds.length > 0,
-      ),
+      handRotationAssessment,
     ),
   ];
   const hasRunWindowCandidate = candidates.some((candidate) =>
@@ -6297,53 +6301,24 @@ function runnerGenericDrawDevelopmentSignals(
   candidates: readonly ActionSemanticCandidate[],
   strategicIntent: RunnerStrategicIntentProfile,
   coverageGaps: RunnerCorePlanDomain["coverageGaps"],
-  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
-  finiteFundingRouteOpen: boolean,
+  handRotation: RunnerHandRotationAssessment,
 ): RunnerPlanDomain["developments"] {
-  const handCapacityGap =
-    input.playerView.own.maxHandSize - input.playerView.own.gripOrHq.length;
-  const knownHandDefinitionCounts = new Map<string, number>();
-  for (const card of input.playerView.own.gripOrHq) {
-    if (!card.known || !card.definitionId) continue;
-    knownHandDefinitionCounts.set(
-      card.definitionId,
-      (knownHandDefinitionCounts.get(card.definitionId) ?? 0) + 1,
-    );
-  }
-  const redundantKnownHandCopy = [...knownHandDefinitionCounts.values()].some(
-    (count) => count > 1,
-  );
+  if (!handRotation.genericDrawAdmissible) return [];
   const fullHandHasKnownRotationTarget =
-    handCapacityGap <= 0 &&
-    (redundantKnownHandCopy ||
-      handDevelopment.some(
-        (evaluation) =>
-          evaluation.deferReason === "duplicate" ||
-          evaluation.deferReason === "no_current_need" ||
-          evaluation.deferReason === "stronger_override",
-      ));
-  const fullHandOptionReassessmentAvailable =
-    handCapacityGap <= 0 && !finiteFundingRouteOpen;
-  const fullHandRotationAvailable =
-    fullHandHasKnownRotationTarget || fullHandOptionReassessmentAvailable;
-  if (
-    (handCapacityGap <= 0 && !fullHandRotationAvailable) ||
-    input.playerView.own.stackOrRdCount <= 0
-  ) {
-    return [];
-  }
+    handRotation.handCapacityGap <= 0 &&
+    handRotation.knownRotationTargetCardInstanceIds.length > 0;
   const drawCandidates = candidates.filter(
     (candidate) =>
       (candidate.actionType === "draw_card" &&
         candidate.semanticActionType === "draw.card" &&
         candidate.sourceKind === "basic_action") ||
-      (handCapacityGap > 0 &&
+      (handRotation.handCapacityGap > 0 &&
         candidate.sourceKind === "card" &&
         candidate.tagEffectProfile?.acuteTagRemoval !== true &&
         candidate.economyProjection?.timing === "immediate" &&
         (candidate.economyProjection.netHandDelta ?? 0) > 0 &&
         (candidate.economyProjection.netHandDelta ?? 0) <=
-          Math.max(0, handCapacityGap)),
+          Math.max(0, handRotation.handCapacityGap)),
   );
   if (drawCandidates.length === 0) return [];
   const throughputTendency = strategicIntent.developmentTendencies?.find(
@@ -6369,9 +6344,7 @@ function runnerGenericDrawDevelopmentSignals(
       phase: "execute",
       purposeCode: fullHandHasKnownRotationTarget
         ? "rotate_functionally_dead_hand_card"
-        : fullHandOptionReassessmentAvailable
-          ? "reassess_full_hand_without_funding_route"
-          : "increase_hand_option_density",
+        : "increase_hand_option_density",
       assignedDomainPlanIds: [],
       duplicateAlreadyInstalled: false,
       affordableOrSupportable: true,
@@ -6385,26 +6358,23 @@ function runnerGenericDrawDevelopmentSignals(
       value:
         (fullHandHasKnownRotationTarget
           ? 18
-          : fullHandOptionReassessmentAvailable
-            ? 8
-            : 10 + Math.min(5, handCapacityGap)) +
+          : 10 + Math.min(5, handRotation.handCapacityGap)) +
         (doctrineThroughputActive ? doctrineValue : 0),
       evidenceCode: fullHandHasKnownRotationTarget
         ? "runner_full_hand_has_functionally_dead_rotation_target"
-        : fullHandOptionReassessmentAvailable
-          ? "runner_full_hand_reassessment_without_ready_funding_route"
-          : "runner_hand_capacity_accepts_immediate_option_development",
+        : "runner_hand_capacity_accepts_immediate_option_development",
       ...(doctrineThroughputActive
         ? {
             evidenceCodes: [
               "runner_engine_doctrine:throughput_until_dependency_ready",
               "runner_engine_owner:runner.develop_board_and_hand",
+              ...handRotation.evidenceCodes,
               ...coverageGaps.map(
                 (gap) => `runner_engine_open_coverage_gap:${gap.gapId}`,
               ),
             ],
           }
-        : {}),
+        : { evidenceCodes: [...handRotation.evidenceCodes] }),
     },
   ];
 }
@@ -19291,6 +19261,7 @@ function uniqueCoverageGaps(
   deckCapabilities: DeckCapabilityProfile,
   strategicIntent: RunnerStrategicIntentProfile,
   economy: RunnerEconomyPosture,
+  handRotation: RunnerHandRotationAssessment,
 ): RunnerCorePlanDomain["coverageGaps"] {
   const result = new Map<
     string,
@@ -19313,8 +19284,9 @@ function uniqueCoverageGaps(
     const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
     return (
       runnerDeckHasCoverageAnswer(deckCapabilities, role) &&
-      coverageSupportActionIds(input, candidates, deckCapabilities, role)
-        .searchEngineSetupActionIds.length > 0
+      coverageSupportActionIds(input, candidates, deckCapabilities, role, {
+        handRotation,
+      }).searchEngineSetupActionIds.length > 0
     );
   });
   const terminalContestThreat = runnerTerminalContestThreat(input);
@@ -19368,8 +19340,21 @@ function uniqueCoverageGaps(
       candidates,
       deckCapabilities,
       requiredRole,
-      coverageDevelopment?.deckHasAlternative,
-      coverageDevelopment?.targetDefinitionId,
+      {
+        ...(coverageDevelopment?.deckHasAlternative !== undefined
+          ? {
+              deckHasStackAnswerOverride:
+                coverageDevelopment.deckHasAlternative,
+            }
+          : {}),
+        ...(coverageDevelopment?.targetDefinitionId
+          ? {
+              targetDefinitionIdOverride:
+                coverageDevelopment.targetDefinitionId,
+            }
+          : {}),
+        handRotation,
+      },
     );
     const supportActions = coverageUpgrade
       ? runnerBreakerUpgradeSupportActions(
@@ -19553,6 +19538,7 @@ function uniqueCoverageGaps(
         candidates,
         deckCapabilities,
         role,
+        { handRotation },
       );
       const deckHasAnswer =
         state.inDeckKnown ||
@@ -19825,8 +19811,10 @@ function runnerBreakerUpgradeSearchRoute(
       candidates,
       deckCapabilities,
       requiredRole,
-      true,
-      targetDefinitionId,
+      {
+        deckHasStackAnswerOverride: true,
+        targetDefinitionIdOverride: targetDefinitionId,
+      },
     ).directSearchActionIds,
   );
   return candidates
@@ -20459,8 +20447,11 @@ function coverageSupportActionIds(
   candidates: readonly ActionSemanticCandidate[],
   deckCapabilities: DeckCapabilityProfile,
   requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
-  deckHasStackAnswerOverride?: boolean,
-  targetDefinitionIdOverride?: string,
+  options: Readonly<{
+    deckHasStackAnswerOverride?: boolean;
+    targetDefinitionIdOverride?: string;
+    handRotation?: RunnerHandRotationAssessment;
+  }> = {},
 ): Pick<
   RunnerCorePlanDomain["coverageGaps"][number],
   | "directSearchActionIds"
@@ -20470,10 +20461,10 @@ function coverageSupportActionIds(
   | "drawForAnswerActionIds"
 > {
   const deckHasStackAnswer =
-    deckHasStackAnswerOverride ??
+    options.deckHasStackAnswerOverride ??
     runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole);
   const targetDefinitionId =
-    targetDefinitionIdOverride ??
+    options.targetDefinitionIdOverride ??
     runnerPreferredCoverageSearchDefinitionId(deckCapabilities, requiredRole);
   const recoveryBindings = candidates.flatMap((candidate) => {
     const target = runnerCoverageRecoveryTarget(input, candidate, requiredRole);
@@ -20573,7 +20564,8 @@ function coverageSupportActionIds(
       })
     : [];
   const sideSafeRoleBasicDraws =
-    deckHasStackAnswerOverride === true &&
+    deckHasStackAnswer &&
+    options.handRotation?.exactKnownNeedDrawAdmissible === true &&
     directSearchCandidates.length === 0 &&
     searchEngineSetupCandidates.length === 0
       ? candidates.filter((candidate) => {

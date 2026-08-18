@@ -1529,7 +1529,7 @@ describe("Runner core plan modules", () => {
     ).toEqual([selectedCredit.actionId]);
   });
 
-  it("blocks coverage rather than drawing when draw is not a valid route", () => {
+  it("blocks coverage when a generic draw is not an exact bound route", () => {
     const coverage = coreModule("runner.rig_and_coverage");
     const [proposal] = coverage.discover(
       context([candidate("draw", "draw_card", "draw.card")], {
@@ -1547,7 +1547,7 @@ describe("Runner core plan modules", () => {
             drawForAnswerActionIds: [],
           },
         ],
-        defense: { drawAllowed: false },
+        defense: { drawAllowed: true },
       }),
     );
 

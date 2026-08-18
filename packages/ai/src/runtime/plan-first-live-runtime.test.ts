@@ -1053,6 +1053,18 @@ describe("authoritative plan-first live runtime", () => {
       visibleCard("blackmail-card", "runner", "event", {
         definitionId: "onr_proteus_102_blackmail",
       }),
+      visibleCard("protected-buffer-1", "runner", "event", {
+        definitionId: "onr_v1_029_special-order",
+      }),
+      visibleCard("protected-buffer-2", "runner", "event", {
+        definitionId: "onr_v1_111_social-engineering",
+      }),
+      visibleCard("protected-buffer-3", "runner", "event", {
+        definitionId: "onr_v1_095_jack-n-joe",
+      }),
+      visibleCard("protected-buffer-4", "runner", "event", {
+        definitionId: "onr_v1_110_sneak-preview",
+      }),
     ];
     input.playerView.servers = [
       server("hq", [
@@ -1142,15 +1154,29 @@ describe("authoritative plan-first live runtime", () => {
           JSON.stringify(instance.moduleState).includes("blackmail-card"),
       ),
     ).toBe(false);
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.some(
+        (instance) =>
+          instance.moduleId === "runner.develop_board_and_hand" &&
+          instance.dedupeKey === "generic:draw-options",
+      ),
+    ).toBe(false);
     expect(residentPlanPortfolioSnapshot(input)?.instances).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           instanceId: "plan:runner.pressure_central:central%3Ahq",
-          openNeedIds: ["coverage:breaker_wall"],
+          openNeedIds: ["coverage:breaker_wall:run:run-hq"],
         }),
         expect.objectContaining({
+          moduleId: "runner.rig_and_coverage",
           parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          parentNeedId: "coverage:breaker_wall",
+          parentNeedId: "coverage:breaker_wall:run:run-hq",
+          moduleState: expect.objectContaining({
+            phase: "draw_for_answer",
+            gap: expect.objectContaining({
+              drawForAnswerActionIds: [draw.actionId],
+            }),
+          }),
         }),
       ]),
     );

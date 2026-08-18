@@ -2460,6 +2460,14 @@ validate_run_path
 Das Modul darf nicht bei jeder spielbaren Programminstallation wachsen. Es
 arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
 
+Ein Basic Draw für eine im eigenen Deck side-sicher bekannte Antwort wird als
+exakte Route dieses Coverage-Plans gebunden. Eine volle Hand ist dabei keine
+harte Sperre: Der Plan darf den sichtbaren Cleanup-Trade-off bewerten, wenn die
+fehlende Rolle konkret benannt ist und die Antwort nachweislich noch im Stack
+liegt. Er darf dafür jedoch keinen lediglich allgemein legalen Draw anhand des
+semantischen Typs übernehmen; die konkrete `actionId` muss vom Coverage-Support
+gebunden sein.
+
 ### 27.5 `runner.develop_board_and_hand`
 
 **Klasse:** `bounded_sequence` oder `development_project`
@@ -2473,6 +2481,17 @@ Verantwortung:
 - ein Deck- oder Board-Engine-Stück entwickeln;
 - sinnvollen Draw, Search, Install oder Eventeinsatz koordinieren;
 - generische Karten ohne eigenen Spezialplan verwertbar machen.
+
+Die allgemeine Handentwicklung und konkrete Supportpläne verwenden dieselbe
+side-sichere Handrotationsbewertung. Ein generischer Draw bei voller Hand setzt
+eine bekannte Karte mit niedrigem aktuellen Haltewert voraus, etwa eine als
+redundant, derzeit unnötig oder schwach und auf absehbare Zeit unbezahlbar
+klassifizierte Karte. Strategisch starke oder akut benötigte Karten werden
+nicht allein wegen ihrer Kosten zu Rotationszielen. Ein konkreter
+Coverage-Kindplan kann unabhängig davon einen bewusst bewerteten
+Cleanup-Tausch eingehen; Owner, Parent-Need und Draw-Action bleiben dabei exakt
+gebunden. Der tatsächliche Draw ist eine private Beobachtungsgrenze und führt
+danach zur Neuplanung statt zu einer vorweggenommenen Folgekarte.
 
 Alle eigenen Handkarten werden bei der Planerkennung klassifiziert:
 
