@@ -117,6 +117,7 @@ export type RunnerCoverageGapSignal = {
     | "breaker_trace"
     | "breaker_universal";
   targetServerId?: string;
+  targetRunActionId?: string;
   requesterModuleId?: "runner.pressure_central" | "runner.contest_remote";
   requesterPlanInstanceId?: string;
   requesterNeedId?: string;

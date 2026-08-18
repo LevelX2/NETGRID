@@ -4321,7 +4321,8 @@ function buildRunnerDomain(
           const coverageSupport = coverageGaps.find(
             (gap) =>
               gap.requesterModuleId === "runner.pressure_central" &&
-              gap.targetServerId === evaluation.targetServerId,
+              gap.targetServerId === evaluation.targetServerId &&
+              gap.targetRunActionId === evaluation.actionId,
           );
           const hqSuccessWindowRoute = sameServerEvaluations.flatMap(
             (candidateEvaluation) => {
@@ -4381,6 +4382,7 @@ function buildRunnerDomain(
             materialMarginalValue &&
             !costlyInformationRunBelowHandBuffer &&
             fundingSupport === undefined &&
+            coverageSupport === undefined &&
             evaluation.pathPassability === "reachable" &&
             evaluation.routeQuote?.reachability !== "no_access" &&
             evaluation.prerunReserveQuote?.status !== "blocked" &&
@@ -4436,16 +4438,18 @@ function buildRunnerDomain(
                       ? pressureCadence.evidenceCode
                       : hqSuccessWindowRoute
                         ? `runner_hq_success_window_setup:${hqSuccessWindowRoute.setup.sourceDefinitionId}`
-                        : fundingSupport
-                          ? fundingSupport.evidenceCode
-                          : costlyInformationRunBelowHandBuffer
-                            ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
-                            : !materialMarginalValue
-                              ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
-                              : !currentPressureRoute
-                                ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
-                                : (evaluation.evidence[0] ??
-                                  "runner_run_target"),
+                        : coverageSupport
+                          ? coverageSupport.evidenceCode
+                          : fundingSupport
+                            ? fundingSupport.evidenceCode
+                            : costlyInformationRunBelowHandBuffer
+                              ? `runner_central_pressure_requires_hand_buffer:${evaluation.targetServerId}`
+                              : !materialMarginalValue
+                                ? `runner_central_pressure_below_material_value:${evaluation.targetServerId}`
+                                : !currentPressureRoute
+                                  ? `runner_central_pressure_no_admissible_route:${evaluation.targetServerId}`
+                                  : (evaluation.evidence[0] ??
+                                    "runner_run_target"),
             ...(coverageSupport
               ? { supportNeedId: coverageSupport.gapId }
               : fundingSupport
@@ -19301,7 +19305,7 @@ function uniqueCoverageGaps(
           })
           .map((candidate) => candidate.actionId)
       : undefined;
-    const gapId = coverageUpgrade
+    const baseGapId = coverageUpgrade
       ? `coverage:${requiredRole}:upgrade:${evaluation.targetServerId}`
       : costRecovery
         ? `coverage:${requiredRole}:efficiency:${evaluation.targetServerId}`
@@ -19321,15 +19325,23 @@ function uniqueCoverageGaps(
         evaluation.score > 0 &&
         evaluation.knownAccessState !== "known_no_current_payoff" &&
         evaluation.accessPayoff !== "known_low_value");
-    result.set(coverageUpgrade ? gapId : requiredRole, {
+    const needKind = coverageUpgrade
+      ? ("coverage_upgrade" as const)
+      : costRecovery
+        ? ("cost_ineffective_coverage" as const)
+        : ("missing_coverage" as const);
+    const gapId = bindToRequester
+      ? `${baseGapId}:run:${encodeURIComponent(evaluation.actionId)}`
+      : baseGapId;
+    const gapKey = bindToRequester
+      ? `${requesterModuleId}:${requesterDedupeKey}:${evaluation.actionId}:${requiredRole}:${needKind}`
+      : requiredRole;
+    result.set(gapKey, {
       gapId,
-      needKind: coverageUpgrade
-        ? "coverage_upgrade"
-        : costRecovery
-          ? "cost_ineffective_coverage"
-          : "missing_coverage",
+      needKind,
       requiredRole,
       targetServerId: evaluation.targetServerId,
+      targetRunActionId: evaluation.actionId,
       ...(bindToRequester
         ? {
             requesterModuleId,
@@ -19416,14 +19428,16 @@ function uniqueCoverageGaps(
       ) {
         continue;
       }
-      const existing = result.get(role);
-      if (existing) {
-        if (
-          existing.priorityClass !== "P2" &&
-          state.inHand &&
-          existing.priorityClass === "P5"
-        ) {
-          result.set(role, { ...existing, priorityClass: "P4" });
+      const existing = [...result.entries()].filter(
+        ([, gap]) => gap.requiredRole === role,
+      );
+      if (existing.length > 0) {
+        if (state.inHand) {
+          for (const [key, gap] of existing) {
+            if (gap.priorityClass === "P5") {
+              result.set(key, { ...gap, priorityClass: "P4" });
+            }
+          }
         }
         continue;
       }
