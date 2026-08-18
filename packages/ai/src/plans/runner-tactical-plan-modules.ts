@@ -20,6 +20,7 @@ import type {
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-bypass-plan";
 import type { RunnerPrerunReserveQuote } from "../run-analysis/runner-run-target-types";
+import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 
 export type RunnerRunRiskContractSignal = {
   schemaVersion: "runner-run-risk-contract-v1";
@@ -303,6 +304,7 @@ export type RunnerTacticalPlanDomain = {
   remoteContests: RunnerRemoteContestSignal[];
   developments: RunnerDevelopmentSignal[];
   runWindows: RunnerRunWindowSignal[];
+  runTargetEvaluations?: RunnerRunTargetEvaluation[];
 };
 
 export type RunnerPlanDomain = RunnerCorePlanDomain & RunnerTacticalPlanDomain;

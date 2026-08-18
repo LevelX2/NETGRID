@@ -206,6 +206,23 @@ describe("AI decision debug sanitizing", () => {
         selectionAuthority: "resident_plan_instance",
         rootPlanInstanceId: "plan:corp.score_agenda:general",
         leafExecutorInstanceId: "plan:corp.economy:score-material",
+        executionOrigin: {
+          rootPlanInstanceId: "plan:corp.score_agenda:general",
+          leafPlanInstanceId: "plan:corp.economy:score-material",
+          commitmentId: "commitment:corp:turn:4",
+          side: "corp",
+          windowKind: "main_action",
+          windowId: "corp_action:12",
+          stateVersion: 12,
+          timingPoint: "corp_action",
+        },
+        selectedStep: {
+          planInstanceId: "plan:corp.economy:score-material",
+          stepId: "draw_score_material",
+          parentInstanceId: "plan:corp.score_agenda:general",
+          needId: "score-material:general",
+          supportAssignmentId: "assignment:score-material",
+        },
         selectedPlan: {
           instanceId: "plan:corp.economy:score-material",
           dedupeKey: "score-material:general",
@@ -490,6 +507,17 @@ describe("AI decision debug sanitizing", () => {
       lane: "plan",
       rootPlanInstanceId: "plan:corp.score_agenda:general",
       leafExecutorInstanceId: "plan:corp.economy:score-material",
+      executionOrigin: {
+        commitmentId: "commitment:corp:turn:4",
+        side: "corp",
+        windowKind: "main_action",
+        stateVersion: 12,
+      },
+      selectedStep: {
+        parentInstanceId: "plan:corp.score_agenda:general",
+        needId: "score-material:general",
+        supportAssignmentId: "assignment:score-material",
+      },
       priority: {
         effectiveClass: "P5",
         parentNeedId: "score-material:general",

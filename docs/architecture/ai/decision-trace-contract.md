@@ -1,6 +1,6 @@
 # KI-Entscheidungslog-Vertrag
 
-Status: Architekturvertrag, 2026-05-22.
+Status: Architekturvertrag, 2026-08-18.
 
 Dieser Vertrag beschreibt, wie NETGRID KI-Entscheidungen lokal nachvollziehbar macht, ohne die bestehenden Engine-, Replay-, Hidden-Info- und Observability-Grenzen aufzuweichen. Er gibt keine Karten frei und ändert keine Regelentscheidung.
 
@@ -154,6 +154,45 @@ Die Detailansicht unterscheidet mindestens:
 - `uncertainty`: bekannte Unsicherheit;
 - `evaluationReason`: Bewertungsgrund;
 - `safetyRedaction`: redigierte oder bewusst ausgelassene Information.
+
+### Decision-Episode-Vertrag
+
+Eine detailliert gespeicherte Plan-first-Entscheidung führt den exakten
+`executionOrigin` des ausführenden Producers. Er bindet Root- und
+Leaf-Planinstanz, optionales Turn-Commitment, Side, Fensterart, Fenster-ID,
+StateVersion und Timingpunkt. Der Server darf diese Bindung weder aus
+Evidence-Strings noch aus späteren Zuständen rekonstruieren.
+
+`selectedStep` bindet zusätzlich die tatsächlich ausgeführte Route an
+Planinstanz und Step sowie – sofern vorhanden – ParentInstanceId, NeedId und
+SupportAssignmentId. Bei einem ausgewählten Start-Run persistiert
+`selectedRunQuote` dessen eigene Pfad-, Credit-, Reserve-, Release- und
+Risikodaten. Die Quote einer abgelehnten Alternative darf die ausgewählte
+Quote nicht vertreten.
+
+Die übrigen Episodendaten werden nicht in einer zweiten Parallelstruktur
+dupliziert. Ihre autoritativen Fundstellen sind:
+
+- residente Planinstanzen und ihre Parent-/Need-Bindungen im gespeicherten
+  Runtime-Checkpoint;
+- Planning Heads, `ResourceGaps`, ausgewählte und abgelehnte Turnlinien sowie
+  Continuation-Status in `planFirstDecision.turnPlanning`;
+- spätere Run-Fortsetzungen und Risikoneubewertungen in den typisierten
+  Planinstanz-/Runner-Runplan-Daten des Runtime-Checkpoints;
+- der zum Entscheidungszeitpunkt sichtbare Zustand in der separaten
+  `analysisSnapshot`.
+
+Fehlt eine dieser Producer-Strukturen, weist die Analyse das Feld als nicht
+gespeichert aus. Eine nachträgliche Schätzung ist unzulässig.
+
+### Kompakter Checkpoint-Input
+
+`checkpointCapture` speichert keinen vollständigen `AIInput`. Zulässig ist
+nur eine explizite `inputProjection` mit Side-, StateVersion-, Timingpunkt-
+und ActionNumber-Bindung sowie den drei bereits freigegebenen kompakten
+Deck-Consumer-Diagnosen. PlayerView, LegalActions und PublicEvents werden
+nicht darin dupliziert: Der sichtbare Zustand liegt in `analysisSnapshot`,
+die historischen legalen Angebote im LegalAction-Audit.
 
 ## Export
 

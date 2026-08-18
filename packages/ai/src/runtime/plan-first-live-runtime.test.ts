@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
+  sanitizeAiDecisionDebug,
 } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -401,6 +402,19 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+    const planFirst = decision.decisionDebug?.planFirstDecision;
+    expect(planFirst?.executionOrigin).toMatchObject({
+      rootPlanInstanceId: planFirst?.rootPlanInstanceId,
+      leafPlanInstanceId: planFirst?.leafExecutorInstanceId,
+      side: "runner",
+      windowKind: "main_action",
+      windowId: `${input.playerView.timingPoint}:${input.playerView.stateVersion}`,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+    });
+    expect(
+      sanitizeAiDecisionDebug(decision.decisionDebug)?.planFirstDecision,
+    ).toBeDefined();
     expect(decision.evidence).toContain("plan_first_lane:plan");
   });
 

@@ -514,12 +514,12 @@ export type AiDecisionHistoricalAudit = {
     actorState: Omit<PlayerView, "legalActions" | "publicEvents">;
   };
   checkpointCapture?: {
-    schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1";
+    schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2";
     provenance: "persisted_at_decision";
     actor: Side;
     stateVersion: number;
     stateHash: string;
-    input: AiDecisionInputWithDeckCapabilities;
+    inputProjection: AiDecisionCheckpointInputProjection;
     runtime: AiRuntimeCheckpointV1;
     validation: {
       sideSafeInput: true;
@@ -544,6 +544,26 @@ export type AiDecisionHistoricalAudit = {
         status: "unavailable";
         reason: "not_in_run_at_decision";
       };
+};
+
+export type AiDecisionCheckpointInputProjection = {
+  schemaVersion: "netgrid-ai-decision-input-projection-v1";
+  side: Side;
+  stateVersion: number;
+  timingPoint: string;
+  actionNumber: number;
+  profileId?: string;
+  deckConsumers: {
+    deckCapabilities?: NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckCapabilities"]
+    >;
+    deckStrategyProfile?: NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckStrategyProfile"]
+    >;
+    deckDoctrineDiagnostic?: NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownDeckDoctrineV2Diagnostic"]
+    >;
+  };
 };
 
 export type DeckConsumerAuditName =
@@ -4605,7 +4625,7 @@ export class MultiplayerService {
       surroundingEvents: source.surroundingEvents,
       audit: audit ?? unavailableAudit,
       checkpointCapture: audit?.checkpointCapture ?? {
-        schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+        schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
         provenance: "unavailable",
         reason: "historical_checkpoint_capture_not_persisted",
       },
@@ -7300,12 +7320,12 @@ function historicalAuditFor(
       actorState,
     },
     checkpointCapture: {
-      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
       provenance: "persisted_at_decision",
       actor: side,
       stateVersion: snapshot.stateVersion,
       stateHash: snapshot.stateHash,
-      input: structuredClone(decisionInput),
+      inputProjection: decisionCheckpointInputProjection(decisionInput),
       runtime: exportAiRuntimeCheckpoint(
         decisionInput,
         requiredCheckpointDeckSnapshotId(decisionInput),
@@ -7416,12 +7436,12 @@ function historicalFailureAuditFor(
       actorState,
     },
     checkpointCapture: {
-      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
       provenance: "persisted_at_decision",
       actor: side,
       stateVersion: snapshot.stateVersion,
       stateHash: snapshot.stateHash,
-      input: structuredClone(decisionInput),
+      inputProjection: decisionCheckpointInputProjection(decisionInput),
       runtime: exportAiRuntimeCheckpoint(
         decisionInput,
         requiredCheckpointDeckSnapshotId(decisionInput),
@@ -7459,6 +7479,36 @@ function requiredCheckpointDeckSnapshotId(
     throw new Error("ai_trace_checkpoint_deck_snapshot_missing");
   }
   return deckSnapshotId;
+}
+
+function decisionCheckpointInputProjection(
+  input: AiDecisionInputWithDeckCapabilities,
+): AiDecisionCheckpointInputProjection {
+  return {
+    schemaVersion: "netgrid-ai-decision-input-projection-v1",
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    actionNumber: input.actionNumber,
+    ...(input.profileId ? { profileId: input.profileId } : {}),
+    deckConsumers: {
+      ...(input.ownDeckCapabilities
+        ? { deckCapabilities: structuredClone(input.ownDeckCapabilities) }
+        : {}),
+      ...(input.ownDeckStrategyProfile
+        ? {
+            deckStrategyProfile: structuredClone(input.ownDeckStrategyProfile),
+          }
+        : {}),
+      ...(input.ownDeckDoctrineV2Diagnostic
+        ? {
+            deckDoctrineDiagnostic: structuredClone(
+              input.ownDeckDoctrineV2Diagnostic,
+            ),
+          }
+        : {}),
+    },
+  };
 }
 
 function beliefCaptureFor(
@@ -7587,9 +7637,7 @@ export function historicalAuditFromTrace(
     : undefined;
 }
 
-export function turnPlanningAuditFromTrace(
-  traceJson: Record<string, unknown>,
-):
+export function turnPlanningAuditFromTrace(traceJson: Record<string, unknown>):
   | {
       schemaVersion: "netgrid-turn-planning-audit-v1";
       provenance: "persisted_at_decision";
@@ -7654,11 +7702,11 @@ export function deckConsumerAuditFromCheckpointCapture(
     "deckDoctrineDiagnostic",
   ];
   const checkpoint = historicalObject(checkpointCapture);
-  const input = historicalObject(checkpoint?.input);
+  const input = historicalObject(checkpoint?.inputProjection);
   const actor = checkpoint?.actor;
   const stateVersion = checkpoint?.stateVersion;
   if (
-    checkpoint?.schemaVersion !== "netgrid-ai-decision-checkpoint-capture-v1" ||
+    checkpoint?.schemaVersion !== "netgrid-ai-decision-checkpoint-capture-v2" ||
     checkpoint.provenance !== "persisted_at_decision" ||
     (actor !== "runner" && actor !== "corp") ||
     typeof stateVersion !== "number" ||
@@ -7672,10 +7720,13 @@ export function deckConsumerAuditFromCheckpointCapture(
     );
   }
 
+  const deckConsumers = historicalObject(input.deckConsumers);
   const consumers = {
-    deckCapabilities: historicalObject(input.ownDeckCapabilities),
-    deckStrategyProfile: historicalObject(input.ownDeckStrategyProfile),
-    deckDoctrineDiagnostic: historicalObject(input.ownDeckDoctrineV2Diagnostic),
+    deckCapabilities: historicalObject(deckConsumers?.deckCapabilities),
+    deckStrategyProfile: historicalObject(deckConsumers?.deckStrategyProfile),
+    deckDoctrineDiagnostic: historicalObject(
+      deckConsumers?.deckDoctrineDiagnostic,
+    ),
   };
   const missingConsumers = consumerNames.filter(
     (name) => consumers[name] === undefined,
@@ -7688,11 +7739,10 @@ export function deckConsumerAuditFromCheckpointCapture(
     );
   }
 
-  const playerView = historicalObject(input.playerView);
   const inputBindingValid =
+    input.schemaVersion === "netgrid-ai-decision-input-projection-v1" &&
     input.side === actor &&
-    playerView?.side === actor &&
-    playerView.stateVersion === stateVersion;
+    input.stateVersion === stateVersion;
   const expectedSchemas = {
     deckCapabilities: "deck-capability-profile-v1",
     deckStrategyProfile: "ai-deck-strategy-profile-v1",

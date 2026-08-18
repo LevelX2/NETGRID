@@ -425,7 +425,7 @@ export type StorageMaintenanceMatchAnalysisBundle = {
     historicalAudit: "ai-decision-historical-audit-v1";
     beliefCapture: "netgrid-ai-belief-capture-v1";
     ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1";
-    checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v1";
+    checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v2";
   };
   match: {
     matchId: string;
@@ -1152,7 +1152,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         historicalAudit: "ai-decision-historical-audit-v1",
         beliefCapture: "netgrid-ai-belief-capture-v1",
         ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
-        checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v1",
+        checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v2",
       },
       match: {
         matchId: materialized.match.matchId,

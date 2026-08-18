@@ -1036,24 +1036,27 @@ describe("Invite and lobby redaction harness", () => {
 describe("Backend 0.5 private storage maintenance", () => {
   it("projects all three persisted deck consumers and fails closed on gaps or actor mismatches", () => {
     const checkpoint = {
-      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+      schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
       provenance: "persisted_at_decision",
       actor: "runner",
       stateVersion: 42,
-      input: {
+      inputProjection: {
+        schemaVersion: "netgrid-ai-decision-input-projection-v1",
         side: "runner",
-        playerView: { side: "runner", stateVersion: 42 },
-        ownDeckCapabilities: {
-          schemaVersion: "deck-capability-profile-v1",
-          side: "runner",
-        },
-        ownDeckStrategyProfile: {
-          schemaVersion: "ai-deck-strategy-profile-v1",
-          side: "runner",
-        },
-        ownDeckDoctrineV2Diagnostic: {
-          schemaVersion: "deck-doctrine-v2-diagnostic-v1",
-          side: "runner",
+        stateVersion: 42,
+        deckConsumers: {
+          deckCapabilities: {
+            schemaVersion: "deck-capability-profile-v1",
+            side: "runner",
+          },
+          deckStrategyProfile: {
+            schemaVersion: "ai-deck-strategy-profile-v1",
+            side: "runner",
+          },
+          deckDoctrineDiagnostic: {
+            schemaVersion: "deck-doctrine-v2-diagnostic-v1",
+            side: "runner",
+          },
         },
       },
     };
@@ -1063,9 +1066,12 @@ describe("Backend 0.5 private storage maintenance", () => {
       provenance: "persisted_at_decision",
       actor: "runner",
       stateVersion: 42,
-      deckCapabilities: checkpoint.input.ownDeckCapabilities,
-      deckStrategyProfile: checkpoint.input.ownDeckStrategyProfile,
-      deckDoctrineDiagnostic: checkpoint.input.ownDeckDoctrineV2Diagnostic,
+      deckCapabilities:
+        checkpoint.inputProjection.deckConsumers.deckCapabilities,
+      deckStrategyProfile:
+        checkpoint.inputProjection.deckConsumers.deckStrategyProfile,
+      deckDoctrineDiagnostic:
+        checkpoint.inputProjection.deckConsumers.deckDoctrineDiagnostic,
       validation: {
         inputMatchesActor: true,
         consumerSidesMatchActor: true,
@@ -1074,8 +1080,11 @@ describe("Backend 0.5 private storage maintenance", () => {
     });
 
     const missingDoctrine = structuredClone(checkpoint);
-    delete (missingDoctrine.input as Partial<typeof missingDoctrine.input>)
-      .ownDeckDoctrineV2Diagnostic;
+    delete (
+      missingDoctrine.inputProjection.deckConsumers as Partial<
+        typeof missingDoctrine.inputProjection.deckConsumers
+      >
+    ).deckDoctrineDiagnostic;
     expect(deckConsumerAuditFromCheckpointCapture(missingDoctrine)).toEqual({
       schemaVersion: "netgrid-deck-consumer-audit-v1",
       provenance: "unavailable",
@@ -1085,7 +1094,8 @@ describe("Backend 0.5 private storage maintenance", () => {
     });
 
     const mismatchedDoctrine = structuredClone(checkpoint);
-    mismatchedDoctrine.input.ownDeckDoctrineV2Diagnostic.side = "corp";
+    mismatchedDoctrine.inputProjection.deckConsumers.deckDoctrineDiagnostic.side =
+      "corp";
     expect(deckConsumerAuditFromCheckpointCapture(mismatchedDoctrine)).toEqual({
       schemaVersion: "netgrid-deck-consumer-audit-v1",
       provenance: "unavailable",
@@ -1760,7 +1770,7 @@ describe("Backend 0.5 private storage maintenance", () => {
           historicalAudit: "ai-decision-historical-audit-v1",
           beliefCapture: "netgrid-ai-belief-capture-v1",
           ownDeckSnapshot: "netgrid-maintenance-own-deck-snapshot-v1",
-          checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v1",
+          checkpointCapture: "netgrid-ai-decision-checkpoint-capture-v2",
         },
         match: {
           matchId: active.matchId,
@@ -1797,6 +1807,19 @@ describe("Backend 0.5 private storage maintenance", () => {
         appliedDecision: {
           actionId: expect.any(String),
           actionType: expect.any(String),
+        },
+        planFirstDecision: {
+          executionOrigin: {
+            rootPlanInstanceId: expect.any(String),
+            leafPlanInstanceId: expect.any(String),
+            side: "corp",
+            stateVersion: expect.any(Number),
+            timingPoint: expect.any(String),
+          },
+          selectedStep: {
+            planInstanceId: expect.any(String),
+            stepId: expect.any(String),
+          },
         },
       });
       expect(activeBundle.beliefStates).toEqual([
@@ -1943,7 +1966,7 @@ describe("Backend 0.5 private storage maintenance", () => {
         checkpointCapture?: {
           schemaVersion?: string;
           provenance?: string;
-          input?: { side?: string };
+          inputProjection?: { side?: string };
           runtime?: { schemaVersion?: string };
         };
         surroundingEvents?: Array<{ eventId?: string }>;
@@ -2010,11 +2033,16 @@ describe("Backend 0.5 private storage maintenance", () => {
       ).toBeDefined();
       expect(decisionContext.audit?.analysisSnapshot?.actorState).toBeDefined();
       expect(decisionContext.checkpointCapture).toMatchObject({
-        schemaVersion: "netgrid-ai-decision-checkpoint-capture-v1",
+        schemaVersion: "netgrid-ai-decision-checkpoint-capture-v2",
         provenance: "persisted_at_decision",
-        input: { side: "corp" },
+        inputProjection: {
+          schemaVersion: "netgrid-ai-decision-input-projection-v1",
+          side: "corp",
+          stateVersion: expect.any(Number),
+        },
         runtime: { schemaVersion: "ai-runtime-checkpoint-v1" },
       });
+      expect(decisionContext.checkpointCapture).not.toHaveProperty("input");
       expect(decisionContext.audit?.checkpointCapture).toMatchObject({
         validation: {
           sideSafeInput: true,
@@ -12852,12 +12880,10 @@ describe("MVP 0.2 multiplayer service", () => {
             provenance: "persisted_at_decision",
             actor: "runner",
             stateVersion: beforeFailure.gameState.stateVersion,
-            input: {
+            inputProjection: {
+              schemaVersion: "netgrid-ai-decision-input-projection-v1",
               side: "runner",
-              playerView: {
-                side: "runner",
-                stateVersion: beforeFailure.gameState.stateVersion,
-              },
+              stateVersion: beforeFailure.gameState.stateVersion,
             },
             runtime: {
               schemaVersion: "ai-runtime-checkpoint-v1",
@@ -12991,6 +13017,21 @@ describe("MVP 0.2 multiplayer service", () => {
               selectionAuthority: "resident_plan_instance",
               rootPlanInstanceId: "plan:runner.pressure_central:rd",
               leafExecutorInstanceId: "plan:runner.economy:fund-rd",
+              executionOrigin: {
+                rootPlanInstanceId: "plan:runner.pressure_central:rd",
+                leafPlanInstanceId: "plan:runner.economy:fund-rd",
+                side: "runner",
+                windowKind: "main_action",
+                windowId: `${input.playerView.timingPoint}:${input.playerView.stateVersion}`,
+                stateVersion: input.playerView.stateVersion,
+                timingPoint: input.playerView.timingPoint,
+              },
+              selectedStep: {
+                planInstanceId: "plan:runner.economy:fund-rd",
+                stepId: "fund_run",
+                parentInstanceId: "plan:runner.pressure_central:rd",
+                needId: "run-funding:rd",
+              },
               selectedPlan: {
                 instanceId: "plan:runner.economy:fund-rd",
                 dedupeKey: "fund-rd",

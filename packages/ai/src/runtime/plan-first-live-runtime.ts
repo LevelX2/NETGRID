@@ -324,9 +324,7 @@ import { compareExactProbabilities } from "./corp-score-protection-assessment";
 import { projectExactCorpIceRezRoute } from "./corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
-import {
-  runnerRunLockReleaseProjection,
-} from "./runner-run-lock-release-score";
+import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
 import {
   assessRunnerRunFundingAdmission,
   runnerRunTargetIsDirectlyConvertible,
@@ -1727,8 +1725,7 @@ function bindSelectedRunnerRecoverySearchAction(
     signal.targetKind === "capability" &&
     signal.actionIds.includes(result.route.head.actionId) &&
     candidate !== undefined &&
-    action?.payload?.cardImplementationEffectKind ===
-      "search_trash_to_grip" &&
+    action?.payload?.cardImplementationEffectKind === "search_trash_to_grip" &&
     action.payload.cardImplementationSearchFilter === commitment.searchFilter &&
     runnerProgramSearchSourceCardInstanceId(input, candidate) ===
       commitment.sourceCardInstanceId &&
@@ -1749,7 +1746,9 @@ function bindSelectedRunnerRecoverySearchAction(
       side: input.side,
       stateVersion: input.playerView.stateVersion,
       timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((legalAction) => legalAction.type),
+      legalActionTypes: input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
       unresolvedActionIds: [result.route.head.actionId],
       owner: "support_graph",
       planInstanceId: executor.instanceId,
@@ -2493,8 +2492,7 @@ function runnerRunLockReleaseBoundRouteDisposition(
       signal.runActionIds?.includes(actionId) === true,
   );
   if (centralRoute) {
-    const executable =
-      centralRoute.reachable && centralRoute.marginalValue > 0;
+    const executable = centralRoute.reachable && centralRoute.marginalValue > 0;
     return {
       executable,
       ownerModuleId: "runner.pressure_central",
@@ -5252,11 +5250,7 @@ function buildRunnerDomain(
         runnerCandidateExecutesHeapRecovery(input, candidate);
       const recoverySearchCommitment =
         recoverySearchAction && discardKeepScore
-          ? runnerRecoverySearchCommitment(
-              input,
-              candidate,
-              discardKeepScore,
-            )
+          ? runnerRecoverySearchCommitment(input, candidate, discardKeepScore)
           : undefined;
       if (recoverySearchAction && !recoverySearchCommitment) {
         return [];
@@ -5402,11 +5396,11 @@ function buildRunnerDomain(
             : recoverySearchCommitment
               ? { purposeCode: recoverySearchCommitment.targetPurpose }
               : evaluation.currentNeed !== "none" &&
-                evaluation.currentNeed !== undefined
-              ? {
-                  purposeCode: `${evaluation.developmentRole}:${evaluation.currentNeed}`,
-                }
-              : {}),
+                  evaluation.currentNeed !== undefined
+                ? {
+                    purposeCode: `${evaluation.developmentRole}:${evaluation.currentNeed}`,
+                  }
+                : {}),
           assignedDomainPlanIds: assignedCoveragePlanIds,
           duplicateAlreadyInstalled: duplicate,
           affordableOrSupportable:
@@ -5435,8 +5429,8 @@ function buildRunnerDomain(
                     recoverySearchCommitment,
                   }
                 : fundingRoute
-                ? { evidenceCodes: fundingRoute.evidenceCodes }
-                : {}),
+                  ? { evidenceCodes: fundingRoute.evidenceCodes }
+                  : {}),
         },
       ];
     });
@@ -5603,6 +5597,9 @@ function buildRunnerDomain(
     remoteContests,
     developments,
     runWindows,
+    runTargetEvaluations: runTargets.map((evaluation) =>
+      structuredClone(evaluation),
+    ),
   };
 }
 
@@ -5968,8 +5965,7 @@ function runnerCandidateExecutesHeapRecovery(
     (candidate.actionType === "play_event" ||
       candidate.actionType === "activated_card_ability" ||
       candidate.actionType === "trigger_ability") &&
-    action?.payload?.cardImplementationEffectKind ===
-      "search_trash_to_grip" &&
+    action?.payload?.cardImplementationEffectKind === "search_trash_to_grip" &&
     (action.payload.cardImplementationSearchFilter === "program" ||
       action.payload.cardImplementationSearchFilter === "any_card")
   );
@@ -5979,7 +5975,9 @@ function runnerRecoverySearchCommitment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   discardKeepScore: NonNullable<PlanFirstLiveDependencies["discardKeepScore"]>,
-): NonNullable<RunnerDevelopmentSignal["recoverySearchCommitment"]> | undefined {
+):
+  | NonNullable<RunnerDevelopmentSignal["recoverySearchCommitment"]>
+  | undefined {
   const action = input.legalActions.find(
     (entry) => entry.actionId === candidate.actionId,
   );
@@ -5988,7 +5986,10 @@ function runnerRecoverySearchCommitment(
     input,
     candidate,
   );
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(input, candidate);
+  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
+    input,
+    candidate,
+  );
   if (
     action?.payload?.cardImplementationEffectKind !== "search_trash_to_grip" ||
     (searchFilter !== "program" && searchFilter !== "any_card") ||
@@ -16745,6 +16746,11 @@ function planFirstDecisionDebug(params: {
       selectionAuthority: "engine_window",
       rootPlanInstanceId: params.result.origin.rootPlanInstanceId,
       leafExecutorInstanceId: params.result.origin.leafPlanInstanceId,
+      executionOrigin: structuredClone(params.result.origin),
+      selectedStep: {
+        planInstanceId: params.result.origin.leafPlanInstanceId,
+        stepId: params.result.origin.windowId,
+      },
       engineWindowAction: {
         actionId: params.action.actionId,
         actionType: params.action.type,
@@ -16767,6 +16773,10 @@ function planFirstDecisionDebug(params: {
   if (!selectedPlan) {
     throw new Error("plan_first_selected_plan_instance_missing");
   }
+  const rootPlanInstanceId =
+    params.result.portfolio.rootForegroundInstanceId ?? params.planId;
+  const leafPlanInstanceId =
+    params.result.portfolio.executorInstanceId ?? params.planId;
   const assessment = params.result.selectedAssessment;
   const actionCandidate = params.context.actionCandidates.find(
     (candidate) => candidate.actionId === params.action.actionId,
@@ -16818,6 +16828,14 @@ function planFirstDecisionDebug(params: {
       turnPlanning = undefined;
     }
   }
+  const supportBinding = turnPlanning?.selectedLine.phases
+    .flatMap((phase) => phase.supportBindings)
+    .find((binding) => binding.planInstanceId === leafPlanInstanceId);
+  const selectedRunQuote = selectedRunnerRunDebugQuote(
+    params.input,
+    params.context,
+    params.action,
+  );
 
   return {
     ...base,
@@ -16826,10 +16844,42 @@ function planFirstDecisionDebug(params: {
       params.turnPlanningDebug?.mode === "cutover"
         ? "turn_plan_commitment"
         : "resident_plan_instance",
-    rootPlanInstanceId:
-      params.result.portfolio.rootForegroundInstanceId ?? params.planId,
-    leafExecutorInstanceId:
-      params.result.portfolio.executorInstanceId ?? params.planId,
+    rootPlanInstanceId,
+    leafExecutorInstanceId: leafPlanInstanceId,
+    executionOrigin: {
+      rootPlanInstanceId,
+      leafPlanInstanceId,
+      ...(params.result.portfolio.turnPlanCommitment?.commitmentId
+        ? {
+            commitmentId:
+              params.result.portfolio.turnPlanCommitment.commitmentId,
+          }
+        : {}),
+      side: params.input.side,
+      windowKind: planDecisionWindowKindForSemantic(
+        params.result.route.head.semanticActionType,
+      ),
+      windowId: decisionWindowId(
+        params.input,
+        params.result.route.head.semanticActionType,
+      ),
+      stateVersion: params.input.playerView.stateVersion,
+      timingPoint: params.input.playerView.timingPoint,
+    },
+    selectedStep: {
+      planInstanceId: params.result.route.planInstanceId,
+      stepId: params.result.route.step.stepId,
+      ...(selectedPlan.parentInstanceId
+        ? { parentInstanceId: selectedPlan.parentInstanceId }
+        : {}),
+      ...((selectedPlan.parentNeedId ?? priority.needId)
+        ? { needId: selectedPlan.parentNeedId ?? priority.needId }
+        : {}),
+      ...(supportBinding
+        ? { supportAssignmentId: supportBinding.assignmentId }
+        : {}),
+    },
+    ...(selectedRunQuote ? { selectedRunQuote } : {}),
     selectedPlan: planFirstDebugPlanInstance(selectedPlan),
     priority: {
       requestedClass: assessment.priorityClaim.requestedClass,
@@ -23152,6 +23202,99 @@ function windowKindForSemantic(
     return "run";
   if (semantic.startsWith("turn_flow.")) return "pass_decline";
   return "automatic_resolution";
+}
+
+function planDecisionWindowKindForSemantic(
+  semantic: string,
+): AiPlanFirstDecisionDebug["executionOrigin"]["windowKind"] {
+  if (semantic.startsWith("trace.")) return "trace";
+  const engineWindowKind = windowKindForSemantic(semantic);
+  return engineWindowKind === "automatic_resolution"
+    ? "main_action"
+    : engineWindowKind;
+}
+
+function decisionWindowId(input: AiDecisionInput, semantic: string): string {
+  const choiceId = input.playerView.pendingChoice?.choiceId;
+  if (choiceId) return choiceId;
+  if (
+    (semantic.startsWith("run.") || semantic.startsWith("breaker.")) &&
+    input.playerView.run?.runId
+  ) {
+    return input.playerView.run.runId;
+  }
+  return `${input.playerView.timingPoint}:${input.playerView.stateVersion}`;
+}
+
+function selectedRunnerRunDebugQuote(
+  input: AiDecisionInput,
+  context: PlanSchedulerContext,
+  action: LegalAction,
+): AiPlanFirstDecisionDebug["selectedRunQuote"] | undefined {
+  if (input.side !== "runner" || action.type !== "start_run") return undefined;
+  const domain = context.domain as RunnerPlanDomain;
+  const evaluation = domain.runTargetEvaluations?.find(
+    (candidate) => candidate.actionId === action.actionId,
+  );
+  if (!evaluation) return undefined;
+  const pressure = domain.centralPressure.find(
+    (signal) =>
+      signal.runActionIds?.includes(action.actionId) === true ||
+      signal.runActionValues?.[action.actionId] !== undefined,
+  );
+  const contest = domain.remoteContests.find(
+    (signal) => signal.runActionAssessments[action.actionId] !== undefined,
+  );
+  const signal = pressure ?? contest;
+  const routeValue =
+    pressure?.runActionRouteDiagnostics?.[action.actionId] ??
+    contest?.runActionAssessments[action.actionId]?.routeDiagnostic;
+  const riskContract = signal?.runRiskContract;
+  return {
+    schemaVersion: "ai-selected-run-quote-v1",
+    actionId: action.actionId,
+    serverId: evaluation.targetServerId,
+    targetKind: evaluation.targetKind,
+    purpose:
+      riskContract?.reserveQuote.purpose ??
+      (signal?.purpose === "contest"
+        ? "contest"
+        : (signal?.purpose ?? "access")),
+    recommendation: evaluation.recommendation,
+    pathPassability: evaluation.pathPassability,
+    pathCost: evaluation.pathCost,
+    creditsBeforeRun: input.playerView.own.credits,
+    creditsAfterRun: evaluation.creditsAfterRun,
+    score: evaluation.score,
+    reachable: signal?.reachable ?? evaluation.pathPassability === "reachable",
+    runCommitment: evaluation.runCommitment,
+    ...(signal?.supportNeedId ? { supportNeedId: signal.supportNeedId } : {}),
+    ...(signal?.routePreparation
+      ? { routePreparation: signal.routePreparation }
+      : {}),
+    ...(routeValue ? { routeValue: structuredClone(routeValue) } : {}),
+    ...(evaluation.prerunReserveQuote
+      ? { reserveQuote: structuredClone(evaluation.prerunReserveQuote) }
+      : {}),
+    ...(riskContract
+      ? {
+          riskContract: {
+            schemaVersion: riskContract.schemaVersion,
+            observedAtStateVersion: riskContract.observedAtStateVersion,
+            unrezzedIceRisk: riskContract.unrezzedIceRisk,
+            runnerCreditsAtEntry: riskContract.runnerCreditsAtEntry,
+            runnerHandCountAtEntry: riskContract.runnerHandCountAtEntry,
+            visibleDuringRunRezSupport: riskContract.visibleDuringRunRezSupport,
+            reserveQuote: structuredClone(riskContract.reserveQuote),
+            evidenceCodes: [...riskContract.evidenceCodes],
+          },
+        }
+      : {}),
+    evidenceCodes: [
+      ...evaluation.evidence,
+      ...(signal ? [signal.evidenceCode] : []),
+    ],
+  };
 }
 
 function turnKey(input: AiDecisionInput): string {

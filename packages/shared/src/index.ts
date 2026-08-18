@@ -3934,6 +3934,89 @@ export type AiPlanFirstDebugDisposition = {
   evidenceCode: string;
 };
 
+export type AiPlanFirstDebugExecutionOrigin = {
+  rootPlanInstanceId: string;
+  leafPlanInstanceId: string;
+  commitmentId?: string;
+  side: "runner" | "corp";
+  windowKind:
+    | "automatic_resolution"
+    | "mandatory_choice"
+    | "optional_ability"
+    | "main_action"
+    | "run"
+    | "access"
+    | "trace"
+    | "pass_decline";
+  windowId: string;
+  stateVersion: number;
+  timingPoint: string;
+};
+
+export type AiPlanFirstDebugStepBinding = {
+  planInstanceId: string;
+  stepId: string;
+  parentInstanceId?: string;
+  needId?: string;
+  supportAssignmentId?: string;
+};
+
+export type AiPlanFirstDebugPrerunReserveQuote = {
+  purpose: "information" | "access" | "multiaccess" | "contest";
+  status: "not_required" | "satisfied" | "information_probe_only" | "blocked";
+  riskTolerance: "standard" | "matchpoint_with_stable_universal_coverage";
+  knownPathCost: number;
+  creditsAfterKnownPath: number;
+  unknownIceCount: number;
+  unknownIcePositions: number[];
+  corpRezCredits: number;
+  visibleCoverage:
+    | "stable_universal"
+    | "risky_universal"
+    | "typed_only"
+    | "none";
+  requiredCredits: number;
+  creditGap: number;
+  requiredHandBuffer: number;
+  handBufferGap: number;
+  evidence: string[];
+};
+
+export type AiPlanFirstDebugSelectedRunQuote = {
+  schemaVersion: "ai-selected-run-quote-v1";
+  actionId: string;
+  serverId: string;
+  targetKind: string;
+  purpose: "information" | "access" | "multiaccess" | "contest";
+  recommendation: string;
+  pathPassability: string;
+  pathCost: number;
+  creditsBeforeRun: number;
+  creditsAfterRun: number;
+  score: number;
+  reachable: boolean;
+  runCommitment: "probe_only" | "full_path";
+  supportNeedId?: string;
+  routePreparation?: string;
+  routeValue?: {
+    rawRouteScore: number;
+    opportunityCost: number;
+    effectiveRouteScore: number;
+  };
+  reserveQuote?: AiPlanFirstDebugPrerunReserveQuote;
+  riskContract?: {
+    schemaVersion: "runner-run-risk-contract-v1";
+    observedAtStateVersion: number;
+    unrezzedIceRisk: number;
+    runnerCreditsAtEntry: number;
+    runnerHandCountAtEntry: number;
+    visibleDuringRunRezSupport: boolean;
+    reserveQuote: AiPlanFirstDebugPrerunReserveQuote;
+    evidenceCodes: string[];
+  };
+  evidenceCodes: string[];
+};
+
 export const AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION =
   "ai-turn-planning-debug-v1" as const;
 
@@ -4283,6 +4366,9 @@ export type AiPlanFirstDecisionDebug = {
     | "engine_window";
   rootPlanInstanceId: string;
   leafExecutorInstanceId: string;
+  executionOrigin: AiPlanFirstDebugExecutionOrigin;
+  selectedStep: AiPlanFirstDebugStepBinding;
+  selectedRunQuote?: AiPlanFirstDebugSelectedRunQuote;
   selectedPlan?: AiPlanFirstDebugPlanInstance;
   priority?: AiPlanFirstDebugPriority;
   route?: AiPlanFirstDebugRoute;
@@ -4695,31 +4781,39 @@ function sanitizeAiDecisionDetailSections(
   return sections.length > 0 ? sections : undefined;
 }
 
-function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
+function sanitizeAiDecisionDebugJson(
+  value: unknown,
+  depth = 0,
+  limits: { maxDepth: number; arrayEntries: number; objectEntries: number } = {
+    maxDepth: 10,
+    arrayEntries: 16,
+    objectEntries: 32,
+  },
+): unknown {
   // Turn-planning phases contain bound support records and action nodes below
   // the existing plan-first envelope. The object/array size limits still bound
   // the payload, while this depth preserves the declared typed contract.
-  if (depth > 10) return undefined;
+  if (depth > limits.maxDepth) return undefined;
   if (typeof value === "string") return sanitizeAiDecisionDebugString(value);
   if (typeof value === "number")
     return Number.isFinite(value) ? value : undefined;
   if (typeof value === "boolean" || value === null) return value;
   if (Array.isArray(value)) {
     return value
-      .slice(0, 16)
-      .map((entry) => sanitizeAiDecisionDebugJson(entry, depth + 1))
+      .slice(0, limits.arrayEntries)
+      .map((entry) => sanitizeAiDecisionDebugJson(entry, depth + 1, limits))
       .filter((entry) => entry !== undefined);
   }
   if (!value || typeof value !== "object") return undefined;
   const result: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(
     value as Record<string, unknown>,
-  ).slice(0, 32)) {
+  ).slice(0, limits.objectEntries)) {
     if (AI_DECISION_DEBUG_FORBIDDEN_KEY_PATTERN.test(key)) {
       result[key] = "[redacted-debug-field]";
       continue;
     }
-    const sanitized = sanitizeAiDecisionDebugJson(entry, depth + 1);
+    const sanitized = sanitizeAiDecisionDebugJson(entry, depth + 1, limits);
     if (sanitized !== undefined) result[key] = sanitized;
   }
   return result;
@@ -4728,7 +4822,11 @@ function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
 function sanitizeAiPlanFirstDecisionDebug(
   value: unknown,
 ): AiPlanFirstDecisionDebug | undefined {
-  const sanitized = sanitizeAiDecisionDebugJson(value);
+  const sanitized = sanitizeAiDecisionDebugJson(value, 0, {
+    maxDepth: 16,
+    arrayEntries: 128,
+    objectEntries: 64,
+  });
   if (!sanitized || typeof sanitized !== "object" || Array.isArray(sanitized)) {
     return undefined;
   }
@@ -4741,6 +4839,9 @@ function sanitizeAiPlanFirstDecisionDebug(
       "selectionAuthority",
       "rootPlanInstanceId",
       "leafExecutorInstanceId",
+      "executionOrigin",
+      "selectedStep",
+      "selectedRunQuote",
       "selectedPlan",
       "priority",
       "route",
@@ -4761,6 +4862,15 @@ function sanitizeAiPlanFirstDecisionDebug(
       candidate.selectionAuthority !== "engine_window") ||
     typeof candidate.rootPlanInstanceId !== "string" ||
     typeof candidate.leafExecutorInstanceId !== "string" ||
+    !isAiPlanFirstExecutionOrigin(candidate.executionOrigin) ||
+    candidate.executionOrigin.rootPlanInstanceId !==
+      candidate.rootPlanInstanceId ||
+    candidate.executionOrigin.leafPlanInstanceId !==
+      candidate.leafExecutorInstanceId ||
+    candidate.executionOrigin.stateVersion !== candidate.stateVersion ||
+    !isAiPlanFirstStepBinding(candidate.selectedStep) ||
+    (candidate.selectedRunQuote !== undefined &&
+      !isAiPlanFirstSelectedRunQuote(candidate.selectedRunQuote)) ||
     !isAiPlanFirstStrategicContext(candidate.strategicContext) ||
     !isAiPlanFirstQuoteEvidence(candidate.engineQuoteEvidence) ||
     !Array.isArray(candidate.assessmentEvidenceCodes) ||
@@ -4784,6 +4894,9 @@ function sanitizeAiPlanFirstDecisionDebug(
       !isAiPlanFirstPlanInstance(candidate.selectedPlan) ||
       !isAiPlanFirstPriority(candidate.priority) ||
       !isAiPlanFirstRoute(candidate.route) ||
+      candidate.selectedStep.planInstanceId !==
+        candidate.route.planInstanceId ||
+      candidate.selectedStep.stepId !== candidate.route.stepId ||
       candidate.selectedPlan.instanceId !== candidate.route.planInstanceId ||
       candidate.selectedPlan.instanceId !== candidate.leafExecutorInstanceId ||
       candidate.route.stateVersion !== candidate.stateVersion)
@@ -4796,11 +4909,104 @@ function sanitizeAiPlanFirstDecisionDebug(
       candidate.selectedPlan !== undefined ||
       candidate.priority !== undefined ||
       candidate.route !== undefined ||
+      candidate.selectedRunQuote !== undefined ||
       !isAiPlanFirstEngineWindowAction(candidate.engineWindowAction))
   ) {
     return undefined;
   }
   return sanitized as AiPlanFirstDecisionDebug;
+}
+
+function isAiPlanFirstStepBinding(
+  value: unknown,
+): value is AiPlanFirstDebugStepBinding {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "planInstanceId",
+      "stepId",
+      "parentInstanceId",
+      "needId",
+      "supportAssignmentId",
+    ]) &&
+    typeof candidate.planInstanceId === "string" &&
+    typeof candidate.stepId === "string" &&
+    [
+      candidate.parentInstanceId,
+      candidate.needId,
+      candidate.supportAssignmentId,
+    ]
+      .filter((entry) => entry !== undefined)
+      .every((entry) => typeof entry === "string")
+  );
+}
+
+function isAiPlanFirstSelectedRunQuote(
+  value: unknown,
+): value is AiPlanFirstDebugSelectedRunQuote {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    candidate.schemaVersion === "ai-selected-run-quote-v1" &&
+    typeof candidate.actionId === "string" &&
+    typeof candidate.serverId === "string" &&
+    typeof candidate.targetKind === "string" &&
+    ["information", "access", "multiaccess", "contest"].includes(
+      String(candidate.purpose),
+    ) &&
+    typeof candidate.recommendation === "string" &&
+    typeof candidate.pathPassability === "string" &&
+    [
+      candidate.pathCost,
+      candidate.creditsBeforeRun,
+      candidate.creditsAfterRun,
+      candidate.score,
+    ].every((entry) => typeof entry === "number" && Number.isFinite(entry)) &&
+    typeof candidate.reachable === "boolean" &&
+    (candidate.runCommitment === "probe_only" ||
+      candidate.runCommitment === "full_path") &&
+    Array.isArray(candidate.evidenceCodes) &&
+    candidate.evidenceCodes.every((entry) => typeof entry === "string")
+  );
+}
+
+function isAiPlanFirstExecutionOrigin(
+  value: unknown,
+): value is AiPlanFirstDebugExecutionOrigin {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    hasOnlyAiPlanFirstFields(candidate, [
+      "rootPlanInstanceId",
+      "leafPlanInstanceId",
+      "commitmentId",
+      "side",
+      "windowKind",
+      "windowId",
+      "stateVersion",
+      "timingPoint",
+    ]) &&
+    typeof candidate.rootPlanInstanceId === "string" &&
+    typeof candidate.leafPlanInstanceId === "string" &&
+    (candidate.commitmentId === undefined ||
+      typeof candidate.commitmentId === "string") &&
+    (candidate.side === "runner" || candidate.side === "corp") &&
+    [
+      "automatic_resolution",
+      "mandatory_choice",
+      "optional_ability",
+      "main_action",
+      "run",
+      "access",
+      "trace",
+      "pass_decline",
+    ].includes(String(candidate.windowKind)) &&
+    typeof candidate.windowId === "string" &&
+    typeof candidate.stateVersion === "number" &&
+    Number.isFinite(candidate.stateVersion) &&
+    typeof candidate.timingPoint === "string"
+  );
 }
 
 function isAiTurnPlanningDebug(value: unknown): value is AiTurnPlanningDebug {

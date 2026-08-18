@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { LegalActionPayload, VisibleCard } from "@netgrid/shared";
+import {
+  sanitizeAiDecisionDebug,
+  type LegalActionPayload,
+  type VisibleCard,
+} from "@netgrid/shared";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
@@ -448,9 +452,46 @@ describe("plan-first Remote contest continuation", () => {
   });
 
   it("continues toward one unknown inner ICE while the admitted run-risk contract is still satisfied", () => {
-    const { decision, leaf, root } = runRiskContractScenario({
+    const { startDecision, decision, leaf, root } = runRiskContractScenario({
       currentCredits: 4,
       currentGripCount: 3,
+    });
+
+    expect(startDecision.decisionDebug?.planFirstDecision).toMatchObject({
+      selectedStep: {
+        planInstanceId: expect.any(String),
+        stepId: expect.any(String),
+      },
+      selectedRunQuote: {
+        schemaVersion: "ai-selected-run-quote-v1",
+        actionId: "run-remote-1-risk-contract",
+        serverId: "remote_1",
+        purpose: "contest",
+        pathCost: 0,
+        creditsBeforeRun: 4,
+        creditsAfterRun: 4,
+        score: 300,
+        reachable: true,
+        runCommitment: "probe_only",
+        reserveQuote: {
+          requiredCredits: 4,
+          creditGap: 0,
+          requiredHandBuffer: 3,
+          handBufferGap: 0,
+        },
+        riskContract: {
+          unrezzedIceRisk: 0.81,
+          runnerCreditsAtEntry: 4,
+          reserveQuote: { creditGap: 0, handBufferGap: 0 },
+        },
+      },
+    });
+    expect(
+      sanitizeAiDecisionDebug(startDecision.decisionDebug)?.planFirstDecision
+        ?.selectedRunQuote,
+    ).toMatchObject({
+      actionId: "run-remote-1-risk-contract",
+      reserveQuote: { creditGap: 0, handBufferGap: 0 },
     });
 
     expect(decision).toMatchObject({
@@ -688,7 +729,8 @@ function runRiskContractScenario(params: {
     server("remote_1", [unknownInnerIce], [valuableRemote]),
   ];
 
-  expect(context.chooseSemanticRuntimeAction(startInput, {})).toMatchObject({
+  const startDecision = context.chooseSemanticRuntimeAction(startInput, {});
+  expect(startDecision).toMatchObject({
     actionId: startRun.actionId,
     reasonCode: "plan_first.runner.contest_remote",
   });
@@ -760,7 +802,7 @@ function runRiskContractScenario(params: {
   const leaf = residentPlanPortfolioSnapshot(continuationInput)?.instances.find(
     (instance) => instance.moduleId === "runner.convert_run_window",
   );
-  return { decision, leaf, root };
+  return { startDecision, decision, leaf, root };
 }
 
 function testGrip(count: number, prefix: string): VisibleCard[] {
