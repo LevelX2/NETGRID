@@ -130,6 +130,35 @@ reguläre lokale Dateien, Größen und sämtliche SHA-256-Werte. Die gebündelte
 wird gegen das Manifest gegengeprüft und danach über den vorhandenen atomaren
 Normalisierungs- und Storepfad importiert.
 
+## Lokale Maintenance-Oberfläche
+
+Unter `/maintenance/card-images` stehen dieselben Import- und Paketverträge
+ohne CLI zur Verfügung. Die Seite ist Teil der Maintenance-Control-Plane und
+bleibt im Profil `local` auf direkte Loopback-Verbindungen beschränkt. Sie
+verlangt eine Maintenance-Anmeldung; mutierende Import- und Buildvorgänge
+verlangen zusätzlich eine frische Reauthentifizierung.
+
+Lokale Zuordnungstabellen, Quellbilder und übertragene Paketverzeichnisse
+werden unter `data/local-assets/card-image-import/inbox/` bereitgestellt. Bei
+gesetztem `NETGRID_DATA_ROOT` liegt die Inbox entsprechend unter dem dortigen
+`card-image-import/inbox/`. Der Browser erhält und sendet ausschließlich
+relative Inbox-Einträge. Absolute Serverpfade, Quell-URLs und private
+Dateiinhalte gehören nicht zum HTTP-Vertrag.
+
+Die Oberfläche bietet:
+
+- Bestandszahlen für Originalset, Proteus und Classic;
+- CSV-Vorlagen für den Gesamtkatalog oder ein einzelnes Profil;
+- Prüflauf und Import für lokale beziehungsweise ausdrücklich bestätigte
+  HTTPS-Zuordnungen;
+- Paketprüfung und -import für erkannte IMG07-Verzeichnispakete;
+- lokalen Paketbuild aus einer vollständigen Inbox-Zuordnung;
+- serialisierte Jobs mit Fortschritt und strukturiertem Abschlussbericht.
+
+Ein Prüflauf reserviert keine spätere Schreibentscheidung. Beim eigentlichen
+Import werden Quellen, Rechtebestätigung, Konfliktmodus, Hashes und Bindungen
+erneut geprüft. Während des Spiels erfolgt weiterhin kein Remotezugriff.
+
 ## Private-Asset-Grenze
 
 `data/local-assets/card-image-packs/` ist vollständig ignoriert. Private

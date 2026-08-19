@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, Download, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, Download, ExternalLink, Eye, Images, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
 import {
   aiTraceMetaRows,
   aiTraceActionRows,
@@ -641,6 +641,10 @@ export default function MaintenancePage() {
           </div>
         </div>
         <MaintenanceSecurityControls auth={auth}>
+          <a href="/maintenance/card-images" style={linkButton} title="Lokale Kartenbilder verwalten">
+            <Images size={16} aria-hidden="true" />
+            Kartenbilder
+          </a>
           <button type="button" style={button} onClick={() => void refresh(filters, "refresh")} disabled={loading} title="Aktualisieren">
             {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
             {loading ? "Lädt" : "Aktualisieren"}

@@ -139,6 +139,27 @@ Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` s
 8. Passwortänderung oder lokaler Reset meldet alle Geräte ab.
 9. Direkter LAN-Aufruf von Port `8787` bleibt für Maintenance geschlossen.
 
+## Lokale Kartenbildverwaltung
+
+Die Kartenbildverwaltung ist unter `/maintenance/card-images` aus der
+Maintenance-Seite erreichbar. Anders als die übrige optional über HTTPS
+freigeschaltete Control Plane bleibt dieser Bereich immer auf das Profil
+`local` und eine direkte Loopback-Verbindung beschränkt. Ein Remote- oder
+LAN-Aufruf wird auch mit gültiger Maintenance-Sitzung abgelehnt.
+
+Vor der Bedienung werden Zuordnungstabellen, Quellbilder oder übertragene
+IMG07-Paketverzeichnisse unter
+`data/local-assets/card-image-import/inbox/` abgelegt. Die Oberfläche zeigt
+nur relative Inbox-Einträge. Import und Paketbuild verlangen nach der normalen
+Anmeldung eine frische Passworteingabe im Reauth-Dialog; Prüfläufe und
+Vorlagendownloads verändern keine Bindungen.
+
+Der HTTPS-Modus ist ein ausdrücklich bestätigter Vorbereitungsvorgang. Nach
+dem erfolgreichen Import verwendet die Spielruntime ausschließlich die lokal
+persistierten normalisierten Bilder. Details zu Formaten, Limits und
+Paketprofilen stehen in
+`docs/architecture/card-images/personal-card-image-import.md`.
+
 ## Laufende Matchanalyse
 
 Für normale Analyse laufender NETGRID-Matches sollen Codex und andere

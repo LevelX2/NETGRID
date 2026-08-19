@@ -40,7 +40,12 @@ Originalset mit 374, Proteus mit 154 und Classic mit 54 indexierten Bildern.
 Manifest, Mindest-Importer-Version, Katalogfingerabdruck, Pfade und Hashes
 werden vor dem atomaren Import geprüft. Quellen und Buildausgaben bleiben in
 ignorierten lokalen Verzeichnissen und gehören weder in CI noch in den
-Hauptinstaller. Führend ist
+Hauptinstaller. Die lokale, authentifizierte Maintenance-Oberfläche unter
+`/maintenance/card-images` zeigt den Bestand, erzeugt Vorlagen und steuert
+Prüfläufe, Importe sowie private Paket-Builds über eine verwaltete relative
+Inbox. Mutierende Jobs verlangen eine frische Reauthentifizierung; die
+Oberfläche bleibt selbst bei freigeschalteter Remote-Maintenance auf direkte
+Loopback-Verbindungen begrenzt. Führend ist
 `docs/architecture/card-images/personal-card-image-import.md`.
 
 ## Engine und Karten

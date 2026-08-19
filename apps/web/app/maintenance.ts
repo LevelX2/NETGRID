@@ -263,7 +263,13 @@ export function resolveMaintenanceServerHttp(
     hostname === "::1" ||
     hostname === "[::1]"
   ) {
-    return "http://127.0.0.1:8787";
+    try {
+      const localServerUrl = new URL(configured);
+      localServerUrl.hostname = "127.0.0.1";
+      return localServerUrl.origin;
+    } catch {
+      return "http://127.0.0.1:8787";
+    }
   }
   return configured;
 }

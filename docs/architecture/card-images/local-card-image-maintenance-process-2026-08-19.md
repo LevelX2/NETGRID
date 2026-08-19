@@ -5,7 +5,7 @@ Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img08-local-card-image-management`
 Worktree: `C:\Projekte\NETGRID_IMG08_LOCAL_CARD_IMAGE_MANAGEMENT`
-Aktives Paket: `IMG08.5`
+Aktives Paket: finaler Integrations- und Cleanup-Checkpoint
 
 ## Quelle und Zielprüfung
 
@@ -115,7 +115,7 @@ queued -> running -> failed
 2. `IMG08.2` – Import-Inbox und Bestandsübersicht (`completed`)
 3. `IMG08.3` – lokale und HTTPS-Importjobs (`completed`)
 4. `IMG08.4` – private Bildpaketverwaltung (`completed`)
-5. `IMG08.5` – Maintenance-Weboberfläche und Berichte
+5. `IMG08.5` – Maintenance-Weboberfläche und Berichte (`completed`)
 6. Finaler Integrations- und Cleanup-Checkpoint
 
 ## Paketfortschritt
@@ -171,6 +171,23 @@ queued -> running -> failed
 - absolute private Buildausgaben vollständig aus HTTP-Berichten entfernt;
 - `@netgrid/card-images`: 45 Tests und Typecheck bestanden;
 - fokussierter Server-HTTP-Test: 7 Tests bestanden.
+
+### IMG08.5 abgeschlossen
+
+- lokale Kartenbildverwaltung unter `/maintenance/card-images` und Navigation
+  aus der bestehenden Maintenance-Seite ergänzt;
+- Bestandskarten, sichere relative Inbox-Auswahl, Vorlagendownload, lokale und
+  explizite HTTPS-Importe sowie Paketprüfung, -import und -build umgesetzt;
+- mutierende Jobs an den bestehenden Reauth-Dialog gebunden und Fortschritt
+  sowie terminale Berichte dargestellt;
+- Maintenance-URL-Auflösung so korrigiert, dass eine ausdrücklich
+  konfigurierte Portabweichung beim Loopback-Routing erhalten bleibt;
+- fokussierte Webtests: 19 Tests bestanden;
+- isolierter Firefox-Smoke-Test auf den abweichenden Ports `13100` und `18787`
+  mit eigener SQLite-/Auth-Ablage bestanden: Login, Bestandszahlen, alle
+  Arbeitsbereiche und Originalset-Vorlagendownload ohne Konsolenfehler;
+- die lokalen Testprozesse, Laufzeitdaten und Browserartefakte wurden danach
+  vollständig entfernt.
 
 ## Paketdetails
 
