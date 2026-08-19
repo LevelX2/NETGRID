@@ -114,7 +114,7 @@ const cases: Array<{
     roles: ["ice_modifier", "economy_asset", "remote_support"],
     values: { remoteRootValue: 2 },
     risks: [],
-    purposes: [],
+    purposes: ["rez_support_visible_installed_ice"],
     strategies: ["corp.ice_tax_glacier"],
     strategyCovered: true,
     qualityConfidence: "high",

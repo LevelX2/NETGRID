@@ -48,7 +48,7 @@ describe("ActionCardSemanticProfiles", () => {
     expect(profiles["onr_v1_043_mystery-box"]?.compatibilitySignals).toEqual(
       expect.arrayContaining([
         "line_support:runner.search.breaker",
-        "strategic_role:engine_anchor",
+        "strategic_role:support_tool",
       ]),
     );
   });
