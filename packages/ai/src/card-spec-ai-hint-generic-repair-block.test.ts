@@ -129,6 +129,12 @@ describe("generic CardSpec AI-hint repair block", () => {
       planningEntry("onr_v1_131_microtech-backup-drive"),
     );
     delete (ordinaryHardware.planning.engine as any).runnerUtilityLongtail;
+    ordinaryHardware.planning.planningAnnotations!.capabilities =
+      ordinaryHardware.planning.planningAnnotations!.capabilities?.filter(
+        (capability) =>
+          capability.capabilityKey !==
+          "runner_utility_longtail_replace_installed_program_trash_with_host_on_source",
+      );
     const ordinaryHardwareHint = deriveCardSpecAiHint(
       ordinaryHardware as never,
     );
