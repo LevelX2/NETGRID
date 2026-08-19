@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+
 import {
   SubroutineIcon,
   isSubroutineRuleLine,
@@ -112,7 +117,3 @@ export function cardTextPreviewType(cardType: string | undefined): string {
   const normalized = (cardType ?? "unknown").trim().toLowerCase();
   return /^[a-z][a-z0-9_-]*$/.test(normalized) ? normalized : "unknown";
 }
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
