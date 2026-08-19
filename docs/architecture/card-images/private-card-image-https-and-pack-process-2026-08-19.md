@@ -1,10 +1,11 @@
 # Kartenbildimport IMG06–IMG07
 
-Status: `active`
+Status: `integration_ready`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img06-img07-image-import-packs`
 Worktree: `C:\Projekte\NETGRID_IMG06_IMG07_IMAGE_IMPORT_PACKS`
+Aktueller Zustand: `final_verify`
 
 ## Quelle und Zielprüfung
 
@@ -146,6 +147,24 @@ Bei einem roten Done-Gate verbleibt der Prozess im aktuellen Zustand.
 - IMG07-Prüfstand: 37 Kartenbild-Pakettests und Paket-Typecheck grün. Der
   CLI-Smoke erzeugte für `classic` genau 54 Datenzeilen plus Kopfzeile;
   `git check-ignore` bestätigte die lokale Paketausgabe als ignoriert.
+
+## Finale Verifikation vor Integration
+
+- `@netgrid/card-images`: 7 Testdateien mit 37 Tests grün.
+- Paket-Typecheck und Paket-Build grün.
+- Paketgrenzen grün für 1.924 geprüfte Dateien.
+- Formatprüfung der geänderten Dateien und `git diff --check` grün.
+- Produktiver IMG06-Realnetz-Smoke gegen ein einzelnes direktes
+  Re:Factor-JPG grün; keine Datei wurde gespeichert oder importiert.
+- CLI-Smoke `pack-template --profile classic` grün mit 54 Datenzeilen plus
+  Kopfzeile; Ausgabe liegt außerhalb des Repositorys unter einem temporären
+  persistenten Root.
+- Der breite Workspace-Typecheck erreicht nach den grünen Shared-, Cards-,
+  Catalog-, Engine-, Card-Images- und Deck-Paketen das AI-Paket und stoppt dort
+  an sechs unabhängigen Baselinefehlern: zwei optionale Felder
+  (`modifier.appliesToRunner`, `option.card`) und vier bereits entfernte
+  historische Migration-JSON-Imports. Derselbe AI-Typecheck reproduziert im
+  unveränderten primären `main` exakt dieselben sechs Fehler.
 
 ## Paketfolge
 

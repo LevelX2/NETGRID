@@ -1,6 +1,6 @@
 # Aktueller Projektstatus
 
-Stand: 2026-08-15
+Stand: 2026-08-19
 
 ## Produktstand
 
@@ -21,6 +21,27 @@ Führend ist
 `docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md`.
 
 Innerhalb der privaten Anwendung sind öffentliche Matchlisten, accountgebundene persönliche Historie, Live-Zuschauer und terminale Lern-Replays umgesetzt.
+
+## Kartenbilder und lokale Vorbereitung
+
+Persönliche Kartenbilder werden ausschließlich in einer lokalen
+Vorbereitungsphase importiert, normalisiert und persistent gespeichert. Die
+Spielruntime verwendet danach nur lokale Varianten; Remote-URLs und lokale
+Quellpfade gelangen nicht in Browser-, Match-, Replay- oder StateHash-Daten.
+
+Neben lokalen PNG-, JPEG- und WebP-Quellen existiert ein ausdrücklich zu
+aktivierender HTTPS-Import. Er erzwingt öffentliche gepinnte Netzwerkziele,
+Redirect-Neuprüfung, feste Zeit-, Byte- und Statusgrenzen, zulässige MIME-Typen,
+tatsächliche Bilddekodierung und optionalen SHA-256. Der normale Import bleibt
+netzwerkfrei.
+
+Für private Komplettbestände existieren drei lokale Paketprofile:
+Originalset mit 374, Proteus mit 154 und Classic mit 54 indexierten Bildern.
+Manifest, Mindest-Importer-Version, Katalogfingerabdruck, Pfade und Hashes
+werden vor dem atomaren Import geprüft. Quellen und Buildausgaben bleiben in
+ignorierten lokalen Verzeichnissen und gehören weder in CI noch in den
+Hauptinstaller. Führend ist
+`docs/architecture/card-images/personal-card-image-import.md`.
 
 ## Engine und Karten
 
