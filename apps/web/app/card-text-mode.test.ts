@@ -33,6 +33,8 @@ describe("text card display", () => {
     expect(styles).toContain(".card.textCard.hardware {");
     expect(styles).toContain(".card.textCard.upgrade {");
     expect(styles).toContain("--text-card-accent: #adb8c7;");
+    expect(styles).toContain(".card.textCard.ice {");
+    expect(styles).toContain("--text-card-accent: #3299cf;");
     expect(styles).toContain("var(--card-bg) 72%");
   });
 
@@ -50,5 +52,20 @@ describe("text card display", () => {
     expect(cardSource).toContain('tooltipMode === "image" ? "enhanced" : tooltipMode');
     expect(styles).toContain(".card.compactCard .cardRulesPreview {");
     expect(styles).toContain("-webkit-line-clamp: 2;");
+  });
+
+  it("uses the card type accent for the readable card tooltip", () => {
+    const cardSource = readFileSync(
+      new URL("../features/cards/CardView.tsx", import.meta.url),
+      "utf8",
+    );
+    const styles = readFileSync(
+      new URL("./globals.css", import.meta.url),
+      "utf8",
+    );
+
+    expect(cardSource).toContain("cardTooltipType-${card.type}");
+    expect(styles).toContain(".cardTooltip.cardTooltipType-ice {");
+    expect(styles).toContain("--card-tooltip-accent: #3299cf;");
   });
 });

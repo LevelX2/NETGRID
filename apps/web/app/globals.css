@@ -10398,6 +10398,7 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .cardTooltip {
+  --card-tooltip-accent: var(--runner);
   position: fixed;
   left: 16px;
   top: 16px;
@@ -10406,9 +10407,14 @@ section[data-testid="legal-actions"].cueHighlight {
   display: grid;
   gap: 5px;
   padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--runner), var(--line));
+  border: 1px solid color-mix(in srgb, var(--card-tooltip-accent), var(--line) 28%);
   border-radius: 7px;
-  background: var(--tooltip-bg);
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--card-tooltip-accent), var(--tooltip-bg) 78%),
+      var(--tooltip-bg) 68%
+    );
   color: var(--text);
   box-shadow: var(--tooltip-shadow);
   font-size: 12px;
@@ -10429,6 +10435,39 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .cardTooltip strong {
   font-size: 13px;
+}
+
+.cardTooltip.cardTooltipType-agenda {
+  --card-tooltip-accent: var(--agenda);
+}
+
+.cardTooltip.cardTooltipType-ice {
+  --card-tooltip-accent: #3299cf;
+}
+
+.cardTooltip.cardTooltipType-asset {
+  --card-tooltip-accent: #caa7ff;
+}
+
+.cardTooltip.cardTooltipType-upgrade {
+  --card-tooltip-accent: #adb8c7;
+}
+
+.cardTooltip.cardTooltipType-operation,
+.cardTooltip.cardTooltipType-event {
+  --card-tooltip-accent: #f0a55d;
+}
+
+.cardTooltip.cardTooltipType-program {
+  --card-tooltip-accent: var(--runner);
+}
+
+.cardTooltip.cardTooltipType-hardware {
+  --card-tooltip-accent: #c7e88a;
+}
+
+.cardTooltip.cardTooltipType-resource {
+  --card-tooltip-accent: #e38ca8;
 }
 
 .cardTooltip span {
@@ -10454,16 +10493,16 @@ section[data-testid="legal-actions"].cueHighlight {
   align-items: center;
   gap: 4px;
   padding: 1px 6px;
-  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 35%);
+  border: 1px solid color-mix(in srgb, var(--card-tooltip-accent), var(--line) 35%);
   border-radius: 999px;
   color: var(--text);
-  background: color-mix(in srgb, var(--runner), var(--section-bg) 88%);
+  background: color-mix(in srgb, var(--card-tooltip-accent), var(--section-bg) 88%);
   font-size: 11px;
   line-height: 1;
 }
 
 .cardTooltipStat .icon {
-  color: var(--runner);
+  color: var(--card-tooltip-accent);
   font-weight: 700;
 }
 
@@ -15907,7 +15946,7 @@ select,
 }
 
 .card.textCard.ice {
-  --text-card-accent: var(--ice);
+  --text-card-accent: #3299cf;
 }
 
 .card.textCard.asset {

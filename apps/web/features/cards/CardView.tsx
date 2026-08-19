@@ -167,6 +167,7 @@ export function CardView({
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
+  const tooltipTypeClass = card.known && card.type ? ` cardTooltipType-${card.type}` : "";
   const hiddenBackClass = forceCardBack ? ` hiddenBack ${forceCardBack}HiddenBack forcedCardBack` : !card.known && hiddenSide ? ` hiddenBack ${hiddenSide}HiddenBack` : "";
   const concealedRunnerResource = isConcealedRunnerResourceCard(card);
   const knownConcealedRunnerResource = card.known && concealedRunnerResource && !forceCardBack;
@@ -547,7 +548,7 @@ export function CardView({
   const tooltipElement = showTooltip && tooltipId ? (
     <span
       ref={tooltipRef}
-      className={`cardTooltip ${tooltipPlacement} mode-${effectiveTooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
+      className={`cardTooltip${tooltipTypeClass} ${tooltipPlacement} mode-${effectiveTooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
       id={tooltipId}
       role="tooltip"
       style={tooltipPositionStyle}
