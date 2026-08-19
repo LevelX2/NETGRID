@@ -110,15 +110,15 @@ Verhaltensimplementierung.
 
 ## Schnelle Schichtzuordnung
 
-| Änderungsbedarf | Richtige Schicht |
-| --- | --- |
-| Regel, Legalität, Kosten oder zustandsabhängige Wirkung | Engine / vollständiger Engine-Quote |
-| Wiederverwendbare Kartenfunktion | aktive Hint- und Action-/Ability-Semantik |
-| Deckweite Tendenz und Komponentenstruktur | DeckDoctrine / Strategic Intent |
-| Aktuelles Ziel, Quelle, Server, Ressource oder Sequenz | zuständiges Planmodul |
-| Vergleich mehrerer kohärenter Restzuglinien | TurnPlanner-Policy und registrierte Dimensionen |
-| Payload einer bereits gewählten Action | enger Choice-Resolver |
-| Darstellung und Erklärung | Observability ohne Bewertungswirkung |
+| Änderungsbedarf                                         | Richtige Schicht                                |
+| ------------------------------------------------------- | ----------------------------------------------- |
+| Regel, Legalität, Kosten oder zustandsabhängige Wirkung | Engine / vollständiger Engine-Quote             |
+| Wiederverwendbare Kartenfunktion                        | aktive Hint- und Action-/Ability-Semantik       |
+| Deckweite Tendenz und Komponentenstruktur               | DeckDoctrine / Strategic Intent                 |
+| Aktuelles Ziel, Quelle, Server, Ressource oder Sequenz  | zuständiges Planmodul                           |
+| Vergleich mehrerer kohärenter Restzuglinien             | TurnPlanner-Policy und registrierte Dimensionen |
+| Payload einer bereits gewählten Action                  | enger Choice-Resolver                           |
+| Darstellung und Erklärung                               | Observability ohne Bewertungswirkung            |
 
 Eine Fähigkeit gehört nur dann in den gemeinsamen Kernel, wenn mehrere
 fachlich verschiedene Planmodule dieselbe Lebenszyklus-, Ressourcen-,
@@ -128,7 +128,8 @@ sie im Planowner.
 ## Zentrale Ownership-Beispiele
 
 - `corp.score_agenda`: Agenda, Zielremote, Install/Advance/Score,
-  Scoredeadline und Rush-Risiko.
+  Scoredeadline und Rush-Risiko sowie vollständig Engine-gequotete
+  regelbasierte Umwandlungen, die unmittelbar Agendapunkte erzeugen.
 - `corp.defend_servers`: globale ICE-Allokation, jede ICE-Installation,
   Schutzbewertung und Rezentscheidung.
 - `corp.establish_scoring_remote`: langfristige Remote-Nutzbarkeit, ohne

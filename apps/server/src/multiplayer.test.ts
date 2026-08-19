@@ -10552,6 +10552,52 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
+  it("advances the selected decks past their central-payoff and obligation-removal plan-coverage windows", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "central-payoff-opening-plan-coverage",
+    });
+    const created = await service.createMatch({
+      mode: "ai_vs_ai",
+      hostSide: "runner",
+      seed: "selfplay-007-1aad240bff9cc20537a132d45cf0aaa4",
+      runnerDifficulty: "hard",
+      corpDifficulty: "hard",
+      aiDeckPolicy: "selected",
+      aiTraceMode: "detailed",
+      participantADecks: {
+        runnerDeckSnapshotId:
+          "standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0",
+        corpDeckSnapshotId: "standard_standard_corp_tycho_ice_stack_1.0.0",
+      },
+      settings: {
+        agendaPointsToWin: 7,
+        cardPool: "originalset_classic_proteus",
+      },
+    });
+
+    const advanceBatch = async () => {
+      const advanced = await service.advanceAi({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        mode: "batch",
+      });
+      if (!advanced.ok) {
+        const failed = await storage.load(created.matchId);
+        const attempt = failed?.aiDecisionTraces?.at(-1);
+        throw new Error(JSON.stringify(attempt?.traceJson ?? advanced.error));
+      }
+      return advanced;
+    };
+
+    await advanceBatch();
+    const afterObligationWindow = await advanceBatch();
+    expect(
+      afterObligationWindow.requesterPayload.playerView.stateVersion,
+    ).toBeGreaterThan(52);
+  });
+
   it("creates the second observable AI-vs-AI series game with side-swapped AI identities", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {

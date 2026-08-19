@@ -2819,6 +2819,13 @@ Der Plan berechnet die vollständige Konversionsroute und reserviert:
 - Advancement-Counter;
 - benötigte Schutz-/Rezreserve.
 
+Auch eine aktuell legale, regelbasierte Ressourcenumwandlung, die unmittelbar
+Agendapunkte erzeugt, gehört als `convert_agenda`-Step diesem Owner. Ihr
+Vertrag stammt vollständig aus derselben LegalAction: Quellregel, positive
+Punktwirkung, aktive Verpflichtung, Credits, Klicks und StateVersion müssen
+exakt gebunden sein. Der Plan darf weder Kartentext noch historische Kosten
+rekonstruieren; ein unvollständiger Quote blockiert den Step fail-closed.
+
 Installieren, Advancen und Scoren sind Phasen derselben exakten
 `corp.score_agenda`-Instanz. Eine aktuell legale Advance-Action ist deshalb
 kein unbekannter Score-Schutz und kein unabhängiger Entwicklungskandidat,
@@ -3540,6 +3547,10 @@ Jedes Modul besitzt eine interne Schema- oder Modulversion. Änderungen an
   Zukunftsprojektion begrenzt Commitment- und Terminalclaims, macht einen
   vollständig Engine-gequoteten aktuellen Advance-Step aber nicht zu
   unbekanntem Score-Schutz.
+- **Kernentscheidung:** Vollständig Engine-gequotete regelbasierte
+  Ressourcenumwandlungen mit unmittelbarem Agendapunktgewinn sind
+  `convert_agenda`-Steps von `corp.score_agenda`; ein Choice-Resolver oder
+  Economy-Plan darf ihre Wirkung nicht erneut ableiten.
 - **Kernentscheidung:** HQ-/R&D-Allokation verwendet serverspezifische
   Agenda-, Kartenverlust-, Multiaccess-, Sondereffekt- und Runhistorienfacts.
   Bei belastbarem R&D-Fokus darf der Defense-Plan ohne höherrangige HQ-Evidence

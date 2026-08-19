@@ -8,6 +8,49 @@ import type {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves the public obligation-removal cost and agenda conversion quote", () => {
+    const action = conversionAction();
+    action.type = "trigger_ability";
+    action.source = "game_rule";
+    action.costs = [{ credits: 12, clicks: 1 }];
+    action.payload = {
+      abilityId: "remove_obligation",
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtCreditCost: 12,
+      obligationDebtScoreAgendaPoints: 1,
+      obligationDebtCountBefore: 1,
+      privateObligationProbe: "must-not-cross-dto",
+    };
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: playerView(action),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "obligation-removal-dto",
+      decisionId: "obligation-removal-dto:corp:1",
+      actionNumber: 1,
+      profileId: "obligation-removal-dto-test",
+    });
+
+    expect(input.legalActions[0]?.payload).toMatchObject({
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtCreditCost: 12,
+      obligationDebtScoreAgendaPoints: 1,
+      obligationDebtCountBefore: 1,
+    });
+    expect(input.playerView.legalActions[0]?.payload).toMatchObject({
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtCreditCost: 12,
+      obligationDebtScoreAgendaPoints: 1,
+      obligationDebtCountBefore: 1,
+    });
+    expect(input.legalActions[0]?.payload).not.toHaveProperty(
+      "privateObligationProbe",
+    );
+  });
+
   it("preserves a public engine-bound install target but blocks an engine-only one", () => {
     const publicInstall = conversionAction();
     publicInstall.type = "install_card";
@@ -1014,8 +1057,7 @@ describe("AI input DTO score-conversion contract", () => {
       profileId: "post-rez-run-quote-dto-test",
     });
     expect(
-      incompleteInput.playerView.servers[0]?.ice[0]
-        ?.effectivePostRezRunQuote,
+      incompleteInput.playerView.servers[0]?.ice[0]?.effectivePostRezRunQuote,
     ).toEqual({
       context: "installed_post_rez",
       cardId: "corp-fixed-ice",
@@ -1042,9 +1084,9 @@ describe("AI input DTO score-conversion contract", () => {
       actionNumber: 1,
       profileId: "post-rez-run-quote-dto-test",
     });
-    expect(
-      runnerInput.playerView.servers[0]?.ice[0],
-    ).not.toHaveProperty("effectivePostRezRunQuote");
+    expect(runnerInput.playerView.servers[0]?.ice[0]).not.toHaveProperty(
+      "effectivePostRezRunQuote",
+    );
 
     view.servers[0]!.ice[0]!.effectivePostRezRunQuote = {
       ...postRezQuote,

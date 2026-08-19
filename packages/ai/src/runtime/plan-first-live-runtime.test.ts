@@ -835,6 +835,86 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
+  it("classifies a central-payoff install from definition hints when action semantics omit the server target", () => {
+    resetResidentPlanPortfolioMemory();
+    const installMole = legalAction(
+      "install-rd-mole",
+      "runner",
+      "install_card",
+      "Install R&D Mole",
+      { credits: 0, clicks: 1 },
+      {
+        source: "rd-mole-card",
+        payload: {
+          cardId: "rd-mole-card",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const runRd = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const input = aiInput("runner", [installMole, credit, runRd]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("rd-mole-card", "runner", "resource", {
+        definitionId: "onr_proteus_147_r-and-d-mole",
+      }),
+    ];
+    const blockedRd = {
+      ...safeRuntimeRunTarget("run-rd", "rd"),
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      score: 120,
+    };
+
+    const decision = liveContext({
+      buildActionSemanticCandidates: (
+        params: Parameters<typeof buildActionSemanticCandidates>[0],
+      ) =>
+        buildActionSemanticCandidates(params).map((candidate) =>
+          candidate.actionId === installMole.actionId
+            ? {
+                ...candidate,
+                sourceDefinitionId: undefined,
+                effectTargets: [],
+                actionTacticSignals: candidate.actionTacticSignals.filter(
+                  (signal) => signal !== "access.rnd_multiaccess",
+                ),
+              }
+            : candidate,
+        ),
+      evaluateRunnerHandDevelopment: () => [],
+      evaluateRunnerRunTargets: () => [blockedRd],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 6,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "runner_access_payoff_install_waits_for_bound_access_route:rd",
+    );
+  });
+
   it("binds a legal access-payoff install to a viable multi-turn central campaign before the run is funded", () => {
     resetResidentPlanPortfolioMemory();
     const install = legalAction(
@@ -7179,6 +7259,49 @@ describe("authoritative plan-first live runtime", () => {
     });
     expect(decision.evidence).toContain(
       "plan_assessment_evidence:transient_plan_signal_plan:corp.score_agenda",
+    );
+  });
+
+  it("keeps an Engine-quoted obligation removal and agenda gain inside the score plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const removeObligation = legalAction(
+      "remove-obligation",
+      "corp",
+      "trigger_ability",
+      "Remove obligation and score 1 agenda point",
+      { credits: 12, clicks: 1 },
+      {
+        source: "game_rule",
+        payload: {
+          abilityId: "remove_obligation",
+          obligationDebtAbility: "remove_obligation",
+          obligationDebtCreditCost: 12,
+          obligationDebtScoreAgendaPoints: 1,
+          obligationDebtCountBefore: 1,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("corp", [removeObligation, credit]);
+    input.playerView.own.credits = 14;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.agendaPoints = 3;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: removeObligation.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      "plan_step_capability:convert_score_agenda",
     );
   });
 

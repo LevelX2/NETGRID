@@ -3243,6 +3243,56 @@ export function runnerActionDispositions(
     ...unboundOneShotSearchActionIds,
     ...optionalProgramTrashInstallDispositionActionIds,
   ]);
+  for (const action of input.legalActions) {
+    if (
+      action.type !== "install_card" ||
+      centralPreparationActionIds.has(action.actionId) ||
+      developmentOwnedActionIds.has(action.actionId) ||
+      coverageOwnedActionIds.has(action.actionId) ||
+      specializedPlanOwnedActionIds.has(action.actionId) ||
+      dispositions.some((entry) => entry.actionId === action.actionId)
+    ) {
+      continue;
+    }
+    const candidate = candidates.find(
+      (entry) => entry.actionId === action.actionId,
+    );
+    const sourceDefinitionId = candidate
+      ? runnerCandidateSourceDefinitionId(input, candidate)
+      : undefined;
+    const serverId =
+      (candidate ? runnerCentralPayoffServer(candidate) : undefined) ??
+      (sourceDefinitionId
+        ? runnerCentralPayoffServerForDefinition(sourceDefinitionId)
+        : undefined);
+    if (!serverId) continue;
+    const targetEvaluations = runTargets.filter(
+      (target) =>
+        target.targetServerId === serverId ||
+        target.accessServerId === serverId,
+    );
+    const currentAccessRoute = targetEvaluations.some(
+      (target) =>
+        target.pathPassability === "reachable" &&
+        target.score > 0 &&
+        (target.recommendation === "run_now" ||
+          target.recommendation === "run_if_free"),
+    );
+    const boundCoverageContinuation = domain.coverageGaps.some(
+      (gap) =>
+        (gap.targetServerId === undefined || gap.targetServerId === serverId) &&
+        (gap.answerInHand || (gap.directSearchActionIds?.length ?? 0) > 0),
+    );
+    add(
+      action.actionId,
+      "runner.pressure_central",
+      currentAccessRoute
+        ? `runner_access_payoff_install_not_admitted_to_current_central_campaign:${serverId}`
+        : boundCoverageContinuation
+          ? `runner_access_payoff_install_waits_for_coverage_bound_central_campaign:${serverId}`
+          : `runner_access_payoff_install_waits_for_bound_access_route:${serverId}`,
+    );
+  }
   for (const signal of domain.centralPressure) {
     for (const actionId of signal.rejectedPreparationActionIds ?? []) {
       add(
@@ -3314,7 +3364,7 @@ export function runnerActionDispositions(
         add(
           actionId,
           "runner.pressure_central",
-          `runner_access_payoff_install_waits_for_bound_access_route:${runnerCentralPayoffServer(accessPayoffCandidate) ?? "unknown"}`,
+          `runner_access_payoff_install_waits_for_bound_access_route:${runnerCentralPayoffServer(accessPayoffCandidate) ?? (evaluation.definitionId ? runnerCentralPayoffServerForDefinition(evaluation.definitionId) : undefined) ?? "unknown"}`,
         );
       }
       continue;
@@ -6688,7 +6738,8 @@ function runnerCentralPressureDevelopmentSignals(
       ? candidates.find(
           (entry) =>
             entry.actionId === evaluation.legalActionId &&
-            entry.sourceDefinitionId === evaluation.definitionId,
+            runnerCandidateSourceDefinitionId(input, entry) ===
+              evaluation.definitionId,
         )
       : undefined;
     const supportsPrimaryStrategy = candidate?.strategySupport.some(
@@ -6701,9 +6752,9 @@ function runnerCentralPressureDevelopmentSignals(
     ) {
       return [];
     }
-    const serverId = candidate
-      ? runnerCentralPayoffServer(candidate)
-      : runnerCentralPayoffServerForDefinition(evaluation.definitionId);
+    const serverId =
+      (candidate ? runnerCentralPayoffServer(candidate) : undefined) ??
+      runnerCentralPayoffServerForDefinition(evaluation.definitionId);
     if (!serverId) return [];
     const target = [...runTargets]
       .filter(
@@ -7134,7 +7185,9 @@ function runnerCentralPayoffServer(
     return "hq";
   }
   if (targets.has("archives")) return "archives";
-  return undefined;
+  return candidate.sourceDefinitionId
+    ? runnerCentralPayoffServerForDefinition(candidate.sourceDefinitionId)
+    : undefined;
 }
 
 function runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
@@ -7149,9 +7202,9 @@ function runnerAccessPayoffDevelopmentLacksBoundAccessRoute(
   ) {
     return false;
   }
-  const serverId = candidate
-    ? runnerCentralPayoffServer(candidate)
-    : runnerCentralPayoffServerForDefinition(evaluation.definitionId);
+  const serverId =
+    (candidate ? runnerCentralPayoffServer(candidate) : undefined) ??
+    runnerCentralPayoffServerForDefinition(evaluation.definitionId);
   if (!serverId) return false;
   const targetEvaluations = runTargets.filter(
     (target) =>
@@ -12225,6 +12278,86 @@ function scoreProjectForCandidate(
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
   residentScoreAgendaInstanceId?: string,
 ): CorpScoreProjectSignal[] {
+  const obligationRemovalAction = input.legalActions.find(
+    (action) =>
+      action.actionId === candidate.actionId &&
+      action.side === "corp" &&
+      action.type === "trigger_ability" &&
+      action.source === "game_rule" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.payload?.obligationDebtAbility === "remove_obligation" &&
+      action.payload?.abilityId === "remove_obligation",
+  );
+  if (obligationRemovalAction) {
+    const agendaPoints =
+      obligationRemovalAction.payload?.obligationDebtScoreAgendaPoints;
+    const obligationCount =
+      obligationRemovalAction.payload?.obligationDebtCountBefore;
+    const creditCost =
+      obligationRemovalAction.payload?.obligationDebtCreditCost;
+    const legalActionCostsAreExact = obligationRemovalAction.costs.every(
+      (cost) =>
+        (cost.credits === undefined ||
+          isFiniteNonNegativeInteger(cost.credits)) &&
+        (cost.clicks === undefined || isFiniteNonNegativeInteger(cost.clicks)),
+    );
+    const quotedCreditCost = obligationRemovalAction.costs.reduce(
+      (sum, cost) => sum + (cost.credits ?? 0),
+      0,
+    );
+    const quotedClickCost = obligationRemovalAction.costs.reduce(
+      (sum, cost) => sum + (cost.clicks ?? 0),
+      0,
+    );
+    if (
+      typeof agendaPoints !== "number" ||
+      !Number.isSafeInteger(agendaPoints) ||
+      agendaPoints <= 0 ||
+      typeof obligationCount !== "number" ||
+      !Number.isSafeInteger(obligationCount) ||
+      obligationCount <= 0 ||
+      typeof creditCost !== "number" ||
+      !Number.isSafeInteger(creditCost) ||
+      creditCost < 0 ||
+      !legalActionCostsAreExact ||
+      quotedCreditCost !== creditCost ||
+      quotedClickCost <= 0
+    ) {
+      throw new PlanResolutionFailure("missing_action_semantics", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        unresolvedActionIds: [candidate.actionId],
+        owner: "rules_contract",
+        removalCondition: [
+          "A legal obligation-removal score conversion must quote its positive agenda gain, active obligation count, exact credit cost, and exact action costs.",
+          `agendaPoints=${String(agendaPoints)}`,
+          `obligationCount=${String(obligationCount)}`,
+          `payloadCreditCost=${String(creditCost)}`,
+          `legalCreditCost=${quotedCreditCost}`,
+          `legalClickCost=${quotedClickCost}`,
+          `legalCostsExact=${legalActionCostsAreExact}`,
+        ].join(" "),
+      });
+    }
+    return [
+      {
+        projectId: "obligation-debt-removal",
+        agendaPoints,
+        actionIds: [candidate.actionId],
+        routeSemanticActionTypes: [candidate.semanticActionType],
+        phase: "convert_agenda",
+        sameTurnCloseout: true,
+        deadlinePressure: true,
+        terminalScore:
+          input.playerView.own.agendaPoints + agendaPoints >=
+          input.playerView.agendaPointsToWin,
+        feasible: true,
+        evidenceCode: `corp_obligation_debt_score_conversion:${obligationCount}:${creditCost}:${agendaPoints}`,
+      },
+    ];
+  }
   if (candidateIsVisibleCorpAgendaInstall(input, candidate)) {
     const agenda = requireVisibleCandidateSource(input, candidate);
     const agendaDefinitionId =
