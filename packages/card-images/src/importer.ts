@@ -2,6 +2,10 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import { parseCardImageMappingCsv, type CardImageMappingRow } from "./csv";
+import {
+  downloadHttpsCardImage,
+  type HttpsImageDownload,
+} from "./https-import";
 import { normalizeCardImage, type NormalizedCardImage } from "./normalizer";
 import {
   CardImageStore,
@@ -15,6 +19,7 @@ const MAX_SOURCE_BYTES = 50 * 1024 * 1024;
 export type CardImageImportErrorCode =
   | "mapping_file_missing"
   | "source_remote_not_allowed"
+  | "source_rights_confirmation_required"
   | "source_file_missing"
   | "source_file_too_large"
   | "source_hash_mismatch";
@@ -38,6 +43,9 @@ export type ImportCardImagesOptions = {
   dryRun?: boolean;
   now?: () => Date;
   cards?: readonly CatalogCard[];
+  allowHttpsSources?: boolean;
+  rightsConfirmed?: boolean;
+  httpsDownloader?: (source: string) => Promise<HttpsImageDownload>;
 };
 
 export type CardImageImportResult = {
@@ -91,7 +99,13 @@ export async function importCardImagesFromCsv(
   const selected = rows.filter((row) => row.enabled);
   const prepared: PreparedImage[] = [];
   for (const row of selected)
-    prepared.push(await prepareLocalImage(row, path.dirname(mappingFile)));
+    prepared.push(
+      await prepareImage(row, path.dirname(mappingFile), {
+        allowHttpsSources: options.allowHttpsSources ?? false,
+        rightsConfirmed: options.rightsConfirmed ?? false,
+        httpsDownloader: options.httpsDownloader ?? downloadHttpsCardImage,
+      }),
+    );
 
   const store = options.store ?? new CardImageStore();
   const collectionId = options.collectionId ?? "personal";
@@ -142,6 +156,49 @@ export async function importCardImagesFromCsv(
   };
 }
 
+async function prepareImage(
+  row: CardImageMappingRow,
+  mappingDirectory: string,
+  options: {
+    allowHttpsSources: boolean;
+    rightsConfirmed: boolean;
+    httpsDownloader: (source: string) => Promise<HttpsImageDownload>;
+  },
+): Promise<PreparedImage> {
+  if (hasUrlScheme(row.source)) {
+    if (!options.allowHttpsSources)
+      throw new CardImageImportError(
+        "source_remote_not_allowed",
+        `Remotequelle für ${row.printingId} benötigt den expliziten HTTPS-Importmodus.`,
+        row.printingId,
+      );
+    if (!options.rightsConfirmed)
+      throw new CardImageImportError(
+        "source_rights_confirmation_required",
+        `HTTPS-Import für ${row.printingId} benötigt die Bestätigung der Nutzungsrechte.`,
+        row.printingId,
+      );
+    const downloaded = await options.httpsDownloader(row.source);
+    const normalized = await normalizeCardImage(
+      downloaded.content,
+      row.printingId,
+    );
+    if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
+      throw new CardImageImportError(
+        "source_hash_mismatch",
+        `SHA-256 der Bildquelle für ${row.printingId} stimmt nicht.`,
+        row.printingId,
+      );
+    return {
+      row,
+      sourceFileName: downloaded.sourceFileName,
+      normalized,
+      assetHash: normalized.assetHash,
+    };
+  }
+  return prepareLocalImage(row, mappingDirectory);
+}
+
 async function prepareLocalImage(
   row: CardImageMappingRow,
   mappingDirectory: string,
@@ -149,7 +206,7 @@ async function prepareLocalImage(
   if (/^https?:\/\//i.test(row.source))
     throw new CardImageImportError(
       "source_remote_not_allowed",
-      `Remotequelle für ${row.printingId} ist in IMG01–IMG05 nicht erlaubt.`,
+      `Remotequelle für ${row.printingId} benötigt den expliziten HTTPS-Importmodus.`,
       row.printingId,
     );
   const source = path.isAbsolute(row.source)
@@ -186,6 +243,10 @@ async function prepareLocalImage(
     normalized,
     assetHash: normalized.assetHash,
   };
+}
+
+function hasUrlScheme(source: string): boolean {
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(source);
 }
 
 function planBindingResults(

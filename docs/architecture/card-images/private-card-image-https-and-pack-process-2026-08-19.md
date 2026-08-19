@@ -124,6 +124,19 @@ prepared -> IMG06 -> IMG07 -> final_verify -> main_sync
 
 Bei einem roten Done-Gate verbleibt der Prozess im aktuellen Zustand.
 
+## Fortschritt
+
+- Prozessvorbereitung abgeschlossen und committed.
+- IMG06 implementiert: Der lokale Befehl `import` bleibt netzwerkfrei;
+  `import-https` verlangt zusätzlich `--confirm-rights`. HTTPS-Requests werden
+  auf vollständig geprüfte öffentliche DNS-Ergebnisse gepinnt, jeder Redirect
+  wird neu geprüft, und Status-, MIME-, Encoding-, Byte-, Verbindungs- und
+  Gesamtzeitgrenzen greifen vor der lokalen Normalisierung und Bindung.
+- IMG06-Prüfstand: 31 Kartenbild-Pakettests und Paket-Typecheck grün. Ein
+  optionaler produktiver Smoke gegen ein einzelnes Re:Factor-JPG war mit
+  100.266 Byte, `image/jpeg` und dem erwarteten SHA-256 erfolgreich; die Datei
+  wurde nicht gespeichert oder importiert.
+
 ## Paketfolge
 
 ### IMG06 – HTTPS-Import

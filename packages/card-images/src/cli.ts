@@ -37,7 +37,7 @@ export async function runCardImageCli(args: readonly string[]): Promise<void> {
     );
     return;
   }
-  if (command === "import") {
+  if (command === "import" || command === "import-https") {
     const mappingFile = requiredOption(options, "file");
     const mode = optionalString(options["on-existing"]) ?? "fail";
     if (mode !== "fail" && mode !== "skip" && mode !== "replace")
@@ -47,12 +47,14 @@ export async function runCardImageCli(args: readonly string[]): Promise<void> {
       collectionId: optionalString(options.collection) ?? "personal",
       onExisting: mode,
       dryRun: options["dry-run"] === true,
+      allowHttpsSources: command === "import-https",
+      rightsConfirmed: options["confirm-rights"] === true,
     });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return;
   }
   throw new Error(
-    "Aufruf: card-images template --output <datei> [--set <setId>] [--side runner|corp] [--missing-only] oder card-images import --file <datei> [--dry-run] [--on-existing fail|skip|replace]",
+    "Aufruf: card-images template --output <datei> [--set <setId>] [--side runner|corp] [--missing-only], card-images import --file <datei> [--dry-run] [--on-existing fail|skip|replace] oder card-images import-https --file <datei> --confirm-rights [--dry-run] [--on-existing fail|skip|replace]",
   );
 }
 

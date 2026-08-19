@@ -32,6 +32,7 @@
     "check:card-asset-retention": "node scripts/check-card-asset-retention.mjs",
     "card-images:template": "corepack pnpm --filter @netgrid/card-images cli template",
     "card-images:import": "corepack pnpm --filter @netgrid/card-images cli import",
+    "card-images:import-https": "corepack pnpm --filter @netgrid/card-images cli import-https",
     "check:engine-cardimplementation-architecture-target": "node scripts/check-engine-cardimplementation-architecture-target.mjs",
     "check:engine-cardimplementation-architecture-target:selftest": "node scripts/check-engine-cardimplementation-architecture-target.mjs --self-test",
     "check:engine-source-structure": "node scripts/check-engine-source-structure.mjs",
