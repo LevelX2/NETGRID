@@ -6584,10 +6584,15 @@
     }
   },
   "expectation": {
+    "acceptableActions": [
+      {
+        "actionId": "runner.draw_card"
+      }
+    ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_hq_information"],
-      "requiredAssessmentEvidence": ["target:hq"]
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["draw_for_answer_breaker_ap"],
+      "requiredAssessmentEvidence": ["target:rd"]
     }
   }
 }

@@ -12032,15 +12032,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.end_turn"
+        "actionId": "runner.gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.complete_turn"],
+      "acceptablePlanKinds": ["runner.economy"],
       "acceptableCapabilities": [
-        "complete_turn_after_productive_routes_exhausted"
+        "gain_general_liquid_credits"
       ],
-      "requiredAssessmentEvidence": ["productive_legal_routes_exhausted"]
+      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     }
   }
 }

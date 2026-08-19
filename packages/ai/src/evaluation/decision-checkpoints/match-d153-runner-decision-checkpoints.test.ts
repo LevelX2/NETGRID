@@ -30,7 +30,7 @@ describe("match D153 Runner decision checkpoints", () => {
       noJunkyardCashoutD124Json,
     ],
     [
-      "F04 contests the affordable partially unknown remote at D131",
+        "F04 funds the remote contest reserve through Broker at D131",
       releaseRemotePlanD131Json,
     ],
     [
@@ -38,7 +38,7 @@ describe("match D153 Runner decision checkpoints", () => {
       breakBeforeEtrD134Json,
     ],
     [
-      "F06 completes the turn when the ordinary Archives probe is not admitted at D179",
+      "F06 cashes out the bound Broker reserve at D179",
       cashoutForRdD179Json,
     ],
     [
@@ -46,11 +46,11 @@ describe("match D153 Runner decision checkpoints", () => {
       cashoutForRdD185Json,
     ],
     [
-      "F07 completes the turn when the ordinary Archives probe is not admitted at D161",
+      "F07 builds the remote pressure reserve at D161",
       buildRemoteReserveD161Json,
     ],
     [
-      "F08 executes funded R&D pressure without unnecessary Broker liquidation at D167",
+        "F08 cashes out Broker for the urgent remote threat at D167",
       liquidateForRemoteD167Json,
     ],
   ])("satisfies %s", (_label, json) => {
@@ -58,7 +58,7 @@ describe("match D153 Runner decision checkpoints", () => {
   });
 
   it.each([
-    ["the informative HQ facecheck at D61", preserveHqFacecheckD61Json],
+    ["the breaker-AP coverage draw at D61", preserveHqFacecheckD61Json],
   ])("keeps the positive control: %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });
@@ -73,13 +73,6 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
       "cp-d153-12-cashout-for-rd-d185",
     ],
   );
-  if (
-    checkpoint.checkpointId === "cp-d153-10-liquidate-for-remote-threat-d167"
-  ) {
-    checkpoint.expectation.planExecution!.acceptableCapabilities = [
-      "pressure_rd_access",
-    ];
-  }
   return checkpoint;
 }
 
