@@ -322,7 +322,6 @@ function traceBidSelectionPurpose(
 ): string {
   return encodeParts([
     "engine.randomized_trace_bid_selection",
-    quote.matchId,
     quote.side,
     quote.assessment.traceId,
     quote.choiceId,

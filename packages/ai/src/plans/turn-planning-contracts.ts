@@ -452,8 +452,8 @@ export function buildPlanningStateIdentity(
     stateVersion,
     sideSafePlanningFingerprint: turnPlanningFingerprint("planning-state", {
       side: input.side,
-      playerView: omitActionIds(planningView),
-      eventTail: omitActionIds(input.eventTail),
+      playerView: omitNonSemanticIdentifiers(planningView),
+      eventTail: omitNonSemanticIdentifiers(input.eventTail),
       actionSemantics,
     }),
   };
@@ -1088,7 +1088,7 @@ function canonicalLegalActionSemantics(
         effectRef: action.effectRef,
         resolvedEffects: action.resolvedEffects ?? [],
         visibility: action.visibility,
-        payload: omitActionIds(action.payload),
+        payload: omitNonSemanticIdentifiers(action.payload),
       }),
     )
     .sort(compareCanonical);
@@ -1130,13 +1130,22 @@ function compareCanonical(left: unknown, right: unknown): number {
   );
 }
 
-function omitActionIds(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(omitActionIds);
+function omitNonSemanticIdentifiers(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(omitNonSemanticIdentifiers);
   if (typeof value !== "object" || value === null) return value;
   return Object.fromEntries(
     Object.entries(value)
-      .filter(([key]) => key.toLowerCase() !== "actionid")
-      .map(([key, child]) => [key, omitActionIds(child)]),
+      .filter(
+        ([key]) =>
+          ![
+            "actionid",
+            "matchid",
+            "statehash",
+            "statehashafter",
+            "finalstatehash",
+          ].includes(key.toLowerCase()),
+      )
+      .map(([key, child]) => [key, omitNonSemanticIdentifiers(child)]),
   );
 }
 

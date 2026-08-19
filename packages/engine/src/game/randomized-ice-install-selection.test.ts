@@ -99,6 +99,30 @@ describe("Engine-randomized ICE install near ties", () => {
     );
   });
 
+  it("selects the same near-tie candidate for one seed across match ids", () => {
+    const selected = ["match-left", "match-right"].map((matchId) => {
+      const state = corpActionState(matchId);
+      const quoted = quoteRandomizedIceInstallSelection(
+        state,
+        requestFor(state, hqAndRdIceCandidates(state)),
+      );
+      expect(quoted.ok).toBe(true);
+      if (!quoted.ok) throw new Error(quoted.error.message);
+      const applied = applyRandomizedIceInstallSelection(state, {
+        kind: "engine_randomized_ice_install_selection",
+        quote: quoted.quote,
+      });
+      expect(applied.ok).toBe(true);
+      if (!applied.ok) throw new Error(applied.error.message);
+      return {
+        targetServerId: applied.receipt.selectedCandidate.targetServerId,
+        randomValue: applied.receipt.randomDraw.value,
+      };
+    });
+
+    expect(selected[1]).toEqual(selected[0]);
+  });
+
   it("fails closed before randomness for stale, tampered, incomplete, or invalid candidates", () => {
     const state = corpActionState();
     const quoted = quoteRandomizedIceInstallSelection(
@@ -188,8 +212,9 @@ describe("Engine-randomized ICE install near ties", () => {
   });
 });
 
-function corpActionState(): GameState {
+function corpActionState(matchId = "local-demo-match"): GameState {
   const initial = createGame({
+    matchId,
     seed: "near-0",
     setupMode: "completed",
   });

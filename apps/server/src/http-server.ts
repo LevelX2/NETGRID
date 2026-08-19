@@ -173,7 +173,7 @@ type ClientWsMessage =
       payload: {
         knownStateVersion?: number;
         knownMatchVersion?: number;
-        mode?: "single_step" | "until_human";
+        mode?: "single_step" | "until_human" | "batch";
       };
     }
   | { type: "ping"; payload: { clientTime: number } };
@@ -596,7 +596,9 @@ export class NetgridRealtimeServer {
       ...(typeof payload.knownMatchVersion === "number"
         ? { knownMatchVersion: payload.knownMatchVersion }
         : {}),
-      ...(payload.mode === "until_human" || payload.mode === "single_step"
+      ...(payload.mode === "until_human" ||
+      payload.mode === "single_step" ||
+      payload.mode === "batch"
         ? { mode: payload.mode }
         : {}),
     });
@@ -3408,7 +3410,9 @@ async function routeHttp(
           ...(typeof body.knownMatchVersion === "number"
             ? { knownMatchVersion: body.knownMatchVersion }
             : {}),
-          ...(body.mode === "until_human" || body.mode === "single_step"
+          ...(body.mode === "until_human" ||
+          body.mode === "single_step" ||
+          body.mode === "batch"
             ? { mode: body.mode }
             : {}),
         });

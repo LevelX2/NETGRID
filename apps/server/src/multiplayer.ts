@@ -3222,7 +3222,7 @@ export class MultiplayerService {
     sessionToken: string;
     knownStateVersion?: number;
     knownMatchVersion?: number;
-    mode?: "single_step" | "until_human";
+    mode?: "single_step" | "until_human" | "batch";
   }): Promise<AdvanceAiResult> {
     return this.withMatchLock(input.matchId, async () => {
       const record = await this.mustLoadForAction(input.matchId, {
@@ -3325,7 +3325,8 @@ export class MultiplayerService {
 
       const beforeEventCount = record.eventLog.length;
       const aiStepResult =
-        input.mode === "until_human" && record.match.mode !== "ai_vs_ai"
+        (input.mode === "until_human" && record.match.mode !== "ai_vs_ai") ||
+        (input.mode === "batch" && record.match.mode === "ai_vs_ai")
           ? this.runAiUntilNextHuman(record)
           : this.runAiStep(record);
       this.syncPlayerClock(record);

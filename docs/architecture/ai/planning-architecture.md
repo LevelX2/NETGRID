@@ -3799,6 +3799,16 @@ Pseudozufalls-Tiebreak ist unzulässig. Gleicher Seed, gleicher
 führen zu demselben Draw und Replay; unterschiedliche zulässige Seeds dürfen
 die nahgleichen Alternativen variieren.
 
+Transport- und Auditidentitäten dürfen diese Gleichheit nicht unbemerkt
+aufbrechen. Insbesondere `matchId`, `StateHash` und daraus abgeleitete
+StateHash-Felder gehören weder in einen fachlichen Randomisierungszweck noch
+in den side-sicheren Planungsfingerprint oder einen stabilen Tie-Break. Sie
+bleiben weiterhin verbindlicher Bestandteil von Quote-Zuordnung,
+State-Version-Validierung, Receipts und Replay-Prüfung. Zwei Spiele mit
+gleichem Seed, gleichen Decks und gleicher fachlicher Zustandsfolge müssen
+daher dieselbe Aktions- und Planfolge wählen, auch wenn ihre Match-IDs und
+folglich ihre StateHashes verschieden sind.
+
 ## 34. Arbeit während eines Zuges
 
 ### 34.1 Zugbeginn

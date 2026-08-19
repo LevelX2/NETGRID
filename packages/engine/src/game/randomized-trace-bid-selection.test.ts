@@ -80,6 +80,13 @@ describe("Engine-randomized Blind Trace bid selection", () => {
     expect(bids.size).toBeGreaterThan(1);
   });
 
+  it("selects the same bid for one seed across match ids", () => {
+    const first = selectBid("trace-bid-match-independent", "match-left");
+    const second = selectBid("trace-bid-match-independent", "match-right");
+
+    expect(second).toEqual(first);
+  });
+
   it("fails closed before randomness for stale or tampered quotes", () => {
     const state = blindTraceBidState("trace-bid-fail-closed");
     const quoted = quote(state);
@@ -123,8 +130,11 @@ describe("Engine-randomized Blind Trace bid selection", () => {
   });
 });
 
-function selectBid(seed: string): { bid: number; draw: number } {
-  const state = blindTraceBidState(seed);
+function selectBid(
+  seed: string,
+  matchId = "local-demo-match",
+): { bid: number; draw: number } {
+  const state = blindTraceBidState(seed, matchId);
   const quoted = quote(state);
   if (!quoted.ok) throw new Error(quoted.error.message);
   const applied = applyRandomizedTraceBidSelection(state, {
@@ -177,8 +187,12 @@ function quote(state: GameState) {
   });
 }
 
-function blindTraceBidState(seed: string): GameState {
+function blindTraceBidState(
+  seed: string,
+  matchId = "local-demo-match",
+): GameState {
   const state = createGame({
+    matchId,
     seed,
     setupMode: "completed",
     traceRulesProfile: "classic_blind",

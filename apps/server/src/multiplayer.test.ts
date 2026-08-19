@@ -10418,7 +10418,7 @@ describe("MVP 0.2 multiplayer service", () => {
     );
   });
 
-  it("runs observable AI-vs-AI matches one persisted step at a time and allows host cancellation", async () => {
+  it("keeps explicit AI-vs-AI single-step semantics, batches on request and allows host cancellation", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
       tokenSalt: "observable-ai-vs-ai-service",
@@ -10504,7 +10504,28 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(afterStep.gameState.stateVersion).toBe(initialStateVersion + 1);
     expect(afterStep.eventLog).toHaveLength(initialEventCount + 1);
     expect(afterStep.aiDecisionTraces).toHaveLength(1);
-    const hashBeforeCancel = hashState(afterStep.gameState);
+    const batched = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterStep.gameState.stateVersion,
+      knownMatchVersion: afterStep.match.matchVersion,
+      mode: "batch",
+    });
+    expect(batched.ok).toBe(true);
+    if (!batched.ok) throw new Error(batched.error.message);
+    const afterBatch = await service.loadForTest(created.matchId);
+    if (!afterBatch?.gameState)
+      throw new Error("Missing batched observable AI-vs-AI state");
+    const batchStepCount =
+      afterBatch.gameState.stateVersion - afterStep.gameState.stateVersion;
+    expect(batchStepCount).toBeGreaterThan(1);
+    expect(batchStepCount).toBeLessThanOrEqual(40);
+    expect(afterBatch.eventLog).toHaveLength(
+      afterStep.eventLog.length + batchStepCount,
+    );
+    expect(afterBatch.aiDecisionTraces).toHaveLength(1 + batchStepCount);
+    const hashBeforeCancel = hashState(afterBatch.gameState);
 
     const cancelled = await service.cancelMatch({
       matchId: created.matchId,

@@ -104,6 +104,29 @@ describe("turn planning contracts", () => {
     );
   });
 
+  it("keeps transport match and StateHash identities out of planner tie-breaking", () => {
+    const first = decisionInput();
+    const second = structuredClone(first);
+    first.eventTail = [
+      {
+        matchId: "match-left",
+        stateHashAfter: "fnv1a:left",
+        type: "gain_credit",
+      },
+    ] as unknown as AiDecisionInput["eventTail"];
+    second.eventTail = [
+      {
+        matchId: "match-right",
+        stateHashAfter: "fnv1a:right",
+        type: "gain_credit",
+      },
+    ] as unknown as AiDecisionInput["eventTail"];
+
+    expect(buildPlanningStateIdentity(second)).toEqual(
+      buildPlanningStateIdentity(first),
+    );
+  });
+
   it("changes planner identity when actor-visible state changes", () => {
     const first = decisionInput();
     const second = structuredClone(first);
