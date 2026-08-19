@@ -3,6 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { instantiatePlanProposal } from "./plan-instance";
 import { bindBestCurrentPlanRoute } from "./plan-route";
+import {
+  requireValidatedPlanAssessment,
+  RUNNER_PLAN_PRIORITY_POLICY,
+} from "./plan-assessment";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { RunnerCorePlanDomain } from "./runner-core-plan-modules";
 import type { PlanSchedulerContext } from "./plan-scheduler";
@@ -679,6 +683,96 @@ describe("Runner tactical plan modules", () => {
     ).toMatchObject({
       priorityClaim: { requestedClass: "P4" },
       intentFit: "tactical_override",
+    });
+  });
+
+  it("does not retain a superseded support gap when a remote contest route becomes executable", () => {
+    const remoteRun = run("remote-run", "remote_1");
+    const module = tacticalModule("runner.contest_remote");
+    const runnerContext = context([remoteRun], {
+      remoteContests: [
+        {
+          contestId: "remote:remote_1",
+          serverId: "remote_1",
+          purpose: "contest",
+          knownAgendaThreat: true,
+          terminalPatternThreat: true,
+          reachable: true,
+          marginalValue: 1400,
+          evidenceCode: "runner_matchpoint_remote_pattern_focus:remote_1",
+          supportNeedId: "coverage:breaker_wall",
+          runActionAssessments: {
+            [remoteRun.actionId]: {
+              verdict: "executable",
+              stepValue: 1400,
+              evidenceCodes: ["current_remote_route"],
+            },
+          },
+        },
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      module.discover(runnerContext)[0]!,
+      10,
+    );
+    (runnerContext.domain as RunnerPlanDomain).coverageGaps.push({
+      gapId: "coverage:breaker_wall",
+      requiredRole: "breaker_wall",
+      requesterModuleId: "runner.contest_remote",
+      requesterPlanInstanceId: instance.instanceId,
+      requesterNeedId: "coverage:breaker_wall",
+      priorityClass: "P2",
+      evidenceCode: "missing_wall_coverage",
+      deckHasAnswer: false,
+      answerInHand: false,
+      fundingActionIds: [],
+      directSearchActionIds: [],
+      searchEngineSetupActionIds: [],
+      drawForAnswerActionIds: [],
+    });
+
+    const planAssessment = module.assess(
+      instance,
+      runnerContext,
+      emptyPortfolio(),
+    );
+
+    expect(planAssessment).toMatchObject({
+      readiness: "executable_now",
+      feasibility: { currentRouteHeadPossible: true },
+      resourceGaps: [],
+    });
+    expect(() =>
+      requireValidatedPlanAssessment(
+        planAssessment,
+        RUNNER_PLAN_PRIORITY_POLICY,
+        10,
+      ),
+    ).not.toThrow();
+    const materialized = module.materialize(
+      instance,
+      planAssessment as never,
+      runnerContext,
+    );
+    expect(materialized.step).toMatchObject({
+      stepId: `${instance.instanceId}:contest`,
+      capability: { capabilityId: "contest_remote" },
+      target: { kind: "server", id: "remote_1" },
+    });
+    const route = bindBestCurrentPlanRoute({
+      side: "runner",
+      stateVersion: 10,
+      timingPoint: "runner.action",
+      planInstanceId: instance.instanceId,
+      ...materialized,
+    });
+    expect(route).toMatchObject({
+      planInstanceId: instance.instanceId,
+      head: {
+        planInstanceId: instance.instanceId,
+        stepId: `${instance.instanceId}:contest`,
+        actionId: remoteRun.actionId,
+      },
     });
   });
 

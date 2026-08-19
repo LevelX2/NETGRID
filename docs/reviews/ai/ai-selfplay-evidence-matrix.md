@@ -61,6 +61,7 @@ Verbindliche Gates je Paarung:
 | `runner-low-payoff-pressure`              | Runs nach unmittelbarem und zukünftigem Informations-/Tempoertrag auswählen                                                                    |     1 |        1 |         0 |                   0 | Archives-Runs mit LegalActions, öffentlichem Informationsstand und Folgeplan vergleichen                                                                                     |
 | `runner-coverage-owner-materialization`   | Alle vom Rig-Plan beanspruchten legalen Coverage-Antworten auch als ausführbare Route materialisieren                                          |     1 |        0 |         0 |                   1 | Bei neuen Coverage-Fällen Owner, Rollenpassung, Kosten und tatsächlich veröffentlichte Action-IDs vergleichen                                                                |
 | `runner-urgent-remote-support-conversion` | Einen dringenden Remote-Contest über Funding, Breaker-Installation und sichere Rückkehr zum Remote-Root im selben Zug vollständig konvertieren |     1 |        0 |         0 |                   1 | Weitere Karten- und Deckkombinationen prüfen; Projektion darf weder zukünftige Action-IDs noch unbekannte Kosten oder Gefahren annehmen                                      |
+| `plan-support-readiness-consistency`      | Aktuellen ausführbaren Route-Head und noch offenen gebundenen Supportbedarf in jeder Planbewertung widerspruchsfrei klassifizieren             |     1 |        0 |         0 |                   1 | Weitere alternative Routen prüfen; `executable_now` darf nie gleichzeitig einen offenen `ResourceGap` tragen                                                                 |
 
 ## Fallregister
 
@@ -77,6 +78,7 @@ Verbindliche Gates je Paarung:
 | `SP-009` | `corp-deck-exhaustion-horizon`            | Behoben/verifiziert | Corp   | vor Fix `match_c7144122aaeafb8b`, D126; final `match_e17749ea32acc45e`, D126–D128                                                  | Basic Draw war wegen kurzem Pflichtzieh-Horizont blockiert, Night Shift mit demselben Kartenverbrauch wurde über Economy dennoch gespielt                                                                                           | planübergreifende Corp-Draw-Sicherheitsdisposition mit Economy-Owner                                                                                                |
 | `SP-010` | `runner-urgent-remote-support-conversion` | Behoben/verifiziert | Runner | vor Fix `match_ddac385459428c34`, D54–D63; Zwischenlauf `match_7086b0128fda7eeb`, D57–D59; final `match_d1466637af6d0a60`, D54–D64 | Nach einem gescheiterten Remote-Probe lag eine vollständige Credit–Breaker–Rerun-Linie vor. Die KI lief stattdessen erst auf HQ und nach dem ersten Fix auf R&D, sodass die bedrohte Vier-Punkte-Agenda liegen blieb                | `runner.contest_remote` als Root, `runner.rig_and_coverage` als exakt gebundener Support-Leaf und sichere Run-Reservefreigabe                                       |
 | `SP-011` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_d1466637af6d0a60`, D149, D172, D191 und spätere Rezfenster D312, D314, D316                                                 | Corp legt drei zusätzliche Wall-/Code-Gate-Schichten auf das wiederholt angegriffene R&D. Gegen die öffentlich passenden kostenlosen Breaker erzeugen sie später keinen Access-Stop und werden trotz genügend Credits nicht gerezzt | `corp.defend_servers`; offen ist, ob bei der Installation eine konkret bessere Platzierung oder eine schnellere Score-/Economy-Aktion legal und messbar stärker war |
+| `SP-012` | `plan-support-readiness-consistency`      | Behoben/verifiziert | Runner | vor Fix `match_81da14276d2357ad`, D283–D284; final `match_5aba9d2141ec1d24`, D282–D300                                             | Der dringende Remote-Plan hatte eine aktuelle ausführbare Route, führte aber gleichzeitig noch einen älteren Wall-Coverage-Bedarf und scheiterte deshalb vor der Auswahl fail-closed                                                | gemeinsamer Assessment-Vertrag von `runner.contest_remote`, `runner.pressure_central` und `runner.develop_board_and_hand`                                           |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -352,6 +354,52 @@ Status: Verdacht. Der Fall verdichtet SP-005 vom reinen Serververhältnis hin
 zur allgemeinen Frage, ob zusätzliche zentrale ICE-Schichten gegen bekannte
 passende Breaker tatsächlich Zugriffsschutz erzeugen.
 
+Zyklus 004 liefert die notwendige Gegenprobe: Shadoe Tag & Bag legt ebenfalls
+zusätzliche zentrale ICE-Schichten, doch das sichtbare Rent-I-Con ist nur ein
+selbstzerstörender Universal-Breaker. Jede weitere Schicht verbraucht reale
+Credits oder eine weitere Breaker-Kopie und trägt zum späteren
+Coverage-Ausfall des Runners bei. Das widerlegt SP-011 nicht, schränkt den
+Verdacht aber menschenverständlich ein: Prüfbedürftig ist nicht „zusätzliches
+ICE gegen irgendeinen sichtbaren Breaker“, sondern nur eine Schicht, deren
+Grenznutzen gegen dauerhaft verfügbare, passende und nahezu kostenlose
+Abdeckung nicht belegt ist.
+
+## SP-012 – ausführbarer Plan und offener Supportbedarf widersprechen sich
+
+- Auswahlseed: `ced7adaf85f1c327099d7b7bc9535f26`
+- Spielseed: `selfplay-004-492b88128585eaac4fe73d7bff7d456d`
+- Runner: Rent-I-Con: Das Shellspiel, 45 Karten, `fnv1a:518ccd75`
+- Corp: Shadoe Tag & Bag, 48 Karten, `fnv1a:f0c0544f`
+- Ausgangslauf: kein Endergebnis; KI-Abbruch beim Zwischenstand 2:6
+- Finales Replay: Corp 10 – Runner 3, Agendapunkte 7:3
+
+Der konkrete Verdacht war eindeutig reproduzierbar: Nach der Installation und
+dem ersten Advance von Project Babylon bei sechs Corp-Agendapunkten nahm der
+Runner D282 einen Credit. D283 und der wiederholte D284 scheiterten, obwohl
+weiterhin legale Runner-Aktionen existierten. Die Diagnose erklärte den
+Widerspruch exakt: `runner.contest_remote` meldete eine jetzt ausführbare
+Route und gleichzeitig den älteren offenen Bedarf nach Wall-Abdeckung.
+
+Das ist kein Kartenbewertungsproblem. Eine Planbewertung kann entweder ihren
+aktuellen Route-Head ausführen oder zuerst gebundene Unterstützung benötigen;
+beides zugleich ist unzulässig. Der Prioritätsvalidator stoppte deshalb
+korrekt fail-closed. Der Fehler lag im gemeinsamen Assessment-Zulieferer der
+Runner-Pläne.
+
+Der generische Fix übernimmt einen gebundenen Support-`ResourceGap` nur noch,
+solange der Parent keinen aktuellen Route-Head besitzt. Im identischen Replay
+finanziert der Runner D282–D283, spielt D284 Social Engineering unter dem
+bestehenden Remote-Owner, löst die Engine-Choices aus und stiehlt D300 Project
+Babylon. Alle 327 Entscheidungen des fertigen Replays sind legal,
+owner-konsistent und ohne Fallback oder Timeout.
+
+Status: behoben/verifiziert. Der Fix verhindert den Runtimeabbruch und lässt
+den bestehenden Remote-Plan seine alternative aktuelle Route ausführen. Der
+spätere Runner-Verlust ist ein getrennt analysiertes Coverage-/Attritions-
+Matchup: Im verbleibenden Deck existiert kein Wall-Breaker mehr, sodass die
+letzte Subsidiary-Branch-Linie nicht legal passierbar ist.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
-[Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md).
+[Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
+[Review Selbstspielzyklus 004](ai-selfplay-cycle-004-review.md).

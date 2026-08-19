@@ -590,6 +590,7 @@ function centralPressureModule(): PlanModule {
         context,
         instance,
         current.signal.supportNeedId,
+        routeExists,
       );
       const result = assessment(
         instance,
@@ -730,6 +731,7 @@ function remoteContestModule(): PlanModule {
         context,
         instance,
         current.signal.supportNeedId,
+        routeExists,
       );
       const result = assessment(
         instance,
@@ -857,6 +859,7 @@ function developmentModule(): PlanModule {
         context,
         instance,
         current.signal.supportNeedId,
+        routeExists,
       );
       const result = assessment(
         instance,
@@ -1200,7 +1203,12 @@ function exactRunnerParentSupportResourceGaps(
   context: PlanSchedulerContext,
   parent: PlanInstance,
   supportNeedId: string | undefined,
+  currentRouteExists: boolean,
 ): ResourceGap[] {
+  // A bound support need describes why the parent had no route. Once the
+  // parent owns an executable route again, that historical need must not also
+  // classify the same assessment as support-dependent.
+  if (currentRouteExists) return [];
   if (supportNeedId === undefined) return [];
   const exactNeeds = domain(context).fundingNeeds.filter(
     (

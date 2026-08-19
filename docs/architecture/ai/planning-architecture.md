@@ -1399,6 +1399,18 @@ Readiness trennt:
 Ein langfristig sehr attraktiver, aber noch wartender Killplan verdrängt
 keinen aktuell ausführbaren Scoring-Plan. Er bleibt dennoch im Portfolio.
 
+`executable_now` und ein offener `ResourceGap` sind innerhalb derselben
+aktuellen Planbewertung gegenseitig ausgeschlossen. Ein exakt gebundener
+Supportbedarf beschreibt, warum der Parent noch keinen aktuellen Route-Head
+besitzt, und begründet dann `executable_with_support`. Sobald derselbe Parent
+einen aktuellen Route-Head materialisieren kann – auch über eine andere
+zulässige Vorbereitung oder alternative Route –, darf der frühere
+Supportbedarf diese Bewertung nicht zusätzlich als supportabhängig
+klassifizieren. Die residente Need-/Supportbeziehung darf für spätere
+Revalidierung im Portfolio erhalten bleiben; Prioritätsclaim, Readiness und
+`resourceGaps` des aktuellen Assessments müssen jedoch denselben gegenwärtigen
+Ausführungszustand beschreiben.
+
 ### 14.4 Hysterese
 
 Ein Challenger ersetzt den aktuellen Vordergrund nur, wenn mindestens eine
