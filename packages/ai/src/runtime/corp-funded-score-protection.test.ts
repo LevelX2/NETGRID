@@ -204,7 +204,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
     });
   });
 
-  it("fails closed on missing, incomplete, or non-credit rez obligations", () => {
+  it("fails closed on missing or incomplete quotes and budgets mandatory agenda-point rez costs", () => {
     const wall = fundedIce("data-wall", "onr_v1_238_data-wall-2-0", false);
     const { effectiveRezCostQuote: _missingQuote, ...withoutQuote } = wall;
     expect(
@@ -239,23 +239,47 @@ describe("assessBestFundedCorpScoreProtection", () => {
       knowledge: "unknown",
       unknownReason: "incomplete_rez_cost_quote",
     });
+    const agendaPointWall = {
+      ...wall,
+      effectiveRezCostQuote: {
+        ...wall.effectiveRezCostQuote!,
+        mandatoryAdditionalCosts: { agendaPoints: 1 },
+      },
+    };
     expect(
       fundedAssessment({
-        serverIce: [
-          {
-            ...wall,
-            effectiveRezCostQuote: {
-              ...wall.effectiveRezCostQuote!,
-              mandatoryAdditionalCosts: { agendaPoints: 1 },
-            },
-          },
-        ],
+        serverIce: [agendaPointWall],
         corpCredits: 5,
+        corpAgendaPoints: 1,
         threshold: HALF,
       }),
     ).toMatchObject({
-      knowledge: "unknown",
-      unknownReason: "unsupported_mandatory_rez_cost",
+      knowledge: "known",
+      fundedProtection: true,
+      totalSelectedRezCost: 2,
+      totalSelectedAgendaPointCost: 1,
+      agendaPointsAfterDefense: 0,
+      selectedRezCosts: [
+        {
+          iceInstanceId: "data-wall",
+          credits: 2,
+          agendaPoints: 1,
+        },
+      ],
+    });
+    expect(
+      fundedAssessment({
+        serverIce: [agendaPointWall],
+        corpCredits: 5,
+        corpAgendaPoints: 0,
+        threshold: HALF,
+      }),
+    ).toMatchObject({
+      knowledge: "known",
+      fundedProtection: false,
+      totalSelectedRezCost: 0,
+      totalSelectedAgendaPointCost: 0,
+      selectedRezCosts: [],
     });
   });
 
@@ -296,6 +320,7 @@ describe("assessBestFundedCorpScoreProtection", () => {
       observedAtStateVersion: 7,
       availableCorpCredits: 2,
       availableCorpClicks: 3,
+      availableCorpAgendaPoints: 0,
       scoreReserve: NO_RESERVE,
       maximumRunnerAccessSuccessProbability: HALF,
     };
@@ -827,9 +852,9 @@ describe("projectCorpFundedIceInstallRoute", () => {
 
   it("fails closed when current resources drift from the stored baseline", () => {
     const setup = routeSetup({
-      source: handIce("filter", "onr_v1_244_filter"),
+      source: handIce("data-wall", "onr_v1_238_data-wall-2-0"),
       targetServerId: "remote_1",
-      currentIce: [],
+      currentIce: [fundedIce("existing-filter", "onr_v1_244_filter", true)],
       corpCredits: 5,
     });
 
@@ -966,29 +991,57 @@ describe("projectCorpFundedIceInstallRoute", () => {
     });
   });
 
-  it("rejects mandatory agenda-point cost in a post-install rez quote", () => {
+  it("projects a mandatory agenda-point cost in a post-install rez quote", () => {
     const setup = routeSetup({
       source: handIce("filter", "onr_v1_244_filter"),
       targetServerId: "remote_1",
       currentIce: [],
       corpCredits: 5,
+      corpAgendaPoints: 1,
     });
+    const action = {
+      ...setup.action,
+      payload: {
+        ...setup.action.payload,
+        postInstallRezQuoteMandatoryAgendaPointCost: 1,
+        postInstallRezQuoteMandatoryAdditionalCostKind: "agenda_point",
+      },
+    };
 
+    expect(projectCorpFundedIceInstallRoute({ ...setup, action })).toMatchObject(
+      {
+        knowledge: "known",
+        after: {
+          totalSelectedAgendaPointCost: 1,
+          agendaPointsAfterDefense: 0,
+        },
+      },
+    );
+    const insufficientSetup = routeSetup({
+      source: handIce("data-wall", "onr_v1_238_data-wall-2-0"),
+      targetServerId: "remote_1",
+      currentIce: [fundedIce("existing-filter", "onr_v1_244_filter", true)],
+      corpCredits: 5,
+      corpAgendaPoints: 0,
+    });
     expect(
       projectCorpFundedIceInstallRoute({
-        ...setup,
+        ...insufficientSetup,
         action: {
-          ...setup.action,
+          ...insufficientSetup.action,
           payload: {
-            ...setup.action.payload,
+            ...insufficientSetup.action.payload,
             postInstallRezQuoteMandatoryAgendaPointCost: 1,
             postInstallRezQuoteMandatoryAdditionalCostKind: "agenda_point",
           },
         },
       }),
     ).toMatchObject({
-      knowledge: "unknown",
-      unknownReason: "unsupported_mandatory_rez_cost",
+      knowledge: "known",
+      after: {
+        totalSelectedAgendaPointCost: 0,
+        selectedRezCosts: [],
+      },
     });
   });
 
@@ -1186,6 +1239,7 @@ function routeFor(params: {
   scoreReserve?: CorpScoreReserve;
   runnerRig?: VisibleCard[];
   runnerCredits?: number;
+  corpAgendaPoints?: number;
   preferPostInstallSourceProgress?: boolean;
 }) {
   return projectCorpFundedIceInstallRoute(routeSetup(params));
@@ -1199,6 +1253,7 @@ function routeSetup(params: {
   scoreReserve?: CorpScoreReserve;
   runnerRig?: VisibleCard[];
   runnerCredits?: number;
+  corpAgendaPoints?: number;
   preferPostInstallSourceProgress?: boolean;
 }) {
   const currentIce = params.currentIce ?? [];
@@ -1207,6 +1262,9 @@ function routeSetup(params: {
     serverIce: currentIce,
     corpCredits: params.corpCredits,
     scoreReserve,
+    ...(params.corpAgendaPoints !== undefined
+      ? { corpAgendaPoints: params.corpAgendaPoints }
+      : {}),
     ...(params.runnerRig ? { runnerRig: params.runnerRig } : {}),
     ...(params.runnerCredits !== undefined
       ? { runnerCredits: params.runnerCredits }
@@ -1224,6 +1282,7 @@ function routeSetup(params: {
     currentStateVersion: 7,
     currentCorpCredits: params.corpCredits,
     currentCorpClicks: 3,
+    currentCorpAgendaPoints: params.corpAgendaPoints ?? 0,
     visibleCorpHand: [params.source],
     ...(params.targetServerId === "new_remote"
       ? {}
@@ -1272,6 +1331,7 @@ function fundedAssessment(params: {
   threshold?: typeof QUARTER | typeof HALF;
   runnerRig?: VisibleCard[];
   runnerCredits?: number;
+  corpAgendaPoints?: number;
 }): CorpFundedScoreProtectionAssessment {
   return assessBestFundedCorpScoreProtection({
     serverIce: params.serverIce,
@@ -1281,6 +1341,7 @@ function fundedAssessment(params: {
     observedAtStateVersion: 7,
     availableCorpCredits: params.corpCredits,
     availableCorpClicks: params.corpClicks ?? 3,
+    availableCorpAgendaPoints: params.corpAgendaPoints ?? 0,
     scoreReserve: params.scoreReserve ?? NO_RESERVE,
     maximumRunnerAccessSuccessProbability: params.threshold ?? QUARTER,
   });

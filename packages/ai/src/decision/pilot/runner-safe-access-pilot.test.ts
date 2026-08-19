@@ -45,7 +45,9 @@ describe("runner-safe-access-pilot", () => {
   });
 });
 
-function frame(params: { candidate: ActionSemanticCandidate }): SemanticDecisionFrame {
+function frame(params: {
+  candidate: ActionSemanticCandidate;
+}): SemanticDecisionFrame {
   return {
     schemaVersion: "semantic-decision-frame-v1",
     side: "runner",
@@ -70,6 +72,12 @@ function frame(params: { candidate: ActionSemanticCandidate }): SemanticDecision
           pathPassability: "reachable",
           pathCost: 0,
           creditsAfterRun: 4,
+          fundingNeed: {
+            reason: "none",
+            routeFundingGap: 0,
+            postRunFloorGap: 0,
+            protectedLiquidReserve: 0,
+          },
           runCommitment: "full_path",
           stealOrTrashAffordable: "unknown",
           installedRunPayoff: payoff(),
@@ -219,6 +227,7 @@ function runCandidate(
     primaryProjectionStatus: "projected",
     projectionIssues: [],
     hardGates: [],
-    evidence: source === "evidence" ? [`run_action_projection_target:${serverId}`] : [],
+    evidence:
+      source === "evidence" ? [`run_action_projection_target:${serverId}`] : [],
   };
 }

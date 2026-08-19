@@ -147,6 +147,13 @@ export type RunnerCoverageGapSignal = {
   installActionIds?: string[];
   installActionValues?: Record<string, number>;
   fundingGap?: number;
+  sameTurnRunConversion?: {
+    targetRunActionId: string;
+    requiredCredits: number;
+    requiredClicksAfterFunding: number;
+    projectedKnownPathCost: number;
+    postRunCreditFloor: number;
+  };
   currentKnownPathCost?: number;
   currentPathFundingGap?: number;
   recoveryMode?:
@@ -1387,8 +1394,11 @@ function coverageModule(
         );
         const draws = coverageDrawCandidates(context, gap);
         const funding = coverageFundingCandidates(context, gap);
-        const phase =
-          installs.length > 0
+        const sameTurnConversionNeedsFunding =
+          gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0;
+        const phase = sameTurnConversionNeedsFunding
+          ? "fund_answer"
+          : installs.length > 0
             ? "install_answer"
             : gap.answerInHand && (gap.fundingGap ?? 0) > 0
               ? "fund_answer"
@@ -1474,16 +1484,21 @@ function coverageModule(
         };
       }
       if (current.phase === "fund_answer") {
+        const candidates = coverageFundingCandidates(context, current.gap);
         return {
           step: {
             stepId: `${instance.instanceId}:fund:${current.gap.requiredRole}`,
             capability: {
               capabilityId: `fund_install_${current.gap.requiredRole}`,
-              semanticActionTypes: ["economy.gain_credit"],
+              semanticActionTypes: [
+                ...new Set(
+                  candidates.map((entry) => entry.candidate.semanticActionType),
+                ),
+              ],
             },
             purpose: `Fund the visible in-hand answer for ${current.gap.requiredRole}.`,
           },
-          candidates: coverageFundingCandidates(context, current.gap),
+          candidates,
         };
       }
       const candidates = coverageDrawCandidates(context, current.gap);

@@ -154,6 +154,8 @@ function scoreDecoySignals(params: {
             observedAtStateVersion: params.input.playerView.stateVersion,
             availableCorpCredits: params.input.playerView.own.credits,
             availableCorpClicks: params.input.playerView.own.clicks,
+            availableCorpAgendaPoints:
+              params.input.playerView.own.agendaPoints,
             scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
             maximumRunnerAccessSuccessProbability: {
               numerator: 1,

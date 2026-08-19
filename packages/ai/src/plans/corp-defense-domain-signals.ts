@@ -583,6 +583,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     observedAtStateVersion: input.playerView.stateVersion,
     availableCorpCredits: input.playerView.own.credits,
     availableCorpClicks: input.playerView.own.clicks,
+    availableCorpAgendaPoints: input.playerView.own.agendaPoints,
     scoreReserve,
     maximumRunnerAccessSuccessProbability,
   });
@@ -672,6 +673,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
     currentStateVersion: input.playerView.stateVersion,
     currentCorpCredits: input.playerView.own.credits,
     currentCorpClicks: input.playerView.own.clicks,
+    currentCorpAgendaPoints: input.playerView.own.agendaPoints,
     visibleCorpHand: input.playerView.own.gripOrHq,
     ...(server ? { currentServer: { id: server.id, ice: serverIce } } : {}),
     runnerRig: input.playerView.opponent.rig ?? [],

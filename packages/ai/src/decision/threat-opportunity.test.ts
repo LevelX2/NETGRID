@@ -243,6 +243,12 @@ function runTarget(params: {
     pathPassability,
     pathCost: 1,
     creditsAfterRun: 4,
+    fundingNeed: {
+      reason: "none",
+      routeFundingGap: 0,
+      postRunFloorGap: 0,
+      protectedLiquidReserve: 0,
+    },
     runCommitment: "full_path",
     stealOrTrashAffordable: true,
     installedRunPayoff: payoff(),

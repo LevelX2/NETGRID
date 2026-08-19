@@ -1035,7 +1035,8 @@ function preparedScoreParentSuppressesSiblingRoute(
     (project) =>
       project.agendaInstanceId === agendaInstanceId &&
       project.serverId !== undefined &&
-      project.serverId !== "new_remote",
+      project.serverId !== "new_remote" &&
+      project.feasible,
   );
   if (preparedProjects.length === 0) return false;
   const siblingWasAdmitted = domain.scoreProjects.some(

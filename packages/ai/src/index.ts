@@ -582,6 +582,7 @@ export type {
   RunnerKnownAccessState,
   RunnerPathPassability,
   RunnerRunTargetEvaluation,
+  RunnerRunTargetFundingNeed,
   RunnerRunTargetKind,
   RunnerRunTargetRecommendation,
 } from "./runner-run-target-evaluation";
