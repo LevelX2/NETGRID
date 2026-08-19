@@ -139,7 +139,7 @@
   },
   "engine": {
     "stateVersion": 246,
-    "stateHash": "fnv1a:3e7e46ab",
+    "stateHash": "fnv1a:ec7c94cd",
     "testOnlyGameState": {
       "matchId": "ai-sim_ai-renticon-code-rot-20260718-001_local_runner_rent_i_con_shellspiel_2026_07_17_local_corp_code_rot_bitte_eintreten_2026_07_16",
       "baseline": {
@@ -17708,7 +17708,7 @@
         "sourceCardInstanceId": "corp_onr_v1_221_asp_2",
         "sourceDefinitionId": "onr_v1_221_asp",
         "subroutineIndex": 0,
-        "baseTraceStrength": 5,
+        "traceLimit": 5,
         "corpBidMax": 10,
         "status": "runner_bid",
         "successEffect": {
@@ -17716,7 +17716,7 @@
           "amount": 1
         },
         "corpBid": 2,
-        "traceStrength": 7,
+        "traceValue": 7,
         "runnerLink": 0
       },
       "pendingChoice": {

@@ -38,6 +38,7 @@ const cases: Array<{
     risks: [
       "opportunity_cost",
       "reserve_risk",
+      "loss_condition",
       "credit_swing",
       "leave_play_penalty",
     ],
@@ -111,9 +112,9 @@ const cases: Array<{
   {
     id: "onr_v1_317_data-masons",
     roles: ["ice_modifier", "economy_asset", "remote_support"],
-    values: { economy: 2, remoteRootValue: 2 },
+    values: { remoteRootValue: 2 },
     risks: [],
-    purposes: ["rez_best_defensive_ice"],
+    purposes: [],
     strategies: ["corp.ice_tax_glacier"],
     strategyCovered: true,
     qualityConfidence: "high",
@@ -124,13 +125,13 @@ const cases: Array<{
     roles: ["ice", "damage_ice", "etr_ice", "sentry_ice"],
     risks: [],
     values: {},
-    purposes: [],
+    purposes: ["choose_effective_rez_strength_x"],
     effectTargets: [
       "corp_ice.net_damage",
       "corp_ice.end_run",
       "corp_ice.rez_paid_scaling",
     ],
-    strategies: ["corp.ice_tax_glacier"],
+    strategies: ["corp.damage_kill", "corp.ice_tax_glacier"],
     strategyCovered: true,
     qualityConfidence: "medium",
   },
@@ -343,18 +344,15 @@ const signalCases: Record<
       "ice.corp_strength_support",
     ],
     tacticSignals: [
-      "corp.remote_protection",
       "ice.corp_rez_discount",
       "ice.corp_strength_support",
       "tax.ice",
     ],
     actionTacticSignals: [
-      "corp.remote_protection",
       "effect:remote_protection",
       "effect:rez_discount",
       "effect_scope:ice",
       "effect_timing:persistent",
-      "remote_role:ice_modifier",
     ],
     conditions: ["requires_installed_ice"],
     requiredMechanics: [
@@ -491,9 +489,9 @@ const signalCases: Record<
       "effect:remote_tax",
       "effect_scope:remote",
       "effect_timing:during_run",
-      "remote_role:run_tax",
+      "remote_role:scoring_protection",
     ],
-    conditions: ["requires_remote_server"],
+    conditions: [],
     requiredMechanics: [
       "fortRunWindows",
       "installCapabilities",
@@ -623,6 +621,20 @@ describe("CS06 effective AI hint compatibility", () => {
           "tax.ice",
         ],
         confidence: "high",
+      },
+      {
+        cardId: "onr_proteus_020_digiconda",
+        strategyId: "corp.damage_kill",
+        role: "support_tool",
+        roleDetail: "net_damage_ice",
+        evidence: [
+          "corp_ice.damage_source",
+          "corp_ice.rez_paid_scaling",
+          "damage.payoff",
+        ],
+        confidence: "low",
+        rationale:
+          "Two Net damage supports a damage line, but a single expensive ICE is not itself a damage-kill anchor.",
       },
       {
         cardId: "onr_proteus_020_digiconda",
