@@ -60,7 +60,11 @@ Done-Gate:
 
 - START03 abgeschlossen: Listener-Preflight mit zwei fokussierten Pester-Tests
   und PowerShell-Syntaxprüfung verifiziert.
-- START04 aktiv.
+- START04 abgeschlossen: Runtime prüft Deckquell- und Profil-Eingabehash ohne
+  Profilberechnung; das Guide-Gate prüft die vollständige Profilausgabe.
+- Bekannte, unabhängige Baselines: `check:ai-deck-doctrine-strategy` scheitert
+  auch auf `main` an `Legacy planRole created Runner R&D pressure anchor`;
+  `check:standard-deck-guides` meldet 42 bereits auf `main` veraltete Guides.
 
 ## Abschluss
 

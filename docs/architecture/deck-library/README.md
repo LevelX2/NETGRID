@@ -5,3 +5,4 @@
 ## Enthaltene Artefakte
 
 - `local-file-deck-library-2026-05-07.md`
+- `standard-deck-guide-validation.md`
