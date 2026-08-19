@@ -7,11 +7,75 @@ import { runAiDecisionCheckpoint } from "../evaluation/decision-checkpoints/chec
 import { residentPlanPortfolioSnapshot } from "./resident-plan-portfolio-memory";
 import {
   corpPlanningHeadContinuationScope,
+  corpPlanningHeadPriorityCoverage,
   specializedPlanningLineMatchesRoute,
 } from "./corp-turn-planner-shadow";
 import { planningHeadMatchesCommittedPhaseRoot } from "./corp-turn-planner-cutover";
 
 describe("Corp TurnPlanner selected-head binding", () => {
+  it("keeps an urgent same-turn score head inside its exact agenda root", () => {
+    const scoreRoot =
+      "plan:corp.score_agenda:agenda%3Ahostile-takeover%3Aremote_1";
+    const scoreHead = {
+      rootPlanInstanceId: scoreRoot,
+      rootPlanModuleId: "corp.score_agenda" as const,
+      moduleId: "corp.score_agenda" as const,
+      executorPlanInstanceId: scoreRoot,
+      priorityClass: "P3" as const,
+      nextMilestoneId: "advance_score_agenda",
+    };
+
+    expect(corpPlanningHeadContinuationScope(scoreHead)).toBe("same_root");
+    expect(
+      corpPlanningHeadContinuationScope({
+        ...scoreHead,
+        priorityClass: "P4",
+      }),
+    ).toBeUndefined();
+    expect(scoreHead).toMatchObject({
+      rootPlanInstanceId: scoreRoot,
+      executorPlanInstanceId: scoreRoot,
+      moduleId: "corp.score_agenda",
+      nextMilestoneId: "advance_score_agenda",
+    });
+
+    const exactCoverage = corpPlanningHeadPriorityCoverage({
+      urgentPriorityClass: "P3",
+      urgentExactScoreRootAvailable: true,
+      head: scoreHead,
+    });
+    const siblingCoverage = corpPlanningHeadPriorityCoverage({
+      urgentPriorityClass: "P3",
+      urgentExactScoreRootAvailable: true,
+      head: {
+        ...scoreHead,
+        moduleId: "corp.economy",
+        executorPlanInstanceId:
+          "plan:corp.economy:score-support%3Aagenda%3Atycho%3Aremote_1",
+      },
+    });
+
+    expect(exactCoverage).toMatchObject({
+      requiredObligationIds: [
+        "priority-band:P3",
+        "urgent-exact-score-owner:P3",
+      ],
+      satisfiedObligationIds: [
+        "priority-band:P3",
+        "urgent-exact-score-owner:P3",
+      ],
+      violatedObligationIds: [],
+    });
+    expect(siblingCoverage).toMatchObject({
+      requiredObligationIds: [
+        "priority-band:P3",
+        "urgent-exact-score-owner:P3",
+      ],
+      satisfiedObligationIds: ["priority-band:P3"],
+      violatedObligationIds: ["urgent-exact-score-owner:P3"],
+    });
+  });
+
   it("returns from an exact defense support leaf to its score root", () => {
     const scoreRoot = "plan:corp.score_agenda:agenda%3Aagenda-1%3Aremote_2";
     const supportHead = {
@@ -22,6 +86,7 @@ describe("Corp TurnPlanner selected-head binding", () => {
         "plan:corp.defend_servers:score-protection%3Aagenda-1%3Aremote_2",
       executorParentPlanInstanceId: scoreRoot,
       executorParentNeedId: "score-protection:agenda-1:remote_2",
+      priorityClass: "P4" as const,
       nextMilestoneId: "score_server_protected",
     };
 
