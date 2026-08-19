@@ -956,6 +956,8 @@ export function createCardRuntimeResolvers(
       stateVersion: state.stateVersion + 1,
       side: "runner",
       source: `card_implementation.pro018_stack_install_run_cleanup:${sourceCardId}:${definition.id}:${String(legalAction.payload?.serverId ?? "hq")}:${state.stateVersion + 1}`,
+      sourceCardInstanceId: sourceCardId,
+      sourceCardDefinitionId: definition.id,
       prompt: "Programm aus dem Stack installieren",
       kind: "select_cards",
       minSelections: 1,
@@ -1192,13 +1194,13 @@ export function createCardRuntimeResolvers(
       };
     }
     if (
-      hiddenLongtail?.kind ===
-      "secret_spend_guess_then_targeted_bypass_run"
+      hiddenLongtail?.kind === "secret_spend_guess_then_targeted_bypass_run"
     ) {
       return {
         name: "card_implementation_runner_event_secret_spend_guess_then_targeted_bypass_run",
         canPlay: (state) =>
-          state.runner.credits >= Math.max(0, Math.floor(definition.cost ?? 0)) + 2,
+          state.runner.credits >=
+          Math.max(0, Math.floor(definition.cost ?? 0)) + 2,
         resolve: (state, legalAction) => {
           if (state.runner.credits < 2)
             throw new Error(
@@ -1211,8 +1213,7 @@ export function createCardRuntimeResolvers(
           legalAction.payload = {
             ...(legalAction.payload ?? {}),
             hiddenZoneBarrier: true,
-            hiddenZoneAction:
-              "secret_spend_guess_then_targeted_bypass_run",
+            hiddenZoneAction: "secret_spend_guess_then_targeted_bypass_run",
             sourceDefinitionId: definition.id,
           };
         },

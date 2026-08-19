@@ -28,6 +28,7 @@ import {
   type VisibleConditionalEncounterEffect,
   type VisibleCorpIcePostRezRunQuote,
   type VisibleCorpCounterBankPreparationQuote,
+  type VisibleCorpIceRezActionResourceExchangeQuote,
   type VisibleCorpIceRezResourceExchangeQuote,
   type VisibleCorpRezCostQuote,
   type VisibleCorpScoreContinuationQuote,
@@ -127,6 +128,11 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "discountedRezSourceDefinitionId",
   "discountedRezCostBase",
   "temporaryDerezAfterRun",
+  "variableRezKind",
+  "baseRezCost",
+  "variableRezAdditionalCost",
+  "variableRezValue",
+  "effectiveSubroutineCountAfterRez",
   "rezCostPaid",
   "rezCostReductionAmount",
   "rezCostReductionSourceDefinitionIds",
@@ -1509,6 +1515,8 @@ function sanitizeVisibleCardWithOptions(
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
   const effectiveRezResourceExchangeQuote =
     card.effectiveRezResourceExchangeQuote;
+  const effectiveRezActionResourceExchangeQuotes =
+    card.effectiveRezActionResourceExchangeQuotes;
   const scoreContinuationQuote = card.scoreContinuationQuote;
   const counterBankPreparationQuote = card.counterBankPreparationQuote;
   const includeEffectiveRezCostQuote =
@@ -1541,6 +1549,32 @@ function sanitizeVisibleCardWithOptions(
       options.expectedCorpRezServerId &&
     effectiveRezResourceExchangeQuote.expiresAtStateVersion ===
       options.expectedCorpRezStateVersion;
+  const sanitizedEffectiveRezActionResourceExchangeQuotes =
+    options.allowCorpRezCostQuote === true &&
+    Array.isArray(effectiveRezActionResourceExchangeQuotes)
+      ? effectiveRezActionResourceExchangeQuotes.flatMap((entry) => {
+          if (
+            typeof entry.actionId !== "string" ||
+            entry.actionId.length === 0 ||
+            entry.quote.context !== "installed" ||
+            entry.quote.cardId !== card.instanceId ||
+            entry.quote.targetServerId !== options.expectedCorpRezServerId ||
+            entry.quote.projectedServerId !== options.expectedCorpRezServerId ||
+            entry.quote.expiresAtStateVersion !==
+              options.expectedCorpRezStateVersion
+          ) {
+            return [];
+          }
+          return [
+            {
+              actionId: entry.actionId,
+              quote: sanitizeInstalledCorpIceRezResourceExchangeQuote(
+                entry.quote,
+              ),
+            } satisfies VisibleCorpIceRezActionResourceExchangeQuote,
+          ];
+        })
+      : [];
   const includeScoreContinuationQuote =
     options.allowCorpScoreContinuationQuote === true &&
     scoreContinuationQuote?.context === "installed_agenda" &&
@@ -1657,6 +1691,12 @@ function sanitizeVisibleCardWithOptions(
             sanitizeInstalledCorpIceRezResourceExchangeQuote(
               effectiveRezResourceExchangeQuote,
             ),
+        }
+      : {}),
+    ...(sanitizedEffectiveRezActionResourceExchangeQuotes.length > 0
+      ? {
+          effectiveRezActionResourceExchangeQuotes:
+            sanitizedEffectiveRezActionResourceExchangeQuotes,
         }
       : {}),
     ...(includeScoreContinuationQuote && scoreContinuationQuote

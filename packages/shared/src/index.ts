@@ -3114,6 +3114,11 @@ export type VisibleCorpIceRezResourceExchangeQuote =
       };
     };
 
+export type VisibleCorpIceRezActionResourceExchangeQuote = {
+  actionId: string;
+  quote: VisibleCorpIceRezResourceExchangeQuote;
+};
+
 /**
  * Corp-private, Engine-certified continuation budget for one installed agenda.
  *
@@ -3598,6 +3603,7 @@ export type VisibleCard = {
   effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
+  effectiveRezActionResourceExchangeQuotes?: VisibleCorpIceRezActionResourceExchangeQuote[];
   /** Present only for the Corp's installed agendas. */
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
   /** Present only in the Corp's own HQ or on an own installed root card. */

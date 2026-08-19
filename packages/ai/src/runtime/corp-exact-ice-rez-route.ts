@@ -176,6 +176,7 @@ export function projectExactCorpIceRezRoute(params: {
   });
   const accessBlock = readExactCurrentRunAccessBlock({
     input,
+    candidate,
     sourceCard,
     targetServerId,
   });
@@ -329,7 +330,10 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
   const action = input.legalActions.find(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
-  const resourceExchangeQuote = sourceCard.effectiveRezResourceExchangeQuote;
+  const resourceExchangeQuote = exactRezActionResourceExchangeQuote(
+    sourceCard,
+    candidate.actionId,
+  );
   if (
     totalRezCredits !== 0 ||
     action?.payload?.temporaryDerezAfterRun === true ||
@@ -359,11 +363,15 @@ function isFreePersistentDefenseOnWorthwhileCurrentServer(params: {
 
 function readExactCurrentRunAccessBlock(params: {
   input: AiDecisionInput;
+  candidate: ActionSemanticCandidate;
   sourceCard: VisibleCard;
   targetServerId: string;
 }): CorpExactIceRezRouteProjection["accessBlock"] | undefined {
-  const { input, sourceCard, targetServerId } = params;
-  const quote = sourceCard.effectiveRezResourceExchangeQuote;
+  const { input, candidate, sourceCard, targetServerId } = params;
+  const quote = exactRezActionResourceExchangeQuote(
+    sourceCard,
+    candidate.actionId,
+  );
   if (
     input.playerView.run?.attackedServerId !== targetServerId ||
     quote?.context !== "installed" ||
@@ -416,7 +424,10 @@ function readExactCurrentRunResourceExchange(params: {
     after,
     totalRezCredits,
   } = params;
-  const quote = sourceCard.effectiveRezResourceExchangeQuote;
+  const quote = exactRezActionResourceExchangeQuote(
+    sourceCard,
+    candidate.actionId,
+  );
   if (
     quote?.context !== "installed" ||
     quote.complete !== true ||
@@ -654,7 +665,7 @@ export function readExactInstalledCorpIceRezQuote(params: {
   }
   const actionCertifiedQuote =
     action.payload?.discountedRezSourceCardId === undefined
-      ? ordinaryRezActionQuote(action.payload, quote)
+      ? ordinaryRezActionQuote(action.payload, quote, actionCredits)
       : discountedRezActionQuote(action.payload, quote, actionCredits);
   if (
     !actionCertifiedQuote ||
@@ -672,6 +683,7 @@ export function readExactInstalledCorpIceRezQuote(params: {
 function ordinaryRezActionQuote(
   payload: AiDecisionInput["legalActions"][number]["payload"],
   quote: Extract<VisibleCorpRezCostQuote, { complete: true }>,
+  actionCredits: number,
 ): Extract<VisibleCorpRezCostQuote, { complete: true }> | undefined {
   if (
     payload?.discountedRezSourceDefinitionId !== undefined ||
@@ -680,7 +692,42 @@ function ordinaryRezActionQuote(
   ) {
     return undefined;
   }
+  if (
+    quote.costKind === "variable" &&
+    quote.variableParameter.kind === "paid_end_the_run_subroutines"
+  ) {
+    const value = payload?.variableRezValue;
+    const additionalCredits = payload?.variableRezAdditionalCost;
+    if (
+      payload?.variableRezKind !== "paid_end_the_run_subroutines" ||
+      !nonNegativeSafeInteger(value) ||
+      value < quote.variableParameter.minSubroutines ||
+      !nonNegativeSafeInteger(additionalCredits) ||
+      additionalCredits !==
+        value * quote.variableParameter.additionalCreditsPerSubroutine ||
+      payload.baseRezCost !== quote.finalCredits ||
+      payload.rezCostPaid !== actionCredits ||
+      payload.effectiveSubroutineCountAfterRez !== value ||
+      actionCredits !== quote.finalCredits + additionalCredits
+    ) {
+      return undefined;
+    }
+    return { ...quote, finalCredits: actionCredits };
+  }
   return quote;
+}
+
+function exactRezActionResourceExchangeQuote(
+  sourceCard: VisibleCard,
+  actionId: string,
+) {
+  const exact = sourceCard.effectiveRezActionResourceExchangeQuotes?.filter(
+    (entry) => entry.actionId === actionId,
+  );
+  if (exact && exact.length > 0) {
+    return exact.length === 1 ? exact[0]?.quote : undefined;
+  }
+  return sourceCard.effectiveRezResourceExchangeQuote;
 }
 
 /**

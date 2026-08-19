@@ -82,6 +82,27 @@ export function buildPlayerViewProjection(
         side === "corp"
           ? visibleCorpIceRezResourceExchangeQuote(state, id, visibleIce)
           : undefined;
+      const effectiveRezActionResourceExchangeQuotes =
+        side === "corp"
+          ? legalActions.flatMap((action) => {
+              const count = action.payload?.effectiveSubroutineCountAfterRez;
+              if (
+                action.type !== "rez_ice" ||
+                action.source !== id ||
+                !Number.isSafeInteger(count) ||
+                (count as number) < 0
+              ) {
+                return [];
+              }
+              const quote = visibleCorpIceRezResourceExchangeQuote(
+                state,
+                id,
+                visibleIce,
+                { hardEndTheRunSubroutineCountAfterRez: count as number },
+              );
+              return quote ? [{ actionId: action.actionId, quote }] : [];
+            })
+          : [];
       return {
         ...visibleIce,
         ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
@@ -89,6 +110,9 @@ export function buildPlayerViewProjection(
         ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),
         ...(effectiveRezResourceExchangeQuote
           ? { effectiveRezResourceExchangeQuote }
+          : {}),
+        ...(effectiveRezActionResourceExchangeQuotes.length > 0
+          ? { effectiveRezActionResourceExchangeQuotes }
           : {}),
       };
     });

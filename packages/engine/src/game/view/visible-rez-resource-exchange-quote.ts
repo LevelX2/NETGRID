@@ -40,6 +40,9 @@ export function visibleCorpIceRezResourceExchangeQuote(
   state: GameState,
   iceId: CardInstanceId,
   visibleIce: VisibleCard,
+  options: {
+    hardEndTheRunSubroutineCountAfterRez?: number;
+  } = {},
 ): VisibleCorpIceRezResourceExchangeQuote | undefined {
   const server = state.corp.servers.find((candidate) =>
     candidate.ice.includes(iceId),
@@ -83,7 +86,9 @@ export function visibleCorpIceRezResourceExchangeQuote(
       complete: false,
       reason: "effective_run_projection_unavailable",
     };
-  const endTheRunCount = hardEndTheRunSubroutineCount(projectedRunQuote);
+  const endTheRunCount =
+    options.hardEndTheRunSubroutineCountAfterRez ??
+    hardEndTheRunSubroutineCount(projectedRunQuote);
   if (endTheRunCount <= 0) {
     return {
       ...binding,

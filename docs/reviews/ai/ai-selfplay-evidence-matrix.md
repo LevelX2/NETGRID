@@ -54,7 +54,7 @@ Verbindliche Gates je Paarung:
 
 | Cluster                                   | Fähigkeit                                                                                                                                      | Fälle | Verdacht | Bestätigt | Behoben/verifiziert | Nächste Verdichtung                                                                                                                                                          |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----: | -------: | --------: | ------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                      |     3 |        1 |         0 |                   2 | Weitere Schutz-Drawing-Fälle mit tatsächlich erreichbarer Folgelinie sammeln und mit den zwei Ownership-Fixes vergleichen                                                    |
+| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                      |     4 |        2 |         0 |                   2 | Score-Stau bei dauerhaft agenda-gesättigtem HQ gegen unzureichend geschützte Remotes abgrenzen und einen zustandsgenauen gestuften Alternativpfad belegen                    |
 | `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                      |     2 |        1 |         0 |                   1 | Frühe einzeln sichere Draws weiter sammeln; der planübergreifende kurze Pflichtzieh-Horizont ist bereits abgesichert                                                         |
 | `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen zusätzlicher ICE-Schichten gemeinsam bewerten         |     2 |        2 |         0 |                   0 | Vergleichszustände sammeln, in denen eine konkrete alternative ICE-Platzierung oder Score-/Economy-Aktion nachweislich mehr Zugriffsschutz beziehungsweise Siegtempo erzeugt |
 | `corp-score-exposure-risk`                | Agenda nur in eine gegen öffentliche Rig-Abdeckung ausreichend finanzierbare Score-Remote überführen                                           |     1 |        1 |         0 |                   0 | Vergleichbare gestufte Score-Linien mit Rez-Budget, Runner-Credits und Breakerabdeckung sammeln                                                                              |
@@ -62,6 +62,10 @@ Verbindliche Gates je Paarung:
 | `runner-coverage-owner-materialization`   | Alle vom Rig-Plan beanspruchten legalen Coverage-Antworten auch als ausführbare Route materialisieren                                          |     1 |        0 |         0 |                   1 | Bei neuen Coverage-Fällen Owner, Rollenpassung, Kosten und tatsächlich veröffentlichte Action-IDs vergleichen                                                                |
 | `runner-urgent-remote-support-conversion` | Einen dringenden Remote-Contest über Funding, Breaker-Installation und sichere Rückkehr zum Remote-Root im selben Zug vollständig konvertieren |     1 |        0 |         0 |                   1 | Weitere Karten- und Deckkombinationen prüfen; Projektion darf weder zukünftige Action-IDs noch unbekannte Kosten oder Gefahren annehmen                                      |
 | `plan-support-readiness-consistency`      | Aktuellen ausführbaren Route-Head und noch offenen gebundenen Supportbedarf in jeder Planbewertung widerspruchsfrei klassifizieren             |     1 |        0 |         0 |                   1 | Weitere alternative Routen prüfen; `executable_now` darf nie gleichzeitig einen offenen `ResourceGap` tragen                                                                 |
+| `runner-finite-coverage-lifecycle`        | Endliche Universal-Breaker über aktuelle Zugriffswerte und vorhersehbare spätere Matchpoint-Server hinweg einsetzen                            |     1 |        1 |         0 |                   0 | Wiederholungen sammeln, in denen ein früher Run messbar weniger wert ist und die spätere Serverrolle bereits sichtbar oder deckseitig vorhersehbar war                       |
+| `runner-install-invocation-coverage`      | Alle aktuellen Zahlungs- und Trash-Varianten derselben planbewerteten Installation exakt routen oder dispositionieren                          |     1 |        0 |         0 |                   1 | Weitere Installationsquellen mit mehreren Zahlungswegen prüfen; unabhängige Coverage- oder Development-Owner dürfen nicht überschrieben werden                               |
+| `structured-choice-origin-binding`        | Jedes planrelevante Engine-Choice strukturiert an Quellinstanz, Quelldefinition und ausgewählte Aktion zurückbinden                            |     1 |        0 |         0 |                   1 | Weitere Hidden-Zone- und Search-Choices auf vollständige strukturierte Herkunft prüfen; Source-Strings bleiben ungeparst                                                     |
+| `corp-variable-rez-action-quote`          | Kosten und Runwirkung jeder aktuellen variablen ICE-Rez-LegalAction als exakt actiongebundene Engine-Quote bereitstellen                       |     1 |        0 |         0 |                   1 | Die actiongebundene Quote auf weitere variable Familien wie X-Stärke und alternative Subtypen ausdehnen, sobald ein reproduzierbarer Entscheidungsfall sie benötigt          |
 
 ## Fallregister
 
@@ -79,6 +83,11 @@ Verbindliche Gates je Paarung:
 | `SP-010` | `runner-urgent-remote-support-conversion` | Behoben/verifiziert | Runner | vor Fix `match_ddac385459428c34`, D54–D63; Zwischenlauf `match_7086b0128fda7eeb`, D57–D59; final `match_d1466637af6d0a60`, D54–D64 | Nach einem gescheiterten Remote-Probe lag eine vollständige Credit–Breaker–Rerun-Linie vor. Die KI lief stattdessen erst auf HQ und nach dem ersten Fix auf R&D, sodass die bedrohte Vier-Punkte-Agenda liegen blieb                | `runner.contest_remote` als Root, `runner.rig_and_coverage` als exakt gebundener Support-Leaf und sichere Run-Reservefreigabe                                       |
 | `SP-011` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_d1466637af6d0a60`, D149, D172, D191 und spätere Rezfenster D312, D314, D316                                                 | Corp legt drei zusätzliche Wall-/Code-Gate-Schichten auf das wiederholt angegriffene R&D. Gegen die öffentlich passenden kostenlosen Breaker erzeugen sie später keinen Access-Stop und werden trotz genügend Credits nicht gerezzt | `corp.defend_servers`; offen ist, ob bei der Installation eine konkret bessere Platzierung oder eine schnellere Score-/Economy-Aktion legal und messbar stärker war |
 | `SP-012` | `plan-support-readiness-consistency`      | Behoben/verifiziert | Runner | vor Fix `match_81da14276d2357ad`, D283–D284; final `match_5aba9d2141ec1d24`, D282–D300                                             | Der dringende Remote-Plan hatte eine aktuelle ausführbare Route, führte aber gleichzeitig noch einen älteren Wall-Coverage-Bedarf und scheiterte deshalb vor der Auswahl fail-closed                                                | gemeinsamer Assessment-Vertrag von `runner.contest_remote`, `runner.pressure_central` und `runner.develop_board_and_hand`                                           |
+| `SP-013` | `runner-finite-coverage-lifecycle`        | Verdacht            | Runner | `match_5aba9d2141ec1d24`, frühe Zentralruns und D300–D327                                                                          | Selbstzerstörende Rent-I-Con-Kopien tragen frühe Zugriffe, fehlen aber gegen die spätere Matchpoint-Remote; unklar ist, ob ein früher Einsatz mit damaliger Sicht tatsächlich weniger wert war                                      | `runner.pressure_central` und `runner.contest_remote` benötigen eine gemeinsame endliche Coverage-Lebenszyklusbewertung                                             |
+| `SP-014` | `runner-install-invocation-coverage`      | Behoben/verifiziert | Runner | vor Fix `match_b920d5897a7fa766`, D99; final `match_a827f500dc378815`                                                              | Zentraldruck dispositionierte nur die kanonische Vienna-22-Installation; gleichwertige Bits- und Programm-Trash-Zahlungsvarianten derselben Quellinstanz blieben ownerlos                                                           | Variantenpropagierung innerhalb `runner.pressure_central`, ohne bestehende Spezialowner zu überschreiben                                                            |
+| `SP-015` | `structured-choice-origin-binding`        | Behoben/verifiziert | Runner | vor Fix `match_f96e7445261cab1a`, D154–D155; final `match_a827f500dc378815`                                                        | Test Spin war als Coverage-Suche exakt gewählt, doch das Engine-Choice verlor strukturierte Quellinstanz und Quelldefinition und konnte nicht zur Suchaktion zurückgebunden werden                                                  | Engine-Choice-Erzeugung und bestehende Coverage-Continuation; kein Source-String-Parsing im Resolver                                                                |
+| `SP-016` | `corp-variable-rez-action-quote`          | Behoben/verifiziert | Corp   | vor Fix `match_a989710008cbc543`, D11, D16, D59, D191, D228, D230 und D238; final `match_a827f500dc378815`, ab D11                 | Variable Rez-LegalActions nannten Kosten und Wirkung exakt, die Kartenquote blieb jedoch ohne Subroutinen unvollständig; bezahlbare stopping ICE wurden deshalb wiederholt abgelehnt                                                | Engine-PlayerView liefert actiongebundene Variantenquote; `corp.defend_servers` liest nur die exakt ausgewählte aktuelle Action                                     |
+| `SP-017` | `corp-score-plan-conversion`              | Verdacht            | Corp   | `match_a827f500dc378815`, Corp-Züge 0–44, Scorefortschritt erst D411–D412                                                          | HQ enthält fast durchgehend drei bis fünf Agenden und die Corp erreicht bis zu 16 Credits, beginnt aber erst nach 44 Zügen eine Score-Remote und verliert 0:8                                                                       | `corp.score_agenda` mit Agenda-Sättigungs-, Score-Stau- und gestuftem Schutzvertrag; Schwelle und besserer konkreter Pfad sind noch offen                           |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -399,7 +408,95 @@ spätere Runner-Verlust ist ein getrennt analysiertes Coverage-/Attritions-
 Matchup: Im verbleibenden Deck existiert kein Wall-Breaker mehr, sodass die
 letzte Subsidiary-Branch-Linie nicht legal passierbar ist.
 
+## SP-013 – endliche Breaker zwischen frühem Payoff und spätem Matchpoint
+
+Der finale Replay aus Zyklus 004 zeigt ein strategisches Lebenszyklusproblem,
+aber noch keinen belegten Fehlzug. Rent-I-Con ist universell, zerstört sich
+jedoch nach dem Run. Mehrere Kopien ermöglichen frühe zentrale Zugriffe; vor
+der späteren dreifach geschützten Matchpoint-Remote ist keine Wall-Abdeckung
+mehr vorhanden.
+
+Der Verdacht lautet: Ein Planportfolio könnte endliche Coverage nicht nur je
+aktuellem Run, sondern gegen vorhersehbare spätere Serverrollen reservieren.
+Für einen Fix fehlt der Gegenbeweis, dass ein konkreter früher Verbrauch bei
+damaliger Sicht weniger wertvoll war. Auch darf die KI keine unbekannte
+spätere ICE-Zusammensetzung vorwegnehmen.
+
+Status: Verdacht. Neue Fälle müssen frühen Zugriffswert, verbleibende Kopien,
+sichtbare gegnerische Scorestrategie und spätere konkrete Coverage-Lücke
+gemeinsam ausweisen.
+
+## SP-014 – gleichwertige Installationsvarianten ohne Planabdeckung
+
+- Auswahlseed: `fb0f32492012bf9d4cec7495cf187ec7`
+- Spielseed: `selfplay-005-d0e715c051817d8f50363e8ccb5afafd`
+- Ausgangslauf: `match_b920d5897a7fa766`, D99
+- Finaler Replay: `match_a827f500dc378815`
+
+Vienna 22 besitzt mehrere gleichzeitig legale Zahlungs- und
+Programm-Trash-Varianten. `runner.pressure_central` dispositionierte nur die
+kanonische Installation, obwohl alle Varianten dieselbe aktuelle
+Quellinstanz und denselben strategischen Zweck besaßen. Die übrigen
+LegalActions blieben ownerlos und lösten korrekt
+`missing_plan_module_coverage` aus.
+
+Der Fix überträgt die Zweckdisposition auf aktuelle semantische
+Geschwistervarianten derselben Quellinstanz. Varianten mit bereits vorhandenem
+Coverage-, Development- oder Spezialowner bleiben unberührt.
+
+Status: behoben/verifiziert. Der identische Replay überschreitet D99; ein
+fokussierter Ownership-Test sichert auch Bits- und Programm-Trash-Varianten.
+
+## SP-015 – strukturiertes Suchfenster ohne Herkunftsbindung
+
+Im ersten Replay nach SP-014 wählt der Coverage-Plan D154 Test Spin für eine
+Code-Gate-Antwort. D155 kann die Choice nicht zurückbinden, weil die Engine nur
+eine textuelle Source, aber keine strukturierten Quellfelder projiziert.
+
+Der Fix ergänzt Quellinstanz und Quelldefinition im bestehenden
+Choice-Vertrag. Der Resolver parst keinen Source-String und wählt weiterhin
+nur die Payload der bereits vom Coverage-Plan gewählten Action.
+
+Status: behoben/verifiziert. Der finale Replay führt die gebundene
+Test-Spin-Suche aus und endet regulär.
+
+## SP-016 – variable Rez-Variante ohne exakte Ressourcenaustausch-Quote
+
+Im Zwischenreplay `match_a989710008cbc543` veröffentlicht die Engine für
+Gatekeeper, Sandstorm und weitere variable ICE mehrere genaue Rez-LegalActions.
+Die einzelne Kartenquote kennt vor dem Rez jedoch noch keine erzeugte
+End-the-run-Subroutine. Dadurch lehnt `corp.defend_servers` sieben bezahlbare
+Varianten als unbekannt ab. Nach D11 wird Project Venice aus HQ gestohlen.
+
+Der Fix veröffentlicht die Ressourcenaustausch-Quote je aktueller Action-ID,
+erhält die zertifizierten Variantenfelder in der AI-Eingabe und validiert
+Kosten und Wirkung ohne Kartentext-Fallback. Im finalen Replay rezzt die Corp
+D11 Gatekeeper mit einer End-the-run-Subroutine.
+
+Status: behoben/verifiziert. Der letzte identische Lauf endet nach 440
+Entscheidungen ohne Entscheidungsfehler; alle 39 angrenzenden
+Corp-Rez-Routentests sind grün.
+
+## SP-017 – Score-Stau bei dauerhaft agenda-gesättigtem HQ
+
+Im finalen Zyklus-005-Replay liegen schon nach der ersten Pflichtziehung zwei,
+ab dem zweiten Corp-Zug drei und später fünf Agenden in HQ. Die Corp erreicht
+mehrfach neun bis sechzehn Credits, beginnt aber erst D411 eine Score-Remote
+und erzielt keinen Punkt. Economy und Defense verlängern die Partie, während
+der Runner 15-mal R&D angreift und vier Agenden für acht Punkte stiehlt.
+
+Der Verdacht ist menschenverständlich zweischneidig: Zu frühe, unterfinanzierte
+Remote-Installationen bleiben nach SP-006 riskant; dauerhaftes Warten auf eine
+statische Vollschutzschwelle lässt zugleich HQ- und R&D-Exposition sowie das
+gegnerische Rig wachsen. Benötigt wird deshalb ein gestufter, zustandsgenauer
+Score-Stau-Vertrag statt einer pauschal niedrigeren Schutzschwelle.
+
+Status: Verdacht. Vor einem Fix müssen ein konkreter früherer Installations-,
+Schutz- und Advance-Pfad sowie sein Risiko gegenüber dem tatsächlich
+gewählten Warten belegt werden.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
-[Review Selbstspielzyklus 004](ai-selfplay-cycle-004-review.md).
+[Review Selbstspielzyklus 004](ai-selfplay-cycle-004-review.md) und
+[Review Selbstspielzyklus 005](ai-selfplay-cycle-005-review.md).

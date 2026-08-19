@@ -4445,6 +4445,10 @@ Jedes Modul testet:
 - Engine-zertifizierte aktuelle und Post-Install-Rez-Quotes bestimmen Kosten
   und Reserve; fehlende oder falsch gebundene Quotes dürfen nicht auf
   gedruckte `rezCost` zurückfallen;
+- variable aktuelle Rez-LegalActions besitzen eine zur exakten Action-ID
+  gehörende Engine-Quote für Kosten und Runwirkung; eine einzige Kartenquote
+  darf unterschiedliche Zahlungs-, Stärke-, Subtyp- oder
+  Subroutinenvarianten weder zusammenfassen noch stellvertretend bewerten;
 - `funding_only` delegiert Economy-Support und materialisiert keinen
   zielgerichteten Defense-Draw;
 - unbekannte oder unvollständige Defense-Facts enden fail-closed und werden

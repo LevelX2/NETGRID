@@ -680,7 +680,7 @@ describe("authoritative plan-first live runtime", () => {
     ).toBe(false);
   });
 
-  it("defers central multiaccess installation until a current or bound access route exists", () => {
+  it("defers every payment and program-trash variant of a central payoff install until a bound access route exists", () => {
     resetResidentPlanPortfolioMemory();
     const rdInterface = legalAction(
       "install-rd-interface",
@@ -711,7 +711,66 @@ describe("authoritative plan-first live runtime", () => {
       { credits: 0, clicks: 1 },
       { payload: { serverId: "rd" } },
     );
-    const input = aiInput("runner", [rdInterface, credit, runRd]);
+    const installVariants = [
+      legalAction(
+        "install-rd-interface-with-one-hosted-credit",
+        "runner",
+        "install_card",
+        "Install R&D Interface with one hosted credit",
+        { credits: 1, clicks: 1 },
+        {
+          source: "rd-interface-card",
+          payload: {
+            cardId: "rd-interface-card",
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            runnerInstallPaymentSourceIds: "software-installer",
+            runnerInstallPaymentSourceAmounts: "1",
+            runnerInstallPaymentHostedCredits: 1,
+          },
+        },
+      ),
+      legalAction(
+        "install-rd-interface-with-two-hosted-credits",
+        "runner",
+        "install_card",
+        "Install R&D Interface with two hosted credits",
+        { credits: 1, clicks: 1 },
+        {
+          source: "rd-interface-card",
+          payload: {
+            cardId: "rd-interface-card",
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            runnerInstallPaymentSourceIds: "software-installer",
+            runnerInstallPaymentSourceAmounts: "2",
+            runnerInstallPaymentHostedCredits: 2,
+          },
+        },
+      ),
+      legalAction(
+        "install-rd-interface-with-program-trash-and-hosted-credit",
+        "runner",
+        "install_card",
+        "Trash a program and install R&D Interface with a hosted credit",
+        { credits: 1, clicks: 1 },
+        {
+          source: "rd-interface-card",
+          payload: {
+            cardId: "rd-interface-card",
+            sourceDefinitionId: "onr_v1_139_r-and-d-interface",
+            runnerProgramTrashBeforeInstall: true,
+            runnerInstallPaymentSourceIds: "software-installer",
+            runnerInstallPaymentSourceAmounts: "1",
+            runnerInstallPaymentHostedCredits: 1,
+          },
+        },
+      ),
+    ];
+    const input = aiInput("runner", [
+      rdInterface,
+      ...installVariants,
+      credit,
+      runRd,
+    ]);
     input.playerView.own.credits = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("rd-interface-card", "runner", "hardware", {
@@ -730,7 +789,9 @@ describe("authoritative plan-first live runtime", () => {
         params: Parameters<typeof buildActionSemanticCandidates>[0],
       ) =>
         buildActionSemanticCandidates(params).map((candidate) =>
-          candidate.actionId === "install-rd-interface"
+          [rdInterface, ...installVariants].some(
+            (action) => action.actionId === candidate.actionId,
+          )
             ? {
                 ...candidate,
                 effectTargets: ["rd"],

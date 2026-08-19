@@ -89,7 +89,9 @@ function installSyntheticRunnerProgram(
   id: string,
 ): CardInstanceId {
   const cardId = addRunnerGrip(state, "simple_decoder", id);
-  state.runner.grip = state.runner.grip.filter((candidate) => candidate !== cardId);
+  state.runner.grip = state.runner.grip.filter(
+    (candidate) => candidate !== cardId,
+  );
   state.runner.rig.programs.push(cardId);
   state.runner.memoryUsed += 1;
   state.cardInstances[cardId] = {
@@ -135,7 +137,11 @@ function playEventAction(
   return action;
 }
 
-function applyLegal(state: GameState, side: Side, action: LegalAction): GameState {
+function applyLegal(
+  state: GameState,
+  side: Side,
+  action: LegalAction,
+): GameState {
   const result = applyAction(state, {
     matchId: state.matchId,
     side,
@@ -170,7 +176,10 @@ function resolveChoiceResult(
 }
 
 function expectReplayStable(before: GameState, after: GameState): void {
-  const replay = replayEvents(before, after.eventLog.slice(before.eventLog.length));
+  const replay = replayEvents(
+    before,
+    after.eventLog.slice(before.eventLog.length),
+  );
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(after));
 }
@@ -236,8 +245,9 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     );
 
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(runnerChoice?.options.find((option) => option.value === nonCandidateId))
-      .toMatchObject({ selectable: false });
+    expect(
+      runnerChoice?.options.find((option) => option.value === nonCandidateId),
+    ).toMatchObject({ selectable: false });
     const optionId = runnerChoice?.options.find(
       (option) => option.value === hardwareId,
     )?.id;
@@ -292,7 +302,9 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     });
     expect(stale.ok).toBe(false);
 
-    const illegal = resolveChoiceResult(state, "runner", ["card_not_in_choice"]);
+    const illegal = resolveChoiceResult(state, "runner", [
+      "card_not_in_choice",
+    ]);
     expect(illegal.ok).toBe(false);
   });
 
@@ -300,7 +312,10 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     let state = baseState("pro018-hijack-full-mu");
     const hijackId = addRunnerGrip(state, HIJACK, "pro018_hijack_full_mu");
     const targetId = addRunnerGrip(state, JACKHAMMER, "pro018_hijack_target");
-    const trashId = installSyntheticRunnerProgram(state, "pro018_hijack_filler_1");
+    const trashId = installSyntheticRunnerProgram(
+      state,
+      "pro018_hijack_filler_1",
+    );
     installSyntheticRunnerProgram(state, "pro018_hijack_filler_2");
     installSyntheticRunnerProgram(state, "pro018_hijack_filler_3");
     installSyntheticRunnerProgram(state, "pro018_hijack_filler_4");
@@ -364,7 +379,11 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     const before = structuredClone(state);
     const randomCounterBefore = state.randomCounter;
 
-    state = applyLegal(state, "runner", playEventAction(state, testSpinId, "rd"));
+    state = applyLegal(
+      state,
+      "runner",
+      playEventAction(state, testSpinId, "rd"),
+    );
 
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -375,6 +394,10 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
       "candidateCount",
     );
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice).toMatchObject({
+      sourceCardInstanceId: testSpinId,
+      sourceCardDefinitionId: TEST_SPIN,
+    });
     expect(runnerChoice?.cardSearchPresentation).toMatchObject({
       sourceZone: "stack",
       selectableFilter: "program",
@@ -382,8 +405,11 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
       shuffleAfter: true,
       showNonMatchingCards: true,
     });
-    expect(runnerChoice?.options.find((option) => option.value === displayOnlyEventId))
-      .toMatchObject({ selectable: false });
+    expect(
+      runnerChoice?.options.find(
+        (option) => option.value === displayOnlyEventId,
+      ),
+    ).toMatchObject({ selectable: false });
     const optionId = runnerChoice?.options.find(
       (option) => option.value === programId,
     )?.id;
@@ -392,8 +418,9 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
 
     expect(state.runner.credits).toBe(4);
     expect(state.randomCounter).toBeGreaterThan(randomCounterBefore);
-    expect(lastPublicPayload(state, "pro018_stack_install_run_cleanup"))
-      .toMatchObject({
+    expect(
+      lastPublicPayload(state, "pro018_stack_install_run_cleanup"),
+    ).toMatchObject({
       hiddenZoneAction: "pro018_stack_install_run_cleanup",
       publicRevealDefinitionId: JACKHAMMER,
       installedProgramDefinitionId: JACKHAMMER,
@@ -418,8 +445,9 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     expect(state.runner.rig.programs).not.toContain(programId);
     expect(state.runner.stack).toContain(programId);
     expect(state.cardInstances[programId]?.faceup).toBe(false);
-    expect(lastPublicPayload(state, "pro018_test_spin_return_to_stack"))
-      .toMatchObject({
+    expect(
+      lastPublicPayload(state, "pro018_test_spin_return_to_stack"),
+    ).toMatchObject({
       hiddenZoneAction: "pro018_test_spin_return_to_stack",
       returnedProgramDefinitionId: JACKHAMMER,
       returnedToStack: true,
@@ -430,9 +458,20 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
 
   it("Test Spin keeps a stack program selectable at full MU and resumes after program trash", () => {
     let state = baseState("pro018-test-spin-full-mu");
-    const testSpinId = addRunnerGrip(state, TEST_SPIN, "pro018_test_spin_full_mu");
-    const targetId = addRunnerStack(state, JACKHAMMER, "pro018_test_spin_target");
-    const trashId = installSyntheticRunnerProgram(state, "pro018_test_spin_filler_1");
+    const testSpinId = addRunnerGrip(
+      state,
+      TEST_SPIN,
+      "pro018_test_spin_full_mu",
+    );
+    const targetId = addRunnerStack(
+      state,
+      JACKHAMMER,
+      "pro018_test_spin_target",
+    );
+    const trashId = installSyntheticRunnerProgram(
+      state,
+      "pro018_test_spin_filler_1",
+    );
     installSyntheticRunnerProgram(state, "pro018_test_spin_filler_2");
     installSyntheticRunnerProgram(state, "pro018_test_spin_filler_3");
     installSyntheticRunnerProgram(state, "pro018_test_spin_filler_4");
@@ -462,11 +501,12 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     expect(state.runner.rig.programs).toContain(targetId);
     expect(state.runner.memoryUsed).toBe(4);
     expect(state.run).toBeDefined();
-    expect(lastPublicPayload(state, "pro018_stack_install_run_cleanup"))
-      .toMatchObject({
-        installedProgramDefinitionId: JACKHAMMER,
-        installDeferredForMemory: true,
-      });
+    expect(
+      lastPublicPayload(state, "pro018_stack_install_run_cleanup"),
+    ).toMatchObject({
+      installedProgramDefinitionId: JACKHAMMER,
+      installDeferredForMemory: true,
+    });
     state = finishCurrentRun(state);
     expect(state.runner.rig.programs).not.toContain(targetId);
     expect(state.runner.memoryUsed).toBe(3);
@@ -475,7 +515,11 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
 
   it("Test Spin applies the credit plus meat-damage penalty if the installed program cannot return", () => {
     let state = baseState("pro018-test-spin-penalty");
-    const testSpinId = addRunnerGrip(state, TEST_SPIN, "pro018_test_spin_penalty");
+    const testSpinId = addRunnerGrip(
+      state,
+      TEST_SPIN,
+      "pro018_test_spin_penalty",
+    );
     const programId = addRunnerStack(
       state,
       JACKHAMMER,
@@ -484,7 +528,11 @@ describe("Proteus PRO018 hidden-zone search/install tutor suite", () => {
     state.runner.credits = 2;
     const before = structuredClone(state);
 
-    state = applyLegal(state, "runner", playEventAction(state, testSpinId, "rd"));
+    state = applyLegal(
+      state,
+      "runner",
+      playEventAction(state, testSpinId, "rd"),
+    );
     const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
       (option) => option.value === programId,
     )?.id;

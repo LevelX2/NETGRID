@@ -60,6 +60,63 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  it("uses the exact Engine quote for a paid end-the-run rez variant", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_024_gatekeeper", 0, {
+      rezSubroutineCount: 1,
+      includeDecline: true,
+    });
+    const exactActionQuote =
+      fixture.sourceCard.effectiveRezActionResourceExchangeQuotes?.find(
+        (entry) => entry.actionId === fixture.engineAction.actionId,
+      );
+
+    expect(fixture.engineAction).toMatchObject({
+      costs: [{ credits: 5 }],
+      payload: {
+        variableRezKind: "paid_end_the_run_subroutines",
+        effectiveSubroutineCountAfterRez: 1,
+      },
+    });
+    expect(exactActionQuote).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      quote: {
+        complete: true,
+        hardEndTheRunSubroutineCount: 1,
+        runnerBreakUnavailable: {
+          reason: "no_visible_eligible_breaker",
+        },
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      totalRezCredits: 5,
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        hardEndTheRunSubroutineCount: 1,
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+  });
+
   it("accepts an Engine-certified Olivia Salazar rez receipt without using printed rezCost", () => {
     const fixture = engineOliviaIceRezWindow();
     const ordinaryProjection = projectExactCorpIceRezRoute({
@@ -1108,6 +1165,8 @@ function engineIceRezWindow(
     runnerProgramBitCounters?: readonly number[];
     futureIceDefinitionId?: string;
     futureIceRezzed?: boolean;
+    rezSubroutineCount?: number;
+    includeDecline?: boolean;
   },
 ) {
   let state = createGameAfterSetup({
@@ -1164,8 +1223,14 @@ function engineIceRezWindow(
   });
   if (!result.ok) throw new Error(result.error.message);
   state = result.state;
-  const rezAction = getLegalActions(state, "corp").find(
-    (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
+  const currentActions = getLegalActions(state, "corp");
+  const rezAction = currentActions.find(
+    (action) =>
+      action.type === "rez_ice" &&
+      action.payload?.cardId === iceId &&
+      (options?.rezSubroutineCount === undefined ||
+        action.payload.effectiveSubroutineCountAfterRez ===
+          options.rezSubroutineCount),
   );
   if (!rezAction) {
     throw new Error("Engine did not expose a payable ICE rez action");
@@ -1175,7 +1240,12 @@ function engineIceRezWindow(
     side: "corp",
     playerView,
     eventTail: [],
-    legalActions: [rezAction],
+    legalActions: [
+      rezAction,
+      ...(options?.includeDecline
+        ? currentActions.filter((action) => action.type === "decline_rez")
+        : []),
+    ],
     difficulty: "normal",
     seed: state.seed,
     decisionId: `exact-ice-rez-${definitionId}-${agendaPoints}`,
@@ -1189,7 +1259,7 @@ function engineIceRezWindow(
     visibleSourceDefinitionsByInstanceId: {
       [iceId]: definitionId,
     },
-  })[0];
+  }).find((entry) => entry.actionId === rezAction.actionId);
   const sourceCard = input.playerView.servers
     .find((server) => server.id === "rd")
     ?.ice.find((ice) => ice.instanceId === iceId);

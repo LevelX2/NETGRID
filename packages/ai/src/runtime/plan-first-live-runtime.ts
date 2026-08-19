@@ -3272,11 +3272,51 @@ export function runnerActionDispositions(
         domain.coverageGaps,
       )
     ) {
-      add(
-        accessPayoffCandidate.actionId,
-        "runner.pressure_central",
-        `runner_access_payoff_install_waits_for_bound_access_route:${runnerCentralPayoffServer(accessPayoffCandidate) ?? "unknown"}`,
+      const sourceCardInstanceId = runnerInstallSourceInstanceId(
+        accessPayoffCandidate,
+        input.legalActions.find(
+          (action) => action.actionId === accessPayoffCandidate.actionId,
+        ),
       );
+      const actionIds = candidates
+        .filter((candidate) => {
+          if (
+            sourceCardInstanceId === undefined ||
+            candidate.actionType !== accessPayoffCandidate.actionType ||
+            candidate.semanticActionType !==
+              accessPayoffCandidate.semanticActionType
+          ) {
+            return false;
+          }
+          return (
+            runnerInstallSourceInstanceId(
+              candidate,
+              input.legalActions.find(
+                (action) => action.actionId === candidate.actionId,
+              ),
+            ) === sourceCardInstanceId
+          );
+        })
+        .map((candidate) => candidate.actionId);
+      if (!actionIds.includes(accessPayoffCandidate.actionId)) {
+        actionIds.push(accessPayoffCandidate.actionId);
+      }
+      for (const actionId of actionIds) {
+        if (
+          centralPreparationActionIds.has(actionId) ||
+          coverageOwnedActionIds.has(actionId) ||
+          developmentOwnedActionIds.has(actionId) ||
+          specializedPlanOwnedActionIds.has(actionId) ||
+          dispositions.some((entry) => entry.actionId === actionId)
+        ) {
+          continue;
+        }
+        add(
+          actionId,
+          "runner.pressure_central",
+          `runner_access_payoff_install_waits_for_bound_access_route:${runnerCentralPayoffServer(accessPayoffCandidate) ?? "unknown"}`,
+        );
+      }
       continue;
     }
     if (centralPreparationActionIds.has(evaluation.legalActionId)) continue;
