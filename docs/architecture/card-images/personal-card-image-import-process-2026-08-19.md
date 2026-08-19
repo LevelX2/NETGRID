@@ -4,7 +4,7 @@ Status: `in_progress`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img01-img05-card-image-import`
-Aktueller Zustand: `IMG01_done`
+Aktueller Zustand: `IMG02_done`
 
 ## Quelle und Zielprüfung
 
@@ -107,6 +107,10 @@ Bei roten Done-Gates verbleibt der Prozess im aktuellen Zustand.
 - Checks: Pakettests, Paket-Typecheck, Web-Lookup-Test und Package-Boundary-
   Check grün. Der Web-Typecheck bleibt an zwei identischen, auf `main`
   reproduzierten KI-Baselinefehlern außerhalb dieses Scopes rot.
+- IMG02 abgeschlossen: inhaltsadressierte Blobs, Asset-Manifeste,
+  sammlungsbezogene Bindungen sowie atomare Konfliktmodi sind implementiert.
+- Checks: neun Kartenbild-Pakettests, Paket-Typecheck und Package-Boundary-
+  Check grün.
 
 ## Paketfolge
 
