@@ -649,7 +649,7 @@ function contributeCorpActionDispositionForCandidate(
     add(
       candidate.actionId,
       "corp.defend_servers",
-      "corp_ice_install_has_no_engine_certified_access_probability_reduction",
+      "corp_ice_install_has_no_executable_funded_or_project_bound_defense_route",
     );
     return;
   }

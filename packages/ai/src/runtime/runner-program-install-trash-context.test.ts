@@ -4,6 +4,75 @@ import { describe, expect, it } from "vitest";
 import { createRunnerProgramInstallTrashContext } from "./runner-program-install-trash-context";
 
 describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
+  it("fails closed when a program-trash install cannot name an acceptable sufficient sacrifice", () => {
+    const codeGate = program("only_code_gate", 1);
+    const sentry = program("only_sentry", 1);
+    const barrier = program("only_barrier", 1);
+    const krash = program("krash", 1);
+    const rig = [codeGate, sentry, barrier];
+    const cardsById = new Map(rig.map((card) => [card.instanceId, card]));
+    const breakerRoleById = new Map([
+      [codeGate.instanceId, "decoder"],
+      [sentry.instanceId, "killer"],
+      [barrier.instanceId, "fracter"],
+    ]);
+    const context = createRunnerProgramInstallTrashContext({
+      safeNonNegativeInteger: (value) => Math.max(0, value ?? 0),
+      visibleMemoryCost: (card) => card?.memoryCost ?? 0,
+      visibleCardsByInstanceId: () => cardsById,
+      visibleBreakerRoleCounts: () =>
+        new Map([
+          ["decoder", 1],
+          ["killer", 1],
+          ["fracter", 1],
+        ]),
+      visibleBreakerRoles: (card) => {
+        const role = breakerRoleById.get(card.instanceId);
+        return role ? [role] : [];
+      },
+      rolesForCardId: () => [],
+      isRunnerPressureRole: () => false,
+      isRunnerEconomyRole: () => false,
+      visibleCounterValue: () => 0,
+      visibleInstallCost: () => 0,
+    });
+    const input = {
+      side: "runner",
+      seed: "program-trash-no-acceptable-sacrifice",
+      decisionId: "program-trash-no-acceptable-sacrifice:2",
+      profileId: "runner-baseline",
+      legalActions: [],
+      playerView: {
+        stateVersion: 2,
+        timingPoint: "runner_action.main",
+        own: {
+          credits: 0,
+          gripOrHq: [krash],
+          rig,
+          memoryUsed: 3,
+          memoryLimit: 3,
+        },
+        opponent: { credits: 0 },
+        servers: [],
+      },
+    } as unknown as AiDecisionInput;
+    const options = rig.map((card) => ({
+      id: `card_${card.instanceId}`,
+      label: card.title ?? card.instanceId,
+      value: card.instanceId,
+    }));
+
+    expect(() =>
+      context.selectedRunnerProgramInstallTrashOptionIds(
+        input,
+        {
+          source: "runner_program_trash_before_install:krash:2",
+        } as never,
+        options,
+      ),
+    ).toThrowError("commitment_invalidated");
+  });
+
   it("trashes only the least valuable sufficient program at an MU checkpoint", () => {
     const expendable = program("expendable", 1);
     const onlyFracter = program("only_fracter", 1);

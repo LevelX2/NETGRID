@@ -76,6 +76,11 @@ export type PlanEarlyEndTurnJustification =
       kind: "forgo_exhausted_runner_capacity";
       capacityKind: "empty_stack_all_voluntary_routes_rejected";
       explicitlyNonproductiveActionIds: string[];
+    }
+  | {
+      kind: "forgo_terminal_deck_pressure_capacity";
+      capacityKind: "match_point_favorable_deck_race_all_voluntary_routes_rejected";
+      explicitlyNonproductiveActionIds: string[];
     };
 
 export type PlanMaterialization = {
@@ -888,6 +893,36 @@ function assertEarlyEndTurnRoute(
     );
   if (exhaustedRunnerCapacityForgoProven) return;
 
+  const terminalDeckPressureProofActionIds =
+    justification?.kind === "forgo_terminal_deck_pressure_capacity"
+      ? sortedUnique(justification.explicitlyNonproductiveActionIds)
+      : [];
+  const exactTerminalDeckPressureActionSet = sameStrings(
+    remainingActionIds,
+    terminalDeckPressureProofActionIds,
+  );
+  const terminalDeckPressureForgoProven =
+    justification?.kind === "forgo_terminal_deck_pressure_capacity" &&
+    justification.capacityKind ===
+      "match_point_favorable_deck_race_all_voluntary_routes_rejected" &&
+    context.input.side === "runner" &&
+    moduleId === "runner.defense_and_recovery" &&
+    context.input.playerView.own.agendaPoints >=
+      context.input.playerView.agendaPointsToWin - 1 &&
+    context.input.playerView.opponent.deckCount > 0 &&
+    context.input.playerView.opponent.deckCount <
+      context.input.playerView.own.stackOrRdCount &&
+    remainingActionIds.length > 0 &&
+    exactTerminalDeckPressureActionSet &&
+    remainingActionIds.every((actionId) =>
+      (context.actionDispositions ?? []).some(
+        (entry) =>
+          entry.actionId === actionId &&
+          entry.disposition === "explicitly_nonproductive",
+      ),
+    );
+  if (terminalDeckPressureForgoProven) return;
+
   throw new PlanResolutionFailure("end_turn_with_usable_capacity", {
     side: context.input.side,
     stateVersion: context.input.playerView.stateVersion,
@@ -896,7 +931,7 @@ function assertEarlyEndTurnRoute(
     unresolvedActionIds: remainingActionIds,
     owner: "rules_contract",
     removalCondition:
-      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo or an empty-Stack Runner turn whose voluntary routes were all owner-rejected. Normal click capacity must otherwise be converted by a productive plan route.",
+      "Bind early standard EndTurn to a structurally proven terminal win, an exact restricted-capacity forgo, an empty-Stack Runner turn whose voluntary routes were all owner-rejected, or an exact match-point deck-pressure wait with a favorable deck race and no owner-accepted route. Normal click capacity must otherwise be converted by a productive plan route.",
     planInstanceId: route.planInstanceId,
     stepId: route.step.stepId,
     candidateCount: materialized.candidates.length,

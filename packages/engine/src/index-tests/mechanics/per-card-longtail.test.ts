@@ -4050,12 +4050,36 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(
       state.corpTurnFlags?.fortActivityServerIdsSinceCorpTurnStart,
     ).toContain(rovingServerId);
+    const lucidrineId = "spotcheck_roving_lucidrine";
+    state.runner.maxHandSize = 100;
+    state.runner.grip.unshift(lucidrineId);
+    state.cardInstances[lucidrineId] = {
+      id: lucidrineId,
+      instanceId: lucidrineId,
+      definitionId: "onr_v1_098_lucidrine-booster-drug",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "grip" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    } as never;
 
     state = toRunnerTurnFromCorpMain(state);
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "start_run" &&
+          action.payload?.serverId === rovingServerId,
+      ),
+    ).toBe(true);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_098_lucidrine-booster-drug" &&
           action.payload?.serverId === rovingServerId,
       ),
     ).toBe(true);
@@ -4069,6 +4093,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "start_run" &&
+          action.payload?.serverId === rovingServerId,
+      ),
+    ).toBe(false);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_098_lucidrine-booster-drug" &&
           action.payload?.serverId === rovingServerId,
       ),
     ).toBe(false);

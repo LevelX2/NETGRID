@@ -15,6 +15,7 @@ import {
 } from "./runner-program-install-trash-policy";
 import { runnerProgramSacrificeExclusion as buildRunnerProgramSacrificeExclusion } from "./runner-program-sacrifice-exclusion";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -86,9 +87,23 @@ export function createRunnerProgramInstallTrashContext(
     );
     if (!assessment.memoryRequired) return [];
     if (assessment.requiredMemoryToFree <= 0) return [];
-    const selectedCandidates = choice.source.startsWith(
+    const forcedMinimalSacrifice = choice.source.startsWith(
       "runner.program_install_memory:",
-    )
+    );
+    if (!assessment.canFreeRequiredMemory && !forcedMinimalSacrifice) {
+      throw new PlanResolutionFailure("commitment_invalidated", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: (input.legalActions ?? []).map(
+          (action) => action.type,
+        ),
+        owner: "plan_module",
+        removalCondition:
+          "Select a program-trash install only when the owning Runner development plan has an acceptable sufficient sacrifice set for its exact memory deficit.",
+      });
+    }
+    const selectedCandidates = forcedMinimalSacrifice
       ? selectedMinimalProgramSacrificeCandidates(
           assessment.candidates,
           assessment.requiredMemoryToFree,

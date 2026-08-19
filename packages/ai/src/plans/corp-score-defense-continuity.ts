@@ -7,16 +7,61 @@ export type CorpVisibleAgendaPredicate = (
   card: VisibleCard,
 ) => boolean;
 
+export type CorpResidentScoreDefenseBinding = Readonly<{
+  agendaInstanceId: string;
+  serverId: string;
+}>;
+
+/**
+ * A concrete, empty remote with an Engine-quoted ICE interaction is never a
+ * blank scoring target. The exact score-protection probability model may
+ * deliberately leave conditional, damaging, taxing, or encounter-disrupting
+ * subroutines unquantified, but corp.score_agenda must still preserve the
+ * strictly better server topology instead of opening an empty sibling remote.
+ *
+ * This is intentionally a reuse/dominance fact, not a claim that the remote
+ * already satisfies the score-protection threshold. Assets in the root keep
+ * the server available for an explicit parallel-remote decision.
+ */
+export function corpRemoteHasEngineQuotedReusableScoreFriction(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) =>
+      candidate.id === serverId && candidate.id.startsWith("remote_"),
+  );
+  if (!server || server.root.length > 0 || server.ice.length === 0) {
+    return false;
+  }
+  return server.ice.some((ice) => {
+    if (ice.rezzed === true) {
+      return (ice.effectiveRunQuote?.subroutines.length ?? 0) > 0;
+    }
+    const quote = ice.effectivePostRezRunQuote;
+    return (
+      quote?.context === "installed_post_rez" &&
+      quote.complete === true &&
+      quote.cardId === ice.instanceId &&
+      quote.targetServerId === serverId &&
+      quote.projectedServerId === serverId &&
+      quote.expiresAtStateVersion === input.playerView.stateVersion &&
+      quote.effectiveRunQuote.iceInstanceId === ice.instanceId &&
+      quote.effectiveRunQuote.subroutines.length > 0
+    );
+  });
+}
+
 /**
  * Reads the exact score/defense execution receipt that permits the resident
  * score root to continue with its already bound agenda. This adapter owns no
  * plan discovery, action materialization, or executor selection.
  */
-export function corpResidentScoreAgendaInstanceId(
+export function corpResidentScoreDefenseBinding(
   previous: ResidentPlanPortfolio | undefined,
   input: AiDecisionInput,
   visibleCardIsAgenda: CorpVisibleAgendaPredicate,
-): string | undefined {
+): CorpResidentScoreDefenseBinding | undefined {
   const commitment = previous?.turnPlanCommitment;
   const committedRootPlanInstanceId =
     commitment?.phases[commitment.cursor.phaseIndex]?.root.planInstanceId;
@@ -96,6 +141,12 @@ export function corpResidentScoreAgendaInstanceId(
       commitment.cursor.nodeIndex
     ];
   const stagedIceInstanceId = currentNode?.invocation.sourceCardInstanceId;
+  const exactImmediateStagingServers =
+    stagedIceInstanceId === undefined
+      ? []
+      : input.playerView.servers.filter((server) =>
+          server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
+        );
   const exactImmediateStagingReceipt =
     root !== undefined &&
     lease !== undefined &&
@@ -105,9 +156,7 @@ export function corpResidentScoreAgendaInstanceId(
     lease.stateIdentity.stateVersion + 1 === input.playerView.stateVersion &&
     currentNode?.invocation.semanticActionType === "install.card" &&
     stagedIceInstanceId !== undefined &&
-    input.playerView.servers.some((server) =>
-      server.ice.some((ice) => ice.instanceId === stagedIceInstanceId),
-    );
+    exactImmediateStagingServers.length === 1;
   const residentScoreStagingServers =
     typeof recentScoreStagingSignal?.sourceCardInstanceId === "string"
       ? input.playerView.servers.filter(
@@ -128,9 +177,33 @@ export function corpResidentScoreAgendaInstanceId(
       residentScoreServerId?.startsWith("remote_") === true) &&
     typeof recentScoreStagingSignal?.sourceCardInstanceId === "string" &&
     residentScoreStagingServers.length === 1;
-  if (!exactImmediateStagingReceipt && !residentScoreStagingReceipt) {
+  const residentConcreteScoreServers =
+    residentScoreAgendaCardInstanceId !== undefined &&
+    residentScoreServerId?.startsWith("remote_") === true
+      ? input.playerView.servers.filter(
+          (server) =>
+            server.id === residentScoreServerId && server.ice.length > 0,
+        )
+      : [];
+  const residentConcreteScoreReceipt =
+    residentConcreteScoreServers.length === 1 &&
+    input.playerView.own.gripOrHq.some(
+      (card) =>
+        card.instanceId === residentScoreAgendaCardInstanceId &&
+        visibleCardIsAgenda(input, card),
+    );
+  if (
+    !exactImmediateStagingReceipt &&
+    !residentScoreStagingReceipt &&
+    !residentConcreteScoreReceipt
+  ) {
     return undefined;
   }
+  const resolvedServerId = residentConcreteScoreReceipt
+    ? residentConcreteScoreServers[0]!.id
+    : residentScoreStagingReceipt
+      ? residentScoreStagingServers[0]!.id
+      : exactImmediateStagingServers[0]!.id;
   if (
     residentScoreAgendaCardInstanceId !== undefined &&
     input.playerView.own.gripOrHq.some(
@@ -139,13 +212,31 @@ export function corpResidentScoreAgendaInstanceId(
         visibleCardIsAgenda(input, card),
     )
   ) {
-    return residentScoreAgendaCardInstanceId;
+    return {
+      agendaInstanceId: residentScoreAgendaCardInstanceId,
+      serverId: resolvedServerId,
+    };
   }
   if (!root) return undefined;
-  return input.playerView.own.gripOrHq.find(
+  const agendaInstanceId = input.playerView.own.gripOrHq.find(
     (card) =>
       card.definitionId !== undefined &&
       root.dedupeKey.includes(`:${card.instanceId}:`) &&
       visibleCardIsAgenda(input, card),
   )?.instanceId;
+  return agendaInstanceId
+    ? { agendaInstanceId, serverId: resolvedServerId }
+    : undefined;
+}
+
+export function corpResidentScoreAgendaInstanceId(
+  previous: ResidentPlanPortfolio | undefined,
+  input: AiDecisionInput,
+  visibleCardIsAgenda: CorpVisibleAgendaPredicate,
+): string | undefined {
+  return corpResidentScoreDefenseBinding(
+    previous,
+    input,
+    visibleCardIsAgenda,
+  )?.agendaInstanceId;
 }

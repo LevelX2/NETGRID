@@ -210,6 +210,7 @@ export type RunnerDefenseSignals = {
   handBufferActionIds?: string[];
   forgoUnsafeRunCapacity: boolean;
   forgoExhaustedStandardCapacity?: boolean;
+  forgoTerminalDeckPressureCapacity?: boolean;
   discardChoiceBinding?: RunnerDiscardChoiceBinding;
   reactionReserveNeed?: {
     needId: "runner-defense-reaction-reserve";
@@ -703,7 +704,8 @@ type DefenseState = {
     | "build_reaction_reserve"
     | "discard_window"
     | "forgo_unsafe_run"
-    | "forgo_exhausted_options";
+    | "forgo_exhausted_options"
+    | "forgo_terminal_deck_pressure";
   signals: RunnerDefenseSignals;
 };
 type CreditBankState = {
@@ -1419,7 +1421,7 @@ function coverageModule(
           preparations.length > 0 ||
           installs.length > 0 ||
           (phase === "fund_answer" && funding.length > 0) ||
-          (!gap.answerInHand && gap.deckHasAnswer && draws.length > 0);
+          (!gap.answerInHand && draws.length > 0);
         return proposal({
           moduleId: "runner.rig_and_coverage",
           dedupeKey: gap.gapId,
@@ -1668,7 +1670,21 @@ function defenseModule(): PlanModule {
                     .map((candidate) => candidate.actionId),
                 },
               }
-            : {}),
+            : current.phase === "forgo_terminal_deck_pressure"
+              ? {
+                  earlyEndTurnJustification: {
+                    kind: "forgo_terminal_deck_pressure_capacity" as const,
+                    capacityKind:
+                      "match_point_favorable_deck_race_all_voluntary_routes_rejected" as const,
+                    explicitlyNonproductiveActionIds: context.actionCandidates
+                      .filter(
+                        (candidate) =>
+                          candidate.semanticActionType !== "turn_flow.end_turn",
+                      )
+                      .map((candidate) => candidate.actionId),
+                  },
+                }
+              : {}),
       };
     },
   };
@@ -2380,7 +2396,7 @@ function coverageDrawCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
 ): PlanMaterialization["candidates"] {
-  if (gap.answerInHand || !gap.deckHasAnswer) return [];
+  if (gap.answerInHand) return [];
   const directSearchIds = new Set(gap.directSearchActionIds);
   const searchSetupIds = new Set(gap.searchEngineSetupActionIds);
   const drawForAnswerIds = new Set(gap.drawForAnswerActionIds);
@@ -2399,7 +2415,9 @@ function coverageDrawCandidates(
         ) ?? false;
       return (
         isCoverageRoute &&
+        (directSearchIds.has(candidate.actionId) || gap.deckHasAnswer) &&
         (!displacedByGeneralHandDevelopment ||
+          directSearchIds.has(candidate.actionId) ||
           (gap.deckHasAnswer && isDrawRoute))
       );
     })
@@ -2476,6 +2494,8 @@ function defensePhase(
   if (signals.forgoUnsafeRunCapacity) openPhases.push("forgo_unsafe_run");
   if (signals.forgoExhaustedStandardCapacity)
     openPhases.push("forgo_exhausted_options");
+  if (signals.forgoTerminalDeckPressureCapacity)
+    openPhases.push("forgo_terminal_deck_pressure");
   return (
     openPhases.find(
       (phase) =>
@@ -2497,7 +2517,10 @@ function defenseCandidates(
   ) {
     return [];
   }
-  if (phase === "forgo_exhausted_options") {
+  if (
+    phase === "forgo_exhausted_options" ||
+    phase === "forgo_terminal_deck_pressure"
+  ) {
     const voluntaryCandidates = actionCandidates.filter(
       (candidate) => candidate.semanticActionType !== "turn_flow.end_turn",
     );
@@ -2522,7 +2545,11 @@ function defenseCandidates(
     .filter((candidate) => {
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
-      if (phase === "forgo_unsafe_run" || phase === "forgo_exhausted_options")
+      if (
+        phase === "forgo_unsafe_run" ||
+        phase === "forgo_exhausted_options" ||
+        phase === "forgo_terminal_deck_pressure"
+      )
         return (
           candidate.semanticActionType === "turn_flow.end_turn" &&
           candidate.sourceKind === "game_rule"
@@ -2623,6 +2650,11 @@ function defenseCapability(
       capabilityId: "forgo_empty_stack_rejected_option_capacity",
       semanticActionTypes: ["turn_flow.end_turn"],
     };
+  if (phase === "forgo_terminal_deck_pressure")
+    return {
+      capabilityId: "forgo_match_point_deck_pressure_capacity",
+      semanticActionTypes: ["turn_flow.end_turn"],
+    };
   if (phase === "build_reaction_reserve")
     return {
       capabilityId: "build_damage_reaction_reserve",
@@ -2652,6 +2684,7 @@ function defensePhaseValue(
   if (phase === "clear_persistent_hazard_counter") return 90;
   if (phase === "forgo_unsafe_run") return 60;
   if (phase === "forgo_exhausted_options") return 10;
+  if (phase === "forgo_terminal_deck_pressure") return 10;
   if (phase === "build_reaction_reserve") return 70;
   return 20 + Math.max(0, signals.minimumHandBuffer - signals.handSize) * 120;
 }

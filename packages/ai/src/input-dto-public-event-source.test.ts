@@ -183,4 +183,65 @@ describe("AI input DTO public event source binding", () => {
       "unapprovedSourceAlias",
     );
   });
+
+  it("preserves the Engine-owned Corp mandatory draw rate for deckout planning", () => {
+    const action = legalAction(
+      "corp.gain_credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const event: PublicGameEvent = {
+      eventId: "corp-extra-mandatory-draw",
+      type: "mandatory_draw",
+      stateVersionBefore: 8,
+      stateVersionAfter: 9,
+      turnSerial: 6,
+      stateHashAfter: "fnv1a:corp-extra-mandatory-draw",
+      publicPayload: {
+        actor: "corp",
+        actionType: "mandatory_draw",
+        corpMandatoryDraw: true,
+        corpMandatoryDrawCompleted: true,
+        corpMandatoryCardCount: 1,
+        corpMandatoryAdditionalCardCount: 1,
+        corpMandatoryTotalBaseDrawCount: 2,
+        corpMandatoryAgendaCardCount: 0,
+        corpMandatoryOptionalAgendaCardCount: 0,
+        corpMandatorySkivvissCardCount: 1,
+        corpMandatoryAdditionalSourceCount: 1,
+        corpMandatoryAdditionalSourceDefinitionIds:
+          "onr_v1_064_skivviss",
+        unapprovedDrawRateAlias: 2,
+      },
+    };
+    const view = playerView("corp", [action]);
+    view.publicEvents = [event];
+
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      eventTail: view.publicEvents,
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "corp-extra-mandatory-draw",
+      decisionId: "corp-extra-mandatory-draw:corp:9",
+      actionNumber: 9,
+      profileId: "corp-extra-mandatory-draw-test",
+    });
+
+    expect(input.playerView.publicEvents[0]?.publicPayload).toMatchObject({
+      corpMandatoryDraw: true,
+      corpMandatoryDrawCompleted: true,
+      corpMandatoryCardCount: 1,
+      corpMandatoryAdditionalCardCount: 1,
+      corpMandatoryTotalBaseDrawCount: 2,
+      corpMandatorySkivvissCardCount: 1,
+      corpMandatoryAdditionalSourceDefinitionIds: "onr_v1_064_skivviss",
+    });
+    expect(input.playerView.publicEvents[0]?.publicPayload).not.toHaveProperty(
+      "unapprovedDrawRateAlias",
+    );
+  });
 });
