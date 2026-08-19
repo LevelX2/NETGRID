@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { localizedDeCardTitle } from "./card-image-manifest";
 import { localCardImageUrl, withCardImageVariant } from "./card-image-service";
+import { readFileSync } from "node:fs";
 
 describe("card image client service", () => {
   it("keeps generated and local O:NR image URLs versioned", () => {
@@ -36,5 +37,27 @@ describe("card image client service", () => {
     );
     expect(withCardImageVariant("https://example.invalid/card.webp", "full")).toBe("https://example.invalid/card.webp");
     expect(withCardImageVariant(undefined, "preview")).toBeUndefined();
+  });
+
+  it("reports an unavailable image only after its optional localized fallback also fails", () => {
+    const source = readFileSync(
+      new URL("../features/cards/card-image-service.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain('target.dataset.fallbackApplied = "true"');
+    expect(source).toContain("onUnavailable?.(event)");
+  });
+
+  it("switches a known image-mode card to its text layout after all image sources fail", () => {
+    const source = readFileSync(
+      new URL("../features/cards/CardView.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("const [cardImageUnavailable, setCardImageUnavailable] = useState(false)");
+    expect(source).toContain("const usesTextCardLayout = displayMode === \"text-card\" || (displayMode === \"placeholder\" && !cardImageUrl)");
+    expect(source).toContain("onUnavailable={() => setCardImageUnavailable(true)}");
+    expect(source).not.toContain('alt={`Kartenbild ${card.title ?? "Karte"}`}');
   });
 });

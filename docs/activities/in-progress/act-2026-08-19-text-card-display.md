@@ -145,6 +145,23 @@ Done-Gate: Arbeitsworktree sauber, relevante Webtests und Typecheck grün,
 - Vor jedem Paketcommit: `git diff --check`.
 - Vor Integration: fokussierte Tests erneut und der relevante Typecheck.
 
+## Paketprotokoll
+
+### TCD-01 — abgeschlossen am 2026-08-19
+
+- `CardImage` meldet einen Ausfall erst, wenn auch die optionale lokalisierte
+  Variante fehlgeschlagen ist.
+- `CardView` wechselt dann nur bekannte Bildmodus-Karten lokal auf die
+  Textkarten-Geometrie; verdeckte Karten bleiben davon ausgenommen.
+- Der Bildtooltip verwendet keinen sichtbaren Ersatz-Alt-Text mehr und fällt
+  auf seine Text-Schnellansicht zurück.
+- Check: `corepack pnpm exec vitest run app/card-image-service.test.ts` —
+  7/7 grün.
+- Bekannter unabhängiger Baseline-Blocker: Web-Typecheck scheitert in
+  `app/ai-turn-plan-comparison-ui.test.ts` und
+  `packages/ai/src/runtime/selected-choices-for-decision.ts`; keine dieser
+  Dateien gehört zu diesem Paket.
+
 ## Worktree-, Git- und Integrationsregeln
 
 Arbeitsworktree: `C:\Projekte\NETGRID_TEXT_CARD_DISPLAY`

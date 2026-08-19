@@ -163,6 +163,7 @@ export function CardView({
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPinnedVisible, setTooltipPinnedVisible] = useState(false);
+  const [cardImageUnavailable, setCardImageUnavailable] = useState(false);
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
@@ -175,7 +176,6 @@ export function CardView({
   const inactiveZoneBadge = inactiveZone ? inactiveCardZoneBadgeLabel(inactiveZone) : null;
   const inactiveZoneAriaSuffix = inactiveZone ? inactiveCardZoneAriaSuffix(inactiveZone) : "";
   const isCompact = compact || displayMode === "compact";
-  const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
   const lifecycleMarkers = preview || forceCardBack ? [] : (card.lifecycleMarkers ?? []);
   const detailLines = card.known ? cardDetailLines(previewCard) : [];
@@ -189,7 +189,17 @@ export function CardView({
   const preferredImageSource = usePreferredCardImageSource(card.definitionId);
   const preferredImageUrl = preferredImageSource.src ?? card.imageUrl;
   const preferredImageFallbackUrl = preferredImageSource.fallbackSrc;
-  const tooltipImageUrl = card.known ? preferredImageUrl : undefined;
+  useEffect(() => {
+    setCardImageUnavailable(false);
+  }, [preferredImageUrl, preferredImageFallbackUrl]);
+
+  const candidateCardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack
+    ? preferredImageUrl
+    : undefined;
+  const cardImageUrl = cardImageUnavailable ? undefined : candidateCardImageUrl;
+  const usesTextCardLayout = displayMode === "text-card" || (displayMode === "placeholder" && !cardImageUrl);
+  const modeClass = usesTextCardLayout ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
+  const tooltipImageUrl = card.known && !cardImageUnavailable ? preferredImageUrl : undefined;
   const { showSetBadges } = useCardImagePreference();
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
   const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
@@ -211,11 +221,10 @@ export function CardView({
         card.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(card.memoryCost) } : null
       ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
     : [];
-  const cardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack ? preferredImageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
   const isOperationImageCard = Boolean(visualImageUrl) && card.known && isOperationCardType(card.type) && hasGeneratedCardArt(card.definitionId);
-  const showArtBlock = !visualImageUrl && displayMode === "placeholder";
+  const showArtBlock = !visualImageUrl && displayMode === "placeholder" && !usesTextCardLayout;
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
@@ -530,7 +539,8 @@ export function CardView({
           src={tooltipImageUrl}
           fallbackSrc={preferredImageFallbackUrl}
           variant="preview"
-          alt={`Kartenbild ${card.title ?? "Karte"}`}
+          decorative
+          onUnavailable={() => setCardImageUnavailable(true)}
         />
       ) : (
         <>
@@ -686,7 +696,16 @@ export function CardView({
         data-archive-facedown={archiveFacedown ? "true" : undefined}
         data-inactive-zone={inactiveZone}
       >
-        {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} variant="thumb" decorative /> : null}
+        {visualImageUrl ? (
+          <CardImage
+            className="cardImage"
+            src={visualImageUrl}
+            fallbackSrc={preferredImageFallbackUrl}
+            variant="thumb"
+            decorative
+            onUnavailable={() => setCardImageUnavailable(true)}
+          />
+        ) : null}
         {selectedTarget ? (
           <span
             className="cardSelectedTargetBadge"

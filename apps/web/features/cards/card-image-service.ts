@@ -14,6 +14,7 @@ type CardImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "loading
   alt?: string;
   decorative?: boolean;
   fallbackSrc?: string | undefined;
+  onUnavailable?: (event: SyntheticEvent<HTMLImageElement>) => void;
   priority?: boolean;
   variant?: "thumb" | "preview" | "full" | "master";
 };
@@ -34,7 +35,17 @@ export function withCardImageVariant(src: string | undefined, variant: CardImage
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
-export function CardImage({ src, alt = "", decorative = false, fallbackSrc, priority = false, variant = "full", onError, ...props }: CardImageProps) {
+export function CardImage({
+  src,
+  alt = "",
+  decorative = false,
+  fallbackSrc,
+  onUnavailable,
+  priority = false,
+  variant = "full",
+  onError,
+  ...props
+}: CardImageProps) {
   if (!src) return null;
   const variantSrc = withCardImageVariant(src, variant);
   const variantFallbackSrc = withCardImageVariant(fallbackSrc, variant);
@@ -50,6 +61,8 @@ export function CardImage({ src, alt = "", decorative = false, fallbackSrc, prio
       if (variantFallbackSrc && target.dataset.fallbackApplied !== "true") {
         target.dataset.fallbackApplied = "true";
         target.src = variantFallbackSrc;
+      } else {
+        onUnavailable?.(event);
       }
       onError?.(event);
     }
