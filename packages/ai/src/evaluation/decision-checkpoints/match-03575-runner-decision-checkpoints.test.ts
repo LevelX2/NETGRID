@@ -62,7 +62,7 @@ describe("match 03575 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "03575-C02-STALE-RD-TOP";
         checkpoint.expectation = {
-          exactActionId: "runner.start_run.remote_1",
+          acceptableActions: [{ actionId: "runner.start_run.remote_1" }],
           planExecution: {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],

@@ -80,7 +80,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       // only legal hand-management route an overflow-credit conversion.
       moveFirstCorpCardToArchives(current, URBAN_RENEWAL);
       current.expectation = {
-        exactActionId: "corp.gain_credit",
+        acceptableActions: [{ actionId: "corp.gain_credit" }],
         planExecution: {
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],

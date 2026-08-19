@@ -69,8 +69,12 @@ describe("match Manhunt exact decision checkpoints", () => {
     const noTagWindow = mutateFixture(cp02Json, (fixture) => {
       moveCorpCardsToArchives(fixture, new Set([CHANCE_OBSERVATION]));
       fixture.expectation = {
-        exactActionId:
-          "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+        acceptableActions: [
+          {
+            actionId:
+              "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+          },
+        ],
         planExecution: {
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],
@@ -119,7 +123,7 @@ describe("match Manhunt exact decision checkpoints", () => {
       );
       restoreCorpScoredAgendaToRd(fixture);
       fixture.expectation = {
-        exactActionId: "corp.gain_credit",
+        acceptableActions: [{ actionId: "corp.gain_credit" }],
         planExecution: {
           acceptablePlanKinds: ["corp.economy"],
           acceptableCapabilities: ["develop_or_convert_corp_economy"],

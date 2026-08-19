@@ -34,8 +34,12 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-A1-RICH-RUNNER-CONTROL";
       fixture.expectation = {
-        exactActionId:
-          "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
+        acceptableActions: [
+          {
+            actionId:
+              "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
+          },
+        ],
         forbiddenActions: [
           {
             type: "install_card",

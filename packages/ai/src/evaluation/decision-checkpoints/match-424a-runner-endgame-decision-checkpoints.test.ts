@@ -118,8 +118,12 @@ describe("match 424A runner endgame decision checkpoints", () => {
       checkpoint.source.findingId = "424A-F06-MISSING-COVERAGE-CONTROL";
       delete checkpoint.expectation.runTargets;
       checkpoint.expectation = {
-        exactActionId:
-          "runner.activated_card_ability.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_039_krash_1.activated.onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip.runner_onr_v1_039_krash_1",
+        acceptableActions: [
+          {
+            actionId:
+              "runner.activated_card_ability.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_039_krash_1.activated.onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip.runner_onr_v1_039_krash_1",
+          },
+        ],
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
           acceptableCapabilities: ["search_answer_breaker_wall"],
