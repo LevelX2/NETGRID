@@ -262,6 +262,7 @@ import {
 } from "./corp-hand-inventory-facts";
 import {
   assessCorpDrawAdmission,
+  corpVoluntaryDrawLeavesUnsafeMandatoryHorizon,
   type CorpDrawAdmissionAssessment,
   type CorpDrawAdmissionPriority,
   type CorpDrawCapacityReleaseRoute,
@@ -10267,6 +10268,25 @@ function corpCandidateProjectsCardDraw(
   );
 }
 
+function corpCandidatePreservesVoluntaryDrawHorizon(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  terminalNeedBeforeMandatoryDraw = false,
+): boolean {
+  const cardsDrawn =
+    candidate.semanticActionType === "draw.card"
+      ? 1
+      : candidate.economyProjection?.cardsDrawn;
+  if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
+    return true;
+  }
+  return !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
+    remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+    cardsDrawn: cardsDrawn!,
+    terminalNeedBeforeMandatoryDraw,
+  });
+}
+
 function buildCorpDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -11407,13 +11427,19 @@ function buildCorpDomain(
           }
         : signal,
     );
-  const immediateFundingActionIds = candidates
+  const executableFundingCandidates = candidates.filter(
+    (candidate) =>
+      corpEconomyActionIsOwned(candidate) &&
+      corpEconomyCandidateHasExecutablePayload(input, candidate),
+  );
+  const immediateFundingActionIds = executableFundingCandidates
     .filter(
-      (candidate) =>
-        corpEconomyActionIsOwned(candidate) &&
-        corpEconomyCandidateHasExecutablePayload(input, candidate),
+      (candidate) => corpCandidatePreservesVoluntaryDrawHorizon(input, candidate),
     )
     .map((candidate) => candidate.actionId);
+  const terminalFundingActionIds = executableFundingCandidates.map(
+    (candidate) => candidate.actionId,
+  );
   const punishCampaigns = uniqueBy(
     punishSignals(input, candidates, scorelineFeasibility, previous),
     (signal) => signal.campaignId,
@@ -11425,6 +11451,7 @@ function buildCorpDomain(
     ambushes,
     punishCampaigns,
     immediateFundingActionIds,
+    terminalFundingActionIds,
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
@@ -14493,6 +14520,7 @@ function corpImmediateOperationEconomyConversions(
       projection.reliability !== "guaranteed" ||
       projection.source !== "legal_action_payload" ||
       projection.confidence !== "high" ||
+      !corpCandidatePreservesVoluntaryDrawHorizon(input, candidate) ||
       projection.cardsConsumed !== 1 ||
       !Number.isSafeInteger(projection.clickCost) ||
       projection.clickCost !== candidate.costProfile.clickCost ||
@@ -14872,6 +14900,7 @@ function corpRequiredEconomyNeeds(
   ambushes: readonly CorpPlanDomain["ambushes"][number][],
   punishCampaigns: readonly CorpPunishCampaignSignal[],
   immediateFundingActionIds: string[],
+  terminalFundingActionIds: string[],
 ): CorpCorePlanDomain["economyNeeds"] {
   const projectsWithCurrentProtectionSupport = new Set(
     defenseNeeds.flatMap((need) =>
@@ -14907,7 +14936,11 @@ function corpRequiredEconomyNeeds(
             kind: "parent_funding" as const,
             needId: `score-support:${project.projectId}`,
             gap: project.fundingMilestone.remainingGap,
-            actionIds: immediateFundingActionIds,
+            actionIds:
+              project.feasible &&
+              (project.sameTurnCloseout || project.terminalScore)
+                ? terminalFundingActionIds
+                : immediateFundingActionIds,
             parentPlanInstanceId: planInstanceIdForProposal({
               moduleId: "corp.score_agenda",
               dedupeKey: project.projectId,
@@ -19632,10 +19665,46 @@ function uniqueCoverageGaps(
       terminalContestThreat?.kind === "opponent_matchpoint" &&
       terminalContestThreat.remoteServerIds.includes(evaluation.targetServerId);
     if (installedRoles.has(requiredRole) && !coverageDevelopment) continue;
+    const installActionValues = runnerCoverageInstallActionValues(
+      input,
+      candidates,
+      evaluation.targetServerId,
+      requiredRole,
+    );
+    const legalCoverageInstallActionIds = Object.keys(
+      installActionValues,
+    ).sort(
+      (left, right) =>
+        (installActionValues[right] ?? Number.NEGATIVE_INFINITY) -
+          (installActionValues[left] ?? Number.NEGATIVE_INFINITY) ||
+        left.localeCompare(right),
+    );
+    const bestLegalCoverageCandidate = candidates.find(
+      (candidate) =>
+        candidate.actionId === legalCoverageInstallActionIds[0],
+    );
+    const bestLegalCoverageCard = bestLegalCoverageCandidate
+      ? input.playerView.own.gripOrHq.find(
+          (card) =>
+            card.instanceId ===
+            runnerInstallSourceInstanceId(
+              bestLegalCoverageCandidate,
+              input.legalActions.find(
+                (action) =>
+                  action.actionId === bestLegalCoverageCandidate.actionId,
+              ),
+            ),
+        )
+      : undefined;
     const visibleAnswer =
       coverageDevelopment?.visibleAnswer ??
+      bestLegalCoverageCard ??
       runnerHandBreakerForCoverage(input.playerView, preciseCoverage);
-    const answerInstallCost = visibleAnswer?.installCost;
+    const answerInstallCost = coverageDevelopment
+      ? visibleAnswer?.installCost
+      : bestLegalCoverageCandidate?.costProfile.costKnownStatus === "known"
+        ? (bestLegalCoverageCandidate.costProfile.creditCost ?? 0)
+        : visibleAnswer?.installCost;
     const baseSupportActions = coverageSupportActionIds(
       input,
       candidates,
@@ -19676,18 +19745,20 @@ function uniqueCoverageGaps(
         : runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole)) ||
       supportActions.directSearchActionIds.length > 0;
     const installActionIds = visibleAnswer
-      ? candidates
-          .filter((candidate) => {
-            const action = input.legalActions.find(
-              (legalAction) => legalAction.actionId === candidate.actionId,
-            );
-            return (
-              candidate.semanticActionType === "install.card" &&
-              runnerInstallSourceInstanceId(candidate, action) ===
-                visibleAnswer.instanceId
-            );
-          })
-          .map((candidate) => candidate.actionId)
+      ? coverageDevelopment
+        ? candidates
+            .filter((candidate) => {
+              const action = input.legalActions.find(
+                (legalAction) => legalAction.actionId === candidate.actionId,
+              );
+              return (
+                candidate.semanticActionType === "install.card" &&
+                runnerInstallSourceInstanceId(candidate, action) ===
+                  visibleAnswer.instanceId
+              );
+            })
+            .map((candidate) => candidate.actionId)
+        : legalCoverageInstallActionIds
       : undefined;
     const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
       input,
@@ -19796,12 +19867,7 @@ function uniqueCoverageGaps(
         false,
         sameTurnRunConversion?.requiredClicksAfterFunding ?? 1,
       ),
-      installActionValues: runnerCoverageInstallActionValues(
-        input,
-        candidates,
-        evaluation.targetServerId,
-        requiredRole,
-      ),
+      installActionValues,
       ...supportActions,
     });
   }

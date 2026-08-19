@@ -1148,6 +1148,13 @@ function offersForHeads(params: {
         .filter((head) => head.priorityClass === params.urgentPriorityClass)
         .map((head) => head.candidateId)
     : [];
+  const urgentExactScoreRootAvailable = params.urgentPriorityClass
+    ? params.heads.some(
+        (head) =>
+          head.priorityClass === params.urgentPriorityClass &&
+          isExactScoreRootHead(head),
+      )
+    : false;
   return params.heads.flatMap((head) => {
     const candidate = params.candidates.find(
       (entry) => entry.actionId === head.currentBinding.actionId,
@@ -1159,9 +1166,11 @@ function offersForHeads(params: {
         ? urgentHeadIds.map((candidateId) => [candidateId])
         : [[]];
     return dependencyVariants.map((dependencyCandidateIds) => {
-      const priorityCoverage = priorityCoverageForHead(
-        params.urgentPriorityClass,
-      );
+      const priorityCoverage = corpPlanningHeadPriorityCoverage({
+        urgentPriorityClass: params.urgentPriorityClass,
+        urgentExactScoreRootAvailable,
+        head,
+      });
       const groupKey = commutativeGroupKey(candidate);
       const boundary = boundaryForCandidate(params.input, candidate, head);
       const boundaryMustBeImmediate =
@@ -1215,17 +1224,94 @@ export function corpPlanningHeadContinuationScope(
   head: Pick<
     TurnPlanningHeadCandidate,
     | "rootPlanInstanceId"
+    | "rootPlanModuleId"
+    | "moduleId"
     | "executorPlanInstanceId"
     | "executorParentPlanInstanceId"
     | "executorParentNeedId"
+    | "priorityClass"
   >,
 ): "same_root" | undefined {
+  if (
+    isExactScoreRootHead(head) &&
+    (head.priorityClass === "P1" ||
+      head.priorityClass === "P2" ||
+      head.priorityClass === "P3")
+  ) {
+    return "same_root";
+  }
   return head.executorPlanInstanceId !== undefined &&
     head.executorPlanInstanceId !== head.rootPlanInstanceId &&
     head.executorParentPlanInstanceId === head.rootPlanInstanceId &&
     head.executorParentNeedId !== undefined
     ? "same_root"
     : undefined;
+}
+
+export function corpPlanningHeadPriorityCoverage(params: {
+  urgentPriorityClass: string | undefined;
+  urgentExactScoreRootAvailable: boolean;
+  head: Pick<
+    TurnPlanningHeadCandidate,
+    | "rootPlanInstanceId"
+    | "rootPlanModuleId"
+    | "moduleId"
+    | "executorPlanInstanceId"
+    | "priorityClass"
+  >;
+}): PriorityCoverage {
+  if (!params.urgentPriorityClass) {
+    return {
+      requiredObligationIds: [],
+      satisfiedObligationIds: [],
+      violatedObligationIds: [],
+      deferredObligationIds: [],
+    };
+  }
+  const bandObligationId = `priority-band:${params.urgentPriorityClass}`;
+  const exactScoreObligationId = params.urgentExactScoreRootAvailable
+    ? `urgent-exact-score-owner:${params.urgentPriorityClass}`
+    : undefined;
+  const headIsUrgent =
+    params.head.priorityClass === params.urgentPriorityClass;
+  const headOwnsUrgentExactScore =
+    headIsUrgent && isExactScoreRootHead(params.head);
+  return {
+    requiredObligationIds: [
+      bandObligationId,
+      ...(exactScoreObligationId ? [exactScoreObligationId] : []),
+    ],
+    satisfiedObligationIds: [
+      bandObligationId,
+      ...(exactScoreObligationId && headOwnsUrgentExactScore
+        ? [exactScoreObligationId]
+        : []),
+    ],
+    violatedObligationIds:
+      exactScoreObligationId && headIsUrgent && !headOwnsUrgentExactScore
+        ? [exactScoreObligationId]
+        : [],
+    deferredObligationIds:
+      exactScoreObligationId && !headIsUrgent
+        ? [exactScoreObligationId]
+        : [],
+  };
+}
+
+function isExactScoreRootHead(
+  head: Pick<
+    TurnPlanningHeadCandidate,
+    | "rootPlanInstanceId"
+    | "rootPlanModuleId"
+    | "moduleId"
+    | "executorPlanInstanceId"
+  >,
+): boolean {
+  return (
+    head.rootPlanModuleId === "corp.score_agenda" &&
+    head.moduleId === "corp.score_agenda" &&
+    head.executorPlanInstanceId === head.rootPlanInstanceId
+  );
 }
 
 function selectedAgendaHeadCandidateIds(
@@ -1267,26 +1353,6 @@ function highestUrgentPriorityClass(
     .map((head) => head.priorityClass)
     .filter((priorityClass) => ["P1", "P2", "P3"].includes(priorityClass))
     .sort()[0];
-}
-
-function priorityCoverageForHead(
-  urgentPriorityClass: string | undefined,
-): PriorityCoverage {
-  if (!urgentPriorityClass) {
-    return {
-      requiredObligationIds: [],
-      satisfiedObligationIds: [],
-      violatedObligationIds: [],
-      deferredObligationIds: [],
-    };
-  }
-  const obligationId = `priority-band:${urgentPriorityClass}`;
-  return {
-    requiredObligationIds: [obligationId],
-    satisfiedObligationIds: [obligationId],
-    violatedObligationIds: [],
-    deferredObligationIds: [],
-  };
 }
 
 function boundaryForCandidate(

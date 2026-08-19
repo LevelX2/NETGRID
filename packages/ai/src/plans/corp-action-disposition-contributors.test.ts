@@ -7,6 +7,7 @@ import {
   collectCorpActionDispositions,
   type CorpActionDispositionContributorFacts,
 } from "./corp-action-disposition-contributors";
+import { planInstanceIdForProposal } from "./plan-instance";
 
 describe("corp action disposition contributors", () => {
   it("assigns an exact Data Fort capability only to corp.score_agenda", () => {
@@ -325,6 +326,65 @@ describe("corp action disposition contributors", () => {
           "corp_conditional_punish_action_has_no_engine_quote_request",
       },
     ]);
+  });
+
+  it("keeps an unsafe-horizon draw only on its exact terminal score parent", () => {
+    const current = input();
+    current.playerView.own.stackOrRdCount = 3;
+    const candidate = {
+      actionId: "terminal-night-shift",
+      actionType: "play_operation",
+      semanticActionType: "economy.gain_credit",
+      sourceKind: "card",
+      economyProjection: { cardsDrawn: 1 },
+    } as unknown as ActionSemanticCandidate;
+    const projectId = "terminal-score-project";
+    const parentPlanInstanceId = planInstanceIdForProposal({
+      moduleId: "corp.score_agenda",
+      dedupeKey: projectId,
+    });
+    const domain = {
+      ...emptyDomain(),
+      scoreProjects: [
+        {
+          projectId,
+          agendaPoints: 1,
+          phase: "advance_agenda",
+          sameTurnCloseout: true,
+          terminalScore: false,
+          feasible: true,
+          evidenceCode: "exact-terminal-score",
+        },
+      ],
+      economyNeeds: [
+        {
+          kind: "parent_funding",
+          needId: "terminal-score-funding",
+          gap: 1,
+          actionIds: [candidate.actionId],
+          parentPlanInstanceId,
+          urgentForScore: true,
+          evidenceCode: "exact-terminal-score",
+        },
+      ],
+    } as CorpPlanDomain;
+    const facts = {
+      ...contributorFacts(),
+      corpOpenEconomyPlanOwnsAction: vi.fn(() => true),
+    };
+
+    expect(
+      collectCorpActionDispositions(current, [candidate], domain, facts),
+    ).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: candidate.actionId,
+          evidenceCode: expect.stringContaining(
+            "corp_voluntary_draw_blocked_deckout_horizon",
+          ),
+        }),
+      ]),
+    );
   });
 });
 

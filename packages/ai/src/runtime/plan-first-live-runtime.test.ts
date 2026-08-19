@@ -1761,6 +1761,152 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("routes every legal coverage answer through Rig when the first hand answer is unaffordable", () => {
+    resetResidentPlanPortfolioMemory();
+    const installKrash = legalAction(
+      "install-krash-direct",
+      "runner",
+      "install_card",
+      "Install Krash",
+      { credits: 0, clicks: 1 },
+      {
+        source: "krash-card",
+        payload: {
+          cardId: "krash-card",
+          sourceDefinitionId: "onr_v1_039_krash",
+        },
+      },
+    );
+    const trashThenInstallKrash = legalAction(
+      "install-krash-with-trash.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Krash",
+      { credits: 0, clicks: 1 },
+      {
+        source: "krash-card",
+        payload: {
+          cardId: "krash-card",
+          sourceDefinitionId: "onr_v1_039_krash",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const run = legalAction(
+      "run-rd-with-missing-wall-coverage",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("runner", [
+      installKrash,
+      trashThenInstallKrash,
+      run,
+      credit,
+    ]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("worm-card", "runner", "program", {
+        definitionId: "onr_v1_074_worm",
+        title: "Worm",
+        rulesText: "[0]: Break wall subroutine.\n[3]: +1 strength.",
+        installCost: 4,
+        memoryCost: 1,
+        strength: 2,
+        subtypes: ["icebreaker", "worm"],
+      }),
+      visibleCard("krash-card", "runner", "program", {
+        definitionId: "onr_v1_039_krash",
+        title: "Krash",
+        rulesText:
+          "2 credits: Break ice subroutine.\n2 credits: +1 strength.",
+        installCost: 0,
+        memoryCost: 1,
+        strength: 0,
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    input.playerView.own.rig = [
+      visibleCard("installed-codecracker", "runner", "program", {
+        definitionId: "onr_v1_014_codecracker",
+        title: "Codecracker",
+        installCost: 2,
+        memoryCost: 1,
+        strength: 0,
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        quotedFixtureIce({
+          instanceId: "rd-data-wall",
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          strength: 0,
+          subtypes: ["wall"],
+        }),
+      ]),
+      server("archives"),
+    ];
+    const target = safeRuntimeRunTarget(run.actionId, "rd");
+
+    const decision = liveContext({
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: "krash-card",
+          definitionId: "onr_v1_039_krash",
+          legalActionId: installKrash.actionId,
+          priority: 1_000,
+          developmentRole: "breaker_or_rig_piece",
+          strategicFit: "strong",
+          currentNeed: "acute",
+          cardType: "program",
+          installCost: 0,
+          creditsAfterInstall: 3,
+          duplicateRole: "useful_backup",
+          finalInstallFit: 1_170,
+        }),
+      ],
+      evaluateRunnerRunTargets: () => [
+        {
+          ...target,
+          pathPassability: "blocked_missing_coverage",
+          recommendation: "find_breaker_first",
+          score: 0,
+          evidence: ["target:rd", "missing_coverage:breaker_wall"],
+        },
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installKrash.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.rig_and_coverage",
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.rig_and_coverage" },
+          route: { actionId: installKrash.actionId },
+          turnPlanning: {
+            coverage: { status: "pass", coveragePercent: 100 },
+          },
+        },
+      },
+    });
+  });
+
   it("classifies a matchpoint-reserved optional Cyfermaster trash-install only through its variant owner", () => {
     resetResidentPlanPortfolioMemory();
     const direct = legalAction(
@@ -5476,6 +5622,42 @@ describe("authoritative plan-first live runtime", () => {
       actionId: "night-shift",
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
+    });
+
+    resetResidentPlanPortfolioMemory();
+    const shortDeckHorizon = aiInput("corp", [
+      nightShift,
+      credit,
+      draw,
+      end,
+    ]);
+    shortDeckHorizon.playerView.own.clicks = 3;
+    shortDeckHorizon.playerView.own.credits = 1;
+    shortDeckHorizon.playerView.own.stackOrRdCount = 3;
+    shortDeckHorizon.playerView.own.gripOrHq = [
+      visibleCard("night-shift-card", "corp", "operation", {
+        definitionId: "onr_v1_295_night-shift",
+      }),
+    ];
+    expect(
+      liveContext().chooseSemanticRuntimeAction(shortDeckHorizon, {}),
+    ).toMatchObject({
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          dispositions: expect.arrayContaining([
+            expect.objectContaining({
+              actionId: "night-shift",
+              disposition: "explicitly_nonproductive",
+              ownerModuleId: "corp.economy",
+              evidenceCode:
+                "corp_voluntary_draw_blocked_deckout_horizon:remaining_after:2",
+            }),
+          ]),
+        },
+      },
     });
   });
 

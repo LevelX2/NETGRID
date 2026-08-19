@@ -32,6 +32,8 @@ import {
 } from "./corp-defense-domain-signals";
 import { corpSameTurnScoreConversionPaths } from "./tactical-plan-corp-score-conversion";
 import type { PlanActionDisposition } from "./plan-scheduler";
+import { planInstanceIdForProposal } from "./plan-instance";
+import { corpVoluntaryDrawLeavesUnsafeMandatoryHorizon } from "../runtime/corp-draw-admission";
 
 type CorpRunDefenseAbilityAssessment = Readonly<{
   productive: boolean;
@@ -238,6 +240,16 @@ function contributeCorpActionDispositionForCandidate(
   ) => void,
   facts: CorpActionDispositionContributorFacts,
 ): void {
+  const deckoutHorizonDisposition =
+    corpVoluntaryDrawDeckoutHorizonDisposition(input, candidate, domain);
+  if (deckoutHorizonDisposition) {
+    add(
+      candidate.actionId,
+      deckoutHorizonDisposition.ownerModuleId,
+      deckoutHorizonDisposition.evidenceCode,
+    );
+    return;
+  }
   if (candidate.planOwnerBinding?.owner === "corp.score_agenda") {
     add(
       candidate.actionId,
@@ -1025,6 +1037,75 @@ function contributeCorpActionDispositionForCandidate(
       "corp_card_action_has_no_exact_parent_need",
     );
   }
+}
+
+function corpVoluntaryDrawDeckoutHorizonDisposition(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  domain: CorpPlanDomain,
+):
+  | {
+      ownerModuleId: PlanActionDisposition["ownerModuleId"];
+      evidenceCode: string;
+    }
+  | undefined {
+  const cardsDrawn =
+    candidate.semanticActionType === "draw.card"
+      ? 1
+      : candidate.economyProjection?.cardsDrawn;
+  if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
+    return undefined;
+  }
+  const admittedTerminalDraw = (domain.drawArbitrations ?? []).some(
+    (assessment) =>
+      assessment.actionId === candidate.actionId &&
+      assessment.disposition === "admitted" &&
+      assessment.terminalNeedBeforeMandatoryDraw,
+  );
+  const exactTerminalScoreSupport = domain.scoreProjects.some((project) => {
+    if (
+      !project.feasible ||
+      (!project.sameTurnCloseout && !project.terminalScore)
+    ) {
+      return false;
+    }
+    const parentPlanInstanceId = planInstanceIdForProposal({
+      moduleId: "corp.score_agenda",
+      dedupeKey: project.projectId,
+    });
+    return domain.economyNeeds.some(
+      (signal) =>
+        signal.kind === "parent_funding" &&
+        signal.parentPlanInstanceId === parentPlanInstanceId &&
+        signal.actionIds.includes(candidate.actionId),
+    );
+  });
+  if (
+    !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
+      remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
+      cardsDrawn: cardsDrawn!,
+      terminalNeedBeforeMandatoryDraw:
+        admittedTerminalDraw || exactTerminalScoreSupport,
+    })
+  ) {
+    return undefined;
+  }
+  const remainingAfterDraw =
+    input.playerView.own.stackOrRdCount - cardsDrawn!;
+  const economyOwnsAction =
+    candidate.semanticActionType === "economy.gain_credit" ||
+    domain.economyNeeds.some((signal) =>
+      signal.actionIds.includes(candidate.actionId),
+    );
+  const arbitrationOwner = (domain.drawArbitrations ?? []).find(
+    (assessment) => assessment.actionId === candidate.actionId,
+  )?.ownerModuleId;
+  return {
+    ownerModuleId: economyOwnsAction
+      ? "corp.economy"
+      : (arbitrationOwner ?? "corp.hand_and_agenda_management"),
+    evidenceCode: `corp_voluntary_draw_blocked_deckout_horizon:remaining_after:${remainingAfterDraw}`,
+  };
 }
 
 function preparedScoreParentSuppressesSiblingRoute(
