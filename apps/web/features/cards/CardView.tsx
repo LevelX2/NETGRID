@@ -260,7 +260,7 @@ export function CardView({
       observer?.disconnect();
       if (animationFrame !== null) cancelAnimationFrame(animationFrame);
     };
-  }, [usesTextCardLayout, card.title, metaText, rulesText, setBadgeLabel]);
+  }, [usesTextCardLayout, card.title, metaText, rulesText, card.setShortLabel]);
 
   const cardStyle = usesTextCardLayout
     ? ({ "--text-card-scale": String(textCardScale) } as CSSProperties)
