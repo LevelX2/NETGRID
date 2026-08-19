@@ -1,10 +1,10 @@
 # Persönlicher Kartenbildimport IMG01–IMG05
 
-Status: `in_progress`
+Status: `implementation_complete`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img01-img05-card-image-import`
-Aktueller Zustand: `IMG05_done`
+Aktueller Zustand: `ready_for_main_merge`
 
 ## Quelle und Zielprüfung
 
@@ -266,6 +266,18 @@ Commit: `feat(card-images): resolve personal runtime overrides`
 - Vor dem Main-Merge final mindestens die betroffenen Tests, Typechecks und
   einen Build ausführen; bekannte unabhängige Baselinefehler getrennt
   ausweisen.
+
+## Finale Verifikation
+
+- Kartenbildpaket: 22 Tests, Typecheck und Build grün.
+- Web-Kartenbildpfad: 18 fokussierte Lookup-, Route- und Clienttests grün.
+- Paketgrenzen: grün für 1.923 geprüfte Dateien.
+- Web-Produktionsbuild: Anwendung kompiliert erfolgreich; der nachgelagerte
+  TypeScript-Schritt stoppt ausschließlich am bereits auf `main` vorhandenen
+  KI-Baselinefehler `option.card`.
+- Workspace-Typecheck: alle Pakete bis einschließlich `card-images` und
+  `decks` grün; Stopp im KI-Paket an bereits vorhandenen optionalen Feldern
+  und fehlenden lokalen Review-JSON-Artefakten.
 
 ## Worktree-, Git- und Integrationsregeln
 
