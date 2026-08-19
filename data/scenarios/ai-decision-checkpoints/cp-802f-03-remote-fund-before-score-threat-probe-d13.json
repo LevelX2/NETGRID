@@ -3948,13 +3948,16 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "start_run",
+        "targetServerId": "remote_1"
       }
     ],
-    "forbiddenActions": [
-      {
-        "actionId": "runner.start_run.remote_1"
-      }
-    ]
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": [
+        "runner_remote_contest_waits_for_credit_reserve:remote_1"
+      ]
+    }
   }
 }
