@@ -28613,11 +28613,10 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["fund_onr_proteus_134_cortical-cybermodem"],
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
       "requiredAssessmentEvidence": [
-        "development_funding_route_status:covered_guaranteed",
-        "source:own_runner_hand:card_specific_purpose:economy_engine:setup"
+        "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_1"
       ]
     }
   }

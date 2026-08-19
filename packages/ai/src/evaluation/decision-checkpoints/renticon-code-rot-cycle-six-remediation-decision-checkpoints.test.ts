@@ -12,10 +12,10 @@ const FIXTURES = [
     "uses the exact program tutor instead of a negative persistent install",
     negativeInstallJson,
   ],
-  ["stops a saturated coverage search", saturatedSearchJson],
+  ["funds Rent-I-Con after the coverage search is saturated", saturatedSearchJson],
   ["funds the bound same-turn economy development", richCreditRepeatJson],
   [
-    "does not force an ordinary Archives run outside its deterministic opportunity",
+    "funds Tycho without forcing an ordinary Archives run",
     overflowDrawJson,
   ],
 ] as const;
