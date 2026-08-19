@@ -73,7 +73,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("still permits an unfunded third layer as bounded staging", () => {
+  it("activates the available BBS economy before an unfunded third layer", () => {
     const checkpoint = mutateFixture(
       avoidUnfundedRdOverstackJson,
       (fixture) => {
@@ -91,7 +91,19 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           };
         }
         fixture.expectation = {
-          acceptableActions: [{ type: "install_card", targetServerId: "rd" }],
+          acceptableActions: [
+            {
+              type: "rez_card",
+              sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+            },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["corp.economy"],
+            acceptableCapabilities: ["develop_or_convert_corp_economy"],
+            requiredAssessmentEvidence: [
+              "corp_visible_economy_campaign:rez:remote_1:protected_contestable",
+            ],
+          },
         };
       },
     );
