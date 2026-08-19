@@ -5650,7 +5650,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": ["bid_2"]
+      "mustSelectOptionIds": ["bid_1"]
     }
   }
 }

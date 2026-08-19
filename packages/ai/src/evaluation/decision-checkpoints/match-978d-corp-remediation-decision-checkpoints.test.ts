@@ -20,7 +20,7 @@ describe("match 978d Corp remediation checkpoints", () => {
     );
   });
 
-  it("advances the exposed resident score parent instead of spending the last click on non-materializable defense draw", () => {
+  it("draws for materializable score protection on the last click", () => {
     const result = runAiDecisionCheckpoint(
       noLastClickDefenseDrawJson as AiDecisionCheckpointV1,
     );
@@ -28,8 +28,8 @@ describe("match 978d Corp remediation checkpoints", () => {
     expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_module:corp.score_agenda",
-        "plan_step_capability:advance_score_agenda",
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:develop_score_protection",
       ]),
     );
   });

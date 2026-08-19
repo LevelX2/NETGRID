@@ -4633,9 +4633,9 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_rd_information"],
-      "requiredAssessmentEvidence": ["target:rd"]
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": ["runner_direct_run_converts_now:remote_1"]
     }
   }
 }

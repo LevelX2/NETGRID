@@ -8,11 +8,11 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("match 03575 runner decision checkpoints", () => {
-  it("preserves economy instead of overbidding an unpunished trace", () => {
+  it("pays the minimal modern Trace bid", () => {
     expectCheckpointToPass(fixture(traceBidEconomyJson));
   });
 
-  it("runs a freshly randomized R&D at matchpoint", () => {
+  it("contests the certified remote at matchpoint", () => {
     expectCheckpointToPass(fixture(rdRepeatFreshMatchpointJson));
   });
 
@@ -45,7 +45,7 @@ describe("match 03575 runner decision checkpoints", () => {
       delete latestCorpBid.publicPayload.corpBidMax;
       delete latestCorpBid.publicPayload.traceStrength;
       checkpoint.expectation = {
-        choice: { mustSelectOptionIds: ["bid_2"] },
+        choice: { mustSelectOptionIds: ["bid_1"] },
       };
     });
 
@@ -62,11 +62,11 @@ describe("match 03575 runner decision checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "03575-C02-STALE-RD-TOP";
         checkpoint.expectation = {
-          forbiddenActions: [{ actionId: "runner.start_run.rd" }],
+          exactActionId: "runner.start_run.remote_1",
           planExecution: {
-            acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["pressure_hq_access"],
-            requiredAssessmentEvidence: ["target:hq"],
+            acceptablePlanKinds: ["runner.contest_remote"],
+            acceptableCapabilities: ["contest_remote"],
+            requiredAssessmentEvidence: ["runner_direct_run_converts_now:remote_1"],
           },
         };
       },
