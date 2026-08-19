@@ -10,6 +10,12 @@ normalisiert und in den persistenten inhaltsadressierten Kartenbildspeicher
 übernommen. Spielruntime, Webclient und Multiplayer-Server verwenden danach nur
 die bereits lokal gespeicherten Varianten.
 
+Der frühere direkte Laufzeitzugriff auf den lokalen ONR-Quellordner ist nicht
+mehr Bestandteil der Bildauflösung. Bestehende private Quelldateien werden
+einmalig zu vollständigen IMG07-Paketen gebaut und anschließend über denselben
+Paketimport wie auf einer übertragenen Installation in die persönliche
+Collection übernommen.
+
 Remote-URLs, lokale Quellpfade und Paketpfade werden weder in PlayerViews noch
 in Browserpayloads, Replays, Events oder StateHash übernommen. Kartenbilder
 bleiben reine Anzeigeinhalte und verändern keine Spielregeln oder
@@ -26,6 +32,15 @@ corepack pnpm --filter @netgrid/card-images cli template --output C:\Pfad\mappin
 Aktivierte Zeilen verwenden `printingId` als kanonischen Schlüssel. `quelle`
 enthält einen lokalen absoluten oder relativ zur CSV aufgelösten Pfad;
 `sha256` kann den erwarteten Hash der unveränderten Quelldatei enthalten.
+Die optionale Spalte `randzuschnittPx` beschreibt einen expliziten Zuschnitt
+als `links,oben,rechts,unten` in Pixeln der nach EXIF ausgerichteten Quelle.
+Ein leeres Feld lässt die Quelle unverändert; ein gesetzter Wert wird vor der
+Variantenbildung auf Bildgrenzen und plausible Kartenabmessungen geprüft.
+Erzeugte Vorlagen beginnen mit einer deutschsprachigen Kurzanleitung. Zeilen,
+deren erstes Feld nach optionalem Leerraum mit `#` beginnt, sind Kommentare
+und werden vom Importer ignoriert. Dadurch dürfen zusätzliche Hinweise auch
+innerhalb der Zuordnungstabelle stehen, ohne als Kartenzeilen verarbeitet zu
+werden.
 
 Der lokale Import führt keinerlei Netzwerkzugriff aus:
 
@@ -135,20 +150,33 @@ Normalisierungs- und Storepfad importiert.
 Unter `/maintenance/card-images` stehen dieselben Import- und Paketverträge
 ohne CLI zur Verfügung. Die Seite ist Teil der Maintenance-Control-Plane und
 bleibt im Profil `local` auf direkte Loopback-Verbindungen beschränkt. Sie
-verlangt eine Maintenance-Anmeldung; mutierende Import- und Buildvorgänge
-verlangen zusätzlich eine frische Reauthentifizierung.
+verlangt eine Maintenance-Anmeldung sowie bei Mutationen eine gültige
+CSRF-/Origin-Prüfung. Kartenbildimport, Paketimport und Paketbuild verlangen
+innerhalb dieser Sitzung keine zusätzliche Passworteingabe; die frische
+Reauthentifizierung bleibt destruktiven Storage-Maintenance-Aktionen
+vorbehalten.
 
 Lokale Zuordnungstabellen, Quellbilder und übertragene Paketverzeichnisse
 werden unter `data/local-assets/card-image-import/inbox/` bereitgestellt. Bei
 gesetztem `NETGRID_DATA_ROOT` liegt die Inbox entsprechend unter dem dortigen
-`card-image-import/inbox/`. Der Browser erhält und sendet ausschließlich
-relative Inbox-Einträge. Absolute Serverpfade, Quell-URLs und private
-Dateiinhalte gehören nicht zum HTTP-Vertrag.
+`card-image-import/inbox/`. Der Browser arbeitet außerhalb ausdrücklich
+ausgewählter lokaler Dateien ausschließlich mit relativen Inbox-Einträgen. Eine
+ausgewählte CSV oder ein vollständiger IMG07-Paketordner darf über die
+authentifizierte Loopback-Maintenance-Verbindung in einen verwalteten
+Inbox-Bereich geladen werden. Paketdateien werden einzeln begrenzt und das
+Manifest zuletzt geschrieben, damit ein abgebrochener Upload nicht als Paket
+angeboten wird. Absolute Serverpfade werden nicht übertragen oder
+zurückgeliefert; Quell-URLs bleiben ausschließlich Inhalt der nicht
+zurückgelieferten Zuordnungsdatei.
 
 Die Oberfläche bietet:
 
 - Bestandszahlen für Originalset, Proteus und Classic;
 - CSV-Vorlagen für den Gesamtkatalog oder ein einzelnes Profil;
+- direkte Auswahl und sichere Bereitstellung einer lokalen CSV-Datei in der
+  Import-Inbox;
+- direkte Auswahl und begrenzte Bereitstellung eines vollständigen
+  IMG07-Paketordners;
 - Prüflauf und Import für lokale beziehungsweise ausdrücklich bestätigte
   HTTPS-Zuordnungen;
 - Paketprüfung und -import für erkannte IMG07-Verzeichnispakete;
@@ -158,6 +186,18 @@ Die Oberfläche bietet:
 Ein Prüflauf reserviert keine spätere Schreibentscheidung. Beim eigentlichen
 Import werden Quellen, Rechtebestätigung, Konfliktmodus, Hashes und Bindungen
 erneut geprüft. Während des Spiels erfolgt weiterhin kein Remotezugriff.
+
+Die Normalisierung skaliert Quellbilder niemals hoch. Sie erzeugt WebP-Varianten
+mit den Obergrenzen 2400 × 3360 (`master`, verlustfrei), 1200 × 1680 (`full`),
+480 × 674 (`preview`) und 256 × 358 (`thumb`). Kleinere Quellen behalten in
+`master` und `full` ihre vorhandenen Abmessungen; `preview` und `thumb` werden
+nur bei Bedarf proportional verkleinert. Der Prüf- und Importbericht zeigt das
+Quellformat mit Quellabmessungen sowie das erzeugte Masterformat mit
+Masterabmessungen als Vorher-Nachher-Angabe.
+Ein in der Zuordnung gesetzter `randzuschnittPx` wird vor dieser Skalierung
+angewendet. Bildpakete übernehmen den Wert in Zuordnung und Manifest; Pakete
+mit Zuschnitt setzen deshalb mindestens Importer-Version 2 voraus. Pakete und
+Zuordnungen ohne die optionale Spalte bleiben gültig.
 
 ## Private-Asset-Grenze
 

@@ -14,6 +14,7 @@ import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import {
   parseCardImageMappingCsv,
   serializeCardImageMappingCsv,
+  type CardImageCropPixels,
   type CardImageMappingRow,
 } from "./csv";
 import {
@@ -33,7 +34,7 @@ import {
 } from "./store";
 
 export const CARD_IMAGE_PACK_SCHEMA_VERSION = "netgrid-card-image-pack-v1";
-export const CARD_IMAGE_PACK_IMPORTER_VERSION = 1;
+export const CARD_IMAGE_PACK_IMPORTER_VERSION = 2;
 export const CARD_IMAGE_PACK_MANIFEST_FILE = "netgrid-card-image-pack.json";
 export const CARD_IMAGE_PACK_MAPPING_FILE = "mapping.csv";
 
@@ -80,6 +81,7 @@ export type CardImagePackEntry = {
   sourceSha256: string;
   mediaType: CardImageMediaType;
   bytes: number;
+  cropPixels?: CardImageCropPixels;
 };
 
 export type CardImagePackManifest = {
@@ -153,7 +155,7 @@ export type ImportPrivateCardImagePackOptions = {
 };
 
 export type CardImagePackProgress = {
-  phase: "validating" | "building" | "importing";
+  phase: "validating" | "building" | "preparing" | "storing";
   completed: number;
   total: number;
   printingId?: string;
@@ -300,7 +302,11 @@ async function buildCardImagePack(
     const entries: CardImagePackEntry[] = [];
     const assignments = new Map<
       string,
-      { source: string; expectedSha256: string }
+      {
+        source: string;
+        expectedSha256: string;
+        cropPixels?: CardImageCropPixels;
+      }
     >();
     const rowsByPrintingId = new Map(
       selected.map((row) => [row.printingId, row]),
@@ -317,7 +323,11 @@ async function buildCardImagePack(
         path.dirname(mappingFile),
         options.localSourceResolver,
       );
-      const normalized = await normalizeCardImage(source, card.printingId);
+      const normalized = await normalizeCardImage(
+        source,
+        card.printingId,
+        row.cropPixels ? { cropPixels: row.cropPixels } : {},
+      );
       if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
         throw new CardImagePackError(
           "pack_source_hash_mismatch",
@@ -337,10 +347,12 @@ async function buildCardImagePack(
         sourceSha256: normalized.sourceHash,
         mediaType: normalized.sourceMediaType,
         bytes: normalized.sourceBytes,
+        ...(row.cropPixels ? { cropPixels: row.cropPixels } : {}),
       });
       assignments.set(card.printingId, {
         source: relativePath,
         expectedSha256: normalized.sourceHash,
+        ...(row.cropPixels ? { cropPixels: row.cropPixels } : {}),
       });
       options.onProgress?.({
         phase: "building",
@@ -351,7 +363,9 @@ async function buildCardImagePack(
     }
     const manifest: CardImagePackManifest = {
       schemaVersion: CARD_IMAGE_PACK_SCHEMA_VERSION,
-      minimumImporterVersion: CARD_IMAGE_PACK_IMPORTER_VERSION,
+      minimumImporterVersion: entries.some((entry) => entry.cropPixels)
+        ? CARD_IMAGE_PACK_IMPORTER_VERSION
+        : 1,
       packId: context.profile.packId,
       profileId: context.profile.profileId,
       displayName: context.profile.displayName,
@@ -390,12 +404,10 @@ async function importCardImagePack(
   const entryByPrintingId = new Map(
     manifest.entries.map((entry) => [entry.printingId, entry]),
   );
-  const importSteps = context.cards.length * (options.dryRun ? 1 : 2);
-  const totalSteps = context.cards.length + importSteps;
   options.onProgress?.({
     phase: "validating",
     completed: 0,
-    total: totalSteps,
+    total: context.cards.length,
   });
   for (const [index, card] of context.cards.entries()) {
     const entry = entryByPrintingId.get(card.printingId)!;
@@ -425,7 +437,7 @@ async function importCardImagePack(
     options.onProgress?.({
       phase: "validating",
       completed: index + 1,
-      total: totalSteps,
+      total: context.cards.length,
       printingId: card.printingId,
     });
   }
@@ -438,13 +450,18 @@ async function importCardImagePack(
     dryRun: options.dryRun ?? false,
     ...(options.now ? { now: options.now } : {}),
     cards: rawContext.cards,
-    onProgress: (progress) =>
+    onProgress: (progress) => {
+      const completed =
+        progress.phase === "storing"
+          ? progress.completed - context.cards.length
+          : progress.completed;
       options.onProgress?.({
-        phase: "importing",
-        completed: context.cards.length + progress.completed,
-        total: totalSteps,
+        phase: progress.phase,
+        completed,
+        total: context.cards.length,
         ...(progress.printingId ? { printingId: progress.printingId } : {}),
-      }),
+      });
+    },
   });
   return {
     packId: manifest.packId,
@@ -560,7 +577,8 @@ async function validateBundledMapping(
     const entry = entries.get(row.printingId)!;
     if (
       row.source !== entry.relativePath ||
-      row.expectedSha256 !== entry.sourceSha256
+      row.expectedSha256 !== entry.sourceSha256 ||
+      !sameCropPixels(row.cropPixels, entry.cropPixels)
     )
       throw new CardImagePackError(
         "pack_manifest_invalid",
@@ -568,6 +586,48 @@ async function validateBundledMapping(
         row.printingId,
       );
   }
+}
+
+function sameCropPixels(
+  left: CardImageCropPixels | undefined,
+  right: CardImageCropPixels | undefined,
+): boolean {
+  if (!left || !right) return left === right;
+  return (
+    left.left === right.left &&
+    left.top === right.top &&
+    left.right === right.right &&
+    left.bottom === right.bottom
+  );
+}
+
+function manifestCropPixels(
+  value: unknown,
+  printingId: string,
+): CardImageCropPixels | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) throw invalidManifest(printingId);
+  const crop = {
+    left: value.left,
+    top: value.top,
+    right: value.right,
+    bottom: value.bottom,
+  };
+  if (
+    Object.values(crop).some(
+      (part) =>
+        !Number.isSafeInteger(part) ||
+        Number(part) < 0 ||
+        Number(part) > 100_000,
+    )
+  )
+    throw invalidManifest(printingId);
+  return {
+    left: Number(crop.left),
+    top: Number(crop.top),
+    right: Number(crop.right),
+    bottom: Number(crop.bottom),
+  };
 }
 
 function validateManifest(
@@ -622,14 +682,24 @@ function validateManifest(
         packImageRelativePath(card.printingId, candidate.mediaType)
     )
       throw invalidManifest(card.printingId);
+    const cropPixels = manifestCropPixels(
+      candidate.cropPixels,
+      card.printingId,
+    );
     entries.push({
       printingId: card.printingId,
       relativePath: candidate.relativePath,
       sourceSha256: candidate.sourceSha256,
       mediaType: candidate.mediaType,
       bytes: Number(candidate.bytes),
+      ...(cropPixels ? { cropPixels } : {}),
     });
   }
+  if (
+    minimumImporterVersion < CARD_IMAGE_PACK_IMPORTER_VERSION &&
+    entries.some((entry) => entry.cropPixels)
+  )
+    throw invalidManifest();
   return {
     schemaVersion: CARD_IMAGE_PACK_SCHEMA_VERSION,
     minimumImporterVersion,

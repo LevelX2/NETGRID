@@ -16,11 +16,14 @@ import {
   inventoryCardImageInbox,
   resolveCardImageInboxEntry,
   resolveCardImageInboxSource,
+  writeCardImageInboxMapping,
+  writeCardImageInboxPackageFile,
   type BuildPrivateCardImagePackOptions,
   type BuildPrivateCardImagePackResult,
   type CardImageBindingConflictMode,
   type CardImageCollectionInventory,
   type CardImageImportReport,
+  type CardImageImportProgress,
   type CardImageInboxInventory,
   type CardImageInboxOptions,
   type HttpsImageDownload,
@@ -41,7 +44,7 @@ export type CardImageMaintenanceCapabilities = {
   importModes: readonly ["local", "https", "pack"];
   conflictModes: readonly ["fail", "skip", "replace"];
   httpsRequiresRightsConfirmation: true;
-  mutationsRequireReauthentication: true;
+  mutationsRequireReauthentication: false;
 };
 
 export type CardImageMaintenanceJobKind =
@@ -193,7 +196,7 @@ export class CardImageMaintenanceService {
       importModes: ["local", "https", "pack"],
       conflictModes: ["fail", "skip", "replace"],
       httpsRequiresRightsConfirmation: true,
-      mutationsRequireReauthentication: true,
+      mutationsRequireReauthentication: false,
     };
   }
 
@@ -203,6 +206,31 @@ export class CardImageMaintenanceService {
 
   async inbox(): Promise<CardImageInboxInventory> {
     return inventoryCardImageInbox(this.inboxOptions);
+  }
+
+  async uploadMapping(
+    fileName: string,
+    content: string,
+  ): Promise<{ relativePath: string }> {
+    const entry = await writeCardImageInboxMapping(
+      fileName,
+      content,
+      this.inboxOptions,
+    );
+    return { relativePath: entry.relativePath };
+  }
+
+  async uploadPackageFile(
+    packageName: string,
+    relativeFilePath: string,
+    content: Uint8Array,
+  ): Promise<{ package: string; file: string }> {
+    return writeCardImageInboxPackageFile(
+      packageName,
+      relativeFilePath,
+      content,
+      this.inboxOptions,
+    );
   }
 
   mappingTemplate(profileId: PrivateCardImagePackProfileId | "all"): {
@@ -322,7 +350,10 @@ export class CardImageMaintenanceService {
             this.inboxOptions,
           ),
         onProgress: (progress) => {
-          job.progress = { ...progress };
+          job.progress = mappingJobProgress(
+            progress,
+            job.kind === "mapping_preview",
+          );
         },
         ...(this.httpsDownloader
           ? { httpsDownloader: this.httpsDownloader }
@@ -427,6 +458,28 @@ export class CardImageMaintenanceService {
     ))
       this.jobs.delete(job.jobId);
   }
+}
+
+function mappingJobProgress(
+  progress: CardImageImportProgress,
+  dryRun: boolean,
+): CardImageMaintenanceJobProgress {
+  if (dryRun) return { ...progress };
+  const total = progress.total / 2;
+  const completed =
+    progress.phase === "storing"
+      ? progress.completed - total
+      : progress.completed;
+  if (
+    !Number.isSafeInteger(total) ||
+    !Number.isSafeInteger(completed) ||
+    completed < 0 ||
+    completed > total
+  )
+    throw invalidInternalJob(
+      "Der technische Importfortschritt konnte nicht auf Karten abgebildet werden.",
+    );
+  return { ...progress, completed, total };
 }
 
 function validateMappingJobInput(input: StartCardImageMappingJobInput): void {

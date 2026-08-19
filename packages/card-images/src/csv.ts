@@ -1,6 +1,6 @@
 import type { CatalogCard } from "@netgrid/catalog";
 
-export const CARD_IMAGE_MAPPING_COLUMNS = [
+const REQUIRED_CARD_IMAGE_MAPPING_COLUMNS = [
   "aktiv",
   "printingId",
   "setId",
@@ -9,6 +9,25 @@ export const CARD_IMAGE_MAPPING_COLUMNS = [
   "titel",
   "quelle",
   "sha256",
+] as const;
+
+export const CARD_IMAGE_MAPPING_COLUMNS = [
+  ...REQUIRED_CARD_IMAGE_MAPPING_COLUMNS,
+  "randzuschnittPx",
+] as const;
+
+export const CARD_IMAGE_MAPPING_COMMENT_PREFIX = "#";
+
+const CARD_IMAGE_MAPPING_INSTRUCTIONS = [
+  "# NETGRID-Kartenbild-Zuordnung",
+  "# Kommentarzeilen beginnen mit # und werden beim Import ignoriert.",
+  "# Bearbeite nur aktiv, quelle sowie optional sha256 und randzuschnittPx; die Katalogspalten müssen unverändert bleiben.",
+  "# aktiv: ja aktiviert die Zeile, nein lässt sie unberücksichtigt.",
+  "# Lokale Quelle: relativer Pfad zur CSV, zum Beispiel images/afreet.jpg. In der Maintenance-Oberfläche muss die Datei innerhalb der Import-Inbox liegen.",
+  "# HTTPS-Quelle: direkte https://-URL zu einer PNG-, JPEG- oder WebP-Datei. Webseiten- und Artikel-URLs sind unzulässig; wähle dafür den expliziten HTTPS-Importmodus.",
+  "# sha256: optional exakt 64 hexadezimale Zeichen zur Prüfung der unveränderten Quelldatei.",
+  "# randzuschnittPx: optional links,oben,rechts,unten in Pixeln nach EXIF-Ausrichtung, zum Beispiel 40,35,40,35. Leer bedeutet kein Zuschnitt.",
+  "# Trennzeichen ist das Semikolon. Felder mit Semikolon, Anführungszeichen oder Zeilenumbruch müssen nach CSV-Regeln in Anführungszeichen stehen.",
 ] as const;
 
 export type CardImageMappingRow = {
@@ -20,7 +39,15 @@ export type CardImageMappingRow = {
   title: string;
   source: string;
   expectedSha256?: string;
+  cropPixels?: CardImageCropPixels;
   rowNumber: number;
+};
+
+export type CardImageCropPixels = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
 };
 
 export type CardImageMappingCsvErrorCode =
@@ -32,7 +59,8 @@ export type CardImageMappingCsvErrorCode =
   | "csv_unknown_printing_id"
   | "csv_catalog_mismatch"
   | "csv_source_missing"
-  | "csv_sha256_invalid";
+  | "csv_sha256_invalid"
+  | "csv_crop_invalid";
 
 export class CardImageMappingCsvError extends Error {
   constructor(
@@ -49,10 +77,17 @@ export function serializeCardImageMappingCsv(
   cards: readonly CatalogCard[],
   assignments: ReadonlyMap<
     string,
-    { source: string; expectedSha256?: string }
+    {
+      source: string;
+      expectedSha256?: string;
+      cropPixels?: CardImageCropPixels;
+    }
   > = new Map(),
 ): string {
-  const rows = [CARD_IMAGE_MAPPING_COLUMNS.join(";")];
+  const rows = [
+    ...CARD_IMAGE_MAPPING_INSTRUCTIONS,
+    CARD_IMAGE_MAPPING_COLUMNS.join(";"),
+  ];
   for (const card of cards) {
     const assignment = assignments.get(card.printingId);
     rows.push(
@@ -65,6 +100,9 @@ export function serializeCardImageMappingCsv(
         card.title,
         assignment?.source ?? "",
         assignment?.expectedSha256 ?? "",
+        assignment?.cropPixels
+          ? serializeCropPixels(assignment.cropPixels)
+          : "",
       ]
         .map(serializeCsvField)
         .join(";"),
@@ -78,11 +116,19 @@ export function parseCardImageMappingCsv(
   cards: readonly CatalogCard[],
 ): CardImageMappingRow[] {
   const records = parseDelimitedRows(input.replace(/^\uFEFF/, ""));
-  const header = records.shift();
-  if (!header || !sameColumns(header, CARD_IMAGE_MAPPING_COLUMNS))
+  const headerIndex = records.findIndex((fields) => !isCommentRow(fields));
+  const header = headerIndex >= 0 ? records[headerIndex] : undefined;
+  const hasCropColumn = header
+    ? sameColumns(header, CARD_IMAGE_MAPPING_COLUMNS)
+    : false;
+  if (
+    !header ||
+    (!hasCropColumn &&
+      !sameColumns(header, REQUIRED_CARD_IMAGE_MAPPING_COLUMNS))
+  )
     throw new CardImageMappingCsvError(
       "csv_header_invalid",
-      `CSV-Kopf muss exakt ${CARD_IMAGE_MAPPING_COLUMNS.join(";")} enthalten.`,
+      `CSV-Kopf muss ${REQUIRED_CARD_IMAGE_MAPPING_COLUMNS.join(";")} und darf zusätzlich randzuschnittPx enthalten.`,
       1,
     );
   const cardsByPrintingId = new Map(
@@ -90,13 +136,14 @@ export function parseCardImageMappingCsv(
   );
   const seen = new Set<string>();
   const rows: CardImageMappingRow[] = [];
-  for (const [index, fields] of records.entries()) {
-    const rowNumber = index + 2;
+  for (const [index, fields] of records.slice(headerIndex + 1).entries()) {
+    const rowNumber = headerIndex + index + 2;
+    if (isCommentRow(fields)) continue;
     if (fields.every((field) => field.trim().length === 0)) continue;
-    if (fields.length !== CARD_IMAGE_MAPPING_COLUMNS.length)
+    if (fields.length !== header.length)
       throw new CardImageMappingCsvError(
         "csv_row_invalid",
-        `Zeile ${rowNumber} besitzt ${fields.length} statt ${CARD_IMAGE_MAPPING_COLUMNS.length} Spalten.`,
+        `Zeile ${rowNumber} besitzt ${fields.length} statt ${header.length} Spalten.`,
         rowNumber,
       );
     const values = fields.map((field) => field.trim());
@@ -108,6 +155,7 @@ export function parseCardImageMappingCsv(
     const title = values[5]!;
     const source = values[6]!;
     const hash = values[7]!;
+    const cropValue = hasCropColumn ? values[8]! : "";
     if (!printingId)
       throw new CardImageMappingCsvError(
         "csv_row_invalid",
@@ -152,6 +200,9 @@ export function parseCardImageMappingCsv(
         `Zeile ${rowNumber} enthält keinen gültigen SHA-256.`,
         rowNumber,
       );
+    const cropPixels = cropValue
+      ? parseCropPixels(cropValue, rowNumber)
+      : undefined;
     rows.push({
       enabled,
       printingId,
@@ -161,10 +212,49 @@ export function parseCardImageMappingCsv(
       title,
       source,
       ...(hash ? { expectedSha256: hash.toLowerCase() } : {}),
+      ...(cropPixels ? { cropPixels } : {}),
       rowNumber,
     });
   }
   return rows;
+}
+
+function parseCropPixels(
+  value: string,
+  rowNumber: number,
+): CardImageCropPixels {
+  const parts = value.split(",").map((part) => part.trim());
+  const values = parts.map((part) =>
+    /^\d+$/.test(part) ? Number(part) : Number.NaN,
+  );
+  if (
+    values.length !== 4 ||
+    values.some(
+      (part) => !Number.isSafeInteger(part) || part < 0 || part > 100_000,
+    )
+  )
+    throw new CardImageMappingCsvError(
+      "csv_crop_invalid",
+      `Zeile ${rowNumber} enthält keinen gültigen randzuschnittPx-Wert links,oben,rechts,unten.`,
+      rowNumber,
+    );
+  return {
+    left: values[0]!,
+    top: values[1]!,
+    right: values[2]!,
+    bottom: values[3]!,
+  };
+}
+
+function serializeCropPixels(crop: CardImageCropPixels): string {
+  return [crop.left, crop.top, crop.right, crop.bottom].join(",");
+}
+
+function isCommentRow(fields: readonly string[]): boolean {
+  return (
+    fields[0]?.trimStart().startsWith(CARD_IMAGE_MAPPING_COMMENT_PREFIX) ??
+    false
+  );
 }
 
 function parseDelimitedRows(input: string): string[][] {

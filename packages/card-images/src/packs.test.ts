@@ -63,6 +63,12 @@ describe("private card image packs", () => {
       cardCount: 2,
     });
     expect(built.manifest.entries).toHaveLength(2);
+    expect(built.manifest.entries[0]?.cropPixels).toEqual({
+      left: 10,
+      top: 10,
+      right: 10,
+      bottom: 10,
+    });
     expect(buildProgress).toEqual([
       { phase: "building", completed: 0, total: 2 },
       {
@@ -87,6 +93,7 @@ describe("private card image packs", () => {
         expect.objectContaining({
           enabled: true,
           expectedSha256: expect.any(String),
+          cropPixels: expect.objectContaining({ left: 10, top: 10 }),
         }),
       ]),
     );
@@ -94,6 +101,38 @@ describe("private card image packs", () => {
     const store = new CardImageStore({
       root: path.join(fixture.root, "store"),
     });
+    const previewProgress: CardImagePackProgress[] = [];
+    const previewed = await __cardImagePackTestOnly.importCardImagePack(
+      { profile: fixture.profile, cards: fixture.cards },
+      built.manifest,
+      built.outputDirectory,
+      {
+        packDirectory: built.outputDirectory,
+        store,
+        collectionId: "personal",
+        dryRun: true,
+        onProgress: (progress) => previewProgress.push(progress),
+      },
+    );
+    expect(previewed.importReport.dryRun).toBe(true);
+    expect(
+      Object.keys((await store.readCollection("personal")).bindings),
+    ).toHaveLength(0);
+    expect([
+      ...new Set(previewProgress.map((progress) => progress.phase)),
+    ]).toEqual(["validating", "preparing"]);
+    expect(
+      previewProgress.every(
+        (progress) => progress.total === fixture.cards.length,
+      ),
+    ).toBe(true);
+    expect(previewProgress.at(-1)).toEqual({
+      phase: "preparing",
+      completed: 2,
+      total: 2,
+      printingId: fixture.cards[1]!.printingId,
+    });
+
     const importProgress: CardImagePackProgress[] = [];
     const imported = await __cardImagePackTestOnly.importCardImagePack(
       { profile: fixture.profile, cards: fixture.cards },
@@ -113,12 +152,12 @@ describe("private card image packs", () => {
     expect(importProgress[0]).toEqual({
       phase: "validating",
       completed: 0,
-      total: 6,
+      total: 2,
     });
     expect(importProgress.at(-1)).toEqual({
-      phase: "importing",
-      completed: 6,
-      total: 6,
+      phase: "storing",
+      completed: 2,
+      total: 2,
       printingId: fixture.cards[1]!.printingId,
     });
   });
@@ -206,6 +245,14 @@ describe("private card image packs", () => {
         { packDirectory: built.outputDirectory },
       ),
     ).rejects.toMatchObject({ code: "pack_importer_too_old" });
+    await expect(
+      __cardImagePackTestOnly.importCardImagePack(
+        { profile: fixture.profile, cards: fixture.cards },
+        { ...built.manifest, minimumImporterVersion: 1 },
+        built.outputDirectory,
+        { packDirectory: built.outputDirectory },
+      ),
+    ).rejects.toMatchObject({ code: "pack_manifest_invalid" });
 
     const unsafe: CardImagePackManifest = {
       ...built.manifest,
@@ -285,7 +332,14 @@ async function packFixture() {
       new Map(
         cards.map((card, index) => [
           card.printingId,
-          { source: imageFiles[index]! },
+          {
+            source: imageFiles[index]!,
+            ...(index === 0
+              ? {
+                  cropPixels: { left: 10, top: 10, right: 10, bottom: 10 },
+                }
+              : {}),
+          },
         ]),
       ),
     ),
