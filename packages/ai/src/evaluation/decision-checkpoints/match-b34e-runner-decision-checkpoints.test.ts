@@ -21,7 +21,7 @@ const PSYCHIC_FRIEND_ID = "runner_onr_classic_030_psychic-friend_1";
 describe("match B34E runner decision checkpoints", () => {
   it.each([
     [
-      "does not classify Library Search as coverage search",
+      "installs the required code-gate coverage before Library Search",
       librarySearchRoleJson,
     ],
     [
@@ -38,7 +38,7 @@ describe("match B34E runner decision checkpoints", () => {
       closeoutBlackBoxD94Json,
     ],
     [
-      "uses a productive final click instead of overflow draw at D97",
+      "funds Finders Keepers instead of overflow draw at D97",
       productiveD97Json,
     ],
     [
