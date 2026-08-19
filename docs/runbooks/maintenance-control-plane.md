@@ -150,9 +150,11 @@ LAN-Aufruf wird auch mit gültiger Maintenance-Sitzung abgelehnt.
 Vor der Bedienung werden Zuordnungstabellen, Quellbilder oder übertragene
 IMG07-Paketverzeichnisse unter
 `data/local-assets/card-image-import/inbox/` abgelegt. Die Oberfläche zeigt
-nur relative Inbox-Einträge. Import und Paketbuild verlangen nach der normalen
-Anmeldung eine frische Passworteingabe im Reauth-Dialog; Prüfläufe und
-Vorlagendownloads verändern keine Bindungen.
+nur sichere relative Inbox-Einträge; lokal ausgewählte Dateien und
+Paketordner werden zuerst dorthin kopiert. Import und Paketbuild verwenden die
+bereits authentifizierte Maintenance-Sitzung mit CSRF-/Origin-Prüfung und
+verlangen keine zweite Passworteingabe. Prüfläufe und Vorlagendownloads
+verändern keine Bindungen.
 
 Der HTTPS-Modus ist ein ausdrücklich bestätigter Vorbereitungsvorgang. Nach
 dem erfolgreichen Import verwendet die Spielruntime ausschließlich die lokal

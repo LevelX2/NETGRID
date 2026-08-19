@@ -43,9 +43,9 @@ ignorierten lokalen Verzeichnissen und gehören weder in CI noch in den
 Hauptinstaller. Die lokale, authentifizierte Maintenance-Oberfläche unter
 `/maintenance/card-images` zeigt den Bestand, erzeugt Vorlagen und steuert
 Prüfläufe, Importe sowie private Paket-Builds über eine verwaltete relative
-Inbox. Mutierende Jobs verlangen eine frische Reauthentifizierung; die
-Oberfläche bleibt selbst bei freigeschalteter Remote-Maintenance auf direkte
-Loopback-Verbindungen begrenzt. Führend ist
+Inbox. Die bestehende Maintenance-Anmeldung, CSRF-/Origin-Prüfung und die
+direkte Loopback-Grenze schützen auch mutierende Kartenbildjobs; eine zweite
+Passworteingabe ist dafür nicht erforderlich. Führend ist
 `docs/architecture/card-images/personal-card-image-import.md`.
 
 ## Engine und Karten

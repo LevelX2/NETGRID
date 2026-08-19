@@ -73,7 +73,7 @@ describe("IMG08 local card image maintenance boundary", () => {
       importModes: ["local", "https", "pack"],
       conflictModes: ["fail", "skip", "replace"],
       httpsRequiresRightsConfirmation: true,
-      mutationsRequireReauthentication: true,
+      mutationsRequireReauthentication: false,
     });
     expect(JSON.stringify(payload)).not.toMatch(/[A-Z]:\\|\/Users\//i);
   });
@@ -203,7 +203,7 @@ describe("IMG08 local card image maintenance boundary", () => {
     expect(template).toContain("printingId");
   });
 
-  it("runs preview jobs, serializes execution and requires reauthentication for apply", async () => {
+  it("runs preview and apply jobs serially within the authenticated session", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-jobs-"));
     const inboxRoot = path.join(root, "inbox");
     await mkdir(inboxRoot, { recursive: true });
@@ -277,24 +277,6 @@ describe("IMG08 local card image maintenance boundary", () => {
     releaseImport();
     await expectJobStatus(client.baseUrl, session, "job-1", "succeeded");
 
-    const applyWithoutReauth = await fetch(
-      `${client.baseUrl}/api/storage/maintenance/card-images/imports/apply`,
-      { method: "POST", headers: mutationHeaders, body },
-    );
-    expect(applyWithoutReauth.status).toBe(403);
-    await expect(applyWithoutReauth.json()).resolves.toMatchObject({
-      error: { code: "maintenance_reauthentication_required" },
-    });
-
-    const reauth = await fetch(
-      `${client.baseUrl}/api/storage/maintenance/auth/reauthenticate`,
-      {
-        method: "POST",
-        headers: mutationHeaders,
-        body: JSON.stringify({ password: PASSWORD }),
-      },
-    );
-    expect(reauth.status).toBe(200);
     const apply = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/imports/apply`,
       { method: "POST", headers: mutationHeaders, body },
@@ -424,16 +406,6 @@ describe("IMG08 local card image maintenance boundary", () => {
       cardCount: 54,
     });
 
-    const importWithoutReauth = await fetch(
-      `${client.baseUrl}/api/storage/maintenance/card-images/packs/import`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ pack: "classic-pack", onExisting: "replace" }),
-      },
-    );
-    expect(importWithoutReauth.status).toBe(403);
-    await reauthenticate(client.baseUrl, session);
     const imported = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/packs/import`,
       {
@@ -451,7 +423,6 @@ describe("IMG08 local card image maintenance boundary", () => {
     );
     expect(importedJob.report).toMatchObject({ operation: "import" });
 
-    await reauthenticate(client.baseUrl, session);
     const built = await fetch(
       `${client.baseUrl}/api/storage/maintenance/card-images/packs/build`,
       {
@@ -561,26 +532,6 @@ async function expectJobStatus(
     await new Promise((resolve) => setTimeout(resolve, 5));
   }
   throw new Error(`Card image job did not reach ${expectedStatus}`);
-}
-
-async function reauthenticate(
-  baseUrl: string,
-  session: { cookie: string; csrfToken: string },
-): Promise<void> {
-  const response = await fetch(
-    `${baseUrl}/api/storage/maintenance/auth/reauthenticate`,
-    {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        cookie: session.cookie,
-        origin: LOCAL_ORIGIN,
-        "x-netgrid-csrf": session.csrfToken,
-      },
-      body: JSON.stringify({ password: PASSWORD }),
-    },
-  );
-  expect(response.status).toBe(200);
 }
 
 function importReport(dryRun: boolean): CardImageImportReport {

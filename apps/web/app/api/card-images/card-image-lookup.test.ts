@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { CardImageStore } from "@netgrid/card-images";
+import { CardImageStore } from "@netgrid/card-images/runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { lookupCardImage } from "./card-image-lookup";
 
@@ -17,9 +17,11 @@ afterEach(async () => {
 
 describe("card image lookup", () => {
   it("resolves registered German display-only skin assets through printingId", async () => {
+    const root = await temporaryRoot();
     const image = await lookupCardImage(
       "onr_v1_188_ai-chief-financial-officer",
       "http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&v=test",
+      { personalStore: new CardImageStore({ root }) },
     );
 
     expect(image).toMatchObject({
@@ -34,10 +36,12 @@ describe("card image lookup", () => {
   });
 
   it("does not invent German skin assets for cards outside the localized registry", async () => {
+    const root = await temporaryRoot();
     await expect(
       lookupCardImage(
         "onr_v1_001_afreet",
         "http://netgrid.local/api/card-images/onr_v1_001_afreet?skin=de&v=test",
+        { personalStore: new CardImageStore({ root }) },
       ),
     ).resolves.toBeNull();
   });

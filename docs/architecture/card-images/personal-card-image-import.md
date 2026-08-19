@@ -146,8 +146,11 @@ Normalisierungs- und Storepfad importiert.
 Unter `/maintenance/card-images` stehen dieselben Import- und Paketverträge
 ohne CLI zur Verfügung. Die Seite ist Teil der Maintenance-Control-Plane und
 bleibt im Profil `local` auf direkte Loopback-Verbindungen beschränkt. Sie
-verlangt eine Maintenance-Anmeldung; mutierende Import- und Buildvorgänge
-verlangen zusätzlich eine frische Reauthentifizierung.
+verlangt eine Maintenance-Anmeldung sowie bei Mutationen eine gültige
+CSRF-/Origin-Prüfung. Kartenbildimport, Paketimport und Paketbuild verlangen
+innerhalb dieser Sitzung keine zusätzliche Passworteingabe; die frische
+Reauthentifizierung bleibt destruktiven Storage-Maintenance-Aktionen
+vorbehalten.
 
 Lokale Zuordnungstabellen, Quellbilder und übertragene Paketverzeichnisse
 werden unter `data/local-assets/card-image-import/inbox/` bereitgestellt. Bei
