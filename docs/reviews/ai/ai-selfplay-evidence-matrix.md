@@ -1142,6 +1142,13 @@ einem Fix muss die terminale Eventbasis des Result-Snapshots gegen Persistenz
 und Zeitpunkt der Snapshot-Erzeugung abgegrenzt werden. Bericht oder UI
 dürfen keinen stillen Ersatzwert berechnen.
 
+Zyklus 018 liefert eine Gegenindikation und eine Bestätigung: Seed 1 und 2
+stimmen mit einem beziehungsweise sieben erfolgreichen Runs zwischen Result
+und vollständigen Run-Snapshots überein. In `match_8e8d8fa7b8772b55` meldet
+das Result dagegen drei, während acht verschiedene Run-IDs die Accessphase
+mit `successful: true` erreichen. Der Fehler ist damit nicht pauschal, aber
+erneut real und wahrscheinlich zustands- oder zeitpunktabhängig.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
@@ -1154,4 +1161,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 010](ai-selfplay-cycle-010-review.md) sowie
 [Review Selbstspielzyklus 011](ai-selfplay-cycle-011-review.md) sowie
 [Review Selbstspielzyklus 016](ai-selfplay-cycle-016-review.md) sowie
-[Review Selbstspielzyklus 017](ai-selfplay-cycle-017-review.md).
+[Review Selbstspielzyklus 017](ai-selfplay-cycle-017-review.md) sowie
+[Review Selbstspielzyklus 018](ai-selfplay-cycle-018-review.md).
