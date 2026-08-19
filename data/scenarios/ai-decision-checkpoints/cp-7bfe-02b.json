@@ -6606,20 +6606,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
-      }
-    ],
-    "forbiddenActions": [
-      {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_304_systematic-layoffs"
+        "actionId": "corp.advance_card.corp_onr_v1_196_corporate-war_3.corp_onr_v1_196_corporate-war_3"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["develop_score_protection"],
+      "acceptablePlanKinds": ["corp.score_agenda"],
+      "acceptableCapabilities": ["advance_score_agenda"],
       "requiredAssessmentEvidence": [
-        "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_196_corporate-war_3:remote_1:remote_1"
+        "engine_certified_next_turn_score_continuation:corp_onr_v1_196_corporate-war_3:remote_1"
       ]
     }
   }

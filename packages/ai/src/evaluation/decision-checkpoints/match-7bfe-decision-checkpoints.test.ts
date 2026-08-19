@@ -46,7 +46,7 @@ describe("match 7BFE exact decision checkpoints", () => {
       fixture.expectation = {
         acceptableActions: [
           {
-            type: "draw_card",
+            type: "gain_credit",
           },
         ],
         forbiddenActions: [
@@ -56,10 +56,10 @@ describe("match 7BFE exact decision checkpoints", () => {
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };
@@ -72,12 +72,12 @@ describe("match 7BFE exact decision checkpoints", () => {
     const earlierWindow = mutateFixture(cp05Json, (fixture) => {
       fixture.engine.testOnlyGameState.corp.clicks = 2;
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [{ type: "gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };
