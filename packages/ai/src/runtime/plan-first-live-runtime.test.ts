@@ -6263,6 +6263,213 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain('"kind":"parent_funding"');
   });
 
+  it("reinforces an existing score remote with a different meaningful ICE instead of opening a sibling remote", () => {
+    resetResidentPlanPortfolioMemory();
+    const stateVersion = 23;
+    const agenda = visibleCard("tycho", "corp", "agenda", {
+      definitionId: "onr_v1_220_tycho-extension",
+      title: "Tycho Extension",
+      advancementRequirement: 4,
+      agendaPoints: 4,
+    });
+    const cinderella = visibleCard("cinderella", "corp", "ice", {
+      definitionId: "onr_v1_228_cinderella",
+      title: "Cinderella",
+      rezCost: 8,
+      strength: 6,
+      subtypes: ["ap", "black ice", "firestarter", "sentry"],
+    });
+    const agendaInstall = (serverId: "remote_1" | "new_remote") =>
+      legalAction(
+        `install-tycho-${serverId}`,
+        "corp",
+        "install_card",
+        `Install Tycho Extension in ${serverId}`,
+        { credits: 0, clicks: 1 },
+        {
+          source: agenda.instanceId,
+          payload: {
+            cardId: agenda.instanceId,
+            sourceDefinitionId: "onr_v1_220_tycho-extension",
+            placement: "root",
+            serverId,
+            agendaInstallScoreHorizonQuoteSchemaVersion:
+              "corp-agenda-install-score-horizon-quote-v1",
+            agendaInstallScoreHorizonQuoteCardId: agenda.instanceId,
+            agendaInstallScoreHorizonQuoteTargetServerId: serverId,
+            agendaInstallScoreHorizonQuoteExpiresAtStateVersion: stateVersion,
+            agendaInstallScoreHorizonQuoteAdvancementRequirement: 4,
+            agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 1,
+            agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 3,
+            agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks:
+              3,
+            agendaInstallScoreHorizonQuoteComplete: true,
+          },
+        },
+      );
+    const iceInstall = (serverId: "remote_1" | "new_remote") =>
+      legalAction(
+        `install-cinderella-${serverId}`,
+        "corp",
+        "install_card",
+        `Install Cinderella on ${serverId}`,
+        { credits: serverId === "remote_1" ? 1 : 0, clicks: 1 },
+        {
+          source: cinderella.instanceId,
+          payload: {
+            cardId: cinderella.instanceId,
+            sourceDefinitionId: "onr_v1_228_cinderella",
+            placement: "ice",
+            serverId,
+            iceInstallBaseCost: serverId === "remote_1" ? 1 : 0,
+            iceInstallAdditionalCost: 0,
+            iceInstallReduction: 0,
+            iceInstallTotalCost: serverId === "remote_1" ? 1 : 0,
+            postInstallRezQuoteCardId: cinderella.instanceId,
+            postInstallRezQuoteTargetServerId: serverId,
+            postInstallRezQuoteProjectedServerId:
+              serverId === "new_remote" ? "remote_2" : serverId,
+            postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+            postInstallRezQuoteComplete: true,
+            postInstallRezQuoteCostKind: "fixed",
+            postInstallRezQuoteBaseCredits: 8,
+            postInstallRezQuoteFinalCredits: 8,
+            postInstallRezQuoteMandatoryAgendaPointCost: 0,
+          },
+        },
+      );
+    const installAgendaExisting = agendaInstall("remote_1");
+    const installAgendaNew = agendaInstall("new_remote");
+    const reinforceExisting = iceInstall("remote_1");
+    const openSibling = iceInstall("new_remote");
+    const gainCredit = legalAction(
+      "gain-credit-score-remote-reinforcement",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const endTurn = legalAction(
+      "end-turn-score-remote-reinforcement",
+      "corp",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("corp", [
+      installAgendaExisting,
+      installAgendaNew,
+      reinforceExisting,
+      openSibling,
+      gainCredit,
+      endTurn,
+    ]);
+    input.decisionId = "score-remote-reinforcement:23";
+    input.playerView.stateVersion = stateVersion;
+    input.playerView.turnSerial = 11;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 5;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [agenda, cinderella];
+    input.playerView.opponent.credits = 4;
+    input.playerView.opponent.agendaPoints = 2;
+    input.playerView.opponent.rig = [
+      visibleCard("jackhammer", "runner", "program", {
+        definitionId: "onr_v1_036_jackhammer",
+        title: "Jackhammer",
+        installCost: 1,
+        memoryCost: 1,
+        strength: 0,
+        subtypes: ["icebreaker", "noisy"],
+        rezzed: true,
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq", [
+        visibleCard("hq-ice", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+      server("rd", [
+        visibleCard("rd-ice", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          rezzed: true,
+        }),
+      ]),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          title: "Wall of Static",
+          rezCost: 3,
+          strength: 2,
+          subtypes: ["wall"],
+          rezzed: false,
+          effectivePostRezRunQuote: {
+            context: "installed_post_rez",
+            cardId: "remote-wall",
+            iceDefinitionId: "onr_v1_279_wall-of-static",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            effectiveRunQuote: {
+              iceInstanceId: "remote-wall",
+              iceDefinitionId: "onr_v1_279_wall-of-static",
+              effectiveStrength: 2,
+              subroutines: [
+                {
+                  id: "remote-wall-end-the-run",
+                  type: "end_the_run",
+                  sourceDefinitionId: "onr_v1_279_wall-of-static",
+                  sourceTitle: "Wall of Static",
+                },
+              ],
+            },
+          },
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "remote-wall",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 3,
+            finalCredits: 3,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
+        }),
+      ]),
+    ];
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: reinforceExisting.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining("%3Aremote_1"),
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          selectedStep: {
+            parentInstanceId: expect.stringContaining("%3Aremote_1"),
+          },
+        },
+      },
+    });
+    expect(decision.actionId).not.toBe(openSibling.actionId);
+  });
+
   it("persists one effect-targeted score-protection draw attempt while keeping same-state retries deterministic", () => {
     resetResidentPlanPortfolioMemory();
     const draw = legalAction(

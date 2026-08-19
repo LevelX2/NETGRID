@@ -63,6 +63,33 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     });
   });
 
+  it("separates direct encounter cost or damage from a trace-only threat", () => {
+    expect(
+      visibleCorpIceDefenseProfile(
+        corpIce("cinderella", {
+          definitionId: "onr_v1_228_cinderella",
+          title: "Cinderella",
+        }),
+      ),
+    ).toMatchObject({
+      hasImmediateStop: true,
+      hasMeaningfulTaxOrDamage: true,
+      hasDirectEncounterCostOrDamage: true,
+    });
+    expect(
+      visibleCorpIceDefenseProfile(
+        corpIce("hunter", {
+          definitionId: "onr_v1_249_hunter",
+          title: "Hunter",
+        }),
+      ),
+    ).toMatchObject({
+      hasImmediateStop: false,
+      hasMeaningfulTaxOrDamage: true,
+      hasDirectEncounterCostOrDamage: false,
+    });
+  });
+
   it("flags zero-effect variable trace rez actions", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(5),

@@ -13656,9 +13656,10 @@ function corpScoreProtectionStagingInstallSignal(
     ) === true;
   const boundedConditionalDeterrence =
     source !== undefined &&
-    (startsFirstScoreProtectionLayer || reinforcesExistingIceRole) &&
-    (sourceDefense.hasMeaningfulTaxOrDamage ||
-      sourceDefense.hasEncounterDisruption);
+    (sourceDefense.hasDirectEncounterCostOrDamage ||
+      sourceDefense.hasEncounterDisruption ||
+      ((startsFirstScoreProtectionLayer || reinforcesExistingIceRole) &&
+        sourceDefense.hasMeaningfulTaxOrDamage));
   if (
     source?.definitionId !== candidate.sourceDefinitionId ||
     definition?.type !== "ice" ||
@@ -13710,9 +13711,13 @@ function corpScoreProtectionStagingInstallSignal(
   if (!corpScoreProtectionStagingPairFitsCurrentTurn(input, project, action)) {
     return undefined;
   }
-  const boundedFirstLayerWithoutCurrentFunding =
-    startsFirstScoreProtectionLayer &&
-    corpFirstScoreProtectionLayerCanPrecedeFunding(
+  const completesBoundedScoreProtectionMaturity =
+    existingRemote?.ice.length === 1 &&
+    corpScoreProjectNeedsProtectionMaturity(project);
+  const boundedStagingLayerWithoutCurrentFunding =
+    (startsFirstScoreProtectionLayer ||
+      completesBoundedScoreProtectionMaturity) &&
+    corpBoundedScoreProtectionLayerCanPrecedeFunding(
       input,
       project,
       action,
@@ -13720,7 +13725,7 @@ function corpScoreProtectionStagingInstallSignal(
     );
   if (
     startsFirstScoreProtectionLayer &&
-    !boundedFirstLayerWithoutCurrentFunding &&
+    !boundedStagingLayerWithoutCurrentFunding &&
     corpScoreProtectionHasMaterialImmediateLiquidityAlternative(
       input,
       allCandidates,
@@ -13729,12 +13734,11 @@ function corpScoreProtectionStagingInstallSignal(
     return undefined;
   }
   if (
-    !boundedFirstLayerWithoutCurrentFunding &&
+    !boundedStagingLayerWithoutCurrentFunding &&
     !corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
       input,
       project,
       action,
-      existingRemote,
     )
   ) {
     return undefined;
@@ -13855,7 +13859,7 @@ function corpPreparedScoreProjectHasImmediateFundingSupport(
   );
 }
 
-function corpFirstScoreProtectionLayerCanPrecedeFunding(
+function corpBoundedScoreProtectionLayerCanPrecedeFunding(
   input: AiDecisionInput,
   project: CorpScoreProjectSignal,
   action: LegalAction,
@@ -13880,7 +13884,7 @@ function corpFirstScoreProtectionLayerCanPrecedeFunding(
     0,
   );
   const rezCredits = action.payload?.postInstallRezQuoteFinalCredits;
-  const firstLayerCanBeRezzedFromCurrentLiquidity =
+  const stagingLayerCanBeRezzedFromCurrentLiquidity =
     project.terminalScore &&
     Number.isSafeInteger(installCredits) &&
     installCredits >= 0 &&
@@ -13889,7 +13893,7 @@ function corpFirstScoreProtectionLayerCanPrecedeFunding(
     rezCredits >= 0 &&
     installCredits + rezCredits <= input.playerView.own.credits;
   return (
-    firstLayerCanBeRezzedFromCurrentLiquidity ||
+    stagingLayerCanBeRezzedFromCurrentLiquidity ||
     (typeof advancementRequirement === "number" &&
       advancementRequirement >= 4 &&
       input.playerView.own.credits >= 5 &&
@@ -13927,7 +13931,6 @@ function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
   input: AiDecisionInput,
   project: CorpScoreProjectSignal,
   action: LegalAction,
-  existingRemote: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): boolean {
   const need = project.protectionNeed;
   if (!need) return false;
@@ -13967,30 +13970,11 @@ function corpScoreProtectionStagingRezPortfolioIsNearTermFundable(
   ) {
     return false;
   }
-  const existingRemoteId = existingRemote?.id;
-  const pendingExistingRezCredits = (existingRemote?.ice ?? []).reduce(
-    (sum, ice) => {
-      if (!Number.isFinite(sum) || ice.rezzed === true) return sum;
-      const quote = ice.effectiveRezCostQuote;
-      if (
-        quote?.context !== "installed" ||
-        quote.cardId !== ice.instanceId ||
-        quote.targetServerId !== existingRemoteId ||
-        quote.projectedServerId !== existingRemoteId ||
-        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
-        quote.complete !== true ||
-        quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
-        !Number.isSafeInteger(quote.finalCredits) ||
-        quote.finalCredits < 0
-      ) {
-        return Number.NaN;
-      }
-      return sum + quote.finalCredits;
-    },
-    0,
-  );
-  if (!Number.isSafeInteger(pendingExistingRezCredits)) return false;
-  const pendingRezCredits = pendingExistingRezCredits + sourceRezCredits;
+  // Existing unrezzed ICE are alternative encounter responses, not a debt
+  // that must be funded together with every later layer. The staging route
+  // binds and funds its newly installed source; the exact protection quote
+  // can still select additional existing ICE when that is actually needed.
+  const pendingRezCredits = sourceRezCredits;
   const nearTermFundingGap = Math.max(
     0,
     installCredits +

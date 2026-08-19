@@ -2214,6 +2214,22 @@ Varianten. Dabei werden mindestens berücksichtigt:
 - Bluff- und Informationswert;
 - Opportunitätskosten der anderweitigen ICE-Nutzung.
 
+Eine zusätzliche ICE-Schicht darf nicht allein deshalb als wirkungslos
+gelten, weil die unmittelbare Zugriffs-Erfolgswahrscheinlichkeit in der
+aktuellen Projektion gleich bleibt. Bekannter Stop-, Breaker-Tax-, Damage- oder
+Encounter-Störungswert ist ebenfalls Schutzfortschritt. Unrezzte vorhandene
+ICE bleiben alternative Rez-Optionen und werden nur bei einer tatsächlich
+gebundenen gemeinsamen Rez-Linie vollständig in denselben Fundingbedarf
+eingerechnet.
+
+Eine zulässige längerfristige Vorfinanzierung wird zwischen erster und zweiter
+Schutzschicht nicht asymmetrisch behandelt: Hat ein vorhandenes Remote genau
+eine Schicht und verlangt das konkrete Scoreprojekt die übliche zweite
+Reifeschicht, darf diese unter denselben makrostrategischen Sicherungen vor der
+vollständigen Rez-/Score-Finanzierung gelegt werden. Das ist eine begrenzte
+Projektfortsetzung, kein Freibrief für weitere Layer und keine dauerhafte
+Festlegung eines bestimmten Remotes als Score- oder Asset-Remote.
+
 Erst danach meldet der Defense-Plan seine besten Step-Optionen an den
 Scheduler.
 

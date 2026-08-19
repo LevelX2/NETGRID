@@ -43,8 +43,9 @@ Verbindliche Gates je Paarung:
    Verhaltensmuster unterscheiden.
 4. Neue Evidence mit allen bestehenden Clustern korrelieren und betroffene
    ältere Fälle neu bewerten oder reproduzieren.
-5. Klare generische Fehler mit Ownership-Test beheben und denselben Seed aus
-   einer frischen isolierten Datenbank erneut vollständig analysieren.
+5. Klare generische Fehler mit Ownership-Test beheben und denselben Seed als
+   frischen Matchlauf in der fortgeschriebenen isolierten Worktree-Datenbank
+   erneut vollständig analysieren.
 6. Erst schließen, wenn der letzte Lauf und die verdichtete Matrix keinen
    weiteren klaren Fix tragen.
 7. Lokal nach `main` integrieren, danach den erneut aktuellen `main`-Stand in
@@ -54,9 +55,9 @@ Verbindliche Gates je Paarung:
 
 | Cluster                                   | Fähigkeit                                                                                                                                      | Fälle | Verdacht | Bestätigt | Behoben/verifiziert | Nächste Verdichtung                                                                                                                                                          |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----: | -------: | --------: | ------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                      |     5 |        3 |         0 |                   2 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; zwei verschiedene Decks zeigen jetzt denselben Score-Stau                |
+| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                      |     5 |        2 |         0 |                   3 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; zwei verschiedene Decks zeigen jetzt denselben Score-Stau                |
 | `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                      |     2 |        1 |         0 |                   1 | Frühe einzeln sichere Draws weiter sammeln; der planübergreifende kurze Pflichtzieh-Horizont ist bereits abgesichert                                                         |
-| `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen zusätzlicher ICE-Schichten gemeinsam bewerten         |     2 |        2 |         0 |                   0 | Vergleichszustände sammeln, in denen eine konkrete alternative ICE-Platzierung oder Score-/Economy-Aktion nachweislich mehr Zugriffsschutz beziehungsweise Siegtempo erzeugt |
+| `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen von ICE und defensiven Server-Upgrades gemeinsam bewerten |     3 |        3 |         0 |                   0 | Vergleichszustände mit exakt gequoteten Upgrade-Effekten, alternativen ICE-Platzierungen sowie Score-/Economy-Pfaden sammeln                                                |
 | `corp-score-exposure-risk`                | Agenda nur in eine gegen öffentliche Rig-Abdeckung ausreichend finanzierbare Score-Remote überführen                                           |     1 |        1 |         0 |                   0 | Vergleichbare gestufte Score-Linien mit Rez-Budget, Runner-Credits und Breakerabdeckung sammeln                                                                              |
 | `runner-low-payoff-pressure`              | Runs nach unmittelbarem und zukünftigem Informations-/Tempoertrag auswählen                                                                    |     1 |        1 |         0 |                   0 | Archives-Runs mit LegalActions, öffentlichem Informationsstand und Folgeplan vergleichen                                                                                     |
 | `runner-coverage-owner-materialization`   | Alle vom Rig-Plan beanspruchten legalen Coverage-Antworten auch als ausführbare Route materialisieren                                          |     1 |        0 |         0 |                   1 | Bei neuen Coverage-Fällen Owner, Rollenpassung, Kosten und tatsächlich veröffentlichte Action-IDs vergleichen                                                                |
@@ -104,7 +105,8 @@ Verbindliche Gates je Paarung:
 | `SP-025` | `runner-coverage-draw-cadence`            | Behoben/verifiziert | Runner | vor Fix `match_ebc151e8a1be1520`, Zwischenlauf `match_87856c3dcdca58ea`, final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`                  | Derselbe Coverage-Bedarf materialisierte nach jeder privaten Handänderung erneut Basic Draw und verbrauchte bis zu vier Klicks desselben Zuges; der erste enge Fix ließ parallele Gap-Erzeuger offen                                              | gemeinsamer endlicher Draw-Takt aller Coverage-Gaps in `runner.rig_and_coverage`; terminaler Remote-Bedarf bleibt explizite Ausnahme                                |
 | `SP-026` | `runner-run-preparation-binding`          | Behoben/verifiziert | Runner | vor Fix `match_7949f3aff19b8b5a`, D134; final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`                                                   | Morphing Tool konnte den für eine konkrete Runroute benötigten Breaker-Subtyp legal wählen, doch die Vorbereitung trug nur anonyme Kosten und blieb ohne Planowner                                                                                | Runanalyse erhält Quellinstanz, Definition und Subtyp; `runner.rig_and_coverage` führt die exakt gebundene aktuelle Action als Support des Run-Parents aus          |
 | `SP-027` | `corp-score-server-reservation`           | Behoben/verifiziert | Corp   | vor Fix `match_a944b3add18ccebb`, D166–D168; Zwischenlauf `match_7d4876b58d2a3e13`, D184; final `match_63ee0abf99b1725d`/`match_c1484f4685ab273d` | Handmanagement installierte ein Economy-Asset in die Remote, die der exakte Scoreplan gerade mit ICE vorbereitet hatte. Der enge Letzter-Klick-Fix gab denselben Server im Folgezug erneut für Overflow frei.                                     | `corp.hand_and_agenda_management` dispositioniert den Konflikt; Agenda- und ICE-Owner sowie der exakte Score-Parent bleiben unverändert                             |
-| `SP-028` | `corp-score-plan-conversion`              | Verdacht            | Corp   | `match_63ee0abf99b1725d` und `match_c1484f4685ab273d`, D166, D185 und D200                                                                        | Der Score-Support verteilt je eine ICE-Schicht auf drei leere Remotes, installiert aber keine Agenda. HQ bleibt agenda-gesättigt und verliert im letzten Multiaccess zwei Agenden.                                                                | `corp.score_agenda` und `corp.defend_servers`; vergleichende Quote für bestehende Investition, Rez-Budget, Runner-Coverage und früher erreichbare Scorekonversion   |
+| `SP-028` | `corp-score-plan-conversion`              | Behoben/verifiziert | Corp   | vor Fix `match_c1484f4685ab273d` und `match_e58f7c30dc9ee2f6`, D166/D185/D200; final `match_7597acdd221583e2`, D166–D167                           | Derselbe Schutzwert wurde auf einem neuen leeren Remote zugelassen, auf der bereits vorbereiteten Remote aber wegen unveränderter unmittelbarer Zugriffswahrscheinlichkeit und asymmetrischer Fundingregel abgelehnt. Final entsteht genau eine zweischichtige Remote. | `corp.defend_servers` bleibt Support-Leaf von `corp.score_agenda`; Schutzwirkung, optionale Rez-Routen und begrenzte zweite Reifeschicht werden gemeinsam bewertet    |
+| `SP-029` | `corp-central-defense-allocation`         | Verdacht            | Corp   | `match_7597acdd221583e2`, D167–D183; Gegenbild `match_c1484f4685ab273d`, D168 und späterer HQ-Run                                                  | Das bekannte defensive Upgrade Rio de Janeiro City Grid ist legal auf HQ, besitzt aber keinen Defense-Planpfad und wird nur zufällig durch Handdruck installiert. Im finalen Replay fehlt dieser Umweg vor dem terminalen HQ-Multiaccess.          | `corp.defend_servers` und defensive Root-Upgrades; exakter Effekt-/Kostenvergleich gegen ICE, Credits und Scorefortschritt fehlt                                    |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -770,10 +772,48 @@ scorebaren Projekt. Eine pauschale Regel „immer den bestehenden Server
 verstärken“ wäre trotzdem nicht belastbar, weil die zweite Schicht teurer zu
 rezzen war und keine zertifizierte unmittelbare Zugriffssenkung besaß.
 
-Status: hoch priorisierter Verdacht und dritte Verdichtung von SP-017. Für
-einen Fix muss eine vergleichende Score-Schutz-Quote belegen, dass
-Konsolidierung unter dem sichtbaren Rez-Budget und der Runner-Coverage eine
-Agenda früher und sicherer konvertiert als ein neuer Server.
+Die erste Gegenprobe nach einem engen Fundingfix blieb über 264
+Entscheidungen vollständig unverändert. Sie zeigte, dass nicht die Summe der
+bereits liegenden Rez-Kosten allein, sondern zusätzlich eine asymmetrische
+Vorfinanzierungsregel wirkte: Eine neue erste Schutzschicht durfte langfristig
+vorbereitet werden, die genau zur üblichen Remote-Reife fehlende zweite
+Schicht nicht. Außerdem hatte der lokale Trace Breaker-Creditverbrauch,
+Stop-, Tax-/Damage- und Encounter-Störungswert fälschlich mit „keine
+Zugriffswahrscheinlichkeitsreduktion“ gleichgesetzt.
+
+Der generische Fix erkennt diese bekannten Effekte als Schutzfortschritt,
+behandelt vorhandene unrezzte ICE als alternative und nicht zwingend gemeinsam
+zu finanzierende Rez-Routen und erlaubt unter denselben engen Sicherungen die
+zweite Reifeschicht. Die Ausnahme endet bei zwei Schichten und erzeugt weder
+blindes Layern noch ein dauerhaft festgelegtes Score-Remote.
+
+Status: behoben/verifiziert. Im finalen Realpfad-Replay
+`match_7597acdd221583e2` installiert derselbe Defense-Leaf D166 Wall of Static
+in Remote 1 und D167 Cinderella als zweite Schicht genau dort. Bis D166 ist
+die Actionfolge identisch; bis zum regulären Ende D183 existiert keine weitere
+Remote. Zwei fokussierte Ownership-Regressionen und 69 angrenzende Tests sind
+grün.
+
+## SP-029 – Defensive Server-Upgrades besitzen keinen Defense-Planpfad
+
+Im finalen SP-028-Replay hält HQ sechs später stehlbare Agendapunkte und wird
+vom sichtbaren HQ-Interface-Plan bedroht. Rio de Janeiro City Grid ist D167
+legal auf HQ installierbar und besitzt einen bekannten wiederholten
+End-the-run-Effekt, wird aber ausschließlich vom Handmanagement betrachtet und
+dort mangels Hand- oder Parentbedarf ausgeschlossen. Im Referenzlauf gelangt
+Rio erst einen Klick später wegen HQ-Overflow auf HQ; im finalen Lauf fehlt
+dieser zufällige Umweg, und der Runner beendet das Match im nächsten HQ-
+Multiaccess.
+
+Menschenverständlich lautet der Verdacht: Defensive Root-Upgrades können
+aktuell nicht gemeinsam mit ICE, zentralem Agenda-Risiko und Scoretempo
+bewertet werden. Der einzelne Seed belegt Relevanz, aber noch nicht, wann die
+Upgrade-Route ICE, Credit-Aufbau oder Scorefortschritt generisch verdrängen
+soll.
+
+Status: Verdacht. Weitere Fälle müssen LegalAction, exakten Kosten-/Effektwert,
+Zentraldruck und Alternativpfade gemeinsam liefern; die Evidence wird mit
+SP-005 und SP-011 verdichtet.
 
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
@@ -783,4 +823,5 @@ Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 006](ai-selfplay-cycle-006-review.md) sowie
 [Review Selbstspielzyklus 007](ai-selfplay-cycle-007-review.md) sowie
 [Review Selbstspielzyklus 008](ai-selfplay-cycle-008-review.md) sowie
-[Review Selbstspielzyklus 009](ai-selfplay-cycle-009-review.md).
+[Review Selbstspielzyklus 009](ai-selfplay-cycle-009-review.md) sowie
+[Review Selbstspielzyklus 010](ai-selfplay-cycle-010-review.md).

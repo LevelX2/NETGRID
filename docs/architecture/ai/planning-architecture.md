@@ -3026,6 +3026,28 @@ vollständigen Funding-/Reservevertrag projiziert. Eine Route ist nur
 produktiv, wenn sie das Schutzziel erfüllt oder nachweisbar in dessen Richtung
 fortschreibt; ein zweites ICE ohne zusätzlichen Effekt ist kein Fortschritt.
 
+Der Schutzeffekt ist dabei nicht auf eine binäre oder unveränderte unmittelbare
+Zugriffs-Erfolgswahrscheinlichkeit verengt. Ein zusätzliches ICE schreibt den
+Schutz auch dann nachweisbar fort, wenn seine Engine-zertifizierte Begegnung
+zusätzliche Breaker-Credits bindet oder seine bekannte Funktion Stop,
+Tax-/Damage-Druck beziehungsweise Encounter-Störung erzeugt. Das gilt
+unabhängig davon, ob bereits dasselbe ICE oder derselbe Rollenbegriff am Server
+liegt. Bereits installierte unrezzte ICE sind alternative Rez- und
+Encounter-Routen; ihre gesamten Rez-Kosten werden einer neuen Installation
+nur dann als gemeinsame Finanzierungspflicht zugerechnet, wenn der konkrete
+Schutzvertrag tatsächlich das gemeinsame Rezzen verlangt.
+
+Die Vorfinanzierungsregel bleibt symmetrisch und begrenzt: Wenn die erste
+Schutzschicht eines langfristigen Scoreprojekts unter den makrostrategischen
+Sicherungen bereits vor vollständiger Rez-/Score-Finanzierung gelegt werden
+darf, darf eine vorhandene Ein-Schicht-Remote unter denselben Sicherungen auch
+mit genau der zweiten, zur üblichen Remote-Reife fehlenden Schicht fortgeführt
+werden. Sie darf deshalb nicht zugunsten einer neuen leeren Schwester-Remote
+verworfen werden. Diese Regel rechtfertigt keine dritte oder weitere Schicht
+ohne neuen exakten Bedarf und weist keinem Remote dauerhaft eine feste Rolle
+zu; nach Ende oder Änderung des Projekts kann jedes legal geeignete Remote
+erneut für Agenda, Asset oder einen anderen Root-Inhalt bewertet werden.
+
 Die Allokationswertung berücksichtigt mindestens:
 
 - strategischen Serverwert sowie sichtbare, erwartete und jüngst beobachtete

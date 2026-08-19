@@ -181,6 +181,18 @@ sie im Planowner.
 - Unrezztes ICE kann Staffelung, Bluff, Handentlastung und Vorbereitung sein.
   Es gibt weder Sofort-Rez-Pflicht noch blindes Layer-Stapeln; Defense bewertet
   globale Opportunitätskosten.
+- Eine unveränderte unmittelbare Zugriffs-Erfolgswahrscheinlichkeit beweist
+  nicht, dass eine zusätzliche ICE-Schicht wirkungslos ist. Engine-zertifizierter
+  Breaker-Creditverbrauch sowie bekannte Stop-, Tax-/Damage- und
+  Encounter-Störung sind eigenständiger Schutzfortschritt. Bereits installierte
+  unrezzte ICE sind dabei optionale Rez-Routen und keine gemeinsam vollständig
+  zu finanzierende Pflichtschuld.
+- Darf eine erste Schutzschicht als längerfristige Score-Vorbereitung vor ihrer
+  vollständigen Finanzierung gelegt werden, gilt dieselbe eng begrenzte
+  Vorbereitung auch für die zweite, zur üblichen Remote-Reife fehlende Schicht.
+  Daraus folgt weder ein blindes drittes Layer noch ein dauerhaft festes
+  „Score-Remote“; vorhandene Remotes bleiben je nach legalem Projektinhalt
+  wiederverwendbar.
 - Ein Scoreplan darf Schutz an Defense delegieren. Defense darf deshalb weder
   Agenda noch Zielremote oder Scoreentscheidung übernehmen.
 - Strategiekomponenten müssen gemeinsam ausführbar sein. Ein Einzelanker
