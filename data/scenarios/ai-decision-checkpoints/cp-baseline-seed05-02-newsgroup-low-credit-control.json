@@ -5743,11 +5743,11 @@
   },
   "expectation": {
     "contractKind": "correctness",
-    "acceptableActions": [
-      {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_v1_045_newsgroup-filter"
-      }
-    ]
+    "exactActionId": "runner.install_card.runner_onr_v1_184_top-runners-conference_1.runner_onr_v1_184_top-runners-conference_1",
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.recurring_economy"],
+      "acceptableCapabilities": ["recurring_economy_install"],
+      "requiredAssessmentEvidence": ["runner_recurring_economy_install_ready"]
+    }
   }
 }

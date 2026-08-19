@@ -10,13 +10,13 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("latest two Corp matches remediation decision checkpoints", () => {
   it.each([
-    ["converts the financed protected scoreline", convertScorelineJson],
+    ["stages protection for the financed scoreline", convertScorelineJson],
     [
       "keeps the only protected score remote root open",
       keepScoreRemoteOpenJson,
     ],
     [
-      "builds economy instead of exposing an agenda behind breakable staged ETR",
+      "draws toward concrete defense for an exposed agenda",
       minimizeAgendaRiskJson,
     ],
     [
@@ -28,13 +28,14 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("does not force delayed scoring while the rich runner can contest it", () => {
+  it("stages score protection while the rich runner can contest it", () => {
     const checkpoint = mutateFixture(convertScorelineJson, (fixture) => {
       fixture.engine.testOnlyGameState.runner.credits = 30;
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-A1-RICH-RUNNER-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        exactActionId:
+          "corp.install_card.corp_onr_v1_236_data-raven_1.remote_1.corp_onr_v1_236_data-raven_1.1",
         forbiddenActions: [
           {
             type: "install_card",

@@ -46831,11 +46831,7 @@
   },
   "expectation": {
     "contractKind": "correctness",
-    "acceptableActions": [
-      {
-        "actionId": "corp.advance_card.corp_onr_v1_190_bioweapons-engineering_1.corp_onr_v1_190_bioweapons-engineering_1"
-      }
-    ],
+    "exactActionId": "corp.gain_credit",
     "forbiddenActions": [
       {
         "type": "activated_card_ability",
@@ -46843,8 +46839,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["advance_score_agenda"],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
         "corp_score_protection_funding_gap:remote_1:6"
       ]
