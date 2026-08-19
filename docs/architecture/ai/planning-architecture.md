@@ -2497,6 +2497,24 @@ liegt. Er darf dafür jedoch keinen lediglich allgemein legalen Draw anhand des
 semantischen Typs übernehmen; die konkrete `actionId` muss vom Coverage-Support
 gebunden sein.
 
+Ein Coverage-Bedarf darf höchstens einen Draw pro Runner-Zug ausführen. Das
+gilt sowohl für den allgemeinen Rig-first-/Setup-Anker als auch für einen
+nicht terminalen konkreten Runbedarf. Der Draw ist eine private
+Beobachtungsgrenze; weitere Klicks desselben Zugs müssen nach der Neuplanung
+anderen produktiven Plänen, einer exakt gebundenen Suche, Finanzierung oder
+Installation offenstehen. Eine akute, als P2 belegte terminale
+Coverage-Unterbrechung wird von dieser Draw-Kadenz nicht abgeschwächt.
+
+Eine Runner-main-Fähigkeit, welche die aktive Coverage eines bereits
+installierten flexiblen Breakers umstellt, gehört ebenfalls ausschließlich
+`runner.rig_and_coverage`. Die sichtbare Runpfadquote muss Quellinstanz,
+Definition, Ziel-Coverage sowie Klick- und Creditkosten der Vorbereitung
+liefern. Das Modul bindet daraus die exakte aktuelle `LegalAction` als
+Kindplan des zuständigen Zentraldruck- oder Remote-Contest-Plans. Ohne einen
+solchen konkreten Runbedarf wird die Umstellung ausdrücklich als unproduktiv
+klassifiziert; sie darf weder ownerlos bleiben noch vorsorglich auf Verdacht
+ausgeführt werden.
+
 ### 27.5 `runner.develop_board_and_hand`
 
 **Klasse:** `bounded_sequence` oder `development_project`

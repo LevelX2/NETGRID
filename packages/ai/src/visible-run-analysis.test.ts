@@ -583,7 +583,17 @@ describe("visible run analysis targeted breaker paths", () => {
       blocked: false,
       canReachAccess: true,
       visibleBreakCost: 3,
-      preRunPreparation: { credits: 1, clicks: 1 },
+      preRunPreparation: {
+        credits: 1,
+        clicks: 1,
+        subtypeChanges: [
+          {
+            sourceCardInstanceId: "morphing-tool-prep",
+            sourceDefinitionId: "onr_proteus_092_morphing-tool",
+            selectedSubtype: "sentry",
+          },
+        ],
+      },
     });
     expect(
       assessKnownRezzedIcePath(ice, [morphingTool], 3, [], 0, {

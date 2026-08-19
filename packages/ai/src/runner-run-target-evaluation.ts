@@ -155,6 +155,10 @@ function evaluateRunnerRunTarget(
     (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
     0,
   );
+  const actionClickCost = projection.action.costs.reduce(
+    (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+    0,
+  );
   const creditsAfterAction = Math.max(
     0,
     params.input.playerView.own.credits - actionCreditCost,
@@ -203,6 +207,10 @@ function evaluateRunnerRunTarget(
         projection.damagePreventionPool ?? 0,
       ),
       prohibitNoisyIcebreakers: projection.noNoisyBreakers,
+      availableRunnerClicks: Math.max(
+        0,
+        params.input.playerView.own.clicks - actionClickCost,
+      ),
       ...(params.input.playerView.own.runnerTraceSupportQuote
         ? {
             runnerTraceSupportQuote:

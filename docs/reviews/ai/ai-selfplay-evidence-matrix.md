@@ -54,7 +54,7 @@ Verbindliche Gates je Paarung:
 
 | Cluster                                   | Fähigkeit                                                                                                                                      | Fälle | Verdacht | Bestätigt | Behoben/verifiziert | Nächste Verdichtung                                                                                                                                                          |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----: | -------: | --------: | ------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                      |     4 |        2 |         0 |                   2 | Score-Stau bei dauerhaft agenda-gesättigtem HQ gegen unzureichend geschützte Remotes abgrenzen und einen zustandsgenauen gestuften Alternativpfad belegen                    |
+| `corp-score-plan-conversion`              | Vorbereiteten Score-Plan in Install-, Advance- und Score-Schritte überführen, ohne die exakte Agenda-Bindung zu verlieren                      |     5 |        3 |         0 |                   2 | Kumulierte Kosten des Wartens gegen einen konkreten gestuften Install-/Schutz-/Advance-Pfad quoten; zwei verschiedene Decks zeigen jetzt denselben Score-Stau                |
 | `corp-deck-exhaustion-horizon`            | Freiwilligen Draw gegen Pflichtziehungen, R&D-Zugriffe und verbleibende Siegzeit bewerten                                                      |     2 |        1 |         0 |                   1 | Frühe einzeln sichere Draws weiter sammeln; der planübergreifende kurze Pflichtzieh-Horizont ist bereits abgesichert                                                         |
 | `corp-central-defense-allocation`         | Öffentlichen Zentraldruck, vorhandene Breakerabdeckung und den tatsächlichen Grenznutzen zusätzlicher ICE-Schichten gemeinsam bewerten         |     2 |        2 |         0 |                   0 | Vergleichszustände sammeln, in denen eine konkrete alternative ICE-Platzierung oder Score-/Economy-Aktion nachweislich mehr Zugriffsschutz beziehungsweise Siegtempo erzeugt |
 | `corp-score-exposure-risk`                | Agenda nur in eine gegen öffentliche Rig-Abdeckung ausreichend finanzierbare Score-Remote überführen                                           |     1 |        1 |         0 |                   0 | Vergleichbare gestufte Score-Linien mit Rez-Budget, Runner-Credits und Breakerabdeckung sammeln                                                                              |
@@ -69,6 +69,8 @@ Verbindliche Gates je Paarung:
 | `deterministic-ai-replay-identity`        | Fachlich gleiche KI-Zustände über verschiedene Match-IDs in dieselbe RNG-, Plan- und Tie-Break-Folge überführen                                |     2 |        0 |         0 |                   2 | Weitere Engine-Randomisierungsfamilien und Planner-Fingerprints auf Transport-, Zeit- und Auditidentitäten prüfen                                                            |
 | `corp-punish-route-quote-completeness`    | Mehrstufige Tag-/Trace-/Damage-Linien vollständig quoten und unvollständige Gründe side-sicher im Decision Trace erklären                      |     1 |        1 |         0 |                   0 | Chance-Observation/Scorched-Earth-Zustand erneut mit persistiertem strukturiertem Incomplete-Grund reproduzieren                                                             |
 | `runner-matchpoint-coverage-horizon`      | Verbleibende reale Deckrollen gegen eine sichtbar entstehende Matchpoint-Remote bewerten und nur tatsächlich erreichbare Coverage suchen       |     1 |        1 |         0 |                   0 | Frühere Zustände mit noch vorhandener passender Coverage und belegter alternativer Funding-/Draw-/Install-Linie sammeln                                                      |
+| `runner-coverage-draw-cadence`            | Einen strategischen Coverage-Draw als endliche Zugressource behandeln, auch wenn private Handänderungen denselben Gap neu bewerten             |     1 |        0 |         0 |                   1 | Planübergreifende reine Draw-Züge beobachten; eine gemeinsame Zugquote erst bei wiederholter Evidence einführen                                                              |
+| `runner-run-preparation-binding`          | Eine vor dem Run exakt benötigte Breaker-Vorbereitung an Run-Parent, Quellinstanz und aktuelle LegalAction binden                              |     1 |        0 |         0 |                   1 | Weitere vorbereitende Fähigkeiten nur über exakte Runroute und denselben Coverage-Supportowner anbinden                                                                      |
 
 ## Fallregister
 
@@ -97,7 +99,9 @@ Verbindliche Gates je Paarung:
 | `SP-021` | `runner-central-payoff-owner-binding`     | Behoben/verifiziert | Runner | Spielseed Zyklus 007; Abbruch vor D8, final `match_2c166dda041da6ff` und `match_fc3094aac35c9b54`                                            | R&D Mole war als sichtbare Handkarte und LegalAction vorhanden, verlor aber ohne angereicherte Kandidatenfelder seine R&D-Fähigkeitszuordnung und blieb ownerlos                                                                                  | Quellinstanzbindung und Definition-Hint innerhalb `runner.pressure_central`                                                                                         |
 | `SP-022` | `corp-rule-score-conversion`              | Behoben/verifiziert | Corp   | Spielseed Zyklus 007; Abbruch vor D53, final beide Replays D53                                                                               | Eine exakt gequotete Aktion entfernte für einen Klick und 12 Credits eine aktive Verpflichtung und erzeugte einen Agendapunkt, doch der positive KI-Inputfilter entfernte die Quote und ließ die Aktion ownerlos                                  | `corp.score_agenda` als `convert_agenda`-Owner; exakte LegalAction-Quote                                                                                            |
 | `SP-023` | `runner-terminal-contest-risk-contract`   | Verdacht            | Runner | `match_2c166dda041da6ff` und `match_fc3094aac35c9b54`, D404–D419, kritisch D410–D414                                                         | Runner erkennt eine zweifach avancierte Score-Remote, beginnt mit vollständiger Breakerabdeckung den Contest, behandelt ihn aber weiter als Probe und jackt nach einem Credit Reserveverschlechterung aus; die Corp scoret direkt danach zum Sieg | `runner.contest_remote`, öffentliche Next-Turn-Terminalhülle und während des Runs erhaltener Risikovertrag                                                          |
-| `SP-024` | `match-result-successful-run-count`       | Verdacht            | Beide  | beide finalen Replays Zyklus 007; Result-Snapshot gegenüber `access_card`-Ereignissen D153, D186, D218 und D239                              | Ergebnis meldet null erfolgreiche Runs, obwohl vier Runs einen ersten Zugriff erzeugten und einer davon eine Agenda stahl; Match- und Agendapunkte sind korrekt                                                                                   | Server-Result-Snapshot und Action-Delta-Persistenz; konkrete Ursache noch nicht isoliert                                                                            |
+| `SP-024` | `match-result-successful-run-count`       | Verdacht            | Beide  | beide finalen Replays Zyklus 007; Gegenprobe Zyklus 008 mit 13 gestarteten und drei korrekt gezählten erfolgreichen Runs                     | Zyklus 007 meldet null erfolgreiche Runs trotz Zugriffen; Zyklus 008 zählt korrekt. Damit ist ein allgemeines Zählerfehlen widerlegt, der situations- oder laufzeitspezifische Pfad aber noch nicht isoliert                                      | Server-Result-Snapshot und Action-Delta-Persistenz; konkrete Ursache noch nicht isoliert                                                                            |
+| `SP-025` | `runner-coverage-draw-cadence`            | Behoben/verifiziert | Runner | vor Fix `match_ebc151e8a1be1520`, Zwischenlauf `match_87856c3dcdca58ea`, final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`             | Derselbe Coverage-Bedarf materialisierte nach jeder privaten Handänderung erneut Basic Draw und verbrauchte bis zu vier Klicks desselben Zuges; der erste enge Fix ließ parallele Gap-Erzeuger offen                                              | gemeinsamer endlicher Draw-Takt aller Coverage-Gaps in `runner.rig_and_coverage`; terminaler Remote-Bedarf bleibt explizite Ausnahme                                |
+| `SP-026` | `runner-run-preparation-binding`          | Behoben/verifiziert | Runner | vor Fix `match_7949f3aff19b8b5a`, D134; final `match_232bb3100f587eaa`/`match_49d866da5b4d3582`                                              | Morphing Tool konnte den für eine konkrete Runroute benötigten Breaker-Subtyp legal wählen, doch die Vorbereitung trug nur anonyme Kosten und blieb ohne Planowner                                                                                | Runanalyse erhält Quellinstanz, Definition und Subtyp; `runner.rig_and_coverage` führt die exakt gebundene aktuelle Action als Support des Run-Parents aus          |
 
 ## SP-001 – Score-Schutz-Drawing ohne belegte Konversion
 
@@ -514,6 +518,16 @@ Schutzschwelle nötig ist; gesucht wird weiterhin nur der Stauzustand, in dem
 langes Warten selbst mehr Agendaexposition erzeugt als ein konkreter
 gestufter Scorepfad.
 
+Zyklus 008 verdichtet den Verdacht deckübergreifend. Tycho Ice Stack hält am
+Ende zwei Vier-Punkte-Agenden in HQ. Von D5 bis D237 ist ein exakt gebundener
+Score-Root 28-mal Auswahlursprung, erzeugt aber nur zwölf Draws, zehn Credits
+und sechs ICE-Installationen. Keine Agenda wird installiert oder avanciert.
+Der Runner zerstört währenddessen wiederholt die Infrastruktur von Remote 1
+und stiehlt die zweite Agenda schließlich aus HQ. Der nächste Schritt ist nun
+präziser: Die kumulierten Kosten des Wartens müssen gegen einen konkreten
+gestuften Scorepfad quotiert werden; eine pauschale Schutzschwellen-Senkung
+bleibt unzulässig.
+
 ## SP-018 – Match-Identität verändert fachlich gleichen KI-Zufall
 
 - Auswahlseed: `2a2ae05031d207c0a8b0f85df8161fbb`
@@ -652,10 +666,57 @@ geklärt werden, ob Snapshot-Erzeugung, Delta-Persistenz oder ein veralteter
 Laufzeitpfad die Abweichung erzeugt; ein nachgelagerter Ersatzwert wäre kein
 Ursachenfix.
 
+Zyklus 008 ist eine Gegenprobe: Der Result-Snapshot zählt 13 gestartete und
+drei erfolgreiche Runs korrekt. Damit ist ein allgemeines Fehlen der Zählung
+widerlegt; der konkrete Zyklus-007-Pfad bleibt offen.
+
+## SP-025 – Coverage-Draw wird innerhalb desselben Zuges neu zugelassen
+
+- Auswahlseed: `c8d449f120fc55a5b7566e6044e584a4`
+- Spielseed: `selfplay-008-55db67ce8f2128515b476c79acb0aced`
+- Runner: Proteus Runner – Breaker Lab & Virus Pressure, 45 Karten,
+  `fnv1a:70ae3c9a`
+- Corp: Tycho Ice Stack, 45 Karten, `fnv1a:32e3f739`
+
+Im Ausgangslauf `match_ebc151e8a1be1520` zieht der Runner in mehreren Zügen
+mit allen vier Klicks. Jeder Draw verändert die private Hand und lässt
+denselben Coverage-Bedarf wieder wie eine neue strategische Gelegenheit
+erscheinen. Der Runner verwirft überzählige Karten, startet nur einen Run und
+verliert Corp 10 – Runner 0.
+
+Ein erster enger Fix begrenzte nur einen Gap-Erzeuger; der Zwischenlauf
+`match_87856c3dcdca58ea` zeigte weiterhin bis zu vier Coverage-Draws pro Zug.
+Der endgültige Vertrag rekonstruiert aus der öffentlichen Aktionshistorie
+einen gemeinsamen endlichen Coverage-Draw-Takt. Suche, Installation und
+Funding bleiben verfügbar; nur ein exakt terminaler Remote-Bedarf darf die
+Cadence überstimmen.
+
+Status: behoben/verifiziert. Zwei finale Replays enden nach je 258
+Entscheidungen Runner 10 – Corp 0 und stimmen in allen Action-IDs,
+Actiontypen und Planownern überein.
+
+## SP-026 – exakte Breaker-Vorbereitung hat keinen Run-Owner
+
+Im Zwischenlauf `match_7949f3aff19b8b5a` erkennt die Runanalyse vor D134,
+dass Morphing Tool für einen konkreten Pfad genau einen sichtbaren Subtyp
+wählen muss. Credits und Klick sind quotiert, aber Quellinstanz, Definition
+und Subtyp fehlen im Route-Vertrag. Die aktuelle LegalAction bleibt deshalb
+ownerlos und die Runtime stoppt korrekt fail-closed.
+
+Der Fix erhält diese drei Bindungen in der bestehenden Runroute. Der
+Run-Parent veröffentlicht einen exakten Coverage-Bedarf, den ausschließlich
+`runner.rig_and_coverage` mit `prepare_coverage` ausführt. Subtypwechsel ohne
+gebundenen Runbedarf werden ausdrücklich abgelehnt; der Resolver erhält keine
+zweite Entscheidungsautorität.
+
+Status: behoben/verifiziert. Positive und negative Ownership-Tests sowie
+beide vollständigen finalen Replays sind grün.
+
 Vollständige Entscheidungsklassifikation, Gewinneranalyse und Verlustursache:
 [Review Selbstspielzyklus 002](ai-selfplay-cycle-002-review.md) und
 [Review Selbstspielzyklus 003](ai-selfplay-cycle-003-review.md) sowie
 [Review Selbstspielzyklus 004](ai-selfplay-cycle-004-review.md) und
 [Review Selbstspielzyklus 005](ai-selfplay-cycle-005-review.md) sowie
 [Review Selbstspielzyklus 006](ai-selfplay-cycle-006-review.md) sowie
-[Review Selbstspielzyklus 007](ai-selfplay-cycle-007-review.md).
+[Review Selbstspielzyklus 007](ai-selfplay-cycle-007-review.md) sowie
+[Review Selbstspielzyklus 008](ai-selfplay-cycle-008-review.md).

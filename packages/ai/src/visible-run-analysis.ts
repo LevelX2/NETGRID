@@ -268,12 +268,16 @@ function selectableSubtypeRigVariants(
   availablePreRunCredits: number,
 ): Array<{
   rigCards: VisibleCard[];
-  preRunPreparation?: { credits: number; clicks: number };
+  preRunPreparation?: NonNullable<
+    KnownRezzedIcePathAssessment["preRunPreparation"]
+  >;
 }> {
   return rigCards.reduce<
     Array<{
       rigCards: VisibleCard[];
-      preRunPreparation?: { credits: number; clicks: number };
+      preRunPreparation?: NonNullable<
+        KnownRezzedIcePathAssessment["preRunPreparation"]
+      >;
     }>
   >(
     (variants, card) => {
@@ -317,6 +321,14 @@ function selectableSubtypeRigVariants(
                     clicks:
                       (variant.preRunPreparation?.clicks ?? 0) +
                       change.cost.clicks,
+                    subtypeChanges: [
+                      ...(variant.preRunPreparation?.subtypeChanges ?? []),
+                      {
+                        sourceCardInstanceId: card.instanceId,
+                        sourceDefinitionId: card.definitionId!,
+                        selectedSubtype,
+                      },
+                    ],
                   },
                 }))
             : []),
@@ -365,7 +377,7 @@ function assessKnownRezzedIcePathInternal(
   options: {
     allowBreakingRunPathEffects: boolean;
     bartmossOutcome?: "retained" | "trashed";
-    preRunPreparation?: { credits: number; clicks: number };
+    preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
   },
   initialBreakerStrengths?: Map<string, number>,
   deflectorContext: VisibleDeflectorContext = {},

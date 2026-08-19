@@ -17261,6 +17261,7 @@ describe("authoritative plan-first live runtime", () => {
       run,
       costIneffectiveCoverageCreditAction(),
     ]);
+    const currentTurnSerial = input.playerView.turnSerial!;
     input.playerView.own.gripOrHq = [
       visibleCard("coverage-draw-buffer-1", "runner", "event"),
       visibleCard("coverage-draw-buffer-2", "runner", "event"),
@@ -17296,16 +17297,60 @@ describe("authoritative plan-first live runtime", () => {
       expect.arrayContaining([
         expect.objectContaining({
           instanceId: "plan:runner.pressure_central:central%3Ahq",
-          openNeedIds: ["coverage:breaker_wall:efficiency:hq"],
+          openNeedIds: [
+            "coverage:breaker_wall:efficiency:hq:run:run-costly-hq-wall",
+          ],
         }),
         expect.objectContaining({
           instanceId:
-            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Ahq",
+            "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aefficiency%3Ahq%3Arun%3Arun-costly-hq-wall",
           parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
-          parentNeedId: "coverage:breaker_wall:efficiency:hq",
+          parentNeedId:
+            "coverage:breaker_wall:efficiency:hq:run:run-costly-hq-wall",
         }),
       ]),
     );
+
+    const afterDraw = structuredClone(input);
+    afterDraw.playerView.publicEvents = [
+      {
+        eventId: "runner-concrete-coverage-draw-turn-7",
+        type: "draw_card",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        turnSerial: currentTurnSerial,
+        stateHashAfter: "fnv1a:runner-concrete-coverage-draw-turn-7",
+        publicPayload: {
+          actor: "runner",
+          actionType: "draw_card",
+        },
+      },
+    ];
+    afterDraw.eventTail = afterDraw.playerView.publicEvents;
+    resetResidentPlanPortfolioMemory();
+    const decisionAfterDraw = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_deck"),
+      evaluateRunnerRunTargets: () => [costIneffectiveWallTarget(run.actionId)],
+    }).chooseSemanticRuntimeAction(afterDraw, {});
+
+    expect(decisionAfterDraw).toMatchObject({
+      actionId: "credit-for-costly-hq-wall",
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      residentPlanPortfolioSnapshot(afterDraw)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      gap: {
+        drawForAnswerActionIds: [],
+        recoveryEvidenceCodes: expect.arrayContaining([
+          `runner_coverage_draw_cadence_consumed:${currentTurnSerial}`,
+        ]),
+      },
+    });
   });
 
   it("binds Jack 'n' Joe to coverage only while a matching visible deck role remains", () => {
@@ -18072,6 +18117,265 @@ describe("authoritative plan-first live runtime", () => {
           parentNeedId: "coverage:breaker_wall",
         }),
       ]),
+    });
+  });
+
+  it("binds an exact pre-run breaker subtype change to rig and coverage", () => {
+    resetResidentPlanPortfolioMemory();
+    const change = legalAction(
+      "morphing-tool-to-sentry",
+      "runner",
+      "trigger_ability",
+      "Choose Sentry coverage",
+      { credits: 1, clicks: 1 },
+      {
+        source: "morphing-tool",
+        payload: {
+          cardId: "morphing-tool",
+          runnerAbility: "change_icebreaker_subtype",
+          selectedSubtype: "sentry",
+          abilityId: "change_icebreaker_subtype",
+        },
+      },
+    );
+    const run = legalAction(
+      "run-hq-after-subtype-change",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "gain-credit-instead-of-subtype-change",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [change, run, credit]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.rig = [
+      visibleCard("morphing-tool", "runner", "program", {
+        definitionId: "onr_proteus_092_morphing-tool",
+        title: "Morphing Tool",
+        selectedSubtype: "code_gate",
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "hq"),
+      recommendation: "run_now" as const,
+      score: 400,
+      routeQuote: {
+        ...safeRuntimeRunTarget(run.actionId, "hq").routeQuote!,
+        preRunPreparation: {
+          credits: 1,
+          clicks: 1,
+          subtypeChanges: [
+            {
+              sourceCardInstanceId: "morphing-tool",
+              sourceDefinitionId: "onr_proteus_092_morphing-tool",
+              selectedSubtype: "sentry",
+            },
+          ],
+        },
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: change.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.rig_and_coverage" },
+    });
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.pressure_central:central%3Ahq",
+      executorInstanceId: expect.stringContaining(
+        "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry%3Aprepare-run",
+      ),
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.rig_and_coverage",
+          parentInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          moduleState: expect.objectContaining({
+            phase: "prepare_coverage",
+          }),
+        }),
+      ]),
+    });
+  });
+
+  it("rejects breaker subtype changes without a bound run coverage need", () => {
+    resetResidentPlanPortfolioMemory();
+    const change = legalAction(
+      "unbound-morphing-tool-to-sentry",
+      "runner",
+      "trigger_ability",
+      "Choose Sentry coverage",
+      { credits: 1, clicks: 1 },
+      {
+        source: "morphing-tool",
+        payload: {
+          cardId: "morphing-tool",
+          runnerAbility: "change_icebreaker_subtype",
+          selectedSubtype: "sentry",
+          abilityId: "change_icebreaker_subtype",
+        },
+      },
+    );
+    const credit = legalAction(
+      "gain-credit-without-subtype-need",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [change, credit]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.rig = [
+      visibleCard("morphing-tool", "runner", "program", {
+        definitionId: "onr_proteus_092_morphing-tool",
+        selectedSubtype: "code_gate",
+        subtypes: ["icebreaker"],
+      }),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "runner_breaker_subtype_change_requires_bound_run_coverage_need",
+    );
+  });
+
+  it("allows only one strategic coverage draw per runner turn", () => {
+    resetResidentPlanPortfolioMemory();
+    const draw = legalAction(
+      "draw-for-code-gate-coverage",
+      "runner",
+      "draw_card",
+      "Draw 1",
+      { credits: 0, clicks: 1 },
+    );
+    const credit = legalAction(
+      "gain-credit-after-coverage-draw",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [draw, credit]);
+    input.playerView.turnSerial = 7;
+    input.playerView.publicEvents = [];
+    input.eventTail = [];
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("coverage-buffer-1", "runner", "event"),
+      visibleCard("coverage-buffer-2", "runner", "event"),
+      visibleCard("coverage-buffer-3", "runner", "event"),
+      visibleCard("coverage-buffer-4", "runner", "event"),
+      visibleCard("coverage-buffer-5", "runner", "event"),
+    ];
+    const dependencies = {
+      runnerStrategicIntentForInput: () => ({
+        primaryWinIntent: "runner.access_agendas" as const,
+        setupEngine: ["runner.rig_first"],
+      }),
+      deckCapabilitiesForInput: () => ({
+        runner: {
+          breakerInventory: [
+            {
+              cardId: "test-code-gate-breaker",
+              title: "Test Code Gate Breaker",
+              coverage: ["code_gate" as const],
+              risks: [],
+              restrictions: [],
+              quantityKnownInDeck: 1,
+              locations: ["in_deck" as const],
+              confidence: "high" as const,
+              evidence: ["test_code_gate_breaker_in_deck"],
+            },
+          ],
+          breakerCoverageMatrix: {
+            code_gate: {
+              coverage: "code_gate" as const,
+              inDeckKnown: true,
+              inHand: false,
+              installed: false,
+              searchableNow: false,
+              drawOnly: true,
+              missing: false,
+              bestKnownCards: ["test-code-gate-breaker"],
+              blockers: ["needs_draw"],
+            },
+          },
+          searchAccess: { tools: [] },
+          economyBankTools: [],
+        },
+      }),
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 0,
+        desiredCreditReserve: 1,
+        fundingNeed: true,
+        evidence: [],
+      }),
+    };
+
+    const firstDecision = liveContext(dependencies).chooseSemanticRuntimeAction(
+      input,
+      {},
+    );
+    expect(firstDecision).toMatchObject({
+      actionId: draw.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+
+    const afterDraw = structuredClone(input);
+    afterDraw.playerView.publicEvents = [
+      {
+        eventId: "runner-basic-draw-turn-7",
+        type: "draw_card",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        turnSerial: 7,
+        stateHashAfter: "fnv1a:runner-basic-draw-turn-7",
+        publicPayload: {
+          actor: "runner",
+          actionType: "draw_card",
+        },
+      },
+    ];
+    afterDraw.eventTail = afterDraw.playerView.publicEvents;
+    resetResidentPlanPortfolioMemory();
+
+    const secondDecision = liveContext(
+      dependencies,
+    ).chooseSemanticRuntimeAction(afterDraw, {});
+    expect(secondDecision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    const coverage = residentPlanPortfolioSnapshot(afterDraw)?.instances.find(
+      (instance) => instance.moduleId === "runner.rig_and_coverage",
+    );
+    expect(coverage?.moduleState).toMatchObject({
+      gap: {
+        drawForAnswerActionIds: [],
+        recoveryEvidenceCodes: ["runner_coverage_draw_cadence_consumed:7"],
+      },
     });
   });
 
