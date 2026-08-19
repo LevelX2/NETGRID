@@ -127,7 +127,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
         (section) => section.id === "plan_portfolio",
       )?.items,
     ).toContain(
-      "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_defense_support_install:hq:corp_upgrade_install_placement_fit:reserve_after_action:0|source:visible_state",
+      "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_missing_concrete_defense_draw:rd|source:visible_state",
     );
   });
 
