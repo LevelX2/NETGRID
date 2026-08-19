@@ -79,6 +79,20 @@ export type CorpScoreProjectSignal = {
   sameTurnCloseout: boolean;
   deadlinePressure?: boolean;
   protectionNeed?: CorpFundedRemoteAccessRiskNeed;
+  /**
+   * Current-state score-horizon evidence derived by corp.score_agenda from
+   * state-bound Engine rez and post-rez run quotes. A downstream defense
+   * support search may preserve this certificate, but must not replace it
+   * with a second protection verdict.
+   */
+  scoreHorizonCertification?: Readonly<{
+    kind: "affordable_engine_quoted_defense_layers";
+    observedAtStateVersion: number;
+    serverId: string;
+    layerInstanceIds: readonly [string, string];
+    requiredCredits: number;
+    requiredAgendaPoints: number;
+  }>;
   uncertainty?: {
     kind: "later_score_route";
     knowledge: "unknown";

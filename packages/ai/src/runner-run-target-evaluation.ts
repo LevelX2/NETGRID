@@ -75,6 +75,7 @@ import {
 import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 import { quoteRunnerRunRiskReserve } from "./run-analysis/runner-run-risk-reserve";
 import { quoteRunnerConsumableRunOpportunity } from "./run-analysis/runner-consumable-run-opportunity";
+import { runnerVisibleLethalIceDamageAssessment } from "./runner-damage-threat-assessment";
 
 export * from "./run-analysis/runner-run-target-types";
 
@@ -223,6 +224,17 @@ function evaluateRunnerRunTarget(
         : {}),
     },
   );
+  const visibleLethalIceDamage = runnerVisibleLethalIceDamageAssessment(
+    params.input,
+    projectedServerIce,
+    {
+      generalCredits: creditsAvailableDuringRun,
+      runDamagePreventionRemaining: Math.max(
+        0,
+        projection.damagePreventionPool ?? 0,
+      ),
+    },
+  );
   const payoff =
     accessReplacementPayoffForTarget(
       params,
@@ -280,6 +292,7 @@ function evaluateRunnerRunTarget(
       : spendLimitBlocksPath
         ? "blocked_unpayable"
         : basePathPassability;
+  if (visibleLethalIceDamage) pathPassability = "blocked_unbreakable";
   const creditsAfterRun = generalCreditsRemainingAfterRun(
     creditsAfterAction,
     runOnlyCredits,
@@ -526,6 +539,12 @@ function evaluateRunnerRunTarget(
       `known_access_state:${payoff.knownAccessState}`,
       `central_access_novelty_ratio:${payoff.accessNoveltyRatio}`,
       `path_passability:${pathPassability}`,
+      ...(visibleLethalIceDamage
+        ? [
+            `runner_visible_lethal_ice_damage_blocks_run_start:${targetServerId}`,
+            visibleLethalIceDamage.evidenceCode,
+          ]
+        : []),
       ...(path.missingCoverage?.length
         ? [`missing_coverage:${path.missingCoverage.join("|")}`]
         : []),

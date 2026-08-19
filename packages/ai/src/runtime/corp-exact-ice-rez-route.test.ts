@@ -572,6 +572,50 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  it("keeps Corp defense ownership when a post-break consequence cannot rescue an unaffordable route", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_classic_011_glacier", 2, {
+      runnerCredits: 3,
+      runnerPrograms: ["onr_v1_036_jackhammer"],
+      includeDecline: true,
+    });
+
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      hardEndTheRunSubroutineCount: 2,
+      runnerBreak: {
+        breakerDefinitionId: "onr_v1_036_jackhammer",
+        requiredCredits: 5,
+        canPayFromCurrentCredits: false,
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        hardEndTheRunSubroutineCount: 2,
+        reason: "visible_break_route_unaffordable",
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+  });
+
   it("does not promote an equal paid exchange while the Runner keeps normal credits", () => {
     const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
       runnerCredits: 2,
