@@ -9,8 +9,12 @@ export type MaintenanceMatchSizes = {
   matchRecordBytes: number;
   gameStateBytes: number;
   eventPayloadBytes: number;
+  engineEventBytes: number;
   stateSnapshotBytes: number;
   deckSnapshotBytes: number;
+  aiDecisionTraceBytes: number;
+  pendingUndoBytes: number;
+  startLobbyBytes: number;
   approximateTotalBytes: number;
 };
 

@@ -121,8 +121,12 @@ export type StorageMaintenanceMatchSizes = {
   matchRecordBytes: number;
   gameStateBytes: number;
   eventPayloadBytes: number;
+  engineEventBytes: number;
   stateSnapshotBytes: number;
   deckSnapshotBytes: number;
+  aiDecisionTraceBytes: number;
+  pendingUndoBytes: number;
+  startLobbyBytes: number;
   approximateTotalBytes: number;
 };
 
@@ -3246,6 +3250,24 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           deck_sizes AS (
             SELECT match_id, COALESCE(LENGTH(private_deck_snapshots_json), 0) AS deck_snapshot_bytes
             FROM private_deck_snapshots
+          ),
+          engine_event_sizes AS (
+            SELECT match_id, COALESCE(SUM(LENGTH(event_json)), 0) AS engine_event_bytes
+            FROM engine_events
+            GROUP BY match_id
+          ),
+          ai_trace_sizes AS (
+            SELECT match_id, COALESCE(SUM(LENGTH(trace_json)), 0) AS ai_decision_trace_bytes
+            FROM ai_decision_traces
+            GROUP BY match_id
+          ),
+          pending_undo_sizes AS (
+            SELECT match_id, COALESCE(LENGTH(pending_undo_json), 0) AS pending_undo_bytes
+            FROM pending_undo
+          ),
+          start_lobby_sizes AS (
+            SELECT match_id, COALESCE(LENGTH(start_lobby_json), 0) AS start_lobby_bytes
+            FROM start_lobbies
           )
         SELECT
           m.match_id AS matchId,
@@ -3257,18 +3279,29 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           m.record_json AS recordJson,
           m.created_at AS createdAt,
           m.updated_at AS updatedAt,
-          COALESCE(LENGTH(m.record_json), 0) AS matchRecordBytes,
+          COALESCE(LENGTH(m.record_json), 0)
+            + COALESCE(LENGTH(m.baseline_json), 0)
+            + COALESCE(LENGTH(m.settings_json), 0)
+            + COALESCE(LENGTH(m.lifecycle_json), 0) AS matchRecordBytes,
           COALESCE(gs.game_state_bytes, 0) AS gameStateBytes,
           COALESCE(es.event_count, 0) AS eventCount,
           COALESCE(es.event_payload_bytes, 0) AS eventPayloadBytes,
           COALESCE(ss.snapshot_count, 0) AS snapshotCount,
           COALESCE(ss.state_snapshot_bytes, 0) AS stateSnapshotBytes,
-          COALESCE(ds.deck_snapshot_bytes, 0) AS deckSnapshotBytes
+          COALESCE(ds.deck_snapshot_bytes, 0) AS deckSnapshotBytes,
+          COALESCE(ees.engine_event_bytes, 0) AS engineEventBytes,
+          COALESCE(ats.ai_decision_trace_bytes, 0) AS aiDecisionTraceBytes,
+          COALESCE(pus.pending_undo_bytes, 0) AS pendingUndoBytes,
+          COALESCE(sls.start_lobby_bytes, 0) AS startLobbyBytes
         FROM matches m
         LEFT JOIN event_sizes es ON es.match_id = m.match_id
         LEFT JOIN snapshot_sizes ss ON ss.match_id = m.match_id
         LEFT JOIN game_state_sizes gs ON gs.match_id = m.match_id
         LEFT JOIN deck_sizes ds ON ds.match_id = m.match_id
+        LEFT JOIN engine_event_sizes ees ON ees.match_id = m.match_id
+        LEFT JOIN ai_trace_sizes ats ON ats.match_id = m.match_id
+        LEFT JOIN pending_undo_sizes pus ON pus.match_id = m.match_id
+        LEFT JOIN start_lobby_sizes sls ON sls.match_id = m.match_id
         ORDER BY m.updated_at DESC`,
       )
       .all() as Array<{
@@ -3288,6 +3321,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       snapshotCount: number;
       stateSnapshotBytes: number;
       deckSnapshotBytes: number;
+      engineEventBytes: number;
+      aiDecisionTraceBytes: number;
+      pendingUndoBytes: number;
+      startLobbyBytes: number;
     }>;
     const participants = this.maintenanceParticipantsByMatch();
     const olderThanMs =
@@ -3400,24 +3437,40 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     eventPayloadBytes: number;
     stateSnapshotBytes: number;
     deckSnapshotBytes: number;
+    engineEventBytes: number;
+    aiDecisionTraceBytes: number;
+    pendingUndoBytes: number;
+    startLobbyBytes: number;
   }): StorageMaintenanceMatchSizes {
     const matchRecordBytes = Number(row.matchRecordBytes);
     const gameStateBytes = Number(row.gameStateBytes);
     const eventPayloadBytes = Number(row.eventPayloadBytes);
     const stateSnapshotBytes = Number(row.stateSnapshotBytes);
     const deckSnapshotBytes = Number(row.deckSnapshotBytes);
+    const engineEventBytes = Number(row.engineEventBytes);
+    const aiDecisionTraceBytes = Number(row.aiDecisionTraceBytes);
+    const pendingUndoBytes = Number(row.pendingUndoBytes);
+    const startLobbyBytes = Number(row.startLobbyBytes);
     return {
       matchRecordBytes,
       gameStateBytes,
       eventPayloadBytes,
+      engineEventBytes,
       stateSnapshotBytes,
       deckSnapshotBytes,
+      aiDecisionTraceBytes,
+      pendingUndoBytes,
+      startLobbyBytes,
       approximateTotalBytes:
         matchRecordBytes +
         gameStateBytes +
         eventPayloadBytes +
+        engineEventBytes +
         stateSnapshotBytes +
-        deckSnapshotBytes,
+        deckSnapshotBytes +
+        aiDecisionTraceBytes +
+        pendingUndoBytes +
+        startLobbyBytes,
     };
   }
 
