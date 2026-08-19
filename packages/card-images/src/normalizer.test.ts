@@ -91,6 +91,41 @@ describe("card image normalization", () => {
     });
   });
 
+  it("applies an explicit pixel crop after EXIF orientation", async () => {
+    const source = await sharp({
+      create: { width: 1050, height: 750, channels: 3, background: "#b6bcbc" },
+    })
+      .withMetadata({ orientation: 6 })
+      .jpeg({ quality: 90 })
+      .toBuffer();
+    const normalized = await normalizeCardImage(source, "cropped", {
+      cropPixels: { left: 40, top: 35, right: 40, bottom: 35 },
+    });
+
+    expect(normalized).toMatchObject({
+      sourceWidth: 1050,
+      sourceHeight: 750,
+    });
+    expect(normalized.variants.master).toMatchObject({
+      width: 670,
+      height: 980,
+    });
+  });
+
+  it("rejects a crop outside the oriented source image", async () => {
+    const source = await sharp({
+      create: { width: 609, height: 855, channels: 3, background: "#224466" },
+    })
+      .png()
+      .toBuffer();
+
+    await expect(
+      normalizeCardImage(source, "invalid-crop", {
+        cropPixels: { left: 400, top: 0, right: 400, bottom: 0 },
+      }),
+    ).rejects.toMatchObject({ code: "source_image_crop_invalid" });
+  });
+
   it("rejects landscape and implausible card ratios", async () => {
     const source = await sharp({
       create: { width: 900, height: 600, channels: 3, background: "#112233" },

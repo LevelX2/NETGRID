@@ -32,6 +32,10 @@ corepack pnpm --filter @netgrid/card-images cli template --output C:\Pfad\mappin
 Aktivierte Zeilen verwenden `printingId` als kanonischen Schlüssel. `quelle`
 enthält einen lokalen absoluten oder relativ zur CSV aufgelösten Pfad;
 `sha256` kann den erwarteten Hash der unveränderten Quelldatei enthalten.
+Die optionale Spalte `randzuschnittPx` beschreibt einen expliziten Zuschnitt
+als `links,oben,rechts,unten` in Pixeln der nach EXIF ausgerichteten Quelle.
+Ein leeres Feld lässt die Quelle unverändert; ein gesetzter Wert wird vor der
+Variantenbildung auf Bildgrenzen und plausible Kartenabmessungen geprüft.
 Erzeugte Vorlagen beginnen mit einer deutschsprachigen Kurzanleitung. Zeilen,
 deren erstes Feld nach optionalem Leerraum mit `#` beginnt, sind Kommentare
 und werden vom Importer ignoriert. Dadurch dürfen zusätzliche Hinweise auch
@@ -190,6 +194,10 @@ mit den Obergrenzen 2400 × 3360 (`master`, verlustfrei), 1200 × 1680 (`full`),
 nur bei Bedarf proportional verkleinert. Der Prüf- und Importbericht zeigt das
 Quellformat mit Quellabmessungen sowie das erzeugte Masterformat mit
 Masterabmessungen als Vorher-Nachher-Angabe.
+Ein in der Zuordnung gesetzter `randzuschnittPx` wird vor dieser Skalierung
+angewendet. Bildpakete übernehmen den Wert in Zuordnung und Manifest; Pakete
+mit Zuschnitt setzen deshalb mindestens Importer-Version 2 voraus. Pakete und
+Zuordnungen ohne die optionale Spalte bleiben gültig.
 
 ## Private-Asset-Grenze
 

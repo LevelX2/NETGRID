@@ -47,6 +47,10 @@ Inbox. Die bestehende Maintenance-Anmeldung, CSRF-/Origin-Prüfung und die
 direkte Loopback-Grenze schützen auch mutierende Kartenbildjobs; eine zweite
 Passworteingabe ist dafür nicht erforderlich. Führend ist
 `docs/architecture/card-images/personal-card-image-import.md`.
+Zuordnungen dürfen zusätzlich pro Quelle einen expliziten
+`randzuschnittPx`-Wert `links,oben,rechts,unten` enthalten; ohne Wert bleibt das
+Bild unverändert. Maintenance-Fortschritt wird dabei pro Verarbeitungsphase in
+Karten statt in doppelt gezählten technischen Arbeitsschritten angezeigt.
 
 ## Engine und Karten
 

@@ -37,6 +37,9 @@ describe("card image CSV workflow", () => {
     expect(template).toContain(
       "# HTTPS-Quelle: direkte https://-URL zu einer PNG-, JPEG- oder WebP-Datei.",
     );
+    expect(template).toContain(
+      "# randzuschnittPx: optional links,oben,rechts,unten in Pixeln",
+    );
     expect(template).toContain("\r\naktiv;printingId;");
   });
 
@@ -65,6 +68,44 @@ describe("card image CSV workflow", () => {
     );
 
     expect(parseCardImageMappingCsv(csv, [card])).toHaveLength(1);
+  });
+
+  it("parses an optional source-pixel crop and keeps mappings without the optional column valid", () => {
+    const card = fixtureCard();
+    const csv = serializeCardImageMappingCsv(
+      [card],
+      new Map([
+        [
+          card.printingId,
+          {
+            source: "card.jpg",
+            cropPixels: { left: 40, top: 35, right: 40, bottom: 35 },
+          },
+        ],
+      ]),
+    );
+    expect(parseCardImageMappingCsv(csv, [card])[0]).toMatchObject({
+      cropPixels: { left: 40, top: 35, right: 40, bottom: 35 },
+    });
+
+    const withoutCropColumn = csv
+      .split("\r\n")
+      .map((line) => {
+        if (line.includes(";randzuschnittPx"))
+          return line.replace(";randzuschnittPx", "");
+        if (line.startsWith("ja;") || line.startsWith("nein;"))
+          return line.slice(0, line.lastIndexOf(";"));
+        return line;
+      })
+      .join("\r\n");
+    expect(
+      parseCardImageMappingCsv(withoutCropColumn, [card])[0],
+    ).not.toHaveProperty("cropPixels");
+    expect(() =>
+      parseCardImageMappingCsv(csv.replaceAll("40,35,40,35", "40,ungültig"), [
+        card,
+      ]),
+    ).toThrowError(expect.objectContaining({ code: "csv_crop_invalid" }));
   });
 
   it("dry-runs without writing blobs or bindings and then imports locally", async () => {
@@ -110,6 +151,57 @@ describe("card image CSV workflow", () => {
       "preview",
       "thumb",
     ]);
+  });
+
+  it("applies the CSV pixel crop to imported variants", async () => {
+    const root = await temporaryDirectory("netgrid-card-import-crop-");
+    const card = fixtureCard();
+    await writePng(path.join(root, "card.png"), 750, 1050, "#b6bcbc");
+    const mapping = path.join(root, "mapping.csv");
+    await writeFile(
+      mapping,
+      activeCsv([
+        {
+          card,
+          source: "card.png",
+          cropPixels: { left: 40, top: 35, right: 40, bottom: 35 },
+        },
+      ]),
+      "utf8",
+    );
+
+    const report = await importCardImagesFromCsv({
+      mappingFile: mapping,
+      cards: [card],
+      dryRun: true,
+    });
+    expect(report.results[0]).toMatchObject({
+      sourceWidth: 750,
+      sourceHeight: 1050,
+      width: 670,
+      height: 980,
+    });
+    await writeFile(
+      mapping,
+      activeCsv([
+        {
+          card,
+          source: "card.png",
+          cropPixels: { left: 400, top: 0, right: 400, bottom: 0 },
+        },
+      ]),
+      "utf8",
+    );
+    await expect(
+      importCardImagesFromCsv({
+        mappingFile: mapping,
+        cards: [card],
+        dryRun: true,
+      }),
+    ).rejects.toMatchObject({
+      code: "source_image_crop_invalid",
+      printingId: card.printingId,
+    });
   });
 
   it("does not activate any row when one selected source is invalid", async () => {
@@ -302,6 +394,7 @@ function activeCsv(
     card: CatalogCard;
     source: string;
     expectedSha256?: string;
+    cropPixels?: { left: number; top: number; right: number; bottom: number };
   }[],
 ): string {
   const cards = entries.map((entry) => entry.card);
@@ -325,6 +418,12 @@ function activeCsv(
       fields[7] =
         entries.find((entry) => entry.card.printingId === printingId)
           ?.expectedSha256 ?? "";
+      const crop = entries.find(
+        (entry) => entry.card.printingId === printingId,
+      )?.cropPixels;
+      fields[8] = crop
+        ? [crop.left, crop.top, crop.right, crop.bottom].join(",")
+        : "";
       return fields.join(";");
     })
     .join("\r\n");

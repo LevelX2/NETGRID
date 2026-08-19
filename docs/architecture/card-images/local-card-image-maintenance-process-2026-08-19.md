@@ -50,7 +50,8 @@ verwendet weiterhin ausschließlich den persistenten lokalen Bildspeicher.
 - keine frei wählbaren absoluten Serverpfade im Browser;
 - kein Scraping von Katalog- oder Artikelseiten;
 - keine ZIP-, Add-on-EXE- oder Windows-Installer-Erzeugung;
-- keine Bildbearbeitung oder manuelle Zuschnittoberfläche;
+- keine interaktive Bildbearbeitung oder visuelle Zuschnittoberfläche; ein
+  expliziter, validierter Pixelzuschnitt darf in der Zuordnungs-CSV stehen;
 - keine automatischen oder zeitgesteuerten Remote-Downloads;
 - keine Änderung an Engine, GameState, Replay, StateHash, Kartenlegalität oder
   KI.

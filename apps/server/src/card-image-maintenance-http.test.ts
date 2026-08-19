@@ -208,28 +208,51 @@ describe("IMG08 local card image maintenance boundary", () => {
     const inboxRoot = path.join(root, "inbox");
     await mkdir(inboxRoot, { recursive: true });
     await writeFile(path.join(inboxRoot, "mapping.csv"), "synthetic");
-    let releaseImport!: () => void;
-    const blocked = new Promise<void>((resolve) => {
-      releaseImport = resolve;
+    let releasePreview!: () => void;
+    const previewBlocked = new Promise<void>((resolve) => {
+      releasePreview = resolve;
     });
-    let calls = 0;
+    let releaseApply!: () => void;
+    const applyBlocked = new Promise<void>((resolve) => {
+      releaseApply = resolve;
+    });
     const importCards = async (
       options: ImportCardImagesOptions,
     ): Promise<CardImageImportReport> => {
-      calls += 1;
+      if (options.dryRun) {
+        options.onProgress?.({
+          phase: "preparing",
+          completed: 0,
+          total: 1,
+        });
+        await previewBlocked;
+        options.onProgress?.({
+          phase: "preparing",
+          completed: 1,
+          total: 1,
+          printingId: "onr_v1_001_afreet",
+        });
+        return importReport(true);
+      }
       options.onProgress?.({
         phase: "preparing",
         completed: 0,
-        total: 1,
+        total: 104,
       });
-      if (calls === 1) await blocked;
       options.onProgress?.({
         phase: "preparing",
-        completed: 1,
-        total: 1,
-        printingId: "onr_v1_001_afreet",
+        completed: 43,
+        total: 104,
+        printingId: "onr_classic_043_rockerboy-promotion",
       });
-      return importReport(options.dryRun === true);
+      await applyBlocked;
+      options.onProgress?.({
+        phase: "storing",
+        completed: 53,
+        total: 104,
+        printingId: "onr_classic_001_data-fort-remapping",
+      });
+      return importReport(false);
     };
     const client = await startClient(
       localConfig(),
@@ -274,7 +297,7 @@ describe("IMG08 local card image maintenance boundary", () => {
     await expect(parallel.json()).resolves.toMatchObject({
       error: { code: "card_image_job_in_progress" },
     });
-    releaseImport();
+    releasePreview();
     await expectJobStatus(client.baseUrl, session, "job-1", "succeeded");
 
     const apply = await fetch(
@@ -285,6 +308,13 @@ describe("IMG08 local card image maintenance boundary", () => {
     await expect(apply.json()).resolves.toMatchObject({
       job: { jobId: "job-2", kind: "mapping_import" },
     });
+    await expectJobProgress(client.baseUrl, session, "job-2", {
+      phase: "preparing",
+      completed: 43,
+      total: 52,
+      printingId: "onr_classic_043_rockerboy-promotion",
+    });
+    releaseApply();
     await expectJobStatus(client.baseUrl, session, "job-2", "succeeded");
   });
 
@@ -532,6 +562,36 @@ async function expectJobStatus(
     await new Promise((resolve) => setTimeout(resolve, 5));
   }
   throw new Error(`Card image job did not reach ${expectedStatus}`);
+}
+
+async function expectJobProgress(
+  baseUrl: string,
+  session: { cookie: string; csrfToken: string },
+  jobId: string,
+  expectedProgress: Record<string, unknown>,
+): Promise<void> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const response = await fetch(
+      `${baseUrl}/api/storage/maintenance/card-images/jobs/${jobId}`,
+      { headers: { cookie: session.cookie, origin: LOCAL_ORIGIN } },
+    );
+    expect(response.status).toBe(200);
+    const payload = (await response.json()) as {
+      job: { status: string; progress: Record<string, unknown> };
+    };
+    if (
+      Object.entries(expectedProgress).every(
+        ([key, value]) => payload.job.progress[key] === value,
+      )
+    )
+      return;
+    if (payload.job.status === "failed")
+      throw new Error(`Card image job failed: ${JSON.stringify(payload.job)}`);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  throw new Error(
+    `Card image job did not expose progress ${JSON.stringify(expectedProgress)}`,
+  );
 }
 
 function importReport(dryRun: boolean): CardImageImportReport {

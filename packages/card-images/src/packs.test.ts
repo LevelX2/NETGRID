@@ -63,6 +63,12 @@ describe("private card image packs", () => {
       cardCount: 2,
     });
     expect(built.manifest.entries).toHaveLength(2);
+    expect(built.manifest.entries[0]?.cropPixels).toEqual({
+      left: 10,
+      top: 10,
+      right: 10,
+      bottom: 10,
+    });
     expect(buildProgress).toEqual([
       { phase: "building", completed: 0, total: 2 },
       {
@@ -87,6 +93,7 @@ describe("private card image packs", () => {
         expect.objectContaining({
           enabled: true,
           expectedSha256: expect.any(String),
+          cropPixels: expect.objectContaining({ left: 10, top: 10 }),
         }),
       ]),
     );
@@ -238,6 +245,14 @@ describe("private card image packs", () => {
         { packDirectory: built.outputDirectory },
       ),
     ).rejects.toMatchObject({ code: "pack_importer_too_old" });
+    await expect(
+      __cardImagePackTestOnly.importCardImagePack(
+        { profile: fixture.profile, cards: fixture.cards },
+        { ...built.manifest, minimumImporterVersion: 1 },
+        built.outputDirectory,
+        { packDirectory: built.outputDirectory },
+      ),
+    ).rejects.toMatchObject({ code: "pack_manifest_invalid" });
 
     const unsafe: CardImagePackManifest = {
       ...built.manifest,
@@ -317,7 +332,14 @@ async function packFixture() {
       new Map(
         cards.map((card, index) => [
           card.printingId,
-          { source: imageFiles[index]! },
+          {
+            source: imageFiles[index]!,
+            ...(index === 0
+              ? {
+                  cropPixels: { left: 10, top: 10, right: 10, bottom: 10 },
+                }
+              : {}),
+          },
         ]),
       ),
     ),

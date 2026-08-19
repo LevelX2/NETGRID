@@ -8,7 +8,12 @@ import {
   type HttpsImageDownload,
   type HttpsImageImportErrorCode,
 } from "./https-import";
-import { normalizeCardImage, type NormalizedCardImage } from "./normalizer";
+import {
+  CardImageNormalizationError,
+  normalizeCardImage,
+  type CardImageNormalizationErrorCode,
+  type NormalizedCardImage,
+} from "./normalizer";
 import {
   CardImageStore,
   CardImageStoreError,
@@ -25,7 +30,8 @@ export type CardImageImportErrorCode =
   | "source_file_missing"
   | "source_file_too_large"
   | "source_hash_mismatch"
-  | HttpsImageImportErrorCode;
+  | HttpsImageImportErrorCode
+  | CardImageNormalizationErrorCode;
 
 export class CardImageImportError extends Error {
   constructor(
@@ -226,10 +232,7 @@ async function prepareImage(
         );
       throw error;
     }
-    const normalized = await normalizeCardImage(
-      downloaded.content,
-      row.printingId,
-    );
+    const normalized = await normalizeMappedImage(downloaded.content, row);
     if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
       throw new CardImageImportError(
         "source_hash_mismatch",
@@ -280,7 +283,7 @@ async function prepareLocalImage(
       `Bildquelle für ${row.printingId} überschreitet 50 MiB.`,
       row.printingId,
     );
-  const normalized = await normalizeCardImage(content, row.printingId);
+  const normalized = await normalizeMappedImage(content, row);
   if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
     throw new CardImageImportError(
       "source_hash_mismatch",
@@ -293,6 +296,23 @@ async function prepareLocalImage(
     normalized,
     assetHash: normalized.assetHash,
   };
+}
+
+async function normalizeMappedImage(
+  content: Uint8Array,
+  row: CardImageMappingRow,
+): Promise<NormalizedCardImage> {
+  try {
+    return await normalizeCardImage(
+      content,
+      row.printingId,
+      row.cropPixels ? { cropPixels: row.cropPixels } : {},
+    );
+  } catch (error) {
+    if (error instanceof CardImageNormalizationError)
+      throw new CardImageImportError(error.code, error.message, row.printingId);
+    throw error;
+  }
 }
 
 function hasUrlScheme(source: string): boolean {

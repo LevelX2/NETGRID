@@ -23,6 +23,7 @@ import {
   type CardImageBindingConflictMode,
   type CardImageCollectionInventory,
   type CardImageImportReport,
+  type CardImageImportProgress,
   type CardImageInboxInventory,
   type CardImageInboxOptions,
   type HttpsImageDownload,
@@ -349,7 +350,10 @@ export class CardImageMaintenanceService {
             this.inboxOptions,
           ),
         onProgress: (progress) => {
-          job.progress = { ...progress };
+          job.progress = mappingJobProgress(
+            progress,
+            job.kind === "mapping_preview",
+          );
         },
         ...(this.httpsDownloader
           ? { httpsDownloader: this.httpsDownloader }
@@ -454,6 +458,28 @@ export class CardImageMaintenanceService {
     ))
       this.jobs.delete(job.jobId);
   }
+}
+
+function mappingJobProgress(
+  progress: CardImageImportProgress,
+  dryRun: boolean,
+): CardImageMaintenanceJobProgress {
+  if (dryRun) return { ...progress };
+  const total = progress.total / 2;
+  const completed =
+    progress.phase === "storing"
+      ? progress.completed - total
+      : progress.completed;
+  if (
+    !Number.isSafeInteger(total) ||
+    !Number.isSafeInteger(completed) ||
+    completed < 0 ||
+    completed > total
+  )
+    throw invalidInternalJob(
+      "Der technische Importfortschritt konnte nicht auf Karten abgebildet werden.",
+    );
+  return { ...progress, completed, total };
 }
 
 function validateMappingJobInput(input: StartCardImageMappingJobInput): void {
