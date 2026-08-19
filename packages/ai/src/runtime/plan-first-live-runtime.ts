@@ -3045,7 +3045,10 @@ export function runnerActionDispositions(
   }
   const centralPreparationActionIds = new Set(
     domain.centralPressure.flatMap(
-      (signal) => signal.preparationActionIds ?? [],
+      (signal) => [
+        ...(signal.preparationActionIds ?? []),
+        ...(signal.rejectedPreparationActionIds ?? []),
+      ],
     ),
   );
   const remotePreparationActionIds = new Set(

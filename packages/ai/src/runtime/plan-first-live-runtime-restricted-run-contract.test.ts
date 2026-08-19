@@ -289,16 +289,16 @@ describe("plan-first Engine-restricted run contract", () => {
 
     expect(decision).toMatchObject({
       actionId: end.actionId,
-      reasonCode: "plan_first.runner.complete_turn",
+      reasonCode: "plan_first.runner.defense_and_recovery",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "runner.complete_turn",
+        planKind: "runner.defense_and_recovery",
       },
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
-        "plan_assessment_evidence:productive_legal_routes_exhausted",
+        "plan_module:runner.defense_and_recovery",
+        "plan_step_capability:forgo_empty_stack_rejected_option_capacity",
       ]),
     );
   });
