@@ -1,6 +1,6 @@
 # Persönlicher Kartenbildimport
 
-Stand: 2026-08-19
+Stand: 2026-08-20
 
 ## Laufzeitvertrag
 
@@ -86,12 +86,26 @@ IMG07 definiert drei feste Profile:
 | `proteus`     | `proteus`        |    154 | `netgrid-private-proteus-images`     |
 | `classic`     | `classic`        |     54 | `netgrid-private-classic-images`     |
 
-Ein Paket ist zunächst ein übertragbares Verzeichnis. Es enthält:
+Der fachliche Paketinhalt ist ein übertragbares Verzeichnis. Es enthält:
 
 - `netgrid-card-image-pack.json` mit Schema-, Profil-, Set-, Kartenanzahl-,
   Katalogfingerabdruck- und Mindest-Importer-Version;
 - `mapping.csv` mit allen aktivierten Setzuordnungen und Quellhashes;
 - `images/` mit exakt einer indexierten Quelldatei je `printingId`.
+
+Dieser Inhalt kann unverändert als Verzeichnis oder als einzelne ZIP-Datei
+transportiert werden. Im ZIP liegen Manifest, Mapping und `images/` direkt an
+der Archivwurzel; ein zusätzlicher äußerer Ordner ist nicht zulässig. ZIP ist
+nur die Transporthülle: Nach dem kontrollierten Entpacken laufen dieselben
+Manifest-, Katalog-, Pfad-, Hash-, Normalisierungs- und Bindungsprüfungen wie
+beim Verzeichnisimport.
+
+Der ZIP-Import verarbeitet Einträge gestreamt in einem isolierten
+Staging-Verzeichnis. Er verbietet Traversal, absolute und doppelte Pfade,
+Backslashes, Symlinks, Verschlüsselung und andere Kompressionsmethoden als
+`stored` oder `deflate`. Es gelten höchstens 1.000 Einträge, 512 MiB
+Archivgröße, 1 GiB entpackte Gesamtgröße und 50 MiB je Datei. Fehler- und
+Erfolgsstände werden aus dem Staging entfernt.
 
 Der spätere Windows-Add-on-Installer darf dieses Format verpacken und den
 gleichen Importkern aufrufen; er benötigt kein zweites Paket- oder
@@ -113,6 +127,7 @@ Standardpfade im Repository:
 ```text
 data/local-assets/card-image-packs/source/<profil>/mapping.csv
 data/local-assets/card-image-packs/build/<profil>/
+data/local-assets/card-image-packs/build/<paket-id>.zip
 ```
 
 Bei gesetztem `NETGRID_DATA_ROOT` liegen die Verzeichnisse entsprechend unter
@@ -123,6 +138,7 @@ Nach Eintragen und Aktivieren aller lokalen Bildquellen wird gebaut:
 
 ```powershell
 corepack pnpm --filter @netgrid/card-images cli pack-build --profile originalset --file C:\Pfad\mapping.csv
+corepack pnpm --filter @netgrid/card-images cli pack-build --profile originalset --file C:\Pfad\mapping.csv --format zip
 ```
 
 Eine bestehende erzeugte Ausgabe wird nur mit dem ausdrücklichen Schalter
@@ -137,6 +153,8 @@ vor dem Spiel importiert werden:
 ```powershell
 corepack pnpm --filter @netgrid/card-images cli pack-import --directory D:\NETGRID-Pakete\originalset --dry-run
 corepack pnpm --filter @netgrid/card-images cli pack-import --directory D:\NETGRID-Pakete\originalset --on-existing replace
+corepack pnpm --filter @netgrid/card-images cli pack-import --zip D:\NETGRID-Pakete\netgrid-private-originalset-images.zip --dry-run
+corepack pnpm --filter @netgrid/card-images cli pack-import --zip D:\NETGRID-Pakete\netgrid-private-originalset-images.zip --on-existing replace
 ```
 
 Vor jeder Bindungsänderung prüft der Importer Profil, Mindestversion,
@@ -156,12 +174,13 @@ innerhalb dieser Sitzung keine zusätzliche Passworteingabe; die frische
 Reauthentifizierung bleibt destruktiven Storage-Maintenance-Aktionen
 vorbehalten.
 
-Lokale Zuordnungstabellen, Quellbilder und übertragene Paketverzeichnisse
+Lokale Zuordnungstabellen, Quellbilder und übertragene Paketverzeichnisse oder
+ZIP-Pakete
 werden unter `data/local-assets/card-image-import/inbox/` bereitgestellt. Bei
 gesetztem `NETGRID_DATA_ROOT` liegt die Inbox entsprechend unter dem dortigen
 `card-image-import/inbox/`. Der Browser arbeitet außerhalb ausdrücklich
 ausgewählter lokaler Dateien ausschließlich mit relativen Inbox-Einträgen. Eine
-ausgewählte CSV oder ein vollständiger IMG07-Paketordner darf über die
+ausgewählte CSV, ein vollständiger IMG07-Paketordner oder eine ZIP-Datei darf über die
 authentifizierte Loopback-Maintenance-Verbindung in einen verwalteten
 Inbox-Bereich geladen werden. Paketdateien werden einzeln begrenzt und das
 Manifest zuletzt geschrieben, damit ein abgebrochener Upload nicht als Paket
@@ -177,10 +196,12 @@ Die Oberfläche bietet:
   Import-Inbox;
 - direkte Auswahl und begrenzte Bereitstellung eines vollständigen
   IMG07-Paketordners;
+- gestreamte Auswahl und atomare Bereitstellung eines ZIP-Bildpakets;
 - Prüflauf und Import für lokale beziehungsweise ausdrücklich bestätigte
   HTTPS-Zuordnungen;
-- Paketprüfung und -import für erkannte IMG07-Verzeichnispakete;
-- lokalen Paketbuild aus einer vollständigen Inbox-Zuordnung;
+- Paketprüfung und -import für erkannte IMG07-Verzeichnis- und ZIP-Pakete;
+- lokalen Paketbuild aus einer vollständigen Inbox-Zuordnung wahlweise als
+  Verzeichnis oder ZIP-Datei;
 - serialisierte Jobs mit Fortschritt und strukturiertem Abschlussbericht.
 
 Ein Prüflauf reserviert keine spätere Schreibentscheidung. Beim eigentlichen

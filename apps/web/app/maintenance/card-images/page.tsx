@@ -24,6 +24,7 @@ import { resolveMaintenanceServerHttp } from "../../maintenance";
 import {
   cardImageJobIsTerminal,
   cardImageJobProgressPercent,
+  cardImagePackTransport,
   importReportFromJob,
   mappingInboxEntries,
   packInboxEntries,
@@ -31,6 +32,7 @@ import {
   type CardImageConflictMode,
   type CardImageInboxInventory,
   type CardImageMaintenanceJob,
+  type CardImagePackTransport,
   type CardImageProfileId,
 } from "../../card-image-maintenance";
 
@@ -54,6 +56,7 @@ export default function CardImageMaintenancePage() {
     completed: number;
     total: number;
   } | null>(null);
+  const [uploadingPackArchive, setUploadingPackArchive] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [job, setJob] = useState<CardImageMaintenanceJob | null>(null);
@@ -68,8 +71,17 @@ export default function CardImageMaintenancePage() {
   const [buildProfile, setBuildProfile] =
     useState<CardImageProfileId>("originalset");
   const [replaceBuild, setReplaceBuild] = useState(false);
+  const [buildFormat, setBuildFormat] =
+    useState<CardImagePackTransport>("directory");
   const mappings = useMemo(() => mappingInboxEntries(inbox), [inbox]);
   const packs = useMemo(() => packInboxEntries(inbox), [inbox]);
+  const selectedPack = useMemo(
+    () => packs.find((entry) => entry.relativePath === pack),
+    [pack, packs],
+  );
+  const selectedPackTransport = selectedPack
+    ? cardImagePackTransport(selectedPack)
+    : "directory";
   const activeJob = Boolean(job && !cardImageJobIsTerminal(job));
   const importReport = importReportFromJob(job);
 
@@ -108,7 +120,9 @@ export default function CardImageMaintenancePage() {
       setPack((current) =>
         current &&
         inboxPayload.entries.some(
-          (entry) => entry.relativePath === current && entry.usage === "pack",
+          (entry) =>
+            entry.relativePath === current &&
+            (entry.usage === "pack" || entry.usage === "pack-archive"),
         )
           ? current
           : (packInboxEntries(inboxPayload)[0]?.relativePath ?? ""),
@@ -342,6 +356,49 @@ export default function CardImageMaintenancePage() {
     }
   };
 
+  const uploadPackArchive = async (file: File) => {
+    setUploadingPackArchive(true);
+    setError("");
+    setNotice("");
+    try {
+      if (!file.name.toLowerCase().endsWith(".zip"))
+        throw new Error("Bitte wähle ein ZIP-Bildpaket aus.");
+      const safeBase =
+        file.name
+          .slice(0, -4)
+          .normalize("NFKD")
+          .replace(/[^a-zA-Z0-9._-]+/g, "-")
+          .replace(/^-+|-+$/g, "") || "bildpaket";
+      const fileName = `upload-${Date.now()}-${safeBase.slice(0, 90)}.zip`;
+      const response = await auth.request(
+        `/api/storage/maintenance/card-images/inbox/package-archives?fileName=${encodeURIComponent(fileName)}`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/zip" },
+          body: file,
+        },
+      );
+      const uploaded = await responsePayload<{ relativePath: string }>(
+        response,
+        "ZIP-Bildpaket konnte nicht bereitgestellt werden.",
+      );
+      await refresh();
+      setPack(uploaded.relativePath);
+      setNotice(
+        `${uploaded.relativePath} wurde in der Import-Inbox bereitgestellt.`,
+      );
+    } catch (uploadError) {
+      setError(
+        errorMessage(
+          uploadError,
+          "ZIP-Bildpaket konnte nicht bereitgestellt werden.",
+        ),
+      );
+    } finally {
+      setUploadingPackArchive(false);
+    }
+  };
+
   if (auth.status !== "authenticated")
     return (
       <MaintenanceAuthBoundary auth={auth} title="Kartenbilder verwalten" />
@@ -375,11 +432,11 @@ export default function CardImageMaintenancePage() {
         </header>
 
         <p style={infoBox}>
-          CSV-Dateien und Bildpaketordner kannst du unten direkt auswählen. Die
-          ausgewählten Dateien werden in den lokalen Importbereich kopiert.
-          HTTPS-Quellen werden nur beim ausdrücklich gestarteten Import
-          heruntergeladen; Katalog und Spiel verwenden danach ausschließlich die
-          lokal gespeicherten Bilder.
+          CSV-Dateien sowie Bildpakete als Ordner oder ZIP kannst du unten
+          direkt auswählen. Die ausgewählten Dateien werden in den lokalen
+          Importbereich kopiert. HTTPS-Quellen werden nur beim ausdrücklich
+          gestarteten Import heruntergeladen; Katalog und Spiel verwenden danach
+          ausschließlich die lokal gespeicherten Bilder.
         </p>
         {error ? <p style={errorBox}>{error}</p> : null}
         {notice ? <p style={successBox}>{notice}</p> : null}
@@ -534,32 +591,59 @@ export default function CardImageMaintenancePage() {
               <div>
                 <h2 style={h2}>Bildpaket prüfen und importieren</h2>
                 <p style={subtle}>
-                  Erkannte IMG07-Verzeichnispakete aus der Inbox. Die optionale
+                  Erkannte IMG07-Pakete als Verzeichnis oder ZIP. Die
                   vollständige Prüfung verarbeitet alle Bilder, speichert aber
                   nichts.
                 </p>
               </div>
-              <label style={button}>
-                <FileUp size={15} />
-                {packUploadProgress
-                  ? `Paket ${packUploadProgress.completed}/${packUploadProgress.total}`
-                  : "Paketordner auswählen …"}
-                <input
-                  type="file"
-                  multiple
-                  hidden
-                  disabled={Boolean(packUploadProgress) || activeJob}
-                  {...({ webkitdirectory: "", directory: "" } as Record<
-                    string,
-                    string
-                  >)}
-                  onChange={(event) => {
-                    const files = event.target.files;
-                    event.target.value = "";
-                    if (files) void uploadPackDirectory(files);
-                  }}
-                />
-              </label>
+              <div style={buttonRow}>
+                <label style={button}>
+                  <FileUp size={15} />
+                  {packUploadProgress
+                    ? `Ordner ${packUploadProgress.completed}/${packUploadProgress.total}`
+                    : "Paketordner auswählen …"}
+                  <input
+                    type="file"
+                    multiple
+                    hidden
+                    disabled={
+                      Boolean(packUploadProgress) ||
+                      uploadingPackArchive ||
+                      activeJob
+                    }
+                    {...({ webkitdirectory: "", directory: "" } as Record<
+                      string,
+                      string
+                    >)}
+                    onChange={(event) => {
+                      const files = event.target.files;
+                      event.target.value = "";
+                      if (files) void uploadPackDirectory(files);
+                    }}
+                  />
+                </label>
+                <label style={button}>
+                  <FileUp size={15} />
+                  {uploadingPackArchive
+                    ? "ZIP wird hochgeladen"
+                    : "ZIP-Paket auswählen …"}
+                  <input
+                    type="file"
+                    accept=".zip,application/zip"
+                    hidden
+                    disabled={
+                      Boolean(packUploadProgress) ||
+                      uploadingPackArchive ||
+                      activeJob
+                    }
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = "";
+                      if (file) void uploadPackArchive(file);
+                    }}
+                  />
+                </label>
+              </div>
             </div>
             <Field label="Bildpaket">
               <select
@@ -570,15 +654,15 @@ export default function CardImageMaintenancePage() {
                 <option value="">Kein Paket erkannt</option>
                 {packs.map((entry) => (
                   <option key={entry.relativePath} value={entry.relativePath}>
+                    {cardImagePackTransport(entry) === "zip" ? "ZIP" : "Ordner"}
+                    {" · "}
                     {entry.relativePath}
                   </option>
                 ))}
               </select>
               {!packs.length ? (
                 <span style={subtle}>
-                  Kopiere den vollständigen Paketordner einschließlich Manifest,
-                  mapping.csv und images-Verzeichnis in die Import-Inbox und
-                  aktualisiere anschließend die Ansicht.
+                  Wähle einen vollständigen Paketordner oder ein ZIP-Paket aus.
                 </span>
               ) : null}
             </Field>
@@ -599,7 +683,11 @@ export default function CardImageMaintenancePage() {
                 onClick={() =>
                   void startJob(
                     "/api/storage/maintenance/card-images/packs/preview",
-                    { pack, onExisting: packConflictMode },
+                    {
+                      pack,
+                      packTransport: selectedPackTransport,
+                      onExisting: packConflictMode,
+                    },
                   ).catch((jobError) =>
                     setError(
                       errorMessage(jobError, "Paketprüfung fehlgeschlagen."),
@@ -621,7 +709,11 @@ export default function CardImageMaintenancePage() {
                 onClick={() =>
                   void startJob(
                     "/api/storage/maintenance/card-images/packs/import",
-                    { pack, onExisting: packConflictMode },
+                    {
+                      pack,
+                      packTransport: selectedPackTransport,
+                      onExisting: packConflictMode,
+                    },
                   ).catch((jobError) =>
                     setError(
                       errorMessage(jobError, "Paketimport fehlgeschlagen."),
@@ -638,8 +730,8 @@ export default function CardImageMaintenancePage() {
             <div>
               <h2 style={h2}>Privates Bildpaket bauen</h2>
               <p style={subtle}>
-                Ausgabe bleibt lokal unter{" "}
-                <code>data/local-assets/card-image-packs/build</code>.
+                Ausgabe als Verzeichnis oder einzelne ZIP-Datei bleibt lokal
+                unter <code>data/local-assets/card-image-packs/build</code>.
               </p>
             </div>
             <Field label="Profil">
@@ -669,6 +761,20 @@ export default function CardImageMaintenancePage() {
                 ))}
               </select>
             </Field>
+            <Field label="Ausgabeformat">
+              <select
+                style={input}
+                value={buildFormat}
+                onChange={(event) =>
+                  setBuildFormat(
+                    event.target.value === "zip" ? "zip" : "directory",
+                  )
+                }
+              >
+                <option value="directory">Verzeichnis</option>
+                <option value="zip">ZIP-Datei</option>
+              </select>
+            </Field>
             <label style={checkField}>
               <input
                 type="checkbox"
@@ -688,6 +794,7 @@ export default function CardImageMaintenancePage() {
                     mapping,
                     profileId: buildProfile,
                     replace: replaceBuild,
+                    outputFormat: buildFormat,
                   },
                 ).catch((jobError) =>
                   setError(
@@ -787,14 +894,16 @@ function JobPanel({ job }: { job: CardImageMaintenanceJob }) {
         {phaseLabel(job.progress.phase)} · {job.progress.completed} /{" "}
         {job.progress.total || "?"}
         {job.progress.printingId ? ` · ${job.progress.printingId}` : ""}
+        {job.progress.relativePath ? ` · ${job.progress.relativePath}` : ""}
       </p>
       {job.error ? <p style={errorBox}>{job.error.message}</p> : null}
       {terminal &&
       job.report?.schemaVersion ===
         "netgrid-card-image-pack-maintenance-report-v1" ? (
         <p style={successBox}>
-          Paket {job.report.packId}: {job.report.operation} für{" "}
-          {job.report.cardCount} Bilder abgeschlossen.
+          Paket {job.report.packId} ({transportLabel(job.report.transport)}):{" "}
+          {operationLabel(job.report.operation)} für {job.report.cardCount}{" "}
+          Bilder abgeschlossen.
         </p>
       ) : null}
     </section>
@@ -921,7 +1030,21 @@ function phaseLabel(
     validating: "Paketdateien werden geprüft",
     building: "Paket wird gebaut",
     importing: "Paket wird importiert",
+    archiving: "ZIP-Datei wird erstellt",
+    extracting: "ZIP-Datei wird sicher entpackt",
   }[phase];
+}
+
+function transportLabel(transport: CardImagePackTransport): string {
+  return transport === "zip" ? "ZIP" : "Verzeichnis";
+}
+
+function operationLabel(operation: "preview" | "import" | "build"): string {
+  return {
+    preview: "Prüfung",
+    import: "Import",
+    build: "Erstellung",
+  }[operation];
 }
 
 const pageShell: CSSProperties = {

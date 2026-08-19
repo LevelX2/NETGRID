@@ -2278,6 +2278,25 @@ async function routeHttp(
 
     if (
       url.pathname ===
+        `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/package-archives` &&
+      request.method === "POST"
+    ) {
+      const fileName = url.searchParams.get("fileName");
+      if (!fileName)
+        throw new CardImageMaintenanceError(
+          "card_image_job_input_invalid",
+          "Der ZIP-Paketupload ist unvollständig.",
+        );
+      sendJson(
+        response,
+        201,
+        await cardImageMaintenance.uploadPackageArchive(fileName, request),
+      );
+      return;
+    }
+
+    if (
+      url.pathname ===
         `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox/package-files` &&
       request.method === "POST"
     ) {
@@ -3940,6 +3959,10 @@ function cardImagePackJobInput(
       mapping: body.mapping,
       profileId,
       replace: body.replace === true,
+      outputFormat:
+        body.outputFormat === "directory" || body.outputFormat === "zip"
+          ? body.outputFormat
+          : invalidPackTransport(),
     };
   }
   const onExisting =
@@ -3956,8 +3979,19 @@ function cardImagePackJobInput(
   return {
     kind: pathname.endsWith("/preview") ? "pack_preview" : "pack_import",
     pack: body.pack,
+    packTransport:
+      body.packTransport === "directory" || body.packTransport === "zip"
+        ? body.packTransport
+        : invalidPackTransport(),
     onExisting,
   };
+}
+
+function invalidPackTransport(): never {
+  throw new CardImageMaintenanceError(
+    "card_image_job_input_invalid",
+    "Das Bildpaket benötigt ein gültiges Transportformat.",
+  );
 }
 
 function sendBootstrap(

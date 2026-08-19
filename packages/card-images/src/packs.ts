@@ -23,6 +23,13 @@ import {
 } from "./importer";
 import { normalizeCardImage } from "./normalizer";
 import {
+  CardImagePackArchiveError,
+  createCardImagePackArchive,
+  extractCardImagePackArchive,
+  type CardImagePackArchiveLimits,
+} from "./pack-archive";
+import {
+  resolveNetgridCardImageImportRoot,
   resolveNetgridCardImagePackBuildRoot,
   resolveNetgridCardImagePackSourceRoot,
   type NetgridPathOptions,
@@ -144,6 +151,11 @@ export type BuildPrivateCardImagePackResult = {
   manifest: CardImagePackManifest;
 };
 
+export type BuildPrivateCardImagePackZipResult = {
+  outputFile: string;
+  manifest: CardImagePackManifest;
+};
+
 export type ImportPrivateCardImagePackOptions = {
   packDirectory: string;
   store?: CardImageStore;
@@ -154,11 +166,27 @@ export type ImportPrivateCardImagePackOptions = {
   onProgress?: (progress: CardImagePackProgress) => void;
 };
 
+export type ImportPrivateCardImagePackZipOptions = Omit<
+  ImportPrivateCardImagePackOptions,
+  "packDirectory"
+> & {
+  archiveFile: string;
+  pathOptions?: NetgridPathOptions;
+  archiveLimits?: CardImagePackArchiveLimits;
+};
+
 export type CardImagePackProgress = {
-  phase: "validating" | "building" | "preparing" | "storing";
+  phase:
+    | "validating"
+    | "building"
+    | "preparing"
+    | "storing"
+    | "archiving"
+    | "extracting";
   completed: number;
   total: number;
   printingId?: string;
+  relativePath?: string;
 };
 
 export type ImportPrivateCardImagePackResult = {
@@ -244,6 +272,76 @@ export async function buildPrivateCardImagePack(
   );
 }
 
+export async function buildPrivateCardImagePackZip(
+  options: BuildPrivateCardImagePackOptions,
+): Promise<BuildPrivateCardImagePackZipResult> {
+  const cards = Object.values(createRuntimeCardsById());
+  return buildCardImagePackZip(
+    { profile: privateCardImagePackProfile(options.profileId), cards },
+    {
+      mappingFile: options.mappingFile,
+      buildRoot: resolveNetgridCardImagePackBuildRoot(options.pathOptions),
+      replace: options.replace ?? false,
+      now: options.now ?? (() => new Date()),
+      localSourceResolver: options.localSourceResolver,
+      onProgress: options.onProgress,
+    },
+  );
+}
+
+async function buildCardImagePackZip(
+  rawContext: PackContext,
+  options: {
+    mappingFile: string;
+    buildRoot: string;
+    replace: boolean;
+    now: () => Date;
+    localSourceResolver?: BuildPrivateCardImagePackOptions["localSourceResolver"];
+    onProgress?: BuildPrivateCardImagePackOptions["onProgress"];
+  },
+): Promise<BuildPrivateCardImagePackZipResult> {
+  const context = createPackContext(rawContext.profile, rawContext.cards);
+  const profile = context.profile;
+  const buildRoot = path.resolve(options.buildRoot);
+  const target = safeChildPath(buildRoot, `${profile.packId}.zip`);
+  if (!options.replace && (await fileExists(target)))
+    throw new CardImagePackError(
+      "pack_output_exists",
+      `ZIP-Bildpaketausgabe für ${profile.profileId} existiert bereits.`,
+    );
+  await mkdir(buildRoot, { recursive: true });
+  const stagingRoot = safeChildPath(
+    buildRoot,
+    `.zip-build-${profile.profileId}-${randomUUID()}`,
+  );
+  const stagingArchive = safeChildPath(
+    buildRoot,
+    `.zip-staging-${profile.profileId}-${randomUUID()}.zip`,
+  );
+  await mkdir(stagingRoot, { recursive: true });
+  try {
+    const built = await buildCardImagePack(context, {
+      mappingFile: options.mappingFile,
+      buildRoot: stagingRoot,
+      replace: false,
+      now: options.now,
+      localSourceResolver: options.localSourceResolver,
+      onProgress: options.onProgress,
+    });
+    await createCardImagePackArchive({
+      sourceDirectory: built.outputDirectory,
+      targetFile: stagingArchive,
+      mtime: new Date(built.manifest.createdAt),
+      onProgress: (progress) => options.onProgress?.({ ...progress }),
+    });
+    await activateBuildFile(stagingArchive, target, options.replace);
+    return { outputFile: target, manifest: built.manifest };
+  } finally {
+    await rm(stagingRoot, { recursive: true, force: true });
+    await rm(stagingArchive, { force: true });
+  }
+}
+
 export async function importPrivateCardImagePack(
   options: ImportPrivateCardImagePackOptions,
 ): Promise<ImportPrivateCardImagePackResult> {
@@ -255,6 +353,20 @@ export async function importPrivateCardImagePack(
     createPackContext(profile, cards),
     rawManifest,
     packDirectory,
+    options,
+  );
+}
+
+export async function importPrivateCardImagePackZip(
+  options: ImportPrivateCardImagePackZipOptions,
+): Promise<ImportPrivateCardImagePackResult> {
+  return importCardImagePackZip(
+    undefined,
+    options.archiveFile,
+    path.join(
+      resolveNetgridCardImageImportRoot(options.pathOptions),
+      "staging",
+    ),
     options,
   );
 }
@@ -468,6 +580,66 @@ async function importCardImagePack(
     profileId: manifest.profileId,
     importReport,
   };
+}
+
+async function importCardImagePackZip(
+  rawContext: PackContext | undefined,
+  archiveFile: string,
+  stagingRoot: string,
+  options: ImportPrivateCardImagePackZipOptions,
+): Promise<ImportPrivateCardImagePackResult> {
+  const extracted = await extractCardImagePackArchive({
+    archiveFile,
+    stagingRoot,
+    ...(options.archiveLimits ? { limits: options.archiveLimits } : {}),
+    onProgress: (progress) => options.onProgress?.({ ...progress }),
+  });
+  try {
+    const rawManifest = await readManifest(extracted.directory);
+    const context = rawContext
+      ? createPackContext(rawContext.profile, rawContext.cards)
+      : createPackContext(
+          privateCardImagePackProfile(rawProfileId(rawManifest)),
+          Object.values(createRuntimeCardsById()),
+        );
+    const manifest = validateManifest(rawManifest, context);
+    validateArchiveContents(extracted.fileNames, manifest);
+    return await importCardImagePack(
+      context,
+      rawManifest,
+      extracted.directory,
+      {
+        packDirectory: extracted.directory,
+        ...(options.store ? { store: options.store } : {}),
+        ...(options.collectionId ? { collectionId: options.collectionId } : {}),
+        ...(options.onExisting ? { onExisting: options.onExisting } : {}),
+        ...(options.dryRun !== undefined ? { dryRun: options.dryRun } : {}),
+        ...(options.now ? { now: options.now } : {}),
+        ...(options.onProgress ? { onProgress: options.onProgress } : {}),
+      },
+    );
+  } finally {
+    await rm(extracted.directory, { recursive: true, force: true });
+  }
+}
+
+function validateArchiveContents(
+  fileNames: readonly string[],
+  manifest: CardImagePackManifest,
+): void {
+  const expected = [
+    CARD_IMAGE_PACK_MANIFEST_FILE,
+    CARD_IMAGE_PACK_MAPPING_FILE,
+    ...manifest.entries.map((entry) => entry.relativePath),
+  ].sort();
+  if (
+    fileNames.length !== expected.length ||
+    fileNames.some((fileName, index) => fileName !== expected[index])
+  )
+    throw new CardImagePackArchiveError(
+      "pack_archive_invalid",
+      "ZIP-Bildpaketinhalt stimmt nicht exakt mit dem Manifest überein.",
+    );
 }
 
 function createPackContext(
@@ -809,6 +981,32 @@ async function activateBuildOutput(
   }
 }
 
+async function activateBuildFile(
+  staging: string,
+  target: string,
+  replace: boolean,
+): Promise<void> {
+  if (!(await fileExists(target))) {
+    await rename(staging, target);
+    return;
+  }
+  if (!replace)
+    throw new CardImagePackError(
+      "pack_output_exists",
+      "ZIP-Bildpaketausgabe existiert bereits.",
+    );
+  const backup = `${target}.backup-${randomUUID()}`;
+  await rename(target, backup);
+  try {
+    await rename(staging, target);
+    await rm(backup, { force: true });
+  } catch (error) {
+    if (!(await fileExists(target)) && (await fileExists(backup)))
+      await rename(backup, target);
+    throw error;
+  }
+}
+
 function safeChildPath(root: string, childName: string): string {
   const resolvedRoot = path.resolve(root);
   const target = path.resolve(resolvedRoot, childName);
@@ -918,7 +1116,9 @@ function isMissingFileError(error: unknown): boolean {
 
 export const __cardImagePackTestOnly = {
   buildCardImagePack,
+  buildCardImagePackZip,
   importCardImagePack,
+  importCardImagePackZip,
   createPackContext,
   validateManifest,
 };

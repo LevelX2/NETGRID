@@ -3,33 +3,40 @@ import {
   CardImageImportError,
   CardImageInboxError,
   CardImageMappingCsvError,
+  CardImagePackArchiveError,
   CardImagePackError,
   CardImageStore,
   CardImageStoreError,
   HttpsImageImportError,
   PRIVATE_CARD_IMAGE_PACK_PROFILES,
   buildPrivateCardImagePack,
+  buildPrivateCardImagePackZip,
   createCurrentCardImageMappingTemplate,
   importCardImagesFromCsv,
   importPrivateCardImagePack,
+  importPrivateCardImagePackZip,
   inventoryCardImageCollection,
   inventoryCardImageInbox,
   resolveCardImageInboxEntry,
   resolveCardImageInboxSource,
   writeCardImageInboxMapping,
   writeCardImageInboxPackageFile,
+  writeCardImageInboxPackageArchive,
   type BuildPrivateCardImagePackOptions,
   type BuildPrivateCardImagePackResult,
+  type BuildPrivateCardImagePackZipResult,
   type CardImageBindingConflictMode,
   type CardImageCollectionInventory,
   type CardImageImportReport,
   type CardImageImportProgress,
   type CardImageInboxInventory,
   type CardImageInboxOptions,
+  type CardImagePackProgress,
   type HttpsImageDownload,
   type ImportCardImagesOptions,
   type ImportPrivateCardImagePackOptions,
   type ImportPrivateCardImagePackResult,
+  type ImportPrivateCardImagePackZipOptions,
   type NetgridPathOptions,
   type PrivateCardImagePackProfileId,
 } from "@netgrid/card-images";
@@ -43,6 +50,8 @@ export type CardImageMaintenanceCapabilities = {
   collectionId: "personal";
   importModes: readonly ["local", "https", "pack"];
   conflictModes: readonly ["fail", "skip", "replace"];
+  packTransports: readonly ["directory", "zip"];
+  packBuildFormats: readonly ["directory", "zip"];
   httpsRequiresRightsConfirmation: true;
   mutationsRequireReauthentication: false;
 };
@@ -61,15 +70,26 @@ export type CardImageMaintenanceJobStatus =
   | "failed";
 
 export type CardImageMaintenanceJobProgress = {
-  phase: "preparing" | "storing" | "validating" | "building" | "importing";
+  phase:
+    | "preparing"
+    | "storing"
+    | "validating"
+    | "building"
+    | "importing"
+    | "archiving"
+    | "extracting";
   completed: number;
   total: number;
   printingId?: string;
+  relativePath?: string;
 };
+
+export type CardImagePackTransport = "directory" | "zip";
 
 export type CardImagePackMaintenanceReport = {
   schemaVersion: "netgrid-card-image-pack-maintenance-report-v1";
   operation: "preview" | "import" | "build";
+  transport: CardImagePackTransport;
   profileId: PrivateCardImagePackProfileId;
   packId: string;
   cardCount: number;
@@ -84,6 +104,8 @@ export type CardImageMaintenanceJobView = {
   sourceMode?: "local" | "https" | "pack";
   mapping?: string;
   pack?: string;
+  packTransport?: CardImagePackTransport;
+  outputFormat?: CardImagePackTransport;
   profileId?: PrivateCardImagePackProfileId;
   replace?: boolean;
   onExisting?: CardImageBindingConflictMode;
@@ -111,6 +133,7 @@ export type StartCardImagePackJobInput =
   | {
       kind: "pack_preview" | "pack_import";
       pack: string;
+      packTransport: CardImagePackTransport;
       onExisting: CardImageBindingConflictMode;
     }
   | {
@@ -118,6 +141,7 @@ export type StartCardImagePackJobInput =
       mapping: string;
       profileId: PrivateCardImagePackProfileId;
       replace: boolean;
+      outputFormat: CardImagePackTransport;
     };
 
 export class CardImageMaintenanceError extends Error {
@@ -149,8 +173,14 @@ export class CardImageMaintenanceService {
   private readonly buildPack: (
     options: BuildPrivateCardImagePackOptions,
   ) => Promise<BuildPrivateCardImagePackResult>;
+  private readonly buildPackZip: (
+    options: BuildPrivateCardImagePackOptions,
+  ) => Promise<BuildPrivateCardImagePackZipResult>;
   private readonly importPack: (
     options: ImportPrivateCardImagePackOptions,
+  ) => Promise<ImportPrivateCardImagePackResult>;
+  private readonly importPackZip: (
+    options: ImportPrivateCardImagePackZipOptions,
   ) => Promise<ImportPrivateCardImagePackResult>;
   private readonly httpsDownloader:
     | ((source: string) => Promise<HttpsImageDownload>)
@@ -171,8 +201,14 @@ export class CardImageMaintenanceService {
       buildPack?: (
         options: BuildPrivateCardImagePackOptions,
       ) => Promise<BuildPrivateCardImagePackResult>;
+      buildPackZip?: (
+        options: BuildPrivateCardImagePackOptions,
+      ) => Promise<BuildPrivateCardImagePackZipResult>;
       importPack?: (
         options: ImportPrivateCardImagePackOptions,
+      ) => Promise<ImportPrivateCardImagePackResult>;
+      importPackZip?: (
+        options: ImportPrivateCardImagePackZipOptions,
       ) => Promise<ImportPrivateCardImagePackResult>;
       httpsDownloader?: (source: string) => Promise<HttpsImageDownload>;
     } = {},
@@ -184,7 +220,9 @@ export class CardImageMaintenanceService {
     this.idFactory = options.idFactory ?? randomUUID;
     this.importCards = options.importCards ?? importCardImagesFromCsv;
     this.buildPack = options.buildPack ?? buildPrivateCardImagePack;
+    this.buildPackZip = options.buildPackZip ?? buildPrivateCardImagePackZip;
     this.importPack = options.importPack ?? importPrivateCardImagePack;
+    this.importPackZip = options.importPackZip ?? importPrivateCardImagePackZip;
     this.httpsDownloader = options.httpsDownloader;
   }
 
@@ -195,6 +233,8 @@ export class CardImageMaintenanceService {
       collectionId: "personal",
       importModes: ["local", "https", "pack"],
       conflictModes: ["fail", "skip", "replace"],
+      packTransports: ["directory", "zip"],
+      packBuildFormats: ["directory", "zip"],
       httpsRequiresRightsConfirmation: true,
       mutationsRequireReauthentication: false,
     };
@@ -231,6 +271,18 @@ export class CardImageMaintenanceService {
       content,
       this.inboxOptions,
     );
+  }
+
+  async uploadPackageArchive(
+    fileName: string,
+    source: AsyncIterable<Uint8Array | string>,
+  ): Promise<{ relativePath: string }> {
+    const entry = await writeCardImageInboxPackageArchive(
+      fileName,
+      source,
+      this.inboxOptions,
+    );
+    return { relativePath: entry.relativePath };
   }
 
   mappingTemplate(profileId: PrivateCardImagePackProfileId | "all"): {
@@ -275,6 +327,7 @@ export class CardImageMaintenanceService {
             mapping: input.mapping,
             profileId: input.profileId,
             replace: input.replace,
+            outputFormat: input.outputFormat,
             rightsConfirmed: false,
             progress: { phase: "building", completed: 0, total: 0 },
           })
@@ -282,6 +335,7 @@ export class CardImageMaintenanceService {
             kind: input.kind,
             sourceMode: "pack",
             pack: input.pack,
+            packTransport: input.packTransport,
             onExisting: input.onExisting,
             rightsConfirmed: false,
             progress: { phase: "validating", completed: 0, total: 0 },
@@ -349,7 +403,7 @@ export class CardImageMaintenanceService {
             mappingDirectory,
             this.inboxOptions,
           ),
-        onProgress: (progress) => {
+        onProgress: (progress: CardImageImportProgress) => {
           job.progress = mappingJobProgress(
             progress,
             job.kind === "mapping_preview",
@@ -374,7 +428,7 @@ export class CardImageMaintenanceService {
           "file",
           this.inboxOptions,
         );
-        const result = await this.buildPack({
+        const buildOptions: BuildPrivateCardImagePackOptions = {
           profileId: job.profileId,
           mappingFile,
           replace: job.replace === true,
@@ -389,10 +443,16 @@ export class CardImageMaintenanceService {
           onProgress: (progress) => {
             job.progress = { ...progress };
           },
-        });
+        };
+        const transport = job.outputFormat ?? "directory";
+        const result =
+          transport === "zip"
+            ? await this.buildPackZip(buildOptions)
+            : await this.buildPack(buildOptions);
         return {
           schemaVersion: "netgrid-card-image-pack-maintenance-report-v1",
           operation: "build",
+          transport,
           profileId: result.manifest.profileId,
           packId: result.manifest.packId,
           cardCount: result.manifest.cardCount,
@@ -400,26 +460,38 @@ export class CardImageMaintenanceService {
       }
       if (!job.pack || !job.onExisting)
         throw invalidInternalJob("Paket-Importjob ist unvollständig.");
-      const packDirectory = await resolveCardImageInboxEntry(
+      const transport = job.packTransport ?? "directory";
+      const packSource = await resolveCardImageInboxEntry(
         job.pack,
-        "directory",
+        transport === "zip" ? "file" : "directory",
         this.inboxOptions,
       );
-      const result = await this.importPack({
-        packDirectory,
+      const importOptions = {
         store: this.store,
         collectionId: "personal",
         onExisting: job.onExisting,
         dryRun: job.kind === "pack_preview",
         now: this.now,
-        onProgress: (progress) => {
+        onProgress: (progress: CardImagePackProgress) => {
           job.progress = { ...progress };
         },
-      });
+      };
+      const result =
+        transport === "zip"
+          ? await this.importPackZip({
+              archiveFile: packSource,
+              pathOptions: this.packPathOptions,
+              ...importOptions,
+            })
+          : await this.importPack({
+              packDirectory: packSource,
+              ...importOptions,
+            });
       const profile = PRIVATE_CARD_IMAGE_PACK_PROFILES[result.profileId];
       return {
         schemaVersion: "netgrid-card-image-pack-maintenance-report-v1",
         operation: job.kind === "pack_preview" ? "preview" : "import",
+        transport,
         profileId: result.profileId,
         packId: result.packId,
         cardCount: profile.expectedCardCount,
@@ -500,13 +572,22 @@ function validatePackJobInput(input: StartCardImagePackJobInput): void {
   if (input.kind === "pack_build") {
     if (
       !input.mapping.trim() ||
-      !(input.profileId in PRIVATE_CARD_IMAGE_PACK_PROFILES)
+      !(input.profileId in PRIVATE_CARD_IMAGE_PACK_PROFILES) ||
+      !isPackTransport(input.outputFormat)
     )
       throw invalidJobInput();
     return;
   }
-  if (!input.pack.trim() || !isConflictMode(input.onExisting))
+  if (
+    !input.pack.trim() ||
+    !isConflictMode(input.onExisting) ||
+    !isPackTransport(input.packTransport)
+  )
     throw invalidJobInput();
+}
+
+function isPackTransport(value: string): value is CardImagePackTransport {
+  return value === "directory" || value === "zip";
 }
 
 function isConflictMode(value: string): value is CardImageBindingConflictMode {
@@ -539,6 +620,7 @@ function publicJobError(
     error instanceof CardImageInboxError ||
     error instanceof CardImageImportError ||
     error instanceof CardImageMappingCsvError ||
+    error instanceof CardImagePackArchiveError ||
     error instanceof CardImagePackError ||
     error instanceof CardImageStoreError ||
     error instanceof HttpsImageImportError ||
