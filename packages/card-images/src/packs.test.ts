@@ -1,10 +1,11 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 import sharp from "sharp";
 import { afterEach, describe, expect, it } from "vitest";
 import { parseCardImageMappingCsv, serializeCardImageMappingCsv } from "./csv";
+import { createCardImagePackArchive } from "./pack-archive";
 import {
   CARD_IMAGE_PACK_IMPORTER_VERSION,
   CARD_IMAGE_PACK_MANIFEST_FILE,
@@ -160,6 +161,83 @@ describe("private card image packs", () => {
       total: 2,
       printingId: fixture.cards[1]!.printingId,
     });
+  });
+
+  it("builds and imports the same package through a ZIP transport envelope", async () => {
+    const fixture = await packFixture();
+    const progress: CardImagePackProgress[] = [];
+    const built = await __cardImagePackTestOnly.buildCardImagePackZip(
+      { profile: fixture.profile, cards: fixture.cards },
+      {
+        mappingFile: fixture.mappingFile,
+        buildRoot: path.join(fixture.root, "zip-build"),
+        replace: false,
+        now: () => new Date("2026-08-20T00:00:00.000Z"),
+        onProgress: (event) => progress.push(event),
+      },
+    );
+    expect(path.basename(built.outputFile)).toBe(
+      "netgrid-private-test-images.zip",
+    );
+    expect(progress.some((event) => event.phase === "archiving")).toBe(true);
+
+    const store = new CardImageStore({
+      root: path.join(fixture.root, "zip-store"),
+    });
+    const stagingRoot = path.join(fixture.root, "zip-staging");
+    const imported = await __cardImagePackTestOnly.importCardImagePackZip(
+      { profile: fixture.profile, cards: fixture.cards },
+      built.outputFile,
+      stagingRoot,
+      {
+        archiveFile: built.outputFile,
+        store,
+        collectionId: "personal",
+      },
+    );
+    expect(imported.importReport.summary.bound).toBe(2);
+    expect(
+      Object.keys((await store.readCollection("personal")).bindings),
+    ).toHaveLength(2);
+    await expect(readdir(stagingRoot)).resolves.toEqual([]);
+
+    await expect(
+      __cardImagePackTestOnly.buildCardImagePackZip(
+        { profile: fixture.profile, cards: fixture.cards },
+        {
+          mappingFile: fixture.mappingFile,
+          buildRoot: path.join(fixture.root, "zip-build"),
+          replace: false,
+          now: () => new Date("2026-08-20T00:00:00.000Z"),
+        },
+      ),
+    ).rejects.toMatchObject({ code: "pack_output_exists" });
+  });
+
+  it("rejects ZIP image files not declared by the package manifest", async () => {
+    const fixture = await packFixture();
+    const built = await buildFixturePack(fixture);
+    await writeFile(
+      path.join(built.outputDirectory, "images", "undeclared.png"),
+      "extra",
+    );
+    const archiveFile = path.join(fixture.root, "extra.zip");
+    await createCardImagePackArchive({
+      sourceDirectory: built.outputDirectory,
+      targetFile: archiveFile,
+      mtime: new Date("2026-08-20T00:00:00.000Z"),
+    });
+    const stagingRoot = path.join(fixture.root, "extra-staging");
+
+    await expect(
+      __cardImagePackTestOnly.importCardImagePackZip(
+        { profile: fixture.profile, cards: fixture.cards },
+        archiveFile,
+        stagingRoot,
+        { archiveFile, dryRun: true },
+      ),
+    ).rejects.toMatchObject({ code: "pack_archive_invalid" });
+    await expect(readdir(stagingRoot)).resolves.toEqual([]);
   });
 
   it("uses the caller-provided local source resolver for package builds", async () => {

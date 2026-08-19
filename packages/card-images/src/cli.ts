@@ -5,7 +5,9 @@ import { createRuntimeCardsById, type CatalogSide } from "@netgrid/catalog";
 import { importCardImagesFromCsv } from "./importer";
 import {
   buildPrivateCardImagePack,
+  buildPrivateCardImagePackZip,
   importPrivateCardImagePack,
+  importPrivateCardImagePackZip,
   privateCardImagePackProfile,
   writePrivateCardImagePackTemplate,
   type PrivateCardImagePackProfileId,
@@ -56,23 +58,39 @@ export async function runCardImageCli(args: readonly string[]): Promise<void> {
   }
   if (command === "pack-build") {
     const profileId = requiredProfile(options);
-    const result = await buildPrivateCardImagePack({
+    const format = packFormat(options);
+    const buildOptions = {
       profileId,
       mappingFile: requiredOption(options, "file"),
       replace: options.replace === true,
-    });
+    };
+    const result =
+      format === "zip"
+        ? await buildPrivateCardImagePackZip(buildOptions)
+        : await buildPrivateCardImagePack(buildOptions);
     process.stdout.write(
-      `${JSON.stringify({ ok: true, command, profileId, output: result.outputDirectory, manifest: result.manifest }, null, 2)}\n`,
+      `${JSON.stringify({ ok: true, command, profileId, format, output: "outputFile" in result ? result.outputFile : result.outputDirectory, manifest: result.manifest }, null, 2)}\n`,
     );
     return;
   }
   if (command === "pack-import") {
-    const report = await importPrivateCardImagePack({
-      packDirectory: requiredOption(options, "directory"),
+    const directory = optionalString(options.directory);
+    const archiveFile = optionalString(options.zip);
+    if (Boolean(directory) === Boolean(archiveFile))
+      throw new Error(
+        "Pack-Import benötigt genau eine Option: --directory oder --zip.",
+      );
+    const importOptions = {
       collectionId: optionalString(options.collection) ?? "personal",
       onExisting: conflictMode(options),
       dryRun: options["dry-run"] === true,
-    });
+    };
+    const report = archiveFile
+      ? await importPrivateCardImagePackZip({ archiveFile, ...importOptions })
+      : await importPrivateCardImagePack({
+          packDirectory: directory!,
+          ...importOptions,
+        });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return;
   }
@@ -91,8 +109,16 @@ export async function runCardImageCli(args: readonly string[]): Promise<void> {
     return;
   }
   throw new Error(
-    "Aufruf: card-images template --output <datei> [--set <setId>] [--side runner|corp] [--missing-only], card-images import --file <datei> [--dry-run] [--on-existing fail|skip|replace], card-images import-https --file <datei> --confirm-rights [--dry-run] [--on-existing fail|skip|replace], card-images pack-template --profile originalset|proteus|classic [--replace], card-images pack-build --profile originalset|proteus|classic --file <datei> [--replace] oder card-images pack-import --directory <paket> [--collection personal] [--dry-run] [--on-existing fail|skip|replace]",
+    "Aufruf: card-images template --output <datei> [--set <setId>] [--side runner|corp] [--missing-only], card-images import --file <datei> [--dry-run] [--on-existing fail|skip|replace], card-images import-https --file <datei> --confirm-rights [--dry-run] [--on-existing fail|skip|replace], card-images pack-template --profile originalset|proteus|classic [--replace], card-images pack-build --profile originalset|proteus|classic --file <datei> [--format directory|zip] [--replace] oder card-images pack-import (--directory <paket> | --zip <paket.zip>) [--collection personal] [--dry-run] [--on-existing fail|skip|replace]",
   );
+}
+
+function packFormat(
+  options: Record<string, string | true>,
+): "directory" | "zip" {
+  const format = optionalString(options.format) ?? "directory";
+  if (format === "directory" || format === "zip") return format;
+  throw new Error("--format muss directory oder zip sein.");
 }
 
 function conflictMode(
