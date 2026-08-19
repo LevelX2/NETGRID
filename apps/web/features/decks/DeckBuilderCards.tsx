@@ -3,7 +3,11 @@
 import { Trash2 } from "lucide-react";
 import type { CSSProperties } from "react";
 
-import { neededDevelopmentLabel } from "../cards/card-detail-lines";
+import {
+  deckCardMetricLine,
+  formatDeckCardTerm,
+  formatDeckCardTypeLine,
+} from "./deck-card-text-lines";
 import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
 
@@ -22,17 +26,6 @@ type DeckBuilderDetail = DeckBuilderCard & {
   setName: string;
   collectorNumber: string;
   definitionId?: string;
-};
-
-const CATALOG_NUMERIC_LABELS: Record<string, string> = {
-  cost: "Kosten",
-  installCost: "Install",
-  memoryCost: "MU",
-  strength: "Stärke",
-  rezCost: "Rez",
-  trashCost: "Trash",
-  advancementRequirement: "Benötigt",
-  agendaPoints: "Agenda"
 };
 
 export function DeckTableLibraryCard({
@@ -78,12 +71,15 @@ export function DeckTableLibraryCard({
           cardId={card.catalogCardId}
           title={card.title}
           cardType={card.type}
+          typeLine={formatDeckCardTypeLine(card)}
+          metricLine={deckCardMetricLine(detail)}
+          textDensity="table"
           {...(detail?.text ? { rulesText: detail.text } : {})}
           {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
           {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
         />
         <strong>{card.title}</strong>
-        <span>{formatCatalogTypeLine(card)}</span>
+        <span>{formatDeckCardTypeLine(card)}</span>
         {quantity > 0 ? <b>x{quantity}</b> : null}
       </div>
     </DeckCardTooltipTrigger>
@@ -107,7 +103,7 @@ export function DeckLibraryCard({
   onRemove(): void;
   onSelect(): void;
 }) {
-  const metrics = deckBuilderMetricLine(detail);
+  const metrics = deckCardMetricLine(detail);
   return (
     <DeckCardTooltipTrigger
       card={card}
@@ -120,13 +116,15 @@ export function DeckLibraryCard({
         cardId={card.catalogCardId}
         title={card.title}
         cardType={card.type}
+        typeLine={formatDeckCardTypeLine(card)}
+        metricLine={metrics}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
         {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card.title}</strong>
-        <span>{formatCatalogTypeLine(card)}</span>
+        <span>{formatDeckCardTypeLine(card)}</span>
         {metrics ? <small>{metrics}</small> : null}
         {detail?.text ? <p>{detail.text}</p> : null}
       </div>
@@ -156,13 +154,15 @@ export function DeckBuilderPreview({
   onAdd(): void;
   onRemove(): void;
 }) {
-  const metrics = deckBuilderMetricLine(detail);
+  const metrics = deckCardMetricLine(detail);
   return (
     <section className="deckBuilderPreview" aria-label="Kartenpreview">
       <DeckCardThumb
         cardId={card.catalogCardId}
         title={card.title}
         cardType={card.type}
+        typeLine={formatDeckCardTypeLine(card)}
+        metricLine={metrics}
         preview
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
@@ -171,7 +171,7 @@ export function DeckBuilderPreview({
       <div className="deckBuilderPreviewText">
         <span>{deckBuilderCardGroup(card)}</span>
         <strong>{card.title}</strong>
-        <small>{formatCatalogTypeLine(card)}</small>
+        <small>{formatDeckCardTypeLine(card)}</small>
         {metrics ? <small>{metrics}</small> : null}
         <p>{detail?.text ?? "Kartentext wird geladen."}</p>
       </div>
@@ -207,7 +207,7 @@ export function DeckListCard({
   onRemove(): void;
   onSelect(): void;
 }) {
-  const metrics = deckBuilderMetricLine(detail);
+  const metrics = deckCardMetricLine(detail);
   return (
     <DeckCardTooltipTrigger
       card={card}
@@ -220,13 +220,15 @@ export function DeckListCard({
         cardId={card?.catalogCardId ?? cardId}
         title={card?.title ?? cardId}
         {...(card?.type ? { cardType: card.type } : {})}
+        {...(card ? { typeLine: formatDeckCardTypeLine(card) } : {})}
+        {...(metrics ? { metricLine: metrics } : {})}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
         {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card?.title ?? cardId}</strong>
-        <span>{card ? formatCatalogTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
+        <span>{card ? formatDeckCardTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
         {metrics ? <small>{metrics}</small> : null}
       </div>
       <div className="deckQuantityControls">
@@ -247,40 +249,5 @@ export function DeckListCard({
 
 function deckBuilderCardGroup(card: DeckBuilderCard | null): string {
   if (!card) return "Unbekannt";
-  return [formatCatalogTerm(card.type), card.subtypes.map(formatCatalogTerm).join(" / ")].filter(Boolean).join(" - ");
-}
-
-function deckBuilderMetricLine(detail: DeckBuilderDetail | undefined): string {
-  if (!detail) return "";
-  return Object.entries(CATALOG_NUMERIC_LABELS)
-    .map(([key, label]) => {
-      const value = detail.numeric[key];
-      return catalogNumericLabel(key, label, value);
-    })
-    .filter(Boolean)
-    .join(" · ");
-}
-
-function catalogNumericLabel(key: string, label: string, value: number | null | undefined): string | null {
-  if (value === null || value === undefined) return null;
-  if (key === "advancementRequirement") return neededDevelopmentLabel(value);
-  return `${label} ${value}`;
-}
-
-function formatCatalogTypeLine(card: Pick<DeckBuilderCard, "type" | "subtypes">): string {
-  const type = formatCatalogTerm(card.type);
-  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
-  return [type, subtypes].filter(Boolean).join(" - ");
-}
-
-function formatCatalogTerm(value: string): string {
-  const normalized = value.toLowerCase();
-  if (normalized === "ice") return "ICE";
-  if (normalized === "event") return "Prep";
-  return value
-    .replace(/[_-]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
+  return [formatDeckCardTerm(card.type), card.subtypes.map(formatDeckCardTerm).join(" / ")].filter(Boolean).join(" - ");
 }

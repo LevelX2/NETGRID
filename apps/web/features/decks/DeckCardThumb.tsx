@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { CardImage } from "../cards/card-image-service";
 import { CardTextPreview } from "../cards/CardTextPreview";
+import type { CardTextPreviewDensity } from "../cards/CardTextPreview";
 import {
   HardwareImageOverlay,
   OperationImageOverlay,
@@ -20,6 +21,7 @@ export function DeckCardThumb({
   rulesText,
   typeLine,
   metricLine,
+  textDensity,
   installCost,
   cost,
   large = false,
@@ -32,6 +34,7 @@ export function DeckCardThumb({
   rulesText?: string;
   typeLine?: string;
   metricLine?: string;
+  textDensity?: CardTextPreviewDensity;
   installCost?: number;
   cost?: number;
   large?: boolean;
@@ -81,7 +84,7 @@ export function DeckCardThumb({
       ) : (
         <CardTextPreview
           title={title}
-          density={preview ? "preview" : table ? "table" : "thumb"}
+          density={textDensity ?? (preview ? "preview" : table ? "table" : "thumb")}
           {...(cardType ? { cardType } : {})}
           {...(typeLine ? { typeLine } : {})}
           {...(metricLine ? { metricLine } : {})}

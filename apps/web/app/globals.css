@@ -4493,14 +4493,12 @@ select {
 
 .cardTextPreview {
   --card-text-preview-accent: var(--muted);
+  --card-text-preview-scale: 1;
   width: 100%;
   height: 100%;
   min-width: 0;
   min-height: 0;
-  display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr);
-  align-content: start;
-  gap: clamp(1px, 2.5cqi, 4px);
+  display: block;
   padding: clamp(3px, 5cqi, 9px);
   overflow: hidden;
   border-radius: inherit;
@@ -4520,6 +4518,14 @@ select {
   text-align: left;
 }
 
+.cardTextPreviewContent {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  align-content: start;
+  gap: calc(clamp(1px, 2.5cqi, 4px) * var(--card-text-preview-scale));
+  min-width: 0;
+}
+
 .cardTextPreviewTitle,
 .cardTextPreviewType,
 .cardTextPreviewMetrics,
@@ -4530,7 +4536,7 @@ select {
 
 .cardTextPreviewTitle {
   color: var(--text);
-  font-size: clamp(7px, 10cqi, 14px);
+  font-size: calc(clamp(7px, 10cqi, 14px) * var(--card-text-preview-scale));
   font-weight: 850;
   line-height: 1.08;
 }
@@ -4538,7 +4544,7 @@ select {
 .cardTextPreviewType,
 .cardTextPreviewMetrics {
   color: color-mix(in srgb, var(--text), var(--muted) 52%);
-  font-size: clamp(5px, 6.4cqi, 10px);
+  font-size: calc(clamp(5px, 6.4cqi, 10px) * var(--card-text-preview-scale));
   line-height: 1.12;
 }
 
@@ -4548,15 +4554,17 @@ select {
 }
 
 .cardTextPreviewRules {
-  display: -webkit-box;
+  display: block;
   min-height: 0;
   overflow: hidden;
   color: var(--text);
-  font-size: clamp(5px, 6.8cqi, 11px);
+  font-size: calc(clamp(5px, 6.8cqi, 11px) * var(--card-text-preview-scale));
   line-height: 1.18;
   white-space: pre-line;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+}
+
+.cardTextPreviewRules > span {
+  display: block;
 }
 
 .cardTextPreviewRules.loading {
@@ -4565,9 +4573,12 @@ select {
 }
 
 .cardTextPreview.density-thumb {
+  padding: 4px;
+}
+
+.cardTextPreview.density-thumb .cardTextPreviewContent {
   grid-template-rows: auto minmax(0, 1fr);
   gap: 2px;
-  padding: 4px;
 }
 
 .cardTextPreview.density-thumb .cardTextPreviewType,
@@ -4578,17 +4589,12 @@ select {
 
 .cardTextPreview.density-thumb .cardTextPreviewTitle {
   align-self: start;
-  font-size: clamp(6px, 13cqi, 9px);
+  font-size: calc(clamp(6px, 13cqi, 9px) * var(--card-text-preview-scale));
   line-height: 1.05;
 }
 
-.cardTextPreview.density-table .cardTextPreviewRules {
-  -webkit-line-clamp: 5;
-}
-
 .cardTextPreview.density-preview .cardTextPreviewRules {
-  font-size: clamp(8px, 5.2cqi, 12px);
-  -webkit-line-clamp: 10;
+  font-size: calc(clamp(8px, 5.2cqi, 12px) * var(--card-text-preview-scale));
 }
 
 .cardTextPreview.type-agenda {

@@ -124,6 +124,8 @@ app/deck-card-text-fallback.test.ts` (3 Tests grün), `git diff --check`.
 
 ### DCT-02: Deck-Editor und Decktisch
 
+Status: abgeschlossen
+
 Ziel: Normale Deckbibliothek, Deckliste, Preview, Decktischkarten und
 Decktischbibliothek zeigen jeweils eine platzgerechte Textdarstellung.
 
@@ -137,6 +139,23 @@ Anfangsbuchstaben; der Decktisch zeigt direkt Regelhinweise und vollständige
 Regeln bleiben im Tooltip erreichbar.
 
 Commit: `feat(web): add text fallbacks to deck table`
+
+Ergebnis: Alle Thumbnail-Consumer erhalten gemeinsame Typ- und Wertezeilen.
+Die schmale Decktischbibliothek nutzt eine detailreiche Textdichte ohne ihre
+Kartenbreite zu verändern, Decktischkarten zeigen Regelhinweise direkt. Lange
+Texte werden per Größenmessung bis zu einer definierten Lesbarkeitsgrenze
+verkleinert statt über eine feste Zeilenzahl abgeschnitten. Bild-Tooltips
+wechseln nach terminalem Ladefehler in den erweiterten, typfarbigen
+Texttooltip.
+
+Checks: `vitest run app/deck-card-text-fallback.test.ts
+features/cards/CardTextPreview.test.tsx
+features/decks/deck-card-text-lines.test.ts
+features/decks/deck-table-model.test.ts` (14 Tests grün), `git diff --check`.
+Der Web-Typecheck erreicht ausschließlich zwei bereits im Ausgangsstand
+vorhandene unabhängige Fehler in `packages/ai/...selected-choices...` und
+`app/ai-turn-plan-comparison-ui.test.ts`; die geänderten Webdateien erzeugen
+keinen zusätzlichen TypeScript-Befund.
 
 ### DCT-03: Katalogvorschau und Katalog-Tooltip
 
