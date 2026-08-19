@@ -668,6 +668,19 @@ Sie enthält keine zukünftige `actionId`. Eine konkrete bekannte
 zulässig und wird beim Erreichen des Steps gegen die dann aktuellen
 `LegalActions` rematerialisiert.
 
+Das gilt auch für eine aktuell nur an der Bezahlbarkeit scheiternde
+Installation einer bekannten eigenen Handkarte. Ein Fachmodul darf deren
+statischen CardSpec-Installationspreis, Action-Capacity und sichtbare
+Speicherbelegung für eine Funding-Linie projizieren, wenn alle benötigten
+Objekte und Voraussetzungen side-sicher bekannt sind. Die Projektion enthält
+keine vorweggenommene Installations-`actionId`: Nach dem Funding muss die
+Engine die konkrete Installation als aktuelle `LegalAction` veröffentlichen,
+und der gebundene Support-Leaf rematerialisiert genau diese Aktion. Fehlt die
+Action dann oder sind Installationswahl, Kostenmodifikator oder Voraussetzung
+nicht vollständig projektierbar, endet die Linie fail-closed. Root-Plan,
+Parent-Need und Prioritätsklasse bleiben während Funding, Rematerialisierung
+und Rückkehr zum fachlichen Root erhalten.
+
 ## 7. Neue Kernverträge
 
 Die folgenden Typen zeigen den beabsichtigten Vertrag. Namen und Felder sind

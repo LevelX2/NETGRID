@@ -1829,8 +1829,7 @@ describe("authoritative plan-first live runtime", () => {
       visibleCard("krash-card", "runner", "program", {
         definitionId: "onr_v1_039_krash",
         title: "Krash",
-        rulesText:
-          "2 credits: Break ice subroutine.\n2 credits: +1 strength.",
+        rulesText: "2 credits: Break ice subroutine.\n2 credits: +1 strength.",
         installCost: 0,
         memoryCost: 1,
         strength: 0,
@@ -5625,12 +5624,7 @@ describe("authoritative plan-first live runtime", () => {
     });
 
     resetResidentPlanPortfolioMemory();
-    const shortDeckHorizon = aiInput("corp", [
-      nightShift,
-      credit,
-      draw,
-      end,
-    ]);
+    const shortDeckHorizon = aiInput("corp", [nightShift, credit, draw, end]);
     shortDeckHorizon.playerView.own.clicks = 3;
     shortDeckHorizon.playerView.own.credits = 1;
     shortDeckHorizon.playerView.own.stackOrRdCount = 3;
@@ -16346,6 +16340,222 @@ describe("authoritative plan-first live runtime", () => {
       actionId: run.actionId,
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
+    });
+  });
+
+  it("keeps an urgent remote as root while funding a not-yet-legal breaker install", () => {
+    resetResidentPlanPortfolioMemory();
+    const runRemote = legalAction(
+      "run-urgent-code-gate-remote",
+      "runner",
+      "start_run",
+      "Run Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const runHq = legalAction(
+      "run-hq-instead-of-urgent-remote",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "credit-for-urgent-code-gate-remote",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const install = legalAction(
+      "install-wizards-book-for-urgent-remote",
+      "runner",
+      "install_card",
+      "Install Wizard's Book",
+      { credits: 5, clicks: 1 },
+      {
+        source: "wizards-book-card",
+        payload: {
+          cardId: "wizards-book-card",
+          sourceDefinitionId: "onr_v1_073_wizards-book",
+        },
+      },
+    );
+    const wizardsBook = visibleCard("wizards-book-card", "runner", "program", {
+      definitionId: "onr_v1_073_wizards-book",
+      title: "Wizard's Book",
+      installCost: 5,
+      memoryCost: 1,
+      strength: 2,
+      subtypes: ["icebreaker"],
+      rulesText: "[0]: Break code gate subroutine. [2]: +1 strength.",
+    });
+    const input = aiInput("runner", [runRemote, runHq, credit]);
+    input.decisionId = "urgent-credit-install-rerun:1";
+    input.playerView.turnSerial = 9;
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.memoryUsed = 2;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.gripOrHq = [wizardsBook];
+    input.playerView.servers = [
+      server(
+        "remote_1",
+        [
+          quotedFixtureIce({
+            instanceId: "urgent-remote-code-gate",
+            definitionId: "onr_v1_261_quandary",
+            title: "Quandary",
+            strength: 2,
+            subtypes: ["code_gate"],
+          }),
+        ],
+        [
+          {
+            ...visibleCard("urgent-hidden-remote-root", "corp", "agenda", {
+              advancementCounters: 1,
+            }),
+            known: false,
+          },
+        ],
+      ),
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    const blockedRemote = {
+      ...safeRuntimeRunTarget(runRemote.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      pathPassability: "blocked_missing_coverage" as const,
+      recommendation: "find_breaker_first" as const,
+      scoreThreat: true,
+      score: 500,
+      evidence: ["missing_coverage:breaker_code_gate"],
+    };
+    let coverageInstalled = false;
+    const context = liveContext({
+      evaluateRunnerRunTargets: () => [
+        coverageInstalled
+          ? {
+              ...blockedRemote,
+              pathPassability: "reachable" as const,
+              pathCost: 0,
+              creditsAfterRun: 0,
+              recommendation: "gain_credits_first" as const,
+              fundingNeed: {
+                reason: "post_run_floor_gap" as const,
+                routeFundingGap: 0,
+                postRunFloorGap: 1,
+                protectedLiquidReserve: 1,
+              },
+              routeQuote: {
+                ...blockedRemote.routeQuote,
+                reachability: "guaranteed_access" as const,
+                knownCost: 0,
+                guaranteedKnownCost: 0,
+                availableCredits: 0,
+                fundingGap: 0,
+              },
+              evidence: ["test_urgent_remote_reachable_after_install"],
+            }
+          : blockedRemote,
+        safeRuntimeRunTarget(runHq.actionId, "hq"),
+      ],
+    });
+
+    const fundingDecision = context.chooseSemanticRuntimeAction(input, {});
+
+    expect(fundingDecision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(fundingDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        "plan_step_capability:fund_install_breaker_code_gate",
+        "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
+      ]),
+    );
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: expect.stringContaining(
+        "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+      ),
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          openNeedIds: expect.arrayContaining([
+            expect.stringContaining("coverage:breaker_code_gate"),
+          ]),
+        }),
+        expect.objectContaining({
+          moduleId: "runner.rig_and_coverage",
+          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          moduleState: expect.objectContaining({
+            phase: "fund_answer",
+            gap: expect.objectContaining({
+              fundingGap: 1,
+              sameTurnRunConversion: expect.objectContaining({
+                targetRunActionId: runRemote.actionId,
+                requiredCredits: 5,
+                requiredClicksAfterFunding: 2,
+                projectedKnownPathCost: 0,
+                postRunCreditFloor: 0,
+                installProjection: "card_spec_requires_rematerialization",
+              }),
+            }),
+          }),
+        }),
+      ]),
+    });
+
+    const funded = structuredClone(input);
+    funded.decisionId = "urgent-credit-install-rerun:2";
+    funded.playerView.stateVersion = 2;
+    funded.playerView.own.credits = 5;
+    funded.playerView.own.clicks = 2;
+    funded.legalActions = [install, runRemote, runHq, credit];
+    funded.playerView.legalActions = funded.legalActions;
+    for (const action of funded.legalActions) action.expiresAtStateVersion = 2;
+
+    expect(context.chooseSemanticRuntimeAction(funded, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(funded)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: expect.stringContaining(
+        "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
+      ),
+    });
+
+    coverageInstalled = true;
+    const installed = structuredClone(funded);
+    installed.decisionId = "urgent-credit-install-rerun:3";
+    installed.playerView.stateVersion = 3;
+    installed.playerView.own.credits = 0;
+    installed.playerView.own.clicks = 1;
+    installed.playerView.own.rig = [wizardsBook];
+    installed.playerView.own.gripOrHq = [];
+    installed.legalActions = [runRemote, runHq, credit];
+    installed.playerView.legalActions = installed.legalActions;
+    for (const action of installed.legalActions)
+      action.expiresAtStateVersion = 3;
+
+    expect(context.chooseSemanticRuntimeAction(installed, {})).toMatchObject({
+      actionId: runRemote.actionId,
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+    });
+    expect(residentPlanPortfolioSnapshot(installed)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
     });
   });
 

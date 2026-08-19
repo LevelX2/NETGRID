@@ -7930,9 +7930,36 @@ function runnerRunCreditFloorOverrideAllowed(
     return true;
   if (!runnerRunHasExactUrgency(input, evaluation)) return false;
   if (evaluation.accessTargetKind === "remote" && evaluation.scoreThreat) {
-    return input.playerView.opponent.credits <= 1;
+    return (
+      input.playerView.opponent.credits <= 1 ||
+      runnerGuaranteedUrgentRemoteCanSpendToZero(evaluation)
+    );
   }
   return true;
+}
+
+function runnerGuaranteedUrgentRemoteCanSpendToZero(
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  const routeQuote = evaluation.routeQuote;
+  return (
+    evaluation.accessTargetKind === "remote" &&
+    evaluation.scoreThreat &&
+    evaluation.pathPassability === "reachable" &&
+    evaluation.knownAccessState !== "known_no_current_payoff" &&
+    evaluation.accessPayoffContestable !== false &&
+    evaluation.creditsAfterRun >= 0 &&
+    routeQuote?.reachability === "guaranteed_access" &&
+    routeQuote.fundingGap === 0 &&
+    routeQuote.unknownIceCount === 0 &&
+    routeQuote.effects.length === 0 &&
+    routeQuote.conditionalReasons.length === 0 &&
+    (routeQuote.conditionalRiskReasons?.length ?? 0) === 0 &&
+    (evaluation.unknownUnrezzedIceCount ?? 0) === 0 &&
+    (evaluation.visibleIceRunHazards?.length ?? 0) === 0 &&
+    (evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
+    evaluation.visibleTraceTagHazardUnavoidable !== true
+  );
 }
 
 function runnerFreeCentralInformationRoutePreservesCurrentCredits(
@@ -11433,8 +11460,8 @@ function buildCorpDomain(
       corpEconomyCandidateHasExecutablePayload(input, candidate),
   );
   const immediateFundingActionIds = executableFundingCandidates
-    .filter(
-      (candidate) => corpCandidatePreservesVoluntaryDrawHorizon(input, candidate),
+    .filter((candidate) =>
+      corpCandidatePreservesVoluntaryDrawHorizon(input, candidate),
     )
     .map((candidate) => candidate.actionId);
   const terminalFundingActionIds = executableFundingCandidates.map(
@@ -19671,17 +19698,14 @@ function uniqueCoverageGaps(
       evaluation.targetServerId,
       requiredRole,
     );
-    const legalCoverageInstallActionIds = Object.keys(
-      installActionValues,
-    ).sort(
+    const legalCoverageInstallActionIds = Object.keys(installActionValues).sort(
       (left, right) =>
         (installActionValues[right] ?? Number.NEGATIVE_INFINITY) -
           (installActionValues[left] ?? Number.NEGATIVE_INFINITY) ||
         left.localeCompare(right),
     );
     const bestLegalCoverageCandidate = candidates.find(
-      (candidate) =>
-        candidate.actionId === legalCoverageInstallActionIds[0],
+      (candidate) => candidate.actionId === legalCoverageInstallActionIds[0],
     );
     const bestLegalCoverageCard = bestLegalCoverageCandidate
       ? input.playerView.own.gripOrHq.find(
@@ -19762,6 +19786,7 @@ function uniqueCoverageGaps(
       : undefined;
     const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
       input,
+      candidates,
       evaluation,
       visibleAnswer,
       answerInstallCost,
@@ -20794,6 +20819,7 @@ function runnerTerminalRemoteContestVisibleHazardFundingGap(
 
 function runnerUrgentRemoteCoverageConversionQuote(
   input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
   visibleAnswer: VisibleCard | undefined,
   answerInstallCost: number | undefined,
@@ -20807,8 +20833,7 @@ function runnerUrgentRemoteCoverageConversionQuote(
       evaluation.pathPassability !== "blocked_unbreakable") ||
     !visibleAnswer ||
     !Number.isSafeInteger(answerInstallCost) ||
-    (answerInstallCost ?? -1) < 0 ||
-    !installActionIds?.length
+    (answerInstallCost ?? -1) < 0
   ) {
     return undefined;
   }
@@ -20822,23 +20847,12 @@ function runnerUrgentRemoteCoverageConversionQuote(
   ) {
     return undefined;
   }
-  const installRoute = installActionIds
-    .flatMap((actionId) => {
-      const action = input.legalActions.find(
-        (candidate) => candidate.actionId === actionId,
-      );
-      if (!action) return [];
-      const clickCost = action.costs.reduce(
-        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-        0,
-      );
-      return clickCost > 0 ? [{ actionId, clickCost }] : [];
-    })
-    .sort(
-      (left, right) =>
-        left.clickCost - right.clickCost ||
-        left.actionId.localeCompare(right.actionId),
-    )[0];
+  const installRoute = runnerUrgentCoverageInstallProjection(
+    input,
+    visibleAnswer,
+    answerInstallCost as number,
+    installActionIds,
+  );
   const runAction = input.legalActions.find(
     (action) => action.actionId === evaluation.actionId,
   );
@@ -20870,12 +20884,37 @@ function runnerUrgentRemoteCoverageConversionQuote(
   ) {
     return undefined;
   }
-  const postRunCreditFloor = 1;
-  const requiredCredits =
+  const requiredCreditsWithoutFloor =
     (answerInstallCost as number) +
     legalActionCreditCost(runAction) +
-    projectedKnownPathCost +
-    postRunCreditFloor;
+    projectedKnownPathCost;
+  const remainingFundingClicks = Math.max(
+    0,
+    input.playerView.own.clicks - requiredClicksAfterFunding,
+  );
+  const fundingCanReach = (targetCredits: number): boolean =>
+    targetCredits <= input.playerView.own.credits ||
+    runnerExactFundingRouteContract(input, candidates, {
+      demandId: `urgent-remote-coverage-projection:${evaluation.actionId}`,
+      sourcePlanId: `runner.rig_and_coverage:urgent-remote-coverage-projection:${evaluation.targetServerId}`,
+      purpose: "breaker_for_current_plan",
+      priority: "current_foreground_plan",
+      hardness: "hard",
+      deadline: "end_of_current_turn",
+      targetCredits,
+      remainingClicks: remainingFundingClicks,
+      evidence: [
+        `urgent_remote_coverage_projection:${evaluation.targetServerId}`,
+        `coverage_conversion_clicks_reserved:${requiredClicksAfterFunding}`,
+      ],
+    }).routeActionIds.length > 0;
+  const postRunCreditFloor = fundingCanReach(requiredCreditsWithoutFloor + 1)
+    ? 1
+    : fundingCanReach(requiredCreditsWithoutFloor)
+      ? 0
+      : undefined;
+  if (postRunCreditFloor === undefined) return undefined;
+  const requiredCredits = requiredCreditsWithoutFloor + postRunCreditFloor;
   if (!Number.isSafeInteger(requiredCredits) || requiredCredits < 0) {
     return undefined;
   }
@@ -20885,6 +20924,73 @@ function runnerUrgentRemoteCoverageConversionQuote(
     requiredClicksAfterFunding,
     projectedKnownPathCost,
     postRunCreditFloor,
+    installProjection: installRoute.projection,
+  };
+}
+
+function runnerUrgentCoverageInstallProjection(
+  input: AiDecisionInput,
+  visibleAnswer: VisibleCard,
+  answerInstallCost: number,
+  installActionIds: readonly string[] | undefined,
+):
+  | {
+      clickCost: number;
+      projection:
+        | "current_legal_action"
+        | "card_spec_requires_rematerialization";
+    }
+  | undefined {
+  const currentRoute = (installActionIds ?? [])
+    .flatMap((actionId) => {
+      const action = input.legalActions.find(
+        (candidate) => candidate.actionId === actionId,
+      );
+      if (!action) return [];
+      const clickCost = action.costs.reduce(
+        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+        0,
+      );
+      return clickCost > 0 ? [{ actionId, clickCost }] : [];
+    })
+    .sort(
+      (left, right) =>
+        left.clickCost - right.clickCost ||
+        left.actionId.localeCompare(right.actionId),
+    )[0];
+  if (currentRoute) {
+    return {
+      clickCost: currentRoute.clickCost,
+      projection: "current_legal_action",
+    };
+  }
+
+  const definition = visibleAnswer.definitionId
+    ? CARD_DEFINITIONS_BY_ID[visibleAnswer.definitionId]
+    : undefined;
+  const memoryCost = definition?.memoryCost;
+  const memoryUsed = input.playerView.own.memoryUsed;
+  const memoryLimit = input.playerView.own.memoryLimit;
+  const cardIsStillInHand = input.playerView.own.gripOrHq.some(
+    (card) => card.instanceId === visibleAnswer.instanceId,
+  );
+  if (
+    !cardIsStillInHand ||
+    definition?.side !== "runner" ||
+    definition.type !== "program" ||
+    !Number.isSafeInteger(definition.installCost) ||
+    definition.installCost !== answerInstallCost ||
+    input.playerView.own.credits >= answerInstallCost ||
+    !Number.isSafeInteger(memoryCost) ||
+    !Number.isSafeInteger(memoryUsed) ||
+    !Number.isSafeInteger(memoryLimit) ||
+    (memoryUsed as number) + (memoryCost as number) > (memoryLimit as number)
+  ) {
+    return undefined;
+  }
+  return {
+    clickCost: 1,
+    projection: "card_spec_requires_rematerialization",
   };
 }
 

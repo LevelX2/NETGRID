@@ -153,6 +153,9 @@ export type RunnerCoverageGapSignal = {
     requiredClicksAfterFunding: number;
     projectedKnownPathCost: number;
     postRunCreditFloor: number;
+    installProjection:
+      | "current_legal_action"
+      | "card_spec_requires_rematerialization";
   };
   currentKnownPathCost?: number;
   currentPathFundingGap?: number;
