@@ -19,7 +19,11 @@ describe("static AI hint semantics", () => {
     expect(hqInterface?.functionSignals).toContain("access.hq_multiaccess");
     expect(hqInterface?.strategyAnchors).toContain("runner.hq_pressure");
     expect(rex?.functionSignals).toContain("corp_ice.trace_source");
-    expect(rex?.strategyAnchors).toContain("corp.ice_tax_glacier");
+    expect(rex?.strategySupportPairs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ strategyId: "corp.ice_tax_glacier" }),
+      ]),
+    );
   });
 
   it("feeds action semantics from the same static fields", () => {
