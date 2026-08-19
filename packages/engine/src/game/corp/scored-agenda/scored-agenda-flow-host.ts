@@ -36,6 +36,7 @@ export type ScoredAgendaFlowHost = {
     ) => CardScoredAgendaImplementation | undefined;
     effectiveAgendaDifficulty: (cardId: CardInstanceId) => number;
     hasSubtype: (definition: CardDefinition, subtype: string) => boolean;
+    effectiveHasSubtype: (cardId: CardInstanceId, subtype: string) => boolean;
     isOveradvanceAgendaDefinition: (definitionId: string) => boolean;
   };
   zones: {

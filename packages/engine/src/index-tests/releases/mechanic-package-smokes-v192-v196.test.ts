@@ -992,6 +992,8 @@ describe("V1.9.5 Mechanikpaket N", () => {
           ...ONR_V1_9_5_CORP_DECK.cards,
           { id: "onr_v1_232_crystal-wall", quantity: 1 },
           { id: "onr_v1_237_data-wall", quantity: 1 },
+          { id: "onr_proteus_013_caryatid", quantity: 1 },
+          { id: "onr_proteus_040_sumo-2008", quantity: 1 },
         ],
       },
       agendaPointsToWin: 7,
@@ -1028,10 +1030,42 @@ describe("V1.9.5 Mechanikpaket N", () => {
       "remote_1",
       "simple_code_gate_ice",
     );
+    const printedWallAsCodeGateId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_proteus_013_caryatid",
+    );
+    const printedSentryAsWallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_proteus_040_sumo-2008",
+    );
     state.cardInstances[rezzedWallId] = {
       ...state.cardInstances[rezzedWallId]!,
       faceup: true,
       rezzed: true,
+    };
+    state.cardInstances[printedWallAsCodeGateId] = {
+      ...state.cardInstances[printedWallAsCodeGateId]!,
+      faceup: true,
+      rezzed: true,
+      variableIceState: {
+        family: "alternate_subtype",
+        additionalCostPaid: 1,
+        value: 1,
+        selectedSubtypes: ["code_gate"],
+      },
+    };
+    state.cardInstances[printedSentryAsWallId] = {
+      ...state.cardInstances[printedSentryAsWallId]!,
+      faceup: true,
+      rezzed: true,
+      variableIceState: {
+        family: "alternate_subtype",
+        additionalCostPaid: 1,
+        value: 1,
+        selectedSubtypes: ["wall"],
+      },
     };
 
     state = apply(
@@ -1081,10 +1115,23 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(rezzedWallView?.strength).toBe(
       (CARD_DEFINITIONS_BY_ID["onr_v1_237_data-wall"]?.strength ?? 0) + 1,
     );
+    const remoteIce = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    )?.ice;
+    expect(
+      remoteIce?.find((ice) => ice.instanceId === printedWallAsCodeGateId)
+        ?.strength,
+    ).toBe(CARD_DEFINITIONS_BY_ID["onr_proteus_013_caryatid"]?.strength);
+    expect(
+      remoteIce?.find((ice) => ice.instanceId === printedSentryAsWallId)
+        ?.strength,
+    ).toBe(
+      (CARD_DEFINITIONS_BY_ID["onr_proteus_040_sumo-2008"]?.strength ?? 0) + 1,
+    );
 
     const beforeChoiceCredits = state.corp.credits;
     const skipped = applyChoices(structuredClone(state), "corp", []);
-    expect(skipped.corp.credits).toBe(beforeChoiceCredits + 1);
+    expect(skipped.corp.credits).toBe(beforeChoiceCredits + 2);
     expect(skipped.cardInstances[firstHiddenWallId]?.faceup).toBe(false);
     expect(skipped.cardInstances[secondHiddenWallId]?.faceup).toBe(false);
     expect(skipped.cardInstances[codeGateId]?.faceup).toBe(false);
@@ -1092,9 +1139,9 @@ describe("V1.9.5 Mechanikpaket N", () => {
       actionType: "resolve_choice",
       hiddenZoneAction: "scored_subtype_reveal_walls",
       revealedCount: 0,
-      rezzedMatchingIceCount: 1,
-      countedMatchingIceCount: 1,
-      gainedCredits: 1,
+      rezzedMatchingIceCount: 2,
+      countedMatchingIceCount: 2,
+      gainedCredits: 2,
     });
 
     const initial = structuredClone(state);
@@ -1109,16 +1156,16 @@ describe("V1.9.5 Mechanikpaket N", () => {
     expect(state.cardInstances[secondHiddenWallId]?.faceup).toBe(true);
     expect(state.cardInstances[secondHiddenWallId]?.rezzed).toBe(false);
     expect(state.cardInstances[codeGateId]?.faceup).toBe(false);
-    expect(state.corp.credits).toBe(beforeChoiceCredits + 3);
+    expect(state.corp.credits).toBe(beforeChoiceCredits + 4);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "scored_subtype_reveal_walls",
       abilityId: "scored_subtype_reveal",
       revealedCount: 2,
-      rezzedMatchingIceCount: 1,
-      countedMatchingIceCount: 3,
-      gainedCredits: 3,
+      rezzedMatchingIceCount: 2,
+      countedMatchingIceCount: 4,
+      gainedCredits: 4,
     });
     expect(
       String(state.eventLog.at(-1)?.publicPayload.publicRevealDefinitionIds),

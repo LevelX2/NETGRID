@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
+import { effectiveCardHasNormalizedSubtype } from "../../ability-engine/card-implementation-modifiers";
 import { createChoiceHiddenZoneRuntime } from "./choice-hidden-zone-runtime";
 import { createLifecycleRuntime } from "./lifecycle-runtime";
 import { createTurnCorpRuntime } from "./turn-corp-runtime";
@@ -1079,6 +1080,13 @@ export function createScoredEconomyRuntimeHosts(
           ),
         hasSubtype: (definition, subtype) =>
           deps.cardHasSubtype(definition, subtype),
+        effectiveHasSubtype: (cardId, subtype) =>
+          effectiveCardHasNormalizedSubtype(
+            state,
+            cardId,
+            subtype,
+            definitionFor(state, cardId),
+          ),
         isOveradvanceAgendaDefinition: (definitionId) =>
           OVERADVANCE_AGENDA_SOURCES.has(definitionId as CardDefinitionId),
       },

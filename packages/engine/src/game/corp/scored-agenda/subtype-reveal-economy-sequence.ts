@@ -96,7 +96,7 @@ export function resolveScoredSubtypeRevealChoice(
       instance.zone.zone !== "serverIce" ||
       instance.rezzed ||
       instance.faceup ||
-      !host.cards.hasSubtype(host.cards.definitionFor(selectedId), subtype)
+      !host.cards.effectiveHasSubtype(selectedId, subtype)
     ) {
       throw new Error("Das Reveal-Ziel ist nicht mehr gueltig.");
     }
@@ -111,9 +111,7 @@ function scoredSubtypeRevealAgendaAbility(): "scored_subtype_reveal" {
 
 function scoredSubtypeRevealHiddenZoneAction(
   subtype: ScoredSubtypeRevealSubtype,
-):
-  | "scored_subtype_reveal_code_gates"
-  | "scored_subtype_reveal_walls" {
+): "scored_subtype_reveal_code_gates" | "scored_subtype_reveal_walls" {
   return subtype === "wall"
     ? "scored_subtype_reveal_walls"
     : "scored_subtype_reveal_code_gates";
@@ -143,7 +141,7 @@ function installedIceIdsWithSubtype(
       const instance = host.cards.mustInstance(iceId);
       return (
         instance.zone.zone === "serverIce" &&
-        host.cards.hasSubtype(host.cards.definitionFor(iceId), subtype)
+        host.cards.effectiveHasSubtype(iceId, subtype)
       );
     })
     .sort();

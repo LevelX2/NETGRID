@@ -181,6 +181,18 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
       effectiveAgendaDifficulty: () => input.effectiveDifficulty ?? 3,
       hasSubtype: (cardDefinition, subtype) =>
         cardDefinition.subtypes?.includes(subtype) ?? false,
+      effectiveHasSubtype: (cardId, subtype) => {
+        const cardInstance = cardInstances[cardId];
+        const cardDefinition =
+          definitions[cardId] ?? definitions[cardInstance?.definitionId ?? ""];
+        const subtypes =
+          cardDefinition?.type === "ice" &&
+          cardInstance?.rezzed &&
+          cardInstance.variableIceState?.selectedSubtypes?.length
+            ? cardInstance.variableIceState.selectedSubtypes
+            : cardDefinition?.subtypes;
+        return subtypes?.includes(subtype) ?? false;
+      },
       isOveradvanceAgendaDefinition: (definitionId) =>
         input.overadvanceDefinitionIds?.includes(definitionId) ?? false,
     },
