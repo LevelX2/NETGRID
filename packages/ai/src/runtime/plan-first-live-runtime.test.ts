@@ -9969,6 +9969,64 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain('"kind":"develop_liquidity"');
   });
 
+  it("keeps the finite turn-liquidity target stable through all remaining normal clicks", () => {
+    resetResidentPlanPortfolioMemory();
+    const end = legalAction(
+      "end",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const context = liveContext({
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 5,
+        desiredCreditReserve: 12,
+        creditReservePolicy: {
+          phase: "midgame",
+          contestReserve: 0,
+        },
+        fundingNeed: true,
+        evidence: ["test_midgame_reserve"],
+      }),
+    });
+    const input = aiInput("runner", [end, credit]);
+    input.playerView.turnSerial = 12;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 14;
+    input.playerView.opponent.deckCount = 10;
+
+    for (const [offset, credits, clicks] of [
+      [0, 14, 3],
+      [1, 15, 2],
+      [2, 16, 1],
+    ] as const) {
+      input.playerView.stateVersion += offset === 0 ? 0 : 1;
+      input.playerView.own.credits = credits;
+      input.playerView.own.clicks = clicks;
+      for (const action of input.legalActions) {
+        action.expiresAtStateVersion = input.playerView.stateVersion;
+      }
+      const decision = context.chooseSemanticRuntimeAction(input, {});
+      expect(decision).toMatchObject({
+        actionId: credit.actionId,
+        reasonCode: "plan_first.runner.economy",
+        fallbackUsed: false,
+      });
+      expect(
+        JSON.stringify(residentPlanPortfolioSnapshot(input)),
+      ).toContain('"targetCredits":17');
+    }
+  });
+
   it("ends the turn when every remaining install route is explicitly rejected", () => {
     resetResidentPlanPortfolioMemory();
     const cardInstanceId = "deferred-program";
@@ -13234,7 +13292,55 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("lets the current route quote, not no-access action history, govern a 6/7 terminal central probe", () => {
+  it("does not let terminal central pressure overwrite a negative exact run quote", () => {
+    resetResidentPlanPortfolioMemory();
+    const runHq = legalAction(
+      "run-hq-negative-terminal",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "credit-negative-terminal",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const endTurn = legalAction(
+      "end-negative-terminal",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [runHq, credit, endTurn]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 5;
+    input.playerView.opponent.deckCount = 10;
+
+    expect(
+      liveContext({
+        evaluateRunnerRunTargets: () => [
+          {
+            ...safeRuntimeRunTarget(runHq.actionId, "hq"),
+            recommendation: "run_if_free" as const,
+            score: -195,
+          },
+        ],
+      }).chooseSemanticRuntimeAction(input, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+  });
+
+  it("lets a positive current route quote, not no-access action history, govern a 6/7 terminal central probe", () => {
     const runHq = legalAction(
       "run-hq",
       "runner",
@@ -13268,7 +13374,7 @@ describe("authoritative plan-first live runtime", () => {
     const terminalProbe = {
       ...safeRuntimeRunTarget(runHq.actionId, "hq"),
       recommendation: "run_if_free" as const,
-      score: -40,
+      score: 40,
     };
     let routeIsBlocked = false;
     const blockedTerminalProbe = {

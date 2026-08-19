@@ -3623,6 +3623,43 @@ function runnerDrawActionHasCurrentPlanPurpose(
   );
 }
 
+function runnerResidentTurnLiquidityTarget(
+  previous: ResidentPlanPortfolio | undefined,
+  currentTurnKey: string,
+): number | undefined {
+  const needId = `economy-liquidity-development:${currentTurnKey}`;
+  const instance = previous?.instances.find(
+    (candidate) =>
+      candidate.moduleId === "runner.economy" &&
+      candidate.dedupeKey === needId,
+  );
+  const moduleState = instance?.moduleState as
+    | {
+        kind?: unknown;
+        need?: Partial<
+          Extract<
+            RunnerCorePlanDomain["fundingNeeds"][number],
+            { kind: "develop_liquidity" }
+          >
+        >;
+      }
+    | undefined;
+  const need = moduleState?.need;
+  if (
+    moduleState?.kind !== "economy" ||
+    need?.kind !== "develop_liquidity" ||
+    need.needId !== needId ||
+    need.priorityClass !== "P6" ||
+    need.cadence?.kind !== "remaining_turn_capacity" ||
+    need.completion?.kind !== "target_credits_or_no_clicks" ||
+    !Number.isSafeInteger(need.targetCredits) ||
+    (need.targetCredits ?? -1) < 0
+  ) {
+    return undefined;
+  }
+  return need.targetCredits;
+}
+
 function buildRunnerDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -3680,22 +3717,36 @@ function buildRunnerDomain(
       .map((candidate) => candidate.actionId),
     (actionId) => actionId,
   );
+  const residentTurnLiquidityTarget = runnerResidentTurnLiquidityTarget(
+    previous,
+    turnKey(input),
+  );
+  const opensTurnLiquidityDevelopment =
+    currentCredits < Math.max(10, economy.desiredCreditReserve + 3);
+  const turnLiquidityTargetCredits = residentTurnLiquidityTarget ??
+    (opensTurnLiquidityDevelopment
+      ? currentCredits + remainingClicks
+      : currentCredits);
+  const turnLiquidityGap = Math.max(
+    0,
+    turnLiquidityTargetCredits - currentCredits,
+  );
   const turnLiquidityFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
     remainingClicks > 0 &&
     turnLiquidityActionIds.length > 0 &&
-    currentCredits < Math.max(10, economy.desiredCreditReserve + 3)
+    turnLiquidityGap > 0
       ? [
           {
             kind: "develop_liquidity",
             needId: `economy-liquidity-development:${turnKey(input)}`,
             actionIds: turnLiquidityActionIds,
             currentCreditsAtRevalidation: currentCredits,
-            targetCredits: currentCredits + remainingClicks,
-            gap: remainingClicks,
+            targetCredits: turnLiquidityTargetCredits,
+            gap: turnLiquidityGap,
             priorityClass: "P6",
             cadence: {
               kind: "remaining_turn_capacity",
-              maximumConversions: remainingClicks,
+              maximumConversions: turnLiquidityGap,
             },
             completion: {
               kind: "target_credits_or_no_clicks",
@@ -4465,7 +4516,6 @@ function buildRunnerDomain(
               evaluation.recommendation === "run_if_free" ||
               directRunCanConvertNow) &&
             (evaluation.score > 0 ||
-              terminalCentralAccess ||
               hqSuccessWindowRoute !== undefined);
           const purpose =
             executionMode === "contest" ? ("access" as const) : executionMode;
@@ -4488,9 +4538,7 @@ function buildRunnerDomain(
               currentPressureRoute && !safetyBlocked && !forgoUnsafeRunCapacity,
             marginalValue: knownAgendaInArchives
               ? 1_000
-              : terminalCentralAccess
-                ? Math.max(1, 1_000 + evaluation.score)
-                : hqSuccessWindowRoute
+              : hqSuccessWindowRoute
                   ? Math.max(320, evaluation.score)
                   : evaluation.recommendation === "run_now"
                     ? evaluation.score
@@ -4529,7 +4577,6 @@ function buildRunnerDomain(
                   candidates,
                   runTargets,
                   evaluation.targetServerId,
-                  terminalCentralAccess,
                 )
               : [],
             runActionValues: Object.fromEntries(
@@ -4627,7 +4674,7 @@ function buildRunnerDomain(
                   !lacksDifferentialPayoff &&
                   (candidate.recommendation === "run_now" ||
                     candidate.recommendation === "run_if_free") &&
-                  (candidate.score > 0 || terminalCentralAccess);
+                  candidate.score > 0;
                 if (candidateRouteAdmissible) return [];
                 const spendLimitBlocked =
                   candidate.runActionProjection?.spendLimit !== undefined &&
@@ -21243,7 +21290,6 @@ function witnessedRunActionIds(
   candidates: readonly ActionSemanticCandidate[],
   evaluations: readonly RunnerRunTargetEvaluation[],
   serverId: string,
-  terminalCentralAccess = false,
 ): string[] {
   const serverEvaluations = evaluations.filter(
     (evaluation) => evaluation.targetServerId === serverId,
@@ -21255,7 +21301,7 @@ function witnessedRunActionIds(
           evaluation.pathPassability === "reachable" &&
           (evaluation.recommendation === "run_now" ||
             evaluation.recommendation === "run_if_free") &&
-          (evaluation.score > 0 || terminalCentralAccess) &&
+          evaluation.score > 0 &&
           evaluation.knownAccessState !== "known_no_current_payoff",
       )
       .map((evaluation) => evaluation.actionId);
