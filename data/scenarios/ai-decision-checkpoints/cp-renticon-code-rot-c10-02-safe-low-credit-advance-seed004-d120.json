@@ -13882,7 +13882,7 @@
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_score_protection_funding_gap:remote_1:2"
+        "engine_certified_next_turn_score_continuation:corp_onr_v1_193_corporate-coup_2:remote_1"
       ]
     }
   }

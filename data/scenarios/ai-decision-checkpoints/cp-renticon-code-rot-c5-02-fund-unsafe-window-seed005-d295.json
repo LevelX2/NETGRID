@@ -29066,7 +29066,7 @@
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_score_protection_funding_gap:remote_1:1"
+        "engine_certified_next_turn_score_continuation:corp_onr_v1_207_netwatch-operations-office_1:remote_1"
       ]
     }
   }
