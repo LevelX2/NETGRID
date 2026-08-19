@@ -1,11 +1,11 @@
 # IMG08 – Lokale Kartenbildverwaltung
 
-Status: `ready-for-main`
+Status: `completed`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img08-local-card-image-management`
 Worktree: `C:\Projekte\NETGRID_IMG08_LOCAL_CARD_IMAGE_MANAGEMENT`
-Aktives Paket: lokaler Main-Merge und Cleanup
+Aktueller Zustand: `complete`
 
 ## Quelle und Zielprüfung
 
@@ -390,3 +390,20 @@ markiere das Goal erst danach als complete.
 - Worktree und gemergter Arbeitsbranch sind nachweislich entfernt.
 - Kein privates Bild, privates Paket oder lokales Laufzeitartefakt ist
   versioniert.
+
+## Integrationsergebnis
+
+Der vollständige Arbeitsstand wurde per Fast-forward bis `7645c07d9` in den
+lokalen `main` integriert. Im Hauptcheckout sind danach alle 45
+Kartenbildtests, der Kartenbild-Typecheck, 19 fokussierte Webtests, 7
+fokussierte Server-HTTP-Tests und das Package-Boundary-Gate grün gelaufen. Die
+lokale pnpm-Installation wurde mit eingefrorenem Lockfile aktualisiert, damit
+der neue Server-Workspace-Link auf `@netgrid/card-images` unmittelbar
+verfügbar ist.
+
+Git hat den Arbeits-Worktree sauber abgemeldet. Verbliebene ignorierte pnpm-
+und Next-Junctions zeigten ausschließlich innerhalb des exakten ehemaligen
+Worktree-Pfads; sie wurden nach dieser Prüfung entfernt. Git-Registrierung und
+Dateisystempfad sind verifiziert abwesend. Der vollständig gemergte
+Arbeitsbranch wurde gelöscht. Es erfolgte kein Push und keine
+Remoteintegration.
