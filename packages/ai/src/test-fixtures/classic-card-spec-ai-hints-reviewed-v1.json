@@ -243,7 +243,6 @@
         "planRoles": ["score_agenda", "draw"],
         "valueHints": {},
         "strategicRole": ["engine_anchor"],
-        "strategyAnchors": ["corp.draw_engine"],
         "lineSupport": ["corp.draw_engine"],
         "strategySupportPairs": [
           {
@@ -330,7 +329,6 @@
         "strategicRole": ["defensive_tool"],
         "strategyAnchors": ["corp.remote_scoring"],
         "lineSupport": ["corp.remote_scoring"],
-        "strategicExchangeKinds": ["score_progress"],
         "strategySupportPairs": [
           {
             "strategyId": "corp.remote_scoring",
@@ -358,6 +356,18 @@
               }
             ],
             "functionSignals": ["score.scored_agenda_action"]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "install_theorem_proof_as_runner_program",
+            "preferences": ["current_access_only"],
+            "avoid": ["hidden_info_dependent_choice"],
+            "kind": "replacement_target",
+            "timing": "on_access",
+            "targetType": "accessed_card",
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -480,7 +490,12 @@
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["punish_payoff", "tax_tool"],
-        "strategyAnchors": ["corp.damage_kill"],
+        "strategyAnchors": [
+          "corp.damage_kill",
+          "corp.economy_rez_reserve",
+          "corp.ice_tax_glacier",
+          "corp.tag_trace_punish"
+        ],
         "lineSupport": ["corp.damage_kill", "corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -489,7 +504,6 @@
             "roleDetail": "persistent_damage_counter_ice",
             "evidence": [
               "corp_ice.damage_source",
-              "corp_ice.end_run",
               "corp_ice.net_damage",
               "damage.corp_persistent_damage_counter",
               "damage.payoff"
@@ -504,8 +518,7 @@
             "evidence": [
               "corp_ice.damage_source",
               "corp_ice.end_run",
-              "corp_ice.net_damage",
-              "damage.corp_persistent_damage_counter"
+              "corp_ice.net_damage"
             ],
             "confidence": "medium",
             "rationale": "v2: ETR plus Damage-Druck und noisy-rez discount unterstützen ICE-Tax/Glacier."
@@ -556,18 +569,9 @@
           {
             "kind": "persistent_counter_effect",
             "scope": "runner",
-            "timing": "start_of_run",
-            "resource": "net_damage",
-            "target": "runner_counter_baskerville_run_start_net_damage",
-            "amount": 2,
-            "repeatable": true
-          },
-          {
-            "kind": "persistent_counter_effect",
-            "scope": "runner",
-            "timing": "action",
+            "timing": "trace_success",
             "resource": "counters",
-            "target": "runner_counter_baskerville_remove_for_3_credits",
+            "target": "baskerville_counter_run_start_net_damage",
             "amount": 1,
             "repeatable": true
           },
@@ -627,11 +631,9 @@
           "effect_scope:run_path",
           "effect_scope:runner",
           "effect_scope:trace",
-          "effect_timing:action",
           "effect_timing:during_run",
           "effect_timing:encounter",
           "effect_timing:encounter_resolution",
-          "effect_timing:start_of_run",
           "effect_timing:trace_success",
           "trace.source"
         ],
@@ -710,8 +712,6 @@
             "evidence": [
               "corp_ice.damage_source",
               "corp_ice.net_damage",
-              "corp_ice.next_ice_break_lock",
-              "corp_ice.run_lock",
               "damage.payoff"
             ],
             "confidence": "high",
@@ -1017,6 +1017,11 @@
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["tax_tool"],
+        "strategyAnchors": [
+          "corp.central_stabilize",
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -1052,7 +1057,6 @@
         ],
         "costProfile": { "credits": 5 },
         "riskTags": [
-          "redirect_opens_archives_access",
           "hidden_ice",
           "run_redirect",
           "target_fort_choice",
@@ -1223,7 +1227,7 @@
               "protects_central_access_pressure",
               "current_run_path_relevance"
             ],
-            "avoid": ["irrelevant_server_ice"],
+            "avoid": ["hidden_info_dependent_choice", "irrelevant_server_ice"],
             "kind": "use_target",
             "timing": "start_of_run",
             "targetType": "ice_position",
@@ -1275,6 +1279,7 @@
           "effect_timing:start_of_run"
         ],
         "conditions": [
+          { "kind": "requires_remote_server" },
           { "kind": "requires_encounter" },
           { "kind": "requires_unbroken_subroutine" },
           { "kind": "requires_installed_ice" }
@@ -1322,6 +1327,7 @@
         "roles": ["ice", "etr_ice", "sentry_ice", "program_trash_ice"],
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
+        "strategyAnchors": ["corp.economy_rez_reserve", "corp.ice_tax_glacier"],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
@@ -1331,7 +1337,7 @@
               "high_install_cost_or_memory",
               "central_or_remote_plan_enabler"
             ],
-            "avoid": ["low_value_program"],
+            "avoid": ["hidden_info_dependent_choice", "low_value_program"],
             "kind": "use_target",
             "timing": "subroutine_resolution",
             "targetType": "program",
@@ -1426,6 +1432,7 @@
         "roles": ["ice", "code_gate_ice", "etr_ice", "taxing_ice"],
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
         "valueHints": {},
+        "strategyAnchors": ["corp.ice_tax_glacier"],
         "effects": [
           {
             "kind": "etr",
@@ -1506,7 +1513,11 @@
         "planRoles": ["protect_hq", "protect_rnd"],
         "valueHints": {},
         "strategicRole": ["defensive_tool", "tax_tool"],
-        "strategyAnchors": ["corp.central_stabilize"],
+        "strategyAnchors": [
+          "corp.central_stabilize",
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
         "lineSupport": ["corp.central_stabilize", "corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -1522,20 +1533,23 @@
             "role": "tax_tool",
             "roleDetail": "run_redirect_tax_ice",
             "evidence": ["corp_ice.encounter_tax", "run.corp_redirect"],
-            "confidence": "low",
-            "rationale": "The redirect only adds tax when the chosen subsidiary fort actually presents useful known ICE before its newly opened access."
+            "confidence": "high",
+            "rationale": "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur."
           }
         ],
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
-            "purpose": "redirect_central_run_to_safe_subsidiary_fort",
+            "purpose": "redirect_central_run_to_subsidiary_fort",
             "preferences": [
-              "reduces_current_run_payoff",
+              "protects_central_access_pressure",
               "adds_relevant_encounter_tax",
-              "known_or_rezzed_ice"
+              "protects_agenda_remote"
             ],
-            "avoid": ["low_value_accessed_card", "no_subsidiary_fort_target"],
+            "avoid": [
+              "hidden_info_dependent_choice",
+              "no_subsidiary_fort_target"
+            ],
             "kind": "use_target",
             "timing": "subroutine_resolution",
             "targetType": "server",
@@ -1576,7 +1590,7 @@
           "hintReviewed": true,
           "needsHumanReview": false,
           "strategyCovered": true,
-          "confidence": "medium"
+          "confidence": "high"
         },
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -1947,17 +1961,12 @@
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
-            "purpose": "choose_archives_ice_subset_for_hq_recovery",
+            "purpose": "recover_archives_ice_to_hq",
             "preferences": [
-              "best_cards_for_current_plan",
               "protects_agenda_remote",
-              "protects_central_access_pressure",
-              "known_or_rezzed_ice"
+              "protects_central_access_pressure"
             ],
-            "avoid": [
-              "low_impact_ice",
-              "avoid_revealing_high_value_hidden_ice_without_need"
-            ],
+            "avoid": ["hidden_info_dependent_choice", "low_impact_ice"],
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "card",
@@ -2041,8 +2050,8 @@
         "cardType": "asset",
         "aiSupportStatus": "ai_supported",
         "roles": ["asset", "remote_support"],
-        "planRoles": ["runner_hand_disruption"],
-        "valueHints": {},
+        "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
+        "valueHints": { "remoteRootValue": 3 },
         "strategicRole": ["defensive_tool"],
         "strategyAnchors": ["corp.central_stabilize"],
         "lineSupport": ["corp.central_stabilize"],
@@ -2083,10 +2092,15 @@
           }
         ],
         "functionSignals": ["run.successful_run_grip_reset"],
-        "tacticSignals": ["punish.payoff", "run.successful_run_grip_reset"],
+        "tacticSignals": [
+          "draw.card",
+          "punish.payoff",
+          "run.successful_run_grip_reset"
+        ],
         "actionTacticSignals": [
           "access.corp_access_punish",
           "access.payoff",
+          "draw.card",
           "effect:access_punish",
           "effect:draw",
           "effect:zone_shuffle",
@@ -2126,54 +2140,52 @@
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
-        "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
-        "valueHints": {},
-        "strategicRole": ["tax_tool"],
-        "lineSupport": ["corp.ice_tax_glacier"],
-        "strategySupportPairs": [
-          {
-            "strategyId": "corp.ice_tax_glacier",
-            "role": "tax_tool",
-            "roleDetail": "fort_bound_noisy_breaker_ability_tax",
-            "evidence": ["tax.ice"],
-            "confidence": "medium",
-            "rationale": "Taxes Noisy breaker ability use on the installed fort; placement may protect a central or a remote."
-          }
-        ],
+        "roles": ["remote_support", "upgrade"],
+        "planRoles": ["build_scoring_remote"],
+        "valueHints": { "remoteRootValue": 2 },
         "effects": [
           {
             "kind": "run_tax",
-            "scope": "fort",
+            "scope": "runner",
             "timing": "during_run",
             "resource": "credits",
             "target": "run.break_cost_penalty",
             "amount": 1,
             "repeatable": true
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "remote",
+            "timing": "persistent",
+            "target": "remote.scoring_protection"
           }
         ],
-        "functionSignals": [
+        "functionSignals": ["run.break_cost_penalty", "tax.runner_persistent"],
+        "tacticSignals": [
+          "corp.remote_protection",
           "run.break_cost_penalty",
-          "tax.runner_persistent",
-          "tax.noisy_breaker_ability"
+          "tax.runner_persistent"
         ],
-        "tacticSignals": ["run.break_cost_penalty", "tax.runner_persistent"],
         "actionTacticSignals": [
+          "corp.remote_protection",
+          "effect:remote_protection",
           "effect:run_tax",
-          "effect_scope:fort",
-          "effect_timing:during_run"
+          "effect_scope:remote",
+          "effect_scope:runner",
+          "effect_timing:during_run",
+          "effect_timing:persistent"
         ],
         "conditions": [
           { "kind": "requires_installed_ice" },
-          { "kind": "requires_during_run" }
+          { "kind": "requires_during_run" },
+          { "kind": "requires_remote_server" }
         ],
         "costProfile": { "credits": 3 },
-        "riskTags": ["run_cost_modifier", "region"],
+        "riskTags": ["hidden_root", "run_cost_modifier", "region"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
-          "strategyCovered": true,
-          "confidence": "medium"
+          "strategyCovered": false
         },
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -2198,6 +2210,7 @@
         "planRoles": ["tag_source"],
         "valueHints": { "remoteRootValue": 2 },
         "strategicRole": ["enabler"],
+        "strategyAnchors": ["corp.tag_trace_punish"],
         "lineSupport": ["corp.tag_trace_punish"],
         "strategySupportPairs": [
           {
@@ -2210,6 +2223,15 @@
             ],
             "confidence": "medium",
             "rationale": "Delayed probabilistic start-of-turn tag source that scales with the number of Runner runs last turn; not specifically a multiple-run-only condition."
+          }
+        ],
+        "actionStrategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "anchor_evidence",
+            "roleDetail": "anchor_evidence_tag_source",
+            "evidence": ["tactic_signal_anchor:tag.source"],
+            "confidence": "high"
           }
         ],
         "effects": [
@@ -2545,10 +2567,11 @@
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
+        "roles": ["remote_support", "upgrade"],
         "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
-        "valueHints": {},
+        "valueHints": { "remoteRootValue": 3 },
         "strategicRole": ["tax_tool"],
+        "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
         "strategySupportPairs": [
           {
@@ -2570,14 +2593,13 @@
         "targetProfiles": [
           {
             "schemaVersion": "target-profile-v1",
-            "purpose": "choose_ice_for_one_shot_strength_double",
+            "purpose": "double_relevant_ice_strength_until_end_of_turn",
             "preferences": [
               "current_run_path_relevance",
-              "high_strength_ice",
-              "high_break_cost_without_bonus",
-              "relevant_server_ice"
+              "protects_agenda_remote",
+              "protects_central_access_pressure"
             ],
-            "avoid": ["irrelevant_server_ice", "already_cheap_to_break"],
+            "avoid": ["hidden_info_dependent_choice", "irrelevant_server_ice"],
             "kind": "use_target",
             "timing": "activated_ability",
             "targetType": "installed_ice",
@@ -2607,10 +2629,12 @@
           "ice.strength_modifier"
         ],
         "tacticSignals": [
+          "corp.remote_protection",
           "ice.corp_strength_support",
           "ice.corp_targeted_strength_boost"
         ],
         "actionTacticSignals": [
+          "corp.remote_protection",
           "effect:global_modifier",
           "effect:remote_protection",
           "effect_scope:ice",
@@ -2630,7 +2654,7 @@
         "riskTags": [
           "opportunity_cost",
           "reserve_risk",
-          "installed_card_trash_cost",
+          "hidden_root",
           "targeted_ice",
           "temporary_modifier",
           "credit_cost",
@@ -2761,14 +2785,9 @@
         "side": "corp",
         "cardType": "upgrade",
         "aiSupportStatus": "ai_supported",
-        "roles": ["tag_punishment"],
-        "planRoles": [
-          "protect_hq",
-          "protect_rnd",
-          "protect_remote",
-          "punish_tagged_runner"
-        ],
-        "valueHints": {},
+        "roles": ["remote_support", "upgrade", "tag_punishment"],
+        "planRoles": ["build_scoring_remote", "punish_tagged_runner"],
+        "valueHints": { "remoteRootValue": 3 },
         "strategicRole": ["punish_payoff"],
         "strategyAnchors": ["corp.tag_trace_punish"],
         "lineSupport": ["corp.tag_trace_punish"],
@@ -2807,6 +2826,12 @@
             "resource": "credits",
             "target": "tag.payoff",
             "repeatable": true
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "remote",
+            "timing": "persistent",
+            "target": "remote.scoring_protection"
           }
         ],
         "functionSignals": [
@@ -2817,25 +2842,31 @@
         ],
         "tacticSignals": [
           "condition.runner_has_one_or_more_tags",
+          "corp.remote_protection",
           "punish.payoff",
           "tag.payoff",
           "tag.runner_credit_loss_payoff",
           "tax.runner_persistent"
         ],
         "actionTacticSignals": [
+          "corp.remote_protection",
+          "effect:remote_protection",
           "effect:run_tax",
           "effect:tag_punish_payoff",
+          "effect_scope:remote",
           "effect_scope:runner",
+          "effect_timing:persistent",
           "effect_timing:start_of_run",
           "punish.payoff",
           "tag.payoff"
         ],
         "conditions": [
           { "kind": "requires_during_run" },
-          { "kind": "requires_runner_tagged" }
+          { "kind": "requires_runner_tagged" },
+          { "kind": "requires_remote_server" }
         ],
         "costProfile": { "credits": 1 },
-        "riskTags": ["run_cost_modifier", "tag_synergy"],
+        "riskTags": ["hidden_root", "run_cost_modifier", "tag_synergy"],
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -3675,8 +3706,9 @@
         ],
         "planRoles": ["pressure_rnd", "agenda_pressure"],
         "valueHints": {},
-        "strategicRole": ["enabler"],
-        "lineSupport": ["runner.rnd_pressure", "runner.run_event_tempo"],
+        "strategicRole": ["payoff_anchor"],
+        "strategyAnchors": ["runner.rnd_pressure", "runner.run_event_tempo"],
+        "lineSupport": ["runner.rnd_pressure"],
         "actionCapabilitySemantics": [
           {
             "capabilityKey": "on_play_run_rd_store_revealed_agenda",
@@ -3690,6 +3722,18 @@
               }
             ],
             "functionSignals": ["run.make_run", "run.rnd"]
+          }
+        ],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "purpose": "replace_rnd_access_with_reveal_until_agenda",
+            "preferences": ["high_value_accessed_card"],
+            "avoid": ["hidden_info_dependent_choice"],
+            "kind": "replacement_target",
+            "timing": "after_successful_run",
+            "targetType": "card",
+            "hiddenInfoPolicy": "current_access_only"
           }
         ],
         "effects": [
@@ -3791,12 +3835,16 @@
         "planRoles": ["pressure_hq", "pressure_rnd"],
         "valueHints": {},
         "strategicRole": ["payoff_anchor"],
-        "strategyAnchors": ["runner.interface_closeout"],
-        "lineSupport": [
+        "strategyAnchors": [
           "runner.hq_pressure",
           "runner.interface_closeout",
           "runner.rnd_pressure",
           "runner.run_event_tempo"
+        ],
+        "lineSupport": [
+          "runner.hq_pressure",
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
         ],
         "actionStrategySupportPairs": [
           {
@@ -3833,9 +3881,10 @@
             "schemaVersion": "target-profile-v1",
             "purpose": "choose_hq_or_rnd_for_conditional_multiaccess_run",
             "preferences": [
-              "server_relevant_to_current_plan",
+              "protects_central_access_pressure",
               "current_run_path_relevance"
             ],
+            "avoid": ["hidden_info_dependent_choice"],
             "kind": "use_target",
             "timing": "on_play",
             "targetType": "server",
@@ -3947,15 +3996,6 @@
             "capabilityKey": "on_play_remove_tags_and_draw",
             "effects": [
               {
-                "kind": "tag_prevention",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "tags",
-                "target": "remove_tags",
-                "amount": 2,
-                "finite": true
-              },
-              {
                 "kind": "draw",
                 "scope": "runner",
                 "timing": "action",
@@ -3965,7 +4005,7 @@
                 "finite": true
               }
             ],
-            "functionSignals": ["setup.draw", "tag.removal"]
+            "functionSignals": ["setup.draw"]
           }
         ],
         "effects": [
@@ -3985,15 +4025,6 @@
             "resource": "cards",
             "target": "draw",
             "amount": 3,
-            "finite": true
-          },
-          {
-            "kind": "tag_prevention",
-            "scope": "runner",
-            "timing": "action",
-            "resource": "tags",
-            "target": "remove_tags",
-            "amount": 2,
             "finite": true
           },
           {
@@ -4792,7 +4823,10 @@
           "effect_timing:persistent",
           "effect_timing:prevention_window"
         ],
-        "conditions": [{ "kind": "requires_damage" }],
+        "conditions": [
+          { "kind": "requires_installed_ice" },
+          { "kind": "requires_damage" }
+        ],
         "costProfile": {
           "opportunityCost": "medium",
           "reserveRisk": "medium",
@@ -4924,10 +4958,14 @@
           "economy.temporary_resource_bank"
         ],
         "tacticSignals": [
+          "damage.payoff",
+          "economy.card",
           "risk.brain_damage_self_inflicted",
           "risk.unpreventable_brain_damage"
         ],
         "actionTacticSignals": [
+          "damage.payoff.runner",
+          "economy.card",
           "effect:damage",
           "effect:finite_economy_pool",
           "effect:global_modifier",
@@ -4940,7 +4978,10 @@
           "effect_timing:persistent",
           "effect_timing:start_of_turn"
         ],
-        "conditions": [{ "kind": "requires_start_of_turn" }],
+        "conditions": [
+          { "kind": "requires_installed_ice" },
+          { "kind": "requires_start_of_turn" }
+        ],
         "costProfile": {
           "opportunityCost": "high",
           "reserveRisk": "high",

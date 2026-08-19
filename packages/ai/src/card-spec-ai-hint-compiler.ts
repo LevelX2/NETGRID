@@ -6166,47 +6166,6 @@ function deriveTargetProfiles(
         modifier.appliesTo.cardType === "ice" &&
         modifier.appliesTo.sameServerAsSource === true,
     ) === true;
-  // This describes an already-bound rez decision. The scope comes directly
-  // from a closed mechanical modifier, so the defense plan need not recreate
-  // card-specific target semantics from labels or rules text.
-  const modifierRezSupportProfiles: NonNullable<AiCardHint["targetProfiles"]> = [
-    ...(requiredSubtype === undefined
-      ? []
-      : [
-          {
-            schemaVersion: "target-profile-v1" as const,
-            kind: "use_target" as const,
-            timing: "corp_rez_window" as const,
-            targetType: "installed_ice" as const,
-            purpose: "rez_support_visible_installed_ice",
-            preferences: [],
-            avoid: ["hidden_info_dependent_choice"] as Array<
-              "hidden_info_dependent_choice"
-            >,
-            hiddenInfoPolicy: "legal_targets_only" as const,
-            requiredSubtypes: [requiredSubtype],
-            serverScope: "any_visible_server" as const,
-          },
-        ]),
-    ...(sameFortAdditionalSubroutine
-      ? [
-          {
-            schemaVersion: "target-profile-v1" as const,
-            kind: "use_target" as const,
-            timing: "corp_rez_window" as const,
-            targetType: "installed_ice" as const,
-            purpose: "rez_support_visible_installed_ice",
-            preferences: [],
-            avoid: ["hidden_info_dependent_choice"] as Array<
-              "hidden_info_dependent_choice"
-            >,
-            hiddenInfoPolicy: "legal_targets_only" as const,
-            serverScope: "source_fort" as const,
-            activeRunConstraint: "same_fort_upcoming_ice_when_active" as const,
-          },
-        ]
-      : []),
-  ];
   if (preference?.kind === "target_preference" && sameFortAdditionalSubroutine)
     return [
       {
@@ -6235,7 +6194,6 @@ function deriveTargetProfiles(
             }),
         hiddenInfoPolicy: "public_or_controller_known_only",
       },
-      ...modifierRezSupportProfiles,
     ];
   if (preference?.kind === "target_preference" && requiredSubtype !== undefined)
     return [
@@ -6259,9 +6217,7 @@ function deriveTargetProfiles(
         requiredSubtypes: [requiredSubtype],
         serverScope: "any_visible_server",
       },
-      ...modifierRezSupportProfiles,
     ];
-  if (modifierRezSupportProfiles.length > 0) return modifierRezSupportProfiles;
   const capabilityPreferences = new Map(
     (entry.planning.planningAnnotations?.capabilities ?? []).flatMap(
       (capability) => {

@@ -31797,20 +31797,6 @@
             "rationale": "Agenda Semantic Review v1 maps Black Ice Quality Assurance to corp.ice_tax_glacier as tax_tool/black_ice_tax_anchor."
           }
         ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["black_ice"],
-            "serverScope": "any_visible_server"
-          }
-        ],
         "effects": [
           {
             "kind": "remote_protection",
@@ -32663,14 +32649,15 @@
           {
             "schemaVersion": "target-profile-v1",
             "kind": "use_target",
-            "timing": "corp_rez_window",
+            "timing": "on_score",
             "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["code_gate"],
-            "serverScope": "any_visible_server"
+            "purpose": "choose_code_gates_to_reveal_for_credits",
+            "preferences": [
+              "prefer_reveal_when_credit_value_exceeds_information_cost",
+              "prefer_already_public_or_low_information_value_code_gates"
+            ],
+            "avoid": ["avoid_revealing_high_value_hidden_ice_without_need"],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -34520,14 +34507,15 @@
           {
             "schemaVersion": "target-profile-v1",
             "kind": "use_target",
-            "timing": "corp_rez_window",
+            "timing": "on_score",
             "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["wall"],
-            "serverScope": "any_visible_server"
+            "purpose": "choose_walls_to_reveal_for_credits",
+            "preferences": [
+              "prefer_reveal_when_credit_value_exceeds_information_cost",
+              "prefer_already_public_or_low_information_value_walls"
+            ],
+            "avoid": ["avoid_revealing_high_value_hidden_ice_without_need"],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
         "effects": [
@@ -43128,20 +43116,6 @@
             "confidence": "high"
           }
         ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["wall"],
-            "serverScope": "any_visible_server"
-          }
-        ],
         "effects": [
           {
             "kind": "rez_discount",
@@ -43381,20 +43355,6 @@
             "evidence": ["ice.corp_rez_discount", "tax.ice"],
             "confidence": "high",
             "rationale": "Code-Gate scope is a hard structured target-profile constraint; subtype data remains card data and is not mirrored as a tactic signal."
-          }
-        ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["code_gate"],
-            "serverScope": "any_visible_server"
           }
         ],
         "effects": [
@@ -45046,20 +45006,6 @@
             "evidence": ["ice.corp_rez_discount"],
             "confidence": "medium",
             "rationale": "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
-          }
-        ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["black_ice"],
-            "serverScope": "any_visible_server"
           }
         ],
         "effects": [
@@ -46932,20 +46878,6 @@
             "rationale": "Wall rez discount plus wall strength is clear glacier/tax support."
           }
         ],
-        "targetProfiles": [
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "requiredSubtypes": ["wall"],
-            "serverScope": "any_visible_server"
-          }
-        ],
         "effects": [
           {
             "kind": "rez_discount",
@@ -47648,18 +47580,6 @@
             ],
             "avoid": ["option_with_no_visible_current_payoff"],
             "hiddenInfoPolicy": "public_or_controller_known_only"
-          },
-          {
-            "schemaVersion": "target-profile-v1",
-            "kind": "use_target",
-            "timing": "corp_rez_window",
-            "targetType": "installed_ice",
-            "purpose": "rez_support_visible_installed_ice",
-            "preferences": [],
-            "avoid": ["hidden_info_dependent_choice"],
-            "hiddenInfoPolicy": "legal_targets_only",
-            "serverScope": "source_fort",
-            "activeRunConstraint": "same_fort_upcoming_ice_when_active"
           }
         ],
         "effects": [

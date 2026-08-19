@@ -30,7 +30,7 @@ describe("Originalset V1 CardSpec AI hint reviewed semantic golden", () => {
         profile,
       })),
     );
-    expect(actionCapacity).toHaveLength(32);
+    expect(actionCapacity).toHaveLength(31);
     expect(new Set(actionCapacity.map(({ cardId }) => cardId)).size).toBe(30);
     for (const { hint } of reviewedGolden.cards) {
       expect(hint).not.toHaveProperty("manualNotes");
