@@ -18,6 +18,10 @@ const packageRules = [
   { prefix: "packages/shared/", allow: new Set() },
   { prefix: "packages/cards/", allow: new Set(["@netgrid/shared"]) },
   {
+    prefix: "packages/card-images/",
+    allow: new Set(["@netgrid/catalog"]),
+  },
+  {
     prefix: "packages/catalog/",
     allow: new Set(["@netgrid/cards", "@netgrid/shared"]),
   },

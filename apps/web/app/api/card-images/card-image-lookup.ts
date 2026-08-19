@@ -1,14 +1,17 @@
-import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  resolveNetgridCardImageRoot,
+  resolveNetgridRepositoryRoot,
+} from "@netgrid/card-images";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import {
   GENERATED_CARD_IMAGES,
   localizedDeCardImagePath,
 } from "../../card-image-manifest";
 
-const REPO_ROOT = resolveRepoRoot();
-const IMAGE_DIR = path.join(REPO_ROOT, "data", "local-assets", "card-images");
+const REPO_ROOT = resolveNetgridRepositoryRoot();
+const IMAGE_DIR = resolveNetgridCardImageRoot({ repositoryRoot: REPO_ROOT });
 const LOCALIZED_DE_IMAGE_DIR = path.join(
   REPO_ROOT,
   "data",
@@ -336,12 +339,3 @@ export type LocalOnrAsset = {
   side: string;
   relativePath: string;
 };
-
-function resolveRepoRoot(): string {
-  const candidates = [process.cwd(), path.resolve(process.cwd(), "..", "..")];
-  return (
-    candidates.find((candidate) =>
-      existsSync(path.join(candidate, "data", "card-import")),
-    ) ?? process.cwd()
-  );
-}

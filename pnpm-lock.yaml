@@ -63,6 +63,9 @@ importers:
       '@netgrid/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@netgrid/card-images':
+        specifier: workspace:*
+        version: link:../../packages/card-images
       '@netgrid/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
@@ -112,6 +115,8 @@ importers:
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared
+
+  packages/card-images: {}
 
   packages/cards:
     dependencies:

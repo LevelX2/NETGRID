@@ -4,6 +4,7 @@ Status: `in_progress`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img01-img05-card-image-import`
+Aktueller Zustand: `IMG01_done`
 
 ## Quelle und Zielprüfung
 
@@ -98,6 +99,14 @@ prepared -> IMG01 -> IMG02 -> IMG03 -> IMG04 -> IMG05
 ```
 
 Bei roten Done-Gates verbleibt der Prozess im aktuellen Zustand.
+
+## Fortschritt
+
+- IMG01 abgeschlossen: zentraler `NETGRID_DATA_ROOT`-Vertrag,
+  Repository-Default und persistenter Kartenbild-Root sind implementiert.
+- Checks: Pakettests, Paket-Typecheck, Web-Lookup-Test und Package-Boundary-
+  Check grün. Der Web-Typecheck bleibt an zwei identischen, auf `main`
+  reproduzierten KI-Baselinefehlern außerhalb dieses Scopes rot.
 
 ## Paketfolge
 
