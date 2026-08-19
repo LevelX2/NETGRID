@@ -11363,15 +11363,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "draw_card"
-      }
-    ],
+    "exactActionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
     "planExecution": {
-      "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["draw_for_answer_breaker_ap"],
-      "requiredAssessmentEvidence": ["target:rd"]
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_build"],
+      "requiredAssessmentEvidence": ["runner_credit_bank_continue_to_value_target"]
     },
     "runTargets": [
       {
