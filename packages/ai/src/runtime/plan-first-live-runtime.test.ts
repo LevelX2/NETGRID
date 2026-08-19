@@ -9,6 +9,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
+import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import {
   buildDeckCapabilityProfileFromInput,
   type BreakerCapability,
@@ -2774,6 +2775,122 @@ describe("authoritative plan-first live runtime", () => {
               ...additionalCards.map((card) => card.instanceId),
             ],
           },
+        },
+      },
+    });
+  });
+
+  it("keeps exact Encounter ownership when a deflector can be broken or resolved", () => {
+    resetResidentPlanPortfolioMemory();
+    const pump = legalAction(
+      "pump-cyfermaster",
+      "runner",
+      "pump_breaker",
+      "Pump Cyfermaster",
+      { credits: 1, clicks: 0 },
+      {
+        source: "cyfermaster",
+        payload: {
+          breakerId: "cyfermaster",
+          iceId: "entrapment",
+          pumpStrengthAmount: 1,
+        },
+      },
+    );
+    const breakDeflector = legalAction(
+      "break-entrapment",
+      "runner",
+      "break_subroutine",
+      "Break Entrapment",
+      { credits: 2, clicks: 0 },
+      {
+        source: "cyfermaster",
+        payload: {
+          breakerId: "cyfermaster",
+          iceId: "entrapment",
+          subroutineIndex: 0,
+          subroutineId: "paid-deflect",
+        },
+      },
+    );
+    const continueRun = legalAction(
+      "resolve-entrapment",
+      "runner",
+      "continue_run",
+      "Resolve Entrapment",
+      { credits: 0, clicks: 0 },
+      {
+        payload: {
+          encounterContinue: true,
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+          encounterSubroutineIds: "paid-deflect",
+        },
+      },
+    );
+    const input = aiInput("runner", [pump, breakDeflector, continueRun]);
+    for (const action of input.legalActions) {
+      action.timingPoint = "run.encounter_ice";
+    }
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 3;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.rig = [
+      visibleCard("cyfermaster", "runner", "program", {
+        definitionId: "onr_v1_016_cyfermaster",
+        strength: 5,
+        subtypes: ["icebreaker"],
+      }),
+    ];
+    const entrapment = visibleCard("entrapment", "corp", "ice", {
+      definitionId: "onr_classic_010_entrapment",
+      rezzed: true,
+      strength: 4,
+      subtypes: ["code_gate", "deflector"],
+      effectiveRunQuote: {
+        iceInstanceId: "entrapment",
+        iceDefinitionId: "onr_classic_010_entrapment",
+        effectiveStrength: 4,
+        subroutines: [
+          {
+            id: "paid-deflect",
+            type: "deflect_run",
+            deflectorTarget: "any_data_fort",
+            deflectorCost: 2,
+          },
+        ],
+      },
+    });
+    const entrapmentWithoutCurrentQuote = { ...entrapment };
+    delete entrapmentWithoutCurrentQuote.effectiveRunQuote;
+    input.playerView.run = {
+      runId: "run-on-mature-remote",
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+      encounteredIce: entrapmentWithoutCurrentQuote,
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [entrapment]),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: continueRun.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          route: { actionId: continueRun.actionId },
         },
       },
     });
@@ -8466,6 +8583,264 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       JSON.stringify(residentPlanPortfolioSnapshot(protectedInput)),
     ).not.toContain("missing_action_semantics");
+  });
+
+  it("lets the score plan reuse a mature remote whose two Engine-certified layers tax or damage without changing exact access probability", () => {
+    const stateVersion = 1;
+    const installAgenda = legalAction(
+      "install-agenda-in-mature-remote",
+      "corp",
+      "install_card",
+      "Install agenda in mature remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: "agenda-1",
+        payload: {
+          cardId: "agenda-1",
+          sourceDefinitionId: "onr_classic_002_superserum",
+          serverId: "remote_1",
+          placement: "root",
+          agendaInstallScoreHorizonQuoteSchemaVersion:
+            "corp-agenda-install-score-horizon-quote-v1",
+          agendaInstallScoreHorizonQuoteCardId: "agenda-1",
+          agendaInstallScoreHorizonQuoteTargetServerId: "remote_1",
+          agendaInstallScoreHorizonQuoteExpiresAtStateVersion: stateVersion,
+          agendaInstallScoreHorizonQuoteAdvancementRequirement: 3,
+          agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 1,
+          agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 2,
+          agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+          agendaInstallScoreHorizonQuoteComplete: true,
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const installRedundantFourthIce = legalAction(
+      "install-redundant-fourth-ice",
+      "corp",
+      "install_card",
+      "Install another ICE on the mature remote",
+      { credits: 3, clicks: 1 },
+      {
+        source: "extra-data-wall",
+        payload: {
+          cardId: "extra-data-wall",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "remote_1",
+          placement: "ice",
+          iceInstallBaseCost: 3,
+          iceInstallAdditionalCost: 0,
+          iceInstallReduction: 0,
+          iceInstallTotalCost: 3,
+          postInstallRezQuoteCardId: "extra-data-wall",
+          postInstallRezQuoteTargetServerId: "remote_1",
+          postInstallRezQuoteProjectedServerId: "remote_1",
+          postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 5,
+          postInstallRezQuoteFinalCredits: 5,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
+    const input = aiInput("corp", [
+      installAgenda,
+      installRedundantFourthIce,
+      credit,
+    ]);
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+    input.playerView.own.credits = 7;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda-1", "corp", "agenda", {
+        definitionId: "onr_classic_002_superserum",
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      }),
+      visibleCard("extra-data-wall", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        rezCost: 5,
+        strength: 0,
+        subtypes: ["wall"],
+      }),
+    ];
+    input.playerView.opponent.agendaPoints = 5;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("glacier", "corp", "ice", {
+          definitionId: "onr_classic_011_glacier",
+          strength: 5,
+          subtypes: ["code_gate", "ap"],
+          rezzed: false,
+          effectivePostRezRunQuote: {
+            context: "installed_post_rez",
+            cardId: "glacier",
+            iceDefinitionId: "onr_classic_011_glacier",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            effectiveRunQuote: {
+              iceInstanceId: "glacier",
+              iceDefinitionId: "onr_classic_011_glacier",
+              effectiveStrength: 5,
+              subroutines: [
+                { id: "glacier-etr-1", type: "end_the_run" },
+                { id: "glacier-etr-2", type: "end_the_run" },
+              ],
+            },
+          },
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "glacier",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 0,
+            finalCredits: 0,
+            mandatoryAdditionalCosts: { agendaPoints: 1 },
+          },
+        }),
+        visibleCard("brain-drain", "corp", "ice", {
+          definitionId: "onr_classic_007_brain-drain",
+          strength: 3,
+          subtypes: ["sentry", "black_ice", "ap"],
+          rezzed: false,
+          effectivePostRezRunQuote: {
+            context: "installed_post_rez",
+            cardId: "brain-drain",
+            iceDefinitionId: "onr_classic_007_brain-drain",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            effectiveRunQuote: {
+              iceInstanceId: "brain-drain",
+              iceDefinitionId: "onr_classic_007_brain-drain",
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "brain-drain-random-damage",
+                  type: "random_damage",
+                  amount: 3,
+                  damageType: "core",
+                },
+              ],
+            },
+          },
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "brain-drain",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 3,
+            finalCredits: 3,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
+        }),
+        visibleCard("entrapment", "corp", "ice", {
+          definitionId: "onr_classic_010_entrapment",
+          strength: 4,
+          subtypes: ["code_gate", "deflector"],
+          rezzed: false,
+          effectivePostRezRunQuote: {
+            context: "installed_post_rez",
+            cardId: "entrapment",
+            iceDefinitionId: "onr_classic_010_entrapment",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            effectiveRunQuote: {
+              iceInstanceId: "entrapment",
+              iceDefinitionId: "onr_classic_010_entrapment",
+              effectiveStrength: 4,
+              subroutines: [
+                {
+                  id: "paid-deflect",
+                  type: "deflect_run",
+                  deflectorTarget: "any_data_fort",
+                  deflectorCost: 2,
+                },
+              ],
+            },
+          },
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "entrapment",
+            targetServerId: "remote_1",
+            projectedServerId: "remote_1",
+            expiresAtStateVersion: stateVersion,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 2,
+            finalCredits: 2,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
+        }),
+      ]),
+    ];
+    input.playerView.opponent.rig = [];
+
+    resetResidentPlanPortfolioMemory();
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision).toMatchObject({
+      actionId: installAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "corp.score_agenda",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining("plan:corp.score_agenda:"),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:corp.score_agenda:",
+          ),
+          route: { actionId: installAgenda.actionId },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+      ]),
+    );
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    expect(JSON.stringify(portfolio)).not.toContain(
+      "corp_score_protection_funding_gap:remote_1",
+    );
+    expect(JSON.stringify(portfolio)).not.toContain(
+      installRedundantFourthIce.actionId,
+    );
+
+    const underfunded = structuredClone(input);
+    underfunded.decisionId = "mature-remote-underfunded";
+    underfunded.playerView.own.credits = 6;
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(underfunded, {}),
+    ).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("installs a matchpoint agenda in the last viable deckout window under an extra mandatory draw", () => {
@@ -15828,6 +16203,179 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
     });
+  });
+
+  it("keeps runner.convert_run_window ownership while jacking out before visible lethal ICE damage", () => {
+    resetResidentPlanPortfolioMemory();
+    const jackOut = legalAction("jack-out", "runner", "jack_out", "Jack out", {
+      credits: 0,
+      clicks: 0,
+    });
+    const continueRun = legalAction(
+      "continue",
+      "runner",
+      "continue_run",
+      "Continue",
+      { credits: 0, clicks: 0 },
+    );
+    const input = aiInput("runner", [continueRun, jackOut]);
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.own.gripOrHq = [
+      visibleCard("grip-1", "runner", "event"),
+      visibleCard("grip-2", "runner", "event"),
+    ];
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "movement",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    input.playerView.servers = [
+      server("hq"),
+      server(
+        "rd",
+        [
+          visibleCard("brain-drain", "corp", "ice", {
+            definitionId: "onr_classic_007_brain-drain",
+            rezzed: true,
+            strength: 3,
+            subtypes: ["sentry", "black_ice", "ap"],
+            effectiveRunQuote: {
+              iceInstanceId: "brain-drain",
+              iceDefinitionId: "onr_classic_007_brain-drain",
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "brain-drain-random-damage",
+                  type: "random_damage",
+                  amount: 3,
+                  damageType: "core",
+                  sourceDefinitionId: "onr_classic_007_brain-drain",
+                },
+              ],
+            },
+          }),
+        ],
+      ),
+      server("archives"),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: jackOut.actionId,
+      reasonCode: "plan_first.runner.convert_run_window",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.convert_run_window",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.convert_run_window:",
+          ),
+          route: {
+            actionId: jackOut.actionId,
+            stepId: expect.any(String),
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "runner_visible_lethal_ice_damage_requires_jack_out",
+        ),
+      ]),
+    );
+  });
+
+  it("keeps visible lethal ICE damage inside run-target ownership instead of restarting the run", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "run-rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const credit = legalAction(
+      "runner.gain_credit.visible-lethal",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const endTurn = legalAction(
+      "runner.end_turn.visible-lethal",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [run, credit, endTurn]);
+    input.playerView.own.credits = 0;
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("grip-1", "runner", "event"),
+      visibleCard("grip-2", "runner", "event"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server(
+        "rd",
+        [
+          visibleCard("brain-drain", "corp", "ice", {
+            definitionId: "onr_classic_007_brain-drain",
+            rezzed: true,
+            strength: 3,
+            subtypes: ["sentry", "black_ice", "ap"],
+            effectiveRunQuote: {
+              iceInstanceId: "brain-drain",
+              iceDefinitionId: "onr_classic_007_brain-drain",
+              effectiveStrength: 3,
+              subroutines: [
+                {
+                  id: "brain-drain-random-damage",
+                  type: "random_damage",
+                  amount: 3,
+                  damageType: "core",
+                  sourceDefinitionId: "onr_classic_007_brain-drain",
+                },
+              ],
+            },
+          }),
+        ],
+      ),
+      server("archives"),
+    ];
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets,
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.economy",
+        planFirstDecision: {
+          route: { actionId: credit.actionId },
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "plan_portfolio_blocked:plan:runner.pressure_central:central%3Ard",
+        ),
+      ]),
+    );
   });
 
   it("keeps a safety-aborted server plan blocked until the Runner develops its route", () => {

@@ -3609,6 +3609,109 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "run_now",
     });
   });
+
+  it("does not start a run into visible unbreakable ICE damage that would flatline the Runner", () => {
+    const brainDrain = visibleCard("brain-drain", {
+      definitionId: "onr_classic_007_brain-drain",
+      title: "Brain Drain",
+      type: "ice",
+      rezzed: true,
+      strength: 3,
+      subtypes: ["sentry", "black_ice", "ap"],
+      effectiveRunQuote: {
+        iceInstanceId: "brain-drain",
+        iceDefinitionId: "onr_classic_007_brain-drain",
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "brain-drain-random-damage",
+            type: "random_damage",
+            amount: 3,
+            damageType: "core",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+          },
+        ],
+      },
+    });
+    const input = aiInput({
+      credits: 0,
+      grip: [visibleCard("grip-1"), visibleCard("grip-2")],
+      servers: [server("rd", { ice: [brainDrain] })],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const [lethal] = evaluateRunnerRunTargets({ input });
+
+    expect(lethal).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "blocked_unbreakable",
+      recommendation: "find_breaker_first",
+    });
+    expect(lethal?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_visible_lethal_ice_damage_blocks_run_start:rd",
+        expect.stringContaining("runner_visible_lethal_ice_damage|"),
+      ]),
+    );
+
+    input.playerView.own.freeNetOrCoreDamagePreventionRemaining = 1;
+    const [prevented] = evaluateRunnerRunTargets({ input });
+    expect(prevented?.evidence).not.toContain(
+      "runner_visible_lethal_ice_damage_blocks_run_start:rd",
+    );
+  });
+
+  it("does not start a run when visible core damage would make the cleanup hand limit negative", () => {
+    const brainDrain = visibleCard("brain-drain-cleanup", {
+      definitionId: "onr_classic_007_brain-drain",
+      title: "Brain Drain",
+      type: "ice",
+      rezzed: true,
+      strength: 3,
+      subtypes: ["sentry", "black_ice", "ap"],
+      effectiveRunQuote: {
+        iceInstanceId: "brain-drain-cleanup",
+        iceDefinitionId: "onr_classic_007_brain-drain",
+        effectiveStrength: 3,
+        subroutines: [
+          {
+            id: "brain-drain-cleanup-random-damage",
+            type: "random_damage",
+            amount: 3,
+            damageType: "core",
+            sourceDefinitionId: "onr_classic_007_brain-drain",
+          },
+        ],
+      },
+    });
+    const input = aiInput({
+      credits: 0,
+      grip: [
+        visibleCard("grip-1"),
+        visibleCard("grip-2"),
+        visibleCard("grip-3"),
+      ],
+      servers: [server("rd", { ice: [brainDrain] })],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+    input.playerView.own.coreDamage = 3;
+    input.playerView.own.maxHandSize = 2;
+
+    const [lethal] = evaluateRunnerRunTargets({ input });
+
+    expect(lethal).toMatchObject({
+      targetServerId: "rd",
+      pathPassability: "blocked_unbreakable",
+      recommendation: "find_breaker_first",
+    });
+    expect(lethal?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_visible_lethal_ice_damage_blocks_run_start:rd",
+        expect.stringContaining("cleanup_flatline:true"),
+        expect.stringContaining("effective_max_hand_after:-1"),
+      ]),
+    );
+  });
 });
 
 function aiInput(params: {

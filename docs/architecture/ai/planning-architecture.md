@@ -4556,6 +4556,15 @@ Jedes Modul testet:
   gehörende Engine-Quote für Kosten und Runwirkung; eine einzige Kartenquote
   darf unterschiedliche Zahlungs-, Stärke-, Subtyp- oder
   Subroutinenvarianten weder zusammenfassen noch stellvertretend bewerten;
+- eine unvollständige nachgelagerte Verschlechterung darf die bereits exakt
+  belegte monotone Untergrenze einer unbezahlbaren direkten Breakroute nicht
+  verdecken; sobald die direkte Route bezahlbar ist, bleibt die unvollständige
+  Gesamtwirkung weiterhin fail-closed;
+- ein Scoreparent darf eine aktuelle, server- und `stateVersion`-gebundene
+  Zertifizierung mehrerer bezahlbarer Engine-gequoteter Schutzlayer an seinen
+  bestehenden Defense-Support weitergeben; der Support bewahrt diese Evidence,
+  trifft aber weder eine zweite Schutzentscheidung noch eröffnet er einen
+  parallelen Scoreowner;
 - `funding_only` delegiert Economy-Support und materialisiert keinen
   zielgerichteten Defense-Draw;
 - unbekannte oder unvollständige Defense-Facts enden fail-closed und werden
@@ -4924,6 +4933,20 @@ Rahmen nicht verändert. Beispiele:
 - allgemeine Reservierung mehrerer Folgeaktionen → Kernel.
 
 ## 45. Änderungsverlauf
+
+### 1.3 – 2026-08-20
+
+- den bestehenden Score-/Defense-Vertrag um ein enges, aktuelles
+  Engine-Evidence-Zertifikat für eine bereits reife Remote präzisiert; der
+  Scoreparent bleibt alleiniger Owner und ein nachgelagerter Supportscan darf
+  dieselbe Schutzfrage nicht widersprüchlich neu entscheiden;
+- den Engine-Quote-Vertrag für monotone Ressourcen-Untergrenzen präzisiert:
+  eine sicher unbezahlbare direkte Breakroute bleibt trotz noch nicht
+  vollständig modellierter nachgelagerter Verschlechterung zertifizierbar,
+  während potenziell bezahlbare unvollständige Routen fail-closed bleiben;
+- `ai-program-logic-change-compass.md` und AI-README auf Folgewirkungen
+  geprüft; ihre bestehenden Owner-, Engine-Quote- und Fail-closed-Grenzen
+  bleiben unverändert ausreichend.
 
 ### 1.2 – 2026-08-02
 

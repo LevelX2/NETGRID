@@ -314,7 +314,6 @@ function quoteBreakAbility(params: {
   const breakCount = ability.count;
   if (
     ability.onUseEndRun ||
-    ability.postBreakStealthLoss !== undefined ||
     ability.specialEffects?.some(
       (effect) =>
         effect.kind !== "run_end_trash_source_if_used" &&
@@ -345,6 +344,17 @@ function quoteBreakAbility(params: {
     !nonNegativeSafeInteger(runnerCredits) ||
     !nonNegativeSafeInteger(runnerAvailableCredits) ||
     runnerAvailableCredits < runnerCredits
+  ) {
+    return { kind: "unknown" };
+  }
+  // A post-break consequence cannot make an otherwise unaffordable breaker
+  // route executable. Certify that lower-bound access block even when the
+  // consequence itself is outside this resource-exchange schema. If the
+  // Runner can pay the direct route, keep failing closed until the complete
+  // consequence can be represented as part of the exchange.
+  if (
+    ability.postBreakStealthLoss !== undefined &&
+    runnerAvailableCredits >= requiredCredits
   ) {
     return { kind: "unknown" };
   }
