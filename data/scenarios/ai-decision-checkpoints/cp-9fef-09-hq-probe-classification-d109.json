@@ -8685,16 +8685,11 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "actionId": "runner.start_run.hq"
-      }
-    ],
-    "runTargets": [
-      {
-        "actionId": "runner.start_run.hq",
-        "requiredEvidence": ["run_commitment:probe_only"]
-      }
-    ]
+    "exactActionId": "runner.gain_credit",
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
+    }
   }
 }
