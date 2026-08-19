@@ -916,10 +916,49 @@ export function createNetgridHttpServer(
   const removeAccountStatisticsObserver = observeAccountStatistics
     ? activeService.addPersistenceObserver(observeAccountStatistics)
     : undefined;
-  const accountStatisticsReady = observeAccountStatistics
-    ? activeService
-        .reconcilePersistedMatches(observeAccountStatistics)
-        .then(() => undefined)
+  const accountStatisticsReady = accountStatistics
+    ? (async () => {
+        const statistics = accountStatistics;
+        const input = await statistics.startupReconciliationInput();
+        const report = await activeService.reconcilePersistedMatches(
+          observeAccountStatistics!,
+          {
+            metadataMatchIds: [
+              ...new Set([
+                ...input.missingGameResultMatchIds,
+                ...input.boundMatchIds,
+              ]),
+            ],
+            terminalResultMatchIds: input.missingGameResultMatchIds,
+          },
+        );
+        let repairedSeriesBindings = 0;
+        for (const candidate of report.metadata) {
+          if (!candidate.seriesNextMatchId) continue;
+          if (
+            !(await statistics.hasMissingNextMatchParticipantBindings(
+              candidate.matchId,
+              candidate.seriesNextMatchId,
+            ))
+          )
+            continue;
+          await statistics.reconcileSeriesNextParticipantBindingsFor(
+            candidate.matchId,
+            candidate.seriesNextMatchId,
+          );
+          repairedSeriesBindings += 1;
+        }
+        console.info(
+          JSON.stringify({
+            event: "account_statistics_startup_reconciliation",
+            candidateQueryDurationMs:
+              Math.round(report.queryDurationMs * 100) / 100,
+            candidateCount: report.candidateCount,
+            repairedEntries: report.repairedMatchCount + repairedSeriesBindings,
+            repairedSeriesBindings,
+          }),
+        );
+      })()
     : Promise.resolve();
   const realtime = new NetgridRealtimeServer(
     activeService,

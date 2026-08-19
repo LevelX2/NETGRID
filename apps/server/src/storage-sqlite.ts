@@ -22,6 +22,7 @@ import {
   type AiDecisionTraceRecord,
   type MatchMode,
   type MatchStatus,
+  type MatchStartupReconciliationMetadata,
   type MultiplayerStorage,
   type StoredMatch,
 } from "./multiplayer";
@@ -667,6 +668,40 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return rows.map((row) =>
       this.recordFromJson(row.match_id, row.record_json),
     );
+  }
+
+  async listStartupReconciliationMetadata(
+    matchIds: readonly string[],
+  ): Promise<MatchStartupReconciliationMetadata[]> {
+    const ids = [...new Set(matchIds)];
+    if (ids.length === 0) return [];
+    const placeholders = ids.map(() => "?").join(", ");
+    const rows = this.db
+      .prepare(
+        `SELECT match_id AS matchId, status, state_version AS stateVersion,
+                updated_at AS updatedAt,
+                json_extract(record_json, '$.match.series.nextMatchId') AS seriesNextMatchId
+           FROM matches
+          WHERE match_id IN (${placeholders})`,
+      )
+      .all(...ids) as Array<{
+      matchId: string;
+      status: MatchStatus;
+      stateVersion: number | null;
+      updatedAt: string;
+      seriesNextMatchId: string | null;
+    }>;
+    return rows.map((row) => ({
+      matchId: row.matchId,
+      status: row.status,
+      ...(typeof row.stateVersion === "number"
+        ? { stateVersion: Number(row.stateVersion) }
+        : {}),
+      updatedAt: row.updatedAt,
+      ...(row.seriesNextMatchId
+        ? { seriesNextMatchId: row.seriesNextMatchId }
+        : {}),
+    }));
   }
 
   async listOpenMatchCandidates(): Promise<StoredMatch[]> {
