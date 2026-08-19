@@ -15,6 +15,7 @@ type CardImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src" | "loading
   decorative?: boolean;
   fallbackSrc?: string | undefined;
   priority?: boolean;
+  variant?: "thumb" | "preview" | "full" | "master";
 };
 
 export function localCardImageUrl(cardId: string | undefined | null, options: { preferGerman?: boolean } = {}): string | undefined {
@@ -26,20 +27,29 @@ export function localCardImageUrl(cardId: string | undefined | null, options: { 
   return undefined;
 }
 
-export function CardImage({ src, alt = "", decorative = false, fallbackSrc, priority = false, onError, ...props }: CardImageProps) {
+export function withCardImageVariant(src: string | undefined, variant: CardImageProps["variant"]): string | undefined {
+  if (!src || !variant || !src.startsWith("/api/card-images/")) return src;
+  const url = new URL(src, "http://netgrid.local");
+  url.searchParams.set("variant", variant);
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
+export function CardImage({ src, alt = "", decorative = false, fallbackSrc, priority = false, variant = "full", onError, ...props }: CardImageProps) {
   if (!src) return null;
+  const variantSrc = withCardImageVariant(src, variant);
+  const variantFallbackSrc = withCardImageVariant(fallbackSrc, variant);
   return createElement("img", {
     ...props,
-    src,
+    src: variantSrc,
     alt: decorative ? "" : alt,
     "aria-hidden": decorative ? "true" : props["aria-hidden"],
     loading: priority ? "eager" : "lazy",
     decoding: "async",
     onError: (event: SyntheticEvent<HTMLImageElement>) => {
       const target = event.currentTarget;
-      if (fallbackSrc && target.dataset.fallbackApplied !== "true") {
+      if (variantFallbackSrc && target.dataset.fallbackApplied !== "true") {
         target.dataset.fallbackApplied = "true";
-        target.src = fallbackSrc;
+        target.src = variantFallbackSrc;
       }
       onError?.(event);
     }

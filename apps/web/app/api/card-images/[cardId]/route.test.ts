@@ -1,6 +1,7 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { ManagedCardImageRuntimeError } from "@netgrid/card-images";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { lookupCardImage } = vi.hoisted(() => ({ lookupCardImage: vi.fn() }));
@@ -29,6 +30,7 @@ beforeEach(() => {
     kind: "generated",
     relativePath: "generated-test-card.png",
     absolutePath: imagePath,
+    mediaType: "image/png",
     versioned: true,
   });
 });
@@ -40,6 +42,51 @@ describe("card image route cache contract", () => {
     expect(cacheControlForCardImage({ kind: "localized_de", versioned: true })).toBe("private, max-age=31536000, immutable");
     expect(cacheControlForCardImage({ kind: "localized_de", versioned: false })).toBe("private, max-age=0, must-revalidate");
     expect(cacheControlForCardImage({ kind: "local_onr", versioned: false })).toBe("private, max-age=0, must-revalidate");
+    expect(cacheControlForCardImage({ kind: "personal", versioned: false })).toBe("private, max-age=0, must-revalidate");
+  });
+
+  it("serves personal WebP variants with content-hash validation", async () => {
+    lookupCardImage.mockResolvedValueOnce({
+      cardId: "test_card",
+      printingId: "test_card_printing",
+      kind: "personal",
+      relativePath: "blobs/sha256/ab/test.webp",
+      absolutePath: imagePath,
+      mediaType: "image/webp",
+      contentHash: "a".repeat(64),
+      variant: "preview",
+      versioned: false,
+    });
+    const response = await GET(new Request("http://netgrid.local/api/card-images/test_card?variant=preview"), {
+      params: Promise.resolve({ cardId: "test_card" }),
+    });
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/webp");
+    expect(response.headers.get("cache-control")).toBe("private, max-age=0, must-revalidate");
+  });
+
+  it("returns path-free diagnostics for invalid variants and personal assets", async () => {
+    lookupCardImage.mockRejectedValueOnce(
+      new ManagedCardImageRuntimeError("invalid_variant", "Die angeforderte Kartenbildvariante ist ungültig."),
+    );
+    const invalidVariant = await GET(new Request("http://netgrid.local/api/card-images/test_card?variant=secret"), {
+      params: Promise.resolve({ cardId: "test_card" }),
+    });
+    expect(invalidVariant.status).toBe(400);
+    expect(await invalidVariant.json()).toEqual({
+      error: { code: "card_image_variant_invalid", message: "Die angeforderte Kartenbildvariante ist ungültig." },
+    });
+
+    lookupCardImage.mockRejectedValueOnce(
+      new ManagedCardImageRuntimeError("personal_image_invalid", "Das persönliche Kartenbild ist unvollständig oder beschädigt."),
+    );
+    const invalidAsset = await GET(new Request("http://netgrid.local/api/card-images/test_card"), {
+      params: Promise.resolve({ cardId: "test_card" }),
+    });
+    const body = await invalidAsset.text();
+    expect(invalidAsset.status).toBe(404);
+    expect(body).not.toContain(temporaryDirectory);
+    expect(JSON.parse(body).error.code).toBe("personal_card_image_invalid");
   });
 
   it("honors ETag and Last-Modified revalidation without exposing file paths", () => {
@@ -89,6 +136,7 @@ describe("card image route cache contract", () => {
       kind: "generated",
       relativePath: "generated-missing-card.png",
       absolutePath: path.join(temporaryDirectory, "private", "missing-card.png"),
+      mediaType: "image/png",
       versioned: true,
     });
 

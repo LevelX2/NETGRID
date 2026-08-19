@@ -1,6 +1,11 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
+  CardImageStore,
+  type CardImageMediaType,
+  type CardImageVariantKind,
+  parseCardImageVariant,
+  resolveManagedCardImage,
   resolveNetgridCardImageRoot,
   resolveNetgridRepositoryRoot,
 } from "@netgrid/card-images";
@@ -32,24 +37,51 @@ const LOCAL_ONR_ASSET_INDEX_PATH = path.join(
   "onr-1996",
   "card-image-index.local.json",
 );
+const PERSONAL_CARD_IMAGE_STORE = new CardImageStore();
 
 export type CardImageLookupResult = {
   cardId: string;
   printingId: string;
-  kind: "generated" | "local_onr" | "localized_de";
+  kind: "personal" | "generated" | "local_onr" | "localized_de";
   relativePath: string;
   absolutePath: string;
+  mediaType: CardImageMediaType;
+  contentHash?: string;
+  variant?: CardImageVariantKind;
   versioned: boolean;
+};
+
+export type CardImageLookupOptions = {
+  personalStore?: CardImageStore;
 };
 
 export async function lookupCardImage(
   cardId: string,
   requestUrl: string,
+  options: CardImageLookupOptions = {},
 ): Promise<CardImageLookupResult | null> {
   const catalogCard = createRuntimeCardsById()[cardId];
   if (catalogCard === undefined) return null;
   const { printingId } = catalogCard;
   const request = safeRequestUrl(requestUrl);
+  const variant = parseCardImageVariant(request?.searchParams.get("variant"));
+  const personalImage = await resolveManagedCardImage(
+    options.personalStore ?? PERSONAL_CARD_IMAGE_STORE,
+    printingId,
+    variant,
+  );
+  if (personalImage)
+    return {
+      cardId,
+      printingId,
+      kind: "personal",
+      relativePath: personalImage.relativePath,
+      absolutePath: personalImage.absolutePath,
+      mediaType: personalImage.mediaType,
+      contentHash: personalImage.blobHash,
+      variant: personalImage.variant,
+      versioned: false,
+    };
   if (request?.searchParams.get("skin") === "de") {
     const localizedPath = localizedDeCardImagePath(printingId);
     if (localizedPath)
@@ -94,7 +126,7 @@ function imageResult(
   const baseDir = imageBaseDir(kind);
   const absolutePath = path.resolve(baseDir, relativePath);
   if (!absolutePath.startsWith(`${baseDir}${path.sep}`)) return null;
-  return { cardId, printingId, kind, relativePath, absolutePath, versioned };
+  return { cardId, printingId, kind, relativePath, absolutePath, mediaType: "image/png", versioned };
 }
 
 function hasVersionParam(requestUrl: string): boolean {
@@ -178,12 +210,14 @@ function isSafeLocalImagePath(
     path.isAbsolute(value)
   )
     return false;
+  if (kind === "personal") return false;
   if (kind === "local_onr") return value.startsWith("onr-1996/");
   if (kind === "localized_de") return value.startsWith("rendered/full/");
   return value.startsWith("generated-");
 }
 
 function imageBaseDir(kind: CardImageLookupResult["kind"]): string {
+  if (kind === "personal") return IMAGE_DIR;
   return kind === "localized_de" ? LOCALIZED_DE_IMAGE_DIR : IMAGE_DIR;
 }
 

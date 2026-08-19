@@ -4,7 +4,7 @@ Status: `in_progress`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img01-img05-card-image-import`
-Aktueller Zustand: `IMG04_done`
+Aktueller Zustand: `IMG05_done`
 
 ## Quelle und Zielprüfung
 
@@ -122,6 +122,17 @@ Bei roten Done-Gates verbleibt der Prozess im aktuellen Zustand.
 - Checks: 18 Kartenbild-Pakettests einschließlich Orientierung, Größenlimits,
   Verhältnis- und Metadatenprüfung sowie Paket-Typecheck und Package-Boundary-
   Check grün.
+- IMG05 abgeschlossen: persönliche Bindungen werden vor lokalisierten,
+  generierten und lokalen O:NR-Bildern aufgelöst; die Bildroute liefert den
+  korrekten MIME-Typ und inhaltsbasierte Validatoren, während Kartenansichten
+  gezielt `thumb`, `preview` oder `full` anfordern. Ungültige Varianten und
+  beschädigte gebundene Assets scheitern mit pfadfreien Diagnosen.
+- Checks: 22 Kartenbild-Pakettests, 18 fokussierte Webtests, Paket-Typecheck
+  und Package-Boundary-Check grün. Der Web-Typecheck bleibt ausschließlich an
+  den bereits auf `main` reproduzierten KI-Baselinefehlern zu
+  `executionOrigin`/`selectedStep` und `option.card` rot. Der breite
+  Web-Testlauf zeigt 27 scope-fremde Baselineabweichungen; die drei
+  Kartenbild-Testdateien selbst sind grün.
 
 ## Paketfolge
 

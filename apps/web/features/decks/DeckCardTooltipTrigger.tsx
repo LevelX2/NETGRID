@@ -244,7 +244,7 @@ export function DeckCardTooltipTrigger({
             <>
               {showHardwareOverlay ? <HardwareImageOverlay title={card.title} rulesText={rulesText} installCost={detail?.numeric.installCost} /> : null}
               {showOperationOverlay ? <OperationImageOverlay title={card.title} rulesText={rulesText} cost={detail?.numeric.cost} /> : null}
-              <CardImage className="cardTooltipImage" src={tooltipImageUrl} fallbackSrc={tooltipImageSource.fallbackSrc} alt={`Kartenbild ${card.title ?? "Karte"}`} />
+              <CardImage className="cardTooltipImage" src={tooltipImageUrl} fallbackSrc={tooltipImageSource.fallbackSrc} variant="preview" alt={`Kartenbild ${card.title ?? "Karte"}`} />
             </>
           ) : (
             <>

@@ -432,7 +432,7 @@ export function CatalogPanel({
               </div>
               {catalogImageUrl ? (
                 <div className={`catalogImagePreview ${catalogImagePreviewMode}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}>
-                  <CardImage src={catalogImageUrl} fallbackSrc={catalogImageSource.fallbackSrc} alt={`Kartenbild ${detail.title}`} priority {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
+                  <CardImage src={catalogImageUrl} fallbackSrc={catalogImageSource.fallbackSrc} variant="preview" alt={`Kartenbild ${detail.title}`} priority {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
                   {showCatalogHardwareOverlay ? (
                     <HardwareImageOverlay
                       title={detail.title}

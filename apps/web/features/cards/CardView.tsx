@@ -529,6 +529,7 @@ export function CardView({
           className="cardTooltipImage"
           src={tooltipImageUrl}
           fallbackSrc={preferredImageFallbackUrl}
+          variant="preview"
           alt={`Kartenbild ${card.title ?? "Karte"}`}
         />
       ) : (
@@ -685,7 +686,7 @@ export function CardView({
         data-archive-facedown={archiveFacedown ? "true" : undefined}
         data-inactive-zone={inactiveZone}
       >
-        {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} decorative /> : null}
+        {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} fallbackSrc={preferredImageFallbackUrl} variant="thumb" decorative /> : null}
         {selectedTarget ? (
           <span
             className="cardSelectedTargetBadge"

@@ -40,7 +40,7 @@ export function DeckCardThumb({
     <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${table ? "table" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? (
         <>
-          <CardImage src={imageUrl} fallbackSrc={imageSource.fallbackSrc} decorative />
+          <CardImage src={imageUrl} fallbackSrc={imageSource.fallbackSrc} variant="thumb" decorative />
           {showHardwareOverlay ? (
             <HardwareImageOverlay
               title={title}

@@ -300,7 +300,7 @@ export function ChronicleCardTrigger({
         >
           {showImageTooltip ? (
             <span className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}>
-              <CardImage className="chronicleCardImage" src={imageUrl} fallbackSrc={imageSource.fallbackSrc} alt={`Kartenbild ${card.title}`} />
+              <CardImage className="chronicleCardImage" src={imageUrl} fallbackSrc={imageSource.fallbackSrc} variant="preview" alt={`Kartenbild ${card.title}`} />
               {showHardwareOverlay ? (
                 <HardwareImageOverlay
                   title={card.title}

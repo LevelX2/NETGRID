@@ -326,9 +326,7 @@ export class CardImageStore {
     await this.verifyVariantBlob(master);
   }
 
-  private async verifyVariantBlob(
-    variant: StoredCardImageVariant,
-  ): Promise<void> {
+  async verifyVariantBlob(variant: StoredCardImageVariant): Promise<void> {
     const file = this.absoluteVariantPath(variant);
     try {
       await verifyExistingBlob(file, variant.blobHash);

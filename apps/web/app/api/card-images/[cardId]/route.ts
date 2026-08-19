@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
+import { ManagedCardImageRuntimeError } from "@netgrid/card-images";
 import { NextResponse } from "next/server";
 import { lookupCardImage, type CardImageLookupResult } from "../card-image-lookup";
 
@@ -8,7 +9,16 @@ const VERSIONED_CACHE_CONTROL = "private, max-age=31536000, immutable";
 
 export async function GET(request: Request, context: { params: Promise<{ cardId: string }> }) {
   const { cardId } = await context.params;
-  const image = await lookupCardImage(cardId, request.url);
+  let image: CardImageLookupResult | null;
+  try {
+    image = await lookupCardImage(cardId, request.url);
+  } catch (error) {
+    if (error instanceof ManagedCardImageRuntimeError) {
+      if (error.code === "invalid_variant") return safeImageError("card_image_variant_invalid", error.message, 400);
+      return safeImageError("personal_card_image_invalid", error.message, 404);
+    }
+    throw error;
+  }
   if (!image) return safeImageError("card_image_not_found", "Kartenbild wurde nicht gefunden.", 404);
 
   let fileStat: Awaited<ReturnType<typeof stat>>;
@@ -39,7 +49,7 @@ function imageResponseHeaders(
   const headers = new Headers({
     "Cache-Control": cacheControlForCardImage(image),
     "Content-Length": String(fileStat.size),
-    "Content-Type": "image/png",
+    "Content-Type": image.mediaType,
     ETag: validators.etag,
     "Last-Modified": validators.lastModified,
     "X-Content-Type-Options": "nosniff"
@@ -49,7 +59,7 @@ function imageResponseHeaders(
 
 function imageValidators(image: CardImageLookupResult, fileStat: Awaited<ReturnType<typeof stat>>): { etag: string; lastModified: string } {
   const hash = createHash("sha256")
-    .update(`${image.kind}:${image.printingId}:${Number(fileStat.size)}:${Math.floor(Number(fileStat.mtimeMs))}`)
+    .update(image.contentHash ?? `${image.kind}:${image.printingId}:${Number(fileStat.size)}:${Math.floor(Number(fileStat.mtimeMs))}`)
     .digest("base64url")
     .slice(0, 24);
   return {
@@ -73,7 +83,7 @@ export function clientHasFreshImage(request: Request, validators: { etag: string
   return Number.isFinite(sinceMs) && Number.isFinite(lastModifiedMs) && lastModifiedMs <= sinceMs;
 }
 
-function safeImageError(code: string, message: string, status: 403 | 404): NextResponse {
+function safeImageError(code: string, message: string, status: 400 | 403 | 404): NextResponse {
   return NextResponse.json(
     { error: { code, message } },
     {
