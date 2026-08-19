@@ -2441,6 +2441,10 @@ function sanitizeVisibleEffectiveSubroutine(
     !isNonEmptyString(value.id) ||
     !isVisibleEffectiveSubroutineType(value.type) ||
     (value.amount !== undefined && !isNonNegativeSafeInteger(value.amount)) ||
+    (value.damageType !== undefined &&
+      value.damageType !== "net" &&
+      value.damageType !== "meat" &&
+      value.damageType !== "core") ||
     (value.traceLimit !== undefined &&
       !isNonNegativeSafeInteger(value.traceLimit)) ||
     (value.runFutureStrengthCancelPaymentAmount !== undefined &&
@@ -2470,6 +2474,9 @@ function sanitizeVisibleEffectiveSubroutine(
     id: value.id,
     type: value.type,
     ...(value.amount !== undefined ? { amount: value.amount } : {}),
+    ...(value.damageType !== undefined
+      ? { damageType: value.damageType }
+      : {}),
     ...(value.traceLimit !== undefined ? { traceLimit: value.traceLimit } : {}),
     ...(value.runFutureStrengthCancelPaymentAmount !== undefined
       ? {

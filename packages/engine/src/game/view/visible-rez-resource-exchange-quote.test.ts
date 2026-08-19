@@ -8,6 +8,8 @@ const RENT_I_CON = "onr_classic_031_rent-i-con";
 const BARTMOSS = "onr_v1_005_bartmoss-memorial-icebreaker";
 const VEWY_VEWY_QUIET = "onr_v1_071_vewy-vewy-quiet";
 const CHIBA_BANK_ACCOUNT = "onr_proteus_133_chiba-bank-account";
+const GLACIER = "onr_classic_011_glacier";
+const JACKHAMMER = "onr_v1_036_jackhammer";
 const FILTER_ID = "resource_exchange_filter" as CardInstanceId;
 const RENT_I_CON_ID = "resource_exchange_rent_i_con" as CardInstanceId;
 const VEWY_VEWY_QUIET_ID =
@@ -162,6 +164,43 @@ describe("visible Corp ICE rez resource exchange quote", () => {
         normalCreditsRequired: 0,
         nonNormalRunCreditsApplied: 1,
         canPayFromCurrentCredits: true,
+      },
+    });
+  });
+
+  it("certifies an unaffordable direct break before an unexecuted post-break consequence", () => {
+    const { state } = resourceExchangeState();
+    state.runner.credits = 3;
+    state.cardInstances[FILTER_ID]!.definitionId = GLACIER;
+    state.cardInstances[RENT_I_CON_ID]!.definitionId = JACKHAMMER;
+    const visibleGlacier: VisibleCard = {
+      instanceId: FILTER_ID,
+      known: true,
+      definitionId: GLACIER,
+      type: "ice",
+      subtypes: ["wall"],
+      strength: 5,
+      owner: "corp",
+      controller: "corp",
+      rezzed: false,
+    };
+
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(
+        state,
+        FILTER_ID,
+        visibleGlacier,
+      ),
+    ).toMatchObject({
+      complete: true,
+      hardEndTheRunSubroutineCount: 2,
+      runnerBreak: {
+        breakerCardId: RENT_I_CON_ID,
+        breakerDefinitionId: JACKHAMMER,
+        requiredCredits: 5,
+        pumpCredits: 5,
+        breakCredits: 0,
+        canPayFromCurrentCredits: false,
       },
     });
   });

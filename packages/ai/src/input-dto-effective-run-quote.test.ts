@@ -219,6 +219,7 @@ function validEffectiveRunQuote(): VisibleEffectiveIceRunQuote {
         id: "trace-and-deflect",
         type: "initiate_trace",
         amount: 2,
+        damageType: "net",
         traceLimit: 3,
         runFutureStrengthCancelPaymentAmount: 1,
         traceSuccessEffect: {
@@ -330,6 +331,10 @@ function malformedQuoteCases(): Array<{
     {
       label: "negative subroutine amount",
       mutate: (quote) => (subroutine(quote).amount = -1),
+    },
+    {
+      label: "unknown subroutine damage type",
+      mutate: (quote) => (subroutine(quote).damageType = "hidden_damage"),
     },
     {
       label: "fractional base trace",

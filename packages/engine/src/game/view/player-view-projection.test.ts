@@ -298,6 +298,29 @@ describe("PlayerView projection", () => {
     });
   });
 
+  it("projects the public damage type of a visible effective ICE subroutine", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "known-rezzed-damage-ice-run-quote" }),
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId]!.definitionId =
+      "onr_classic_007_brain-drain";
+    state.cardInstances[iceId]!.faceup = true;
+    state.cardInstances[iceId]!.rezzed = true;
+
+    const ice = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+
+    expect(ice?.effectiveRunQuote?.subroutines).toEqual([
+      expect.objectContaining({
+        type: "random_damage",
+        amount: 3,
+        damageType: "core",
+      }),
+    ]);
+  });
+
   it("projects a Corp-private state-bound post-rez run quote for fixed ICE", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "fixed-ice-post-rez-run-quote" }),

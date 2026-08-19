@@ -2853,6 +2853,8 @@ export type VisibleEffectiveSubroutine = {
   id: string;
   type: SubroutineType;
   amount?: number;
+  /** Public damage type for an effective visible damage subroutine. */
+  damageType?: DamageType;
   traceLimit?: number;
   runFutureStrengthCancelPaymentAmount?: number;
   traceSuccessEffect?: TraceSuccessEffect;

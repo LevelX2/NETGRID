@@ -1527,6 +1527,16 @@ function runWindowCandidates(
           ) === true ||
           signal.actionAssessments?.[
             candidate.actionId
+          ]?.evidenceCodes.includes(
+            "runner_encounter_action_plan_admissible",
+          ) === true ||
+          signal.actionAssessments?.[
+            candidate.actionId
+          ]?.evidenceCodes.includes(
+            "runner_run_window_action_plan_admissible",
+          ) === true ||
+          signal.actionAssessments?.[
+            candidate.actionId
           ]?.evidenceCodes.includes("runner_optional_bonus_run_decline") ===
             true ||
           candidate.semanticActionType.startsWith("access.")),
