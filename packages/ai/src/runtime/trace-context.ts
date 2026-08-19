@@ -21,18 +21,32 @@ export type LatestTraceContext = {
 export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
   const visibleRunnerLink = visibleRunnerLinkAtCorpBid(input);
   const visibleTrace = input.playerView.trace;
+  const eventTrace = latestTraceContextFromEventTail(input, visibleRunnerLink);
   if (visibleTrace) {
+    const matchingEventTrace =
+      eventTrace.sourceDefinitionId === undefined ||
+      eventTrace.sourceDefinitionId === visibleTrace.sourceDefinitionId
+        ? eventTrace
+        : {};
+    const corpBid = visibleTrace.corpBid ?? matchingEventTrace.corpBid;
+    const traceValue =
+      visibleTrace.corpStrength ?? matchingEventTrace.traceValue ?? corpBid;
     return {
       sourceDefinitionId: visibleTrace.sourceDefinitionId,
-      traceLimit: visibleTrace.printedTrace,
-      effectiveTraceLimit: visibleTrace.effectiveTraceLimit,
+      traceLimit: visibleTrace.printedTrace ?? matchingEventTrace.traceLimit,
+      effectiveTraceLimit:
+        visibleTrace.effectiveTraceLimit ??
+        matchingEventTrace.effectiveTraceLimit,
       traceRulesProfile: visibleTrace.profile,
-      runnerLink: visibleTrace.runnerLink ?? visibleRunnerLink,
-      ...(visibleTrace.corpBid !== undefined
-        ? { corpBid: visibleTrace.corpBid }
+      runnerLink:
+        visibleTrace.runnerLink ??
+        matchingEventTrace.runnerLink ??
+        visibleRunnerLink,
+      ...(corpBid !== undefined
+        ? { corpBid }
         : {}),
-      ...(visibleTrace.corpStrength !== undefined
-        ? { traceValue: visibleTrace.corpStrength }
+      ...(traceValue !== undefined
+        ? { traceValue }
         : {}),
       ...(visibleTrace.runnerBid !== undefined
         ? { runnerBid: visibleTrace.runnerBid }
@@ -45,6 +59,13 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
         : {}),
     };
   }
+  return eventTrace;
+}
+
+function latestTraceContextFromEventTail(
+  input: AiDecisionInput,
+  visibleRunnerLink: number,
+): LatestTraceContext {
   for (const event of input.eventTail.slice().reverse()) {
     const traceLimit = event.publicPayload.traceLimit;
     const traceValue = event.publicPayload.traceValue;

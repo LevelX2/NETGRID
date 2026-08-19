@@ -7040,18 +7040,12 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
-      {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_v1_045_newsgroup-filter"
-      }
-    ],
+    "exactActionId": "runner.install_card.runner_onr_v1_040_loony-goon_1.runner_onr_v1_040_loony-goon_1",
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["fund_onr_v1_021_dwarf"],
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["install_breaker_sentry"],
       "requiredAssessmentEvidence": [
-        "development_funding_route_status:covered_guaranteed",
-        "source:own_runner_hand:card_specific_purpose:breaker_or_rig_piece:acute"
+        "deck_strategy_open_sentry_coverage"
       ]
     }
   }

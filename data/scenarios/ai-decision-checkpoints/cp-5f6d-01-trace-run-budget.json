@@ -7231,7 +7231,7 @@
   },
   "expectation": {
     "choice": {
-      "mustSelectOptionIds": ["bid_1"]
+      "mustSelectOptionIds": ["bid_0"]
     }
   }
 }
