@@ -1,6 +1,6 @@
 # CardSpec-Zufallsreview Batch 16 – Abschlussprozess
 
-Status: in Bearbeitung
+Status: verifiziert, lokale Integration vorbereitet
 Quelle: Nutzerbericht „NETGRID – CardSpec-Zufallsreview Batch 16: Abschluss-Findings“  
 Ausgangsbranch: `main` auf `183d827a0`
 
@@ -84,3 +84,45 @@ Genau ein Paket ist aktiv. Jedes Paket endet mit fokussierter Prüfung, `git dif
 - Text und Planning-Artefakt entsprechen Quelle und typisiertem Mechanikvertrag.
 - Relevante Checks sind grün oder unabhängige Baseline-Blocker exakt dokumentiert.
 - Arbeitsbranch ist lokal nach `main` integriert; Worktree und Branch sind verifiziert entfernt.
+
+## Tatsächliche Disposition
+
+### Unverändert
+
+- **Flak:** Der Abschlussbericht bestätigt keinen Text-, Mechanik-, Projektions- oder Planningfehler. Die Karte bleibt unverändert.
+
+### Umgesetzt
+
+- **Superior Net Barriers – Effective Subtypes:** Der generische instance-aware Modifier-Matcher wertet bei rezzed Alternate-Subtype-ICE den aktuell gewählten Subtyp aus. Ein als Code Gate gerezztes printed Wall erhält deshalb keinen Wall-Stärkebonus; ein als Wall gerezztes printed Sentry erhält ihn.
+- **Superior Net Barriers – Score-Auszahlung:** Candidate-Erzeugung, Choice-Revalidierung und Auszahlung verwenden denselben Effective-Subtype-Vertrag. Unrezzte ICE behalten für die Reveal-Wahl ihren gedruckten Subtyp.
+- **Superior Net Barriers – kanonischer Text:** `gain [1]` entspricht wieder der Originalquelle.
+- **Superior Net Barriers – Planning:** Die irreführende statische Economy-Wertung `medium` wurde entfernt. Der typisierte Score-Effekt projiziert weiterhin Burst-Economy und das capability-nahe TargetProfile bewertet den tatsächlichen Creditwert gegen den Informationspreis; es entsteht keine zweite AI-Entscheidungsautorität.
+
+### Bewusst nicht umgesetzt
+
+- Keine Karten-ID-Sonderlogik für Superior Net Barriers.
+- Kein zusätzlicher AI-Resolver und kein statischer Ersatzwert für die zustandsabhängige Auszahlung von null bis N Credits.
+- Keine redundanten Änderungen an Flak.
+
+## Verification Evidence
+
+- `@netgrid/engine` fokussierte Superior-/Scored-Agenda-Regressionen: **33/33 bestanden**.
+- `@netgrid/engine` Typecheck: **bestanden**.
+- `@netgrid/cards` Registry-, Planning-, Validation- und Compatibility-Projections: **88/88 bestanden**.
+- `@netgrid/cards` Typecheck: **bestanden**.
+- `check:card-spec-ai-hints`: **bestanden**, generiertes Artefakt aktuell.
+- `check:ai-hint-metadata-contracts`: **bestanden**, 0 Hard Errors.
+- `git diff --check`: **bestanden**.
+
+## Paketcommits vor Integration
+
+1. `a11a990f9` – `docs(cards): plan batch 16 final review fixes`
+2. `c8d774969` – `fix(engine): honor effective ice subtypes for wall effects`
+3. `58e0e1ad8` – `fix(cards): align superior net barriers semantics`
+
+## Vorbereiteter Integrationsabschluss
+
+- Der Arbeitsbranch wurde gegen den weiterhin unveränderten lokalen `main` auf `183d827a0` geprüft; ein zusätzlicher Main-Merge war nicht erforderlich.
+- Nach diesem Verifikationscommit wird der Branch lokal nach `main` integriert.
+- Anschließend werden Worktree und Branch ohne Force entfernt und die Integration per Ancestor- und Statusprüfung verifiziert.
+- Kein Push vorgesehen.
