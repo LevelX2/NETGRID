@@ -51,7 +51,7 @@ describe("match D153 card hint consumer contract", () => {
     );
   });
 
-  it("binds every visible Broker instance without selecting an unbound payout", () => {
+  it("binds every visible Broker instance before selecting its matching payout", () => {
     const checkpoint = bindHistoricalRunEventCadence(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );
@@ -120,16 +120,17 @@ describe("match D153 card hint consumer contract", () => {
         (tool) => tool.cardId === JUNKYARD,
       ),
     ).toBe(false);
-    expect(result.decision?.actionId).toBe("runner.end_turn");
+    expect(result.decision?.actionId).toBe(
+      "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+    );
     expect(result.decision?.fallbackUsed).toBe(false);
     expect(result.decision?.decisionDebug?.planKind).toBe(
-      "runner.complete_turn",
+      "runner.credit_bank",
     );
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
-        "plan_step_capability:complete_turn_after_productive_routes_exhausted",
-        "plan_assessment_evidence:productive_legal_routes_exhausted",
-        "plan_priority_class:P6",
+        "plan_step_capability:credit_bank_cash_out",
+        "plan_assessment_evidence:runner_credit_bank_cashout_for_click_efficient_liquidity",
       ]),
     );
 
