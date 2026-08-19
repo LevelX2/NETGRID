@@ -2410,7 +2410,17 @@ function coverageDrawCandidates(
         : searchSetupIds.has(candidate.actionId)
           ? 80
           : drawForAnswerIds.has(candidate.actionId)
-            ? 60
+            ? 60 +
+              Math.min(
+                4,
+                Math.max(
+                  0,
+                  (candidate.semanticActionType === "draw.card"
+                    ? 1
+                    : (candidate.economyProjection?.cardsDrawn ?? 1)) - 1,
+                ),
+              ) *
+                5
             : 5,
     }));
 }

@@ -5408,8 +5408,10 @@ function buildRunnerDomain(
         ]),
       ]);
       if (
-        candidate !== undefined &&
-        specialistOwnedActionIds.has(candidate.actionId)
+        (candidate !== undefined &&
+          specialistOwnedActionIds.has(candidate.actionId)) ||
+        (evaluation.legalActionId !== undefined &&
+          specialistOwnedActionIds.has(evaluation.legalActionId))
       ) {
         return [];
       }
@@ -5570,7 +5572,14 @@ function buildRunnerDomain(
         : undefined;
       const fundingTargetCredits =
         reserveProtectedTargetCredits ?? evaluation.fundingNeed?.targetCredits;
+      const executableCurrentActionConsumesRemainingTurn =
+        executableNow &&
+        candidate !== undefined &&
+        ((candidate.costProfile.clickCost ?? 0) >= remainingClicks ||
+          (candidate.semanticActionType === "install.card" &&
+            remainingClicks <= 1));
       const developmentFundingMilestone =
+        !executableCurrentActionConsumesRemainingTurn &&
         (waitingForCredits || waitingForReserve) &&
         fundingTargetCredits !== undefined
           ? runnerDevelopmentFundingMilestone({
@@ -5586,7 +5595,8 @@ function buildRunnerDomain(
           : undefined;
       if (
         (waitingForCredits || waitingForReserve) &&
-        developmentFundingMilestone === undefined
+        developmentFundingMilestone === undefined &&
+        !executableCurrentActionConsumesRemainingTurn
       ) {
         return [];
       }
@@ -5637,7 +5647,7 @@ function buildRunnerDomain(
             : {}),
           phase: restrictedProgramInstallCommitment
             ? ("open_restricted_sequence" as const)
-            : waitingForCredits || waitingForReserve
+            : developmentFundingMilestone !== undefined
               ? ("fund" as const)
               : ("execute" as const),
           ...(restrictedProgramInstallCommitment
