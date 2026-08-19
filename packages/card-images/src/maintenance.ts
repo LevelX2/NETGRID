@@ -124,6 +124,19 @@ export async function resolveCardImageInboxEntry(
   return canonicalCandidate;
 }
 
+export async function resolveCardImageInboxSource(
+  source: string,
+  mappingDirectory: string,
+  options: CardImageInboxOptions = {},
+): Promise<string> {
+  const root = await ensureInboxRoot(options);
+  const candidate = path.isAbsolute(source)
+    ? path.resolve(source)
+    : path.resolve(mappingDirectory, source);
+  const relative = path.relative(root, candidate).split(path.sep).join("/");
+  return resolveCardImageInboxEntry(relative, "file", options);
+}
+
 export async function inventoryCardImageCollection(
   options: {
     collectionId?: string;

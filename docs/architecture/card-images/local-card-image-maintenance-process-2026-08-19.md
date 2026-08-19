@@ -5,7 +5,7 @@ Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img08-local-card-image-management`
 Worktree: `C:\Projekte\NETGRID_IMG08_LOCAL_CARD_IMAGE_MANAGEMENT`
-Aktives Paket: `IMG08.3`
+Aktives Paket: `IMG08.4`
 
 ## Quelle und Zielprüfung
 
@@ -113,7 +113,7 @@ queued -> running -> failed
 
 1. `IMG08.1` – Sicherheits- und Backend-Vertrag (`completed`)
 2. `IMG08.2` – Import-Inbox und Bestandsübersicht (`completed`)
-3. `IMG08.3` – lokale und HTTPS-Importjobs
+3. `IMG08.3` – lokale und HTTPS-Importjobs (`completed`)
 4. `IMG08.4` – private Bildpaketverwaltung
 5. `IMG08.5` – Maintenance-Weboberfläche und Berichte
 6. Finaler Integrations- und Cleanup-Checkpoint
@@ -145,6 +145,19 @@ queued -> running -> failed
 - Package-Boundary-Gate bestanden;
 - Server-Typecheck weiterhin nur durch denselben unabhängigen AI-Baselinefehler
   gestoppt.
+
+### IMG08.3 abgeschlossen
+
+- sequenziellen In-Memory-Jobcontroller mit stabilen Zuständen, Fortschritt,
+  terminalem Bericht und begrenzter Historie ergänzt;
+- lokale und explizite HTTPS-Mappings über denselben bestehenden Importkern
+  angebunden;
+- lokale CSV-Quellen zusätzlich kanonisch auf die verwaltete Inbox begrenzt;
+- Apply-Route mit CSRF und frischer Maintenance-Reauthentifizierung geschützt;
+- HTTPS-Rechtebestätigung vor Jobstart erzwungen;
+- parallele Kartenbildjobs mit strukturiertem Konflikt abgelehnt;
+- `@netgrid/card-images`: 44 Tests und Typecheck bestanden;
+- fokussierter Server-HTTP-Test: 6 Tests bestanden.
 
 ## Paketdetails
 

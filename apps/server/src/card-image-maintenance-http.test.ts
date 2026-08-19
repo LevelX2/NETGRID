@@ -3,7 +3,11 @@ import type { AddressInfo } from "node:net";
 import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { CardImageStore } from "@netgrid/card-images";
+import {
+  CardImageStore,
+  type CardImageImportReport,
+  type ImportCardImagesOptions,
+} from "@netgrid/card-images";
 import {
   InMemoryMaintenanceCredentialStore,
   MaintenanceAuthService,
@@ -149,6 +153,146 @@ describe("IMG08 local card image maintenance boundary", () => {
     expect(template).toContain("printingId");
   });
 
+  it("runs preview jobs, serializes execution and requires reauthentication for apply", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-jobs-"));
+    const inboxRoot = path.join(root, "inbox");
+    await mkdir(inboxRoot, { recursive: true });
+    await writeFile(path.join(inboxRoot, "mapping.csv"), "synthetic");
+    let releaseImport!: () => void;
+    const blocked = new Promise<void>((resolve) => {
+      releaseImport = resolve;
+    });
+    let calls = 0;
+    const importCards = async (
+      options: ImportCardImagesOptions,
+    ): Promise<CardImageImportReport> => {
+      calls += 1;
+      options.onProgress?.({
+        phase: "preparing",
+        completed: 0,
+        total: 1,
+      });
+      if (calls === 1) await blocked;
+      options.onProgress?.({
+        phase: "preparing",
+        completed: 1,
+        total: 1,
+        printingId: "onr_v1_001_afreet",
+      });
+      return importReport(options.dryRun === true);
+    };
+    const client = await startClient(
+      localConfig(),
+      new CardImageMaintenanceService({
+        inbox: { inboxRoot },
+        store: new CardImageStore({ root: path.join(root, "store") }),
+        importCards,
+        idFactory: (() => {
+          let id = 0;
+          return () => `job-${++id}`;
+        })(),
+      }),
+    );
+    const session = await client.login(LOCAL_ORIGIN);
+    const mutationHeaders = {
+      "content-type": "application/json",
+      cookie: session.cookie,
+      origin: LOCAL_ORIGIN,
+      "x-netgrid-csrf": session.csrfToken,
+    };
+    const body = JSON.stringify({
+      sourceMode: "local",
+      mapping: "mapping.csv",
+      onExisting: "fail",
+      rightsConfirmed: false,
+    });
+
+    const preview = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/imports/preview`,
+      { method: "POST", headers: mutationHeaders, body },
+    );
+    expect(preview.status).toBe(202);
+    await expect(preview.json()).resolves.toMatchObject({
+      job: { jobId: "job-1", status: "queued", mapping: "mapping.csv" },
+    });
+
+    const parallel = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/imports/preview`,
+      { method: "POST", headers: mutationHeaders, body },
+    );
+    expect(parallel.status).toBe(409);
+    await expect(parallel.json()).resolves.toMatchObject({
+      error: { code: "card_image_job_in_progress" },
+    });
+    releaseImport();
+    await expectJobStatus(client.baseUrl, session, "job-1", "succeeded");
+
+    const applyWithoutReauth = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/imports/apply`,
+      { method: "POST", headers: mutationHeaders, body },
+    );
+    expect(applyWithoutReauth.status).toBe(403);
+    await expect(applyWithoutReauth.json()).resolves.toMatchObject({
+      error: { code: "maintenance_reauthentication_required" },
+    });
+
+    const reauth = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/auth/reauthenticate`,
+      {
+        method: "POST",
+        headers: mutationHeaders,
+        body: JSON.stringify({ password: PASSWORD }),
+      },
+    );
+    expect(reauth.status).toBe(200);
+    const apply = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/imports/apply`,
+      { method: "POST", headers: mutationHeaders, body },
+    );
+    expect(apply.status).toBe(202);
+    await expect(apply.json()).resolves.toMatchObject({
+      job: { jobId: "job-2", kind: "mapping_import" },
+    });
+    await expectJobStatus(client.baseUrl, session, "job-2", "succeeded");
+  });
+
+  it("rejects HTTPS jobs without an explicit rights confirmation", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-rights-"));
+    const inboxRoot = path.join(root, "inbox");
+    await mkdir(inboxRoot, { recursive: true });
+    await writeFile(path.join(inboxRoot, "mapping.csv"), "synthetic");
+    const client = await startClient(
+      localConfig(),
+      new CardImageMaintenanceService({
+        inbox: { inboxRoot },
+        store: new CardImageStore({ root: path.join(root, "store") }),
+      }),
+    );
+    const session = await client.login(LOCAL_ORIGIN);
+    const response = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/imports/preview`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: session.cookie,
+          origin: LOCAL_ORIGIN,
+          "x-netgrid-csrf": session.csrfToken,
+        },
+        body: JSON.stringify({
+          sourceMode: "https",
+          mapping: "mapping.csv",
+          onExisting: "fail",
+          rightsConfirmed: false,
+        }),
+      },
+    );
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: "card_image_job_input_invalid" },
+    });
+  });
+
   async function startClient(
     config: DeploymentConfig,
     cardImageMaintenance?: CardImageMaintenanceService,
@@ -199,12 +343,51 @@ describe("IMG08 local card image maintenance boundary", () => {
         );
         expect(response.status).toBe(200);
         const cookie = response.headers.get("set-cookie")?.split(";", 1)[0];
-        if (!cookie) throw new Error("Maintenance login returned no cookie");
-        return { cookie };
+        const payload = (await response.json()) as { csrfToken?: string };
+        if (!cookie || !payload.csrfToken)
+          throw new Error("Maintenance login returned no session proof");
+        return { cookie, csrfToken: payload.csrfToken };
       },
     };
   }
 });
+
+async function expectJobStatus(
+  baseUrl: string,
+  session: { cookie: string; csrfToken: string },
+  jobId: string,
+  expectedStatus: "succeeded" | "failed",
+): Promise<void> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const response = await fetch(
+      `${baseUrl}/api/storage/maintenance/card-images/jobs/${jobId}`,
+      { headers: { cookie: session.cookie, origin: LOCAL_ORIGIN } },
+    );
+    expect(response.status).toBe(200);
+    const payload = (await response.json()) as {
+      job: { status: string; error?: unknown };
+    };
+    if (payload.job.status === expectedStatus) return;
+    if (payload.job.status === "failed")
+      throw new Error(`Card image job failed: ${JSON.stringify(payload.job)}`);
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+  throw new Error(`Card image job did not reach ${expectedStatus}`);
+}
+
+function importReport(dryRun: boolean): CardImageImportReport {
+  return {
+    schemaVersion: "card-image-import-report-v1",
+    createdAt: "2026-08-19T00:00:00.000Z",
+    collectionId: "personal",
+    dryRun,
+    onExisting: "fail",
+    tableRows: 1,
+    selectedRows: 1,
+    results: [],
+    summary: { bound: 1, replaced: 0, skipped: 0, unchanged: 0 },
+  };
+}
 
 function localConfig(): DeploymentConfig {
   return loadDeploymentConfig({} as NodeJS.ProcessEnv);

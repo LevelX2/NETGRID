@@ -46,6 +46,19 @@ export type ImportCardImagesOptions = {
   allowHttpsSources?: boolean;
   rightsConfirmed?: boolean;
   httpsDownloader?: (source: string) => Promise<HttpsImageDownload>;
+  localSourceResolver?: (
+    source: string,
+    mappingDirectory: string,
+    printingId: string,
+  ) => Promise<string>;
+  onProgress?: (progress: CardImageImportProgress) => void;
+};
+
+export type CardImageImportProgress = {
+  phase: "preparing" | "storing";
+  completed: number;
+  total: number;
+  printingId?: string;
 };
 
 export type CardImageImportResult = {
@@ -98,14 +111,24 @@ export async function importCardImagesFromCsv(
   const rows = parseCardImageMappingCsv(mappingText, cards);
   const selected = rows.filter((row) => row.enabled);
   const prepared: PreparedImage[] = [];
-  for (const row of selected)
+  const totalSteps = selected.length * (options.dryRun ? 1 : 2);
+  options.onProgress?.({ phase: "preparing", completed: 0, total: totalSteps });
+  for (const row of selected) {
     prepared.push(
       await prepareImage(row, path.dirname(mappingFile), {
         allowHttpsSources: options.allowHttpsSources ?? false,
         rightsConfirmed: options.rightsConfirmed ?? false,
         httpsDownloader: options.httpsDownloader ?? downloadHttpsCardImage,
+        localSourceResolver: options.localSourceResolver,
       }),
     );
+    options.onProgress?.({
+      phase: "preparing",
+      completed: prepared.length,
+      total: totalSteps,
+      printingId: row.printingId,
+    });
+  }
 
   const store = options.store ?? new CardImageStore();
   const collectionId = options.collectionId ?? "personal";
@@ -116,7 +139,7 @@ export async function importCardImagesFromCsv(
   let results = planned;
   if (!options.dryRun) {
     const changes = [];
-    for (const image of prepared) {
+    for (const [index, image] of prepared.entries()) {
       const asset = await store.putAssetVariants({
         variants: Object.values(image.normalized.variants),
       });
@@ -128,6 +151,12 @@ export async function importCardImagesFromCsv(
       changes.push({
         printingId: image.row.printingId,
         assetHash: image.assetHash,
+      });
+      options.onProgress?.({
+        phase: "storing",
+        completed: selected.length + index + 1,
+        total: totalSteps,
+        printingId: image.row.printingId,
       });
     }
     const applied = await store.applyBindings(
@@ -163,6 +192,7 @@ async function prepareImage(
     allowHttpsSources: boolean;
     rightsConfirmed: boolean;
     httpsDownloader: (source: string) => Promise<HttpsImageDownload>;
+    localSourceResolver?: ImportCardImagesOptions["localSourceResolver"];
   },
 ): Promise<PreparedImage> {
   if (hasUrlScheme(row.source)) {
@@ -196,12 +226,13 @@ async function prepareImage(
       assetHash: normalized.assetHash,
     };
   }
-  return prepareLocalImage(row, mappingDirectory);
+  return prepareLocalImage(row, mappingDirectory, options.localSourceResolver);
 }
 
 async function prepareLocalImage(
   row: CardImageMappingRow,
   mappingDirectory: string,
+  localSourceResolver?: ImportCardImagesOptions["localSourceResolver"],
 ): Promise<PreparedImage> {
   if (/^https?:\/\//i.test(row.source))
     throw new CardImageImportError(
@@ -209,9 +240,11 @@ async function prepareLocalImage(
       `Remotequelle für ${row.printingId} benötigt den expliziten HTTPS-Importmodus.`,
       row.printingId,
     );
-  const source = path.isAbsolute(row.source)
-    ? path.resolve(row.source)
-    : path.resolve(mappingDirectory, row.source);
+  const source = localSourceResolver
+    ? await localSourceResolver(row.source, mappingDirectory, row.printingId)
+    : path.isAbsolute(row.source)
+      ? path.resolve(row.source)
+      : path.resolve(mappingDirectory, row.source);
   let content: Buffer;
   try {
     content = await readFile(source);
