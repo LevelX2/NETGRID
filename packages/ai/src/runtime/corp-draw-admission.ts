@@ -121,8 +121,11 @@ export function assessCorpDrawAdmission(params: {
     params.consequenceFacts.terminalNeedBeforeMandatoryDraw === true;
   const cleanupExposureUncovered =
     projectedEndTurnOverflow > safeDiscardCandidateCount;
-  const deckoutHorizonUnsafe =
-    mandatoryDrawHorizonAfterDraw < 3 && !terminalNeedBeforeMandatoryDraw;
+  const deckoutHorizonUnsafe = corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
+    remainingDeckCardsBeforeDraw,
+    cardsDrawn,
+    terminalNeedBeforeMandatoryDraw,
+  });
   const exactCapacityReleaseRoutes = validProjection
     ? params.capacityReleaseRoutes
         .filter(
@@ -256,6 +259,19 @@ export function assessCorpDrawAdmission(params: {
       `corp_draw_admission:${disposition}`,
     ],
   };
+}
+
+export function corpVoluntaryDrawLeavesUnsafeMandatoryHorizon(params: {
+  remainingDeckCardsBeforeDraw: number;
+  cardsDrawn: number;
+  terminalNeedBeforeMandatoryDraw: boolean;
+}): boolean {
+  return (
+    nonNegativeSafeInteger(params.remainingDeckCardsBeforeDraw) &&
+    positiveSafeInteger(params.cardsDrawn) &&
+    params.remainingDeckCardsBeforeDraw - params.cardsDrawn < 3 &&
+    !params.terminalNeedBeforeMandatoryDraw
+  );
 }
 
 function capacityReleaseCanSequenceBeforeDraw(params: {
