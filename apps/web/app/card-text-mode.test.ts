@@ -31,6 +31,9 @@ describe("text card display", () => {
     expect(styles).toContain(".card.textCard.ice {");
     expect(styles).toContain(".card.textCard.program {");
     expect(styles).toContain(".card.textCard.hardware {");
+    expect(styles).toContain(".card.textCard.upgrade {");
+    expect(styles).toContain("--text-card-accent: #adb8c7;");
+    expect(styles).toContain("var(--card-bg) 72%");
   });
 
   it("keeps rule hints visible in compact cards and makes an unavailable image tooltip informative", () => {

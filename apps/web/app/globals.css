@@ -15837,11 +15837,12 @@ select,
   background:
     linear-gradient(
       160deg,
-      color-mix(in srgb, var(--text-card-accent, var(--card-bg)), transparent 87%),
-      transparent 42%
+      color-mix(in srgb, var(--text-card-accent, var(--card-bg)), var(--card-bg) 72%) 0%,
+      color-mix(in srgb, var(--text-card-accent, var(--card-bg)), var(--card-bg) 89%) 72%,
+      var(--card-bg) 100%
     ),
     linear-gradient(180deg, color-mix(in srgb, var(--card-bg), #071016 8%), var(--card-bg));
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--text-card-accent, var(--line)), transparent 42%);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--text-card-accent, var(--line)), white 16%);
 }
 
 .card.textCard.preview {
@@ -15909,9 +15910,12 @@ select,
   --text-card-accent: var(--ice);
 }
 
-.card.textCard.asset,
-.card.textCard.upgrade {
+.card.textCard.asset {
   --text-card-accent: #caa7ff;
+}
+
+.card.textCard.upgrade {
+  --text-card-accent: #adb8c7;
 }
 
 .card.textCard.operation,
