@@ -1,6 +1,6 @@
 # STARTUP STORAGE OPTIMIZATION – Prozess
 
-Status: START01 abgeschlossen, START02 abgeschlossen; Main-Integration ausstehend
+Status: abgeschlossen und lokal nach `main` integriert
 Datum: 2026-08-19
 Worktree: `C:\Projekte\NETGRID_STARTUP_STORAGE_OPTIMIZATION`
 Branch: `codex/startup-storage-optimization`
@@ -89,4 +89,10 @@ WHERE NOT EXISTS (
 - Bestandene fokussierte Tests: `src/account-statistics.test.ts`, `src/storage-maintenance-match-sizes.test.ts`, `apps/web/app/maintenance.test.ts`, `apps/web/app/maintenance/match-id-copy.test.ts`.
 - Server- und Web-Typechecks erreichen aktuell bekannte unabhängige Baseline-Fehler in `packages/ai/src/runtime/selected-choices-for-decision.ts`; der Web-Typecheck meldet zusätzlich die bestehende Fixture-Abweichung in `app/ai-turn-plan-comparison-ui.test.ts`.
 
-Commit- und Main-Integrationsstand sowie Worktree-Cleanup werden nach der finalen Integration ergänzt.
+### Abschluss
+
+- START01: `05148d120` – `perf(server): make startup reconciliation data-minimal`
+- START02: `83db6ccdd` – `fix(maintenance): include AI data in match storage totals`
+- Integration: Fast-Forward von `9472b48c0` auf `83db6ccdd` in lokalem `main`.
+- Main-Verifikation: beide fokussierten Server- und Webtests erneut bestanden.
+- Worktree- und Branch-Cleanup: nach diesem Abschlusscommit auszuführen und doppelt zu verifizieren.
