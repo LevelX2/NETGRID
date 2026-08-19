@@ -129,6 +129,12 @@ export type BuildPrivateCardImagePackOptions = {
   replace?: boolean;
   now?: () => Date;
   pathOptions?: NetgridPathOptions;
+  localSourceResolver?: (
+    source: string,
+    mappingDirectory: string,
+    printingId: string,
+  ) => Promise<string>;
+  onProgress?: (progress: CardImagePackProgress) => void;
 };
 
 export type BuildPrivateCardImagePackResult = {
@@ -143,6 +149,14 @@ export type ImportPrivateCardImagePackOptions = {
   onExisting?: CardImageBindingConflictMode;
   dryRun?: boolean;
   now?: () => Date;
+  onProgress?: (progress: CardImagePackProgress) => void;
+};
+
+export type CardImagePackProgress = {
+  phase: "validating" | "building" | "importing";
+  completed: number;
+  total: number;
+  printingId?: string;
 };
 
 export type ImportPrivateCardImagePackResult = {
@@ -222,6 +236,8 @@ export async function buildPrivateCardImagePack(
       buildRoot: resolveNetgridCardImagePackBuildRoot(options.pathOptions),
       replace: options.replace ?? false,
       now: options.now ?? (() => new Date()),
+      localSourceResolver: options.localSourceResolver,
+      onProgress: options.onProgress,
     },
   );
 }
@@ -248,6 +264,8 @@ async function buildCardImagePack(
     buildRoot: string;
     replace: boolean;
     now: () => Date;
+    localSourceResolver?: BuildPrivateCardImagePackOptions["localSourceResolver"];
+    onProgress?: BuildPrivateCardImagePackOptions["onProgress"];
   },
 ): Promise<BuildPrivateCardImagePackResult> {
   const context = createPackContext(rawContext.profile, rawContext.cards);
@@ -287,9 +305,18 @@ async function buildCardImagePack(
     const rowsByPrintingId = new Map(
       selected.map((row) => [row.printingId, row]),
     );
-    for (const card of context.cards) {
+    options.onProgress?.({
+      phase: "building",
+      completed: 0,
+      total: context.cards.length,
+    });
+    for (const [index, card] of context.cards.entries()) {
       const row = rowsByPrintingId.get(card.printingId)!;
-      const source = await readPackBuildSource(row, path.dirname(mappingFile));
+      const source = await readPackBuildSource(
+        row,
+        path.dirname(mappingFile),
+        options.localSourceResolver,
+      );
       const normalized = await normalizeCardImage(source, card.printingId);
       if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
         throw new CardImagePackError(
@@ -314,6 +341,12 @@ async function buildCardImagePack(
       assignments.set(card.printingId, {
         source: relativePath,
         expectedSha256: normalized.sourceHash,
+      });
+      options.onProgress?.({
+        phase: "building",
+        completed: index + 1,
+        total: context.cards.length,
+        printingId: card.printingId,
       });
     }
     const manifest: CardImagePackManifest = {
@@ -357,7 +390,14 @@ async function importCardImagePack(
   const entryByPrintingId = new Map(
     manifest.entries.map((entry) => [entry.printingId, entry]),
   );
-  for (const card of context.cards) {
+  const importSteps = context.cards.length * (options.dryRun ? 1 : 2);
+  const totalSteps = context.cards.length + importSteps;
+  options.onProgress?.({
+    phase: "validating",
+    completed: 0,
+    total: totalSteps,
+  });
+  for (const [index, card] of context.cards.entries()) {
     const entry = entryByPrintingId.get(card.printingId)!;
     let content: Buffer;
     try {
@@ -382,6 +422,12 @@ async function importCardImagePack(
         `Paketdatei für ${card.printingId} stimmt nicht mit dem Manifest überein.`,
         card.printingId,
       );
+    options.onProgress?.({
+      phase: "validating",
+      completed: index + 1,
+      total: totalSteps,
+      printingId: card.printingId,
+    });
   }
   await validateBundledMapping(packDirectory, context, manifest);
   const importReport = await importCardImagesFromCsv({
@@ -392,6 +438,13 @@ async function importCardImagePack(
     dryRun: options.dryRun ?? false,
     ...(options.now ? { now: options.now } : {}),
     cards: rawContext.cards,
+    onProgress: (progress) =>
+      options.onProgress?.({
+        phase: "importing",
+        completed: context.cards.length + progress.completed,
+        total: totalSteps,
+        ...(progress.printingId ? { printingId: progress.printingId } : {}),
+      }),
   });
   return {
     packId: manifest.packId,
@@ -442,6 +495,7 @@ function validateCompleteMapping(
 async function readPackBuildSource(
   row: CardImageMappingRow,
   mappingDirectory: string,
+  localSourceResolver?: BuildPrivateCardImagePackOptions["localSourceResolver"],
 ): Promise<Buffer> {
   if (hasUrlScheme(row.source))
     throw new CardImagePackError(
@@ -449,9 +503,11 @@ async function readPackBuildSource(
       `Bildpaket-Builder akzeptiert für ${row.printingId} nur lokale Quellen.`,
       row.printingId,
     );
-  const source = path.isAbsolute(row.source)
-    ? path.resolve(row.source)
-    : path.resolve(mappingDirectory, row.source);
+  const source = localSourceResolver
+    ? await localSourceResolver(row.source, mappingDirectory, row.printingId)
+    : path.isAbsolute(row.source)
+      ? path.resolve(row.source)
+      : path.resolve(mappingDirectory, row.source);
   let content: Buffer;
   try {
     content = await readFile(source);

@@ -28,6 +28,7 @@ export {
   type CardImagePackEntry,
   type CardImagePackErrorCode,
   type CardImagePackManifest,
+  type CardImagePackProgress,
   type ImportPrivateCardImagePackOptions,
   type ImportPrivateCardImagePackResult,
   type PrivateCardImagePackProfile,

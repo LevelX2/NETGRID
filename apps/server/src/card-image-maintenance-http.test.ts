@@ -5,7 +5,11 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   CardImageStore,
+  type BuildPrivateCardImagePackOptions,
+  type BuildPrivateCardImagePackResult,
   type CardImageImportReport,
+  type ImportPrivateCardImagePackOptions,
+  type ImportPrivateCardImagePackResult,
   type ImportCardImagesOptions,
 } from "@netgrid/card-images";
 import {
@@ -293,6 +297,143 @@ describe("IMG08 local card image maintenance boundary", () => {
     });
   });
 
+  it("previews, imports and builds private packs without exposing output paths", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-packs-"));
+    const inboxRoot = path.join(root, "inbox");
+    await mkdir(path.join(inboxRoot, "classic-pack"), { recursive: true });
+    await writeFile(path.join(inboxRoot, "classic.csv"), "synthetic");
+    const importPack = async (
+      options: ImportPrivateCardImagePackOptions,
+    ): Promise<ImportPrivateCardImagePackResult> => {
+      options.onProgress?.({
+        phase: "validating",
+        completed: 54,
+        total: 108,
+      });
+      return {
+        packId: "netgrid-private-classic-images",
+        profileId: "classic",
+        importReport: importReport(options.dryRun === true),
+      };
+    };
+    const buildPack = async (
+      options: BuildPrivateCardImagePackOptions,
+    ): Promise<BuildPrivateCardImagePackResult> => {
+      options.onProgress?.({ phase: "building", completed: 54, total: 54 });
+      return {
+        outputDirectory: path.join(root, "private-build-output"),
+        manifest: {
+          schemaVersion: "netgrid-card-image-pack-v1",
+          minimumImporterVersion: 1,
+          packId: "netgrid-private-classic-images",
+          profileId: "classic",
+          displayName: "NETGRID private Bilder – Classic",
+          setId: "classic",
+          createdAt: "2026-08-19T00:00:00.000Z",
+          cardCount: 54,
+          catalogFingerprint: "a".repeat(64),
+          entries: [],
+        },
+      };
+    };
+    const client = await startClient(
+      localConfig(),
+      new CardImageMaintenanceService({
+        inbox: { inboxRoot },
+        store: new CardImageStore({ root: path.join(root, "store") }),
+        importPack,
+        buildPack,
+        idFactory: (() => {
+          let id = 10;
+          return () => `job-${++id}`;
+        })(),
+      }),
+    );
+    const session = await client.login(LOCAL_ORIGIN);
+    const headers = {
+      "content-type": "application/json",
+      cookie: session.cookie,
+      origin: LOCAL_ORIGIN,
+      "x-netgrid-csrf": session.csrfToken,
+    };
+
+    const preview = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/packs/preview`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ pack: "classic-pack", onExisting: "fail" }),
+      },
+    );
+    expect(preview.status).toBe(202);
+    const previewJob = await expectJobStatus(
+      client.baseUrl,
+      session,
+      "job-11",
+      "succeeded",
+    );
+    expect(previewJob.report).toMatchObject({
+      operation: "preview",
+      profileId: "classic",
+      cardCount: 54,
+    });
+
+    const importWithoutReauth = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/packs/import`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ pack: "classic-pack", onExisting: "replace" }),
+      },
+    );
+    expect(importWithoutReauth.status).toBe(403);
+    await reauthenticate(client.baseUrl, session);
+    const imported = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/packs/import`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ pack: "classic-pack", onExisting: "replace" }),
+      },
+    );
+    expect(imported.status).toBe(202);
+    const importedJob = await expectJobStatus(
+      client.baseUrl,
+      session,
+      "job-12",
+      "succeeded",
+    );
+    expect(importedJob.report).toMatchObject({ operation: "import" });
+
+    await reauthenticate(client.baseUrl, session);
+    const built = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/packs/build`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          mapping: "classic.csv",
+          profileId: "classic",
+          replace: false,
+        }),
+      },
+    );
+    expect(built.status).toBe(202);
+    const builtJob = await expectJobStatus(
+      client.baseUrl,
+      session,
+      "job-13",
+      "succeeded",
+    );
+    expect(builtJob.report).toMatchObject({
+      operation: "build",
+      profileId: "classic",
+      cardCount: 54,
+    });
+    expect(JSON.stringify(builtJob)).not.toContain(root);
+    expect(JSON.stringify(builtJob)).not.toContain("private-build-output");
+  });
+
   async function startClient(
     config: DeploymentConfig,
     cardImageMaintenance?: CardImageMaintenanceService,
@@ -357,7 +498,7 @@ async function expectJobStatus(
   session: { cookie: string; csrfToken: string },
   jobId: string,
   expectedStatus: "succeeded" | "failed",
-): Promise<void> {
+): Promise<Record<string, any>> {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const response = await fetch(
       `${baseUrl}/api/storage/maintenance/card-images/jobs/${jobId}`,
@@ -367,12 +508,33 @@ async function expectJobStatus(
     const payload = (await response.json()) as {
       job: { status: string; error?: unknown };
     };
-    if (payload.job.status === expectedStatus) return;
+    if (payload.job.status === expectedStatus)
+      return payload.job as Record<string, any>;
     if (payload.job.status === "failed")
       throw new Error(`Card image job failed: ${JSON.stringify(payload.job)}`);
     await new Promise((resolve) => setTimeout(resolve, 5));
   }
   throw new Error(`Card image job did not reach ${expectedStatus}`);
+}
+
+async function reauthenticate(
+  baseUrl: string,
+  session: { cookie: string; csrfToken: string },
+): Promise<void> {
+  const response = await fetch(
+    `${baseUrl}/api/storage/maintenance/auth/reauthenticate`,
+    {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        cookie: session.cookie,
+        origin: LOCAL_ORIGIN,
+        "x-netgrid-csrf": session.csrfToken,
+      },
+      body: JSON.stringify({ password: PASSWORD }),
+    },
+  );
+  expect(response.status).toBe(200);
 }
 
 function importReport(dryRun: boolean): CardImageImportReport {

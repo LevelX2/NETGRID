@@ -105,8 +105,8 @@ import {
   CARD_IMAGE_MAINTENANCE_API_PREFIX,
   CardImageMaintenanceError,
   CardImageMaintenanceService,
-  type CardImageMaintenanceJobKind,
   type StartCardImageMappingJobInput,
+  type StartCardImagePackJobInput,
 } from "./card-image-maintenance";
 import {
   CardImageInboxError,
@@ -2247,7 +2247,7 @@ async function routeHttp(
           `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/imports/apply`) &&
       request.method === "POST"
     ) {
-      const kind: CardImageMaintenanceJobKind = url.pathname.endsWith(
+      const kind: "mapping_preview" | "mapping_import" = url.pathname.endsWith(
         "/preview",
       )
         ? "mapping_preview"
@@ -2255,6 +2255,20 @@ async function routeHttp(
       const body = await readJson(request);
       const job = cardImageMaintenance.startMappingJob(
         cardImageMappingJobInput(body, kind),
+      );
+      sendJson(response, 202, { job });
+      return;
+    }
+
+    if (
+      (url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/preview` ||
+        url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/import` ||
+        url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/build`) &&
+      request.method === "POST"
+    ) {
+      const body = await readJson(request);
+      const job = cardImageMaintenance.startPackJob(
+        cardImagePackJobInput(body, url.pathname),
       );
       sendJson(response, 202, { job });
       return;
@@ -3775,7 +3789,7 @@ function cardImageTemplateProfile(
 
 function cardImageMappingJobInput(
   body: Record<string, unknown>,
-  kind: CardImageMaintenanceJobKind,
+  kind: "mapping_preview" | "mapping_import",
 ): StartCardImageMappingJobInput {
   const sourceMode =
     body.sourceMode === "local" || body.sourceMode === "https"
@@ -3803,6 +3817,46 @@ function cardImageMappingJobInput(
     mapping: body.mapping,
     onExisting,
     rightsConfirmed: body.rightsConfirmed === true,
+  };
+}
+
+function cardImagePackJobInput(
+  body: Record<string, unknown>,
+  pathname: string,
+): StartCardImagePackJobInput {
+  if (pathname.endsWith("/build")) {
+    const profileId =
+      typeof body.profileId === "string" &&
+      body.profileId in PRIVATE_CARD_IMAGE_PACK_PROFILES
+        ? (body.profileId as PrivateCardImagePackProfileId)
+        : undefined;
+    if (!profileId || typeof body.mapping !== "string")
+      throw new CardImageMaintenanceError(
+        "card_image_job_input_invalid",
+        "Der Bildpaket-Build enthält ungültige Eingaben.",
+      );
+    return {
+      kind: "pack_build",
+      mapping: body.mapping,
+      profileId,
+      replace: body.replace === true,
+    };
+  }
+  const onExisting =
+    body.onExisting === "fail" ||
+    body.onExisting === "skip" ||
+    body.onExisting === "replace"
+      ? body.onExisting
+      : undefined;
+  if (!onExisting || typeof body.pack !== "string")
+    throw new CardImageMaintenanceError(
+      "card_image_job_input_invalid",
+      "Der Bildpaket-Import enthält ungültige Eingaben.",
+    );
+  return {
+    kind: pathname.endsWith("/preview") ? "pack_preview" : "pack_import",
+    pack: body.pack,
+    onExisting,
   };
 }
 
@@ -4426,6 +4480,8 @@ function isSensitiveMaintenanceOperation(
     pathname === "/api/storage/maintenance/cleanup/policy/run" ||
     pathname === "/api/storage/maintenance/snapshot-compaction/apply" ||
     pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/imports/apply` ||
+    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/import` ||
+    pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/packs/build` ||
     /\/api\/storage\/maintenance\/matches\/[^/]+\/recovery-access$/.test(
       pathname,
     )

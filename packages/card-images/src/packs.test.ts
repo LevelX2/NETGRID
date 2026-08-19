@@ -12,6 +12,7 @@ import {
   __cardImagePackTestOnly,
   createPrivateCardImagePackTemplate,
   type CardImagePackManifest,
+  type CardImagePackProgress,
   type PrivateCardImagePackProfile,
 } from "./packs";
 import { CardImageStore } from "./store";
@@ -50,7 +51,10 @@ describe("private card image packs", () => {
 
   it("builds a self-contained local pack and imports it through the atomic core", async () => {
     const fixture = await packFixture();
-    const built = await buildFixturePack(fixture);
+    const buildProgress: CardImagePackProgress[] = [];
+    const built = await buildFixturePack(fixture, false, {
+      onProgress: (progress) => buildProgress.push(progress),
+    });
     expect(built.manifest).toMatchObject({
       schemaVersion: "netgrid-card-image-pack-v1",
       minimumImporterVersion: CARD_IMAGE_PACK_IMPORTER_VERSION,
@@ -59,6 +63,21 @@ describe("private card image packs", () => {
       cardCount: 2,
     });
     expect(built.manifest.entries).toHaveLength(2);
+    expect(buildProgress).toEqual([
+      { phase: "building", completed: 0, total: 2 },
+      {
+        phase: "building",
+        completed: 1,
+        total: 2,
+        printingId: fixture.cards[0]!.printingId,
+      },
+      {
+        phase: "building",
+        completed: 2,
+        total: 2,
+        printingId: fixture.cards[1]!.printingId,
+      },
+    ]);
     const bundledMapping = await readFile(
       path.join(built.outputDirectory, "mapping.csv"),
       "utf8",
@@ -75,6 +94,7 @@ describe("private card image packs", () => {
     const store = new CardImageStore({
       root: path.join(fixture.root, "store"),
     });
+    const importProgress: CardImagePackProgress[] = [];
     const imported = await __cardImagePackTestOnly.importCardImagePack(
       { profile: fixture.profile, cards: fixture.cards },
       built.manifest,
@@ -83,12 +103,40 @@ describe("private card image packs", () => {
         packDirectory: built.outputDirectory,
         store,
         collectionId: "personal",
+        onProgress: (progress) => importProgress.push(progress),
       },
     );
     expect(imported.importReport.summary.bound).toBe(2);
     expect(
       Object.keys((await store.readCollection("personal")).bindings),
     ).toHaveLength(2);
+    expect(importProgress[0]).toEqual({
+      phase: "validating",
+      completed: 0,
+      total: 6,
+    });
+    expect(importProgress.at(-1)).toEqual({
+      phase: "importing",
+      completed: 6,
+      total: 6,
+      printingId: fixture.cards[1]!.printingId,
+    });
+  });
+
+  it("uses the caller-provided local source resolver for package builds", async () => {
+    const fixture = await packFixture();
+    const resolved: string[] = [];
+    await buildFixturePack(fixture, false, {
+      localSourceResolver: async (source, _mappingDirectory, printingId) => {
+        resolved.push(`${printingId}:${source}`);
+        return source;
+      },
+    });
+    expect(resolved).toEqual(
+      fixture.cards.map(
+        (card, index) => `${card.printingId}:${fixture.imageFiles[index]}`,
+      ),
+    );
   });
 
   it("rejects incomplete and remote builder mappings before creating output", async () => {
@@ -249,6 +297,14 @@ async function packFixture() {
 async function buildFixturePack(
   fixture: Awaited<ReturnType<typeof packFixture>>,
   replace = false,
+  options: {
+    localSourceResolver?: (
+      source: string,
+      mappingDirectory: string,
+      printingId: string,
+    ) => Promise<string>;
+    onProgress?: (progress: CardImagePackProgress) => void;
+  } = {},
 ) {
   return __cardImagePackTestOnly.buildCardImagePack(
     { profile: fixture.profile, cards: fixture.cards },
@@ -257,6 +313,7 @@ async function buildFixturePack(
       buildRoot: path.join(fixture.root, "build"),
       replace,
       now: () => new Date("2026-08-19T15:00:00.000Z"),
+      ...options,
     },
   );
 }
