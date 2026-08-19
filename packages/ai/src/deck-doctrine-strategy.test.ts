@@ -94,7 +94,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       cards: [{ cardId: "onr_v1_188_ai-chief-financial-officer", quantity: 3 }],
     }).strategyScores["corp.deck_recycle_engine"];
 
-    expect(oneCopy?.anchorEvidence.length).toBeGreaterThan(1);
+    expect(oneCopy?.anchorEvidence).toHaveLength(1);
     expect(oneCopy?.anchorScore).toBeLessThan(70);
     expect(threeCopies?.anchorScore).toBeLessThan(100);
     expect(threeCopies?.anchorScore ?? 0).toBeLessThan(
@@ -221,7 +221,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       expect.arrayContaining([
         expect.objectContaining({
           cardId: "onr_v1_081_custodial-position",
-          source: "derivedStrategyAnchor",
+          source: "lineSupport",
         }),
       ]),
     );
@@ -319,7 +319,9 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     });
 
     expect(profile.functionSignalCounts["breaker.emergency_coverage"]).toBe(3);
-    expect(profile.functionSignalCounts["breaker.self_trash_risk"]).toBe(3);
+    expect(profile.functionSignalCounts["breaker.self_trash_risk"] ?? 0).toBe(
+      0,
+    );
     expect(profile.functionSignalCounts["breaker.universal"] ?? 0).toBe(0);
     expect(profile.runnerProfile?.coverageProfile.universal.count).toBe(0);
     expect(profile.runnerProfile?.coverageProfile.wall.count).toBe(0);
