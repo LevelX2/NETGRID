@@ -1,6 +1,6 @@
 # Private Kartenbildpakete als Verzeichnis oder ZIP
 
-Status: In Umsetzung
+Status: Abgeschlossen
 Stand: 2026-08-20
 Quelle: Nutzerfreigabe im Kartenbild-Maintenance-Dialog
 
@@ -210,3 +210,18 @@ gemergten Arbeitsbranch löschen und das Goal erst danach als complete markieren
 - Current-State-Dokumentation ist konsistent.
 - Alle fünf Paketcommits sind lokal in `main` integriert.
 - Worktree und Branch sind entfernt und die Entfernung ist doppelt verifiziert.
+
+## Umsetzungsevidence
+
+- ZIP01: Prozessvertrag `cce10862f`.
+- ZIP02: Streaming-Kern `257be0685`; Kartenbildsuite mit 60 Tests grün.
+- ZIP03: Maintenance-API `91e1a5f3b`; fokussierter HTTP-Vertrag mit 7 Tests
+  grün.
+- ZIP04: Oberfläche `3464761be`; fokussierte UI-Verträge mit 6 Tests grün.
+- ZIP05: CLI, Architektur, Runbook, Current State und abschließende
+  Integrationsprüfung.
+- Die betroffenen Paket-Typechecks sind grün. Die breiten Server-/Web-
+  Typechecks werden unabhängig von dieser Änderung durch bestehende Fehler in
+  `packages/ai/src/runtime/selected-choices-for-decision.ts` sowie einen
+  veralteten AI-UI-Testvertrag blockiert; die Kartenbildpfade besitzen keine
+  TypeScript-Diagnose.
