@@ -1,6 +1,6 @@
 # CardSpec-Zufallsreview Batch 16 – Abschlussprozess
 
-Status: verifiziert, lokale Integration vorbereitet
+Status: abgeschlossen, lokal nach `main` integriert
 Quelle: Nutzerbericht „NETGRID – CardSpec-Zufallsreview Batch 16: Abschluss-Findings“  
 Ausgangsbranch: `main` auf `183d827a0`
 
@@ -120,9 +120,10 @@ Genau ein Paket ist aktiv. Jedes Paket endet mit fokussierter Prüfung, `git dif
 2. `c8d774969` – `fix(engine): honor effective ice subtypes for wall effects`
 3. `58e0e1ad8` – `fix(cards): align superior net barriers semantics`
 
-## Vorbereiteter Integrationsabschluss
+## Integration und Cleanup
 
 - Der Arbeitsbranch wurde gegen den weiterhin unveränderten lokalen `main` auf `183d827a0` geprüft; ein zusätzlicher Main-Merge war nicht erforderlich.
-- Nach diesem Verifikationscommit wird der Branch lokal nach `main` integriert.
-- Anschließend werden Worktree und Branch ohne Force entfernt und die Integration per Ancestor- und Statusprüfung verifiziert.
-- Kein Push vorgesehen.
+- Der Arbeitsbranch wurde per Fast-forward lokal nach `main` integriert; Integrations-HEAD vor dieser abschließenden Dokumentationsaktualisierung: `b6d222f2c`.
+- Die Ancestor-Prüfung war erfolgreich; `main` und Arbeitsbranch waren sauber.
+- Worktree `C:\Projekte\NETGRID_CARD_RANDOM_BATCH_16`, seine Test-Junctions und Branch `codex/card-random-batch-16` wurden ohne Force entfernt und anschließend verifiziert.
+- Kein Push durchgeführt.
