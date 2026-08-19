@@ -70,6 +70,10 @@ export type PutCardImageBlobInput = {
   kind?: CardImageVariantKind;
 };
 
+export type PutCardImageAssetInput = {
+  variants: readonly PutCardImageBlobInput[];
+};
+
 export type CardImageStoreErrorCode =
   | "invalid_collection_id"
   | "invalid_printing_id"
@@ -113,14 +117,34 @@ export class CardImageStore {
   async putMasterAsset(
     input: PutCardImageBlobInput,
   ): Promise<StoredCardImageAsset> {
-    const variant = await this.putBlob({ ...input, kind: "master" });
-    const existing = await this.readAssetIfPresent(variant.blobHash);
-    if (existing) return existing;
+    return this.putAssetVariants({ variants: [{ ...input, kind: "master" }] });
+  }
+
+  async putAssetVariants(
+    input: PutCardImageAssetInput,
+  ): Promise<StoredCardImageAsset> {
+    const variants: StoredCardImageAsset["variants"] = {};
+    for (const candidate of input.variants) {
+      const variant = await this.putBlob(candidate);
+      if (variants[variant.kind])
+        throw new CardImageStoreError(
+          "asset_manifest_invalid",
+          `Kartenbild-Asset enthält Variante ${variant.kind} mehrfach.`,
+        );
+      variants[variant.kind] = variant;
+    }
+    const master = variants.master;
+    if (!master)
+      throw new CardImageStoreError(
+        "asset_manifest_invalid",
+        "Kartenbild-Asset benötigt eine Master-Variante.",
+      );
+    const existing = await this.readAssetIfPresent(master.blobHash);
     const asset: StoredCardImageAsset = {
       schemaVersion: CARD_IMAGE_STORE_SCHEMA_VERSION,
-      assetHash: variant.blobHash,
-      createdAt: this.now().toISOString(),
-      variants: { master: variant },
+      assetHash: master.blobHash,
+      createdAt: existing?.createdAt ?? this.now().toISOString(),
+      variants: { ...existing?.variants, ...variants },
     };
     await this.writeJsonAtomically(
       this.assetManifestPath(asset.assetHash),

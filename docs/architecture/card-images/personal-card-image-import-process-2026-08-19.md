@@ -4,7 +4,7 @@ Status: `in_progress`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img01-img05-card-image-import`
-Aktueller Zustand: `IMG03_done`
+Aktueller Zustand: `IMG04_done`
 
 ## Quelle und Zielprüfung
 
@@ -116,6 +116,12 @@ Bei roten Done-Gates verbleibt der Prozess im aktuellen Zustand.
   über CLI und Package-API verfügbar.
 - Checks: 14 Kartenbild-Pakettests, Paket-Typecheck und Package-Boundary-Check
   grün; CLI-Smoke erzeugte für Proteus exakt 154 Datenzeilen plus Kopfzeile.
+- IMG04 abgeschlossen: EXIF-Ausrichtung, sRGB-Normalisierung,
+  Metadatenentfernung und WebP-Derivate `master`, `thumb`, `preview` und `full`
+  werden ohne Crop und ohne Hochskalierung erzeugt.
+- Checks: 18 Kartenbild-Pakettests einschließlich Orientierung, Größenlimits,
+  Verhältnis- und Metadatenprüfung sowie Paket-Typecheck und Package-Boundary-
+  Check grün.
 
 ## Paketfolge
 

@@ -74,9 +74,17 @@ describe("card image CSV workflow", () => {
       cards: [card],
     });
     expect(imported.summary.bound).toBe(1);
-    expect(
-      await store.resolveBinding("personal", card.printingId),
-    ).toMatchObject({ assetHash: imported.results[0]!.assetHash });
+    const binding = await store.resolveBinding("personal", card.printingId);
+    expect(binding).toMatchObject({
+      assetHash: imported.results[0]!.assetHash,
+    });
+    const asset = await store.readAsset(binding!.assetHash);
+    expect(Object.keys(asset.variants).sort()).toEqual([
+      "full",
+      "master",
+      "preview",
+      "thumb",
+    ]);
   });
 
   it("does not activate any row when one selected source is invalid", async () => {

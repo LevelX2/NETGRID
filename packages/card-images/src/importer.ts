@@ -1,9 +1,8 @@
-import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
-import sharp from "sharp";
 import { parseCardImageMappingCsv, type CardImageMappingRow } from "./csv";
+import { normalizeCardImage, type NormalizedCardImage } from "./normalizer";
 import {
   CardImageStore,
   CardImageStoreError,
@@ -13,19 +12,11 @@ import {
 } from "./store";
 
 const MAX_SOURCE_BYTES = 50 * 1024 * 1024;
-const MAX_INPUT_PIXELS = 100_000_000;
-const MIN_WIDTH = 200;
-const MIN_HEIGHT = 280;
-const MAX_DIMENSION = 12_000;
-
 export type CardImageImportErrorCode =
   | "mapping_file_missing"
   | "source_remote_not_allowed"
   | "source_file_missing"
   | "source_file_too_large"
-  | "source_image_invalid"
-  | "source_image_format_unsupported"
-  | "source_image_dimensions_invalid"
   | "source_hash_mismatch";
 
 export class CardImageImportError extends Error {
@@ -76,11 +67,8 @@ export type CardImageImportReport = {
 type PreparedImage = {
   row: CardImageMappingRow;
   sourceFileName: string;
-  content: Buffer;
+  normalized: NormalizedCardImage;
   assetHash: string;
-  mediaType: CardImageMediaType;
-  width: number;
-  height: number;
 };
 
 export async function importCardImagesFromCsv(
@@ -115,11 +103,8 @@ export async function importCardImagesFromCsv(
   if (!options.dryRun) {
     const changes = [];
     for (const image of prepared) {
-      const asset = await store.putMasterAsset({
-        content: image.content,
-        mediaType: image.mediaType,
-        width: image.width,
-        height: image.height,
+      const asset = await store.putAssetVariants({
+        variants: Object.values(image.normalized.variants),
       });
       if (asset.assetHash !== image.assetHash)
         throw new CardImageStoreError(
@@ -188,69 +173,19 @@ async function prepareLocalImage(
       `Bildquelle für ${row.printingId} überschreitet 50 MiB.`,
       row.printingId,
     );
-  const assetHash = sha256(content);
-  if (row.expectedSha256 && row.expectedSha256 !== assetHash)
+  const normalized = await normalizeCardImage(content, row.printingId);
+  if (row.expectedSha256 && row.expectedSha256 !== normalized.sourceHash)
     throw new CardImageImportError(
       "source_hash_mismatch",
       `SHA-256 der Bildquelle für ${row.printingId} stimmt nicht.`,
       row.printingId,
     );
-  const metadata = await safeMetadata(content, row.printingId);
-  const mediaType = mediaTypeForFormat(metadata.format, row.printingId);
-  const width = metadata.width;
-  const height = metadata.height;
-  if (
-    !width ||
-    !height ||
-    width < MIN_WIDTH ||
-    height < MIN_HEIGHT ||
-    width > MAX_DIMENSION ||
-    height > MAX_DIMENSION ||
-    width >= height
-  )
-    throw new CardImageImportError(
-      "source_image_dimensions_invalid",
-      `Bildquelle für ${row.printingId} besitzt keine plausiblen Kartenabmessungen.`,
-      row.printingId,
-    );
   return {
     row,
     sourceFileName: path.basename(source),
-    content,
-    assetHash,
-    mediaType,
-    width,
-    height,
+    normalized,
+    assetHash: normalized.assetHash,
   };
-}
-
-async function safeMetadata(content: Buffer, printingId: string) {
-  try {
-    return await sharp(content, {
-      failOn: "error",
-      limitInputPixels: MAX_INPUT_PIXELS,
-    }).metadata();
-  } catch {
-    throw new CardImageImportError(
-      "source_image_invalid",
-      `Bildquelle für ${printingId} konnte nicht sicher dekodiert werden.`,
-      printingId,
-    );
-  }
-}
-
-function mediaTypeForFormat(
-  format: string | undefined,
-  printingId: string,
-): CardImageMediaType {
-  if (format === "png") return "image/png";
-  if (format === "jpeg") return "image/jpeg";
-  if (format === "webp") return "image/webp";
-  throw new CardImageImportError(
-    "source_image_format_unsupported",
-    `Bildformat für ${printingId} wird nicht unterstützt.`,
-    printingId,
-  );
 }
 
 function planBindingResults(
@@ -286,14 +221,15 @@ function reportResult(
     previousAssetHash?: string;
   },
 ): CardImageImportResult {
+  const master = image.normalized.variants.master;
   return {
     printingId: image.row.printingId,
     sourceFileName: image.sourceFileName,
     assetHash: image.assetHash,
-    mediaType: image.mediaType,
-    width: image.width,
-    height: image.height,
-    bytes: image.content.byteLength,
+    mediaType: master.mediaType,
+    width: master.width,
+    height: master.height,
+    bytes: image.normalized.sourceBytes,
     status: binding.status,
     ...(binding.previousAssetHash
       ? { previousAssetHash: binding.previousAssetHash }
@@ -312,10 +248,6 @@ function summarize(
   };
   for (const result of results) summary[result.status] += 1;
   return summary;
-}
-
-function sha256(content: Uint8Array): string {
-  return createHash("sha256").update(content).digest("hex");
 }
 
 function isMissingFileError(error: unknown): boolean {
