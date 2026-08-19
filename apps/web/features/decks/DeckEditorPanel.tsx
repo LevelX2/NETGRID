@@ -35,7 +35,6 @@ import {
   filterCatalogCardsByRarity,
   catalogCardMatchesTypeFilters,
   catalogRarityLabel,
-  catalogSetDetailLabel,
   summarizeCatalogRarityFilters,
   summarizeCatalogSetFilters,
   summarizeCatalogTypeFilters,
@@ -46,7 +45,7 @@ import {
 } from "../catalog/catalog-model";
 import { DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
-import { neededDevelopmentLabel } from "../cards/card-detail-lines";
+import { formatCardTerm } from "../cards/card-text-lines";
 import { DeckAgendaStatusBadge } from "./DeckAgendaStatusBadge";
 import type { StandardDeck } from "../account/account-deck-client";
 import {
@@ -241,81 +240,14 @@ const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   operation: true,
 };
 
-const CATALOG_NUMERIC_LABELS: Record<string, string> = {
-  cost: "Kosten",
-  installCost: "Install",
-  memoryCost: "MU",
-  strength: "Stärke",
-  rezCost: "Rez",
-  trashCost: "Trash",
-  advancementRequirement: "Benötigt",
-  agendaPoints: "Agenda",
-};
-
-function formatCatalogTerm(value: string): string {
-  const normalized = value.toLowerCase();
-  if (normalized === "ice") return "ICE";
-  if (normalized === "event") return "Prep";
-  return value
-    .replace(/[_-]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
-}
-
-function formatCatalogTypeLine(
-  card: Pick<CatalogCardSummary, "type" | "subtypes">,
-): string {
-  const type = formatCatalogTerm(card.type);
-  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
-  return [type, subtypes].filter(Boolean).join(" - ");
-}
-
-function catalogNumericLabel(
-  key: string,
-  label: string,
-  value: number | null | undefined,
-): string | null {
-  if (value === null || value === undefined) return null;
-  if (key === "advancementRequirement") return neededDevelopmentLabel(value);
-  return `${label} ${value}`;
-}
-
 function deckBuilderCardGroup(card: CatalogCardSummary | null): string {
   if (!card) return "Unbekannt";
   return [
-    formatCatalogTerm(card.type),
-    card.subtypes.map(formatCatalogTerm).join(" / "),
+    formatCardTerm(card.type),
+    card.subtypes.map(formatCardTerm).join(" / "),
   ]
     .filter(Boolean)
     .join(" - ");
-}
-
-function deckBuilderMetricLine(detail: CatalogCardDetail | undefined): string {
-  if (!detail) return "";
-  return Object.entries(CATALOG_NUMERIC_LABELS)
-    .map(([key, label]) => {
-      const value = detail.numeric[key];
-      return catalogNumericLabel(key, label, value);
-    })
-    .filter(Boolean)
-    .join(" · ");
-}
-
-function deckBuilderCardTooltip(
-  card: CatalogCardSummary,
-  detail: CatalogCardDetail | undefined,
-): string {
-  return [
-    card.title,
-    formatCatalogTypeLine(card),
-    detail ? catalogSetDetailLabel(detail) : "",
-    detail ? deckBuilderMetricLine(detail) : "",
-    detail?.text ?? "",
-  ]
-    .filter(Boolean)
-    .join("\n");
 }
 
 function catalogCardAllowedForDeckEditor(

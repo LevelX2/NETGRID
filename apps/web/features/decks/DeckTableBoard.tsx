@@ -35,6 +35,7 @@ import {
 } from "./deck-table-model";
 import { DeckCardThumb } from "./DeckCardThumb";
 import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
+import { cardMetricLine, formatCardTypeLine } from "../cards/card-text-lines";
 
 type CatalogCardSummary = {
   catalogCardId: string;
@@ -402,6 +403,8 @@ function DeckTablePileView({
                     cardId={card.catalogCardId}
                     title={card.title}
                     cardType={card.type}
+                    typeLine={formatCardTypeLine(card)}
+                    metricLine={cardMetricLine(detail)}
                     table
                     {...(detail?.text ? { rulesText: detail.text } : {})}
                     {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}

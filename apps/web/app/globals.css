@@ -2799,15 +2799,22 @@ select {
 .catalogImagePreview {
   position: relative;
   width: min(230px, 100%);
+  aspect-ratio: 5 / 7;
   margin: 10px auto 12px;
   overflow: hidden;
   border-radius: 8px;
 }
 
+.catalogImagePreview.textFallback {
+  border: 1px solid var(--line);
+  box-shadow: var(--card-shadow);
+}
+
 .catalogImagePreview img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   border: 1px solid var(--card-image-border);
   border-radius: 8px;
   box-shadow: var(--card-shadow);
@@ -4478,6 +4485,7 @@ select {
 
 .deckCardThumb {
   position: relative;
+  container-type: inline-size;
   width: 52px;
   aspect-ratio: 5 / 7;
   display: grid;
@@ -4488,6 +4496,145 @@ select {
   color: var(--muted);
   background: var(--card-hidden-bg);
   font-weight: 800;
+}
+
+.cardTextPreview {
+  --card-text-preview-accent: var(--muted);
+  --card-text-preview-scale: 1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: block;
+  padding: clamp(3px, 5cqi, 9px);
+  overflow: hidden;
+  border-radius: inherit;
+  color: var(--text);
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--card-text-preview-accent), var(--card-bg) 70%) 0%,
+      color-mix(in srgb, var(--card-text-preview-accent), var(--card-bg) 88%) 70%,
+      var(--card-bg) 100%
+    );
+  box-shadow:
+    inset clamp(2px, 2.5cqi, 4px) 0 0
+      color-mix(in srgb, var(--card-text-preview-accent), white 16%),
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--card-text-preview-accent), var(--line) 34%);
+  text-align: left;
+}
+
+.cardTextPreviewContent {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  align-content: start;
+  gap: calc(clamp(1px, 2.5cqi, 4px) * var(--card-text-preview-scale));
+  min-width: 0;
+}
+
+.cardTextPreviewTitle,
+.cardTextPreviewType,
+.cardTextPreviewMetrics,
+.cardTextPreviewRules {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cardTextPreviewTitle {
+  color: var(--text);
+  font-size: calc(clamp(7px, 10cqi, 14px) * var(--card-text-preview-scale));
+  font-weight: 850;
+  line-height: 1.08;
+}
+
+.cardTextPreviewType,
+.cardTextPreviewMetrics {
+  color: color-mix(in srgb, var(--text), var(--muted) 52%);
+  font-size: calc(clamp(5px, 6.4cqi, 10px) * var(--card-text-preview-scale));
+  line-height: 1.12;
+}
+
+.cardTextPreviewMetrics {
+  color: color-mix(in srgb, var(--card-text-preview-accent), var(--text) 48%);
+  font-weight: 750;
+}
+
+.cardTextPreviewRules {
+  display: block;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: calc(clamp(5px, 6.8cqi, 11px) * var(--card-text-preview-scale));
+  line-height: 1.18;
+  white-space: pre-line;
+}
+
+.cardTextPreviewRules > span {
+  display: block;
+}
+
+.cardTextPreviewRules.loading {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.cardTextPreview.density-thumb {
+  padding: 4px;
+}
+
+.cardTextPreview.density-thumb .cardTextPreviewContent {
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 2px;
+}
+
+.cardTextPreview.density-thumb .cardTextPreviewType,
+.cardTextPreview.density-thumb .cardTextPreviewMetrics,
+.cardTextPreview.density-thumb .cardTextPreviewRules {
+  display: none;
+}
+
+.cardTextPreview.density-thumb .cardTextPreviewTitle {
+  align-self: start;
+  font-size: calc(clamp(6px, 13cqi, 9px) * var(--card-text-preview-scale));
+  line-height: 1.05;
+}
+
+.cardTextPreview.density-preview .cardTextPreviewRules {
+  font-size: calc(clamp(8px, 5.2cqi, 12px) * var(--card-text-preview-scale));
+}
+
+.cardTextPreview.type-agenda {
+  --card-text-preview-accent: var(--agenda);
+}
+
+.cardTextPreview.type-ice {
+  --card-text-preview-accent: #3299cf;
+}
+
+.cardTextPreview.type-asset {
+  --card-text-preview-accent: #caa7ff;
+}
+
+.cardTextPreview.type-upgrade {
+  --card-text-preview-accent: #adb8c7;
+}
+
+.cardTextPreview.type-operation,
+.cardTextPreview.type-event {
+  --card-text-preview-accent: #f0a55d;
+}
+
+.cardTextPreview.type-program {
+  --card-text-preview-accent: var(--runner);
+}
+
+.cardTextPreview.type-hardware {
+  --card-text-preview-accent: #c7e88a;
+}
+
+.cardTextPreview.type-resource {
+  --card-text-preview-accent: #e38ca8;
 }
 
 .deckCardThumb.large {
