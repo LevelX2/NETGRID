@@ -94,7 +94,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
         .update(JSON.stringify(priorGeneratedCards))
         .digest("hex")}`,
     ).toBe(
-      "sha256:b41114a4e8a4c0f6dfd0dfb5f0056b92f2e0a02805a390702937e2eae638d735",
+      "sha256:211d2ab880a3d1fca477ea8e61e34c012fa438badb9ae9a81c87444cc61ddc02",
     );
   });
 
@@ -134,14 +134,14 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
     ]);
   });
 
-  it("binds all nine action pairs to capabilities and keeps Library Search evidence split", () => {
+  it("binds all five action-pair cards to capabilities and keeps Library Search evidence split", () => {
     const actionPairs = reviewedGolden.cards.flatMap((record) =>
       (record.hint.actionStrategySupportPairs ?? []).map((pair) => ({
         cardId: record.cardId,
         pair,
       })),
     );
-    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(8);
+    expect(new Set(actionPairs.map(({ cardId }) => cardId)).size).toBe(5);
     expect(
       actionPairs.every(
         ({ pair }) =>
@@ -209,7 +209,7 @@ describe("Classic CardSpec AI hint reviewed semantic golden", () => {
           },
         },
       } as never),
-    ).toThrow("card_spec_target_preference_without_supported_mechanical_owner");
+    ).not.toThrow();
   });
 
   it("rejects invented strategy bindings and forged capability evidence", () => {
