@@ -88,6 +88,21 @@ export function resolveNetgridCardImagePackBuildRoot(
   return path.join(resolveNetgridCardImagePackRoot(options), "build");
 }
 
+export function resolveNetgridCardImageImportRoot(
+  options: NetgridPathOptions = {},
+): string {
+  return path.join(
+    path.dirname(resolveNetgridCardImageRoot(options)),
+    "card-image-import",
+  );
+}
+
+export function resolveNetgridCardImageImportInboxRoot(
+  options: NetgridPathOptions = {},
+): string {
+  return path.join(resolveNetgridCardImageImportRoot(options), "inbox");
+}
+
 function configuredDataRoot(env: NodeJS.ProcessEnv): string | undefined {
   const value = env[NETGRID_DATA_ROOT_ENV]?.trim();
   if (!value) return undefined;

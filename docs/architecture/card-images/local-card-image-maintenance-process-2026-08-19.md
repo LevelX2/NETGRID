@@ -5,7 +5,7 @@ Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img08-local-card-image-management`
 Worktree: `C:\Projekte\NETGRID_IMG08_LOCAL_CARD_IMAGE_MANAGEMENT`
-Aktives Paket: `IMG08.2`
+Aktives Paket: `IMG08.3`
 
 ## Quelle und Zielprüfung
 
@@ -112,7 +112,7 @@ queued -> running -> failed
 ## Paketfolge
 
 1. `IMG08.1` – Sicherheits- und Backend-Vertrag (`completed`)
-2. `IMG08.2` – Import-Inbox und Bestandsübersicht
+2. `IMG08.2` – Import-Inbox und Bestandsübersicht (`completed`)
 3. `IMG08.3` – lokale und HTTPS-Importjobs
 4. `IMG08.4` – private Bildpaketverwaltung
 5. `IMG08.5` – Maintenance-Weboberfläche und Berichte
@@ -131,6 +131,20 @@ queued -> running -> failed
 - Server-Typecheck erreicht weiterhin ausschließlich den bereits auf `main`
   vorhandenen unabhängigen AI-Fehler
   `selected-choices-for-decision.ts(2588): option.card possibly undefined`.
+
+### IMG08.2 abgeschlossen
+
+- verwalteten Inbox-Root mit kanonischer Rootprüfung, Traversal- und
+  Symlink-Sperre ergänzt;
+- ausschließlich relative Inbox-Einträge klassifiziert;
+- Katalogbestand für Originalset 374, Proteus 154 und Classic 54 gegen die
+  persönliche Collection ausgewertet;
+- geschützte Inventory-, Inbox- und CSV-Template-Routen ergänzt;
+- `@netgrid/card-images`: 42 Tests und Typecheck bestanden;
+- fokussierter Server-HTTP-Test: 4 Tests bestanden;
+- Package-Boundary-Gate bestanden;
+- Server-Typecheck weiterhin nur durch denselben unabhängigen AI-Baselinefehler
+  gestoppt.
 
 ## Paketdetails
 

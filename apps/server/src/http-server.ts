@@ -105,6 +105,11 @@ import {
   CARD_IMAGE_MAINTENANCE_API_PREFIX,
   CardImageMaintenanceService,
 } from "./card-image-maintenance";
+import {
+  CardImageInboxError,
+  PRIVATE_CARD_IMAGE_PACK_PROFILES,
+  type PrivateCardImagePackProfileId,
+} from "@netgrid/card-images";
 
 const NETGRID_REPOSITORY_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -2194,6 +2199,43 @@ async function routeHttp(
     }
 
     if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inventory` &&
+      request.method === "GET"
+    ) {
+      sendJson(response, 200, await cardImageMaintenance.inventory());
+      return;
+    }
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inbox` &&
+      request.method === "GET"
+    ) {
+      sendJson(response, 200, await cardImageMaintenance.inbox());
+      return;
+    }
+
+    if (
+      url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/template` &&
+      request.method === "GET"
+    ) {
+      const profileId = cardImageTemplateProfile(
+        url.searchParams.get("profile"),
+      );
+      if (!profileId) {
+        sendJson(response, 400, {
+          error: {
+            code: "card_image_profile_invalid",
+            message: "Das angeforderte Kartenbildprofil ist ungültig.",
+          },
+        });
+        return;
+      }
+      const template = cardImageMaintenance.mappingTemplate(profileId);
+      sendCsv(response, template.content, template.fileName);
+      return;
+    }
+
+    if (
       url.pathname === "/api/storage/maintenance/summary" &&
       request.method === "GET"
     ) {
@@ -3551,6 +3593,12 @@ async function routeHttp(
       sendJson(response, mapped.status, mapped.payload);
       return;
     }
+    if (error instanceof CardImageInboxError) {
+      sendJson(response, error.code === "inbox_entry_missing" ? 404 : 400, {
+        error: { code: error.code, message: error.message },
+      });
+      return;
+    }
     if (
       error instanceof StorageError &&
       error.code === "storage_temporarily_unavailable"
@@ -3655,6 +3703,27 @@ function sendMarkdown(
     "content-disposition": `attachment; filename="${filename}"`,
   });
   response.end(markdown);
+}
+
+function sendCsv(
+  response: ServerResponse,
+  content: string,
+  filename: string,
+): void {
+  response.writeHead(200, {
+    "content-type": "text/csv; charset=utf-8",
+    "content-disposition": `attachment; filename="${filename}"`,
+  });
+  response.end(content);
+}
+
+function cardImageTemplateProfile(
+  value: string | null,
+): PrivateCardImagePackProfileId | "all" | undefined {
+  if (!value || value === "all") return "all";
+  return value in PRIVATE_CARD_IMAGE_PACK_PROFILES
+    ? (value as PrivateCardImagePackProfileId)
+    : undefined;
 }
 
 function sendBootstrap(

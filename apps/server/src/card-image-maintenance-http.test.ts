@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import type { AddressInfo } from "node:net";
+import { mkdtemp, mkdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { CardImageStore } from "@netgrid/card-images";
 import {
   InMemoryMaintenanceCredentialStore,
   MaintenanceAuthService,
@@ -8,8 +12,12 @@ import {
   createNetgridHttpServer,
   type NetgridServerHandle,
 } from "./http-server";
-import { loadDeploymentConfig, type DeploymentConfig } from "./internet-hardening";
+import {
+  loadDeploymentConfig,
+  type DeploymentConfig,
+} from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService } from "./multiplayer";
+import { CardImageMaintenanceService } from "./card-image-maintenance";
 
 const LOCAL_ORIGIN = "http://127.0.0.1:3100";
 const REMOTE_ORIGIN = "https://admin.netgrid.example";
@@ -82,7 +90,69 @@ describe("IMG08 local card image maintenance boundary", () => {
     });
   });
 
-  async function startClient(config: DeploymentConfig) {
+  it("serves catalog inventory, relative inbox entries and profile templates", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "netgrid-img08-http-"));
+    const inboxRoot = path.join(root, "inbox");
+    await mkdir(path.join(inboxRoot, "mappings"), { recursive: true });
+    await writeFile(path.join(inboxRoot, "mappings", "originalset.csv"), "x");
+    const client = await startClient(
+      localConfig(),
+      new CardImageMaintenanceService({
+        inbox: { inboxRoot },
+        store: new CardImageStore({ root: path.join(root, "store") }),
+      }),
+    );
+    const session = await client.login(LOCAL_ORIGIN);
+    const headers = { cookie: session.cookie, origin: LOCAL_ORIGIN };
+
+    const inventoryResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inventory`,
+      { headers },
+    );
+    expect(inventoryResponse.status).toBe(200);
+    const inventory = await inventoryResponse.json();
+    expect(inventory.sets).toEqual([
+      expect.objectContaining({
+        profileId: "originalset",
+        total: 374,
+        bound: 0,
+      }),
+      expect.objectContaining({ profileId: "proteus", total: 154, bound: 0 }),
+      expect.objectContaining({ profileId: "classic", total: 54, bound: 0 }),
+    ]);
+
+    const inboxResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/inbox`,
+      { headers },
+    );
+    expect(inboxResponse.status).toBe(200);
+    const inbox = await inboxResponse.json();
+    expect(inbox.entries).toContainEqual(
+      expect.objectContaining({
+        relativePath: "mappings/originalset.csv",
+        usage: "mapping",
+      }),
+    );
+    expect(JSON.stringify(inbox)).not.toContain(root);
+
+    const templateResponse = await fetch(
+      `${client.baseUrl}/api/storage/maintenance/card-images/template?profile=classic`,
+      { headers },
+    );
+    expect(templateResponse.status).toBe(200);
+    expect(templateResponse.headers.get("content-type")).toContain("text/csv");
+    expect(templateResponse.headers.get("content-disposition")).toContain(
+      "netgrid-card-images-classic.csv",
+    );
+    const template = await templateResponse.text();
+    expect(template.trimEnd().split("\n")).toHaveLength(55);
+    expect(template).toContain("printingId");
+  });
+
+  async function startClient(
+    config: DeploymentConfig,
+    cardImageMaintenance?: CardImageMaintenanceService,
+  ) {
     const maintenanceAuth = new MaintenanceAuthService(
       new InMemoryMaintenanceCredentialStore(),
       {
@@ -100,7 +170,11 @@ describe("IMG08 local card image maintenance boundary", () => {
       new MultiplayerService(new InMemoryMatchStorage(), {
         tokenSalt: "img08-maintenance-test",
       }),
-      { deploymentConfig: config, maintenanceAuth },
+      {
+        deploymentConfig: config,
+        maintenanceAuth,
+        ...(cardImageMaintenance ? { cardImageMaintenance } : {}),
+      },
     );
     handles.push(handle);
     await new Promise<void>((resolve) =>
