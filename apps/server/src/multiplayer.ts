@@ -629,6 +629,9 @@ export type MultiplayerStorage = {
   ): Promise<StoredMatch | undefined>;
   saveActionDelta?(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
+  listStartupReconciliationMetadata?(
+    matchIds: readonly string[],
+  ): Promise<MatchStartupReconciliationMetadata[]>;
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   listPublicMatchCandidates?(): Promise<StoredMatch[]>;
   listResultSnapshotCandidates?(): Promise<StoredMatch[]>;
@@ -685,6 +688,26 @@ export type MultiplayerStorage = {
 };
 
 export type MatchPersistenceObserver = (record: StoredMatch) => Promise<void>;
+
+export type MatchStartupReconciliationMetadata = {
+  matchId: string;
+  status: MatchStatus;
+  stateVersion?: number;
+  updatedAt: string;
+  seriesNextMatchId?: string;
+};
+
+export type StartupReconciliationReport = {
+  queryDurationMs: number;
+  candidateCount: number;
+  repairedMatchCount: number;
+  metadata: MatchStartupReconciliationMetadata[];
+};
+
+export type StartupReconciliationInput = {
+  metadataMatchIds: readonly string[];
+  terminalResultMatchIds: readonly string[];
+};
 
 export type SidePayload = ApiSidePayload;
 export type AiTurnPresentationState = ApiAiTurnPresentationState;
@@ -1036,6 +1059,25 @@ export class InMemoryMatchStorage implements MultiplayerStorage {
     return [...this.records.values()].map((record) => clone(record));
   }
 
+  async listStartupReconciliationMetadata(
+    matchIds: readonly string[],
+  ): Promise<MatchStartupReconciliationMetadata[]> {
+    const wanted = new Set(matchIds);
+    return [...this.records.values()]
+      .filter((record) => wanted.has(record.match.matchId))
+      .map((record) => ({
+        matchId: record.match.matchId,
+        status: record.match.status,
+        ...(record.gameState
+          ? { stateVersion: record.gameState.stateVersion }
+          : {}),
+        updatedAt: record.match.updatedAt,
+        ...(record.match.series?.nextMatchId
+          ? { seriesNextMatchId: record.match.series.nextMatchId }
+          : {}),
+      }));
+  }
+
   async health(): Promise<StorageHealth> {
     return { ok: true, kind: "memory", matchCount: this.records.size };
   }
@@ -1112,11 +1154,35 @@ export class MultiplayerService {
 
   async reconcilePersistedMatches(
     observer: MatchPersistenceObserver,
-  ): Promise<number> {
-    if (!this.storage.list) return 0;
-    const records = await this.storage.list();
-    for (const record of records) await observer(record);
-    return records.length;
+    input: StartupReconciliationInput,
+  ): Promise<StartupReconciliationReport> {
+    if (!this.storage.listStartupReconciliationMetadata)
+      throw new Error("startup_reconciliation_metadata_unsupported");
+    const queryStartedAt = performance.now();
+    const metadata = await this.storage.listStartupReconciliationMetadata(
+      input.metadataMatchIds,
+    );
+    const queryDurationMs = performance.now() - queryStartedAt;
+    const candidateMatchIds = new Set(input.terminalResultMatchIds);
+    const terminalCandidates = metadata.filter(
+      (candidate) =>
+        candidateMatchIds.has(candidate.matchId) &&
+        (candidate.status === "finished" || candidate.status === "forfeited"),
+    );
+    for (const candidate of terminalCandidates) {
+      const record = await this.storage.load(candidate.matchId);
+      if (!record)
+        throw new Error(
+          `startup_reconciliation_candidate_missing:${candidate.matchId}`,
+        );
+      await observer(record);
+    }
+    return {
+      queryDurationMs,
+      candidateCount: terminalCandidates.length,
+      repairedMatchCount: terminalCandidates.length,
+      metadata,
+    };
   }
 
   private async persist(record: StoredMatch): Promise<void> {

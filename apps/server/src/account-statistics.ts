@@ -96,6 +96,12 @@ export type AccountStatisticsStorage = {
   listMatchParticipantsForAccount(
     accountId: string,
   ): Promise<AccountMatchParticipantBinding[]>;
+  listMatchIdsWithMissingGameResults(): Promise<string[]>;
+  listBoundMatchIds(): Promise<string[]>;
+  hasMissingNextMatchParticipantBindings(
+    sourceMatchId: string,
+    targetMatchId: string,
+  ): Promise<boolean>;
   recordGameResult(record: AccountGameResultRecord): Promise<void>;
   recordSeriesResult(record: AccountSeriesResultRecord): Promise<void>;
   listGameResultsForAccount(
@@ -172,6 +178,48 @@ export class InMemoryAccountStatisticsStorage implements AccountStatisticsStorag
       .filter((binding) => binding.accountId === accountId)
       .sort((left, right) => right.boundAt.localeCompare(left.boundAt))
       .map((binding) => clone(binding));
+  }
+
+  async listMatchIdsWithMissingGameResults(): Promise<string[]> {
+    return [
+      ...new Set(
+        [...this.bindings.values()]
+          .filter(
+            (binding) =>
+              !this.gameResults.has(
+                gameResultKey({
+                  accountId: binding.accountId,
+                  originMatchId: binding.matchId,
+                  participantSlot: binding.participantSlot,
+                } as AccountGameResultRecord),
+              ),
+          )
+          .map((binding) => binding.matchId),
+      ),
+    ];
+  }
+
+  async listBoundMatchIds(): Promise<string[]> {
+    return [
+      ...new Set([...this.bindings.values()].map((binding) => binding.matchId)),
+    ];
+  }
+
+  async hasMissingNextMatchParticipantBindings(
+    sourceMatchId: string,
+    targetMatchId: string,
+  ): Promise<boolean> {
+    const targetBindings = new Map(
+      [...this.bindings.values()]
+        .filter((binding) => binding.matchId === targetMatchId)
+        .map((binding) => [binding.participantSlot, binding.accountId]),
+    );
+    return [...this.bindings.values()]
+      .filter((binding) => binding.matchId === sourceMatchId)
+      .some(
+        (binding) =>
+          targetBindings.get(binding.participantSlot) !== binding.accountId,
+      );
   }
 
   async recordGameResult(record: AccountGameResultRecord): Promise<void> {
@@ -278,6 +326,58 @@ export class SqliteAccountStatisticsStorage implements AccountStatisticsStorage 
        FROM account_match_participants WHERE account_id = ? ORDER BY bound_at DESC`,
       )
       .all(accountId) as AccountMatchParticipantBinding[];
+  }
+
+  async listMatchIdsWithMissingGameResults(): Promise<string[]> {
+    return (
+      this.db
+        .prepare(
+          `SELECT DISTINCT participant.match_id AS matchId
+             FROM account_match_participants participant
+            WHERE NOT EXISTS (
+              SELECT 1
+                FROM account_game_results result
+               WHERE result.account_id = participant.account_id
+                 AND result.origin_match_id = participant.match_id
+                 AND result.participant_slot = participant.participant_slot
+            )
+            ORDER BY participant.match_id ASC`,
+        )
+        .all() as Array<{ matchId: string }>
+    ).map((row) => row.matchId);
+  }
+
+  async listBoundMatchIds(): Promise<string[]> {
+    return (
+      this.db
+        .prepare(
+          "SELECT DISTINCT match_id AS matchId FROM account_match_participants ORDER BY match_id ASC",
+        )
+        .all() as Array<{ matchId: string }>
+    ).map((row) => row.matchId);
+  }
+
+  async hasMissingNextMatchParticipantBindings(
+    sourceMatchId: string,
+    targetMatchId: string,
+  ): Promise<boolean> {
+    const row = this.db
+      .prepare(
+        `SELECT EXISTS(
+          SELECT 1
+            FROM account_match_participants source
+           WHERE source.match_id = ?
+             AND NOT EXISTS (
+               SELECT 1
+                 FROM account_match_participants target
+                WHERE target.match_id = ?
+                  AND target.participant_slot = source.participant_slot
+                  AND target.account_id = source.account_id
+             )
+        ) AS missing`,
+      )
+      .get(sourceMatchId, targetMatchId) as { missing: number };
+    return row.missing === 1;
   }
 
   async recordGameResult(record: AccountGameResultRecord): Promise<void> {
@@ -583,6 +683,38 @@ export class AccountMatchStatisticsService {
     await this.inheritMatchParticipants({
       sourceMatchId: record.match.matchId,
       targetMatchId: nextMatchId,
+      bindingSource: "inherited_series_next",
+    });
+  }
+
+  async startupReconciliationInput(): Promise<{
+    missingGameResultMatchIds: string[];
+    boundMatchIds: string[];
+  }> {
+    const [missingGameResultMatchIds, boundMatchIds] = await Promise.all([
+      this.storage.listMatchIdsWithMissingGameResults(),
+      this.storage.listBoundMatchIds(),
+    ]);
+    return { missingGameResultMatchIds, boundMatchIds };
+  }
+
+  hasMissingNextMatchParticipantBindings(
+    sourceMatchId: string,
+    targetMatchId: string,
+  ): Promise<boolean> {
+    return this.storage.hasMissingNextMatchParticipantBindings(
+      sourceMatchId,
+      targetMatchId,
+    );
+  }
+
+  reconcileSeriesNextParticipantBindingsFor(
+    sourceMatchId: string,
+    targetMatchId: string,
+  ): Promise<void> {
+    return this.inheritMatchParticipants({
+      sourceMatchId,
+      targetMatchId,
       bindingSource: "inherited_series_next",
     });
   }

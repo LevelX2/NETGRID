@@ -24,6 +24,12 @@ import {
   type RunnerDeckEngineDoctrine,
 } from "./runner-deck-engine-doctrine";
 
+// Bei jeder semantischen Änderung von buildDeckStrategyProfile oder seiner
+// verwendeten Strategiequellen erhöhen. Das Standarddeck-Guide-Gate prüft die
+// resultierenden Profile zusätzlich vollständig.
+export const DECK_STRATEGY_PROFILE_ANALYSIS_REVISION =
+  "deck-strategy-profile-v1" as const;
+
 export type DeckStrategyConfidence = "low" | "medium" | "high";
 
 export type DeckStrategyEvidence = {

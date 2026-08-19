@@ -820,8 +820,12 @@ export default function MaintenancePage() {
               ["Match-Record", formatBytes(detail.sizes.matchRecordBytes)],
               ["Aktueller Zustand", formatBytes(detail.sizes.gameStateBytes)],
               ["Events", formatBytes(detail.sizes.eventPayloadBytes)],
+              ["Engine-Events", formatBytes(detail.sizes.engineEventBytes)],
               ["Snapshots", formatBytes(detail.sizes.stateSnapshotBytes)],
               ["Deck-Snapshot-Blöcke", formatBytes(detail.sizes.deckSnapshotBytes)],
+              ["KI-Entscheidungstraces", formatBytes(detail.sizes.aiDecisionTraceBytes)],
+              ["Pending Undo", formatBytes(detail.sizes.pendingUndoBytes)],
+              ["Start-Lobby", formatBytes(detail.sizes.startLobbyBytes)],
               ["Löschschutz", detail.retentionProtected ? `aktiv${detail.retentionProtectedAt ? ` seit ${new Date(detail.retentionProtectedAt).toLocaleString("de-DE")}` : ""}` : "aus"],
               ["Cleanup", detail.cleanupAssessment.reason]
             ]}

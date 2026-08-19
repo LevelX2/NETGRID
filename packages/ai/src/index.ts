@@ -149,6 +149,7 @@ export type {
 export {
   buildDeckStrategyProfile,
   DECK_STRATEGY_METADATA_CONSUMER_CONTRACT,
+  DECK_STRATEGY_PROFILE_ANALYSIS_REVISION,
 } from "./deck-doctrine-strategy";
 export {
   buildRunnerDeckEngineDoctrine,
