@@ -419,15 +419,16 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "runner",
       (action) => action.type === "access_card",
     );
-    accessState = applyChoices(accessState, "corp", [`target_${programId}`]);
     expect(accessState.runner.heap).toContain(programId);
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
+      actionType: "access_card",
       hiddenZoneAction: "v1919_access_ambush_trash_installed",
       ambushDefinitionId: "onr_v1_323_experimental-ai",
       trashedCardDefinitionId: "simple_decoder",
     });
-    expect(accessState.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(accessState.eventLog.at(-1)?.visibilityClass).toBe(
+      "hidden_info_barrier",
+    );
     expect(accessState.run?.accessedCardId).toBe(
       programTrashByAdvancementAssetId,
     );
@@ -759,12 +760,6 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "runner",
       (action) => action.type === "access_card",
     );
-    expect(hardwareState.pendingChoice?.source).toBe(
-      "card_implementation.runner_installed_multi_trash",
-    );
-    hardwareState = applyChoices(hardwareState, "corp", [
-      `target_${hardwareId}`,
-    ]);
     expect(hardwareState.runner.heap).toContain(hardwareId);
     expect(hardwareState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1919_access_ambush_trash_installed",

@@ -93,17 +93,17 @@ describe("run fort trigger execution", () => {
       "rig",
     );
     state.cardInstances[olderHostedId] = {
-      ...instance(olderHostedId, "old_program", "runner", "rig"),
+      ...instance(olderHostedId, "simple_fracter", "runner", "rig"),
       hostedOn: microtechId,
     } as CardInstance;
     state.cardInstances[topHostedId] = {
-      ...instance(topHostedId, "top_program", "runner", "rig"),
+      ...instance(topHostedId, "simple_decoder", "runner", "rig"),
       hostedOn: microtechId,
     } as CardInstance;
     const host = testHost(state, {
       [MICROTECH_BACKUP_DRIVE_ID]: definition(MICROTECH_BACKUP_DRIVE_ID, "hardware"),
-      old_program: definition("old_program", "program"),
-      top_program: definition("top_program", "program"),
+      simple_fracter: definition("simple_fracter", "program"),
+      simple_decoder: definition("simple_decoder", "program"),
     });
     const action = triggerAction(state, {
       cardId: microtechId,
@@ -128,7 +128,7 @@ describe("run fort trigger execution", () => {
     expect(action.payload).toMatchObject({
       v1922RunnerHardwareAbility: "return_top_hosted_program",
       sourceDefinitionId: MICROTECH_BACKUP_DRIVE_ID,
-      returnedCardDefinitionId: "top_program",
+      returnedCardDefinitionId: "simple_decoder",
       returnedToGrip: true,
       hostedProgramCountAfter: 1,
     });

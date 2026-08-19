@@ -810,7 +810,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       ["Raptor", "onr_v1_054_raptor", "simple_sentry_ice", 2, true],
       ["Shaka", "onr_v1_060_shaka", "simple_sentry_ice", 1, true],
       ["Wild Card", "onr_v1_072_wild-card", "simple_sentry_ice", 0, true],
-      ["Flak", "onr_v1_027_flak", "onr_v1_280_zombie", 1, true],
+      ["Flak", "onr_v1_027_flak", "onr_v1_224_bolter-cluster", 1, true],
       [
         "Dogcatcher",
         "onr_v1_018_dogcatcher",

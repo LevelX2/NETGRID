@@ -406,7 +406,7 @@ describe("card set support catalog source", () => {
     const superiorNetBarriers =
       createRuntimeCardsById()["onr_v1_219_superior-net-barriers"];
     expect(superiorNetBarriers?.text).toBe(
-      "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
+      "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain [1] for each revealed or rezzed wall.",
     );
   });
 

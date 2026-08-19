@@ -164,6 +164,9 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         runnerCreditsSpent: 0,
       }),
     },
+    install: {
+      finalizeCorpIceInstallInnermost: () => undefined,
+    },
     choices: {
       hiddenZoneArrangeChoiceHandlerHost: () => ({}) as never,
       openRunnerInstalledTrashPreventionWindow: () => false,

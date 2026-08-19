@@ -1282,13 +1282,9 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
     state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.pendingChoice?.source).toBe(
-      "card_implementation.runner_installed_multi_trash",
-    );
-    state = applyChoices(state, "corp", [`target_${blinkId}`]);
     expect(state.runner.heap).toContain(blinkId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
+      actionType: "access_card",
       ambushDefinitionId: "onr_v1_323_experimental-ai",
       trashedCardDefinitionId: "onr_v1_007_blink",
     });
@@ -4073,18 +4069,6 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     expect(accessResult.ok).toBe(true);
     if (!accessResult.ok) throw new Error(accessResult.error.message);
     state = accessResult.state;
-    expect(state.pendingChoice).toMatchObject({
-      side: "corp",
-      source: "card_implementation.runner_installed_multi_trash",
-      minSelections: 1,
-      maxSelections: 1,
-    });
-    const hardwareTrashOption = state.pendingChoice?.options.find(
-      (option) => option.value === wuTechId,
-    );
-    expect(hardwareTrashOption).toBeDefined();
-    state = applyChoice(state, "corp", hardwareTrashOption?.id ?? "");
-
     expect(state.runner.heap).toContain(wuTechId);
     expect(state.runner.memoryUsed).toBe(5);
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(4);

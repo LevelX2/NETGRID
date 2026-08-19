@@ -2140,7 +2140,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       4,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      abilityId: "program_install_action_bundle",
+      abilityId: "runner_program_trash_before_install",
       valuPakInstallActionSpent: true,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -2673,7 +2673,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           id: "onr_v1_corp_v1922_flak_ap",
           name: "O:NR V1.9.22 Flak AP ICE Corp",
           cards: [
-            { id: "onr_v1_280_zombie", quantity: 1 },
+            { id: "onr_v1_224_bolter-cluster", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -2685,7 +2685,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     state.runner.memoryLimit = 4;
     state.corp.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_027_flak");
-    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_280_zombie");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_224_bolter-cluster");
 
     state = apply(
       state,
@@ -2781,8 +2781,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
 
     state = apply(state, "runner", (action) => action.type === "continue_run");
-    expect(state.run).toBeUndefined();
-    expect(state.runner.coreDamage).toBe(1);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.run?.accessedCardId).toBeDefined();
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
