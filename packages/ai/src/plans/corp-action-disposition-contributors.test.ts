@@ -180,6 +180,61 @@ describe("corp action disposition contributors", () => {
     ).toEqual([]);
   });
 
+  it("does not let an infeasible prepared score parent suppress a legal sibling route", () => {
+    const candidate = {
+      actionId: "install-agenda-new-remote",
+      actionType: "install_card",
+      semanticActionType: "install.card",
+      sourceKind: "card",
+      sourceCardInstanceId: "agenda-in-hq",
+      targetIds: ["new_remote"],
+    } as unknown as ActionSemanticCandidate;
+    const domain = {
+      ...emptyDomain(),
+      scoreProjects: [
+        {
+          projectId: "prepared-but-unfunded",
+          agendaPoints: 2,
+          agendaInstanceId: "agenda-in-hq",
+          serverId: "remote_1",
+          phase: "install_agenda" as const,
+          sameTurnCloseout: false,
+          terminalScore: false,
+          feasible: false,
+          evidenceCode: "prepared_parent_rez_resource_unavailable",
+        },
+        {
+          projectId: "feasible-sibling",
+          agendaPoints: 2,
+          agendaInstanceId: "agenda-in-hq",
+          serverId: "new_remote",
+          actionIds: [candidate.actionId],
+          phase: "install_agenda" as const,
+          sameTurnCloseout: false,
+          terminalScore: false,
+          feasible: true,
+          evidenceCode: "new_remote_score_route_feasible",
+        },
+      ],
+    };
+    const facts = {
+      ...contributorFacts(),
+      candidateIsVisibleCorpAgendaInstall: vi.fn(() => true),
+      candidateTargetIds: vi.fn(() => ["new_remote"]),
+    };
+
+    expect(
+      collectCorpActionDispositions(input(), [candidate], domain, facts),
+    ).toEqual([
+      {
+        actionId: candidate.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "corp.hand_and_agenda_management",
+        evidenceCode: "corp_card_action_has_no_exact_parent_need",
+      },
+    ]);
+  });
+
   it("disposes an exact tag-source action with no visible payoff without requiring a quote", () => {
     const candidate = {
       actionId: "trace-tag-source",

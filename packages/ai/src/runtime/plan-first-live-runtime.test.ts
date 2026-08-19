@@ -7230,7 +7230,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps a fully quoted current advance executable while later score protection remains open", () => {
+  it("funds an exposed agenda's exact score protection reserve before advancing", () => {
     resetResidentPlanPortfolioMemory();
     const advance = legalAction(
       "advance-coup",
@@ -7274,13 +7274,16 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
-      actionId: "advance-coup",
-      reasonCode: "plan_first.corp.score_agenda",
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     const scorePortfolio = JSON.stringify(residentPlanPortfolioSnapshot(input));
     expect(scorePortfolio).toContain('"protectionNeed"');
     expect(scorePortfolio).toContain('"fundedProtection":false');
+    expect(scorePortfolio).toContain(
+      '"evidenceCode":"corp_score_protection_required:remote_1"',
+    );
   });
 
   it("does not treat generic access damage as a tag-punish conversion", () => {

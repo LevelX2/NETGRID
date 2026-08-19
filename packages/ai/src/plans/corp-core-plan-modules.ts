@@ -3644,6 +3644,7 @@ function scoreResourceGaps(
   const hasExactCurrentAdvanceHead =
     signal.phase === "advance_agenda" &&
     signal.feasible &&
+    (fundingGap ?? 0) === 0 &&
     knownProtectionFundingGap === 0 &&
     scoreCandidates(context, signal).length > 0;
   const hasExactCurrentScopedInstallHead =
@@ -4225,6 +4226,7 @@ function selectedCentralAccessRiskRemains(
     observedAtStateVersion: context.input.playerView.stateVersion,
     availableCorpCredits: context.input.playerView.own.credits,
     availableCorpClicks: context.input.playerView.own.clicks,
+    availableCorpAgendaPoints: context.input.playerView.own.agendaPoints,
     scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
     maximumRunnerAccessSuccessProbability: {
       numerator: 0,

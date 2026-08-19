@@ -4084,7 +4084,7 @@ describe("Corp core plan modules", () => {
     },
   );
 
-  it("keeps an exact current advance executable when its funding gap belongs only to later protection", () => {
+  it("keeps an exact current advance behind its published protection funding gap", () => {
     const score = corpModule("corp.score_agenda");
     const project = {
       ...scoreProject(
@@ -4114,15 +4114,17 @@ describe("Corp core plan modules", () => {
       blockers: [],
     });
     expect(planAssessment).toMatchObject({
-      readiness: "executable_now",
-      feasibility: { currentRouteHeadPossible: true },
-      resourceGaps: [],
+      readiness: "executable_with_support",
+      feasibility: { currentRouteHeadPossible: false },
+      resourceGaps: [
+        {
+          needId: `score-support:${project.projectId}`,
+          capability: "credits",
+          minimum: 2,
+          available: 0,
+        },
+      ],
     });
-    expect(
-      score
-        .materialize(instance, planAssessment, corpContext)
-        .candidates.map((entry) => entry.candidate.actionId),
-    ).toEqual([advance.actionId]);
   });
 
   it("keeps an exact current terminal install executable while its later score route remains unknown", () => {
@@ -5762,6 +5764,7 @@ function knownInstallProjection<
     knowledge: "known" as const,
     availableCorpCredits: params.availableCredits ?? 0,
     availableCorpClicks: params.availableClicks ?? 3,
+    availableCorpAgendaPoints: 0,
     totalScoreReserveCredits: 0,
     hardClickReserve: 0,
     fundedProtection: params.preservesReserves !== false,
@@ -5769,7 +5772,9 @@ function knownInstallProjection<
     protection,
     selectedRezCosts,
     totalSelectedRezCost: params.totalCredits,
+    totalSelectedAgendaPointCost: 0,
     creditsAfterDefense: 0,
+    agendaPointsAfterDefense: 0,
     clicksAfterDefense: 2,
     preservesScoreCreditReserve: params.preservesReserves !== false,
     preservesHardClickReserve: true,

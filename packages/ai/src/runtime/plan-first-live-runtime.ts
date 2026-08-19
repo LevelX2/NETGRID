@@ -12397,7 +12397,9 @@ function scoreProjectForCandidate(
       sameTurnCloseout ||
       (scorelineFeasibility?.deadline !== "current_turn_only" &&
         scorelineFeasibility?.feasible !== false &&
-        scoreActionSemanticsKnown);
+        scoreActionSemanticsKnown &&
+        fundedWindowProtected &&
+        (fundingGap ?? 0) === 0);
     return [
       {
         projectId,
@@ -12949,6 +12951,7 @@ function corpFundedScoreProtectionNeed(
     observedAtStateVersion: input.playerView.stateVersion,
     availableCorpCredits: input.playerView.own.credits,
     availableCorpClicks: input.playerView.own.clicks,
+    availableCorpAgendaPoints: input.playerView.own.agendaPoints,
     scoreReserve,
     maximumRunnerAccessSuccessProbability:
       policy.maximumRunnerAccessSuccessProbability,
@@ -13205,6 +13208,7 @@ function corpScoreProtectionInstallRouteScan(
       currentStateVersion: input.playerView.stateVersion,
       currentCorpCredits: input.playerView.own.credits,
       currentCorpClicks: input.playerView.own.clicks,
+      currentCorpAgendaPoints: input.playerView.own.agendaPoints,
       visibleCorpHand: input.playerView.own.gripOrHq,
       ...(currentServer
         ? {
