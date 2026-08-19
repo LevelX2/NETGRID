@@ -1,6 +1,7 @@
 import { mkdtemp, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { Readable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import {
   CardImageInboxError,
@@ -9,6 +10,7 @@ import {
   resolveCardImageInboxEntry,
   writeCardImageInboxMapping,
   writeCardImageInboxPackageFile,
+  writeCardImageInboxPackageArchive,
 } from "./maintenance";
 import { CARD_IMAGE_PACK_MANIFEST_FILE } from "./packs";
 import { CardImageStore } from "./store";
@@ -141,6 +143,47 @@ describe("IMG08 managed card image maintenance inbox", () => {
         { inboxRoot },
       ),
     ).rejects.toMatchObject({ code: "inbox_upload_invalid" });
+  });
+
+  it("streams ZIP packages atomically into the inbox and classifies them", async () => {
+    const inboxRoot = await temporaryRoot();
+    const uploaded = await writeCardImageInboxPackageArchive(
+      "classic.zip",
+      Readable.from([Buffer.from("zip-content")]),
+      { inboxRoot },
+    );
+
+    expect(uploaded).toEqual({
+      relativePath: "archives/classic.zip",
+      kind: "file",
+      usage: "pack-archive",
+      bytes: 11,
+    });
+    expect(
+      (await inventoryCardImageInbox({ inboxRoot })).entries,
+    ).toContainEqual(uploaded);
+    await expect(
+      writeCardImageInboxPackageArchive(
+        "classic.zip",
+        Readable.from([Buffer.from("again")]),
+        { inboxRoot },
+      ),
+    ).rejects.toMatchObject({ code: "inbox_upload_exists" });
+  });
+
+  it("removes partial ZIP uploads that exceed the streamed byte limit", async () => {
+    const inboxRoot = await temporaryRoot();
+    await expect(
+      writeCardImageInboxPackageArchive(
+        "too-large.zip",
+        Readable.from([Buffer.from("1234"), Buffer.from("5678")]),
+        { inboxRoot, maximumBytes: 6 },
+      ),
+    ).rejects.toMatchObject({ code: "inbox_upload_too_large" });
+
+    expect((await inventoryCardImageInbox({ inboxRoot })).entries).toEqual([
+      { relativePath: "archives", kind: "directory", usage: "directory" },
+    ]);
   });
 
   it("rejects symlink entries fail-closed when the platform permits creating one", async () => {
