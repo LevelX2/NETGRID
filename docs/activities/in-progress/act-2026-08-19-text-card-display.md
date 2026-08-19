@@ -162,6 +162,18 @@ Done-Gate: Arbeitsworktree sauber, relevante Webtests und Typecheck grün,
   `packages/ai/src/runtime/selected-choices-for-decision.ts`; keine dieser
   Dateien gehört zu diesem Paket.
 
+### TCD-02 — abgeschlossen am 2026-08-19
+
+- Textkarten nutzen unabhängig vom Inhalt die Kartenproportion `5 / 7`.
+- Die Komponente misst ihre verfügbare Höhe und verdichtet Titel, Metadaten,
+Set-Badge und vollständigen Regeltext gemeinsam. Der Textmodus besitzt keine
+Regelzeilenbegrenzung.
+- Agenda, ICE, Asset/Upgrade, Operation/Event, Programm, Hardware und
+Resource erhalten nur einen dunklen Verlauf, einen seitlichen Akzent und einen
+passenden Randton. Es gibt keine vollflächigen, grellen Typfarben.
+- Check: `corepack pnpm exec vitest run app/card-image-service.test.ts
+  app/card-text-mode.test.ts` — 9/9 grün.
+
 ## Worktree-, Git- und Integrationsregeln
 
 Arbeitsworktree: `C:\Projekte\NETGRID_TEXT_CARD_DISPLAY`

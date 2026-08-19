@@ -228,6 +228,42 @@ export function CardView({
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
+  const [textCardScale, setTextCardScale] = useState(1);
+
+  useEffect(() => {
+    if (!usesTextCardLayout) {
+      setTextCardScale(1);
+      return;
+    }
+
+    let cancelled = false;
+    let animationFrame: number | null = null;
+    const fitText = () => {
+      const element = cardRef.current;
+      if (cancelled || !element || element.clientHeight === 0) return;
+      const requiredHeight = element.scrollHeight;
+      const availableHeight = element.clientHeight;
+      const nextScale = Math.max(0.36, Math.min(1, (availableHeight / requiredHeight) * 0.98));
+      setTextCardScale((currentScale) => Math.abs(currentScale - nextScale) < 0.01 ? currentScale : nextScale);
+    };
+    const scheduleFit = () => {
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(fitText);
+    };
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleFit);
+
+    observer?.observe(cardRef.current!);
+    scheduleFit();
+    return () => {
+      cancelled = true;
+      observer?.disconnect();
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+    };
+  }, [usesTextCardLayout, card.title, metaText, rulesText, setBadgeLabel]);
+
+  const cardStyle = usesTextCardLayout
+    ? ({ "--text-card-scale": String(textCardScale) } as CSSProperties)
+    : undefined;
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
   const advancementDisplay = showAdvancementCounters && !preview ? advancementCounterDisplay(card) : null;
@@ -635,6 +671,7 @@ export function CardView({
         ref={cardRef}
         type="button"
         className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${concealedRunnerResourceClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${effectiveModifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        style={cardStyle}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
