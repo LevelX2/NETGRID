@@ -11,7 +11,7 @@ export const cardSpec = {
   text: {
     schemaVersion: "canonical-card-text-v1",
     rulesText:
-      "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
+      "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain [1] for each revealed or rezzed wall.",
   },
   rules: {
     schemaVersion: "card-rules-v1",
@@ -107,11 +107,6 @@ export const cardSpec = {
         kind: "tactic_interpretation",
         signal: "economy.card",
         use: "economy.card",
-      },
-      {
-        kind: "value_interpretation",
-        axis: "economy",
-        rating: "medium",
       },
     ],
     capabilities: [

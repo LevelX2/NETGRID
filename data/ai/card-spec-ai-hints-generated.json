@@ -34481,7 +34481,7 @@
     {
       "cardId": "onr_v1_219_superior-net-barriers",
       "cardRulesFingerprint": "fnv1a64x2:card-rules-v1:2bdad3df2fa8567b",
-      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:e3fb94b3114a012f",
+      "planningAnnotationsFingerprint": "fnv1a64x2:card-planning-annotations-v1:12014020c45efc64",
       "hint": {
         "cardId": "onr_v1_219_superior-net-barriers",
         "side": "corp",
@@ -34489,7 +34489,7 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["ice_modifier", "economy_asset", "remote_support"],
         "planRoles": ["score_now", "score_next_turn", "build_scoring_remote"],
-        "valueHints": { "economy": 2 },
+        "valueHints": {},
         "strategicRole": ["tax_tool"],
         "strategyAnchors": ["corp.ice_tax_glacier"],
         "lineSupport": ["corp.ice_tax_glacier"],
