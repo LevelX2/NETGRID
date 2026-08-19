@@ -12,7 +12,7 @@ describe("match FD6320 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(centralTargetQualityJson));
   });
 
-  it("converts a reachable open HQ run at matchpoint before slow hand development", () => {
+  it("builds the finite portfolio reserve before the reachable HQ run", () => {
     expectCheckpointToPass(fixture(reachableHqMatchpointJson));
   });
 
@@ -97,11 +97,6 @@ function fixture(value: unknown): AiDecisionCheckpointV1 {
     structuredClone(value) as AiDecisionCheckpointV1,
     ["FD6320-F01-central-target-quality", "FD6320-F02-reachable-hq-matchpoint"],
   );
-  if (checkpoint.checkpointId === "FD6320-F02-reachable-hq-matchpoint") {
-    checkpoint.expectation.planExecution!.acceptableCapabilities = [
-      "pressure_hq_access",
-    ];
-  }
   return checkpoint;
 }
 
