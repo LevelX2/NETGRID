@@ -71,7 +71,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("draws for score material when unfunded City Surveillance has no legal punish route", () => {
+  it("builds liquid credits when unfunded City Surveillance has no legal punish route", () => {
     const unfundedEngine = mutateFixture(cp04Json, (current) => {
       current.engine.testOnlyGameState.corp.credits = 0;
       restoreCorpScoredAgendaToRd(current);
@@ -80,12 +80,12 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       // only legal hand-management route an overflow-credit conversion.
       moveFirstCorpCardToArchives(current, URBAN_RENEWAL);
       current.expectation = {
-        acceptableActions: [{ actionId: "corp.draw_card" }],
+        exactActionId: "corp.gain_credit",
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };

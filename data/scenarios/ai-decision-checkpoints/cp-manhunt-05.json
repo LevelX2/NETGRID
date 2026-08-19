@@ -11641,12 +11641,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_visible_economy_campaign:onr_v1_309_bbs-whispering-campaign:install"
-      ],
-      "forbiddenCapabilities": ["gain_general_liquid_credits"]
+      "acceptablePlanKinds": ["corp.hand_and_agenda_management"],
+      "acceptableCapabilities": ["resolve_hq_overflow"],
+      "requiredAssessmentEvidence": ["corp_hq_overflow_exact_conversion:1"]
     }
   }
 }

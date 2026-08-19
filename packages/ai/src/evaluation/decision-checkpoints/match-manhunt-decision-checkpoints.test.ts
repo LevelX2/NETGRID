@@ -35,7 +35,7 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("develops the finite economy asset that funds and preserves the kill line", () => {
+  it("uses the finite economy asset to resolve HQ overflow", () => {
     const result = runAiDecisionCheckpoint(fixture(cp05Json));
 
     expect(result.ok, result.message).toBe(true);
@@ -65,16 +65,17 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("draws for missing score material when no visible tag action remains", () => {
+  it("takes the certified campaign payout when no visible tag action remains", () => {
     const noTagWindow = mutateFixture(cp02Json, (fixture) => {
       moveCorpCardsToArchives(fixture, new Set([CHANCE_OBSERVATION]));
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        exactActionId:
+          "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign",
           ],
         },
       };
@@ -110,7 +111,7 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("draws for missing score material when no visible kill pair remains", () => {
+  it("builds liquid credits when no visible kill pair remains", () => {
     const noVisibleKillPair = mutateFixture(cp05Json, (fixture) => {
       moveCorpCardsToArchives(
         fixture,
@@ -118,12 +119,12 @@ describe("match Manhunt exact decision checkpoints", () => {
       );
       restoreCorpScoredAgendaToRd(fixture);
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        exactActionId: "corp.gain_credit",
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_engine_certified_basic_liquidity_development",
           ],
         },
       };
