@@ -1,10 +1,10 @@
 # Persönlicher Kartenbildimport IMG01–IMG05
 
-Status: `implementation_complete`
+Status: `completed`
 Stand: 2026-08-19
 Primärer Agent: `release-implementation-agent`
 Arbeitsbranch: `codex/img01-img05-card-image-import`
-Aktueller Zustand: `ready_for_main_merge`
+Aktueller Zustand: `complete`
 
 ## Quelle und Zielprüfung
 
@@ -314,3 +314,11 @@ Worktree sowie Branch erst nach nachgewiesen sauberer Integration.
 - Arbeits-Worktree und gemergter Arbeitsbranch sind verifiziert entfernt.
 - Offene Punkte sind ausschließlich klar abgegrenzte Nachfolgepakete wie
   HTTPS-Import, private Paket-Builder oder Windows-Distribution.
+
+## Integrationsergebnis
+
+Der vollständige Arbeitsstand wurde per Fast-forward bis `d5885f119` in den
+lokalen `main` integriert. Die fokussierten Kartenbild-Gates wurden im
+Hauptcheckout nach Aktualisierung der lokalen Workspace-Verknüpfungen erneut
+grün ausgeführt. Arbeits-Worktree und Arbeitsbranch wurden anschließend
+verifiziert entfernt; es erfolgte kein Push.
