@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cardImageJobIsTerminal,
+  cardImagePackTransport,
   cardImageJobProgressPercent,
   importReportFromJob,
   mappingInboxEntries,
@@ -28,14 +29,22 @@ describe("IMG08 card image maintenance UI helpers", () => {
           kind: "directory" as const,
           usage: "pack" as const,
         },
+        {
+          relativePath: "archives/classic.zip",
+          kind: "file" as const,
+          usage: "pack-archive" as const,
+        },
       ],
     };
     expect(
       mappingInboxEntries(inbox).map((entry) => entry.relativePath),
     ).toEqual(["mapping.csv"]);
-    expect(packInboxEntries(inbox).map((entry) => entry.relativePath)).toEqual([
+    const packs = packInboxEntries(inbox);
+    expect(packs.map((entry) => entry.relativePath)).toEqual([
       "classic-pack",
+      "archives/classic.zip",
     ]);
+    expect(packs.map(cardImagePackTransport)).toEqual(["directory", "zip"]);
   });
 
   it("clamps progress and recognizes terminal jobs", () => {
@@ -68,6 +77,7 @@ describe("IMG08 card image maintenance UI helpers", () => {
           report: {
             schemaVersion: "netgrid-card-image-pack-maintenance-report-v1",
             operation: "preview",
+            transport: "directory",
             profileId: "classic",
             packId: "classic-pack",
             cardCount: 54,
